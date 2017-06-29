@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,12 @@ private:
 
 
         //- Initialize heThermo
-        void init();
+        void init
+        (
+            const volScalarField& p,
+            const volScalarField& T,
+            volScalarField& he
+        );
 
 
 public:

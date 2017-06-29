@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -212,6 +212,14 @@ const Foam::labelUList& Foam::lduAddressing::losortStartAddr() const
     }
 
     return *losortStartPtr_;
+}
+
+
+void Foam::lduAddressing::clearOut()
+{
+    deleteDemandDrivenData(losortPtr_);
+    deleteDemandDrivenData(ownerStartPtr_);
+    deleteDemandDrivenData(losortStartPtr_);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,69 +28,91 @@ License
 // OpenFOAM includes
 #include "polyPatch.H"
 #include "primitivePatch.H"
-#include "vtkOpenFOAMPoints.H"
+#include "foamVtkAdaptors.H"
 
 // VTK includes
 #include "vtkCellArray.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class PatchType>
-vtkPolyData* Foam::vtkPVFoam::patchVTKMesh
+vtkSmartPointer<vtkPoints> Foam::vtkPVFoam::movePatchPoints
 (
-    const word& name,
     const PatchType& p
 )
 {
-    vtkPolyData* vtkmesh = vtkPolyData::New();
-
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPVFoam::patchVTKMesh - " << name << endl;
-        printMemory();
-    }
-
     // Convert OpenFOAM mesh vertices to VTK
-    const Foam::pointField& points = p.localPoints();
+    const pointField& points = p.localPoints();
 
-    vtkPoints* vtkpoints = vtkPoints::New();
-    vtkpoints->Allocate(points.size());
+    auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+    vtkpoints->SetNumberOfPoints(points.size());
     forAll(points, i)
     {
-        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
+        vtkpoints->SetPoint(i, points[i].v_);
     }
 
-    vtkmesh->SetPoints(vtkpoints);
-    vtkpoints->Delete();
+    return vtkpoints;
+}
 
 
-    // Add faces as polygons
+template<class PatchType>
+vtkSmartPointer<vtkCellArray> Foam::vtkPVFoam::patchFacesVTKCells
+(
+    const PatchType& p
+)
+{
+    // Faces as polygons
     const faceList& faces = p.localFaces();
 
-    vtkCellArray* vtkcells = vtkCellArray::New();
-    vtkcells->Allocate(faces.size());
+    label nAlloc = faces.size();
+    forAll(faces, facei)
+    {
+        nAlloc += faces[facei].size();
+    }
+
+    auto cells = vtkSmartPointer<vtkCellArray>::New();
+
+    UList<vtkIdType> cellsUL =
+        vtkUList
+        (
+            cells,
+            faces.size(),
+            nAlloc
+        );
+
+    // Cell connectivity for polygons
+    // [size, verts..., size, verts... ]
+    label idx = 0;
     forAll(faces, facei)
     {
         const face& f = faces[facei];
-        vtkIdType nodeIds[f.size()];
+
+        cellsUL[idx++] = f.size();
 
         forAll(f, fp)
         {
-            nodeIds[fp] = f[fp];
+            cellsUL[idx++] = f[fp];
         }
-        vtkcells->InsertNextCell(f.size(), nodeIds);
     }
 
-    vtkmesh->SetPolys(vtkcells);
-    vtkcells->Delete();
+    return cells;
+}
 
-    if (debug)
-    {
-        Info<< "<end> Foam::vtkPVFoam::patchVTKMesh - " << name << endl;
-        printMemory();
-    }
+
+template<class PatchType>
+vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::patchVTKMesh
+(
+    const PatchType& p
+)
+{
+    auto vtkmesh = vtkSmartPointer<vtkPolyData>::New();
+
+    vtkmesh->SetPoints(movePatchPoints(p));
+    vtkmesh->SetPolys(patchFacesVTKCells(p));
 
     return vtkmesh;
 }

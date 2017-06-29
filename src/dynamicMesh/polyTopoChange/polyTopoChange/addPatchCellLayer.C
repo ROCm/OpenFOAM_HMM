@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -495,13 +495,18 @@ void Foam::addPatchCellLayer::setFaceProps
 
         if (!found)
         {
-            FatalErrorInFunction
+            //FatalErrorInFunction
+            WarningInFunction
                 << "Problem: cannot find patch edge " << ppEdgeI
                 << " with mesh vertices " << patchEdge
                 << " at " << patchEdge.line(mesh.points())
-                << " is not in face " << faceI << " with mesh vertices "
+                << " in face " << faceI << " with mesh vertices "
                 << f
-                << exit(FatalError);
+                << " at " << pointField(mesh.points(), f)
+                << endl
+                << "Continuing with potentially incorrect faceZone orientation"
+                //<< exit(FatalError);
+                << endl;
         }
     }
 }

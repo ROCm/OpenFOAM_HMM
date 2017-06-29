@@ -35,7 +35,7 @@ Description
     The weight of a blended scheme is given by a function of the blending
     factor, f:
 
-    \[f
+    \f[
         weight = f scheme1 + (1 - f) scheme2
     \f]
 

@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -143,48 +143,58 @@ unset SCOTCH_ARCH_PATH
 
 if [ -n "$foamClean" ]
 then
-    cleaned=`$foamClean "$PATH" "$foamOldDirs"` && PATH="$cleaned"
-    cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"` && LD_LIBRARY_PATH="$cleaned"
-    cleaned=`$foamClean "$MANPATH" "$foamOldDirs"` && MANPATH="$cleaned"
+    cleaned=$($foamClean "$PATH" "$foamOldDirs") && PATH="$cleaned"
+    cleaned=$($foamClean "$LD_LIBRARY_PATH" "$foamOldDirs") && LD_LIBRARY_PATH="$cleaned"
+    cleaned=$($foamClean "$MANPATH" "$foamOldDirs") && MANPATH="$cleaned"
 fi
 
-
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH
-[ -n "$MANPATH" ] || unset MANPATH
 [ -n "$LD_PRELOAD" ] || unset LD_PRELOAD
+[ -n "$MANPATH" ] || unset MANPATH
 
+#------------------------------------------------------------------------------
+# Cleanup aliases and functions
 
-unset cleaned foamClean foamOldDirs
+unalias wmSet       2>/dev/null
+unalias wmInt32     2>/dev/null
+unalias wmInt64     2>/dev/null
+unalias wmSP        2>/dev/null
+unalias wmDP        2>/dev/null
+
+unalias wmUnset     2>/dev/null
+
+unalias wmSchedOn   2>/dev/null
+unalias wmSchedOff  2>/dev/null
+
+unalias foam        2>/dev/null
+unalias foamSite    2>/dev/null
+
+unalias src         2>/dev/null
+unalias lib         2>/dev/null
+unalias app         2>/dev/null
+unalias sol         2>/dev/null
+unalias util        2>/dev/null
+unalias tut         2>/dev/null
+unalias run         2>/dev/null
+
+unset -f wmRefresh  2>/dev/null
+unset -f foamVersion 2>/dev/null
+unset -f foamPV     2>/dev/null
+
+# Cleanup bash completions, which look like this:
+#     "complete ... -F _of_APPNAME APPNAME
+# For economy, obtain list first but also add in 'filter_opts' helper
+foamClean="$(complete 2>/dev/null | sed -n -e 's/complete.*-F _of_.* \(..*\)$/\1/p')"
+for cleaned in $foamClean filter_opts
+do
+    unset -f _of_$cleaned 2>/dev/null
+    complete -r $cleaned  2>/dev/null
+done
 
 
 #------------------------------------------------------------------------------
-# Cleanup aliases
+# Intermediate variables (do as last for a clean exit code)
 
-unalias wmSet
-unalias wmInt32
-unalias wmInt64
-unalias wmSP
-unalias wmDP
-
-unalias wmUnset
-
-unalias wmSchedOn
-unalias wmSchedOff
-
-unalias foam
-unalias foamSite
-
-unalias src
-unalias lib
-unalias app
-unalias sol
-unalias util
-unalias tut
-unalias run
-
-unset -f wmRefresh
-unset -f foamVersion
-unset -f foamPV
-
+unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------

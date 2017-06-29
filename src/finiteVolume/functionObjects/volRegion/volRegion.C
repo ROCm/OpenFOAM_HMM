@@ -83,6 +83,7 @@ Foam::functionObjects::volRegion::volRegion
       ? regionTypeNames_.read(dict.lookup("regionType"))
       : vrtAll
     ),
+    regionName_(polyMesh::defaultRegion),
     regionID_(-1)
 {
     read(dict);
@@ -143,7 +144,7 @@ bool Foam::functionObjects::volRegion::read
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown region type. Valid region types are:"
-                << regionTypeNames_
+                << regionTypeNames_.toc()
                 << exit(FatalIOError);
         }
     }

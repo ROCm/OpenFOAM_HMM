@@ -188,7 +188,7 @@ Foam::DLListBase::link* Foam::DLListBase::removeHead()
 
     if (!first_)
     {
-        last_ = 0;
+        last_ = nullptr;
     }
 
     f->deregister();
@@ -204,8 +204,8 @@ Foam::DLListBase::link* Foam::DLListBase::remove(DLListBase::link* l)
 
     if (l == first_ && first_ == last_)
     {
-        first_ = 0;
-        last_ = 0;
+        first_ = nullptr;
+        last_ = nullptr;
     }
     else if (l == first_)
     {

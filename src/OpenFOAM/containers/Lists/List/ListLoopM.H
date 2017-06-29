@@ -22,8 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    List\<T\> is a 1D vector of objects of type T, where the size of the
-    vector is known and used for subscript bounds checking, etc.
+    Macros for accessing List elements
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,8 +36,8 @@ Description
 // Element access looping using [] for vector machines
 
 #define List_FOR_ALL(f, i)                      \
-        const label _n##i = (f).size();\
-        for (label i=0; i<_n##i; i++)  \
+        const label _n##i = (f).size();         \
+        for (label i=0; i<_n##i; ++i)           \
         {
 
 #define List_END_FOR_ALL  }
@@ -60,7 +59,7 @@ Description
 // Pointer looping for scalar machines
 
 #define List_FOR_ALL(f, i)                      \
-        label i = (f).size();          \
+        label i = (f).size();                   \
         while (i--)                             \
         {                                       \
 

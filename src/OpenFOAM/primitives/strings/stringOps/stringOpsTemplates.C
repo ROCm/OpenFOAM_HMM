@@ -40,15 +40,14 @@ Foam::word Foam::stringOps::name
     // same concept as GNU/BSD asprintf()
     // use snprintf with zero to determine the number of characters required
 
-    int n = ::snprintf(0, 0, fmt, val);
+    const int n = ::snprintf(nullptr, 0, fmt, val);
     if (n > 0)
     {
         char buf[n+1];
         ::snprintf(buf, n+1, fmt, val);
         buf[n] = 0;
 
-        // no stripping desired
-        return word(buf, false);
+        return word(buf, false); // no stripping desired
     }
 
     return word::null;

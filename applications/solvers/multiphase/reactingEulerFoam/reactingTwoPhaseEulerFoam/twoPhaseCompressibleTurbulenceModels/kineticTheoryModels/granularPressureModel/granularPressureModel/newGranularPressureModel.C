@@ -41,7 +41,7 @@ Foam::kineticTheoryModels::granularPressureModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(granularPressureModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalError
             << "granularPressureModel::New(const dictionary&) : " << endl

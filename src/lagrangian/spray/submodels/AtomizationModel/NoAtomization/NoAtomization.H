@@ -105,7 +105,7 @@ public:
             const vector& injectionPos,
             const scalar pAmbient,
             const scalar chi,
-            cachedRandom& rndGen
+            Random& rndGen
         ) const;
 };
 

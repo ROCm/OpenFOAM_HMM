@@ -50,15 +50,15 @@ class pyramid;
 template<class Point, class PointRef, class polygonRef>
 inline Istream& operator>>
 (
-    Istream&,
-    pyramid<Point, PointRef, polygonRef>&
+    Istream& is,
+    pyramid<Point, PointRef, polygonRef>& p
 );
 
 template<class Point, class PointRef, class polygonRef>
 inline Ostream& operator<<
 (
-    Ostream&,
-    const pyramid<Point, PointRef, polygonRef>&
+    Ostream& os,
+    const pyramid<Point, PointRef, polygonRef>& p
 );
 
 
@@ -83,7 +83,7 @@ public:
         inline pyramid(polygonRef base, const Point& apex);
 
         //- Construct from Istream
-        inline pyramid(Istream&);
+        inline pyramid(Istream& is);
 
 
     // Member functions
@@ -100,27 +100,27 @@ public:
         // Properties
 
             //- Return centre (centroid)
-            inline Point centre(const pointField& points) const;
+            inline Point centre(const UList<point>& points) const;
 
             //- Return height vector
-            inline vector height(const pointField& points) const;
+            inline vector height(const UList<point>& points) const;
 
             //- Return scalar magnitude - returns volume of pyramid
-            inline scalar mag(const pointField& points) const;
+            inline scalar mag(const UList<point>& points) const;
 
 
     // IOstream operators
 
         friend Istream& operator>> <Point, PointRef, polygonRef>
         (
-            Istream&,
-            pyramid&
+            Istream& is,
+            pyramid& p
         );
 
         friend Ostream& operator<< <Point, PointRef, polygonRef>
         (
-            Ostream&,
-            const pyramid&
+            Ostream& os,
+            const pyramid& p
         );
 };
 

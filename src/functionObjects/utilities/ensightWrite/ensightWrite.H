@@ -65,18 +65,21 @@ Description
         noPatches    | Suppress writing patches     | no        | false
         patches      | Select patches to write      | no        |
         faceZones    | Select faceZones to write    | no        |
-        deprecatedOrder | Old ordering of volume cells  | no    | false
-        consecutive  | Consecutive output numbering | no    | false
+        consecutive  | Consecutive output numbering | no        | false
     \endtable
 
     Note that if the \c patches entry is an empty list, this will select all
     patches and suppress writing the internalMesh.
     Consecutive output numbering can be used in conjunction with \c overwrite.
 
+See also
+    Foam::functionObjects::vtkWrite
+    Foam::functionObjects::fvMeshFunctionObject
+    Foam::functionObjects::timeControl
+
 SourceFiles
     ensightWrite.C
     ensightWriteTemplates.C
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -134,9 +137,6 @@ class ensightWrite
 
 
     // Private Member Functions
-
-        //- Eliminate duplicate 'word' entries
-        static void uniqWords(wordReList&);
 
         //- Ensight case handler
         ensightCase& ensCase()

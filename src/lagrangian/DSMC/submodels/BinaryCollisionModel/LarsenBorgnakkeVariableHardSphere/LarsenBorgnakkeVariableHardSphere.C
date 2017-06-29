@@ -39,14 +39,14 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
 {
     CloudType& cloud(this->owner());
 
-    Random& rndGen(cloud.rndGen());
+    Random& rndGen = cloud.rndGen();
 
     scalar ChiAMinusOne = ChiA - 1;
     scalar ChiBMinusOne = ChiB - 1;
 
     if (ChiAMinusOne < SMALL && ChiBMinusOne < SMALL)
     {
-        return rndGen.scalar01();
+        return rndGen.sample01<scalar>();
     }
 
     scalar energyRatio;
@@ -56,7 +56,7 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
     {
         P = 0;
 
-        energyRatio = rndGen.scalar01();
+        energyRatio = rndGen.sample01<scalar>();
 
         if (ChiAMinusOne < SMALL)
         {
@@ -81,7 +81,7 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
                     ChiBMinusOne
                 );
         }
-    } while (P < rndGen.scalar01());
+    } while (P < rndGen.sample01<scalar>());
 
     return energyRatio;
 }
@@ -186,7 +186,7 @@ void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
     scalar& EiP = pP.Ei();
     scalar& EiQ = pQ.Ei();
 
-    Random& rndGen(cloud.rndGen());
+    Random& rndGen = cloud.rndGen();
 
     scalar inverseCollisionNumber = 1/relaxationCollisionNumber_;
 
@@ -217,13 +217,14 @@ void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
 
     if (iDofP > 0)
     {
-        if (inverseCollisionNumber > rndGen.scalar01())
+        if (inverseCollisionNumber > rndGen.sample01<scalar>())
         {
             availableEnergy += preCollisionEiP;
 
             if (iDofP == 2)
             {
-                scalar energyRatio = 1.0 - pow(rndGen.scalar01(), (1.0/ChiB));
+                scalar energyRatio =
+                    1.0 - pow(rndGen.sample01<scalar>(), (1.0/ChiB));
                 EiP = energyRatio*availableEnergy;
             }
             else
@@ -238,13 +239,13 @@ void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
 
     if (iDofQ > 0)
     {
-        if (inverseCollisionNumber > rndGen.scalar01())
+        if (inverseCollisionNumber > rndGen.sample01<scalar>())
         {
             availableEnergy += preCollisionEiQ;
 
             if (iDofQ == 2)
             {
-                scalar energyRatio = 1.0 - pow(rndGen.scalar01(), (1.0/ChiB));
+                scalar energyRatio = 1.0 - pow(rndGen.sample01<scalar>(), (1.0/ChiB));
                 EiQ = energyRatio*availableEnergy;
             }
             else
@@ -261,9 +262,9 @@ void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
     scalar cR = sqrt(2.0*availableEnergy/mR);
 
     // Variable Hard Sphere collision part
-    scalar cosTheta = 2.0*rndGen.scalar01() - 1.0;
+    scalar cosTheta = 2.0*rndGen.sample01<scalar>() - 1.0;
     scalar sinTheta = sqrt(1.0 - cosTheta*cosTheta);
-    scalar phi = twoPi*rndGen.scalar01();
+    scalar phi = twoPi*rndGen.sample01<scalar>();
 
     vector postCollisionRelU =
         cR

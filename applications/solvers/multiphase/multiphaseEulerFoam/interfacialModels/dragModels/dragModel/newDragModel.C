@@ -44,7 +44,7 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(dragModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown dragModelType type "

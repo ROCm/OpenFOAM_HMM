@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,9 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-%{
+%option prefix="yySTL"
+%option yyclass="yySTLFlexLexer"
 
-#undef yyFlexLexer
+%{
 
  /* ------------------------------------------------------------------------ *\
    ------ local definitions
@@ -35,9 +36,9 @@ License
 #include "OSspecific.H"
 
 using namespace Foam;
-
 // Dummy yyFlexLexer::yylex() to keep the linker happy. It is not called
 //! \cond dummy
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 int yyFlexLexer::yylex()
 {
     FatalErrorInFunction
@@ -45,29 +46,29 @@ int yyFlexLexer::yylex()
         << abort(FatalError);
     return 0;
 }
+#endif
 //! \endcond
 
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
 //! \cond dummy
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
-int yyFlexLexer::yywrap()
+int yySTLFlexLexer::yywrap()
 #endif
 {
     return 1;
 }
 //! \endcond
 
-
 //- A lexer for parsing STL ASCII files.
 //  Returns DynamicList(s) of points and facets (zoneIds).
 //  The facets are within a solid/endsolid grouping
 class STLASCIILexer
 :
-    public yyFlexLexer
+    public yySTLFlexLexer
 {
     // Private data
 
@@ -76,7 +77,7 @@ class STLASCIILexer
         label lineNo_;
         word  startError_;
 
-        DynamicList<point> points_;
+        DynamicList<STLpoint> points_;
         DynamicList<label> facets_;
         DynamicList<word>  names_;
         DynamicList<label> sizes_;
@@ -95,16 +96,16 @@ public:
         //- The lexer function itself
         int lex();
 
-    // Access
+      // Access
 
-        //- Do all the solid groups appear in order
+        //- Do all the solid groups appear in order?
         inline bool sorted() const
         {
             return sorted_;
         }
 
-        //- A list of points corresponding to a pointField
-        inline DynamicList<point>& points()
+        //- A list of unstitched triangle points
+        inline DynamicList<STLpoint>& points()
         {
             return points_;
         }
@@ -116,13 +117,13 @@ public:
             return facets_;
         }
 
-        //- Names
+        //- Solid names in the order of their appearance.
         inline DynamicList<word>& names()
         {
             return names_;
         }
 
-        //- Sizes
+        //- Solid sizes in the order of their appearance.
         inline DynamicList<label>& sizes()
         {
             return sizes_;
@@ -132,7 +133,7 @@ public:
 
 STLASCIILexer::STLASCIILexer(istream* is, const label approxNpoints)
 :
-    yyFlexLexer(is),
+    yySTLFlexLexer(is),
     sorted_(true),
     groupID_(-1),
     lineNo_(1),
@@ -145,6 +146,7 @@ STLASCIILexer::STLASCIILexer(istream* is, const label approxNpoints)
    ------ cppLexer::yylex()
  \* ------------------------------------------------------------------------ */
 
+#undef YY_DECL
 #define YY_DECL int STLASCIILexer::lex()
 
 %}
@@ -202,9 +204,9 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
     // End of read character pointer returned by strtof
     // char* endPtr;
 
-    STLpoint normal;
+    label cmpt = 0;   // Component index when reading vertex
     STLpoint vertex;
-    label cmpt = 0;   // component index used for reading vertex
+    // STLpoint normal;
 
     static const char* stateNames[7] =
     {
@@ -237,154 +239,167 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
  /*                      ------ Reading control header ------                */
 
 {solid} {
-        BEGIN(readSolidName);
-    }
+    BEGIN(readSolidName);
+}
 
 <readSolidName>{string} {
-        word name(Foam::string::validate<word>(YYText()));
+    const word solidName(Foam::string::validate<word>(YYText()));
 
-        HashTable<label>::const_iterator fnd = lookup_.find(name);
-        if (fnd != lookup_.end())
+    auto iter = lookup_.cfind(solidName);
+    if (iter.found())
+    {
+        if (groupID_ != iter.object())
         {
-            if (groupID_ != fnd())
-            {
-                // group appeared out of order
-                sorted_ = false;
-            }
-            groupID_ = fnd();
+            sorted_ = false;  // Group appeared out of order
+            groupID_ = iter.object();
+        }
+    }
+    else
+    {
+        groupID_ = sizes_.size();
+        if (lookup_.insert(solidName, groupID_))
+        {
+            names_.append(solidName);
+            sizes_.append(0);
         }
         else
         {
-            groupID_ = sizes_.size();
-            lookup_.insert(name, groupID_);
-            names_.append(name);
-            sizes_.append(0);
+            FatalErrorInFunction<< "Duplicate solid-name: " << solidName
+                << exit(FatalError);
         }
-        BEGIN(INITIAL);
     }
+    BEGIN(INITIAL);
+}
 
 <readSolidName>{space}\n {
-        word name("solid");
+    const word solidName("solid");  // Could also use solid0, solid1, ...
 
-        HashTable<label>::const_iterator fnd = lookup_.find(name);
-        if (fnd != lookup_.end())
+    auto iter = lookup_.cfind(solidName);
+    if (iter.found())
+    {
+        if (groupID_ != iter.object())
         {
-            if (groupID_ != fnd())
-            {
-                // group appeared out of order
-                sorted_ = false;
-            }
-            groupID_ = fnd();
+            sorted_ = false;  // Group appeared out of order
+            groupID_ = iter.object();
+        }
+    }
+    else
+    {
+        groupID_ = sizes_.size();
+        if (lookup_.insert(solidName, groupID_))
+        {
+            names_.append(solidName);
+            sizes_.append(0);
         }
         else
         {
-            groupID_ = sizes_.size();
-            lookup_.insert(name, groupID_);
-            names_.append(name);
-            sizes_.append(0);
+            FatalErrorInFunction<< "Duplicate solid-name: " << solidName
+                << exit(FatalError);
         }
-
-        lineNo_++;
-        BEGIN(INITIAL);
     }
+
+    ++lineNo_;
+    BEGIN(INITIAL);
+}
 
 {color} {
-    }
+    /* ignore 'color' */
+}
 
 {facet} {
-        BEGIN(readFacet);
-    }
+    BEGIN(readFacet);
+}
 
 <readFacet>{normal} {
-        BEGIN(readNormal);
-    }
+    BEGIN(readNormal);
+}
 
 <readNormal>{point} {
-        /*
-         skip reading normals:
-         normal.x() = strtof(YYText(), &endPtr);
-         normal.y() = strtof(endPtr, &endPtr);
-         normal.z() = strtof(endPtr, &endPtr);
-         normals_.append(normal);
-         */
-        BEGIN(readFacet);
-    }
+    /*
+     skip reading normals:
+     normal.x() = strtof(YYText(), &endPtr);
+     normal.y() = strtof(endPtr, &endPtr);
+     normal.z() = strtof(endPtr, &endPtr);
+     normals_.append(normal);
+     */
+    BEGIN(readFacet);
+}
 
 <readFacet>{outerloop} {
-        BEGIN(readVertices);
-    }
+    BEGIN(readVertices);
+}
 
 <readVertices>{vertex} {
-        BEGIN(readVertex);
-    }
+    BEGIN(readVertex);
+}
 
 <readVertex>{space}{signedInteger}{space} {
-        vertex[cmpt++] = atol(YYText());
+    vertex[cmpt++] = atol(YYText());
 
-        if (cmpt == 3)
-        {
-            cmpt = 0;
-            points_.append(vertex);
-            BEGIN(readVertices);
-        }
+    if (cmpt == 3)
+    {
+        cmpt = 0;
+        points_.append(vertex);
+        BEGIN(readVertices);
     }
+}
 
 <readVertex>{space}{floatNum}{space} {
-        vertex[cmpt++] = atof(YYText());
+    vertex[cmpt++] = atof(YYText());
 
-        if (cmpt == 3)
-        {
-            cmpt = 0;
-            points_.append(vertex);
-            BEGIN(readVertices);
-        }
+    if (cmpt == 3)
+    {
+        cmpt = 0;
+        points_.append(vertex);
+        BEGIN(readVertices);
     }
+}
 
 <readVertices>{endloop} {
-        BEGIN(readFacet);
-    }
+    BEGIN(readFacet);
+}
 
 <readFacet>{endfacet} {
-        facets_.append(groupID_);
-        sizes_[groupID_]++;
-        BEGIN(INITIAL);
-    }
+    facets_.append(groupID_);
+    sizes_[groupID_]++;
+    BEGIN(INITIAL);
+}
 
 {endsolid} {
-    }
+}
 
 
- /* ------------------ Ignore remaining space and \n s. -------------------- */
+ /* ---------------- Ignore remaining spaces and newlines ------------------ */
 
 <*>{space} {}
-<*>\n      { lineNo_++; }
+<*>\n      { ++lineNo_; }
 
 
  /* ------------------- Any other characters are errors -------------------- */
 
 <*>. {
-        startError_ = YYText();
-        yy_push_state(stlError);
-    }
+    startError_ = YYText();
+    yy_push_state(stlError);
+}
 
 
  /* ---------------------------- Error handler ----------------------------- */
 
 <stlError>.* {
-        yy_pop_state();
-        FatalErrorInFunction
-            << "while " << stateNames[YY_START] << " on line " << lineNo_ << nl
-            << "    expected " << stateExpects[YY_START]
-            << " but found '" << startError_.c_str() << YYText() << "'"
-            << exit(FatalError);
-    }
+    yy_pop_state();
+    FatalErrorInFunction
+        << "while " << stateNames[YY_START] << " on line " << lineNo_ << nl
+        << "    expected " << stateExpects[YY_START]
+        << " but found '" << startError_.c_str() << YYText() << "'"
+        << exit(FatalError);
+}
 
 
  /*  ------------------------ On EOF terminate ----------------------------  */
 
 <<EOF>> {
-            yyterminate();
-    }
+    yyterminate();
+}
 %%
 
 
@@ -396,6 +411,8 @@ bool Foam::fileFormats::STLReader::readASCII
     const fileName& filename
 )
 {
+    format_ = UNKNOWN;
+
     IFstream is(filename);
     if (!is)
     {
@@ -417,6 +434,7 @@ bool Foam::fileFormats::STLReader::readASCII
     names_.transfer(lexer.names());
     sizes_.transfer(lexer.sizes());
 
+    format_ = ASCII;
     return true;
 }
 

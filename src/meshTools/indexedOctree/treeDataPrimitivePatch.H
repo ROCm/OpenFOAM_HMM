@@ -80,9 +80,6 @@ class treeDataPrimitivePatch
 
     // Private Member Functions
 
-        //- Calculate face bounding box
-        static treeBoundBox calcBb(const pointField&, const face&);
-
         //- Initialise all member data
         void update();
 

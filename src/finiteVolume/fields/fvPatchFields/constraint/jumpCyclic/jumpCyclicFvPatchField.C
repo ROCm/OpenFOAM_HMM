@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ Foam::jumpCyclicFvPatchField<Type>::jumpCyclicFvPatchField
     cyclicFvPatchField<Type>(p, iF, dict)
 {
     // Call this evaluation in derived classes
-    //this->evaluate(Pstream::blocking);
+    //this->evaluate(Pstream::commsTypes::blocking);
 }
 
 
@@ -132,6 +132,7 @@ template<class Type>
 void Foam::jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -146,6 +147,7 @@ template<class Type>
 void Foam::jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
+    const bool add,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes
@@ -183,11 +185,7 @@ void Foam::jumpCyclicFvPatchField<Type>::updateInterfaceMatrix
     this->transformCoupleField(pnf);
 
     // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = this->cyclicPatch().faceCells();
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 

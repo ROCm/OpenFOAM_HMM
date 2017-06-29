@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,10 @@ Description
             (0.21 0.20999 0.01)   // at outlet2
             (0.21 0 0.01)         // at central block
         );
+
+        // Optional: filter out points that haven't been found. Default
+        //           is to include them (with value -VGREAT)
+        includeOutOfBounds  true;
     }
     \endverbatim
 
@@ -133,45 +137,53 @@ protected:
         //- Load fields from files (not from objectRegistry)
         bool loadFromFiles_;
 
-        // Read from dictonary
 
-            //- Names of fields to probe
-            wordReList fieldSelection_;
+      // Read from dictonary
 
-            //- Fixed locations, default = yes
-            //  Note: set to false for moving mesh calculations where locations
-            //        should move with the mesh
-            bool fixedLocations_;
+        //- Names of fields to probe
+        wordReList fieldSelection_;
 
-            //- Interpolation scheme name
-            //  Note: only possible when fixedLocations_ is true
-            word interpolationScheme_;
+        //- Fixed locations, default = yes
+        //  Note: set to false for moving mesh calculations where locations
+        //        should move with the mesh
+        bool fixedLocations_;
+
+        //- Interpolation scheme name
+        //  Note: only possible when fixedLocations_ is true
+        word interpolationScheme_;
+
+        //- Include probes that were not found
+        bool includeOutOfBounds_;
 
 
-        // Calculated
+      // Calculated
 
-            //- Categorized scalar/vector/tensor vol fields
-            fieldGroup<scalar> scalarFields_;
-            fieldGroup<vector> vectorFields_;
-            fieldGroup<sphericalTensor> sphericalTensorFields_;
-            fieldGroup<symmTensor> symmTensorFields_;
-            fieldGroup<tensor> tensorFields_;
+        //- Categorized scalar/vector/tensor vol fields
+        fieldGroup<scalar> scalarFields_;
+        fieldGroup<vector> vectorFields_;
+        fieldGroup<sphericalTensor> sphericalTensorFields_;
+        fieldGroup<symmTensor> symmTensorFields_;
+        fieldGroup<tensor> tensorFields_;
 
-            //- Categorized scalar/vector/tensor surf fields
-            fieldGroup<scalar> surfaceScalarFields_;
-            fieldGroup<vector> surfaceVectorFields_;
-            fieldGroup<sphericalTensor> surfaceSphericalTensorFields_;
-            fieldGroup<symmTensor> surfaceSymmTensorFields_;
-            fieldGroup<tensor> surfaceTensorFields_;
+        //- Categorized scalar/vector/tensor surf fields
+        fieldGroup<scalar> surfaceScalarFields_;
+        fieldGroup<vector> surfaceVectorFields_;
+        fieldGroup<sphericalTensor> surfaceSphericalTensorFields_;
+        fieldGroup<symmTensor> surfaceSymmTensorFields_;
+        fieldGroup<tensor> surfaceTensorFields_;
 
-            // Cells to be probed (obtained from the locations)
-            labelList elementList_;
+        //- Cells to be probed (obtained from the locations)
+        labelList elementList_;
 
-            // Faces to be probed
-            labelList faceList_;
+        //- Faces to be probed
+        labelList faceList_;
 
-            //- Current open files
-            HashPtrTable<OFstream> probeFilePtrs_;
+        //- Processor holding the cell or face (-1 if point not found
+        //  on any processor)
+        labelList processor_;
+
+        //- Current open files
+        HashPtrTable<OFstream> probeFilePtrs_;
 
 
     // Protected Member Functions
@@ -179,16 +191,13 @@ protected:
         //- Clear old field groups
         void clearFieldGroups();
 
-        //- Append fieldName to the appropriate group
-        label appendFieldGroup(const word& fieldName, const word& fieldType);
-
         //- Classify field types, returns the number of fields
         label classifyFields();
 
         //- Find cells and faces containing probes
-        virtual void findElements(const fvMesh&);
+        virtual void findElements(const fvMesh& mesh);
 
-        //- Classify field type and Open/close file streams,
+        //- Classify field type and open/close file streams,
         //  returns number of fields to sample
         label prepare();
 
@@ -219,10 +228,10 @@ private:
         void sampleAndWriteSurfaceFields(const fieldGroup<Type>&);
 
         //- Disallow default bitwise copy construct
-        probes(const probes&);
+        probes(const probes&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const probes&);
+        void operator=(const probes&) = delete;
 
 
 public:

@@ -96,14 +96,14 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        binned(const dictionary& dict, cachedRandom& rndGen);
+        binned(const dictionary& dict, Random& rndGen);
 
         //- Construct from components
         binned
         (
             const UList<scalar>& sampleData,
             const scalar binWidth,
-            cachedRandom& rndGen
+            Random& rndGen
         );
 
         //- Construct copy

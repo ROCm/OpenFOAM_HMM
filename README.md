@@ -13,7 +13,7 @@ OpenCFD Ltd grants use of the OpenFOAM trademark by Third Parties on a licence b
 
 Please [contact OpenCFD](http://www.openfoam.com/contact) if you have any questions on the use of the OpenFOAM trademark.
 
-Violations of the Trademark are continuously monitored, and will be duly prosecuted. 
+Violations of the Trademark are continuously monitored, and will be duly prosecuted.
 
 
 # Useful Links

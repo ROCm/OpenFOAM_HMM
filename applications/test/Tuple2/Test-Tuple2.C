@@ -31,6 +31,7 @@ Description
 #include "Tuple2.H"
 #include "label.H"
 #include "scalar.H"
+#include "List.H"
 
 using namespace Foam;
 
@@ -39,9 +40,25 @@ using namespace Foam;
 
 int main()
 {
-    Tuple2<label, scalar> t2(1, 3.2);
+    typedef Tuple2<label, scalar> indexedScalar;
 
-    Info<< t2 << " " << t2.first() << " " << t2.second() << endl;
+    indexedScalar t2(1, 3.2);
+
+    Info<< "tuple: "
+        << t2 << " "
+        << t2.first() << " " << t2.second() << endl;
+
+    List<indexedScalar> list1(10);
+    forAll(list1, i)
+    {
+        list1[i] = indexedScalar(-i, i*i);
+    }
+
+    sort(list1);
+
+    Info<< "tuples:" << nl
+        << list1
+        << endl;
 
     Info<< "End\n" << endl;
 

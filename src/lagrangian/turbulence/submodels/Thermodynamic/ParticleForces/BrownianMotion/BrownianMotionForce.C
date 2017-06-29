@@ -206,7 +206,7 @@ Foam::forceSuSp Foam::BrownianMotionForce<CloudType>::calcCoupled
 
     // To generate a spherical distribution:
 
-    cachedRandom& rnd = this->owner().rndGen();
+    Random& rnd = this->owner().rndGen();
 
     const scalar theta = rnd.sample01<scalar>()*twoPi;
     const scalar u = 2*rnd.sample01<scalar>() - 1;

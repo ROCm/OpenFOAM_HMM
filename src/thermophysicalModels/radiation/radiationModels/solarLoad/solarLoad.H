@@ -105,10 +105,10 @@ private:
         autoPtr<singleCellFvMesh> coarseMesh_;
 
         //- Net radiative heat flux [W/m2]
-        volScalarField Qr_;
+        volScalarField qr_;
 
         //- Secondary solar radiative heat flux [W/m2]
-        volScalarField QsecondRad_;
+        volScalarField qsecondRad_;
 
         //- Direct hit faces Ids
         autoPtr<faceShading> hitFaces_;
@@ -143,10 +143,10 @@ private:
         //- Face-compact map
         labelListIOList visibleFaceFaces_;
 
-        //- Couple solids through mapped boundary patch using Qr (default:true)
+        //- Couple solids through mapped boundary patch using qr (default:true)
         bool solidCoupled_;
 
-        //- Couple wall patches using Qr (default:false)
+        //- Couple wall patches using qr (default:false)
         bool wallCoupled_;
 
         //- Absorptivity list

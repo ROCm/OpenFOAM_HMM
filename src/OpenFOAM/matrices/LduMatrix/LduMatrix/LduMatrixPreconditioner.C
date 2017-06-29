@@ -42,7 +42,7 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
         typename symMatrixConstructorTable::iterator constructorIter =
             symMatrixConstructorTablePtr_->find(preconditionerName);
 
-        if (constructorIter == symMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -68,7 +68,7 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
         typename asymMatrixConstructorTable::iterator constructorIter =
             asymMatrixConstructorTablePtr_->find(preconditionerName);
 
-        if (constructorIter == asymMatrixConstructorTablePtr_->end())
+        if (!constructorIter.found())
         {
             FatalIOErrorInFunction
             (

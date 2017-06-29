@@ -35,12 +35,11 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 )
 {
     const dictionary& coordDict = dict.subDict(typeName_());
-    word coordType = coordDict.lookup("type");
+    const word coordType = coordDict.lookup("type");
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(coordType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(coordType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

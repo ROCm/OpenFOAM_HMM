@@ -12,9 +12,9 @@
       - fvm::laplacian(turbulence->alphaEff(), he)
      ==
         rho*(U&g)
+      + Qdot
       + parcels.Sh(he)
-      + radiation->Sh(thermo)
-      + combustion->Sh()
+      + radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
 
@@ -25,6 +25,7 @@
     EEqn.solve();
 
     fvOptions.correct(he);
+
     thermo.correct();
     radiation->correct();
 

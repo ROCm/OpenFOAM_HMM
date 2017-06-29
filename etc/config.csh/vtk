@@ -36,18 +36,20 @@
 #     equivalent config.sh version too, since that is the one which will
 #     be used during the build process.
 #
-# It is recommended to use the VTK sources from ParaView 5.0.1.
+# It is recommended to use VTK sources from ParaView (5.0.1 or later)
 #
-# See the BuildIssues.txt about problems that can be encountered when using
+# See BuildIssues.txt about problems that can be encountered when using
 # the 'plain' VTK sources.
 #------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set vtk_version=VTK-7.1.0
-set mesa_version=mesa-13.0.1
+set vtk_version=VTK-8.1.0
+set mesa_version=mesa-17.1.1
 
 setenv VTK_DIR $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$vtk_version
 setenv MESA_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$mesa_version
 
+# END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if ($?FOAM_VERBOSE && $?prompt) then
     echo "Using vtk  ($vtk_version)  ->  $VTK_DIR"

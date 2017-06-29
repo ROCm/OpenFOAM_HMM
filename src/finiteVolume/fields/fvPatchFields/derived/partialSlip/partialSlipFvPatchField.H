@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2011-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,8 @@ Description
 Usage
     \table
         Property      | Description             | Required    | Default value
-        valueFraction | fraction of value used for boundary [0-1] | yes |
+        refValue      | Reference value at zero slip | no     | 0
+        valueFraction | Fraction of refValue used for boundary [0-1] | yes |
     \endtable
 
     Example of the boundary condition specification:
@@ -42,6 +43,7 @@ Usage
     <patchName>
     {
         type            partialSlip;
+        refValue        uniform 0.001;
         valueFraction   uniform 0.1;
         value           uniform 0;
     }
@@ -75,6 +77,9 @@ class partialSlipFvPatchField
     public transformFvPatchField<Type>
 {
     // Private data
+
+        //- Reference value
+        Field<Type> refValue_;
 
         //- Fraction (0-1) of value used for boundary condition
         scalarField valueFraction_;
@@ -176,6 +181,16 @@ public:
 
         // Return defining fields
 
+            virtual Field<Type>& refValue()
+            {
+                return refValue_;
+            }
+
+            virtual const Field<Type>& refValue() const
+            {
+                return refValue_;
+            }
+
             virtual scalarField& valueFraction()
             {
                 return valueFraction_;
@@ -195,7 +210,8 @@ public:
             //- Evaluate the patch field
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType=Pstream::blocking
+                const Pstream::commsTypes commsType =
+                    Pstream::commsTypes::blocking
             );
 
             //- Return face-gradient transform diagonal

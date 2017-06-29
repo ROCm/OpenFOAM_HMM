@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,8 @@ supersonicFreestreamFvPatchVectorField
     TInf_(readScalar(dict.lookup("TInf"))),
     gamma_(readScalar(dict.lookup("gamma")))
 {
+    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+
     if (dict.found("value"))
     {
         fvPatchField<vector>::operator=

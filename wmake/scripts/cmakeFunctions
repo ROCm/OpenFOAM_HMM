@@ -1,0 +1,178 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Script
+#     cmakeFunctions
+#
+# Description
+#     Helper functions for CMake
+#------------------------------------------------------------------------------
+
+# Source the wmake functions
+. $WM_PROJECT_DIR/wmake/scripts/wmakeFunctions
+
+# Ensure CMake gets the correct C/C++ compilers
+[ -n "$WM_CC" ]  && export CC="$WM_CC"
+[ -n "$WM_CXX" ] && export CXX="$WM_CXX"
+
+
+#------------------------------------------------------------------------------
+
+#
+# Check sentinel file(s) to handle paraview / vtk version changes
+#
+sameDependency()
+{
+    local depend="$1"
+    local sourceDir="$2"
+    local objectsDir sentinel prev
+
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
+    sentinel="$objectsDir/ThirdParty"
+
+    echo $sentinel
+
+    if read -r prev 2>/dev/null < $sentinel
+    then
+        if [ "$prev" = "$depend" ]
+        then
+            return 0
+        else
+            echo "${depend%=*} changed between builds" 1>&2
+            return 1
+        fi
+    elif [ -f "$objectsDir/CMakeCache.txt" ]
+    then
+        echo "previous build was incomplete" 1>&2
+        return 1
+    else
+        return 0
+    fi
+}
+
+
+# CMake with output suppressed according to WM_QUIET
+_cmake()
+{
+    echo "cmake..."
+    if [ -n "$WM_QUIET" ]
+    then
+        cmake -DCMAKE_RULE_MESSAGES=OFF $@ >/dev/null
+    else
+        cmake $@
+    fi
+}
+
+
+# CMake into objectsDir with external dependency
+# - use sentinel file(s) to handle paraview/vtk version changes
+cmakeVersioned()
+{
+    local depend="$1"
+    local sourceDir="$2"
+    local objectsDir sentinel
+
+    # Where generated files are stored
+    objectsDir=$(findObjectDir "$sourceDir") || exit 1 # Fatal
+
+    # Version changed
+    sentinel=$(sameDependency "$depend" "$sourceDir") || \
+        rm -rf "$objectsDir" > /dev/null 2>&1
+
+    mkdir -p $objectsDir && \
+    (
+        cd $objectsDir && _cmake $sourceDir && make \
+     && echo "$depend" > ${sentinel:-/dev/null}
+    )
+}
+
+
+# CMake into objectsDir with VTK_DIR dependency
+cmakeVtk()
+{
+    cmakeVersioned "VTK_DIR=$VTK_DIR" "$1"
+}
+
+
+# CMake into objectsDir with ParaView_DIR dependency
+cmakePv()
+{
+    cmakeVersioned "ParaView_DIR=$ParaView_DIR" "$1"
+}
+
+
+#
+# Build library - use sentinel file(s) to handle paraview version changes
+#
+wmakeLibPv()
+{
+    local depend="ParaView_DIR=$ParaView_DIR"
+    local sentinel
+
+    for libName
+    do
+        sentinel=$(sameDependency "$depend" $libName) || \
+            wclean $libName
+
+        wmake $targetType $libName \
+        && echo "$depend" > ${sentinel:-/dev/null}
+    done
+}
+
+
+#
+# There are several prerequisites for building plugins
+#
+canBuildPlugin()
+{
+    [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ] || {
+        echo "==> cannot build ParaView plugins without paraview directory"
+        echo "    ParaView_DIR=$ParaView_DIR"
+        return 1
+    }
+
+    [ -n "$PV_PLUGIN_PATH" ] || {
+        echo "==> ${PWD##*/} : invalid PV_PLUGIN_PATH for building ParaView plugins"
+        echo "    PV_PLUGIN_PATH=${PV_PLUGIN_PATH:-unset}"
+        return 1
+    }
+
+    [ -d "$ParaView_INCLUDE_DIR" ] && \
+    [ -f "$ParaView_INCLUDE_DIR/pqServerManagerModel.h" ] || {
+        echo "==> cannot build ParaView plugins without an include directory"
+        echo "    ... or without GUI support"
+        echo "    ParaView_INCLUDE_DIR=$ParaView_INCLUDE_DIR"
+        return 1
+    }
+
+    command -v cmake > /dev/null 2>&1 || {
+        echo "==> cannot build ParaView plugins without cmake"
+        return 1
+    }
+
+    return 0 # success
+}
+
+
+#------------------------------------------------------------------------------

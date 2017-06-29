@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ namespace Foam
 class face;
 class triFace;
 
-inline bool operator==(const triFace&, const triFace&);
-inline bool operator!=(const triFace&, const triFace&);
+inline bool operator==(const triFace& a, const triFace& b);
+inline bool operator!=(const triFace& a, const triFace& b);
 
 
 /*---------------------------------------------------------------------------*\
@@ -87,19 +87,21 @@ public:
         );
 
         //- Construct from a list of 3 labels.
-        explicit inline triFace(const labelUList&);
+        explicit inline triFace(const labelUList& lst);
 
         //- Construct from an initializer list of 3 labels
-        explicit inline triFace(std::initializer_list<label>);
+        explicit inline triFace(std::initializer_list<label> lst);
 
         //- Construct from Istream
-        inline triFace(Istream&);
+        inline triFace(Istream& is);
 
 
     // Member Functions
 
-        //- Collapse face by removing duplicate point labels
-        //  return the collapsed size, set collapsed point labels to -1
+        //- 'Collapse' face by marking duplicate point labels.
+        //  Duplicates point labels are marked with '-1'
+        //  (the lower vertex is retained).
+        //  Return the collapsed size.
         inline label collapse();
 
         //- Flip the face in-place.
@@ -107,26 +109,26 @@ public:
         inline void flip();
 
         //- Return the points corresponding to this face
-        inline pointField points(const pointField&) const;
+        inline pointField points(const UList<point>& points) const;
 
         //- Return triangle as a face
         inline face triFaceFace() const;
 
         //- Return the triangle
-        inline triPointRef tri(const pointField&) const;
+        inline triPointRef tri(const UList<point>& points) const;
 
         //- Return centre (centroid)
-        inline point centre(const pointField&) const;
+        inline point centre(const UList<point>& points) const;
 
         //- Calculate average value at centroid of face
         template<class Type>
-        Type average(const pointField&, const Field<Type>&) const;
+        Type average(const UList<point>& unused, const Field<Type>& fld) const;
 
         //- Magnitude of face area
-        inline scalar mag(const pointField&) const;
+        inline scalar mag(const UList<point>& points) const;
 
         //- Vector normal; magnitude is equal to area of face
-        inline vector normal(const pointField&) const;
+        inline vector normal(const UList<point>& points) const;
 
         //- Number of triangles after splitting
         inline label nTriangles() const;
@@ -135,29 +137,35 @@ public:
         //  The starting points of the original and reverse face are identical.
         inline triFace reverseFace() const;
 
-        //- Return swept-volume
+        //- Return true if the global point label is found in face.
+        bool found(const label globalIndex) const;
+
+        //- Which local index (0,1,2) on face given a global index.
+        //  returns -1 if not found
+        label which(const label globalIndex) const;
+
+        //- Return swept-volume from old-points to new-points
         inline scalar sweptVol
         (
-            const pointField& oldPoints,
-            const pointField& newPoints
+            const UList<point>& opts,
+            const UList<point>& npts
         ) const;
 
         //- Return the inertia tensor, with optional reference
         //  point and density specification
         inline tensor inertia
         (
-            const pointField&,
+            const UList<point>& points,
             const point& refPt = vector::zero,
             scalar density = 1.0
         ) const;
 
-        //- Return point intersection with a ray starting at p,
-        //  with direction q.
+        //- Return point intersection with a ray starting at p, in direction q.
         inline pointHit ray
         (
             const point& p,
             const vector& q,
-            const pointField& points,
+            const UList<point>& points,
             const intersection::algorithm = intersection::FULL_RAY,
             const intersection::direction dir = intersection::VECTOR
         ) const;
@@ -167,7 +175,7 @@ public:
         (
             const point& p,
             const vector& q,
-            const pointField& points,
+            const UList<point>& points,
             const intersection::algorithm alg,
             const scalar tol = 0.0
         ) const;
@@ -177,7 +185,7 @@ public:
             const point& p,
             const vector& q,
             const point& ctr,
-            const pointField& points,
+            const UList<point>& points,
             const intersection::algorithm alg,
             const scalar tol = 0.0
         ) const;
@@ -186,7 +194,7 @@ public:
         inline pointHit nearestPoint
         (
             const point& p,
-            const pointField& points
+            const UList<point>& points
         ) const;
 
 
@@ -199,7 +207,7 @@ public:
         inline pointHit nearestPointClassify
         (
             const point& p,
-            const pointField& points,
+            const UList<point>& points,
             label& nearType,
             label& nearLabel
         ) const;
@@ -219,20 +227,23 @@ public:
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
         //  -  0: edge not found on the face
-        inline int edgeDirection(const edge&) const;
+        inline int edgeDirection(const edge& e) const;
 
         //- Compare triFaces
         //  Returns:
         //  -  0: different
         //  - +1: identical
         //  - -1: same face, but different orientation
-        static inline int compare(const triFace&, const triFace&);
+        static inline int compare(const triFace& a, const triFace& b);
 
-    // Friend Operators
-
-        inline friend bool operator==(const triFace&, const triFace&);
-        inline friend bool operator!=(const triFace&, const triFace&);
 };
+
+
+template<>
+inline bool contiguous<triFace>()  {return true;}
+
+inline bool operator==(const triFace& a, const triFace& b);
+inline bool operator!=(const triFace& a, const triFace& b);
 
 
 //- Hash specialization for hashing triFace - a commutative hash value.
@@ -257,10 +268,6 @@ inline unsigned Hash<triFace>::operator()(const triFace& t) const
 {
     return Hash<triFace>::operator()(t, 0);
 }
-
-
-template<>
-inline bool contiguous<triFace>()  {return true;}
 
 
 //- Hash specialization to offset faces in ListListOps::combineOffset

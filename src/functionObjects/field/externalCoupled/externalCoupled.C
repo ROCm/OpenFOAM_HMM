@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,27 +50,18 @@ namespace functionObjects
 }
 }
 
+const Foam::Enum<Foam::functionObjects::externalCoupled::stateEnd>
+    Foam::functionObjects::externalCoupled::stateEndNames_
+    {
+        { stateEnd::REMOVE, "remove" },
+        { stateEnd::DONE, "done" }
+        // 'IGNORE' is internal use only and thus without a name
+    };
+
+
 Foam::word Foam::functionObjects::externalCoupled::lockName = "OpenFOAM";
 
 Foam::string Foam::functionObjects::externalCoupled::patchKey = "// Patch:";
-
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::functionObjects::externalCoupled::stateEnd,
-    2
->::names[] =
-{
-    "remove",
-    "done"
-    // The 'IGNORE' enumeration is internal use only and thus has no name
-};
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::externalCoupled::stateEnd,
-    2
-> Foam::functionObjects::externalCoupled::stateEndNames_;
 
 
 namespace Foam
@@ -86,16 +77,16 @@ static void writeList(Ostream& os, const string& header, const UList<T>& L)
 
     // Write size and start delimiter
     os  << L.size() << nl
-        << token::BEGIN_LIST;
+        << token::BEGIN_LIST << nl;
 
     // Write contents
     forAll(L, i)
     {
-        os << nl << L[i];
+        os << L[i] << nl;
     }
 
     // Write end delimiter
-    os << nl << token::END_LIST << nl << endl;
+    os << token::END_LIST << nl << endl;
 }
 //! \endcond
 
@@ -141,77 +132,72 @@ Foam::fileName Foam::functionObjects::externalCoupled::lockFile() const
 
 void Foam::functionObjects::externalCoupled::useMaster() const
 {
-    if (!Pstream::master())
+    if (Pstream::master())
     {
-        return;
-    }
+        const fileName lck(lockFile());
 
-    const fileName fName(lockFile());
-    IFstream is(fName);
+        // Only create lock file if it doesn't already exist
+        if (!Foam::isFile(lck))
+        {
+            Log << type() << ": creating lock file" << endl;
 
-    // Only create lock file if it doesn't already exist
-    if (!is.good())
-    {
-        Log << type() << ": creating lock file" << endl;
-
-        OFstream os(fName);
-        os  << "status=openfoam\n";
-        os.flush();
+            OFstream os(lck);
+            os << "status=openfoam\n";
+            os.flush();
+        }
     }
 }
 
 
 void Foam::functionObjects::externalCoupled::useSlave() const
 {
-    if (!Pstream::master())
+    if (Pstream::master())
     {
-        return;
+        Log << type() << ": removing lock file" << endl;
+
+        Foam::rm(lockFile());
     }
-
-    Log << type() << ": removing lock file" << endl;
-
-    Foam::rm(lockFile());
 }
 
 
 void Foam::functionObjects::externalCoupled::cleanup() const
 {
-    if (!Pstream::master())
+    if (Pstream::master())
     {
-        return;
-    }
-
-    const fileName lck(lockFile());
-    switch (stateEnd_)
-    {
-        case REMOVE:
+        const fileName lck(lockFile());
+        switch (stateEnd_)
+        {
+            case REMOVE:
             {
                 Log << type() << ": removing lock file" << endl;
                 Foam::rm(lck);
+                break;
             }
-            break;
-        case DONE:
+            case DONE:
             {
                 Log << type() << ": lock file status=done" << endl;
                 OFstream os(lck);
                 os  << "status=done\n";
                 os.flush();
+                break;
             }
-            break;
-        case IGNORE:
-            break;
+            case IGNORE:
+                break;
+        }
+
+        stateEnd_ = IGNORE;   // Avoid re-triggering in destructor
     }
 }
 
 
-void Foam::functionObjects::externalCoupled::removeReadFiles() const
+void Foam::functionObjects::externalCoupled::removeDataSlave() const
 {
     if (!Pstream::master())
     {
         return;
     }
 
-    Log << type() << ": removing all read files" << endl;
+    Log << type() << ": removing data files written by slave" << nl;
 
     forAll(regionGroupNames_, regioni)
     {
@@ -237,14 +223,14 @@ void Foam::functionObjects::externalCoupled::removeReadFiles() const
 }
 
 
-void Foam::functionObjects::externalCoupled::removeWriteFiles() const
+void Foam::functionObjects::externalCoupled::removeDataMaster() const
 {
     if (!Pstream::master())
     {
         return;
     }
 
-    Log << type() << ": removing all write files" << endl;
+    Log << type() << ": removing data files written by master" << nl;
 
     forAll(regionGroupNames_, regioni)
     {
@@ -272,42 +258,34 @@ void Foam::functionObjects::externalCoupled::removeWriteFiles() const
 
 void Foam::functionObjects::externalCoupled::waitForSlave() const
 {
-    const fileName fName(lockFile());
-    label totalTime = 0;
-    bool found = false;
-
-    Log << type() << ": beginning wait for lock file " << fName << nl;
-
-    while (!found)
+    bool waiting = true;
+    if (Pstream::master())
     {
-        if (Pstream::master())
+        const fileName lck(lockFile());
+        unsigned totalTime = 0;
+
+        Log << type() << ": beginning wait for lock file " << lck << nl;
+
+        while ((waiting = !Foam::isFile(lck)) == true)
         {
-            if (totalTime > timeOut_)
+            sleep(waitInterval_);
+            totalTime += waitInterval_;
+
+            if (timeOut_ && totalTime > timeOut_)
             {
                 FatalErrorInFunction
                     << "Wait time exceeded timeout of " << timeOut_
                     << " s" << abort(FatalError);
             }
 
-            IFstream is(fName);
-            if (is.good())
-            {
-                found = true;
-
-                Log << type() << ": found lock file " << fName << endl;
-            }
-            else
-            {
-                sleep(waitInterval_);
-                totalTime += waitInterval_;
-
-                Log << type() << ": wait time = " << totalTime << endl;
-            }
+            Log << type() << ": wait time = " << totalTime << endl;
         }
 
-        // Prevent other procs from racing ahead
-        reduce(found, orOp<bool>());
+        Log << type() << ": found lock file " << lck << endl;
     }
+
+    // MPI barrier
+    Pstream::scatter(waiting);
 }
 
 
@@ -322,14 +300,14 @@ void Foam::functionObjects::externalCoupled::readColumns
     // Get sizes for all processors
     const globalIndex globalFaces(nRows);
 
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
     if (Pstream::master())
     {
         string line;
 
         // Read data from file and send to destination processor
 
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
         {
             // Temporary storage
             List<scalarField> values(nColumns);
@@ -342,7 +320,7 @@ void Foam::functionObjects::externalCoupled::readColumns
                 values[columni].setSize(procNRows);
             }
 
-            for (label rowi = 0; rowi < procNRows; rowi++)
+            for (label rowi = 0; rowi < procNRows; ++rowi)
             {
                 // Get a line
                 do
@@ -358,11 +336,12 @@ void Foam::functionObjects::externalCoupled::readColumns
                     }
 
                     masterFilePtr().getLine(line);
-                } while (line.empty() || line[0] == '#');
+                }
+                while (line.empty() || line[0] == '#');
 
                 IStringStream lineStr(line);
 
-                for (label columni = 0; columni < nColumns; columni++)
+                for (label columni = 0; columni < nColumns; ++columni)
                 {
                     lineStr >> values[columni][rowi];
                 }
@@ -391,7 +370,7 @@ void Foam::functionObjects::externalCoupled::readLines
     // Get sizes for all processors
     const globalIndex globalFaces(nRows);
 
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     if (Pstream::master())
     {
@@ -399,14 +378,14 @@ void Foam::functionObjects::externalCoupled::readLines
 
         // Read line from file and send to destination processor
 
-        for (label proci = 0; proci < Pstream::nProcs(); proci++)
+        for (label proci = 0; proci < Pstream::nProcs(); ++proci)
         {
             // Number of rows to read for processor proci
             label procNRows = globalFaces.localSize(proci);
 
             UOPstream toProc(proci, pBufs);
 
-            for (label rowi = 0; rowi < procNRows; rowi++)
+            for (label rowi = 0; rowi < procNRows; ++rowi)
             {
                 // Get a line
                 do
@@ -422,7 +401,8 @@ void Foam::functionObjects::externalCoupled::readLines
                     }
 
                     masterFilePtr().getLine(line);
-                } while (line.empty() || line[0] == '#');
+                }
+                while (line.empty() || line[0] == '#');
 
                 // Send line to the destination processor
                 toProc << line;
@@ -435,7 +415,7 @@ void Foam::functionObjects::externalCoupled::readLines
 
     // Read lines from PstreamBuffers
     UIPstream str(Pstream::masterNo(), pBufs);
-    for (label rowi = 0; rowi < nRows; rowi++)
+    for (label rowi = 0; rowi < nRows; ++rowi)
     {
         string line(str);
         lines << line.c_str() << nl;
@@ -568,8 +548,8 @@ Foam::word Foam::functionObjects::externalCoupled::compositeName
     {
         if (regionNames[0] == polyMesh::defaultRegion)
         {
-            // For compatibility with single region cases suppress single
-            // region name
+            // For compatibility with single region cases
+            // - suppress single region name
             return word::null;
         }
         else
@@ -636,35 +616,38 @@ void Foam::functionObjects::externalCoupled::readData()
             {
                 const word& fieldName = fieldNames[fieldi];
 
-                bool ok = readData<scalar>
+                const bool ok =
                 (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || readData<vector>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || readData<sphericalTensor>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || readData<symmTensor>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || readData<tensor>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
+                    readData<scalar>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || readData<vector>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || readData<sphericalTensor>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || readData<symmTensor>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || readData<tensor>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
                 );
 
                 if (!ok)
@@ -706,35 +689,38 @@ void Foam::functionObjects::externalCoupled::writeData() const
             {
                 const word& fieldName = fieldNames[fieldi];
 
-                bool ok = writeData<scalar>
+                const bool ok =
                 (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || writeData<vector>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || writeData<sphericalTensor>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || writeData<symmTensor>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
-                );
-                ok = ok || writeData<tensor>
-                (
-                    meshes,
-                    groupName,
-                    fieldName
+                    writeData<scalar>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || writeData<vector>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || writeData<sphericalTensor>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || writeData<symmTensor>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
+                 || writeData<tensor>
+                    (
+                        meshes,
+                        groupName,
+                        fieldName
+                    )
                 );
 
                 if (!ok)
@@ -794,7 +780,7 @@ void Foam::functionObjects::externalCoupled::initialise()
         }
     }
 
-    if (initByExternal_)
+    if (slaveFirst_)
     {
         // Wait for initial data to be made available
         waitForSlave();
@@ -828,7 +814,7 @@ Foam::functionObjects::externalCoupled::externalCoupled
         mkDir(baseDir());
     }
 
-    if (!initByExternal_)
+    if (!slaveFirst_)
     {
         useMaster();
     }
@@ -863,7 +849,7 @@ bool Foam::functionObjects::externalCoupled::execute()
         waitForSlave();
 
         // Remove old data files from OpenFOAM
-        removeWriteFiles();
+        removeDataMaster();
 
         // Read data passed back from external source
         readData();
@@ -885,11 +871,9 @@ bool Foam::functionObjects::externalCoupled::end()
     functionObject::end();
 
     // Remove old data files
-    removeReadFiles();
-    removeWriteFiles();
+    removeDataMaster();
+    removeDataSlave();
     cleanup();
-
-    stateEnd_ = IGNORE;   // Avoid running cleanup() again in destructor
 
     return true;
 }
@@ -899,25 +883,37 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
 {
     functionObject::read(dict);
 
-    calcFrequency_  = dict.lookupOrDefault("calcFrequency", 1);
+    // NB: Cannot change directory or initialization
+    // if things have already been initialized
+    if (!initialised_)
+    {
+        dict.lookup("commsDir") >> commsDir_;
+        commsDir_.expand();
+        commsDir_.clean();
 
-    dict.lookup("commsDir") >> commsDir_;
-    commsDir_.expand();
-    commsDir_.clean();
+        slaveFirst_ = readBool(dict.lookup("initByExternal"));
+        // slaveFirst_ = dict.lookupOrDefault<bool>("initByExternal", false);
+    }
 
-    waitInterval_   = dict.lookupOrDefault("waitInterval", 1);
-    timeOut_        = dict.lookupOrDefault("timeOut", 100*waitInterval_);
-    initByExternal_ = readBool(dict.lookup("initByExternal"));
-    // initByExternal_ = dict.lookupOrDefault<Switch>("initByExternal", false);
-    stateEnd_       =
-        stateEndNames_[dict.lookupOrDefault<word>("stateEnd", "remove")];
+    calcFrequency_ = dict.lookupOrDefault("calcFrequency", 1);
+
+    waitInterval_ = dict.lookupOrDefault("waitInterval", 1u);
+    if (!waitInterval_)
+    {
+        // Enforce non-zero sleep
+        waitInterval_ = 1u;
+    }
+
+    timeOut_ = dict.lookupOrDefault("timeOut", 100*waitInterval_);
+    stateEnd_ =
+        stateEndNames_.lookupOrDefault("stateEnd", dict, stateEnd::DONE);
 
 
     // Get names of all fvMeshes (and derived types)
     wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
 
     const dictionary& allRegionsDict = dict.subDict("regions");
-    forAllConstIter(dictionary, allRegionsDict, iter)
+    forAllConstIters(allRegionsDict, iter)
     {
         if (!iter().isDict())
         {
@@ -936,8 +932,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
         regionGroupNames_.append(compositeName(regionNames));
         regionGroupRegions_.append(regionNames);
 
-
-        forAllConstIter(dictionary, regionDict, regionIter)
+        forAllConstIters(regionDict, regionIter)
         {
             if (!regionIter().isDict())
             {
@@ -948,15 +943,12 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
             const wordRe groupName(regionIter().keyword());
             const dictionary& groupDict = regionIter().dict();
 
-            label nGroups = groupNames_.size();
+            const label nGroups = groupNames_.size();
             const wordList readFields(groupDict.lookup("readFields"));
             const wordList writeFields(groupDict.lookup("writeFields"));
 
-            HashTable<labelList>::iterator fnd = regionToGroups_.find
-            (
-                regionGroupNames_.last()
-            );
-            if (fnd != regionToGroups_.end())
+            auto fnd = regionToGroups_.find(regionGroupNames_.last());
+            if (fnd.found())
             {
                 fnd().append(nGroups);
             }

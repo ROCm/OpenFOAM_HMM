@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -154,6 +154,14 @@ class functionObject
         void operator=(const functionObject&) = delete;
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Return a scoped name, e.g. used to construct local field names
+        word scopedName(const word& name) const;
+
+
 public:
 
     //- Runtime type information
@@ -232,6 +240,9 @@ public:
 
         //- Called at the end of Time::adjustDeltaT() if adjustTime is true
         virtual bool adjustTimeStep();
+
+        //- Did any file get changed during execution?
+        virtual bool filesModified() const;
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh& mpm);

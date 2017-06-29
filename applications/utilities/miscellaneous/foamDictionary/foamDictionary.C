@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,10 +55,10 @@ Usage
         the resulting dictionary to standard output.
 
       - \par -includes
-        List the \c #include and \c #includeIfPresent files to standard output
+        List the \c \#include and \c \#includeIfPresent files to standard output
 
       - \par -disableFunctionEntries
-        Do not expand macros or directives (#include etc)
+        Do not expand macros or directives (\#include etc)
 
     Example usage:
       - Change simulation to run for one timestep only:
@@ -112,6 +112,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "profiling.H"
 #include "Time.H"
 #include "IFstream.H"
 #include "OFstream.H"
@@ -241,6 +242,7 @@ int main(int argc, char *argv[])
     argList::addNote("manipulates dictionaries");
 
     argList::noBanner();
+    argList::noJobInfo();
     argList::validArgs.append("dictionary");
     argList::addBoolOption("keywords", "list keywords");
     argList::addOption("entry", "name", "report/select the named entry");
@@ -288,6 +290,7 @@ int main(int argc, char *argv[])
         "disableFunctionEntries",
         "Disable expansion of dictionary directives - #include, #codeStream etc"
     );
+    profiling::disable(); // Disable profiling (and its output)
 
     argList args(argc, argv);
 
@@ -396,7 +399,7 @@ int main(int argc, char *argv[])
             );
             if (entPtr)
             {
-                Info<< *entPtr << endl;
+                Info<< *entPtr;
             }
         }
         else if (args.optionFound("remove"))
@@ -467,7 +470,11 @@ int main(int argc, char *argv[])
                             const tokenList& tokens = entPtr->stream();
                             forAll(tokens, i)
                             {
-                                Info<< tokens[i] << token::SPACE;
+                                Info<< tokens[i];
+                                if (i < tokens.size() - 1)
+                                {
+                                    Info<< token::SPACE;
+                                }
                             }
                             Info<< endl;
                         }
@@ -478,7 +485,7 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        Info<< *entPtr << endl;
+                        Info<< *entPtr;
                     }
                 }
             }

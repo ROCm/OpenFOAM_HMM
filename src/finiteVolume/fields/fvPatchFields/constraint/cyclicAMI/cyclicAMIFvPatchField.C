@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,7 +65,7 @@ Foam::cyclicAMIFvPatchField<Type>::cyclicAMIFvPatchField
 
     if (!dict.found("value") && this->coupled())
     {
-        this->evaluate(Pstream::blocking);
+        this->evaluate(Pstream::commsTypes::blocking);
     }
 }
 
@@ -179,6 +179,7 @@ template<class Type>
 void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -204,12 +205,7 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
     }
 
     // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = cyclicAMIPatch_.faceCells();
-
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 
@@ -217,6 +213,7 @@ template<class Type>
 void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
+    const bool add,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes
@@ -241,12 +238,7 @@ void Foam::cyclicAMIFvPatchField<Type>::updateInterfaceMatrix
     }
 
     // Multiply the field by coefficients and add into the result
-    const labelUList& faceCells = cyclicAMIPatch_.faceCells();
-
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 

@@ -248,7 +248,7 @@ void Foam::waveModels::cnoidal::setLevel
     {
         const scalar eta =
             this->eta
-	        (
+            (
                 waveHeight_,
                 m_,
                 waveKx,
@@ -290,7 +290,7 @@ void Foam::waveModels::cnoidal::setVelocity
             const label paddlei = faceToPaddle_[facei];
 
             const vector Uf = this->Uf
-	        (
+            (
                 waveHeight_,
                 waterDepthRef_,
                 m_,

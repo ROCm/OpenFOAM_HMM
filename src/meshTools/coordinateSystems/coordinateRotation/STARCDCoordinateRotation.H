@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,7 +83,7 @@ class STARCDCoordinateRotation
             const scalar rotZ,
             const scalar rotX,
             const scalar rotY,
-            const bool inDegrees=true
+            const bool inDegrees
         );
 
 
@@ -98,11 +98,14 @@ public:
         //- Construct null
         STARCDCoordinateRotation();
 
+        //- Construct as copy
+        STARCDCoordinateRotation(const STARCDCoordinateRotation& r);
+
         //- Construct from rotation vector
         STARCDCoordinateRotation
         (
             const vector& rotZrotXrotY,
-            const bool inDegrees=true
+            const bool inDegrees
         );
 
         //- Construct from components of rotation vector
@@ -111,17 +114,19 @@ public:
             const scalar rotZ,
             const scalar rotX,
             const scalar rotY,
-            const bool inDegrees=true
+            const bool inDegrees
         );
 
         //- Construct from dictionary
-        STARCDCoordinateRotation(const dictionary&);
+        explicit STARCDCoordinateRotation(const dictionary& dict);
 
-        //- Construct from dictionary and mesh
-        STARCDCoordinateRotation(const dictionary&, const objectRegistry&);
+        //- Construct from dictionary and a registry (typically a mesh)
+        STARCDCoordinateRotation
+        (
+            const dictionary& dict,
+            const objectRegistry& unused
+        );
 
-         //- Construct as copy
-        STARCDCoordinateRotation(const STARCDCoordinateRotation&);
 
         //- Return clone
         autoPtr<coordinateRotation> clone() const
@@ -147,9 +152,7 @@ public:
 
         //- Update the rotation for a list of cells
         virtual void updateCells(const polyMesh&, const labelList&)
-        {
-            // do nothing
-        }
+        {}
 
         //- Return local-to-global transformation tensor
         virtual const tensor& R() const
@@ -220,11 +223,6 @@ public:
         // symmetrical tensor
         virtual symmTensor transformVector(const vector& st) const;
 
-
-    // Write
-
-        //- Write
-        virtual void write(Ostream&) const;
 };
 
 

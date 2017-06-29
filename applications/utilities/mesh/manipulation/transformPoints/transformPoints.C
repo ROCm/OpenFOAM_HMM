@@ -53,9 +53,9 @@ Usage
     it will also read & transform vector & tensor fields.
 
     Note:
-    yaw (rotation about z)
-    pitch (rotation about y)
     roll (rotation about x)
+    pitch (rotation about y)
+    yaw (rotation about z)
 
 \*---------------------------------------------------------------------------*/
 
@@ -143,6 +143,12 @@ void rotateFields(const argList& args, const Time& runTime, const tensor& T)
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Transform (translate/rotate/scale) mesh points.\n"
+        "Note: roll=rotation about x, pitch=rotation about y, "
+        "yaw=rotation about z"
+    );
     argList::addOption
     (
         "translate",
@@ -160,13 +166,13 @@ int main(int argc, char *argv[])
     (
         "rollPitchYaw",
         "vector",
-        "transform in terms of '(roll pitch yaw)' in degrees"
+        "rotate by '(roll pitch yaw)' in degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "transform in terms of '(yaw pitch roll)' in degrees"
+        "rotate by '(yaw pitch roll)' in degrees"
     );
     argList::addBoolOption
     (

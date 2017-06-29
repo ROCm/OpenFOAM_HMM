@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::drippingInjection
+    Foam::regionModels::surfaceFilmModels::drippingInjection
 
 Description
-    Film Dripping mass transfer model.
+    Film dripping mass transfer model.
 
     If the film mass exceeds that needed to generate a valid parcel, the
     equivalent mass is removed from the film.
@@ -42,7 +42,7 @@ SourceFiles
 
 #include "injectionModel.H"
 #include "distributionModel.H"
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,10 +84,10 @@ protected:
         scalar particlesPerParcel_;
 
         //- Random number generator
-        cachedRandom rndGen_;
+        Random rndGen_;
 
         //- Parcel size PDF model
-        const autoPtr<distributionModels::distributionModel>
+        const autoPtr<distributionModel>
             parcelDistribution_;
 
         //- Diameters of particles to inject into the dripping
@@ -105,7 +105,7 @@ public:
         //- Construct from surface film model
         drippingInjection
         (
-            surfaceFilmModel& owner,
+            surfaceFilmModel& film,
             const dictionary& dict
         );
 

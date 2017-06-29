@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,7 +115,7 @@ Usage
         value           uniform 0.01;
     \endverbatim
 
-SeeAlso
+See also
     Foam::alphatPhaseChangeJayatillekeWallFunctionFvPatchField
 
 SourceFiles
@@ -180,6 +180,9 @@ private:
 
         //- Departure diameter field
         scalarField dDep_;
+
+        //- Quenching surface heat flux
+        scalarField qq_;
 
         //- Run-time selected heat flux partitioning model
         autoPtr<wallBoilingModels::partitioningModel>
@@ -269,12 +272,23 @@ public:
 
     // Member functions
 
-        //- Calculate and return the departure diameter field
+        //- Return the departure diameter field
         const scalarField& dDeparture() const
         {
             return dDep_;
         }
 
+        //- Return the quenching surface heat flux [W/m2]
+        const scalarField& qq() const
+        {
+            return qq_;
+        }
+
+        //- Return the evaporation surface heat flux [W/m2]
+        tmp<scalarField> qe() const
+        {
+            return mDotL_/AbyV_;
+        }
 
         // Evaluation functions
 

@@ -46,11 +46,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
     // Anull list
     L.setSize(0);
 
-    is.fatalCheck("operator>>(Istream&, List<T>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
-    is.fatalCheck("operator>>(Istream&, List<T>&) : reading first token");
+    is.fatalCheck(FUNCTION_NAME);
 
     if (firstToken.isCompound())
     {
@@ -74,13 +74,13 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
             // Read beginning of contents
-            char delimiter = is.readBeginList("List");
+            const char delimiter = is.readBeginList("List");
 
             if (s)
             {
                 if (delimiter == token::BEGIN_LIST)
                 {
-                    for (label i=0; i<s; i++)
+                    for (label i=0; i<s; ++i)
                     {
                         is >> L[i];
 
@@ -103,7 +103,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                         "reading the single entry"
                     );
 
-                    for (label i=0; i<s; i++)
+                    for (label i=0; i<s; ++i)
                     {
                         L[i] = element;
                     }

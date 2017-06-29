@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 
 
     word patchMapMethod;
-    if (meshToMesh::interpolationMethodNames_.found(mapMethod))
+    if (meshToMesh::interpolationMethodNames_.hasEnum(mapMethod))
     {
         // Lookup corresponding AMI method
         meshToMesh::interpolationMethod method =

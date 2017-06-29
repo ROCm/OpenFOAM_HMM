@@ -35,49 +35,38 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(vtkUnstructuredReader, 1);
-
-    template<>
-    const char*
-    NamedEnum<vtkUnstructuredReader::vtkDataType, 8>::names[] =
-    {
-        "int",
-        "unsigned_int",
-        "long",
-        "unsigned_long",
-        "float",
-        "double",
-        "string",
-        "vtkIdType"
-    };
-    const NamedEnum<vtkUnstructuredReader::vtkDataType, 8>
-    vtkUnstructuredReader::vtkDataTypeNames;
-
-
-    template<>
-    const char*
-    NamedEnum<vtkUnstructuredReader::vtkDataSetType, 3>::names[] =
-    {
-        "FIELD",
-        "SCALARS",
-        "VECTORS"
-    };
-    const NamedEnum<vtkUnstructuredReader::vtkDataSetType, 3>
-    vtkUnstructuredReader::vtkDataSetTypeNames;
-
-
-    template<>
-    const char*
-    NamedEnum<vtkUnstructuredReader::parseMode, 5>::names[] =
-    {
-        "NOMODE",
-        "UNSTRUCTURED_GRID",
-        "POLYDATA",
-        "CELL_DATA",
-        "POINT_DATA"
-    };
-    const NamedEnum<vtkUnstructuredReader::parseMode, 5>
-    vtkUnstructuredReader::parseModeNames;
 }
+
+const Foam::Enum<Foam::vtkUnstructuredReader::vtkDataType>
+    Foam::vtkUnstructuredReader::vtkDataTypeNames
+    {
+        { vtkDataType::VTK_INT, "int" },
+        { vtkDataType::VTK_UINT, "unsigned_int" },
+        { vtkDataType::VTK_LONG, "long" },
+        { vtkDataType::VTK_ULONG, "unsigned_long" },
+        { vtkDataType::VTK_FLOAT, "float" },
+        { vtkDataType::VTK_DOUBLE, "double" },
+        { vtkDataType::VTK_STRING, "string" },
+        { vtkDataType::VTK_ID, "vtkIdType" }
+    };
+
+const Foam::Enum<Foam::vtkUnstructuredReader::vtkDataSetType>
+    Foam::vtkUnstructuredReader::vtkDataSetTypeNames
+    {
+        { vtkDataSetType::VTK_FIELD, "FIELD" },
+        { vtkDataSetType::VTK_SCALARS, "SCALARS" },
+        { vtkDataSetType::VTK_VECTORS, "VECTORS" }
+    };
+
+const Foam::Enum<Foam::vtkUnstructuredReader::parseMode>
+    Foam::vtkUnstructuredReader::parseModeNames
+    {
+        { parseMode::NOMODE, "NOMODE" },
+        { parseMode::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
+        { parseMode::POLYDATA, "POLYDATA" },
+        { parseMode::CELL_DATA, "CELL_DATA" },
+        { parseMode::POINT_DATA, "POINT_DATA" }
+    };
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -136,7 +125,7 @@ void Foam::vtkUnstructuredReader::extractCells
     {
         switch (cellTypes[i])
         {
-            case foamVtkCore::VTK_VERTEX:
+            case vtk::cellType::VTK_VERTEX:
             {
                 warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -152,7 +141,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_POLY_VERTEX:
+            case vtk::cellType::VTK_POLY_VERTEX:
             {
                 warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -160,7 +149,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_LINE:
+            case vtk::cellType::VTK_LINE:
             {
                 //warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -180,7 +169,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_POLY_LINE:
+            case vtk::cellType::VTK_POLY_LINE:
             {
                 //warnUnhandledType(inFile, cellTypes[i], warningGiven);
                 label nRead = cellVertData[dataIndex++];
@@ -194,7 +183,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_TRIANGLE:
+            case vtk::cellType::VTK_TRIANGLE:
             {
                 faceMap_[facei] = i;
                 face& f = faces_[facei++];
@@ -214,7 +203,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_QUAD:
+            case vtk::cellType::VTK_QUAD:
             {
                 faceMap_[facei] = i;
                 face& f = faces_[facei++];
@@ -235,7 +224,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_POLYGON:
+            case vtk::cellType::VTK_POLYGON:
             {
                 faceMap_[facei] = i;
                 face& f = faces_[facei++];
@@ -248,7 +237,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_TETRA:
+            case vtk::cellType::VTK_TETRA:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 4)
@@ -268,7 +257,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_PYRAMID:
+            case vtk::cellType::VTK_PYRAMID:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 5)
@@ -289,7 +278,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_WEDGE:
+            case vtk::cellType::VTK_WEDGE:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 6)
@@ -311,7 +300,7 @@ void Foam::vtkUnstructuredReader::extractCells
             }
             break;
 
-            case foamVtkCore::VTK_HEXAHEDRON:
+            case vtk::cellType::VTK_HEXAHEDRON:
             {
                 label nRead = cellVertData[dataIndex++];
                 if (nRead != 8)

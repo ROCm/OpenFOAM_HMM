@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,6 +159,15 @@ Foam::volScalarField& Foam::basicThermo::lookupOrConstruct
 }
 
 
+void Foam::basicThermo::lookupAndCheckout(const char* name) const
+{
+    if (db().foundObject<volScalarField>(name))
+    {
+         db().checkOut(*db()[name]);
+    }
+}
+
+
 Foam::basicThermo::basicThermo
 (
     const fvMesh& mesh,
@@ -280,7 +289,9 @@ Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::basicThermo::~basicThermo()
-{}
+{
+    lookupAndCheckout("p");
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -449,14 +460,28 @@ Foam::wordList Foam::basicThermo::splitThermoName
         {
             cmpts[i] = thermoName.substr(beg, end-beg);
             cmpts[i++].replaceAll(">","");
+
+            // If the number of number of components in the name
+            // is greater than nCmpt return an empty list
+            if (i == nCmpt)
+            {
+                return wordList::null();
+            }
         }
         beg = end + 1;
+    }
+
+    // If the number of number of components in the name is not equal to nCmpt
+    // return an empty list
+    if (i + 1 != nCmpt)
+    {
+        return wordList::null();
     }
 
     if (beg < thermoName.size())
     {
         cmpts[i] = thermoName.substr(beg, string::npos);
-        cmpts[i++].replaceAll(">","");
+        cmpts[i].replaceAll(">","");
     }
 
     return cmpts;

@@ -70,6 +70,7 @@ bool Foam::CollidingParcel<ParcelType>::move
         static_cast<typename TrackData::cloudType::parcelType&>(*this);
 
     td.keepParticle = true;
+    td.switchProcessor = false;
 
     switch (td.part())
     {

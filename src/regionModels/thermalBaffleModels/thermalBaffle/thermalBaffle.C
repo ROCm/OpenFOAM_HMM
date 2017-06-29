@@ -97,7 +97,7 @@ void thermalBaffle::solveEnergy()
     volScalarField alpha("alpha", thermo_->alpha());
 
 
-    //If region is one-dimension variable thickness
+    // If region is one-dimension variable thickness
     if (oneD_ && !constantThickness_)
     {
         // Scale K and rhoCp and fill Q in the internal baffle region.
@@ -112,7 +112,7 @@ void thermalBaffle::solveEnergy()
                 const label cellId = cells[i];
 
                 Q[cellId] =
-                    Qs_.boundaryField()[patchi][localFacei]
+                    qs_.boundaryField()[patchi][localFacei]
                    /thickness_[localFacei];
 
                 rho[cellId] *= delta_.value()/thickness_[localFacei];
@@ -167,11 +167,11 @@ thermalBaffle::thermalBaffle
     nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
     thermo_(solidThermo::New(regionMesh(), dict)),
     h_(thermo_->he()),
-    Qs_
+    qs_
     (
         IOobject
         (
-            "Qs",
+            "qs",
             regionMesh().time().timeName(),
             regionMesh(),
             IOobject::READ_IF_PRESENT,
@@ -227,11 +227,11 @@ thermalBaffle::thermalBaffle
     nNonOrthCorr_(readLabel(solution().lookup("nNonOrthCorr"))),
     thermo_(solidThermo::New(regionMesh())),
     h_(thermo_->he()),
-    Qs_
+    qs_
     (
         IOobject
         (
-            "Qs",
+            "qs",
             regionMesh().time().timeName(),
             regionMesh(),
             IOobject::READ_IF_PRESENT,
@@ -289,13 +289,13 @@ void thermalBaffle::init()
     if (oneD_ && !constantThickness_)
     {
         label patchi = intCoupledPatchIDs_[0];
-        const label Qsb = Qs_.boundaryField()[patchi].size();
+        const label qsb = qs_.boundaryField()[patchi].size();
 
-        if (Qsb!= thickness_.size())
+        if (qsb!= thickness_.size())
         {
             FatalErrorInFunction
-                << "the boundary field of Qs is "
-                << Qsb << " and " << nl
+                << "the boundary field of qs is "
+                << qsb << " and " << nl
                 << "the field 'thickness' is " << thickness_.size() << nl
                 << exit(FatalError);
         }

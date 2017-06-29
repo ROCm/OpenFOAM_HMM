@@ -2,11 +2,61 @@
     word alphaScheme("div(phi,alpha)");
     word alpharScheme("div(phirb,alpha)");
 
+    // Set the off-centering coefficient according to ddt scheme
+    scalar ocCoeff = 0;
+    {
+        tmp<fv::ddtScheme<scalar>> tddtAlpha
+        (
+            fv::ddtScheme<scalar>::New
+            (
+                mesh,
+                mesh.ddtScheme("ddt(alpha)")
+            )
+        );
+        const fv::ddtScheme<scalar>& ddtAlpha = tddtAlpha();
+
+        if
+        (
+            isType<fv::EulerDdtScheme<scalar>>(ddtAlpha)
+         || isType<fv::localEulerDdtScheme<scalar>>(ddtAlpha)
+        )
+        {
+            ocCoeff = 0;
+        }
+        else if (isType<fv::CrankNicolsonDdtScheme<scalar>>(ddtAlpha))
+        {
+            if (nAlphaSubCycles > 1)
+            {
+                FatalErrorInFunction
+                    << "Sub-cycling is not supported "
+                       "with the CrankNicolson ddt scheme"
+                    << exit(FatalError);
+            }
+
+            if
+            (
+                alphaRestart
+             || mesh.time().timeIndex() > mesh.time().startTimeIndex() + 1
+            )
+            {
+                ocCoeff =
+                    refCast<const fv::CrankNicolsonDdtScheme<scalar>>(ddtAlpha)
+                   .ocCoeff();
+            }
+        }
+        else
+        {
+            FatalErrorInFunction
+                << "Only Euler and CrankNicolson ddt schemes are supported"
+                << exit(FatalError);
+        }
+    }
+
+    // Set the time blending factor, 1 for Euler
+    scalar cnCoeff = 1.0/(1.0 + ocCoeff);
+
     // Standard face-flux compression coefficient
-    surfaceScalarField phic
-    (
-        mixture.cAlpha()*mag(alphaPhic/mesh.magSf())
-    );
+    surfaceScalarField phic(mixture.cAlpha()*mag(alphaPhic/mesh.magSf()));
 
     // Add the optional isotropic compression contribution
     if (icAlpha > 0)
@@ -15,9 +65,11 @@
         phic += (mixture.cAlpha()*icAlpha)*fvc::interpolate(mag(U));
     }
 
+    surfaceScalarField::Boundary& phicBf =
+        phic.boundaryFieldRef();
+
     // Do not compress interface at non-coupled boundary faces
     // (inlets, outlets etc.)
-    surfaceScalarField::Boundary& phicBf = phic.boundaryFieldRef();
     forAll(phic.boundaryField(), patchi)
     {
         fvsPatchScalarField& phicp = phicBf[patchi];
@@ -28,68 +80,84 @@
         }
     }
 
-    tmp<surfaceScalarField> tphiAlpha;
+    tmp<surfaceScalarField> phiCN(alphaPhic);
+
+    // Calculate the Crank-Nicolson off-centred volumetric flux
+    if (ocCoeff > 0)
+    {
+        phiCN = cnCoeff*alphaPhic + (1.0 - cnCoeff)*alphaPhic.oldTime();
+    }
 
     if (MULESCorr)
     {
+        #include "alphaSuSp.H"
+
         fvScalarMatrix alpha1Eqn
         (
-            fv::EulerDdtScheme<scalar>(mesh).fvmDdt(alphac, alpha1)
+            (
+                LTS
+              ? fv::localEulerDdtScheme<scalar>(mesh).fvmDdt(alphac, alpha1)
+              : fv::EulerDdtScheme<scalar>(mesh).fvmDdt(alpha1)
+            )
           + fv::gaussConvectionScheme<scalar>
             (
                 mesh,
-                alphaPhic,
-                upwind<scalar>(mesh, alphaPhic)
-            ).fvmDiv(alphaPhic, alpha1)
-          - fvm::Sp(fvc::ddt(alphac) + fvc::div(alphaPhic), alpha1)
+                phiCN,
+                upwind<scalar>(mesh, phiCN)
+            ).fvmDiv(phiCN, alpha1)
+         - fvm::Sp(fvc::ddt(alphac) + fvc::div(phiCN), alpha1)
+         ==
+            Su + fvm::Sp(Sp + divU, alpha1)
         );
 
         alpha1Eqn.solve();
 
         Info<< "Phase-1 volume fraction = "
             << alpha1.weightedAverage(mesh.Vsc()).value()
-            << "  Min(alpha1) = " << min(alpha1).value()
-            << "  Max(alpha1) = " << max(alpha1).value()
+            << "  Min(" << alpha1.name() << ") = " << min(alpha1).value()
+            << "  Max(" << alpha1.name() << ") = " << max(alpha1).value()
             << endl;
 
-        tmp<surfaceScalarField> tphiAlphaUD(alpha1Eqn.flux());
-        alphaPhi = tphiAlphaUD();
+        tmp<surfaceScalarField> talphaPhiUD(alpha1Eqn.flux());
+        alphaPhi = talphaPhiUD();
 
-        if (alphaApplyPrevCorr && tphiAlphaCorr0.valid())
+        if (alphaApplyPrevCorr && talphaPhiCorr0.valid())
         {
             Info<< "Applying the previous iteration compression flux" << endl;
-
             MULES::correct
             (
                 alphac,
                 alpha1,
                 alphaPhi,
-                tphiAlphaCorr0.ref(),
+                talphaPhiCorr0.ref(),
                 zeroField(), zeroField(),
                 1, 0
             );
 
-            alphaPhi += tphiAlphaCorr0();
+            alphaPhi += talphaPhiCorr0();
         }
 
         // Cache the upwind-flux
-        tphiAlphaCorr0 = tphiAlphaUD;
+        talphaPhiCorr0 = talphaPhiUD;
 
         alpha2 = 1.0 - alpha1;
 
         mixture.correct();
     }
 
+
     for (int aCorr=0; aCorr<nAlphaCorr; aCorr++)
     {
+        #include "alphaSuSp.H"
+
         surfaceScalarField phir(phic*mixture.nHatf());
 
-        tmp<surfaceScalarField> tphiAlphaUn
+        tmp<surfaceScalarField> talphaPhiUn
         (
             fvc::flux
             (
-                alphaPhic,
-                alpha1,
+                phiCN(),
+                cnCoeff*alpha1 + (1.0 - cnCoeff)*alpha1.oldTime(),
                 alphaScheme
             )
           + fvc::flux
@@ -102,46 +170,47 @@
 
         if (MULESCorr)
         {
-            tmp<surfaceScalarField> tphiAlphaCorr(tphiAlphaUn() - alphaPhi);
+            tmp<surfaceScalarField> talphaPhiCorr(talphaPhiUn() - alphaPhi);
             volScalarField alpha10("alpha10", alpha1);
-
-            //MULES::correct(alpha1, tphiAlphaUn(), tphiAlphaCorr(), 1, 0);
 
             MULES::correct
             (
                 alphac,
                 alpha1,
-                tphiAlphaUn(),
-                tphiAlphaCorr.ref(),
-                zeroField(), zeroField(),
-                1, 0
+                talphaPhiUn(),
+                talphaPhiCorr.ref(),
+                Sp,
+                (-Sp*alpha1)(),
+                1,
+                0
             );
 
             // Under-relax the correction for all but the 1st corrector
             if (aCorr == 0)
             {
-                alphaPhi += tphiAlphaCorr();
+                alphaPhi += talphaPhiCorr();
             }
             else
             {
                 alpha1 = 0.5*alpha1 + 0.5*alpha10;
-                alphaPhi += 0.5*tphiAlphaCorr();
+                alphaPhi += 0.5*talphaPhiCorr();
             }
         }
         else
         {
-            alphaPhi = tphiAlphaUn;
+            alphaPhi = talphaPhiUn;
 
             MULES::explicitSolve
             (
                 alphac,
                 alpha1,
-                alphaPhic,
+                phiCN,
                 alphaPhi,
-                zeroField(), zeroField(),
-                1, 0
+                Sp,
+                (Su + divU*min(alpha1(), scalar(1)))(),
+                1,
+                0
             );
-
         }
 
         alpha2 = 1.0 - alpha1;
@@ -149,16 +218,41 @@
         mixture.correct();
     }
 
-    rhoPhi = alphaPhi*(rho1 - rho2) + alphaPhic*rho2;
-
     if (alphaApplyPrevCorr && MULESCorr)
     {
-        tphiAlphaCorr0 = alphaPhi - tphiAlphaCorr0;
+        talphaPhiCorr0 = alphaPhi - talphaPhiCorr0;
+        talphaPhiCorr0.ref().rename("alphaPhiCorr0");
+    }
+    else
+    {
+        talphaPhiCorr0.clear();
+    }
+
+    if
+    (
+        word(mesh.ddtScheme("ddt(rho,U)"))
+     == fv::EulerDdtScheme<vector>::typeName
+    )
+    {
+        #include "rhofs.H"
+        rhoPhi = alphaPhi*(rho1f - rho2f) + phiCN*rho2f;
+    }
+    else
+    {
+        if (ocCoeff > 0)
+        {
+            // Calculate the end-of-time-step alpha flux
+            alphaPhi = (alphaPhi - (1.0 - cnCoeff)*alphaPhi.oldTime())/cnCoeff;
+        }
+
+        // Calculate the end-of-time-step mass flux
+        #include "rhofs.H"
+        rhoPhi = alphaPhi*(rho1f - rho2f) + alphaPhic*rho2f;
     }
 
     Info<< "Phase-1 volume fraction = "
         << alpha1.weightedAverage(mesh.Vsc()).value()
-        << "  Min(alpha1) = " << min(alpha1).value()
-        << "  Max(alpha1) = " << max(alpha1).value()
+        << "  Min(" << alpha1.name() << ") = " << min(alpha1).value()
+        << "  Max(" << alpha1.name() << ") = " << max(alpha1).value()
         << endl;
 }

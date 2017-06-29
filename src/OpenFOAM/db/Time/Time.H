@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,7 @@ namespace Foam
 
 // Forward declaration of classes
 class argList;
+class profilingTrigger;
 
 /*---------------------------------------------------------------------------*\
                              Class Time Declaration
@@ -79,6 +80,9 @@ class Time
 
         //- file-change monitor for all registered files
         mutable autoPtr<fileMonitor> monitorPtr_;
+
+        //- Profiling trigger for time-loop (for run, loop)
+        mutable profilingTrigger* loopProfiling_;
 
         //- Any loaded dynamic libraries. Make sure to construct before
         //  reading controlDict.
@@ -333,29 +337,33 @@ public:
                 void readModifiedObjects();
 
                 //- Helper: add watches for list of files
-                void addWatches(regIOobject&, const fileNameList&) const;
+                void addWatches
+                (
+                    regIOobject& rio,
+                    const fileNameList& files
+                ) const;
 
                 //- Find index (or -1) of file in list of handles
                 label findWatch
                 (
                     const labelList& watchIndices,
-                    const fileName&
+                    const fileName& fName
                 ) const;
 
                 //- Add watching of a file. Returns handle
-                label addTimeWatch(const fileName&) const;
+                label addTimeWatch(const fileName& fName) const;
 
                 //- Remove watch on a file (using handle)
-                bool removeWatch(const label) const;
+                bool removeWatch(const label watchIndex) const;
 
                 //- Get name of file being watched (using handle)
-                const fileName& getFile(const label) const;
+                const fileName& getFile(const label watchIndex) const;
 
                 //- Get current state of file (using handle)
-                fileMonitor::fileState getState(const label) const;
+                fileMonitor::fileState getState(const label watchIndex) const;
 
                 //- Set current state of file (using handle) to unmodified
-                void setUnmodified(const label) const;
+                void setUnmodified(const label watchIndex) const;
 
 
             //- Return the location of "dir" containing the file "name".
@@ -375,20 +383,24 @@ public:
 
             //- Search the case for the time directory path
             //  corresponding to the given instance
-            word findInstancePath(const fileName& path, const instant&) const;
+            word findInstancePath
+            (
+                const fileName& directory,
+                const instant& t
+            ) const;
 
             //- Search the case for the time directory path
             //  corresponding to the given instance
-            word findInstancePath(const instant&) const;
+            word findInstancePath(const instant& t) const;
 
             //- Search the case for the time closest to the given time
-            instant findClosestTime(const scalar) const;
+            instant findClosestTime(const scalar t) const;
 
             //- Search instantList for the time index closest to the given time
             static label findClosestTimeIndex
             (
-                const instantList&,
-                const scalar,
+                const instantList& timeDirs,
+                const scalar t,
                 const word& constantName = "constant"
             );
 
@@ -398,9 +410,9 @@ public:
             //- Write using given format, version and compression
             virtual bool writeObject
             (
-                IOstream::streamFormat,
-                IOstream::versionNumber,
-                IOstream::compressionType
+                IOstream::streamFormat fmt,
+                IOstream::versionNumber ver,
+                IOstream::compressionType cmp
             ) const;
 
             //- Write the objects now (not at end of iteration) and continue
@@ -420,7 +432,7 @@ public:
             //  formatted with given precision
             static word timeName
             (
-                const scalar,
+                const scalar t,
                 const int precision = precision_
             );
 
@@ -430,7 +442,7 @@ public:
             //- Search a given directory for valid time directories
             static instantList findTimes
             (
-                const fileName&,
+                const fileName& directory,
                 const word& constantName = "constant"
             );
 
@@ -521,42 +533,42 @@ public:
             //- Adjust the current stopAtControl. Note that this value
             //  only persists until the next time the dictionary is read.
             //  Return true if the stopAtControl changed.
-            virtual bool stopAt(const stopAtControls) const;
+            virtual bool stopAt(const stopAtControls sa) const;
 
             //- Reset the time and time-index to those of the given time
-            virtual void setTime(const Time&);
+            virtual void setTime(const Time& t);
 
             //- Reset the time and time-index
-            virtual void setTime(const instant&, const label newIndex);
+            virtual void setTime(const instant& inst, const label newIndex);
 
             //- Reset the time and time-index
             virtual void setTime
             (
-                const dimensionedScalar&,
+                const dimensionedScalar& newTime,
                 const label newIndex
             );
 
             //- Reset the time and time-index
-            virtual void setTime(const scalar, const label newIndex);
+            virtual void setTime(const scalar newTime, const label newIndex);
 
             //- Reset end time
-            virtual void setEndTime(const dimensionedScalar&);
+            virtual void setEndTime(const dimensionedScalar& endTime);
 
             //- Reset end time
-            virtual void setEndTime(const scalar);
+            virtual void setEndTime(const scalar endTime);
 
-            //- Reset time step
+            //- Reset time step, normally also calling adjustDeltaT()
             virtual void setDeltaT
             (
-                const dimensionedScalar&,
-                const bool adjustDeltaT = true
+                const dimensionedScalar& deltaT,
+                const bool adjust = true
             );
 
-            //- Reset time step
+            //- Reset time step, normally also calling adjustDeltaT()
             virtual void setDeltaT
             (
-                const scalar,
-                const bool adjustDeltaT = true
+                const scalar deltaT,
+                const bool adjust = true
             );
 
             //- Set time to sub-cycle for the given number of steps
@@ -575,10 +587,10 @@ public:
     // Member operators
 
         //- Set deltaT to that specified and increment time via operator++()
-        virtual Time& operator+=(const dimensionedScalar&);
+        virtual Time& operator+=(const dimensionedScalar& deltaT);
 
         //- Set deltaT to that specified and increment time via operator++()
-        virtual Time& operator+=(const scalar);
+        virtual Time& operator+=(const scalar deltaT);
 
         //- Prefix increment,
         //  also invokes the functionObjectList::start() or

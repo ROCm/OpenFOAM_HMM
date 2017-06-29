@@ -43,8 +43,8 @@ boundaryField
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 294.75;
         Tnbr            T;
-        QrNbr           none;
-        Qr              Qr;
+        qrNbr           none;
+        qr              qr;
         kappaMethod     fluidThermo;
     }
     region0_to_panelRegion_internalWallPanel_top
@@ -52,8 +52,8 @@ boundaryField
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 294.75;
         Tnbr            T;
-        QrNbr           none;
-        Qr              Qr;
+        qrNbr           none;
+        qr              qr;
         kappaMethod     fluidThermo;
     }
     region0_to_panelRegion_internalWallPanel_bottom
@@ -61,8 +61,8 @@ boundaryField
         type            compressible::turbulentTemperatureRadCoupledMixed;
         value           uniform 294.75;
         Tnbr            T;
-        QrNbr           none;
-        Qr              Qr;
+        qrNbr           none;
+        qr              qr;
         kappaMethod     fluidThermo;
     }
 }

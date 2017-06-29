@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,8 @@ phaseHydrostaticPressureFvPatchScalarField
     pRefValue_(readScalar(dict.lookup("pRefValue"))),
     pRefPoint_(dict.lookup("pRefPoint"))
 {
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+
     this->refValue() = pRefValue_;
 
     if (dict.found("value"))

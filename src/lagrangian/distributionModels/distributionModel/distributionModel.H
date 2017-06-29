@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,13 +55,11 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "cachedRandom.H"
+#include "Random.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
-{
-namespace distributionModels
 {
 
 /*---------------------------------------------------------------------------*\
@@ -79,7 +77,7 @@ protected:
         const dictionary distributionModelDict_;
 
         //- Reference to the random number generator
-        cachedRandom& rndGen_;
+        Random& rndGen_;
 
 
     // Protected Member Functions
@@ -102,7 +100,7 @@ public:
         dictionary,
         (
             const dictionary& dict,
-            cachedRandom& rndGen
+            Random& rndGen
         ),
         (dict, rndGen)
     );
@@ -115,7 +113,7 @@ public:
         (
             const word& name,
             const dictionary& dict,
-            cachedRandom& rndGen
+            Random& rndGen
         );
 
         //- Construct copy
@@ -129,7 +127,7 @@ public:
     static autoPtr<distributionModel> New
     (
         const dictionary& dict,
-        cachedRandom& rndGen
+        Random& rndGen
     );
 
 
@@ -155,7 +153,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace distributionModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

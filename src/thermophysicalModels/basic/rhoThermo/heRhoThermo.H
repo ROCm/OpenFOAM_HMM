@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,17 @@ class heRhoThermo
     // Private Member Functions
 
         //- Calculate the thermo variables
-        void calculate();
+        void calculate
+        (
+            const volScalarField& p,
+            volScalarField& T,
+            volScalarField& he,
+            volScalarField& psi,
+            volScalarField& rho,
+            volScalarField& mu,
+            volScalarField& alpha,
+            const bool doOldTimes
+        );
 
         //- Construct as copy (not implemented)
         heRhoThermo(const heRhoThermo<BasicPsiThermo, MixtureType>&);

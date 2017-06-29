@@ -78,8 +78,8 @@ template<class T, class Key, class Hash> Ostream& operator<<
 //- Template-invariant bits for StaticHashTable
 struct StaticHashTableCore
 {
-    //- Return a canonical (power-of-two) size
-    static label canonicalSize(const label);
+    //- Return a canonical (power-of-two) of the requested size.
+    static label canonicalSize(const label requested_size);
 
     //- Construct null
     StaticHashTableCore()
@@ -119,15 +119,12 @@ class StaticHashTable
         //- The current number of elements in table
         label nElmts_;
 
-        //- Return a canonical (power-of-two) size
-        static label canonicalSize(const label);
-
         //- Return the hash index of the Key within the current table size.
         //  No checks for zero-sized tables.
-        inline label hashKeyIndex(const Key&) const;
+        inline label hashKeyIndex(const Key& key) const;
 
         //- Assign a new hashed entry to a possibly already existing key
-        bool set(const Key&, const T& newElmt, bool protect);
+        bool set(const Key& key, const T& obj, bool protect);
 
 
 public:
@@ -205,6 +202,10 @@ public:
             //- Find and return an const_iterator set at the hashed entry
             //  If not found iterator = end()
             const_iterator find(const Key& key) const;
+
+            //- Find and return an const_iterator set at the hashed entry
+            //  If not found iterator = end()
+            const_iterator cfind(const Key& key) const;
 
             //- Return the table of contents
             List<Key> toc() const;
@@ -397,7 +398,7 @@ private:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    #include "StaticHashTableI.H"
+#include "StaticHashTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

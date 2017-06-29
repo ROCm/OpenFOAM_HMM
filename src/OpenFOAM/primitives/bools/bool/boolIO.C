@@ -21,17 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Reads an bool from an input stream, for a given version number and file
-    format. If an ASCII file is being read, then the line numbers are counted
-    and an erroneous read is reported.
-
 \*---------------------------------------------------------------------------*/
-
-#include "error.H"
 
 #include "bool.H"
 #include "Switch.H"
+#include "error.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,7 +46,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
     // we could also write as text string without any difficulty
     // os  << (b ? "true" : "false");
     os.write(label(b));
-    os.check("Ostream& operator<<(Ostream&, const bool)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

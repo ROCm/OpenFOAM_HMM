@@ -58,7 +58,7 @@ Foam::ignitionSite::ignitionSite
     timeIndex_(db_.timeIndex())
 {
     // Check state of Istream
-    is.check("ignitionSite::ignitionSite(Istream&)");
+    is.check(FUNCTION_NAME);
 
     findIgnitionCells(mesh_);
 }
@@ -94,7 +94,7 @@ Foam::ignitionSite::ignitionSite
     timeIndex_(db_.timeIndex())
 {
     // Check state of Istream
-    is.check("ignitionSite::ignitionSite(Istream&)");
+    is.check(FUNCTION_NAME);
 
     findIgnitionCells(mesh_);
 }

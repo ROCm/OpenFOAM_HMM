@@ -62,6 +62,14 @@ die()
     exit 1
 }
 
+# Automatically upgrade copyrights in files.
+# Disabled by default since some changes (eg, spelling) do not automatically
+# imply an update copyright.
+optCopyright=false
+
+# Run all tests (do not exit on first failure)
+optAll=false
+
 #-----------------------------------------------------------------------------
 # Check content that will be added by this commit.
 
@@ -76,11 +84,27 @@ fi
 # called manually with arguments for the files/directories to be tested?
 if [ "$#" -gt 0 ]
 then
-    case "$1" in
-    -h | -help)
-        die "interactive usage: supply list of files/directories to check"
-        ;;
-    esac
+    while [ "$#" -gt 0 ]
+    do
+        case "$1" in
+        -h | -help)
+            die "interactive usage: supply list of files/directories to check"
+            ;;
+        -copy)
+            echo "$hookName: adjust copyright enabled" 1>&2
+            optCopyright=true
+            shift
+            ;;
+        -all)
+            echo "$hookName: do all tests (no premature exit)" 1>&2
+            optAll=true
+            shift
+            ;;
+        *)
+            break
+            ;;
+        esac
+    done
 
     # obtain list of all specified files/directories
     fileList=$(git ls-files -- $@ 2>/dev/null)
@@ -100,6 +124,8 @@ unset badFiles
 # join list of files with this amount of space
 Indent="    "
 
+exitCode=0
+
 #
 # report bad files and die if there are any
 #
@@ -114,7 +140,14 @@ dieOnBadFiles()
         echo "File(s):" 1>&2
         echo "$badFiles" 1>&2
         echo ''  1>&2
-        exit 1
+
+        exitCode=1
+        if [ "$optAll" = true ]
+        then
+            return 0   # Continue to the next test
+        else
+            exit $exitCode
+        fi
     fi
 }
 
@@ -314,7 +347,7 @@ MESSAGE
 
 
 #
-# check that OpenFOAM Foundation copyright is current
+# check that copyright date is current
 #
 checkCopyright()
 {
@@ -327,9 +360,9 @@ checkCopyright()
         startYear=`grep "Copyright.*OpenCFD" $f | sed 's/[^0-9]*\([0-9]*\).*/\1/g'`
         endYear=`grep "Copyright.*-.*OpenCFD" $f | sed 's/[^-]*-\([0-9]*\).*/\1/g'`
         #echo "startYear=$startYear endYear=$endYear"
-        if [ "$startYear" != "" ]
+        if [ -n "$startYear" ]
         then
-            if [ "$endYear" != "" ]
+            if [ -n "$endYear" ]
             then
                 # Date is of type 2011-2012 OpenCFD Ltd.
                 if [ "$year" != "$endYear" ]
@@ -371,7 +404,11 @@ checkLineLengthNonDirective
 # check for non-standard code patterns
 checkNonStandardCodePatterns
 
-checkCopyright
+# Stop now if there were any errors
+[ "$exitCode" = 0 ] || exit $exitCode
+
+# check copyright date (normally disabled)
+[ "$optCopyright" = true ] && checkCopyright
 
 exit 0
 #------------------------------------------------------------------------------

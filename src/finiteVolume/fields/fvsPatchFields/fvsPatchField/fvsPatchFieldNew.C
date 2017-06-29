@@ -42,7 +42,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     typename patchConstructorTable::iterator cstrIter =
         patchConstructorTablePtr_->find(patchFieldType);
 
-    if (cstrIter == patchConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchField type "
@@ -61,7 +61,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
         typename patchConstructorTable::iterator patchTypeCstrIter =
             patchConstructorTablePtr_->find(p.type());
 
-        if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+        if (patchTypeCstrIter.found())
         {
             return patchTypeCstrIter()(p, iF);
         }
@@ -107,14 +107,14 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     typename dictionaryConstructorTable::iterator cstrIter
         = dictionaryConstructorTablePtr_->find(patchFieldType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         if (!disallowGenericFvsPatchField)
         {
             cstrIter = dictionaryConstructorTablePtr_->find("generic");
         }
 
-        if (cstrIter == dictionaryConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -136,11 +136,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
         typename dictionaryConstructorTable::iterator patchTypeCstrIter
             = dictionaryConstructorTablePtr_->find(p.type());
 
-        if
-        (
-            patchTypeCstrIter != dictionaryConstructorTablePtr_->end()
-         && patchTypeCstrIter() != cstrIter()
-        )
+        if (patchTypeCstrIter.found() && patchTypeCstrIter() != cstrIter())
         {
             FatalIOErrorInFunction
             (
@@ -173,7 +169,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     typename patchMapperConstructorTable::iterator cstrIter =
         patchMapperConstructorTablePtr_->find(ptf.type());
 
-    if (cstrIter == patchMapperConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchField type " << ptf.type() << nl << nl
@@ -185,7 +181,7 @@ Foam::tmp<Foam::fvsPatchField<Type>> Foam::fvsPatchField<Type>::New
     typename patchMapperConstructorTable::iterator
         patchTypeCstrIter = patchMapperConstructorTablePtr_->find(p.type());
 
-    if (patchTypeCstrIter != patchMapperConstructorTablePtr_->end())
+    if (patchTypeCstrIter.found())
     {
         return patchTypeCstrIter()(ptf, p, iF, pfMapper);
     }

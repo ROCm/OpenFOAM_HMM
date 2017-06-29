@@ -166,7 +166,7 @@ void Foam::turbulentInletFvPatchField<Type>::updateCoeffs()
 
         forAll(patchField, facei)
         {
-            ranGen_.randomise(randomField[facei]);
+            ranGen_.randomise01<Type>(randomField[facei]);
         }
 
         // Correction-factor to compensate for the loss of RMS fluctuation

@@ -15,9 +15,10 @@ EXE_LIBS = \
     -lchemistryModel \
     -lcoalCombustion \
     -lcombustionModels \
-    -lcompressibleEulerianInterfacialModels \
+    -lcompressibleTransportModels \
     -lcompressibleTurbulenceModels \
-    -lCompressibleTwoPhaseMixtureTurbulenceModels \
+    -lconversion \
+    -ldecompose \
     -ldecompositionMethods \
     -ldistributed \
     -ldistributionModels \
@@ -27,7 +28,6 @@ EXE_LIBS = \
     -lDSMC \
     -ldynamicFvMesh \
     -ldynamicMesh \
-    -ledgeMesh \
     -lengine \
     -lextrudeModel \
     -lfieldFunctionObjects \
@@ -40,23 +40,26 @@ EXE_LIBS = \
     -lgenericPatchFields \
     -lincompressibleTransportModels \
     -lincompressibleTurbulenceModels \
-    -linterfaceProperties \
+    -llagrangian \
     -llagrangianFunctionObjects \
     -llagrangianIntermediate \
     -llagrangianSpray \
     -llagrangianTurbulence \
     -llaminarFlameSpeedModels \
-    -lliquidPropertiesFvPatchFields \
-    -lliquidProperties \
     -lmeshTools \
+    -lmolecularMeasurements \
+    -lmolecule \
     -lODE \
-    -lphaseChangeTwoPhaseMixtures \
-    -lphaseCompressibleTurbulenceModels \
-    -lphaseTemperatureChangeTwoPhaseMixtures \
+    -lpairPatchAgglomeration \
     -lpotential \
     -lpyrolysisModels \
     -lradiationModels \
+    -lreactingEulerianInterfacialCompositionModels \
+    -lreactingEulerianInterfacialModels \
+    -lreactingPhaseSystem \
+    -lreactingTwoPhaseSystem \
     -lreactionThermophysicalModels \
+    -lreconstruct \
     -lregionCoupled \
     -lregionCoupling \
     -lregionModels \
@@ -67,10 +70,10 @@ EXE_LIBS = \
     -lsampling \
     -lscotchDecomp \
     -lsixDoFRigidBodyMotion \
-    -lSloanRenumber \
+    -lSLGThermo \
     -lsnappyHexMesh \
     -lsolidChemistryModel \
-    -lsolidProperties \
+    -lsolidParticle \
     -lsolidSpecie \
     -lsolidThermo \
     -lsolverFunctionObjects \
@@ -79,9 +82,17 @@ EXE_LIBS = \
     -lsurfaceFilmModels \
     -lsurfMesh \
     -lthermalBaffleModels \
-    -lthermophysicalFunctions \
+    -lthermophysicalProperties \
     -ltopoChangerFvMesh \
-    -lturbulenceModelSchemes \
     -lturbulenceModels \
-    -ltwoPhaseProperties \
+    -ltwoPhaseMixture \
+    -ltwoPhaseReactingTurbulenceModels \
     -lutilityFunctionObjects
+/*
+    Combinations of the following libs leads to corruption errors... ?
+    -limmiscibleIncompressibleTwoPhaseMixture \
+    -linterfaceProperties \
+    -lphaseChangeTwoPhaseMixtures \
+    -ltwoPhaseMixtureThermo \
+    -ltwoPhaseProperties \
+*/

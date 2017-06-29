@@ -17,7 +17,7 @@ runApplication decomposePar -decomposeParDict system/decomposeParDict.hierarchic
 # \cp system/decomposeParDict.ptscotch system/decomposeParDict
 runParallel snappyHexMesh -decomposeParDict system/decomposeParDict.ptscotch -profiling -overwrite
 
-find . -type f -iname "*level*" -exec rm {} \;
+find . -iname '*level*' -type f -delete
 
 #- Set the initial fields
 restore0Dir -processor

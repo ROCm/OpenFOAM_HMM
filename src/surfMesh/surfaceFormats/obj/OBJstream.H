@@ -25,7 +25,7 @@ Class
     Foam::OBJstream
 
 Description
-    OFstream which keeps track of vertices
+    OFstream that keeps track of vertices
 
 SourceFiles
     OBJstream.C
@@ -47,6 +47,8 @@ SourceFiles
 namespace Foam
 {
 
+class treeBoundBox;
+
 /*---------------------------------------------------------------------------*\
                           Class OBJstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -64,7 +66,7 @@ class OBJstream
 
     // Private Member Functions
 
-        void writeAndCheck(const char);
+        void writeAndCheck(const char c);
 
 public:
 
@@ -105,21 +107,22 @@ public:
             using Ostream::write;
 
             //- Write character
-            virtual Ostream& write(const char);
+            virtual Ostream& write(const char c);
 
             //- Write character string
-            virtual Ostream& write(const char*);
+            virtual Ostream& write(const char* str);
 
             //- Write word
-            virtual Ostream& write(const word&);
+            virtual Ostream& write(const word& str);
 
-            virtual Ostream& write(const string&);
+            //- Write string
+            virtual Ostream& write(const string& str);
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             virtual Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& str,
                 const bool quoted=true
             );
 
@@ -127,41 +130,57 @@ public:
         // Direct write functionality
 
             //- Write point
-            Ostream& write(const point&);
+            Ostream& write(const point& pt);
 
             //- Write point and vector normal ('vn')
-            Ostream& write(const point&, const vector&);
+            Ostream& write(const point& pt, const vector& n);
 
-            //- Write edge as points with line
-            Ostream& write(const edge&, const UList<point>&);
+            //- Write edge as points and line
+            Ostream& write(const edge& e, const UList<point>& points);
 
             //- Write line
-            Ostream& write(const linePointRef&);
+            Ostream& write(const linePointRef& ln);
 
             //- Write line with points and vector normals ('vn')
             Ostream& write
             (
-                const linePointRef&,
+                const linePointRef& ln,
                 const vector& n0,
                 const vector& n1
             );
 
-            //- Write triangle as points with lines or filled polygon
-            Ostream& write(const triPointRef&, const bool lines = true);
+            //- Write triangle as points and lines/filled-polygon
+            Ostream& write(const triPointRef& f, const bool lines = true);
 
-            //- Write face as points with lines or filled polygon
+            //- Write face as points and lines/filled-polygon
             Ostream& write
             (
-                const face&,
-                const UList<point>&,
+                const face& f,
+                const UList<point>& points,
                 const bool lines = true
             );
 
-            //- Write patch as points and faces with lines or filled polygons
+            //- Write patch faces as points and lines/filled-polygon
             Ostream& write
             (
-                const faceList&,
-                const pointField&,
+                const UList<face>& faces,
+                const pointField& points,
+                const bool lines = true
+            );
+
+            //- Write edges as points and lines.
+            //  Optionally eliminate unused points.
+            Ostream& write
+            (
+                const UList<edge>& edges,
+                const UList<point>& points,
+                const bool compact = false
+            );
+
+            //- Write tree-bounding box as lines/filled-polygons
+            Ostream& write
+            (
+                const treeBoundBox& bb,
                 const bool lines = true
             );
 

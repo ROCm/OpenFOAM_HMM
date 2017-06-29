@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,26 +30,26 @@ License
 #include "fvMesh.H"
 #include "IOobjectList.H"
 #include "passiveParticle.H"
-#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
 #include "vtkPoints.h"
 #include "vtkPolyData.h"
+#include "vtkSmartPointer.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
+vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 (
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const word& cloudName
-)
+) const
 {
-    vtkPolyData* vtkmesh = nullptr;
+    vtkSmartPointer<vtkPolyData> vtkmesh;
 
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPVFoam::lagrangianVTKMesh - timePath "
+        Info<< "<beg> lagrangianVTKMesh - timePath "
             << mesh.time().timePath()/cloud::prefix/cloudName << endl;
         printMemory();
     }
@@ -73,32 +73,24 @@ vtkPolyData* Foam::vtkPVFoam::lagrangianVTKMesh
             Info<< "cloud with " << parcels.size() << " parcels" << endl;
         }
 
-        vtkmesh = vtkPolyData::New();
-        vtkPoints* vtkpoints = vtkPoints::New();
-        vtkCellArray* vtkcells = vtkCellArray::New();
-
-        vtkpoints->Allocate(parcels.size());
-        vtkcells->Allocate(parcels.size());
+        auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+        vtkpoints->SetNumberOfPoints(parcels.size());
 
         vtkIdType particleId = 0;
-        forAllConstIter(Cloud<passiveParticle>, parcels, iter)
+        forAllConstIters(parcels, iter)
         {
-            vtkInsertNextOpenFOAMPoint(vtkpoints, iter().position());
-
-            vtkcells->InsertNextCell(1, &particleId);
-            particleId++;
+            vtkpoints->SetPoint(particleId, iter().position().v_);
+            ++particleId;
         }
 
+        vtkmesh = vtkSmartPointer<vtkPolyData>::New();
         vtkmesh->SetPoints(vtkpoints);
-        vtkpoints->Delete();
-
-        vtkmesh->SetVerts(vtkcells);
-        vtkcells->Delete();
+        vtkmesh->SetVerts(foamPvCore::identityVertices(parcels.size()));
     }
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPVFoam::lagrangianVTKMesh" << endl;
+        Info<< "<end> lagrangianVTKMesh" << endl;
         printMemory();
     }
 

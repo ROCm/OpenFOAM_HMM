@@ -1,7 +1,4 @@
 {
-    rho = thermo.rho();
-    rho.relax();
-
     volScalarField rAU("rAU", 1.0/UEqn.A());
     surfaceScalarField rhorAUf("rhorAUf", fvc::interpolate(rho*rAU));
     volVectorField HbyA(constrainHbyA(rAU*UEqn.H(), U, p_rgh));
@@ -24,6 +21,8 @@
     // Update the pressure BCs to ensure flux consistency
     constrainPressure(p_rgh, rho, U, phiHbyA, rhorAUf, MRF);
 
+    dimensionedScalar compressibility = fvc::domainIntegrate(psi);
+    bool compressible = (compressibility.value() > SMALL);
 
     while (simple.correctNonOrthogonal())
     {
@@ -33,6 +32,7 @@
         );
 
         p_rghEqn.setReference(pRefCell, getRefCellValue(p_rgh, pRefCell));
+
         p_rghEqn.solve();
 
         if (simple.finalNonOrthogonalIter())
@@ -51,12 +51,9 @@
         }
     }
 
-    #include "continuityErrs.H"
-
     p = p_rgh + rho*gh;
 
-    dimensionedScalar compressibility = fvc::domainIntegrate(psi);
-    bool compressible = (compressibility.value() > SMALL);
+    #include "continuityErrs.H"
 
     // For closed-volume cases adjust the pressure level
     // to obey overall mass continuity
@@ -75,6 +72,7 @@
         {
             p += (initialMass - fvc::domainIntegrate(psi*p))
                 /fvc::domainIntegrate(psi);
+
         }
         p_rgh = p - rho*gh;
     }

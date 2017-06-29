@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -185,6 +185,9 @@ public:
 
         // Return patch field evaluation schedule
         virtual const lduSchedule& patchSchedule() const = 0;
+
+        //- Clear additional addressing
+        void clearOut();
 
         //- Return losort addressing
         const labelUList& losortAddr() const;

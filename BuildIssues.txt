@@ -1,4 +1,4 @@
-OpenFOAM-v1612+
+OpenFOAM-1706
 ==================
 Known Build Issues
 ==================
@@ -22,16 +22,15 @@ VTK
 ---
 
 If using the runTimePostProcessing to create on-the-fly images, you
-can either simply just compile ParaView-5.0.1 and these libraries will
-be used.
+can simply just compile ParaView and these libraries will be used.
 
 If you elect to use a separate VTK compilation (for example for
 off-screen rendering), it is advisable to reuse the VTK libraries that
-are provided with ParaView-5.0.1, by making an appropriate symlink
+are provided with ParaView by making an appropriate symlink
 prior to using makeVTK. This doesn't just reduce disk-space, but works
-much better than using the VTK-7.1.0.tar file.
+much better than using the VTK tar file.
 
-Using runTimePostProcessing with the 'plain' VTK-7.1.0 libraries does
+Using runTimePostProcessing with the 'plain' VTK libraries does
 generally work, but does not exit cleanly:
 
     symbol lookup error: .../linux64Gcc/VTK-7.1.0/lib/libvtkCommonExecutionModel-7.1.so.1:
@@ -59,5 +58,22 @@ there are also minimum gcc/g++ requirements there:
 
 If your system compiler is too old to build the minimum required gcc or
 clang/llvm, it is just simply too old.
+
+
+-------------------------
+Building with spack
+-------------------------
+
+If you are building with spack, note that the depends_on for paraview
+resolves poorly. The +qt dependency (for building the reader module)
+may need to be specified as a preference by including the following in
+your `~/.spack/packages.yaml` file:
+
+    packages:
+        paraview:
+            variants: +qt
+
+It appears that spack will otherwise ignore any paraview+qt version
+and attempt to install a paraview~qt version instead.
 
 --

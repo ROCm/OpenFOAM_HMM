@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,9 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class plane;
 class triSurface;
+class treeBoundBox;
 
 /*---------------------------------------------------------------------------*\
                            Class surfaceFeatures Declaration
@@ -70,12 +72,13 @@ class surfaceFeatures
 {
 public:
 
+        //- Edge status
         enum edgeStatus
         {
-            NONE,
-            REGION,
-            EXTERNAL,
-            INTERNAL
+            NONE,       //!< Not a classified feature edge
+            REGION,     //
+            EXTERNAL,   //!< "Convex" edge
+            INTERNAL    //!< "Concave" edge
         };
 
 
@@ -169,6 +172,17 @@ private:
             labelList& featVisited
         );
 
+        //- Divide into multiple normal bins
+        //  - set REGION if != 2 normals
+        //  - set REGION if 2 normals that make feature angle
+        //  - otherwise set NONE and set normals,bins
+        edgeStatus checkFlatRegionEdge
+        (
+            const scalar tol,
+            const scalar includedAngle,
+            const label edgeI
+        ) const;
+
 public:
 
     ClassName("surfaceFeatures");
@@ -176,12 +190,12 @@ public:
     // Constructors
 
         //- Construct from surface
-        surfaceFeatures(const triSurface&);
+        surfaceFeatures(const triSurface& surf);
 
         //- Construct from components
         surfaceFeatures
         (
-            const triSurface&,
+            const triSurface& surf,
             const labelList& featurePoints,
             const labelList& featureEdges,
             const label externalStart,
@@ -194,7 +208,7 @@ public:
         //  geometric criteria
         surfaceFeatures
         (
-            const triSurface&,
+            const triSurface& surf,
             const scalar includedAngle,
             const scalar minLen = 0,
             const label minElems = 0,
@@ -202,15 +216,15 @@ public:
         );
 
         //- Construct from dictionary
-        surfaceFeatures(const triSurface&, const dictionary& dict);
+        surfaceFeatures(const triSurface& surf, const dictionary& dict);
 
         //- Construct from file
-        surfaceFeatures(const triSurface&, const fileName& fName);
+        surfaceFeatures(const triSurface& surf, const fileName& fName);
 
         //- Construct from pointField and edgeList (edgeMesh)
         surfaceFeatures
         (
-            const triSurface&,
+            const triSurface& surf,
             const pointField& points,
             const edgeList& edges,
             const scalar mergeTol = 1e-6,
@@ -218,7 +232,7 @@ public:
         );
 
         //- Construct as copy
-        surfaceFeatures(const surfaceFeatures&);
+        surfaceFeatures(const surfaceFeatures& sf);
 
 
     // Member Functions
@@ -298,6 +312,50 @@ public:
                 const label minElems,
                 const scalar includedAngle
             );
+
+            //- Mark edge status inside box as 'NONE'
+            void excludeBox
+            (
+                List<edgeStatus>& edgeStat,
+                const treeBoundBox& bb
+            ) const;
+
+            //- Mark edge status outside box as 'NONE'
+            void subsetBox
+            (
+                List<edgeStatus>& edgeStat,
+                const treeBoundBox& bb
+            ) const;
+
+            //- Mark edge status as 'NONE' for edges inside/outside box.
+            void deleteBox
+            (
+                List<edgeStatus>& edgeStat,
+                const treeBoundBox& bb,
+                const bool removeInside
+            ) const;
+
+            //- If edge does not intersect the plane, mark as 'NONE'
+            void subsetPlane
+            (
+                List<edgeStatus>& edgeStat,
+                const plane& cutPlane
+            ) const;
+
+            //- Mark edges with a single connected face as 'NONE'
+            void excludeOpen(List<edgeStatus>& edgeStat) const;
+
+            //- Divide into multiple normal bins
+            //  - set REGION if != 2 normals
+            //  - set REGION if 2 normals that make feature angle
+            //  - otherwise set NONE and set normals,bins
+            void checkFlatRegionEdge
+            (
+                List<edgeStatus>& edgeStat,
+                const scalar tol,
+                const scalar includedAngle
+            ) const;
+
 
             //- From member feature edges to status per edge.
             List<edgeStatus> toStatus() const;
@@ -404,7 +462,7 @@ public:
         // Write
 
             //- Write as dictionary
-            void writeDict(Ostream&) const;
+            void writeDict(Ostream& os) const;
 
             //- Write as dictionary to file
             void write(const fileName& fName) const;
@@ -413,11 +471,14 @@ public:
             //  feature points) for visualization
             void writeObj(const fileName& prefix) const;
 
+            //- Write some information
+            void writeStats(Ostream& os) const;
+
 
 
     // Member Operators
 
-        void operator=(const surfaceFeatures&);
+        void operator=(const surfaceFeatures& rhs);
 
 
 };

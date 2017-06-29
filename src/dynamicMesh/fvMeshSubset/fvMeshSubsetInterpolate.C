@@ -102,6 +102,7 @@ tmp<GeometricField<Type, fvPatchField, volMesh>> fvMeshSubset::interpolate
         )
     );
     GeometricField<Type, fvPatchField, volMesh>& resF = tresF.ref();
+    resF.oriented() = vf.oriented();
 
 
     // 2. Change the fvPatchFields to the correct type using a mapper
@@ -180,8 +181,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
     const fvMesh& sMesh,
     const labelList& patchMap,
     const labelList& cellMap,
-    const labelList& faceMap,
-    const bool negateIfFlipped
+    const labelList& faceMap
 )
 {
     // 1. Create the complete field with dummy patch fields
@@ -247,6 +247,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
         )
     );
     GeometricField<Type, fvsPatchField, surfaceMesh>& resF = tresF.ref();
+    resF.oriented() = vf.oriented();
 
 
     // 2. Change the fvsPatchFields to the correct type using a mapper
@@ -310,7 +311,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
                 {
                     Type val = vf.internalField()[baseFacei];
 
-                    if (cellMap[fc[i]] == own[baseFacei] || !negateIfFlipped)
+                    if (cellMap[fc[i]] == own[baseFacei] || !vf.oriented()())
                     {
                         pfld[i] = val;
                     }
@@ -342,8 +343,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
 template<class Type>
 tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
 (
-    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf,
-    const bool negateIfFlipped
+    const GeometricField<Type, fvsPatchField, surfaceMesh>& sf
 ) const
 {
     return interpolate
@@ -352,8 +352,7 @@ tmp<GeometricField<Type, fvsPatchField, surfaceMesh>> fvMeshSubset::interpolate
         subMesh(),
         patchMap(),
         cellMap(),
-        faceMap(),
-        negateIfFlipped
+        faceMap()
     );
 }
 
@@ -423,6 +422,7 @@ fvMeshSubset::interpolate
         )
     );
     GeometricField<Type, pointPatchField, pointMesh>& resF = tresF.ref();
+    resF.oriented() = vf.oriented();
 
 
     // 2. Change the pointPatchFields to the correct type using a mapper
@@ -531,6 +531,8 @@ tmp<DimensionedField<Type, volMesh>> fvMeshSubset::interpolate
             Field<Type>(df, cellMap)
         )
     );
+
+    tresF.ref().oriented() = df.oriented();
 
     return tresF;
 }

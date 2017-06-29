@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,14 +25,11 @@ License
 
 #include <cctype>
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::word::stripInvalid()
 {
-    // skip stripping unless debug is active to avoid
-    // costly operations
+    // skip stripping unless debug is active (to avoid costly operations)
     if (debug && string::stripInvalid<word>(*this))
     {
         std::cerr
@@ -100,11 +97,11 @@ inline Foam::word::word(const char* s, const bool doStripInvalid)
 inline Foam::word::word
 (
     const char* s,
-    const size_type n,
+    const size_type len,
     const bool doStripInvalid
 )
 :
-    string(s, n)
+    string(s, len)
 {
     if (doStripInvalid)
     {
@@ -130,31 +127,43 @@ inline bool Foam::word::valid(char c)
 }
 
 
+inline bool Foam::word::hasExt() const
+{
+    return string::hasExt();
+}
+
+
+inline bool Foam::word::removeExt()
+{
+    return string::removeExt();
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::word::operator=(const word& q)
+inline void Foam::word::operator=(const word& w)
 {
-    string::operator=(q);
+    string::operator=(w);
 }
 
 
-inline void Foam::word::operator=(const string& q)
+inline void Foam::word::operator=(const string& s)
 {
-    string::operator=(q);
+    string::operator=(s);
     stripInvalid();
 }
 
 
-inline void Foam::word::operator=(const std::string& q)
+inline void Foam::word::operator=(const std::string& s)
 {
-    string::operator=(q);
+    string::operator=(s);
     stripInvalid();
 }
 
 
-inline void Foam::word::operator=(const char* q)
+inline void Foam::word::operator=(const char* s)
 {
-    string::operator=(q);
+    string::operator=(s);
     stripInvalid();
 }
 
@@ -176,6 +185,5 @@ inline Foam::word Foam::operator&(const word& a, const word& b)
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

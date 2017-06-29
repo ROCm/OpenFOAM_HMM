@@ -42,11 +42,11 @@ Usage
         libs            ("libfieldFunctionObjects.so");
         operation       subtract;
 
-        source1
+        region1
         {
             ...
         }
-        source2
+        region2
         {
             ...
         }

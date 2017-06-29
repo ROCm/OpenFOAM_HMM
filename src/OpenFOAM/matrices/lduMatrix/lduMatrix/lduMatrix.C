@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,9 @@ namespace Foam
 {
     defineTypeNameAndDebug(lduMatrix, 1);
 }
+
+
+const Foam::label Foam::lduMatrix::solver::defaultMaxIter_ = 1000;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -335,7 +338,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const lduMatrix& ldum)
         os  << ldum.upper();
     }
 
-    os.check("Ostream& operator<<(Ostream&, const lduMatrix&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }
@@ -395,7 +398,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<lduMatrix>& ip)
     //    os  << endl;
     //}
 
-    os.check("Ostream& operator<<(Ostream&, const lduMatrix&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

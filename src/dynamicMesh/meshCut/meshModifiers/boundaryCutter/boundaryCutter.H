@@ -44,7 +44,7 @@ SourceFiles
 
 #include "Map.H"
 #include "labelList.H"
-#include "edge.H"
+#include "EdgeMap.H"
 #include "typeInfo.H"
 #include "labelPair.H"
 
@@ -71,7 +71,7 @@ class boundaryCutter
         const polyMesh& mesh_;
 
         //- Per edge sorted (start to end) list of points added.
-        HashTable<labelList, edge, Hash<edge>> edgeAddedPoints_;
+        EdgeMap<labelList> edgeAddedPoints_;
 
         //- Per face the mid point added.
         Map<label> faceAddedPoint_;
@@ -159,8 +159,7 @@ public:
         // Access
 
             //- Per edge a sorted list (start to end) of added points.
-            const HashTable<labelList, edge, Hash<edge>>& edgeAddedPoints()
-             const
+            const EdgeMap<labelList>& edgeAddedPoints() const
             {
                 return edgeAddedPoints_;
             }

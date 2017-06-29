@@ -37,6 +37,7 @@ SourceFiles
 
 #include "pointField.H"
 #include "word.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,7 +71,7 @@ public:
 private:
 
         //- String representation of coordFormat enums
-        static const NamedEnum<coordFormat, 5> coordFormatNames_;
+        static const Enum<coordFormat> coordFormatNames_;
 
 
 protected:

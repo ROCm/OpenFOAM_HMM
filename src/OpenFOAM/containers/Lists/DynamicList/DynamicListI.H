@@ -81,6 +81,19 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class InputIterator>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
+(
+    InputIterator begIter,
+    InputIterator endIter
+)
+:
+    List<T>(begIter, endIter),
+    capacity_(this->size())
+{}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
     std::initializer_list<T> lst

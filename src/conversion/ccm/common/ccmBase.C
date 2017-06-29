@@ -85,10 +85,10 @@ bool Foam::ccm::base::close()
     {
         if (CCMIOIsValidEntity(globalState_->root))
         {
-            CCMIOCloseFile(NULL, globalState_->root);
+            CCMIOCloseFile(nullptr, globalState_->root);
         }
         delete globalState_;
-        globalState_ = 0;
+        globalState_ = nullptr;
 
         return true;
     }

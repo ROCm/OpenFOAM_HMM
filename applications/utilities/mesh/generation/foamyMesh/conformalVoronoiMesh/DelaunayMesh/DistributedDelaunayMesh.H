@@ -71,10 +71,6 @@ public:
         typedef typename Triangulation::All_cells_iterator
             All_cells_iterator;
 
-        typedef typename DelaunayMesh<Triangulation>::labelPairHashSet
-            labelPairHashSet;
-
-
 private:
 
         autoPtr<List<boundBox>> allBackgroundMeshBounds_;
@@ -192,12 +188,6 @@ public:
             PointIterator end,
             bool printErrors = true
         );
-
-//        distributeField();
-
-
-    // Queries
-
 
 };
 

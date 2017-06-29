@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,30 +56,26 @@ namespace stringOps
     //  -# variables
     //    - "$VAR", "${VAR}"
     //
-    //  Supports default values as per the Bourne/Korn shell.
+    //  Supports default and alternative values as per the POSIX shell.
     //  \code
-    //      "${parameter:-defValue}"
+    //      a)  "${parameter:-defValue}"
+    //      b)  "${parameter:+altValue}"
     //  \endcode
-    //  If parameter is unset or null, the \c defValue is substituted.
+    //  a) If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
     //
-    //  Supports alternative values as per the Bourne/Korn shell.
-    //  \code
-    //      "${parameter:+altValue}"
-    //  \endcode
-    //  If parameter is unset or null, nothing is substituted.
+    //  b) If parameter is unset or null, nothing is substituted.
     //  Otherwise the \c altValue is substituted.
     //
-    //  Any unknown entries are removed silently.
-    //
-    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  - Any unknown entries are removed silently.
+    //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
     //  are left as is.
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
     string expand
     (
-        const string&,
+        const string& original,
         const HashTable<string, word, string::hash>& mapping,
         const char sigil = '$'
     );
@@ -90,30 +86,26 @@ namespace stringOps
     //  -# variables
     //    - "$VAR", "${VAR}"
     //
-    //  Supports default values as per the Bourne/Korn shell.
+    //  Supports default and alternative values as per the POSIX shell.
     //  \code
-    //      "${parameter:-defValue}"
+    //      a)  "${parameter:-defValue}"
+    //      b)  "${parameter:+altValue}"
     //  \endcode
-    //  If parameter is unset or null, the \c defValue is substituted.
+    //  a) If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
     //
-    //  Supports alternative values as per the Bourne/Korn shell.
-    //  \code
-    //      "${parameter:+altValue}"
-    //  \endcode
-    //  If parameter is unset or null, nothing is substituted.
+    //  b) If parameter is unset or null, nothing is substituted.
     //  Otherwise the \c altValue is substituted.
     //
-    //  Any unknown entries are removed silently.
-    //
-    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  - Any unknown entries are removed silently.
+    //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
     //  are left as is.
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
     string& inplaceExpand
     (
-        string&,
+        string& s,
         const HashTable<string, word, string::hash>& mapping,
         const char sigil = '$'
     );
@@ -129,13 +121,20 @@ namespace stringOps
     //  string expansions
     string expand
     (
-        const string&,
+        const string& original,
         const dictionary& dict,
         const char sigil = '$'
     );
 
 
     //- Get dictionary or (optionally) environment variable
+    //
+    //  The environment variable lookup supports default and alternative
+    //  values as per the POSIX shell.
+    //  \code
+    //      ${parameter:-defValue}
+    //      ${parameter:+altValue}
+    //  \endcode
     string getVariable
     (
         const word& name,
@@ -189,7 +188,7 @@ namespace stringOps
     //  string expansions
     string& inplaceExpand
     (
-        string&,
+        string& s,
         const dictionary& dict,
         const char sigil = '$'
     );
@@ -206,30 +205,26 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
-    //  Supports default values as per the Bourne/Korn shell.
+    //  Supports default and alternative values as per the POSIX shell.
     //  \code
-    //      "${parameter:-defValue}"
+    //      a)  "${parameter:-defValue}"
+    //      b)  "${parameter:+altValue}"
     //  \endcode
-    //  If parameter is unset or null, the \c defValue is substituted.
+    //  a) If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
     //
-    //  Supports alternative values as per the Bourne/Korn shell.
-    //  \code
-    //      "${parameter:+altValue}"
-    //  \endcode
-    //  If parameter is unset or null, nothing is substituted.
+    //  b) If parameter is unset or null, nothing is substituted.
     //  Otherwise the \c altValue is substituted.
     //
-    //  Any unknown entries are removed silently, if allowEmpty is true.
-    //
-    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  - Any unknown entries are removed silently, if allowEmpty is true.
+    //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
     //  are left as is.
     //
     //  \sa
     //  Foam::findEtcFile
     string expand
     (
-        const string&,
+        const string& original,
         const bool allowEmpty = false
     );
 
@@ -245,63 +240,62 @@ namespace stringOps
     //    - leading "~user" : home directory for specified user
     //    - leading "~OpenFOAM" : site/user OpenFOAM configuration directory
     //
-    //  Supports default values as per the Bourne/Korn shell.
+    //  Supports default and alternative values as per the POSIX shell.
     //  \code
-    //      "${parameter:-defValue}"
+    //      a)  "${parameter:-defValue}"
+    //      b)  "${parameter:+altValue}"
     //  \endcode
-    //  If parameter is unset or null, the \c defValue is substituted.
+    //  a) If parameter is unset or null, the \c defValue is substituted.
     //  Otherwise, the value of parameter is substituted.
     //
-    //  Supports alternative values as per the Bourne/Korn shell.
-    //  \code
-    //      "${parameter:+altValue}"
-    //  \endcode
-    //  If parameter is unset or null, nothing is substituted.
+    //  b) If parameter is unset or null, nothing is substituted.
     //  Otherwise the \c altValue is substituted.
     //
-    //  Any unknown entries are removed silently, if allowEmpty is true.
-    //
-    //  Malformed entries (eg, brace mismatch, sigil followed by bad character)
+    //  - Any unknown entries are removed silently if allowEmpty is true.
+    //  - Malformed entries (eg, brace mismatch, sigil followed by bad chars)
     //  are left as is.
     //
-    //  Any unknown entries are removed silently if allowEmpty is true.
     //  \sa
     //  Foam::findEtcFile
     string& inplaceExpand
     (
-        string&,
+        string& s,
         const bool allowEmpty = false
     );
 
 
+    //- Replace environment variable contents with its name.
+    //  This is essentially the inverse operation for inplaceExpand.
+    //  Return true if a replacement was successful.
+    bool inplaceReplaceVar(string& s, const word& varName);
+
+
     //- Return string trimmed of leading whitespace
-    string trimLeft(const string&);
+    string trimLeft(const string& s);
 
     //- Trim leading whitespace inplace
-    string& inplaceTrimLeft(string&);
+    string& inplaceTrimLeft(string& s);
 
     //- Return string trimmed of trailing whitespace
-    string trimRight(const string&);
+    string trimRight(const string& s);
 
     //- Trim trailing whitespace inplace
-    string& inplaceTrimRight(string&);
+    string& inplaceTrimRight(string& s);
 
     //- Return string trimmed of leading and trailing whitespace
-    string trim(const string&);
+    string trim(const string& original);
 
     //- Trim leading and trailing whitespace inplace
-    string& inplaceTrim(string&);
+    string& inplaceTrim(string& s);
 
 
-    //- Return a word representation of the primitive,
-    //  using printf-style formatter.
+    //- Using printf-formatter for a word representation of the primitive.
     //  The representation is not checked for valid word characters -
     //  it is assumed that the caller knows what they are doing
     template<class PrimitiveType>
     Foam::word name(const char* fmt, const PrimitiveType& val);
 
-    //- Return a word representation of the primitive,
-    //  using printf-style formatter.
+    //- Using printf-formatter for a word representation of the primitive.
     //  The representation is not checked for valid word characters -
     //  it is assumed that the caller knows what they are doing
     template<class PrimitiveType>

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,9 +32,30 @@ License
 
 //! \cond fileScope
 
-//  The number of bytes in the STL binary header
+// The number of bytes in the STL binary header
 static const unsigned STLHeaderSize = 80;
 
+// Check if "SOLID" or "solid" appears as the first non-space content.
+// Assume that any leading space is less than 75 chars or so, otherwise
+// it is really bad input.
+static bool startsWithSolid(const char header[STLHeaderSize])
+{
+    unsigned pos = 0;
+    while (std::isspace(header[pos]) && pos < STLHeaderSize)
+    {
+        ++pos;
+    }
+
+    return
+    (
+        pos < (STLHeaderSize-5)  // At least 5 chars remaining
+     && std::toupper(header[pos+0]) == 'S'
+     && std::toupper(header[pos+1]) == 'O'
+     && std::toupper(header[pos+2]) == 'L'
+     && std::toupper(header[pos+3]) == 'I'
+     && std::toupper(header[pos+4]) == 'D'
+    );
+}
 //! \endcond
 
 
@@ -52,16 +73,16 @@ bool Foam::fileFormats::STLCore::isBinaryName
     const STLFormat& format
 )
 {
-    return (format == DETECT ? (filename.ext() == "stlb") : format == BINARY);
+    return (format == UNKNOWN ? (filename.ext() == "stlb") : format == BINARY);
 }
 
 
 // Check binary by getting the header and number of facets
 // this seems to work better than the old token-based method
-// - some programs (eg, pro-STAR) have 'solid' as the first word in
-//   the binary header.
 // - using wordToken can cause an abort if non-word (binary) content
 //   is detected ... this is not exactly what we want.
+// - some programs (eg, pro-STAR) have 'solid' as the first word in
+//   the binary header. This is just wrong and not our fault.
 int Foam::fileFormats::STLCore::detectBinaryHeader
 (
     const fileName& filename
@@ -93,27 +114,24 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
     char header[STLHeaderSize];
     is.read(header, STLHeaderSize);
 
-    // Check that stream is OK, if not this may be an ASCII file
-    if (!is.good())
+    // If the stream is bad, it can't be a binary STL
+    if (!is.good() || startsWithSolid(header))
     {
         return 0;
     }
 
+
     // Read the number of triangles in the STL file
-    // (note: read as int so we can check whether >2^31)
-    int nTris;
-    is.read(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+    // (note: read as signed so we can check whether >2^31)
+    int32_t nTris;
+    is.read(reinterpret_cast<char*>(&nTris), sizeof(int32_t));
 
     // Check that stream is OK and number of triangles is positive,
     // if not this may be an ASCII file
     //
     // Also compare the file size with that expected from the number of tris
-    // If the comparison is not sensible then it may be an ASCII file
-    if
-    (
-        !is
-     || nTris < 0
-    )
+    // If the comparison is still not sensible then it may be an ASCII file
+    if (!is || nTris < 0)
     {
         return 0;
     }
@@ -176,7 +194,7 @@ Foam::fileFormats::STLCore::readBinaryHeader
     is.read(header, STLHeaderSize);
 
     // Check that stream is OK, if not this may be an ASCII file
-    if (!is.good())
+    if (!is.good()) // could check again: startsWithSolid(header)
     {
         streamPtr.clear();
 
@@ -187,8 +205,8 @@ Foam::fileFormats::STLCore::readBinaryHeader
 
     // Read the number of triangles in the STl file
     // (note: read as int so we can check whether >2^31)
-    int nTris;
-    is.read(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+    int32_t nTris;
+    is.read(reinterpret_cast<char*>(&nTris), sizeof(int32_t));
 
     // Check that stream is OK and number of triangles is positive,
     // if not this maybe an ASCII file
@@ -230,7 +248,7 @@ Foam::fileFormats::STLCore::readBinaryHeader
 void Foam::fileFormats::STLCore::writeBinaryHeader
 (
     ostream& os,
-    unsigned int nTris
+    uint32_t nTris
 )
 {
     // STL header with extra information about nTris
@@ -244,7 +262,7 @@ void Foam::fileFormats::STLCore::writeBinaryHeader
     }
 
     os.write(header, STLHeaderSize);
-    os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
+    os.write(reinterpret_cast<char*>(&nTris), sizeof(uint32_t));
 }
 
 

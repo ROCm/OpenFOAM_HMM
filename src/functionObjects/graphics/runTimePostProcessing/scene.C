@@ -194,7 +194,7 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
     vtkSmartPointer<vtkLightKit> lightKit = vtkSmartPointer<vtkLightKit>::New();
     lightKit->AddLightsToRenderer(renderer);
 
-    if (clipBox_ != boundBox::greatBox)
+    if (!clipBox_.empty())
     {
         const point& min = clipBox_.min();
         const point& max = clipBox_.max();
@@ -252,7 +252,7 @@ void Foam::functionObjects::runTimePostPro::scene::setCamera
     // Apply clipping if required
     // Note: possible optimisation - if the camera is static, this only needs
     //       to be done once on initialisation
-    if (clipBox_ != boundBox::greatBox)
+    if (!clipBox_.empty())
     {
         setActorVisibility(renderer, false);
         clipBoxActor_->VisibilityOn();
@@ -297,7 +297,7 @@ Foam::functionObjects::runTimePostPro::scene::scene
     cameraUp_(nullptr),
     cameraViewAngle_(nullptr),
     cameraZoom_(nullptr),
-    clipBox_(boundBox::greatBox),
+    clipBox_(boundBox::invertedBox),
     clipBoxActor_(),
     parallelProjection_(true),
     nFrameTotal_(1),

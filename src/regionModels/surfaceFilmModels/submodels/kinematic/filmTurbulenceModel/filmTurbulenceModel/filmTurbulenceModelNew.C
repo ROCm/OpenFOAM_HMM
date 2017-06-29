@@ -49,7 +49,7 @@ autoPtr<filmTurbulenceModel> filmTurbulenceModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown filmTurbulenceModel type " << modelType

@@ -1,0 +1,61 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.sh/mgridgen
+#
+# Description
+#     Setup file for MGridGen include/libraries.
+#     Sourced during wmake process only.
+#
+#     Normally used to specify the MGridGen version and location for a
+#     ThirdParty installation.
+#
+#     If using system-wide installations, use the following setting:
+#
+#         MGRIDGEN_VERSION=mgridgen-system
+#
+#     If the system mgridgen is unusable and you don't have or want
+#     a ThirdParty installation:
+#
+#         MGRIDGEN_VERSION=mgridgen-none
+#
+#     If using a central installation, but not located under ThirdParty:
+#         - specify mgridgen-system
+#         - provide full path for MGRIDGEN_ARCH_PATH
+#
+# Note
+#     A csh version is not needed, since the values here are only sourced
+#     during the wmake process.
+#
+#     MGridGen can be entirely disabled, by either renaming this file or
+#     by creating an empty one with the same name at a user or site location.
+#
+#------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
+
+MGRIDGEN_VERSION=ParMGridGen-1.0
+export MGRIDGEN_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/$MGRIDGEN_VERSION
+
+# END OF (NORMAL) USER EDITABLE PART
+#------------------------------------------------------------------------------

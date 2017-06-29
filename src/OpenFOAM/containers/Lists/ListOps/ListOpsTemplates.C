@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,11 +34,8 @@ ListType Foam::renumber
     const ListType& lst
 )
 {
-    // Create copy
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     forAll(lst, elemI)
     {
@@ -73,26 +70,42 @@ template<class ListType>
 ListType Foam::reorder
 (
     const labelUList& oldToNew,
-    const ListType& lst
+    const ListType& lst,
+    const bool prune
 )
 {
-    // Create copy
-    ListType newLst(lst.size());
+    const label sz = lst.size();
 
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    ListType newLst(sz);
+    newLst.setSize(sz);     // Consistent sizing (eg, DynamicList)
 
-    forAll(lst, elemI)
+    label maxIdx = -1;      // For pruning: newSize = maxIdx+1
+    forAll(lst, i)
     {
-        if (oldToNew[elemI] >= 0)
+        const label newIdx = oldToNew[i];
+        if (newIdx >= 0)
         {
-            newLst[oldToNew[elemI]] = lst[elemI];
+            // Could additionally enforce (newIdx < lst.size())
+            // ... or just rely on FULLDEBUG from UList
+
+            newLst[newIdx] = lst[i];
+
+            if (maxIdx < newIdx)
+            {
+                maxIdx = newIdx;
+            }
         }
-        else
+        else if (!prune)
         {
-            newLst[elemI] = lst[elemI];
+            newLst[i] = lst[i];
         }
     }
+
+    if (prune)
+    {
+        newLst.setSize(maxIdx+1);
+    }
+
     return newLst;
 }
 
@@ -101,25 +114,40 @@ template<class ListType>
 void Foam::inplaceReorder
 (
     const labelUList& oldToNew,
-    ListType& lst
+    ListType& lst,
+    const bool prune
 )
 {
-    // Create copy
-    ListType newLst(lst.size());
+    const label sz = lst.size();
 
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    ListType newLst(sz);
+    newLst.setSize(sz);     // Consistent sizing (eg, DynamicList)
 
-    forAll(lst, elemI)
+    label maxIdx = -1;      // For pruning: newSize = maxIdx+1
+    forAll(lst, i)
     {
-        if (oldToNew[elemI] >= 0)
+        const label newIdx = oldToNew[i];
+        if (newIdx >= 0)
         {
-            newLst[oldToNew[elemI]] = lst[elemI];
+            // Could additionally enforce (newIdx < lst.size())
+            // ... or just rely on FULLDEBUG from UList
+
+            newLst[newIdx] = lst[i];
+
+            if (maxIdx < newIdx)
+            {
+                maxIdx = newIdx;
+            }
         }
-        else
+        else if (!prune)
         {
-            newLst[elemI] = lst[elemI];
+            newLst[i] = lst[i];
         }
+    }
+
+    if (prune)
+    {
+        newLst.setSize(maxIdx+1);
     }
 
     lst.transfer(newLst);
@@ -133,16 +161,15 @@ void Foam::inplaceMapValue
     Container& lst
 )
 {
-    for
-    (
-        typename Container::iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
-    )
+    for (auto iter = lst.begin(); iter != lst.end(); ++iter)
     {
-        if (iter() >= 0)
+        const label oldIdx = iter.object();
+        if (oldIdx >= 0)
         {
-            iter() = oldToNew[iter()];
+            // Could additionally enforce (oldIdx < oldToNew.size())
+            // ... or just rely on FULLDEBUG from UList
+
+            iter.object() = oldToNew[oldIdx];
         }
     }
 }
@@ -157,16 +184,15 @@ void Foam::inplaceMapKey
 {
     Container newLst(lst.size());
 
-    for
-    (
-        typename Container::iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
-    )
+    for (auto iter = lst.begin(); iter != lst.end(); ++iter)
     {
-        if (iter.key() >= 0)
+        const label oldIdx = iter.key();
+        if (oldIdx >= 0)
         {
-            newLst.insert(oldToNew[iter.key()], iter());
+            // Could additionally enforce (oldIdx < oldToNew.size())
+            // ... or just rely on FULLDEBUG from UList
+
+            newLst.insert(oldToNew[oldIdx], iter.object());
         }
     }
 
@@ -236,8 +262,9 @@ void Foam::duplicateOrder
 
     sortedOrder(lst, order, cmp);
 
+    const label last = (order.size()-1);
     label n = 0;
-    for (label i = 0; i < order.size() - 1; ++i)
+    for (label i = 0; i < last; ++i)
     {
         if (lst[order[i]] == lst[order[i+1]])
         {
@@ -271,20 +298,50 @@ void Foam::uniqueOrder
 
     if (order.size() > 1)
     {
+        const label last = (order.size()-1);
         label n = 0;
-        for (label i = 0; i < order.size() - 1; ++i)
+        for (label i = 0; i < last; ++i)
         {
             if (lst[order[i]] != lst[order[i+1]])
             {
                 order[n++] = order[i];
             }
         }
-        order[n++] = order[order.size()-1];
+        order[n++] = order[last];
         order.setSize(n);
     }
 }
 
 
+template<class ListType>
+void Foam::inplaceUniqueSort(ListType& lst)
+{
+    inplaceUniqueSort
+    (
+        lst,
+        typename UList<typename ListType::value_type>::less(lst)
+    );
+}
+
+
+template<class ListType, class Cmp>
+void Foam::inplaceUniqueSort(ListType& lst, const Cmp& cmp)
+{
+    labelList order;
+    uniqueOrder(lst, order, cmp);
+
+    ListType newLst(order.size());
+    newLst.setSize(order.size()); // Consistent sizing (eg, DynamicList)
+
+    forAll(order, elemI)
+    {
+        newLst[elemI] = lst[order[elemI]];
+    }
+
+    lst.transfer(newLst);
+}
+
+
 template<class T, class ListType>
 ListType Foam::subset
 (
@@ -303,9 +360,7 @@ ListType Foam::subset
     }
 
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     label nElem = 0;
     forAll(lst, elemI)
@@ -366,9 +421,7 @@ ListType Foam::subset
     // eg, when it is a PackedBoolList or a labelHashSet
 
     ListType newLst(lst.size());
-
-    // ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     label nElem = 0;
     forAll(lst, elemI)
@@ -411,46 +464,93 @@ void Foam::inplaceSubset
 }
 
 
-template<class InList, class OutList>
+template<class ListType, class UnaryPredicate>
+ListType Foam::subsetList
+(
+    const ListType& lst,
+    const UnaryPredicate& pred
+)
+{
+    ListType newLst(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
+
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (pred(lst[elemI]))
+        {
+            newLst[nElem++] = lst[elemI];
+        }
+    }
+    newLst.setSize(nElem);
+
+    return newLst;
+}
+
+
+template<class ListType, class UnaryPredicate>
+void Foam::inplaceSubsetList
+(
+    ListType& lst,
+    const UnaryPredicate& pred
+)
+{
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (pred(lst[elemI]))
+        {
+            if (nElem != elemI)
+            {
+                lst[nElem] = lst[elemI];
+            }
+            ++nElem;
+        }
+    }
+
+    lst.setSize(nElem);
+}
+
+
+template<class InputIntListType, class OutputIntListType>
 void Foam::invertManyToMany
 (
-    const label nEdges,
-    const UList<InList>& pointEdges,
-    List<OutList>& edges
+    const label len,
+    const UList<InputIntListType>& input,
+    List<OutputIntListType>& output
 )
 {
-    // Number of points per edge
-    labelList nPointsPerEdge(nEdges, 0);
+    // The output list sizes
+    labelList sizes(len, 0);
 
-    forAll(pointEdges, pointi)
+    forAll(input, listi)
     {
-        const InList& pEdges = pointEdges[pointi];
+        const InputIntListType& sublist = input[listi];
 
-        forAll(pEdges, j)
+        forAll(sublist, idx)
         {
-            nPointsPerEdge[pEdges[j]]++;
+            sizes[sublist[idx]]++;
         }
     }
 
-    // Size edges
-    edges.setSize(nEdges);
-
-    forAll(nPointsPerEdge, edgeI)
+    // Size output
+    output.setSize(len);
+    forAll(sizes, outi)
     {
-        edges[edgeI].setSize(nPointsPerEdge[edgeI]);
+        output[outi].setSize(sizes[outi]);
     }
-    nPointsPerEdge = 0;
 
-    // Fill edges
-    forAll(pointEdges, pointi)
+    // Fill output
+    sizes = 0;
+    forAll(input, listi)
     {
-        const InList& pEdges = pointEdges[pointi];
+        const InputIntListType& sublist = input[listi];
 
-        forAll(pEdges, j)
+        forAll(sublist, idx)
         {
-            label edgeI = pEdges[j];
+            const label outi = sublist[idx];
 
-            edges[edgeI][nPointsPerEdge[edgeI]++] = pointi;
+            output[outi][sizes[outi]++] = listi;
         }
     }
 }

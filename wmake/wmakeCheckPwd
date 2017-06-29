@@ -29,16 +29,17 @@
 #     wmakeCheckPwd <dir>
 #
 # Description
-#     Check that the current working directory is the directory <dir>
+#     Check that the current working directory is the directory <dir>.
+#     Exit status 0 when the directories are identical
 #
 #-------------------------------------------------------------------------------
 Script=${0##*/}
 
-unset quietOpt
+unset optQuiet
+exec 1>&2 # No stdout, stderr only
 
 usage() {
-    [ "$quietOpt" = true ] && exit 1
-    exec 1>&2
+    [ "$optQuiet" = true ] && exit 1
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
@@ -57,6 +58,17 @@ USAGE
 }
 
 
+error()
+{
+    if [ "$optQuiet" != true ]
+    then
+        echo "$Script error: $1"
+        shift
+        while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    fi
+    exit 1
+}
+
 #------------------------------------------------------------------------------
 # Parse arguments and options
 #------------------------------------------------------------------------------
@@ -68,11 +80,11 @@ do
         usage
         ;;
     -q | -quiet)
-        quietOpt=true
+        optQuiet=true
         shift
         ;;
     -*)
-        usage "unknown option: '$*'"
+        usage "Unknown option: '$1'"
         ;;
     *)
         break
@@ -80,42 +92,21 @@ do
     esac
 done
 
+[ "$#" -eq 1 ] || usage "Incorrect number of arguments"
 
-[ "$#" -eq 1 ] || usage
-
-# Set dirName to <dir>
 dirName="$1"
 
-# Simple check against $PWD
+# Simple lexical check against PWD
 [ "$PWD" = "$dirName" ] && exit 0
 
-# Check existance of <dir>
-[ -d "$dirName" ] || {
-    [ "$quietOpt" = true ] || {
-        echo "$Script error: Directory does not exist $dirName"
-    }
-    exit 1
-}
+# Check existence of <dir>
+[ -d "$dirName" ] || error "Directory does not exist '$dirName'"
 
-# Use /bin/pwd to get the absolute path (could be linked)
-thisDir=$(/bin/pwd)
-target=$(cd $dirName 2>/dev/null && /bin/pwd)
-
-# Return 0 if this directory is <dir>
-[ "$thisDir" = "$target" ] && exit 0
-
-# This directory is not <dir>
-[ "$quietOpt" = true ] || {
-    echo "$Script error: Current directory is not $dirName"
-}
-exit 1
+# Compare absolute paths, without symlinks
+[ "$(cd $dirName 2>/dev/null && pwd -P)" = "$(pwd -P)" ] || \
+    error "Current directory is not '$dirName'"
 
 
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Group
 Description
     Calculates the equilibrium flame temperature for a given fuel and
     pressure for a range of unburnt gas temperatures and equivalence
-    ratios; the effects of dissociation on O2, H2O and CO2 are included.
+    ratios; includes the effects of dissociation on O2, H2O and CO2.
 
 \*---------------------------------------------------------------------------*/
 
@@ -57,7 +57,16 @@ typedef species::thermo<janafThermo<perfectGas<specie>>, absoluteEnthalpy>
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Calculates the equilibrium flame temperature for a given fuel\n"
+        "and pressure for a range of unburnt gas temperatures and equivalence\n"
+        "ratios; includes the effects of dissociation on O2, H2O and CO2."
+    );
+    argList::noParallel();
+    argList::noFunctionObjects();
     argList::validArgs.append("controlFile");
+
     argList args(argc, argv);
 
     const fileName controlFileName = args[1];
@@ -103,25 +112,27 @@ int main(int argc, char *argv[])
     Info<< nl << "Reading thermodynamic data for relevant species"
         << nl << endl;
 
-    // Reactants
-    thermo FUEL(thermoData.subDict(fuelName));
-    thermo O2(thermoData.subDict("O2"));
-    thermo N2(thermoData.subDict("N2"));
+    // Reactants (mole-based)
+    thermo FUEL(thermoData.subDict(fuelName)); FUEL *= FUEL.W();
 
-    // Products
-    thermo CO2(thermoData.subDict("CO2"));
-    thermo H2O(thermoData.subDict("H2O"));
+    // Oxidant (mole-based)
+    thermo O2(thermoData.subDict("O2")); O2 *= O2.W();
+    thermo N2(thermoData.subDict("N2")); N2 *= N2.W();
 
-    // Product fragments
-    thermo CO(thermoData.subDict("CO"));
-    thermo H2(thermoData.subDict("H2"));
+    // Intermediates (mole-based)
+    thermo H2(thermoData.subDict("H2")); H2 *= H2.W();
+
+    // Products (mole-based)
+    thermo CO2(thermoData.subDict("CO2")); CO2 *= CO2.W();
+    thermo H2O(thermoData.subDict("H2O")); H2O *= H2O.W();
+    thermo CO(thermoData.subDict("CO")); CO *= CO.W();
 
 
     // Product dissociation reactions
 
     thermo CO2BreakUp
     (
-        CO2 == CO + 0.5* O2
+        CO2 == CO + 0.5*O2
     );
 
     thermo H2OBreakUp
@@ -148,7 +159,7 @@ int main(int argc, char *argv[])
     (
         "stoichiometricAirFuelMassRatio",
         dimless,
-        (oxidant.W()*oxidant.nMoles())/FUEL.W()
+        oxidant.Y()/FUEL.W()
     );
 
     Info<< "stoichiometricAirFuelMassRatio "
@@ -212,7 +223,6 @@ int main(int argc, char *argv[])
         // Iteration loop for adiabatic flame temperature
         for (int j=0; j<20; j++)
         {
-
             if (j > 0)
             {
                 co = co2*

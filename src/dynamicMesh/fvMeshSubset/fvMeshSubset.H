@@ -177,6 +177,14 @@ public:
                 const bool syncCouples = true
             );
 
+            //- setLargeCellSubset but only marking certain cells
+            void setLargeCellSubset
+            (
+                const UList<label>& globalCellMap,
+                const label patchID = -1,
+                const bool syncPar = true
+            );
+
             //- setLargeCellSubset but with labelHashSet.
             void setLargeCellSubset
             (
@@ -275,16 +283,14 @@ public:
                 const fvMesh& sMesh,
                 const labelList& patchMap,
                 const labelList& cellMap,
-                const labelList& faceMap,
-                const bool negateIfFlipped = true
+                const labelList& faceMap
             );
 
             template<class Type>
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
             interpolate
             (
-                const GeometricField<Type, fvsPatchField, surfaceMesh>&,
-                const bool negateIfFlipped = true
+                const GeometricField<Type, fvsPatchField, surfaceMesh>&
             ) const;
 
             //- Map point field

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,14 +57,16 @@ pid_t ppid();
 //- Return the group PID of this process
 pid_t pgid();
 
-//- Return true if environment variable of given name is defined
-bool env(const word&);
+//- True if environment variable of given name is defined.
+//  Using an empty name is a no-op and always returns false.
+bool env(const std::string& envName);
 
-//- Return environment variable of given name
-//  Return string() if the environment is undefined
-string getEnv(const word&);
+//- Get environment value for given envName.
+//  Return string() if the environment is undefined or envName is empty.
+string getEnv(const std::string& envName);
 
-//- Set an environment variable
+//- Set an environment variable, return true on success.
+//  Using an empty name is a no-op and always returns false.
 bool setEnv(const word& name, const std::string& value, const bool overwrite);
 
 //- Return the system's host name, as per hostname(1)
@@ -84,74 +86,89 @@ bool isAdministrator();
 fileName home();
 
 //- Return home directory path name for a particular user
-fileName home(const string& userName);
+fileName home(const std::string& userName);
 
 //- Return current working directory path name
 fileName cwd();
 
-//- Change the current directory to the one given and return true,
-//  else return false
+//- Change current directory to the one specified and return true on success.
+//  Using an empty name is a no-op and always returns false.
 bool chDir(const fileName& dir);
 
 //- Make a directory and return an error if it could not be created
-//  and does not already exist
-bool mkDir(const fileName&, mode_t=0777);
+//  and does not already exist.
+//  Using an empty pathName is a no-op and always returns false.
+bool mkDir(const fileName& pathName, mode_t mode=0777);
 
-//- Set the file mode
-bool chMod(const fileName&, const mode_t);
+//- Set the file/directory mode, return true on success.
+//  Using an empty name is a no-op and always returns false.
+bool chMod(const fileName& name, const mode_t mode);
 
-//- Return the file mode
-mode_t mode(const fileName&, const bool followLink=true);
+//- Return the file mode, normally following symbolic links
+//  Using an empty name is a no-op and always returns 0.
+mode_t mode(const fileName& name, const bool followLink=true);
 
-//- Return the file type: DIRECTORY or FILE
-fileName::Type type(const fileName&, const bool followLink=true);
+//- Return the file type: DIRECTORY or FILE, normally following symbolic links
+//  Using an empty name is a no-op and always returns UNDEFINED.
+fileName::Type type(const fileName& name, const bool followLink=true);
 
 //- Does the name exist (as DIRECTORY or FILE) in the file system?
 //  Optionally enable/disable check for gzip file.
+//  Using an empty name is a no-op and always returns false.
 bool exists
 (
-    const fileName&,
+    const fileName& name,
     const bool checkGzip=true,
     const bool followLink=true
 );
 
 //- Does the name exist as a DIRECTORY in the file system?
-bool isDir(const fileName&, const bool followLink=true);
+//  Using an empty name is a no-op and always returns false.
+bool isDir(const fileName& name, const bool followLink=true);
 
 //- Does the name exist as a FILE in the file system?
 //  Optionally enable/disable check for gzip file.
+//  Using an empty name is a no-op and always returns false.
 bool isFile
 (
-    const fileName&,
+    const fileName& name,
     const bool checkGzip=true,
     const bool followLink=true
 );
 
-//- Return size of file
-off_t fileSize(const fileName&, const bool followLink=true);
+//- Return size of file or -1 on failure (normally follows symbolic links).
+//  Using an empty name is a no-op and always returns -1.
+off_t fileSize(const fileName& name, const bool followLink=true);
+
+//- Return time of last file modification (normally follows symbolic links).
+//  Using an empty name is a no-op and always returns 0.
+time_t lastModified(const fileName& name, const bool followLink=true);
 
 //- Return time of last file modification
-time_t lastModified(const fileName&, const bool followLink=true);
+//  Using an empty name is a no-op and always returns 0.
+double highResLastModified(const fileName& name);
 
-//- Return time of last file modification
-double highResLastModified(const fileName&);
-
-//- Read a directory and return the entries as a string list
+//- Read a directory and return the entries as a fileName List.
+//  Using an empty directory name returns an empty list.
 fileNameList readDir
 (
-    const fileName&,
-    const fileName::Type=fileName::FILE,
+    const fileName& directory,
+    const fileName::Type type=fileName::FILE,
     const bool filtergz=true,
     const bool followLink=true
 );
 
-//- Copy, recursively if necessary, the source to the destination
+//- Copy the source to the destination (recursively if necessary).
+//  An empty source name is a no-op and always returns false.
 bool cp(const fileName& src, const fileName& dst, const bool followLink=true);
 
 //- Create a softlink. dst should not exist. Returns true if successful.
+//  An empty source or destination name is a no-op that always returns false,
+//  but also produces a warning.
 bool ln(const fileName& src, const fileName& dst);
 
-//- Rename src to dst
+//- Rename src to dst.
+//  An empty source or destination name is a no-op that always returns false.
 bool mv
 (
     const fileName& src,
@@ -161,46 +178,56 @@ bool mv
 
 //- Rename to a corresponding backup file
 //  If the backup file already exists, attempt with "01" .. "99" suffix
-bool mvBak(const fileName&, const std::string& ext = "bak");
+//  An empty name or extension is a no-op that always returns false.
+bool mvBak(const fileName& src, const std::string& ext = "bak");
 
-//- Remove a file, returning true if successful otherwise false
-bool rm(const fileName&);
+//- Remove a file (or its gz equivalent), returning true if successful.
+//  An empty name is a no-op that always returns false.
+bool rm(const fileName& file);
 
-//- Remove a dirctory and its contents
-bool rmDir(const fileName&);
+//- Remove a dirctory and its contents (optionally silencing warnings)
+//  An empty directory name is a no-op that always returns false,
+//  but also produces a warning.
+bool rmDir(const fileName& directory, const bool silent=false);
 
 //- Sleep for the specified number of seconds
-unsigned int sleep(const unsigned int);
+unsigned int sleep(const unsigned int sec);
 
 //- Close file descriptor
-void fdClose(const int);
+void fdClose(const int fd);
 
 //- Check if machine is up by pinging given port
-bool ping(const string&, const label port, const label timeOut);
+bool ping(const std::string& destName, const label port, const label timeOut);
 
 //- Check if machine is up by pinging port 22 (ssh) and 222 (rsh)
-bool ping(const string&, const label timeOut=10);
+bool ping(const std::string& host, const label timeOut=10);
 
 //- Execute the specified command via the shell.
 //  Uses vfork/execl internally.
 //  Where possible, use the list version instead.
+//
+//  Treats an empty command as a successful no-op.
 int system(const std::string& command);
 
 //- Execute the specified command with arguments.
 //  Uses vfork/execvp internally
+//
+//  Treats an empty command as a successful no-op.
 int system(const UList<string>& command);
 
-//- Open a shared library. Return handle to library. Print error message
-//  if library cannot be loaded (check = true)
+//- Open a shared library and return handle to library.
+//  Print error message if library cannot be loaded (suppress with check=true)
 void* dlOpen(const fileName& lib, const bool check = true);
 
 //- Close a dlopened library using handle. Return true if successful
-bool dlClose(void*);
+bool dlClose(void* handle);
 
 //- Lookup a symbol in a dlopened library using handle to library
 void* dlSym(void* handle, const std::string& symbol);
 
-//- Report if symbol in a dlopened library could be found
+//- Report if symbol in a dlopened library could be found.
+//  Using a null handle or an empty symbol name is a no-op and always
+//  returns false.
 bool dlSymFound(void* handle, const std::string& symbol);
 
 //- Return all loaded libraries
@@ -217,6 +244,18 @@ label osRandomInteger();
 
 //- Return random double precision (uniform distribution between 0 and 1)
 scalar osRandomDouble();
+
+//- Return the size of the buffer for re-entrant random number generator
+label osRandomBufferSize();
+
+//- Seed random number generator.
+void osRandomSeed(const label seed, List<char>& buffer);
+
+//- Return random integer (uniform distribution between 0 and 2^31)
+label osRandomInteger(List<char>& buffer);
+
+//- Return random double precision (uniform distribution between 0 and 1)
+scalar osRandomDouble(List<char>& buffer);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

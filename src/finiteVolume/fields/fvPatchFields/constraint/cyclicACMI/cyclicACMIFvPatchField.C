@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ Foam::cyclicACMIFvPatchField<Type>::cyclicACMIFvPatchField
 
     if (!dict.found("value") && this->coupled())
     {
-        this->evaluate(Pstream::blocking);
+        this->evaluate(Pstream::commsTypes::blocking);
     }
 }
 
@@ -195,6 +195,7 @@ template<class Type>
 void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField& coeffs,
     const direction cmpt,
@@ -213,14 +214,9 @@ void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
     // Transform according to the transformation tensors
     transformCoupleField(pnf, cmpt);
 
-    const labelUList& faceCells = cyclicACMIPatch_.faceCells();
-
     pnf = cyclicACMIPatch_.interpolate(pnf);
 
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 
@@ -228,6 +224,7 @@ template<class Type>
 void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
+    const bool add,
     const Field<Type>& psiInternal,
     const scalarField& coeffs,
     const Pstream::commsTypes
@@ -244,14 +241,9 @@ void Foam::cyclicACMIFvPatchField<Type>::updateInterfaceMatrix
     // Transform according to the transformation tensors
     transformCoupleField(pnf);
 
-    const labelUList& faceCells = cyclicACMIPatch_.faceCells();
-
     pnf = cyclicACMIPatch_.interpolate(pnf);
 
-    forAll(faceCells, elemI)
-    {
-        result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-    }
+    this->addToInternalField(result, !add, coeffs, pnf);
 }
 
 

@@ -32,10 +32,10 @@ Description
     Reference:
     \verbatim
         Tenneti, S., Garg, R., & Subramaniam, S. (2011).
-        Drag law for monodisperse gas–solid systems using particle-resolved
+        Drag law for monodisperse gas-solid systems using particle-resolved
         direct numerical simulation of flow past fixed assemblies of spheres.
-        International Journal of Multiphase Flow, 37(9), 1072–1092.
-    \verbatim
+        International Journal of Multiphase Flow, 37(9), 1072-1092.
+    \endverbatim
 
 SourceFiles
     Tenneti.C

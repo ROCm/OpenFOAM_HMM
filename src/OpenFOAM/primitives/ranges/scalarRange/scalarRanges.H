@@ -55,27 +55,28 @@ public:
 
     // Constructors
 
-        //- Construct Null
+        //- Construct null
         scalarRanges();
 
         //- Construct from Istream.
         //  The list items are comma-delimited.
-        scalarRanges(Istream&);
+        scalarRanges(Istream& is);
+
 
     // Member Functions
 
         //- Return true if the given value is within the ranges
-        bool selected(const scalar) const;
+        bool selected(const scalar value) const;
 
         //- Return the set of selected entries in the given list
         //  that are within the ranges
-        List<bool> selected(const List<scalar>&) const;
+        List<bool> selected(const UList<scalar>& values) const;
 
         //- Select a list of values that are within the ranges
-        List<scalar> select(const List<scalar>&) const;
+        List<scalar> select(const List<scalar>& values) const;
 
         //- Select a list of values that are within the ranges
-        void inplaceSelect(List<scalar>&) const;
+        void inplaceSelect(List<scalar>& values) const;
 };
 
 

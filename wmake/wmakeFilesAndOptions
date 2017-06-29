@@ -59,23 +59,23 @@ do
     -h | -help)   # Provide immediate help
         usage
         ;;
-    -*)
-        usage "unknown option: '$*'"
-        ;;
     *)
-        break
+        # No options/arguments
+        usage "unexpected options/arguments: $*"
         ;;
     esac
 done
 
-# No arguments
-[ "$#" -eq 0 ] || usage "unexpected arguments: '$*'"
-
+if [ -e Make ]
+then
+    echo "$Script error: Make directory already exists" 1>&2
+    exit 1
+fi
 
 #------------------------------------------------------------------------------
 # Check environment variables
 #------------------------------------------------------------------------------
-for check in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR
+for check in WM_DIR WM_ARCH WM_COMPILER
 do
     eval test "\$$check" || {
         echo "$Script error: environment variable \$$check not set" 1>&2
@@ -83,30 +83,10 @@ do
     }
 done
 
-if [ -d Make ]
-then
-    echo "$Script error: Make directory already exists" 1>&2
-    exit 1
-else
-    mkdir Make
-fi
+mkdir Make
+[ -e Make/files ]   || $WM_DIR/scripts/makeFiles
+[ -e Make/options ] || $WM_DIR/scripts/makeOptions
 
-[ -e Make/files ] || {
-    echo "$Script: Creating Make/files"
-    $WM_DIR/scripts/makeFiles
-}
-
-[ -e Make/options ] || {
-    echo "$Script: Creating Make/options"
-    $WM_DIR/scripts/makeOptions
-}
-
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

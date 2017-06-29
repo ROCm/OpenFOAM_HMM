@@ -53,15 +53,13 @@ Description
     }
 
     // Pressure data supplied in CSV file format
-    csvFileData
-    {
-        fileName        "pressureData";
-        nHeaderLine     1;
-        refColumn       0;
-        componentColumns (1);
-        separator       " ";
-        mergeSeparators yes;
-    }
+    file            "pressureData";
+    //files           ("pressureData1" "pressureData2");
+    nHeaderLine     1;
+    refColumn       0;
+    componentColumns (1);
+    separator       " ";
+    mergeSeparators yes;
 
     graphFormat     raw;
 
@@ -117,7 +115,11 @@ protected:
         ) const;
 
         //- Process the CSV data
-        void processData(const Function1Types::CSV<scalar>& data);
+        void processData
+        (
+            const label dataseti,
+            const Function1Types::CSV<scalar>& data
+        );
 
 
 public:

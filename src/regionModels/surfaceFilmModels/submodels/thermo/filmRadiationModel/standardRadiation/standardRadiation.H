@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::standardRadiation
+    Foam::regionModels::surfaceFilmModels::standardRadiation
 
 Description
     Standard radiation model
@@ -60,10 +60,10 @@ private:
     // Private data
 
         //- Radiative incident flux mapped from  the primary region / [kg/s3]
-        volScalarField QinPrimary_;
+        volScalarField qinPrimary_;
 
         //- Remaining radiative flux after removing local contribution
-        volScalarField QrNet_;
+        volScalarField qrNet_;
 
 
         // Model coefficients
@@ -95,7 +95,7 @@ public:
         //- Construct from surface film model and dictionary
         standardRadiation
         (
-            surfaceFilmModel& owner,
+            surfaceFilmModel& film,
             const dictionary& dict
         );
 
@@ -112,7 +112,7 @@ public:
             virtual void correct();
 
             //- Return the radiation sensible enthalpy source
-            //  Also updates QrNet
+            //  Also updates qrNet
             virtual tmp<volScalarField> Shs();
 };
 

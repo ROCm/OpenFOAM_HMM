@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "ensightWrite.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "wordRes.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -46,25 +47,6 @@ namespace functionObjects
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::functionObjects::ensightWrite::uniqWords(wordReList& lst)
-{
-    boolList retain(lst.size());
-    wordHashSet uniq;
-    forAll(lst, i)
-    {
-        const wordRe& select = lst[i];
-
-        retain[i] =
-        (
-            select.isPattern()
-         || uniq.insert(static_cast<const word&>(select))
-        );
-    }
-
-    inplaceSubset(retain, lst);
-}
-
 
 int Foam::functionObjects::ensightWrite::process(const word& fieldName)
 {
@@ -132,15 +114,10 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
         dict.lookupOrDefault<Switch>("noPatches", false)
     );
 
-    writeOpts_.deprecatedOrder
-    (
-        dict.lookupOrDefault<Switch>("deprecatedOrder", false)
-    );
-
     if (dict.found("patches"))
     {
         wordReList lst(dict.lookup("patches"));
-        uniqWords(lst);
+        wordRes::inplaceUniq(lst);
 
         writeOpts_.patchSelection(lst);
     }
@@ -148,7 +125,7 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     if (dict.found("faceZones"))
     {
         wordReList lst(dict.lookup("faceZones"));
-        uniqWords(lst);
+        wordRes::inplaceUniq(lst);
 
         writeOpts_.faceZoneSelection(lst);
     }
@@ -174,7 +151,7 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     // output fields
     //
     dict.lookup("fields") >> selectFields_;
-    uniqWords(selectFields_);
+    wordRes::inplaceUniq(selectFields_);
 
     return true;
 }
@@ -246,7 +223,7 @@ bool Foam::functionObjects::ensightWrite::write()
         ensCase().setTime(t.value(), t.timeIndex());
     }
 
-    wordHashSet candidates = subsetStrings(selectFields_, mesh_.names());
+    wordHashSet candidates(subsetStrings(selectFields_, mesh_.names()));
     DynamicList<word> missing(selectFields_.size());
     DynamicList<word> ignored(selectFields_.size());
 

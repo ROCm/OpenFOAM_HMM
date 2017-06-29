@@ -544,7 +544,7 @@ void Foam::faceZone::writeDict(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& zn)
 {
     zn.write(os);
-    os.check("Ostream& operator<<(Ostream&, const faceZone&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,27 @@ if (&(df1).mesh() != &(df2).mesh())                                 \
 }
 
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type, class GeoMesh>
+void Foam::DimensionedField<Type, GeoMesh>::checkFieldSize() const
+{
+    const label fieldSize = this->size();
+    if (fieldSize)
+    {
+        const label meshSize = GeoMesh::size(this->mesh_);
+        if (fieldSize != meshSize)
+        {
+            FatalErrorInFunction
+                << "size of field = " << fieldSize
+                << " is not the same as the size of mesh = "
+                << meshSize
+                << abort(FatalError);
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type, class GeoMesh>
@@ -59,16 +80,46 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(field),
     mesh_(mesh),
+    dimensions_(dims),
+    oriented_()
+{
+    checkFieldSize();
+}
+
+
+template<class Type, class GeoMesh>
+DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& dims,
+    const Xfer<Field<Type>>& field
+)
+:
+    regIOobject(io),
+    Field<Type>(field),
+    mesh_(mesh),
     dimensions_(dims)
 {
-    if (field.size() && field.size() != GeoMesh::size(mesh))
-    {
-        FatalErrorInFunction
-            << "size of field = " << field.size()
-            << " is not the same as the size of mesh = "
-            << GeoMesh::size(mesh)
-            << abort(FatalError);
-    }
+    checkFieldSize();
+}
+
+
+template<class Type, class GeoMesh>
+DimensionedField<Type, GeoMesh>::DimensionedField
+(
+    const IOobject& io,
+    const Mesh& mesh,
+    const dimensionSet& dims,
+    const Xfer<List<Type>>& field
+)
+:
+    regIOobject(io),
+    Field<Type>(field),
+    mesh_(mesh),
+    dimensions_(dims)
+{
+    checkFieldSize();
 }
 
 
@@ -84,7 +135,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(GeoMesh::size(mesh)),
     mesh_(mesh),
-    dimensions_(dims)
+    dimensions_(dims),
+    oriented_()
 {
     if (checkIOFlags)
     {
@@ -105,7 +157,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(GeoMesh::size(mesh), dt.value()),
     mesh_(mesh),
-    dimensions_(dt.dimensions())
+    dimensions_(dt.dimensions()),
+    oriented_()
 {
     if (checkIOFlags)
     {
@@ -123,7 +176,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(df),
     Field<Type>(df),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -137,7 +191,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(df, reuse),
     Field<Type>(df, reuse),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -150,7 +205,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(df(), true),
     Field<Type>(df),
     mesh_(df->mesh_),
-    dimensions_(df->dimensions_)
+    dimensions_(df->dimensions_),
+    oriented_(df->oriented_)
 {}
 
 
@@ -168,7 +224,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
         tdf.isTmp()
     ),
     mesh_(tdf().mesh_),
-    dimensions_(tdf().dimensions_)
+    dimensions_(tdf().dimensions_),
+    oriented_(tdf().oriented_)
 {
     tdf.clear();
 }
@@ -185,7 +242,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(df),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -200,7 +258,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io, df),
     Field<Type>(df, reuse),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -214,7 +273,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(newName, df, newName == df.name()),
     Field<Type>(df),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -229,7 +289,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(newName, df, true),
     Field<Type>(df, reuse),
     mesh_(df.mesh_),
-    dimensions_(df.dimensions_)
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -243,7 +304,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(newName, df, true),
     Field<Type>(df),
     mesh_(df->mesh_),
-    dimensions_(df->dimensions_)
+    dimensions_(df->dimensions_),
+    oriented_(df->oriented_)
 {}
 
 
@@ -262,7 +324,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
         tdf.isTmp()
     ),
     mesh_(tdf().mesh_),
-    dimensions_(tdf().dimensions_)
+    dimensions_(tdf().dimensions_),
+    oriented_(tdf().oriented_)
 {
     tdf.clear();
 }
@@ -437,6 +500,7 @@ void DimensionedField<Type, GeoMesh>::operator=
     checkField(*this, df, "=");
 
     dimensions_ = df.dimensions();
+    oriented_ = df.oriented();
     Field<Type>::operator=(df);
 }
 
@@ -460,6 +524,7 @@ void DimensionedField<Type, GeoMesh>::operator=
     checkField(*this, df, "=");
 
     dimensions_ = df.dimensions();
+    oriented_ = df.oriented();
     this->transfer(const_cast<DimensionedField<Type, GeoMesh>&>(df));
     tdf.clear();
 }
@@ -487,6 +552,7 @@ void DimensionedField<Type, GeoMesh>::operator op                              \
     checkField(*this, df, #op);                                                \
                                                                                \
     dimensions_ op df.dimensions();                                            \
+    oriented_ op df.oriented();                                                \
     Field<Type>::operator op(df);                                              \
 }                                                                              \
                                                                                \

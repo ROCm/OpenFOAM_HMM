@@ -29,7 +29,12 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-int Foam::labelRange::debug(::Foam::debug::debugSwitch("labelRange", 0));
+namespace Foam
+{
+int labelRange::debug(debug::debugSwitch("labelRange", 0));
+}
+
+const Foam::labelRange Foam::labelRange::null;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -49,11 +54,17 @@ void Foam::labelRange::adjust()
 {
     if (start_ < 0)
     {
-        size_ += start_;
+        if (size_ <= 0)
+        {
+            size_ = 0;
+        }
+        else
+        {
+            size_ += start_;
+        }
         start_ = 0;
     }
-
-    if (size_ < 0)
+    else if (size_ < 0)
     {
         size_ = 0;
     }
@@ -62,22 +73,21 @@ void Foam::labelRange::adjust()
 
 bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
 {
-    const label final = touches ? 1 : 0;
+    const label extra = touches ? 1 : 0;
 
     return
     (
-        this->size()
-     && range.size()
+        this->size() && range.size()
      &&
         (
             (
                 range.first() >= this->first()
-             && range.first() <= this->last() + final
+             && range.first() <= this->last() + extra
             )
          ||
             (
                 this->first() >= range.first()
-             && this->first() <= range.last() + final
+             && this->first() <= range.last() + extra
             )
         )
     );
@@ -91,35 +101,78 @@ Foam::labelRange Foam::labelRange::join(const labelRange& range) const
     {
         return *this;
     }
-    else if (!range.size_)
+    else if (!range.size())
     {
         return range;
     }
 
     const label lower = Foam::min(this->first(), range.first());
     const label upper = Foam::max(this->last(),  range.last());
-    const label sz = upper - lower + 1;
+    const label total = upper+1 - lower;
+    // last = start+size-1
+    // size = last+1-start
 
-    return labelRange(lower, sz);
+    return labelRange(lower, total);
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::labelRange::operator+=(const labelRange& rhs)
+Foam::labelRange Foam::labelRange::subset(const labelRange& range) const
 {
-    if (!size_)
-    {
-        // trivial case
-        operator=(rhs);
-    }
-    else if (rhs.size_)
-    {
-        const label lower = Foam::min(this->first(), rhs.first());
-        const label upper = Foam::max(this->last(),  rhs.last());
+    const label lower = Foam::max(this->first(), range.first());
+    const label upper = Foam::min(this->last(),  range.last());
+    const label total = upper+1 - lower;
+    // last = start+size-1
+    // size = last+1-start
 
-        start_ = lower;
-        size_  = upper - lower + 1;
+    if (total > 0)
+    {
+        return labelRange(lower, total);
+    }
+    else
+    {
+        return labelRange();
+    }
+}
+
+
+Foam::labelRange Foam::labelRange::subset
+(
+    const label start,
+    const label size
+) const
+{
+    const label lower = Foam::max(this->start(), start);
+    const label upper = Foam::min(this->last(),  start+Foam::max(0,size-1));
+    const label total = upper+1 - lower;
+    // last = start+size-1
+    // size = last+1-start
+
+    if (total > 0)
+    {
+        return labelRange(lower, total);
+    }
+    else
+    {
+        return labelRange();
+    }
+}
+
+
+Foam::labelRange Foam::labelRange::subset0(const label size) const
+{
+    const label lower = Foam::max(this->start(), 0);
+    const label upper = Foam::min(this->last(),  Foam::max(0,size-1));
+    const label total = upper+1 - lower;
+    // last = start+size-1
+    // size = last+1-start
+
+    if (total > 0)
+    {
+        return labelRange(lower, total);
+    }
+    else
+    {
+        return labelRange();
     }
 }
 
@@ -132,7 +185,7 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
     is  >> range.start_ >> range.size_;
     is.readEnd("labelRange");
 
-    is.check("operator>>(Istream&, labelRange&)");
+    is.check(FUNCTION_NAME);
 
     // Disallow invalid sizes
     if (range.size_ < 0)
@@ -148,10 +201,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
 {
     // Write ASCII only for now
     os  << token::BEGIN_LIST
-        << range.start_ << token::SPACE << range.size_
+        << range.start() << token::SPACE << range.size()
         << token::END_LIST;
 
-    os.check("operator<<(Ostream&, const labelRange&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

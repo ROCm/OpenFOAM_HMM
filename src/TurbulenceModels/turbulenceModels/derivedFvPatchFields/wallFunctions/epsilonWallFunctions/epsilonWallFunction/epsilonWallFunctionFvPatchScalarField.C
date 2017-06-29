@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -234,25 +234,16 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
     {
         const label celli = patch.faceCells()[facei];
 
-        const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
-
         const scalar w = cornerWeights[facei];
 
-        if (yPlus > yPlusLam_)
-        {
-            epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
+        epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
 
-            G0[celli] +=
-                w
-               *(nutw[facei] + nuw[facei])
-               *magGradUw[facei]
-               *Cmu25*sqrt(k[celli])
-               /(kappa_*y[facei]);
-        }
-        else
-        {
-            epsilon0[celli] += w*2.0*k[celli]*nuw[facei]/sqr(y[facei]);
-        }
+        G0[celli] +=
+            w
+            *(nutw[facei] + nuw[facei])
+            *magGradUw[facei]
+            *Cmu25*sqrt(k[celli])
+            /(kappa_*y[facei]);
     }
 }
 

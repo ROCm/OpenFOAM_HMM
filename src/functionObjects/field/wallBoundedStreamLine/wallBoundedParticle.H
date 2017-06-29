@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -123,6 +123,20 @@ protected:
         //- Construct current edge
         edge currentEdge() const;
 
+        //- Replacement for particle::currentTetIndices() that avoids bombing
+        //  out on invalid tet decomposition (tetBasePtIs = -1)
+        tetIndices currentTetIndices() const;
+
+        //- Replacement for particle::crossEdgeConnectedFace that avoids bombing
+        //  out on invalid tet decomposition (tetBasePtIs = -1)
+        void crossEdgeConnectedFace
+        (
+            const label& celli,
+            label& tetFacei,
+            label& tetPti,
+            const edge& e
+        );
+
         //- Cross mesh edge into different face on same cell
         void crossEdgeConnectedFace(const edge& meshEdge);
 
@@ -130,10 +144,10 @@ protected:
         void crossDiagonalEdge();
 
         //- Track through single triangle
-        scalar trackFaceTri(const vector& endPosition, label& minEdgei);
+        scalar trackFaceTri(const vector& n, const vector& endPosition, label&);
 
         //- Is current triangle in the track direction
-        bool isTriAlongTrack(const point& endPosition) const;
+        bool isTriAlongTrack(const vector& n, const point& endPosition) const;
 
 
     // Patch interactions

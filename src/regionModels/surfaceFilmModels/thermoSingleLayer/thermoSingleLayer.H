@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::thermoSingleLayer
+    Foam::regionModels::surfaceFilmModels::thermoSingleLayer
 
 Description
     Thermodynamic form of single-cell layer surface film model
@@ -367,10 +367,10 @@ public:
         // Derived fields (calculated on-the-fly)
 
             //- Return the convective heat energy from film to wall
-            inline tmp<scalarField> Qconvw(const label patchi) const;
+            inline tmp<scalarField> qconvw(const label patchi) const;
 
             //- Return the convective heat energy from primary region to film
-            inline tmp<scalarField> Qconvp(const label patchi) const;
+            inline tmp<scalarField> qconvp(const label patchi) const;
 
 
         // Evolution

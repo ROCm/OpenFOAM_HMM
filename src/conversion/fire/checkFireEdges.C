@@ -25,8 +25,7 @@ License
 
 #include "checkFireEdges.H"
 #include "polyMesh.H"
-#include "edge.H"
-#include "HashSet.H"
+#include "edgeHashes.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -69,7 +68,6 @@ Foam::label Foam::checkFireEdges
 {
     label nFailedEdges = 0;
     const bool fullCheck = true;
-    typedef HashSet<edge, Hash<edge>> edgeHashSet;
 
     Info<< "Checking edges according to AVL/FIRE on-the-fly methodology..."
         << endl;
@@ -194,7 +192,7 @@ Foam::label Foam::checkFireEdges
                 thisEdge.flip();
             }
 
-            if (&points)
+            if (notNull(points))
             {
                 forAll(thisEdge, keyI)
                 {
@@ -220,7 +218,7 @@ Foam::label Foam::checkFireEdges
         {
             labelList keys = strayPoints.sortedToc();
 
-            if (&points)
+            if (notNull(points))
             {
                 forAll(keys, keyI)
                 {
@@ -257,10 +255,9 @@ Foam::label Foam::checkFireEdges
 {
     label nPoints = -1;
 
-    if (&points)
+    if (notNull(points))
     {
         nPoints = points.size();
-
     }
     else
     {
@@ -287,10 +284,7 @@ Foam::label Foam::checkFireEdges
 }
 
 
-Foam::label Foam::checkFireEdges
-(
-    const polyMesh& mesh
-)
+Foam::label Foam::checkFireEdges(const polyMesh& mesh)
 {
     return checkFireEdges(mesh.faces(), mesh.pointFaces(), mesh.points());
 }

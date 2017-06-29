@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,27 +64,10 @@ Foam::solidReaction<ReactionThermo>::solidReaction
 (
     const speciesTable& species,
     const HashPtrTable<ReactionThermo>& thermoDatabase,
-    Istream& is
-)
-:
-    Reaction<ReactionThermo>(species, thermoDatabase, is),
-    pyrolisisGases_(),
-    glhs_(),
-    grhs_()
-{
-    NotImplemented;
-}
-
-
-template<class ReactionThermo>
-Foam::solidReaction<ReactionThermo>::solidReaction
-(
-    const speciesTable& species,
-    const HashPtrTable<ReactionThermo>& thermoDatabase,
     const dictionary& dict
 )
 :
-    Reaction<ReactionThermo>(species, thermoDatabase, dict),
+    Reaction<ReactionThermo>(species, thermoDatabase, dict, false),
     pyrolisisGases_(dict.parent().parent().lookup("gaseousSpecies")),
     glhs_(),
     grhs_()

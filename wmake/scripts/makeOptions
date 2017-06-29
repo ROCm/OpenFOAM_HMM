@@ -34,16 +34,17 @@
 
 if [ -r Make/options ]
 then
-    echo "Error: Make/options already exists - exiting"
+    echo "Error: Make/options already exists - exiting" 1>&2
     exit 1
 fi
 
 [ -d Make ] || mkdir Make
-
 rm -f Make/options
+#------------------------------------------------------------------------------
+echo "Creating Make/options"
 
 echo 'EXE_INC = \
-    -I$(LIB_SRC)/finiteVolume/lnInclude' >> Make/options
+    -I$(LIB_SRC)/finiteVolume/lnInclude' > Make/options
 echo >> Make/options
 echo 'EXE_LIBS = \
     -lfiniteVolume' >> Make/options

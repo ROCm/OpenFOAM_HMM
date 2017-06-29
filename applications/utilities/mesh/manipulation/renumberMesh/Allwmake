@@ -4,20 +4,35 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Parse arguments for compilation (at least for error catching)
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-export COMPILE_FLAGS=''
-export LINK_FLAGS=''
+unset COMP_FLAGS LINK_FLAGS
 
 if [ -f "${FOAM_LIBBIN}/libSloanRenumber.so" ]
 then
-    echo "Found libSloanRenumber.so  --  enabling Sloan renumbering support."
+    echo "    found libSloanRenumber  --  enabling sloan renumbering support."
     export LINK_FLAGS="${LINK_FLAGS} -lSloanRenumber"
 fi
 
-if [ -f "${ZOLTAN_ARCH_PATH}/lib/libzoltan.a" -a -f "${FOAM_LIBBIN}/libzoltanRenumber.so" ]
+if [ -f "${FOAM_LIBBIN}/libzoltanRenumber.so" ]
 then
-    echo "Found libzoltanRenumber.so  --  enabling zoltan renumbering support."
-    export COMPILE_FLAGS="-DFOAM_USE_ZOLTAN"
-    export LINK_FLAGS="${LINK_FLAGS} -lzoltanRenumber -L${ZOLTAN_ARCH_PATH}/lib -lzoltan"
+    if [ -z "$ZOLTAN_ARCH_PATH" ]
+    then
+        # Optional: get ZOLTAN_ARCH_PATH
+        if settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/zoltan)
+        then
+            . $settings
+        fi
+    fi
+
+    for libdir in lib "lib${WM_COMPILER_LIB_ARCH}"
+    do
+        if [ -f "$ZOLTAN_ARCH_PATH/$libdir/libzoltan.a" ]
+        then
+            echo "    found libzoltanRenumber  --  enabling zoltan renumbering support."
+            export COMP_FLAGS="-DFOAM_USE_ZOLTAN"
+            export LINK_FLAGS="${LINK_FLAGS} -lzoltanRenumber -L$ZOLTAN_ARCH_PATH/$libdir -lzoltan"
+            break
+        fi
+    done
 fi
 
 wmake $targetType

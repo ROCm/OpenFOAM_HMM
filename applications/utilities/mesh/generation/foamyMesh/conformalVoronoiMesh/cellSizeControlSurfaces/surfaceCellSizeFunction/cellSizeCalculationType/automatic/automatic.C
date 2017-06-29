@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,7 @@ Foam::automatic::automatic
         surface,
         defaultCellSize
     ),
-    coeffsDict_(cellSizeCalcTypeDict.subDict(typeName + "Coeffs")),
+    coeffsDict_(cellSizeCalcTypeDict.optionalSubDict(typeName + "Coeffs")),
     surfaceName_(surface.searchableSurface::name()),
     readCurvature_(Switch(coeffsDict_.lookup("curvature"))),
     curvatureFile_(coeffsDict_.lookup("curvatureFile")),
@@ -288,7 +288,7 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
         vtkSurfaceWriter().write
         (
             surface_.searchableSurface::time().constant()/"triSurface",
-            surfaceName_.lessExt().name(),
+            surfaceName_.nameLessExt(),
             meshedSurfRef
             (
                 surface_.points(),

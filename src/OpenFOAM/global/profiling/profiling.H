@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2009-2016 Bernhard Gschaider
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2107 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,9 @@ SourceFiles
 #ifndef profiling_H
 #define profiling_H
 
+#include "profilingTrigger.H"
 #include "HashPtrTable.H"
+#include "Tuple2.H"
 #include "LIFOStack.H"
 #include "Map.H"
 #include "Time.H"
@@ -65,9 +67,9 @@ namespace Foam
 
 // Forward declaration of classes
 class Ostream;
-class dictionary;
 class cpuInfo;
 class memInfo;
+class profilingSysInfo;
 
 /*---------------------------------------------------------------------------*\
                           Class profiling Declaration
@@ -79,13 +81,49 @@ class profiling
 {
 public:
 
-    // Forward declarations of components
+    // Public typedefs
 
-        class Information;
-        class Trigger;
-        class sysInfo;
+        typedef profilingInformation Information;
+        typedef profilingTrigger Trigger;
+
+    // Static data members
+
+        //- Flag if profiling is allowed
+        static int allowed;
 
 private:
+
+    // Private classes, typedefs
+
+        typedef profilingSysInfo sysInfo;
+
+        //- Profile information lookup is qualified by parent id
+        typedef Tuple2<string, label> Key;
+
+        //- Hashing for information lookup
+        class HashKey
+        :
+            public Hash<Key>
+        {
+        public:
+
+            HashKey()
+            {}
+
+            //- Hash qualified by the parent id to avoid collisions
+            unsigned operator()(const Key& key) const
+            {
+                return
+                (
+                    Hash<string>()(key.first())
+                  + Hash<label>()(key.second())
+                );
+            }
+        };
+
+        typedef HashPtrTable<Information, Key, HashKey> StorageContainer;
+        typedef LIFOStack<Information*> StackContainer;
+
 
     // Private Static Data Members
 
@@ -94,10 +132,6 @@ private:
 
 
     // Private Data Members
-
-        typedef HashPtrTable<Information, string> StorageContainer;
-        typedef LIFOStack<Information*> StackContainer;
-
 
         //- The owner of the profiling
         const Time& owner_;
@@ -137,16 +171,22 @@ protected:
 
     // Friendship
 
+        friend class profilingTrigger;
         friend class Time;
 
 
     // Constructors
 
         //- Construct IO object, everything enabled
-        profiling(const IOobject&, const Time&);
+        profiling(const IOobject& io, const Time& owner);
 
         //- Construct IO object with finer control over behaviour
-        profiling(const dictionary&, const IOobject&, const Time&);
+        profiling
+        (
+            const dictionary& dict,
+            const IOobject& io,
+            const Time& owner
+        );
 
 
     //- Destructor
@@ -155,49 +195,66 @@ protected:
 
     // Protected Member Functions
 
-        //- Find profiling information element or null on failure
-        Information* find(const string& name);
+        //- Find named profiling information element with specified parent.
+        //  Return nullptr on failure.
+        profilingInformation* find(const string& descr, const label parentId);
 
         //- Add to hashed storage,
         //  returns pointer to newly stored element for chaining
-        Information* store(Information*);
+        profilingInformation* store(profilingInformation* info);
 
         //- Add to stack and set timer lookup (based on Id)
-        void push(Information*, clockTime& timer);
+        void push(profilingInformation* info, clockTime& timer);
 
         //- Remove from stack and remove timer lookup (based on Id).
         //  Returns pointer to profiling information element
-        Information* pop();
+        profilingInformation* pop();
 
 
     // Static control elements
 
         //- Singleton to initialize profiling pool, everything enabled
-        static void initialize(const IOobject&, const Time&);
+        static void initialize
+        (
+            const IOobject& ioObj,
+            const Time& owner
+        );
 
         //- Singleton to initialize profiling pool with finer control
-        static void initialize(const dictionary&, const IOobject&, const Time&);
+        static void initialize
+        (
+            const dictionary& dict,
+            const IOobject& ioObj,
+            const Time& owner
+        );
 
         //- Stop profiling, cleanup pool if possible
-        static void stop(const Time&);
+        static void stop(const Time& owner);
 
         //- Existing or new element on pool, add to stack.
         //  Returns null if profiling has not been initialized
-        static Information* New(const string& name, clockTime& timer);
+        static profilingInformation* New
+        (
+            const string& descr,
+            clockTime& timer
+        );
 
         //- Remove the information from the top of the stack
-        static void unstack(const Information*);
+        static void unstack(const profilingInformation* info);
 
 public:
 
     // Static Member Functions
 
-        //- True if profiling is active
+        //- True if profiling is allowed and is active
         static bool active();
+
+        //- Disallow profiling by forcing the InfoSwitch off.
+        static void disable();
 
         //- Print profiling information to specified output
         //  Forwards to writeData member of top-level object
-        static bool print(Ostream&);
+        static bool print(Ostream& os);
 
         //- Write profiling information now
         static bool writeNow();
@@ -209,10 +266,10 @@ public:
         const Time& owner() const;
 
         //- The size of the current stack
-        Foam::label size() const;
+        label size() const;
 
         //- writeData member function required by regIOobject
-        virtual bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream& os) const;
 
         //- Write as uncompressed ASCII, using given format
         virtual bool writeObject
@@ -224,269 +281,11 @@ public:
 
 };
 
-
-/*---------------------------------------------------------------------------*\
-                   Class profiling::Information Declaration
-\*---------------------------------------------------------------------------*/
-
-class profiling::Information
-{
-    // Private Static Data Members
-
-        //- Counter to generate the ids
-        static label nextId_;
-
-        //- get a new ID and update the counter
-        static label getNextId();
-
-        //- raise the next possible ID (to avoid ID-clashes during reading)
-        static void raiseID(label maxVal);
-
-
-    // Private Data Members
-
-        //- Unique id to identify it
-        const label id_;
-
-        //- What this timer does
-        const string description_;
-
-        //- Pointer to the parent object (or self for top-level)
-        Information* parent_;
-
-        //- Nr of times this was called
-        long calls_;
-
-        //- Total time spent
-        scalar totalTime_;
-
-        //- Time spent in children
-        scalar childTime_;
-
-        //- Max memory usage on call.
-        //  Only valid when the calling profiling has memInfo active.
-        mutable int maxMem_;
-
-        //- Is this information currently on the stack?
-        mutable bool onStack_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        Information(const Information&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const Information&) = delete;
-
-
-protected:
-
-    // Friendship
-
-        friend class profiling;
-
-
-    // Constructors
-
-        //- Construct null - only the master-element
-        Information();
-
-
-    // Member Functions
-
-        //- Mark as being on the stack
-        void push() const;
-
-        //- Mark as being off the stack
-        void pop() const;
-
-
-        //- Write the profiling times, optionally with additional values
-        //  Use dictionary format.
-        Ostream& write
-        (
-            Ostream& os,
-            const bool offset = false,
-            const scalar& elapsedTime = 0,
-            const scalar& childTime = 0
-        ) const;
-
-public:
-
-
-    // Constructors
-
-        //- Construct from components
-        Information(Information* parent, const string& descr);
-
-
-    //- Destructor
-    ~Information();
-
-
-    // Member Functions
-
-    // Access
-
-        inline label id() const
-        {
-            return id_;
-        }
-
-
-        inline const string& description() const
-        {
-            return description_;
-        }
-
-
-        inline Information& parent() const
-        {
-            return *parent_;
-        }
-
-
-        inline label calls() const
-        {
-            return calls_;
-        }
-
-
-        inline const scalar& totalTime() const
-        {
-            return totalTime_;
-        }
-
-
-        inline const scalar& childTime() const
-        {
-            return childTime_;
-        }
-
-
-        inline int maxMem() const
-        {
-            return maxMem_;
-        }
-
-
-        inline bool onStack() const
-        {
-            return onStack_;
-        }
-
-
-    // Edit
-
-        //- Update it with a new timing information
-        void update(const scalar& elapsedTime);
-
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream&, const Information&);
-
-};
-
-
-/*---------------------------------------------------------------------------*\
-                      Class profiling::Trigger Declaration
-\*---------------------------------------------------------------------------*/
-
-class profiling::Trigger
-{
-    // Private Data Members
-
-        //- The timer for the profiling information
-        clockTime clock_;
-
-        //- The profiling information
-        Information *ptr_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        Trigger(const Trigger&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const Trigger&) = delete;
-
-
-public:
-
-    // Constructors
-
-        //- Construct profiling with given description.
-        //  Descriptions beginning with 'application::' are reserved for
-        //  internal use.
-        Trigger(const char* name);
-
-        //- Construct profiling with given description.
-        //  Descriptions beginning with 'application::' are reserved for
-        //  internal use.
-        Trigger(const string& name);
-
-
-    //- Destructor
-    ~Trigger();
-
-
-    // Member Functions
-
-    // Access
-
-        //- True if the triggered profiling is active
-        bool running() const;
-
-
-    // Edit
-
-        //- Stop triggered profiling
-        void stop();
-
-};
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Macros
-
-//- Define profiling with specified name and description string
-//  This is required if the description contains space, colons etc.
-//  \sa addProfiling0
-//  \sa endProfiling
-#define addProfiling(name,descr)                                              \
-    ::Foam::profiling::Trigger  profilingTriggerFor##name(descr)
-
-//- Define profiling with specified name and description correspond to the name
-//  \sa addProfiling
-//  \sa endProfiling
-#define addProfiling0(name)                                                    \
-    ::Foam::profiling::Trigger  profilingTriggerFor##name(#name)
-
-//- Define profiling with specified name and description correspond to the
-//  compiler-defined function name string:
-//  \sa addProfiling
-//  \sa endProfiling
-#ifdef __GNUC__
-    #define addProfilingInFunction(name)                                       \
-    ::Foam::profiling::Trigger  profilingTriggerFor##name(__PRETTY_FUNCTION__)
-#else
-    #define addProfilingInFunction(name)                                       \
-    ::Foam::profiling::Trigger  profilingTriggerFor##name(__func__)
-#endif
-
-//- Remove profiling with specified name
-//  \sa addProfiling
-//  \sa addProfiling0
-#define endProfiling(name)      profilingTriggerFor##name.stop()
-
 
 #endif
 

@@ -25,6 +25,7 @@ boundaryField
     wallPanel_top
     {
         type            externalWallHeatFluxTemperature;
+        mode            coefficient;
         Ta              uniform 294.75;
         h               uniform 10;
         kappaMethod     solidThermo;
@@ -46,8 +47,8 @@ boundaryField
         type                compressible::turbulentTemperatureRadCoupledMixed;
         neighbourField      T;
         kappaMethod         solidThermo;
-        QrNbr               Qr;
-        Qr                  none;
+        qrNbr               qr;
+        qr                  none;
         value               $internalField;
     }
 }

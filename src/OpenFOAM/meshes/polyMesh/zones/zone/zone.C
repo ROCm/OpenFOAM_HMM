@@ -242,7 +242,7 @@ void Foam::zone::write(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const zone& z)
 {
     z.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const zone& z");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

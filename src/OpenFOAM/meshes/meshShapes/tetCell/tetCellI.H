@@ -71,7 +71,7 @@ inline Foam::triFace Foam::tetCell::face(const label facei) const
     static const label c[] = {3, 2, 3, 1};
 
     #ifdef FULLDEBUG
-    if (facei >= 4)
+    if (facei < 0 || facei >= 4)
     {
         FatalErrorInFunction
             << "index out of range 0 -> 3. facei = " << facei
@@ -96,7 +96,7 @@ inline Foam::label Foam::tetCell::edgeFace(const label edgeI) const
     static const label edgeFaces[6] = {2, 3, 1, 0, 0, 1};
 
     #ifdef FULLDEBUG
-    if (edgeI >= 6)
+    if (edgeI < 0 || edgeI >= 6)
     {
         FatalErrorInFunction
             << "edge index out of range 0 -> 5. edgeI = " << edgeI
@@ -127,14 +127,14 @@ inline Foam::label Foam::tetCell::edgeAdjacentFace
     };
 
     #ifdef FULLDEBUG
-    if (facei >= 4)
+    if (facei < 0 || facei >= 4)
     {
         FatalErrorInFunction
             << "face index out of range 0 -> 3. facei = " << facei
             << abort(FatalError);
     }
 
-    if (edgeI >= 6)
+    if (edgeI < 0 || edgeI >= 6)
     {
         FatalErrorInFunction
             << "edge index out of range 0 -> 5. edgeI = " << edgeI
@@ -155,7 +155,7 @@ inline Foam::edge Foam::tetCell::tetEdge(const label edgeI) const
     static const label end[] = {1, 2, 3, 1, 2, 2};
 
     #ifdef FULLDEBUG
-    if (edgeI >= 6)
+    if (edgeI < 0 || edgeI >= 6)
     {
         FatalErrorInFunction
             << "index out of range 0 -> 5. edgeI = " << edgeI
@@ -167,7 +167,7 @@ inline Foam::edge Foam::tetCell::tetEdge(const label edgeI) const
 }
 
 
-inline Foam::tetPointRef Foam::tetCell::tet(const pointField& points) const
+inline Foam::tetPointRef Foam::tetCell::tet(const UList<point>& points) const
 {
     return tetPointRef
     (

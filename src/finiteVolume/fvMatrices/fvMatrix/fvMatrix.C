@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -508,6 +508,32 @@ void Foam::fvMatrix<Type>::setReference
 
 
 template<class Type>
+void Foam::fvMatrix<Type>::setReferences
+(
+    const labelList& cellLabels,
+    const UList<Type>& values,
+    const bool forceReference
+)
+{
+    bool needRef = (forceReference || psi_.needReference());
+
+    if (needRef)
+    {
+        forAll(cellLabels, celli)
+        {
+            label cellId = cellLabels[celli];
+            if (celli >= 0)
+            {
+                source()[cellId] += diag()[cellId]*values[celli];
+                diag()[cellId] += diag()[cellId];
+            }
+        }
+    }
+}
+
+
+
+template<class Type>
 void Foam::fvMatrix<Type>::relax(const scalar alpha)
 {
     if (alpha <= 0)
@@ -892,6 +918,8 @@ flux() const
     GeometricField<Type, fvsPatchField, surfaceMesh>& fieldFlux =
         tfieldFlux.ref();
 
+    fieldFlux.setOriented();
+
     for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
     {
         fieldFlux.primitiveFieldRef().replace
@@ -942,6 +970,20 @@ flux() const
     }
 
     return tfieldFlux;
+}
+
+
+template<class Type>
+const Foam::dictionary& Foam::fvMatrix<Type>::solverDict() const
+{
+    return psi_.mesh().solverDict
+    (
+        psi_.select
+        (
+            psi_.mesh().data::template lookupOrDefault<bool>
+            ("finalIteration", false)
+        )
+    );
 }
 
 
@@ -2385,7 +2427,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fvMatrix<Type>& fvm)
         << fvm.internalCoeffs_ << nl
         << fvm.boundaryCoeffs_ << endl;
 
-    os.check("Ostream& operator<<(Ostream&, fvMatrix<Type>&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }

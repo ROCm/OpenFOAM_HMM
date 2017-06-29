@@ -278,25 +278,25 @@ bool Foam::fileFormats::FIREMeshWriter::write(const fileName& meshName) const
     {
         const word ext = baseName.ext();
 
-        if (FIRECore::file3dExtensions.found(ext))
+        if (FIRECore::file3dExtensions.hasEnum(ext))
         {
             FIRECore::fileExt3d fireFileType = FIRECore::file3dExtensions[ext];
-            if (fireFileType == FIRECore::POLY_ASCII)
+            if (fireFileType == FIRECore::fileExt3d::POLY_ASCII)
             {
                 useBinary   = false;
                 useCompress = false;
             }
-            else if (fireFileType == FIRECore::POLY_BINARY)
+            else if (fireFileType == FIRECore::fileExt3d::POLY_BINARY)
             {
                 useBinary   = true;
                 useCompress = false;
             }
-            else if (fireFileType == FIRECore::POLY_ASCII_COMPRESSED)
+            else if (fireFileType == FIRECore::fileExt3d::POLY_ASCII_Z)
             {
                 useBinary   = false;
                 useCompress = true;
             }
-            else if (fireFileType == FIRECore::POLY_BINARY_COMPRESSED)
+            else if (fireFileType == FIRECore::fileExt3d::POLY_BINARY_Z)
             {
                 useBinary   = true;
                 useCompress = true;

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,6 +49,9 @@ Usage
       - \par -dict \<filename\>
         Specify alternative dictionary for the block mesh description.
 
+      - \par -sets
+        Write cellZones as cellSets too (for processing purposes)
+
 \*---------------------------------------------------------------------------*/
 
 #include "Time.H"
@@ -79,13 +82,22 @@ int main(int argc, char *argv[])
         "blockTopology",
         "write block edges and centres as .obj files"
     );
+    argList::addBoolOption
+    (
+        "noClean",
+        "keep the existing files in the polyMesh"
+    );
     argList::addOption
     (
         "dict",
         "file",
         "specify alternative dictionary for the blockMesh description"
     );
-
+    argList::addBoolOption
+    (
+        "sets",
+        "write cellZones as cellSets too (for processing purposes)"
+    );
     argList::addNote
     (
         "Block description\n"
@@ -164,6 +176,30 @@ int main(int argc, char *argv[])
         dictPath = runTime.system()/regionPath/dictName;
     }
 
+    if (!args.optionFound("noClean"))
+    {
+        fileName polyMeshPath
+        (
+            runTime.path()/runTime.constant()/regionPath/polyMesh::meshSubDir
+        );
+
+        if (exists(polyMeshPath))
+        {
+            if (exists(polyMeshPath/dictName))
+            {
+                Info<< "Not deleting polyMesh directory " << nl
+                    << "    " << polyMeshPath << nl
+                    << "    because it contains " << dictName << endl;
+            }
+            else
+            {
+                Info<< "Deleting polyMesh directory" << nl
+                    << "    " << polyMeshPath << endl;
+                rmDir(polyMeshPath);
+            }
+        }
+    }
+
     IOobject meshDictIO
     (
         dictPath,
@@ -186,7 +222,6 @@ int main(int argc, char *argv[])
 
     IOdictionary meshDict(meshDictIO);
     blockMesh blocks(meshDict, regionName);
-
 
     if (args.optionFound("blockTopology"))
     {
@@ -251,7 +286,6 @@ int main(int argc, char *argv[])
         defaultFacesType
     );
 
-
     // Read in a list of dictionaries for the merge patch pairs
     if (meshDict.found("mergePatchPairs"))
     {
@@ -271,8 +305,7 @@ int main(int argc, char *argv[])
     // Set any cellZones (note: cell labelling unaffected by above
     // mergePatchPairs)
 
-    label nZones = blocks.numZonedBlocks();
-
+    const label nZones = blocks.numZonedBlocks();
     if (nZones > 0)
     {
         Info<< nl << "Adding cell zones" << endl;
@@ -325,11 +358,7 @@ int main(int argc, char *argv[])
             }
         }
 
-
         List<cellZone*> cz(zoneMap.size());
-
-        Info<< nl << "Writing cell zones as cellSets" << endl;
-
         forAllConstIter(HashTable<label>, zoneMap, iter)
         {
             label zoneI = iter();
@@ -341,10 +370,6 @@ int main(int argc, char *argv[])
                 zoneI,
                 mesh.cellZones()
             );
-
-            // Write as cellSet for ease of processing
-            cellSet cset(mesh, iter.key(), zoneCells[zoneI].shrink());
-            cset.write();
         }
 
         mesh.pointZones().setSize(0);
@@ -356,7 +381,14 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
 
-    Info<< nl << "Writing polyMesh" << endl;
+    Info<< nl << "Writing polyMesh with "
+        << mesh.cellZones().size() << " cellZones";
+    if (args.optionFound("sets") && !mesh.cellZones().empty())
+    {
+        Info<< " (written as cellSets too)";
+    }
+    Info<< endl;
+
     mesh.removeFiles();
     if (!mesh.write())
     {
@@ -365,6 +397,14 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
+    if (args.optionFound("sets"))
+    {
+        forAll(mesh.cellZones(), zonei)
+        {
+            const cellZone& cz = mesh.cellZones()[zonei];
+            cellSet(mesh, cz.name(), cz).write();
+        }
+    }
 
     //
     // write some information

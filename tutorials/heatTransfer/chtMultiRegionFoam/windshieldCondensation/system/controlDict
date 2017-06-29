@@ -35,7 +35,7 @@ writeControl    adjustableRunTime;
 
 purgeWrite      0;
 
-writeFormat     binary;
+writeFormat     ascii;
 
 writePrecision  10;
 
@@ -49,7 +49,7 @@ runTimeModifiable true;
 
 adjustTimeStep  yes;
 
-maxDi           10;
+maxDi           10e3;
 
 functions
 {

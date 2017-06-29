@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::primaryRadiation
+    Foam::regionModels::surfaceFilmModels::primaryRadiation
 
 Description
     Radiation model whereby the radiative heat flux is mapped from the primary
@@ -61,7 +61,7 @@ private:
     // Private data
 
         //- Incident radiative flux mapped from  the primary region / [kg/s3]
-        volScalarField QinPrimary_;
+        volScalarField qinPrimary_;
 
 
     // Private member functions
@@ -84,7 +84,7 @@ public:
         //- Construct from surface film model and dictionary
         primaryRadiation
         (
-            surfaceFilmModel& owner,
+            surfaceFilmModel& film,
             const dictionary& dict
         );
 
@@ -101,7 +101,7 @@ public:
             virtual void correct();
 
             //- Return the radiation sensible enthalpy source
-            //  Also updates QrNet
+            //  Also updates qrNet
             virtual tmp<volScalarField> Shs();
 };
 

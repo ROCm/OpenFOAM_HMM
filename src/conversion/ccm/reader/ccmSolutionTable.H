@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,8 @@ Description
 #define ccmSolutionTable_H
 
 #include "SLList.H"
-#include "stringListOps.H"
 #include "Ostream.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,8 +39,16 @@ namespace Foam
 namespace ccm
 {
 
+class fieldEntry;
+class fieldTable;
+class solutionEntry;
+
+Ostream& operator<<(Ostream& os, const fieldEntry& entry);
+Ostream& operator<<(Ostream& os, const fieldTable& entry);
+Ostream& operator<<(Ostream& os, const solutionEntry& entry);
+
 /*---------------------------------------------------------------------------*\
-                      Class ccm::namesList Declaration
+                    Class Foam::ccm::namesList Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A linked-list that is searchable by the 'name()' of the items
@@ -50,8 +58,8 @@ class namesList
     public SLList<T>
 {
 public:
-    typedef typename SLList<T>::const_iterator const_iterator;
-    typedef typename SLList<T>::iterator iterator;
+    using const_iterator = typename SLList<T>::const_iterator;
+    using iterator = typename SLList<T>::iterator;
 
     // Constructors
 
@@ -65,12 +73,7 @@ public:
         //- Return true if a list element has a name that matches key
         bool found(const word& key) const
         {
-            for
-            (
-                const_iterator iter = SLList<T>::begin();
-                iter != SLList<T>::end();
-                ++iter
-            )
+            forAllConstIters(*this, iter)
             {
                 if (iter().name() == key)
                 {
@@ -85,12 +88,7 @@ public:
         //- Find a list element has a name matching key
         iterator find(const word& key)
         {
-            for
-            (
-                iterator iter = SLList<T>::begin();
-                iter != SLList<T>::end();
-                ++iter
-            )
+            forAllIters(*this, iter)
             {
                 if (iter().name() == key)
                 {
@@ -112,12 +110,7 @@ public:
             List<word> matched(SLList<T>::size());
 
             label matchI = 0;
-            for
-            (
-                const_iterator iter = SLList<T>::begin();
-                iter != SLList<T>::end();
-                ++iter
-            )
+            forAllConstIters(*this, iter)
             {
                 const word& name = iter().name();
 
@@ -139,7 +132,7 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                      Class ccm::fieldEntry Declaration
+                    Class Foam::ccm::fieldEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A ccm field entry with short name, name, maxId and type
@@ -224,15 +217,6 @@ public:
     // Edit
 
         //- Set the field units
-        void units(const char* units)
-        {
-            if (units && *units)
-            {
-                units_ = units;
-            }
-        }
-
-        //- Set the field units
         void units(const std::string& units)
         {
             if (!units.empty())
@@ -279,8 +263,9 @@ public:
 
 };
 
+
 /*---------------------------------------------------------------------------*\
-                    Class ccm::solutionEntry Declaration
+                  Class Foam::ccm::solutionEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A ccm solution entry with name, iteration and time
@@ -306,8 +291,8 @@ public:
         solutionEntry
         (
             const word& name,
-            const label& iteration,
-            const scalar& timeValue = 0
+            const label iteration,
+            const scalar timeValue = 0
         )
         :
             name_(name),
@@ -355,7 +340,7 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
-                    Class ccm::solutionTable Declaration
+                  Class Foam::ccm::solutionTable Declaration
 \*---------------------------------------------------------------------------*/
 
 // Typedef: ccm::solutionTable
@@ -364,7 +349,7 @@ typedef namesList<solutionEntry> solutionTable;
 
 
 /*---------------------------------------------------------------------------*\
-                      Class ccm::fieldTable Declaration
+                    Class Foam::ccm::fieldTable Declaration
 \*---------------------------------------------------------------------------*/
 
 //- A list of the available fields
@@ -382,15 +367,16 @@ public:
             namesList<fieldEntry>()
         {}
 
+
     // Access
 
         //- The maximum cell Id referenced in the list
         label maxCellId() const
         {
             label maxId = 0;
-            forAllConstIter(namesList<fieldEntry>, *this, iter)
+            forAllConstIters(*this, iter)
             {
-                label currMax = (iter()).maxCellId();
+                const label currMax = iter().maxCellId();
 
                 if (maxId < currMax)
                 {
@@ -406,10 +392,9 @@ public:
         label maxFaceId() const
         {
             label maxId = 0;
-
-            forAllConstIter(namesList<fieldEntry>, *this, iter)
+            forAllConstIters(*this, iter)
             {
-                label currMax = (iter()).maxFaceId();
+                const label currMax = iter().maxFaceId();
 
                 if (maxId < currMax)
                 {

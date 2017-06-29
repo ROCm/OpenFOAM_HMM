@@ -92,11 +92,10 @@ void Foam::dynamicCode::checkSecurity
 
 Foam::word Foam::dynamicCode::libraryBaseName(const fileName& libPath)
 {
-    word libName(libPath.name(true));
-    libName.erase(0, 3);    // Remove leading 'lib' from name
+    word libName(libPath.nameLessExt());
+    libName.removeStart("lib");  // Remove leading 'lib' from name
     return libName;
 }
-
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -494,11 +493,7 @@ bool Foam::dynamicCode::copyOrCreateFiles(const bool verbose) const
 
 bool Foam::dynamicCode::wmakeLibso() const
 {
-    DynamicList<string> cmd(4);
-    cmd.append("wmake");
-    cmd.append("-s");
-    cmd.append("libso");
-    cmd.append(this->codePath());
+    stringList cmd{"wmake", "-s", "libso", this->codePath()};
 
     // NOTE: could also resolve wmake command explicitly
     //   cmd[0] = stringOps::expand("$WM_PROJECT_DIR/wmake/wmake");

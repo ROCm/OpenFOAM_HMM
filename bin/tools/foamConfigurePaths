@@ -139,11 +139,12 @@ _inlineSed()
     }
 
     grep -q "$regexp" "$file" && sed -i -e "$cmd" "$file" || { \
-        echo "Failed: $msg in $file"
+        echo "Failed: ${msg:-replacement} in $file"
         return 1
     }
 
-    echo "    $msg  ($file)"
+    [ -n "$msg" ] && echo "    $msg  ($file)"
+
     return 0
 }
 
@@ -166,7 +167,7 @@ replace()
         shift 2
 
         _inlineSed \
-            $file \
+            $file  \
             "$key=.*" \
             "$key=$val" \
             "Replaced $key setting by '$val'"
@@ -194,8 +195,13 @@ do
         _inlineSed \
             etc/bashrc \
             '\(.*BASH_SOURCE.*\)' \
-            '##\1' \
-            "Removed default FOAM_INST_DIR setting"
+            '## \1' \
+            "Remove default FOAM_INST_DIR setting" \
+        && _inlineSed \
+            etc/bashrc \
+            '\(.* && FOAM_INST_DIR\)' \
+            '## \1'
+
         _inlineSed \
             etc/bashrc \
             '^ *FOAM_INST_DIR=.*' \

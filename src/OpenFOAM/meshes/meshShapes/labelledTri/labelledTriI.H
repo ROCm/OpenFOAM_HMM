@@ -137,9 +137,7 @@ inline Foam::Istream& Foam::operator>>(Istream& is, labelledTri& t)
         is.read(reinterpret_cast<char*>(&t), sizeof(labelledTri));
     }
 
-    // Check state of Ostream
-    is.check("Istream& operator>>(Istream&, labelledTri&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -161,10 +159,7 @@ inline Foam::Ostream& Foam::operator<<(Ostream& os, const labelledTri& t)
         );
     }
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const labelledTri&)");
-
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

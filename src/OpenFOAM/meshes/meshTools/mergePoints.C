@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,32 +29,40 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
+template<class PointList>
 Foam::label Foam::mergePoints
 (
-    const UList<Type>& points,
+    const PointList& points,
     const scalar mergeTol,
     const bool verbose,
     labelList& pointMap,
-    const Type& origin
+    typename PointList::const_reference origin
 )
 {
-    // Create a old to new point mapping array
-    pointMap.setSize(points.size());
+    typedef typename PointList::value_type point_type;
+
+    const label nPoints = points.size();
+
+    // Create an old to new point mapping array
+    pointMap.setSize(nPoints);
     pointMap = -1;
 
-    if (points.empty())
+    if (!nPoints)
     {
         return 0;
     }
 
-    // Explicitly convert to Field to support various list types
-    tmp<Field<Type>> tPoints(new Field<Type>(points));
-
-    Type compareOrigin = origin;
-    if (origin == Type::max)
+    point_type compareOrigin = origin;
+    if (origin == point_type::max)
     {
-        compareOrigin = sum(tPoints())/points.size();
+        // Use average of input points to define a comparison origin.
+        // Same as sum(points)/nPoints, but handles different list types
+        compareOrigin = points[0];
+        for (label pointi=1; pointi < nPoints; ++pointi)
+        {
+            compareOrigin += points[pointi];
+        }
+        compareOrigin /= nPoints;
     }
 
     // We're comparing distance squared to origin first.
@@ -66,33 +74,31 @@ Foam::label Foam::mergePoints
     //     x^2+y^2+z^2 + 2*mergeTol*(x+z+y) + mergeTol^2*...
     // so the difference will be 2*mergeTol*(x+y+z)
 
-    const scalar mergeTolSqr = Foam::sqr(scalar(mergeTol));
+    const scalar mergeTolSqr = Foam::sqr(mergeTol);
 
     // Sort points by magSqr
-    const Field<Type> d(tPoints - compareOrigin);
-
-    List<scalar> magSqrD(d.size());
-    forAll(d, pointi)
+    List<scalar> magSqrDist(nPoints);
+    forAll(points, pointi)
     {
-        magSqrD[pointi] = magSqr(d[pointi]);
+        magSqrDist[pointi] = magSqr(points[pointi] - compareOrigin);
     }
     labelList order;
-    sortedOrder(magSqrD, order);
+    Foam::sortedOrder(magSqrDist, order);
 
 
-    Field<scalar> sortedTol(points.size());
+    Field<scalar> sortedTol(nPoints);
     forAll(order, sortI)
     {
-        label pointi = order[sortI];
+        const point_type& pt = points[order[sortI]];
 
-        // Convert to scalar precision
-        const point pt
-        (
-            scalar(d[pointi].x()),
-            scalar(d[pointi].y()),
-            scalar(d[pointi].z())
-        );
-        sortedTol[sortI] = 2*mergeTol*(mag(pt.x())+mag(pt.y())+mag(pt.z()));
+        // Use scalar precision
+        sortedTol[sortI] =
+            2*mergeTol*
+            (
+                mag(scalar(pt.x() - compareOrigin.x()))
+              + mag(scalar(pt.y() - compareOrigin.y()))
+              + mag(scalar(pt.z() - compareOrigin.z()))
+            );
     }
 
     label newPointi = 0;
@@ -101,12 +107,14 @@ Foam::label Foam::mergePoints
     label pointi = order[0];
     pointMap[pointi] = newPointi++;
 
-    for (label sortI = 1; sortI < order.size(); sortI++)
+    for (label sortI = 1; sortI < order.size(); ++sortI)
     {
         // Get original point index
-        label pointi = order[sortI];
-        const scalar mag2 = magSqrD[order[sortI]];
+        const label pointi = order[sortI];
+        const scalar mag2 = magSqrDist[order[sortI]];
+
         // Convert to scalar precision
+        // NOTE: not yet using point_type template parameter
         const point pt
         (
             scalar(points[pointi].x()),
@@ -122,11 +130,14 @@ Foam::label Foam::mergePoints
         (
             label prevSortI = sortI - 1;
             prevSortI >= 0
-         && (mag(magSqrD[order[prevSortI]] - mag2) <= sortedTol[sortI]);
-            prevSortI--
+         && (mag(magSqrDist[order[prevSortI]] - mag2) <= sortedTol[sortI]);
+            --prevSortI
         )
         {
-            label prevPointi = order[prevSortI];
+            const label prevPointi = order[prevSortI];
+
+            // Convert to scalar precision
+            // NOTE: not yet using point_type template parameter
             const point prevPt
             (
                 scalar(points[prevPointi].x()),
@@ -169,18 +180,18 @@ Foam::label Foam::mergePoints
 }
 
 
-template<class Type>
+template<class PointList>
 bool Foam::mergePoints
 (
-    const UList<Type>& points,
+    const PointList& points,
     const scalar mergeTol,
     const bool verbose,
     labelList& pointMap,
-    List<Type>& newPoints,
-    const Type& origin
+    List<typename PointList::value_type>& newPoints,
+    typename PointList::const_reference origin
 )
 {
-    label nUnique = mergePoints
+    const label nUnique = mergePoints
     (
         points,
         mergeTol,

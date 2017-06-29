@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,14 +58,16 @@ namespace Foam
 {
 
 // Forward declaration of classes
+class word;
+class wordRe;
 class Istream;
 class Ostream;
 
 // Forward declaration of friend functions and operators
 class string;
-Istream& operator>>(Istream&, string&);
-Ostream& operator<<(Ostream&, const string&);
-Ostream& operator<<(Ostream&, const std::string&);
+Istream& operator>>(Istream& is, string& s);
+Ostream& operator<<(Ostream& os, const string& s);
+Ostream& operator<<(Ostream& os, const std::string& s);
 
 
 /*---------------------------------------------------------------------------*\
@@ -76,6 +78,37 @@ class string
 :
     public std::string
 {
+protected:
+
+    // Protected Member Functions
+
+        //- Find position of a file extension dot, return npos on failure.
+        //  A wrapped version of find_last_of("./") with additional logic.
+        inline size_type find_ext() const;
+
+        //- Return file name extension (part after last .)
+        word ext() const;
+
+        //- Append a '.' and the ending.
+        //  The '.' and ending will not be added when the ending is empty,
+        //  or when the object was or ended with a '/'.
+        //
+        //  \return True if append occurred.
+        bool ext(const word& ending);
+
+        //- Return true if it has an extension or simply ends with a '.'
+        inline bool hasExt() const;
+
+        //- Return true if the extension is the same as the given ending.
+        bool hasExt(const word& ending) const;
+
+        //- Return true if the extension matches the given ending.
+        bool hasExt(const wordRe& ending) const;
+
+        //- Remove extension, returning true if string changed.
+        inline bool removeExt();
+
+
 public:
 
     // Static data members
@@ -94,7 +127,9 @@ public:
         hash()
         {}
 
-        inline unsigned operator()(const string&, unsigned seed = 0) const;
+        //- Hash for string.
+        //  Uses Foam::string instead of std::string for automatic conversions.
+        inline unsigned operator()(const string& str, unsigned seed = 0) const;
     };
 
 
@@ -109,7 +144,7 @@ public:
         //- Construct as copy of character array
         inline string(const char* str);
 
-        //- Construct as copy of specified number of characters
+        //- Construct as copy with a maximum number of characters
         inline string(const char* str, const size_type len);
 
         //- Construct from a single character
@@ -124,33 +159,33 @@ public:
         //- Count and return the number of a given character in the string
         size_type count(const char c) const;
 
-        //- Is this string type valid?
+        //- Does the string contain valid characters only?
         template<class String>
-        static inline bool valid(const string& str);
+        static inline bool valid(const std::string& str);
 
-        //- Does this string have particular meta-characters?
+        //- Does this string contain meta-characters?
         //  The meta characters can be optionally quoted.
         template<class String>
-        static inline bool meta(const string& str, const char quote = '\\');
+        static inline bool meta(const std::string& str, const char quote='\\');
 
         //- Strip invalid characters from the given string
         template<class String>
-        static inline bool stripInvalid(string& str);
+        static inline bool stripInvalid(std::string& str);
 
         //- Return a valid String from the given string
         template<class String>
-        static inline String validate(const string& str);
+        static inline String validate(const std::string& str);
 
         //- Return a String with quoted meta-characters from the given string
         template<class String>
         static inline string quotemeta
         (
-            const string& str,
+            const std::string& str,
             const char quote = '\\'
         );
 
         //- True when strings match literally
-        inline bool match(const std::string& str) const;
+        inline bool match(const std::string& text) const;
 
         //- Avoid masking the normal std::string replace
         using std::string::replace;
@@ -201,6 +236,14 @@ public:
         //- Return string with trailing character removed
         string removeTrailing(const char character) const;
 
+        //- Remove the given text from the start of the string.
+        //  Always true if the removal occurred or the given text is empty.
+        bool removeStart(const std::string& text);
+
+        //- Remove the given text from the end of the string.
+        //  Always true if the removal occurred or the given text is empty.
+        bool removeEnd(const std::string& text);
+
         //- True if the string starts with the given text.
         //  Always true if the given text is empty or if the string
         //  is identical to the given text.
@@ -214,14 +257,18 @@ public:
 
     // Member Operators
 
-        //- Return the sub-string from the i-th character for \a n characters
+        //- Match text
+        //  \return True when strings match literally.
+        inline bool operator()(const std::string& text) const;
+
+        //- Return sub-string from the i-th character for \a n characters
         inline string operator()
         (
             const size_type i,
             const size_type n
         ) const;
 
-        //- Return the sub-string from the first character for \a n characters
+        //- Return sub-string from the first character for \a n characters
         inline string operator()
         (
             const size_type n

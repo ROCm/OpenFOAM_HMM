@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,7 +64,7 @@ Foam::displacementSBRStressFvMotionSolver::displacementSBRStressFvMotionSolver
     const IOdictionary& dict
 )
 :
-    displacementMotionSolver(mesh, dict, dict.lookup("solver")),
+    displacementMotionSolver(mesh, dict, typeName),
     fvMotionSolver(mesh),
     cellDisplacement_
     (
@@ -186,7 +186,7 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
 
     volTensorField gradCd("gradCd", fvc::grad(cellDisplacement_));
 
-    Foam::solve
+    fvVectorMatrix TEqn
     (
         fvm::laplacian
         (
@@ -234,6 +234,8 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
         )
         */
     );
+
+    TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
 }
 
 

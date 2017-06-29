@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -185,7 +185,7 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
 
     volScalarField invT
     (
-        (1.0/(theta_.value()*this->delta()))*pow(flm_*fmm_, 1.0/8.0)
+        alpha*rho*(1.0/(theta_.value()*this->delta()))*pow(flm_*fmm_, 1.0/8.0)
     );
 
     volScalarField LM(L && M);
@@ -195,8 +195,8 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
         fvm::ddt(alpha, rho, flm_)
       + fvm::div(alphaRhoPhi, flm_)
      ==
-        alpha*rho*invT*LM
-      - fvm::Sp(alpha*rho*invT, flm_)
+        invT*LM
+      - fvm::Sp(invT, flm_)
       + fvOptions(alpha, rho, flm_)
     );
 
@@ -213,8 +213,8 @@ void dynamicLagrangian<BasicTurbulenceModel>::correct()
         fvm::ddt(alpha, rho, fmm_)
       + fvm::div(alphaRhoPhi, fmm_)
      ==
-        alpha*rho*invT*MM
-      - fvm::Sp(alpha*rho*invT, fmm_)
+        invT*MM
+      - fvm::Sp(invT, fmm_)
       + fvOptions(alpha, rho, fmm_)
     );
 

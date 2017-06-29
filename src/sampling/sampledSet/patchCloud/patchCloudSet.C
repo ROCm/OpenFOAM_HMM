@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ void Foam::patchCloudSet::calcSamples
 
     labelList patchFaces(sz);
     sz = 0;
-    treeBoundBox bb(point::max, point::min);
+    treeBoundBox bb(boundBox::invertedBox);
     forAllConstIter(labelHashSet, patchSet_, iter)
     {
         const polyPatch& pp = mesh().boundaryMesh()[iter.key()];
@@ -84,11 +84,8 @@ void Foam::patchCloudSet::calcSamples
             patchFaces[sz++] = pp.start()+i;
         }
 
-        // Do not do reduction.
-        const boundBox patchBb(pp.points(), pp.meshPoints(), false);
-
-        bb.min() = min(bb.min(), patchBb.min());
-        bb.max() = max(bb.max(), patchBb.max());
+        // Without reduction.
+        bb.add(pp.points(), pp.meshPoints());
     }
 
     // Not very random
@@ -97,8 +94,8 @@ void Foam::patchCloudSet::calcSamples
     bb = bb.extend(rndGen, 1e-4);
 
     // Make sure bb is 3D.
-    bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
-    bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    bb.min() -= point::uniform(ROOTVSMALL);
+    bb.max() += point::uniform(ROOTVSMALL);
 
 
     indexedOctree<treeDataFace> patchTree

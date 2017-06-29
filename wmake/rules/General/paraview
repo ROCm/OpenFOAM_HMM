@@ -1,0 +1,8 @@
+#-------------------------------*- makefile -*---------------------------------
+# paraview values
+
+# major.minor: eg, /path/paraview-5.0 -> 5.0
+#
+ParaView_MAJOR := $(shell echo $(ParaView_INCLUDE_DIR) | sed -e 's/^.*-//')
+
+#------------------------------------------------------------------------------

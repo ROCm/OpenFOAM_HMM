@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,31 +30,20 @@ License
 
 Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
 (
-    const dictionary& dict, const objectRegistry& obr
+    const dictionary& dict,
+    const objectRegistry& obr
 )
 {
-    if (debug)
+    const word rotType = dict.lookup("type");
+
+    auto cstrIter = objectRegistryConstructorTablePtr_->cfind(rotType);
+
+    if (!cstrIter.found())
     {
-        Pout<< "coordinateRotation::New(const dictionary&) : "
-            << "constructing coordinateRotation"
-            << endl;
-    }
-
-    word rotType = dict.lookup("type");
-
-    objectRegistryConstructorTable::iterator cstrIter =
-        objectRegistryConstructorTablePtr_->find(rotType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown coordinateRotation type "
-            << rotType << nl << nl
+        FatalIOErrorInFunction(dict)
+            << "Unknown coordinateRotation type " << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
-            << "[default: axes ]"
-            << dictionaryConstructorTablePtr_->sortedToc()
+            << objectRegistryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -67,32 +56,21 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     const dictionary& dict
 )
 {
-    if (debug)
+    const word rotType = dict.lookup("type");
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(rotType);
+
+    if (!cstrIter.found())
     {
-        Pout<< "coordinateRotation::New(const dictionary&) : "
-            << "constructing coordinateRotation"
-            << endl;
-    }
-
-    word rotType = dict.lookup("type");
-
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(rotType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown coordinateRotation type "
-            << rotType << nl << nl
+        FatalIOErrorInFunction(dict)
+            << "Unknown coordinateRotation type " << rotType << nl << nl
             << "Valid coordinateRotation types are :" <<  nl
-            << "[default: axes ]"
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
     return autoPtr<coordinateRotation>(cstrIter()(dict));
 }
+
 
 // ************************************************************************* //

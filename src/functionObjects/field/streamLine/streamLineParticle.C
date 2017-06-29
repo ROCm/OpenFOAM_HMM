@@ -148,12 +148,7 @@ Foam::streamLineParticle::streamLineParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "streamLineParticle::streamLineParticle"
-        "(const Cloud<streamLineParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -497,9 +492,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const streamLineParticle& p)
         << token::SPACE << p.sampledScalars_
         << token::SPACE << p.sampledVectors_;
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const streamLineParticle&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

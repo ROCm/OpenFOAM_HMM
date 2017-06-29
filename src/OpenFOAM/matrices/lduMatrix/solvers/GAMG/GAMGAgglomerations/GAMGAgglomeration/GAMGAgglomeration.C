@@ -307,7 +307,7 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         lduMeshConstructorTable::iterator cstrIter =
             lduMeshConstructorTablePtr_->find(agglomeratorType);
 
-        if (cstrIter == lduMeshConstructorTablePtr_->end())
+        if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown GAMGAgglomeration type "
@@ -408,7 +408,7 @@ Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
     geometryConstructorTable::iterator cstrIter =
         geometryConstructorTablePtr_->find(agglomeratorType);
 
-    if (cstrIter == geometryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGAgglomeration type "

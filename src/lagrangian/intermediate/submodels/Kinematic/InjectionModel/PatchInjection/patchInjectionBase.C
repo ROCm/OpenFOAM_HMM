@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ License
 #include "patchInjectionBase.H"
 #include "polyMesh.H"
 #include "SubField.H"
-#include "cachedRandom.H"
+#include "Random.H"
 #include "triPointRef.H"
 #include "volFields.H"
 #include "polyMeshTetDecomposition.H"
@@ -151,7 +151,7 @@ void Foam::patchInjectionBase::updateMesh(const polyMesh& mesh)
 void Foam::patchInjectionBase::setPositionAndCell
 (
     const fvMesh& mesh,
-    cachedRandom& rnd,
+    Random& rnd,
     vector& position,
     label& cellOwner,
     label& tetFacei,
@@ -201,29 +201,57 @@ void Foam::patchInjectionBase::setPositionAndCell
             // Position perturbed away from face (into domain)
             const scalar a = rnd.position(scalar(0.1), scalar(0.5));
             const vector& pc = mesh.cellCentres()[cellOwner];
-            const vector d = mag(pf - pc)*patchNormal_[facei];
+            const vector d =
+                mag((pf - pc) & patchNormal_[facei])*patchNormal_[facei];
 
             position = pf - a*d;
 
-            // The position is between the face and cell centre, which could
-            // be in any tet of the decomposed cell, so arbitrarily choose the
-            // first face of the cell as the tetFace and the first point after
-            // the base point on the face as the tetPt.  The tracking will pick
-            // the cell consistent with the motion in the first tracking step
-            //tetFaceI = mesh.cells()[cellOwner][0];
-            //tetPtI = 1;
+            // Try to find tetFacei and tetPti in the current position
+            mesh.findTetFacePt(cellOwner, position, tetFacei, tetPti);
 
-            //SAF: temporary fix for patchInjection.
-            // This function finds both cellOwner and tetFaceI. The particle
-            // was injected in a non-boundary cell and the tracking function
-            // could not find the cellOwner
-            mesh.findCellFacePt
-            (
-                position,
-                cellOwner,
-                tetFacei,
-                tetPti
-            );
+            // tetFacei and tetPti not found, check if the cell has changed
+            if (tetFacei == -1 ||tetPti == -1)
+            {
+                mesh.findCellFacePt(position, cellOwner, tetFacei, tetPti);
+            }
+
+            // Both searches failed, choose a random position within
+            // the original cell
+            if (tetFacei == -1 ||tetPti == -1)
+            {
+                // Reset cellOwner
+                cellOwner = cellOwners_[facei];
+                const scalarField& V = mesh.V();
+
+                // Construct cell tet indices
+                const List<tetIndices> cellTetIs =
+                    polyMeshTetDecomposition::cellTetIndices(mesh, cellOwner);
+
+                // Construct cell tet volume fractions
+                scalarList cTetVFrac(cellTetIs.size(), 0.0);
+                for (label teti=1; teti<cellTetIs.size()-1; teti++)
+                {
+                    cTetVFrac[teti] =
+                        cTetVFrac[teti-1]
+                      + cellTetIs[teti].tet(mesh).mag()/V[cellOwner];
+                }
+                cTetVFrac.last() = 1;
+
+                // Set new particle position
+                const scalar volFrac = rnd.sample01<scalar>();
+                label teti = 0;
+                forAll(cTetVFrac, vfI)
+                {
+                    if (cTetVFrac[vfI] > volFrac)
+                    {
+                        teti = vfI;
+                        break;
+                    }
+                }
+                position = cellTetIs[teti].tet(mesh).randomPoint(rnd);
+                tetFacei = cellTetIs[teti].face();
+                tetPti = cellTetIs[teti].tetPt();
+            }
         }
         else
         {

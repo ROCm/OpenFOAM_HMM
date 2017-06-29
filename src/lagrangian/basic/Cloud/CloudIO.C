@@ -262,9 +262,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Cloud<ParticleType>& pc)
 {
     pc.writeData(os);
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const Cloud<ParticleType>&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

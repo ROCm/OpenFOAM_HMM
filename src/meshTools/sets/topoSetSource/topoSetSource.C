@@ -80,7 +80,7 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(topoSetSourceType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown topoSetSource type " << topoSetSourceType
@@ -104,7 +104,7 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
     istreamConstructorTable::iterator cstrIter =
         istreamConstructorTablePtr_->find(topoSetSourceType);
 
-    if (cstrIter == istreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown topoSetSource type " << topoSetSourceType

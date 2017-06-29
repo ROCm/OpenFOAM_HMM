@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,9 @@ Class
     Foam::nullObject
 
 Description
-    Singleton null-object class and instance
+    Singleton null-object class and instance.
+    It occupies enough space to reinterpret its content as a class with
+    a null pointer for its content.
 
 SourceFiles
     nullObjectI.H
@@ -47,20 +49,41 @@ namespace Foam
 
 class NullObject
 {
+    //- Ensure it occupies enough space to reinterpret_cast to a class
+    //  having some member data
+    const union
+    {
+        void* ptr;
+        unsigned long val;
+    } null;
+
     //- Private constructor
     NullObject()
+    :
+        null{nullptr}
     {}
 
     //- Disallow default bitwise copy construct
-    NullObject(const NullObject&);
+    NullObject(const NullObject&) = delete;
 
     //- Disallow default bitwise assignment
-    void operator=(const NullObject&);
+    void operator=(const NullObject&) = delete;
 
 public:
-
     //- The unique null object
     static const NullObject nullObject;
+
+    //- A nullptr pointer content
+    inline const void* pointer() const
+    {
+        return null.ptr;
+    }
+
+    //- A zero value content
+    inline unsigned long value() const
+    {
+        return null.val;
+    }
 };
 
 

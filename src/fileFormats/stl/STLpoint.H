@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::STLpoint
 
 Description
-    A vertex point representation for STL files.
+    A vertex point or facet normal representation for STL files.
 
 \*---------------------------------------------------------------------------*/
 
@@ -34,7 +34,6 @@ Description
 
 #include "point.H"
 #include "floatVector.H"
-#include "Istream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +46,7 @@ namespace Foam
 
 class STLpoint
 :
-    public Vector<float>
+    public floatVector
 {
 
 public:
@@ -58,22 +57,28 @@ public:
         inline STLpoint()
         {}
 
-        //- Construct from components
+        //- Construct from single-precision point
+        inline STLpoint(const Vector<float>& p)
+        :
+            floatVector(p)
+        {}
+
+        //- Construct from double-precision point
+        inline STLpoint(const Vector<double>& p)
+        :
+            floatVector(float(p.x()), float(p.y()), float(p.z()))
+        {}
+
+        //- Construct from single-precision components
         inline STLpoint(float x, float y, float z)
         :
-            Vector<float>(x, y, z)
+            floatVector(x, y, z)
         {}
 
-        //- Construct from point
-        inline STLpoint(const point& pt)
+        //- Construct from double-precision components
+        inline STLpoint(double x, double y, double z)
         :
-            Vector<float>(float(pt.x()), float(pt.y()), float(pt.z()))
-        {}
-
-        //- Construct from istream
-        inline STLpoint(Istream& is)
-        :
-            Vector<float>(is)
+            floatVector(float(x), float(y), float(z))
         {}
 
 

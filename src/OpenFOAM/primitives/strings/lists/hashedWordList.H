@@ -47,8 +47,8 @@ namespace Foam
 class hashedWordList;
 
 // Forward declaration of friend functions and operators
-Istream& operator>>(Istream&, hashedWordList&);
-Ostream& operator<<(Ostream&, const hashedWordList&);
+Istream& operator>>(Istream& is, hashedWordList& lst);
+Ostream& operator<<(Ostream& os, const hashedWordList& lst);
 
 
 /*---------------------------------------------------------------------------*\
@@ -62,7 +62,7 @@ class hashedWordList
     // Private data
 
         //- Hash of words/indices
-        mutable HashTable<label,word> indices_;
+        mutable HashTable<label> indices_;
 
 
     // Private Member Functions
@@ -97,7 +97,7 @@ public:
         );
 
         //- Construct from an initializer list
-        inline hashedWordList(std::initializer_list<word>);
+        inline hashedWordList(std::initializer_list<word> lst);
 
         //- Construct from the word keys of any HashTable, sorting immediately.
         //  This also handles a wordHashSet, which is derived from a HashTable.
@@ -105,7 +105,7 @@ public:
         template<class AnyType, class AnyHash>
         explicit inline hashedWordList
         (
-            const HashTable<AnyType, word, AnyHash>& h
+            const HashTable<AnyType, word, AnyHash>& tbl
         );
 
         //- Construct from number and list of words,
@@ -122,7 +122,7 @@ public:
         hashedWordList(const char** lst, const bool removeDuplicates=false);
 
         //- Construct from Istream
-        hashedWordList(Istream&);
+        hashedWordList(Istream& is);
 
 
     // Member Functions
@@ -141,7 +141,7 @@ public:
         inline bool contains(const word& name) const;
 
         //- Return the hash of words/indices for inspection
-        inline const HashTable<label,word>& lookup() const;
+        inline const HashTable<label>& lookup() const;
 
         //- Transfer the contents of the argument List into this list
         //  and annul the argument list,
@@ -161,26 +161,33 @@ public:
 
     // Member Operators
 
-        //- Assignment operator from list of words
-        inline void operator=(const UList<word>& lst);
-
-        //- Assignment operator from initializer list
-        inline void operator=(std::initializer_list<word> lst);
-
-        //- Assignment operator.
-        inline void operator=(const hashedWordList& lst);
-
         //- Return name corresponding to specified index
         inline const word& operator[](const label index) const;
 
-        //- Return index corresponding to specified name
+        //- Return index corresponding to specified name, or -1 on failure
         inline label operator[](const word& name) const;
+
+        //- Does the list contain the specified name - same as found.
+        //  Makes hashedWordList suitable as a unary predicate.
+        inline bool operator()(const word& name) const;
+
+
+      // Assignment
+
+        //- Assignment operator from list of words. Rehashes the indices.
+        inline void operator=(const UList<word>& lst);
+
+        //- Assignment operator from initializer list. Rehashes the indices.
+        inline void operator=(std::initializer_list<word> lst);
+
+        //- Assignment operator. Rehashes the indices.
+        inline void operator=(const hashedWordList& lst);
 
 
     // Istream operators
 
-        friend Istream& operator>>(Istream&, hashedWordList&);
-        friend Ostream& operator<<(Ostream&, const hashedWordList&);
+        friend Istream& operator>>(Istream& is, hashedWordList& lst);
+        friend Ostream& operator<<(Ostream& os, const hashedWordList& lst);
 };
 
 

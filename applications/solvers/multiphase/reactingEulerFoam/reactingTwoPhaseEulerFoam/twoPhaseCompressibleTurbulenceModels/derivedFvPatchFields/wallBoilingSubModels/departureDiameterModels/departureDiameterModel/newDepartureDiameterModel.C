@@ -41,7 +41,7 @@ Foam::wallBoilingModels::departureDiameterModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(departureDiameterModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown departureDiameterModelType type "

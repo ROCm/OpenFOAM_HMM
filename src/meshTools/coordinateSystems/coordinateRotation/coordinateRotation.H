@@ -123,7 +123,8 @@ public:
         //- Select constructed from dictionary and objectRegistry
         static autoPtr<coordinateRotation> New
         (
-            const dictionary& dict, const objectRegistry& obr
+            const dictionary& dict,
+            const objectRegistry& obr
         );
 
         //- Select constructed from dictionary
@@ -216,8 +217,8 @@ public:
 
     // Write
 
-            //- Write
-            virtual void write(Ostream&) const = 0;
+        //- Write coordinateRotation as e1,e2,e3 vectors
+        virtual void write(Ostream& os) const;
 
 };
 

@@ -45,7 +45,7 @@ Description
 #include "timeSelector.H"
 #include "OFstream.H"
 #include "passiveParticleCloud.H"
-
+#include "labelPairHashes.H"
 #include "SortableList.H"
 #include "IOobjectList.H"
 #include "PtrList.H"
@@ -133,8 +133,6 @@ int main(int argc, char *argv[])
     fileName vtkPath(runTime.path()/"VTK");
     mkDir(vtkPath);
 
-    typedef HashTable<label, labelPair, labelPair::Hash<>> trackTableType;
-
     forAll(timeDirs, timeI)
     {
         runTime.setTime(timeDirs[timeI], timeI);
@@ -168,13 +166,14 @@ int main(int argc, char *argv[])
         label nTracks = 0;
 
         {
-            trackTableType trackTable;
+            labelPairLookup trackTable;
+
             forAll(particles, i)
             {
                 const label origProc = particles[i].origProc();
                 const label origId = particles[i].origId();
 
-                const trackTableType::const_iterator& iter =
+                labelPairLookup::const_iterator iter =
                     trackTable.find(labelPair(origProc, origId));
 
                 if (iter == trackTable.end())

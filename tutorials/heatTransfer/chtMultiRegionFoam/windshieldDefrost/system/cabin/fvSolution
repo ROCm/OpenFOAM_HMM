@@ -66,6 +66,8 @@ PIMPLE
     momentumPredictor no;
     nCorrectors     1;
     nNonOrthogonalCorrectors 0;
+    pRefCell    0;
+    pRefValue   1e5;
 }
 
 relaxationFactors

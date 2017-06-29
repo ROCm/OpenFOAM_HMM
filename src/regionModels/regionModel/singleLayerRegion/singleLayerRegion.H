@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::singleLayerRegion
+    Foam::regionModels::singleLayerRegion
 
 Description
     Base class for single layer region models

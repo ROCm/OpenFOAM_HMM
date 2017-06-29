@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,8 @@ Description
         // Fields to be sampled
         fields          (p U);
 
-        // Interpolation scheme to use
+        // Interpolation scheme to use (only used if interpolate=true for
+        // the surfaces below)
         interpolationScheme cell;
 
         // Output surface format
@@ -58,7 +59,12 @@ Description
                 type        sampledTriSurfaceMesh;
                 surface     f0surf.obj;
                 source      cells;
+
+                // Optional: keep original regions
                 keepIds     true;
+
+                // Optional: generate values on points instead of faces
+                interpolate true;
             }
         );
     }

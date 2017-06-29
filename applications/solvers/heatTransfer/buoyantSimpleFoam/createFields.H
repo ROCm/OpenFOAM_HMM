@@ -88,3 +88,26 @@ dimensionedScalar totalVolume = sum(mesh.V());
 
 #include "createMRF.H"
 #include "createRadiationModel.H"
+
+dimensionedScalar rhoMax
+(
+    dimensionedScalar::lookupOrDefault
+    (
+        "rhoMax",
+        simple.dict(),
+        dimDensity,
+        GREAT
+    )
+);
+
+dimensionedScalar rhoMin
+(
+    dimensionedScalar::lookupOrDefault
+    (
+        "rhoMin",
+        simple.dict(),
+        dimDensity,
+        0
+    )
+);
+

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -27,11 +27,10 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::distributionModels::distributionModel>
-Foam::distributionModels::distributionModel::New
+Foam::autoPtr<Foam::distributionModel> Foam::distributionModel::New
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 {
     const word modelType(dict.lookup("type"));
@@ -41,7 +40,7 @@ Foam::distributionModels::distributionModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown distribution model type " << modelType << nl << nl

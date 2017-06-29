@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,7 +98,19 @@ public:
         backwardDdtScheme(const fvMesh& mesh, Istream& is)
         :
             ddtScheme<Type>(mesh, is)
-        {}
+        {
+            if (is.good() && !is.eof())
+            {
+                is >> this->ddtPhiCoeff_;
+            }
+
+            // Ensure the old-old-time cell volumes are available
+            // for moving meshes
+            if (mesh.moving())
+            {
+                mesh.V00();
+            }
+        }
 
 
     // Member Functions

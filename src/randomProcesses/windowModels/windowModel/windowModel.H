@@ -118,7 +118,7 @@ public:
 
         //- Return the windowed data
         template<class Type>
-        tmp<Field<Type> > apply
+        tmp<Field<Type>> apply
         (
             const Field<Type>& fld,
             const label windowI

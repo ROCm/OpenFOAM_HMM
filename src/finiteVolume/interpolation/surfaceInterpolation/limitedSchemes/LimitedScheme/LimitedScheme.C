@@ -37,18 +37,19 @@ void Foam::LimitedScheme<Type, Limiter, LimitFunc>::calcLimiter
     surfaceScalarField& limiterField
 ) const
 {
+    typedef GeometricField<typename Limiter::phiType, fvPatchField, volMesh>
+        VolFieldType;
+
+    typedef GeometricField<typename Limiter::gradPhiType, fvPatchField, volMesh>
+        GradVolFieldType;
+
     const fvMesh& mesh = this->mesh();
 
-    tmp<GeometricField<typename Limiter::phiType, fvPatchField, volMesh>>
-        tlPhi = LimitFunc<Type>()(phi);
+    tmp<VolFieldType> tlPhi = LimitFunc<Type>()(phi);
+    const VolFieldType& lPhi = tlPhi();
 
-    const GeometricField<typename Limiter::phiType, fvPatchField, volMesh>&
-        lPhi = tlPhi();
-
-    tmp<GeometricField<typename Limiter::gradPhiType, fvPatchField, volMesh>>
-        tgradc(fvc::grad(lPhi));
-    const GeometricField<typename Limiter::gradPhiType, fvPatchField, volMesh>&
-        gradc = tgradc();
+    tmp<GradVolFieldType> tgradc(fvc::grad(lPhi));
+    const GradVolFieldType& gradc = tgradc();
 
     const surfaceScalarField& CDweights = mesh.surfaceInterpolation::weights();
 
@@ -76,8 +77,7 @@ void Foam::LimitedScheme<Type, Limiter, LimitFunc>::calcLimiter
         );
     }
 
-    surfaceScalarField::Boundary& bLim =
-        limiterField.boundaryFieldRef();
+    surfaceScalarField::Boundary& bLim = limiterField.boundaryFieldRef();
 
     forAll(bLim, patchi)
     {
@@ -128,6 +128,8 @@ void Foam::LimitedScheme<Type, Limiter, LimitFunc>::calcLimiter
             pLim = 1.0;
         }
     }
+
+    limiterField.setOriented();
 }
 
 

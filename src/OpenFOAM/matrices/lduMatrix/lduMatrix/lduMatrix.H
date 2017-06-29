@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 #include "solverPerformance.H"
 #include "InfoProxy.H"
-#include "profiling.H"
+#include "profilingTrigger.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -107,6 +107,9 @@ public:
             //- Dictionary of controls
             dictionary controlDict_;
 
+            //- Default maximum number of iterations in the solver
+            static const label defaultMaxIter_;
+
             //- Maximum number of iterations in the solver
             label maxIter_;
 
@@ -119,7 +122,7 @@ public:
             //- Convergence tolerance relative to the initial
             scalar relTol_;
 
-            profiling::Trigger profiling_;
+            profilingTrigger profiling_;
 
         // Protected Member Functions
 
@@ -669,6 +672,7 @@ public:
             //  for matrix operations
             void initMatrixInterfaces
             (
+                const bool add,
                 const FieldField<Field, scalar>& interfaceCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
                 const scalarField& psiif,
@@ -679,6 +683,7 @@ public:
             //- Update interfaced interfaces for matrix operations
             void updateMatrixInterfaces
             (
+                const bool add,
                 const FieldField<Field, scalar>& interfaceCoeffs,
                 const lduInterfaceFieldPtrsList& interfaces,
                 const scalarField& psiif,

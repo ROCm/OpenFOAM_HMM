@@ -1,0 +1,10 @@
+sinclude $(GENERAL_RULES)/paraview
+
+EXE_INC = \
+    ${c++LESSWARN} \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(ParaView_INCLUDE_DIR) \
+    -I$(ParaView_INCLUDE_DIR)/vtkkwiml
+
+LIB_LIBS = \
+    $(GLIBS)

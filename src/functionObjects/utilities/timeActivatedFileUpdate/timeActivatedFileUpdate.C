@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,11 +50,13 @@ namespace functionObjects
 
 void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
 {
+    modified_ = false;
+
     label i = lastIndex_;
     while
     (
         i < timeVsFile_.size()-1
-     && timeVsFile_[i+1].first() < time_.value()
+     && timeVsFile_[i+1].first() < time_.value()+0.5*time_.deltaTValue()
     )
     {
         i++;
@@ -65,10 +67,15 @@ void Foam::functionObjects::timeActivatedFileUpdate::updateFile()
         Log << nl << type() << ": copying file" << nl << timeVsFile_[i].second()
             << nl << "to:" << nl << fileToUpdate_ << nl << endl;
 
-        fileName destFile(fileToUpdate_ + Foam::name(pid()));
-        cp(timeVsFile_[i].second(), destFile);
-        mv(destFile, fileToUpdate_);
+        if (Pstream::master() || time_.distributed())
+        {
+            // Slaves do not copy if running non-distributed
+            fileName destFile(fileToUpdate_ + Foam::name(pid()));
+            cp(timeVsFile_[i].second(), destFile);
+            mv(destFile, fileToUpdate_);
+        }
         lastIndex_ = i;
+        modified_ = true;
     }
 }
 
@@ -86,7 +93,8 @@ Foam::functionObjects::timeActivatedFileUpdate::timeActivatedFileUpdate
     time_(runTime),
     fileToUpdate_("unknown-fileToUpdate"),
     timeVsFile_(),
-    lastIndex_(-1)
+    lastIndex_(-1),
+    modified_(false)
 {
     read(dict);
 }
@@ -130,6 +138,7 @@ bool Foam::functionObjects::timeActivatedFileUpdate::read
             << timeVsFile_[i].second() << endl;
     }
 
+    // Copy starting files
     updateFile();
 
     return true;
@@ -147,6 +156,12 @@ bool Foam::functionObjects::timeActivatedFileUpdate::execute()
 bool Foam::functionObjects::timeActivatedFileUpdate::write()
 {
     return true;
+}
+
+
+bool Foam::functionObjects::timeActivatedFileUpdate::filesModified() const
+{
+    return modified_;
 }
 
 

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    foamVtkBase64Formatter
+    Foam::vtk::base64Formatter
 
 Description
     Inline base-64 encoded binary output.
@@ -33,51 +33,57 @@ Description
 #ifndef foamVtkBase64Formatter_H
 #define foamVtkBase64Formatter_H
 
+#include "foamVtkFormatter.H"
 #include "foamVtkBase64Layer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace vtk
+{
 
 /*---------------------------------------------------------------------------*\
-                   Class foamVtkBase64Formatter Declaration
+                       Class base64Formatter Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamVtkBase64Formatter
+class base64Formatter
 :
     public foamVtkBase64Layer
 {
     // Private Data Members
 
         static const char* name_;
-        static const char* encoding_;
+        static const outputOptions opts_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        foamVtkBase64Formatter(const foamVtkBase64Formatter&) = delete;
+        base64Formatter(const base64Formatter&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const foamVtkBase64Formatter&) = delete;
+        void operator=(const base64Formatter&) = delete;
+
 
 public:
 
     // Constructors
 
         //- Construct and attach to an output stream
-        foamVtkBase64Formatter(std::ostream& os);
+        base64Formatter(std::ostream& os);
 
 
     //- Destructor
-    virtual ~foamVtkBase64Formatter();
+    virtual ~base64Formatter();
 
 
     // Member Functions
 
+        //- The output is INLINE_BASE64.
+        virtual const outputOptions& opts() const;
+
         //- Name for the XML output type ("binary")
-        //  The lowercase version of the Legacy output type.
         virtual const char* name() const;
 
 
@@ -89,6 +95,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace vtk
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

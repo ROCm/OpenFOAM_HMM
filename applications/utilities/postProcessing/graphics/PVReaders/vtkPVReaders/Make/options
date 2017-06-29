@@ -1,7 +1,0 @@
-EXE_INC = \
-    ${c++LESSWARN} \
-    -I$(ParaView_INCLUDE_DIR) \
-    -I$(ParaView_INCLUDE_DIR)/vtkkwiml
-
-LIB_LIBS = \
-    $(GLIBS)

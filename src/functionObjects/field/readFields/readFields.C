@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,15 @@ Foam::functionObjects::readFields::readFields
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    fieldSet_()
+    fieldSet_(),
+    readOnStart_(true)
 {
     read(dict);
+
+    if (readOnStart_)
+    {
+        execute();
+    }
 }
 
 
@@ -69,6 +75,7 @@ bool Foam::functionObjects::readFields::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
 
     dict.lookup("fields") >> fieldSet_;
+    dict.readIfPresent("readOnStart", readOnStart_);
 
     return true;
 }

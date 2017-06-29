@@ -20,11 +20,11 @@
     const fileName pdfPath = runTime.path()/"pdf";
     mkDir(pdfPath);
 
-    cachedRandom rndGen(label(0), -1);
+    Random rndGen;
 
-    autoPtr<distributionModels::distributionModel> p
+    autoPtr<distributionModel> p
     (
-        distributionModels::distributionModel::New
+        distributionModel::New
         (
             pdfDictionary,
             rndGen
@@ -45,4 +45,3 @@
     }
 
     scalarField samples(nIntervals, 0);
-

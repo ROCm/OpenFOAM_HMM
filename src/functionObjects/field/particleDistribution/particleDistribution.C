@@ -61,7 +61,7 @@ Foam::functionObjects::particleDistribution::particleDistribution
     cloudName_("unknown-cloudName"),
     nameVsBinWidth_(),
     tagFieldName_("none"),
-    rndGen_(1234, -1),
+    rndGen_(),
     writerPtr_(nullptr)
 {
     read(dict);

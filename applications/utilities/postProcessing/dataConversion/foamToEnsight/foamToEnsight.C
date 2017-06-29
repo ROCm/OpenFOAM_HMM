@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,7 @@ Note
 
 #include "fvc.H"
 #include "volFields.H"
+#include "hashedWordList.H"
 
 #include "labelIOField.H"
 #include "scalarIOField.H"
@@ -172,8 +173,7 @@ int main(int argc, char *argv[])
     (
         "name",
         "subdir",
-        "define sub-directory name to use for ensight data "
-        "(default: 'EnSight')"
+        "sub-directory name for ensight output (default: 'EnSight')"
     );
     argList::addOption
     (
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
     );
 
     // The volume field types that we handle
-    const wordList volFieldTypes
+    const hashedWordList volFieldTypes
     {
         volScalarField::typeName,
         volVectorField::typeName,
@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    // default to binary output, unless otherwise specified
+    // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
         args.optionFound("ascii")
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
     }
 
     //
-    // general (case) output options
+    // General (case) output options
     //
     ensightCase::options caseOpts(format);
 
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 
 
     //
-    // output configuration (geometry related)
+    // Output configuration (geometry related)
     //
     ensightMesh::options writeOpts(format);
     writeOpts.noPatches(args.optionFound("noPatches"));
@@ -291,7 +291,7 @@ int main(int argc, char *argv[])
             << mesh.boundaryMesh()[0].name() << ")"
             << endl;
     }
-    meshSubsetHelper myMesh(mesh, meshSubsetHelper::ZONE, cellZoneName);
+    meshSubsetHelper meshRef(mesh, meshSubsetHelper::ZONE, cellZoneName);
 
     //
     // Open new ensight case file, initialize header etc.
@@ -305,19 +305,13 @@ int main(int argc, char *argv[])
 
 
     // Construct the Ensight mesh
-    ensightMesh ensMesh(myMesh.mesh(), writeOpts);
+    ensightMesh ensMesh(meshRef.mesh(), writeOpts);
 
     if (Pstream::master())
     {
         Info<< "Converting " << timeDirs.size() << " time steps" << nl;
         ensCase.printInfo(Info) << endl;
     }
-
-
-    // Set Time to the last time before looking for lagrangian objects
-    runTime.setTime(timeDirs.last(), timeDirs.size()-1);
-
-    IOobjectList objects(mesh, runTime.timeName());
 
     #include "checkMeshMoving.H"
     #include "findCloudFields.H"
@@ -330,6 +324,40 @@ int main(int argc, char *argv[])
     Info<< "Startup in "
         << timer.cpuTimeIncrement() << " s, "
         << mem.update().size() << " kB" << nl << endl;
+
+    // Get the list of supported classes/fields
+    HashTable<wordHashSet> usableObjects;
+    {
+        // Initially all possible objects that are available at the final time
+        IOobjectList objects(mesh, timeDirs.last().name());
+
+        // Categorize by classes, pre-filter on name (if requested)
+        usableObjects =
+        (
+            fieldPatterns.empty()
+          ? objects.classes()
+          : objects.classes(fieldPatterns)
+        );
+
+        // Limit to types that we explicitly handle
+        usableObjects.filterKeys(volFieldTypes);
+
+        // Force each field-type into existence (simplifies code logic
+        // and doesn't cost much) and simultaneously remove all
+        // "*_0" restart fields
+
+        for (auto fieldType : volFieldTypes)
+        {
+            usableObjects
+            (
+                fieldType
+            ).filterKeys
+            (
+                [](const word& k){ return k.endsWith("_0"); },
+                true  // prune
+            );
+        }
+    }
 
     // ignore special fields (_0 fields),
     // ignore fields we don't handle,
@@ -346,7 +374,7 @@ int main(int argc, char *argv[])
         polyMesh::readUpdateState meshState = mesh.readUpdate();
         if (meshState != polyMesh::UNCHANGED)
         {
-            myMesh.correct();
+            meshRef.correct();
             ensMesh.expire();
             ensMesh.correct();
         }
@@ -362,25 +390,22 @@ int main(int argc, char *argv[])
         // ~~~~~~~~~~~~~~~~~~~~~~
         Info<< "Write volume field (";
 
-        forAll(volFieldTypes, typei)
+        for (auto fieldType : volFieldTypes)
         {
-            const word& fieldType = volFieldTypes[typei];
-            wordList fieldNames = objects.names(fieldType);
+            // For convenience, just force each field-type into existence.
+            // This simplifies code logic and doesn't cost much at all.
+            wordHashSet& fieldNames = usableObjects(fieldType);
 
-            // Filter on name as required
-            if (!fieldPatterns.empty())
+            forAllIters(fieldNames, fieldIter)
             {
-                inplaceSubsetStrings(fieldPatterns, fieldNames);
-            }
-
-            forAll(fieldNames, fieldi)
-            {
-                const word& fieldName = fieldNames[fieldi];
+                const word& fieldName = fieldIter.key();
 
                 #include "checkData.H"
 
+                // Partially complete field?
                 if (!fieldsToUse[fieldName])
                 {
+                    fieldNames.erase(fieldIter);
                     continue;
                 }
 
@@ -404,7 +429,7 @@ int main(int argc, char *argv[])
                     volScalarField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<scalar>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -420,7 +445,7 @@ int main(int argc, char *argv[])
                     volVectorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<vector>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -436,7 +461,7 @@ int main(int argc, char *argv[])
                     volSphericalTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<sphericalTensor>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -452,7 +477,7 @@ int main(int argc, char *argv[])
                     volSymmTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<symmTensor>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -468,7 +493,7 @@ int main(int argc, char *argv[])
                     volTensorField vf(fieldObject, mesh);
                     wrote = ensightOutput::writeField<tensor>
                     (
-                        myMesh.interpolate(vf),
+                        meshRef.interpolate(vf),
                         ensMesh,
                         os,
                         nodeValues
@@ -493,7 +518,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<scalar>
                     (
-                        myMesh.interpolate<scalar>(df),
+                        meshRef.interpolate<scalar>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -517,7 +542,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<vector>
                     (
-                        myMesh.interpolate<vector>(df),
+                        meshRef.interpolate<vector>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -541,7 +566,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<sphericalTensor>
                     (
-                        myMesh.interpolate<sphericalTensor>(df),
+                        meshRef.interpolate<sphericalTensor>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -565,7 +590,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<symmTensor>
                     (
-                        myMesh.interpolate<symmTensor>(df),
+                        meshRef.interpolate<symmTensor>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -589,7 +614,7 @@ int main(int argc, char *argv[])
                     );
                     wrote = ensightOutput::writeField<tensor>
                     (
-                        myMesh.interpolate<tensor>(df),
+                        meshRef.interpolate<tensor>(df),
                         ensMesh,
                         os,
                         nodeValues
@@ -597,7 +622,8 @@ int main(int argc, char *argv[])
                 }
                 else
                 {
-                    // Do not currently handle this type - blacklist for the future.
+                    // Do not currently handle this type
+                    // - blacklist for the future.
                     fieldsToUse.set(fieldName, false);
                 }
 

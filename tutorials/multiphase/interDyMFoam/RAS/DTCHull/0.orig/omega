@@ -21,7 +21,6 @@ internalField   uniform 2;
 
 boundaryField
 {
-    //- Set patchGroups for constraint patches
     #includeEtc "caseDicts/setConstraintTypes"
 
     inlet
@@ -47,6 +46,7 @@ boundaryField
     hull
     {
         type            omegaWallFunction;
+        blended         true;
         value           $internalField;
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,6 +69,9 @@ protected:
 
         // Solution controls
 
+            //- Flag to indicate whether to solve for the flow
+            bool solveFlow_;
+
             //- Maximum number of PIMPLE correctors
             label nCorrPIMPLE_;
 
@@ -77,6 +80,10 @@ protected:
 
             //- Current PISO corrector
             label corrPISO_;
+
+            //- Flag to indicate whether to update density in SIMPLE
+            //  rather than PISO mode
+            bool SIMPLErho_;
 
             //- Flag to indicate whether to only solve turbulence on final iter
             bool turbOnFinalIterOnly_;
@@ -125,28 +132,35 @@ public:
             //- Current PISO corrector index
             inline label corrPISO() const;
 
+            //- Flag to indicate whether to update density in SIMPLE
+            //  rather than PISO mode
+            inline bool SIMPLErho() const;
+
 
         // Solution control
 
             //- PIMPLE loop
             virtual bool loop();
 
-            //- Pressure corrector loop
+            //- Pressure corrector loop control
             inline bool correct();
 
-            //- Helper function to identify when to store the intial residuals
+            //- Return true to store the intial residuals
             inline bool storeInitialResiduals() const;
 
-            //- Helper function to identify first PIMPLE (outer) iteration
+            //- Return true for first PIMPLE (outer) iteration
             inline bool firstIter() const;
 
-            //- Helper function to identify final PIMPLE (outer) iteration
+            //- Return true fore final PIMPLE (outer) iteration
             inline bool finalIter() const;
 
-            //- Helper function to identify final inner iteration
+            //- Return true for final inner iteration
             inline bool finalInnerIter() const;
 
-            //- Helper function to identify whether to solve for turbulence
+            //- Return true to solve for flow
+            inline bool solveFlow() const;
+
+            //- Return true to solve for turbulence
             inline bool turbCorr() const;
 };
 

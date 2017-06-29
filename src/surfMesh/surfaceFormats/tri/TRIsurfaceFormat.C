@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,13 +78,24 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 {
     this->clear();
 
-    // read in the values
+    // Read in the values
     TRIsurfaceFormatCore reader(filename);
 
-    // transfer points
-    this->storedPoints().transfer(reader.points());
+    // Get the map for stitched surface points
+    labelList pointMap;
+    const label nUniquePoints = reader.mergePointsMap(pointMap);
 
-    // retrieve the original zone information
+    const auto& readpts = reader.points();
+
+    // Assign points
+    pointField& pointLst = this->storedPoints();
+    pointLst.setSize(nUniquePoints);
+    forAll(readpts, pointi)
+    {
+        pointLst[pointMap[pointi]] = readpts[pointi];
+    }
+
+    // Retrieve the original zone information
     List<label> sizes(reader.sizes().xfer());
     List<label> zoneIds(reader.zoneIds().xfer());
 
@@ -93,16 +104,21 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 
     if (reader.sorted())
     {
-        // already sorted - generate directly
+        // Already sorted - generate directly
         forAll(faceLst, facei)
         {
             const label startPt = 3*facei;
-            faceLst[facei] = triFace(startPt, startPt+1, startPt+2);
+            faceLst[facei] = Face
+            {
+                pointMap[startPt],
+                pointMap[startPt+1],
+                pointMap[startPt+2]
+            };
         }
     }
     else
     {
-        // unsorted - determine the sorted order:
+        // Unsorted - determine the sorted order:
         // avoid SortableList since we discard the main list anyhow
         List<label> faceMap;
         sortedOrder(zoneIds, faceMap);
@@ -111,7 +127,12 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
         forAll(faceMap, facei)
         {
             const label startPt = 3*faceMap[facei];
-            faceLst[facei] = triFace(startPt, startPt+1, startPt+2);
+            faceLst[facei] = Face
+            {
+                pointMap[startPt],
+                pointMap[startPt+1],
+                pointMap[startPt+2]
+            };
         }
     }
     zoneIds.clear();
@@ -121,7 +142,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 
     this->addZones(sizes);
     this->addZonesToFaces(); // for labelledTri
-    this->stitchFaces(SMALL);
+
     return true;
 }
 

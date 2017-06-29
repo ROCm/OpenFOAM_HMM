@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,6 +86,14 @@ class FixedList
         T v_[Size];
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Write the FixedList with its compound type
+        void writeEntry(Ostream& os) const;
+
+
 public:
 
     //- Hashing function class.
@@ -117,29 +125,30 @@ public:
         inline FixedList();
 
         //- Construct from value
-        explicit inline FixedList(const T&);
+        explicit inline FixedList(const T& t);
 
         //- Construct from C-array
-        explicit inline FixedList(const T v[Size]);
+        explicit inline FixedList(const T lst[Size]);
 
-        //- Construct given start and end iterators
+        //- Construct given begin/end iterators
+        //  Uses std::distance when verifying the size.
         template<class InputIterator>
-        inline FixedList(InputIterator first, InputIterator last);
+        inline FixedList(InputIterator begIter, InputIterator endIter);
 
         //- Construct from an initializer list
-        inline FixedList(std::initializer_list<T>);
+        inline FixedList(std::initializer_list<T> lst);
 
         //- Construct from UList
-        explicit inline FixedList(const UList<T>&);
+        explicit inline FixedList(const UList<T>& lst);
 
         //- Construct from SLList
-        explicit inline FixedList(const SLList<T>&);
+        explicit inline FixedList(const SLList<T>& lst);
 
         //- Copy constructor
-        inline FixedList(const FixedList<T, Size>&);
+        inline FixedList(const FixedList<T, Size>& lst);
 
         //- Construct from Istream
-        FixedList(Istream&);
+        FixedList(Istream& is);
 
         //- Clone
         inline autoPtr<FixedList<T, Size>> clone() const;
@@ -197,45 +206,39 @@ public:
 
             //- Dummy resize function
             //  needed to make FixedList consistent with List
-            inline void resize(const label);
+            inline void resize(const label s);
 
             //- Dummy setSize function
             //  needed to make FixedList consistent with List
-            inline void setSize(const label);
+            inline void setSize(const label s);
 
             //- Copy (not transfer) the argument contents
             //  needed to make FixedList consistent with List
-            void transfer(const FixedList<T, Size>&);
-
-        //- Write the FixedList as a dictionary entry
-        void writeEntry(Ostream&) const;
-
-        //- Write the FixedList as a dictionary entry with keyword
-        void writeEntry(const word& keyword, Ostream&) const;
+            void transfer(const FixedList<T, Size>& lst);
 
 
     // Member operators
 
         //- Return element of FixedList
-        inline T& operator[](const label);
+        inline T& operator[](const label i);
 
         //- Return element of constant FixedList
-        inline const T& operator[](const label) const;
+        inline const T& operator[](const label i) const;
 
         //- Assignment to array operator. Takes linear time
-        inline void operator=(const T v[Size]);
+        inline void operator=(const T lst[Size]);
 
         //- Assignment to UList operator. Takes linear time
-        inline void operator=(const UList<T>&);
+        inline void operator=(const UList<T>& lst);
 
         //- Assignment to SLList operator. Takes linear time
-        inline void operator=(const SLList<T>&);
+        inline void operator=(const SLList<T>& lst);
 
         //- Assignment to an initializer list. Takes linear time
-        inline void operator=(std::initializer_list<T>);
+        inline void operator=(std::initializer_list<T> lst);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T&);
+        inline void operator=(const T& t);
 
 
     // STL type definitions
@@ -327,11 +330,11 @@ public:
         //- Return size of the largest possible FixedList
         inline label max_size() const;
 
-        //- Return true if the FixedList is empty (ie, size() is zero)
+        //- Always false since zero-sized FixedList is compile-time disabled.
         inline bool empty() const;
 
         //- Swap two FixedLists of the same type in constant time
-        void swap(FixedList<T, Size>&);
+        void swap(FixedList<T, Size>& a);
 
 
     // STL member operators
@@ -339,35 +342,48 @@ public:
         //- Equality operation on FixedLists of the same type.
         //  Returns true when the FixedLists are elementwise equal
         //  (using FixedList::value_type::operator==).  Takes linear time
-        bool operator==(const FixedList<T, Size>&) const;
+        bool operator==(const FixedList<T, Size>& a) const;
 
         //- The opposite of the equality operation. Takes linear time
-        bool operator!=(const FixedList<T, Size>&) const;
+        bool operator!=(const FixedList<T, Size>& a) const;
 
         //- Compare two FixedLists lexicographically. Takes linear time
-        bool operator<(const FixedList<T, Size>&) const;
+        bool operator<(const FixedList<T, Size>& a) const;
 
         //- Compare two FixedLists lexicographically. Takes linear time
-        bool operator>(const FixedList<T, Size>&) const;
+        bool operator>(const FixedList<T, Size>& a) const;
 
         //- Return true if !(a > b). Takes linear time
-        bool operator<=(const FixedList<T, Size>&) const;
+        bool operator<=(const FixedList<T, Size>& a) const;
 
         //- Return true if !(a < b). Takes linear time
-        bool operator>=(const FixedList<T, Size>&) const;
+        bool operator>=(const FixedList<T, Size>& a) const;
+
+
+    // Writing
+
+        //- Write the List as a dictionary entry with keyword
+        void writeEntry(const word& keyword, Ostream& os) const;
+
+        //- Write the List, with line-breaks in ASCII if the list length
+        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 
     // IOstream operators
 
         //- Read List from Istream, discarding contents of existing List
         friend Istream& operator>> <T, Size>
-        (Istream&, FixedList<T, Size>&);
+        (
+            Istream& is,
+            FixedList<T, Size>& L
+        );
 
-        //- Write FixedList to Ostream
+        //- Write List to Ostream, as per writeList() with shortListLen=10
         friend Ostream& operator<< <T, Size>
         (
-            Ostream&,
-            const FixedList<T, Size>&
+            Ostream& os,
+            const FixedList<T, Size>& L
         );
 };
 

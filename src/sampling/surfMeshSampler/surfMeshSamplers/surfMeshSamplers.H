@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Description
 
         // Sample at every time-step
         executeControl  timeStep;
-        executeInterval   1;
+        executeInterval 1;
 
         // Disable writing (or write at same frequency as fields)
         writeControl    none;
@@ -153,20 +153,20 @@ public:
 
     // Constructors
 
-        //- Construct from Time and dictionary
+        //- Construct from name, Time and dictionary
         surfMeshSamplers
         (
             const word& name,
-            const Time& time,
+            const Time& runTime,
             const dictionary& dict
         );
 
-        //- Construct for given objectRegistry and dictionary
+        //- Construct from name, objectRegistry and dictionary
         surfMeshSamplers
         (
             const word& name,
-            const objectRegistry&,
-            const dictionary&
+            const objectRegistry& obr,
+            const dictionary& dict
         );
 
 

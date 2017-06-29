@@ -50,9 +50,9 @@ class polyMesh;
 //- check edge connectivity
 label checkFireEdges
 (
-    const faceList&,
+    const faceList& faces,
     const labelListList& pointFaces,
-    const UList<point>& = UList<point>::null()
+    const UList<point>& points = UList<point>::null()
 );
 
 
@@ -60,12 +60,12 @@ label checkFireEdges
 label checkFireEdges
 (
     const faceList&,
-    const UList<point>& = UList<point>::null()
+    const UList<point>& points = UList<point>::null()
 );
 
 
 //- check edge connectivity
-label checkFireEdges(const polyMesh&);
+label checkFireEdges(const polyMesh& mesh);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

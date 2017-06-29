@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::injectionModelList
+    Foam::regionModels::surfaceFilmModels::injectionModelList
 
 Description
     List container for film injection models
@@ -79,12 +79,12 @@ public:
     // Constructors
 
         //- Construct null
-        injectionModelList(surfaceFilmModel& owner);
+        injectionModelList(surfaceFilmModel& film);
 
         //- Construct from type name, dictionary and surface film model
         injectionModelList
         (
-            surfaceFilmModel& owner,
+            surfaceFilmModel& film,
             const dictionary& dict
         );
 

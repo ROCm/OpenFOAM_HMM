@@ -60,7 +60,7 @@ Foam::phaseChangeTwoPhaseMixture::New
         componentsConstructorTablePtr_
             ->find(phaseChangeTwoPhaseMixtureTypeName);
 
-    if (cstrIter == componentsConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown phaseChangeTwoPhaseMixture type "

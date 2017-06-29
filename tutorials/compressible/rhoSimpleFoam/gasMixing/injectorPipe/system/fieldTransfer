@@ -1,0 +1,45 @@
+// -*- C++ -*-
+
+// ************************************************************************* //
+
+// Transcribe volume fields to surfaces.
+fieldTransfer
+{
+    type    surfMeshes;
+    libs    ("libsampling.so");
+    log     true;
+    writeControl    none;
+    createOnRead    true;
+    executeControl  timeStep;
+    executeInterval 1;
+
+    fields  (rho U tracer0);
+    derived (rhoU);
+
+    baseCfg
+    {
+        type        sampledTriSurfaceMesh;
+        source      cells;
+    }
+
+    surfaces
+    (
+        plane-0.25
+        {
+            $baseCfg
+            surface     plane-0.25.stl;
+        }
+        plane-0.45
+        {
+            $baseCfg
+            surface     plane-0.45.stl;
+        }
+        plane-0.55
+        {
+            $baseCfg
+            surface     plane-0.55.stl;
+        }
+    );
+}
+
+// ************************************************************************* //

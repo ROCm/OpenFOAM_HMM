@@ -138,9 +138,7 @@ public:
                 >> m.orientation_;
             is.readEnd("magnet");
 
-            // Check state of Istream
-            is.check("operator>>(Istream&, magnet&)");
-
+            is.check(FUNCTION_NAME);
             return is;
         }
 

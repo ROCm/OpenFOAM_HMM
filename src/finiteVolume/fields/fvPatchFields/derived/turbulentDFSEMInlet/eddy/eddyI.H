@@ -29,7 +29,7 @@ using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::eddy::epsi(cachedRandom& rndGen) const
+Foam::scalar Foam::eddy::epsi(Random& rndGen) const
 {
     // Random number with zero mean and unit variance
     return rndGen.sample01<scalar>() > 0.5 ? 1 : -1;
@@ -84,7 +84,7 @@ inline Foam::scalar Foam::eddy::c1() const
 }
 
 
-Foam::vector Foam::eddy::epsilon(cachedRandom& rndGen) const
+Foam::vector Foam::eddy::epsilon(Random& rndGen) const
 {
     return vector(epsi(rndGen), epsi(rndGen), epsi(rndGen));
 }

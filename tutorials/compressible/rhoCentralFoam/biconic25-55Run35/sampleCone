@@ -44,9 +44,9 @@ done
 
 sample $timeOpt
 SDIR=sets
-LSDIR=`ls $SDIR | head -1`
-EXAMPLE_FILE=`ls -1 $SDIR/${LSDIR}/* | head -1`
-FS=`basename $EXAMPLE_FILE | cut -d_ -f2-`
+LSDIR=$(ls $SDIR | head -1)
+EXAMPLE_FILE=$(ls -1 $SDIR/${LSDIR}/* | head -1)
+FS=$(basename $EXAMPLE_FILE | cut -d_ -f2-)
 
 for d in $SDIR/*
 do

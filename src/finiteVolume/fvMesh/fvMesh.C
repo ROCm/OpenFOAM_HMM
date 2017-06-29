@@ -2,7 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +37,7 @@ License
 #include "fvMeshMapper.H"
 #include "mapClouds.H"
 #include "MeshObject.H"
+#include "fvMatrix.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -267,7 +269,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
         InfoInFunction << "Constructing fvMesh from IOobject" << endl;
     }
 
-    // Check the existance of the cell volumes and read if present
+    // Check the existence of the cell volumes and read if present
     // and set the storage of V00
     if (isFile(time().timePath()/"V0"))
     {
@@ -288,7 +290,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
         V00();
     }
 
-    // Check the existance of the mesh fluxes, read if present and set the
+    // Check the existence of the mesh fluxes, read if present and set the
     // mesh to be moving
     if (isFile(time().timePath()/"meshPhi"))
     {
@@ -407,6 +409,50 @@ Foam::fvMesh::~fvMesh()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::SolverPerformance<Foam::scalar> Foam::fvMesh::solve
+(
+    fvMatrix<scalar>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::vector> Foam::fvMesh::solve
+(
+    fvMatrix<vector>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::symmTensor> Foam::fvMesh::solve
+(
+    fvMatrix<symmTensor>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
+
+Foam::SolverPerformance<Foam::tensor> Foam::fvMesh::solve
+(
+    fvMatrix<tensor>& m,
+    const dictionary& dict
+) const
+{
+    // Redirect to fvMatrix solver
+    return m.solveSegregatedOrCoupled(dict);
+}
+
 
 void Foam::fvMesh::addFvPatches
 (
@@ -819,6 +865,14 @@ bool Foam::fvMesh::writeObject
     if (phiPtr_)
     {
         ok = phiPtr_->write();
+        // NOTE: The old old time mesh phi might be necessary for certain
+        // solver smooth restart using second order time schemes.
+        //ok = phiPtr_->oldTime().write();
+    }
+    if (V0Ptr_ && V0Ptr_->writeOpt() == IOobject::AUTO_WRITE)
+    {
+        // For second order restarts we need to write V0
+        ok = V0Ptr_->write();
     }
 
     return ok && polyMesh::writeObject(fmt, ver, cmp);

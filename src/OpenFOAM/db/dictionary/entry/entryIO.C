@@ -73,7 +73,7 @@ bool Foam::entry::getKeyword(keyType& keyword, token& keywordToken, Istream& is)
 bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 {
     token keywordToken;
-    bool ok = getKeyword(keyword, keywordToken, is);
+    const bool ok = getKeyword(keyword, keywordToken, is);
 
     if (ok)
     {
@@ -106,13 +106,13 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 
 bool Foam::entry::New(dictionary& parentDict, Istream& is)
 {
-    is.fatalCheck("entry::New(const dictionary& parentDict, Istream&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     keyType keyword;
     token keyToken;
 
     // Get the next keyword and if a valid keyword return true
-    bool valid = getKeyword(keyword, keyToken, is);
+    const bool valid = getKeyword(keyword, keyToken, is);
 
     if (!valid)
     {
@@ -153,7 +153,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
     {
         if (keyword[0] == '#')      // ... Function entry
         {
-            word functionName = keyword(1, keyword.size()-1);
+            const word functionName = keyword(1, keyword.size()-1);
             if (disableFunctionEntries)
             {
                 return parentDict.add
@@ -195,7 +195,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
             if (nextToken == token::BEGIN_BLOCK)
             {
-                word varName = keyword(1, keyword.size()-1);
+                const word varName = keyword(1, keyword.size()-1);
 
                 // lookup the variable name in the given dictionary
                 const entry* ePtr = parentDict.lookupScopedEntryPtr
@@ -227,7 +227,14 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             }
             else
             {
-                parentDict.substituteScopedKeyword(keyword);
+                // Deal with duplicate entries (at least partially)
+                const bool mergeEntry =
+                (
+                    functionEntries::inputModeEntry::merge()
+                 || functionEntries::inputModeEntry::overwrite()
+                );
+
+                parentDict.substituteScopedKeyword(keyword, mergeEntry);
             }
 
             return true;
@@ -317,7 +324,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
 Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
-    is.fatalCheck("entry::New(Istream&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     keyType keyword;
 

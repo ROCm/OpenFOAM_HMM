@@ -58,7 +58,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
     );
 
     string line;
-    List<string> groups;
+    List<std::string> groups;
     while (is.good() && is.getLine(line).good())
     {
         if (ctnameRE.match(line, groups))
@@ -87,7 +87,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     const UList<surfZone>& zoneLst
 )
 {
-    word caseName = os.name().lessExt().name();
+    const word caseName = os.name().nameLessExt();
 
     os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
         << "! " << pointLst.size() << " points, " << nFaces << " faces" << nl

@@ -67,7 +67,7 @@ void Foam::cylindrical::init
         tensorField& R = Rptr_();
         forAll(cells, i)
         {
-            label celli = cells[i];
+            const label celli = cells[i];
             vector dir = cc[celli] - origin_;
             dir /= mag(dir) + VSMALL;
 
@@ -92,6 +92,40 @@ void Foam::cylindrical::init
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::cylindrical::cylindrical(const cylindrical& r)
+:
+    Rptr_(r.Rptr_, false),  // clone
+    origin_(r.origin_),
+    e3_(r.e3_)
+{}
+
+
+Foam::cylindrical::cylindrical(const tensorField& R)
+:
+    Rptr_(),
+    origin_(Zero),
+    e3_(Zero)
+{
+    Rptr_() = R;
+}
+
+
+Foam::cylindrical::cylindrical(const dictionary& dict)
+:
+    Rptr_(),
+    origin_(),
+    e3_()
+{
+    FatalErrorInFunction
+        << " cylindrical can not be constructed from dictionary "
+        << " use the construtctor : "
+           "("
+           "    const dictionary&, const objectRegistry&"
+           ")"
+        << exit(FatalIOError);
+}
+
+
 Foam::cylindrical::cylindrical
 (
     const dictionary& dict,
@@ -103,12 +137,9 @@ Foam::cylindrical::cylindrical
     e3_(Zero)
 {
     // If origin is specified in the coordinateSystem
-    if (dict.parent().found("origin"))
-    {
-        dict.parent().lookup("origin") >> origin_;
-    }
+    dict.parent().readIfPresent("origin", origin_);
 
-    // rotation axis
+    // Rotation axis
     dict.lookup("e3") >> e3_;
 
     init(obr);
@@ -144,40 +175,6 @@ Foam::cylindrical::cylindrical
 {
     init(obr, cells);
 }
-
-
-Foam::cylindrical::cylindrical(const dictionary& dict)
-:
-    Rptr_(),
-    origin_(),
-    e3_()
-{
-    FatalErrorInFunction
-        << " cylindrical can not be constructed from dictionary "
-        << " use the construtctor : "
-           "("
-           "    const dictionary&, const objectRegistry&"
-           ")"
-        << exit(FatalIOError);
-}
-
-
-Foam::cylindrical::cylindrical(const tensorField& R)
-:
-    Rptr_(),
-    origin_(Zero),
-    e3_(Zero)
-{
-    Rptr_() = R;
-}
-
-
-Foam::cylindrical::cylindrical(const cylindrical& r)
-:
-    Rptr_(r.Rptr_, false),  // clone
-    origin_(r.origin_),
-    e3_(r.e3_)
-{}
 
 
 
@@ -360,7 +357,7 @@ Foam::symmTensor Foam::cylindrical::transformVector
 
 void Foam::cylindrical::write(Ostream& os) const
 {
-     os.writeKeyword("e3") << e3() << token::END_STATEMENT << nl;
+     os.writeEntry("e3", e3());
 }
 
 

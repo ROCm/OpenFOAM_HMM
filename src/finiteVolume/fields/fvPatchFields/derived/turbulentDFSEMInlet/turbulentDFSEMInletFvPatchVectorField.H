@@ -81,7 +81,7 @@ SourceFiles
 #define turbulentDFSEMInletFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "cachedRandom.H"
+#include "Random.H"
 #include "eddy.H"
 #include "pointIndexHit.H"
 #include "instantList.H"
@@ -184,7 +184,7 @@ class turbulentDFSEMInletFvPatchVectorField
         scalar v0_;
 
         //- Random number generator
-        cachedRandom rndGen_;
+        Random rndGen_;
 
         //- Length scale per patch face
         scalarField sigmax_;
@@ -231,7 +231,7 @@ class turbulentDFSEMInletFvPatchVectorField
         //- Helper function to interpolate values from the boundary data or
         //  read from dictionary
         template<class Type>
-        tmp<Field<Type> > interpolateOrRead
+        tmp<Field<Type>> interpolateOrRead
         (
             const word& fieldName,
             const dictionary& dict,
@@ -240,7 +240,7 @@ class turbulentDFSEMInletFvPatchVectorField
 
         //- Helper function to interpolate values from the boundary data
         template<class Type>
-        tmp<Field<Type> > interpolateBoundaryData
+        tmp<Field<Type>> interpolateBoundaryData
         (
             const word& fieldName
         ) const;
@@ -258,7 +258,7 @@ class turbulentDFSEMInletFvPatchVectorField
         //  processor
         void calcOverlappingProcEddies
         (
-            List<List<eddy> >& overlappingEddies
+            List<List<eddy>>& overlappingEddies
         ) const;
 
 

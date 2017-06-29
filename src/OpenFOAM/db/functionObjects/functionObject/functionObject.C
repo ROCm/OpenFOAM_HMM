@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,14 @@ namespace Foam
 }
 
 bool Foam::functionObject::postProcess(false);
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+Foam::word Foam::functionObject::scopedName(const word& name) const
+{
+    return name_ + ":" + name;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -95,7 +103,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(functionType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown function type "
@@ -141,6 +149,12 @@ bool Foam::functionObject::end()
 
 
 bool Foam::functionObject::adjustTimeStep()
+{
+    return false;
+}
+
+
+bool Foam::functionObject::filesModified() const
 {
     return false;
 }

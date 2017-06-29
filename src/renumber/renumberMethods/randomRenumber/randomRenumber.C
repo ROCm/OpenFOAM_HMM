@@ -65,7 +65,7 @@ Foam::labelList Foam::randomRenumber::renumber
     {
         forAll(newToOld, i)
         {
-            label j = rndGen.integer(0, newToOld.size()-1);
+            label j = rndGen.position<label>(0, newToOld.size()-1);
             Swap(newToOld[i], newToOld[j]);
         }
     }

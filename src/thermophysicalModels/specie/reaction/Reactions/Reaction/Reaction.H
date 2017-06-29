@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -168,19 +168,6 @@ public:
         (
             autoPtr,
             Reaction,
-            Istream,
-            (
-                const speciesTable& species,
-                const HashPtrTable<ReactionThermo>& thermoDatabase,
-                Istream& is
-            ),
-            (species, thermoDatabase, is)
-        );
-
-        declareRunTimeSelectionTable
-        (
-            autoPtr,
-            Reaction,
             dictionary,
             (
                 const speciesTable& species,
@@ -191,36 +178,6 @@ public:
         );
 
 
-    // Public classes
-
-        //- Class used for the read-construction of PtrLists of reaction
-        class iNew
-        {
-            const speciesTable& species_;
-            const HashPtrTable<ReactionThermo>& thermoDatabase_;
-
-        public:
-
-            iNew
-            (
-                const speciesTable& species,
-                const HashPtrTable<ReactionThermo>& thermoDatabase
-            )
-            :
-                species_(species),
-                thermoDatabase_(thermoDatabase)
-            {}
-
-            autoPtr<Reaction> operator()(Istream& is) const
-            {
-                return autoPtr<Reaction>
-                (
-                    Reaction::New(species_, thermoDatabase_, is)
-                );
-            }
-        };
-
-
     // Constructors
 
         //- Construct from components
@@ -229,26 +186,27 @@ public:
             const speciesTable& species,
             const List<specieCoeffs>& lhs,
             const List<specieCoeffs>& rhs,
-            const HashPtrTable<ReactionThermo>& thermoDatabase
+            const HashPtrTable<ReactionThermo>& thermoDatabase,
+            bool initReactionThermo = true
         );
 
         //- Construct as copy given new speciesTable
-        Reaction(const Reaction<ReactionThermo>&, const speciesTable& species);
-
-        //- Construct from Istream
         Reaction
         (
-            const speciesTable& species,
-            const HashPtrTable<ReactionThermo>& thermoDatabase,
-            Istream& is
+            const Reaction<ReactionThermo>&,
+            const speciesTable& species
         );
 
         //- Construct from dictionary
+        // NOTE: initReactionThermo is used by solidReaction where there is no
+        // need of setting a lhs - rhs thermo type for each reaction. This is
+        // needed for mechanism with reversible reactions
         Reaction
         (
             const speciesTable& species,
             const HashPtrTable<ReactionThermo>& thermoDatabase,
-            const dictionary& dict
+            const dictionary& dict,
+            bool initReactionThermo = true
         );
 
         //- Construct and return a clone
@@ -274,14 +232,6 @@ public:
 
 
     // Selectors
-
-        //- Return a pointer to new patchField created on freestore from input
-        static autoPtr<Reaction<ReactionThermo>> New
-        (
-            const speciesTable& species,
-            const HashPtrTable<ReactionThermo>& thermoDatabase,
-            Istream& is
-        );
 
         //- Return a pointer to new patchField created on freestore from dict
         static autoPtr<Reaction<ReactionThermo>> New
@@ -312,10 +262,10 @@ public:
             virtual const List<specieCoeffs>& grhs() const;
             virtual const List<specieCoeffs>& glhs() const;
 
-            // - Access to specie list
+            //- Access to specie list
             const speciesTable& species() const;
 
-            // - Access to gas specie list
+            //- Access to gas specie list
             virtual const speciesTable& gasSpecies() const;
 
             //- Construct the left- and right-hand-side reaction coefficients

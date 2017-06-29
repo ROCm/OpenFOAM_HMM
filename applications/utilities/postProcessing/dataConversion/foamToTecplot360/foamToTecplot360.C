@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
     mkDir(fvPath);
 
     // Mesh wrapper: does subsetting
-    meshSubsetHelper myMesh(mesh, meshSubsetHelper::SET, cellSetName);
+    meshSubsetHelper meshRef(mesh, meshSubsetHelper::SET, cellSetName);
 
     forAll(timeDirs, timeI)
     {
@@ -308,8 +308,8 @@ int main(int argc, char *argv[])
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
-        polyMesh::readUpdateState meshState = myMesh.readUpdate();
-        const fvMesh& mesh = myMesh.mesh();
+        polyMesh::readUpdateState meshState = meshRef.readUpdate();
+        const fvMesh& mesh = meshRef.mesh();
 
         // TotalNumFaceNodes
         int32_t nFaceNodes = 0;
@@ -333,23 +333,23 @@ int main(int argc, char *argv[])
         // Construct the vol fields (on the original mesh if subsetted)
 
         PtrList<const volScalarField> vsf;
-        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vsf);
+        readFields(meshRef, meshRef.baseMesh(), objects, selectedFields, vsf);
         print("    volScalarFields            :", Info, vsf);
 
         PtrList<const volVectorField> vvf;
-        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vvf);
+        readFields(meshRef, meshRef.baseMesh(), objects, selectedFields, vvf);
         print("    volVectorFields            :", Info, vvf);
 
-        PtrList<const volSphericalTensorField> vSpheretf;
-        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vSpheretf);
-        print("    volSphericalTensorFields   :", Info, vSpheretf);
+        PtrList<const volSphericalTensorField> vSphf;
+        readFields(meshRef, meshRef.baseMesh(), objects, selectedFields, vSphf);
+        print("    volSphericalTensorFields   :", Info, vSphf);
 
-        PtrList<const volSymmTensorField> vSymmtf;
-        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vSymmtf);
-        print("    volSymmTensorFields        :", Info, vSymmtf);
+        PtrList<const volSymmTensorField> vSymf;
+        readFields(meshRef, meshRef.baseMesh(), objects, selectedFields, vSymf);
+        print("    volSymmTensorFields        :", Info, vSymf);
 
         PtrList<const volTensorField> vtf;
-        readFields(myMesh, myMesh.baseMesh(), objects, selectedFields, vtf);
+        readFields(meshRef, meshRef.baseMesh(), objects, selectedFields, vtf);
         print("    volTensorFields            :", Info, vtf);
 
 
@@ -365,8 +365,8 @@ int main(int argc, char *argv[])
 
         PtrList<const pointScalarField> psf;
         PtrList<const pointVectorField> pvf;
-        //PtrList<const pointSphericalTensorField> pSpheretf;
-        //PtrList<const pointSymmTensorField> pSymmtf;
+        //PtrList<const pointSphericalTensorField> pSphf;
+        //PtrList<const pointSymmTensorField> pSymf;
         //PtrList<const pointTensorField> ptf;
 
 
@@ -402,8 +402,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                myMesh,
-                pointMesh::New(myMesh.baseMesh()),
+                meshRef,
+                pointMesh::New(meshRef.baseMesh()),
                 objects,
                 selectedFields,
                 psf
@@ -412,8 +412,8 @@ int main(int argc, char *argv[])
 
             readFields
             (
-                myMesh,
-                pointMesh::New(myMesh.baseMesh()),
+                meshRef,
+                pointMesh::New(meshRef.baseMesh()),
                 objects,
                 selectedFields,
                 pvf
@@ -422,28 +422,28 @@ int main(int argc, char *argv[])
 
             //readFields
             //(
-            //    myMesh,
-            //    pointMesh::New(myMesh.baseMesh()),
+            //    meshRef,
+            //    pointMesh::New(meshRef.baseMesh()),
             //    objects,
             //    selectedFields,
-            //    pSpheretf
+            //    pSphf
             //);
-            //print("    pointSphericalTensorFields :", Info, pSpheretf);
+            //print("    pointSphericalTensorFields :", Info, pSphf);
             //
             //readFields
             //(
-            //    myMesh,
-            //    pointMesh::New(myMesh.baseMesh()),
+            //    meshRef,
+            //    pointMesh::New(meshRef.baseMesh()),
             //    objects,
             //    selectedFields,
-            //    pSymmtf
+            //    pSymf
             //);
-            //print("    pointSymmTensorFields      :", Info, pSymmtf);
+            //print("    pointSymmTensorFields      :", Info, pSymf);
             //
             //readFields
             //(
-            //    myMesh,
-            //    pointMesh::New(myMesh.baseMesh()),
+            //    meshRef,
+            //    pointMesh::New(meshRef.baseMesh()),
             //    objects,
             //    selectedFields,
             //    ptf
@@ -495,14 +495,14 @@ int main(int argc, char *argv[])
 
         tecplotWriter::getTecplotNames
         (
-            vSpheretf,
+            vSphf,
             tecplotWriter::CELL_CENTERED,
             varNames,
             varLocation
         );
         tecplotWriter::getTecplotNames
         (
-            vSpheretf,
+            vSphf,
             tecplotWriter::CELL_CENTERED,
             cellVarNames,
             cellVarLocation
@@ -510,14 +510,14 @@ int main(int argc, char *argv[])
 
         tecplotWriter::getTecplotNames
         (
-            vSymmtf,
+            vSymf,
             tecplotWriter::CELL_CENTERED,
             varNames,
             varLocation
         );
         tecplotWriter::getTecplotNames
         (
-            vSymmtf,
+            vSymf,
             tecplotWriter::CELL_CENTERED,
             cellVarNames,
             cellVarLocation
@@ -607,8 +607,8 @@ int main(int argc, char *argv[])
                 // Write all fields
                 writer.writeFields(vsf);
                 writer.writeFields(vvf);
-                writer.writeFields(vSpheretf);
-                writer.writeFields(vSymmtf);
+                writer.writeFields(vSphf);
+                writer.writeFields(vSymf);
                 writer.writeFields(vtf);
 
                 writer.writeFields(psf);
@@ -689,8 +689,8 @@ int main(int argc, char *argv[])
                 // Write all fields
                 writer.writeFields(vsf);
                 writer.writeFields(vvf);
-                writer.writeFields(vSpheretf);
-                writer.writeFields(vSymmtf);
+                writer.writeFields(vSphf);
+                writer.writeFields(vSymf);
                 writer.writeFields(vtf);
 
                 writer.writeFields(psf);
@@ -784,24 +784,24 @@ int main(int argc, char *argv[])
                     )
                 );
             }
-            forAll(vSpheretf, i)
+            forAll(vSphf, i)
             {
                 writer.writeField
                 (
                     writer.getFaceField
                     (
-                        linearInterpolate(vSpheretf[i])(),
+                        linearInterpolate(vSphf[i])(),
                         faceLabels
                     )
                 );
             }
-            forAll(vSymmtf, i)
+            forAll(vSymf, i)
             {
                 writer.writeField
                 (
                     writer.getFaceField
                     (
-                        linearInterpolate(vSymmtf[i])(),
+                        linearInterpolate(vSymf[i])(),
                         faceLabels
                     )
                 );
@@ -837,7 +837,7 @@ int main(int argc, char *argv[])
 
         fileName patchFileName;
 
-        if (myMesh.useSubMesh())
+        if (meshRef.useSubMesh())
         {
             patchFileName =
                 fvPath/"boundaryMesh"/cellSetName
@@ -930,26 +930,26 @@ int main(int argc, char *argv[])
                         )
                     );
                 }
-                forAll(vSpheretf, i)
+                forAll(vSphf, i)
                 {
                     writer.writeField
                     (
                         writer.getPatchField
                         (
                             nearCellValue,
-                            vSpheretf[i],
+                            vSphf[i],
                             patchID
                         )
                     );
                 }
-                forAll(vSymmtf, i)
+                forAll(vSymf, i)
                 {
                     writer.writeField
                     (
                         writer.getPatchField
                         (
                             nearCellValue,
-                            vSymmtf[i],
+                            vSymf[i],
                             patchID
                         )
                     );
@@ -1010,7 +1010,7 @@ int main(int argc, char *argv[])
 
             fileName patchFileName;
 
-            if (myMesh.useSubMesh())
+            if (meshRef.useSubMesh())
             {
                 patchFileName =
                     fvPath/"faceZoneMesh"/cellSetName
@@ -1094,24 +1094,24 @@ int main(int argc, char *argv[])
                             )
                         );
                     }
-                    forAll(vSpheretf, i)
+                    forAll(vSphf, i)
                     {
                         writer.writeField
                         (
                             writer.getFaceField
                             (
-                                linearInterpolate(vSpheretf[i])(),
+                                linearInterpolate(vSphf[i])(),
                                 pp
                             )
                         );
                     }
-                    forAll(vSymmtf, i)
+                    forAll(vSymf, i)
                     {
                         writer.writeField
                         (
                             writer.getFaceField
                             (
-                                linearInterpolate(vSymmtf[i])(),
+                                linearInterpolate(vSymf[i])(),
                                 pp
                             )
                         );

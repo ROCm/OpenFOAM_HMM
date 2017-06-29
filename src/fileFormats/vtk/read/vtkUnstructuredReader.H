@@ -51,7 +51,7 @@ SourceFiles
 #include "objectRegistry.H"
 #include "cellShapeList.H"
 #include "HashSet.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,8 +63,6 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class vtkUnstructuredReader
-:
-    public fileFormats::foamVtkCore
 {
 public:
 
@@ -83,7 +81,7 @@ public:
             VTK_ID
         };
 
-        static const NamedEnum<vtkDataType, 8> vtkDataTypeNames;
+        static const Enum<vtkDataType> vtkDataTypeNames;
 
 
         //- Enumeration defining the vtk dataset types
@@ -94,11 +92,10 @@ public:
             VTK_VECTORS
         };
 
-        static const NamedEnum<vtkDataSetType, 3> vtkDataSetTypeNames;
+        static const Enum<vtkDataSetType> vtkDataSetTypeNames;
 
 
-        //- Enumeration defining the parse mode - what type of data is being
-        //  read
+        //- Enumeration defining the parse mode - type of data being read
         enum parseMode
         {
             NOMODE,
@@ -108,7 +105,7 @@ public:
             POINT_DATA
         };
 
-        static const NamedEnum<parseMode, 5> parseModeNames;
+        static const Enum<parseMode> parseModeNames;
 
 
 private:
@@ -207,7 +204,7 @@ private:
 
         void read(ISstream& inFile);
 
-        //- Dissallow assignment
+        //- Disallow assignment
         void operator=(const vtkUnstructuredReader&);
 
 
@@ -220,6 +217,7 @@ public:
 
         //- Construct from Istream, read all
         vtkUnstructuredReader(const objectRegistry& obr, ISstream&);
+
 
     // Member Functions
 

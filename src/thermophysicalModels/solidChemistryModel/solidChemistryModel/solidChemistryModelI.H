@@ -97,10 +97,10 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRs() const
 
 
 template<class CompType, class SolidThermo>
-inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::solidChemistryModel<CompType, SolidThermo>::RRsHs() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tRRsHs
+    tmp<DimensionedField<scalar, volMesh>> tRRsHs
     (
         new DimensionedField<scalar, volMesh>
         (

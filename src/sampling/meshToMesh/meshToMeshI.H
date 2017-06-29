@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,20 @@ inline const Foam::pointListList& Foam::meshToMesh::tgtToSrcCellVec() const
 inline Foam::scalar Foam::meshToMesh::V() const
 {
     return V_;
+}
+
+
+inline const Foam::autoPtr<Foam::mapDistribute>&
+Foam::meshToMesh::srcMap() const
+{
+    return srcMapPtr_;
+}
+
+
+inline const Foam::autoPtr<Foam::mapDistribute>&
+Foam::meshToMesh::tgtMap() const
+{
+    return tgtMapPtr_;
 }
 
 

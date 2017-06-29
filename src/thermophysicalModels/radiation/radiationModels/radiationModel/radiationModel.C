@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "scatterModel.H"
 #include "sootModel.H"
 #include "fvmSup.H"
-#include "fluidThermo.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,7 +43,7 @@ namespace Foam
 }
 
 const Foam::word Foam::radiation::radiationModel::externalRadHeatFieldName_ =
-    "QrExt";
+    "qrExt";
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -235,10 +235,10 @@ void Foam::radiation::radiationModel::correct()
 
 Foam::tmp<Foam::fvScalarMatrix> Foam::radiation::radiationModel::Sh
 (
-    fluidThermo& thermo
+    const basicThermo& thermo,
+    const volScalarField& he
 ) const
 {
-    volScalarField& he = thermo.he();
     const volScalarField Cpv(thermo.Cpv());
     const volScalarField T3(pow3(T_));
 

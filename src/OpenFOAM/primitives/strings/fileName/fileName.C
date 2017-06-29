@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,15 +41,15 @@ const Foam::fileName Foam::fileName::null;
 Foam::fileName::fileName(const UList<word>& lst)
 {
     // Estimate overall size
-    size_type sz = lst.size();
-    for (const word& item : lst)
+    size_type sz = lst.size();  // Approx number of '/' needed
+    for (const auto& item : lst)
     {
         sz += item.size();
     }
     reserve(sz);
 
     sz = 0;
-    for (const word& item : lst)
+    for (const auto& item : lst)
     {
         if (item.size())
         {
@@ -63,15 +63,15 @@ Foam::fileName::fileName(const UList<word>& lst)
 Foam::fileName::fileName(std::initializer_list<word> lst)
 {
     // Estimate overall size
-    size_type sz = lst.size();
-    for (const word& item : lst)
+    size_type sz = lst.size();  // Approx number of '/' needed
+    for (const auto& item : lst)
     {
         sz += item.size();
     }
     reserve(sz);
 
     sz = 0;
-    for (const word& item : lst)
+    for (const auto& item : lst)
     {
         if (item.size())
         {
@@ -87,12 +87,6 @@ Foam::fileName::fileName(std::initializer_list<word> lst)
 Foam::fileName::Type Foam::fileName::type(const bool followLink) const
 {
     return ::Foam::type(*this, followLink);
-}
-
-
-bool Foam::fileName::isAbsolute() const
-{
-    return !empty() && operator[](0) == '/';
 }
 
 
@@ -215,7 +209,7 @@ Foam::fileName Foam::fileName::clean() const
 
 Foam::word Foam::fileName::name() const
 {
-    size_type i = rfind('/');
+    const size_type i = rfind('/');
 
     if (i == npos)
     {
@@ -223,69 +217,44 @@ Foam::word Foam::fileName::name() const
     }
     else
     {
-        return substr(i+1, npos);
+        return substr(i+1);
     }
 }
 
 
-Foam::string Foam::fileName::caseName() const
+Foam::word Foam::fileName::nameLessExt() const
 {
-    string cName = *this;
+    size_type beg = rfind('/');
 
-    const string caseStr(getEnv("FOAM_CASE"));
-
-    const size_type i = find(caseStr);
-
-    if (i == npos)
+    if (beg == npos)
     {
-        return cName;
+        beg = 0;
     }
     else
     {
-        return cName.replace(i, caseStr.size(), string("$FOAM_CASE"));
+        ++beg;
     }
-}
 
-
-Foam::word Foam::fileName::name(const bool noExt) const
-{
-    if (noExt)
+    size_type dot = rfind('.');
+    if (dot != npos && dot <= beg)
     {
-        size_type beg = rfind('/');
-        if (beg == npos)
-        {
-            beg = 0;
-        }
-        else
-        {
-            ++beg;
-        }
+        dot = npos;
+    }
 
-        size_type dot = rfind('.');
-        if (dot != npos && dot <= beg)
-        {
-            dot = npos;
-        }
-
-        if (dot == npos)
-        {
-            return substr(beg, npos);
-        }
-        else
-        {
-            return substr(beg, dot - beg);
-        }
+    if (dot == npos)
+    {
+        return substr(beg, npos);
     }
     else
     {
-        return this->name();
+        return substr(beg, dot - beg);
     }
 }
 
 
 Foam::fileName Foam::fileName::path() const
 {
-    size_type i = rfind('/');
+    const size_type i = rfind('/');
 
     if (i == npos)
     {
@@ -304,7 +273,7 @@ Foam::fileName Foam::fileName::path() const
 
 Foam::fileName Foam::fileName::lessExt() const
 {
-    size_type i = find_ext();
+    const size_type i = find_ext();
 
     if (i == npos)
     {
@@ -319,81 +288,26 @@ Foam::fileName Foam::fileName::lessExt() const
 
 Foam::word Foam::fileName::ext() const
 {
-    size_type i = find_ext();
-
-    if (i == npos)
-    {
-        return word::null;
-    }
-    else
-    {
-        return substr(i+1, npos);
-    }
+    return string::ext();
 }
 
 
 Foam::fileName& Foam::fileName::ext(const word& ending)
 {
-    if (!ending.empty() && !empty() && operator[](size()-1) != '/')
-    {
-        append(".");
-        append(ending);
-    }
-
+    string::ext(ending);
     return *this;
-}
-
-
-bool Foam::fileName::hasExt() const
-{
-    return (find_ext() != npos);
 }
 
 
 bool Foam::fileName::hasExt(const word& ending) const
 {
-    size_type i = find_ext();
-    if (i == npos)
-    {
-        return false;
-    }
-
-    ++i; // Do next comparison *after* the dot
-    return
-    (
-        // Lengths must match
-        ((size() - i) == ending.size())
-     && !compare(i, npos, ending)
-    );
+    return string::hasExt(ending);
 }
 
 
 bool Foam::fileName::hasExt(const wordRe& ending) const
 {
-    size_type i = find_ext();
-    if (i == npos)
-    {
-        return false;
-    }
-
-    std::string end = substr(i+1, npos);
-    return ending.match(end);
-}
-
-
-bool Foam::fileName::removeExt()
-{
-    const size_type i = find_ext();
-
-    if (i == npos)
-    {
-        return false;
-    }
-    else
-    {
-        this->resize(i);
-        return true;
-    }
+    return string::hasExt(ending);
 }
 
 
@@ -469,7 +383,7 @@ void Foam::fileName::operator=(const char* str)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::operator/(const string& a, const string& b)
 {

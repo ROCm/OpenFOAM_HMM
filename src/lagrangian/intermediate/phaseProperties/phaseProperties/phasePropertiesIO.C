@@ -36,7 +36,7 @@ Foam::phaseProperties::phaseProperties(Istream& is)
     Y_(0),
     carrierIds_(0)
 {
-    is.check("Foam::phaseProperties::phaseProperties(Istream& is)");
+    is.check(FUNCTION_NAME);
 
     dictionaryEntry phaseInfo(dictionary::null, is);
 
@@ -67,10 +67,7 @@ Foam::phaseProperties::phaseProperties(Istream& is)
 
 Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 {
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>(Istream&, phaseProperties&)"
-    );
+    is.check(FUNCTION_NAME);
 
     dictionaryEntry phaseInfo(dictionary::null, is);
 
@@ -102,10 +99,7 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const phaseProperties& pp)
 {
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Ostream&, const phaseProperties&)"
-    );
+    os.check(FUNCTION_NAME);
 
     os  << pp.phaseTypeNames[pp.phase_] << nl << token::BEGIN_BLOCK << nl
         << incrIndent;
@@ -118,11 +112,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const phaseProperties& pp)
 
     os  << decrIndent << token::END_BLOCK << nl;
 
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Ostream&, const phaseProperties&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

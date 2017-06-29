@@ -8,19 +8,17 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
     ${c++LESSWARN} \
-    -I$(FOAM_APP)/utilities/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
+    -I$(FOAM_UTILITIES)/mesh/generation/extrude2DMesh/extrude2DMesh/lnInclude \
     -I../conformalVoronoi2DMesh/lnInclude \
     -I../conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/parallel/decompose/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/surfMesh/lnInclude \
-    -I$(LIB_SRC)/edgeMesh/lnInclude \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/sampling/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/mesh/extrudeModel/lnInclude \
-    -I$(LIB_SRC)/sampling/lnInclude \
-    -I$(LIB_SRC)/triSurface/lnInclude \
-    -I$(LIB_SRC)/fileFormats/lnInclude \
     -I$(LIB_SRC)/mesh/snappyHexMesh/lnInclude
 
 EXE_LIBS = \
@@ -30,11 +28,7 @@ EXE_LIBS = \
     -lcv2DMesh \
     -lconformalVoronoiMesh \
     -lmeshTools \
-    -lsurfMesh \
-    -ledgeMesh \
-    -ltriSurface \
+    -lsampling \
     -ldynamicMesh \
     -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp \
-    -lsampling \
-    -lfileFormats
+    -L$(FOAM_LIBBIN)/dummy -lscotchDecomp -lptscotchDecomp

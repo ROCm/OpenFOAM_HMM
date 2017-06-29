@@ -36,7 +36,7 @@ SourceFiles
 #define STARCDCore_H
 
 #include "IFstream.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "pointField.H"
 #include "Map.H"
 #include "FixedList.H"
@@ -113,8 +113,8 @@ private:
 
     // Private Data
 
-        static const NamedEnum<fileHeader, 3> fileHeaders_;
-        static const NamedEnum<fileExt, 4>    fileExtensions_;
+        static const Enum<fileHeader> fileHeaders_;
+        static const Enum<fileExt>    fileExtensions_;
 
 
 protected:

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,6 +81,8 @@ inletOutletTotalTemperatureFvPatchScalarField
     gamma_(readScalar(dict.lookup("gamma"))),
     T0_("T0", dict, p.size())
 {
+    this->patchType() = dict.lookupOrDefault<word>("patchType", word::null);
+
     this->phiName_ = dict.lookupOrDefault<word>("phi", "phi");
 
     this->refValue() = Zero;

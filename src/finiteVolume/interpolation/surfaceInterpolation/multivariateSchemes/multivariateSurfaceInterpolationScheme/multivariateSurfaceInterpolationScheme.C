@@ -71,7 +71,7 @@ Foam::multivariateSurfaceInterpolationScheme<Type>::New
     typename IstreamConstructorTable::iterator constructorIter =
         IstreamConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == IstreamConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
         FatalIOErrorInFunction
         (

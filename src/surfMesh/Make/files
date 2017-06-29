@@ -37,7 +37,35 @@ $(surfaceFormats)/tri/TRIsurfaceFormatCore.C
 $(surfaceFormats)/tri/TRIsurfaceFormatRunTime.C
 $(surfaceFormats)/vtk/VTKsurfaceFormatCore.C
 $(surfaceFormats)/vtk/VTKsurfaceFormatRunTime.C
+$(surfaceFormats)/vtp/VTPsurfaceFormatCore.C
+$(surfaceFormats)/vtp/VTPsurfaceFormatRunTime.C
 $(surfaceFormats)/x3d/X3DsurfaceFormatCore.C
 $(surfaceFormats)/x3d/X3DsurfaceFormatRunTime.C
+
+triSurface/triSurface.C
+triSurface/triSurfaceAddressing.C
+triSurface/stitchTriangles.C
+
+triSurface/fields/triSurfaceFields.C
+triSurface/patches/geometricSurfacePatch.C
+triSurface/patches/surfacePatch.C
+
+interfaces = triSurface/interfaces
+$(interfaces)/STL/writeSTL.C
+$(interfaces)/STL/readSTL.C
+$(interfaces)/GTS/writeGTS.C
+$(interfaces)/GTS/readGTS.C
+$(interfaces)/OBJ/readOBJ.C
+$(interfaces)/OBJ/writeOBJ.C
+$(interfaces)/SMESH/writeSMESH.C
+$(interfaces)/OFF/readOFF.C
+$(interfaces)/OFF/writeOFF.C
+$(interfaces)/TRI/writeTRI.C
+$(interfaces)/TRI/readTRI.C
+$(interfaces)/AC3D/readAC.C
+$(interfaces)/AC3D/writeAC.C
+$(interfaces)/VTK/readVTK.C
+$(interfaces)/VTK/writeVTK.C
+$(interfaces)/NAS/readNAS.C
 
 LIB = $(FOAM_LIBBIN)/libsurfMesh

@@ -38,13 +38,13 @@ log()
 
 init()
 {
-    log "initialisation: creating ${dataFile}.in"
+    log "init - creating ${dataFile}.in"
 
     # Hard-coded for patch of size 8 (heater/minY)
     n1=8
     refValue1=500
     touch "${dataFile}.in"
-    log "initialisation: adding $n1 data elements with refValue $refValue1"
+    log "init - adding $n1 data elements with refValue $refValue1"
     for i in $(seq 1 $n1); do
         echo "$refValue1 $refGrad $valueFraction" >> "${dataFile}.in"
     done
@@ -52,7 +52,7 @@ init()
     # Hard-coded for patch of size 40 (topAir/minX)
     n2=40
     refValue2=300
-    log "initialisation: adding $n2 data elements with refValue $refValue2"
+    log "init - adding $n2 data elements with refValue $refValue2"
     for i in $(seq 1 $n2); do
         echo "$refValue2 $refGrad $valueFraction" >> "${dataFile}.in"
     done
@@ -65,8 +65,7 @@ init()
 # create the comms directory
 mkdir -p ${commsDir}/${regionGroupName}/${patchGroupName}
 
-# tutorial case employs the 'initByExternalOption', so we need to provide
-# the initial values
+# Tutorial case uses 'initByExternalOption', so we must provide initial values
 init
 
 
@@ -78,13 +77,13 @@ do
     then
         if grep -q "status=done" ${lockFile}
         then
-             log "found lock file ${lockFile} with 'status=done' - finished"
+             log "found lock file '${lockFile}' with 'status=done' - finished"
              break
         elif [ -s $lockFile ]
         then
-             log "found lock file ${lockFile} containing '$(cat $lockFile)' - waiting"
+             log "found lock file '${lockFile}' containing '$(< $lockFile)' - waiting"
         else
-             log "found lock file ${lockFile} - waiting"
+             log "found lock file '${lockFile}' - waiting"
         fi
 
         totalWait=$(expr $totalWait + $waitSec)
@@ -109,7 +108,7 @@ do
         awk '{if( $1 != "#" ){print $1+1 " 0 1"}}' \
             ${dataFile}.out >| ${dataFile}.in
 
-        log "creating lock file ${lockFile}"
+        log "creating lock file '${lockFile}'"
         touch ${lockFile}
     fi
 done

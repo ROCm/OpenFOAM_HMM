@@ -53,12 +53,13 @@
 #     When _foamAddLib is unset (eg, called from makeParaView or from foamPV):
 #         - the ParaView_VERSION variable is retained.
 #------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-ParaView_VERSION=5.0.1
+ParaView_VERSION=5.4.0
 ParaView_MAJOR=detect                   # Automatically determine major version
-
 cmake_version=cmake-system
 
+# END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 
 # Clean PATH and LD_LIBRARY_PATH
@@ -168,11 +169,11 @@ then
 
 fi
 
-unset -f _foamParaviewEval
+unset -f _foamParaviewEval 2> /dev/null
 unset cleaned cmake cmake_version pvName pvMajor pvLibDir pvPython
 unset ParaView_MAJOR
 
-if type _foamAddLib > /dev/null 2>&1    # normal sourcing
+if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
 then
     unset ParaView_VERSION
 fi

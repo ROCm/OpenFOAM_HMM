@@ -28,6 +28,7 @@ License
 #include "IOmanip.H"
 #include "Pair.H"
 #include "OSspecific.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -160,6 +161,45 @@ Foam::scalarField& Foam::graph::y()
 }
 
 
+void Foam::graph::setXRange(const scalar x0, const scalar x1)
+{
+    if (x1 < x0)
+    {
+        FatalErrorInFunction
+            << "When setting limits, x1 must be greater than x0" << nl
+            << "    x0: " << x0 << nl
+            << "    x1: " << x1 << nl
+            << abort(FatalError);
+    }
+
+    label i0 = 0;
+    label i1 = 0;
+
+    forAll(x_, i)
+    {
+        if (x_[i] < x0)
+        {
+            i0 = i + 1;
+        }
+        if (x_[i] < x1)
+        {
+            i1 = i;
+        }
+    }
+
+    label nX = i1 - i0 + 1;
+    scalarField xNew(SubField<scalar>(x_, nX, i0));
+    x_.transfer(xNew);
+
+    forAllIter(HashPtrTable<curve>, *this, iter)
+    {
+        curve* c = iter();
+        scalarField cNew(SubField<scalar>(*c, nX, i0));
+        c->transfer(cNew);
+    }
+}
+
+
 Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
 (
     const word& graphFormat
@@ -175,7 +215,7 @@ Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(graphFormat);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown graph format " << graphFormat
@@ -258,7 +298,7 @@ void Foam::graph::write
 Foam::Ostream& Foam::operator<<(Ostream& os, const graph& g)
 {
     g.writeTable(os);
-    os.check("Ostream& operator<<(Ostream&, const graph&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -85,9 +85,7 @@ Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
         return is;
     }
 
-    // Check state of IOstream
-    is.check("Istream& operator>>(Istream&, wordRe&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -95,7 +93,7 @@ Foam::Istream& Foam::operator>>(Istream& is, wordRe& w)
 Foam::Ostream& Foam::operator<<(Ostream& os, const wordRe& w)
 {
     os.writeQuoted(w, w.isPattern());
-    os.check("Ostream& operator<<(Ostream&, const wordRe&)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -110,7 +108,6 @@ Foam::Ostream& Foam::wordRe::info(Ostream& os) const
     {
         os  << "wordRe(plain) \"" << *this << '"';
     }
-    os.flush();
 
     return os;
 }

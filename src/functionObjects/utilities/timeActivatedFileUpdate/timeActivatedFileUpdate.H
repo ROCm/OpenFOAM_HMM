@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,6 +106,9 @@ class timeActivatedFileUpdate
         //- Index of last file copied
         label lastIndex_;
 
+        //- Has anything been copied?
+        bool modified_;
+
 
     // Private Member Functions
 
@@ -150,6 +153,9 @@ public:
 
         //- Do nothing
         virtual bool write();
+
+        //- Did any file get changed during execution?
+        virtual bool filesModified() const;
 };
 
 

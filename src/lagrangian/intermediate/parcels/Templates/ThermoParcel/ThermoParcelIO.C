@@ -73,11 +73,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "ThermoParcel::ThermoParcel(const polyMesh&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -189,12 +185,7 @@ Foam::Ostream& Foam::operator<<
         );
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const ThermoParcel<ParcelType>&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -110,7 +110,11 @@ Foam::LESModels::maxDeltaxyz::maxDeltaxyz
     LESdelta(name, turbulence),
     deltaCoeff_
     (
-        dict.subDict(type() + "Coeffs").lookupOrDefault<scalar>("deltaCoeff", 1)
+        dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
+        (
+            "deltaCoeff",
+            1
+        )
     )
 {
     calcDelta();
@@ -121,7 +125,7 @@ Foam::LESModels::maxDeltaxyz::maxDeltaxyz
 
 void Foam::LESModels::maxDeltaxyz::read(const dictionary& dict)
 {
-    const dictionary& coeffsDict(dict.subDict(type() + "Coeffs"));
+    const dictionary& coeffsDict(dict.optionalSubDict(type() + "Coeffs"));
 
     coeffsDict.readIfPresent<scalar>("deltaCoeff", deltaCoeff_);
 

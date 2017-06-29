@@ -28,13 +28,13 @@ License
 
 inline Foam::labelRanges::labelRanges()
 :
-    ParentType()
+    StorageContainer()
 {}
 
 
 inline Foam::labelRanges::labelRanges(const label nElem)
 :
-    ParentType(nElem)
+    StorageContainer(nElem)
 {}
 
 
@@ -42,12 +42,12 @@ inline Foam::labelRanges::labelRanges(const label nElem)
 
 inline Foam::labelRanges::const_iterator::const_iterator
 (
-    const labelRanges& lst,
-    const bool endIter
+    const labelRanges* lst,
+    const label i
 )
 :
     list_(lst),
-    index_(endIter ? lst.size() : 0),
+    index_(i < 0 ? lst->size() : i),
     subIndex_(0)
 {}
 
@@ -76,20 +76,14 @@ inline bool Foam::labelRanges::const_iterator::operator!=
 
 inline Foam::label Foam::labelRanges::const_iterator::operator*()
 {
-    return list_[index_][subIndex_];
-}
-
-
-inline Foam::label Foam::labelRanges::const_iterator::operator()()
-{
-    return list_[index_][subIndex_];
+    return list_->operator[](index_)[subIndex_];
 }
 
 
 inline Foam::labelRanges::const_iterator&
 Foam::labelRanges::const_iterator::operator++()
 {
-    if (++subIndex_ >= list_[index_].size())
+    if (++subIndex_ >= list_->operator[](index_).size())
     {
         // Next sub-list
         ++index_;
@@ -111,35 +105,35 @@ Foam::labelRanges::const_iterator::operator++(int)
 
 inline Foam::labelRanges::const_iterator Foam::labelRanges::cbegin() const
 {
-    return const_iterator(*this);
+    return const_iterator(this, 0);
 }
 
 
 inline const Foam::labelRanges::const_iterator Foam::labelRanges::cend() const
 {
-    return const_iterator(*this, true);
+    return const_iterator(this, -1);
 }
 
 
 inline Foam::labelRanges::const_iterator Foam::labelRanges::begin() const
 {
-    return const_iterator(*this);
+    return const_iterator(this, 0);
 }
 
 
 inline const Foam::labelRanges::const_iterator Foam::labelRanges::end() const
 {
-    return const_iterator(*this, true);
+    return const_iterator(this, -1);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::labelRanges::contains(const label value) const
+inline bool Foam::labelRanges::found(const label value) const
 {
     forAll(*this, i)
     {
-        if (this->ParentType::operator[](i).contains(value))
+        if (StorageContainer::operator[](i).found(value))
         {
             return true;
         }

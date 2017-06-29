@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -402,10 +402,15 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
         td.keepParticle
     );
 
-    // Invoke surface film model
-    if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))
+    if (isA<processorPolyPatch>(pp))
     {
-        // All interactions done
+        // Skip processor patches
+        return false;
+    }
+    else if (td.cloud().surfaceFilm().transferParcel(p, pp, td.keepParticle))
+    {
+        // Surface film model consumes the interaction, i.e. all
+        // interactions done
         return true;
     }
     else

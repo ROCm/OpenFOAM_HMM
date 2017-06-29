@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ Description
     \endvartable
 
 
-    The distribution inside the hear exchanger is given by:
+    The distribution inside the heat exchanger is given by:
     \f[
         Q_c = \frac{V_c |U_c| (T_c - T_{ref})}{\sum(V_c |U_c| (T_c - T_{ref}))}
     \f]
@@ -70,18 +70,15 @@ Usage
         type            effectivenessHeatExchangerSource;
         active          yes;
 
-        effectivenessHeatExchangerSourceCoeffs
-        {
-            selectionMode   cellZone;
-            cellZone        porosity;
+        selectionMode   cellZone;
+        cellZone        porosity;
 
-            secondaryMassFlowRate   1.0;
-            secondaryInletT         336;
-            // primaryInletT           293;  // Constrain to this T if present
-            faceZone                facesZoneInletOriented;
-            outOfBounds             clamp;
-            fileName                "effTable";
-        }
+        secondaryMassFlowRate   1.0;
+        secondaryInletT 336;
+        // primaryInletT 293;  // Constrain to this T if present
+        faceZone        facesZoneInletOriented;
+        outOfBounds     clamp;
+        file            "effTable";
     }
     \endverbatim
 
@@ -124,7 +121,7 @@ Usage
     \endverbatim
 
 Note
-- the table with name "fileName" should have the same units as the
+- the table with name "file" should have the same units as the
   secondary mass flow rate and kg/s for phi
 - faceZone is the faces at the inlet of the cellzone, it needs to be
   created with flip map flags. It is used to integrate the net mass flow

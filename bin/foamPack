@@ -119,7 +119,7 @@ else
     ( cd $packDir && git archive --format=tar --prefix=$packDir/ HEAD) > $packBase.tar &&
 
     echo "add in time-stamp and lnInclude directories" 1>&2 &&
-    tar cf $packBase.tar2 $packDir/.timeStamp $packDir/.build `find -H $packDir -type d -name lnInclude` &&
+    tar cf $packBase.tar2 $packDir/.timeStamp $packDir/.build $(find -H $packDir -name lnInclude -type d) &&
     tar Af $packBase.tar $packBase.tar2 &&
 
     echo "gzip tar file" 1>&2 &&

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,6 +92,22 @@ void Foam::motionSmootherAlgo::checkFld(const pointScalarField& fld)
 
 Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 (
+    const UList<label>& faceLabels
+) const
+{
+    labelHashSet usedPoints(mesh_.nPoints()/100);
+
+    for (auto faceId : faceLabels)
+    {
+        usedPoints.insert(mesh_.faces()[faceId]);
+    }
+
+    return usedPoints;
+}
+
+
+Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
+(
     const labelHashSet& faceLabels
 ) const
 {
@@ -99,12 +115,7 @@ Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 
     forAllConstIter(labelHashSet, faceLabels, iter)
     {
-        const face& f = mesh_.faces()[iter.key()];
-
-        forAll(f, fp)
-        {
-            usedPoints.insert(f[fp]);
-        }
+        usedPoints.insert(mesh_.faces()[iter.key()]);
     }
 
     return usedPoints;
@@ -459,12 +470,12 @@ void Foam::motionSmootherAlgo::setDisplacementPatchFields
             if (patchSchedule[patchEvalI].init)
             {
                 displacementBf[patchi]
-                    .initEvaluate(Pstream::scheduled);
+                    .initEvaluate(Pstream::commsTypes::scheduled);
             }
             else
             {
                 displacementBf[patchi]
-                    .evaluate(Pstream::scheduled);
+                    .evaluate(Pstream::commsTypes::scheduled);
             }
         }
     }
@@ -616,12 +627,12 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
             if (patchSchedule[patchEvalI].init)
             {
                 displacementBf[patchi]
-                    .initEvaluate(Pstream::blocking);
+                    .initEvaluate(Pstream::commsTypes::blocking);
             }
             else
             {
                 displacementBf[patchi]
-                    .evaluate(Pstream::blocking);
+                    .evaluate(Pstream::commsTypes::blocking);
             }
         }
     }
@@ -637,12 +648,12 @@ void Foam::motionSmootherAlgo::correctBoundaryConditions
             if (patchSchedule[patchEvalI].init)
             {
                 displacementBf[patchi]
-                    .initEvaluate(Pstream::blocking);
+                    .initEvaluate(Pstream::commsTypes::blocking);
             }
             else
             {
                 displacementBf[patchi]
-                    .evaluate(Pstream::blocking);
+                    .evaluate(Pstream::commsTypes::blocking);
             }
         }
     }

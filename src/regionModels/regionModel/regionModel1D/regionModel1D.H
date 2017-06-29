@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::regionModel1D
+    Foam::regionModels::regionModel1D
 
 Description
     Base class for 1-D region models

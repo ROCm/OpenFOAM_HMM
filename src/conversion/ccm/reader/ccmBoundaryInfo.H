@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    Containers for holding STARCCM boundary information
+    Container for holding STARCCM boundary information
 
 \*---------------------------------------------------------------------------*/
 #ifndef ccmBoundaryInfo_H
@@ -40,8 +40,11 @@ namespace Foam
 namespace ccm
 {
 
+class ccmBoundaryInfo;
+Ostream& operator<<(Ostream& os, const ccmBoundaryInfo& entry);
+
 /*---------------------------------------------------------------------------*\
-                    Class ccm::ccmBoundaryInfo Declaration
+                 Class Foam::ccm::ccmBoundaryInfo Declaration
 \*---------------------------------------------------------------------------*/
 
 //- Helper when reading raw boundary information
@@ -95,8 +98,8 @@ public:
         return ccmIndex != rhs.ccmIndex;
     }
 
-   // IOstream Operators
 
+    //- Ostream Operator
     friend Ostream& operator<<(Ostream& os, const ccmBoundaryInfo& entry)
     {
         os  << "BoundaryFaces-" << entry.ccmIndex;
@@ -107,7 +110,6 @@ public:
 
         return os;
     }
-
 };
 
 

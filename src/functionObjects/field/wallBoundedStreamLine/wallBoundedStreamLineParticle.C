@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -120,11 +120,12 @@ Foam::vector Foam::wallBoundedStreamLineParticle::sample
     {
         // Stagnant particle. Might as well stop
         lifeTime_ = 0;
+        return vector::zero;
     }
-
-    U /= magU;
-
-    return U;
+    else
+    {
+        return U/magU;
+    }
 }
 
 
@@ -185,12 +186,7 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "wallBoundedStreamLineParticle::wallBoundedStreamLineParticle"
-        "(const Cloud<wallBoundedStreamLineParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -271,16 +267,6 @@ bool Foam::wallBoundedStreamLineParticle::move
         {
             // Force removal
             lifeTime_ = 0;
-        }
-
-        if
-        (
-            !td.keepParticle
-        ||  td.switchProcessor
-        ||  lifeTime_ == 0
-        )
-        {
-            break;
         }
     }
 
@@ -422,12 +408,7 @@ Foam::Ostream& Foam::operator<<
         << token::SPACE << p.sampledScalars_
         << token::SPACE << p.sampledVectors_;
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const wallBoundedStreamLineParticle&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

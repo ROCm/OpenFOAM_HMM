@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ License
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Time.H"
+#include "ListOps.H"
 #include "polyBoundaryMesh.H"
 #include "polyMesh.H"
 
@@ -112,24 +113,23 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
     const word ext = name.ext();
 
-    typename writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
 
-    if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
+    if (!mfIter.found())
     {
-        // no direct writer, delegate to proxy if possible
-        wordHashSet supported = ProxyType::writeTypes();
+        // No direct writer, delegate to proxy if possible
+        const wordHashSet& delegate = ProxyType::writeTypes();
 
-        if (supported.found(ext))
+        if (delegate.found(ext))
         {
-            MeshedSurfaceProxy<Face>(surf).write(name);
+            MeshedSurfaceProxy<Face>(surf).write(name, ext);
         }
         else
         {
             FatalErrorInFunction
                 << "Unknown file extension " << ext << nl << nl
-                << "Valid types are :" << endl
-                << (supported | writeTypes())
+                << "Valid types:" << nl
+                << flatOutput((delegate | writeTypes()).sortedToc()) << nl
                 << exit(FatalError);
         }
     }
@@ -327,9 +327,8 @@ void Foam::UnsortedMeshedSurface<Face>::setOneZone()
         zoneName = "zone0";
     }
 
-    // set single default zone
-    zoneToc_.setSize(1);
-    zoneToc_[0] = surfZoneIdentifier(zoneName, 0);
+    // Set single default zone
+    zoneToc_ = { surfZoneIdentifier(zoneName, 0) };
 }
 
 
@@ -446,7 +445,7 @@ Foam::Istream& Foam::UnsortedMeshedSurface<Face>::read(Istream& is)
         >> this->storedPoints()
         >> this->storedFaces();
 
-    is.check("UnsortedMeshedSurface::read(Istream&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -458,7 +457,7 @@ Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
         << this->points()
         << this->surfFaces();
 
-    os.check("UnsortedMeshedSurface::write(Ostream&) const");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

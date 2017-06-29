@@ -67,6 +67,8 @@ void Foam::fvMesh::makeSf() const
         dimArea,
         faceAreas()
     );
+
+    SfPtr_->setOriented();
 }
 
 
@@ -258,10 +260,11 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
                 *this,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
-                false
+                true
             ),
             V0()
         );
+
 
         // If V00 is used then V0 should be stored for restart
         V0Ptr_->writeOpt() = IOobject::AUTO_WRITE;
@@ -271,8 +274,7 @@ const Foam::volScalarField::Internal& Foam::fvMesh::V00() const
 }
 
 
-Foam::tmp<Foam::volScalarField::Internal>
-Foam::fvMesh::Vsc() const
+Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc() const
 {
     if (moving() && time().subCycling())
     {
@@ -300,8 +302,7 @@ Foam::fvMesh::Vsc() const
 }
 
 
-Foam::tmp<Foam::volScalarField::Internal>
-Foam::fvMesh::Vsc0() const
+Foam::tmp<Foam::volScalarField::Internal> Foam::fvMesh::Vsc0() const
 {
     if (moving() && time().subCycling())
     {
@@ -400,6 +401,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
         )
     );
     surfaceVectorField& delta = tdelta.ref();
+    delta.setOriented();
 
     const volVectorField& C = this->C();
     const labelUList& owner = this->owner();
@@ -410,8 +412,7 @@ Foam::tmp<Foam::surfaceVectorField> Foam::fvMesh::delta() const
         delta[facei] = C[neighbour[facei]] - C[owner[facei]];
     }
 
-    surfaceVectorField::Boundary& deltabf =
-        delta.boundaryFieldRef();
+    surfaceVectorField::Boundary& deltabf =  delta.boundaryFieldRef();
 
     forAll(deltabf, patchi)
     {
@@ -437,6 +438,8 @@ const Foam::surfaceScalarField& Foam::fvMesh::phi() const
     {
         (*phiPtr_) = dimensionedScalar("0", dimVolume/dimTime, 0.0);
     }
+
+    phiPtr_->setOriented();
 
     return *phiPtr_;
 }

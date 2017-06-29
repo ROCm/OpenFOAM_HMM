@@ -27,8 +27,21 @@ Class
 Description
     A collection of tools for triSurface.
 
+Note
+    The curvature calculation is an implementation of the algorithm from:
+    \verbatim
+        "Estimating Curvatures and their Derivatives on Triangle Meshes"
+        by S. Rusinkiewicz
+        3DPVT'04 Proceedings of the 3D Data Processing,
+        Visualization, and Transmission, 2nd International Symposium
+        Pages 486-493
+        http://gfx.cs.princeton.edu/pubs/_2004_ECA/curvpaper.pdf
+    \endverbatim
+
 SourceFiles
     triSurfaceTools.C
+    triSurfaceCloseness.C
+    triSurfaceCurvature.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,9 +50,12 @@ SourceFiles
 
 #include "boolList.H"
 #include "pointField.H"
+#include "vectorField.H"
+#include "triadFieldFwd.H"
 #include "DynamicList.H"
 #include "HashSet.H"
 #include "FixedList.H"
+#include "Pair.H"
 #include "vector2D.H"
 #include "triPointRef.H"
 #include "surfaceLocation.H"
@@ -56,6 +72,7 @@ class polyBoundaryMesh;
 class plane;
 class triSurface;
 class face;
+class Time;
 template<class Face> class MeshedSurface;
 
 
@@ -280,16 +297,6 @@ public:
             const edge& e
         );
 
-        ////- Order vertices consistent with face
-        //static void orderVertices
-        //(
-        //    const labelledTri& f,
-        //    const label v1,
-        //    const label v2,
-        //    label& vA,
-        //    label& vB
-        //);
-
         //- Get face connected to edge not facei
         static label otherFace
         (
@@ -490,12 +497,16 @@ public:
 
     // Triangulation and interpolation
 
+        //- Do unconstrained Delaunay of points. Returns triSurface with 3D
+        //  points with z=0. All triangles in region 0.
+        static triSurface delaunay2D(const List<vector2D>&);
+
         //- Calculate linear interpolation weights for point (guaranteed to be
         //  inside triangle)
         static void calcInterpolationWeights
         (
-            const triPointRef&,
-            const point&,
+            const triPointRef& tri,
+            const point& p,
             FixedList<scalar, 3>& weights
         );
 
@@ -510,13 +521,86 @@ public:
         (
             const triSurface& s,
             const pointField& samplePts,
-            List<FixedList<label, 3>>& verts,
-            List<FixedList<scalar, 3>>& weights
+            List<FixedList<label, 3>>& allVerts,
+            List<FixedList<scalar, 3>>& allWeights
         );
 
-        //- Do unconstrained Delaunay of points. Returns triSurface with 3D
-        //  points with z=0. All triangles in region 0.
-        static triSurface delaunay2D(const List<vector2D>&);
+
+    // Curvature
+
+        //- Weighting for normals of faces attached to vertex
+        static scalar vertexNormalWeight
+        (
+            const triFace& f,
+            const label pI,
+            const vector& fN,
+            const UList<point>& points
+        );
+
+        //- Weighted average of normals of attached faces
+        static tmp<vectorField> vertexNormals(const triSurface& surf);
+
+        //- Local coordinate-system for each point normal
+        static tmp<triadField> vertexTriads
+        (
+            const triSurface& surf,
+            const vectorField& pointNormals
+        );
+
+        //- Surface curvatures at the vertex points
+        static tmp<scalarField> curvatures
+        (
+            const triSurface& surf,
+            const vectorField& pointNormals,
+            const triadField& pointTriads
+        );
+
+        //- Surface curvatures at the vertex points
+        static tmp<scalarField> curvatures
+        (
+            const triSurface& surf
+        );
+
+        //- Write surface curvature at the vertex points and return the field
+        static tmp<scalarField> writeCurvature
+        (
+            const Time& runTime,
+            const word& basename,
+            const triSurface& surf
+        );
+
+
+    // Closeness
+
+        //- Check and write internal/external closeness fields
+        static Pair<tmp<scalarField>> writeCloseness
+        (
+            const Time& runTime,
+            const word& basename,
+            const triSurface& surf,
+            const scalar internalAngleTolerance = 45,
+            const scalar externalAngleTolerance = 10
+        );
+
+
+    // Feature Proximity
+
+        //- Calculate feature proximity
+        scalarField featureProximity
+        (
+            const triSurface& surf,
+            const scalar searchDistance
+        );
+
+        //- Check and write internal/external closeness fields
+        static void writeFeatureProximity
+        (
+            const Time& runTime,
+            const word& basename,
+            const triSurface& surf,
+            const bool writeVTK,
+            const scalar searchDistance
+        );
 
 
     // Surface checking functionality

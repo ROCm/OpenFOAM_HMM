@@ -70,12 +70,7 @@ Foam::findCellParticle::findCellParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "findCellParticle::findCellParticle"
-        "(const Cloud<findCellParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -227,9 +222,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const findCellParticle& p)
         );
     }
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const findCellParticle&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

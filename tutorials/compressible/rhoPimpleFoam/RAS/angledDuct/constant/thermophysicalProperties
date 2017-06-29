@@ -23,14 +23,13 @@ thermoType
     thermo          hConst;
     equationOfState perfectGas;
     specie          specie;
-    energy          sensibleEnthalpy;
+    energy          sensibleInternalEnergy;
 }
 
 mixture
 {
     specie
     {
-        nMoles      1;
         molWeight   28.9;
     }
     thermodynamics

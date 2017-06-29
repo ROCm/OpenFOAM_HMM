@@ -38,6 +38,15 @@ void Foam::DimensionedField<Type, GeoMesh>::readField
 {
     dimensions_.reset(dimensionSet(fieldDict.lookup("dimensions")));
 
+    // Note: oriented state may have already been set on construction
+    // - if so - do not reset by re-reading
+    // - required for backwards compatibility in case of restarting from
+    //   an old run where the oriented state may not have been set
+    if (oriented_.oriented() != orientedType::ORIENTED)
+    {
+        oriented_.read(fieldDict);
+    }
+
     Field<Type> f(fieldDictEntry, fieldDict, GeoMesh::size(mesh_));
     this->transfer(f);
 }
@@ -74,7 +83,8 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(0),
     mesh_(mesh),
-    dimensions_(dimless)
+    dimensions_(dimless),
+    oriented_()
 {
     readField(dictionary(readStream(typeName)), fieldDictEntry);
 }
@@ -92,7 +102,8 @@ Foam::DimensionedField<Type, GeoMesh>::DimensionedField
     regIOobject(io),
     Field<Type>(0),
     mesh_(mesh),
-    dimensions_(dimless)
+    dimensions_(dimless),
+    oriented_()
 {
     readField(fieldDict, fieldDictEntry);
 }
@@ -107,19 +118,15 @@ bool Foam::DimensionedField<Type, GeoMesh>::writeData
     const word& fieldDictEntry
 ) const
 {
-    os.writeKeyword("dimensions") << dimensions() << token::END_STATEMENT
-        << nl << nl;
+    os.writeEntry("dimensions", dimensions());
+    oriented_.writeEntry(os);
+
+    os<< nl << nl;
 
     Field<Type>::writeEntry(fieldDictEntry, os);
 
-    // Check state of Ostream
-    os.check
-    (
-        "bool DimensionedField<Type, GeoMesh>::writeData"
-        "(Ostream& os, const word& fieldDictEntry) const"
-    );
-
-    return (os.good());
+    os.check(FUNCTION_NAME);
+    return os.good();
 }
 
 

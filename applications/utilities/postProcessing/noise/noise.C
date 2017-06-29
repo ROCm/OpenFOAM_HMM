@@ -102,6 +102,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::noCheckProcessorDirectories();
+
     #include "addDictOption.H"
     #include "setRootCase.H"
     #include "createTime.H"

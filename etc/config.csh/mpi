@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,35 +25,32 @@
 #     etc/config.csh/mpi
 #
 # Description
-#     Startup file for communications library (MPI) for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
+#     Setup file for communications library (MPI) for OpenFOAM
+#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
+#
+#     For USERMPI, the user is responsible for supplying an appropriate
+#     wmake/rules/General/mplibUSERMPI file and managing all settings
 #
 #------------------------------------------------------------------------------
-
-# Communications library
-# ~~~~~~~~~~~~~~~~~~~~~~
-
-unsetenv MPI_ARCH_PATH MPI_HOME FOAM_MPI_LIBBIN
+unsetenv MPI_ARCH_PATH MPI_HOME
 
 switch ("$WM_MPLIB")
 case SYSTEMOPENMPI:
     # Use the system installed openmpi, get library directory via mpicc
     setenv FOAM_MPI openmpi-system
 
+    # Bit of a hack: strip off 'lib' and hope this is the prefix for openmpi
+    # include files and libraries.
     set libDir=`mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/'`
 
-    # Bit of a hack: strip off 'lib' and hope this is the path to openmpi
-    # Include files and libraries.
     setenv MPI_ARCH_PATH "${libDir:h}"
-
     _foamAddLib     $libDir
     unset libDir
     breaksw
 
 case OPENMPI:
     setenv FOAM_MPI openmpi-1.10.4
-    # Optional configuration tweaks:
-    _foamSource `$WM_PROJECT_DIR/bin/foamEtcFile config.csh/openmpi`
+    _foamEtc config.csh/openmpi                 # <- Adjustments (optional)
 
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
 
@@ -71,12 +68,19 @@ case OPENMPI:
     _foamAddMan     $MPI_ARCH_PATH/share/man
     breaksw
 
+case USERMPI:
+    # Use an arbitrary, user-specified mpi implementation
+    setenv FOAM_MPI mpi-user
+    _foamEtc config.csh/mpi-user                # <- Adjustments
+    breaksw
+
 case SYSTEMMPI:
     setenv FOAM_MPI mpi-system
+    _foamEtc config.csh/mpi-system              # <- Adjustments (optional)
 
-    if ( ! ($?MPI_ROOT) ) then
+    if ( ! $?MPI_ROOT ) then
         echo
-        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
+        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
         echo "    Please set the environment variable MPI_ROOT to point to" \
              " the base folder for the system MPI in use."
         echo "    Example:"
@@ -86,27 +90,27 @@ case SYSTEMMPI:
     else
         setenv MPI_ARCH_PATH $MPI_ROOT
 
-        if ( ! ($?MPI_ARCH_FLAGS) ) then
+        if ( ! $?MPI_ARCH_FLAGS ) then
             echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
+            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
             echo "    MPI_ARCH_FLAGS is not set. Example:"
             echo
             echo '        setenv MPI_ARCH_FLAGS "-DOMPI_SKIP_MPICXX"'
             echo
         endif
 
-        if ( ! ($?MPI_ARCH_INC) ) then
+        if ( ! $?MPI_ARCH_INC ) then
             echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
+            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
             echo "    MPI_ARCH_INC is not set. Example:"
             echo
             echo '        setenv MPI_ARCH_INC "-isystem $MPI_ROOT/include"'
             echo
         endif
 
-        if ( ! ($?MPI_ARCH_LIBS) ) then
+        if ( ! $?MPI_ARCH_LIBS ) then
             echo
-            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
+            echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
             echo "    MPI_ARCH_LIBS is not set. Example:"
             echo
             echo '        setenv MPI_ARCH_LIBS "-L$MPI_ROOT/lib -lmpi"'
@@ -116,16 +120,12 @@ case SYSTEMMPI:
     breaksw
 
 case MPICH:
-    setenv FOAM_MPI mpich2-1.1.1p1
+    setenv FOAM_MPI mpich-3.2
     setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
     setenv MPI_HOME $MPI_ARCH_PATH
 
     _foamAddPath    $MPI_ARCH_PATH/bin
-
-    # 64-bit on OpenSuSE 12.1 uses lib64 others use lib
     _foamAddLib     $MPI_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
-    _foamAddLib     $MPI_ARCH_PATH/lib
-
     _foamAddMan     $MPI_ARCH_PATH/share/man
     breaksw
 
@@ -133,14 +133,10 @@ case MPICH-GM:
     setenv FOAM_MPI mpich-gm
     setenv MPI_ARCH_PATH /opt/mpi
     setenv MPICH_PATH $MPI_ARCH_PATH
-    setenv GM_LIB_PATH /opt/gm/lib64
+    setenv GM_LIB_PATH /opt/gm/lib$WM_COMPILER_LIB_ARCH
 
     _foamAddPath    $MPI_ARCH_PATH/bin
-
-    # 64-bit on OpenSuSE 12.1 uses lib64 others use lib
     _foamAddLib     $MPI_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
-    _foamAddLib     $MPI_ARCH_PATH/lib
-
     _foamAddLib     $GM_LIB_PATH
     breaksw
 
@@ -191,10 +187,10 @@ case QSMPI:
     breaksw
 
 case SGIMPI:
-    if ( ! $?MPI_ROOT) setenv MPI_ROOT /dummy
+    if ( ! $?MPI_ROOT ) setenv MPI_ROOT /dummy
 
     if ( ! -d "$MPI_ROOT" ) then
-        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
+        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
         echo "    MPI_ROOT not a valid mpt installation directory."
         echo "    Please set MPI_ROOT to the mpt installation directory."
         echo "    (usually done by loading the mpt module)"
@@ -207,7 +203,6 @@ case SGIMPI:
 
     setenv FOAM_MPI ${MPI_ROOT:t}
     setenv MPI_ARCH_PATH $MPI_ROOT
-
 
     if ($?FOAM_VERBOSE && $?prompt) then
         echo "Using SGI MPT:"
@@ -215,16 +210,15 @@ case SGIMPI:
         echo "    FOAM_MPI : $FOAM_MPI"
     endif
 
-
     _foamAddPath    $MPI_ARCH_PATH/bin
     _foamAddLib     $MPI_ARCH_PATH/lib
     breaksw
 
 case INTELMPI:
-    if ( ! $?MPI_ROOT) setenv MPI_ROOT /dummy
+    if ( ! $?MPI_ROOT ) setenv MPI_ROOT /dummy
 
     if ( ! -d "$MPI_ROOT" ) then
-        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/settings:"
+        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
         echo "    MPI_ROOT not a valid mpt installation directory."
         echo "    Please set MPI_ROOT to the mpt installation directory."
         echo "    (usually done by loading the mpt module)"
@@ -238,13 +232,11 @@ case INTELMPI:
     setenv FOAM_MPI ${MPI_ROOT:t}
     setenv MPI_ARCH_PATH $MPI_ROOT
 
-
     if ($?FOAM_VERBOSE && $?prompt) then
         echo "Using INTEL MPT:"
         echo "    MPI_ROOT : $MPI_ROOT"
         echo "    FOAM_MPI : $FOAM_MPI"
     endif
-
 
     _foamAddPath    $MPI_ARCH_PATH/bin64
     _foamAddLib     $MPI_ARCH_PATH/lib64
@@ -257,16 +249,17 @@ endsw
 
 
 # Add (non-dummy) MPI implementation
-# Dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
+# - dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
 if ( "$FOAM_MPI" != dummy ) then
-    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}:${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+    if ( $?FOAM_EXT_LIBBIN ) then   # External libraries (allowed to be unset)
+        _foamAddLib ${FOAM_EXT_LIBBIN}/${FOAM_MPI}
+    endif
+    _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}
 endif
 
 
-# Set the minimum MPI buffer size (used by all platforms except SGI MPI)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Minimum MPI buffer size (used by all except SGI MPI)
 if ( ! $?minBufferSize ) set minBufferSize=20000000
-
 if ( $?MPI_BUFFER_SIZE ) then
     if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
         setenv MPI_BUFFER_SIZE $minBufferSize
@@ -275,8 +268,8 @@ else
     setenv MPI_BUFFER_SIZE $minBufferSize
 endif
 
-# Cleanup environment:
-# ~~~~~~~~~~~~~~~~~~~~
+# Cleanup environment
+# ~~~~~~~~~~~~~~~~~~~
 unset minBufferSize
 
 #------------------------------------------------------------------------------

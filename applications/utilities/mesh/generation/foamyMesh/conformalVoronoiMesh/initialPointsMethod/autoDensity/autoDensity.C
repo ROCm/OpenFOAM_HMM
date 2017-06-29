@@ -553,11 +553,11 @@ bool Foam::autoDensity::fillBox
                       + vector
                         (
                             delta.x()
-                           *(i + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
+                           *(i + 0.5 + 0.1*(rndGen().sample01<scalar>() - 0.5)),
                             delta.y()
-                           *(j + 0.5 + 0.1*(rndGen().scalar01() - 0.5)),
+                           *(j + 0.5 + 0.1*(rndGen().sample01<scalar>() - 0.5)),
                             delta.z()
-                           *(k + 0.5 + 0.1*(rndGen().scalar01() - 0.5))
+                           *(k + 0.5 + 0.1*(rndGen().sample01<scalar>() - 0.5))
                         );
                 }
             }
@@ -662,7 +662,7 @@ bool Foam::autoDensity::fillBox
                 // TODO - is there a lot of cost in the 1/density calc?  Could
                 // assess on
                 //    (1/maxDensity)/(1/localDensity) = minVolume/localVolume
-                if (localDensity/maxDensity > rndGen().scalar01())
+                if (localDensity/maxDensity > rndGen().sample01<scalar>())
                 {
                     scalar localVolume = 1/localDensity;
 
@@ -675,7 +675,7 @@ bool Foam::autoDensity::fillBox
                         scalar addProbability =
                            (totalVolume - volumeAdded)/localVolume;
 
-                        scalar r = rndGen().scalar01();
+                        scalar r = rndGen().sample01<scalar>();
 
                         if (debug)
                         {
@@ -729,7 +729,7 @@ bool Foam::autoDensity::fillBox
         {
             trialPoints++;
 
-            point p = min + cmptMultiply(span, rndGen().vector01());
+            point p = min + cmptMultiply(span, rndGen().sample01<vector>());
 
             scalar localSize = cellShapeControls().cellSize(p);
 
@@ -785,7 +785,7 @@ bool Foam::autoDensity::fillBox
 
                 // Accept possible placements proportional to the relative local
                 // density
-                if (localDensity/maxDensity > rndGen().scalar01())
+                if (localDensity/maxDensity > rndGen().sample01<scalar>())
                 {
                     scalar localVolume = 1/localDensity;
 
@@ -798,7 +798,7 @@ bool Foam::autoDensity::fillBox
                         scalar addProbability =
                             (totalVolume - volumeAdded)/localVolume;
 
-                        scalar r = rndGen().scalar01();
+                        scalar r = rndGen().sample01<scalar>();
 
                         if (debug)
                         {

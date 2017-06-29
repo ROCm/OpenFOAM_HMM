@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -755,11 +755,7 @@ bool Foam::functionObjectList::read()
                         fo2,
                         "functionObject::" + key + "::new"
                     );
-                    if
-                    (
-                        dict.found("writeControl")
-                     || dict.found("outputControl")
-                    )
+                    if (functionObjects::timeControl::entriesPresent(dict))
                     {
                         foPtr.set
                         (
@@ -819,6 +815,21 @@ bool Foam::functionObjectList::read()
         indices_.clear();
     }
 
+    return ok;
+}
+
+
+bool Foam::functionObjectList::filesModified() const
+{
+    bool ok = false;
+    if (execution_)
+    {
+        forAll(*this, objectI)
+        {
+            bool changed = operator[](objectI).filesModified();
+            ok = ok || changed;
+        }
+    }
     return ok;
 }
 

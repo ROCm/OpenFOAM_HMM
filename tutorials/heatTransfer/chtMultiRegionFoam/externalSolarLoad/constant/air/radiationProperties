@@ -72,8 +72,8 @@ solarLoadCoeffs
         C   0.058;  // Model constant
 
     // Radiative flux coupling flags
-    solidCoupled    true;  //Couple through Qr the solid regions (default true)
-    wallCoupled     false; //Couple through Qr wall patches (default false)
+    solidCoupled    true;  //Couple through qr the solid regions (default true)
+    wallCoupled     false; //Couple through qr wall patches (default false)
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,8 +48,7 @@ bool Foam::primitiveMesh::pointInCellBB
 
     if (inflationFraction > SMALL)
     {
-        vector inflation = inflationFraction*vector::one*mag(bb.span());
-        bb = boundBox(bb.min() - inflation, bb.max() + inflation);
+        bb.inflate(inflationFraction);
     }
 
     return bb.contains(p);
@@ -86,6 +85,11 @@ bool Foam::primitiveMesh::pointInCell(const point& p, label celli) const
 Foam::label Foam::primitiveMesh::findNearestCell(const point& location) const
 {
     const vectorField& centres = cellCentres();
+
+    if (!centres.size())
+    {
+        return -1;
+    }
 
     label nearestCelli = 0;
     scalar minProximity = magSqr(centres[0] - location);

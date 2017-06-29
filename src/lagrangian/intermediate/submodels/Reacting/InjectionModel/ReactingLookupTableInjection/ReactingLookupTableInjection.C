@@ -181,7 +181,7 @@ void Foam::ReactingLookupTableInjection<CloudType>::setPositionAndCell
     label injectorI = 0;
     if (randomise_)
     {
-        cachedRandom& rnd = this->owner().rndGen();
+        Random& rnd = this->owner().rndGen();
         injectorI = rnd.position<label>(0, injectorCells_.size() - 1);
     }
     else

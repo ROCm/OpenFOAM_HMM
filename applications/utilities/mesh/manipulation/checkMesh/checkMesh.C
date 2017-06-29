@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,12 +57,18 @@ Usage
     Reconstruct all cellSets and faceSets geometry and write to postProcessing/
     directory according to surfaceFormat (e.g. vtk or ensight)
 
+    \param -writeAllFields \n
+    Writes all mesh quality measures as fields.
+
+    \param -writeFields '(\<fieldName\>)' \n
+    Writes selected mesh quality measures as fields.
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
 #include "timeSelector.H"
 #include "Time.H"
-#include "polyMesh.H"
+#include "fvMesh.H"
 #include "globalMeshData.H"
 #include "surfaceWriter.H"
 #include "vtkSetWriter.H"
@@ -71,6 +77,7 @@ Usage
 #include "checkTopology.H"
 #include "checkGeometry.H"
 #include "checkMeshQuality.H"
+#include "writeFields.H"
 
 using namespace Foam;
 
@@ -97,6 +104,17 @@ int main(int argc, char *argv[])
     );
     argList::addBoolOption
     (
+        "writeAllFields",
+        "write volFields with mesh quality parameters"
+    );
+    argList::addOption
+    (
+        "writeFields",
+        "wordList",
+        "write volFields with selected mesh quality parameters"
+    );
+    argList::addBoolOption
+    (
         "meshQuality",
         "read user-defined mesh quality criterions from system/meshQualityDict"
     );
@@ -110,7 +128,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-    #include "createNamedPolyMesh.H"
+    #include "createNamedMesh.H"
 
     const bool noTopology  = args.optionFound("noTopology");
     const bool allGeometry = args.optionFound("allGeometry");
@@ -119,6 +137,24 @@ int main(int argc, char *argv[])
 
     word surfaceFormat;
     const bool writeSets = args.optionReadIfPresent("writeSets", surfaceFormat);
+    HashSet<word> selectedFields;
+    bool writeFields = args.optionReadIfPresent
+    (
+        "writeFields",
+        selectedFields
+    );
+    if (!writeFields && args.optionFound("writeAllFields"))
+    {
+        selectedFields.insert("nonOrthoAngle");
+        selectedFields.insert("faceWeight");
+        selectedFields.insert("skewness");
+        selectedFields.insert("cellDeterminant");
+        selectedFields.insert("aspectRatio");
+        selectedFields.insert("cellShapes");
+        selectedFields.insert("cellVolume");
+        selectedFields.insert("cellVolumeRatio");
+    }
+
 
     if (noTopology)
     {
@@ -142,6 +178,11 @@ int main(int argc, char *argv[])
         Info<< "Reconstructing and writing " << surfaceFormat
             << " representation"
             << " of all faceSets and cellSets." << nl << endl;
+    }
+    if (selectedFields.size())
+    {
+        Info<< "Writing mesh quality as fields " << selectedFields << nl
+            << endl;
     }
 
 
@@ -234,6 +275,10 @@ int main(int argc, char *argv[])
                 Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
                     << endl;
             }
+
+
+            // Write selected fields
+            Foam::writeFields(mesh, selectedFields);
         }
         else if (state == polyMesh::POINTS_MOVED)
         {
@@ -262,6 +307,10 @@ int main(int argc, char *argv[])
             {
                 Info<< "\nMesh OK.\n" << endl;
             }
+
+
+            // Write selected fields
+            Foam::writeFields(mesh, selectedFields);
         }
     }
 

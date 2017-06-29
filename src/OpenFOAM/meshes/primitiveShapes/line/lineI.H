@@ -91,6 +91,16 @@ inline Point Foam::line<Point, PointRef>::vec() const
 
 
 template<class Point, class PointRef>
+inline Point Foam::line<Point, PointRef>::unitVec() const
+{
+    Point v = b_ - a_;
+    v /= ::Foam::mag(v) + VSMALL;
+
+    return v;
+}
+
+
+template<class Point, class PointRef>
 Foam::PointHit<Point> Foam::line<Point, PointRef>::nearestDist
 (
     const Point& p
@@ -270,7 +280,7 @@ inline Foam::Istream& Foam::operator>>
     is  >> l.a_ >> l.b_;
     is.readEnd("line");
 
-    is.check("Istream& operator>>(Istream&, line&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 

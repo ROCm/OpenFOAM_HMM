@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -177,14 +177,13 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
             const cell& c = cells[celli];
 
             // determine bounding box of tgt cell
-            boundBox cellBb(point::max, point::min);
+            boundBox cellBb(boundBox::invertedBox);
             forAll(c, facei)
             {
                 const face& f = faces[c[facei]];
                 forAll(f, fp)
                 {
-                    cellBb.min() = min(cellBb.min(), points[f[fp]]);
-                    cellBb.max() = max(cellBb.max(), points[f[fp]]);
+                    cellBb.add(points, f);
                 }
             }
 
@@ -276,7 +275,7 @@ void Foam::meshToMesh::distributeCells
     List<labelList>& procLocalFaceIDs
 ) const
 {
-    PstreamBuffers pBufs(Pstream::nonBlocking);
+    PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     points.setSize(Pstream::nProcs());
     nInternalFaces.setSize(Pstream::nProcs(), 0);

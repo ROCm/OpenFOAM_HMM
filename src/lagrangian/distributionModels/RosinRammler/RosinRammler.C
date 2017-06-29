@@ -42,7 +42,7 @@ namespace distributionModels
 Foam::distributionModels::RosinRammler::RosinRammler
 (
     const dictionary& dict,
-    cachedRandom& rndGen
+    Random& rndGen
 )
 :
     distributionModel(typeName, dict, rndGen),

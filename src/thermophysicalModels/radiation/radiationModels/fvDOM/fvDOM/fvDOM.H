@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -104,13 +104,13 @@ class fvDOM
         volScalarField G_;
 
         //- Total radiative heat flux [W/m2]
-        volScalarField Qr_;
+        volScalarField qr_;
 
          //- Emmited radiative heat flux [W/m2]
-        volScalarField Qem_;
+        volScalarField qem_;
 
         //- Incidet radiative heat flux [W/m2]
-        volScalarField Qin_;
+        volScalarField qin_;
 
         //- Total absorption coefficient [1/m]
         volScalarField a_;
@@ -252,13 +252,13 @@ public:
             inline const volScalarField& G() const;
 
             //- Const access to total radiative heat flux field
-            inline const volScalarField& Qr() const;
+            inline const volScalarField& qr() const;
 
             //- Const access to incident radiative heat flux field
-            inline const volScalarField& Qin() const;
+            inline const volScalarField& qin() const;
 
             //- Const access to emitted radiative heat flux field
-            inline const volScalarField& Qem() const;
+            inline const volScalarField& qem() const;
 
             //- Const access to black body
             inline const blackBodyEmission& blackBody() const;

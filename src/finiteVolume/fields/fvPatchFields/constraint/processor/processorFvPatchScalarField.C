@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ template<>
 void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 (
     scalarField&,
+    const bool add,
     const scalarField& psiInternal,
     const scalarField&,
     const direction,
@@ -44,7 +45,11 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
 {
     this->patch().patchInternalField(psiInternal, scalarSendBuf_);
 
-    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    if
+    (
+        commsType == Pstream::commsTypes::nonBlocking
+     && !Pstream::floatTransfer
+    )
     {
         // Fast path.
         if (debug && !this->ready())
@@ -60,7 +65,7 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
         outstandingRecvRequest_ = UPstream::nRequests();
         UIPstream::read
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
@@ -71,7 +76,7 @@ void processorFvPatchField<scalar>::initInterfaceMatrixUpdate
         outstandingSendRequest_ = UPstream::nRequests();
         UOPstream::write
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             procPatch_.neighbProcNo(),
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
@@ -92,6 +97,7 @@ template<>
 void processorFvPatchField<scalar>::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField&,
     const scalarField& coeffs,
     const direction,
@@ -103,9 +109,11 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
         return;
     }
 
-    const labelUList& faceCells = this->patch().faceCells();
-
-    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    if
+    (
+        commsType == Pstream::commsTypes::nonBlocking
+     && !Pstream::floatTransfer
+    )
     {
         // Fast path.
         if
@@ -122,10 +130,7 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
 
 
         // Consume straight from scalarReceiveBuf_
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*scalarReceiveBuf_[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
     }
     else
     {
@@ -134,10 +139,7 @@ void processorFvPatchField<scalar>::updateInterfaceMatrix
             procPatch_.compressedReceive<scalar>(commsType, this->size())()
         );
 
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
+        this->addToInternalField(result, !add, coeffs, pnf);
     }
 
     const_cast<processorFvPatchField<scalar>&>(*this).updatedMatrix() = true;

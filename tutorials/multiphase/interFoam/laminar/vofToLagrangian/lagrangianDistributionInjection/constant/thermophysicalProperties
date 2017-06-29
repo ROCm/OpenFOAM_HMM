@@ -32,7 +32,6 @@ N2
 {
     specie
     {
-        nMoles      1;
         molWeight   28;
     }
     thermodynamics
@@ -51,7 +50,6 @@ H2O
 {
     specie
     {
-        nMoles      1;
         molWeight   28;
     }
     thermodynamics

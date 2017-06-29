@@ -25,11 +25,11 @@ FoamFile
 
         reactingOneDimCoeffs
         {
-            QrHSource       no; //Energy source term due in depht radiation
+            qrHSource       no; //Energy source term due in depht radiation
 
             filmCoupled     false;
 
-            radFluxName     Qr;
+            qrHSource       on;
 
             minimumDelta    1e-6;
 

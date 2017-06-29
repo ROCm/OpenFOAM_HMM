@@ -25,7 +25,7 @@ Class
     Foam::patchIdentifier
 
 Description
-    Identifies patch by name, patch index and physical type
+    Identifies a patch by name, patch index and physical type
 
 SourceFiles
     patchIdentifier.C
@@ -48,11 +48,11 @@ class dictionary;
 // Forward declaration of friend functions and operators
 
 class patchIdentifier;
-Ostream& operator<<(Ostream&, const patchIdentifier&);
+Ostream& operator<<(Ostream& os, const patchIdentifier& p);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class patchIdentifier Declaration
+                       Class patchIdentifier Declaration
 \*---------------------------------------------------------------------------*/
 
 class patchIdentifier
@@ -68,7 +68,7 @@ class patchIdentifier
         //- Optional physical type
         mutable word physicalType_;
 
-        //- Optional groups patch belongs to
+        //- Optional groups to which the patch belongs
         wordList inGroups_;
 
 public:
@@ -88,14 +88,14 @@ public:
         patchIdentifier
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const label index
         );
 
-        //- Construct from geometric patch, resetting the index
+        //- Copy construct from geometric patch, resetting the index
         patchIdentifier
         (
-            const patchIdentifier&,
+            const patchIdentifier& p,
             const label index
         );
 
@@ -106,64 +106,64 @@ public:
 
     // Member Functions
 
-        //- Return name
+        //- Return the patch name
         const word& name() const
         {
             return name_;
         }
 
-        //- Return name for modification
+        //- Modifiable patch name
         word& name()
         {
             return name_;
         }
 
-        //- Return the optional physical type of the patch
+        //- The optional physical type of the patch
         const word& physicalType() const
         {
             return physicalType_;
         }
 
-        //- Return the optional physical type of the patch for modification
+        //- Modifiable optional physical type of the patch
         word& physicalType()
         {
             return physicalType_;
         }
 
-        //- Return the index of this patch in the boundaryMesh
+        //- The index of this patch in the boundaryMesh
         label index() const
         {
             return index_;
         }
 
-        //- Return the index of this patch in the boundaryMesh for modification
+        //- Modifiable the index of this patch in the boundaryMesh
         label& index()
         {
             return index_;
         }
 
-        //- Return the optional groups patch belongs to
+        //- The optional groups that the patch belongs to
         const wordList& inGroups() const
         {
             return inGroups_;
         }
 
-        //- Return the optional groups patch belongs to for modification
+        //- Modifiable optional groups that the patch belongs to
         wordList& inGroups()
         {
             return inGroups_;
         }
 
-        //- Test if in group
-        bool inGroup(const word&) const;
+        //- Check if the patch is in named group
+        bool inGroup(const word& name) const;
 
         //- Write patchIdentifier as a dictionary
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const patchIdentifier&);
+        friend Ostream& operator<<(Ostream& os, const patchIdentifier& p);
 };
 
 

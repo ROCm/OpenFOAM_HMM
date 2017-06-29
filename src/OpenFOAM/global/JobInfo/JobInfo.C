@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,74 +28,14 @@ License
 #include "clock.H"
 #include "OFstream.H"
 #include "Pstream.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::JobInfo::writeJobInfo(Foam::debug::infoSwitch("writeJobInfo", 0));
 Foam::JobInfo Foam::jobInfo;
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::JobInfo::JobInfo()
-:
-    runningJobPath_(),
-    finishedJobPath_(),
-    cpuTime_()
-{
-    name() = "JobInfo";
-
-    if (writeJobInfo && Pstream::master())
-    {
-        string baseDir = getEnv("FOAM_JOB_DIR");
-        string jobFile = hostName() + '.' + Foam::name(pid());
-
-        fileName runningDir(baseDir/"runningJobs");
-        fileName finishedDir(baseDir/"finishedJobs");
-
-        runningJobPath_  = runningDir/jobFile;
-        finishedJobPath_ = finishedDir/jobFile;
-
-        if (baseDir.empty())
-        {
-            FatalErrorInFunction
-                << "Cannot get JobInfo directory $FOAM_JOB_DIR"
-                << Foam::exit(FatalError);
-        }
-
-        if (!isDir(runningDir) && !mkDir(runningDir))
-        {
-            FatalErrorInFunction
-                << "Cannot make JobInfo directory " << runningDir
-                << Foam::exit(FatalError);
-        }
-
-        if (!isDir(finishedDir) && !mkDir(finishedDir))
-        {
-            FatalErrorInFunction
-                << "Cannot make JobInfo directory " << finishedDir
-                << Foam::exit(FatalError);
-        }
-    }
-
-    constructed = true;
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::JobInfo::~JobInfo()
-{
-    if (writeJobInfo && constructed && Pstream::master())
-    {
-        mv(runningJobPath_, finishedJobPath_);
-    }
-
-    constructed = false;
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::JobInfo::write(Ostream& os) const
 {
@@ -118,21 +58,6 @@ bool Foam::JobInfo::write(Ostream& os) const
 }
 
 
-void Foam::JobInfo::write() const
-{
-    if (writeJobInfo && Pstream::master())
-    {
-        if (!write(OFstream(runningJobPath_)()))
-        {
-            FatalErrorInFunction
-                << "Failed to write to JobInfo file "
-                << runningJobPath_
-                << Foam::exit(FatalError);
-        }
-    }
-}
-
-
 void Foam::JobInfo::end(const word& terminationType)
 {
     if (writeJobInfo && constructed && Pstream::master())
@@ -146,11 +71,84 @@ void Foam::JobInfo::end(const word& terminationType)
             add("termination", terminationType);
         }
 
-        rm(runningJobPath_);
-        write(OFstream(finishedJobPath_)());
+        Foam::rm(runningDir_/jobFileName_);
+        write(OFstream(finishedDir_/jobFileName_)());
     }
 
     constructed = false;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::JobInfo::JobInfo()
+:
+    jobFileName_(),
+    runningDir_(),
+    finishedDir_(),
+    cpuTime_()
+{
+    name() = "JobInfo";
+
+    if (writeJobInfo && Pstream::master())
+    {
+        string jobDir = getEnv("FOAM_JOB_DIR");
+        if (jobDir.empty())
+        {
+            // Fallback: ~/.OpenFOAM/jobControl
+            jobDir = home()/WM_USER_RESOURCE_DIRNAME/"jobControl";
+        }
+
+        jobFileName_ = hostName() + '.' + Foam::name(pid());
+        runningDir_  = jobDir/"runningJobs";
+        finishedDir_ = jobDir/"finishedJobs";
+
+        if (!isDir(jobDir) && !mkDir(jobDir))
+        {
+            FatalErrorInFunction
+                << "No JobInfo directory:  FOAM_JOB_DIR=" << jobDir
+                << Foam::exit(FatalError);
+        }
+        if (!isDir(runningDir_) && !mkDir(runningDir_))
+        {
+            FatalErrorInFunction
+                << "No JobInfo directory:  " << runningDir_
+                << Foam::exit(FatalError);
+        }
+        if (!isDir(finishedDir_) && !mkDir(finishedDir_))
+        {
+            FatalErrorInFunction
+                << "No JobInfo directory:  " << finishedDir_
+                << Foam::exit(FatalError);
+        }
+    }
+
+    constructed = true;
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::JobInfo::~JobInfo()
+{
+    signalEnd();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::JobInfo::write() const
+{
+    if (writeJobInfo && constructed && Pstream::master())
+    {
+        const fileName output = runningDir_/jobFileName_;
+        if (!write(OFstream(output)()))
+        {
+            FatalErrorInFunction
+                << "Failed to write to JobInfo file " << output
+                << Foam::exit(FatalError);
+        }
+    }
 }
 
 
@@ -176,9 +174,8 @@ void Foam::JobInfo::signalEnd() const
 {
     if (writeJobInfo && constructed && Pstream::master())
     {
-        mv(runningJobPath_, finishedJobPath_);
+        Foam::mv(runningDir_/jobFileName_, finishedDir_/jobFileName_);
     }
-
     constructed = false;
 }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,9 +27,9 @@ License
 #include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
-#include "Ostream.H"
 #include "OFstream.H"
 #include "ListOps.H"
+#include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -172,7 +172,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
             labelUList& f = static_cast<labelUList&>(dynVertices);
 
-            if (MeshedSurface<Face>::isTri() && f.size() > 3)
+            if (faceTraits<Face>::isTri() && f.size() > 3)
             {
                 // simple face triangulation about f[0]
                 // points may be incomplete
@@ -180,7 +180,7 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                 {
                     label fp2 = f.fcIndex(fp1);
 
-                    dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
+                    dynFaces.append(Face{f[0], f[fp1], f[fp2]});
                     dynZones.append(zoneI);
                     dynSizes[zoneI]++;
                 }
@@ -237,7 +237,7 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 
 
     os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
-        << "o " << os.name().lessExt().name() << nl
+        << "o " << os.name().nameLessExt() << nl
         << nl
         << "# points : " << pointLst.size() << nl
         << "# faces  : " << faceLst.size() << nl

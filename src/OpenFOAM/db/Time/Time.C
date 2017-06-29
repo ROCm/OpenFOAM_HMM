@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,7 @@ License
 #include "argList.H"
 #include "HashSet.H"
 #include "profiling.H"
+#include "demandDrivenData.H"
 
 #include <sstream>
 
@@ -99,12 +100,13 @@ void Foam::Time::adjustDeltaT()
 
     if (adjustTime)
     {
-        scalar nSteps = timeToNextWrite/deltaT_ - SMALL;
+        scalar nSteps = timeToNextWrite/deltaT_;
 
         // For tiny deltaT the label can overflow!
         if (nSteps < labelMax)
         {
-            label nStepsToNextWrite = label(nSteps) + 1;
+            // nSteps can be < 1 so make sure at least 1
+            label nStepsToNextWrite = max(1, round(nSteps));
 
             scalar newDeltaT = timeToNextWrite/nStepsToNextWrite;
 
@@ -186,6 +188,8 @@ void Foam::Time::setControls()
         int oldPrecision = precision_;
         int requiredPrecision = -1;
         bool found = false;
+        word oldTime(timeName());
+
         for
         (
             precision_ = maxPrecision_;
@@ -195,6 +199,14 @@ void Foam::Time::setControls()
         {
             // Update the time formatting
             setTime(startTime_, 0);
+
+            // Check that the time name has changed otherwise exit loop
+            word newTime(timeName());
+            if (newTime == oldTime)
+            {
+                break;
+            }
+            oldTime = newTime;
 
             // Check the existence of the time directory with the new format
             found = exists(timePath(), false);
@@ -320,9 +332,14 @@ void Foam::Time::setControls()
 }
 
 
-void Foam::Time::setMonitoring(bool forceProfiling)
+void Foam::Time::setMonitoring(const bool forceProfiling)
 {
     const dictionary* profilingDict = controlDict_.subDictPtr("profiling");
+    if (!profilingDict)
+    {
+        // ... or from etc/controlDict
+        profilingDict = debug::controlDict().subDictPtr("profiling");
+    }
 
     // initialize profiling on request
     // otherwise rely on profiling entry within controlDict
@@ -408,6 +425,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -467,6 +485,7 @@ Foam::Time::Time
     (
         args.parRunControl().parRun(),
         args.rootPath(),
+        args.distributed(),
         args.globalCaseName(),
         args.caseName(),
         systemName,
@@ -475,6 +494,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -514,7 +534,9 @@ Foam::Time::Time
         *this,
         argList::validOptions.found("withFunctionObjects")
       ? args.optionFound("withFunctionObjects")
-      : !args.optionFound("noFunctionObjects")
+      : argList::validOptions.found("noFunctionObjects")
+      ? !args.optionFound("noFunctionObjects")
+      : false
     )
 {
     libs_.open(controlDict_, "libs");
@@ -550,6 +572,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -589,7 +612,6 @@ Foam::Time::Time
 {
     libs_.open(controlDict_, "libs");
 
-
     // Explicitly set read flags on objectRegistry so anything constructed
     // from it reads as well (e.g. fvSolution).
     readOpt() = IOobject::MUST_READ_IF_MODIFIED;
@@ -621,6 +643,7 @@ Foam::Time::Time
 
     objectRegistry(*this),
 
+    loopProfiling_(nullptr),
     libs_(),
 
     controlDict_
@@ -664,6 +687,8 @@ Foam::Time::Time
 
 Foam::Time::~Time()
 {
+    deleteDemandDrivenData(loopProfiling_);
+
     forAllReverse(controlDict_.watchIndices(), i)
     {
         removeWatch(controlDict_.watchIndices()[i]);
@@ -747,18 +772,15 @@ const Foam::fileName& Foam::Time::getFile(const label watchIndex) const
 }
 
 
-Foam::fileMonitor::fileState Foam::Time::getState
-(
-    const label watchFd
-) const
+Foam::fileMonitor::fileState Foam::Time::getState(const label watchIndex) const
 {
-    return monitorPtr_().getState(watchFd);
+    return monitorPtr_().getState(watchIndex);
 }
 
 
-void Foam::Time::setUnmodified(const label watchFd) const
+void Foam::Time::setUnmodified(const label watchIndex) const
 {
-    monitorPtr_().setUnmodified(watchFd);
+    monitorPtr_().setUnmodified(watchIndex);
 }
 
 
@@ -905,13 +927,15 @@ Foam::dimensionedScalar Foam::Time::endTime() const
 
 bool Foam::Time::run() const
 {
-    bool running = value() < (endTime_ - 0.5*deltaT_);
+    deleteDemandDrivenData(loopProfiling_);
+
+    bool isRunning = value() < (endTime_ - 0.5*deltaT_);
 
     if (!subCycling_)
     {
         // Only execute when the condition is no longer true
         // ie, when exiting the control loop
-        if (!running && timeIndex_ != startTimeIndex_)
+        if (!isRunning && timeIndex_ != startTimeIndex_)
         {
             // Ensure functionObjects execute on last time step
             // (and hence write uptodate functionObjectProperties)
@@ -925,7 +949,7 @@ bool Foam::Time::run() const
         }
     }
 
-    if (running)
+    if (isRunning)
     {
         if (!subCycling_)
         {
@@ -941,27 +965,45 @@ bool Foam::Time::run() const
                 addProfiling(functionObjects, "functionObjects.execute()");
                 functionObjects_.execute();
             }
+
+            // Check if the execution of functionObjects require re-reading
+            // any files. This moves effect of e.g. 'timeActivatedFileUpdate'
+            // one time step forward. Note that we cannot call
+            // readModifiedObjects from within timeActivatedFileUpdate since
+            // it might re-read the functionObjects themselves (and delete
+            // the timeActivatedFileUpdate one)
+            if (functionObjects_.filesModified())
+            {
+                const_cast<Time&>(*this).readModifiedObjects();
+            }
         }
 
-        // Update the "running" status following the
+        // Update the "is-running" status following the
         // possible side-effects from functionObjects
-        running = value() < (endTime_ - 0.5*deltaT_);
+        isRunning = value() < (endTime_ - 0.5*deltaT_);
+
+        // (re)trigger profiling
+        if (profiling::active())
+        {
+            loopProfiling_ =
+                new profilingTrigger("time.run() " + objectRegistry::name());
+        }
     }
 
-    return running;
+    return isRunning;
 }
 
 
 bool Foam::Time::loop()
 {
-    bool running = run();
+    const bool isRunning = run();
 
-    if (running)
+    if (isRunning)
     {
         operator++();
     }
 
-    return running;
+    return isRunning;
 }
 
 
@@ -1052,19 +1094,19 @@ void Foam::Time::setEndTime(const scalar endTime)
 void Foam::Time::setDeltaT
 (
     const dimensionedScalar& deltaT,
-    const bool bAdjustDeltaT
+    const bool adjust
 )
 {
-    setDeltaT(deltaT.value(), bAdjustDeltaT);
+    setDeltaT(deltaT.value(), adjust);
 }
 
 
-void Foam::Time::setDeltaT(const scalar deltaT, const bool bAdjustDeltaT)
+void Foam::Time::setDeltaT(const scalar deltaT, const bool adjust)
 {
     deltaT_ = deltaT;
     deltaTchanged_ = true;
 
-    if (bAdjustDeltaT)
+    if (adjust)
     {
         adjustDeltaT();
     }

@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -47,10 +47,12 @@
 #     be used during the build process. See further notes there.
 #
 #------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set adios_version=ADIOS-1.11.0
+set adios_version=ADIOS-1.11.1
 setenv ADIOS_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
 
+# END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if ($?FOAM_VERBOSE && $?prompt) then
     echo "Using adios ($adios_version)  ->  $ADIOS_ARCH_PATH"
@@ -66,6 +68,6 @@ if ( "$ending" != "adios-none" && "$ending" != "adios-system" ) then
     _foamAddPath $ADIOS_ARCH_PATH/bin
 endif
 
-unset adios_version ending cleaned
+unset adios_version ending
 
 #------------------------------------------------------------------------------

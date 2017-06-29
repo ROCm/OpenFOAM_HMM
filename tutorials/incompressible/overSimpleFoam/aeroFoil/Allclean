@@ -1,0 +1,20 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+
+cd aeroFoil_snappyHexMesh
+cleanCase
+
+cd ../aeroFoil_overset
+cleanCase
+rm -rf 0
+
+cd ../background_snappyHexMesh
+cleanCase
+
+
+cd ../background_overset
+cleanCase
+./Allclean

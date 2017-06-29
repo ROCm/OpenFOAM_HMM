@@ -68,8 +68,8 @@ USAGE
     exit 1
 }
 
-# Set true to clean-up file if interupted
-cleanup=
+# Set true to clean-up file if interrupted
+unset cleanup
 
 while [ "$#" -gt 0 ]
 do
@@ -78,7 +78,7 @@ do
         usage
         ;;
     -kill | -clean)
-        cleanup="true"
+        cleanup=true
         shift
         ;;
     -*)
@@ -110,7 +110,7 @@ makefile="$WM_COLLECT_DIR.Makefile"
 
 
 # Clean-up files and exit
-if [ -n "$cleanup" ]
+if [ "$cleanup" = true ]
 then
     rm -rf $WM_COLLECT_DIR
     rm -f $makefile
@@ -142,31 +142,23 @@ then
     echo -e "\t$E cd $PWD && \\" >> $file
     echo -e "\t${@:1:($#-1)} $object" >> $file
     echo >> $file
-else
-    if [ -d $WM_COLLECT_DIR ]
-    then
-        # Collect all the makefiles into a single makefiles for this build
-        (cd $WM_COLLECT_DIR && ls -1rt | xargs cat > $makefile)
+elif [ -d $WM_COLLECT_DIR ]
+then
+    # Collect all the makefiles into a single makefiles for this build
+    (cd $WM_COLLECT_DIR && ls -1rt | xargs cat > $makefile)
 
-        # Add a build rule for all of the targets
-        echo 'all: $(OBJECTS)' >> $makefile
+    # Add a build rule for all of the targets
+    echo 'all: $(OBJECTS)' >> $makefile
 
-        # Clear out all of the target makefiles
-        rm -rf $WM_COLLECT_DIR
+    # Clear out all of the target makefiles
+    rm -rf $WM_COLLECT_DIR
 
-        # Run make on the collected makefile
-        make -j $WM_NCOMPPROCS -f $makefile all
+    # Run make on the collected makefile
+    make -j $WM_NCOMPPROCS -f $makefile all
 
-        rm -f $makefile
-    fi
+    rm -f $makefile
 fi
 
-
-#------------------------------------------------------------------------------
-# Cleanup local variables and functions
-#------------------------------------------------------------------------------
-
-unset Script usage
-
+exit 0 # clean exit
 
 #------------------------------------------------------------------------------

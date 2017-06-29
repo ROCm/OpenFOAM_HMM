@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,7 @@ Group
 
 Description
     Abstract base class for ddt schemes.
+
 
 SourceFiles
     ddtScheme.C
@@ -76,6 +77,9 @@ protected:
 
         const fvMesh& mesh_;
 
+        //- Input for fvcDdtPhiCoeff (-1 default)
+        scalar ddtPhiCoeff_;
+
 
     // Private Member Functions
 
@@ -109,13 +113,15 @@ public:
         //- Construct from mesh
         ddtScheme(const fvMesh& mesh)
         :
-            mesh_(mesh)
+            mesh_(mesh),
+            ddtPhiCoeff_(-1)
         {}
 
         //- Construct from mesh and Istream
-        ddtScheme(const fvMesh& mesh, Istream&)
+        ddtScheme(const fvMesh& mesh, Istream& is)
         :
-            mesh_(mesh)
+            mesh_(mesh),
+            ddtPhiCoeff_(-1)
         {}
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,6 +121,9 @@ public:
 
             //- Dictionary of controls
             dictionary controlDict_;
+
+            //- Default maximum number of iterations in the solver
+            static const label defaultMaxIter_ = 1000;
 
             //- Maximum number of iterations in the solver
             label maxIter_;
@@ -614,6 +617,7 @@ public:
             //  for matrix operations
             void initMatrixInterfaces
             (
+                const bool add,
                 const FieldField<Field, LUType>& interfaceCoeffs,
                 const Field<Type>& psiif,
                 Field<Type>& result
@@ -622,6 +626,7 @@ public:
             //- Update interfaced interfaces for matrix operations
             void updateMatrixInterfaces
             (
+                const bool add,
                 const FieldField<Field, LUType>& interfaceCoeffs,
                 const Field<Type>& psiif,
                 Field<Type>& result

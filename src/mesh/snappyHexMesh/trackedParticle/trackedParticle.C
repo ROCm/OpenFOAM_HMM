@@ -81,12 +81,7 @@ Foam::trackedParticle::trackedParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "trackedParticle::trackedParticle"
-        "(const Cloud<trackedParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -270,9 +265,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
         );
     }
 
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const trackedParticle&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

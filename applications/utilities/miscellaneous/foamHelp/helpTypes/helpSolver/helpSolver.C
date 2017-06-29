@@ -63,7 +63,6 @@ void Foam::helpTypes::helpSolver::init()
 {
     helpType::init();
 
-    argList::validArgs.append("solver");
     argList::addBoolOption
     (
         "read",

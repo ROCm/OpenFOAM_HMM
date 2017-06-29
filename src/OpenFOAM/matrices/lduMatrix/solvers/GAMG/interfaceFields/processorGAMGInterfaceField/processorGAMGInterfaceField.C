@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,6 +93,7 @@ Foam::processorGAMGInterfaceField::~processorGAMGInterfaceField()
 void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 (
     scalarField&,
+    const bool,
     const scalarField& psiInternal,
     const scalarField&,
     const direction,
@@ -104,14 +105,18 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 
     procInterface_.interfaceInternalField(psiInternal, scalarSendBuf_);
 
-    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    if
+    (
+        commsType == Pstream::commsTypes::nonBlocking
+     && !Pstream::floatTransfer
+    )
     {
         // Fast path.
         scalarReceiveBuf_.setSize(scalarSendBuf_.size());
         outstandingRecvRequest_ = UPstream::nRequests();
         IPstream::read
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
             reinterpret_cast<char*>(scalarReceiveBuf_.begin()),
             scalarReceiveBuf_.byteSize(),
@@ -122,7 +127,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
         outstandingSendRequest_ = UPstream::nRequests();
         OPstream::write
         (
-            Pstream::nonBlocking,
+            Pstream::commsTypes::nonBlocking,
             procInterface_.neighbProcNo(),
             reinterpret_cast<const char*>(scalarSendBuf_.begin()),
             scalarSendBuf_.byteSize(),
@@ -144,6 +149,7 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
 void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
 (
     scalarField& result,
+    const bool add,
     const scalarField&,
     const scalarField& coeffs,
     const direction cmpt,
@@ -158,9 +164,11 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     label oldWarn = UPstream::warnComm;
     UPstream::warnComm = comm();
 
-    const labelUList& faceCells = procInterface_.faceCells();
-
-    if (commsType == Pstream::nonBlocking && !Pstream::floatTransfer)
+    if
+    (
+        commsType == Pstream::commsTypes::nonBlocking
+     && !Pstream::floatTransfer
+    )
     {
         // Fast path.
         if
@@ -181,10 +189,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         transformCoupleField(scalarReceiveBuf_, cmpt);
 
         // Multiply the field by coefficients and add into the result
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*scalarReceiveBuf_[elemI];
-        }
+        addToInternalField(result, !add, coeffs, scalarReceiveBuf_);
     }
     else
     {
@@ -194,10 +199,7 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
         );
         transformCoupleField(pnf, cmpt);
 
-        forAll(faceCells, elemI)
-        {
-            result[faceCells[elemI]] -= coeffs[elemI]*pnf[elemI];
-        }
+        addToInternalField(result, !add, coeffs, pnf);
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;

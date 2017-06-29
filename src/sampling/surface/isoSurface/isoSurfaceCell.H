@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -330,7 +330,7 @@ public:
             const scalarField& pointValues,
             const scalar iso,
             const bool regularise,
-            const boundBox& bounds = boundBox::greatBox,
+            const boundBox& bounds = boundBox::invertedBox,
             const scalar mergeTol = 1e-6    // fraction of bounding box
         );
 

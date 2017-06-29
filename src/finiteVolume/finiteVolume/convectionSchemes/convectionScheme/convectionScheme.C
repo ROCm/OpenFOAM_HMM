@@ -82,7 +82,7 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
     typename IstreamConstructorTable::iterator cstrIter =
         IstreamConstructorTablePtr_->find(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -128,7 +128,7 @@ tmp<convectionScheme<Type>> convectionScheme<Type>::New
     typename MultivariateConstructorTable::iterator cstrIter =
         MultivariateConstructorTablePtr_->find(schemeName);
 
-    if (cstrIter == MultivariateConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (

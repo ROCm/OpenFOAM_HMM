@@ -41,7 +41,7 @@ Foam::kineticTheoryModels::frictionalStressModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(frictionalStressModelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalError
             << "frictionalStressModel::New(const dictionary&) : " << endl

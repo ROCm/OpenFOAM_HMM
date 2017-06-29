@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     {
         // Collect mesh faces and bounding box
         labelList bndFaces(nFaces);
-        treeBoundBox overallBb(treeBoundBox::invertedBox);
+        treeBoundBox overallBb(boundBox::invertedBox);
 
         nFaces = 0;
         forAll(patchIDs, i)
@@ -79,12 +79,9 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             {
                 bndFaces[nFaces++] = pp.start()+i;
                 const face& f = pp[i];
-                forAll(f, fp)
-                {
-                    const point& pt = pp.points()[f[fp]];
-                    overallBb.min() = min(overallBb.min(), pt);
-                    overallBb.max() = max(overallBb.max(), pt);
-                }
+
+                // Without reduction.
+                overallBb.add(pp.points(), f);
             }
         }
 
@@ -132,11 +129,11 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
             if (isA<emptyPolyPatch>(bm[patchi]))
             {
                 WarningInFunction
-                << " The sample point: " << sample
-                << " belongs to " << patchi
-                << " which is an empty patch. This is not permitted. "
-                << " This sample will not be included "
-                << endl;
+                    << " The sample point: " << sample
+                    << " belongs to " << patchi
+                    << " which is an empty patch. This is not permitted. "
+                    << " This sample will not be included "
+                    << endl;
             }
             else if (info.hit())
             {
@@ -200,14 +197,23 @@ void Foam::patchProbes::findElements(const fvMesh& mesh)
     elementList_ = -1;
     faceList_.setSize(nearest.size());
     faceList_ = -1;
+    processor_.setSize(nearest.size());
+    processor_ = -1;
+
+    processor_.setSize(size());
+    processor_ = -1;
 
     forAll(nearest, sampleI)
     {
+        processor_[sampleI] = nearest[sampleI].second().second();
         if (nearest[sampleI].second().second() == Pstream::myProcNo())
         {
             // Store the face to sample
             faceList_[sampleI] = nearest[sampleI].first().index();
+            label facei = faceList_[sampleI];
+            processor_[sampleI] = (facei != -1 ? Pstream::myProcNo() : -1);
         }
+        reduce(processor_[sampleI], maxOp<label>());
     }
 }
 

@@ -11,6 +11,4 @@ writer/ccmWriter.C
 writer/ccmWriterMesh.C
 writer/ccmWriterSolution.C
 
-/* misc/mergePoints1.C */
-
 LIB = $(FOAM_LIBBIN)/libccm

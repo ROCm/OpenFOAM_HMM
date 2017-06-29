@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,7 @@ Usage
         Property     | Description             | Required    | Default value
         type         | type name: readFields   | yes         |
         fields       | list of fields to read  |  no         |
+        readOnStart  | flag to start reading on start-up | no  | yes
         log          | Log to standard output  | no          | yes
     \endtable
 
@@ -87,6 +88,9 @@ protected:
 
         //- Fields to load
         wordList fieldSet_;
+
+        //- Flag to read on construction
+        bool readOnStart_;
 
 
     // Protected Member Functions

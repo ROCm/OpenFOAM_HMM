@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -778,8 +778,8 @@ bool Foam::sampledTriSurfaceMesh::update()
         surface_.triSurface::points(),
         surface_.triSurface::meshPoints()
     );
-    bb.min() = max(bb.min(), mesh().bounds().min());
-    bb.max() = min(bb.max(), mesh().bounds().max());
+
+    bb.intersect(mesh().bounds());
 
     // Extend a bit
     const vector span(bb.span());

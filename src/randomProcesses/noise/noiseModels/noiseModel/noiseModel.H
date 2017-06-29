@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,17 +35,35 @@ Description
     fl              25;
     fu              25;
     startTime       0;
+
+    outputPrefix    "test1";
+
+    // Optional write options dictionary
+    writeOptions
+    {
+        writePrmsf  no;
+        writeSPL    yes;
+        writePSD    yes;
+        writePSDf   no;
+        writeOctaves yes;
+    }
     \endverbatim
 
     where
     \table
-        Property    | Description                   | Required  | Default value
-        rhoRef      | Reference density             | no        | 1
-        N           | Number of samples in sampling window | no | 65536 (2^16)
-        fl          | Lower frequency bounds        | no        | 25
-        fu          | Upper frequency bounds        | no        | 10000
-        startTime   | Start time                    | no        | 0
-        graphFormat | Graph format                  | no        | raw
+        Property     | Description                   | Required  | Default value
+        rhoRef       | Reference density             | no        | 1
+        N            | Number of samples in sampling window | no | 65536 (2^16)
+        fl           | Lower frequency bounds        | no        | 25
+        fu           | Upper frequency bounds        | no        | 10000
+        startTime    | Start time                    | no        | 0
+        outputPrefix | Prefix applied to output files| no        | ''
+        graphFormat  | Graph format                  | no        | raw
+        writePrmsf   | Write Prmsf data              | no        | yes
+        writeSPL     | Write SPL data                | no        | yes
+        writePSD     | Write PSD data                | no        | yes
+        writePSDf    | Write PSDf data               | no        | yes
+        writeOctaves | Write octaves data            | no        | yes
     \endtable
 
 Note
@@ -108,6 +126,9 @@ protected:
         //- Upper frequency limit, default = 10kHz
         scalar fUpper_;
 
+        //- Flag to indicate that custom frequency bounds are being used
+        bool customBounds_;
+
         //- Start time, default = 0s
         scalar startTime_;
 
@@ -118,7 +139,45 @@ protected:
         word graphFormat_;
 
 
+        // Data validation
+
+            //- Min pressure value
+            scalar minPressure_;
+
+            //- Min pressure value
+            scalar maxPressure_;
+
+
+        // Write options
+
+            //- Output  file prefix, default = ''
+            fileName outputPrefix_;
+
+            //- Write Prmsf; default = yes
+            bool writePrmsf_;
+
+            //- Write SPL; default = yes
+            bool writeSPL_;
+
+            //- Write PSD; default = yes
+            bool writePSD_;
+
+            //- Write PSDf; default = yes
+            bool writePSDf_;
+
+            //- Write writeOctaves; default = yes
+            bool writeOctaves_;
+
+
     // Protected Member Functions
+
+        //- Helper function to read write options and provide info feedback
+        void readWriteOption
+        (
+            const dictionary& dict,
+            const word& lookup,
+            bool& option
+        ) const;
 
         //- Check and return uniform time step
         scalar checkUniformTimeStep
@@ -126,12 +185,18 @@ protected:
             const scalarList& times
         ) const;
 
+        //- Return true if all pressure data is within min/max bounds
+        bool validateBounds(const scalarList& p) const;
+
         //- Find and return start time index
         label findStartTimeIndex
         (
             const instantList& allTimes,
             const scalar startTime
         ) const;
+
+        //- Return the base output directory
+        fileName baseFileDir(const label dataseti) const;
 
 
 public:

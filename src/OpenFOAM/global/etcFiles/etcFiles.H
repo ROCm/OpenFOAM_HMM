@@ -44,7 +44,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Search for directories from user/group/shipped directories.
+//- Search for directories from user/group/other directories.
 //  The search scheme allows for version-specific and
 //  version-independent files using the following hierarchy:
 //  - \b user settings:
@@ -56,14 +56,19 @@ namespace Foam
 //  - \b group (site) settings (when $WM_PROJECT_SITE is not set):
 //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>
 //    - $WM_PROJECT_INST_DIR/site/
-//  - \b other (shipped) settings:
+//  - \b other (project) settings:
 //    - $WM_PROJECT_DIR/etc/
 //
 //  \return The list of full paths of all the matching directories or
 //  an empty list if the name cannot be found.
-fileNameList findEtcDirs(const fileName& local = fileName::null);
+//  Optionally stop search after the first directory has been found.
+fileNameList findEtcDirs
+(
+    const fileName& name = fileName::null,
+    const bool findFirst = false
+);
 
-//- Search for files from user/group/shipped directories.
+//- Search for files from user/group/other directories.
 //  The search scheme allows for version-specific and
 //  version-independent files using the following hierarchy:
 //  - \b user settings:
@@ -75,7 +80,7 @@ fileNameList findEtcDirs(const fileName& local = fileName::null);
 //  - \b group (site) settings (when $WM_PROJECT_SITE is not set):
 //    - $WM_PROJECT_INST_DIR/site/\<VERSION\>
 //    - $WM_PROJECT_INST_DIR/site/
-//  - \b other (shipped) settings:
+//  - \b other (project) settings:
 //    - $WM_PROJECT_DIR/etc/
 //
 //  \return The list of full paths of all the matching files or
@@ -84,16 +89,16 @@ fileNameList findEtcDirs(const fileName& local = fileName::null);
 //  Optionally stop search after the first file has been found.
 fileNameList findEtcFiles
 (
-    const fileName&,
-    bool mandatory=false,
-    bool findFirst=false
+    const fileName& name,
+    const bool mandatory = false,
+    const bool findFirst = false
 );
 
-//- Search for a file using findEtcFiles.
+//- Search for a single file using findEtcFiles.
 //  \return The full path name of the first file found in the
 //  search hierarchy or an empty fileName if the name cannot be found.
-//  Optionally abort if the file cannot be found.
-fileName findEtcFile(const fileName&, bool mandatory=false);
+//  Optionally abort if the file cannot be found but is mandatory.
+fileName findEtcFile(const fileName& name, const bool mandatory=false);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

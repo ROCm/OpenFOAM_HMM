@@ -26,8 +26,6 @@ License
 #include "error.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * Private Member Classes * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -59,10 +57,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::StaticHashTable<T, Key, Hash>::insert
 (
     const Key& key,
-    const T& newEntry
+    const T& obj
 )
 {
-    return set(key, newEntry, true);
+    return set(key, obj, true);
 }
 
 
@@ -70,10 +68,10 @@ template<class T, class Key, class Hash>
 inline bool Foam::StaticHashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& newEntry
+    const T& obj
 )
 {
-    return set(key, newEntry, false);
+    return set(key, obj, false);
 }
 
 

@@ -128,7 +128,7 @@ void Foam::ParticleTracks<CloudType>::postFace
              << "Cloud storage not allocated" << abort(FatalError);
         }
 
-        hitTableType::iterator iter =
+        labelPairLookup::iterator iter =
             faceHitCounter_.find(labelPair(p.origProc(), p.origId()));
 
         label localI = -1;

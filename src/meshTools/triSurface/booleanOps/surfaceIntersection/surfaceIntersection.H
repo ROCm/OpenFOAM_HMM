@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,10 +41,19 @@ Description
     hit of both faces and an edge is created between the retrieved vertex and
     the new one.
 
-    Note: when doing intersecting itself uses intersection::planarTol() as a
-    fraction of
+    Note: when doing intersecting itself uses 'tolerance' as a fraction of
     current edge length to determine if intersection is a point-touching one
     instead of an edge-piercing action.
+
+    Some constructors allow a dictionary of intersection controls:
+    \table
+        Property       | Description                    | Type   | Default value
+        tolerance      | Edge-length tolerance          | scalar | 1e-3
+        allowEdgeHits  | Edge-end cuts another edge     | bool   | true
+        snap           | Snap near end-points           | bool   | true
+        warnDegenerate | Number of warnings about degenerate edges | label | 0
+        intersectionMethod | Control for self intersection | (self,region,none)
+    \endtable
 
 SourceFiles
     surfaceIntersection.C
@@ -58,11 +67,12 @@ SourceFiles
 
 #include "DynamicList.H"
 #include "point.H"
-#include "edge.H"
-#include "labelPairLookup.H"
-#include "typeInfo.H"
+#include "edgeHashes.H"
 #include "edgeList.H"
+#include "labelPairHashes.H"
 #include "pointIndexHit.H"
+#include "typeInfo.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -74,50 +84,88 @@ class triSurfaceSearch;
 class triSurface;
 class edgeIntersections;
 
+
+//- Key is non-commutative pair of labels. Value is commutative pair of labels
+typedef LabelPairMap<edge> labelPairEdgeLookup;
+
+//- Map from edge back to all parents (pairs of faces)
+typedef EdgeMap<labelPairHashSet> edgelabelPairHashLookup;
+
+
 /*---------------------------------------------------------------------------*\
-                    Class surfaceIntersection Declaration
+                     Class surfaceIntersection Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceIntersection
 {
+public:
+
+    //- Surface intersection types for classify, doCutEdges
+    enum intersectionType
+    {
+        FIRST,          //!< First surface
+        SECOND,         //!< Second surface
+        SELF,           //!< Self-intersection
+        SELF_REGION,    //!< Self-intersection, region-wise only
+        NONE            //!< None = invalid (for input only)
+    };
+
+    //- The user-selectable self-intersection enumeration names
+    static const Enum<intersectionType> selfIntersectionNames;
+
+
+private:
+
     // Private data
+
+        //- Tolerance for intersections
+        scalar tolerance_;
+
+        //- Allow edge-ends to cut another edge.
+        bool allowEdgeHits_;
+
+        //- Snap cut points near edge ends (default: true)
+        bool snapToEnd_;
+
+        //- Maximum number of warnings about degenerate edges
+        label warnDegenerate_;
 
         //- Newly introduced points.
         pointField cutPoints_;
 
-        //- Newly introduced edges (are on both surfaces). Reference into
-        //  cutPoints.
+        //- Newly introduced edges (are on both surfaces).
+        //  Reference into cutPoints.
         edgeList cutEdges_;
 
-        //- From face on surf1 and face on surf2 to intersection point
-        // (label in cutPoints)
-        labelPairLookup facePairToVertex_;
-
         //- From face on surf1 and face on surf2 to intersection edge
-        //  (label in cutEdges)
-        labelPairLookup facePairToEdge_;
+        labelPairEdgeLookup facePairToEdge_;
 
-        //- Edges on surf1 that are cut. From edge on surf1 to label in cutPoint
-        //  If multiple cuts:sorted from edge.start to edge.end
+        //- From face on surf1 and face on surf2 to intersection edgeId
+        //  (label in cutEdges)
+        labelPairLookup facePairToEdgeId_;
+
+        //- Edges on surf1 that are cut.
+        //  From edgeId on surf1 to location in cutPoint
         labelListList surf1EdgeCuts_;
 
-        //- Edges on surf2 that are cut. From edge on surf2 to label in cutPoint
-        //  If multiple cuts:sorted from edge.start to edge.end
+        //- Edges on surf2 that are cut.
+        //  From edgeId on surf2 to location in cutPoint
         labelListList surf2EdgeCuts_;
+
+        //- Temporary storage to manage edge-edge self-intersections.
+        edgeHashSet edgeEdgeIntersection_;
+
+        //- Temporary storage to manage cuts/intersections from the edge ends
+        Map<label> snappedEnds_;
+
+        //- Temporary storage
+        EdgeMap<label> edgeToId_;
 
 
     // Private Member Functions
 
-        //- Write point in obj format.
-        static void writeOBJ(const point& pt, Ostream& os);
-
-        //- Write points and edges in obj format
-        static void writeOBJ
-        (
-            const List<point>&,
-            const List<edge>&,
-            Ostream&
-        );
+        //- Adjust intersection options according to the dictionary entries
+        void setOptions(const dictionary& dict);
 
         //- Transfer contents of List<DynamicList<..>> to List<List<..>>
         template<class T>
@@ -138,39 +186,12 @@ class surfaceIntersection
         //  to new (-1 if element removed)
         static void removeDuplicates(const labelList& map, labelList& labels);
 
-        //- Apply map to elements of a labelList
-        static void inlineRemap(const labelList& map, labelList& elems);
-
         // Remove all duplicate and degenerate elements. Return unique elements
         // and map from old to new.
         static edgeList filterEdges(const edgeList&, labelList& map);
 
         //- Remove all duplicate elements.
         static labelList filterLabels(const labelList& elems, labelList& map);
-
-        //- Do some checks if edge and face (resulting from hit)
-        //  should not be considered. Returns true if can be discarded.
-        static bool excludeEdgeHit
-        (
-            const triSurface& surf,
-            const label edgeI,
-            const label facei,
-            const scalar tol
-        );
-
-        ////- Given edge (eStart - eEnd) and normal direction construct plane
-        ////  and intersect all edges of hitFace with it.
-        ////  Return the edge and coordinate of hit.
-        //static pointIndexHit faceEdgeIntersection
-        //(
-        //    const triSurface&,
-        //    const label hitFacei,
-        //
-        //    const vector& n,
-        //    const point& eStart,
-        //    const point& eEnd
-        //);
-
 
         //- Debugging: Dump intersected edges to stream
         void writeIntersectedEdges
@@ -188,18 +209,19 @@ class surfaceIntersection
             const scalar endTol,
             const point& p,
             const edge& e,
-            const pointField& points
+            const UList<point>& points
         );
 
-        //- Update reference between faceA and faceB. Updates facePairToVertex_
-        //  (first occurrence of face pair) and facePairToEdge_ (second occ.)
+        //- Update reference between faceA and faceB.
+        //  Updates facePairToEdge_ and facePairToEdgeId_ (on the second hit)
         void storeIntersection
         (
-            const bool isFirstSurf,
+            const enum intersectionType cutFrom,
             const labelList& facesA,
             const label faceB,
-            DynamicList<edge>&,
-            DynamicList<point>&
+            const UList<point>& allCutPoints,
+            const label cutPointId,
+            DynamicList<edge>& allCutEdges
         );
 
         //- Investigate pHit to whether is case of point hits point,
@@ -209,13 +231,12 @@ class surfaceIntersection
             const triSurface& surf1,
             const scalarField& surf1PointTol,
             const triSurface& surf2,
-            const bool isFirstSurf,
+            const enum intersectionType cutFrom,
             const label edgeI,
-            const scalar tolDim,
             const pointIndexHit& pHit,
 
-            DynamicList<edge>& allCutEdges,
             DynamicList<point>& allCutPoints,
+            DynamicList<edge>& allCutEdges,
             List<DynamicList<label>>& surfEdgeCuts
         );
 
@@ -224,16 +245,20 @@ class surfaceIntersection
         (
             const triSurface& surf1,
             const triSurfaceSearch& querySurf2,
-            const bool isFirstSurf,
-            const bool isSelfIntersection,
+            const enum intersectionType cutFrom,
 
-            DynamicList<edge>& allCutEdges,
             DynamicList<point>& allCutPoints,
+            DynamicList<edge>& allCutEdges,
             List<DynamicList<label>>& surfEdgeCuts
         );
 
+        //- Join disconnected intersection points
+        void joinDisconnected(DynamicList<edge>& allCutEdges);
+
 
 public:
+
+    // Public Data, Declarations
 
     ClassName("surfaceIntersection");
 
@@ -242,6 +267,23 @@ public:
 
         //- Construct null
         surfaceIntersection();
+
+        //- Construct from two surfaces.
+        //  Does its own cutting. Has problems with degenerate cuts
+        surfaceIntersection
+        (
+            const triSurfaceSearch& querySurf1,
+            const triSurfaceSearch& querySurf2,
+            const dictionary& dict = dictionary::null
+        );
+
+        //- Construct from self-intersections.
+        //  Does its own cutting, but has problems with degenerate cuts
+        surfaceIntersection
+        (
+            const triSurfaceSearch& querySurf1,
+            const dictionary& dict = dictionary::null
+        );
 
         //- Construct from precalculated intersection information.
         //  Advantage: intersection information is guaranteed to have no
@@ -254,36 +296,36 @@ public:
             const edgeIntersections& intersections2
         );
 
-        //- Construct from two surfaces. Does all its own cutting.
-        //  Has problems with degenerate cuts
-        surfaceIntersection
-        (
-            const triSurfaceSearch& querySurf1,
-            const triSurfaceSearch& querySurf2
-        );
-
-        //- Special: intersect surface with itself. Used to check for
-        //  self-intersection.
-        surfaceIntersection(const triSurfaceSearch& querySurf1);
-
 
     // Member Functions
 
+        //- The list of cut points
         const pointField& cutPoints() const;
 
+        //- The list of created edges
         const edgeList& cutEdges() const;
 
-        const labelPairLookup& facePairToVertex() const;
-
-        const labelPairLookup& facePairToEdge() const;
+        //- Lookup of pairs of faces to created edges
+        const labelPairLookup& facePairToEdgeId() const;
 
         //- Access either surf1EdgeCuts (isFirstSurface = true) or
         //  surf2EdgeCuts
-        const labelListList& edgeCuts(const bool) const;
+        const labelListList& edgeCuts(const bool isFirstSurf) const;
 
+        //- List of cut points on edges of surface1
         const labelListList& surf1EdgeCuts() const;
 
+        //- List of cut points on edges of surface2
         const labelListList& surf2EdgeCuts() const;
+
+
+        //- Geometric merge points (points within mergeDist) prior to
+        //  automatically calling mergeEdges().
+        void mergePoints(const scalar mergeDist);
+
+        //- Merge duplicate edges
+        void mergeEdges();
+
 };
 
 

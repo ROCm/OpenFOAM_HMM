@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ Foam::patchDistMethods::advectionDiffusion::advectionDiffusion
 )
 :
     patchDistMethod(mesh, patchIDs),
-    coeffs_(dict.subDict(type() + "Coeffs")),
+    coeffs_(dict.optionalSubDict(type() + "Coeffs")),
     pdmPredictor_
     (
         patchDistMethod::New
@@ -144,6 +144,11 @@ bool Foam::patchDistMethods::advectionDiffusion::correct
         initialResidual = yEqn.solve().initialResidual();
 
     } while (initialResidual > tolerance_ && ++iter < maxIter_);
+
+    // Need to stabilise the y for overset meshes since the holed cells
+    // keep the initial value (0.0) so the gradient of that will be
+    // zero as well. Turbulence models do not like zero wall distance.
+    y.max(SMALL);
 
     // Only calculate n if the field is defined
     if (notNull(n))

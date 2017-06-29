@@ -30,6 +30,7 @@ Description
     Generates particle size information from Eulerian calculations, e.g. VoF.
 
 Usage
+    \verbatim
     extractEulerianParticles1
     {
         type            extractEulerianParticles;
@@ -37,10 +38,10 @@ Usage
         ...
         faceZone        f0;
         nLocations      10;
-        alphaName       alpha.water;
-        UName           U;
-        rhoName         rho;
-        phiName         phi;
+        alpha           alpha.water;
+        U               U;
+        rho             rho;
+        phi             phi;
     }
     \endverbatim
 
@@ -49,10 +50,14 @@ Usage
         Property     | Description             | Required | Default value
         type         | type name: extractEulerianParticles | yes |
         faceZone     | Name of faceZone used as collection surface | yes |
-        nLocations   | Number of injection bins to generate  | yes |
-        aplhaName    | Name of phase indicator field | yes   |
-        rhoName      | Name of density field   |      yes |
-        phiNane      | Name of flux field      |      yes |
+        alpha        | Name of phase indicator field | yes |
+        alphaThreshold | Threshold for alpha field | no | 0.1 |
+        nLocations   | Number of injection bins to generate  | no | 0 |
+        U            | Name of velocity field  | no | U |
+        rho          | Name of density field   | no | rho |
+        phi          | Name of flux field      | no | phi |
+        minDiameter  | min diameter            | no | small |
+        maxDiameter  | max diameter            | no | great |
     \endtable
 
 SourceFiles
@@ -70,7 +75,6 @@ SourceFiles
 #include "surfaceFieldsFwd.H"
 #include "vectorList.H"
 #include "globalIndex.H"
-#include "cachedRandom.H"
 #include "eulerianParticle.H"
 #include "IOdictionary.H"
 #include "injectedParticleCloud.H"

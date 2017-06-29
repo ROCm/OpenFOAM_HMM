@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,8 +44,9 @@ Description
 #include "OFstream.H"
 #include "IFstream.H"
 #include "demandDrivenData.H"
-#include "writePatch.H"
-#include "writePointSet.H"
+#include "foamVtkWriteCellSetFaces.H"
+#include "foamVtkWriteFaceSet.H"
+#include "foamVtkWritePointSet.H"
 #include "IOobjectList.H"
 #include "cellZoneSet.H"
 #include "faceZoneSet.H"
@@ -75,104 +76,39 @@ void writeVTK
 (
     const polyMesh& mesh,
     const topoSet& currentSet,
-    const fileName& vtkName
+    const fileName& vtkBaseName
 )
 {
     if (isA<faceSet>(currentSet))
     {
         // Faces of set with OpenFOAM faceID as value
-
-        faceList setFaces(currentSet.size());
-        labelList faceValues(currentSet.size());
-        label setFacei = 0;
-
-        forAllConstIter(topoSet, currentSet, iter)
-        {
-            setFaces[setFacei] = mesh.faces()[iter.key()];
-            faceValues[setFacei] = iter.key();
-            setFacei++;
-        }
-
-        primitiveFacePatch fp(setFaces, mesh.points());
-
-        writePatch
+        vtk::writeFaceSet
         (
-            true,
-            currentSet.name(),
-            fp,
-            "faceID",
-            faceValues,
-            mesh.time().path()/vtkName
+            mesh,
+            currentSet,
+            mesh.time().path()/vtkBaseName,
+            vtk::formatType::LEGACY_BINARY
         );
     }
     else if (isA<cellSet>(currentSet))
     {
         // External faces of cellset with OpenFOAM cellID as value
-
-        Map<label> cellFaces(currentSet.size());
-
-        forAllConstIter(cellSet, currentSet, iter)
-        {
-            label celli = iter.key();
-
-            const cell& cFaces = mesh.cells()[celli];
-
-            forAll(cFaces, i)
-            {
-                label facei = cFaces[i];
-
-                if (mesh.isInternalFace(facei))
-                {
-                    label otherCelli = mesh.faceOwner()[facei];
-
-                    if (otherCelli == celli)
-                    {
-                        otherCelli = mesh.faceNeighbour()[facei];
-                    }
-
-                    if (!currentSet.found(otherCelli))
-                    {
-                        cellFaces.insert(facei, celli);
-                    }
-                }
-                else
-                {
-                    cellFaces.insert(facei, celli);
-                }
-            }
-        }
-
-        faceList setFaces(cellFaces.size());
-        labelList faceValues(cellFaces.size());
-        label setFacei = 0;
-
-        forAllConstIter(Map<label>, cellFaces, iter)
-        {
-            setFaces[setFacei] = mesh.faces()[iter.key()];
-            faceValues[setFacei] = iter();              // Cell ID
-            setFacei++;
-        }
-
-        primitiveFacePatch fp(setFaces, mesh.points());
-
-        writePatch
+        vtk::writeCellSetFaces
         (
-            true,
-            currentSet.name(),
-            fp,
-            "cellID",
-            faceValues,
-            mesh.time().path()/vtkName
+            mesh,
+            currentSet,
+            mesh.time().path()/vtkBaseName,
+            vtk::formatType::LEGACY_BINARY
         );
     }
     else if (isA<pointSet>(currentSet))
     {
-        writePointSet
+        vtk::writePointSet
         (
-            true,
             mesh,
             currentSet,
-            mesh.time().path()/vtkName
+            mesh.time().path()/vtkBaseName,
+            vtk::formatType::LEGACY_BINARY
         );
     }
     else
@@ -187,58 +123,58 @@ void writeVTK
 void printHelp(Ostream& os)
 {
     os  << "Please type 'help', 'list', 'quit', 'time ddd'"
-        << " or a set command after prompt." << endl
-        << "'list' will show all current cell/face/point sets." << endl
-        << "'time ddd' will change the current time." << endl
-        << endl
-        << "A set command should be of the following form" << endl
-        << endl
+        << " or a set command after prompt." << nl
+        << "'list' will show all current cell/face/point sets." << nl
+        << "'time ddd' will change the current time." << nl
+        << nl
+        << "A set command should be of the following form" << nl
+        << nl
         << "    cellSet|faceSet|pointSet <setName> <action> <source>"
-        << endl
-        << endl
-        << "The <action> is one of" << endl
-        << "    list            - prints the contents of the set" << endl
-        << "    clear           - clears the set" << endl
-        << "    invert          - inverts the set" << endl
-        << "    remove          - remove the set" << endl
-        << "    new <source>    - sets to set to the source set" << endl
-        << "    add <source>    - adds all elements from the source set" << endl
-        << "    delete <source> - deletes      ,," << endl
+        << nl
+        << nl
+        << "The <action> is one of" << nl
+        << "    list            - prints the contents of the set" << nl
+        << "    clear           - clears the set" << nl
+        << "    invert          - inverts the set" << nl
+        << "    remove          - remove the set" << nl
+        << "    new <source>    - sets to set to the source set" << nl
+        << "    add <source>    - adds all elements from the source set" << nl
+        << "    delete <source> - deletes      ,," << nl
         << "    subset <source> - combines current set with the source set"
-        << endl
-        << endl
+        << nl
+        << nl
         << "The sources come in various forms. Type a wrong source"
-        << " to see all the types available." << endl
-        << endl
+        << " to see all the types available." << nl
+        << nl
         << "Example: pick up all cells connected by point or face to patch"
-        << " movingWall" << endl
-        << endl
-        << "Pick up all faces of patch:" << endl
-        << "    faceSet f0 new patchToFace movingWall" << endl
-        << "Add faces 0,1,2:" << endl
-        << "    faceSet f0 add labelToFace (0 1 2)" << endl
-        << "Pick up all points used by faces in faceSet f0:" << endl
-        << "    pointSet p0 new faceToPoint f0 all" << endl
-        << "Pick up cell which has any face in f0:" << endl
-        << "    cellSet c0 new faceToCell f0 any" << endl
-        << "Add cells which have any point in p0:" << endl
-        << "    cellSet c0 add pointToCell p0 any" << endl
-        << "List set:" << endl
-        << "    cellSet c0 list" << endl
-        << endl
-        << "Zones can be set using zoneSets from corresponding sets:" << endl
-        << "    cellZoneSet c0Zone new setToCellZone c0" << endl
-        << "    faceZoneSet f0Zone new setToFaceZone f0" << endl
-        << endl
-        << "or if orientation is important:" << endl
-        << "    faceZoneSet f0Zone new setsToFaceZone f0 c0" << endl
-        << endl
-        << "ZoneSets can be manipulated using the general actions:" << endl
-        << "    list            - prints the contents of the set" << endl
-        << "    clear           - clears the set" << endl
+        << " movingWall" << nl
+        << nl
+        << "Pick up all faces of patch:" << nl
+        << "    faceSet f0 new patchToFace movingWall" << nl
+        << "Add faces 0,1,2:" << nl
+        << "    faceSet f0 add labelToFace (0 1 2)" << nl
+        << "Pick up all points used by faces in faceSet f0:" << nl
+        << "    pointSet p0 new faceToPoint f0 all" << nl
+        << "Pick up cell which has any face in f0:" << nl
+        << "    cellSet c0 new faceToCell f0 any" << nl
+        << "Add cells which have any point in p0:" << nl
+        << "    cellSet c0 add pointToCell p0 any" << nl
+        << "List set:" << nl
+        << "    cellSet c0 list" << nl
+        << nl
+        << "Zones can be set using zoneSets from corresponding sets:" << nl
+        << "    cellZoneSet c0Zone new setToCellZone c0" << nl
+        << "    faceZoneSet f0Zone new setToFaceZone f0" << nl
+        << nl
+        << "or if orientation is important:" << nl
+        << "    faceZoneSet f0Zone new setsToFaceZone f0 c0" << nl
+        << nl
+        << "ZoneSets can be manipulated using the general actions:" << nl
+        << "    list            - prints the contents of the set" << nl
+        << "    clear           - clears the set" << nl
         << "    invert          - inverts the set (undefined orientation)"
-        << endl
-        << "    remove          - remove the set" << endl
+        << nl
+        << "    remove          - remove the set" << nl
         << endl;
 }
 
@@ -577,7 +513,6 @@ bool doCommand
                         "VTK"/currentSet.name()/currentSet.name()
                       + "_"
                       + name(mesh.time().timeIndex())
-                      + ".vtk"
                     );
 
                     Info<< "    Writing " << currentSet.name()

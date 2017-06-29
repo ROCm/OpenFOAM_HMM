@@ -139,7 +139,7 @@ inline void Foam::SubField<Type>::operator=
 template<class Type>
 inline Foam::SubField<Type>::operator const Foam::Field<Type>&() const
 {
-    return *reinterpret_cast<const Field<Type>* >(this);
+    return *reinterpret_cast<const Field<Type>*>(this);
 }
 
 

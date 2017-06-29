@@ -215,13 +215,16 @@ private:
         const labelList& boundaryAddressing_;
 
         //- List of patch field decomposers
-        List<patchFieldDecomposer*> patchFieldDecomposerPtrs_;
+        PtrList<patchFieldDecomposer> patchFieldDecomposerPtrs_;
 
-        List<processorVolPatchFieldDecomposer*>
+        PtrList<processorVolPatchFieldDecomposer>
             processorVolPatchFieldDecomposerPtrs_;
 
-        List<processorSurfacePatchFieldDecomposer*>
+        PtrList<processorSurfacePatchFieldDecomposer>
             processorSurfacePatchFieldDecomposerPtrs_;
+
+
+        PtrList<scalarField> faceSign_;
 
 
     // Private Member Functions

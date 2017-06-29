@@ -40,6 +40,9 @@ InfoSwitches
     writeDictionaries 0;
     writeOptionalEntries 0;
 
+    // Allow profiling
+    allowProfiling  1;
+
     // Allow case-supplied C++ code (#codeStream, codedFixedValue)
     allowSystemOperations   1;
 }
@@ -78,6 +81,15 @@ OptimisationSwitches
     stopAtWriteNowSignal        -1;
 }
 
+/* Can specify fallback profiling settings
+profiling
+{
+    active      true;
+    cpuInfo     true;
+    memInfo     false;
+    sysInfo     true;
+}
+*/
 
 DebugSwitches
 {
@@ -486,7 +498,6 @@ DebugSwitches
     flowRateInletVelocity   0;
     fluxCorrectedVelocity   0;
     foamChemistryReader 0;
-    foamFile            0;
     forceCoeffs         0;
     forces              0;
     fourth              0;
@@ -855,7 +866,6 @@ DebugSwitches
     triSurface          0;
     triSurfaceMesh      0;
     turbulenceModel     0;
-    turbulentHeatFluxTemperature 0;
     turbulentInlet      0;
     turbulentIntensityKineticEnergyInlet 0;
     turbulentMixingLengthDissipationRateInlet 0;

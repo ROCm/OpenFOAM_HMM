@@ -52,7 +52,7 @@ void Foam::ccm::reader::determineFieldInfo
     (
         CCMIONextEntity
         (
-            NULL,
+            nullptr,
             fieldSetNode,
             kCCMIOFieldPhase,
             &phaseI,
@@ -74,7 +74,7 @@ void Foam::ccm::reader::determineFieldInfo
         (
             CCMIONextEntity
             (
-                NULL,
+                nullptr,
                 phaseNode,
                 kCCMIOField,
                 &fieldI,
@@ -84,12 +84,12 @@ void Foam::ccm::reader::determineFieldInfo
 
          && CCMIOReadField
             (
-                NULL,
+                nullptr,
                 fieldNode,
                 fullName,
                 shortName,
                 &dims,
-                NULL
+                nullptr
             )
          == kCCMIONoErr
         )
@@ -139,7 +139,7 @@ void Foam::ccm::reader::determineFieldInfo
                 (
                     CCMIONextEntity
                     (
-                        NULL,
+                        nullptr,
                         fieldNode,
                         kCCMIOFieldData,
                         &dataI,
@@ -149,20 +149,20 @@ void Foam::ccm::reader::determineFieldInfo
 
                  && CCMIOEntitySize
                     (
-                        NULL,
+                        nullptr,
                         dataNode,
-                        NULL,
+                        nullptr,
                         &maxId
                     )
                  == kCCMIONoErr
 
                  && CCMIOReadFieldDatad
                     (
-                        NULL,
+                        nullptr,
                         dataNode,
-                        NULL,
+                        nullptr,
                         &dataLocation,
-                        NULL,
+                        nullptr,
                         kCCMIOStart,
                         kCCMIOEnd
                     )
@@ -212,7 +212,7 @@ bool Foam::ccm::reader::detectSolution()
     (
         CCMIONextEntity
         (
-            NULL,
+            nullptr,
             (globalState_->root),
             kCCMIOState,
             &stateI,
@@ -230,7 +230,7 @@ bool Foam::ccm::reader::detectSolution()
         (
             CCMIONextEntity
             (
-                NULL,
+                nullptr,
                 stateNode,
                 kCCMIOProcessor,
                 &procI,
@@ -240,11 +240,11 @@ bool Foam::ccm::reader::detectSolution()
 
          && CCMIOReadProcessor
             (
-                NULL,
+                nullptr,
                 processorNode,
-                NULL,           // Ignore verticesNode
-                NULL,           // Ignore topologyNode
-                NULL,           // Ignore initialField
+                nullptr,        // Ignore verticesNode
+                nullptr,        // Ignore topologyNode
+                nullptr,        // Ignore initialField
                 &solutionNode
             )
          == kCCMIONoErr
@@ -263,7 +263,7 @@ bool Foam::ccm::reader::detectSolution()
             (
                 CCMIONextEntity
                 (
-                    NULL,
+                    nullptr,
                     solutionNode,
                     kCCMIORestart,
                     &restartI,
@@ -273,7 +273,7 @@ bool Foam::ccm::reader::detectSolution()
 
              && CCMIOEntityName
                 (
-                    NULL,
+                    nullptr,
                     stateNode,
                     solutionName
                 )
@@ -281,13 +281,13 @@ bool Foam::ccm::reader::detectSolution()
 
              && CCMIOReadRestartInfo
                 (
-                    NULL,
+                    nullptr,
                     restartNode,
-                    NULL,          // Ignore solverName
+                    nullptr,       // Ignore solverName
                     &iteration,
                     &timeValue,
-                    NULL,          // Ignore timeUnits
-                    NULL           // Ignore startAngle
+                    nullptr,       // Ignore timeUnits
+                    nullptr        // Ignore startAngle
                 )
              == kCCMIONoErr
             )
@@ -310,7 +310,7 @@ bool Foam::ccm::reader::detectSolution()
             (
                 CCMIONextEntity
                 (
-                    NULL,
+                    nullptr,
                     processorNode,
                     kCCMIOLagrangianData,
                     &lagrangianI,
@@ -320,9 +320,9 @@ bool Foam::ccm::reader::detectSolution()
 
              && CCMIOReadLagrangianData
                 (
-                    NULL,
+                    nullptr,
                     lagrangianNode,
-                    NULL,
+                    nullptr,
                     &lagrangianSolutions
                 )
              == kCCMIONoErr
@@ -366,10 +366,10 @@ Foam::ccm::reader::readField
     (
         CCMIOGetState
         (
-            NULL,
+            nullptr,
             (globalState_->root),
             solutionName.c_str(),
-            NULL,
+            nullptr,
             &stateNode
         )
      != kCCMIONoErr
@@ -420,7 +420,7 @@ Foam::ccm::reader::readField
     (
         CCMIONextEntity
         (
-            NULL,
+            nullptr,
             stateNode,
             kCCMIOProcessor,
             &procI,
@@ -430,11 +430,11 @@ Foam::ccm::reader::readField
 
     && CCMIOReadProcessor
         (
-            NULL,
+            nullptr,
             processorNode,
-            NULL,           // Ignore verticesNode
-            NULL,           // Ignore topologyNode
-            NULL,           // Ignore initialField
+            nullptr,        // Ignore verticesNode
+            nullptr,        // Ignore topologyNode
+            nullptr,        // Ignore initialField
             &solutionNode
         )
      == kCCMIONoErr
@@ -448,7 +448,7 @@ Foam::ccm::reader::readField
         (
             CCMIONextEntity
             (
-                NULL,
+                nullptr,
                 solutionNode,
                 kCCMIOFieldPhase,
                 &phaseI,
@@ -465,7 +465,7 @@ Foam::ccm::reader::readField
             (
                 CCMIONextEntity
                 (
-                    NULL,
+                    nullptr,
                     phaseNode,
                     kCCMIOField,
                     &fieldI,
@@ -480,10 +480,10 @@ Foam::ccm::reader::readField
                 (
                     &(globalState_->error),
                     fieldNode,
-                    NULL,
+                    nullptr,
                     shortName,
                     &dims,
-                    NULL
+                    nullptr
                 );
                 assertNoError
                 (
@@ -501,7 +501,7 @@ Foam::ccm::reader::readField
                     (
                         CCMIONextEntity
                         (
-                            NULL,
+                            nullptr,
                             fieldNode,
                             kCCMIOFieldData,
                             &dataI,
@@ -518,20 +518,20 @@ Foam::ccm::reader::readField
                         (
                             CCMIOEntitySize
                             (
-                                NULL,
+                                nullptr,
                                 dataNode,
                                 &n,
-                                NULL
+                                nullptr
                             )
                          == kCCMIONoErr
 
                          && CCMIOReadFieldDatad
                             (
-                                NULL,
+                                nullptr,
                                 dataNode,
                                 &mapId,
                                 &dataLocation,
-                                NULL,
+                                nullptr,
                                 kCCMIOStart,
                                 kCCMIOEnd
                             )
@@ -549,10 +549,10 @@ Foam::ccm::reader::readField
                             (
                                 CCMIOEntityDescription
                                 (
-                                    NULL,
+                                    nullptr,
                                     dataNode,
                                     &len,
-                                    NULL
+                                    nullptr
                                 )
                              == kCCMIONoErr
                             )
@@ -563,7 +563,7 @@ Foam::ccm::reader::readField
                                 (
                                     CCMIOEntityDescription
                                     (
-                                        NULL,
+                                        nullptr,
                                         dataNode,
                                         &len,
                                         dataLabel
@@ -577,7 +577,7 @@ Foam::ccm::reader::readField
                                             strstr(fieldName.c_str(), "SIG")
                                          || strstr(fieldName.c_str(), "EPS")
                                         )
-                                     && strstr(dataLabel,  "So") == NULL
+                                     && strstr(dataLabel,  "So") == nullptr
                                     )
                                     {
                                         okayCombination = false;
@@ -607,8 +607,8 @@ Foam::ccm::reader::readField
                             (
                                 &(globalState_->error),
                                 dataNode,
-                                NULL,
-                                NULL,
+                                nullptr,
+                                nullptr,
                                 rawData.begin(),
                                 kCCMIOStart,
                                 kCCMIOEnd
@@ -622,7 +622,7 @@ Foam::ccm::reader::readField
                             // transcribe to output list
                             forAll(mapData, i)
                             {
-                                label cellId = mapData[i];
+                                const label cellId = mapData[i];
                                 scalarData[cellId] = rawData[i];
                             }
 

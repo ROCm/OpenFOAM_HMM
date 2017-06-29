@@ -45,6 +45,7 @@ Usage
 
         fields          ("U.*" p);
     }
+    \endverbatim
 
     Where the entries comprise:
     \table

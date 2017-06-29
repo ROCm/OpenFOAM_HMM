@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -88,6 +88,7 @@ rotatingPressureInletOutletVelocityFvPatchVectorField
     pressureInletOutletVelocityFvPatchVectorField(p, iF, dict),
     omega_(Function1<vector>::New("omega", dict))
 {
+    patchType() = dict.lookupOrDefault<word>("patchType", word::null);
     calcTangentialVelocity();
 }
 

@@ -1,4 +1,4 @@
-solid ascii
+solid porosity_inflated
  facet normal 0 -1 0
   outer loop
    vertex 0 -0.005 -0.031
@@ -33599,4 +33599,4 @@ solid ascii
    vertex 0.1 0.052 0.029
   endloop
  endfacet
-endsolid
+endsolid porosity_inflated

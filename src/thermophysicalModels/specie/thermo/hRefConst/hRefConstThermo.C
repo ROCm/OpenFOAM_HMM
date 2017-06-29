@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,23 +29,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class EquationOfState>
-Foam::hRefConstThermo<EquationOfState>::hRefConstThermo(Istream& is)
-:
-    EquationOfState(is),
-    Cp_(readScalar(is)),
-    Hf_(readScalar(is)),
-    Tref_(readScalar(is)),
-    Href_(readScalar(is))
-{
-    is.check("hRefConstThermo::hRefConstThermo(Istream& is)");
-
-    Cp_ *= this->W();
-    Hf_ *= this->W();
-    Href_ *= this->W();
-}
-
-
-template<class EquationOfState>
 Foam::hRefConstThermo<EquationOfState>::hRefConstThermo(const dictionary& dict)
 :
     EquationOfState(dict),
@@ -53,11 +36,7 @@ Foam::hRefConstThermo<EquationOfState>::hRefConstThermo(const dictionary& dict)
     Hf_(readScalar(dict.subDict("thermodynamics").lookup("Hf"))),
     Tref_(readScalar(dict.subDict("thermodynamics").lookup("Tref"))),
     Href_(readScalar(dict.subDict("thermodynamics").lookup("Href")))
-{
-    Cp_ *= this->W();
-    Hf_ *= this->W();
-    Href_ *= this->W();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -68,10 +47,10 @@ void Foam::hRefConstThermo<EquationOfState>::write(Ostream& os) const
     EquationOfState::write(os);
 
     dictionary dict("thermodynamics");
-    dict.add("Cp", Cp_/this->W());
-    dict.add("Hf", Hf_/this->W());
+    dict.add("Cp", Cp_);
+    dict.add("Hf", Hf_);
     dict.add("Tref", Tref_);
-    dict.add("Href", Href_/this->W());
+    dict.add("Href", Href_);
     os  << indent << dict.dictName() << dict;
 }
 
@@ -85,11 +64,7 @@ Foam::Ostream& Foam::operator<<
     const hRefConstThermo<EquationOfState>& ct
 )
 {
-    os  << static_cast<const EquationOfState&>(ct) << tab
-        << ct.Cp_/ct.W() << tab << ct.Hf_/ct.W() << tab
-        << ct.Tref_ << tab << ct.Href_/ct.W();
-
-    os.check("Ostream& operator<<(Ostream& os, const hRefConstThermo& ct)");
+    ct.write(os);
     return os;
 }
 

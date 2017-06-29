@@ -27,56 +27,37 @@ License
 #include "triSurface.H"
 #include "surfaceIntersection.H"
 #include "meshTools.H"
-#include "OFstream.H"
+#include "OBJstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 defineTypeNameAndDebug(edgeSurface, 0);
-}
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-// Write whole pointField and edges to stream
-void Foam::edgeSurface::writeOBJ
-(
-    const pointField& points,
-    const edgeList& edges,
-    Ostream& os
-)
+// file-scope
+// Write points in obj format
+static void writeObjPoints(const UList<point>& pts, Ostream& os)
 {
-    forAll(points, pointi)
+    forAll(pts, i)
     {
-        const point& pt = points[pointi];
-
-        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-    }
-    forAll(edges, edgeI)
-    {
-        const edge& e = edges[edgeI];
-
-        os << "l " << e.start()+1 << ' ' << e.end()+1 << endl;
+        const point& pt = pts[i];
+        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 }
 
 
 // Write whole pointField and selected edges to stream
-void Foam::edgeSurface::writeOBJ
+void writeObjEdges
 (
-    const pointField& points,
+    const UList<point>& points,
     const edgeList& edges,
     const labelList& edgeLabels,
     Ostream& os
 )
 {
-    forAll(points, pointi)
-    {
-        const point& pt = points[pointi];
+    writeObjPoints(points, os);
 
-        os << "v " << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-    }
     forAll(edgeLabels, i)
     {
         const edge& e = edges[edgeLabels[i]];
@@ -85,6 +66,10 @@ void Foam::edgeSurface::writeOBJ
     }
 }
 
+} // End namespace Foam
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Pointedges in edgeSurface indices only.
 void Foam::edgeSurface::calcPointEdges()
@@ -253,29 +238,16 @@ Foam::edgeSurface::edgeSurface
     }
 
 
-
-
     // Add intersection edges to faceEdges
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    forAllConstIter(labelPairLookup, inter.facePairToEdge(), iter)
+    forAllConstIters(inter.facePairToEdgeId(), iter)
     {
+        // The faceId from the correct surface
+        const label facei = iter.key()[isFirstSurface ? 0 : 1];
+
         // Edge label in intersection
-        const label edgeI = iter();
-
-        // Get the face from the correct surface
-        const FixedList<label, 2>& twoFaces = iter.key();
-
-        label facei;
-
-        if (isFirstSurface)
-        {
-            facei = twoFaces[0];
-        }
-        else
-        {
-            facei = twoFaces[1];
-        }
+        const label edgeI = iter.object();
 
         // Store on face-edge addressing. (note: offset edge)
         allFaceEdges[facei].append(edgeI + nSurfaceEdges_);
@@ -312,18 +284,17 @@ Foam::edgeSurface::edgeSurface
                     << " to " << faceFName << endl;
 
                 OFstream fStream(faceFName);
-                writeOBJ(points_, edges_, fEdges, fStream);
+                writeObjEdges(points_, edges_, fEdges, fStream);
             }
         }
 
         Pout<< "edgeSurface : Dumping edges to edges.obj" << endl;
-        OFstream eStream("edges.obj");
-        writeOBJ(points_, edges_, eStream);
+        OBJstream("edges.obj").write(edges_, points_);
 
         Pout<< "edgeSurface : Dumping intersectionEdges to"
             << " intersectionEdges.obj" << endl;
-        OFstream intEdgesStream("intersectionEdges.obj");
 
+        OFstream intEdgesStream("intersectionEdges.obj");
         labelList edgeLabels(edges_.size() - nSurfaceEdges_);
 
         label i = 0;
@@ -332,7 +303,7 @@ Foam::edgeSurface::edgeSurface
             edgeLabels[i++] = edgeI;
         }
 
-        writeOBJ(points_, edges_, edgeLabels, intEdgesStream);
+        writeObjEdges(points_, edges_, edgeLabels, intEdgesStream);
     }
 }
 

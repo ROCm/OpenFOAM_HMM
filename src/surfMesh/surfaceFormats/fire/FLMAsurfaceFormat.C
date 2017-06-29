@@ -159,11 +159,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 {
     if (!os.good())
     {
-        FatalErrorIn
-        (
-            "fileFormats::FLMAsurfaceFormat::write"
-            "(OSstream&, const MeshedSurfaceProxy<Face>&)"
-        )
+        FatalErrorInFunction
             << "bad output state "
             << exit(FatalError);
     }
@@ -222,7 +218,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     // Set the precision of the points data to 10
     os.precision(10);
 
-    Info<< "points: " << pointLst.size() << endl;
+    Info<< nl << "points: " << pointLst.size() << endl;
     putFireLabel(os, pointLst.size());
     newline(os);
 
@@ -352,11 +348,7 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     }
     else
     {
-        FatalErrorIn
-        (
-            "fileFormats::FLMAsurfaceFormat::write"
-            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
-        )
+        FatalErrorInFunction
             << "Cannot open file for writing " << filename
             << exit(FatalError);
     }

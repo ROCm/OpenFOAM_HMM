@@ -40,11 +40,11 @@ airDeflection
         length      0.01;
 
         //constant
-        pressureDrop    8;
+        //pressureDrop    8;
 
         //volumetricFlowRateTable
-        outOfBounds     clamp;
-        fileName        "volFlowRateTable";
+        //outOfBounds     clamp;
+        //file            "volFlowRateTable";
     }
 }
 

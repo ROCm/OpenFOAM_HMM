@@ -70,6 +70,7 @@ Foam::TimePaths::TimePaths
 :
     processorCase_(false),
     rootPath_(rootPath),
+    distributed_(false),
     globalCaseName_(caseName),
     case_(caseName),
     system_(systemName),
@@ -84,6 +85,7 @@ Foam::TimePaths::TimePaths
 (
     const bool processorCase,
     const fileName& rootPath,
+    const bool distributed,
     const fileName& globalCaseName,
     const fileName& caseName,
     const word& systemName,
@@ -92,6 +94,7 @@ Foam::TimePaths::TimePaths
 :
     processorCase_(processorCase),
     rootPath_(rootPath),
+    distributed_(distributed),
     globalCaseName_(globalCaseName),
     case_(caseName),
     system_(systemName),

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ SourceFiles
 #ifndef maxwellSlipUFvPatchVectorField_H
 #define maxwellSlipUFvPatchVectorField_H
 
-#include "mixedFixedValueSlipFvPatchFields.H"
+#include "partialSlipFvPatchFields.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +50,7 @@ namespace Foam
 
 class maxwellSlipUFvPatchVectorField
 :
-    public mixedFixedValueSlipFvPatchVectorField
+    public partialSlipFvPatchVectorField
 {
     // Private data
 

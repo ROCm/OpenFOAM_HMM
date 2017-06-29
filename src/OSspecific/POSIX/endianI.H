@@ -97,10 +97,11 @@ inline uint64_t Foam::endian::swap64(uint64_t u)
     );
 
     // alternative formulation
-    //
-    // u = ((u<< 8) & 0xFF00FF00FF00FF00ull) | ((u>> 8) & 0x00FF00FF00FF00FFull);
-    // u = ((u<<16) & 0xFFFF0000FFFF0000ull) | ((u>>16) & 0x0000FFFF0000FFFFull);
-    // return (u >> 32) | (u << 32);
+    /*
+     u = ((u<< 8) & 0xFF00FF00FF00FF00ull) | ((u>> 8) & 0x00FF00FF00FF00FFull);
+     u = ((u<<16) & 0xFFFF0000FFFF0000ull) | ((u>>16) & 0x0000FFFF0000FFFFull);
+     return (u >> 32) | (u << 32);
+    */
 #endif
 }
 

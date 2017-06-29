@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,7 +97,7 @@ Foam::interpolationTable<Type>::interpolationTable(const dictionary& dict)
 :
     List<Tuple2<scalar, Type>>(),
     boundsHandling_(wordToBoundsHandling(dict.lookup("outOfBounds"))),
-    fileName_(dict.lookup("fileName")),
+    fileName_(dict.lookup("file")),
     reader_(tableReader<Type>::New(dict))
 {
     readTable();
@@ -205,8 +205,8 @@ Foam::interpolationTable<Type>::outOfBounds
 template<class Type>
 void Foam::interpolationTable<Type>::check() const
 {
-    label n = this->size();
-    scalar prevValue = List<Tuple2<scalar, Type>>::operator[](0).first();
+    const label n = this->size();
+    scalar prevValue = this->first().first();
 
     for (label i=1; i<n; ++i)
     {
@@ -229,10 +229,8 @@ void Foam::interpolationTable<Type>::check() const
 template<class Type>
 void Foam::interpolationTable<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("fileName")
-        << fileName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("outOfBounds")
-        << boundsHandlingToWord(boundsHandling_) << token::END_STATEMENT << nl;
+    os.writeEntry("file", fileName_);
+    os.writeEntry("outOfBounds", boundsHandlingToWord(boundsHandling_));
     if (reader_.valid())
     {
         reader_->write(os);
@@ -251,8 +249,8 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
         return 0;
     }
 
-    scalar minLimit = List<Tuple2<scalar, Type>>::operator[](0).first();
-    scalar maxLimit = List<Tuple2<scalar, Type>>::operator[](n-1).first();
+    const scalar minLimit = this->first().first();
+    const scalar maxLimit = this->last().first();
     scalar lookupValue = value;
 
     if (lookupValue < minLimit)
@@ -272,7 +270,9 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
                     << "value (" << lookupValue << ") underflow" << nl
                     << "    Zero rate of change."
                     << endl;
-                // fall-through to 'CLAMP'
+                // behaviour as per 'CLAMP'
+                return 0;
+                break;
             }
             case interpolationTable::CLAMP:
             {
@@ -305,7 +305,9 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
                     << "value (" << lookupValue << ") overflow" << nl
                     << "    Zero rate of change."
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                return 0;
+                break;
             }
             case interpolationTable::CLAMP:
             {
@@ -346,7 +348,7 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
     }
     else if (hi == 0)
     {
-        // this treatment should should only occur under these conditions:
+        // this treatment should only occur under these conditions:
         //  -> the 'REPEAT' treatment
         //  -> (0 <= value <= minLimit)
         //  -> minLimit > 0
@@ -414,7 +416,9 @@ Foam::interpolationTable<Type>::operator[](const label i) const
                     << "index (" << ii << ") underflow" << nl
                     << "    Continuing with the first entry"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                ii = 0;
+                break;
             }
             case interpolationTable::CLAMP:
             {
@@ -448,7 +452,9 @@ Foam::interpolationTable<Type>::operator[](const label i) const
                     << "index (" << ii << ") overflow" << nl
                     << "    Continuing with the last entry"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                ii = n - 1;
+                break;
             }
             case interpolationTable::CLAMP:
             {
@@ -477,11 +483,11 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
 
     if (n <= 1)
     {
-        return List<Tuple2<scalar, Type>>::operator[](0).second();
+        return this->first().second();
     }
 
-    scalar minLimit = List<Tuple2<scalar, Type>>::operator[](0).first();
-    scalar maxLimit = List<Tuple2<scalar, Type>>::operator[](n-1).first();
+    const scalar minLimit = this->first().first();
+    const scalar maxLimit = this->last().first();
     scalar lookupValue = value;
 
     if (lookupValue < minLimit)
@@ -501,17 +507,19 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
                     << "value (" << lookupValue << ") underflow" << nl
                     << "    Continuing with the first entry"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                return this->first().second();
+                break;
             }
             case interpolationTable::CLAMP:
             {
-                return List<Tuple2<scalar, Type>>::operator[](0).second();
+                return this->first().second();
                 break;
             }
             case interpolationTable::REPEAT:
             {
                 // adjust lookupValue to >= minLimit
-                scalar span = maxLimit-minLimit;
+                const scalar span = maxLimit-minLimit;
                 lookupValue = fmod(lookupValue-minLimit, span) + minLimit;
                 break;
             }
@@ -534,17 +542,19 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
                     << "value (" << lookupValue << ") overflow" << nl
                     << "    Continuing with the last entry"
                     << endl;
-                // fall-through to 'CLAMP'
+                // Behaviour as per 'CLAMP'
+                return this->last().second();
+                break;
             }
             case interpolationTable::CLAMP:
             {
-                return List<Tuple2<scalar, Type>>::operator[](n-1).second();
+                return this->last().second();
                 break;
             }
             case interpolationTable::REPEAT:
             {
                 // adjust lookupValue <= maxLimit
-                scalar span = maxLimit-minLimit;
+                const scalar span = maxLimit-minLimit;
                 lookupValue = fmod(lookupValue-minLimit, span) + minLimit;
                 break;
             }
@@ -575,7 +585,7 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
     }
     else if (hi == 0)
     {
-        // this treatment should should only occur under these conditions:
+        // this treatment should only occur under these conditions:
         //  -> the 'REPEAT' treatment
         //  -> (0 <= value <= minLimit)
         //  -> minLimit > 0

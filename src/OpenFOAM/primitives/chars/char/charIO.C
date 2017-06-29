@@ -39,7 +39,7 @@ char Foam::readChar(Istream& is)
 Foam::Istream& Foam::operator>>(Istream& is, char& c)
 {
     is.read(c);
-    is.check("Istream& operator>>(Istream&, char&)");
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -47,7 +47,7 @@ Foam::Istream& Foam::operator>>(Istream& is, char& c)
 Foam::Ostream& Foam::operator<<(Ostream& os, const char c)
 {
     os.write(c);
-    os.check("Ostream& operator<<(Ostream&, const char)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
@@ -55,7 +55,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const char c)
 Foam::Ostream& Foam::operator<<(Ostream& os, const char* s)
 {
     os.write(s);
-    os.check("Ostream& operator<<(Ostream&, const char*)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

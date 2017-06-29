@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,7 @@ SourceFiles
 #include "globalIndex.H"
 #include "uint.H"
 
+#pragma GCC diagnostic ignored "-Wold-style-cast"
 #include "zoltan.h"
 #include <mpi.h>
 
@@ -261,7 +262,7 @@ static void get_geom_list
 Foam::zoltanRenumber::zoltanRenumber(const dictionary& renumberDict)
 :
     renumberMethod(renumberDict),
-    coeffsDict_(renumberDict.subDict(typeName+"Coeffs"))
+    coeffsDict_(renumberDict.optionalSubDict(typeName+"Coeffs"))
 {}
 
 

@@ -30,7 +30,7 @@ License
 template<class Type>
 Type Foam::triFace::average
 (
-    const pointField& meshPoints,
+    const UList<point>&,
     const Field<Type>& fld
 ) const
 {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "STLReader.H"
 #include "Map.H"
 #include "IFstream.H"
+#include "mergePoints.H"
 
 #undef DEBUG_STLBINARY
 
@@ -37,6 +38,7 @@ bool Foam::fileFormats::STLReader::readBINARY
 )
 {
     sorted_ = true;
+    format_ = UNKNOWN;
 
     label nTris = 0;
     autoPtr<istream> streamPtr = readBinaryHeader(filename, nTris);
@@ -123,6 +125,7 @@ bool Foam::fileFormats::STLReader::readBINARY
     names_.clear();
     sizes_.transfer(dynSizes);
 
+    format_ = BINARY;
     return true;
 }
 
@@ -133,7 +136,7 @@ bool Foam::fileFormats::STLReader::readFile
     const STLFormat& format
 )
 {
-    if (format == DETECT ? detectBinaryHeader(filename) : format == BINARY)
+    if (format == UNKNOWN ? detectBinaryHeader(filename) : format == BINARY)
     {
         return readBINARY(filename);
     }
@@ -155,10 +158,11 @@ Foam::fileFormats::STLReader::STLReader
     points_(),
     zoneIds_(),
     names_(),
-    sizes_()
+    sizes_(),
+    format_(STLCore::UNKNOWN)
 {
     // Auto-detect ASCII/BINARY format
-    readFile(filename, STLCore::DETECT);
+    readFile(filename, STLCore::UNKNOWN);
 }
 
 
@@ -172,7 +176,8 @@ Foam::fileFormats::STLReader::STLReader
     points_(),
     zoneIds_(),
     names_(),
-    sizes_()
+    sizes_(),
+    format_(STLCore::UNKNOWN)
 {
     // Manually specified ASCII/BINARY format
     readFile(filename, format);
@@ -183,6 +188,53 @@ Foam::fileFormats::STLReader::STLReader
 
 Foam::fileFormats::STLReader::~STLReader()
 {}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::fileFormats::STLReader::clear()
+{
+    sorted_ = true;
+    points_.clear();
+    zoneIds_.clear();
+    names_.clear();
+    sizes_.clear();
+    format_ = UNKNOWN;
+}
+
+
+Foam::label Foam::fileFormats::STLReader::mergePointsMap
+(
+    labelList& pointMap
+) const
+{
+    // With the merge distance depending on the input format (ASCII | BINARY),
+    // but must be independent of WM_SP or WM_DP flag.
+    // - floatScalarSMALL  = 1e-6
+    // - doubleScalarSMALL = 1e-15
+
+    return mergePointsMap
+    (
+        (format_ == BINARY ? 10 : 100) * doubleScalarSMALL,
+        pointMap
+    );
+}
+
+
+Foam::label Foam::fileFormats::STLReader::mergePointsMap
+(
+    const scalar mergeTol,
+    labelList& pointMap
+) const
+{
+    return Foam::mergePoints
+    (
+        points_,
+        mergeTol,
+        false, // verbose
+        pointMap
+    );
+}
 
 
 // ************************************************************************* //

@@ -78,16 +78,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         YSolid_ /= YMix[SLD] + ROOTVSMALL;
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel"
-        "("
-            "const polyMesh&, "
-            "Istream&, "
-            "bool"
-        ")"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -454,16 +445,7 @@ Foam::Ostream& Foam::operator<<
         os  << YGasLoc << YLiquidLoc << YSolidLoc;
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<"
-        "("
-            "Ostream&, "
-            "const ReactingMultiphaseParcel<ParcelType>&"
-        ")"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

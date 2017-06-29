@@ -39,8 +39,12 @@ solaris*Gcc*/
 SunOS*Gcc*/
 platforms/
 
-# Reinstate wmake/rules that might look like build directories
-!wmake/rules/*/
+# Top-level build directories
+/build/
+/platforms/
+
+# Reinstate wmake rules that might look like build directories
+!/wmake/rules/*/
 
 # doxygen generated documentation
 doc/Doxygen/html
@@ -58,10 +62,12 @@ doc/Doxygen/DTAGS
 /etc/prefs.sh
 /etc/config.csh/prefs.csh
 /etc/config.sh/prefs.sh
+/wmake/rules/General/mplibUSER*
 
 # Source packages - anywhere
 *.tar.bz2
 *.tar.gz
+*.tar.xz
 *.tar
 *.tgz
 *.gtgz

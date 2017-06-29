@@ -131,10 +131,12 @@ public:
                 return true;
             }
 
-            //- Initialise neighbour matrix update
+            //- Initialise neighbour matrix update. Add
+            //  or subtract coupled contributions to matrix
             virtual void initInterfaceMatrixUpdate
             (
                 scalarField&,
+                const bool add,
                 const scalarField&,
                 const scalarField&,
                 const direction,
@@ -142,21 +144,40 @@ public:
             ) const
             {}
 
-            //- Update result field based on interface functionality
+            //- Update result field based on interface functionality. Add
+            //  or subtract coupled contributions to matrix
             virtual void updateInterfaceMatrix
             (
                 scalarField&,
+                const bool add,
                 const scalarField&,
                 const scalarField&,
                 const direction,
                 const Pstream::commsTypes commsType
             ) const = 0;
+
+            //- Helper: add (or subtract) weighted contributions to internal
+            //  field
+            template<class Type>
+            void addToInternalField
+            (
+                Field<Type>& result,
+                const bool add,
+                const scalarField& coeffs,
+                const Field<Type>& vals
+            ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "lduInterfaceFieldTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

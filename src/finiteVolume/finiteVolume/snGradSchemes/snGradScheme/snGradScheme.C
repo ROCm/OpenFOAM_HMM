@@ -70,7 +70,7 @@ tmp<snGradScheme<Type>> snGradScheme<Type>::New
     typename MeshConstructorTable::iterator constructorIter =
         MeshConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -124,6 +124,7 @@ snGradScheme<Type>::snGrad
         )
     );
     GeometricField<Type, fvsPatchField, surfaceMesh>& ssf = tsf.ref();
+    ssf.setOriented();
 
     // set reference to difference factors array
     const scalarField& deltaCoeffs = tdeltaCoeffs();

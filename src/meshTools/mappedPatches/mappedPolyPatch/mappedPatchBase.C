@@ -1070,7 +1070,7 @@ Foam::mappedPatchBase::mappedPatchBase
     {
         offsetMode_ = offsetModeNames_.read(dict.lookup("offsetMode"));
 
-        switch(offsetMode_)
+        switch (offsetMode_)
         {
             case UNIFORM:
             {
@@ -1109,7 +1109,7 @@ Foam::mappedPatchBase::mappedPatchBase
         (
             dict
         )   << "Please supply the offsetMode as one of "
-            << NamedEnum<offsetMode, 3>::words()
+            << offsetModeNames_
             << exit(FatalIOError);
     }
 }

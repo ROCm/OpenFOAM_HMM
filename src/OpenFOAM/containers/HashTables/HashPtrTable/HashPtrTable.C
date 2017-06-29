@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 :
-    HashTable<T*, Key, Hash>(size)
+    parent_type(size)
 {}
 
 
@@ -41,11 +41,19 @@ Foam::HashPtrTable<T, Key, Hash>::HashPtrTable
     const HashPtrTable<T, Key, Hash>& ht
 )
 :
-    HashTable<T*, Key, Hash>()
+    parent_type(ht.capacity())
 {
     for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
     {
-        this->insert(iter.key(), new T(**iter));
+        const T* ptr = iter.object();
+        if (ptr)
+        {
+            this->insert(iter.key(), new T(*ptr));
+        }
+        else
+        {
+            this->insert(iter.key(), nullptr);
+        }
     }
 }
 
@@ -62,49 +70,58 @@ Foam::HashPtrTable<T, Key, Hash>::~HashPtrTable()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& it)
+T* Foam::HashPtrTable<T, Key, Hash>::remove(iterator& iter)
 {
-    T* elemPtr = *it;
-    HashTable<T*, Key, Hash>::erase(it);
-    return elemPtr;
+    if (iter.found())
+    {
+        T* ptr = iter.object();
+        this->parent_type::erase(iter);
+        return ptr;
+    }
+
+    return nullptr;
 }
 
 
 template<class T, class Key, class Hash>
-bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& it)
+bool Foam::HashPtrTable<T, Key, Hash>::erase(iterator& iter)
 {
-    T* elemPtr = *it;
-
-    if (HashTable<T*, Key, Hash>::erase(it))
+    if (iter.found())
     {
-        if (elemPtr)
+        T* ptr = iter.object();
+
+        if (this->parent_type::erase(iter))
         {
-            delete elemPtr;
-        }
+            if (ptr)
+            {
+                delete ptr;
+            }
 
-        return true;
+            return true;
+        }
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
+}
+
+
+template<class T, class Key, class Hash>
+bool Foam::HashPtrTable<T, Key, Hash>::erase(const Key& key)
+{
+    auto iter = this->find(key);
+    return this->erase(iter);
 }
 
 
 template<class T, class Key, class Hash>
 void Foam::HashPtrTable<T, Key, Hash>::clear()
 {
-    for
-    (
-        iterator iter = this->begin();
-        iter != this->end();
-        ++iter
-    )
+    for (iterator iter = this->begin(); iter != this->end(); ++iter)
     {
-        delete *iter;
+        delete iter.object();
     }
 
-    HashTable<T*, Key, Hash>::clear();
+    this->parent_type::clear();
 }
 
 
@@ -128,7 +145,15 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
 
     for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
     {
-        this->insert(iter.key(), new T(**iter));
+        const T* ptr = iter.object();
+        if (ptr)
+        {
+            this->insert(iter.key(), new T(*ptr));
+        }
+        else
+        {
+            this->insert(iter.key(), nullptr);
+        }
     }
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,6 @@ See also
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "IOstreams.H"
 #include "FixedList.H"
 #include "IFstream.H"
 #include "OFstream.H"
@@ -64,6 +63,15 @@ int main(int argc, char *argv[])
     Info<< "list2:" << list2
         << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
 
+    // Using FixedList for content too
+    {
+        List<FixedList<label, 4>> twolists{list, list2};
+        Info<<"List of FixedList: " << flatOutput(twolists) << endl;
+        sort(twolists);
+        // outer-sort only
+        Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
+    }
+
     Info<< "list: " << list << nl
         << "list2: " << list2 << endl;
     list.swap(list2);
@@ -92,7 +100,11 @@ int main(int argc, char *argv[])
             Serr<< "slave sending to master "
                 << Pstream::masterNo() << endl;
 
-            OPstream toMaster(Pstream::blocking, Pstream::masterNo());
+            OPstream toMaster
+            (
+                Pstream::commsTypes::blocking,
+                Pstream::masterNo()
+            );
 
             FixedList<label, 2> list3;
             list3[0] = 0;
@@ -109,7 +121,7 @@ int main(int argc, char *argv[])
             )
             {
                 Serr << "master receiving from slave " << slave << endl;
-                IPstream fromSlave(Pstream::blocking, slave);
+                IPstream fromSlave(Pstream::commsTypes::blocking, slave);
                 FixedList<label, 2> list3(fromSlave);
 
                 Serr<< list3 << endl;

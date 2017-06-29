@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,7 @@ SourceFiles
 // VTK forward declarations
 class vtkDataArraySelection;
 class vtkCallbackCommand;
+template<class T> class vtkSmartPointer;
 
 // OpenFOAM forward declarations
 namespace Foam
@@ -55,7 +56,7 @@ namespace Foam
 
 
 /*---------------------------------------------------------------------------*\
-                     Class vtkPVFoamReader Declaration
+                       Class vtkPVFoamReader Declaration
 \*---------------------------------------------------------------------------*/
 
 class vtkPVFoamReader
@@ -64,7 +65,7 @@ class vtkPVFoamReader
 {
 public:
     vtkTypeMacro(vtkPVFoamReader, vtkMultiBlockDataSetAlgorithm);
-    void PrintSelf(ostream&, vtkIndent);
+    void PrintSelf(ostream&, vtkIndent) VTK_OVERRIDE;
 
     static vtkPVFoamReader* New();
 
@@ -78,58 +79,62 @@ public:
     vtkGetStringMacro(FileName);
 
     // Description:
-    // OpenFOAM mesh caching control
-    vtkSetMacro(CacheMesh, int);
-    vtkGetMacro(CacheMesh, int);
+    // Print some case information
+    virtual void PrintInfo();
+
+    // Description:
+    // Mesh caching control (0:none,1:fvMesh,3:fvMesh+vtk)
+    vtkSetMacro(MeshCaching, int);
+    vtkGetMacro(MeshCaching, int);
 
     // Description:
     // OpenFOAM refresh times/fields
-    virtual void SetRefresh(int);
+    virtual void Refresh();
 
     // Description:
     // OpenFOAM skip/include the 0/ time directory
-    vtkSetMacro(SkipZeroTime, int);
-    vtkGetMacro(SkipZeroTime, int);
+    vtkSetMacro(SkipZeroTime, bool);
+    vtkGetMacro(SkipZeroTime, bool);
 
     // Description:
     // GUI update control
-    vtkSetMacro(UpdateGUI, int);
-    vtkGetMacro(UpdateGUI, int);
+    vtkSetMacro(UpdateGUI, bool);
+    vtkGetMacro(UpdateGUI, bool);
 
     // Description:
     // OpenFOAM extrapolate internal values onto the patches
-    vtkSetMacro(ExtrapolatePatches, int);
-    vtkGetMacro(ExtrapolatePatches, int);
+    vtkSetMacro(ExtrapolatePatches, bool);
+    vtkGetMacro(ExtrapolatePatches, bool);
 
     // Description:
     // OpenFOAM use vtkPolyhedron instead of decomposing polyhedra
-    vtkSetMacro(UseVTKPolyhedron, int);
-    vtkGetMacro(UseVTKPolyhedron, int);
+    vtkSetMacro(UseVTKPolyhedron, bool);
+    vtkGetMacro(UseVTKPolyhedron, bool);
 
     // Description:
     // OpenFOAM read sets control
-    virtual void SetIncludeSets(int);
-    vtkGetMacro(IncludeSets, int);
+    virtual void SetIncludeSets(bool);
+    vtkGetMacro(IncludeSets, bool);
 
     // Description:
     // OpenFOAM read zones control
-    virtual void SetIncludeZones(int);
-    vtkGetMacro(IncludeZones, int);
+    virtual void SetIncludeZones(bool);
+    vtkGetMacro(IncludeZones, bool);
 
     // Description:
     // OpenFOAM display patch names control
-    virtual void SetShowPatchNames(int);
-    vtkGetMacro(ShowPatchNames, int);
+    virtual void SetShowPatchNames(bool);
+    vtkGetMacro(ShowPatchNames, bool);
 
     // Description:
     // OpenFOAM display patchGroups
-    virtual void SetShowGroupsOnly(int);
-    vtkGetMacro(ShowGroupsOnly, int);
+    virtual void SetShowGroupsOnly(bool);
+    vtkGetMacro(ShowGroupsOnly, bool);
 
     // Description:
     // OpenFOAM volField interpolation
-    vtkSetMacro(InterpolateVolFields, int);
-    vtkGetMacro(InterpolateVolFields, int);
+    vtkSetMacro(InterpolateVolFields, bool);
+    vtkGetMacro(InterpolateVolFields, bool);
 
     // Description:
     // Get the current timestep
@@ -195,7 +200,7 @@ protected:
         vtkInformation*,
         vtkInformationVector**,
         vtkInformationVector*
-    );
+    ) VTK_OVERRIDE;
 
     //- Get the mesh/fields for a particular time
     virtual int RequestData
@@ -203,10 +208,10 @@ protected:
         vtkInformation*,
         vtkInformationVector**,
         vtkInformationVector*
-    );
+    ) VTK_OVERRIDE;
 
     //- Fill in additional port information
-    virtual int FillOutputPortInformation(int, vtkInformation*);
+    virtual int FillOutputPortInformation(int, vtkInformation*) VTK_OVERRIDE;
 
     //- The observer to modify this object when array selections are modified
     vtkCallbackCommand* SelectionObserver;
@@ -218,41 +223,36 @@ protected:
 private:
 
     //- Disallow default bitwise copy construct
-    vtkPVFoamReader(const vtkPVFoamReader&);
+    vtkPVFoamReader(const vtkPVFoamReader&) = delete;
 
     //- Disallow default bitwise assignment
-    void operator=(const vtkPVFoamReader&);
+    void operator=(const vtkPVFoamReader&) = delete;
 
     //- Add/remove patch names to/from the view
     void updatePatchNamesView(const bool show);
 
     int TimeStepRange[2];
-    int Refresh;
-    int CacheMesh;
-    int SkipZeroTime;
+    int MeshCaching;
+    bool SkipZeroTime;
 
-    int ExtrapolatePatches;
-    int UseVTKPolyhedron;
-    int IncludeSets;
-    int IncludeZones;
-    int ShowPatchNames;
-    int ShowGroupsOnly;
-    int InterpolateVolFields;
+    bool ExtrapolatePatches;
+    bool UseVTKPolyhedron;
+    bool IncludeSets;
+    bool IncludeZones;
+    bool ShowPatchNames;
+    bool ShowGroupsOnly;
+    bool InterpolateVolFields;
 
     //- Dummy variable/switch to invoke a reader update
-    int UpdateGUI;
+    bool UpdateGUI;
 
     vtkDataArraySelection* PartSelection;
     vtkDataArraySelection* VolFieldSelection;
     vtkDataArraySelection* PointFieldSelection;
     vtkDataArraySelection* LagrangianFieldSelection;
 
-    //- Cached data for output port0 (experimental!)
-    vtkMultiBlockDataSet* output0_;
-
-    //BTX
-    Foam::vtkPVFoam* foamData_;
-    //ETX
+    //- Backend portion of the reader
+    Foam::vtkPVFoam* backend_;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

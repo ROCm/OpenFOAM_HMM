@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,6 +51,7 @@ Description
 #include "uindirectPrimitivePatch.H"
 #include "globalMeshData.H"
 #include "globalIndex.H"
+#include "timeSelector.H"
 
 using namespace Foam;
 
@@ -63,6 +64,8 @@ int main(int argc, char *argv[])
     (
         "extract surface from a polyMesh"
     );
+    timeSelector::addOptions();
+
     argList::validArgs.append("output file");
     #include "addRegionOption.H"
     argList::addBoolOption
@@ -86,7 +89,14 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const fileName outFileName(args[1]);
+    const fileName userOutFileName(args[1]);
+
+    if (!userOutFileName.hasExt())
+    {
+        FatalErrorInFunction
+            << "Missing extension on output name " << userOutFileName
+            << exit(FatalError);
+    }
 
     Info<< "Extracting surface from boundaryMesh ..."
         << endl << endl;
@@ -106,271 +116,321 @@ int main(int argc, char *argv[])
         Info<< "Excluding all processor patches." << nl << endl;
     }
 
+
     Info<< "Reading mesh from time " << runTime.value() << endl;
 
     #include "createNamedPolyMesh.H"
 
+    // User specified times
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
-    // Create local surface from:
-    // - explicitly named patches only (-patches (at your option)
-    // - all patches (default in sequential mode)
-    // - all non-processor patches (default in parallel mode)
-    // - all non-processor patches (sequential mode, -excludeProcPatches
-    //   (at your option)
-
-    // Construct table of patches to include.
-    const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
-
-    labelHashSet includePatches(bMesh.size());
-
-    if (args.optionFound("patches"))
+    forAll(timeDirs, timeIndex)
     {
-        includePatches = bMesh.patchSet
-        (
-            wordReList(args.optionLookup("patches")())
-        );
-    }
-    else
-    {
-        forAll(bMesh, patchi)
-        {
-            const polyPatch& patch = bMesh[patchi];
+        runTime.setTime(timeDirs[timeIndex], timeIndex);
+        Info<< "Time [" << timeIndex << "] = " << runTime.timeName();
 
-            if (includeProcPatches || !isA<processorPolyPatch>(patch))
+        fileName outFileName;
+        if (timeDirs.size() == 1)
+        {
+            outFileName = userOutFileName;
+            Info<< nl;
+        }
+        else
+        {
+            polyMesh::readUpdateState meshState = mesh.readUpdate();
+            if (timeIndex && meshState == polyMesh::UNCHANGED)
             {
-                includePatches.insert(patchi);
-            }
-        }
-    }
-
-
-
-    const faceZoneMesh& fzm = mesh.faceZones();
-    labelHashSet includeFaceZones(fzm.size());
-
-    if (args.optionFound("faceZones"))
-    {
-        wordReList zoneNames(args.optionLookup("faceZones")());
-        const wordList allZoneNames(fzm.names());
-        forAll(zoneNames, i)
-        {
-            const wordRe& zoneName = zoneNames[i];
-
-            labelList zoneIDs = findStrings(zoneName, allZoneNames);
-
-            forAll(zoneIDs, j)
-            {
-                includeFaceZones.insert(zoneIDs[j]);
-            }
-
-            if (zoneIDs.empty())
-            {
-                WarningInFunction
-                    << "Cannot find any faceZone name matching "
-                    << zoneName << endl;
-            }
-
-        }
-        Info<< "Additionally triangulating faceZones "
-            << UIndirectList<word>(allZoneNames, includeFaceZones.sortedToc())
-            << endl;
-    }
-
-
-
-    // From (name of) patch to compact 'zone' index
-    HashTable<label> compactZoneID(1000);
-    // Mesh face and compact zone indx
-    DynamicList<label> faceLabels;
-    DynamicList<label> compactZones;
-
-    {
-        // Collect sizes. Hash on names to handle local-only patches (e.g.
-        //  processor patches)
-        HashTable<label> patchSize(1000);
-        label nFaces = 0;
-        forAllConstIter(labelHashSet, includePatches, iter)
-        {
-            const polyPatch& pp = bMesh[iter.key()];
-            patchSize.insert(pp.name(), pp.size());
-            nFaces += pp.size();
-        }
-
-        HashTable<label> zoneSize(1000);
-        forAllConstIter(labelHashSet, includeFaceZones, iter)
-        {
-            const faceZone& pp = fzm[iter.key()];
-            zoneSize.insert(pp.name(), pp.size());
-            nFaces += pp.size();
-        }
-
-
-        Pstream::mapCombineGather(patchSize, plusEqOp<label>());
-        Pstream::mapCombineGather(zoneSize, plusEqOp<label>());
-
-
-        // Allocate compact numbering for all patches/faceZones
-        forAllConstIter(HashTable<label>, patchSize, iter)
-        {
-            label sz = compactZoneID.size();
-            compactZoneID.insert(iter.key(), sz);
-        }
-
-        forAllConstIter(HashTable<label>, zoneSize, iter)
-        {
-            label sz = compactZoneID.size();
-            //Info<< "For faceZone " << iter.key() << " allocating zoneID "
-            //    << sz << endl;
-            compactZoneID.insert(iter.key(), sz);
-        }
-
-
-        Pstream::mapCombineScatter(compactZoneID);
-
-
-        // Rework HashTable into labelList just for speed of conversion
-        labelList patchToCompactZone(bMesh.size(), -1);
-        labelList faceZoneToCompactZone(bMesh.size(), -1);
-        forAllConstIter(HashTable<label>, compactZoneID, iter)
-        {
-            label patchi = bMesh.findPatchID(iter.key());
-            if (patchi != -1)
-            {
-                patchToCompactZone[patchi] = iter();
+                Info<<"  ... no mesh change." << nl;
+                continue;
             }
             else
             {
-                label zoneI = fzm.findZoneID(iter.key());
-                faceZoneToCompactZone[zoneI] = iter();
+                Info<< nl;
             }
+
+            // The filename based on the original, but with additional
+            // time information. The extension was previously checked that
+            // it exists
+            std::string::size_type dot = userOutFileName.rfind('.');
+
+            outFileName =
+                userOutFileName.substr(0, dot) + "_"
+              + Foam::name(runTime.value()) + "."
+              + userOutFileName.ext();
         }
 
+        // Create local surface from:
+        // - explicitly named patches only (-patches (at your option)
+        // - all patches (default in sequential mode)
+        // - all non-processor patches (default in parallel mode)
+        // - all non-processor patches (sequential mode, -excludeProcPatches
+        //   (at your option)
 
-        faceLabels.setCapacity(nFaces);
-        compactZones.setCapacity(nFaces);
+        // Construct table of patches to include.
+        const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
-        // Collect faces on patches
-        forAllConstIter(labelHashSet, includePatches, iter)
+        labelHashSet includePatches(bMesh.size());
+
+        if (args.optionFound("patches"))
         {
-            const polyPatch& pp = bMesh[iter.key()];
-            forAll(pp, i)
+            includePatches = bMesh.patchSet
+            (
+                wordReList(args.optionLookup("patches")())
+            );
+        }
+        else
+        {
+            forAll(bMesh, patchi)
             {
-                faceLabels.append(pp.start()+i);
-                compactZones.append(patchToCompactZone[pp.index()]);
+                const polyPatch& patch = bMesh[patchi];
+
+                if (includeProcPatches || !isA<processorPolyPatch>(patch))
+                {
+                    includePatches.insert(patchi);
+                }
             }
         }
-        // Collect faces on faceZones
-        forAllConstIter(labelHashSet, includeFaceZones, iter)
+
+
+        const faceZoneMesh& fzm = mesh.faceZones();
+        labelHashSet includeFaceZones(fzm.size());
+
+        if (args.optionFound("faceZones"))
         {
-            const faceZone& pp = fzm[iter.key()];
-            forAll(pp, i)
+            wordReList zoneNames(args.optionLookup("faceZones")());
+            const wordList allZoneNames(fzm.names());
+            forAll(zoneNames, i)
             {
-                faceLabels.append(pp[i]);
-                compactZones.append(faceZoneToCompactZone[pp.index()]);
+                const wordRe& zoneName = zoneNames[i];
+
+                labelList zoneIDs = findStrings(zoneName, allZoneNames);
+
+                forAll(zoneIDs, j)
+                {
+                    includeFaceZones.insert(zoneIDs[j]);
+                }
+
+                if (zoneIDs.empty())
+                {
+                    WarningInFunction
+                        << "Cannot find any faceZone name matching "
+                        << zoneName << endl;
+                }
+
             }
-        }
-    }
-
-
-    // Addressing engine for all faces
-    uindirectPrimitivePatch allBoundary
-    (
-        UIndirectList<face>(mesh.faces(), faceLabels),
-        mesh.points()
-    );
-
-
-    // Find correspondence to master points
-    labelList pointToGlobal;
-    labelList uniqueMeshPoints;
-    autoPtr<globalIndex> globalNumbers = mesh.globalData().mergePoints
-    (
-        allBoundary.meshPoints(),
-        allBoundary.meshPointMap(),
-        pointToGlobal,
-        uniqueMeshPoints
-    );
-
-    // Gather all unique points on master
-    List<pointField> gatheredPoints(Pstream::nProcs());
-    gatheredPoints[Pstream::myProcNo()] = pointField
-    (
-        mesh.points(),
-        uniqueMeshPoints
-    );
-    Pstream::gatherList(gatheredPoints);
-
-    // Gather all faces
-    List<faceList> gatheredFaces(Pstream::nProcs());
-    gatheredFaces[Pstream::myProcNo()] = allBoundary.localFaces();
-    forAll(gatheredFaces[Pstream::myProcNo()], i)
-    {
-        inplaceRenumber(pointToGlobal, gatheredFaces[Pstream::myProcNo()][i]);
-    }
-    Pstream::gatherList(gatheredFaces);
-
-    // Gather all ZoneIDs
-    List<labelList> gatheredZones(Pstream::nProcs());
-    gatheredZones[Pstream::myProcNo()] = compactZones.xfer();
-    Pstream::gatherList(gatheredZones);
-
-    // On master combine all points, faces, zones
-    if (Pstream::master())
-    {
-        pointField allPoints = ListListOps::combine<pointField>
-        (
-            gatheredPoints,
-            accessOp<pointField>()
-        );
-        gatheredPoints.clear();
-
-        faceList allFaces = ListListOps::combine<faceList>
-        (
-            gatheredFaces,
-            accessOp<faceList>()
-        );
-        gatheredFaces.clear();
-
-        labelList allZones = ListListOps::combine<labelList>
-        (
-            gatheredZones,
-            accessOp<labelList>()
-        );
-        gatheredZones.clear();
-
-
-        // Zones
-        surfZoneIdentifierList surfZones(compactZoneID.size());
-        forAllConstIter(HashTable<label>, compactZoneID, iter)
-        {
-            surfZones[iter()] = surfZoneIdentifier(iter.key(), iter());
-            Info<< "surfZone " << iter()  <<  " : " << surfZones[iter()].name()
+            Info<< "Additionally triangulating faceZones "
+                << UIndirectList<word>
+                  (
+                      allZoneNames,
+                      includeFaceZones.sortedToc()
+                  )
                 << endl;
         }
 
-        UnsortedMeshedSurface<face> unsortedFace
+
+
+        // From (name of) patch to compact 'zone' index
+        HashTable<label> compactZoneID(1000);
+        // Mesh face and compact zone indx
+        DynamicList<label> faceLabels;
+        DynamicList<label> compactZones;
+
+        {
+            // Collect sizes. Hash on names to handle local-only patches (e.g.
+            //  processor patches)
+            HashTable<label> patchSize(1000);
+            label nFaces = 0;
+            forAllConstIter(labelHashSet, includePatches, iter)
+            {
+                const polyPatch& pp = bMesh[iter.key()];
+                patchSize.insert(pp.name(), pp.size());
+                nFaces += pp.size();
+            }
+
+            HashTable<label> zoneSize(1000);
+            forAllConstIter(labelHashSet, includeFaceZones, iter)
+            {
+                const faceZone& pp = fzm[iter.key()];
+                zoneSize.insert(pp.name(), pp.size());
+                nFaces += pp.size();
+            }
+
+
+            Pstream::mapCombineGather(patchSize, plusEqOp<label>());
+            Pstream::mapCombineGather(zoneSize, plusEqOp<label>());
+
+
+            // Allocate compact numbering for all patches/faceZones
+            forAllConstIter(HashTable<label>, patchSize, iter)
+            {
+                label sz = compactZoneID.size();
+                compactZoneID.insert(iter.key(), sz);
+            }
+
+            forAllConstIter(HashTable<label>, zoneSize, iter)
+            {
+                label sz = compactZoneID.size();
+                //Info<< "For faceZone " << iter.key() << " allocating zoneID "
+                //    << sz << endl;
+                compactZoneID.insert(iter.key(), sz);
+            }
+
+
+            Pstream::mapCombineScatter(compactZoneID);
+
+
+            // Rework HashTable into labelList just for speed of conversion
+            labelList patchToCompactZone(bMesh.size(), -1);
+            labelList faceZoneToCompactZone(bMesh.size(), -1);
+            forAllConstIter(HashTable<label>, compactZoneID, iter)
+            {
+                label patchi = bMesh.findPatchID(iter.key());
+                if (patchi != -1)
+                {
+                    patchToCompactZone[patchi] = iter();
+                }
+                else
+                {
+                    label zoneI = fzm.findZoneID(iter.key());
+                    faceZoneToCompactZone[zoneI] = iter();
+                }
+            }
+
+
+            faceLabels.setCapacity(nFaces);
+            compactZones.setCapacity(nFaces);
+
+            // Collect faces on patches
+            forAllConstIter(labelHashSet, includePatches, iter)
+            {
+                const polyPatch& pp = bMesh[iter.key()];
+                forAll(pp, i)
+                {
+                    faceLabels.append(pp.start()+i);
+                    compactZones.append(patchToCompactZone[pp.index()]);
+                }
+            }
+            // Collect faces on faceZones
+            forAllConstIter(labelHashSet, includeFaceZones, iter)
+            {
+                const faceZone& pp = fzm[iter.key()];
+                forAll(pp, i)
+                {
+                    faceLabels.append(pp[i]);
+                    compactZones.append(faceZoneToCompactZone[pp.index()]);
+                }
+            }
+        }
+
+
+        // Addressing engine for all faces
+        uindirectPrimitivePatch allBoundary
         (
-            xferMove(allPoints),
-            xferMove(allFaces),
-            xferMove(allZones),
-            xferMove(surfZones)
+            UIndirectList<face>(mesh.faces(), faceLabels),
+            mesh.points()
         );
 
 
-        MeshedSurface<face> sortedFace(unsortedFace);
-
-        fileName globalCasePath
+        // Find correspondence to master points
+        labelList pointToGlobal;
+        labelList uniqueMeshPoints;
+        autoPtr<globalIndex> globalNumbers = mesh.globalData().mergePoints
         (
-            runTime.processorCase()
-          ? runTime.path()/".."/outFileName
-          : runTime.path()/outFileName
+            allBoundary.meshPoints(),
+            allBoundary.meshPointMap(),
+            pointToGlobal,
+            uniqueMeshPoints
         );
 
-        Info<< "Writing merged surface to " << globalCasePath << endl;
+        // Gather all unique points on master
+        List<pointField> gatheredPoints(Pstream::nProcs());
+        gatheredPoints[Pstream::myProcNo()] = pointField
+        (
+            mesh.points(),
+            uniqueMeshPoints
+        );
+        Pstream::gatherList(gatheredPoints);
 
-        sortedFace.write(globalCasePath);
+        // Gather all faces
+        List<faceList> gatheredFaces(Pstream::nProcs());
+        gatheredFaces[Pstream::myProcNo()] = allBoundary.localFaces();
+        forAll(gatheredFaces[Pstream::myProcNo()], i)
+        {
+            inplaceRenumber
+           (
+                pointToGlobal,
+                gatheredFaces[Pstream::myProcNo()][i]
+           );
+        }
+        Pstream::gatherList(gatheredFaces);
+
+        // Gather all ZoneIDs
+        List<labelList> gatheredZones(Pstream::nProcs());
+        gatheredZones[Pstream::myProcNo()] = compactZones.xfer();
+        Pstream::gatherList(gatheredZones);
+
+        // On master combine all points, faces, zones
+        if (Pstream::master())
+        {
+            pointField allPoints = ListListOps::combine<pointField>
+            (
+                gatheredPoints,
+                accessOp<pointField>()
+            );
+            gatheredPoints.clear();
+
+            faceList allFaces = ListListOps::combine<faceList>
+            (
+                gatheredFaces,
+                accessOp<faceList>()
+            );
+            gatheredFaces.clear();
+
+            labelList allZones = ListListOps::combine<labelList>
+            (
+                gatheredZones,
+                accessOp<labelList>()
+            );
+            gatheredZones.clear();
+
+
+            // Zones
+            surfZoneIdentifierList surfZones(compactZoneID.size());
+            forAllConstIter(HashTable<label>, compactZoneID, iter)
+            {
+                surfZones[iter()] = surfZoneIdentifier(iter.key(), iter());
+                Info<< "surfZone " << iter()
+                    <<  " : "      << surfZones[iter()].name()
+                    << endl;
+            }
+
+            UnsortedMeshedSurface<face> unsortedFace
+            (
+                xferMove(allPoints),
+                xferMove(allFaces),
+                xferMove(allZones),
+                xferMove(surfZones)
+            );
+
+
+            MeshedSurface<face> sortedFace(unsortedFace);
+
+            fileName globalCasePath
+            (
+                outFileName.isAbsolute()
+              ? outFileName
+              : (
+                    runTime.processorCase()
+                  ? runTime.rootPath()/runTime.globalCaseName()/outFileName
+                  : runTime.path()/outFileName
+                )
+            );
+
+            Info<< "Writing merged surface to " << globalCasePath << endl;
+
+            sortedFace.write(globalCasePath);
+        }
     }
-
     Info<< "End\n" << endl;
 
     return 0;

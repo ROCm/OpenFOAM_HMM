@@ -115,6 +115,7 @@ gaussLaplacianScheme<Type, GType>::gammaSnGradCorr
            *vf.dimensions()*mesh.deltaCoeffs().dimensions()
         )
     );
+    tgammaSnGradCorr.ref().oriented() = SfGammaCorr.oriented();
 
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {

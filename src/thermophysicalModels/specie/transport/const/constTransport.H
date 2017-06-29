@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,23 +58,9 @@ inline constTransport<Thermo> operator+
 );
 
 template<class Thermo>
-inline constTransport<Thermo> operator-
-(
-    const constTransport<Thermo>&,
-    const constTransport<Thermo>&
-);
-
-template<class Thermo>
 inline constTransport<Thermo> operator*
 (
     const scalar,
-    const constTransport<Thermo>&
-);
-
-template<class Thermo>
-inline constTransport<Thermo> operator==
-(
-    const constTransport<Thermo>&,
     const constTransport<Thermo>&
 );
 
@@ -122,17 +108,11 @@ public:
         //- Construct as named copy
         inline constTransport(const word&, const constTransport&);
 
-        //- Construct from Istream
-        constTransport(Istream&);
-
         //- Construct from dictionary
         constTransport(const dictionary& dict);
 
         //- Construct and return a clone
         inline autoPtr<constTransport> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<constTransport> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<constTransport> New(const dictionary& dict);
@@ -168,8 +148,6 @@ public:
 
         inline void operator+=(const constTransport&);
 
-        inline void operator-=(const constTransport&);
-
         inline void operator*=(const scalar);
 
 
@@ -181,21 +159,9 @@ public:
             const constTransport&
         );
 
-        friend constTransport operator- <Thermo>
-        (
-            const constTransport&,
-            const constTransport&
-        );
-
         friend constTransport operator* <Thermo>
         (
             const scalar,
-            const constTransport&
-        );
-
-        friend constTransport operator== <Thermo>
-        (
-            const constTransport&,
             const constTransport&
         );
 

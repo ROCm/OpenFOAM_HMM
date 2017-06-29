@@ -30,32 +30,6 @@ License
 #include "List.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-Foam::label Foam::StaticHashTableCore::canonicalSize(const label size)
-{
-    if (size < 1)
-    {
-        return 0;
-    }
-
-    // Enforce power of two
-    unsigned int goodSize = size;
-
-    if (goodSize & (goodSize - 1))
-    {
-        // Brute-force is fast enough
-        goodSize = 1;
-        while (goodSize < unsigned(size))
-        {
-            goodSize <<= 1;
-        }
-    }
-
-    return goodSize;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -185,6 +159,17 @@ Foam::StaticHashTable<T, Key, Hash>::find
     const Key& key
 ) const
 {
+    return this->cfind(key);
+}
+
+
+template<class T, class Key, class Hash>
+typename Foam::StaticHashTable<T, Key, Hash>::const_iterator
+Foam::StaticHashTable<T, Key, Hash>::cfind
+(
+    const Key& key
+) const
+{
     if (nElmts_)
     {
         const label hashIdx = hashKeyIndex(key);
@@ -229,7 +214,7 @@ template<class T, class Key, class Hash>
 bool Foam::StaticHashTable<T, Key, Hash>::set
 (
     const Key& key,
-    const T& newEntry,
+    const T& obj,
     const bool protect
 )
 {
@@ -255,7 +240,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::set
         localObjects.setSize(existing+1);
 
         localKeys[existing] = key;
-        localObjects[existing] = newEntry;
+        localObjects[existing] = obj;
 
         nElmts_++;
     }
@@ -276,7 +261,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::set
     {
         // Found - overwrite existing entry
         // this corresponds to the Perl convention
-        objects_[hashIdx][existing] = newEntry;
+        objects_[hashIdx][existing] = obj;
     }
 
     return true;

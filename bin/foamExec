@@ -26,7 +26,7 @@
 #     foamExec
 #
 # Description
-#     Usage: foamExec [-v foamVersion] <foamCommand> ...
+#     Usage: foamExec [-version=foamVersion] <foamCommand> ...
 #
 #     Runs the <foamVersion> version of executable <foamCommand>
 #     with the rest of the arguments.
@@ -34,7 +34,7 @@
 #     Can also be used for parallel runs. For example,
 #     \code
 #         mpirun -np <nProcs> \
-#             foamExec -version <foamVersion> <foamCommand> ... -parallel
+#             foamExec -version=VERSION <foamCommand> ... -parallel
 #     \endcode
 #
 # Note
@@ -55,40 +55,46 @@ usage() {
 Usage: ${0##*/} [OPTION] <application> ...
 
 options:
-  -prefix <dir>     specify an alternative installation prefix
+  -mode=MODE        Any combination of u(user), g(group), o(other)
+  -prefix=DIR       Specify an alternative installation prefix
                     pass through to foamEtcFile and set as FOAM_INST_DIR
-  -version <ver>    specify an alternative OpenFOAM version
+  -version=VER      Specify alternative OpenFOAM version (eg, 3.0, 1612, ...)
                     pass through to foamEtcFile
-  -help             print the usage
+  -help             Print the usage
 
-* run a particular OpenFOAM version of <application>
+Run a particular OpenFOAM version of <APPLICATION>
 
 USAGE
     exit 1
 }
 
 #-------------------------------------------------------------------------------
+binDir="${0%/*}"                # The bin dir
+projectDir="${binDir%/bin}"     # The project dir
+prefixDir="${projectDir%/*}"    # The prefix dir (same as $WM_PROJECT_INST_DIR)
 
-# the bin dir:
-binDir="${0%/*}"
+## projectDirName="${projectDir##*/}"      # The project directory name
 
-# the project dir:
-projectDir="${binDir%/bin}"
+version="${WM_PROJECT_VERSION:-unknown}"
 
-# the prefix dir (same as $FOAM_INST_DIR):
-prefixDir="${projectDir%/*}"
-
-# # the name used for the project directory
-# projectDirName="${projectDir##*/}"
-
-
-unset etcOpts version
+unset etcOpts
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -mode=*)
+        etcOpts="$etcOpts $1"       # pass-thru to foamEtcFile
+        ;;
+    -prefix=/*)
+        etcOpts="$etcOpts $1"       # pass-thru to foamEtcFile
+        prefixDir="${1#*=}"
+        ;;
+    -version=*)
+        etcOpts="$etcOpts $1"       # pass-thru to foamEtcFile
+        version="${1#*=}"
         ;;
     -m | -mode)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -127,15 +133,15 @@ done
 #
 sourceRc()
 {
-    foamDotFile="$($binDir/foamEtcFile $etcOpts bashrc)" || {
-        echo "Error : bashrc file could not be found for OpenFOAM-${version:-${WM_PROJECT_VERSION:-???}}" 1>&2
+    rcFile="$($binDir/foamEtcFile $etcOpts bashrc)" || {
+        echo "Error : bashrc file could not be found for OpenFOAM-$version" 1>&2
         exit 1
     }
 
     # set to consistent value before sourcing the bashrc
     export FOAM_INST_DIR="$prefixDir"
 
-    . $foamDotFile $FOAM_SETTINGS
+    . $rcFile $FOAM_SETTINGS
 }
 
 

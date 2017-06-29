@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@
 #     etc/config.sh/compiler
 #
 # Description
-#     Startup file for custom compiler versions for OpenFOAM
+#     Setup file for custom compiler versions for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/config.sh/settings
 #
 #------------------------------------------------------------------------------
@@ -62,31 +62,35 @@ ThirdParty)
     Gcc62)
         gcc_version=gcc-6.2.0
         ;;
+    Gcc63)
+        gcc_version=gcc-6.3.0
+        ;;
+    Gcc71)
+        gcc_version=gcc-7.1.0
+        ;;
     Clang)
-        clang_version=llvm-3.7.0
-        # clang_version=llvm-3.8.0
+        clang_version=llvm-3.7.1
+        ;;
+    Clang38)
+        clang_version=llvm-3.8.1
+        ;;
+    Clang39)
+        clang_version=llvm-3.9.1
+        ;;
+    Clang40)
+        clang_version=llvm-4.0.0
         ;;
     *)
-        echo 1>&2
-        echo "Warning in $WM_PROJECT_DIR/etc/config.sh/compiler:" 1>&2
-        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'" 1>&2
-        echo "    Please check your settings" 1>&2
-        echo 1>&2
+        /bin/cat << UNKNOWN_COMPILER 1>&2
+===============================================================================
+Warning in $WM_PROJECT_DIR/etc/config.sh/compiler:
+Unknown ThirdParty compiler type/version - '$WM_COMPILER'
+
+Please check your settings
+===============================================================================
+UNKNOWN_COMPILER
         ;;
     esac
-    ;;
-esac
-
-# common settings (system or ThirdParty)
-case "$WM_COMPILER" in
-Clang)
-    # Using clang - not gcc
-    export WM_CC='clang'
-    export WM_CXX='clang++'
-    ;;
-Icc)
-    export WM_CC='icc'
-    export WM_CXX='icpc'
     ;;
 esac
 

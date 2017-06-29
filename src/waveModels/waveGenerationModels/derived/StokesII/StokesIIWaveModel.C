@@ -119,7 +119,7 @@ void Foam::waveModels::StokesII::setLevel
     {
         const scalar eta =
             this->eta
-	        (
+            (
                 waveHeight_,
                 waterDepthRef_,
                 waveKx,

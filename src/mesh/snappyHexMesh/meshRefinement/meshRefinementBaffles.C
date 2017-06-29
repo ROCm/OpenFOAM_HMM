@@ -3361,7 +3361,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
     const label ownZone,
     const label neiZone,
     wordPairHashTable& zonesToFaceZone,
-    HashTable<word, labelPair, labelPair::Hash<>>& zoneIDsToFaceZone
+    LabelPairMap<word>& zoneIDsToFaceZone
 ) const
 {
     const cellZoneMesh& cellZones = mesh_.cellZones();
@@ -3383,13 +3383,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
             Swap(key.first(), key.second());
         }
 
-        HashTable<word, labelPair, labelPair::Hash<>>::
-        const_iterator zoneFnd = zoneIDsToFaceZone.find
-        (
-            key
-        );
-
-        if (zoneFnd == zoneIDsToFaceZone.end())
+        if (!zoneIDsToFaceZone.found(key))
         {
             // Not found. Allocate.
             const word ownZoneName =

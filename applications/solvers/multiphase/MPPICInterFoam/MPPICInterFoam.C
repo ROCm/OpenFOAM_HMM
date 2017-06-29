@@ -38,6 +38,9 @@ Description
 
 #include "fvCFD.H"
 #include "CMULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
 
 #include "immiscibleIncompressibleTwoPhaseMixture.H"
@@ -45,7 +48,7 @@ Description
 #include "pimpleControl.H"
 #include "fvOptions.H"
 #include "CorrectPhi.H"
-#include "fixedFluxPressureFvPatchScalarField.H"
+#include "fvcSmooth.H"
 
 #include "basicKinematicMPPICCloud.H"
 
@@ -59,15 +62,21 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createControl.H"
+    #include "createTimeControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
+    #include "createAlphaFluxes.H"
     #include "createFvOptions.H"
-    #include "createTimeControls.H"
     #include "correctPhi.H"
-    #include "CourantNo.H"
-    #include "setInitialDeltaT.H"
 
     turbulence->validate();
+
+    if (!LTS)
+    {
+        #include "readTimeControls.H"
+        #include "CourantNo.H"
+        #include "setInitialDeltaT.H"
+    }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,9 +85,17 @@ int main(int argc, char *argv[])
     while (runTime.run())
     {
         #include "readTimeControls.H"
-        #include "CourantNo.H"
-        #include "alphaCourantNo.H"
-        #include "setDeltaT.H"
+
+        if (LTS)
+        {
+            #include "setRDeltaT.H"
+        }
+        else
+        {
+            #include "CourantNo.H"
+            #include "alphaCourantNo.H"
+            #include "setDeltaT.H"
+        }
 
         runTime++;
 
@@ -132,6 +149,8 @@ int main(int argc, char *argv[])
         {
             #include "alphaControls.H"
             #include "alphaEqnSubCycle.H"
+
+            mixture.correct();
 
             #include "UEqn.H"
 

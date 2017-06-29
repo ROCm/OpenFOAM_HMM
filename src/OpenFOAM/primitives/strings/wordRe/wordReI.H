@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +25,13 @@ License
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-inline bool Foam::wordRe::meta(char c)
+inline bool Foam::wordRe::meta(const char c)
 {
     return regExp::meta(c);
 }
 
 
-inline bool Foam::wordRe::isPattern(const string& str)
+inline bool Foam::wordRe::isPattern(const std::string& str)
 {
     return string::meta<regExp>(str);
 }
@@ -48,7 +48,7 @@ inline Foam::wordRe::wordRe()
 
 inline Foam::wordRe::wordRe(const wordRe& str)
 :
-    word(str),
+    word(str, false),
     re_()
 {
     if (str.isPattern())
@@ -56,13 +56,6 @@ inline Foam::wordRe::wordRe(const wordRe& str)
         compile();
     }
 }
-
-
-inline Foam::wordRe::wordRe(const word& str)
-:
-    word(str),
-    re_()
-{}
 
 
 inline Foam::wordRe::wordRe(const keyType& str)
@@ -75,6 +68,34 @@ inline Foam::wordRe::wordRe(const keyType& str)
         compile();
     }
 }
+
+
+inline Foam::wordRe::wordRe(const char* str)
+:
+    word(str, false),
+    re_()
+{}
+
+
+inline Foam::wordRe::wordRe(const std::string& str)
+:
+    word(str, false),
+    re_()
+{}
+
+
+inline Foam::wordRe::wordRe(const string& str)
+:
+    word(str, false),
+    re_()
+{}
+
+
+inline Foam::wordRe::wordRe(const word& str)
+:
+    word(str, false),
+    re_()
+{}
 
 
 inline Foam::wordRe::wordRe(const keyType& str, const compOption opt)
@@ -91,17 +112,7 @@ inline Foam::wordRe::wordRe(const keyType& str, const compOption opt)
 
 inline Foam::wordRe::wordRe(const char* str, const compOption opt)
 :
-    word(str, false),
-    re_()
-{
-    compile(opt);
-}
-
-
-inline Foam::wordRe::wordRe(const string& str, const compOption opt)
-:
-    word(str, false),
-    re_()
+    wordRe(str)
 {
     compile(opt);
 }
@@ -109,8 +120,23 @@ inline Foam::wordRe::wordRe(const string& str, const compOption opt)
 
 inline Foam::wordRe::wordRe(const std::string& str, const compOption opt)
 :
-    word(str, false),
-    re_()
+    wordRe(str)
+{
+    compile(opt);
+}
+
+
+inline Foam::wordRe::wordRe(const string& str, const compOption opt)
+:
+    wordRe(str)
+{
+    compile(opt);
+}
+
+
+inline Foam::wordRe::wordRe(const word& str, const compOption opt)
+:
+    wordRe(str)
 {
     compile(opt);
 }
@@ -126,51 +152,47 @@ inline bool Foam::wordRe::isPattern() const
 
 inline bool Foam::wordRe::compile(const compOption opt) const
 {
-    bool doCompile = false;
+    if (opt)
+    {
+        bool comp = false;
 
-    if (opt & wordRe::REGEXP)
-    {
-        doCompile = true;
-    }
-    else if (opt & wordRe::DETECT)
-    {
-        if (string::meta<regExp>(*this) || !string::valid<word>(*this))
+        if (opt & wordRe::REGEX)
         {
-            doCompile = true;
+            comp = true;
+        }
+        else if (opt & wordRe::DETECT)
+        {
+            comp = string::meta<regExp>(*this) || !string::valid<word>(*this);
+        }
+        else if (opt & wordRe::NOCASE)
+        {
+            comp = true;
+        }
+
+        if (comp)
+        {
+            return re_.set(*this, (opt & wordRe::NOCASE));
         }
     }
-    else if (opt & wordRe::NOCASE)
-    {
-        doCompile = true;
-    }
 
-
-    if (doCompile)
-    {
-        re_.set(*this, (opt & wordRe::NOCASE));
-    }
-    else
-    {
-        re_.clear();
-    }
-
-    return re_.exists();
+    // Fall-through behaviour - not a regex
+    re_.clear();
+    return false;
 }
 
 
 inline bool Foam::wordRe::compile() const
 {
-    re_ = *this;
-    return re_.exists();
+    return re_.set(*this);
 }
 
 
 inline void Foam::wordRe::uncompile(const bool doStripInvalid) const
 {
-    if (re_.clear())
+    if (re_.clear() && doStripInvalid)
     {
-        // skip stripping unless debug is active to avoid costly operations
-        if (word::debug && doStripInvalid)
+        // Skip stripping unless debug is active to avoid costly operations
+        if (word::debug)
         {
             string::stripInvalid<word>
             (
@@ -188,17 +210,15 @@ inline void Foam::wordRe::clear()
 }
 
 
-inline bool Foam::wordRe::match(const std::string& str, bool literalMatch) const
+inline bool Foam::wordRe::match(const std::string& text, bool literal) const
 {
-    if (literalMatch || !re_.exists())
+    if (literal || !re_.exists())
     {
-        // check as string
-        return (str == *this);
+        return !compare(text);  // Compare as literal string
     }
     else
     {
-        // check as regex
-        return re_.match(str);
+        return re_.match(text); // Match as regex
     }
 }
 
@@ -225,10 +245,15 @@ inline void Foam::wordRe::set(const char* str, const compOption opt)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+inline bool Foam::wordRe::operator()(const std::string& text) const
+{
+    return match(text);
+}
+
+
 inline void Foam::wordRe::operator=(const wordRe& str)
 {
     string::operator=(str);
-
     if (str.isPattern())
     {
         compile();
@@ -242,7 +267,7 @@ inline void Foam::wordRe::operator=(const wordRe& str)
 
 inline void Foam::wordRe::operator=(const word& str)
 {
-    word::operator=(str);
+    string::operator=(str);
     re_.clear();
 }
 
@@ -264,21 +289,21 @@ inline void Foam::wordRe::operator=(const keyType& str)
 inline void Foam::wordRe::operator=(const string& str)
 {
     string::operator=(str);
-    compile(DETECT);  // auto-detect regex
+    compile(wordRe::DETECT);  // Auto-detect regex
 }
 
 
 inline void Foam::wordRe::operator=(const std::string& str)
 {
     string::operator=(str);
-    compile(DETECT);  // auto-detect regex
+    compile(wordRe::DETECT);  // Auto-detect regex
 }
 
 
 inline void Foam::wordRe::operator=(const char* str)
 {
     string::operator=(str);
-    compile(DETECT);  // auto-detect regex
+    compile(wordRe::DETECT);  // Auto-detect regex
 }
 
 

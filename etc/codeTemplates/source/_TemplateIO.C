@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) YEAR OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,7 @@ Foam::CLASSNAME::CLASSNAME(Istream& is)
     member1(is),
     member2(is)
 {
-    // Check state of Istream
-    is.check("Foam::CLASSNAME::CLASSNAME(Foam::Istream&)");
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -44,25 +43,14 @@ Foam::CLASSNAME::CLASSNAME(Istream& is)
 
 Foam::Istream& Foam::operator>>(Istream& is, CLASSNAME&)
 {
-    // Check state of Istream
-    is.check
-    (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::CLASSNAME&)"
-    );
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const CLASSNAME&)
 {
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::CLASSNAME&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

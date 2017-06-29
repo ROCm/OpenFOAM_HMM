@@ -1,0 +1,12 @@
+#!/bin/sh
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# create aeroFoil mesh using snappyHexMesh
+(cd aeroFoil_snappyHexMesh && ./Allrun.pre)
+
+# Extrude mesh
+(cd aeroFoil_overset && ./Allrun.pre)
+
+(cd background_snappyHexMesh && ./Allrun.pre)
+
+(cd background_overset &&  ./Allrun.pre)

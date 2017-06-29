@@ -188,7 +188,7 @@ public:
             inline tmp<volScalarField::Internal> RRs() const;
 
             //- Return net solid sensible enthalpy
-            inline tmp<DimensionedField<scalar, volMesh> > RRsHs() const;
+            inline tmp<DimensionedField<scalar, volMesh>> RRsHs() const;
 
             //- Solve the reaction system for the given time step
             //  and return the characteristic time
@@ -201,11 +201,8 @@ public:
             //- Return the chemical time scale
             virtual tmp<volScalarField> tc() const;
 
-            //- Return source for enthalpy equation [kg/m/s3]
-            virtual tmp<volScalarField> Sh() const;
-
-            //- Return the heat release, i.e. enthalpy/sec [m2/s3]
-            virtual tmp<volScalarField> dQ() const;
+            //- Return the heat release rate [kg/m/s3]
+            virtual tmp<volScalarField> Qdot() const;
 
 
         // ODE functions (overriding abstract functions in ODE.H)

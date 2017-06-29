@@ -869,16 +869,9 @@ void Foam::boundaryCutter::updateMesh(const mapPolyMesh& morphMap)
 
     {
         // Create copy since we're deleting entries
-        HashTable<labelList, edge, Hash<edge>>
-            newEdgeAddedPoints(edgeAddedPoints_.size());
+        EdgeMap<labelList> newEdgeAddedPoints(edgeAddedPoints_.size());
 
-        for
-        (
-            HashTable<labelList, edge, Hash<edge>>::const_iterator iter =
-                edgeAddedPoints_.begin();
-            iter != edgeAddedPoints_.end();
-            ++iter
-        )
+        forAllConstIters(edgeAddedPoints_, iter)
         {
             const edge& e = iter.key();
 
@@ -888,7 +881,7 @@ void Foam::boundaryCutter::updateMesh(const mapPolyMesh& morphMap)
 
             if (newStart >= 0 && newEnd >= 0)
             {
-                const labelList& addedPoints = iter();
+                const labelList& addedPoints = iter.object();
 
                 labelList newAddedPoints(addedPoints.size());
                 label newI = 0;

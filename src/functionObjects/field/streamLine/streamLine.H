@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,19 +42,22 @@ Usage
         writeControl    writeTime;
 
         setFormat       vtk;
+        U               U;
         trackForward    yes;
+
         fields
         (
             U
             p
         );
+
         lifeTime        10000;
         trackLength     1e-3;
         nSubCycle       5;
         bounds          (0.2 -10 -10)(0.22 10 10);
         cloudName       particleTracks;
-        seedSampleSet   uniform;
-        uniformCoeffs
+
+        seedSampleSet
         {
             type        uniform;
             axis        x;  //distance;
@@ -70,17 +73,17 @@ Usage
         Property     | Description             | Required    | Default value
         type         | Type name: streamLine   | yes         |
         setFormat    | Output data type        | yes         |
-        U            | Tracking velocity field name | yes    |
+        U            | Tracking velocity field name | no     | U
         fields       | Fields to sample        | yes         |
         lifetime     | Maximum number of particle tracking steps | yes |
         trackLength  | Tracking segment length | no          |
         nSubCycle    | Number of tracking steps per cell | no|
         cloudName    | Cloud name to use       | yes         |
-        bounds       | Bounding box to trim tracks | no | greatBox
+        bounds       | Bounding box to trim tracks | no | invertedBox
         seedSampleSet| Seeding method (see below)| yes       |
     \endtable
 
-    Where \c seedSampleSet is typically one of
+    Where \c seedSampleSet \c type is typically one of
     \plaintable
         uniform | uniform particle seeding
         cloud   | cloud of points
@@ -136,10 +139,10 @@ class streamLine
    // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        streamLine(const streamLine&);
+        streamLine(const streamLine&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const streamLine&);
+        void operator=(const streamLine&) = delete;
 
 
 public:

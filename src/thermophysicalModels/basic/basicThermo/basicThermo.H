@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,11 +83,15 @@ protected:
         //- Construct as copy (not implemented)
         basicThermo(const basicThermo&);
 
+        //- Look up or contruct field
         volScalarField& lookupOrConstruct
         (
             const fvMesh& mesh,
             const char* name
         ) const;
+
+        //- Lookup and check out field
+        void lookupAndCheckout(const char* name) const;
 
         //- Return the enthalpy/internal energy field boundary types
         //  by interrogating the temperature field boundary types
@@ -134,6 +138,17 @@ public:
 
 
     // Selectors
+
+        //- Generic lookup for thermodynamics package thermoTypeName
+        template<class Thermo, class Table>
+        static typename Table::iterator lookupThermo
+        (
+            const dictionary& thermoTypeDict,
+            Table* tablePtr,
+            const int nCmpt,
+            const char* cmptNames[],
+            const word& thermoTypeName
+        );
 
         //- Generic lookup for each of the related thermodynamics packages
         template<class Thermo, class Table>

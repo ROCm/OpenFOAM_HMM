@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,57 @@ const std::size_t Foam::wallBoundedParticle::sizeofFields_
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+Foam::tetIndices Foam::wallBoundedParticle::currentTetIndices() const
+{
+    // Replacement for particle::currentTetIndices that avoids error
+    // upon invalid tetBasePtIs
+
+    const faceList& pFaces = mesh_.faces();
+    const labelList& pOwner = mesh_.faceOwner();
+
+    const Foam::face& f = pFaces[tetFacei_];
+
+    bool own = (pOwner[tetFacei_] == celli_);
+
+    label faceBasePtI = mesh_.tetBasePtIs()[tetFacei_];
+    if (faceBasePtI == -1)
+    {
+        //WarningInFunction
+        //    << "No base point for face " << tetFacei_ << ", " << f
+        //    << ", produces a decomposition that has a minimum "
+        //    << "volume greater than tolerance."
+        //    << endl;
+        faceBasePtI = 0;
+    }
+
+    label facePtI = (tetPti_ + faceBasePtI) % f.size();
+    label otherFacePtI = f.fcIndex(facePtI);
+
+    label facePtAI;
+    label facePtBI;
+    if (own)
+    {
+        facePtAI = facePtI;
+        facePtBI = otherFacePtI;
+    }
+    else
+    {
+        facePtAI = otherFacePtI;
+        facePtBI = facePtI;
+    }
+
+    return tetIndices
+    (
+        celli_,
+        tetFacei_,
+        faceBasePtI,
+        facePtAI,
+        facePtBI,
+        tetPti_
+    );
+}
+
+
 Foam::edge Foam::wallBoundedParticle::currentEdge() const
 {
     if ((meshEdgeStart_ != -1) == (diagEdge_ != -1))
@@ -57,6 +108,18 @@ Foam::edge Foam::wallBoundedParticle::currentEdge() const
     else
     {
         label faceBasePti = mesh_.tetBasePtIs()[tetFace()];
+        if (faceBasePti == -1)
+        {
+            //FatalErrorInFunction
+            //WarningInFunction
+            //    << "No base point for face " << tetFace() << ", " << f
+            //    << ", produces a decomposition that has a minimum "
+            //    << "volume greater than tolerance."
+            //    //<< abort(FatalError);
+            //    << endl;
+            faceBasePti = 0;
+        }
+
         label diagPti = (faceBasePti+diagEdge_)%f.size();
 
         return edge(f[faceBasePti], f[diagPti]);
@@ -66,11 +129,118 @@ Foam::edge Foam::wallBoundedParticle::currentEdge() const
 
 void Foam::wallBoundedParticle::crossEdgeConnectedFace
 (
-    const edge& meshEdge
+    const label& celli,
+    label& tetFacei,
+    label& tetPti,
+    const edge& e
 )
 {
+    const faceList& pFaces = mesh_.faces();
+    const cellList& pCells = mesh_.cells();
+
+    const Foam::face& f = pFaces[tetFacei];
+
+    const Foam::cell& thisCell = pCells[celli];
+
+    forAll(thisCell, cFI)
+    {
+        // Loop over all other faces of this cell and
+        // find the one that shares this edge
+
+        label fI = thisCell[cFI];
+
+        if (tetFacei == fI)
+        {
+            continue;
+        }
+
+        const Foam::face& otherFace = pFaces[fI];
+
+        label edDir = otherFace.edgeDirection(e);
+
+        if (edDir == 0)
+        {
+            continue;
+        }
+        else if (f == pFaces[fI])
+        {
+            // This is a necessary condition if using duplicate baffles
+            // (so coincident faces). We need to make sure we don't cross into
+            // the face with the same vertices since we might enter a tracking
+            // loop where it never exits. This test should be cheap
+            // for most meshes so can be left in for 'normal' meshes.
+            continue;
+        }
+        else
+        {
+            //Found edge on other face
+            tetFacei = fI;
+
+            label eIndex = -1;
+
+            if (edDir == 1)
+            {
+                // Edge is in the forward circulation of this face, so
+                // work with the start point of the edge
+                eIndex = findIndex(otherFace, e.start());
+            }
+            else
+            {
+                // edDir == -1, so the edge is in the reverse
+                // circulation of this face, so work with the end
+                // point of the edge
+                eIndex = findIndex(otherFace, e.end());
+            }
+
+            label tetBasePtI = mesh_.tetBasePtIs()[fI];
+
+            if (tetBasePtI == -1)
+            {
+                //FatalErrorInFunction
+                //WarningInFunction
+                //    << "No base point for face " << fI << ", " << f
+                //    << ", produces a decomposition that has a minimum "
+                //    << "volume greater than tolerance."
+                //    //<< abort(FatalError);
+                //    << endl;
+                tetBasePtI = 0;
+            }
+
+            // Find eIndex relative to the base point on new face
+            eIndex -= tetBasePtI;
+
+            if (neg(eIndex))
+            {
+                eIndex = (eIndex + otherFace.size()) % otherFace.size();
+            }
+
+            if (eIndex == 0)
+            {
+                // The point is the base point, so this is first tet
+                // in the face circulation
+                tetPti = 1;
+            }
+            else if (eIndex == otherFace.size() - 1)
+            {
+                // The point is the last before the base point, so
+                // this is the last tet in the face circulation
+                tetPti = otherFace.size() - 2;
+            }
+            else
+            {
+                tetPti = eIndex;
+            }
+
+            break;
+        }
+    }
+}
+
+
+void Foam::wallBoundedParticle::crossEdgeConnectedFace(const edge& meshEdge)
+{
     // Update tetFace, tetPt
-    particle::crossEdgeConnectedFace(cell(), tetFace(), tetPt(), meshEdge);
+    crossEdgeConnectedFace(cell(), tetFace(), tetPt(), meshEdge);
 
     // Update face to be same as tracking one
     face() = tetFace();
@@ -164,14 +334,13 @@ void Foam::wallBoundedParticle::crossDiagonalEdge()
 
 Foam::scalar Foam::wallBoundedParticle::trackFaceTri
 (
+    const vector& n,
     const vector& endPosition,
     label& minEdgei
 )
 {
     // Track p from position to endPosition
     const triFace tri(currentTetIndices().faceTriIs(mesh_));
-    vector n = tri.normal(mesh_.points());
-    n /= mag(n)+VSMALL;
 
     // Check which edge intersects the trajectory.
     // Project trajectory onto triangle
@@ -245,6 +414,7 @@ Foam::scalar Foam::wallBoundedParticle::trackFaceTri
 
 bool Foam::wallBoundedParticle::isTriAlongTrack
 (
+    const vector& n,
     const point& endPosition
 ) const
 {
@@ -266,10 +436,6 @@ bool Foam::wallBoundedParticle::isTriAlongTrack
 
 
     const vector dir = endPosition-position();
-
-    // Get normal of currentE
-    vector n = triVerts.normal(mesh_.points());
-    n /= mag(n);
 
     forAll(triVerts, i)
     {
@@ -331,12 +497,7 @@ Foam::wallBoundedParticle::wallBoundedParticle
         }
     }
 
-    // Check state of Istream
-    is.check
-    (
-        "wallBoundedParticle::wallBoundedParticle"
-        "(const Cloud<wallBoundedParticle>&, Istream&, bool)"
-    );
+    is.check(FUNCTION_NAME);
 }
 
 
@@ -387,7 +548,7 @@ Foam::Ostream& Foam::operator<<
 {
     const wallBoundedParticle& p = ip.t_;
 
-    tetPointRef tpr(p.currentTet());
+    tetPointRef tpr(p.currentTetIndices().tet(p.mesh()));
 
     os  << "    " << static_cast<const particle&>(p) << nl
         << "    tet:" << nl;

@@ -48,10 +48,10 @@ class Ostream;
 
 typedef uint8_t direction;
 
-direction readDirection(Istream&);
-Istream& operator>>(Istream&, direction&);
-Ostream& operator<<(Ostream&, const direction);
-std::ostream& operator<<(std::ostream&, const direction);
+direction readDirection(Istream& is);
+Istream& operator>>(Istream& is, direction& d);
+Ostream& operator<<(Ostream& os, const direction d);
+std::ostream& operator<<(std::ostream& os, const direction d);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

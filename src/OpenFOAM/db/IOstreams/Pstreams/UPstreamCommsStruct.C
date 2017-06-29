@@ -117,11 +117,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const UPstream::commsStruct& comm)
         << comm.allBelow_ << token::SPACE
         << comm.allNotBelow_;
 
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const commsStruct&)"
-    );
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

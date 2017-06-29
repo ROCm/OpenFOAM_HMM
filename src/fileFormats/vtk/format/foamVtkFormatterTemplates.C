@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,8 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::foamVtkFormatter&
-Foam::foamVtkFormatter::xmlAttribute
+Foam::vtk::formatter&
+Foam::vtk::formatter::writeAttribute
 (
     const word& k,
     const Type& v,
@@ -49,17 +49,18 @@ Foam::foamVtkFormatter::xmlAttribute
 
 
 template<class Type, int nComp>
-Foam::foamVtkFormatter& Foam::foamVtkFormatter::openDataArray
+Foam::vtk::formatter&
+Foam::vtk::formatter::openDataArray
 (
     const word& dataName
 )
 {
     openTag("DataArray");
-    xmlAttr("type", foamVtkPTraits<Type>::typeName);
+    xmlAttr("type", vtkPTraits<Type>::typeName);
     xmlAttr("Name", dataName);
     if (nComp > 1)
     {
-        xmlAttr("NumberOfComponents", nComp);
+        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, nComp);
     }
     xmlAttr("format", name());
 
@@ -68,25 +69,38 @@ Foam::foamVtkFormatter& Foam::foamVtkFormatter::openDataArray
 
 
 template<class Type, int nComp>
-Foam::foamVtkFormatter& Foam::foamVtkFormatter::PDataArray
+Foam::vtk::formatter&
+Foam::vtk::formatter::openDataArray
+(
+    const vtk::dataArrayAttr& attrEnum
+)
+{
+    return openDataArray<Type, nComp>(vtk::dataArrayAttrNames[attrEnum]);
+}
+
+
+template<class Type, int nComp>
+Foam::vtk::formatter&
+Foam::vtk::formatter::PDataArray
 (
     const word& dataName
 )
 {
     openTag("PDataArray");
-    xmlAttr("type", foamVtkPTraits<Type>::typeName);
+    xmlAttr("type", vtkPTraits<Type>::typeName);
     if (dataName.size())
     {
         xmlAttr("Name", dataName);
     }
     if (nComp > 1)
     {
-        xmlAttr("NumberOfComponents", nComp);
+        xmlAttr(fileAttr::NUMBER_OF_COMPONENTS, nComp);
     }
 
     closeTag(true);
 
     return *this;
 }
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -46,17 +46,19 @@
 #     for the appropriate MPI. Eg, libadios_openmpi-system
 #
 #------------------------------------------------------------------------------
+# USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-adios_version=ADIOS-1.11.0
+adios_version=ADIOS-1.11.1
 export ADIOS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
 
+# END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if [ "$FOAM_VERBOSE" -a "$PS1" ]
 then
     echo "Using adios ($adios_version)  ->  $ADIOS_ARCH_PATH" 1>&2
 fi
 
-if type _foamAddPath > /dev/null 2>&1    # normal sourcing
+if command -v _foamAddPath >/dev/null 2>&1  # normal sourcing
 then
     # If ADIOS_ARCH_PATH does not end with '-system' or '-none',
     # it is located within ThirdParty, or a central installation
@@ -69,7 +71,7 @@ then
         _foamAddPath $ADIOS_ARCH_PATH/bin
     fi
 
-    unset adios_version ending cleaned
+    unset adios_version ending
 
 fi
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,14 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
+    #include "addToolOption.H"
+
+    // Intercept request for help
+    if ((argc > 0) && (strcmp(argv[1], "-help") == 0))
+    {
+        #include "setRootCase.H"
+    }
+
     if (argc < 2)
     {
         FatalError
@@ -49,8 +57,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const word utilityName = argv[1];
-
+    word utilityName = argv[1];
     Foam::autoPtr<Foam::helpType> utility
     (
         helpType::New(utilityName)

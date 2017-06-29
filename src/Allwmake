@@ -1,37 +1,34 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+# Run from OPENFOAM src/ directory only
+cd ${0%/*} && wmakeCheckPwd "$WM_PROJECT_DIR/src" 2>/dev/null || {
+    echo "Error (${0##*/}) : not located in \$WM_PROJECT_DIR/src"
+    echo "    Check your OpenFOAM environment and installation"
+    exit 1
+}
+[ -d "$WM_PROJECT_DIR" -a -f "$WM_PROJECT_DIR/etc/bashrc" ] || {
+    echo "Error (${0##*/}) : WM_PROJECT_DIR appears to be incorrect"
+    echo "    Check your OpenFOAM environment and installation"
+    exit 1
+}
 
 # Parse arguments for library compilation
 . $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
 
-wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
-    echo "Allwmake error: Current directory is not \$WM_PROJECT_DIR/src"
-    echo "    The environment variables are inconsistent with the installation."
-    echo "    Check the OpenFOAM entries in your dot-files and source them."
-    exit 1
-}
-
-[ -n "$FOAM_EXT_LIBBIN" ] || {
-    echo "Allwmake error: FOAM_EXT_LIBBIN not set"
-    echo "    Check the OpenFOAM entries in your dot-files and source them."
-    exit 1
-}
+#------------------------------------------------------------------------------
 
 # Update OpenFOAM version strings if required
 wmakePrintBuild -check || wrmo OpenFOAM/global/global.o 2>/dev/null
 
 wmakeLnInclude -u OpenFOAM
-wmakeLnInclude -u OSspecific/${WM_OSTYPE:-POSIX}
+wmakeLnInclude -u OSspecific/${WM_OSTYPE:=POSIX}
 Pstream/Allwmake $targetType $*
 
-OSspecific/${WM_OSTYPE:-POSIX}/Allwmake $targetType $*
+OSspecific/${WM_OSTYPE:=POSIX}/Allwmake $targetType $*
 wmake $targetType OpenFOAM
 
 wmake $targetType fileFormats
 wmake $targetType surfMesh
-wmake $targetType triSurface
 wmake $targetType meshTools
-wmake $targetType edgeMesh
 
 # Decomposition methods needed by dummyThirdParty
 # (dummy metisDecomp, scotchDecomp etc) needed by e.g. meshTools
@@ -52,11 +49,12 @@ wmake $targetType sampling
 wmake $targetType dynamicFvMesh
 wmake $targetType sampling
 wmake $targetType topoChangerFvMesh
-wmake $targetType sampling
 
 # Compile scotchDecomp, metisDecomp etc.
 parallel/Allwmake $targetType $*
 randomProcesses/Allwmake $targetType $*
+
+wmake $targetType overset
 
 wmake $targetType ODE
 wmake $targetType fvMotionSolver
@@ -78,11 +76,13 @@ wmake $targetType regionCoupled
 
 functionObjects/Allwmake $targetType $*
 
+wmake $targetType lumpedPointMotion
 wmake $targetType sixDoFRigidBodyMotion
 wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
 
 # Needs access to Turbulence
-wmake $targetType thermophysicalModels/properties/liquidPropertiesFvPatchFields
+
+wmake $targetType thermophysicalModels/thermophysicalPropertiesFvPatchFields/liquidProperties
 
 #------------------------------------------------------------------------------

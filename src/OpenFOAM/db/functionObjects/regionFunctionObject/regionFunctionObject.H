@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,7 +87,7 @@ protected:
         );
 
         //- The region or sub-region registry being used
-        const objectRegistry& obr() const;
+        virtual const objectRegistry& obr() const;
 
 
         //- Find object (eg, a field) in the (sub) objectRegistry
@@ -114,7 +114,7 @@ protected:
         template<class ObjectType>
         ObjectType* lookupObjectRefPtr(const word& fieldName) const;
 
-        //- Store the given field in the (sub) objectRegistry under the given name
+        //- Store the field in the (sub) objectRegistry under the given name
         //  Note: sets the fieldName to tfield().name() if not already set
         template<class ObjectType>
         bool store
@@ -176,7 +176,7 @@ public:
     // Member Functions
 
         //- Read optional controls
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 };
 
 

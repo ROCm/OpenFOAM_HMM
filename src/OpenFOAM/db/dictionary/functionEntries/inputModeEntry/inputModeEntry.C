@@ -62,7 +62,7 @@ void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
 {
     clear();
 
-    word mode(is);
+    const word mode(is);
     if (mode == "merge" || mode == "default")
     {
         mode_ = MERGE;
@@ -97,7 +97,7 @@ void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
 
 bool Foam::functionEntries::inputModeEntry::execute
 (
-    dictionary& parentDict,
+    dictionary& unused,
     Istream& is
 )
 {

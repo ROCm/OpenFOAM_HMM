@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,12 @@ inline Foam::label Foam::pimpleControl::nCorrPISO() const
 inline Foam::label Foam::pimpleControl::corrPISO() const
 {
     return corrPISO_;
+}
+
+
+inline bool Foam::pimpleControl::SIMPLErho() const
+{
+    return SIMPLErho_;
 }
 
 
@@ -89,6 +95,12 @@ inline bool Foam::pimpleControl::finalInnerIter() const
        finalIter()
     && corrPISO_ == nCorrPISO_
     && corrNonOrtho_ == nNonOrthCorr_ + 1;
+}
+
+
+inline bool Foam::pimpleControl::solveFlow() const
+{
+    return solveFlow_;
 }
 
 

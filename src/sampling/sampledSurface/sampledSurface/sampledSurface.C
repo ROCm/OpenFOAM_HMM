@@ -64,7 +64,7 @@ Foam::autoPtr<Foam::sampledSurface> Foam::sampledSurface::New
     wordConstructorTable::iterator cstrIter =
         wordConstructorTablePtr_->find(sampleType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sample type "
@@ -244,7 +244,7 @@ void Foam::sampledSurface::print(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream &os, const sampledSurface& s)
 {
     s.print(os);
-    os.check("Ostream& operator<<(Ostream&, const sampledSurface&");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

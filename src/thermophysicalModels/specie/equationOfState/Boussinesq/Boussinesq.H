@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,13 +57,6 @@ template<class Specie> class Boussinesq;
 
 template<class Specie>
 inline Boussinesq<Specie> operator+
-(
-    const Boussinesq<Specie>&,
-    const Boussinesq<Specie>&
-);
-
-template<class Specie>
-inline Boussinesq<Specie> operator-
 (
     const Boussinesq<Specie>&,
     const Boussinesq<Specie>&
@@ -125,12 +118,6 @@ public:
             const scalar beta
         );
 
-        //- Construct from Boussinesq
-        inline Boussinesq(const Boussinesq& sp);
-
-        //- Construct from Istream
-        Boussinesq(Istream&);
-
         //- Construct from dictionary
         Boussinesq(const dictionary& dict);
 
@@ -143,9 +130,6 @@ public:
 
         //- Construct and return a clone
         inline autoPtr<Boussinesq> clone() const;
-
-        // Selector from Istream
-        inline static autoPtr<Boussinesq> New(Istream& is);
 
         // Selector from dictionary
         inline static autoPtr<Boussinesq> New
@@ -176,14 +160,14 @@ public:
             //- Return density [kg/m^3]
             inline scalar rho(scalar p, scalar T) const;
 
-            //- Return enthalpy departure [J/kmol]
-            inline scalar h(const scalar p, const scalar T) const;
+            //- Return enthalpy departure [J/kg]
+            inline scalar H(const scalar p, const scalar T) const;
 
-            //- Return cp departure [J/(kmol K]
-            inline scalar cp(scalar p, scalar T) const;
+            //- Return Cp departure [J/(kg K]
+            inline scalar Cp(scalar p, scalar T) const;
 
-            //- Return entropy [J/(kmol K)]
-            inline scalar s(const scalar p, const scalar T) const;
+            //- Return entropy [J/(kg K)]
+            inline scalar S(const scalar p, const scalar T) const;
 
             //- Return compressibility rho/p [s^2/m^2]
             inline scalar psi(scalar p, scalar T) const;
@@ -191,8 +175,8 @@ public:
             //- Return compression factor []
             inline scalar Z(scalar p, scalar T) const;
 
-            //- Return (cp - cv) [J/(kmol K]
-            inline scalar cpMcv(scalar p, scalar T) const;
+            //- Return (Cp - Cv) [J/(kg K]
+            inline scalar CpMCv(scalar p, scalar T) const;
 
 
         // IO
@@ -205,20 +189,12 @@ public:
 
         inline void operator=(const Boussinesq&);
         inline void operator+=(const Boussinesq&);
-        inline void operator-=(const Boussinesq&);
-
         inline void operator*=(const scalar);
 
 
     // Friend operators
 
         friend Boussinesq operator+ <Specie>
-        (
-            const Boussinesq&,
-            const Boussinesq&
-        );
-
-        friend Boussinesq operator- <Specie>
         (
             const Boussinesq&,
             const Boussinesq&

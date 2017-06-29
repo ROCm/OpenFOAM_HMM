@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,9 +70,9 @@ public:
         }
 
         //- Construct from FixedList
-        inline Pair(const FixedList<Type, 2>& fl)
+        inline Pair(const FixedList<Type, 2>& lst)
         :
-            FixedList<Type, 2>(fl)
+            FixedList<Type, 2>(lst)
         {}
 
         //- Construct from Istream
@@ -134,18 +134,20 @@ public:
         }
 
 
+     // Comparison
+
         //- Compare Pairs
-        //  Returning:
+        //  Returns:
         //  -  0: different
-        //  - +1: identical
-        //  - -1: same pair, but reversed order
+        //  - +1: identical values and order used
+        //  - -1: identical values, but in reversed order
         static inline int compare(const Pair<Type>& a, const Pair<Type>& b)
         {
-            if (a == b)
+            if (a[0] == b[0] && a[1] == b[1])
             {
                 return 1;
             }
-            else if (a == reverse(b))
+            else if (a[0] == b[1] && a[1] == b[0])
             {
                 return -1;
             }
@@ -156,6 +158,8 @@ public:
         }
 };
 
+
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 template<class Type>
 Pair<Type> reverse(const Pair<Type>& p)

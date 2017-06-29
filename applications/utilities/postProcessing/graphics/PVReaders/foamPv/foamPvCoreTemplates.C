@@ -1,0 +1,80 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "IOobjectList.H"
+#include "vtkDataArraySelection.h"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::label Foam::foamPvCore::addToSelection
+(
+    vtkDataArraySelection *select,
+    const IOobjectList& objects,
+    const std::string& prefix
+)
+{
+    const wordList names = objects.sortedNames(Type::typeName);
+
+    forAll(names, i)
+    {
+        if (prefix.empty())
+        {
+            select->AddArray(names[i].c_str());
+        }
+        else
+        {
+            select->AddArray((prefix + names[i]).c_str());
+        }
+    }
+
+    return names.size();
+}
+
+
+template<class AnyValue, class AnyHasher>
+void Foam::foamPvCore::setSelectedArrayEntries
+(
+    vtkDataArraySelection* select,
+    const HashTable<AnyValue, string, AnyHasher>& enabled
+)
+{
+    const int n = select->GetNumberOfArrays();
+    // disable everything not explicitly enabled
+    select->DisableAllArrays();
+
+    // Loop through entries, enabling as required
+    for (int i=0; i < n; ++i)
+    {
+        const char* arrayName = select->GetArrayName(i);
+        if (enabled.found(arrayName))
+        {
+            select->EnableArray(arrayName);
+        }
+    }
+}
+
+
+// ************************************************************************* //

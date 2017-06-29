@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@
 #     etc/config.csh/compiler
 #
 # Description
-#     Startup file for custom compiler versions for OpenFOAM
+#     Setup file for custom compiler versions for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/config.csh/settings
 #
 #------------------------------------------------------------------------------
@@ -63,30 +63,35 @@ case ThirdParty:
     case Gcc62:
         set gcc_version=gcc-6.2.0
         breaksw
+    case Gcc63:
+        set gcc_version=gcc-6.3.0
+        breaksw
+    case Gcc71:
+        set gcc_version=gcc-7.1.0
+        breaksw
     case Clang:
-        set clang_version=llvm-3.7.0
-        # set clang_version=llvm-3.8.0
+        set clang_version=llvm-3.7.1
+        breaksw
+    case Clang38:
+        set clang_version=llvm-3.8.1
+        breaksw
+    case Clang39:
+        set clang_version=llvm-3.9.1
+        breaksw
+    case Clang40:
+        set clang_version=llvm-4.0.0
         breaksw
     default:
-        echo
-        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/compiler:"
-        echo "    Unknown OpenFOAM compiler type '$WM_COMPILER'"
-        echo "    Please check your settings"
-        echo
+        /bin/cat << UNKNOWN_COMPILER
+===============================================================================
+Warning in $WM_PROJECT_DIR/etc/config.csh/compiler:
+Unknown ThirdParty compiler type/version - '$WM_COMPILER'
+
+Please check your settings
+===============================================================================
+UNKNOWN_COMPILER
         breaksw
     endsw
-endsw
-
-# common settings (system or ThirdParty)
-switch ("$WM_COMPILER")
-case Clang:
-    # Using clang - not gcc
-    setenv WM_CC 'clang'
-    setenv WM_CXX 'clang++'
-    breaksw
-case Icc:
-    setenv WM_CC 'icc'
-    setenv WM_CXX 'icpc'
     breaksw
 endsw
 

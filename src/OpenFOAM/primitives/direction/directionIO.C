@@ -61,9 +61,7 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
         return is;
     }
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, direction&)");
-
+    is.check(FUNCTION_NAME);
     return is;
 }
 
@@ -71,7 +69,7 @@ Foam::Istream& Foam::operator>>(Istream& is, direction& d)
 Foam::Ostream& Foam::operator<<(Ostream& os, const direction d)
 {
     os.write(label(d));
-    os.check("Ostream& operator<<(Ostream&, const direction)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 

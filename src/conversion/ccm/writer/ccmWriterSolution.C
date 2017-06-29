@@ -463,8 +463,6 @@ void Foam::ccm::writer::writeSolution
         &phaseNode
     );
 
-
-
     forAllConstIter(IOobjectList, objects, iter)
     {
         word fieldName = (*iter()).name();

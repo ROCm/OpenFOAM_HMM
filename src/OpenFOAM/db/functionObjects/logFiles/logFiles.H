@@ -128,7 +128,7 @@ public:
         PtrList<OFstream>& files();
 
         //- Return file 'i'
-        OFstream& file(const label i);
+        OFstream& files(const label i);
 
         //- Write function
         virtual bool write();

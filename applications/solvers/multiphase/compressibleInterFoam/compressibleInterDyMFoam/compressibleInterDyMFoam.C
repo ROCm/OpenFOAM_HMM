@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,9 +24,6 @@ License
 Application
     compressibleInterDyMFoam
 
-Group
-    grpMultiphaseSolvers grpMovingMeshSolvers
-
 Description
     Solver for 2 compressible, non-isothermal immiscible fluids using a VOF
     (volume of fluid) phase-fraction based interface capturing approach,
@@ -42,14 +39,18 @@ Description
 
 #include "fvCFD.H"
 #include "dynamicFvMesh.H"
-#include "MULES.H"
+#include "CMULES.H"
+#include "EulerDdtScheme.H"
+#include "localEulerDdtScheme.H"
+#include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
-#include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
 #include "twoPhaseMixtureThermo.H"
 #include "turbulentFluidThermoModel.H"
 #include "pimpleControl.H"
+#include "fvOptions.H"
 #include "CorrectPhi.H"
+#include "fvcSmooth.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +64,8 @@ int main(int argc, char *argv[])
     #include "initContinuityErrs.H"
     #include "createControl.H"
     #include "createFields.H"
+    #include "createAlphaFluxes.H"
+    #include "createFvOptions.H"
     #include "createUf.H"
     #include "createControls.H"
     #include "CourantNo.H"
@@ -87,62 +90,65 @@ int main(int argc, char *argv[])
         // same divergence
         volScalarField divU("divU0", fvc::div(fvc::absolute(phi, U)));
 
+        if (LTS)
+        {
+            #include "setRDeltaT.H"
+        }
+        else
         {
             #include "CourantNo.H"
+            #include "alphaCourantNo.H"
             #include "setDeltaT.H"
-
-            runTime++;
-
-            Info<< "Time = " << runTime.timeName() << nl << endl;
-
-            scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
-
-            // Do any mesh changes
-            mesh.update();
-
-            if (mesh.changing())
-            {
-                Info<< "Execution time for mesh.update() = "
-                    << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
-                    << " s" << endl;
-
-                gh = (g & mesh.C()) - ghRef;
-                ghf = (g & mesh.Cf()) - ghRef;
-            }
-
-            if ((correctPhi && mesh.changing()) || mesh.topoChanging())
-            {
-                // Calculate absolute flux from the mapped surface velocity
-                // Note: temporary fix until mapped Uf is assessed
-                Uf = fvc::interpolate(U);
-
-                // Calculate absolute flux from the mapped surface velocity
-                phi = mesh.Sf() & Uf;
-
-                #include "correctPhi.H"
-
-                // Make the fluxes relative to the mesh motion
-                fvc::makeRelative(phi, U);
-            }
         }
 
-        if (mesh.changing() && checkMeshCourantNo)
-        {
-            #include "meshCourantNo.H"
-        }
+        runTime++;
 
-        turbulence->correct();
+        Info<< "Time = " << runTime.timeName() << nl << endl;
 
         // --- Pressure-velocity PIMPLE corrector loop
         while (pimple.loop())
         {
-            #include "alphaEqnsSubCycle.H"
-
-            // correct interface on first PIMPLE corrector
-            if (pimple.corr() == 1)
+            if (pimple.firstIter() || moveMeshOuterCorrectors)
             {
-                interface.correct();
+                scalar timeBeforeMeshUpdate = runTime.elapsedCpuTime();
+
+                mesh.update();
+
+                if (mesh.changing())
+                {
+                    Info<< "Execution time for mesh.update() = "
+                        << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
+                        << " s" << endl;
+
+                    gh = (g & mesh.C()) - ghRef;
+                    ghf = (g & mesh.Cf()) - ghRef;
+                }
+
+                if ((mesh.changing() && correctPhi) || mesh.topoChanging())
+                {
+                    // Calculate absolute flux from the mapped surface velocity
+                    // Note: temporary fix until mapped Uf is assessed
+                    Uf = fvc::interpolate(U);
+
+                    // Calculate absolute flux from the mapped surface velocity
+                    phi = mesh.Sf() & Uf;
+
+                    #include "correctPhi.H"
+
+                    // Make the fluxes relative to the mesh motion
+                    fvc::makeRelative(phi, U);
+
+                    mixture.correct();
+                }
+
+                if (mesh.changing() && checkMeshCourantNo)
+                {
+                    #include "meshCourantNo.H"
+                }
             }
+
+            #include "alphaControls.H"
+            #include "compressibleAlphaEqnSubCycle.H"
 
             solve(fvm::ddt(rho) + fvc::div(rhoPhi));
 
@@ -153,6 +159,11 @@ int main(int argc, char *argv[])
             while (pimple.correct())
             {
                 #include "pEqn.H"
+            }
+
+            if (pimple.turbCorr())
+            {
+                turbulence->correct();
             }
         }
 

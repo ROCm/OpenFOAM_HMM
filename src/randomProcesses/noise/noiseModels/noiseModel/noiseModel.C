@@ -35,6 +35,26 @@ namespace Foam
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
+void Foam::noiseModel::readWriteOption
+(
+    const dictionary& dict,
+    const word& lookup,
+    bool& option
+) const
+{
+    dict.readIfPresent(lookup, option);
+
+    if (option)
+    {
+        Info<< "        " << lookup << ": " << "yes" << endl;
+    }
+    else
+    {
+        Info<< "        " << lookup << ": " << "no" << endl;
+    }
+}
+
+
 Foam::scalar Foam::noiseModel::checkUniformTimeStep
 (
     const scalarList& times
@@ -72,6 +92,28 @@ Foam::scalar Foam::noiseModel::checkUniformTimeStep
 }
 
 
+bool Foam::noiseModel::validateBounds(const scalarList& p) const
+{
+    forAll(p, i)
+    {
+        if ((p[i] < minPressure_) || (p[i] > maxPressure_))
+        {
+            WarningInFunction
+                << "Pressure data at position " << i
+                << " is outside of permitted bounds:" << nl
+                << "    pressure: " << p[i] << nl
+                << "    minimum pressure: " << minPressure_ << nl
+                << "    maximum pressure: " << maxPressure_ << nl
+                << endl;
+
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 Foam::label Foam::noiseModel::findStartTimeIndex
 (
     const instantList& allTimes,
@@ -92,6 +134,22 @@ Foam::label Foam::noiseModel::findStartTimeIndex
 }
 
 
+Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
+{
+    fileName baseDir("$FOAM_CASE");
+    word datasetName("input" + Foam::name(dataseti));
+    baseDir =
+        baseDir.expand()
+       /"postProcessing"
+       /"noise"
+       /outputPrefix_
+       /type()
+       /datasetName;
+
+    return baseDir;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
@@ -101,9 +159,18 @@ Foam::noiseModel::noiseModel(const dictionary& dict, const bool readFields)
     nSamples_(65536),
     fLower_(25),
     fUpper_(10000),
+    customBounds_(false),
     startTime_(0),
     windowModelPtr_(),
-    graphFormat_("raw")
+    graphFormat_("raw"),
+    minPressure_(-0.5*VGREAT),
+    maxPressure_(0.5*VGREAT),
+    outputPrefix_(),
+    writePrmsf_(true),
+    writeSPL_(true),
+    writePSD_(true),
+    writePSDf_(true),
+    writeOctaves_(true)
 {
     if (readFields)
     {
@@ -124,10 +191,20 @@ bool Foam::noiseModel::read(const dictionary& dict)
 {
     dict.readIfPresent("rhoRef", rhoRef_);
     dict.readIfPresent("N", nSamples_);
-    dict.readIfPresent("fl", fLower_);
-    dict.readIfPresent("fu", fUpper_);
+    customBounds_ = false;
+    if (dict.readIfPresent("fl", fLower_))
+    {
+        customBounds_ = true;
+    }
+    if (dict.readIfPresent("fu", fUpper_))
+    {
+        customBounds_ = true;
+    }
     dict.readIfPresent("startTime", startTime_);
     dict.readIfPresent("graphFormat", graphFormat_);
+    dict.readIfPresent("minPressure", minPressure_);
+    dict.readIfPresent("maxPressure", maxPressure_);
+    dict.readIfPresent("outputPrefix", outputPrefix_);
 
     // Check number of samples  - must be a power of 2 for our FFT
     bool powerOf2 = ((nSamples_ != 0) && !(nSamples_ & (nSamples_ - 1)));
@@ -164,7 +241,17 @@ bool Foam::noiseModel::read(const dictionary& dict)
 
     }
 
+    Info<< "    Write options:" << endl;
+    dictionary optDict(dict.subOrEmptyDict("writeOptions"));
+    readWriteOption(optDict, "writePrmsf", writePrmsf_);
+    readWriteOption(optDict, "writeSPL", writeSPL_);
+    readWriteOption(optDict, "writePSD", writePSD_);
+    readWriteOption(optDict, "writeOctaves", writeOctaves_);
+
+
     windowModelPtr_ = windowModel::New(dict, nSamples_);
+
+    Info<< nl << endl;
 
     return true;
 }

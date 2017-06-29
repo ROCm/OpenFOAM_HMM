@@ -48,7 +48,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Matrix<Form, Type>& M)
     // Anull matrix
     M.clear();
 
-    is.fatalCheck("operator>>(Istream&, Matrix<Form, Type>&)");
+    is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
@@ -250,9 +250,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Matrix<Form, Type>& M)
         }
     }
 
-    // Check state of IOstream
-    os.check("Ostream& operator<<(Ostream&, const Matrix&)");
-
+    os.check(FUNCTION_NAME);
     return os;
 }
 

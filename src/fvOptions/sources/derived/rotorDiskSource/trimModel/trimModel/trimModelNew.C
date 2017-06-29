@@ -40,7 +40,7 @@ Foam::autoPtr<Foam::trimModel> Foam::trimModel::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(modelType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown " << typeName << " type "

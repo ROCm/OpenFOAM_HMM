@@ -54,7 +54,7 @@ Foam::autoPtr<Foam::twoPhaseSystem> Foam::twoPhaseSystem::New
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(twoPhaseSystemType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown twoPhaseSystemType type "

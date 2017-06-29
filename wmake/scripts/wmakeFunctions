@@ -1,11 +1,10 @@
-#!/bin/sh
-#------------------------------------------------------------------------------
+#----------------------------------*-sh-*--------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -29,6 +28,11 @@
 #     Functions to check wmake environment and find .dep and .o files
 #------------------------------------------------------------------------------
 
+# Ensure these variables are always defined
+MakeDir=Make
+: ${Script:=wmakeFunctions}
+
+
 #------------------------------------------------------------------------------
 # Check environment variables
 #------------------------------------------------------------------------------
@@ -49,55 +53,88 @@ checkEnv()
 # Search up directories tree for the Make sub-directory
 #------------------------------------------------------------------------------
 
+# Return the absolute path for a directory or a file's parent directory
+# expandPath dirName
+# expandPath fileName
+#
+# Output:
+# - the expanded path name
 expandPath()
 {
     if [ -d "$1" ]
     then
-        exPath=$(cd "$1" && pwd -P)
+        (cd "$1" && pwd -P)
+    elif [ -n "$1" ]
+    then
+        (cd $(dirname "$1") && pwd -P)
     else
-        exPath=$(cd $(dirname "$1") && pwd -P)
+        pwd -P
     fi
 }
 
+# Find the target directory, which contains a Make/ directory
+# search upwards in its parent directories, but stopping
+# when it hits the project root, home, or the file-system root
+#
+# findTarget dirName
+#
+# Output:
+# - the relative target directory
+#
+# Global variables used:
+# - WM_PROJECT_DIR, HOME
 findTarget()
 {
-    expandPath $WM_PROJECT_DIR
-    wmpdir=$exPath
-    expandPath $1
+    local project=$(expandPath $WM_PROJECT_DIR)
+    local home=$(expandPath $HOME)
+    local reldir="${1:-.}"
+    local absdir=$(expandPath $reldir)
 
-    if [ "$exPath" = "$wmpdir" \
-                   -o "$exPath" = "$HOME" \
-                   -o "$exPath" = "/" \
-       ]
-    then
-        echo "$Script error: could not find Make directory" 1>&2
-        exit 1
-    elif [ -d "$1/Make" ]; then
-        dir=$1
-    else
-        findTarget "$1/.."
-    fi
+    while [ -n "$absdir" ]
+    do
+        case "$absdir" in
+        ($project | $home | /)
+            break
+            ;;
+        esac
+
+        if [ -d "$reldir/Make" ]
+        then
+            echo "$reldir"
+            return 0
+        else
+            # Check parent directory
+            absdir="${absdir%/*}"
+            reldir="$reldir/.."
+        fi
+    done
+
+    echo "Error: no Make directory for $(expandPath $1)" 1>&2
+    echo 1>&2
+    return 1
 }
 
+
+# Change to 'MakeDir' parent
+# - uses 'MakeDir' for its input
+#
+# Side-effects:
+# - unsets targetType
 cdSource()
 {
-    if [ ! -d $MakeDir ]
+    local dir
+    if [ ! -d "$MakeDir" ]
     then
         echo "$Script: '$MakeDir' directory does not exist in $PWD" 1>&2
-        echo "    Searching up directories tree for Make directory"
+        echo "    Searching up directories tree for Make directory" 1>&2
 
-        findTarget .
-        targetType=
-
-        if [ "$dir" ]
-        then
-            cd $dir 2>/dev/null || {
-                echo "$Script error: could not change to directory '$dir'" 1>&2
-                exit 1
-            }
-        fi
+        dir=$(findTarget .) || exit 1 # Fatal
+        cd $dir 2>/dev/null || {
+            echo "$Script error: could not change to directory '$dir'" 1>&2
+            exit 1
+        }
+        unset targetType
     fi
-
 
     [ -r $MakeDir/files ] || {
         echo "$Script error: file '$MakeDir/files' does not exist in $PWD" 1>&2
@@ -105,46 +142,89 @@ cdSource()
     }
 }
 
+
+# Find the object directory
+# findObjectDir dirName
+# findObjectDir fileName
+#
+# Output:
+# - the objectsDir
+#
+# Global variables used:
+# - WM_PROJECT_DIR, WM_OPTIONS
 findObjectDir()
 {
-    expandPath $WM_PROJECT_DIR
-    wmpdir=$exPath
-    expandPath $1
+    local project=$(expandPath $WM_PROJECT_DIR)
+    local absdir=$(expandPath ${1:-.})
+    local objectsDir
 
-    if echo $exPath | grep "$wmpdir" > /dev/null
+    case "$absdir" in
+    ("$project"/*)
+        local buildPath=$WM_PROJECT_DIR/build/${WM_OPTIONS}
+        objectsDir=$buildPath$(echo $absdir | sed s%$project%% )
+        ;;
+    (*)
+        local path=$absdir
+        local appDir=.
+        [ -d Make ] || appDir=$(findTarget .) || exit 1 # Fatal
+        absdir=$(expandPath $appDir/.)
+        objectsDir=$appDir/Make/${WM_OPTIONS}$(echo $path | sed s%$absdir%% )
+    ;;
+    esac
+
+    echo "$objectsDir"
+}
+
+
+# Find the object directory and remove it
+# removeObjectDir dirName
+# removeObjectDir fileName
+#
+# Output:
+# - NONE
+#
+# Global variables used:
+# - WM_PROJECT_DIR, WM_OPTIONS
+removeObjectDir()
+{
+    local objectsDir=$(findObjectDir ${1:-.})
+    if [ -d "$objectsDir" ]
     then
-        platformPath=$WM_PROJECT_DIR/platforms/${WM_OPTIONS}
-        objectsDir=$platformPath$(echo $exPath | sed s%$wmpdir%% )
-    else
-        path=$exPath
-        dir=.
-        if [ ! -d Make ]
-        then
-            findTarget .
-        fi
-        appDir=$dir
-        expandPath $appDir/.
-        objectsDir=$appDir/Make/${WM_OPTIONS}$(echo $path | sed s%$exPath%% )
+        rm -rf "$objectsDir" > /dev/null 2>&1
     fi
 }
 
-if [ -n "$BASH_VERSION" ]; then
+
+# depToSource depFile
+#
+# Output:
+# - the sourceFile corresponding to depFile
+#
+# Global variables used:
+# - WM_OPTIONS
+# - WM_MPLIB
+if [ -n "$BASH_VERSION" ]
+then
     depToSource()
     {
-        sourceFile=${depFile%.dep}
-        sourceFile="${sourceFile/platforms\/${WM_OPTIONS}\//}"
+        local sourceFile=${1%.dep}
+        sourceFile="${sourceFile/build\/${WM_OPTIONS}\//}"
+        sourceFile="${sourceFile/build\/${WM_OPTIONS}${WM_MPLIB}\//}"
         sourceFile="${sourceFile/Make\/${WM_OPTIONS}\//}"
-        sourceFile="${sourceFile/platforms\/${WM_OPTIONS}${WM_MPLIB}\//}"
         sourceFile="${sourceFile/Make\/${WM_OPTIONS}${WM_MPLIB}\//}"
+
+        echo "$sourceFile"
     }
 else
     depToSource()
     {
-        sourceFile=$(echo ${depFile%.dep} |                 \
-            sed -e s%platforms/${WM_OPTIONS}/%%             \
-                -e s%Make/${WM_OPTIONS}/%%                  \
-                -e s%platforms/${WM_OPTIONS}${WM_MPLIB}/%%  \
+        local sourceFile=$(echo ${1%.dep} |             \
+            sed -e s%build/${WM_OPTIONS}/%%             \
+                -e s%build/${WM_OPTIONS}${WM_MPLIB}/%%  \
+                -e s%Make/${WM_OPTIONS}/%%              \
                 -e s%Make/${WM_OPTIONS}${WM_MPLIB}/%% )
+
+        echo "$sourceFile"
     }
 fi
 

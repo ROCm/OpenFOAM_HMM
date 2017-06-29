@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -73,10 +73,6 @@ class fileName
     public string
 {
     // Private Member Functions
-
-        //- Find position of the file extension dot, return npos on failure.
-        //  A wrapped version of find_last_of("./") with additional logic.
-        inline size_type find_ext() const;
 
         //- Strip invalid characters
         inline void stripInvalid();
@@ -154,6 +150,7 @@ public:
         //
         // * Removes trailing '/'
         //
+        // \return True if any contents changed
         bool clean();
 
         //- Cleanup file name
@@ -161,95 +158,104 @@ public:
         fileName clean() const;
 
 
-        // Interrogation
+      // Interrogation
 
-            //- Return the file type: FILE, DIRECTORY, UNDEFINED or
-            //  LINK (only if followLink=false)
-            Type type(const bool followLink = true) const;
+        //- Return the file type: FILE, DIRECTORY, UNDEFINED or
+        //  LINK (only if followLink=false)
+        Type type(const bool followLink = true) const;
 
-            //- Return true if file name is absolute
-            bool isAbsolute() const;
+        //- Return true if file name is absolute (starts with a '/')
+        inline bool isAbsolute() const;
 
-            //- Convert from relative to absolute
-            fileName& toAbsolute();
-
-
-        // Decomposition
-
-            //- Return file name (part beyond last /)
-            //
-            //  Behaviour compared to /usr/bin/basename:
-            //    Input           name()          basename
-            //    -----           ------          --------
-            //    "foo"           "foo"           "foo"
-            //    "/foo"          "foo"           "foo"
-            //    "foo/bar"       "bar"           "bar"
-            //    "/foo/bar"      "bar"           "bar"
-            //    "/foo/bar/"     ""              "bar"
-            //
-            word name() const;
-
-            //- Return file name (part beyond last /), subsitute for FOAM_CASE
-            string caseName() const;
-
-            //- Return file name, optionally without extension
-            word name(const bool noExt) const;
-
-            //- Return directory path name (part before last /)
-            //
-            //  Behaviour compared to /usr/bin/dirname:
-            //    input           path()          dirname
-            //    -----           ------          -------
-            //    "foo"           "."             "."
-            //    "/foo"          "/"             "foo"
-            //    "foo/bar"       "foo"           "foo"
-            //    "/foo/bar"      "/foo"          "/foo"
-            //    "/foo/bar/"     "/foo/bar/"     "/foo"
-            //
-            fileName path() const;
-
-            //- Return file name without extension (part before last .)
-            fileName lessExt() const;
-
-            //- Return file name extension (part after last .)
-            word ext() const;
-
-            //- Append a '.' and the ending, and return the object.
-            //  The '.' and ending will not be added when the ending is empty,
-            //  or when the file name is empty or ended with a '/'.
-            fileName& ext(const word& ending);
-
-            //- Return true if it has an extension or simply ends with a '.'
-            bool hasExt() const;
-
-            //- Return true if the extension is the same as the given ending.
-            bool hasExt(const word& ending) const;
-
-            //- Return true if the extension matches the given ending.
-            bool hasExt(const wordRe& ending) const;
-
-            //- Remove extension, returning true if string changed.
-            bool removeExt();
+        //- Convert from relative to absolute
+        fileName& toAbsolute();
 
 
-            //- Return path components as wordList
-            //
-            //  Behaviour:
-            //    Input           components()
-            //    -----           ------
-            //    "foo"           1("foo")
-            //    "/foo"          1("foo")
-            //    "foo/bar"       2("foo", "bar")
-            //    "/foo/bar"      2("foo", "bar")
-            //    "/foo/bar/"     2("foo", "bar")
-            wordList components(const char delimiter = '/') const;
+      // Decomposition
 
-            //- Return a single component of the path
-            word component
-            (
-                const size_type cmpt,
-                const char delimiter = '/'
-            ) const;
+        //- Return basename (part beyond last /), including its extension
+        //
+        // Behaviour compared to /usr/bin/basename:
+        // \verbatim
+        //    input           name()    basename
+        //    -----           ------    --------
+        //    "foo"           "foo"     "foo"
+        //    "/foo"          "foo"     "foo"
+        //    "foo/bar"       "bar"     "bar"
+        //    "/foo/bar"      "bar"     "bar"
+        //    "/foo/bar/"     ""        "bar"
+        // \endverbatim
+        word name() const;
+
+        //- Return basename, without extension
+        word nameLessExt() const;
+
+        //- Return basename, optionally without extension
+        // \deprecated in favour of name() or nameLessExt() which describe
+        //  their behaviour more explicitly (MAR-2017).
+        word name(const bool noExt) const
+        {
+            return noExt ? this->nameLessExt() : this->name();
+        }
+
+        //- Return directory path name (part before last /)
+        //
+        //  Behaviour compared to /usr/bin/dirname:
+        //  \verbatim
+        //    input           path()          dirname
+        //    -----           ------          -------
+        //    "foo"           "."             "."
+        //    "/foo"          "/"             "foo"
+        //    "foo/bar"       "foo"           "foo"
+        //    "/foo/bar"      "/foo"          "/foo"
+        //    "/foo/bar/"     "/foo/bar/"     "/foo"
+        // \endverbatim
+        fileName path() const;
+
+        //- Return file name without extension (part before last .)
+        fileName lessExt() const;
+
+        //- Return file name extension (part after last .)
+        word ext() const;
+
+        //- Append a '.' and the ending, and return the object.
+        //  The '.' and ending will not be added when the ending is empty,
+        //  or when the file name is empty or ended with a '/'.
+        fileName& ext(const word& ending);
+
+        //- Return true if it has an extension or simply ends with a '.'
+        inline bool hasExt() const;
+
+        //- Return true if the extension is the same as the given ending.
+        bool hasExt(const word& ending) const;
+
+        //- Return true if the extension matches the given ending.
+        bool hasExt(const wordRe& ending) const;
+
+        //- Remove extension, returning true if string changed.
+        inline bool removeExt();
+
+
+        //- Return path components as wordList
+        //
+        //  Behaviour:
+        //  \verbatim
+        //    Input           components()
+        //    -----           ------
+        //    "foo"           1("foo")
+        //    "/foo"          1("foo")
+        //    "foo/bar"       2("foo", "bar")
+        //    "/foo/bar"      2("foo", "bar")
+        //    "/foo/bar/"     2("foo", "bar")
+        //  \endverbatim
+        wordList components(const char delimiter = '/') const;
+
+        //- Return a single component of the path
+        word component
+        (
+            const size_type cmpt,
+            const char delimiter = '/'
+        ) const;
 
 
     // Member operators
@@ -278,6 +284,8 @@ public:
         friend Ostream& operator<<(Ostream& os, const fileName& fn);
 };
 
+
+// Global Operators
 
 //- Assemble words and fileNames as pathnames by adding a '/' separator.
 //  No '/' separator is added if either argument is an empty string.

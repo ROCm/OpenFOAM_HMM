@@ -39,7 +39,7 @@ writeFormat     ascii;
 
 writePrecision  6;
 
-writeCompression compressed;
+writeCompression on;
 
 timeFormat      general;
 
@@ -59,8 +59,7 @@ functions
         lifeTime        10000;
         nSubCycle       5;
         cloud           particleTracks;
-        seedSampleSet   uniform;
-        uniformCoeffs
+        seedSampleSet
         {
             type            uniform;
             axis            x;
