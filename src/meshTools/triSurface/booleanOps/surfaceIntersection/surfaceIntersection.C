@@ -41,7 +41,10 @@ namespace Foam
 defineTypeNameAndDebug(surfaceIntersection, 0);
 }
 
-const Foam::Enum<Foam::surfaceIntersection::intersectionType>
+const Foam::Enum
+<
+    Foam::surfaceIntersection::intersectionType
+>
 Foam::surfaceIntersection::selfIntersectionNames
 {
     { intersectionType::SELF, "self" },

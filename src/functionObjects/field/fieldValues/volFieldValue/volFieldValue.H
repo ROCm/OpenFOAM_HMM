@@ -153,7 +153,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 13> operationTypeNames_;
+        static const Enum<operationType> operationTypeNames_;
 
 
 protected:

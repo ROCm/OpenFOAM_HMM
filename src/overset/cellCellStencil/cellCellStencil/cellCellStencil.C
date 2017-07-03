@@ -35,22 +35,19 @@ namespace Foam
 {
     defineTypeNameAndDebug(cellCellStencil, 0);
     defineRunTimeSelectionTable(cellCellStencil, mesh);
-
-    template<>
-    const char* NamedEnum
-    <
-        cellCellStencil::cellType,
-        3
-    >::names[] =
-    {
-        "calculated",
-        "interpolated",
-        "hole"
-    };
 }
 
-const Foam::NamedEnum<Foam::cellCellStencil::cellType, 3>
-Foam::cellCellStencil::cellTypeNames_;
+const Foam::Enum
+<
+    Foam::cellCellStencil::cellType
+>
+Foam::cellCellStencil::cellTypeNames_
+{
+    { cellType::CALCULATED, "calculated" },
+    { cellType::INTERPOLATED, "interpolated" },
+    { cellType::HOLE, "hole" },
+};
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

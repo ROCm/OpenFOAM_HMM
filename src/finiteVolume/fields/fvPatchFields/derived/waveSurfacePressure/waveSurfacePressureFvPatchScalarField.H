@@ -79,7 +79,7 @@ SourceFiles
 #define waveSurfacePressureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,7 +121,7 @@ private:
         word rhoName_;
 
         //- Time scheme type names
-        static const NamedEnum<ddtSchemeType, 3> ddtSchemeTypeNames_;
+        static const Enum<ddtSchemeType> ddtSchemeTypeNames_;
 
 
 public:

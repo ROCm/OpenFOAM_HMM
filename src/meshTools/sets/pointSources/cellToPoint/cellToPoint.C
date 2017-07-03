@@ -36,16 +36,6 @@ namespace Foam
     defineTypeNameAndDebug(cellToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, cellToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, cellToPoint, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::cellToPoint::cellAction,
-        1
-    >::names[] =
-    {
-        "all"
-    };
 }
 
 
@@ -56,8 +46,14 @@ Foam::topoSetSource::addToUsageTable Foam::cellToPoint::usage_
     "    Select all points of cells in the cellSet\n\n"
 );
 
-const Foam::NamedEnum<Foam::cellToPoint::cellAction, 1>
-    Foam::cellToPoint::cellActionNames_;
+const Foam::Enum
+<
+    Foam::cellToPoint::cellAction
+>
+Foam::cellToPoint::cellActionNames_
+{
+    { cellAction::ALL, "all" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -111,7 +107,7 @@ Foam::cellToPoint::cellToPoint
 :
     topoSetSource(mesh),
     setName_(dict.lookup("set")),
-    option_(cellActionNames_.read(dict.lookup("option")))
+    option_(cellActionNames_.lookup("option", dict))
 {}
 
 

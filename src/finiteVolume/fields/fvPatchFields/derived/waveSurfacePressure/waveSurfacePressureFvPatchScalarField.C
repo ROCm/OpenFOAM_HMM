@@ -35,27 +35,25 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* NamedEnum
-    <
-        waveSurfacePressureFvPatchScalarField::ddtSchemeType,
-        3
-    >::names[] =
-    {
-        fv::EulerDdtScheme<scalar>::typeName_(),
-        fv::CrankNicolsonDdtScheme<scalar>::typeName_(),
-        fv::backwardDdtScheme<scalar>::typeName_()
-    };
-}
-
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeType,
-    3
->   Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeTypeNames_;
+    Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeType
+>
+Foam::waveSurfacePressureFvPatchScalarField::ddtSchemeTypeNames_
+{
+    {
+        ddtSchemeType::tsEuler,
+        fv::EulerDdtScheme<scalar>::typeName_()
+    },
+    {
+        ddtSchemeType::tsCrankNicolson,
+        fv::CrankNicolsonDdtScheme<scalar>::typeName_()
+    },
+    {
+        ddtSchemeType::tsBackward,
+        fv::backwardDdtScheme<scalar>::typeName_()
+    },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

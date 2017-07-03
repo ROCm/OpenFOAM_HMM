@@ -848,7 +848,7 @@ int main(int argc, char *argv[])
             (
                 meshRefinement::readFlags
                 (
-                    meshRefinement::IOdebugTypeNames,
+                    meshRefinement::debugTypeNames,
                     flags
                 )
             );
@@ -873,7 +873,7 @@ int main(int argc, char *argv[])
                 (
                     meshRefinement::readFlags
                     (
-                        meshRefinement::IOwriteTypeNames,
+                        meshRefinement::writeTypeNames,
                         flags
                     )
                 )
@@ -892,7 +892,7 @@ int main(int argc, char *argv[])
                 (
                     meshRefinement::readFlags
                     (
-                        meshRefinement::IOoutputTypeNames,
+                        meshRefinement::outputTypeNames,
                         flags
                     )
                 )

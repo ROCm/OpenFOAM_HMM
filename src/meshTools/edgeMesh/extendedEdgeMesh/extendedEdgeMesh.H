@@ -100,7 +100,7 @@ public:
         NONFEATURE  //!< Not a feature point
     };
 
-    static const Foam::NamedEnum<pointStatus, 4> pointStatusNames_;
+    static const Enum<pointStatus> pointStatusNames_;
 
     enum edgeStatus
     {
@@ -112,7 +112,7 @@ public:
         NONE        //!< Unclassified (consistency with surfaceFeatures)
     };
 
-    static const Foam::NamedEnum<edgeStatus, 6> edgeStatusNames_;
+    static const Enum<edgeStatus> edgeStatusNames_;
 
     //- Normals point to the outside
     enum sideVolumeType
@@ -123,7 +123,7 @@ public:
         NEITHER = 3   //!< not sure when this may be used
     };
 
-    static const Foam::NamedEnum<sideVolumeType, 4> sideVolumeTypeNames_;
+    static const Enum<sideVolumeType> sideVolumeTypeNames_;
 
     //- Angular closeness tolerance for treating normals as the same
     static scalar cosNormalAngleTol_;

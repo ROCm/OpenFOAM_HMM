@@ -36,7 +36,7 @@ SourceFiles
 #define pointToCell_H
 
 #include "topoSetSource.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,7 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        static const NamedEnum<pointAction, 2> pointActionNames_;
+        static const Enum<pointAction> pointActionNames_;
 
         //- Name of set to use
         word setName_;

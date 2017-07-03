@@ -41,22 +41,16 @@ namespace Foam
             dictionary
         );
     }
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::tabulatedWallFunctions::general::interpolationType,
-        1
-    >::names[] =
-    {
-        "linear"
-    };
-
 }
 
-const
-Foam::NamedEnum<Foam::tabulatedWallFunctions::general::interpolationType, 1>
-    Foam::tabulatedWallFunctions::general::interpolationTypeNames_;
+const Foam::Enum
+<
+    Foam::tabulatedWallFunctions::general::interpolationType
+>
+Foam::tabulatedWallFunctions::general::interpolationTypeNames_
+{
+    { interpolationType::itLinear, "linear" },
+};
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -138,7 +132,7 @@ Foam::tabulatedWallFunctions::general::general
 )
 :
     tabulatedWallFunction(dict, mesh, typeName),
-    interpType_(interpolationTypeNames_[coeffDict_.lookup("interpType")]),
+    interpType_(interpolationTypeNames_.lookup("interpType", coeffDict_)),
     yPlus_(),
     uPlus_(),
     log10YPlus_(coeffDict_.lookup("log10YPlus")),

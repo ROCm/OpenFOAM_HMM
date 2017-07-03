@@ -35,17 +35,6 @@ namespace Foam
     defineTypeNameAndDebug(faceZoneToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, word);
     addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::faceZoneToCell::faceAction,
-        2
-    >::names[] =
-    {
-        "master",
-        "slave"
-    };
 }
 
 
@@ -58,8 +47,15 @@ Foam::topoSetSource::addToUsageTable Foam::faceZoneToCell::usage_
 );
 
 
-const Foam::NamedEnum<Foam::faceZoneToCell::faceAction, 2>
-    Foam::faceZoneToCell::faceActionNames_;
+const Foam::Enum
+<
+    Foam::faceZoneToCell::faceAction
+>
+Foam::faceZoneToCell::faceActionNames_
+{
+    { faceAction::MASTER, "master" },
+    { faceAction::SLAVE, "slave" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -132,7 +128,7 @@ Foam::faceZoneToCell::faceZoneToCell
 :
     topoSetSource(mesh),
     zoneName_(dict.lookup("name")),
-    option_(faceActionNames_.read(dict.lookup("option")))
+    option_(faceActionNames_.lookup("option", dict))
 {}
 
 

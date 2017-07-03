@@ -65,9 +65,10 @@ void Foam::fv::interRegionOption::setMapper()
                 (
                     mesh_,
                     nbrMesh,
-                    meshToMesh::interpolationMethodNames_.read
+                    meshToMesh::interpolationMethodNames_.lookup
                     (
-                        coeffs_.lookup("interpolationMethod")
+                        "interpolationMethod",
+                        coeffs_
                     ),
                     false // not interpolating patches
                 )

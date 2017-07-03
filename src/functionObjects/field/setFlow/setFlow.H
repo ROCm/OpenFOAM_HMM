@@ -110,7 +110,7 @@ class setFlow
         VORTEX3D
     };
 
-   static const Foam::Enum<modeType> modeTypeNames;
+   static const Enum<modeType> modeTypeNames;
 
 
    // Private Data

@@ -78,7 +78,7 @@ SourceFiles
 #define functionObjects_fieldMinMax_H
 
 #include "Switch.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
 #include "vector.H"
@@ -115,7 +115,7 @@ protected:
     // Protected data
 
         //- Mode type names
-        static const NamedEnum<modeType, 2> modeTypeNames_;
+        static const Enum<modeType> modeTypeNames_;
 
         //- Switch to write location of min/max values
         Switch location_;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,51 +45,39 @@ namespace functionObjects
 }
 }
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::turbulenceFields::compressibleField,
-    9
->::names[] =
+    Foam::functionObjects::turbulenceFields::compressibleField
+>
+Foam::functionObjects::turbulenceFields::compressibleFieldNames_
 {
-    "k",
-    "epsilon",
-    "omega",
-    "mut",
-    "muEff",
-    "alphat",
-    "alphaEff",
-    "R",
-    "devRhoReff"
+    { compressibleField::cfK, "k" },
+    { compressibleField::cfEpsilon, "epsilon" },
+    { compressibleField::cfOmega, "omega" },
+    { compressibleField::cfMut, "mut" },
+    { compressibleField::cfMuEff, "muEff" },
+    { compressibleField::cfAlphat, "alphat" },
+    { compressibleField::cfAlphaEff, "alphaEff" },
+    { compressibleField::cfR, "R" },
+    { compressibleField::cfDevRhoReff, "devRhoReff" },
 };
 
-const Foam::NamedEnum
-<
-    Foam::functionObjects::turbulenceFields::compressibleField,
-    9
-> Foam::functionObjects::turbulenceFields::compressibleFieldNames_;
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::turbulenceFields::incompressibleField,
-    7
->::names[] =
+    Foam::functionObjects::turbulenceFields::incompressibleField
+>
+Foam::functionObjects::turbulenceFields::incompressibleFieldNames_
 {
-    "k",
-    "epsilon",
-    "omega",
-    "nut",
-    "nuEff",
-    "R",
-    "devReff"
+    { incompressibleField::ifK, "k" },
+    { incompressibleField::ifEpsilon, "epsilon" },
+    { incompressibleField::ifOmega, "omega" },
+    { incompressibleField::ifNut, "nut" },
+    { incompressibleField::ifNuEff, "nuEff" },
+    { incompressibleField::ifR, "R" },
+    { incompressibleField::ifDevReff, "devReff" },
 };
 
-const Foam::NamedEnum
-<
-    Foam::functionObjects::turbulenceFields::incompressibleField,
-    7
-> Foam::functionObjects::turbulenceFields::incompressibleFieldNames_;
 
 const Foam::word Foam::functionObjects::turbulenceFields::modelName
 (

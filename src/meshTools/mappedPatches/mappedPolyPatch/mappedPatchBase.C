@@ -48,41 +48,34 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(mappedPatchBase, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::mappedPatchBase::sampleMode,
-        6
-    >::names[] =
-    {
-        "nearestCell",
-        "nearestPatchFace",
-        "nearestPatchFaceAMI",
-        "nearestPatchPoint",
-        "nearestFace",
-        "nearestOnlyCell"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::mappedPatchBase::offsetMode,
-        3
-    >::names[] =
-    {
-        "uniform",
-        "nonuniform",
-        "normal"
-    };
 }
 
 
-const Foam::NamedEnum<Foam::mappedPatchBase::sampleMode, 6>
-    Foam::mappedPatchBase::sampleModeNames_;
+const Foam::Enum
+<
+    Foam::mappedPatchBase::sampleMode
+>
+Foam::mappedPatchBase::sampleModeNames_
+{
+    { sampleMode::NEARESTCELL, "nearestCell" },
+    { sampleMode::NEARESTPATCHFACE, "nearestPatchFace" },
+    { sampleMode::NEARESTPATCHFACEAMI, "nearestPatchFaceAMI" },
+    { sampleMode::NEARESTPATCHPOINT, "nearestPatchPoint" },
+    { sampleMode::NEARESTFACE, "nearestFace" },
+    { sampleMode::NEARESTONLYCELL, "nearestOnlyCell" },
+};
 
-const Foam::NamedEnum<Foam::mappedPatchBase::offsetMode, 3>
-    Foam::mappedPatchBase::offsetModeNames_;
+
+const Foam::Enum
+<
+    Foam::mappedPatchBase::offsetMode
+>
+Foam::mappedPatchBase::offsetModeNames_
+{
+    { offsetMode::UNIFORM, "uniform" },
+    { offsetMode::NONUNIFORM, "nonuniform" },
+    { offsetMode::NORMAL, "normal" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -1042,7 +1035,7 @@ Foam::mappedPatchBase::mappedPatchBase
 :
     patch_(pp),
     sampleRegion_(dict.lookupOrDefault<word>("sampleRegion", "")),
-    mode_(sampleModeNames_.read(dict.lookup("sampleMode"))),
+    mode_(sampleModeNames_.lookup("sampleMode", dict)),
     samplePatch_(dict.lookupOrDefault<word>("samplePatch", "")),
     coupleGroup_(dict),
     offsetMode_(UNIFORM),
@@ -1068,7 +1061,7 @@ Foam::mappedPatchBase::mappedPatchBase
 
     if (dict.found("offsetMode"))
     {
-        offsetMode_ = offsetModeNames_.read(dict.lookup("offsetMode"));
+        offsetMode_ = offsetModeNames_.lookup("offsetMode", dict);
 
         switch (offsetMode_)
         {
@@ -1387,17 +1380,14 @@ Foam::pointIndexHit Foam::mappedPatchBase::facePoint
 
 void Foam::mappedPatchBase::write(Ostream& os) const
 {
-    os.writeKeyword("sampleMode") << sampleModeNames_[mode_]
-        << token::END_STATEMENT << nl;
+    os.writeEntry("sampleMode", sampleModeNames_[mode_]);
     if (!sampleRegion_.empty())
     {
-        os.writeKeyword("sampleRegion") << sampleRegion_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("sampleRegion", sampleRegion_);
     }
     if (!samplePatch_.empty())
     {
-        os.writeKeyword("samplePatch") << samplePatch_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("samplePatch", samplePatch_);
     }
     coupleGroup_.write(os);
 
@@ -1412,15 +1402,13 @@ void Foam::mappedPatchBase::write(Ostream& os) const
     }
     else
     {
-        os.writeKeyword("offsetMode") << offsetModeNames_[offsetMode_]
-            << token::END_STATEMENT << nl;
+        os.writeEntry("offsetMode", offsetModeNames_[offsetMode_]);
 
         switch (offsetMode_)
         {
             case UNIFORM:
             {
-                os.writeKeyword("offset") << offset_ << token::END_STATEMENT
-                    << nl;
+                os.writeEntry("offset", offset_);
                 break;
             }
             case NONUNIFORM:
@@ -1430,8 +1418,7 @@ void Foam::mappedPatchBase::write(Ostream& os) const
             }
             case NORMAL:
             {
-                os.writeKeyword("distance") << distance_ << token::END_STATEMENT
-                    << nl;
+                os.writeEntry("distance", distance_);
                 break;
             }
         }
@@ -1440,8 +1427,7 @@ void Foam::mappedPatchBase::write(Ostream& os) const
         {
             if (AMIReverse_)
             {
-                os.writeKeyword("flipNormals") << AMIReverse_
-                    << token::END_STATEMENT << nl;
+                os.writeEntry("flipNormals", AMIReverse_);
             }
 
             if (!surfDict_.empty())

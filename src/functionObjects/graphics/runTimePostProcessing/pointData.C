@@ -48,24 +48,17 @@ namespace runTimePostPro
     defineRunTimeSelectionTable(pointData, dictionary);
 }
 }
-template<>
-const char* NamedEnum
-<
-    functionObjects::runTimePostPro::pointData::representationType,
-    2
->::names[] =
-{
-    "sphere",
-    "vector"
-};
 }
 
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::runTimePostPro::pointData::representationType,
-    2
+    Foam::functionObjects::runTimePostPro::pointData::representationType
 >
-    Foam::functionObjects::runTimePostPro::pointData::representationTypeNames;
+Foam::functionObjects::runTimePostPro::pointData::representationTypeNames
+{
+    { representationType::rtSphere, "sphere" },
+    { representationType::rtVector, "vector" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -106,7 +99,7 @@ Foam::functionObjects::runTimePostPro::pointData::pointData
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.read(dict.lookup("representation"))
+        representationTypeNames.lookup("representation", dict)
     ),
     maxGlyphLength_(readScalar(dict.lookup("maxGlyphLength"))),
     pointColour_(nullptr)

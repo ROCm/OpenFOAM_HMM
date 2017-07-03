@@ -37,7 +37,7 @@ SourceFiles
 
 #include "dictionary.H"
 #include "Tuple2.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "vector.H"
 #include "HashPtrTable.H"
 #include "Function1.H"
@@ -78,7 +78,7 @@ public:
             cbField
         };
 
-        static const NamedEnum<colourByType, 2> colourByTypeNames;
+        static const Enum<colourByType> colourByTypeNames;
 
         enum colourMapType
         {
@@ -88,7 +88,7 @@ public:
             cmGreyscale
         };
 
-        static const NamedEnum<colourMapType, 4> colourMapTypeNames;
+        static const Enum<colourMapType> colourMapTypeNames;
 
 
 private:

@@ -33,27 +33,16 @@ using Foam::constant::physicoChemical::sigma;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char*
-    NamedEnum
-    <
-        externalWallHeatFluxTemperatureFvPatchScalarField::operationMode,
-        3
-    >::names[] =
-    {
-        "power",
-        "flux",
-        "coefficient"
-    };
-}
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationMode,
-    3
-> Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationModeNames;
+    Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationMode
+>
+Foam::externalWallHeatFluxTemperatureFvPatchScalarField::operationModeNames
+{
+    { operationMode::fixedPower, "power" },
+    { operationMode::fixedHeatFlux, "flux" },
+    { operationMode::fixedHeatTransferCoeff, "coefficient" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -92,7 +81,7 @@ externalWallHeatFluxTemperatureFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     temperatureCoupledBase(patch(), dict),
-    mode_(operationModeNames.read(dict.lookup("mode"))),
+    mode_(operationModeNames.lookup("mode", dict)),
     Q_(0),
     relaxation_(dict.lookupOrDefault<scalar>("relaxation", 1)),
     emissivity_(dict.lookupOrDefault<scalar>("emissivity", 0)),
@@ -457,17 +446,14 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
 {
     fvPatchScalarField::write(os);
 
-    os.writeKeyword("mode")
-        << operationModeNames[mode_] << token::END_STATEMENT << nl;
+    os.writeEntry("mode", operationModeNames[mode_]);
     temperatureCoupledBase::write(os);
 
     switch (mode_)
     {
         case fixedPower:
         {
-            os.writeKeyword("Q")
-                << Q_ << token::END_STATEMENT << nl;
-
+            os.writeEntry("Q", Q_);
             break;
         }
         case fixedHeatFlux:
@@ -483,14 +469,12 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
 
             if (relaxation_ < 1)
             {
-                os.writeKeyword("relaxation")
-                    << relaxation_ << token::END_STATEMENT << nl;
+                os.writeEntry("relaxation", relaxation_);
             }
 
             if (emissivity_ > 0)
             {
-                os.writeKeyword("emissivity")
-                    << emissivity_ << token::END_STATEMENT << nl;
+                os.writeEntry("emissivity", emissivity_);
             }
 
             if (thicknessLayers_.size())
@@ -503,12 +487,11 @@ void Foam::externalWallHeatFluxTemperatureFvPatchScalarField::write
         }
     }
 
-    os.writeKeyword("qr")<< qrName_ << token::END_STATEMENT << nl;
+    os.writeEntry("qr", qrName_);
 
     if (qrName_ != "none")
     {
-        os.writeKeyword("qrRelaxation")
-            << qrRelaxation_ << token::END_STATEMENT << nl;
+        os.writeEntry("qrRelaxation", qrRelaxation_);
 
         qrPrevious_.writeEntry("qrPrevious", os);
     }

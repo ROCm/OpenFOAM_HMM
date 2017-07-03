@@ -29,24 +29,19 @@ License
 #include "polyMesh.H"
 #include "regionProperties.H"
 
-using namespace Foam;
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::solverTemplate::solverType
+>
+Foam::solverTemplate::solverTypeNames_
 {
-    template<>
-    const char* Foam::NamedEnum<Foam::solverTemplate::solverType, 4>::names[] =
-    {
-        "compressible",
-        "incompressible",
-        "buoyant",
-        "unknown"
-    };
-}
-
-const Foam::NamedEnum<Foam::solverTemplate::solverType, 4>
-    Foam::solverTemplate::solverTypeNames_;
+    { solverType::stCompressible, "compressible" },
+    { solverType::stIncompressible, "incompressible" },
+    { solverType::stBuoyant, "buoyant" },
+    { solverType::stUnknown, "unknown" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -261,7 +256,7 @@ Foam::solverTemplate::solverTemplate
 
     Info<< "Selecting " << solverName << ": ";
 
-    solverType_ = solverTypeNames_.read(solverDict.lookup("solverType"));
+    solverType_ = solverTypeNames_.lookup("solverType", solverDict);
     Info<< solverTypeNames_[solverType_];
 
     multiRegion_ = readBool(solverDict.lookup("multiRegion"));
@@ -366,7 +361,7 @@ bool Foam::solverTemplate::multiRegion() const
 }
 
 
-label Foam::solverTemplate::nRegion() const
+Foam::label Foam::solverTemplate::nRegion() const
 {
     return regionTypes_.size();
 }

@@ -39,7 +39,7 @@ SourceFiles
 #include "vector.H"
 #include "Function1.H"
 #include "HashPtrTable.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +75,7 @@ public:
             rmPhong             //!< Phong shading
         };
 
-        static const NamedEnum<renderModeType, 3> renderModeTypeNames;
+        static const Enum<renderModeType> renderModeTypeNames;
 
 
 private:

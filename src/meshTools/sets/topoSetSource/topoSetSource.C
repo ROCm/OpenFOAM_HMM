@@ -34,31 +34,27 @@ namespace Foam
     defineTypeNameAndDebug(topoSetSource, 0);
     defineRunTimeSelectionTable(topoSetSource, word);
     defineRunTimeSelectionTable(topoSetSource, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::topoSetSource::setAction,
-        8
-    >::names[] =
-    {
-        "clear",
-        "new",
-        "invert",
-        "add",
-        "delete",
-        "subset",
-        "list",
-        "remove"
-    };
 }
 
 
 Foam::HashTable<Foam::string>* Foam::topoSetSource::usageTablePtr_ = nullptr;
 
 
-const Foam::NamedEnum<Foam::topoSetSource::setAction, 8>
-    Foam::topoSetSource::actionNames_;
+const Foam::Enum
+<
+    Foam::topoSetSource::setAction
+>
+Foam::topoSetSource::actionNames_
+{
+    { setAction::CLEAR, "clear" },
+    { setAction::NEW, "new" },
+    { setAction::INVERT, "invert" },
+    { setAction::ADD, "add" },
+    { setAction::DELETE, "delete" },
+    { setAction::SUBSET, "subset" },
+    { setAction::LIST, "list" },
+    { setAction::REMOVE, "remove" },
+};
 
 
 const Foam::string Foam::topoSetSource::illegalSource_

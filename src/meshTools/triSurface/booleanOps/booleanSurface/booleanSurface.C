@@ -36,23 +36,19 @@ License
 namespace Foam
 {
 defineTypeNameAndDebug(booleanSurface, 0);
-
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::booleanSurface::booleanOpType,
-    4
->::names[] =
-{
-    "union",
-    "intersection",
-    "difference",
-    "all"
-};
 }
 
-const Foam::NamedEnum<Foam::booleanSurface::booleanOpType, 4>
-Foam::booleanSurface::booleanOpTypeNames;
+const Foam::Enum
+<
+    Foam::booleanSurface::booleanOpType
+>
+Foam::booleanSurface::booleanOpTypeNames
+{
+    { booleanOpType::UNION, "union" },
+    { booleanOpType::INTERSECTION, "intersection" },
+    { booleanOpType::DIFFERENCE, "difference" },
+    { booleanOpType::ALL, "all" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

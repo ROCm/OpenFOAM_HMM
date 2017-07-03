@@ -35,7 +35,7 @@ SourceFiles
 #define functionObjects_runTimePostPro_surface_H
 
 #include "geometryBase.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "runTimeSelectionTables.H"
 
 #include "vtkSmartPointer.h"
@@ -74,7 +74,7 @@ public:
             rtGlyph
         };
 
-        static const NamedEnum<representationType, 5> representationTypeNames;
+        static const Enum<representationType> representationTypeNames;
 
 
 private:

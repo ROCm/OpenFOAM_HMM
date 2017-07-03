@@ -33,23 +33,23 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(meshToMesh, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::meshToMesh::interpolationMethod,
-        4
-    >::names[] =
-    {
-        "direct",
-        "mapNearest",
-        "cellVolumeWeight",
-        "correctedCellVolumeWeight"
-    };
-
-    const NamedEnum<meshToMesh::interpolationMethod, 4>
-        meshToMesh::interpolationMethodNames_;
 }
+
+
+const Foam::Enum
+<
+    Foam::meshToMesh::interpolationMethod
+>
+Foam::meshToMesh::interpolationMethodNames_
+{
+    { interpolationMethod::imDirect, "direct" },
+    { interpolationMethod::imMapNearest, "mapNearest" },
+    { interpolationMethod::imCellVolumeWeight, "cellVolumeWeight" },
+    {
+        interpolationMethod::imCorrectedCellVolumeWeight,
+        "correctedCellVolumeWeight"
+    },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

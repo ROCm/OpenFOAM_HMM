@@ -43,7 +43,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "HashTable.H"
 #include "string.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "ListOps.H"
 #include "LIFOStack.H"
 
@@ -69,7 +69,7 @@ public:
         nonBlocking
     };
 
-    static const NamedEnum<commsTypes, 3> commsTypeNames;
+    static const Enum<commsTypes> commsTypeNames;
 
     // Public classes
 

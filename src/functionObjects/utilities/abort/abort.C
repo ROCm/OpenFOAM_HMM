@@ -48,23 +48,17 @@ namespace functionObjects
 }
 }
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::functionObjects::abort::actionType,
-    3
->::names[] =
-{
-    "noWriteNow",
-    "writeNow",
-    "nextWrite"
-};
 
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::abort::actionType,
-    3
-> Foam::functionObjects::abort::actionTypeNames_;
+    Foam::Time::stopAtControls
+>
+Foam::functionObjects::abort::actionNames_
+{
+    { Time::stopAtControls::saNoWriteNow, "noWriteNow" },
+    { Time::stopAtControls::saWriteNow, "writeNow" },
+    { Time::stopAtControls::saNextWrite, "nextWrite" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -94,7 +88,7 @@ Foam::functionObjects::abort::abort
     functionObject(name),
     time_(runTime),
     abortFile_("$FOAM_CASE/" + name),
-    action_(nextWrite)
+    action_(Time::stopAtControls::saNextWrite)
 {
     abortFile_.expand();
     read(dict);
@@ -116,14 +110,12 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
 {
     functionObject::read(dict);
 
-    if (dict.found("action"))
-    {
-        action_ = actionTypeNames_.read(dict.lookup("action"));
-    }
-    else
-    {
-        action_ = nextWrite;
-    }
+    action_ = actionNames_.lookupOrDefault
+    (
+        "action",
+        dict,
+        Time::stopAtControls::saNextWrite
+    );
 
     if (dict.readIfPresent("file", abortFile_))
     {
@@ -143,9 +135,9 @@ bool Foam::functionObjects::abort::execute()
     {
         switch (action_)
         {
-            case noWriteNow :
+            case Time::saNoWriteNow :
             {
-                if (time_.stopAt(Time::saNoWriteNow))
+                if (time_.stopAt(action_))
                 {
                     Info<< "USER REQUESTED ABORT (timeIndex="
                         << time_.timeIndex()
@@ -155,9 +147,9 @@ bool Foam::functionObjects::abort::execute()
                 break;
             }
 
-            case writeNow :
+            case Time::saWriteNow :
             {
-                if (time_.stopAt(Time::saWriteNow))
+                if (time_.stopAt(action_))
                 {
                     Info<< "USER REQUESTED ABORT (timeIndex="
                         << time_.timeIndex()
@@ -167,9 +159,9 @@ bool Foam::functionObjects::abort::execute()
                 break;
             }
 
-            case nextWrite :
+            case Time::saNextWrite :
             {
-                if (time_.stopAt(Time::saNextWrite))
+                if (time_.stopAt(action_))
                 {
                     Info<< "USER REQUESTED ABORT (timeIndex="
                         << time_.timeIndex()
@@ -177,6 +169,11 @@ bool Foam::functionObjects::abort::execute()
                         << endl;
                 }
                 break;
+            }
+
+            default:
+            {
+                // Invalid choices already filtered out by Enum
             }
         }
     }

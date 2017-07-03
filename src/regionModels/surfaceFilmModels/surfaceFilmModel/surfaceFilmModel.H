@@ -44,7 +44,6 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "DimensionedField.H"
 #include "labelList.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

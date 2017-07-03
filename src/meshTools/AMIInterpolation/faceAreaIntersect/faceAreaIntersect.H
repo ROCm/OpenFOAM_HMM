@@ -42,7 +42,7 @@ SourceFiles
 #include "plane.H"
 #include "face.H"
 #include "triPoints.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +63,7 @@ public:
         tmMesh
     };
 
-    static const NamedEnum<triangulationMode, 2> triangulationModeNames_;
+    static const Enum<triangulationMode> triangulationModeNames_;
 
 
 private:

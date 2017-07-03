@@ -39,14 +39,12 @@ Foam::combustionModels::EDC<Type>::EDC
     laminar<Type>(modelType, mesh, combustionProperties, phaseName),
     version_
     (
-        EDCversionNames
-        [
-            this->coeffs().lookupOrDefault
-            (
-                "version",
-                word(EDCversionNames[EDCdefaultVersion])
-            )
-        ]
+        EDCversionNames.lookupOrDefault
+        (
+            "version",
+            this->coeffs(),
+            EDCdefaultVersion
+        )
     ),
     C1_(this->coeffs().lookupOrDefault("C1", 0.05774)),
     C2_(this->coeffs().lookupOrDefault("C2", 0.5)),
@@ -220,14 +218,12 @@ bool Foam::combustionModels::EDC<Type>::read()
     {
         version_ =
         (
-            EDCversionNames
-            [
-                this->coeffs().lookupOrDefault
-                (
-                    "version",
-                    word(EDCversionNames[EDCdefaultVersion])
-                )
-            ]
+            EDCversionNames.lookupOrDefault
+            (
+                "version",
+                this->coeffs(),
+                EDCdefaultVersion
+            )
         );
         C1_ = this->coeffs().lookupOrDefault("C1", 0.05774);
         C2_ = this->coeffs().lookupOrDefault("C2", 0.5);

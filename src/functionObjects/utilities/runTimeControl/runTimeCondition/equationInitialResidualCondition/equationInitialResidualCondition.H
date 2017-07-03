@@ -37,7 +37,7 @@ SourceFiles
 #define functionObjects_runTimeControls_equationInitialResidualCondition_H
 
 #include "runTimeCondition.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ public:
         omMax           //!< Maximum
     };
 
-    static const NamedEnum<operatingMode, 2> operatingModeNames;
+    static const Enum<operatingMode> operatingModeNames;
 
 
 protected:

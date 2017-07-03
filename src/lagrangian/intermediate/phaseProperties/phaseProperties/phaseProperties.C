@@ -27,24 +27,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::phaseProperties::phaseType
+>
+Foam::phaseProperties::phaseTypeNames
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::phaseProperties::phaseType,
-        4
-    >::names[] =
-    {
-        "gas",
-        "liquid",
-        "solid",
-        "unknown"
-    };
-}
-
-const Foam::NamedEnum<Foam::phaseProperties::phaseType, 4>
-    Foam::phaseProperties::phaseTypeNames;
+    { phaseType::GAS, "gas" },
+    { phaseType::LIQUID, "liquid" },
+    { phaseType::SOLID, "solid" },
+    { phaseType::UNKNOWN, "unknown" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -34,23 +34,18 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(UPstream, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::UPstream::commsTypes,
-        3
-    >::names[] =
-    {
-        "blocking",
-        "scheduled",
-        "nonBlocking"
-    };
 }
 
-
-const Foam::NamedEnum<Foam::UPstream::commsTypes, 3>
-    Foam::UPstream::commsTypeNames;
+const Foam::Enum
+<
+    Foam::UPstream::commsTypes
+>
+Foam::UPstream::commsTypeNames
+{
+    { commsTypes::blocking, "blocking" },
+    { commsTypes::scheduled, "scheduled" },
+    { commsTypes::nonBlocking, "nonBlocking" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -411,7 +406,11 @@ registerOptSwitch
 
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
-    commsTypeNames.read(Foam::debug::optimisationSwitches().lookup("commsType"))
+    commsTypeNames.lookup
+    (
+        "commsType",
+        Foam::debug::optimisationSwitches()
+    )
 );
 
 namespace Foam

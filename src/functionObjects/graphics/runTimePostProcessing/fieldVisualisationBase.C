@@ -47,46 +47,27 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::functionObjects::fieldVisualisationBase::colourByType
+>
+Foam::functionObjects::fieldVisualisationBase::colourByTypeNames
 {
-    template<>
-    const char* NamedEnum
-    <
-        functionObjects::fieldVisualisationBase::colourByType,
-        2
-    >::names[] =
-    {
-        "colour",
-        "field"
-    };
+    { colourByType::cbColour, "colour" },
+    { colourByType::cbField, "field" },
+};
 
-    template<>
-    const char* NamedEnum
-    <
-        functionObjects::fieldVisualisationBase::colourMapType,
-        4
-    >::names[] =
-    {
-        "rainbow",
-        "blueWhiteRed",
-        "fire",
-        "greyscale"
-    };
-}
-
-const Foam::NamedEnum
-    <
-        Foam::functionObjects::fieldVisualisationBase::colourByType,
-        2
-    >
-    Foam::functionObjects::fieldVisualisationBase::colourByTypeNames;
-
-const Foam::NamedEnum
-    <
-        Foam::functionObjects::fieldVisualisationBase::colourMapType,
-        4
-    >
-    Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames;
+const Foam::Enum
+<
+    Foam::functionObjects::fieldVisualisationBase::colourMapType
+>
+Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames
+{
+    { colourMapType::cmRainbow, "rainbow" },
+    { colourMapType::cmBlueWhiteRed, "blueWhiteRed" },
+    { colourMapType::cmFire, "fire" },
+    { colourMapType::cmGreyscale, "greyscale" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -508,7 +489,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
     colourMap_(cmRainbow),
     range_()
 {
-    colourBy_ = colourByTypeNames.read(dict.lookup("colourBy"));
+    colourBy_ = colourByTypeNames.lookup("colourBy", dict);
 
     switch (colourBy_)
     {
@@ -523,7 +504,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 
             if (dict.found("colourMap"))
             {
-                colourMap_ = colourMapTypeNames.read(dict.lookup("colourMap"));
+                colourMap_ = colourMapTypeNames.lookup("colourMap", dict);
             }
 
             const dictionary& sbarDict = dict.subDict("scalarBar");

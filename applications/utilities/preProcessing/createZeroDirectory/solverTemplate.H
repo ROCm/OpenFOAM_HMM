@@ -36,7 +36,7 @@ Description
 #include "wordList.H"
 #include "dimensionSet.H"
 #include "IOobject.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,7 @@ public:
         };
 
         //- Solver type names
-        static const NamedEnum<solverType, 4> solverTypeNames_;
+        static const Enum<solverType> solverTypeNames_;
 
 
 private:

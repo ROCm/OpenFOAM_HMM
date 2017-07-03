@@ -27,20 +27,19 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char*
-Foam::NamedEnum<Foam::indexedCellEnum::cellTypes, 6>::names[] =
+const Foam::Enum
+<
+    Foam::indexedCellEnum::cellTypes
+>
+Foam::indexedCellEnum::cellTypesNames_
 {
-    "Unassigned",
-    "Internal",
-    "Surface",
-    "FeatureEdge",
-    "FeaturePoint",
-    "Far"
+    { cellTypes::ctUnassigned, "Unassigned" },
+    { cellTypes::ctFar, "Far" },
+    { cellTypes::ctInternal, "Internal" },
+    { cellTypes::ctSurface, "Surface" },
+    { cellTypes::ctFeatureEdge, "FeatureEdge" },
+    { cellTypes::ctFeaturePoint,"FeaturePoint" },
 };
-
-const Foam::NamedEnum<Foam::indexedCellEnum::cellTypes, 6>
-cellTypesNames_;
 
 
 // ************************************************************************* //

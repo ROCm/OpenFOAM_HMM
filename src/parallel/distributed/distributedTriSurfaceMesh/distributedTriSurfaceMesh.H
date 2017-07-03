@@ -87,7 +87,7 @@ public:
             FROZEN = 2
         };
 
-        static const NamedEnum<distributionType, 3> distributionTypeNames_;
+        static const Enum<distributionType> distributionTypeNames_;
 
 private:
 

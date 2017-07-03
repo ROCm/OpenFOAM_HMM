@@ -65,7 +65,7 @@ public:
         NOORDERING          // unspecified, no automatic ordering
     };
 
-    static const NamedEnum<transformType, 5> transformTypeNames;
+    static const Enum<transformType> transformTypeNames;
 
 
 private:

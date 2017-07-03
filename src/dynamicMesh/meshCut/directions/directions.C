@@ -36,23 +36,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::directions::directionType
+>
+Foam::directions::directionTypeNames_
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::directions::directionType,
-        3
-    >::names[] =
-    {
-        "tan1",
-        "tan2",
-        "normal"
-    };
-}
-
-const Foam::NamedEnum<Foam::directions::directionType, 3>
-    Foam::directions::directionTypeNames_;
+    { directionType::TAN1, "tan1" },
+    { directionType::TAN2, "tan2" },
+    { directionType::NORMAL, "normal" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -289,9 +282,9 @@ Foam::directions::directions
 
     if (coordSystem != "fieldBased")
     {
-        forAll(wantedDirs, i)
+        for (const word& wantedName : wantedDirs)
         {
-            directionType wantedDir = directionTypeNames_[wantedDirs[i]];
+            directionType wantedDir = directionTypeNames_[wantedName];
 
             if (wantedDir == NORMAL)
             {

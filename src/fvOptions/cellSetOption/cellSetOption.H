@@ -84,9 +84,8 @@ public:
             smAll
         };
 
-        //- Word list of selection mode type names
-        static const NamedEnum<selectionModeType, 4>
-            selectionModeTypeNames_;
+        //- List of selection mode type names
+        static const Enum<selectionModeType> selectionModeTypeNames_;
 
 
 protected:

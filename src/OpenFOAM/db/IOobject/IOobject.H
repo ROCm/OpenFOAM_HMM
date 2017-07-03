@@ -76,7 +76,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "InfoProxy.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,7 +129,7 @@ public:
             inotifyMaster
         };
 
-        static const NamedEnum<fileCheckTypes, 4> fileCheckTypesNames;
+        static const Enum<fileCheckTypes> fileCheckTypesNames;
 
 private:
 

@@ -97,7 +97,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "cellSetOption.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -122,7 +122,7 @@ public:
         mdLookup
     };
 
-    static const NamedEnum<thermoMode, 2> thermoModeTypeNames_;
+    static const Enum<thermoMode> thermoModeTypeNames_;
 
 
 private:

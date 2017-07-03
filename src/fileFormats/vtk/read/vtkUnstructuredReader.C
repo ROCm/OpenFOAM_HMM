@@ -37,36 +37,47 @@ namespace Foam
     defineTypeNameAndDebug(vtkUnstructuredReader, 1);
 }
 
-const Foam::Enum<Foam::vtkUnstructuredReader::vtkDataType>
-    Foam::vtkUnstructuredReader::vtkDataTypeNames
-    {
-        { vtkDataType::VTK_INT, "int" },
-        { vtkDataType::VTK_UINT, "unsigned_int" },
-        { vtkDataType::VTK_LONG, "long" },
-        { vtkDataType::VTK_ULONG, "unsigned_long" },
-        { vtkDataType::VTK_FLOAT, "float" },
-        { vtkDataType::VTK_DOUBLE, "double" },
-        { vtkDataType::VTK_STRING, "string" },
-        { vtkDataType::VTK_ID, "vtkIdType" }
-    };
+const Foam::Enum
+<
+    Foam::vtkUnstructuredReader::vtkDataType
+>
+Foam::vtkUnstructuredReader::vtkDataTypeNames
+{
+    { vtkDataType::VTK_INT, "int" },
+    { vtkDataType::VTK_UINT, "unsigned_int" },
+    { vtkDataType::VTK_LONG, "long" },
+    { vtkDataType::VTK_ULONG, "unsigned_long" },
+    { vtkDataType::VTK_FLOAT, "float" },
+    { vtkDataType::VTK_DOUBLE, "double" },
+    { vtkDataType::VTK_STRING, "string" },
+    { vtkDataType::VTK_ID, "vtkIdType" }
+};
 
-const Foam::Enum<Foam::vtkUnstructuredReader::vtkDataSetType>
-    Foam::vtkUnstructuredReader::vtkDataSetTypeNames
-    {
-        { vtkDataSetType::VTK_FIELD, "FIELD" },
-        { vtkDataSetType::VTK_SCALARS, "SCALARS" },
-        { vtkDataSetType::VTK_VECTORS, "VECTORS" }
-    };
 
-const Foam::Enum<Foam::vtkUnstructuredReader::parseMode>
-    Foam::vtkUnstructuredReader::parseModeNames
-    {
-        { parseMode::NOMODE, "NOMODE" },
-        { parseMode::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
-        { parseMode::POLYDATA, "POLYDATA" },
-        { parseMode::CELL_DATA, "CELL_DATA" },
-        { parseMode::POINT_DATA, "POINT_DATA" }
-    };
+const Foam::Enum
+<
+    Foam::vtkUnstructuredReader::vtkDataSetType
+>
+Foam::vtkUnstructuredReader::vtkDataSetTypeNames
+{
+    { vtkDataSetType::VTK_FIELD, "FIELD" },
+    { vtkDataSetType::VTK_SCALARS, "SCALARS" },
+    { vtkDataSetType::VTK_VECTORS, "VECTORS" }
+};
+
+
+const Foam::Enum
+<
+    Foam::vtkUnstructuredReader::parseMode
+>
+Foam::vtkUnstructuredReader::parseModeNames
+{
+    { parseMode::NOMODE, "NOMODE" },
+    { parseMode::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
+    { parseMode::POLYDATA, "POLYDATA" },
+    { parseMode::CELL_DATA, "CELL_DATA" },
+    { parseMode::POINT_DATA, "POINT_DATA" }
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

@@ -60,6 +60,7 @@ SourceFiles
 #include "pointPatchFields.H"
 #include "fixedValuePointPatchFields.H"
 #include "searchableSurfaces.H"
+#include "Enum.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -92,7 +93,7 @@ private:
     // Private data
 
         //- Project mode names
-        static const NamedEnum<projectMode, 3> projectModeNames_;
+        static const Enum<projectMode> projectModeNames_;
 
         //- Maximum velocity
         const vector velocity_;

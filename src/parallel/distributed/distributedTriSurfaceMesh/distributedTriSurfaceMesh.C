@@ -51,23 +51,19 @@ namespace Foam
         distributedTriSurfaceMesh,
         dict
     );
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::distributedTriSurfaceMesh::distributionType,
-        3
-    >::names[] =
-    {
-        "follow",
-        "independent",
-        "frozen"
-    };
 }
 
 
-const Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>
-    Foam::distributedTriSurfaceMesh::distributionTypeNames_;
+const Foam::Enum
+<
+    Foam::distributedTriSurfaceMesh::distributionType
+>
+Foam::distributedTriSurfaceMesh::distributionTypeNames_
+{
+    { distributionType::FOLLOW, "follow" },
+    { distributionType::INDEPENDENT, "independent" },
+    { distributionType::FROZEN, "frozen" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -83,7 +79,7 @@ bool Foam::distributedTriSurfaceMesh::read()
     Pstream::scatterList(procBb_);
 
     // Distribution type
-    distType_ = distributionTypeNames_.read(dict_.lookup("distributionType"));
+    distType_ = distributionTypeNames_.lookup("distributionType", dict_);
 
     // Merge distance
     mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
