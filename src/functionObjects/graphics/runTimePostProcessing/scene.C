@@ -186,20 +186,19 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
     renderer->SetOcclusionRatio(0);
 
     // Set the camera
-    vtkSmartPointer<vtkCamera> camera = vtkSmartPointer<vtkCamera>::New();
+    auto camera = vtkSmartPointer<vtkCamera>::New();
     camera->SetParallelProjection(parallelProjection_);
     renderer->SetActiveCamera(camera);
 
     // Add the lights
-    vtkSmartPointer<vtkLightKit> lightKit = vtkSmartPointer<vtkLightKit>::New();
+    auto lightKit = vtkSmartPointer<vtkLightKit>::New();
     lightKit->AddLightsToRenderer(renderer);
 
     if (!clipBox_.empty())
     {
         const point& min = clipBox_.min();
         const point& max = clipBox_.max();
-        vtkSmartPointer<vtkCubeSource> clipBox =
-            vtkSmartPointer<vtkCubeSource>::New();
+        auto clipBox = vtkSmartPointer<vtkCubeSource>::New();
         clipBox->SetXLength(max.x() - min.x());
         clipBox->SetYLength(max.y() - min.y());
         clipBox->SetZLength(max.z() - min.z());
@@ -209,8 +208,7 @@ void Foam::functionObjects::runTimePostPro::scene::initialise
             min.y() + 0.5*(max.y() - min.y()),
             min.z() + 0.5*(max.z() - min.z())
         );
-        vtkSmartPointer<vtkPolyDataMapper> clipMapper =
-            vtkSmartPointer<vtkPolyDataMapper>::New();
+        auto clipMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
         clipMapper->SetInputConnection(clipBox->GetOutputPort());
 
         clipBoxActor_ = vtkSmartPointer<vtkActor>::New();
@@ -401,8 +399,7 @@ void Foam::functionObjects::runTimePostPro::scene::saveImage
     renderWindow->Render();
 
     // Set up off-screen rendering
-    vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter =
-        vtkSmartPointer<vtkWindowToImageFilter>::New();
+    auto windowToImageFilter = vtkSmartPointer<vtkWindowToImageFilter>::New();
 
     windowToImageFilter->SetInput(renderWindow);
 
@@ -414,7 +411,7 @@ void Foam::functionObjects::runTimePostPro::scene::saveImage
     windowToImageFilter->Update();
 
     // Save the image
-    vtkSmartPointer<vtkPNGWriter> writer = vtkSmartPointer<vtkPNGWriter>::New();
+    auto writer = vtkSmartPointer<vtkPNGWriter>::New();
     fileName fName(prefix/outputName_ + '.' + frameIndexStr() + ".png");
     writer->SetFileName(fName.c_str());
     writer->SetInputConnection(windowToImageFilter->GetOutputPort());

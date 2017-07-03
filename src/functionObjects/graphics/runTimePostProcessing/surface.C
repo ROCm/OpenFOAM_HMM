@@ -120,8 +120,7 @@ void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
         return;
     }
 
-    vtkSmartPointer<vtkFeatureEdges> featureEdges =
-        vtkSmartPointer<vtkFeatureEdges>::New();
+    auto featureEdges = vtkSmartPointer<vtkFeatureEdges>::New();
     featureEdges->SetInputData(data);
     featureEdges->BoundaryEdgesOn();
     featureEdges->FeatureEdgesOn();
@@ -131,8 +130,7 @@ void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
     featureEdges->ColoringOff();
     featureEdges->Update();
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper =
-        vtkSmartPointer<vtkPolyDataMapper>::New();
+    auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputConnection(featureEdges->GetOutputPort());
     mapper->ScalarVisibilityOff();
 

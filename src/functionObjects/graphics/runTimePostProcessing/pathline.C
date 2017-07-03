@@ -104,8 +104,7 @@ void Foam::functionObjects::runTimePostPro::pathline::addLines
         }
         case rtTube:
         {
-            vtkSmartPointer<vtkTubeFilter> tubes =
-                vtkSmartPointer<vtkTubeFilter>::New();
+            auto tubes = vtkSmartPointer<vtkTubeFilter>::New();
             tubes->SetInputData(data);
             tubes->SetRadius(tubeRadius_);
             tubes->SetNumberOfSides(20);
