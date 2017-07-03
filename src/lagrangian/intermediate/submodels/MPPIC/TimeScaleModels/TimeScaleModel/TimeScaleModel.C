@@ -65,19 +65,18 @@ Foam::autoPtr<Foam::TimeScaleModel> Foam::TimeScaleModel::New
     const dictionary& dict
 )
 {
-    word modelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting time scale model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown time scale model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid time scale model types are:" << nl
+            << "Unknown time scale model type "
+            << modelType << nl << nl
+            << "Valid time scale model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

@@ -54,15 +54,15 @@ Foam::tmp<Foam::fv::gradScheme<Type>> Foam::fv::gradScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
             schemeData
-        )   << "Unknown grad scheme " << schemeName << nl << nl
+        )   << "Unknown grad scheme "
+            << schemeName << nl << nl
             << "Valid grad schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

@@ -50,8 +50,7 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
 
     Info<< "Selecting laminar flame speed correlation " << corrType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(corrType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(corrType);
 
     if (!cstrIter.found())
     {
@@ -60,7 +59,7 @@ Foam::autoPtr<Foam::laminarFlameSpeed> Foam::laminarFlameSpeed::New
             propDict
         )   << "Unknown laminarFlameSpeed type "
             << corrType << nl << nl
-            << "Valid laminarFlameSpeed types are :" << endl
+            << "Valid laminarFlameSpeed types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

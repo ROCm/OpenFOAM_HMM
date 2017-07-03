@@ -143,15 +143,14 @@ Foam::autoPtr<Foam::functionObjects::runTimePostPro::pointData> Foam::functionOb
         Info<< "Selecting pointData " << pointDataType << endl;
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(pointDataType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(pointDataType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pointData type "
             << pointDataType << nl << nl
-            << "Valid pointData types are:" << endl
+            << "Valid pointData types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

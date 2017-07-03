@@ -37,15 +37,14 @@ Foam::autoPtr<Foam::trimModel> Foam::trimModel::New
 
     Info<< "    Selecting " << typeName << " " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown " << typeName << " type "
             << modelType << nl << nl
-            << "Valid " << typeName << " types are:" << nl
+            << "Valid " << typeName << " types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

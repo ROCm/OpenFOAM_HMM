@@ -35,20 +35,20 @@ Foam::CollisionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word modelType(dict.lookup("collisionModel"));
+    const word modelType(dict.lookup("collisionModel"));
 
     Info<< "Selecting collision model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown collision model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid collision model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown collisionModel type "
+            << modelType << nl << nl
+            << "Valid collisionModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<CollisionModel<CloudType>>(cstrIter()(dict, owner));

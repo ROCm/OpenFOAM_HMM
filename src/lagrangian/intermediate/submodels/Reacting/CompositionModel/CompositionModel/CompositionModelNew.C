@@ -39,15 +39,14 @@ Foam::CompositionModel<CloudType>::New
 
     Info<< "Selecting composition model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown composition model type "
+            << "Unknown compositionModel type "
             << modelType << nl << nl
-            << "Valid composition model types are:" << nl
+            << "Valid compositionModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }

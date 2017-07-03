@@ -32,7 +32,7 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
     const fvMesh& mesh
 )
 {
-    const word multiphaseSystemType
+    const word systemType
     (
         IOdictionary
         (
@@ -48,18 +48,16 @@ Foam::autoPtr<Foam::multiphaseSystem> Foam::multiphaseSystem::New
         ).lookup("type")
     );
 
-    Info<< "Selecting multiphaseSystem "
-        << multiphaseSystemType << endl;
+    Info<< "Selecting multiphaseSystem " << systemType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(multiphaseSystemType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(systemType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown multiphaseSystemType type "
-            << multiphaseSystemType << endl << endl
-            << "Valid multiphaseSystem types are : " << endl
+            << "Unknown multiphaseSystem type "
+            << systemType << nl << nl
+            << "Valid multiphaseSystem types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

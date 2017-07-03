@@ -42,7 +42,7 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     {
         FatalIOErrorInFunction(dict)
             << "Unknown coordinateRotation type " << rotType << nl << nl
-            << "Valid coordinateRotation types are :" <<  nl
+            << "Valid coordinateRotation types :" <<  nl
             << objectRegistryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -64,7 +64,7 @@ Foam::autoPtr<Foam::coordinateRotation> Foam::coordinateRotation::New
     {
         FatalIOErrorInFunction(dict)
             << "Unknown coordinateRotation type " << rotType << nl << nl
-            << "Valid coordinateRotation types are :" <<  nl
+            << "Valid coordinateRotation types :" <<  nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

@@ -50,18 +50,16 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
             << endl;
     }
 
-    const word thermophysicalFunctionType(is);
+    const word functionType(is);
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(thermophysicalFunctionType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(functionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown thermophysicalFunction type "
-            << thermophysicalFunctionType
-            << nl << nl
-            << "Valid thermophysicalFunction types are :" << endl
+            << functionType << nl << nl
+            << "Valid thermophysicalFunction types :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
@@ -82,17 +80,15 @@ Foam::autoPtr<Foam::thermophysicalFunction> Foam::thermophysicalFunction::New
             << endl;
     }
 
-    const word thermophysicalFunctionType(dict.lookup("functionType"));
+    const word functionType(dict.lookup("functionType"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(thermophysicalFunctionType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown thermophysicalFunction type "
-            << thermophysicalFunctionType
-            << nl << nl
+            << functionType << nl << nl
             << "Valid thermophysicalFunction types are :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);

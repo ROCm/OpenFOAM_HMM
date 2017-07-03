@@ -68,15 +68,14 @@ Foam::autoPtr<Foam::faceSelection> Foam::faceSelection::New
 {
     const word sampleType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(sampleType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(sampleType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown faceSelection type "
             << sampleType << nl << nl
-            << "Valid faceSelection types : " << endl
+            << "Valid faceSelection types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

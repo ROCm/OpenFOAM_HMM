@@ -53,16 +53,15 @@ Foam::combustionModels::rhoCombustionModel::New
 
     Info<< "Selecting combustion model " << combTypeName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(combTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(combTypeName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rhoCombustionModel type "
             << combTypeName << endl << endl
-            << "Valid  combustionModels are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Valid combustionModel types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

@@ -62,13 +62,13 @@ Foam::autoPtr<Foam::token::compound> Foam::token::compound::New
     Istream& is
 )
 {
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(compoundType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(compoundType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(is)
-            << "Unknown compound type " << compoundType << nl << nl
+            << "Unknown compound type "
+            << compoundType << nl << nl
             << "Valid compound types:" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalIOError);

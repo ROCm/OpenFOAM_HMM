@@ -60,25 +60,23 @@ Foam::autoPtr<Foam::cellSizeCalculationType> Foam::cellSizeCalculationType::New
     const scalar& defaultCellSize
 )
 {
-    word cellSizeCalculationTypeTypeName
+    const word calculationType
     (
         cellSizeCalculationTypeDict.lookup("cellSizeCalculationType")
     );
 
     Info<< indent << "Selecting cellSizeCalculationType "
-        << cellSizeCalculationTypeTypeName << endl;
+        << calculationType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(cellSizeCalculationTypeTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(calculationType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cellSizeCalculationType type "
-            << cellSizeCalculationTypeTypeName
-            << endl << endl
-            << "Valid cellSizeCalculationType types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << calculationType << nl << nl
+            << "Valid cellSizeCalculationType types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

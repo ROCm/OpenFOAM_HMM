@@ -61,16 +61,15 @@ autoPtr<thermalBaffleModel> thermalBaffleModel::New(const fvMesh& mesh)
             );
     }
 
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(modelType);
+    auto cstrIter = meshConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
 
         FatalErrorInFunction
-            << "Unknown thermalBaffleModel type " << modelType
-            << nl << nl
-            <<  "Valid thermalBaffleModel types are:" << nl
+            << "Unknown thermalBaffleModel type "
+            << modelType << nl << nl
+            << "Valid thermalBaffleModel types :" << nl
             << meshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -88,16 +87,14 @@ autoPtr<thermalBaffleModel> thermalBaffleModel::New
     word modelType =
         dict.lookupOrDefault<word>("thermalBaffleModel", "thermalBaffle");
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-
         FatalErrorInFunction
-            << "Unknown thermalBaffleModel type " << modelType
-            << nl << nl
-            <<  "Valid thermalBaffleModel types are:" << nl
+            << "Unknown thermalBaffleModel type "
+            << modelType << nl << nl
+            << "Valid thermalBaffleModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

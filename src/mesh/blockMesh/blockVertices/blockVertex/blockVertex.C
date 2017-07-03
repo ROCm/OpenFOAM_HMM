@@ -78,15 +78,14 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
     {
         const word faceType(firstToken.wordToken());
 
-        IstreamConstructorTable::iterator cstrIter =
-            IstreamConstructorTablePtr_->find(faceType);
+        auto cstrIter = IstreamConstructorTablePtr_->cfind(faceType);
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown blockVertex type "
                 << faceType << nl << nl
-                << "Valid blockVertex types are" << endl
+                << "Valid blockVertex types :" << endl
                 << IstreamConstructorTablePtr_->sortedToc()
                 << abort(FatalError);
         }

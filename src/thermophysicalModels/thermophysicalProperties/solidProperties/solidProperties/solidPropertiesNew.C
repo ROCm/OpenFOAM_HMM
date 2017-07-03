@@ -38,14 +38,14 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
         InfoInFunction << "Constructing solidProperties" << endl;
     }
 
-    ConstructorTable::iterator cstrIter = ConstructorTablePtr_->find(name);
+    auto cstrIter = ConstructorTablePtr_->cfind(name);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown solidProperties type "
             << name << nl << nl
-            << "Valid solidProperties types are:" << nl
+            << "Valid solidProperties types :" << nl
             << ConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -84,15 +84,14 @@ Foam::autoPtr<Foam::solidProperties> Foam::solidProperties::New
     }
     else
     {
-        dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(solidType);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(solidType);
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown solidProperties type "
                 << solidType << nl << nl
-                << "Valid solidProperties types are:" << nl
+                << "Valid solidProperties types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }

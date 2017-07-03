@@ -33,15 +33,14 @@ Foam::autoPtr<Foam::edgeMesh> Foam::edgeMesh::New
     const word& ext
 )
 {
-    fileExtensionConstructorTable::iterator cstrIter =
-        fileExtensionConstructorTablePtr_->find(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown file extension " << ext
             << " for file " << name << nl << nl
-            << "Valid extensions are :" << nl
+            << "Valid extensions :" << nl
             << fileExtensionConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

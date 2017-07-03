@@ -65,15 +65,15 @@ tmp<laplacianScheme<Type, GType>> laplacianScheme<Type, GType>::New
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
             schemeData
-        )   << "Unknown laplacian scheme " << schemeName << nl << nl
+        )   << "Unknown laplacian scheme "
+            << schemeName << nl << nl
             << "Valid laplacian schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

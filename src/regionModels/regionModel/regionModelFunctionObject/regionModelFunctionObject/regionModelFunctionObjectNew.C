@@ -39,15 +39,14 @@ Foam::regionModels::regionModelFunctionObject::New
 
     Info<< "        " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown region model function type "
             << modelType << nl << nl
-            << "Valid region model function types are:" << nl
+            << "Valid region model function types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

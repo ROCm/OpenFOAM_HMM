@@ -34,20 +34,19 @@ Foam::autoPtr<Foam::heatTransferModel> Foam::heatTransferModel::New
     const phasePair& pair
 )
 {
-    word heatTransferModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting heatTransferModel for "
-        << pair << ": " << heatTransferModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(heatTransferModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown heatTransferModelType type "
-            << heatTransferModelType << endl << endl
-            << "Valid heatTransferModel types are : " << endl
+            << "Unknown heatTransferModel type "
+            << modelType << nl << nl
+            << "Valid heatTransferModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

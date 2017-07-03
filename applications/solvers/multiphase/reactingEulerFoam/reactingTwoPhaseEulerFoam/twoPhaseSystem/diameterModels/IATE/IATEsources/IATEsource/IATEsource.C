@@ -50,15 +50,14 @@ Foam::diameterModels::IATEsource::New
     const dictionary& dict
 )
 {
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(type);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown IATE source type "
             << type << nl << nl
-            << "Valid IATE source types : " << endl
+            << "Valid IATE source types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

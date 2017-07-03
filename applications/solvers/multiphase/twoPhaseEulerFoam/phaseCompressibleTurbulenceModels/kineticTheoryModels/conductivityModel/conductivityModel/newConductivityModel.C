@@ -33,23 +33,20 @@ Foam::kineticTheoryModels::conductivityModel::New
     const dictionary& dict
 )
 {
-    word conductivityModelType(dict.lookup("conductivityModel"));
+    const word modelType(dict.lookup("conductivityModel"));
 
-    Info<< "Selecting conductivityModel "
-        << conductivityModelType << endl;
+    Info<< "Selecting conductivityModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(conductivityModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalError
-            << "conductivityModel::New(const dictionary&) : " << endl
-            << "    unknown conductivityModelType type "
-            << conductivityModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid conductivityModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorInFunction
+            << "Unknown conductivityModel type "
+            << modelType << nl << nl
+            << "Valid conductivityModel types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<conductivityModel>(cstrIter()(dict));

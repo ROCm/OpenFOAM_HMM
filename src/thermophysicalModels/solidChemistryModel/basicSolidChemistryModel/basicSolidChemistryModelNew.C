@@ -116,8 +116,7 @@ New
 
     Info<< "chemistryTypeName " << chemistryTypeName << endl;
 
-    fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(chemistryTypeName);
+    auto cstrIter = fvMeshConstructorTablePtr_->cfind(chemistryTypeName);
 
     if (!cstrIter.found())
     {

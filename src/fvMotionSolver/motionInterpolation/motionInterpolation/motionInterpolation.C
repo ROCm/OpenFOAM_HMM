@@ -32,7 +32,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(motionInterpolation, 0);
-
     defineRunTimeSelectionTable(motionInterpolation, Istream);
 }
 
@@ -74,15 +73,14 @@ Foam::motionInterpolation::New(const fvMesh& mesh, Istream& entry)
 
     Info<< "Selecting motion interpolation: " << type << endl;
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(type);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interpolation type "
             << type << nl << nl
-            << "Valid interpolation types are :" << endl
+            << "Valid interpolation types :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

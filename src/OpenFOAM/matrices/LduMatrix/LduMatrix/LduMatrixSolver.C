@@ -37,7 +37,7 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     const dictionary& solverDict
 )
 {
-    word solverName = solverDict.lookup("solver");
+    const word solverName = solverDict.lookup("solver");
 
     if (matrix.diagonal())
     {
@@ -53,22 +53,21 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     }
     else if (matrix.symmetric())
     {
-        typename symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(solverName);
+        auto cstrIter = symMatrixConstructorTablePtr_->cfind(solverName);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(solverDict)
                 << "Unknown symmetric matrix solver " << solverName
                 << endl << endl
                 << "Valid symmetric matrix solvers are :" << endl
-                << symMatrixConstructorTablePtr_->toc()
+                << symMatrixConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix,
@@ -78,22 +77,21 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
     }
     else if (matrix.asymmetric())
     {
-        typename asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(solverName);
+        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(solverName);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(solverDict)
                 << "Unknown asymmetric matrix solver " << solverName
                 << endl << endl
                 << "Valid asymmetric matrix solvers are :" << endl
-                << asymMatrixConstructorTablePtr_->toc()
+                << asymMatrixConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix,

@@ -40,22 +40,21 @@ Foam::LduMatrix<Type, DType, LUType>::smoother::New
 
     if (matrix.symmetric())
     {
-        typename symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(smootherName);
+        auto cstrIter = symMatrixConstructorTablePtr_->cfind(smootherName);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(smootherDict)
                 << "Unknown symmetric matrix smoother " << smootherName
                 << endl << endl
                 << "Valid symmetric matrix smoothers are :" << endl
-                << symMatrixConstructorTablePtr_->toc()
+                << symMatrixConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::smoother>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix
@@ -64,22 +63,21 @@ Foam::LduMatrix<Type, DType, LUType>::smoother::New
     }
     else if (matrix.asymmetric())
     {
-        typename asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(smootherName);
+        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(smootherName);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(smootherDict)
                 << "Unknown asymmetric matrix smoother " << smootherName
                 << endl << endl
                 << "Valid asymmetric matrix smoothers are :" << endl
-                << asymMatrixConstructorTablePtr_->toc()
+                << asymMatrixConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::smoother>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix

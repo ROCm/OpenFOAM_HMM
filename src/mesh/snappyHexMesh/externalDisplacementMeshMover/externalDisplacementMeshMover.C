@@ -141,8 +141,7 @@ Foam::externalDisplacementMeshMover::New
 {
     Info<< "Selecting externalDisplacementMeshMover " << type << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(type);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {

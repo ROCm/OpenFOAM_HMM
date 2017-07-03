@@ -26,20 +26,18 @@ License
 #include "relaxationModel.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(relaxationModel, 0);
 defineRunTimeSelectionTable(relaxationModel, dictionary);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-relaxationModel::relaxationModel
+Foam::relaxationModel::relaxationModel
 (
     const word& type,
     const dictionary& relaxationDict,
@@ -54,31 +52,25 @@ relaxationModel::relaxationModel
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-autoPtr<relaxationModel> relaxationModel::New
+Foam::autoPtr<Foam::relaxationModel> Foam::relaxationModel::New
 (
     const dictionary& relaxationDict,
     const Time& runTime
 )
 {
-    word relaxationModelTypeName
-    (
-        relaxationDict.lookup("relaxationModel")
-    );
+    const word modelType(relaxationDict.lookup("relaxationModel"));
 
-    Info<< nl << "Selecting relaxationModel "
-        << relaxationModelTypeName << endl;
+    Info<< nl << "Selecting relaxationModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(relaxationModelTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown relaxationModel type "
-            << relaxationModelTypeName
-            << endl << endl
-            << "Valid relaxationModel types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << modelType << nl << nl
+            << "Valid relaxationModel types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -88,12 +80,8 @@ autoPtr<relaxationModel> relaxationModel::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-relaxationModel::~relaxationModel()
+Foam::relaxationModel::~relaxationModel()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

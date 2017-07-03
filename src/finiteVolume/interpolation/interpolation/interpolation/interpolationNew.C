@@ -35,8 +35,7 @@ Foam::autoPtr<Foam::interpolation<Type>> Foam::interpolation<Type>::New
     const GeometricField<Type, fvPatchField, volMesh>& psi
 )
 {
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(interpolationType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(interpolationType);
 
     if (!cstrIter.found())
     {

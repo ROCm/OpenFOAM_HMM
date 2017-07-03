@@ -73,15 +73,14 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     Info<< "Selecting LES delta type " << deltaType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(deltaType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown LESdelta type "
             << deltaType << nl << nl
-            << "Valid LESdelta types are :" << endl
+            << "Valid LESdelta types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -102,36 +101,31 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 
     Info<< "Selecting LES delta type " << deltaType << endl;
 
-    // First on additional ones
-    dictionaryConstructorTable::const_iterator cstrIter =
-        additionalConstructors.find(deltaType);
-
-    if (cstrIter != additionalConstructors.end())
+    // First any additional ones
     {
-        return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
-    }
-    else
-    {
-        dictionaryConstructorTable::const_iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(deltaType);
+        auto cstrIter = additionalConstructors.cfind(deltaType);
 
-        if (!cstrIter.found())
-        {
-            FatalErrorInFunction
-                << "Unknown LESdelta type "
-                << deltaType << nl << nl
-                << "Valid LESdelta types are :" << endl
-                << additionalConstructors.sortedToc()
-                << " and "
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << exit(FatalError);
-            return autoPtr<LESdelta>();
-        }
-        else
+        if (cstrIter.found())
         {
             return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
         }
     }
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << "Unknown LESdelta type "
+            << deltaType << nl << nl
+            << "Valid LESdelta types :" << endl
+            << additionalConstructors.sortedToc()
+            << " and "
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<LESdelta>(cstrIter()(name, turbulence, dict));
 }
 
 

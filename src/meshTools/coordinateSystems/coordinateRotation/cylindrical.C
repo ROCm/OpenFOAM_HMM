@@ -113,12 +113,12 @@ Foam::cylindrical::cylindrical(const tensorField& R)
 Foam::cylindrical::cylindrical(const dictionary& dict)
 :
     Rptr_(),
-    origin_(),
-    e3_()
+    origin_(Zero),
+    e3_(Zero)
 {
     FatalErrorInFunction
         << " cylindrical can not be constructed from dictionary "
-        << " use the construtctor : "
+        << " use the constructor : "
            "("
            "    const dictionary&, const objectRegistry&"
            ")"

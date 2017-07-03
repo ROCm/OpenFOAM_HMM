@@ -35,21 +35,20 @@ Foam::PairModel<CloudType>::New
     CloudType& owner
 )
 {
-    word PairModelType(dict.lookup("pairModel"));
+    const word modelType(dict.lookup("pairModel"));
 
-    Info<< "Selecting pair model " << PairModelType << endl;
+    Info<< "Selecting pair model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PairModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown pair model type "
-            << PairModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid pair model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown pairModel type "
+            << modelType << nl << nl
+            << "Valid pairModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<PairModel<CloudType>>(cstrIter()(dict, owner));

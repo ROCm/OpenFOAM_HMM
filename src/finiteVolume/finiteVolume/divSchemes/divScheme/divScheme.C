@@ -67,8 +67,7 @@ tmp<divScheme<Type>> divScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
     {

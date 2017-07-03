@@ -42,15 +42,14 @@ Foam::barotropicCompressibilityModel::New
 
     Info<< "Selecting compressibility model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown barotropicCompressibilityModel type "
             << modelType << nl << nl
-            << "Valid barotropicCompressibilityModels are : " << endl
+            << "Valid barotropicCompressibilityModel types : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

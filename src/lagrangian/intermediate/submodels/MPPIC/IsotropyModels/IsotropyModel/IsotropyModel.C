@@ -88,15 +88,14 @@ Foam::IsotropyModel<CloudType>::New
 
     Info<< "Selecting isotropy model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown isotropy model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid isotropy model types are:" << nl
+            << "Unknown isotropy model type "
+            << modelType << nl << nl
+            << "Valid isotropy model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

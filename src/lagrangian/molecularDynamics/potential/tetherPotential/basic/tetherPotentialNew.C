@@ -38,15 +38,14 @@ Foam::autoPtr<Foam::tetherPotential> Foam::tetherPotential::New
     Info<< nl << "Selecting tether potential " << potentialType
         << " for " << name << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(potentialType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(potentialType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown tetherPotential type "
             << potentialType << nl << nl
-            << "Valid tetherPotentials are:" << nl
+            << "Valid tetherPotential types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

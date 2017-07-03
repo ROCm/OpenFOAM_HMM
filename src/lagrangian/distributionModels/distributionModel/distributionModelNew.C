@@ -37,14 +37,14 @@ Foam::autoPtr<Foam::distributionModel> Foam::distributionModel::New
 
     Info<< "Selecting distribution model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown distribution model type " << modelType << nl << nl
-            << "Valid distribution model types are:" << nl
+            << "Unknown distribution model type "
+            << modelType << nl << nl
+            << "Valid distribution model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

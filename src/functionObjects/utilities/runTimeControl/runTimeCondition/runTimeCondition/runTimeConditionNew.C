@@ -36,19 +36,18 @@ Foam::functionObjects::runTimeControls::runTimeCondition::New
     stateFunctionObject& state
 )
 {
-    word conditionType(dict.lookup("type"));
+    const word conditionType(dict.lookup("type"));
 
     Info<< "Selecting runTimeCondition " << conditionType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(conditionType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(conditionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown runTimeCondition type "
             << conditionType << nl << nl
-            << "Valid runTimeCondition types are:" << nl
+            << "Valid runTimeCondition types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -35,20 +35,19 @@ Foam::autoPtr<Foam::phaseModel> Foam::phaseModel::New
     const label index
 )
 {
-    word phaseModelType(fluid.subDict(phaseName).lookup("type"));
+    const word modelType(fluid.subDict(phaseName).lookup("type"));
 
     Info<< "Selecting phaseModel for "
-        << phaseName << ": " << phaseModelType << endl;
+        << phaseName << ": " << modelType << endl;
 
-    phaseSystemConstructorTable::iterator cstrIter =
-        phaseSystemConstructorTablePtr_->find(phaseModelType);
+    auto cstrIter = phaseSystemConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown phaseModelType type "
-            << phaseModelType << endl << endl
-            << "Valid phaseModel types are : " << endl
+            << "Unknown phaseModel type "
+            << modelType << nl << nl
+            << "Valid phaseModel types :" << endl
             << phaseSystemConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -36,15 +36,14 @@ Foam::autoPtr<Foam::extrudeModel> Foam::extrudeModel::New
 
     Info<< "Selecting extrudeModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown extrudeModel type "
             << modelType << nl << nl
-            << "Valid extrudeModel types are :" << nl
+            << "Valid extrudeModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }

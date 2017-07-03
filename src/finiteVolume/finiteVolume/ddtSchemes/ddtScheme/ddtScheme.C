@@ -66,15 +66,15 @@ tmp<ddtScheme<Type>> ddtScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
             schemeData
-        )   << "Unknown ddt scheme " << schemeName << nl << nl
+        )   << "Unknown ddt scheme "
+            << schemeName << nl << nl
             << "Valid ddt schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);

@@ -35,20 +35,19 @@ Foam::surfaceTensionModel::New
     const phasePair& pair
 )
 {
-    word surfaceTensionModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting surfaceTensionModel for "
-        << pair << ": " << surfaceTensionModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    multiphaseConstructorTable::iterator cstrIter =
-        multiphaseConstructorTablePtr_->find(surfaceTensionModelType);
+    auto cstrIter = multiphaseConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown surfaceTensionModelType type "
-            << surfaceTensionModelType << endl << endl
-            << "Valid surfaceTensionModel types are : " << endl
+            << "Unknown surfaceTensionModel type "
+            << modelType << nl << nl
+            << "Valid surfaceTensionModel types :" << endl
             << multiphaseConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

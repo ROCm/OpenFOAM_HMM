@@ -53,15 +53,14 @@ Foam::autoPtr<Foam::engineMesh> Foam::engineMesh::New
 
     Info<< "Selecting engineMesh " << modelType << endl;
 
-    IOobjectConstructorTable::iterator cstrIter =
-        IOobjectConstructorTablePtr_->find(modelType);
+    auto cstrIter = IOobjectConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown engineMesh type "
             << modelType << nl << nl
-            << "Valid engineMesh types are :" << endl
+            << "Valid engineMesh types :" << endl
             << IOobjectConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

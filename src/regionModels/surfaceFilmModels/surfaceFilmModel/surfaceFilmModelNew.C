@@ -66,15 +66,15 @@ autoPtr<surfaceFilmModel> surfaceFilmModel::New
 
     Info<< "Selecting surfaceFilmModel " << modelType << endl;
 
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(modelType);
+    auto cstrIter = meshConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown surfaceFilmModel type " << modelType
-            << nl << nl << "Valid surfaceFilmModel types are:" << nl
-            << meshConstructorTablePtr_->toc()
+            << "Unknown surfaceFilmModel type "
+            << modelType << nl << nl
+            << "Valid surfaceFilmModel types :" << nl
+            << meshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

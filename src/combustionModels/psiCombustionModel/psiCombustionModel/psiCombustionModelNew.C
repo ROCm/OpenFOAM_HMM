@@ -53,16 +53,15 @@ Foam::combustionModels::psiCombustionModel::New
 
     Info<< "Selecting combustion model " << combModelName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(combModelName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(combModelName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown psiCombustionModel type "
             << combModelName << endl << endl
-            << "Valid  combustionModels are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Valid combustionModel types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

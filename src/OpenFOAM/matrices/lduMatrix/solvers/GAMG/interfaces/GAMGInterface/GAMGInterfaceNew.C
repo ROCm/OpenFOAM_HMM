@@ -43,14 +43,13 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
 {
     const word coupleType(fineInterface.type());
 
-    lduInterfaceConstructorTable::iterator cstrIter =
-        lduInterfaceConstructorTablePtr_->find(coupleType);
+    auto cstrIter = lduInterfaceConstructorTablePtr_->cfind(coupleType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGInterface type " << coupleType << ".\n"
-            << "Valid GAMGInterface types are :"
+            << "Valid GAMGInterface types :"
             << lduInterfaceConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -79,14 +78,13 @@ Foam::autoPtr<Foam::GAMGInterface> Foam::GAMGInterface::New
     Istream& is
 )
 {
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(coupleType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(coupleType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGInterface type " << coupleType << ".\n"
-            << "Valid GAMGInterface types are :"
+            << "Valid GAMGInterface types :"
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

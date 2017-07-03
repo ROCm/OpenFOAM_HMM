@@ -35,20 +35,21 @@ Foam::StochasticCollisionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word modelType(dict.lookup("stochasticCollisionModel"));
+    const word modelType(dict.lookup("stochasticCollisionModel"));
 
     Info<< "Selecting stochastic collision model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter =
+        dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown model type type "
-            << modelType << ", constructor not in hash table" << nl << nl
-            << "    Valid model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown stochasticCollisionModel type "
+            << modelType << nl << nl
+            << "Valid stochasticCollisionModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<StochasticCollisionModel<CloudType>>

@@ -35,10 +35,6 @@ defineRunTimeSelectionTable(cellSizeAndAlignmentControl, dictionary);
 }
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
@@ -57,7 +53,7 @@ Foam::cellSizeAndAlignmentControl::cellSizeAndAlignmentControl
         controlFunctionDict.lookupOrDefault<Switch>
         (
             "forceInitialPointInsertion",
-            "off"
+            Switch::OFF
         )
     ),
     name_(name)
@@ -76,28 +72,20 @@ Foam::cellSizeAndAlignmentControl::New
     const scalar& defaultCellSize
 )
 {
-    word cellSizeAndAlignmentControlTypeName
-    (
-        controlFunctionDict.lookup("type")
-    );
+    const word controlType(controlFunctionDict.lookup("type"));
 
     Info<< indent << "Selecting cellSizeAndAlignmentControl "
-        << cellSizeAndAlignmentControlTypeName << endl;
+        << controlType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find
-        (
-            cellSizeAndAlignmentControlTypeName
-        );
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(controlType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cellSizeAndAlignmentControl type "
-            << cellSizeAndAlignmentControlTypeName
-            << endl << endl
-            << "Valid cellSizeAndAlignmentControl types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << controlType << nl << nl
+            << "Valid cellSizeAndAlignmentControl types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -119,10 +107,6 @@ Foam::cellSizeAndAlignmentControl::New
 
 Foam::cellSizeAndAlignmentControl::~cellSizeAndAlignmentControl()
 {}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
 
 
 // ************************************************************************* //

@@ -113,7 +113,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
     const word ext = name.ext();
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
 
     if (!mfIter.found())
     {

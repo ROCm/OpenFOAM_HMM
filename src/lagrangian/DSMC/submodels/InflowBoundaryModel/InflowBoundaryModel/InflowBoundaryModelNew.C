@@ -39,15 +39,14 @@ Foam::InflowBoundaryModel<CloudType>::New
 
     Info<< "Selecting InflowBoundaryModel " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown InflowBoundaryModel type "
             << modelType << nl << nl
-            << "Valid InflowBoundaryModel types are:" << nl
+            << "Valid InflowBoundaryModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

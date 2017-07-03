@@ -40,15 +40,14 @@ Foam::autoPtr<Foam::PDRDragModel> Foam::PDRDragModel::New
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown PDRDragModel type "
             << modelType << nl << nl
-            << "Valid  PDRDragModels are : " << endl
+            << "Valid PDRDragModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

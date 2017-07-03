@@ -54,8 +54,7 @@ namespace Foam
 Foam::autoPtr<Foam::surfaceWriter>
 Foam::surfaceWriter::New(const word& writeType)
 {
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(writeType);
+    auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
 
     if (!cstrIter.found())
     {
@@ -86,8 +85,7 @@ Foam::autoPtr<Foam::surfaceWriter>
 Foam::surfaceWriter::New(const word& writeType, const dictionary& optDict)
 {
     // find constructors with dictionary options
-    wordDictConstructorTable::iterator cstrIter =
-        wordDictConstructorTablePtr_->find(writeType);
+    auto cstrIter = wordDictConstructorTablePtr_->cfind(writeType);
 
     if (!cstrIter.found())
     {

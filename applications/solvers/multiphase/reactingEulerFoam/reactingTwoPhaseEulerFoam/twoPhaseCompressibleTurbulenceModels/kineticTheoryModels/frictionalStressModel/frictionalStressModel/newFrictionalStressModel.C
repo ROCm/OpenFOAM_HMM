@@ -33,24 +33,20 @@ Foam::kineticTheoryModels::frictionalStressModel::New
     const dictionary& dict
 )
 {
-    word frictionalStressModelType(dict.lookup("frictionalStressModel"));
+    const word modelType(dict.lookup("frictionalStressModel"));
 
-    Info<< "Selecting frictionalStressModel "
-        << frictionalStressModelType << endl;
+    Info<< "Selecting frictionalStressModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(frictionalStressModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalError
-            << "frictionalStressModel::New(const dictionary&) : " << endl
-            << "    unknown frictionalStressModelType type "
-            << frictionalStressModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid frictionalStressModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInFunction
+            << "Unknown frictionalStressModel type "
+            << modelType << nl << nl
+            << "Valid frictionalStressModel types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<frictionalStressModel>(cstrIter()(dict));

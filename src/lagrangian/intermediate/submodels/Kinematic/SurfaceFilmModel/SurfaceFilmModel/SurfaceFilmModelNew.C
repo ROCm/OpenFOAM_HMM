@@ -39,15 +39,14 @@ Foam::SurfaceFilmModel<CloudType>::New
 
     Info<< "Selecting surface film model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown surface film model type "
+            << "Unknown surfaceFilmModel type "
             << modelType << nl << nl
-            << "Valid surface film model types are:" << nl
+            << "Valid surfaceFilmModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

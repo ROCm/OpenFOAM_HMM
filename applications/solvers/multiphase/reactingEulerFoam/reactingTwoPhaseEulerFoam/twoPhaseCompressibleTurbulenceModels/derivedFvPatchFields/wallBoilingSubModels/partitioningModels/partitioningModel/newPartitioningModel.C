@@ -33,20 +33,18 @@ Foam::wallBoilingModels::partitioningModel::New
     const dictionary& dict
 )
 {
-    word partitioningModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
-    Info<< "Selecting partitioningModel: "
-        << partitioningModelType << endl;
+    Info<< "Selecting partitioningModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(partitioningModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown partitioningModelType type "
-            << partitioningModelType << endl << endl
-            << "Valid partitioningModel types are : " << endl
+            << "Unknown partitioningModel type "
+            << modelType << nl << nl
+            << "Valid partitioningModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

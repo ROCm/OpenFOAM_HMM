@@ -43,19 +43,19 @@ autoPtr<filmViscosityModel> filmViscosityModel::New
     volScalarField& mu
 )
 {
-    word modelType(dict.lookup("filmViscosityModel"));
+    const word modelType(dict.lookup("filmViscosityModel"));
 
     Info<< "    Selecting filmViscosityModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown filmViscosityModel type " << modelType
-            << nl << nl << "Valid filmViscosityModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Unknown filmViscosityModel type "
+            << modelType << nl << nl
+            << "Valid filmViscosityModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

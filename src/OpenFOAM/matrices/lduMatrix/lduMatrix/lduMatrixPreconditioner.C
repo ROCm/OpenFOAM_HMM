@@ -82,10 +82,9 @@ Foam::lduMatrix::preconditioner::New
 
     if (sol.matrix().symmetric())
     {
-        symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(name);
+        auto cstrIter = symMatrixConstructorTablePtr_->cfind(name);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -99,7 +98,7 @@ Foam::lduMatrix::preconditioner::New
 
         return autoPtr<lduMatrix::preconditioner>
         (
-            constructorIter()
+            cstrIter()
             (
                 sol,
                 controls
@@ -108,10 +107,9 @@ Foam::lduMatrix::preconditioner::New
     }
     else if (sol.matrix().asymmetric())
     {
-        asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(name);
+        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(name);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -125,7 +123,7 @@ Foam::lduMatrix::preconditioner::New
 
         return autoPtr<lduMatrix::preconditioner>
         (
-            constructorIter()
+            cstrIter()
             (
                 sol,
                 controls

@@ -95,14 +95,14 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         InfoInFunction << "Constructing liquidProperties" << endl;
     }
 
-    ConstructorTable::iterator cstrIter = ConstructorTablePtr_->find(name);
+    auto cstrIter = ConstructorTablePtr_->cfind(name);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown liquidProperties type "
             << name << nl << nl
-            << "Valid liquidProperties types are:" << nl
+            << "Valid liquidProperties types :" << nl
             << ConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -121,7 +121,7 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
         InfoInFunction << "Constructing liquidProperties" << endl;
     }
 
-    const word& liquidPropertiesTypeName = dict.dictName();
+    const word& liquidType = dict.dictName();
 
     if (dict.found("defaultCoeffs"))
     {
@@ -129,19 +129,18 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
 
         if (Switch(dict.lookup("defaultCoeffs")))
         {
-            return New(liquidPropertiesTypeName);
+            return New(liquidType);
         }
         else
         {
-            dictionaryConstructorTable::iterator cstrIter =
-                dictionaryConstructorTablePtr_->find(liquidPropertiesTypeName);
+            auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
 
             if (!cstrIter.found())
             {
                 FatalErrorInFunction
                     << "Unknown liquidProperties type "
-                    << liquidPropertiesTypeName << nl << nl
-                    << "Valid liquidProperties types are:" << nl
+                    << liquidType << nl << nl
+                    << "Valid liquidProperties types :" << nl
                     << dictionaryConstructorTablePtr_->sortedToc()
                     << exit(FatalError);
             }
@@ -150,22 +149,21 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
             (
                 cstrIter()
                 (
-                    dict.optionalSubDict(liquidPropertiesTypeName + "Coeffs")
+                    dict.optionalSubDict(liquidType + "Coeffs")
                 )
             );
         }
     }
     else
     {
-        dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(liquidPropertiesTypeName);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown liquidProperties type "
-                << liquidPropertiesTypeName << nl << nl
-                << "Valid liquidProperties types are:" << nl
+                << liquidType << nl << nl
+                << "Valid liquidProperties types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }

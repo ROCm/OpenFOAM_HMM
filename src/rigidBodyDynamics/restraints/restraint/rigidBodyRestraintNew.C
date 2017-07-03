@@ -37,15 +37,14 @@ Foam::RBD::restraint::New
 {
     const word restraintType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(restraintType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(restraintType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown restraint type "
             << restraintType << nl << nl
-            << "Valid restraint types are : " << endl
+            << "Valid restraint types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

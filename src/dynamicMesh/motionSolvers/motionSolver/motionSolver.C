@@ -104,14 +104,14 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
     const IOdictionary& solverDict
 )
 {
-    const word solverTypeName
+    const word solverName
     (
         solverDict.found("motionSolver")
       ? solverDict.lookup("motionSolver")
       : solverDict.lookup("solver")
     );
 
-    Info<< "Selecting motion solver: " << solverTypeName << endl;
+    Info<< "Selecting motion solver: " << solverName << endl;
 
     const_cast<Time&>(mesh.time()).libs().open
     (
@@ -127,15 +127,14 @@ Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::New
             << exit(FatalError);
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(solverTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown solver type "
-            << solverTypeName << nl << nl
-            << "Valid solver types are:" << endl
+            << solverName << nl << nl
+            << "Valid solver types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

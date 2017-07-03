@@ -63,19 +63,18 @@ Foam::autoPtr<Foam::ParticleStressModel> Foam::ParticleStressModel::New
     const dictionary& dict
 )
 {
-    word modelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting particle stress model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown particle stress model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid particle stress model types are:" << nl
+            << "Unknown particle stress model type "
+            << modelType << nl << nl
+            << "Valid particle stress model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

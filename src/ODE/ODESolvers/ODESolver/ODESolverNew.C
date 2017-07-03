@@ -33,18 +33,17 @@ Foam::autoPtr<Foam::ODESolver> Foam::ODESolver::New
     const dictionary& dict
 )
 {
-    word ODESolverTypeName(dict.lookup("solver"));
-    Info<< "Selecting ODE solver " << ODESolverTypeName << endl;
+    const word solverType(dict.lookup("solver"));
+    Info<< "Selecting ODE solver " << solverType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(ODESolverTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown ODESolver type "
-            << ODESolverTypeName << nl << nl
-            << "Valid ODESolvers are : " << endl
+            << solverType << nl << nl
+            << "Valid ODESolver types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -70,22 +70,20 @@ Foam::chemistryTabulationMethod<CompType, ThermoType>::New
 
     dictionary tabdict(dict.subDict("tabulation"));
 
-    word chemistryTabulationMethodName =
+    const word methodName =
         word(tabdict.lookup("method")) + '<'
       + word(dict.subDict("chemistryType").lookup("chemistryThermo")) + ','
       + thermoTypeName + '>';
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(chemistryTabulationMethodName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown chemistryTabulationMethodType type "
-            << chemistryTabulationMethodName
-            << endl << endl
-            << "Valid chemistryTabulationMethodType types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << methodName << nl << nl
+            << "Valid chemistryTabulationMethodType types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

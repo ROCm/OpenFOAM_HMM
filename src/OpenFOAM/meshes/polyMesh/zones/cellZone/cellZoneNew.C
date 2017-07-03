@@ -43,8 +43,7 @@ Foam::autoPtr<Foam::cellZone> Foam::cellZone::New
 
     const word zoneType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(zoneType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(zoneType);
 
     if (!cstrIter.found())
     {
@@ -53,7 +52,7 @@ Foam::autoPtr<Foam::cellZone> Foam::cellZone::New
             dict
         )   << "Unknown cellZone type "
             << zoneType << nl << nl
-            << "Valid cellZone types are:" << nl
+            << "Valid cellZone types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

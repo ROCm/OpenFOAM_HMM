@@ -35,20 +35,19 @@ Foam::aspectRatioModel::New
     const phasePair& pair
 )
 {
-    word aspectRatioModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting aspectRatioModel for "
-        << pair << ": " << aspectRatioModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(aspectRatioModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown aspectRatioModelType type "
-            << aspectRatioModelType << endl << endl
-            << "Valid aspectRatioModel types are : " << endl
+            << "Unknown aspectRatioModel type "
+            << modelType << nl << nl
+            << "Valid aspectRatioModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

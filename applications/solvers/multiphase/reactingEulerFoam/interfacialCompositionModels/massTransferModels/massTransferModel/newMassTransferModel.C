@@ -34,20 +34,19 @@ Foam::autoPtr<Foam::massTransferModel> Foam::massTransferModel::New
     const phasePair& pair
 )
 {
-    word massTransferModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting massTransferModel for "
-        << pair << ": " << massTransferModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(massTransferModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown massTransferModelType type "
-            << massTransferModelType << endl << endl
-            << "Valid massTransferModel types are : " << endl
+            << "Unknown massTransferModel type "
+            << modelType << nl << nl
+            << "Valid massTransferModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -127,7 +127,7 @@ void Foam::MeshedSurface<Face>::write
         InfoInFunction << "Writing to " << name << endl;
     }
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
 
     if (!mfIter.found())
     {

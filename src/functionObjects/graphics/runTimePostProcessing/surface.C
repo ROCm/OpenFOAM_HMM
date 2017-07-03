@@ -209,15 +209,14 @@ Foam::functionObjects::runTimePostPro::surface::New
         Info<< "Selecting surface " << surfaceType << endl;
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(surfaceType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(surfaceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown surface type "
             << surfaceType << nl << nl
-            << "Valid surface types are:" << endl
+            << "Valid surface types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

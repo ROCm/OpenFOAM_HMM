@@ -42,21 +42,19 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
             << endl;
     }
 
-    typename patchConstructorTable::iterator cstrIter =
-        patchConstructorTablePtr_->find(patchFieldType);
+    auto cstrIter = patchConstructorTablePtr_->cfind(patchFieldType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchField type "
             << patchFieldType << nl << nl
-            << "Valid patchField types are :" << endl
+            << "Valid patchField types :" << endl
             << patchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    typename patchConstructorTable::iterator patchTypeCstrIter =
-        patchConstructorTablePtr_->find(p.type());
+    auto patchTypeCstrIter = patchConstructorTablePtr_->cfind(p.type());
 
     if
     (
@@ -116,14 +114,13 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
             << endl;
     }
 
-    typename dictionaryConstructorTable::iterator cstrIter
-        = dictionaryConstructorTablePtr_->find(patchFieldType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchFieldType);
 
     if (!cstrIter.found())
     {
         if (!disallowGenericFvPatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->find("generic");
+            cstrIter = dictionaryConstructorTablePtr_->cfind("generic");
         }
 
         if (!cstrIter.found())
@@ -133,7 +130,7 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
                 dict
             )   << "Unknown patchField type " << patchFieldType
                 << " for patch type " << p.type() << nl << nl
-                << "Valid patchField types are :" << endl
+                << "Valid patchField types :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
@@ -145,8 +142,8 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
      || word(dict.lookup("patchType")) != p.type()
     )
     {
-        typename dictionaryConstructorTable::iterator patchTypeCstrIter
-            = dictionaryConstructorTablePtr_->find(p.type());
+        auto patchTypeCstrIter
+            = dictionaryConstructorTablePtr_->cfind(p.type());
 
         if (patchTypeCstrIter.found() && patchTypeCstrIter() != cstrIter())
         {
@@ -178,14 +175,13 @@ Foam::tmp<Foam::fvPatchField<Type>> Foam::fvPatchField<Type>::New
         InfoInFunction << "Constructing fvPatchField<Type>" << endl;
     }
 
-    typename patchMapperConstructorTable::iterator cstrIter =
-        patchMapperConstructorTablePtr_->find(ptf.type());
+    auto cstrIter = patchMapperConstructorTablePtr_->cfind(ptf.type());
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchField type " << ptf.type() << nl << nl
-            << "Valid patchField types are :" << endl
+            << "Valid patchField types :" << endl
             << patchMapperConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

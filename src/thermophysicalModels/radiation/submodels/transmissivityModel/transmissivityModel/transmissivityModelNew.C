@@ -39,15 +39,14 @@ transmissivityModel::New
 
     Info<< "Selecting transmissivityModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown transmissivityModel type "
             << modelType << nl << nl
-            << "Valid transmissivityModel types are :" << nl
+            << "Valid transmissivityModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -38,15 +38,14 @@ Foam::autoPtr<Foam::radiation::scatterModel> Foam::radiation::scatterModel::New
 
     Info<< "Selecting scatterModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown scatterModel type "
             << modelType << nl << nl
-            << "Valid scatterModel types are :" << nl
+            << "Valid scatterModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

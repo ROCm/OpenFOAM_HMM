@@ -104,19 +104,18 @@ Foam::autoPtr<Foam::relativeVelocityModel> Foam::relativeVelocityModel::New
     const incompressibleTwoPhaseInteractingMixture& mixture
 )
 {
-    word modelType(dict.lookup(typeName));
+    const word modelType(dict.lookup(typeName));
 
     Info<< "Selecting relative velocity model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown time scale model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid time scale model types are:" << nl
+            << "Unknown time scale model type "
+            << modelType << nl << nl
+            << "Valid time scale model types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
@@ -141,13 +140,13 @@ Foam::relativeVelocityModel::~relativeVelocityModel()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-tmp<volScalarField> Foam::relativeVelocityModel::rho() const
+Foam::tmp<Foam::volScalarField> Foam::relativeVelocityModel::rho() const
 {
     return alphac_*rhoc_ + alphad_*rhod_;
 }
 
 
-tmp<volSymmTensorField> Foam::relativeVelocityModel::tauDm() const
+Foam::tmp<Foam::volSymmTensorField> Foam::relativeVelocityModel::tauDm() const
 {
     volScalarField betac(alphac_*rhoc_);
     volScalarField betad(alphad_*rhod_);

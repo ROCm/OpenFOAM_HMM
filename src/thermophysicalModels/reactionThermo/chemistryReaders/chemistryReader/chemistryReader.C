@@ -37,22 +37,21 @@ Foam::chemistryReader<ThermoType>::New
 {
     // Let the chemistry reader type default to CHEMKIN
     // for backward compatibility
-    word chemistryReaderTypeName("chemkinReader");
+    word readerName("chemkinReader");
 
     // otherwise use the specified reader
-    thermoDict.readIfPresent("chemistryReader", chemistryReaderTypeName);
+    thermoDict.readIfPresent("chemistryReader", readerName);
 
-    Info<< "Selecting chemistryReader " << chemistryReaderTypeName << endl;
+    Info<< "Selecting chemistryReader " << readerName << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(chemistryReaderTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(readerName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown chemistryReader type "
-            << chemistryReaderTypeName << nl << nl
-            << "Valid chemistryReader types are:" << nl
+            << readerName << nl << nl
+            << "Valid chemistryReader types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

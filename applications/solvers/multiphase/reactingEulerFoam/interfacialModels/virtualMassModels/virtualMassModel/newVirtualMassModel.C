@@ -34,20 +34,19 @@ Foam::autoPtr<Foam::virtualMassModel> Foam::virtualMassModel::New
     const phasePair& pair
 )
 {
-    word virtualMassModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting virtualMassModel for "
-        << pair << ": " << virtualMassModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(virtualMassModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown virtualMassModelType type "
-            << virtualMassModelType << endl << endl
-            << "Valid virtualMassModel types are : " << endl
+            << "Unknown virtualMassModel type "
+            << modelType << nl << nl
+            << "Valid virtualMassModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

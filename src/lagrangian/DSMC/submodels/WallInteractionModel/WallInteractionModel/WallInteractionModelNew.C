@@ -39,15 +39,14 @@ Foam::WallInteractionModel<CloudType>::New
 
     Info<< "Selecting WallInteractionModel " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown WallInteractionModel type "
             << modelType << nl << nl
-            << "Valid WallInteractionModel types are:" << nl
+            << "Valid WallInteractionModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

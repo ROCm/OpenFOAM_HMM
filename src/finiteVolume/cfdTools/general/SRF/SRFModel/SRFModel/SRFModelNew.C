@@ -52,15 +52,14 @@ Foam::autoPtr<Foam::SRF::SRFModel> Foam::SRF::SRFModel::New
 
     Info<< "Selecting SRFModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown SRFModel type "
             << modelType << nl << nl
-            << "Valid SRFModel types are :" << nl
+            << "Valid SRFModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

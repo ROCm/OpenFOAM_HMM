@@ -63,14 +63,14 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
 
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(modelType);
+    auto cstrIter = meshConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown pyrolysisModel type " << modelType
-            << nl << nl << "Valid pyrolisisModel types are:" << nl
+            << "Unknown pyrolysisModel type "
+            << modelType << nl << nl
+            << "Valid pyrolysisModel types :" << nl
             << meshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -91,14 +91,14 @@ autoPtr<pyrolysisModel> pyrolysisModel::New
 
     Info<< "Selecting pyrolysisModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown pyrolysisModel type " << modelType
-            << nl << nl << "Valid pyrolisisModel types are:" << nl
+            << "Unknown pyrolysisModel type "
+            << modelType << nl << nl
+            << "Valid pyrolysisModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

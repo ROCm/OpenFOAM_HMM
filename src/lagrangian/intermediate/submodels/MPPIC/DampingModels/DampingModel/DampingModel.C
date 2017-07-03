@@ -84,15 +84,14 @@ Foam::DampingModel<CloudType>::New
 
     Info<< "Selecting damping model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown damping model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid damping model types are:" << nl
+            << "Unknown damping model type "
+            << modelType  << nl << nl
+            << "Valid damping model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

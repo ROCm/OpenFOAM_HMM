@@ -56,19 +56,18 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     const labelHashSet& patchIDs
 )
 {
-    word patchDistMethodType(dict.lookup("method"));
+    const word methodType(dict.lookup("method"));
 
-    Info<< "Selecting patchDistMethod " << patchDistMethodType << endl;
+    Info<< "Selecting patchDistMethod " << methodType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(patchDistMethodType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown patchDistMethodType type "
-            << patchDistMethodType << endl << endl
-            << "Valid patchDistMethod types are : " << endl
+            << "Unknown patchDistMethod type "
+            << methodType << endl << endl
+            << "Valid patchDistMethod types : " << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -86,19 +85,18 @@ Foam::autoPtr<Foam::patchDistMethod> Foam::patchDistMethod::New
     const word& defaultPatchDistMethod
 )
 {
-    word patchDistMethodType = defaultPatchDistMethod;
-    dict.readIfPresent("method", patchDistMethodType);
+    word methodType = defaultPatchDistMethod;
+    dict.readIfPresent("method", methodType);
 
-    Info<< "Selecting patchDistMethod " << patchDistMethodType << endl;
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(patchDistMethodType);
+    Info<< "Selecting patchDistMethod " << methodType << endl;
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patchDistMethodType type "
-            << patchDistMethodType << endl << endl
-            << "Valid patchDistMethod types are : " << endl
+            << methodType << endl << endl
+            << "Valid patchDistMethod types : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
