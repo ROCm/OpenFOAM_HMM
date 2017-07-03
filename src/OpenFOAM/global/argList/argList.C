@@ -37,7 +37,7 @@ License
 #include "sigInt.H"
 #include "sigQuit.H"
 #include "sigSegv.H"
-#include "endian.H"
+#include "foamVersion.H"
 
 #include <cctype>
 
@@ -53,22 +53,6 @@ Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
 Foam::word Foam::argList::postProcessOptionName("postProcess");
-
-// file-scope
-// Hint about machine endian, OpenFOAM label and scalar sizes
-static const std::string archHint =
-(
-#ifdef WM_LITTLE_ENDIAN
-    "LSB"
-#elif defined (WM_BIG_ENDIAN)
-    "MSB"
-#else
-    "???"
-#endif
-    ";label="  + std::to_string(8*sizeof(Foam::label))
-  + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
-);
-
 
 Foam::argList::initValidTables::initValidTables()
 {
@@ -639,7 +623,7 @@ void Foam::argList::parse
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << Foam::FOAMbuild << nl
-                << "Arch   : " << archHint << nl
+                << "Arch   : " << Foam::FOAMbuildArch << nl
                 << "Exec   : " << argListStr_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
@@ -650,7 +634,7 @@ void Foam::argList::parse
         jobInfo.add("startDate", dateString);
         jobInfo.add("startTime", timeString);
         jobInfo.add("userName", userName());
-        jobInfo.add("foamVersion", word(FOAMversion));
+        jobInfo.add("foamVersion", word(Foam::FOAMversion));
         jobInfo.add("code", executable_);
         jobInfo.add("argList", argListStr_);
         jobInfo.add("currentDir", cwd());
@@ -660,10 +644,10 @@ void Foam::argList::parse
         // Add build information - only use the first word
         {
             std::string build(Foam::FOAMbuild);
-            std::string::size_type found = build.find(' ');
-            if (found != std::string::npos)
+            std::string::size_type space = build.find(' ');
+            if (space != std::string::npos)
             {
-                build.resize(found);
+                build.resize(space);
             }
             jobInfo.add("foamBuild", build);
         }
@@ -1247,7 +1231,7 @@ void Foam::argList::printUsage() const
         <<"Using: OpenFOAM-" << Foam::FOAMversion
         << " (see www.OpenFOAM.com)" << nl
         << "Build: " << Foam::FOAMbuild << nl
-        << "Arch:  " << archHint << nl
+        << "Arch:  " << Foam::FOAMbuildArch << nl
         << endl;
 }
 

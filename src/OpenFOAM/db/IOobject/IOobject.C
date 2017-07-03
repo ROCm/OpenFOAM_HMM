@@ -351,6 +351,12 @@ const Foam::Time& Foam::IOobject::time() const
 }
 
 
+const Foam::fileName& Foam::IOobject::rootPath() const
+{
+    return time().rootPath();
+}
+
+
 const Foam::fileName& Foam::IOobject::caseName() const
 {
     return time().caseName();
@@ -384,12 +390,6 @@ Foam::word Foam::IOobject::member() const
     {
         return name_.substr(0, i);
     }
-}
-
-
-const Foam::fileName& Foam::IOobject::rootPath() const
-{
-    return time().rootPath();
 }
 
 
@@ -616,6 +616,8 @@ void Foam::IOobject::setBad(const string& s)
     objState_ = BAD;
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 void Foam::IOobject::operator=(const IOobject& io)
 {
