@@ -526,7 +526,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //    const indexedOctree<treeDataTriSurface>& tree = s.tree();
 //
 //
-//    const scalar searchCos(Foam::cos(degToRad(30)));
+//    const scalar searchCos = Foam::cos(30.0_deg);
 //
 //    // Normals for ray shooting and inside/outside detection
 //    vectorField nearNormal;

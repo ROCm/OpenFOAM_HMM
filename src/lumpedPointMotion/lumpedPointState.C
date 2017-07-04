@@ -178,12 +178,12 @@ void Foam::lumpedPointState::relax
         if (prev.degrees_)
         {
             // Was degrees, now radians
-            convert = degToRad(1);
+            convert = degToRad();
         }
         else
         {
             // Was radians, now degrees
-            convert = radToDeg(1);
+            convert = radToDeg();
         }
     }
 

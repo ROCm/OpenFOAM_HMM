@@ -55,7 +55,7 @@ Foam::topoSetSource::addToUsageTable Foam::shapeToCell::usage_
 
 
 // Angle for polys to be considered splitHexes.
-Foam::scalar Foam::shapeToCell::featureCos = Foam::cos(degToRad(10.0));
+Foam::scalar Foam::shapeToCell::featureCos = Foam::cos(10.0_deg);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

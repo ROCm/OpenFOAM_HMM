@@ -53,6 +53,18 @@ inline constexpr scalar radToDeg(const scalar rad) noexcept
     return (rad*180.0/M_PI);
 }
 
+//- Multiplication factor for degrees to radians conversion
+inline constexpr scalar degToRad() noexcept
+{
+    return (M_PI/180.0);
+}
+
+//- Multiplication factor for radians to degrees conversion
+inline constexpr scalar radToDeg() noexcept
+{
+    return (180.0/M_PI);
+}
+
 //- Conversion from atm to Pa
 inline constexpr scalar atmToPa(const scalar atm) noexcept
 {
