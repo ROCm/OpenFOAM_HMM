@@ -55,7 +55,7 @@ Usage
       - \par -fields \<fields\>
         Convert selected fields only. For example,
         \verbatim
-          -fields "( p T U )"
+          -fields '( p T U )'
         \endverbatim
         The quoting is required to avoid shell expansions and to pass the
         information as a single argument.
@@ -231,7 +231,46 @@ labelList getSelectedPatches
             Info<< "    patch " << patchi << " " << pp.name() << endl;
         }
     }
+
     return patchIDs.shrink();
+}
+
+
+HashTable<wordHashSet> candidateObjects
+(
+    const IOobjectList& objects,
+    const wordHashSet& supportedTypes,
+    const bool specifiedFields,
+    const wordHashSet& selectedFields
+)
+{
+    // Special case = no fields
+    if (specifiedFields && selectedFields.empty())
+    {
+        return HashTable<wordHashSet>();
+    }
+
+    HashTable<wordHashSet> usable = objects.classes();
+
+    // Limited to types that we explicitly handle
+    usable.retain(supportedTypes);
+
+    // If specified, further limit to selected fields
+    if (specifiedFields)
+    {
+        forAllIters(usable, iter)
+        {
+            iter.object().retain(selectedFields);
+        }
+
+        // Prune entries without any fields
+        usable.filterValues
+        (
+            [](const wordHashSet& vals){ return !vals.empty(); }
+        );
+    }
+
+    return usable;
 }
 
 
@@ -527,9 +566,39 @@ int main(int argc, char *argv[])
 
     #include "findClouds.H"
 
-    forAll(timeDirs, timeI)
+    // Supported volume field types
+    const wordHashSet vFieldTypes
     {
-        runTime.setTime(timeDirs[timeI], timeI);
+        volScalarField::typeName,
+        volVectorField::typeName,
+        volSphericalTensorField::typeName,
+        volSymmTensorField::typeName,
+        volTensorField::typeName
+    };
+
+    // Supported dimensioned field types
+    const wordHashSet dFieldTypes
+    {
+        volScalarField::Internal::typeName,
+        volVectorField::Internal::typeName,
+        volSphericalTensorField::Internal::typeName,
+        volSymmTensorField::Internal::typeName,
+        volTensorField::Internal::typeName
+    };
+
+    // Supported point field types
+    const wordHashSet pFieldTypes
+    {
+        pointScalarField::typeName,
+        pointVectorField::typeName,
+        pointSphericalTensorField::typeName,
+        pointSymmTensorField::typeName,
+        pointTensorField::typeName
+    };
+
+    forAll(timeDirs, timei)
+    {
+        runTime.setTime(timeDirs[timei], timei);
 
         Info<< "Time: " << runTime.timeName() << endl;
 
@@ -611,14 +680,15 @@ int main(int argc, char *argv[])
         // Search for list of objects for this time
         IOobjectList objects(mesh, runTime.timeName());
 
-        HashSet<word> selectedFields;
+        wordHashSet selectedFields;
         const bool specifiedFields = args.optionReadIfPresent
         (
             "fields",
             selectedFields
         );
 
-        // Construct the vol fields (on the original mesh if subsetted)
+        // Construct the vol fields
+        // References the original mesh, but uses subsetted portion only.
 
         PtrList<const volScalarField> vScalarFld;
         PtrList<const volVectorField> vVectorFld;
@@ -626,7 +696,16 @@ int main(int argc, char *argv[])
         PtrList<const volSymmTensorField> vSymTensorFld;
         PtrList<const volTensorField> vTensorFld;
 
-        if (!specifiedFields || selectedFields.size())
+        if
+        (
+            candidateObjects
+            (
+                objects,
+                vFieldTypes,
+                specifiedFields,
+                selectedFields
+            ).size()
+        )
         {
             readFields
             (
@@ -696,7 +775,16 @@ int main(int argc, char *argv[])
         PtrList<const volSymmTensorField::Internal> dSymTensorFld;
         PtrList<const volTensorField::Internal> dTensorFld;
 
-        if (!specifiedFields || selectedFields.size())
+        if
+        (
+            candidateObjects
+            (
+                objects,
+                dFieldTypes,
+                specifiedFields,
+                selectedFields
+            ).size()
+        )
         {
             readFields
             (
@@ -767,12 +855,24 @@ int main(int argc, char *argv[])
 
         // Construct pointMesh only if necessary since it constructs edge
         // addressing (expensive on polyhedral meshes)
-        if (!noPointValues && !(specifiedFields && selectedFields.empty()))
+        if
+        (
+            !noPointValues
+         && candidateObjects
+            (
+                objects,
+                pFieldTypes,
+                specifiedFields,
+                selectedFields
+            ).size()
+        )
         {
+            const pointMesh& ptMesh = pointMesh::New(meshRef.baseMesh());
+
             readFields
             (
                 meshRef,
-                pointMesh::New(meshRef.baseMesh()),
+                ptMesh,
                 objects,
                 selectedFields,
                 pScalarFld
@@ -782,7 +882,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 meshRef,
-                pointMesh::New(meshRef.baseMesh()),
+                ptMesh,
                 objects,
                 selectedFields,
                 pVectorFld
@@ -792,7 +892,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 meshRef,
-                pointMesh::New(meshRef.baseMesh()),
+                ptMesh,
                 objects,
                 selectedFields,
                 pSphTensorFld
@@ -802,7 +902,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 meshRef,
-                pointMesh::New(meshRef.baseMesh()),
+                ptMesh,
                 objects,
                 selectedFields,
                 pSymTensorFld
@@ -812,7 +912,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 meshRef,
-                pointMesh::New(meshRef.baseMesh()),
+                ptMesh,
                 objects,
                 selectedFields,
                 pTensorFld
@@ -1138,7 +1238,7 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        if (doFaceZones)
+        if (doFaceZones && !mesh.faceZones().empty())
         {
             PtrList<const surfaceScalarField> sScalarFld;
             readFields
@@ -1162,12 +1262,8 @@ int main(int argc, char *argv[])
             );
             print("    surfVector  :", Info, sVectorFld);
 
-            const faceZoneMesh& zones = mesh.faceZones();
-
-            forAll(zones, zoneI)
+            for (const faceZone& fz : mesh.faceZones())
             {
-                const faceZone& fz = zones[zoneI];
-
                 mkDir(fvPath/fz.name());
 
                 fileName outputName =
@@ -1213,10 +1309,8 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        forAll(cloudNames, cloudNo)
+        for (const fileName& cloudName : cloudNames)
         {
-            const fileName& cloudName = cloudNames[cloudNo];
-
             // Always create the cloud directory.
             mkDir(fvPath/cloud::prefix/cloudName);
 
@@ -1358,13 +1452,13 @@ int main(int argc, char *argv[])
         dirs.setSize(sz+1);
         dirs[sz] = ".";
 
-        forAll(dirs, i)
+        for (const fileName& subDir : dirs)
         {
-            fileNameList subFiles(readDir(procVTK/dirs[i], fileName::FILE));
+            fileNameList subFiles(readDir(procVTK/subDir, fileName::FILE));
 
-            forAll(subFiles, j)
+            for (const fileName& subFile : subFiles)
             {
-                fileName procFile(procVTK/dirs[i]/subFiles[j]);
+                fileName procFile(procVTK/subDir/subFile);
 
                 if (exists(procFile))
                 {
