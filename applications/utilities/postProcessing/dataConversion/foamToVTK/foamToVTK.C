@@ -831,16 +831,8 @@ int main(int argc, char *argv[])
         {
             if (vtuMeshCells.empty())
             {
+                // subMesh or baseMesh
                 vtuMeshCells.reset(meshRef.mesh());
-
-                // Convert cellMap, addPointCellLabels to global cell ids
-                if (meshRef.useSubMesh())
-                {
-                    vtuMeshCells.renumberCells
-                    (
-                        meshRef.subsetter().cellMap()
-                    );
-                }
             }
 
             // Create file and write header
@@ -856,7 +848,7 @@ int main(int argc, char *argv[])
             // Write mesh
             vtk::internalWriter writer
             (
-                meshRef.baseMesh(),
+                meshRef.mesh(),
                 vtuMeshCells,
                 outputName,
                 fmtType
