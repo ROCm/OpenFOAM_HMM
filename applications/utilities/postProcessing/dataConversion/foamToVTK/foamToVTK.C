@@ -64,10 +64,12 @@ Usage
         Write surfaceScalarFields (e.g., phi)
 
       - \par -cellSet \<name\>
-      - \par -faceSet \<name\>
+      - \par -cellZone \<name\>
+        Restrict conversion to either the cellSet or the cellZone.
 
+      - \par -faceSet \<name\>
       - \par -pointSet \<name\>
-        Restrict conversion to the cellSet, faceSet or pointSet.
+        Restrict conversion to the faceSet or pointSet.
 
       - \par -nearCellValue
         Output cell value on patches instead of patch value itself
@@ -360,6 +362,12 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "cellZone",
+        "name",
+        "convert a mesh subset corresponding to the specified cellZone"
+    );
+    argList::addOption
+    (
         "faceSet",
         "name",
         "restrict conversion to the specified faceSet"
@@ -490,10 +498,17 @@ int main(int argc, char *argv[])
 
     string vtkName = runTime.caseName();
 
-    word cellSetName;
-    if (args.optionReadIfPresent("cellSet", cellSetName))
+    meshSubsetHelper::subsetType cellSubsetType = meshSubsetHelper::NONE;
+    word cellSubsetName;
+    if (args.optionReadIfPresent("cellSet", cellSubsetName))
     {
-        vtkName = cellSetName;
+        vtkName = cellSubsetName;
+        cellSubsetType = meshSubsetHelper::SET;
+    }
+    else if (args.optionReadIfPresent("cellZone", cellSubsetName))
+    {
+        vtkName = cellSubsetName;
+        cellSubsetType = meshSubsetHelper::ZONE;
     }
     else if (Pstream::parRun())
     {
@@ -534,7 +549,7 @@ int main(int argc, char *argv[])
         (
             args.optionFound("time")
          || args.optionFound("latestTime")
-         || cellSetName.size()
+         || cellSubsetName.size()
          || faceSetName.size()
          || pointSetName.size()
          || regionName != polyMesh::defaultRegion
@@ -555,7 +570,7 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     // Mesh wrapper: does subsetting and decomposition
-    meshSubsetHelper meshRef(mesh, meshSubsetHelper::SET, cellSetName);
+    meshSubsetHelper meshRef(mesh, cellSubsetType, cellSubsetName);
 
     // Collect decomposition information etc.
     vtk::vtuCells vtuMeshCells(fmtType, decomposePoly);
@@ -715,7 +730,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 vScalarFld
             );
-            print("    volScalar            :", Info, vScalarFld);
+            print("    volScalar        :", Info, vScalarFld);
 
             readFields
             (
@@ -725,7 +740,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 vVectorFld
             );
-            print("    volVector            :", Info, vVectorFld);
+            print("    volVector        :", Info, vVectorFld);
 
             readFields
             (
@@ -735,7 +750,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 vSphTensorf
             );
-            print("    volSphericalTensor   :", Info, vSphTensorf);
+            print("    volSphTensor     :", Info, vSphTensorf);
 
             readFields
             (
@@ -745,7 +760,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 vSymTensorFld
             );
-            print("    volSymmTensor        :", Info, vSymTensorFld);
+            print("    volSymmTensor    :", Info, vSymTensorFld);
 
             readFields
             (
@@ -755,7 +770,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 vTensorFld
             );
-            print("    volTensor            :", Info, vTensorFld);
+            print("    volTensor        :", Info, vTensorFld);
         }
 
         const label nVolFields =
@@ -794,7 +809,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 dScalarFld
             );
-            print("    volScalar::Internal          :", Info, dScalarFld);
+            print("    volScalar::Internal      :", Info, dScalarFld);
 
             readFields
             (
@@ -804,7 +819,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 dVectorFld
             );
-            print("    volVector::Internal          :", Info, dVectorFld);
+            print("    volVector::Internal      :", Info, dVectorFld);
 
             readFields
             (
@@ -814,7 +829,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 dSphTensorFld
             );
-            print("    volSphericalTensor::Internal :", Info, dSphTensorFld);
+            print("    volSphTensor::Internal   :", Info, dSphTensorFld);
 
             readFields
             (
@@ -824,7 +839,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 dSymTensorFld
             );
-            print("    volSymmTensor::Internal      :", Info, dSymTensorFld);
+            print("    volSymmTensor::Internal  :", Info, dSymTensorFld);
 
             readFields
             (
@@ -834,7 +849,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 dTensorFld
             );
-            print("    volTensor::Internal          :", Info, dTensorFld);
+            print("    volTensor::Internal      :", Info, dTensorFld);
         }
 
         const label nDimFields =
@@ -877,7 +892,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 pScalarFld
             );
-            print("    pointScalar          :", Info, pScalarFld);
+            print("    pointScalar      :", Info, pScalarFld);
 
             readFields
             (
@@ -887,7 +902,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 pVectorFld
             );
-            print("    pointVector          :", Info, pVectorFld);
+            print("    pointVector      :", Info, pVectorFld);
 
             readFields
             (
@@ -897,7 +912,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 pSphTensorFld
             );
-            print("    pointSphTensor       : ", Info, pSphTensorFld);
+            print("    pointSphTensor   : ", Info, pSphTensorFld);
 
             readFields
             (
@@ -907,7 +922,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 pSymTensorFld
             );
-            print("    pointSymmTensor      :", Info, pSymTensorFld);
+            print("    pointSymmTensor  :", Info, pSymTensorFld);
 
             readFields
             (
@@ -917,7 +932,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 pTensorFld
             );
-            print("    pointTensor          :", Info, pTensorFld);
+            print("    pointTensor      :", Info, pTensorFld);
         }
 
         const label nPointFields =
@@ -1028,7 +1043,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 sScalarFld
             );
-            print("    surfScalar  :", Info, sScalarFld);
+            print("    surfScalar   :", Info, sScalarFld);
 
             PtrList<const surfaceVectorField> sVectorFld;
             readFields
@@ -1039,7 +1054,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 sVectorFld
             );
-            print("    surfVector  :", Info, sVectorFld);
+            print("    surfVector   :", Info, sVectorFld);
 
             if (sScalarFld.size())
             {
@@ -1098,11 +1113,11 @@ int main(int argc, char *argv[])
             fileName outputName
             (
                 fvPath/"allPatches"
-              / (meshRef.useSubMesh() ? cellSetName : "allPatches")
+              / (meshRef.useSubMesh() ? cellSubsetName : "allPatches")
               + "_"
               + timeDesc
             );
-            Info<< "    Combined patches     : "
+            Info<< "    Combined patches    : "
                 << relativeName(runTime, outputName) << nl;
 
             vtk::patchWriter writer
@@ -1168,7 +1183,7 @@ int main(int argc, char *argv[])
                 fileName outputName
                 (
                     fvPath/pp.name()
-                  / (meshRef.useSubMesh() ? cellSetName : pp.name())
+                  / (meshRef.useSubMesh() ? cellSubsetName : pp.name())
                   + "_"
                   + timeDesc
                 );
@@ -1187,7 +1202,7 @@ int main(int argc, char *argv[])
                 if (!isA<emptyPolyPatch>(pp))
                 {
                     // VolFields + patchID
-                    writer.beginCellData(1+nVolFields);
+                    writer.beginCellData(1 + nVolFields);
 
                     // Write patchID field
                     writer.writePatchIDs();
@@ -1249,7 +1264,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 sScalarFld
             );
-            print("    surfScalar  :", Info, sScalarFld);
+            print("    surfScalar   :", Info, sScalarFld);
 
             PtrList<const surfaceVectorField> sVectorFld;
             readFields
@@ -1260,7 +1275,7 @@ int main(int argc, char *argv[])
                 selectedFields,
                 sVectorFld
             );
-            print("    surfVector  :", Info, sVectorFld);
+            print("    surfVector   :", Info, sVectorFld);
 
             for (const faceZone& fz : mesh.faceZones())
             {
@@ -1269,7 +1284,7 @@ int main(int argc, char *argv[])
                 fileName outputName =
                 (
                     fvPath/fz.name()
-                  / (meshRef.useSubMesh() ? cellSetName : fz.name())
+                  / (meshRef.useSubMesh() ? cellSubsetName : fz.name())
                   + "_"
                   + timeDesc
                 );
@@ -1332,15 +1347,15 @@ int main(int argc, char *argv[])
             if (sprayObjs.found("positions"))
             {
                 wordList labelNames(sprayObjs.names(labelIOField::typeName));
-                Info<< "        labels            :";
+                Info<< "        labels      :";
                 print(Info, labelNames);
 
                 wordList scalarNames(sprayObjs.names(scalarIOField::typeName));
-                Info<< "        scalars           :";
+                Info<< "        scalars     :";
                 print(Info, scalarNames);
 
                 wordList vectorNames(sprayObjs.names(vectorIOField::typeName));
-                Info<< "        vectors           :";
+                Info<< "        vectors     :";
                 print(Info, vectorNames);
 
                 wordList sphereNames
@@ -1350,7 +1365,7 @@ int main(int argc, char *argv[])
                         sphericalTensorIOField::typeName
                     )
                 );
-                Info<< "        spherical tensors :";
+                Info<< "        sphTensors  :";
                 print(Info, sphereNames);
 
                 wordList symmNames
@@ -1360,11 +1375,11 @@ int main(int argc, char *argv[])
                         symmTensorIOField::typeName
                     )
                 );
-                Info<< "        symm tensors      :";
+                Info<< "        symmTensors :";
                 print(Info, symmNames);
 
                 wordList tensorNames(sprayObjs.names(tensorIOField::typeName));
-                Info<< "        tensors           :";
+                Info<< "        tensors     :";
                 print(Info, tensorNames);
 
                 vtk::lagrangianWriter writer
