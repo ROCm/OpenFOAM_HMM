@@ -62,14 +62,14 @@ class OSstream
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const OSstream&);
+        void operator=(const OSstream&) = delete;
 
 
 public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         OSstream
         (
             ostream& os,

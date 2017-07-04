@@ -67,7 +67,7 @@ public:
             ISstream
             (
                 *(new std::istringstream(buffer)),
-                "IStringStream.sourceFile",
+                "input",
                 format,
                 version
             )
@@ -85,7 +85,7 @@ public:
             ISstream
             (
                 *(new std::istringstream(buffer)),
-                "IStringStream.sourceFile",
+                "input",
                 format,
                 version
             )

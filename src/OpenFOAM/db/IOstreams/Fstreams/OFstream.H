@@ -84,11 +84,6 @@ class OFstream
     private OFstreamAllocator,
     public OSstream
 {
-    // Private data
-
-        fileName pathname_;
-
-
 public:
 
     // Declare name of the class and its debug switch
@@ -115,17 +110,8 @@ public:
 
         // Access
 
-            //- Return the name of the stream
-            const fileName& name() const
-            {
-                return pathname_;
-            }
-
-            //- Return non-const access to the name of the stream
-            fileName& name()
-            {
-                return pathname_;
-            }
+            //- Read/write access to the name of the stream
+            using OSstream::name;
 
 
         // STL stream

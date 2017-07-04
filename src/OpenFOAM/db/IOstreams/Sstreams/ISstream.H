@@ -75,7 +75,7 @@ class ISstream
         Istream& readVariable(string&);
 
         //- Disallow default bitwise assignment
-        void operator=(const ISstream&);
+        void operator=(const ISstream&) = delete;
 
 
 public:

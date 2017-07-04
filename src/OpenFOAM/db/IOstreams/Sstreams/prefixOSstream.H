@@ -68,7 +68,7 @@ public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         prefixOSstream
         (
             ostream& os,
