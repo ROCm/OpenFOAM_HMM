@@ -492,7 +492,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
             scalarField liquidRho(patch().size(), 0.0);
 
             fixedGradientFvPatchField<scalar>& Yp =
-                const_cast<fixedGradientFvPatchField<scalar>& >
+                const_cast<fixedGradientFvPatchField<scalar>&>
                 (
                     refCast
                     <

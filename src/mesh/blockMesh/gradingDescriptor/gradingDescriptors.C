@@ -70,7 +70,7 @@ Foam::Istream& Foam::operator>>(Istream& is, gradingDescriptors& gds)
         is.putBack(t);
 
         // Read the list for gradingDescriptors
-        is >> static_cast<List<gradingDescriptor>& >(gds);
+        is >> static_cast<List<gradingDescriptor>&>(gds);
 
         // Check state of Istream
         is.check(FUNCTION_NAME);

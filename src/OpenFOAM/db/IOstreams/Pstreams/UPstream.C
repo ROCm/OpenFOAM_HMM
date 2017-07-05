@@ -351,7 +351,7 @@ template<>
 const Foam::UPstream::commsStruct&
 Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
 {
-    return const_cast<UList<UPstream::commsStruct>& >(*this).operator[](procID);
+    return const_cast<UList<UPstream::commsStruct>&>(*this).operator[](procID);
 }
 
 

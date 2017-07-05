@@ -1276,7 +1276,7 @@ void Foam::mapDistributeBase::distribute
 {
     fld.shrink();
 
-    List<T>& fldList = static_cast<List<T>& >(fld);
+    List<T>& fldList = static_cast<List<T>&>(fld);
 
     distribute(fldList, tag);
 
