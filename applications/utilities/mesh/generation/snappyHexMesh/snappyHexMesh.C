@@ -393,7 +393,7 @@ void extractSurface
 
     // Collect sizes. Hash on names to handle local-only patches (e.g.
     //  processor patches)
-    HashTable<label> patchSize(1000);
+    HashTable<label> patchSize(1024);
     label nFaces = 0;
     forAllConstIter(labelHashSet, includePatches, iter)
     {
@@ -405,7 +405,7 @@ void extractSurface
 
 
     // Allocate zone/patch for all patches
-    HashTable<label> compactZoneID(1000);
+    HashTable<label> compactZoneID(1024);
     forAllConstIter(HashTable<label>, patchSize, iter)
     {
         label sz = compactZoneID.size();
