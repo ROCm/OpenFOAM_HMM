@@ -86,7 +86,7 @@ void Foam::sigQuit::set(const bool verbose)
         if (sigaction(SIGQUIT, &newAction, &oldAction_) < 0)
         {
             FatalErrorInFunction
-                << "Cannot call sigQuit::set() more than once"
+                << "Cannot call more than once"
                 << abort(FatalError);
         }
         sigActive_ = true;
@@ -100,9 +100,9 @@ void Foam::sigQuit::unset(const bool)
     {
         if (sigaction(SIGQUIT, &oldAction_, nullptr) < 0)
         {
-        FatalErrorInFunction
-            << "Cannot set SIGQUIT trapping"
-            << abort(FatalError);
+            FatalErrorInFunction
+                << "Cannot unset SIGQUIT trapping"
+                << abort(FatalError);
         }
         sigActive_ = false;
     }

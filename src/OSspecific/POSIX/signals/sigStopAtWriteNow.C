@@ -78,7 +78,6 @@ addstopAtWriteNowSignalToOpt addstopAtWriteNowSignalToOpt_
 
 Foam::Time const* Foam::sigStopAtWriteNow::runTimePtr_ = nullptr;
 
-
 struct sigaction Foam::sigStopAtWriteNow::oldAction_;
 
 
@@ -109,7 +108,8 @@ void Foam::sigStopAtWriteNow::sigHandler(int)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sigStopAtWriteNow::sigStopAtWriteNow(){}
+Foam::sigStopAtWriteNow::sigStopAtWriteNow()
+{}
 
 
 Foam::sigStopAtWriteNow::sigStopAtWriteNow

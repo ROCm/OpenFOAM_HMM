@@ -79,6 +79,14 @@ OptimisationSwitches
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
 
+    // Trap floating point exception.
+    // Can override with FOAM_SIGFPE (true|false)
+    trapFpe         1;
+
+    // Initialization malloced memory to NaN.
+    // Can override with FOAM_SETNAN (true|false)
+    setNaN          0;
+
     // Force dumping (at next timestep) upon signal (-1 to disable)
     writeNowSignal              -1; // 10;
 
