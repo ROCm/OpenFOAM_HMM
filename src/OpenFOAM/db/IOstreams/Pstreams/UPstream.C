@@ -475,4 +475,10 @@ registerOptSwitch
 );
 
 
+const int Foam::UPstream::mpiBufferSize
+(
+    Foam::debug::optimisationSwitch("mpiBufferSize", 0)
+);
+
+
 // ************************************************************************* //

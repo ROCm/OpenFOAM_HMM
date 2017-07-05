@@ -272,6 +272,9 @@ public:
         //- Optional maximum message size (bytes)
         static int maxCommsSize;
 
+        //- MPI buffer-size (bytes)
+        static const int mpiBufferSize;
+
         //- Default communicator (all processors)
         static label worldComm;
 
