@@ -77,38 +77,6 @@ bool Foam::regExp::matchGrouping
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::regExp::regExp()
-:
-    preg_(nullptr)
-{}
-
-
-Foam::regExp::regExp(const char* pattern, bool ignoreCase)
-:
-    preg_(nullptr)
-{
-    set(pattern, ignoreCase);
-}
-
-
-Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
-:
-    preg_(nullptr)
-{
-    set(pattern.c_str(), ignoreCase);
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::regExp::~regExp()
-{
-    clear();
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::regExp::set(const char* pattern, bool ignoreCase)
