@@ -391,11 +391,11 @@ void Foam::argList::getRootCase()
     fileName casePath;
 
     // [-case dir] specified
-    HashTable<string>::const_iterator iter = options_.find("case");
+    auto optIter = options_.cfind("case");
 
-    if (iter != options_.end())
+    if (optIter.found())
     {
-        casePath = iter();
+        casePath = optIter.object();
         casePath.clean();
 
         if (casePath.empty() || casePath == ".")
@@ -679,15 +679,12 @@ void Foam::argList::parse
                 source = options_["decomposeParDict"];
                 if (isDir(source))
                 {
-                    adjustOpt = true;
                     source = source/"decomposeParDict";
+                    adjustOpt = true;
                 }
 
-                if
-                (
-                   !source.isAbsolute()
-                && !(source.size() && source[0] == '.')
-                )
+                // Case-relative if not absolute and not "./" etc
+                if (!source.isAbsolute() && !source.startsWith("."))
                 {
                     source = rootPath_/globalCase_/source;
                     adjustOpt = true;
@@ -1169,32 +1166,26 @@ void Foam::argList::printUsage() const
 
     Info<< "\noptions:\n";
 
-    wordList opts = validOptions.sortedToc();
-    forAll(opts, optI)
+    const wordList opts = validOptions.sortedToc();
+    for (const word& optionName : opts)
     {
-        const word& optionName = opts[optI];
-
-        HashTable<string>::const_iterator iter = validOptions.find(optionName);
         Info<< "  -" << optionName;
         label len = optionName.size() + 3;  // Length includes leading '  -'
 
-        if (iter().size())
+        auto optIter = validOptions.cfind(optionName);
+
+        if (optIter().size())
         {
-            // Length includes space and between option/param and '<>'
-            len += iter().size() + 3;
-            Info<< " <" << iter().c_str() << '>';
+            // Length includes space between option/param and '<>'
+            len += optIter().size() + 3;
+            Info<< " <" << optIter().c_str() << '>';
         }
 
-        HashTable<string>::const_iterator usageIter =
-            optionUsage.find(optionName);
+        auto usageIter = optionUsage.cfind(optionName);
 
-        if (usageIter != optionUsage.end())
+        if (usageIter.found())
         {
-            printOptionUsage
-            (
-                len,
-                usageIter()
-            );
+            printOptionUsage(len, usageIter());
         }
         else
         {
@@ -1204,26 +1195,13 @@ void Foam::argList::printUsage() const
 
     // Place srcDoc/doc/help options at the end
     Info<< "  -srcDoc";
-    printOptionUsage
-    (
-        9,
-        "display source code in browser"
-    );
+    printOptionUsage(9, "display source code in browser" );
 
     Info<< "  -doc";
-    printOptionUsage
-    (
-        6,
-        "display application documentation in browser"
-    );
+    printOptionUsage(6, "display application documentation in browser");
 
     Info<< "  -help";
-    printOptionUsage
-    (
-        7,
-        "print the usage"
-    );
-
+    printOptionUsage(7, "print the usage");
 
     printNotes();
 
@@ -1245,20 +1223,20 @@ void Foam::argList::displayDoc(bool source) const
     // For source code: change foo_8C.html to foo_8C_source.html
     if (source)
     {
-        forAll(docExts, extI)
+        for (fileName& ext : docExts)
         {
-            docExts[extI].replace(".", "_source.");
+            ext.replace(".", "_source.");
         }
     }
 
     fileName docFile;
     bool found = false;
 
-    forAll(docDirs, dirI)
+    for (const fileName& dir : docDirs)
     {
-        forAll(docExts, extI)
+        for (const fileName& ext : docExts)
         {
-            docFile = docDirs[dirI]/executable_ + docExts[extI];
+            docFile = dir/executable_ + ext;
             docFile.expand();
 
             if (isFile(docFile))
