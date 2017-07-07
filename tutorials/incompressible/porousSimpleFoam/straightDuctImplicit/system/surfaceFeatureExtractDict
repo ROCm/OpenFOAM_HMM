@@ -18,16 +18,13 @@ boundaryAndFaceZones.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     baffles (porosityFaces);
 
     // Write options
 
-        writeObj        no; //yes;
+    writeObj            no; //yes;
 }
 
 

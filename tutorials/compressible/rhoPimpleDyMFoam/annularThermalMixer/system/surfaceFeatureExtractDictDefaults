@@ -16,10 +16,8 @@ FoamFile
 
 extractionMethod    extractFromSurface;
 
-extractFromSurfaceCoeffs
-{
-    includedAngle   150;  // Identifes a feature when angle
-}                         // between faces < includedAngle
+includedAngle       150;  // Identifes a feature when angle
+                          // between faces < includedAngle
 
 trimFeatures
 {
