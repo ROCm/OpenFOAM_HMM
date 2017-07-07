@@ -149,7 +149,7 @@ Foam::radiation::blackBodyEmission::blackBodyEmission
     table_
     (
         emissivePowerTable,
-        interpolationTable<scalar>::CLAMP,
+        bounds::repeatableBounding::CLAMP,
         "blackBodyEmissivePower"
     ),
     C1_("C1", dimensionSet(1, 4, 3, 0, 0, 0, 0), 3.7419e-16),
