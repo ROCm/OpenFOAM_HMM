@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -131,6 +131,7 @@ public:
 
         static const Enum<fileCheckTypes> fileCheckTypesNames;
 
+
 private:
 
     // Private data
@@ -172,14 +173,6 @@ private:
 protected:
 
     // Protected Member Functions
-
-        //- Construct and return an IFstream for the object.
-        // \return nullptr if the stream construction failed
-        Istream* objectStream();
-
-        //- Return an IFstream for the object given the exact file.
-        // \return nullptr if the stream construction failed
-        Istream* objectStream(const fileName& fName);
 
         //- Set the object state to bad
         void setBad(const string& s);
@@ -393,12 +386,20 @@ public:
         //- Helper for filePath that searches locally.
         //  When search is false, simply use the current instance,
         //  otherwise search previous instances.
-        fileName localFilePath(const bool search=true) const;
+        fileName localFilePath
+        (
+            const word& typeName,
+            const bool search=true
+        ) const;
 
         //- Helper for filePath that searches up if in parallel
         //  When search is false, simply use the current instance,
         //  otherwise search previous instances.
-        fileName globalFilePath(const bool search=true) const;
+        fileName globalFilePath
+        (
+            const word& typeName,
+            const bool search=true
+        ) const;
 
 
       // Reading
@@ -414,7 +415,8 @@ public:
         bool typeHeaderOk
         (
             const bool checkType = true,
-            const bool search = true
+            const bool search = true,
+            const bool verbose = true
         );
 
         //- Helper: warn that type does not support re-reading
@@ -475,15 +477,16 @@ inline bool typeGlobal()
     return false;
 }
 
+
 //- Template function for obtaining local or global filePath
 template<class T>
-inline fileName typeFilePath(const IOobject& io, const bool search=true)
+inline fileName typeFilePath(const IOobject& io, const bool search = true)
 {
     return
     (
         typeGlobal<T>()
-      ? io.globalFilePath(search)
-      : io.localFilePath(search)
+      ? io.globalFilePath(T::typeName, search)
+      : io.localFilePath(T::typeName, search)
     );
 }
 

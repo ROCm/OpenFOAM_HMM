@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "Time.H"
 #include "polyMesh.H"
 #include "registerSwitch.H"
+#include "fileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -46,6 +47,7 @@ registerOptSwitch
     Foam::regIOobject::fileModificationSkew
 );
 
+
 bool Foam::regIOobject::masterOnlyReading = false;
 
 
@@ -62,8 +64,7 @@ Foam::regIOobject::regIOobject(const IOobject& io, const bool isTime)
         isTime
       ? 0
       : db().getEvent()
-    ),
-    isPtr_(nullptr)
+    )
 {
     // Register with objectRegistry if requested
     if (registerObject())
@@ -156,12 +157,6 @@ Foam::regIOobject::~regIOobject()
             << endl;
     }
 
-    if (isPtr_)
-    {
-        delete isPtr_;
-        isPtr_ = nullptr;
-    }
-
     // Check out of objectRegistry if not owned by the registry
     if (!ownedByRegistry_)
     {
@@ -216,7 +211,7 @@ bool Foam::regIOobject::checkOut()
 
         forAllReverse(watchIndices_, i)
         {
-            time().removeWatch(watchIndices_[i]);
+            fileHandler().removeWatch(watchIndices_[i]);
         }
         watchIndices_.clear();
         return db().checkOut(*this);
@@ -237,12 +232,12 @@ Foam::label Foam::regIOobject::addWatch(const fileName& f)
      && time().runTimeModifiable()
     )
     {
-        index = time().findWatch(watchIndices_, f);
+        index = fileHandler().findWatch(watchIndices_, f);
 
         if (index == -1)
         {
             index = watchIndices_.size();
-            watchIndices_.append(time().addTimeWatch(f));
+            watchIndices_.append(fileHandler().addWatch(f));
         }
     }
     return index;
@@ -266,7 +261,7 @@ void Foam::regIOobject::addWatch()
             f = objectPath();
         }
 
-        label index = time().findWatch(watchIndices_, f);
+        label index = fileHandler().findWatch(watchIndices_, f);
         if (index != -1)
         {
             FatalErrorInFunction
@@ -293,7 +288,7 @@ void Foam::regIOobject::addWatch()
                 watchFiles.setSize(watchIndices_.size());
                 forAll(watchIndices_, i)
                 {
-                    watchFiles[i] = time().getFile(watchIndices_[i]);
+                    watchFiles[i] = fileHandler().getFile(watchIndices_[i]);
                 }
             }
             Pstream::scatter(watchFiles);
@@ -303,18 +298,18 @@ void Foam::regIOobject::addWatch()
                 // unregister current ones
                 forAllReverse(watchIndices_, i)
                 {
-                    time().removeWatch(watchIndices_[i]);
+                    fileHandler().removeWatch(watchIndices_[i]);
                 }
 
                 watchIndices_.clear();
                 forAll(watchFiles, i)
                 {
-                    watchIndices_.append(time().addTimeWatch(watchFiles[i]));
+                    watchIndices_.append(fileHandler().addWatch(watchFiles[i]));
                 }
             }
         }
 
-        addWatch(f);
+        watchIndices_.append(fileHandler().addWatch(f));
     }
 }
 
@@ -416,52 +411,26 @@ void Foam::regIOobject::rename(const word& newName)
 
 Foam::fileName Foam::regIOobject::filePath() const
 {
-    return localFilePath();
-}
-
-
-Foam::Istream* Foam::regIOobject::objectStream()
-{
-    return IOobject::objectStream(filePath());
+    return localFilePath(type());
 }
 
 
 bool Foam::regIOobject::headerOk()
 {
+    // Note: Should be consistent with IOobject::typeHeaderOk(false)
+
     bool ok = true;
 
-    Istream* isPtr = objectStream();
+    fileName fName(filePath());
 
-    // If the stream has failed return
-    if (!isPtr)
+    ok = Foam::fileHandler().readHeader(*this, fName, type());
+
+    if (!ok && IOobject::debug)
     {
-        if (objectRegistry::debug)
-        {
-            Info
-                << "regIOobject::headerOk() : "
-                << "file " << objectPath() << " could not be opened"
-                << endl;
-        }
-
-        ok = false;
+        IOWarningInFunction(fName)
+            << "failed to read header of file " << objectPath()
+            << endl;
     }
-    else
-    {
-        // Try reading header
-        if (!readHeader(*isPtr))
-        {
-            if (objectRegistry::debug)
-            {
-                IOWarningInFunction(*isPtr)
-                    << "failed to read header of file " << objectPath()
-                    << endl;
-            }
-
-            ok = false;
-        }
-    }
-
-    delete isPtr;
 
     return ok;
 }
@@ -469,11 +438,8 @@ bool Foam::regIOobject::headerOk()
 
 void Foam::regIOobject::operator=(const IOobject& io)
 {
-    if (isPtr_)
-    {
-        delete isPtr_;
-        isPtr_ = nullptr;
-    }
+    // Close any file
+    isPtr_.clear();
 
     // Check out of objectRegistry
     checkOut();

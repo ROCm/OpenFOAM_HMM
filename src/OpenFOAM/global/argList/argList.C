@@ -38,6 +38,8 @@ License
 #include "sigQuit.H"
 #include "sigSegv.H"
 #include "foamVersion.H"
+#include "uncollatedFileOperation.H"
+#include "masterUncollatedFileOperation.H"
 
 #include <cctype>
 
@@ -659,12 +661,42 @@ void Foam::argList::parse
         }
     }
 
+
+    // Set fileHandler. In increasing order of priority:
+    // 1. default = uncollated
+    // 2. environment var FOAM_FILEHANDLER
+    // 3. etc/controlDict optimisationSwitches 'fileHandler'
+    // 4. system/controlDict 'fileHandler' (not handled here; done in TimeIO.C)
+
+    {
+        word handlerType(getEnv("FOAM_FILEHANDLER"));
+        HashTable<string>::const_iterator iter = options_.find("fileHandler");
+        if (iter != options_.end())
+        {
+            handlerType = iter();
+        }
+
+        if (handlerType.empty())
+        {
+            handlerType = fileOperation::defaultFileHandler;
+        }
+
+        autoPtr<fileOperation> handler
+        (
+            fileOperation::New
+            (
+                handlerType,
+                bannerEnabled_
+            )
+        );
+        Foam::fileHandler(handler);
+    }
+
     // Case is a single processor run unless it is running parallel
     int nProcs = 1;
 
     // Roots if running distributed
     fileNameList roots;
-
 
     // If this actually is a parallel run
     if (parRunControl_.parRun())
@@ -1046,6 +1078,10 @@ void Foam::argList::parse
 Foam::argList::~argList()
 {
     jobInfo.end();
+
+    // Delete file handler to flush any remaining IO
+    autoPtr<fileOperation> dummy(nullptr);
+    fileHandler(dummy);
 }
 
 
@@ -1339,7 +1375,7 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
 bool Foam::argList::checkRootCase() const
 {
-    if (!isDir(rootPath()))
+    if (!fileHandler().isDir(rootPath()))
     {
         FatalError
             << executable_
@@ -1349,18 +1385,18 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    if (Pstream::parRun())
-    {
-        if (Pstream::master() && (checkProcessorDirectories_ && !isDir(path())))
-        {
-            // Allow slaves on non-existing processor directories created later
-            FatalError
-                << executable_
-                << ": cannot open case directory " << path()
-                << endl;
+    fileName pathDir(fileHandler().filePath(path()));
 
-            return false;
-        }
+    if ((checkProcessorDirectories_ && pathDir.empty()) && Pstream::master())
+    {
+        // Allow slaves on non-existing processor directories, created later
+        // (e.g. redistributePar)
+        FatalError
+            << executable_
+            << ": cannot open case directory " << path()
+            << endl;
+
+        return false;
     }
     else
     {

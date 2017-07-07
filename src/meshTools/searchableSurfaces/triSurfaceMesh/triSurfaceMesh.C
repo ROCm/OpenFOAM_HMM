@@ -51,8 +51,8 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     const fileName fName
     (
         isGlobal
-      ? io.globalFilePath()
-      : io.localFilePath()
+      ? io.globalFilePath(typeName)
+      : io.localFilePath(typeName)
     );
     if (fName.empty())
     {
@@ -89,7 +89,12 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     }
     else
     {
-        fName = (isGlobal ? io.globalFilePath() : io.localFilePath());
+        fName =
+        (
+            isGlobal
+          ? io.globalFilePath(typeName)
+          : io.localFilePath(typeName)
+        );
 
         if (!exists(fName))
         {
@@ -884,7 +889,8 @@ bool Foam::triSurfaceMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     const Time& runTime = searchableSurface::time();

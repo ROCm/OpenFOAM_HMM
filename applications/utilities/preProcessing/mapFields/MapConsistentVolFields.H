@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,9 +49,7 @@ void MapConsistentVolFields
     const fvMesh& meshSource = meshToMesh0Interp.fromMesh();
     const fvMesh& meshTarget = meshToMesh0Interp.toMesh();
 
-    word fieldClassName(fieldType::typeName);
-
-    IOobjectList fields = objects.lookupClass(fieldClassName);
+    IOobjectList fields = objects.lookupClass(fieldType::typeName);
 
     forAllIter(IOobjectList, fields, fieldIter)
     {

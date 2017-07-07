@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,7 +68,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             IOobject::NO_WRITE
         );
 
-        if (fieldHeader.typeHeaderOk<VolFieldType>(true))
+        if (fieldHeader.typeHeaderOk<VolFieldType>(true, true, false))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;
@@ -76,7 +76,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             mesh_.objectRegistry::store(vfPtr);
             return true;
         }
-        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true))
+        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true, true, false))
         {
             // Store field on mesh database
             Log << "    Reading " << fieldName << endl;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,33 +53,38 @@ namespace Foam
     {
         return true;
     }
+
     template<>
     inline bool typeGlobal<scalarGlobalIOList>()
     {
         return true;
     }
+
     template<>
     inline bool typeGlobal<vectorGlobalIOList>()
     {
         return true;
     }
+
     template<>
     inline bool typeGlobal<sphericalTensorGlobalIOList>()
     {
         return true;
     }
+
     template<>
     inline bool typeGlobal<symmTensorGlobalIOList>()
     {
         return true;
     }
+
     template<>
     inline bool typeGlobal<tensorGlobalIOList>()
     {
         return true;
     }
-
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

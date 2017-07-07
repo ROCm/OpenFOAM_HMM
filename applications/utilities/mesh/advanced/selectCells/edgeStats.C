@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "polyMesh.H"
 #include "Ostream.H"
 #include "twoDPointCorrector.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -143,10 +144,8 @@ Foam::scalar Foam::edgeStats::minLen(Ostream& os) const
 
     const edgeList& edges = mesh_.edges();
 
-    forAll(edges, edgeI)
+    forAll(const edge& e : edges)
     {
-        const edge& e = edges[edgeI];
-
         vector eVec(e.vec(mesh_.points()));
 
         scalar eMag = mag(eVec);
@@ -208,14 +207,6 @@ Foam::scalar Foam::edgeStats::minLen(Ostream& os) const
     }
 }
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

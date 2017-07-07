@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,9 @@ Class
 Description
     baseIOdictionary is derived from dictionary and IOobject to give the
     dictionary automatic IO functionality via the objectRegistry.
-    To facilitate IO,
-    baseIOdictionary is provided with a constructor from IOobject and with
-    readData/writeData functions.
+
+    To facilitate IO, baseIOdictionary is provided with a constructor from
+    IOobject and with readData/writeData functions.
 
 SourceFiles
     baseIOdictionary.C

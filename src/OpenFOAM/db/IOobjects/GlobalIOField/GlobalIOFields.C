@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,22 +23,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "globalIOFields.H"
+#include "GlobalIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameWithName(labelGlobalIOField, "labelField");
-    defineTemplateTypeNameWithName(scalarGlobalIOField, "scalarField");
-    defineTemplateTypeNameWithName(vectorGlobalIOField, "vectorField");
-    defineTemplateTypeNameWithName
+    defineTemplateTypeNameAndDebugWithName
     (
-        sphericalTensorGlobalIOField,
-        "sphericalTensorField"
+        GlobalIOField<scalar>,
+        "scalarField",
+        0
     );
-    defineTemplateTypeNameWithName(symmTensorGlobalIOField, "symmTensorField");
-    defineTemplateTypeNameWithName(tensorGlobalIOField, "tensorField");
+    defineTemplateTypeNameAndDebugWithName
+    (
+        GlobalIOField<vector>,
+        "vectorField",
+        0
+    );
+    defineTemplateTypeNameAndDebugWithName
+    (
+        GlobalIOField<sphericalTensor>,
+        "sphericalTensorField",
+        0
+    );
+    defineTemplateTypeNameAndDebugWithName
+    (
+        GlobalIOField<symmTensor>,
+        "symmTensorField",
+        0
+    );
+    defineTemplateTypeNameAndDebugWithName
+    (
+        GlobalIOField<tensor>,
+        "tensorField",
+        0
+    );
 }
+
 
 // ************************************************************************* //

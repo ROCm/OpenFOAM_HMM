@@ -292,7 +292,7 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     curMotionTimeIndex_(time().timeIndex()),
     oldPointsPtr_(nullptr)
 {
-    if (exists(owner_.objectPath()))
+    if (!owner_.headerClassName().empty())
     {
         initMesh();
     }

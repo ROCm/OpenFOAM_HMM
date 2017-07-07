@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -146,7 +146,7 @@ time_t lastModified(const fileName& name, const bool followLink=true);
 
 //- Return time of last file modification
 //  Using an empty name is a no-op and always returns 0.
-double highResLastModified(const fileName& name);
+double highResLastModified(const fileName&, const bool followLink = true);
 
 //- Read a directory and return the entries as a fileName List.
 //  Using an empty directory name returns an empty list.
@@ -256,6 +256,33 @@ label osRandomInteger(List<char>& buffer);
 
 //- Return random double precision (uniform distribution between 0 and 1)
 scalar osRandomDouble(List<char>& buffer);
+
+
+// Thread handling
+
+//- Allocate a thread
+label allocateThread();
+
+//- Start a thread
+void createThread(const label, void *(*start_routine) (void *), void *arg);
+
+//- Wait for thread
+void joinThread(const label);
+
+//- Delete a thread
+void freeThread(const label);
+
+//- Allocate a mutex variable
+label allocateMutex();
+
+//- Lock a mutex variable
+void lockMutex(const label);
+
+//- Unlock a mutex variable
+void unlockMutex(const label);
+
+//- Free a mutex variable
+void freeMutex(const label);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

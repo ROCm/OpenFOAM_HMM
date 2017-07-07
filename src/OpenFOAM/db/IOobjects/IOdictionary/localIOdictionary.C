@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,21 @@ Foam::localIOdictionary::localIOdictionary(const IOobject& io)
     baseIOdictionary(io)
 {
     readHeaderOk(IOstream::ASCII, typeName);
+
+    // For if MUST_READ_IF_MODIFIED
+    addWatch();
+}
+
+
+Foam::localIOdictionary::localIOdictionary
+(
+    const IOobject& io,
+    const word& wantedType
+)
+:
+    baseIOdictionary(io)
+{
+    readHeaderOk(IOstream::ASCII, wantedType);
 
     // For if MUST_READ_IF_MODIFIED
     addWatch();

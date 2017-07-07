@@ -26,6 +26,7 @@ License
 #include "GeometricField.H"
 #include "Time.H"
 #include "demandDrivenData.H"
+#include "dictionary.H"
 #include "localIOdictionary.H"
 #include "data.H"
 
@@ -76,13 +77,14 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields()
         IOobject
         (
             this->name(),
-            this->time().timeName(),
+            this->instance(),
+            this->local(),
             this->db(),
-            IOobject::NO_READ,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
         ),
-        this->readStream(typeName)
+        typeName
     );
 
     this->close();

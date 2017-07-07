@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class localIOdictionary Declaration
+                      Class localIOdictionary Declaration
 \*---------------------------------------------------------------------------*/
 
 class localIOdictionary
@@ -65,6 +65,10 @@ public:
         //- Construct given an IOobject and Istream
         localIOdictionary(const IOobject& io, Istream& is);
 
+        //- Construct given an IOobject, supply wanted typeName
+        localIOdictionary(const IOobject& io, const word& wantedType);
+
+
     //- Destructor
     virtual ~localIOdictionary();
 
@@ -82,7 +86,7 @@ public:
         virtual fileName filePath() const
         {
             // Use default (local only) search strategy
-            return localFilePath();
+            return localFilePath(type());
         }
 
 };

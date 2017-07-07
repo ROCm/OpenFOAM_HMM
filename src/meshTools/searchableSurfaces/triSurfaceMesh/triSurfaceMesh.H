@@ -301,7 +301,8 @@ public:
             (
                 IOstream::streamFormat fmt,
                 IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::compressionType cmp,
+                const bool valid
             ) const;
 
             //- Is object global
@@ -314,7 +315,7 @@ public:
             //  either in the case/processor or case otherwise null
             virtual fileName filePath() const
             {
-                return searchableSurface::globalFilePath();
+                return searchableSurface::globalFilePath(type());
             }
 };
 

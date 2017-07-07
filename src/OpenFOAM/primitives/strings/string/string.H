@@ -150,6 +150,9 @@ public:
         //- Construct from a single character
         inline string(const char c);
 
+        //- Construct from copies of a single character
+        inline string(const size_type, const char);
+
         //- Construct from Istream
         string(Istream& is);
 
