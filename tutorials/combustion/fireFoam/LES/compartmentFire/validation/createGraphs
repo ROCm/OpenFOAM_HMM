@@ -53,12 +53,11 @@ EOF
 }
 
 
-# test if gnuplot exists on the system
-if ! which gnuplot > /dev/null 2>&1
-then
-    echo "gnuplot not found - skipping graph creation" >&2
+# Test if gnuplot exists on the system
+command -v gnuplot >/dev/null 2>&1 || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
-fi
+}
 
 SETSDIRT="../postProcessing/thermoCouple"
 
