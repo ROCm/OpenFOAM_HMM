@@ -35,9 +35,9 @@ namespace Foam
 
 // List of sub-dictionaries to rewrite
 static const Foam::List<Foam::word> subDictNames
-(
-    Foam::IStringStream("(preconditioner smoother)")()
-);
+{
+    "preconditioner", "smoother"
+};
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

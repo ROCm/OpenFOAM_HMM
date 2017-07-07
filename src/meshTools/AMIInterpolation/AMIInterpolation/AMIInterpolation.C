@@ -83,18 +83,13 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::wordTointerpolationMethod
 {
     interpolationMethod method = imDirect;
 
-    wordList methods
-    (
-        IStringStream
-        (
-            "("
-                "directAMI "
-                "mapNearestAMI "
-                "faceAreaWeightAMI "
-                "partialFaceAreaWeightAMI"
-            ")"
-        )()
-    );
+    const wordList methods
+    {
+        "directAMI",
+        "mapNearestAMI",
+        "faceAreaWeightAMI",
+        "partialFaceAreaWeightAMI"
+    };
 
     if (im == "directAMI")
     {
