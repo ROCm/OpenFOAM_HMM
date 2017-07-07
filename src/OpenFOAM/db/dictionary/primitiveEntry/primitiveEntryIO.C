@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,15 +37,15 @@ void Foam::primitiveEntry::append
 {
     if (currToken.isWord())
     {
-        const word& w = currToken.wordToken();
+        const word& key = currToken.wordToken();
 
         if
         (
             disableFunctionEntries
-         || w.size() == 1
+         || key.size() == 1
          || (
-                !(w[0] == '$' && expandVariable(w, dict))
-             && !(w[0] == '#' && expandFunction(w, dict, is))
+                !(key[0] == '$' && expandVariable(key.substr(1), dict))
+             && !(key[0] == '#' && expandFunction(key.substr(1), dict, is))
             )
         )
         {
@@ -54,16 +54,16 @@ void Foam::primitiveEntry::append
     }
     else if (currToken.isVariable())
     {
-        const string& w = currToken.stringToken();
+        const string& key = currToken.stringToken();
 
         if
         (
             disableFunctionEntries
-         || w.size() <= 3
+         || key.size() <= 3
          || !(
-                w[0] == '$'
-             && w[1] == token::BEGIN_BLOCK
-             && expandVariable(w, dict)
+                key[0] == '$'
+             && key[1] == token::BEGIN_BLOCK
+             && expandVariable(key.substr(1), dict)
             )
         )
         {
@@ -79,13 +79,12 @@ void Foam::primitiveEntry::append
 
 bool Foam::primitiveEntry::expandFunction
 (
-    const word& keyword,
-    const dictionary& parentDict,
+    const word& functionName,
+    const dictionary& dict,
     Istream& is
 )
 {
-    word functionName = keyword(1, keyword.size()-1);
-    return functionEntry::execute(functionName, parentDict, *this, is);
+    return functionEntry::execute(functionName, dict, *this, is);
 }
 
 

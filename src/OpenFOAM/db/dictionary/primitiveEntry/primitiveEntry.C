@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,26 +41,24 @@ void Foam::primitiveEntry::append(const UList<token>& varTokens)
 
 bool Foam::primitiveEntry::expandVariable
 (
-    const string& w,
+    const string& varName,
     const dictionary& dict
 )
 {
-    if (w.size() > 2 && w[0] == '$' && w[1] == token::BEGIN_BLOCK)
+    if (varName.size() > 1 && varName[0] == token::BEGIN_BLOCK)
     {
-        // Recursive substitution mode. Replace between {} with expansion.
-        string s(w(2, w.size()-3));
-        // Substitute dictionary and environment variables. Do not allow
-        // empty substitutions.
-        stringOps::inplaceExpand(s, dict, true, false);
-        string newW(w);
-        newW.std::string::replace(1, newW.size()-1, s);
+        // Recursive substitution mode.
+        // Content between {} is replaced with expansion.
+        string expanded = varName.substr(1, varName.size()-2);
 
-        return expandVariable(newW, dict);
+        // Substitute dictionary and environment variables.
+        // Do not allow empty substitutions.
+        stringOps::inplaceExpand(expanded, dict, true, false);
+
+        return expandVariable(expanded, dict);
     }
     else
     {
-        string varName = w(1, w.size()-1);
-
         // lookup the variable name in the given dictionary....
         // Note: allow wildcards to match? For now disabled since following
         // would expand internalField to wildcard match and not expected
@@ -83,8 +81,8 @@ bool Foam::primitiveEntry::expandVariable
         }
         else
         {
-            // not in the dictionary - try an environment variable
-            string envStr = getEnv(varName);
+            // Not in the dictionary - try an environment variable
+            const string envStr = getEnv(varName);
 
             if (envStr.empty())
             {
@@ -100,6 +98,7 @@ bool Foam::primitiveEntry::expandVariable
             append(tokenList(IStringStream('(' + envStr + ')')()));
         }
     }
+
     return true;
 }
 

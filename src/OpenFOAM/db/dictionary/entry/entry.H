@@ -75,15 +75,18 @@ class entry
 
     // Private Member Functions
 
-        //- Get the next valid keyword. Return true if a valid keyType.
+        //- Get the next valid keyword.
+        //  \return True if it is a valid keyType.
         static bool getKeyword
         (
             keyType& keyword,
-            token& keywordToken,
+            token& keyToken,
             Istream& is
         );
 
-        //- Get the next valid keyword otherwise return false
+        //- Get the next valid keyword.
+        //  Warn when an invalid token is encountered that is not an end-of-block or eof
+        //  \return True if it is a valid keyType.
         static bool getKeyword(keyType& keyword, Istream& is);
 
 
