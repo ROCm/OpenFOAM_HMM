@@ -34,7 +34,7 @@ Description
     are calculated using:
 
         \f[
-            U = frac{U_f}{K} ln(\frac{z + z_0}{z_0})
+            U = \frac{U_f}{K} ln \left(\frac{z + z_0}{z_0}\right)
         \f]
 
     where
