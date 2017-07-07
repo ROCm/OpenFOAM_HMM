@@ -77,7 +77,7 @@ private:
         const word prefix_;
 
         //- String representation of timeControls enums
-        static const NamedEnum<timeControls, 9> timeControlNames_;
+        static const Enum<timeControls> timeControlNames_;
 
         //- Type of time control
         timeControls timeControl_;

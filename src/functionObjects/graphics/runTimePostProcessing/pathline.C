@@ -48,27 +48,19 @@ namespace runTimePostPro
     defineRunTimeSelectionTable(pathline, dictionary);
 }
 }
-
-template<>
-const char* NamedEnum
-<
-    functionObjects::runTimePostPro::pathline::representationType,
-    4
->::names[] =
-{
-    "none",
-    "line",
-    "tube",
-    "vector"
-};
 }
 
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::runTimePostPro::pathline::representationType,
-    4
+    Foam::functionObjects::runTimePostPro::pathline::representationType
 >
-    Foam::functionObjects::runTimePostPro::pathline::representationTypeNames;
+Foam::functionObjects::runTimePostPro::pathline::representationTypeNames
+{
+    { representationType::rtNone, "none" },
+    { representationType::rtLine, "line" },
+    { representationType::rtTube, "tube" },
+    { representationType::rtVector, "vector" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -104,8 +96,7 @@ void Foam::functionObjects::runTimePostPro::pathline::addLines
         }
         case rtTube:
         {
-            vtkSmartPointer<vtkTubeFilter> tubes =
-                vtkSmartPointer<vtkTubeFilter>::New();
+            auto tubes = vtkSmartPointer<vtkTubeFilter>::New();
             tubes->SetInputData(data);
             tubes->SetRadius(tubeRadius_);
             tubes->SetNumberOfSides(20);
@@ -138,7 +129,7 @@ Foam::functionObjects::runTimePostPro::pathline::pathline
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.read(dict.lookup("representation"))
+        representationTypeNames.lookup("representation", dict)
     ),
     tubeRadius_(0.0),
     lineColour_(nullptr)

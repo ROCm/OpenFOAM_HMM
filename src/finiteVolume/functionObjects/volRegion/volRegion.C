@@ -37,19 +37,16 @@ namespace functionObjects
 }
 }
 
-template<>
-const char*
-Foam::NamedEnum
-<
-    Foam::functionObjects::volRegion::regionTypes,
-    2
->::names[] = {"cellZone", "all"};
 
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::volRegion::regionTypes,
-    2
-> Foam::functionObjects::volRegion::regionTypeNames_;
+    Foam::functionObjects::volRegion::regionTypes
+>
+Foam::functionObjects::volRegion::regionTypeNames_
+{
+    { regionTypes::vrtCellZone, "cellZone" },
+    { regionTypes::vrtAll, "all" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -79,9 +76,12 @@ Foam::functionObjects::volRegion::volRegion
     mesh_(mesh),
     regionType_
     (
-        dict.found("regionType")
-      ? regionTypeNames_.read(dict.lookup("regionType"))
-      : vrtAll
+        regionTypeNames_.lookupOrDefault
+        (
+            "regionType",
+            dict,
+            regionTypes::vrtAll
+        )
     ),
     regionName_(polyMesh::defaultRegion),
     regionID_(-1)
@@ -144,7 +144,7 @@ bool Foam::functionObjects::volRegion::read
         {
             FatalIOErrorInFunction(dict)
                 << "Unknown region type. Valid region types are:"
-                << regionTypeNames_.toc()
+                << regionTypeNames_.sortedToc()
                 << exit(FatalIOError);
         }
     }

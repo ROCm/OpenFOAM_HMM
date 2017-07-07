@@ -52,24 +52,20 @@ namespace functionObjects
         dictionary
     );
 }
-template<>
-const char* NamedEnum
-<
-    functionObjects::fluxSummary::modeType,
-    5
->::names[] =
-{
-    "faceZone",
-    "faceZoneAndDirection",
-    "cellZoneAndDirection",
-    "surface",
-    "surfaceAndDirection"
-};
 }
 
-
-const Foam::NamedEnum<Foam::functionObjects::fluxSummary::modeType, 5>
-Foam::functionObjects::fluxSummary::modeTypeNames_;
+const Foam::Enum
+<
+    Foam::functionObjects::fluxSummary::modeType
+>
+Foam::functionObjects::fluxSummary::modeTypeNames_
+{
+    { modeType::mdFaceZone , "faceZone" },
+    { modeType::mdFaceZoneAndDirection, "faceZoneAndDirection" },
+    { modeType::mdCellZoneAndDirection, "cellZoneAndDirection" },
+    { modeType::mdSurface, "surface" },
+    { modeType::mdSurfaceAndDirection, "surfaceAndDirection" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -823,7 +819,7 @@ bool Foam::functionObjects::fluxSummary::read(const dictionary& dict)
     fvMeshFunctionObject::read(dict);
     writeFile::read(dict);
 
-    mode_ = modeTypeNames_.read(dict.lookup("mode"));
+    mode_ = modeTypeNames_.lookup("mode", dict);
     phiName_ = dict.lookupOrDefault<word>("phi", "phi");
     scaleFactor_ = dict.lookupOrDefault<scalar>("scaleFactor", 1.0);
     tolerance_   = dict.lookupOrDefault<scalar>("tolerance", 0.8);

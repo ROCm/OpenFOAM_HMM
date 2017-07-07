@@ -107,7 +107,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<samplingSource, 3> samplingSourceNames_;
+        static const Enum<samplingSource> samplingSourceNames_;
 
         //- Reference to mesh
         const polyMesh& mesh_;

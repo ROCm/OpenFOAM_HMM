@@ -34,12 +34,9 @@ using namespace Foam::constant::mathematical;
 
 template<class CloudType>
 Foam::wordList Foam::ThermoSurfaceFilm<CloudType>::interactionTypeNames_
-(
-    IStringStream
-    (
-        "(absorb bounce splashBai)"
-    )()
-);
+{
+    "absorb", "bounce", "splashBai"
+};
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

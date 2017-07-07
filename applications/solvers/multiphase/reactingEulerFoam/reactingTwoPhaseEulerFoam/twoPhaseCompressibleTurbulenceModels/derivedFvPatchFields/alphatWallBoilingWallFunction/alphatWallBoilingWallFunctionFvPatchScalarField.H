@@ -164,7 +164,7 @@ private:
     // Private data
 
         //- Heat source type names
-        static const NamedEnum<phaseType, 2> phaseTypeNames_;
+        static const Enum<phaseType> phaseTypeNames_;
 
         //- Heat source type
         phaseType phaseType_;

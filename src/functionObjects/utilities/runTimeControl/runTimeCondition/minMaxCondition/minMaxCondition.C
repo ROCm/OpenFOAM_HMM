@@ -57,27 +57,19 @@ namespace runTimeControls
 }
 }
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::functionObjects::runTimeControls::minMaxCondition::modeType,
-    2
->::names[] =
-{
-    "minimum",
-    "maximum"
-};
-
-const Foam::NamedEnum
+const Foam::Enum
 <
     Foam
   ::functionObjects
   ::runTimeControls
   ::minMaxCondition
-  ::modeType,
-   2
+  ::modeType
 >
-    Foam::functionObjects::runTimeControls::minMaxCondition::modeTypeNames_;
+Foam::functionObjects::runTimeControls::minMaxCondition::modeTypeNames_
+{
+    { modeType::mdMin, "minimum" },
+    { modeType::mdMax, "maximum" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -92,7 +84,7 @@ Foam::functionObjects::runTimeControls::minMaxCondition::minMaxCondition
 :
     runTimeCondition(name, obr, dict, state),
     functionObjectName_(dict.lookup("functionObject")),
-    mode_(modeTypeNames_.read(dict.lookup("mode"))),
+    mode_(modeTypeNames_.lookup("mode", dict)),
     fieldNames_(dict.lookup("fields")),
     value_(readScalar(dict.lookup("value")))
 {}

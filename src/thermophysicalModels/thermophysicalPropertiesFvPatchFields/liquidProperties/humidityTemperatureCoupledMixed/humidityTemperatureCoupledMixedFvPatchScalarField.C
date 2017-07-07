@@ -33,29 +33,20 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::
-        humidityTemperatureCoupledMixedFvPatchScalarField::
-        massTransferMode,
-        4
-    >::names[] =
-    {
-        "constantMass",
-        "condensation",
-        "evaporation",
-        "condensationAndEvaporation"
-    };
-}
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massTransferMode,
-    4
-> Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massModeTypeNames_;
+    Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massTransferMode
+>
+Foam::humidityTemperatureCoupledMixedFvPatchScalarField::massModeTypeNames_
+{
+    { massTransferMode::mtConstantMass, "constantMass" },
+    { massTransferMode::mtCondensation, "condensation" },
+    { massTransferMode::mtEvaporation, "evaporation" },
+    {
+        massTransferMode::mtCondensationAndEvaporation,
+        "condensationAndEvaporation"
+    },
+};
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -256,7 +247,7 @@ humidityTemperatureCoupledMixedFvPatchScalarField
 
     if (dict.found("mode"))
     {
-        mode_ = massModeTypeNames_.read(dict.lookup("mode"));
+        mode_ = massModeTypeNames_.lookup("mode", dict);
         fluid_ = true;
     }
 
@@ -492,7 +483,7 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::updateCoeffs()
             scalarField liquidRho(patch().size(), 0.0);
 
             fixedGradientFvPatchField<scalar>& Yp =
-                const_cast<fixedGradientFvPatchField<scalar>& >
+                const_cast<fixedGradientFvPatchField<scalar>&>
                 (
                     refCast
                     <
@@ -746,17 +737,15 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
 
     if (fluid_)
     {
-        os.writeKeyword("mode")<< massModeTypeNames_[mode_]
-            << token::END_STATEMENT <<nl;
+        os.writeEntry("mode", massModeTypeNames_[mode_]);
 
         writeEntryIfDifferent<word>(os, "specie", "none", specieName_);
 
-        os.writeKeyword("carrierMolWeight")<< Mcomp_
-            << token::END_STATEMENT <<nl;
+        os.writeEntry("carrierMolWeight", Mcomp_);
 
-        os.writeKeyword("L")<< L_ << token::END_STATEMENT << nl;
-        os.writeKeyword("Tvap")<< Tvap_ << token::END_STATEMENT << nl;
-        os.writeKeyword("fluid")<< fluid_ << token::END_STATEMENT << nl;
+        os.writeEntry("L", L_);
+        os.writeEntry("Tvap", Tvap_);
+        os.writeEntry("fluid", fluid_);
         mass_.writeEntry("mass", os);
 
         if (mode_ == mtConstantMass)

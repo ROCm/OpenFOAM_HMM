@@ -84,8 +84,8 @@ SourceFiles
 #define functionObjects_writeObjects_H
 
 #include "functionObject.H"
-#include "wordReList.H"
-#include "NamedEnum.H"
+#include "wordRes.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -119,7 +119,7 @@ public:
             ANY_WRITE
         };
 
-        static const NamedEnum<writeOption, 3> writeOptionNames_;
+        static const Enum<writeOption> writeOptionNames_;
 
 private:
 
@@ -138,10 +138,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        writeObjects(const writeObjects&);
+        writeObjects(const writeObjects&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const writeObjects&);
+        void operator=(const writeObjects&) = delete;
 
 
 public:

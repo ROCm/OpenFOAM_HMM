@@ -34,7 +34,7 @@ Description
 void Foam::IStringStream::print(Ostream& os) const
 {
     os  << "IStringStream " << name() << " : "
-        << "buffer = \n" << str() << Foam::endl;
+        << "buffer =\n" << str() << Foam::endl;
 
     ISstream::print(os);
 }
@@ -43,7 +43,7 @@ void Foam::IStringStream::print(Ostream& os) const
 void Foam::OStringStream::print(Ostream& os) const
 {
     os  << "OStringStream " << name() << " : "
-        << "buffer = \n" << str() << Foam::endl;
+        << "buffer =\n" << str() << Foam::endl;
 
     OSstream::print(os);
 }

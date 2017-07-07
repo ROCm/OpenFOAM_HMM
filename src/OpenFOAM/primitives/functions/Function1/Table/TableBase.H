@@ -35,6 +35,7 @@ SourceFiles
 #ifndef TableBase_H
 #define TableBase_H
 
+#include "tableBounds.H"
 #include "Function1.H"
 #include "Tuple2.H"
 
@@ -57,20 +58,6 @@ class TableBase
 :
     public Function1<Type>
 {
-public:
-
-    // Public data types
-
-        //- Enumeration for handling out-of-bound values
-        enum boundsHandling
-        {
-            ERROR,          //!< Exit with a FatalError
-            WARN,           //!< Issue warning and clamp value (default)
-            CLAMP,          //!< Clamp value to the start/end value
-            REPEAT          //!< Treat as a repeating list
-        };
-
-
 protected:
 
     // Protected data
@@ -78,8 +65,8 @@ protected:
         //- Table name
         const word name_;
 
-        //- Enumeration for handling out-of-bound values
-        const boundsHandling boundsHandling_;
+        //- Handling for out-of-bound values
+        const bounds::repeatableBounding bounding_;
 
         //- Interpolation type
         const word interpolationScheme_;
@@ -108,7 +95,7 @@ protected:
 private:
 
         //- Disallow default bitwise assignment
-        void operator=(const TableBase<Type>&);
+        void operator=(const TableBase<Type>&) = delete;
 
 
 public:
@@ -127,15 +114,6 @@ public:
 
 
     // Member Functions
-
-        //- Return the out-of-bounds handling as a word
-        word boundsHandlingToWord(const boundsHandling& bound) const;
-
-        //- Return the out-of-bounds handling as an enumeration
-        boundsHandling wordToBoundsHandling(const word& bound) const;
-
-        //- Set the out-of-bounds handling from enum, return previous setting
-        boundsHandling outOfBounds(const boundsHandling& bound);
 
         //- Check the table for size and consistency
         void check() const;
@@ -164,8 +142,8 @@ public:
         //- Write all table data in dictionary format
         virtual void writeData(Ostream& os) const;
 
-        //- Write keywords only in dictionary format. Used for non-inline
-        //  table types
+        //- Write keywords only in dictionary format.
+        //  Used for non-inline table types
         virtual void writeEntries(Ostream& os) const;
 };
 

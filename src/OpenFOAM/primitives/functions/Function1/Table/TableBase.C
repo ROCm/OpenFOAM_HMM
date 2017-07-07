@@ -64,11 +64,13 @@ Foam::Function1Types::TableBase<Type>::TableBase
 :
     Function1<Type>(name),
     name_(name),
-    boundsHandling_
+    bounding_
     (
-        wordToBoundsHandling
+        bounds::repeatableBoundingNames.lookupOrFailsafe
         (
-            dict.lookupOrDefault<word>("outOfBounds", "clamp")
+            "outOfBounds",
+            dict,
+            bounds::repeatableBounding::CLAMP
         )
     ),
     interpolationScheme_
@@ -84,7 +86,7 @@ Foam::Function1Types::TableBase<Type>::TableBase(const TableBase<Type>& tbl)
 :
     Function1<Type>(tbl),
     name_(tbl.name_),
-    boundsHandling_(tbl.boundsHandling_),
+    bounding_(tbl.bounding_),
     interpolationScheme_(tbl.interpolationScheme_),
     table_(tbl.table_),
     tableSamplesPtr_(tbl.tableSamplesPtr_),
@@ -100,90 +102,6 @@ Foam::Function1Types::TableBase<Type>::~TableBase()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::word Foam::Function1Types::TableBase<Type>::boundsHandlingToWord
-(
-     const boundsHandling& bound
-) const
-{
-    word enumName("warn");
-
-    switch (bound)
-    {
-        case ERROR:
-        {
-            enumName = "error";
-            break;
-        }
-        case WARN:
-        {
-            enumName = "warn";
-            break;
-        }
-        case CLAMP:
-        {
-            enumName = "clamp";
-            break;
-        }
-        case REPEAT:
-        {
-            enumName = "repeat";
-            break;
-        }
-    }
-
-    return enumName;
-}
-
-
-template<class Type>
-typename Foam::Function1Types::TableBase<Type>::boundsHandling
-Foam::Function1Types::TableBase<Type>::wordToBoundsHandling
-(
-    const word& bound
-) const
-{
-    if (bound == "error")
-    {
-        return ERROR;
-    }
-    else if (bound == "warn")
-    {
-        return WARN;
-    }
-    else if (bound == "clamp")
-    {
-        return CLAMP;
-    }
-    else if (bound == "repeat")
-    {
-        return REPEAT;
-    }
-    else
-    {
-        WarningInFunction
-            << "bad outOfBounds specifier " << bound << " using 'warn'"
-            << endl;
-
-        return WARN;
-    }
-}
-
-
-template<class Type>
-typename Foam::Function1Types::TableBase<Type>::boundsHandling
-Foam::Function1Types::TableBase<Type>::outOfBounds
-(
-    const boundsHandling& bound
-)
-{
-    boundsHandling prev = boundsHandling_;
-    boundsHandling_ = bound;
-
-    return prev;
-}
-
 
 template<class Type>
 void Foam::Function1Types::TableBase<Type>::check() const
@@ -223,33 +141,33 @@ bool Foam::Function1Types::TableBase<Type>::checkMinBounds
 {
     if (x < table_.first().first())
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << x << ") underflow"
                     << exit(FatalError);
                 break;
             }
-            case WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << x << ") underflow" << nl
                     << endl;
 
-                // Behaviour as per 'CLAMP'
+                // Behaviour as per CLAMP
                 xDash = table_.first().first();
                 return true;
                 break;
             }
-            case CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 xDash = table_.first().first();
                 return true;
                 break;
             }
-            case REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
                 // adjust x to >= minX
                 const scalar span =
@@ -282,33 +200,33 @@ bool Foam::Function1Types::TableBase<Type>::checkMaxBounds
 {
     if (x > table_.last().first())
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << x << ") overflow"
                     << exit(FatalError);
                 break;
             }
-            case WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << x << ") overflow" << nl
                     << endl;
 
-                // Behaviour as per 'CLAMP'
+                // Behaviour as per CLAMP
                 xDash = table_.last().first();
                 return true;
                 break;
             }
-            case CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 xDash = table_.last().first();
                 return true;
                 break;
             }
-            case REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
                 // adjust x to >= minX
                 const scalar span =
@@ -427,9 +345,13 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1Types::TableBase<Type>::y() const
 template<class Type>
 void Foam::Function1Types::TableBase<Type>::writeEntries(Ostream& os) const
 {
-    if (boundsHandling_ != CLAMP)
+    if (bounding_ != bounds::repeatableBounding::CLAMP)
     {
-        os.writeEntry("outOfBounds", boundsHandlingToWord(boundsHandling_));
+        os.writeEntry
+        (
+            "outOfBounds",
+            bounds::repeatableBoundingNames[bounding_]
+        );
     }
     if (interpolationScheme_ != "linear")
     {

@@ -37,18 +37,16 @@ const Foam::word Foam::functionObjects::fieldAverageItem::EXT_PRIME2MEAN
     "Prime2Mean"
 );
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::functionObjects::fieldAverageItem::baseType,
-    2
->::names[] = { "iteration", "time"};
 
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::fieldAverageItem::baseType,
-    2
-> Foam::functionObjects::fieldAverageItem::baseTypeNames_;
+    Foam::functionObjects::fieldAverageItem::baseType
+>
+Foam::functionObjects::fieldAverageItem::baseTypeNames_
+{
+    { baseType::ITER, "iteration" },
+    { baseType::TIME, "time" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

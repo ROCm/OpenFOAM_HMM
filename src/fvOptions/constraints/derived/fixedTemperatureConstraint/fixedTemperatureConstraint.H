@@ -60,7 +60,7 @@ SourceFiles
 #define fixedTemperatureConstraint_H
 
 #include "cellSetOption.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -90,7 +90,7 @@ public:
 
 
     //- String representation of temperatureMode enums
-    static const NamedEnum<temperatureMode, 2> temperatureModeNames_;
+    static const Enum<temperatureMode> temperatureModeNames_;
 
 
 protected:

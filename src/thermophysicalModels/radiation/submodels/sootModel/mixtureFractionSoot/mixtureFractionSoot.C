@@ -38,7 +38,7 @@ Foam::radiation::mixtureFractionSoot<ThermoType>::checkThermo
 {
     if (isA<singleStepReactingMixture<ThermoType>>(thermo))
     {
-        return dynamic_cast<const singleStepReactingMixture<ThermoType>& >
+        return dynamic_cast<const singleStepReactingMixture<ThermoType>&>
         (
             thermo
         );
@@ -50,7 +50,7 @@ Foam::radiation::mixtureFractionSoot<ThermoType>::checkThermo
             << "Please select a thermo package based on "
             << "singleStepReactingMixture" << exit(FatalError);
 
-        return dynamic_cast<const singleStepReactingMixture<ThermoType>& >
+        return dynamic_cast<const singleStepReactingMixture<ThermoType>&>
         (
             thermo
         );

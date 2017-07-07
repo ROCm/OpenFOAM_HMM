@@ -38,18 +38,15 @@ namespace functionObjects
 }
 }
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::fieldMinMax::modeType,
-    2
->::names[] = {"magnitude", "component"};
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::fieldMinMax::modeType,
-    2
-> Foam::functionObjects::fieldMinMax::modeTypeNames_;
+    Foam::functionObjects::fieldMinMax::modeType
+>
+Foam::functionObjects::fieldMinMax::modeTypeNames_
+{
+    { modeType::mdMag,  "magnitude" },
+    { modeType::mdCmpt, "component" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -126,7 +123,7 @@ bool Foam::functionObjects::fieldMinMax::read(const dictionary& dict)
 
     location_ = dict.lookupOrDefault<Switch>("location", true);
 
-    mode_ = modeTypeNames_[dict.lookupOrDefault<word>("mode", "magnitude")];
+    mode_ = modeTypeNames_.lookupOrDefault("mode", dict, modeType::mdMag);
     dict.lookup("fields") >> fieldSet_;
 
     return true;

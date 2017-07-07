@@ -126,13 +126,13 @@ public:
         // Inquiry
 
             //- Return the name of the stream
-            const fileName& name() const
+            virtual const fileName& name() const
             {
                 return name_;
             }
 
             //- Return non-const access to the name of the stream
-            fileName& name()
+            virtual fileName& name()
             {
                 return name_;
             }
@@ -165,7 +165,7 @@ public:
         // Read functions
 
             //- Return next token from stream
-            virtual Istream& read(token&);
+            virtual Istream& read(token& t);
 
             //- Read a character
             virtual Istream& read(char&);
@@ -203,8 +203,8 @@ public:
 
         // Print
 
-            //- Print description of IOstream to Ostream
-            void print(Ostream&) const;
+            //- Print description of stream to Ostream
+            void print(Ostream& os) const;
 };
 
 

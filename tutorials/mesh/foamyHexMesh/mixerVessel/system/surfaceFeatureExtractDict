@@ -18,10 +18,7 @@ shaftRotating.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   100;
-    }
+    includedAngle       100;
 
     subsetFeatures
     {
@@ -30,19 +27,15 @@ shaftRotating.stl
     }
 
     // Write options
-
-        writeObj        yes;
+    writeObj            yes;
 }
 
 
 vessel.stl
 {
-    extractionMethod        extractFromSurface;
+    extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle       120;
-    }
+    includedAngle       120;
 
     subsetFeatures
     {
@@ -55,8 +48,7 @@ vessel.stl
     }
 
     // Write options
-
-        writeObj            no;
+    writeObj            no;
 }
 
 
@@ -64,14 +56,10 @@ spargerInlet.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     // Write options
-
-        writeObj        no;
+    writeObj            no;
 }
 
 
@@ -79,14 +67,10 @@ stirrer.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     // Write options
-
-        writeObj        no;
+    writeObj            no;
 }
 
 
@@ -94,16 +78,12 @@ stirrer_baffles.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     baffles (stirrer);
 
     // Write options
-
-        writeObj        no;
+    writeObj            no;
 }
 
 
@@ -111,16 +91,12 @@ rotating.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     baffles (MRF);
 
     // Write options
-
-        writeObj        yes;
+    writeObj            yes;
 }
 
 
@@ -128,16 +104,12 @@ baffles.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     baffles (baffles);
 
     // Write options
-
-        writeObj        no;
+    writeObj            no;
 }
 
 

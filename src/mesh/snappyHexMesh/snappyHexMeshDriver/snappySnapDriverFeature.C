@@ -2839,7 +2839,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
     // Detect baffle edges. Assume initial mesh will have 0,90 or 180
     // (baffle) degree angles so smoothing should make 0,90
     // to be less than 90. Choose reasonable value
-    const scalar baffleFeatureCos = Foam::cos(degToRad(110));
+    const scalar baffleFeatureCos = Foam::cos(110.0_deg);
 
 
     autoPtr<OBJstream> baffleEdgeStr;

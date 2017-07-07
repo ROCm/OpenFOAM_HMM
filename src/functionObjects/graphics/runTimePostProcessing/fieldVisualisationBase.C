@@ -47,46 +47,27 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::functionObjects::fieldVisualisationBase::colourByType
+>
+Foam::functionObjects::fieldVisualisationBase::colourByTypeNames
 {
-    template<>
-    const char* NamedEnum
-    <
-        functionObjects::fieldVisualisationBase::colourByType,
-        2
-    >::names[] =
-    {
-        "colour",
-        "field"
-    };
+    { colourByType::cbColour, "colour" },
+    { colourByType::cbField, "field" },
+};
 
-    template<>
-    const char* NamedEnum
-    <
-        functionObjects::fieldVisualisationBase::colourMapType,
-        4
-    >::names[] =
-    {
-        "rainbow",
-        "blueWhiteRed",
-        "fire",
-        "greyscale"
-    };
-}
-
-const Foam::NamedEnum
-    <
-        Foam::functionObjects::fieldVisualisationBase::colourByType,
-        2
-    >
-    Foam::functionObjects::fieldVisualisationBase::colourByTypeNames;
-
-const Foam::NamedEnum
-    <
-        Foam::functionObjects::fieldVisualisationBase::colourMapType,
-        4
-    >
-    Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames;
+const Foam::Enum
+<
+    Foam::functionObjects::fieldVisualisationBase::colourMapType
+>
+Foam::functionObjects::fieldVisualisationBase::colourMapTypeNames
+{
+    { colourMapType::cmRainbow, "rainbow" },
+    { colourMapType::cmBlueWhiteRed, "blueWhiteRed" },
+    { colourMapType::cmFire, "fire" },
+    { colourMapType::cmGreyscale, "greyscale" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -100,8 +81,7 @@ void Foam::functionObjects::fieldVisualisationBase::setColourMap
 
     lut->SetNumberOfColors(nColours);
 
-    vtkSmartPointer<vtkColorTransferFunction> ctf =
-        vtkSmartPointer<vtkColorTransferFunction>::New();
+    auto ctf = vtkSmartPointer<vtkColorTransferFunction>::New();
 
     switch (colourMap_)
     {
@@ -163,8 +143,7 @@ void Foam::functionObjects::fieldVisualisationBase::addScalarBar
         return;
     }
 
-    vtkSmartPointer<vtkScalarBarActor> sbar =
-        vtkSmartPointer<vtkScalarBarActor>::New();
+    auto sbar = vtkSmartPointer<vtkScalarBarActor>::New();
     sbar->SetLookupTable(lut);
     sbar->SetNumberOfLabels(scalarBar_.numberOfLabels_);
 
@@ -174,8 +153,7 @@ void Foam::functionObjects::fieldVisualisationBase::addScalarBar
     // - Default scalar bar title text is scales by the scalar bar box
     //   dimensions so if the title is a long string, the text is shrunk to fit
     //   Instead, suppress title and set the title using a vtkTextActor
-    vtkSmartPointer<vtkTextActor> titleActor =
-        vtkSmartPointer<vtkTextActor>::New();
+    auto titleActor = vtkSmartPointer<vtkTextActor>::New();
     sbar->SetTitle(" ");
     titleActor->SetInput(scalarBar_.title_.c_str());
     titleActor->GetTextProperty()->SetFontFamilyToArial();
@@ -282,8 +260,7 @@ void Foam::functionObjects::fieldVisualisationBase::setField
         case cbField:
         {
             // Create look-up table for colours
-            vtkSmartPointer<vtkLookupTable> lut =
-                vtkSmartPointer<vtkLookupTable>::New();
+            auto lut = vtkSmartPointer<vtkLookupTable>::New();
             setColourMap(lut);
             lut->SetVectorMode(vtkScalarsToColors::MAGNITUDE);
 
@@ -337,9 +314,8 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
     vtkRenderer* renderer
 ) const
 {
-    vtkSmartPointer<vtkGlyph3D> glyph = vtkSmartPointer<vtkGlyph3D>::New();
-    vtkSmartPointer<vtkPolyDataMapper> glyphMapper =
-        vtkSmartPointer<vtkPolyDataMapper>::New();
+    auto glyph = vtkSmartPointer<vtkGlyph3D>::New();
+    auto glyphMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     glyphMapper->SetInputConnection(glyph->GetOutputPort());
 
     glyph->SetInputData(data);
@@ -358,8 +334,7 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
     else if (data->GetCellData()->HasArray(scaleFieldNameChar) == 1)
     {
         // Need to convert cell data to point data
-        vtkSmartPointer<vtkCellDataToPointData> cellToPoint =
-            vtkSmartPointer<vtkCellDataToPointData>::New();
+        auto cellToPoint = vtkSmartPointer<vtkCellDataToPointData>::New();
         cellToPoint->SetInputData(data);
         cellToPoint->Update();
         vtkDataSet* pds = cellToPoint->GetOutput();
@@ -380,8 +355,7 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
 
     if (nComponents == 1)
     {
-        vtkSmartPointer<vtkSphereSource> sphere =
-            vtkSmartPointer<vtkSphereSource>::New();
+        auto sphere = vtkSmartPointer<vtkSphereSource>::New();
         sphere->SetCenter(0, 0, 0);
         sphere->SetRadius(0.5);
 
@@ -428,8 +402,7 @@ void Foam::functionObjects::fieldVisualisationBase::addGlyphs
     }
     else if (nComponents == 3)
     {
-        vtkSmartPointer<vtkArrowSource> arrow =
-            vtkSmartPointer<vtkArrowSource>::New();
+        auto arrow = vtkSmartPointer<vtkArrowSource>::New();
         arrow->SetTipResolution(10);
         arrow->SetTipRadius(0.1);
         arrow->SetTipLength(0.35);
@@ -516,7 +489,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
     colourMap_(cmRainbow),
     range_()
 {
-    colourBy_ = colourByTypeNames.read(dict.lookup("colourBy"));
+    colourBy_ = colourByTypeNames.lookup("colourBy", dict);
 
     switch (colourBy_)
     {
@@ -531,7 +504,7 @@ Foam::functionObjects::fieldVisualisationBase::fieldVisualisationBase
 
             if (dict.found("colourMap"))
             {
-                colourMap_ = colourMapTypeNames.read(dict.lookup("colourMap"));
+                colourMap_ = colourMapTypeNames.lookup("colourMap", dict);
             }
 
             const dictionary& sbarDict = dict.subDict("scalarBar");

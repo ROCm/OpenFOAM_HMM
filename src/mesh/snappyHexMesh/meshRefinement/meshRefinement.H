@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,64 +82,43 @@ class snapParameters;
 
 class meshRefinement
 {
-
 public:
 
     // Public data types
 
-        //- Enumeration for what to debug
-        enum IOdebugType
-        {
-            IOMESH,
-            IOOBJINTERSECTIONS,
-            IOFEATURESEEDS,
-            IOATTRACTION,
-            IOLAYERINFO
-        };
-
-        static const NamedEnum<IOdebugType, 5> IOdebugTypeNames;
+        //- Enumeration for what to debug. Used as a bit-pattern.
         enum debugType
         {
-            MESH = 1<<IOMESH,
-            OBJINTERSECTIONS = 1<<IOOBJINTERSECTIONS,
-            FEATURESEEDS = 1<<IOFEATURESEEDS,
-            ATTRACTION = 1<< IOATTRACTION,
-            LAYERINFO = 1<<IOLAYERINFO
+            MESH = (1 << 0),
+            OBJINTERSECTIONS = (1 << 1),
+            FEATURESEEDS = (1 << 2),
+            ATTRACTION = (1 << 3),
+            LAYERINFO = (1 << 4)
         };
 
-        //- Enumeration for what to output
-        enum IOoutputType
-        {
-            IOOUTPUTLAYERINFO
-        };
+        static const Enum<debugType> debugTypeNames;
 
-        static const NamedEnum<IOoutputType, 1> IOoutputTypeNames;
+        //- Enumeration for what to output. Used as a bit-pattern.
         enum outputType
         {
-            OUTPUTLAYERINFO = 1<<IOOUTPUTLAYERINFO
+            OUTPUTLAYERINFO = (1 << 0)
         };
 
-        //- Enumeration for what to write
-        enum IOwriteType
-        {
-            IOWRITEMESH,
-            IONOWRITEREFINEMENT,
-            IOWRITELEVELS,
-            IOWRITELAYERSETS,
-            IOWRITELAYERFIELDS
-        };
+        static const Enum<outputType> outputTypeNames;
 
-        static const NamedEnum<IOwriteType, 5> IOwriteTypeNames;
+        //- Enumeration for what to write. Used as a bit-pattern.
         enum writeType
         {
-            WRITEMESH = 1<<IOWRITEMESH,
-            NOWRITEREFINEMENT = 1<<IONOWRITEREFINEMENT,
-            WRITELEVELS = 1<<IOWRITELEVELS,
-            WRITELAYERSETS = 1<<IOWRITELAYERSETS,
-            WRITELAYERFIELDS = 1<<IOWRITELAYERFIELDS
+            WRITEMESH = (1 << 0),
+            NOWRITEREFINEMENT = (1 << 1),
+            WRITELEVELS = (1 << 2),
+            WRITELAYERSETS = (1 << 3),
+            WRITELAYERFIELDS = (1 << 4)
         };
 
-        //- Enumeration for how the userdata is to be mapped upon refinement.
+        static const Enum<writeType> writeTypeNames;
+
+        //- Enumeration for how userdata is to be mapped upon refinement.
         enum mapType
         {
             MASTERONLY = 1, //!< maintain master only
@@ -1476,10 +1455,13 @@ public:
             static void outputLevel(const outputType);
 
 
-            //- Helper: convert wordList into bit pattern using provided
-            //  NamedEnum
-            template<class Enum>
-            static int readFlags(const Enum& namedEnum, const wordList&);
+            //- Helper: convert wordList into bit pattern using provided Enum
+            template<class EnumContainer>
+            static int readFlags
+            (
+                const EnumContainer& namedEnum,
+                const wordList& words
+            );
 };
 
 

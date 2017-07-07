@@ -63,7 +63,7 @@ SourceFiles
 #define general_H
 
 #include "tabulatedWallFunction.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -91,7 +91,7 @@ public:
             itLinear
         };
 
-        static const NamedEnum<interpolationType, 1> interpolationTypeNames_;
+        static const Enum<interpolationType> interpolationTypeNames_;
 
 
 protected:

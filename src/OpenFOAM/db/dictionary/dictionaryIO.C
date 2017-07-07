@@ -103,7 +103,7 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
     while (!is.eof() && entry::New(*this, is))
     {}
 
-    // normally remove the FoamFile header entry if it exists
+    // Normally remove the FoamFile header entry if it exists
     if (!keepHeader)
     {
         remove("FoamFile");
@@ -140,7 +140,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
     {
         const dictionary& addDict = ePtr->dict();
 
-        forAllConstIter(IDLList<entry>, addDict, iter)
+        forAllConstIter(parent_type, addDict, iter)
         {
             add(iter(), mergeEntry);
         }
@@ -179,7 +179,7 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 
 void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
 {
-    forAllConstIter(IDLList<entry>, *this, iter)
+    forAllConstIter(parent_type, *this, iter)
     {
         const entry& e = *iter;
 

@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     std::vector<bool> stlVector(n, true);
 
     labelHashSet emptyHash;
-    labelHashSet fullHash(1000);
+    labelHashSet fullHash(1024);
     for (label i = 0; i < n; i++)
     {
         fullHash.insert(i);

@@ -45,22 +45,18 @@ namespace Foam
         slidingInterface,
         dictionary
     );
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::slidingInterface::typeOfMatch,
-        2
-    >::names[] =
-    {
-        "integral",
-        "partial"
-    };
 }
 
 
-const Foam::NamedEnum<Foam::slidingInterface::typeOfMatch, 2>
-Foam::slidingInterface::typeOfMatchNames_;
+const Foam::Enum
+<
+    Foam::slidingInterface::typeOfMatch
+>
+Foam::slidingInterface::typeOfMatchNames_
+{
+    { typeOfMatch::INTEGRAL, "integral" },
+    { typeOfMatch::PARTIAL, "partial" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -248,7 +244,7 @@ Foam::slidingInterface::slidingInterface
         dict.lookup("slavePatchName"),
         mme.mesh().boundaryMesh()
     ),
-    matchType_(typeOfMatchNames_.read((dict.lookup("typeOfMatch")))),
+    matchType_(typeOfMatchNames_.lookup("typeOfMatch", dict)),
     coupleDecouple_(dict.lookup("coupleDecouple")),
     attached_(dict.lookup("attached")),
     projectionAlgo_

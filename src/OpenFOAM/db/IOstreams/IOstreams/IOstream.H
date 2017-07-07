@@ -214,8 +214,8 @@ private:
 
     // Private data
 
-        //- Name of the stream
-        static fileName name_;
+        //- Name for any generic stream - normally treat as readonly
+        static fileName staticName_;
 
         streamFormat format_;
         versionNumber version_;
@@ -295,17 +295,11 @@ public:
 
             //- Return the name of the stream
             //  Useful for Fstream to return the filename
-            virtual const fileName& name() const
-            {
-                return name_;
-            }
+            virtual const fileName& name() const;
 
             //- Return non-const access to the name of the stream
             //  Useful to alter the stream name
-            virtual fileName& name()
-            {
-                return name_;
-            }
+            virtual fileName& name();
 
 
         // Check

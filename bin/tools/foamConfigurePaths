@@ -39,8 +39,9 @@ usage: ${0##*/}
   -foamVersion ver        specify project version (eg, 1612)
   -projectName name       specify project directory name (eg, openfoam1612)
   -archOption 32|64       specify 'WM_ARCH_OPTION' architecture option
+  -SP | -float32          specify 'WM_PRECISION_OPTION'
+  -DP | -float64          specify 'WM_PRECISION_OPTION'
   -int32  | -int64        specify 'WM_LABEL_SIZE'
-  -SP     | -DP           specify 'WM_PRECISION_OPTION'
   -system name            specify 'system' compiler to be used
   -third  name            specify 'ThirdParty' compiler to be used
   -boost ver              specify 'boost_version'
@@ -63,7 +64,7 @@ usage: ${0##*/}
   -scotch-path dir        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
   -vtk  ver               specify 'vtk_version' (eg, VTK-7.1.0)
   -mesa ver               specify 'mesa_version' (eg, mesa-13.0.1)
-  -sigfpe | -no-sigfpe    activate/deactivate FOAM_SIGFPE handling
+  -sigfpe | -no-sigfpe    [defunct - now under etc/controlDict]
   gmp-VERSION             for ThirdParty gcc (gmp-system for system library)
   mpfr-VERSION            for ThirdParty gcc (mpfr-system for system library)
   mpc-VERSION             for ThirdParty gcc (mpc-system for system library)
@@ -251,17 +252,22 @@ do
         shift
         ;;
 
+    -SP | -float32)
+        # Replace WM_PRECISION_OPTION=...
+        replace etc/bashrc  WM_PRECISION_OPTION "SP"
+        adjusted=true
+        ;;
+
+    -DP | -float64)
+        # Replace WM_PRECISION_OPTION=...
+        replace etc/bashrc  WM_PRECISION_OPTION "DP"
+        adjusted=true
+        ;;
+
     -int32 | -int64)
         # Replace WM_LABEL_SIZE=...
         optionValue="${1#-int}"
         replace etc/bashrc  WM_LABEL_SIZE "$optionValue"
-        adjusted=true
-        ;;
-
-    -SP | -DP)
-        # Replace WM_PRECISION_OPTION=...
-        optionValue="${1#-}"
-        replace etc/bashrc  WM_PRECISION_OPTION "$optionValue"
         adjusted=true
         ;;
 
@@ -471,20 +477,8 @@ do
         adjusted=true
         ;;
 
-    -sigfpe)
-        # Enable FOAM_SIGFPE handling
-        _inlineSed etc/bashrc \
-            "[a-z][a-z]* FOAM_SIGFPE.*" \
-            "export FOAM_SIGFPE=" \
-            "Activate FOAM_SIGFPE handling"
-        ;;
-
-    -no-sigfpe)
-        # Disable FOAM_SIGFPE handling
-        _inlineSed etc/bashrc \
-            "[a-z][a-z]* FOAM_SIGFPE.*" \
-            "unset FOAM_SIGFPE" \
-            "Deactivate FOAM_SIGFPE handling"
+    -sigfpe | -no-sigfpe)
+        echo "Enable/disable FOAM_SIGFPE now via controlDict" 1>&2
         ;;
 
     *)

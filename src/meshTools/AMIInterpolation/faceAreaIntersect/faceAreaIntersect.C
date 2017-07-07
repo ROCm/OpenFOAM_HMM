@@ -27,20 +27,18 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::faceAreaIntersect::triangulationMode
+>
+Foam::faceAreaIntersect::triangulationModeNames_
 {
-    template<>
-    const char* NamedEnum<faceAreaIntersect::triangulationMode, 2>::names[] =
-    {
-        "fan",
-        "mesh"
-    };
-}
-
-const Foam::NamedEnum<Foam::faceAreaIntersect::triangulationMode, 2>
-    Foam::faceAreaIntersect::triangulationModeNames_;
+    { triangulationMode::tmFan, "fan" },
+    { triangulationMode::tmMesh, "mesh" },
+};
 
 Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
+
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 

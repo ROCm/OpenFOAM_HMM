@@ -51,7 +51,7 @@ void testMapDistribute()
     List<Tuple2<label, List<scalar>>> complexData(100);
     forAll(complexData, i)
     {
-        complexData[i].first() = rndGen.integer(0, Pstream::nProcs()-1);
+        complexData[i].first() = rndGen.position(0, Pstream::nProcs()-1);
         complexData[i].second().setSize(3);
         complexData[i].second()[0] = 1;
         complexData[i].second()[1] = 2;

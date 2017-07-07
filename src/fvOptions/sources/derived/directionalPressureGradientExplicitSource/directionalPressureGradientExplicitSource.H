@@ -126,9 +126,9 @@ private:
 
     // Private data
 
-        static const NamedEnum<pressureDropModel, 3> PressureDropModelNames_;
+        static const Enum<pressureDropModel> pressureDropModelNames_;
 
-         //- Pressure drop model
+        //- Pressure drop model
         pressureDropModel model_;
 
         //- Pressure gradient before correction

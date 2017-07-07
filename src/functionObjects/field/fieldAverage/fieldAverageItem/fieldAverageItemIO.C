@@ -47,7 +47,7 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem(Istream& is)
     fieldName_ = entry.keyword();
     mean_ = readBool(entry.lookup("mean"));
     prime2Mean_ = readBool(entry.lookup("prime2Mean"));
-    base_ = baseTypeNames_[entry.lookup("base")];
+    base_ = baseTypeNames_.lookup("base", entry);
     window_ = entry.lookupOrDefault<scalar>("window", -1.0);
     windowName_ = entry.lookupOrDefault<word>("windowName", "");
 
@@ -77,7 +77,7 @@ Foam::Istream& Foam::functionObjects::operator>>
     faItem.fieldName_ = entry.keyword();
     faItem.mean_ = readBool(entry.lookup("mean"));
     faItem.prime2Mean_ = readBool(entry.lookup("prime2Mean"));
-    faItem.base_ = faItem.baseTypeNames_[entry.lookup("base")];
+    faItem.base_ = faItem.baseTypeNames_.lookup("base", entry);
     faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
     faItem.windowName_ = entry.lookupOrDefault<word>("windowName", "");
 

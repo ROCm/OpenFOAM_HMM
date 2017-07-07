@@ -161,6 +161,18 @@ public:
         ) const;
 
 
+        //- Find the key in the dictionary and return the corresponding
+        //  enumeration element based on its name.
+        //  Return the default value if the key was not found in the dictionary
+        //  or if the enumerated name was incorrect (emit warning)
+        EnumType lookupOrFailsafe
+        (
+            const word& key,
+            const dictionary& dict,
+            const EnumType deflt
+        ) const;
+
+
       // IO
 
         //- Read a word from Istream and return the corresponding enumeration

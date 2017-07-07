@@ -50,7 +50,7 @@ SourceFiles
 #ifndef fieldAverageItem_H
 #define fieldAverageItem_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -119,7 +119,7 @@ private:
         word prime2MeanFieldName_;
 
         //- Averaging base type names
-        static const NamedEnum<baseType, 2> baseTypeNames_;
+        static const Enum<baseType> baseTypeNames_;
 
         //- Averaging base type
         baseType base_;

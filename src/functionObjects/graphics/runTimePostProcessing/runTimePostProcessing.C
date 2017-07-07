@@ -150,8 +150,7 @@ bool Foam::functionObjects::runTimePostProcessing::write()
     sigFpe::unset(false);
 
     // Initialise render window
-    vtkSmartPointer<vtkRenderWindow> renderWindow =
-        vtkSmartPointer<vtkRenderWindow>::New();
+    auto renderWindow = vtkSmartPointer<vtkRenderWindow>::New();
     renderWindow->OffScreenRenderingOn();
     renderWindow->SetSize(output_.width_, output_.height_);
     renderWindow->SetAAFrames(10);
@@ -159,7 +158,7 @@ bool Foam::functionObjects::runTimePostProcessing::write()
     renderWindow->SetMultiSamples(0);
 //    renderWindow->PolygonSmoothingOn();
 
-    vtkSmartPointer<vtkRenderer> renderer = vtkSmartPointer<vtkRenderer>::New();
+    auto renderer = vtkSmartPointer<vtkRenderer>::New();
     scene_.initialise(renderer, output_.name_);
 
     renderWindow->AddRenderer(renderer);

@@ -43,34 +43,26 @@ namespace fieldValues
 }
 }
 
-template<>
-const char*
-Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::fieldValues::volFieldValue::operationType,
-    13
->::names[] =
+    Foam::functionObjects::fieldValues::volFieldValue::operationType
+>
+Foam::functionObjects::fieldValues::volFieldValue::operationTypeNames_
 {
-    "none",
-    "sum",
-    "weightedSum",
-    "sumMag",
-    "average",
-    "weightedAverage",
-    "volAverage",
-    "weightedVolAverage",
-    "volIntegrate",
-    "weightedVolIntegrate",
-    "min",
-    "max",
-    "CoV"
+    { operationType::opNone, "none" },
+    { operationType::opSum, "sum" },
+    { operationType::opWeightedSum, "weightedSum" },
+    { operationType::opSumMag, "sumMag" },
+    { operationType::opAverage, "average" },
+    { operationType::opWeightedAverage, "weightedAverage" },
+    { operationType::opVolAverage, "volAverage" },
+    { operationType::opWeightedVolAverage, "weightedVolAverage" },
+    { operationType::opVolIntegrate, "volIntegrate" },
+    { operationType::opWeightedVolIntegrate, "weightedVolIntegrate" },
+    { operationType::opMin, "min" },
+    { operationType::opMax, "max" },
+    { operationType::opCoV, "CoV" },
 };
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::volFieldValue::operationType,
-    13
-> Foam::functionObjects::fieldValues::volFieldValue::operationTypeNames_;
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -198,7 +190,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
 :
     fieldValue(name, runTime, dict, typeName),
     volRegion(fieldValue::mesh_, dict),
-    operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    operation_(operationTypeNames_.lookup("operation", dict)),
     weightFieldName_("none")
 {
     read(dict);
@@ -215,7 +207,7 @@ Foam::functionObjects::fieldValues::volFieldValue::volFieldValue
 :
     fieldValue(name, obr, dict, typeName),
     volRegion(fieldValue::mesh_, dict),
-    operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    operation_(operationTypeNames_.lookup("operation", dict)),
     weightFieldName_("none")
 {
     read(dict);

@@ -96,10 +96,6 @@ class interfaceProperties
 
 public:
 
-    //- Conversion factor for degrees into radians
-    static const scalar convertToRad;
-
-
     // Constructors
 
         //- Construct from volume fraction field gamma and IOdictionary

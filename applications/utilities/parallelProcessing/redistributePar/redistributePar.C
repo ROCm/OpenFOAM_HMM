@@ -59,6 +59,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "sigFpe.H"
 #include "Time.H"
 #include "fvMesh.H"
 #include "fvMeshTools.H"
@@ -2277,7 +2278,7 @@ int main(int argc, char *argv[])
     bool newTimes = args.optionFound("newTimes");
 
 
-    if (env("FOAM_SIGFPE"))
+    if (Foam::sigFpe::requested())
     {
         WarningInFunction
             << "Detected floating point exception trapping (FOAM_SIGFPE)."
@@ -2285,7 +2286,6 @@ int main(int argc, char *argv[])
             << "    problems when mapping fields. Switch it off in case"
             << " of problems." << endl;
     }
-
 
 
     const HashSet<word> selectedFields(0);

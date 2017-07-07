@@ -38,6 +38,54 @@ inline bool Foam::regExp::meta(const char c)
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::regExp::regExp()
+:
+    preg_(nullptr)
+{}
+
+
+inline Foam::regExp::regExp(const char* pattern)
+:
+    preg_(nullptr)
+{
+    set(pattern, false);
+}
+
+
+inline Foam::regExp::regExp(const std::string& pattern)
+:
+    preg_(nullptr)
+{
+    set(pattern, false);
+}
+
+
+inline Foam::regExp::regExp(const char* pattern, bool ignoreCase)
+:
+    preg_(nullptr)
+{
+    set(pattern, ignoreCase);
+}
+
+
+inline Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
+:
+    preg_(nullptr)
+{
+    set(pattern, ignoreCase);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+inline Foam::regExp::~regExp()
+{
+    clear();
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 inline bool Foam::regExp::empty() const

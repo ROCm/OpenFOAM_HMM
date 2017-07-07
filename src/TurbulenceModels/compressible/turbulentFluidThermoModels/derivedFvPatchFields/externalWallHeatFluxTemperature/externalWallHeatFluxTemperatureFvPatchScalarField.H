@@ -127,7 +127,7 @@ public:
             fixedHeatTransferCoeff,     //!< Fixed heat transfer coefficient
         };
 
-        static const NamedEnum<operationMode, 3> operationModeNames;
+        static const Enum<operationMode> operationModeNames;
 
 
 private:

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "HashSet.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "volFieldsFwd.H"
 #include "Switch.H"
 
@@ -123,7 +123,7 @@ public:
         cfR,
         cfDevRhoReff
     };
-    static const NamedEnum<compressibleField, 9> compressibleFieldNames_;
+    static const Enum<compressibleField> compressibleFieldNames_;
 
     enum incompressibleField
     {
@@ -135,7 +135,7 @@ public:
         ifR,
         ifDevReff
     };
-    static const NamedEnum<incompressibleField, 7> incompressibleFieldNames_;
+    static const Enum<incompressibleField> incompressibleFieldNames_;
 
     static const word modelName;
 

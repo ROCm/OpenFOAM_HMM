@@ -92,7 +92,7 @@ public:
         lcAlpha
     };
 
-    static const NamedEnum<limitControls, 4> limitControlNames_;
+    static const Enum<limitControls> limitControlNames_;
     limitControls limit_;
 
     // Constructors

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,87 +21,60 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::sigWriteNow
+Namespace
+    Foam::bounds
 
 Description
-    Signal handler for interupt defined by OptimisationSwitches::writeNowSignal
-
-    Write once and continue.
+    Namespace for bounding specifications.
+    At the moment, mostly for tables.
 
 SourceFiles
-    sigWriteNow.C
+    tableBounds.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sigWriteNow_H
-#define sigWriteNow_H
+#ifndef tableBounds_H
+#define tableBounds_H
 
-#include <signal.h>
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class Time;
-
-/*---------------------------------------------------------------------------*\
-                           Class sigWriteNow Declaration
-\*---------------------------------------------------------------------------*/
-
-class sigWriteNow
+namespace bounds
 {
-    // Private data
 
-        //- Number of signal to use
-        static int signal_;
+  // Enumerations
 
-        //- Pointer to Time
-        static Time* runTimePtr_;
+    //- Enumeration for handling out-of-bound values
+    enum class normalBounding
+    {
+        ERROR,  //!< Exit with a FatalError
+        WARN,   //!< Issue warning and clamp value (this is a good default)
+        CLAMP   //!< Clamp value to the start/end value
+    };
 
-        //- Saved old signal trapping setting
-        static struct sigaction oldAction_;
-
-
-    // Private Member Functions
-
-        //- Handler for caught signals
-        static void sigHandler(int);
-
-
-public:
-
-    friend class sigStopAtWriteNow;
-
-    //- wip. Have setter have access to signal_
-    friend class addwriteNowSignalToOpt;
-
-    // Constructors
-
-        //- Construct null
-        sigWriteNow();
-
-        //- Construct from components
-        sigWriteNow(const bool verbose, Time& runTime);
+    //- Enumeration for handling out-of-bound values that are repeatable
+    enum class repeatableBounding
+    {
+        ERROR,  //!< Exit with a FatalError
+        WARN,   //!< Issue warning and clamp value (this is a good default)
+        CLAMP,  //!< Clamp value to the start/end value
+        REPEAT  //!< Treat as a repeating list
+    };
 
 
-    //- Destructor
-    ~sigWriteNow();
+    //- Strings corresponding to the normalBounding
+    extern const Foam::Enum<normalBounding> normalBoundingNames;
 
-
-    // Member functions
-
-        //- (re)set signal catcher
-        static void set(const bool verbose);
-
-        //- Is active?
-        bool active() const;
-};
+    //- Strings corresponding to the repeatableBounding
+    extern const Foam::Enum<repeatableBounding> repeatableBoundingNames;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace bounds
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -36,7 +36,7 @@ SourceFiles
 #define faceToCell_H
 
 #include "topoSetSource.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,7 +63,7 @@ public:
 
 private:
 
-        static const NamedEnum<faceAction, 4> faceActionNames_;
+        static const Enum<faceAction> faceActionNames_;
 
 
         //- Add usage string

@@ -30,25 +30,15 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* NamedEnum
-    <
-        fanPressureFvPatchScalarField::fanFlowDirection,
-        2
-    >::names[] =
-    {
-        "in",
-        "out"
-    };
-}
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::fanPressureFvPatchScalarField::fanFlowDirection,
-    2
-> Foam::fanPressureFvPatchScalarField::fanFlowDirectionNames_;
+    Foam::fanPressureFvPatchScalarField::fanFlowDirection
+>
+Foam::fanPressureFvPatchScalarField::fanFlowDirectionNames_
+{
+    { fanFlowDirection::ffdIn, "in" },
+    { fanFlowDirection::ffdOut, "out" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -94,7 +84,7 @@ Foam::fanPressureFvPatchScalarField::fanPressureFvPatchScalarField
 :
     totalPressureFvPatchScalarField(p, iF, dict),
     fanCurve_(dict),
-    direction_(fanFlowDirectionNames_.read(dict.lookup("direction"))),
+    direction_(fanFlowDirectionNames_.lookup("direction", dict)),
     nonDimensional_(dict.lookupOrDefault<Switch>("nonDimensional", false)),
     rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
     dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
@@ -205,10 +195,8 @@ void Foam::fanPressureFvPatchScalarField::write(Ostream& os) const
 {
     totalPressureFvPatchScalarField::write(os);
     fanCurve_.write(os);
-    os.writeKeyword("direction")
-        << fanFlowDirectionNames_[direction_] << token::END_STATEMENT << nl;
-    os.writeKeyword("nonDimensional") << nonDimensional_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("direction", fanFlowDirectionNames_[direction_]);
+    os.writeEntry("nonDimensional", nonDimensional_);
     os.writeEntry("rpm", rpm_);
     os.writeEntry("dm", dm_);
 }

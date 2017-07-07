@@ -156,7 +156,7 @@ SourceFiles
 #define functionObjects_surfaceFieldValue_H
 
 #include "fieldValue.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "meshedSurf.H"
 #include "surfaceMesh.H"
 #include "fvsPatchField.H"
@@ -198,7 +198,7 @@ public:
         };
 
         //- Region type names
-        static const NamedEnum<regionTypes, 4> regionTypeNames_;
+        static const Enum<regionTypes> regionTypeNames_;
 
 
         //- Operation type enumeration
@@ -224,7 +224,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 17> operationTypeNames_;
+        static const Enum<operationType> operationTypeNames_;
 
 
         //- Post-operation type enumeration
@@ -235,7 +235,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<postOperationType, 2> postOperationTypeNames_;
+        static const Enum<postOperationType> postOperationTypeNames_;
 
 
 private:

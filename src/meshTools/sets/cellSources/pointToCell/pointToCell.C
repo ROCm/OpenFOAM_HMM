@@ -36,17 +36,6 @@ namespace Foam
     defineTypeNameAndDebug(pointToCell, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToCell, word);
     addToRunTimeSelectionTable(topoSetSource, pointToCell, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::pointToCell::pointAction,
-        2
-    >::names[] =
-    {
-        "any",
-        "edge"
-    };
 }
 
 
@@ -58,8 +47,15 @@ Foam::topoSetSource::addToUsageTable Foam::pointToCell::usage_
     " in the pointSet\n\n"
 );
 
-const Foam::NamedEnum<Foam::pointToCell::pointAction, 2>
-    Foam::pointToCell::pointActionNames_;
+const Foam::Enum
+<
+    Foam::pointToCell::pointAction
+>
+Foam::pointToCell::pointActionNames_
+{
+    { pointAction::ANY, "any" },
+    { pointAction::EDGE, "edge" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -132,7 +128,7 @@ Foam::pointToCell::pointToCell
 :
     topoSetSource(mesh),
     setName_(dict.lookup("set")),
-    option_(pointActionNames_.read(dict.lookup("option")))
+    option_(pointActionNames_.lookup("option", dict))
 {}
 
 

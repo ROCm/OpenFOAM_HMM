@@ -30,7 +30,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::fileName Foam::IOstream::name_("IOstream");
+Foam::fileName Foam::IOstream::staticName_("IOstream");
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
@@ -88,6 +88,18 @@ Foam::IOstream::compressionEnum(const word& compression)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::fileName& Foam::IOstream::name() const
+{
+    return staticName_;
+}
+
+
+Foam::fileName& Foam::IOstream::name()
+{
+    return staticName_;
+}
+
 
 bool Foam::IOstream::check(const char* operation) const
 {
