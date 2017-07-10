@@ -128,30 +128,6 @@ bool Foam::dictionary::read(Istream& is)
 }
 
 
-bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
-{
-    const word varName = keyword.substr(1);
-
-    // Lookup the variable name in the given dictionary
-    const entry* ePtr = lookupEntryPtr(varName, true, true);
-
-    // If defined insert its entries into this dictionary
-    if (ePtr != nullptr)
-    {
-        const dictionary& addDict = ePtr->dict();
-
-        forAllConstIter(parent_type, addDict, iter)
-        {
-            add(iter(), mergeEntry);
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
 // * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)

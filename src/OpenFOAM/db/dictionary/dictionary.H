@@ -41,10 +41,13 @@ Description
 
 Note
     Within dictionaries, entries can be referenced by using the '$' syntax
-    familiar from shell programming. A '.' separator is used when referencing
-    sub-dictionary entries. Leading '.' prefixes can be used to specify
-    an entry from a parent directory. A leading ':' or '^' prefix specifies
-    starting from the top-level entry. For example,
+    familiar from shell programming.
+    A '.' separator is used when referencing sub-dictionary entries.
+    Leading '.' prefixes can be used to specify an entry from a parent
+    dictionary.
+    An initial '^' anchor (or ':' for backward compatibility) specifies
+    starting from the top-level entry.
+    For example,
 
     \verbatim
     key1        val1;
@@ -70,6 +73,7 @@ Note
 SourceFiles
     dictionary.C
     dictionaryIO.C
+    dictionarySearch.C
 
 SeeAlso
     - Foam::entry
@@ -89,6 +93,7 @@ SeeAlso
 #include "HashTable.H"
 #include "wordList.H"
 #include "className.H"
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -148,22 +153,20 @@ public:
         const word dictName() const
         {
             const word scopedName = name_.name();
-            const std::string::size_type i = scopedName.rfind('.');
+            const auto i = scopedName.rfind('.');
 
             if (i == std::string::npos)
             {
                 return scopedName;
             }
-            else
-            {
-                return scopedName.substr(i+1);
-            }
+
+            return scopedName.substr(i+1);
         }
 };
 
 
 /*---------------------------------------------------------------------------*\
-                           Class dictionary Declaration
+                         Class dictionary Declaration
 \*---------------------------------------------------------------------------*/
 
 class dictionary
@@ -171,15 +174,157 @@ class dictionary
     public dictionaryName,
     public IDLList<entry>
 {
+public:
+
+    // Searching
+
+        //- Generic const/non-const dictionary entry %searcher.
+        //  A %searcher provides a uniform means of finding and returning
+        //  an entry pointer as well as the dictionary \a context in which
+        //  the entry was located.
+        //
+        //  Note that the constructors and set methods are protected such
+        //  that only friends of the class can set things. This safeguards
+        //  against inconsistencies in context/entry.
+        template<bool Const>
+        class Searcher
+        {
+        public:
+            friend dictionary;
+
+            //- The const/non-const type for the context and sub-dictionaries
+            typedef typename std::conditional
+                <Const, const dictionary, dictionary>::type dict_type;
+
+            //- The const/non-const type for entries
+            typedef typename std::conditional
+                <Const, const entry, entry>::type value_type;
+
+            //- A pointer to a const/non-const dictionary
+            typedef dict_type* dict_pointer;
+
+            //- A reference to a const/non-const dictionary
+            typedef dict_type& dict_reference;
+
+            //- A pointer to a const/non-const entry
+            typedef value_type* pointer;
+
+            //- A reference to a const/non-const entry
+            typedef value_type& reference;
+
+
+        protected:
+
+            //- The dictionary context for the entry
+            dict_pointer dict_;
+
+            //- The entry or nullptr
+            pointer eptr_;
+
+
+            //- Construct null
+            Searcher()
+            :
+                dict_(nullptr),
+                eptr_(nullptr)
+            {}
+
+            //- Construct for the given dictionary context
+            Searcher(dict_pointer dict)
+            :
+                dict_(dict),
+                eptr_(nullptr)
+            {}
+
+            //- Assign the entry
+            void set(pointer eptr)
+            {
+                eptr_ = eptr;
+            }
+
+
+        public:
+
+            //- Entry was found.
+            inline bool found() const
+            {
+                return eptr_;
+            }
+
+            //- The containing dictionary context
+            inline dict_reference context() const
+            {
+                return *dict_;
+            }
+
+            //- A pointer to the entry (nullptr if not found)
+            inline pointer ptr() const
+            {
+                return eptr_;
+            }
+
+            //- A reference to the entry (Error if not found)
+            inline reference ref() const
+            {
+                return *eptr_;
+            }
+
+            //- True if found entry is a dictionary.
+            inline bool isDict() const
+            {
+                return eptr_ && eptr_->isDict();
+            }
+
+            //- Pointer to the found entry as a dictionary or nullptr otherwise.
+            inline dict_pointer dictPtr() const
+            {
+                return eptr_ && eptr_->isDict() ? eptr_->dictPtr() : nullptr;
+            }
+
+            //- Reference the found entry as a dictionary.
+            //  (Error if not found, or not a dictionary).
+            inline dict_reference dict() const
+            {
+                return eptr_->dict();
+            }
+
+            //- Permit an explicit cast to the other (const/non-const) searcher
+            inline explicit operator const Searcher<!Const>&() const
+            {
+                return *reinterpret_cast<const Searcher<!Const>*>(this);
+            }
+        };
+
+
+        //- Searcher with const access
+        typedef Searcher<true> const_searcher;
+
+        //- Searcher with non-const access
+        typedef Searcher<false> searcher;
+
+
+    // Friends
+
+        //- Declare friendship with the entry class for IO
+        friend class entry;
+
+        //- Declare friendship with the searcher classes
+        friend const_searcher;
+        friend searcher;
+
+
+private:
+
     // Private data
 
         //- Report optional keywords and values if not present in dictionary
+        //  Set/unset via an InfoSwitch
         static bool writeOptionalEntries;
 
         //- Parent dictionary
         const dictionary& parent_;
 
-        //- HashTable of the entries held on the IDLList for quick lookup
+        //- Quick lookup of the entries held on the IDLList
         HashTable<entry*> hashedEntries_;
 
         //- Entries of matching patterns
@@ -196,27 +341,48 @@ class dictionary
 
         typedef DLList<entry*>::iterator pattern_iterator;
         typedef DLList<entry*>::const_iterator pattern_const_iterator;
+
         typedef DLList<autoPtr<regExp>>::iterator regexp_iterator;
         typedef DLList<autoPtr<regExp>>::const_iterator regexp_const_iterator;
 
 
     // Private Member Functions
 
-        //- Find and return an entry data stream pointer if present
-        //  otherwise return nullptr. Allows scoping using '.'
-        const entry* lookupScopedSubEntryPtr
+        //- Search using a '.' for scoping.
+        //  A leading dot means to use the parent dictionary.
+        //  An intermediate dot separates a sub-dictionary or sub-entry.
+        //  However, the use of dots is unfortunately ambiguous.
+        //  The value "a.b.c.d" could be a first-level entry, a second-level
+        //  entry (eg, "a" with "b.c.d", "a.b" with "c.d" etc),
+        //  or just about any other combination.
+        //  The heuristic tries sucessively longer top-level entries
+        //  until there is a suitable match.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const_searcher csearchDotScoped
         (
             const word& keyword,
             bool recursive,
             bool patternMatch
         ) const;
 
+        //- Search using a '/' for scoping.
+        //  Semantics as per normal files: an intermediate "." is the current
+        //  dictionary level, an intermediate ".." is the parent dictionary.
+        //  Note that since a slash is not a valid word character, there is no
+        //  ambiguity between separator and content.
+        //  No possibility or need for recursion.
+        //
+        //  \param patternMatch use regular expressions
+        const_searcher csearchSlashScoped
+        (
+            const word& keyword,
+            bool patternMatch
+        ) const;
+
 
 public:
-
-    //- Declare friendship with the entry class for IO
-    friend class entry;
-
 
     // Declare name of the class and its debug switch
     ClassName("dictionary");
@@ -234,7 +400,7 @@ public:
         explicit dictionary(const fileName& name);
 
         //- Construct given the entry name, parent dictionary and Istream,
-        //  reading entries until lastEntry or EOF
+        //  reading entries until EOF
         dictionary
         (
             const fileName& name,
@@ -251,7 +417,7 @@ public:
         dictionary(Istream& is, const bool keepHeader);
 
         //- Construct as copy given the parent dictionary
-        dictionary(const dictionary& parentDict, const dictionary&);
+        dictionary(const dictionary& parentDict, const dictionary& dict);
 
         //- Construct top-level dictionary as copy
         dictionary(const dictionary& dict);
@@ -303,284 +469,413 @@ public:
         tokenList tokens() const;
 
 
-        // Search and lookup
+      // Search and lookup
 
-            //- Search dictionary for given keyword
-            //  If recursive, search parent dictionaries
-            //  If patternMatch, use regular expressions
-            bool found
-            (
-                const word& keyword,
-                bool recursive = false,
-                bool patternMatch = true
-            ) const;
+        //- Search dictionary for given keyword
+        //  If recursive, search parent dictionaries
+        //  If patternMatch, use regular expressions
+        //  (default search: non-recursive with patterns).
+        bool found
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
 
-            //- Find and return an entry data stream pointer if present
-            //  otherwise return nullptr.
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions
-            const entry* lookupEntryPtr
-            (
-                const word& keyword,
-                bool recursive,
-                bool patternMatch
-            ) const;
+        //- Find and return an entry data stream pointer if present
+        //  otherwise return nullptr.
+        //  If recursive, search parent dictionaries.
+        //  If patternMatch, use regular expressions
+        const entry* lookupEntryPtr
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        ) const;
 
-            //- Find and return an entry data stream pointer for manipulation
-            //  if present otherwise return nullptr.
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            entry* lookupEntryPtr
-            (
-                const word& keyword,
-                bool recursive,
-                bool patternMatch
-            );
+        //- Find and return an entry data stream pointer for manipulation
+        //  if present otherwise return nullptr.
+        //  If recursive, search parent dictionaries.
+        //  If patternMatch, use regular expressions.
+        entry* lookupEntryPtr
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        );
 
-            //- Find and return an entry data stream if present otherwise error.
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            const entry& lookupEntry
-            (
-                const word& keyword,
-                bool recursive,
-                bool patternMatch
-            ) const;
+        //- Find and return an entry data stream if present otherwise error.
+        //  If recursive, search parent dictionaries.
+        //  If patternMatch, use regular expressions.
+        const entry& lookupEntry
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        ) const;
 
-            //- Find and return an entry data stream
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            ITstream& lookup
-            (
-                const word& keyword,
-                bool recursive = false,
-                bool patternMatch = true
-            ) const;
+        //- Find and return an entry data stream
+        //  If recursive, search parent dictionaries.
+        //  If patternMatch, use regular expressions.
+        //  (default search: non-recursive with patterns).
+        ITstream& lookup
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
 
-            //- Find and return a T,
-            //  if not found throw a fatal error.
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            template<class T>
-            T lookupType
-            (
-                const word&,
-                bool recursive=false,
-                bool patternMatch=true
-            ) const;
+        //- Find and return a T,
+        //  if not found throw a fatal error.
+        //  If recursive, search parent dictionaries.
+        //  If patternMatch, use regular expressions.
+        //  (default search: non-recursive with patterns).
+        template<class T>
+        T lookupType
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
 
-            //- Find and return a T, or return the given default value
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            template<class T>
-            T lookupOrDefault
-            (
-                const word& keyword,
-                const T& deflt,
-                bool recursive = false,
-                bool patternMatch = true
-            ) const;
+        //- Find and return a T, or return the given default value
+        //  If recursive, search parent dictionaries.
+        //  If patternMatch, use regular expressions.
+        //  (default search: non-recursive with patterns).
+        template<class T>
+        T lookupOrDefault
+        (
+            const word& keyword,
+            const T& deflt,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
 
-            //- Find and return a T, if not found return the given
-            //  default value, and add to dictionary.
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            template<class T>
-            T lookupOrAddDefault
-            (
-                const word& keyword,
-                const T& deflt,
-                bool recursive = false,
-                bool patternMatch = true
-            );
+        //- Find and return a T, if not found return the default value
+        //  and add it to dictionary.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        template<class T>
+        T lookupOrAddDefault
+        (
+            const word& keyword,
+            const T& deflt,
+            bool recursive = false,
+            bool patternMatch = true
+        );
 
-            //- Find an entry if present, and assign to T
-            //  Returns true if the entry was found.
-            //  If recursive, search parent dictionaries.
-            //  If patternMatch, use regular expressions.
-            template<class T>
-            bool readIfPresent
-            (
-                const word& keyword,
-                T& val,
-                bool recursive = false,
-                bool patternMatch = true
-            ) const;
+        //- Find an entry if present, and assign to T val.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param val the value to read
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        //
+        //  \return true if the entry was found.
+        template<class T>
+        bool readIfPresent
+        (
+            const word& keyword,
+            T& val,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
 
-            //- Find and return an entry data stream pointer if present
-            //  otherwise return nullptr. Allows scoping using '.'.
-            //  Special handling for ':' at start of keyword and '..'.
-            const entry* lookupScopedEntryPtr
-            (
-                const word& keyword,
-                bool recursive,
-                bool patternMatch
-            ) const;
+        //- Find and return an entry pointer if present, or return a nullptr.
+        //  Allows scoping using '.'.
+        //  Special handling for an absolute anchor (^) at start of the keyword
+        //  and for '..' to ascend into the parent dictionaries.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const entry* lookupScopedEntryPtr
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        ) const;
 
-            //- Check if entry is a sub-dictionary
-            bool isDict(const word& keyword) const;
+        //- Check if entry exists and is a sub-dictionary.
+        //  (search type: non-recursive with patterns)
+        bool isDict(const word& keyword) const;
 
-            //- Find and return a sub-dictionary pointer if present
-            //  otherwise return nullptr.
-            const dictionary* subDictPtr(const word& keyword) const;
+        //- Find and return a sub-dictionary pointer if present
+        //  (and a sub-dictionary) otherwise return nullptr.
+        //  (search type: non-recursive with patterns)
+        const dictionary* subDictPtr(const word& keyword) const;
 
-            //- Find and return a sub-dictionary pointer if present
-            //  otherwise return nullptr.
-            dictionary* subDictPtr(const word& keyword);
+        //- Find and return a sub-dictionary pointer if present
+        //  (and a sub-dictionary) otherwise return nullptr.
+        //
+        //  Search type: non-recursive with patterns.
+        dictionary* subDictPtr(const word& keyword);
 
-            //- Find and return a sub-dictionary
-            const dictionary& subDict(const word& keyword) const;
+        //- Find and return a sub-dictionary.
+        //  Fatal if the entry does not exist or is not a sub-dictionary.
+        //  (search type: non-recursive with patterns)
+        const dictionary& subDict(const word& keyword) const;
 
-            //- Find and return a sub-dictionary for manipulation
-            dictionary& subDict(const word& keyword);
+        //- Find and return a sub-dictionary for manipulation.
+        //  Fatal if the entry does not exist or is not a sub-dictionary.
+        //  (search type: non-recursive with patterns)
+        dictionary& subDict(const word& keyword);
 
-            //- Find and return a sub-dictionary as a copy, or
-            //  return an empty dictionary if the sub-dictionary does not exist
-            dictionary subOrEmptyDict
-            (
-                const word& keyword,
-                const bool mustRead = false
-            ) const;
+        //- Find and return a sub-dictionary as a copy, otherwise return
+        //  an empty dictionary.
+        //  Warn if the entry exists but is not a sub-dictionary.
+        //  (search type: non-recursive with patterns)
+        dictionary subOrEmptyDict
+        (
+            const word& keyword,
+            const bool mustRead = false
+        ) const;
 
-            //- Find and return a sub-dictionary if found
-            //  otherwise return this dictionary
-            const dictionary& optionalSubDict(const word&) const;
+        //- Find and return a sub-dictionary, otherwise return this dictionary.
+        //  Warn if the entry exists but is not a sub-dictionary.
+        //  (search type: non-recursive with patterns)
+        const dictionary& optionalSubDict(const word& keyword) const;
 
-            //- Return the table of contents
-            wordList toc() const;
+        //- Return the table of contents
+        wordList toc() const;
 
-            //- Return the sorted table of contents
-            wordList sortedToc() const;
+        //- Return the sorted table of contents
+        wordList sortedToc() const;
 
-            //- Return table of contents sorted using the specified comparator
-            template<class Compare>
-            wordList sortedToc(const Compare& comp) const;
+        //- Return table of contents sorted using the specified comparator
+        template<class Compare>
+        wordList sortedToc(const Compare& comp) const;
 
-            //- Return the list of available keys or patterns
-            List<keyType> keys(bool patterns = false) const;
-
-
-        // Editing
-
-            //- Substitute the given keyword prepended by '$' with the
-            //  corresponding sub-dictionary entries
-            bool substituteKeyword(const word& keyword, bool mergeEntry=false);
-
-            //- Substitute the given scoped keyword prepended by '$' with the
-            //  corresponding sub-dictionary entries
-            bool substituteScopedKeyword
-            (
-                const word& keyword,
-                bool mergeEntry=false
-            );
-
-            //- Add a new entry
-            //  With the merge option, dictionaries are interwoven and
-            //  primitive entries are overwritten
-            bool add(entry* entryPtr, bool mergeEntry=false);
-
-            //- Add an entry
-            //  With the merge option, dictionaries are interwoven and
-            //  primitive entries are overwritten
-            void add(const entry& e, bool mergeEntry=false);
-
-            //- Add a word entry
-            //  optionally overwrite an existing entry
-            void add(const keyType& k, const word& w, bool overwrite=false);
-
-            //- Add a string entry
-            //  optionally overwrite an existing entry
-            void add(const keyType& k, const string& s, bool overwrite=false);
-
-            //- Add a label entry
-            //  optionally overwrite an existing entry
-            void add(const keyType&, const label l, bool overwrite=false);
-
-            //- Add a scalar entry
-            //  optionally overwrite an existing entry
-            void add(const keyType&, const scalar s, bool overwrite=false);
-
-            //- Add a dictionary entry
-            //  optionally merge with an existing sub-dictionary
-            void add
-            (
-                const keyType& k,
-                const dictionary& d,
-                bool mergeEntry = false
-            );
-
-            //- Add a T entry
-            //  optionally overwrite an existing entry
-            template<class T>
-            void add(const keyType& k, const T& t, bool overwrite=false);
-
-            //- Assign a new entry, overwrite any existing entry
-            void set(entry* entryPtr);
-
-            //- Assign a new entry, overwrite any existing entry
-            void set(const entry& e);
-
-            //- Assign a dictionary entry, overwrite any existing entry
-            void set(const keyType& k, const dictionary& d);
-
-            //- Assign a T entry, overwrite any existing entry
-            template<class T>
-            void set(const keyType& k, const T& t);
-
-            //- Remove an entry specified by keyword
-            bool remove(const word& Keyword);
-
-            //- Change the keyword for an entry,
-            //  optionally forcing overwrite of an existing entry
-            bool changeKeyword
-            (
-                const keyType& oldKeyword,
-                const keyType& newKeyword,
-                bool forceOverwrite=false
-            );
-
-            //- Merge entries from the given dictionary.
-            //  Also merge sub-dictionaries as required.
-            bool merge(const dictionary& dict);
-
-            //- Clear the dictionary
-            void clear();
-
-            //- Transfer the contents of the argument and annul the argument.
-            void transfer(dictionary& dict);
-
-            //- Transfer contents to the Xfer container
-            Xfer<dictionary> xfer();
+        //- Return the list of available keys or patterns
+        List<keyType> keys(bool patterns = false) const;
 
 
-        // Read
+      // Editing
 
-            //- Read dictionary from Istream
-            bool read(Istream& is);
+        //- Substitute the given keyword (which is prefixed by '$')
+        //  with the corresponding sub-dictionary entries
+        bool substituteKeyword
+        (
+            const word& keyword,
+            bool mergeEntry = false
+        );
 
-            //- Read dictionary from Istream, optionally keeping the header
-            bool read(Istream& is, const bool keepHeader);
+        //- Substitute the given scoped keyword (which is prefixed by '$')
+        //  with the corresponding sub-dictionary entries
+        bool substituteScopedKeyword
+        (
+            const word& keyword,
+            bool mergeEntry = false
+        );
+
+        //- Add a new entry
+        //  With the merge option, dictionaries are interwoven and
+        //  primitive entries are overwritten
+        bool add(entry* entryPtr, bool mergeEntry=false);
+
+        //- Add an entry
+        //  With the merge option, dictionaries are interwoven and
+        //  primitive entries are overwritten
+        void add(const entry& e, bool mergeEntry=false);
+
+        //- Add a word entry
+        //  optionally overwrite an existing entry
+        void add(const keyType& k, const word& v, bool overwrite=false);
+
+        //- Add a string entry
+        //  optionally overwrite an existing entry
+        void add(const keyType& k, const string& v, bool overwrite=false);
+
+        //- Add a label entry
+        //  optionally overwrite an existing entry
+        void add(const keyType& k, const label v, bool overwrite=false);
+
+        //- Add a scalar entry
+        //  optionally overwrite an existing entry
+        void add(const keyType& k, const scalar v, bool overwrite=false);
+
+        //- Add a dictionary entry
+        //  optionally merge with an existing sub-dictionary
+        void add
+        (
+            const keyType& k,
+            const dictionary& d,
+            bool mergeEntry = false
+        );
+
+        //- Add a T entry
+        //  optionally overwrite an existing entry
+        template<class T>
+        void add(const keyType& k, const T& v, bool overwrite=false);
+
+        //- Assign a new entry, overwrite any existing entry
+        void set(entry* entryPtr);
+
+        //- Assign a new entry, overwrite any existing entry
+        void set(const entry& e);
+
+        //- Assign a dictionary entry, overwrite any existing entry
+        void set(const keyType& k, const dictionary& v);
+
+        //- Assign a T entry, overwrite any existing entry
+        template<class T>
+        void set(const keyType& k, const T& v);
+
+        //- Remove an entry specified by keyword
+        bool remove(const word& keyword);
+
+        //- Change the keyword for an entry,
+        //  optionally forcing overwrite of an existing entry
+        bool changeKeyword
+        (
+            const keyType& oldKeyword,
+            const keyType& newKeyword,
+            bool forceOverwrite=false
+        );
+
+        //- Merge entries from the given dictionary.
+        //  Also merge sub-dictionaries as required.
+        bool merge(const dictionary& dict);
+
+        //- Clear the dictionary
+        void clear();
+
+        //- Transfer the contents of the argument and annul the argument.
+        void transfer(dictionary& dict);
+
+        //- Transfer contents to the Xfer container
+        Xfer<dictionary> xfer();
 
 
-        // Write
+      // Read
 
-            //- Write sub-dictionary with the keyword as its header
-            void writeEntry(const keyType& keyword, Ostream& os) const;
+        //- Read dictionary from Istream
+        bool read(Istream& is);
 
-            //- Write dictionary entries.
-            //  Optionally with extra new line between entries for
-            //  "top-level" dictionaries
-            void writeEntries(Ostream& os, const bool extraNewLine=false) const;
+        //- Read dictionary from Istream, optionally keeping the header
+        bool read(Istream& is, const bool keepHeader);
 
-            //- Write dictionary, normally with sub-dictionary formatting
-            void write(Ostream& os, const bool subDict=true) const;
+
+      // Write
+
+        //- Write sub-dictionary with the keyword as its header
+        void writeEntry(const keyType& keyword, Ostream& os) const;
+
+        //- Write dictionary entries.
+        //  Optionally with extra new line between entries for
+        //  "top-level" dictionaries
+        void writeEntries(Ostream& os, const bool extraNewLine=false) const;
+
+        //- Write dictionary, normally with sub-dictionary formatting
+        void write(Ostream& os, const bool subDict=true) const;
+
+
+      // Searching
+
+        //- Search dictionary for given keyword
+        //  If recursive, search parent dictionaries
+        //  If patternMatch, use regular expressions
+        //  (default search: non-recursive with patterns).
+        const_searcher csearch
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Search dictionary for given keyword
+        //  If recursive, search parent dictionaries
+        //  If patternMatch, use regular expressions
+        //  (default search: non-recursive with patterns).
+        const_searcher search
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Search dictionary for given keyword
+        //  If recursive, search parent dictionaries
+        //  If patternMatch, use regular expressions
+        //  (default search: non-recursive with patterns).
+        searcher search
+        (
+            const word& keyword,
+            bool recursive = false,
+            bool patternMatch = true
+        );
+
+        //- Search using scoping.
+        //  There are two types of scoping available:
+        //  -# dot-scoping, where a '.' is used to delineate the scope
+        //  -# slash-scoping, where a '/' is used to delineate the scope
+        //
+        //  For dot-scoping, a leading '^' traverses to the top-level
+        //  dictionary, leading dots mean use the parent dictionary and an
+        //  intermediate dot separates a sub-dictionary or sub-entry.
+        //  However, since the use of dots is ambiguous ("a.b.c" could be
+        //  an entry itself or represent a "bc" entry from dictionary "a" etc),
+        //  the heuristic backtracks and attempts successively longer
+        //  top-level entries until a suitable match is found.
+        //
+        //  For slash-scoping, semantics similar to directory structures are
+        //  used. A leading '/' traverses to the top-level dictionary,
+        //  a single leading or intermediate '.' references the current
+        //  dictionary level. A '..' pair references the parent dictionary.
+        //  Any doubled slashes are silently ignored.
+        //  Since a slash is not a valid keyword character, there is no
+        //  ambiguity between separator and content.
+        const_searcher csearchScoped
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        ) const;
+
+        //- Search using dot or slash scoping.
+        const_searcher searchScoped
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        ) const;
+
+        //- Search using dot or slash scoping.
+        searcher searchScoped
+        (
+            const word& keyword,
+            bool recursive,
+            bool patternMatch
+        );
+
+        //- Locate a sub-dictionary using slash-scoping
+        //  \return nullptr if the dictionary path does not exist
+        const dictionary* cfindScopedDictPtr(const fileName& dictPath) const;
+
+        //- Locate a sub-dictionary using slash-scoping
+        //  \return nullptr if the dictionary path does not exist
+        const dictionary* findScopedDictPtr(const fileName& dictPath) const;
+
+        //- Locate a sub-dictionary using slash-scoping
+        //  \return nullptr if the dictionary path does not exist
+        dictionary* findScopedDictPtr(const fileName& dictPath);
+
+        //- Locate existing or create sub-dictionary using slash-scoping
+        //  \return nullptr if the dictionary path could not be created
+        dictionary* makeScopedDictPtr(const fileName& dictPath);
 
 
     // Member Operators
 
-        //- Find and return entry
+        //- Find and return an entry data stream (identical to #lookup method).
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         ITstream& operator[](const word& keyword) const;
 
+        //- Copy assignment
         void operator=(const dictionary& rhs);
 
         //- Include entries from the given dictionary.

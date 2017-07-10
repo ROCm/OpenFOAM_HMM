@@ -224,17 +224,12 @@ bool Foam::entry::New
             const word varName = keyword.substr(1);
 
             // Lookup the variable name in the given dictionary
-            const entry* ePtr = parentDict.lookupScopedEntryPtr
-            (
-                varName,
-                true,
-                true
-            );
+            const auto finder = parentDict.csearchScoped(varName, true, true);
 
-            if (ePtr)
+            if (finder.found())
             {
                 // Read as primitiveEntry
-                const keyType newKeyword(ePtr->stream());
+                const keyType newKeyword(finder.ptr()->stream());
 
                 return parentDict.add
                 (
@@ -285,14 +280,9 @@ bool Foam::entry::New
         bool mergeEntry = false;
 
         // See (using exact match) if entry already present
-        entry* existingPtr = parentDict.lookupEntryPtr
-        (
-            keyword,
-            false,
-            false
-        );
+        auto finder = parentDict.search(keyword, false, false);
 
-        if (existingPtr)
+        if (finder.found())
         {
             if (mode == inputMode::MERGE)
             {
@@ -301,9 +291,9 @@ bool Foam::entry::New
             else if (mode == inputMode::OVERWRITE)
             {
                 // Clear existing dictionary so merge acts like overwrite
-                if (existingPtr->isDict())
+                if (finder.isDict())
                 {
-                    existingPtr->dict().clear();
+                    finder.dict().clear();
                 }
                 mergeEntry = true;
             }
