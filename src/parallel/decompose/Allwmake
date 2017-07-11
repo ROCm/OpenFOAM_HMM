@@ -7,6 +7,19 @@ cd ${0%/*} || exit 1    # Run from this directory
 : ${FOAM_EXT_LIBBIN:=/usr/lib$WM_COMPILER_LIB_ARCH}  # Extra safety
 export FOAM_EXT_LIBBIN
 
+# Check for the existence of any of the files
+hasAnyFile()
+{
+    local file
+    for file
+    do
+        [ -f "$file" -a -r "$file" ] && return 0
+    done
+
+    return 2
+}
+
+
 # Test for metis.
 # - return 0 and export METIS_ARCH_PATH on success
 hasMetis()
@@ -38,10 +51,13 @@ hasMetis()
     }
 
     # Library
-    [ -r $FOAM_EXT_LIBBIN/libmetis.so ] || \
-    [ -r $METIS_ARCH_PATH/lib/libmetis.so ] || \
-    [ -r $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libmetis.so ] || \
-    [ "${METIS_ARCH_PATH##*-}" = system ] || {
+    hasAnyFile \
+        $FOAM_EXT_LIBBIN/libmetis.so \
+        $METIS_ARCH_PATH/lib/libmetis.a \
+        $METIS_ARCH_PATH/lib/libmetis.so \
+        $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libmetis.a \
+        $METIS_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libmetis.so \
+    || [ "${METIS_ARCH_PATH##*-}" = system ] || {
         echo "$warning (missing library)"
         return 2
     }
@@ -93,10 +109,13 @@ hasScotch()
     }
 
     # Library
-    [ -r $FOAM_EXT_LIBBIN/libscotch.so ] || \
-    [ -r $SCOTCH_ARCH_PATH/lib/libscotch.so ] || \
-    [ -r $SCOTCH_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libscotch.so ] || \
-    [ "${SCOTCH_ARCH_PATH##*-}" = system ] || {
+    hasAnyFile \
+        $FOAM_EXT_LIBBIN/libscotch.so \
+        $SCOTCH_ARCH_PATH/lib/libscotch.a \
+        $SCOTCH_ARCH_PATH/lib/libscotch.so \
+        $SCOTCH_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libscotch.a \
+        $SCOTCH_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libscotch.so \
+    || [ "${SCOTCH_ARCH_PATH##*-}" = system ] || {
         echo "$warning (missing library)"
         return 2
     }
