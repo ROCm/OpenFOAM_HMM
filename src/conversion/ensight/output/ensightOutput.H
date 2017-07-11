@@ -91,8 +91,7 @@ class ensightOutput
     (
         const Field<Type>& fld,
         const ensightCells&,
-        ensightFile& os,
-        const bool deprecatedOrder = false
+        ensightFile& os
     );
 
 

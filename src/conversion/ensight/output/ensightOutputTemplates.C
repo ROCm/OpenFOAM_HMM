@@ -171,8 +171,7 @@ bool Foam::ensightOutput::writeCellField
 (
     const Field<Type>& vf,
     const ensightCells& ensCells,
-    ensightFile& os,
-    const bool deprecatedOrder
+    ensightFile& os
 )
 {
     if (ensCells.total())
@@ -180,32 +179,6 @@ bool Foam::ensightOutput::writeCellField
         if (Pstream::master())
         {
             os.beginPart(ensCells.index());
-        }
-
-        if (deprecatedOrder)
-        {
-            // element ordering used in older versions
-            ensightCells::elemType oldOrder[5] =
-            {
-                ensightCells::HEXA8,
-                ensightCells::PENTA6,
-                ensightCells::PYRAMID5,
-                ensightCells::TETRA4,
-                ensightCells::NFACED
-            };
-
-            for (label typei=0; typei < ensightCells::nTypes; ++typei)
-            {
-                const ensightCells::elemType& what = oldOrder[typei];
-
-                writeFieldContent
-                (
-                    ensightCells::key(what),
-                    Field<Type>(vf, ensCells.cellIds(what)),
-                    os
-                );
-            }
-            return true;
         }
 
         for (label typei=0; typei < ensightCells::nTypes; ++typei)
@@ -248,7 +221,7 @@ bool Foam::ensightOutput::writeField
     //
     if (ensMesh.useInternalMesh())
     {
-        writeCellField(vf, meshCells, os, ensMesh.deprecatedOrder());
+        writeCellField(vf, meshCells, os);
     }
 
     //

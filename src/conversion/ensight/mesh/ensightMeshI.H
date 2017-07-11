@@ -49,12 +49,6 @@ inline bool Foam::ensightMesh::useInternalMesh() const
 }
 
 
-inline bool Foam::ensightMesh::deprecatedOrder() const
-{
-    return options_->deprecatedOrder();
-}
-
-
 inline const Foam::ensightCells& Foam::ensightMesh::meshCells() const
 {
     return meshCells_;
