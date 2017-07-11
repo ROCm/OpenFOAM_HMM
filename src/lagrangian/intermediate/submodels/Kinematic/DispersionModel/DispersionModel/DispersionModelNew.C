@@ -39,15 +39,14 @@ Foam::DispersionModel<CloudType>::New
 
     Info<< "Selecting dispersion model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown dispersion model type "
+            << "Unknown dispersionModel type "
             << modelType << nl << nl
-            << "Valid dispersion model types are:" << nl
+            << "Valid dispersionModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

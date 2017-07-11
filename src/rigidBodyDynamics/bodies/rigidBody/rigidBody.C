@@ -76,15 +76,14 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
 {
     const word bodyType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(bodyType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(bodyType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rigidBody type "
             << bodyType << nl << nl
-            << "Valid rigidBody types are : " << endl
+            << "Valid rigidBody types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

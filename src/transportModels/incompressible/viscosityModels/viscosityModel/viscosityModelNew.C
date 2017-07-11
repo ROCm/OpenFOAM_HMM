@@ -41,15 +41,14 @@ Foam::autoPtr<Foam::viscosityModel> Foam::viscosityModel::New
 
     Info<< "Selecting incompressible transport model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown viscosityModel type "
             << modelType << nl << nl
-            << "Valid viscosityModels are : " << endl
+            << "Valid viscosityModels :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

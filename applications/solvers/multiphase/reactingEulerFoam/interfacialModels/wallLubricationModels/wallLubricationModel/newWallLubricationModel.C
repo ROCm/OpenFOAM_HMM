@@ -34,20 +34,19 @@ Foam::autoPtr<Foam::wallLubricationModel> Foam::wallLubricationModel::New
     const phasePair& pair
 )
 {
-    word wallLubricationModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting wallLubricationModel for "
-        << pair << ": " << wallLubricationModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(wallLubricationModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown wallLubricationModelType type "
-            << wallLubricationModelType << endl << endl
-            << "Valid wallLubricationModel types are : " << endl
+            << "Unknown wallLubricationModel type "
+            << modelType << nl << nl
+            << "Valid wallLubricationModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -87,15 +87,14 @@ Foam::autoPtr<Foam::blockEdge> Foam::blockEdge::New
 
     const word edgeType(is);
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(edgeType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(edgeType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown blockEdge type "
             << edgeType << nl << nl
-            << "Valid blockEdge types are" << endl
+            << "Valid blockEdge types :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

@@ -25,6 +25,8 @@ License
 
 #include "primitiveEntry.H"
 #include "dictionary.H"
+#include "IStringStream.H"
+#include "OStringStream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

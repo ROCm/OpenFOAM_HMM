@@ -34,20 +34,19 @@ Foam::autoPtr<Foam::wallDampingModel> Foam::wallDampingModel::New
     const phasePair& pair
 )
 {
-    word wallDampingModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting wallDampingModel for "
-        << pair << ": " << wallDampingModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(wallDampingModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown wallDampingModelType type "
-            << wallDampingModelType << endl << endl
-            << "Valid wallDampingModel types are : " << endl
+            << "Unknown wallDampingModel type "
+            << modelType << nl << nl
+            << "Valid wallDampingModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

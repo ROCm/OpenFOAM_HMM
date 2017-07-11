@@ -84,20 +84,19 @@ Foam::AveragingMethod<Type>::New
     const fvMesh& mesh
 )
 {
-    word averageType(dict.lookup(typeName));
+    const word averageType(dict.lookup(typeName));
 
     //Info<< "Selecting averaging method "
     //    << averageType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(averageType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(averageType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown averaging method " << averageType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid averaging methods are:" << nl
+            << "Unknown averaging method "
+            << averageType  << nl << nl
+            << "Valid averaging methods :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

@@ -33,20 +33,18 @@ Foam::wallBoilingModels::departureFrequencyModel::New
     const dictionary& dict
 )
 {
-    word departureFrequencyModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
-    Info<< "Selecting departureFrequencyModel: "
-        << departureFrequencyModelType << endl;
+    Info<< "Selecting departureFrequencyModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(departureFrequencyModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown departureFrequencyModelType type "
-            << departureFrequencyModelType << endl << endl
-            << "Valid departureFrequencyModel types are : " << endl
+            << "Unknown departureFrequencyModel type "
+            << modelType << nl << nl
+            << "Valid departureFrequencyModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

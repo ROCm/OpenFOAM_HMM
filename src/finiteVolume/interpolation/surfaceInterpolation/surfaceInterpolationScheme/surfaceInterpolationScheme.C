@@ -58,10 +58,9 @@ Foam::surfaceInterpolationScheme<Type>::New
         InfoInFunction << "Discretisation scheme = " << schemeName << endl;
     }
 
-    typename MeshConstructorTable::iterator constructorIter =
-        MeshConstructorTablePtr_->find(schemeName);
+    auto cstrIter = MeshConstructorTablePtr_->cfind(schemeName);
 
-    if (!constructorIter.found())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -73,7 +72,7 @@ Foam::surfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    return constructorIter()(mesh, schemeData);
+    return cstrIter()(mesh, schemeData);
 }
 
 
@@ -106,10 +105,9 @@ Foam::surfaceInterpolationScheme<Type>::New
             << "Discretisation scheme = " << schemeName << endl;
     }
 
-    typename MeshFluxConstructorTable::iterator constructorIter =
-        MeshFluxConstructorTablePtr_->find(schemeName);
+    auto cstrIter = MeshFluxConstructorTablePtr_->cfind(schemeName);
 
-    if (!constructorIter.found())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -121,7 +119,7 @@ Foam::surfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    return constructorIter()(mesh, faceFlux, schemeData);
+    return cstrIter()(mesh, faceFlux, schemeData);
 }
 
 
@@ -241,8 +239,7 @@ Foam::surfaceInterpolationScheme<Type>::dotInterpolate
             << "Interpolating "
             << vf.type() << " "
             << vf.name()
-            << " from cells to faces "
-               "without explicit correction"
+            << " from cells to faces without explicit correction"
             << endl;
     }
 

@@ -64,15 +64,14 @@ Foam::searchableSurfaceModifier::New
     const dictionary& dict
 )
 {
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(type);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown searchableSurfaceModifier type "
             << type << nl << nl
-            << "Valid searchableSurfaceModifier types : " << endl
+            << "Valid searchableSurfaceModifier types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

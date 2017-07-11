@@ -48,7 +48,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
         )
     );
 
-    word temperaturePhaseChangeTwoPhaseMixtureTypeName
+    const word modelType
     (
         phaseChangePropertiesDict.lookup
         (
@@ -56,19 +56,16 @@ Foam::temperaturePhaseChangeTwoPhaseMixture::New
         )
     );
 
-    Info<< "Selecting phaseChange model "
-        << temperaturePhaseChangeTwoPhaseMixtureTypeName << endl;
+    Info<< "Selecting phaseChange model " << modelType << endl;
 
-    componentsConstructorTable::iterator cstrIter =
-        componentsConstructorTablePtr_
-            ->find(temperaturePhaseChangeTwoPhaseMixtureTypeName);
+    auto cstrIter = componentsConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown temperaturePhaseChangeTwoPhaseMixture type "
-            << temperaturePhaseChangeTwoPhaseMixtureTypeName << endl << endl
-            << "Valid  temperaturePhaseChangeTwoPhaseMixtures are : " << endl
+            << modelType << nl << nl
+            << "Valid temperaturePhaseChangeTwoPhaseMixture types :" << endl
             << componentsConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

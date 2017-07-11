@@ -37,7 +37,7 @@ Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
         InfoInFunction << "Constructing UnsortedMeshedSurface" << endl;
     }
 
-    auto cstrIter = fileExtensionConstructorTablePtr_->find(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
 
     if (!cstrIter.found())
     {

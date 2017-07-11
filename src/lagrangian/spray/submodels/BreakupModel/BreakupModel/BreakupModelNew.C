@@ -35,21 +35,20 @@ Foam::BreakupModel<CloudType>::New
     CloudType& owner
 )
 {
-    word BreakupModelType(dict.lookup("breakupModel"));
+    const word modelType(dict.lookup("breakupModel"));
 
-    Info<< "Selecting BreakupModel " << BreakupModelType << endl;
+    Info<< "Selecting breakupModel " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(BreakupModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown BreakupModelType type "
-            << BreakupModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid BreakupModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown breakupModel type "
+            << modelType << nl << nl
+            << "Valid breakupModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<BreakupModel<CloudType>>(cstrIter()(dict, owner));

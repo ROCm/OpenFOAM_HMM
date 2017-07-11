@@ -39,16 +39,16 @@ Foam::InjectionModel<CloudType>::New
 
     Info<< "Selecting injection model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown injection model type "
+            << "Unknown injectionModel type "
             << modelType << nl << nl
-            << "Valid injection model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Valid injectionModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<InjectionModel<CloudType>>(cstrIter()(dict, owner));
@@ -67,16 +67,16 @@ Foam::InjectionModel<CloudType>::New
 {
     Info<< "Selecting injection model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown injection model type "
             << modelType << nl << nl
-            << "Valid injection model types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Valid injection model types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return

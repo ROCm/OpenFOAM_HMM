@@ -48,24 +48,21 @@ Foam::phaseChangeTwoPhaseMixture::New
         )
     );
 
-    word phaseChangeTwoPhaseMixtureTypeName
+    const word modelType
     (
         transportPropertiesDict.lookup("phaseChangeTwoPhaseMixture")
     );
 
-    Info<< "Selecting phaseChange model "
-        << phaseChangeTwoPhaseMixtureTypeName << endl;
+    Info<< "Selecting phaseChange model " << modelType << endl;
 
-    componentsConstructorTable::iterator cstrIter =
-        componentsConstructorTablePtr_
-            ->find(phaseChangeTwoPhaseMixtureTypeName);
+    auto cstrIter = componentsConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown phaseChangeTwoPhaseMixture type "
-            << phaseChangeTwoPhaseMixtureTypeName << endl << endl
-            << "Valid  phaseChangeTwoPhaseMixtures are : " << endl
+            << modelType << nl << nl
+            << "Valid phaseChangeTwoPhaseMixture types :" << endl
             << componentsConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

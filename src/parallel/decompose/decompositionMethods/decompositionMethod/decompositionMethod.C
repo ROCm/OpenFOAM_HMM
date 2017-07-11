@@ -180,19 +180,18 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
     const dictionary& decompositionDict
 )
 {
-    word methodType(decompositionDict.lookup("method"));
+    const word methodType(decompositionDict.lookup("method"));
 
     Info<< "Selecting decompositionMethod " << methodType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(methodType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown decompositionMethod "
             << methodType << nl << nl
-            << "Valid decompositionMethods are : " << endl
+            << "Valid decompositionMethods : " << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

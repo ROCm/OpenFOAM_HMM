@@ -61,7 +61,7 @@ Foam::thermophysicalProperties::New
         InfoInFunction << "Constructing thermophysicalProperties" << endl;
     }
 
-    ConstructorTable::iterator cstrIter = ConstructorTablePtr_->find(name);
+    auto cstrIter = ConstructorTablePtr_->cfind(name);
 
     if (!cstrIter.found())
     {
@@ -88,17 +88,16 @@ Foam::thermophysicalProperties::New
         InfoInFunction << "Constructing thermophysicalProperties" << endl;
     }
 
-    const word& thermophysicalPropertiesTypeName = dict.dictName();
+    const word& propertiesTypeName = dict.dictName();
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(thermophysicalPropertiesTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(propertiesTypeName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown thermophysicalProperties type "
-            << thermophysicalPropertiesTypeName << nl << nl
-            << "Valid thermophysicalProperties types are:" << nl
+            << propertiesTypeName << nl << nl
+            << "Valid thermophysicalProperties types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

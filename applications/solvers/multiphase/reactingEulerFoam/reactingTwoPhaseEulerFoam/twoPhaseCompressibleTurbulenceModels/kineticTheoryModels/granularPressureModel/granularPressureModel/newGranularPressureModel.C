@@ -33,24 +33,20 @@ Foam::kineticTheoryModels::granularPressureModel::New
     const dictionary& dict
 )
 {
-    word granularPressureModelType(dict.lookup("granularPressureModel"));
+    const word modelType(dict.lookup("granularPressureModel"));
 
-    Info<< "Selecting granularPressureModel "
-        << granularPressureModelType << endl;
+    Info<< "Selecting granularPressureModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(granularPressureModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalError
-            << "granularPressureModel::New(const dictionary&) : " << endl
-            << "    unknown granularPressureModelType type "
-            << granularPressureModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid granularPressureModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc()
-            << abort(FatalError);
+        FatalErrorInFunction
+            << "Unknown granularPressureModel type "
+            << modelType << nl << nl
+            << "Valid granularPressureModel types : " << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<granularPressureModel>(cstrIter()(dict));

@@ -73,15 +73,14 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
     const dictionary& dict
 )
 {
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(topoSetSourceType);
+    auto cstrIter = wordConstructorTablePtr_->cfind(topoSetSourceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown topoSetSource type " << topoSetSourceType
-            << endl << endl
-            << "Valid topoSetSource types : " << endl
+            << "Unknown topoSetSource type "
+            << topoSetSourceType << nl << nl
+            << "Valid topoSetSource types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -97,15 +96,14 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
     Istream& is
 )
 {
-    istreamConstructorTable::iterator cstrIter =
-        istreamConstructorTablePtr_->find(topoSetSourceType);
+    auto cstrIter = istreamConstructorTablePtr_->cfind(topoSetSourceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown topoSetSource type " << topoSetSourceType
-            << endl << endl
-            << "Valid topoSetSource types : " << endl
+            << "Unknown topoSetSource type "
+            << topoSetSourceType << nl << nl
+            << "Valid topoSetSource types :" << endl
             << istreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

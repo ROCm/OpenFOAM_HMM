@@ -33,8 +33,7 @@ Foam::autoPtr<Foam::surfaceReader> Foam::surfaceReader::New
     const fileName& fName
 )
 {
-    fileNameConstructorTable::iterator cstrIter =
-        fileNameConstructorTablePtr_->find(readerType);
+    auto cstrIter = fileNameConstructorTablePtr_->cfind(readerType);
 
     if (!cstrIter.found())
     {

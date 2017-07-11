@@ -34,6 +34,7 @@ namespace Foam
     defineRunTimeSelectionTable(surfaceCellSizeFunction, dictionary);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfaceCellSizeFunction::surfaceCellSizeFunction
@@ -64,25 +65,23 @@ Foam::autoPtr<Foam::surfaceCellSizeFunction> Foam::surfaceCellSizeFunction::New
     const scalar& defaultCellSize
 )
 {
-    word surfaceCellSizeFunctionTypeName
+    const word functionName
     (
         surfaceCellSizeFunctionDict.lookup("surfaceCellSizeFunction")
     );
 
     Info<< indent << "Selecting surfaceCellSizeFunction "
-        << surfaceCellSizeFunctionTypeName << endl;
+        << functionName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(surfaceCellSizeFunctionTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown surfaceCellSizeFunction type "
-            << surfaceCellSizeFunctionTypeName
-            << endl << endl
-            << "Valid surfaceCellSizeFunction types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << functionName << nl << nl
+            << "Valid surfaceCellSizeFunction types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

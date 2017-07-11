@@ -33,20 +33,18 @@ Foam::wallBoilingModels::departureDiameterModel::New
     const dictionary& dict
 )
 {
-    word departureDiameterModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
-    Info<< "Selecting departureDiameterModel: "
-        << departureDiameterModelType << endl;
+    Info<< "Selecting departureDiameterModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(departureDiameterModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown departureDiameterModelType type "
-            << departureDiameterModelType << endl << endl
-            << "Valid departureDiameterModel types are : " << endl
+            << "Unknown departureDiameterModel type "
+            << modelType << nl << nl
+            << "Valid departureDiameterModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

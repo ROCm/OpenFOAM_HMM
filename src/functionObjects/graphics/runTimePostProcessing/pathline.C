@@ -183,15 +183,14 @@ Foam::functionObjects::runTimePostPro::pathline::New
         Info<< "Selecting pathline " << pathlineType << endl;
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(pathlineType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(pathlineType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pathline type "
             << pathlineType << nl << nl
-            << "Valid pathline types are:" << endl
+            << "Valid pathline types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

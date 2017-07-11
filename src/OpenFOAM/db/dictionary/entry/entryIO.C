@@ -34,33 +34,33 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::entry::getKeyword(keyType& keyword, token& keywordToken, Istream& is)
+bool Foam::entry::getKeyword(keyType& keyword, token& keyToken, Istream& is)
 {
     // Read the next valid token discarding spurious ';'s
     do
     {
         if
         (
-            is.read(keywordToken).bad()
+            is.read(keyToken).bad()
          || is.eof()
-         || !keywordToken.good()
+         || !keyToken.good()
         )
         {
             return false;
         }
     }
-    while (keywordToken == token::END_STATEMENT);
+    while (keyToken == token::END_STATEMENT);
 
     // If the token is a valid keyword set 'keyword' return true...
-    if (keywordToken.isWord())
+    if (keyToken.isWord())
     {
-        keyword = keywordToken.wordToken();
+        keyword = keyToken.wordToken();
         return true;
     }
-    else if (keywordToken.isString())
+    else if (keyToken.isString())
     {
         // Enable wildcards
-        keyword = keywordToken.stringToken();
+        keyword = keyToken.stringToken();
         return true;
     }
     else
@@ -72,34 +72,32 @@ bool Foam::entry::getKeyword(keyType& keyword, token& keywordToken, Istream& is)
 
 bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 {
-    token keywordToken;
-    const bool ok = getKeyword(keyword, keywordToken, is);
+    token keyToken;
+    const bool valid = getKeyword(keyword, keyToken, is);
 
-    if (ok)
+    if (valid)
     {
         return true;
     }
+
+    // Do some more checking
+    if (keyToken == token::END_BLOCK || is.eof())
+    {
+        return false;
+    }
     else
     {
-        // Do some more checking
-        if (keywordToken == token::END_BLOCK || is.eof())
-        {
-            return false;
-        }
-        else
-        {
-            // Otherwise the token is invalid
-            cerr<< "--> FOAM Warning : " << std::endl
-                << "    From function "
-                << "entry::getKeyword(keyType&, Istream&)" << std::endl
-                << "    in file " << __FILE__
-                << " at line " << __LINE__ << std::endl
-                << "    Reading " << is.name().c_str() << std::endl
-                << "    found " << keywordToken << std::endl
-                << "    expected either " << token::END_BLOCK << " or EOF"
-                << std::endl;
-            return false;
-        }
+        // Otherwise the token is invalid
+        cerr<< "--> FOAM Warning : " << std::endl
+            << "    From function "
+            << FUNCTION_NAME << std::endl
+            << "    in file " << __FILE__
+            << " at line " << __LINE__ << std::endl
+            << "    Reading " << is.name().c_str() << std::endl
+            << "    found " << keyToken << std::endl
+            << "    expected either " << token::END_BLOCK << " or EOF"
+            << std::endl;
+        return false;
     }
 }
 
@@ -139,7 +137,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             // Otherwise the token is invalid
             cerr<< "--> FOAM Warning : " << std::endl
                 << "    From function "
-                << "entry::getKeyword(keyType&, Istream&)" << std::endl
+                << FUNCTION_NAME << std::endl
                 << "    in file " << __FILE__
                 << " at line " << __LINE__ << std::endl
                 << "    Reading " << is.name().c_str() << std::endl
@@ -153,7 +151,6 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
     {
         if (keyword[0] == '#')      // ... Function entry
         {
-            const word functionName = keyword(1, keyword.size()-1);
             if (disableFunctionEntries)
             {
                 return parentDict.add
@@ -169,6 +166,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             }
             else
             {
+                const word functionName(keyword.substr(1), false);
                 return functionEntry::execute(functionName, parentDict, is);
             }
         }
@@ -183,19 +181,23 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
             if (keyword.size() > 2 && keyword[1] == token::BEGIN_BLOCK)
             {
-                // Recursive substitution mode. Replace between {} with
-                // expansion and then let standard variable expansion deal
-                // with rest.
-                string s(keyword(2, keyword.size()-3));
-                // Substitute dictionary and environment variables. Do not allow
-                // empty substitutions.
-                stringOps::inplaceExpand(s, parentDict, true, false);
-                keyword.std::string::replace(1, keyword.size()-1, s);
+                // Recursive substitution mode.
+                // Content between {} is replaced with expansion.
+                // Then let standard variable expansion deal with rest.
+                string expanded = keyword.substr(2, keyword.size()-3);
+
+                // Substitute dictionary and environment variables.
+                // Do not allow empty substitutions.
+                stringOps::inplaceExpand(expanded, parentDict, true, false);
+
+                // Restore the '$' prefix. Use replace since operator= is private
+
+                keyword.std::string::replace(1, keyword.size()-1, expanded);
             }
 
             if (nextToken == token::BEGIN_BLOCK)
             {
-                const word varName = keyword(1, keyword.size()-1);
+                const word varName = keyword.substr(1);
 
                 // lookup the variable name in the given dictionary
                 const entry* ePtr = parentDict.lookupScopedEntryPtr
@@ -238,14 +240,6 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             }
 
             return true;
-        }
-        else if
-        (
-           !disableFunctionEntries
-         && keyword == "include"
-        )                           // ... For backward compatibility
-        {
-            return functionEntries::includeEntry::execute(parentDict, is);
         }
         else                        // ... Data entries
         {

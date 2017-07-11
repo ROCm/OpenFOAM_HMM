@@ -39,16 +39,14 @@ Foam::autoPtr<Foam::tableReader<Type>> Foam::tableReader<Type>::New
         "openFoam"
     );
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_
-            ->find(readerType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(readerType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown reader type " << readerType
-            << nl << nl
-            << "Valid reader types : " << nl
+            << "Unknown reader type "
+            << readerType << nl << nl
+            << "Valid reader types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -78,8 +76,7 @@ void Foam::tableReader<Type>::write(Ostream& os) const
 {
     if (this->type() != "openFoam")
     {
-        os.writeKeyword("readerType")
-            << this->type() << token::END_STATEMENT << nl;
+        os.writeEntry("readerType", this->type());
     }
 }
 

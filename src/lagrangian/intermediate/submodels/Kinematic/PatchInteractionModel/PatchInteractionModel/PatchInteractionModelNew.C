@@ -39,15 +39,14 @@ Foam::PatchInteractionModel<CloudType>::New
 
     Info<< "Selecting patch interaction model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown patch interaction model type "
             << modelType << nl << nl
-            << "Valid patch interaction model types are:" << nl
+            << "Valid patch interaction model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

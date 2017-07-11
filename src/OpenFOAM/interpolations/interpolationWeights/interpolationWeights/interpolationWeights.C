@@ -27,23 +27,18 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(interpolationWeights, 0);
 defineRunTimeSelectionTable(interpolationWeights, word);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-interpolationWeights::interpolationWeights
-(
-    const scalarField& samples
-)
+Foam::interpolationWeights::interpolationWeights(const scalarField& samples)
 :
     samples_(samples)
 {}
@@ -51,7 +46,7 @@ interpolationWeights::interpolationWeights
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-autoPtr<interpolationWeights> interpolationWeights::New
+Foam::autoPtr<Foam::interpolationWeights> Foam::interpolationWeights::New
 (
     const word& type,
     const scalarField& samples
@@ -64,16 +59,14 @@ autoPtr<interpolationWeights> interpolationWeights::New
             << type << endl;
     }
 
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(type);
+    auto cstrIter = wordConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown interpolationWeights type "
-            << type
-            << endl << endl
-            << "Valid interpolationWeights types are :" << endl
+            << type << nl << nl
+            << "Valid interpolationWeights types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -84,12 +77,8 @@ autoPtr<interpolationWeights> interpolationWeights::New
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-interpolationWeights::~interpolationWeights()
+Foam::interpolationWeights::~interpolationWeights()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -70,10 +70,10 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
     const fvMesh& mesh
 )
 {
-    word modelType(coeffs.lookup("type"));
+    const word modelType(coeffs.lookup("type"));
 
     Info<< indent
-        << "Selecting finite volume options model type " << modelType << endl;
+        << "Selecting finite volume options type " << modelType << endl;
 
     const_cast<Time&>(mesh.time()).libs().open
     (
@@ -82,14 +82,14 @@ Foam::autoPtr<Foam::fv::option> Foam::fv::option::New
         dictionaryConstructorTablePtr_
     );
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown Model type " << modelType << nl << nl
-            << "Valid model types are:" << nl
+            << "Unknown fvOption model type "
+            << modelType << nl << nl
+            << "Valid fvOption types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

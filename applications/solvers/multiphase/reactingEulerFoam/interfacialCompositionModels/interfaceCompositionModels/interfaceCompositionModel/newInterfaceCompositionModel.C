@@ -36,7 +36,7 @@ Foam::interfaceCompositionModel::New
     const phasePair& pair
 )
 {
-    word interfaceCompositionModelType
+    const word modelType
     (
         word(dict.lookup("type"))
       + "<"
@@ -47,17 +47,16 @@ Foam::interfaceCompositionModel::New
     );
 
     Info<< "Selecting interfaceCompositionModel for "
-        << pair << ": " << interfaceCompositionModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(interfaceCompositionModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown interfaceCompositionModelType type "
-            << interfaceCompositionModelType << endl << endl
-            << "Valid interfaceCompositionModel types are : " << endl
+            << "Unknown interfaceCompositionModel type "
+            << modelType << nl << nl
+            << "Valid interfaceCompositionModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
