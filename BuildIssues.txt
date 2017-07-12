@@ -3,6 +3,21 @@ OpenFOAM-1706
 Known Build Issues
 ==================
 
+---------------------
+Intel MPI (Gcc/Clang)
+---------------------
+
+  Either I_MPI_ROOT or MPI_ROOT can be used to specify the Intel-MPI
+  installation directory path.
+
+  The ThirdParty build of ptscotch uses `mpiicc` for Intel-MPI
+  instead of the usual `mpicc`.
+  When gcc or clang are used, it is highly likely that the
+  I_MPI_CC environment variable also needs to be set accordingly.
+
+  See `mpiicc -help` for more information about environment variables.
+
+
 --------------
 Intel Compiler
 --------------
