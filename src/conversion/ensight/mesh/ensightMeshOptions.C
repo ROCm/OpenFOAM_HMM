@@ -33,7 +33,6 @@ Foam::ensightMesh::options::options(IOstream::streamFormat format)
     format_(format),
     lazy_(false),
     noPatches_(false),
-    deprecatedOrder_(false),
     patchPatterns_(),
     faceZonePatterns_()
 {}
@@ -56,12 +55,6 @@ bool Foam::ensightMesh::options::lazy() const
 bool Foam::ensightMesh::options::useInternalMesh() const
 {
     return noPatches_ ? true : !patchPatterns_.valid();
-}
-
-
-bool Foam::ensightMesh::options::deprecatedOrder() const
-{
-    return deprecatedOrder_;
 }
 
 
@@ -94,12 +87,6 @@ void Foam::ensightMesh::options::reset()
 void Foam::ensightMesh::options::lazy(const bool b)
 {
     lazy_ = b;
-}
-
-
-void Foam::ensightMesh::options::deprecatedOrder(const bool b)
-{
-    deprecatedOrder_ = b;
 }
 
 

@@ -3,9 +3,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,10 +23,17 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#
+#     stressComponents
 #
 # Description
+#     Script to suggest using the new "-postProcess" solver option.
 #
 #------------------------------------------------------------------------------
+Script=${0##*/}
+
+echo $Script "has been superseded by the -postProcess solver option:"
+echo "<solverName> -funcs '(R components(turbulenceProperties:R))'"
+echo "e.g."
+echo "simpleFoam -postProcess -funcs '(R components(turbulenceProperties:R))'"
 
 #------------------------------------------------------------------------------

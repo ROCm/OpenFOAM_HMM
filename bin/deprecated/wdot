@@ -3,9 +3,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
+#   \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
 #    \\/     M anipulation  |
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -23,10 +23,15 @@
 #     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # Script
-#
+#     wdot
 #
 # Description
+#     Script to suggest using the new "postProcess" utility.
 #
 #------------------------------------------------------------------------------
+Script=${0##*/}
+
+echo $Script "has been superseded by the postProcess utility:"
+echo "postProcess -func XiReactionRate"
 
 #------------------------------------------------------------------------------
