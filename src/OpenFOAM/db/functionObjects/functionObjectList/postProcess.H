@@ -143,6 +143,9 @@ if (argList::postProcess(argc, argv))
             {
                 functionsPtr->end();
             }
+
+            // Report to output (avoid overwriting values from simulation)
+            profiling::print(Info);
         }
         catch (IOerror& err)
         {
