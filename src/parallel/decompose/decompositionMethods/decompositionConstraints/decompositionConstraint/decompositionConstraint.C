@@ -56,15 +56,14 @@ Foam::decompositionConstraint::New
 {
     Info<< "Selecting decompositionConstraint " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(dict)
             << "Unknown decompositionConstraint type "
             << modelType << nl << nl
-            << "Valid decompositionConstraint types:" << endl
+            << "Valid decompositionConstraint types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

@@ -34,23 +34,18 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(UPstream, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::UPstream::commsTypes,
-        3
-    >::names[] =
-    {
-        "blocking",
-        "scheduled",
-        "nonBlocking"
-    };
 }
 
-
-const Foam::NamedEnum<Foam::UPstream::commsTypes, 3>
-    Foam::UPstream::commsTypeNames;
+const Foam::Enum
+<
+    Foam::UPstream::commsTypes
+>
+Foam::UPstream::commsTypeNames
+{
+    { commsTypes::blocking, "blocking" },
+    { commsTypes::scheduled, "scheduled" },
+    { commsTypes::nonBlocking, "nonBlocking" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -351,7 +346,7 @@ template<>
 const Foam::UPstream::commsStruct&
 Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
 {
-    return const_cast<UList<UPstream::commsStruct>& >(*this).operator[](procID);
+    return const_cast<UList<UPstream::commsStruct>&>(*this).operator[](procID);
 }
 
 
@@ -411,7 +406,11 @@ registerOptSwitch
 
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
-    commsTypeNames.read(Foam::debug::optimisationSwitches().lookup("commsType"))
+    commsTypeNames.lookup
+    (
+        "commsType",
+        Foam::debug::optimisationSwitches()
+    )
 );
 
 namespace Foam
@@ -473,6 +472,12 @@ registerOptSwitch
     "maxCommsSize",
     int,
     Foam::UPstream::maxCommsSize
+);
+
+
+const int Foam::UPstream::mpiBufferSize
+(
+    Foam::debug::optimisationSwitch("mpiBufferSize", 0)
 );
 
 

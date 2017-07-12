@@ -63,7 +63,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<faceAction, 2> faceActionNames_;
+        static const Enum<faceAction> faceActionNames_;
 
         //- Add usage string
         static addToUsageTable usage_;

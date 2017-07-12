@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,24 +40,19 @@ namespace fieldValues
 }
 }
 
-template<>
-const char* Foam::NamedEnum
+
+const Foam::Enum
 <
-    Foam::functionObjects::fieldValues::fieldValueDelta::operationType,
-    5
->::names[] =
+    Foam::functionObjects::fieldValues::fieldValueDelta::operationType
+>
+Foam::functionObjects::fieldValues::fieldValueDelta::operationTypeNames_
 {
-    "add",
-    "subtract",
-    "min",
-    "max",
-    "average"
+    { operationType::opAdd, "add" },
+    { operationType::opSubtract, "subtract" },
+    { operationType::opMin, "min" },
+    { operationType::opMax, "max" },
+    { operationType::opAverage, "average" },
 };
-const Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::fieldValueDelta::operationType,
-    5
-> Foam::functionObjects::fieldValues::fieldValueDelta::operationTypeNames_;
 
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
@@ -151,7 +146,7 @@ bool Foam::functionObjects::fieldValues::fieldValueDelta::read
         ).ptr()
     );
 
-    operation_ = operationTypeNames_.read(dict.lookup("operation"));
+    operation_ = operationTypeNames_.lookup("operation", dict);
 
     return true;
 }

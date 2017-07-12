@@ -42,8 +42,8 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
     Info<< "Selecting reaction rate flame area correlation "
         << reactionRateFlameAreaType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(reactionRateFlameAreaType);
+    auto cstrIter =
+        dictionaryConstructorTablePtr_->cfind(reactionRateFlameAreaType);
 
     if (!cstrIter.found())
     {
@@ -51,9 +51,9 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
         (
             dict
         )   << "Unknown reactionRateFlameArea type "
-            << reactionRateFlameAreaType << endl << endl
-            << "Valid reaction rate flame area types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << reactionRateFlameAreaType << nl << nl
+            << "Valid reaction rate flame area types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 

@@ -153,8 +153,7 @@ Foam::LESModel<BasicTurbulenceModel>::New
 
     Info<< "Selecting LES turbulence model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {

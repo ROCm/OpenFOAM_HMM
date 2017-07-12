@@ -41,7 +41,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(surfaceFeatures, 0);
 
-    const scalar surfaceFeatures::parallelTolerance = sin(degToRad(1.0));
+    const scalar surfaceFeatures::parallelTolerance = sin(1.0_deg);
 
 
 //! \cond fileScope

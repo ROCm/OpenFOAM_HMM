@@ -172,7 +172,7 @@ public:
 
     // Static data
 
-        static const NamedEnum<booleanOpType, 4> booleanOpTypeNames;
+        static const Enum<booleanOpType> booleanOpTypeNames;
 
 
 

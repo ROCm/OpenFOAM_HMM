@@ -91,12 +91,11 @@ Foam::IFstream::IFstream
     ISstream
     (
         *ifPtr_,
-        "IFstream.sourceFile_",
+        pathname,
         format,
         version,
         IFstreamAllocator::compression_
-    ),
-    pathname_(pathname)
+    )
 {
     setClosed();
 
@@ -166,7 +165,7 @@ Foam::IFstream& Foam::IFstream::operator()() const
     if (!good())
     {
         // also checks .gz file
-        if (isFile(pathname_, true))
+        if (isFile(this->name(), true))
         {
             check("IFstream::operator()");
             FatalIOError.exit();
@@ -174,7 +173,7 @@ Foam::IFstream& Foam::IFstream::operator()() const
         else
         {
             FatalIOErrorInFunction(*this)
-                << "file " << pathname_ << " does not exist"
+                << "file " << this->name() << " does not exist"
                 << exit(FatalIOError);
         }
     }

@@ -36,18 +36,7 @@ namespace Foam
     defineTypeNameAndDebug(faceToPoint, 0);
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, word);
     addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::faceToPoint::faceAction,
-        1
-    >::names[] =
-    {
-        "all"
-    };
 }
-
 
 Foam::topoSetSource::addToUsageTable Foam::faceToPoint::usage_
 (
@@ -56,8 +45,14 @@ Foam::topoSetSource::addToUsageTable Foam::faceToPoint::usage_
     "    Select all points of faces in the faceSet\n\n"
 );
 
-const Foam::NamedEnum<Foam::faceToPoint::faceAction, 1>
-    Foam::faceToPoint::faceActionNames_;
+const Foam::Enum
+<
+    Foam::faceToPoint::faceAction
+>
+Foam::faceToPoint::faceActionNames_
+{
+    { faceAction::ALL, "all" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -105,7 +100,7 @@ Foam::faceToPoint::faceToPoint
 :
     topoSetSource(mesh),
     setName_(dict.lookup("set")),
-    option_(faceActionNames_.read(dict.lookup("option")))
+    option_(faceActionNames_.lookup("option", dict))
 {}
 
 

@@ -35,20 +35,19 @@ Foam::swarmCorrection::New
     const phasePair& pair
 )
 {
-    word swarmCorrectionType(dict.lookup("type"));
+    const word correctionType(dict.lookup("type"));
 
     Info<< "Selecting swarmCorrection for "
-        << pair << ": " << swarmCorrectionType << endl;
+        << pair << ": " << correctionType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(swarmCorrectionType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(correctionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown swarmCorrectionType type "
-            << swarmCorrectionType << endl << endl
-            << "Valid swarmCorrection types are : " << endl
+            << "Unknown swarmCorrection type "
+            << correctionType << nl << nl
+            << "Valid swarmCorrection types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

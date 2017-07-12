@@ -215,10 +215,37 @@ EnumType Foam::Enum<EnumType>::lookupOrDefault
     {
         return lookup(key, dict);
     }
-    else
+
+    return deflt;
+}
+
+
+template<class EnumType>
+EnumType Foam::Enum<EnumType>::lookupOrFailsafe
+(
+    const word& key,
+    const dictionary& dict,
+    const EnumType deflt
+) const
+{
+    if (dict.found(key))
     {
-        return deflt;
+        const word enumName(dict.lookup(key));
+        const label idx = getIndex(enumName);
+
+        if (idx < 0)
+        {
+            IOWarningInFunction(dict)
+                << "bad " << key <<" specifier " << enumName
+                << " using " << getName(deflt) << endl;
+        }
+        else
+        {
+            return EnumType(values_[idx]);
+        }
     }
+
+    return deflt;
 }
 
 

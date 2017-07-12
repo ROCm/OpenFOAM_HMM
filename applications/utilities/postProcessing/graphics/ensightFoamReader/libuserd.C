@@ -45,6 +45,7 @@ Description
 #include "fvMesh.H"
 #include "cellModeller.H"
 #include "globalFoam.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

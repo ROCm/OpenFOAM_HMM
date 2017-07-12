@@ -97,8 +97,8 @@ bool Foam::functionEntry::execute
         return true;
     }
 
-    executedictionaryIstreamMemberFunctionTable::iterator mfIter =
-        executedictionaryIstreamMemberFunctionTablePtr_->find(functionName);
+    auto mfIter =
+        executedictionaryIstreamMemberFunctionTablePtr_->cfind(functionName);
 
     if (!mfIter.found())
     {
@@ -106,8 +106,8 @@ bool Foam::functionEntry::execute
             << "Unknown functionEntry '" << functionName
             << "' in " << is.name() << " near line " << is.lineNumber()
             << nl << nl
-            << "Valid functionEntries are :" << endl
-            << executedictionaryIstreamMemberFunctionTablePtr_->toc()
+            << "Valid functionEntries :" << endl
+            << executedictionaryIstreamMemberFunctionTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -136,8 +136,11 @@ bool Foam::functionEntry::execute
         return true;
     }
 
-    executeprimitiveEntryIstreamMemberFunctionTable::iterator mfIter =
-        executeprimitiveEntryIstreamMemberFunctionTablePtr_->find(functionName);
+    auto mfIter =
+        executeprimitiveEntryIstreamMemberFunctionTablePtr_->cfind
+        (
+            functionName
+        );
 
     if (!mfIter.found())
     {
@@ -145,8 +148,8 @@ bool Foam::functionEntry::execute
             << "Unknown functionEntry '" << functionName
             << "' in " << is.name() << " near line " << is.lineNumber()
             << nl << nl
-            << "Valid functionEntries are :" << endl
-            << executeprimitiveEntryIstreamMemberFunctionTablePtr_->toc()
+            << "Valid functionEntries :" << endl
+            << executeprimitiveEntryIstreamMemberFunctionTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

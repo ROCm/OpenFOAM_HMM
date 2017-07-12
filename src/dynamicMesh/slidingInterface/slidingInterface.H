@@ -85,7 +85,7 @@ public:
         };
 
         //- Direction names
-        static const NamedEnum<typeOfMatch, 2> typeOfMatchNames_;
+        static const Enum<typeOfMatch> typeOfMatchNames_;
 
 private:
 

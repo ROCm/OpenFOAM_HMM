@@ -123,8 +123,8 @@ public:
             ffdOut
         };
 
-        //- Fan flow directions names
-        static const NamedEnum<fanFlowDirection, 2> fanFlowDirectionNames_;
+        //- Fan flow direction names
+        static const Enum<fanFlowDirection> fanFlowDirectionNames_;
 
 
 private:

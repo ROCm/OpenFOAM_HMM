@@ -86,7 +86,7 @@ void Foam::sigSegv::set(const bool)
         if (sigaction(SIGSEGV, &newAction, &oldAction_) < 0)
         {
             FatalErrorInFunction
-                << "Cannot call sigSegv::set() more than once"
+                << "Cannot call more than once"
                 << abort(FatalError);
         }
         sigActive_ = true;
@@ -101,7 +101,7 @@ void Foam::sigSegv::unset(const bool)
         if (sigaction(SIGSEGV, &oldAction_, nullptr) < 0)
         {
             FatalErrorInFunction
-                << "Cannot set SIGSEGV trapping"
+                << "Cannot unset SIGSEGV trapping"
                 << abort(FatalError);
         }
         sigActive_ = false;

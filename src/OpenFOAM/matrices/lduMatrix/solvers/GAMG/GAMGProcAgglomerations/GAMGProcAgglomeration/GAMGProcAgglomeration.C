@@ -361,15 +361,14 @@ Foam::autoPtr<Foam::GAMGProcAgglomeration> Foam::GAMGProcAgglomeration::New
         InfoInFunction << "Constructing GAMGProcAgglomeration" << endl;
     }
 
-    GAMGAgglomerationConstructorTable::iterator cstrIter =
-        GAMGAgglomerationConstructorTablePtr_->find(type);
+    auto cstrIter = GAMGAgglomerationConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGProcAgglomeration type "
             << type << " for GAMGAgglomeration " << agglom.type() << nl << nl
-            << "Valid GAMGProcAgglomeration types are :" << endl
+            << "Valid GAMGProcAgglomeration types :" << endl
             << GAMGAgglomerationConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

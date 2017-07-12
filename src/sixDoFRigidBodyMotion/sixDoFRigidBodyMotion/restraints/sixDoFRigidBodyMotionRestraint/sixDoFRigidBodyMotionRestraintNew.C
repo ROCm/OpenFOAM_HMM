@@ -39,15 +39,14 @@ Foam::sixDoFRigidBodyMotionRestraint::New
         sDoFRBMRDict.lookup("sixDoFRigidBodyMotionRestraint")
     );
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(restraintType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(restraintType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sixDoFRigidBodyMotionRestraint type "
             << restraintType << nl << nl
-            << "Valid sixDoFRigidBodyMotionRestraint types are : " << endl
+            << "Valid sixDoFRigidBodyMotionRestraint types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

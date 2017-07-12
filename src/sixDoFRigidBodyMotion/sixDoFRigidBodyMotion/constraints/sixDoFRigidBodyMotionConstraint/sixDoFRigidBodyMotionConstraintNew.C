@@ -40,15 +40,14 @@ Foam::sixDoFRigidBodyMotionConstraint::New
         sDoFRBMCDict.lookup("sixDoFRigidBodyMotionConstraint")
     );
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(constraintType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(constraintType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sixDoFRigidBodyMotionConstraint type "
             << constraintType << nl << nl
-            << "Valid sixDoFRigidBodyMotionConstraints are : " << endl
+            << "Valid sixDoFRigidBodyMotionConstraint types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

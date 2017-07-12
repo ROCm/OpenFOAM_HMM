@@ -120,13 +120,11 @@ addGeometryToScene
 
     if (fName.ext() == "vtk")
     {
-        vtkSmartPointer<vtkPolyDataReader> points =
-            vtkSmartPointer<vtkPolyDataReader>::New();
+        auto points = vtkSmartPointer<vtkPolyDataReader>::New();
         points->SetFileName(fName.c_str());
         points->Update();
 
-        vtkSmartPointer<vtkPolyDataMapper> mapper =
-            vtkSmartPointer<vtkPolyDataMapper>::New();
+        auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
 
         actor_->SetMapper(mapper);
 

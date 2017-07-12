@@ -33,20 +33,18 @@ Foam::wallBoilingModels::nucleationSiteModel::New
     const dictionary& dict
 )
 {
-    word nucleationSiteModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
-    Info<< "Selecting nucleationSiteModel: "
-        << nucleationSiteModelType << endl;
+    Info<< "Selecting nucleationSiteModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(nucleationSiteModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown nucleationSiteModelType type "
-            << nucleationSiteModelType << endl << endl
-            << "Valid nucleationSiteModel types are : " << endl
+            << "Unknown nucleationSiteModel type "
+            << modelType << nl << nl
+            << "Valid nucleationSiteModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

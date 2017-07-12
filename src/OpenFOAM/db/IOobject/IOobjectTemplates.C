@@ -116,9 +116,8 @@ void Foam::IOobject::warnNoRereading() const
     {
         WarningInFunction
             << Type::typeName << ' ' << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but " << Type::typeName
-            << " does not support automatic rereading."
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED but "
+            << Type::typeName << " does not support automatic rereading."
             << endl;
     }
 }

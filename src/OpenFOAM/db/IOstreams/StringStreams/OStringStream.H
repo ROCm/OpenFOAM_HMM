@@ -66,7 +66,7 @@ public:
             OSstream
             (
                *(new std::ostringstream()),
-                "OStringStream.sinkFile",
+                "output",
                 format,
                 version
             )
@@ -126,7 +126,7 @@ public:
         // Print
 
             //- Print description to Ostream
-            void print(Ostream&) const;
+            void print(Ostream& os) const;
 };
 
 

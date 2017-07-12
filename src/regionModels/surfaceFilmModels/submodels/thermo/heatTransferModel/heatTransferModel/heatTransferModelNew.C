@@ -42,19 +42,19 @@ autoPtr<heatTransferModel> heatTransferModel::New
     const dictionary& dict
 )
 {
-    word modelType(dict.lookup("heatTransferModel"));
+    const word modelType(dict.lookup("heatTransferModel"));
 
     Info<< "    Selecting heatTransferModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown heatTransferModel type " << modelType << nl << nl
-            << "Valid heatTransferModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Unknown heatTransferModel type "
+            << modelType << nl << nl
+            << "Valid heatTransferModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

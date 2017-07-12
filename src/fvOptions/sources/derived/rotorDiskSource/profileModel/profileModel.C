@@ -73,21 +73,20 @@ Foam::autoPtr<Foam::profileModel> Foam::profileModel::New
     const dictionary& dict
 )
 {
-    const word& modelName(dict.dictName());
+    const word& modelName = dict.dictName();
 
     const word modelType(dict.lookup("type"));
 
     Info<< "    - creating " << modelType << " profile " << modelName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown profile model type " << modelType
-            << nl << nl
-            << "Valid model types are :" << nl
+            << "Unknown profile model type "
+            << modelType << nl << nl
+            << "Valid model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -29,6 +29,7 @@ License
 #include "PstreamGlobals.H"
 #include "SubList.H"
 #include "allReduce.H"
+#include "int.H"
 
 #include <mpi.h>
 
@@ -41,6 +42,12 @@ License
 #elif defined(WM_DP)
     #define MPI_SCALAR MPI_DOUBLE
 #endif
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// file-scope: min value and default for mpiBufferSize
+static const int minBufferSize = 20000000;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,32 +94,31 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     setParRun(numprocs);
 
     #ifndef SGIMPI
-    string bufferSizeName = getEnv("MPI_BUFFER_SIZE");
-
-    if (bufferSizeName.size())
     {
-        int bufferSize = atoi(bufferSizeName.c_str());
+        // Normally use UPstream::mpiBufferSize (optimisationSwitch),
+        // but allow override with the MPI_BUFFER_SIZE env variable
+        // which has an int value
+        int bufSize = 0;
 
-        if (bufferSize)
+        const std::string str = Foam::getEnv("MPI_BUFFER_SIZE");
+        if (str.empty() || !Foam::read(str.c_str(), bufSize) || bufSize <= 0)
         {
-            MPI_Buffer_attach(new char[bufferSize], bufferSize);
+            bufSize = mpiBufferSize;
         }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "UPstream::init(int& argc, char**& argv) : "
-            << "environment variable MPI_BUFFER_SIZE not defined"
-            << Foam::abort(FatalError);
+
+        if (bufSize < minBufferSize)
+        {
+            bufSize = minBufferSize;
+        }
+
+        if (debug)
+        {
+            Pout<< "UPstream::init : mpi-buffer-size " << bufSize << endl;
+        }
+
+        MPI_Buffer_attach(new char[bufSize], bufSize);
     }
     #endif
-
-    //int processorNameLen;
-    //char processorName[MPI_MAX_PROCESSOR_NAME];
-    //
-    //MPI_Get_processor_name(processorName, &processorNameLen);
-    //processorName[processorNameLen] = '\0';
-    //Pout<< "Processor name:" << processorName << endl;
 
     return true;
 }
@@ -126,10 +132,12 @@ void Foam::UPstream::exit(int errnum)
     }
 
     #ifndef SGIMPI
-    int size;
-    char* buff;
-    MPI_Buffer_detach(&buff, &size);
-    delete[] buff;
+    {
+        int size;
+        char* buff;
+        MPI_Buffer_detach(&buff, &size);
+        delete[] buff;
+    }
     #endif
 
     if (PstreamGlobals::outstandingRequests_.size())

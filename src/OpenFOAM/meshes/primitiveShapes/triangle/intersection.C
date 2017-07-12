@@ -29,37 +29,27 @@ License
 
 Foam::scalar Foam::intersection::planarTol_ = 0.2;
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::intersection::direction
+>
+Foam::intersection::directionNames_
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::intersection::direction,
-        2
-    >::names[] =
-    {
-        "vector",
-        "contactSphere"
-    };
+    { intersection::direction::VECTOR, "vector" },
+    { intersection::direction::CONTACT_SPHERE, "contactSphere" },
+};
 
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::intersection::algorithm,
-        3
-    >::names[] =
-    {
-        "fullRay",
-        "halfRay",
-        "visible"
-    };
-}
 
-const Foam::NamedEnum<Foam::intersection::direction, 2>
-Foam::intersection::directionNames_;
-
-const Foam::NamedEnum<Foam::intersection::algorithm, 3>
-Foam::intersection::algorithmNames_;
+const Foam::Enum
+<
+    Foam::intersection::algorithm
+>
+Foam::intersection::algorithmNames_
+{
+    { intersection::algorithm::FULL_RAY, "fullRay" },
+    { intersection::algorithm::HALF_RAY, "halfRay" },
+    { intersection::algorithm::VISIBLE, "visible" },
+};
 
 
 // ************************************************************************* //

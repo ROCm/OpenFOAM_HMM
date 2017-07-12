@@ -38,7 +38,7 @@ SourceFiles
 #define functionObjects_runTimeControls_minMaxCondition_H
 
 #include "runTimeCondition.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +68,7 @@ public:
             mdMax           //!< Maximum
         };
 
-        static const NamedEnum<modeType, 2> modeTypeNames_;
+        static const Enum<modeType> modeTypeNames_;
 
 
 protected:

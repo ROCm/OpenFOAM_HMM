@@ -27,7 +27,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::vtk::fileTag> Foam::vtk::fileTagNames
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
+Foam::vtk::fileTagNames
 {
     { fileTag::VTK_FILE, "VTKFile" },
     { fileTag::DATA_ARRAY, "DataArray" },
@@ -45,7 +49,11 @@ const Foam::Enum<Foam::vtk::fileTag> Foam::vtk::fileTagNames
 };
 
 
-const Foam::Enum<Foam::vtk::fileAttr> Foam::vtk::fileAttrNames
+const Foam::Enum
+<
+    Foam::vtk::fileAttr
+>
+Foam::vtk::fileAttrNames
 {
     { fileAttr::OFFSET, "offset" },
     { fileAttr::NUMBER_OF_COMPONENTS, "NumberOfComponents" },
@@ -57,7 +65,11 @@ const Foam::Enum<Foam::vtk::fileAttr> Foam::vtk::fileAttrNames
 };
 
 
-const Foam::Enum<Foam::vtk::dataArrayAttr> Foam::vtk::dataArrayAttrNames
+const Foam::Enum
+<
+    Foam::vtk::dataArrayAttr
+>
+Foam::vtk::dataArrayAttrNames
 {
     { dataArrayAttr::POINTS, "Points" },
     { dataArrayAttr::OFFSETS, "offsets" },

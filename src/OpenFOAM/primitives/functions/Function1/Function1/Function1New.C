@@ -40,8 +40,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
 
         const word Function1Type(coeffsDict.lookup("type"));
 
-        typename dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(Function1Type);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
 
         if (!cstrIter.found())
         {
@@ -49,7 +48,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
                 << "Unknown Function1 type "
                 << Function1Type << " for Function1 "
                 << entryName << nl << nl
-                << "Valid Function1 types are:" << nl
+                << "Valid Function1 types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
                 << exit(FatalError);
         }
@@ -76,8 +75,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
             Function1Type = firstToken.wordToken();
         }
 
-        typename dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(Function1Type);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(Function1Type);
 
         if (!cstrIter.found())
         {
@@ -85,7 +83,7 @@ Foam::autoPtr<Foam::Function1<Type>> Foam::Function1<Type>::New
                 << "Unknown Function1 type "
                 << Function1Type << " for Function1 "
                 << entryName << nl << nl
-                << "Valid Function1 types are:" << nl
+                << "Valid Function1 types :" << nl
                 << dictionaryConstructorTablePtr_->sortedToc() << nl
                 << exit(FatalError);
         }

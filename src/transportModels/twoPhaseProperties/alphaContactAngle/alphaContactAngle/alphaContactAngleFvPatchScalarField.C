@@ -33,27 +33,19 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(alphaContactAngleFvPatchScalarField, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::alphaContactAngleFvPatchScalarField::limitControls,
-        4
-    >::names[] =
-    {
-        "none",
-        "gradient",
-        "zeroGradient",
-        "alpha"
-    };
 }
 
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::alphaContactAngleFvPatchScalarField::limitControls,
-    4
-> Foam::alphaContactAngleFvPatchScalarField::limitControlNames_;
+    Foam::alphaContactAngleFvPatchScalarField::limitControls
+>
+Foam::alphaContactAngleFvPatchScalarField::limitControlNames_
+{
+    { limitControls::lcNone, "none" },
+    { limitControls::lcGradient, "gradient" },
+    { limitControls::lcZeroGradient, "zeroGradient" },
+    { limitControls::lcAlpha, "alpha" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -77,7 +69,7 @@ Foam::alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 )
 :
     fixedGradientFvPatchScalarField(p, iF),
-    limit_(limitControlNames_.read(dict.lookup("limit")))
+    limit_(limitControlNames_.lookup("limit", dict))
 {
     if (dict.found("gradient"))
     {
@@ -166,8 +158,7 @@ void Foam::alphaContactAngleFvPatchScalarField::write
 ) const
 {
     fixedGradientFvPatchScalarField::write(os);
-    os.writeKeyword("limit")
-        << limitControlNames_[limit_] << token::END_STATEMENT << nl;
+    os.writeEntry("limit", limitControlNames_[limit_]);
 }
 
 

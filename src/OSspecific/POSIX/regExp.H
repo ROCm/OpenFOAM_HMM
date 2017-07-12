@@ -77,7 +77,7 @@ class regExp
         //- Return true if it matches and sets the sub-groups matched.
         bool matchGrouping
         (
-            const std::string&,
+            const std::string& text,
             List<std::string>& groups
         ) const;
 
@@ -99,17 +99,23 @@ public:
     // Constructors
 
         //- Construct null
-        regExp();
+        inline regExp();
+
+        //- Construct from character array
+        inline explicit regExp(const char* pattern);
+
+        //- Construct from string
+        inline explicit regExp(const std::string& pattern);
 
         //- Construct from character array, optionally ignore case
-        regExp(const char* pattern, bool ignoreCase=false);
+        inline regExp(const char* pattern, bool ignoreCase);
 
         //- Construct from string, optionally ignore case
-        regExp(const std::string& pattern, bool ignoreCase=false);
+        inline regExp(const std::string& pattern, bool ignoreCase);
 
 
     //- Destructor
-    ~regExp();
+    inline ~regExp();
 
 
     // Member functions
@@ -143,20 +149,20 @@ public:
 
       // Matching/Searching
 
-        //- Find position within string.
-        //  \Return The index where it begins or string::npos if not found
+        //- Find position within the text.
+        //  \return The index where it begins or string::npos if not found
         std::string::size_type find(const std::string& text) const;
 
-        //- Return true if it matches the entire string
+        //- True if the regex matches the entire text.
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
         bool match(const std::string& text) const;
 
-        //- Return true if it matches and sets the sub-groups matched
+        //- True if the regex matches the text, set the sub-groups matched.
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
         bool match(const std::string& text, List<std::string>& groups) const;
 
-        //- Return true if the regex was found within string
-        bool search(const std::string& text) const;
+        //- Return true if the regex was found within the text
+        inline bool search(const std::string& text) const;
 
 
     // Member Operators

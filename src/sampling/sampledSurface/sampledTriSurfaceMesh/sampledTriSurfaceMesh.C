@@ -35,6 +35,18 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+const Foam::Enum
+<
+    Foam::sampledTriSurfaceMesh::samplingSource
+>
+Foam::sampledTriSurfaceMesh::samplingSourceNames_
+{
+    { samplingSource::cells, "cells" },
+    { samplingSource::insideCells, "insideCells" },
+    { samplingSource::boundaryFaces, "boundaryFaces" },
+};
+
+
 namespace Foam
 {
     defineTypeNameAndDebug(sampledTriSurfaceMesh, 0);
@@ -44,18 +56,6 @@ namespace Foam
         sampledTriSurfaceMesh,
         word
     );
-
-    template<>
-    const char* NamedEnum<sampledTriSurfaceMesh::samplingSource, 3>::names[] =
-    {
-        "cells",
-        "insideCells",
-        "boundaryFaces"
-    };
-
-    const NamedEnum<sampledTriSurfaceMesh::samplingSource, 3>
-    sampledTriSurfaceMesh::samplingSourceNames_;
-
 
     //- Private class for finding nearest
     //  Comprising:
@@ -685,7 +685,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             false
         )
     ),
-    sampleSource_(samplingSourceNames_[dict.lookup("source")]),
+    sampleSource_(samplingSourceNames_.lookup("source", dict)),
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault<Switch>("keepIds", false)),
     originalIds_(),

@@ -39,15 +39,14 @@ Foam::autoPtr<Foam::XiEqModel> Foam::XiEqModel::New
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown XiEqModel type "
             << modelType << nl << nl
-            << "Valid XiEqModels are : " << endl
+            << "Valid XiEqModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -36,7 +36,7 @@ SourceFiles
 #ifndef phaseProperties_H
 #define phaseProperties_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Tuple2.H"
 #include "PtrList.H"
 #include "volFields.H"
@@ -74,7 +74,7 @@ public:
         };
 
         //- Corresponding word representations for phase type enumerations
-        static const NamedEnum<phaseType, 4> phaseTypeNames;
+        static const Enum<phaseType> phaseTypeNames;
 
 
 private:

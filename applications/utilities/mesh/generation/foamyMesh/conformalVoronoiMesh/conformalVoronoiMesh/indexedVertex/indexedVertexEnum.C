@@ -28,42 +28,42 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char*
-Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 15>::names[] =
+const Foam::Enum
+<
+    Foam::indexedVertexEnum::vertexType
+>
+Foam::indexedVertexEnum::vertexTypeNames_
 {
-    "Unassigned",
-    "Internal",
-    "InternalNearBoundary",
-    "InternalSurface",
-    "InternalSurfaceBaffle",
-    "ExternalSurfaceBaffle",
-    "InternalFeatureEdge",
-    "InternalFeatureEdgeBaffle",
-    "ExternalFeatureEdgeBaffle",
-    "InternalFeaturePoint",
-    "ExternalSurface",
-    "ExternalFeatureEdge",
-    "ExternalFeaturePoint",
-    "Far",
-    "Constrained"
+    { vertexType::vtUnassigned, "Unassigned" },
+    { vertexType::vtInternal, "Internal" },
+    { vertexType::vtInternalNearBoundary, "InternalNearBoundary" },
+    { vertexType::vtInternalSurface, "InternalSurface" },
+    { vertexType::vtInternalSurfaceBaffle, "InternalSurfaceBaffle" },
+    { vertexType::vtExternalSurfaceBaffle, "ExternalSurfaceBaffle" },
+    { vertexType::vtInternalFeatureEdge, "InternalFeatureEdge" },
+    { vertexType::vtInternalFeatureEdgeBaffle, "InternalFeatureEdgeBaffle" },
+    { vertexType::vtExternalFeatureEdgeBaffle, "ExternalFeatureEdgeBaffle" },
+    { vertexType::vtInternalFeaturePoint, "InternalFeaturePoint" },
+    { vertexType::vtExternalSurface, "ExternalSurface" },
+    { vertexType::vtExternalFeatureEdge, "ExternalFeatureEdge" },
+    { vertexType::vtExternalFeaturePoint, "ExternalFeaturePoint" },
+    { vertexType::vtFar, "Far" },
+    { vertexType::vtConstrained, "Constrained" },
 };
 
-const Foam::NamedEnum<Foam::indexedVertexEnum::vertexType, 15>
-Foam::indexedVertexEnum::vertexTypeNames_;
 
-
-template<>
-const char*
-Foam::NamedEnum<Foam::indexedVertexEnum::vertexMotion, 2>::names[] =
+const Foam::Enum
+<
+    Foam::indexedVertexEnum::vertexMotion
+>
+Foam::indexedVertexEnum::vertexMotionNames_
 {
-    "fixed",
-    "movable"
+    { vertexMotion::fixed, "fixed" },
+    { vertexMotion::movable, "movable" },
 };
 
-const Foam::NamedEnum<Foam::indexedVertexEnum::vertexMotion, 2>
-vertexMotionNames_;
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
 (

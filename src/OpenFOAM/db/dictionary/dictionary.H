@@ -100,8 +100,8 @@ class regExp;
 class dictionary;
 class SHA1Digest;
 
-Istream& operator>>(Istream&, dictionary&);
-Ostream& operator<<(Ostream&, const dictionary&);
+Istream& operator>>(Istream& is, dictionary& dict);
+Ostream& operator<<(Ostream& os, const dictionary& dict);
 
 /*---------------------------------------------------------------------------*\
                         Class dictionaryName Declaration
@@ -176,20 +176,31 @@ class dictionary
         //- Report optional keywords and values if not present in dictionary
         static bool writeOptionalEntries;
 
-        //- HashTable of the entries held on the DL-list for quick lookup
-        HashTable<entry*> hashedEntries_;
-
         //- Parent dictionary
         const dictionary& parent_;
 
+        //- HashTable of the entries held on the IDLList for quick lookup
+        HashTable<entry*> hashedEntries_;
+
         //- Entries of matching patterns
-        DLList<entry*> patternEntries_;
+        DLList<entry*> patterns_;
 
         //- Patterns as precompiled regular expressions
-        DLList<autoPtr<regExp>> patternRegexps_;
+        DLList<autoPtr<regExp>> regexps_;
 
 
-   // Private Member Functions
+    // Typedefs
+
+        //- The storage container
+        typedef IDLList<entry> parent_type;
+
+        typedef DLList<entry*>::iterator pattern_iterator;
+        typedef DLList<entry*>::const_iterator pattern_const_iterator;
+        typedef DLList<autoPtr<regExp>>::iterator regexp_iterator;
+        typedef DLList<autoPtr<regExp>>::const_iterator regexp_const_iterator;
+
+
+    // Private Member Functions
 
         //- Find and return an entry data stream pointer if present
         //  otherwise return nullptr. Allows scoping using '.'
@@ -199,24 +210,6 @@ class dictionary
             bool recursive,
             bool patternMatch
         ) const;
-
-        //- Search patterns table for exact match or regular expression match
-        bool findInPatterns
-        (
-            const bool patternMatch,
-            const word& Keyword,
-            DLList<entry*>::const_iterator& wcLink,
-            DLList<autoPtr<regExp>>::const_iterator& reLink
-        ) const;
-
-        //- Search patterns table for exact match or regular expression match
-        bool findInPatterns
-        (
-            const bool patternMatch,
-            const word& Keyword,
-            DLList<entry*>::iterator& wcLink,
-            DLList<autoPtr<regExp>>::iterator& reLink
-        );
 
 
 public:
@@ -228,8 +221,7 @@ public:
     // Declare name of the class and its debug switch
     ClassName("dictionary");
 
-
-    //- Null dictionary
+    //- An empty dictionary, which is also the parent for all dictionaries
     static const dictionary null;
 
 
@@ -286,6 +278,8 @@ public:
 
 
     // Member functions
+
+      // Access
 
         //- Return the parent dictionary
         const dictionary& parent() const

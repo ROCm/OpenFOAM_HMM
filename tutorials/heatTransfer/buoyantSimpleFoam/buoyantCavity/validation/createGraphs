@@ -85,20 +85,18 @@ EOF
 
 echo "createGraphs:"
 
-# test if gnuplot exists on the system
-if ! which gnuplot > /dev/null 2>&1
-then
-    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" >&2
+# Test if gnuplot exists on the system
+command -v gnuplot >/dev/null 2>&1 || {
+    echo "FOAM FATAL ERROR: gnuplot not found - skipping graph creation" 1>&2
     exit 1
-fi
+}
 
 SETSDIR="../postProcessing/sample"
 
-if [ ! -d $SETSDIR ]
-then
-    echo "FOAM FATAL ERROR: result sets not available in directory $SETSDIR" >&2
+[ -d "$SETSDIR" ] || {
+    echo "FOAM FATAL ERROR: result sets not available in directory $SETSDIR" 1>&2
     exit 1
-fi
+}
 
 # paths to data
 LATESTTIME=$(ls $SETSDIR)

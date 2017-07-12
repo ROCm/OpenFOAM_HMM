@@ -91,10 +91,6 @@ class threePhaseInterfaceProperties
 
 public:
 
-    //- Conversion factor for degrees into radians
-    static const scalar convertToRad;
-
-
     // Constructors
 
         //- Construct from volume fraction field alpha and IOdictionary

@@ -32,12 +32,10 @@ License
 
 template<class CloudType>
 Foam::wordList Foam::PatchInteractionModel<CloudType>::interactionTypeNames_
-(
-    IStringStream
-    (
-        "(rebound stick escape)"
-    )()
-);
+{
+    "rebound", "stick", "escape"
+};
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

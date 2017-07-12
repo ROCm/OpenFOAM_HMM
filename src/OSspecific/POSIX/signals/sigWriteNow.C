@@ -33,12 +33,12 @@ License
 
 namespace Foam
 {
-
 // Signal number to catch
 int sigWriteNow::signal_
 (
     debug::optimisationSwitch("writeNowSignal", -1)
 );
+
 
 // Register re-reader
 class addwriteNowSignalToOpt
@@ -74,7 +74,6 @@ addwriteNowSignalToOpt addwriteNowSignalToOpt_("writeNowSignal");
 
 
 Foam::Time* Foam::sigWriteNow::runTimePtr_ = nullptr;
-
 
 struct sigaction Foam::sigWriteNow::oldAction_;
 

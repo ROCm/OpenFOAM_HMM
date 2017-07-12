@@ -41,15 +41,14 @@ Foam::autoPtr<Foam::energyScalingFunction> Foam::energyScalingFunction::New
         << scalingType << " for "
         << name << " potential energy." << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(scalingType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(scalingType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown energyScalingFunction type "
             << scalingType << nl << nl
-            << "Valid energyScalingFunctions are:" << nl
+            << "Valid energyScalingFunction types:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

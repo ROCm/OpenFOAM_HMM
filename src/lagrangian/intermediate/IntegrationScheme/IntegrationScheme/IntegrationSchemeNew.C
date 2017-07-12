@@ -41,15 +41,14 @@ Foam::IntegrationScheme<Type>::New
     Info<< "Selecting " << phiName << " integration scheme "
         << schemeName << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(schemeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(schemeName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown integration scheme type "
             << schemeName << nl << nl
-            << "Valid integration scheme types are:" << nl
+            << "Valid integration scheme types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }

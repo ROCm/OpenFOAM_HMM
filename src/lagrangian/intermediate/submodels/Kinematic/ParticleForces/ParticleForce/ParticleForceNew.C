@@ -39,16 +39,14 @@ Foam::ParticleForce<CloudType>::New
 {
     Info<< "    Selecting particle force " << forceType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(forceType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(forceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown particle force type "
-            << forceType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid particle force types are:" << nl
+            << forceType << nl << nl
+            << "Valid particle force types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

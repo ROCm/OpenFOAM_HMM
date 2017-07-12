@@ -212,15 +212,14 @@ Foam::autoPtr<Foam::graph::writer> Foam::graph::writer::New
             << exit(FatalError);
     }
 
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(graphFormat);
+    auto cstrIter = wordConstructorTablePtr_->cfind(graphFormat);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown graph format " << graphFormat
-            << endl << endl
-            << "Valid graph formats are : " << endl
+            << "Unknown graph format "
+            << graphFormat << nl << nl
+            << "Valid graph formats :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -43,7 +43,7 @@ SourceFiles
 #define fileMonitor_H
 
 #include <sys/types.h>
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "className.H"
 #include "DynamicList.H"
 
@@ -74,7 +74,7 @@ public:
             DELETED = 2
         };
 
-        static const NamedEnum<fileState, 3> fileStateNames_;
+        static const Enum<fileState> fileStateNames_;
 
 private:
     // Private data

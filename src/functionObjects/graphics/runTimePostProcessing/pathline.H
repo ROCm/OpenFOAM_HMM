@@ -35,7 +35,7 @@ SourceFiles
 #define functionObjects_runTimePostPro_pathline_H
 
 #include "geometryBase.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -71,7 +71,7 @@ public:
             rtVector
         };
 
-        static const NamedEnum<representationType, 4> representationTypeNames;
+        static const Enum<representationType> representationTypeNames;
 
 
 private:

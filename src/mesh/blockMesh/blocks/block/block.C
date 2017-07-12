@@ -78,8 +78,7 @@ Foam::autoPtr<Foam::block> Foam::block::New
 
     const word blockOrCellShapeType(is);
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(blockOrCellShapeType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(blockOrCellShapeType);
 
     if (!cstrIter.found())
     {

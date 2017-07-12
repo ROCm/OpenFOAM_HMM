@@ -37,15 +37,14 @@ Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
 
     Info<< "Selecting solid-body motion function " << motionType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(motionType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(motionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown solidBodyMotionFunction type "
             << motionType << nl << nl
-            << "Valid solidBodyMotionFunctions are : " << endl
+            << "Valid solidBodyMotionFunction types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

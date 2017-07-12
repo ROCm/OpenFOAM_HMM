@@ -32,20 +32,18 @@ Foam::autoPtr<Foam::saturationModel> Foam::saturationModel::New
     const dictionary& dict
 )
 {
-    word saturationModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
-    Info<< "Selecting saturationModel: "
-        << saturationModelType << endl;
+    Info<< "Selecting saturationModel: " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(saturationModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown saturationModelType type "
-            << saturationModelType << endl << endl
-            << "Valid saturationModel types are : " << endl
+            << "Unknown saturationModel type "
+            << modelType << nl << nl
+            << "Valid saturationModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

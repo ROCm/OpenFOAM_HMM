@@ -62,15 +62,14 @@ Foam::autoPtr<Foam::waveModel> Foam::waveModel::New
 
     Info<< "Selecting waveModel " << modelType << endl;
 
-    patchConstructorTable::iterator cstrIter =
-        patchConstructorTablePtr_->find(modelType);
+    auto cstrIter = patchConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalIOErrorInFunction(waveDict)
             << "Unknown waveModel type "
             << modelType << nl << nl
-            << "Valid waveModel types are:" << nl
+            << "Valid waveModel types :" << nl
             << patchConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

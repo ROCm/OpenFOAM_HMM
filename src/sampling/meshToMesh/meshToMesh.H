@@ -46,7 +46,7 @@ SourceFiles
 #include "treeBoundBox.H"
 #include "mapDistribute.H"
 #include "volFieldsFwd.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "AMIPatchToPatchInterpolation.H"
 #include "pointList.H"
 
@@ -74,8 +74,7 @@ public:
             imCorrectedCellVolumeWeight
         };
 
-        static const NamedEnum<interpolationMethod, 4>
-            interpolationMethodNames_;
+        static const Enum<interpolationMethod> interpolationMethodNames_;
 
 private:
 

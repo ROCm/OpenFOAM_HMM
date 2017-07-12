@@ -57,28 +57,16 @@ namespace fv
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fv::
-        directionalPressureGradientExplicitSource::
-        pressureDropModel,
-        3
-    >::names[] =
-    {
-        "volumetricFlowRateTable",
-        "constant",
-        "DarcyForchheimer"
-    };
-}
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::fv::directionalPressureGradientExplicitSource::pressureDropModel,
-    3
-> Foam::fv::directionalPressureGradientExplicitSource::PressureDropModelNames_;
+    Foam::fv::directionalPressureGradientExplicitSource::pressureDropModel
+>
+Foam::fv::directionalPressureGradientExplicitSource::pressureDropModelNames_
+{
+    { pressureDropModel::pVolumetricFlowRateTable, "volumetricFlowRateTable" },
+    { pressureDropModel::pConstant, "constant" },
+    { pressureDropModel::pDarcyForchheimer, "DarcyForchheimer" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -178,7 +166,7 @@ directionalPressureGradientExplicitSource
 )
 :
     cellSetOption(sourceName, modelType, dict, mesh),
-    model_(PressureDropModelNames_.read(coeffs_.lookup("model"))),
+    model_(pressureDropModelNames_.lookup("model", coeffs_)),
     gradP0_(cells_.size(), Zero),
     dGradP_(cells_.size(), Zero),
     gradPporous_(cells_.size(), Zero),
@@ -236,7 +224,7 @@ directionalPressureGradientExplicitSource
             << "Did not find mode " << model_
             << nl
             << "Please set 'model' to one of "
-            << PressureDropModelNames_
+            << pressureDropModelNames_
             << exit(FatalError);
     }
 

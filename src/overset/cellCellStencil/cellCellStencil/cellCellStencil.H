@@ -81,7 +81,7 @@ protected:
     // Protected data
 
         //- Mode type names
-        static const NamedEnum<cellType, 3> cellTypeNames_;
+        static const Enum<cellType> cellTypeNames_;
 
         //- Reference to the mesh
         const fvMesh& mesh_;

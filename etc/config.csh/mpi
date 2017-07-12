@@ -257,19 +257,7 @@ if ( "$FOAM_MPI" != dummy ) then
     _foamAddLib ${FOAM_LIBBIN}/${FOAM_MPI}
 endif
 
-
-# Minimum MPI buffer size (used by all except SGI MPI)
-if ( ! $?minBufferSize ) set minBufferSize=20000000
-if ( $?MPI_BUFFER_SIZE ) then
-    if ( $MPI_BUFFER_SIZE < $minBufferSize ) then
-        setenv MPI_BUFFER_SIZE $minBufferSize
-    endif
-else
-    setenv MPI_BUFFER_SIZE $minBufferSize
-endif
-
-# Cleanup environment
-# ~~~~~~~~~~~~~~~~~~~
-unset minBufferSize
+# Alternative to 'mpiBufferSize' controlDict entry
+#setenv MPI_BUFFER_SIZE 20000000
 
 #------------------------------------------------------------------------------

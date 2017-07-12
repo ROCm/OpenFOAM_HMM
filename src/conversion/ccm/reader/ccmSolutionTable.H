@@ -414,7 +414,7 @@ public:
             const fieldTable& tbl
         )
         {
-            os  << static_cast<const namesList<fieldEntry>& >(tbl)
+            os  << static_cast<const namesList<fieldEntry>&>(tbl)
                 << nl
                 << "maxCell: "  << tbl.maxCellId()
                 << " maxFace: " << tbl.maxFaceId();

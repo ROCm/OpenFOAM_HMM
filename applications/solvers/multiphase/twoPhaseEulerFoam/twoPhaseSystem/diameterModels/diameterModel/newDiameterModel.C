@@ -33,32 +33,28 @@ Foam::autoPtr<Foam::diameterModel> Foam::diameterModel::New
     const phaseModel& phase
 )
 {
-    word diameterModelType
-    (
-        dict.lookup("diameterModel")
-    );
+    const word modelType(dict.lookup("diameterModel"));
 
     Info << "Selecting diameterModel for phase "
         << phase.name()
         << ": "
-        << diameterModelType << endl;
+        << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(diameterModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-           << "Unknown diameterModelType type "
-           << diameterModelType << endl << endl
-           << "Valid diameterModel types are : " << endl
+           << "Unknown diameterModel type "
+           << modelType << nl << nl
+           << "Valid diameterModel types :" << endl
            << dictionaryConstructorTablePtr_->sortedToc()
            << exit(FatalError);
     }
 
     return cstrIter()
     (
-        dict.optionalSubDict(diameterModelType + "Coeffs"),
+        dict.optionalSubDict(modelType + "Coeffs"),
         phase
     );
 }

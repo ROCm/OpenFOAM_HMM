@@ -38,12 +38,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::lumpedPointMovement::outputFormatType>
-    Foam::lumpedPointMovement::formatNames
-    {
-        { outputFormatType::PLAIN, "plain" },
-        { outputFormatType::DICTIONARY, "dictionary" }
-    };
+const Foam::Enum
+<
+    Foam::lumpedPointMovement::outputFormatType
+>
+Foam::lumpedPointMovement::formatNames
+{
+    { outputFormatType::PLAIN, "plain" },
+    { outputFormatType::DICTIONARY, "dictionary" }
+};
 
 
 const Foam::word

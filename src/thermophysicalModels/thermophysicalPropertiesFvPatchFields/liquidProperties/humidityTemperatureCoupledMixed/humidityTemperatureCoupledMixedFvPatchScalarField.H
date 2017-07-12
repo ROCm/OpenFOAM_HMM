@@ -188,7 +188,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<massTransferMode, 4> massModeTypeNames_;
+        static const Enum<massTransferMode> massModeTypeNames_;
 
         //- Operating mode
         massTransferMode mode_;

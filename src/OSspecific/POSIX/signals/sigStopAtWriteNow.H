@@ -67,6 +67,7 @@ class sigStopAtWriteNow
 
     // Private Member Functions
 
+        //- Handler for caught signals
         static void sigHandler(int);
 
 

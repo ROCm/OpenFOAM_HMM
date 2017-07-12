@@ -32,7 +32,7 @@ Foam::autoPtr<Foam::twoPhaseSystem> Foam::twoPhaseSystem::New
     const fvMesh& mesh
 )
 {
-    const word twoPhaseSystemType
+    const word systemType
     (
         IOdictionary
         (
@@ -48,18 +48,16 @@ Foam::autoPtr<Foam::twoPhaseSystem> Foam::twoPhaseSystem::New
         ).lookup("type")
     );
 
-    Info<< "Selecting twoPhaseSystem "
-        << twoPhaseSystemType << endl;
+    Info<< "Selecting twoPhaseSystem " << systemType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(twoPhaseSystemType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(systemType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown twoPhaseSystemType type "
-            << twoPhaseSystemType << endl << endl
-            << "Valid twoPhaseSystem types are : " << endl
+            << "Unknown twoPhaseSystem type "
+            << systemType << nl << nl
+            << "Valid twoPhaseSystem types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

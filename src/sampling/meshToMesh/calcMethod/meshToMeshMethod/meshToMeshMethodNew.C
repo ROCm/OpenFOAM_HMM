@@ -39,16 +39,16 @@ Foam::autoPtr<Foam::meshToMeshMethod> Foam::meshToMeshMethod::New
         Info<< "Selecting AMIMethod " << methodName << endl;
     }
 
-    componentsConstructorTable::iterator cstrIter =
-        componentsConstructorTablePtr_->find(methodName);
+    auto cstrIter = componentsConstructorTablePtr_->cfind(methodName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown meshToMesh type "
             << methodName << nl << nl
-            << "Valid meshToMesh types are:" << nl
-            << componentsConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Valid meshToMesh types :" << nl
+            << componentsConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<meshToMeshMethod>(cstrIter()(src, tgt));

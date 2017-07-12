@@ -39,7 +39,7 @@ SourceFiles
 #include "PackedBoolList.H"
 #include "boolList.H"
 #include "typeInfo.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +68,7 @@ public:
 
             FACE_DIAG_TRIS    //- Faces decomposed into triangles diagonally
         };
-        static const NamedEnum<decompositionType, 2> decompositionTypeNames;
+        static const Enum<decompositionType> decompositionTypeNames;
 
 
 private:

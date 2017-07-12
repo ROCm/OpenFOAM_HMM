@@ -69,18 +69,12 @@ enum ExtrudeMode
     SURFACE
 };
 
-namespace Foam
+static const Enum<ExtrudeMode> ExtrudeModeNames
 {
-    template<>
-    const char* NamedEnum<ExtrudeMode, 3>::names[] =
-    {
-        "mesh",
-        "patch",
-        "surface"
-    };
-}
-
-static const NamedEnum<ExtrudeMode, 3> ExtrudeModeNames;
+    { ExtrudeMode::MESH, "mesh" },
+    { ExtrudeMode::PATCH, "patch" },
+    { ExtrudeMode::SURFACE, "surface" },
+};
 
 
 void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
@@ -305,9 +299,10 @@ int main(int argc, char *argv[])
     const Switch flipNormals(dict.lookup("flipNormals"));
 
     // What to extrude
-    const ExtrudeMode mode = ExtrudeModeNames.read
+    const ExtrudeMode mode = ExtrudeModeNames.lookup
     (
-        dict.lookup("constructFrom")
+        "constructFrom",
+        dict
     );
 
     // Any merging of small edges

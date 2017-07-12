@@ -45,23 +45,16 @@ namespace functionObjects
 }
 }
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::writeObjects::writeOption,
-    3
->::names[] =
+    Foam::functionObjects::writeObjects::writeOption
+>
+Foam::functionObjects::writeObjects::writeOptionNames_
 {
-    "autoWrite",
-    "noWrite",
-    "anyWrite"
+    { writeOption::AUTO_WRITE, "autoWrite" },
+    { writeOption::NO_WRITE, "noWrite" },
+    { writeOption::ANY_WRITE, "anyWrite" },
 };
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::writeObjects::writeOption,
-    3
-> Foam::functionObjects::writeObjects::writeOptionNames_;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -114,14 +107,12 @@ bool Foam::functionObjects::writeObjects::read(const dictionary& dict)
         dict.lookup("objects") >> objectNames_;
     }
 
-    if (dict.found("writeOption"))
-    {
-        writeOption_ = writeOptionNames_.read(dict.lookup("writeOption"));
-    }
-    else
-    {
-        writeOption_ = ANY_WRITE;
-    }
+    writeOption_ = writeOptionNames_.lookupOrDefault
+    (
+        "writeOption",
+        dict,
+        writeOption::ANY_WRITE
+    );
 
     return true;
 }

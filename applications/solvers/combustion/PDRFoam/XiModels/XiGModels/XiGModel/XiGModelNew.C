@@ -39,15 +39,14 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
 
     Info<< "Selecting flame-wrinkling model " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown XiGModel type "
             << modelType << nl << nl
-            << "Valid XiGModels are : " << endl
+            << "Valid XiGModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

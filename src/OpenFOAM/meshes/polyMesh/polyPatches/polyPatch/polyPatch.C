@@ -279,13 +279,7 @@ Foam::wordList Foam::polyPatch::constraintTypes()
 
     label i = 0;
 
-    for
-    (
-        dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->begin();
-        cstrIter != dictionaryConstructorTablePtr_->end();
-        ++cstrIter
-    )
+    forAllConstIters(*dictionaryConstructorTablePtr_, cstrIter)
     {
         if (constraintType(cstrIter.key()))
         {

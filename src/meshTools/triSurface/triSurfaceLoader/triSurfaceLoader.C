@@ -30,11 +30,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::triSurfaceLoader::loadingOption>
+const Foam::Enum
+<
+    Foam::triSurfaceLoader::loadingOption
+>
 Foam::triSurfaceLoader::loadingOptionNames
-(
-    SINGLE_REGION, { "single", "file", "offset", "merge" }
-);
+{
+    { loadingOption::SINGLE_REGION, "single" },
+    { loadingOption::FILE_REGION, "file" },
+    { loadingOption::OFFSET_REGION, "offset" },
+    { loadingOption::MERGE_REGION, "merge" }
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

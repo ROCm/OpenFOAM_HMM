@@ -72,7 +72,7 @@ public:
 
     // Member Functions
 
-    // Write
+      // Write
 
         //- Process unbuffered
         virtual std::streamsize xsputn(const char* str, std::streamsize n)
@@ -109,7 +109,7 @@ public:
 
     // Member Functions
 
-    // Access
+      // Access
 
         //- This hides both signatures of std::basic_ios::rdbuf()
         sha1streambuf* rdbuf()
@@ -139,16 +139,16 @@ class OSHA1stream
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        OSHA1stream(const OSHA1stream&);
+        OSHA1stream(const OSHA1stream&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const OSHA1stream&);
+        void operator=(const OSHA1stream&) = delete;
 
 public:
 
     // Constructors
 
-        //- Construct and set stream status
+        //- Construct with an empty digest
         OSHA1stream
         (
             streamFormat format=ASCII,
@@ -158,7 +158,7 @@ public:
             OSstream
             (
                 *(new osha1stream),
-                "OSHA1stream.sinkFile_",
+                "OSHA1stream",
                 format,
                 version
             )
@@ -174,7 +174,7 @@ public:
 
     // Member functions
 
-    // Access
+      // Access
 
         //- Full access to the sha1
         Foam::SHA1& sha1()
@@ -188,7 +188,8 @@ public:
             return sha1().digest();
         }
 
-    // Edit
+
+      // Edit
 
         //- Clear the SHA1 calculation
         void rewind()

@@ -44,16 +44,16 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::New
         Info<< "Selecting AMIMethod " << methodName << endl;
     }
 
-    typename componentsConstructorTable::iterator cstrIter =
-        componentsConstructorTablePtr_->find(methodName);
+    auto cstrIter = componentsConstructorTablePtr_->cfind(methodName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown AMIMethod type "
             << methodName << nl << nl
-            << "Valid AMIMethod types are:" << nl
-            << componentsConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Valid AMIMethod types:" << nl
+            << componentsConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<AMIMethod<SourcePatch, TargetPatch>>

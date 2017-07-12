@@ -33,19 +33,18 @@ Foam::autoPtr<Foam::RBD::rigidBodySolver> Foam::RBD::rigidBodySolver::New
     const dictionary& dict
 )
 {
-    word rigidBodySolverType(dict.lookup("type"));
+    const word solverType(dict.lookup("type"));
 
-    Info<< "Selecting rigidBodySolver " << rigidBodySolverType << endl;
+    Info<< "Selecting rigidBodySolver " << solverType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(rigidBodySolverType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rigidBodySolverType type "
-            << rigidBodySolverType << endl << endl
-            << "Valid rigidBodySolver types are : " << endl
+            << solverType << nl << nl
+            << "Valid rigidBodySolver types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

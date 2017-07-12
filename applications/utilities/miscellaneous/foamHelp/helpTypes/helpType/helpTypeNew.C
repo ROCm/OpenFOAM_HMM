@@ -34,8 +34,7 @@ Foam::autoPtr<Foam::helpType> Foam::helpType::New
 {
     Info<< "Selecting helpType " << helpTypeName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(helpTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(helpTypeName);
 
     if (!cstrIter.found())
     {

@@ -45,7 +45,7 @@ SourceFiles
 #define functionObjects_abort_H
 
 #include "functionObject.H"
-#include "NamedEnum.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,21 +62,10 @@ class abort
 :
     public functionObject
 {
-public:
-
-    // Public data
-
-        //- Enumeration defining the type of action
-        enum actionType
-        {
-            noWriteNow,    //!< stop immediately without writing data
-            writeNow,      //!< write data and stop immediately
-            nextWrite      //!< stop the next time data are written
-        };
-
-private:
-
     // Private data
+
+        //- A subset of Time stopAtControls
+        static const Enum<Time::stopAtControls> actionNames_;
 
         //- Reference to the Time
         const Time& time_;
@@ -84,11 +73,8 @@ private:
         //- The fully-qualified name of the abort file
         fileName abortFile_;
 
-        //- Action type names
-        static const NamedEnum<actionType, 3> actionTypeNames_;
-
         //- The type of action
-        actionType action_;
+        Time::stopAtControls action_;
 
 
     // Private Member Functions
@@ -97,10 +83,10 @@ private:
         void removeFile() const;
 
         //- Disallow default bitwise copy construct
-        abort(const abort&);
+        abort(const abort&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const abort&);
+        void operator=(const abort&) = delete;
 
 
 public:
@@ -127,7 +113,7 @@ public:
     // Member Functions
 
         //- Read the dictionary settings
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute, check existence of abort file and take action
         virtual bool execute();

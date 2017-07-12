@@ -43,8 +43,7 @@ Foam::autoPtr<Foam::polyMeshModifier> Foam::polyMeshModifier::New
 
     const word modifierType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modifierType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modifierType);
 
     if (!cstrIter.found())
     {
@@ -53,7 +52,7 @@ Foam::autoPtr<Foam::polyMeshModifier> Foam::polyMeshModifier::New
             dict
         )   << "Unknown polyMeshModifier type "
             << modifierType << nl << nl
-            << "Valid polyMeshModifier types are :" << endl
+            << "Valid polyMeshModifier types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

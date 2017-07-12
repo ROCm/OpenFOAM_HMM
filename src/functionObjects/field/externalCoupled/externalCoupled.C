@@ -50,13 +50,16 @@ namespace functionObjects
 }
 }
 
-const Foam::Enum<Foam::functionObjects::externalCoupled::stateEnd>
-    Foam::functionObjects::externalCoupled::stateEndNames_
-    {
-        { stateEnd::REMOVE, "remove" },
-        { stateEnd::DONE, "done" }
-        // 'IGNORE' is internal use only and thus without a name
-    };
+const Foam::Enum
+<
+    Foam::functionObjects::externalCoupled::stateEnd
+>
+Foam::functionObjects::externalCoupled::stateEndNames_
+{
+    { stateEnd::REMOVE, "remove" },
+    { stateEnd::DONE, "done" }
+    // 'IGNORE' is internal use only and thus without a name
+};
 
 
 Foam::word Foam::functionObjects::externalCoupled::lockName = "OpenFOAM";

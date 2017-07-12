@@ -93,8 +93,7 @@ Foam::OFstream::OFstream
 )
 :
     OFstreamAllocator(pathname, compression),
-    OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
-    pathname_(pathname)
+    OSstream(*ofPtr_, pathname, format, version, compression)
 {
     setClosed();
     setState(ofPtr_->rdstate());

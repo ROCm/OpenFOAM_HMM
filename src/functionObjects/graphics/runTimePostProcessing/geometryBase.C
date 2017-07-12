@@ -32,27 +32,16 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* NamedEnum
-    <
-        functionObjects::runTimePostPro::geometryBase::renderModeType,
-        3
-    >::names[] =
-    {
-        "flat",
-        "gouraud",
-        "phong"
-    };
-}
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::runTimePostPro::geometryBase::renderModeType,
-    3
+    Foam::functionObjects::runTimePostPro::geometryBase::renderModeType
 >
-    Foam::functionObjects::runTimePostPro::geometryBase::renderModeTypeNames;
+Foam::functionObjects::runTimePostPro::geometryBase::renderModeTypeNames
+{
+    { renderModeType::rmFlat, "flat" },
+    { renderModeType::rmGouraud, "gouraud" },
+    { renderModeType::rmPhong, "phong" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -104,7 +93,7 @@ Foam::functionObjects::runTimePostPro::geometryBase::geometryBase
 {
     if (dict.found("renderMode"))
     {
-        renderMode_ = renderModeTypeNames.read(dict.lookup("renderMode"));
+        renderMode_ = renderModeTypeNames.lookup("renderMode", dict);
     }
 
     if (dict.found("opacity"))

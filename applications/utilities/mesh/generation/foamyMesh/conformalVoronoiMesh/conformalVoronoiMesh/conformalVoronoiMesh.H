@@ -122,7 +122,7 @@ public:
             constrained  = 4
         };
 
-        static const NamedEnum<dualMeshPointType, 5> dualMeshPointTypeNames_;
+        static const Enum<dualMeshPointType> dualMeshPointTypeNames_;
 
 
 private:

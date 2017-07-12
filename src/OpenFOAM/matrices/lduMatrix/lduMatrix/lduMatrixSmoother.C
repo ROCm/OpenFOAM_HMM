@@ -86,10 +86,9 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 
     if (matrix.symmetric())
     {
-        symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(name);
+        auto cstrIter = symMatrixConstructorTablePtr_->cfind(name);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(solverControls)
                 << "Unknown symmetric matrix smoother "
@@ -101,7 +100,7 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 
         return autoPtr<lduMatrix::smoother>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix,
@@ -113,10 +112,9 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
     }
     else if (matrix.asymmetric())
     {
-        asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(name);
+        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(name);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(solverControls)
                 << "Unknown asymmetric matrix smoother "
@@ -128,7 +126,7 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
 
         return autoPtr<lduMatrix::smoother>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix,

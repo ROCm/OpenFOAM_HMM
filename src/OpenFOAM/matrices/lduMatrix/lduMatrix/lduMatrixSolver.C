@@ -66,10 +66,9 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.symmetric())
     {
-        symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(name);
+        auto cstrIter = symMatrixConstructorTablePtr_->cfind(name);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(solverControls)
                 << "Unknown symmetric matrix solver " << name << nl << nl
@@ -80,7 +79,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         return autoPtr<lduMatrix::solver>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix,
@@ -93,10 +92,9 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
     }
     else if (matrix.asymmetric())
     {
-        asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(name);
+        auto cstrIter = asymMatrixConstructorTablePtr_->cfind(name);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction(solverControls)
                 << "Unknown asymmetric matrix solver " << name << nl << nl
@@ -107,7 +105,7 @@ Foam::autoPtr<Foam::lduMatrix::solver> Foam::lduMatrix::solver::New
 
         return autoPtr<lduMatrix::solver>
         (
-            constructorIter()
+            cstrIter()
             (
                 fieldName,
                 matrix,

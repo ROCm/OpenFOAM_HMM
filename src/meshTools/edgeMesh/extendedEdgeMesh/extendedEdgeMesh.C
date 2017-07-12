@@ -40,60 +40,52 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(extendedEdgeMesh, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::extendedEdgeMesh::pointStatus,
-        4
-    >::names[] =
-    {
-        "convex",
-        "concave",
-        "mixed",
-        "nonFeature"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::extendedEdgeMesh::edgeStatus,
-        6
-    >::names[] =
-    {
-        "external",
-        "internal",
-        "flat",
-        "open",
-        "multiple",
-        "none"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::extendedEdgeMesh::sideVolumeType,
-        4
-    >::names[] =
-    {
-        "inside",
-        "outside",
-        "both",
-        "neither"
-    };
 }
 
-const Foam::NamedEnum<Foam::extendedEdgeMesh::pointStatus, 4>
-    Foam::extendedEdgeMesh::pointStatusNames_;
 
-const Foam::NamedEnum<Foam::extendedEdgeMesh::edgeStatus, 6>
-    Foam::extendedEdgeMesh::edgeStatusNames_;
+const Foam::Enum
+<
+    Foam::extendedEdgeMesh::pointStatus
+>
+Foam::extendedEdgeMesh::pointStatusNames_
+{
+    { pointStatus::CONVEX, "convex" },
+    { pointStatus::CONCAVE, "concave" },
+    { pointStatus::MIXED, "mixed" },
+    { pointStatus::NONFEATURE, "nonFeature" },
+};
 
-const Foam::NamedEnum<Foam::extendedEdgeMesh::sideVolumeType, 4>
-    Foam::extendedEdgeMesh::sideVolumeTypeNames_;
 
-Foam::scalar Foam::extendedEdgeMesh::cosNormalAngleTol_ =
-    Foam::cos(degToRad(0.1));
+const Foam::Enum
+<
+    Foam::extendedEdgeMesh::edgeStatus
+>
+Foam::extendedEdgeMesh::edgeStatusNames_
+{
+    { edgeStatus::EXTERNAL, "external" },
+    { edgeStatus::INTERNAL, "internal" },
+    { edgeStatus::FLAT, "flat" },
+    { edgeStatus::OPEN, "open" },
+    { edgeStatus::MULTIPLE, "multiple" },
+    { edgeStatus::NONE, "none" },
+
+};
+
+
+const Foam::Enum
+<
+    Foam::extendedEdgeMesh::sideVolumeType
+>
+Foam::extendedEdgeMesh::sideVolumeTypeNames_
+{
+    { sideVolumeType::INSIDE, "inside" },
+    { sideVolumeType::OUTSIDE, "outside" },
+    { sideVolumeType::BOTH, "both" },
+    { sideVolumeType::NEITHER, "neither" },
+};
+
+
+Foam::scalar Foam::extendedEdgeMesh::cosNormalAngleTol_ = Foam::cos(0.1_deg);
 
 
 Foam::label Foam::extendedEdgeMesh::convexStart_ = 0;

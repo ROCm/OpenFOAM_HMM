@@ -96,13 +96,13 @@ export WM_MPLIB=SYSTEMOPENMPI
 #    WM_OSTYPE = POSIX
 #export WM_OSTYPE=POSIX
 
-#- Floating-point signal handling:
-#    set or unset
-export FOAM_SIGFPE=
+#- Alternative to 'trapFpe' controlDict entry
+#  for floating-point exceptions (true|false)
+#export FOAM_SIGFPE=true
 
-#- memory initialisation:
-#    set or unset
-#export FOAM_SETNAN=
+#- Alternative to 'setNaN' controlDict entry
+#  for memory initialisation (true|false)
+#export FOAM_SETNAN=false
 
 
 ################################################################################

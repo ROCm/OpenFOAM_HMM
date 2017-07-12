@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     fileName pointsFile(runTime.constantPath()/"points.tmp");
     OFstream pFile(pointsFile);
 
-    scalar a(degToRad(0.1));
+    const scalar a = 0.1_deg;
     tensor rotateZ =
         tensor
         (
