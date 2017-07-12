@@ -2750,13 +2750,13 @@ void Foam::snappySnapDriver::doSnap
             motionSmoother& meshMover = meshMoverPtr();
 
 
-            // Calculate displacement at every patch point. Insert into
-            // meshMover.
-            // Calculate displacement at every patch point
+            // Calculate displacement at every patch point if we need it:
+            // - if automatic near-surface detection
+            // - if face splitting active
             pointField nearestPoint;
             vectorField nearestNormal;
 
-            if (snapParams.detectNearSurfacesSnap())
+            if (snapParams.detectNearSurfacesSnap() || doSplit)
             {
                 nearestPoint.setSize(pp.nPoints(), vector::max);
                 nearestNormal.setSize(pp.nPoints(), Zero);
