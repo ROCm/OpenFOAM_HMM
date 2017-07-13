@@ -631,7 +631,7 @@ bool Foam::dictionary::changeKeyword
 (
     const keyType& oldKeyword,
     const keyType& newKeyword,
-    bool forceOverwrite
+    bool overwrite
 )
 {
     // No change
@@ -665,7 +665,7 @@ bool Foam::dictionary::changeKeyword
     // newKeyword already exists
     if (iter2.found())
     {
-        if (forceOverwrite)
+        if (overwrite)
         {
             if (iter2()->keyword().isPattern())
             {

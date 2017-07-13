@@ -471,10 +471,11 @@ public:
 
       // Search and lookup
 
-        //- Search dictionary for given keyword
-        //  If recursive, search parent dictionaries
-        //  If patternMatch, use regular expressions
-        //  (default search: non-recursive with patterns).
+        //- Search dictionary for given keyword.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         bool found
         (
             const word& keyword,
@@ -482,10 +483,10 @@ public:
             bool patternMatch = true
         ) const;
 
-        //- Find and return an entry data stream pointer if present
-        //  otherwise return nullptr.
-        //  If recursive, search parent dictionaries.
-        //  If patternMatch, use regular expressions
+        //- Find and return an entry pointer if present, or return a nullptr.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         const entry* lookupEntryPtr
         (
             const word& keyword,
@@ -493,10 +494,11 @@ public:
             bool patternMatch
         ) const;
 
-        //- Find and return an entry data stream pointer for manipulation
-        //  if present otherwise return nullptr.
-        //  If recursive, search parent dictionaries.
-        //  If patternMatch, use regular expressions.
+        //- Find and return an entry pointer for manipulation if present,
+        //  or return a nullptr.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         entry* lookupEntryPtr
         (
             const word& keyword,
@@ -504,9 +506,10 @@ public:
             bool patternMatch
         );
 
-        //- Find and return an entry data stream if present otherwise error.
-        //  If recursive, search parent dictionaries.
-        //  If patternMatch, use regular expressions.
+        //- Find and return an entry if present otherwise error.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         const entry& lookupEntry
         (
             const word& keyword,
@@ -514,10 +517,11 @@ public:
             bool patternMatch
         ) const;
 
-        //- Find and return an entry data stream
-        //  If recursive, search parent dictionaries.
-        //  If patternMatch, use regular expressions.
-        //  (default search: non-recursive with patterns).
+        //- Find and return an entry data stream.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         ITstream& lookup
         (
             const word& keyword,
@@ -525,11 +529,11 @@ public:
             bool patternMatch = true
         ) const;
 
-        //- Find and return a T,
-        //  if not found throw a fatal error.
-        //  If recursive, search parent dictionaries.
-        //  If patternMatch, use regular expressions.
-        //  (default search: non-recursive with patterns).
+        //- Find and return a T. FatalError if not found.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         template<class T>
         T lookupType
         (
@@ -539,9 +543,10 @@ public:
         ) const;
 
         //- Find and return a T, or return the given default value
-        //  If recursive, search parent dictionaries.
-        //  If patternMatch, use regular expressions.
-        //  (default search: non-recursive with patterns).
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         template<class T>
         T lookupOrDefault
         (
@@ -598,12 +603,14 @@ public:
         ) const;
 
         //- Check if entry exists and is a sub-dictionary.
-        //  (search type: non-recursive with patterns)
+        //
+        //  Search type: non-recursive with patterns.
         bool isDict(const word& keyword) const;
 
         //- Find and return a sub-dictionary pointer if present
         //  (and a sub-dictionary) otherwise return nullptr.
-        //  (search type: non-recursive with patterns)
+        //
+        //  Search type: non-recursive with patterns.
         const dictionary* subDictPtr(const word& keyword) const;
 
         //- Find and return a sub-dictionary pointer if present
@@ -614,18 +621,21 @@ public:
 
         //- Find and return a sub-dictionary.
         //  Fatal if the entry does not exist or is not a sub-dictionary.
-        //  (search type: non-recursive with patterns)
+        //
+        //  Search type: non-recursive with patterns.
         const dictionary& subDict(const word& keyword) const;
 
         //- Find and return a sub-dictionary for manipulation.
         //  Fatal if the entry does not exist or is not a sub-dictionary.
-        //  (search type: non-recursive with patterns)
+        //
+        //  Search type: non-recursive with patterns.
         dictionary& subDict(const word& keyword);
 
         //- Find and return a sub-dictionary as a copy, otherwise return
         //  an empty dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
-        //  (search type: non-recursive with patterns)
+        //
+        //  Search type: non-recursive with patterns.
         dictionary subOrEmptyDict
         (
             const word& keyword,
@@ -634,7 +644,8 @@ public:
 
         //- Find and return a sub-dictionary, otherwise return this dictionary.
         //  Warn if the entry exists but is not a sub-dictionary.
-        //  (search type: non-recursive with patterns)
+        //
+        //  Search type: non-recursive with patterns.
         const dictionary& optionalSubDict(const word& keyword) const;
 
         //- Return the table of contents
@@ -669,34 +680,34 @@ public:
             bool mergeEntry = false
         );
 
-        //- Add a new entry
-        //  With the merge option, dictionaries are interwoven and
-        //  primitive entries are overwritten
+        //- Add a new entry.
+        //  \param mergeEntry dictionaries are interwoven and primitive
+        //         entries are overwritten
         bool add(entry* entryPtr, bool mergeEntry=false);
 
-        //- Add an entry
-        //  With the merge option, dictionaries are interwoven and
-        //  primitive entries are overwritten
+        //- Add an entry.
+        //  \param mergeEntry dictionaries are interwoven and primitive
+        //         entries are overwritten
         void add(const entry& e, bool mergeEntry=false);
 
-        //- Add a word entry
-        //  optionally overwrite an existing entry
+        //- Add a word entry.
+        //  \param overwrite force overwrite of an existing entry.
         void add(const keyType& k, const word& v, bool overwrite=false);
 
-        //- Add a string entry
-        //  optionally overwrite an existing entry
+        //- Add a string entry.
+        //  \param overwrite force overwrite of an existing entry.
         void add(const keyType& k, const string& v, bool overwrite=false);
 
-        //- Add a label entry
-        //  optionally overwrite an existing entry
+        //- Add a label entry.
+        //  \param overwrite force overwrite of an existing entry.
         void add(const keyType& k, const label v, bool overwrite=false);
 
-        //- Add a scalar entry
-        //  optionally overwrite an existing entry
+        //- Add a scalar entry.
+        //  \param overwrite force overwrite of an existing entry.
         void add(const keyType& k, const scalar v, bool overwrite=false);
 
-        //- Add a dictionary entry
-        //  optionally merge with an existing sub-dictionary
+        //- Add a dictionary entry.
+        //  \param mergeEntry merge into an existing sub-dictionary
         void add
         (
             const keyType& k,
@@ -705,20 +716,20 @@ public:
         );
 
         //- Add a T entry
-        //  optionally overwrite an existing entry
+        //  \param overwrite force overwrite of existing entry
         template<class T>
         void add(const keyType& k, const T& v, bool overwrite=false);
 
-        //- Assign a new entry, overwrite any existing entry
+        //- Assign a new entry, overwriting any existing entry.
         void set(entry* entryPtr);
 
-        //- Assign a new entry, overwrite any existing entry
+        //- Assign a new entry, overwriting any existing entry.
         void set(const entry& e);
 
-        //- Assign a dictionary entry, overwrite any existing entry
+        //- Assign a dictionary entry, overwriting any existing entry.
         void set(const keyType& k, const dictionary& v);
 
-        //- Assign a T entry, overwrite any existing entry
+        //- Assign a T entry, overwriting any existing entry.
         template<class T>
         void set(const keyType& k, const T& v);
 
@@ -726,12 +737,12 @@ public:
         bool remove(const word& keyword);
 
         //- Change the keyword for an entry,
-        //  optionally forcing overwrite of an existing entry
+        //  \param overwrite force overwrite of an existing entry.
         bool changeKeyword
         (
             const keyType& oldKeyword,
             const keyType& newKeyword,
-            bool forceOverwrite=false
+            bool overwrite=false
         );
 
         //- Merge entries from the given dictionary.
@@ -763,8 +774,8 @@ public:
         void writeEntry(const keyType& keyword, Ostream& os) const;
 
         //- Write dictionary entries.
-        //  Optionally with extra new line between entries for
-        //  "top-level" dictionaries
+        //  \param extraNewLine adds additional newline\n between entries
+        //         for "top-level" dictionaries
         void writeEntries(Ostream& os, const bool extraNewLine=false) const;
 
         //- Write dictionary, normally with sub-dictionary formatting
@@ -774,9 +785,10 @@ public:
       // Searching
 
         //- Search dictionary for given keyword
-        //  If recursive, search parent dictionaries
-        //  If patternMatch, use regular expressions
-        //  (default search: non-recursive with patterns).
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         const_searcher csearch
         (
             const word& keyword,
@@ -785,9 +797,10 @@ public:
         ) const;
 
         //- Search dictionary for given keyword
-        //  If recursive, search parent dictionaries
-        //  If patternMatch, use regular expressions
-        //  (default search: non-recursive with patterns).
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         const_searcher search
         (
             const word& keyword,
@@ -796,9 +809,10 @@ public:
         ) const;
 
         //- Search dictionary for given keyword
-        //  If recursive, search parent dictionaries
-        //  If patternMatch, use regular expressions
-        //  (default search: non-recursive with patterns).
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         searcher search
         (
             const word& keyword,
@@ -826,6 +840,9 @@ public:
         //  Any doubled slashes are silently ignored.
         //  Since a slash is not a valid keyword character, there is no
         //  ambiguity between separator and content.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         const_searcher csearchScoped
         (
             const word& keyword,
@@ -834,6 +851,9 @@ public:
         ) const;
 
         //- Search using dot or slash scoping.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         const_searcher searchScoped
         (
             const word& keyword,
@@ -842,6 +862,9 @@ public:
         ) const;
 
         //- Search using dot or slash scoping.
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
         searcher searchScoped
         (
             const word& keyword,

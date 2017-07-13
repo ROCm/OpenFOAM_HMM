@@ -171,10 +171,8 @@ const Foam::dictionary& Foam::dictionary::topDict() const
     {
         return p.topDict();
     }
-    else
-    {
-        return *this;
-    }
+
+    return *this;
 }
 
 
@@ -184,10 +182,8 @@ Foam::label Foam::dictionary::startLineNumber() const
     {
         return first()->startLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -197,10 +193,8 @@ Foam::label Foam::dictionary::endLineNumber() const
     {
         return last()->endLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -575,16 +569,15 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
             return true;
         }
-        else
-        {
-            IOWarningInFunction((*this))
-                << "problem replacing entry "<< entryPtr->keyword()
-                << " in dictionary " << name() << endl;
 
-            parent_type::remove(entryPtr);
-            delete entryPtr;
-            return false;
-        }
+
+        IOWarningInFunction((*this))
+            << "problem replacing entry "<< entryPtr->keyword()
+            << " in dictionary " << name() << endl;
+
+        parent_type::remove(entryPtr);
+        delete entryPtr;
+        return false;
     }
 
 
@@ -604,16 +597,15 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
         return true;
     }
-    else
-    {
-        IOWarningInFunction((*this))
-            << "attempt to add entry "<< entryPtr->keyword()
-            << " which already exists in dictionary " << name()
-            << endl;
 
-        delete entryPtr;
-        return false;
-    }
+
+    IOWarningInFunction((*this))
+        << "attempt to add entry "<< entryPtr->keyword()
+        << " which already exists in dictionary " << name()
+        << endl;
+
+    delete entryPtr;
+    return false;
 }
 
 
@@ -796,7 +788,8 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted addition assignment to self for dictionary " << name()
+            << "attempted addition assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
@@ -812,7 +805,8 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary " << name()
+            << "attempted assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
@@ -831,7 +825,8 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary " << name()
+            << "attempted assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
