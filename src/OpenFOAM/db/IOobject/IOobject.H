@@ -239,8 +239,10 @@ public:
             bool globalObject = false
         );
 
-        //- Construct from path, registry, io options
-        //  Uses fileNameComponents() to split path into components.
+        //- Construct from path, registry, io options.
+        //  Uses fileNameComponents() to split path into components. The
+        //  path argument is regarded as a file system path, not a case-relative
+        //  path. Any './' gets expanded to the current working directory.
         IOobject
         (
             const fileName& path,

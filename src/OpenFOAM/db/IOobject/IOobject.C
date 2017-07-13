@@ -121,12 +121,16 @@ static inline bool isOutsideOfCase(const std::string& file)
 //    "/xxx/yyy/bar"      ("/xxx/yyy", "", "bar")
 bool Foam::IOobject::fileNameComponents
 (
-    const fileName& path,
+    const fileName& rawPath,
     fileName& instance,
     fileName& local,
     word& name
 )
 {
+    // Re-interpret the path as a file-system path.
+    fileName path(rawPath);
+    path.toAbsolute();
+
     instance.clear();
     local.clear();
     name.clear();
