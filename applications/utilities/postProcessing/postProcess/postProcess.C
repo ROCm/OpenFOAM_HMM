@@ -32,6 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "profiling.H"
 #include "timeSelector.H"
 #include "ReadFields.H"
 #include "volFields.H"
@@ -132,6 +133,7 @@ void executeFunctionObjects
 int main(int argc, char *argv[])
 {
     Foam::timeSelector::addOptions();
+    #include "addProfilingOption.H"
     #include "addRegionOption.H"
     #include "addFunctionObjectOptions.H"
 
@@ -202,6 +204,9 @@ int main(int argc, char *argv[])
                 functionsPtr(),
                 timei == timeDirs.size()-1
             );
+
+            // Report to output (avoid overwriting values from simulation)
+            profiling::print(Info);
         }
         catch (IOerror& err)
         {
