@@ -441,6 +441,9 @@ public:
         );
         #endif
 
+        //- Clone
+        tmp<GeometricField<Type, PatchField, GeoMesh>> clone() const;
+
 
     //- Destructor
     virtual ~GeometricField();
