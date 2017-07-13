@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -591,8 +591,6 @@ public:
             (
                 const parcelType& p,
                 const polyPatch& pp,
-                const scalar trackFraction,
-                const tetIndices& tetIs,
                 vector& normal,
                 vector& Up
             ) const;
