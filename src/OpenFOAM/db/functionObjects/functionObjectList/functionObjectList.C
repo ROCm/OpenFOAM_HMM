@@ -73,7 +73,7 @@ Foam::functionObject* Foam::functionObjectList::remove
     label& oldIndex
 )
 {
-    functionObject* ptr = 0;
+    functionObject* ptr = nullptr;
 
     // Find index of existing functionObject
     HashTable<label>::iterator fnd = indices_.find(key);

@@ -99,7 +99,7 @@ inline Foam::tmp<T>::tmp(const tmp<T>&& t)
 {
     if (isTmp())
     {
-        t.ptr_ = 0;
+        t.ptr_ = nullptr;
     }
 }
 
@@ -116,7 +116,7 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t, bool allowTransfer)
         {
             if (allowTransfer)
             {
-                t.ptr_ = 0;
+                t.ptr_ = nullptr;
             }
             else
             {
@@ -215,7 +215,7 @@ inline T* Foam::tmp<T>::ptr() const
         }
 
         T* ptr = ptr_;
-        ptr_ = 0;
+        ptr_ = nullptr;
 
         return ptr;
     }
@@ -234,12 +234,12 @@ inline void Foam::tmp<T>::clear() const
         if (ptr_->unique())
         {
             delete ptr_;
-            ptr_ = 0;
+            ptr_ = nullptr;
         }
         else
         {
             ptr_->operator--();
-            ptr_ = 0;
+            ptr_ = nullptr;
         }
     }
 }
@@ -372,7 +372,7 @@ inline void Foam::tmp<T>::operator=(const tmp<T>& t)
         }
 
         ptr_ = t.ptr_;
-        t.ptr_ = 0;
+        t.ptr_ = nullptr;
     }
     else
     {

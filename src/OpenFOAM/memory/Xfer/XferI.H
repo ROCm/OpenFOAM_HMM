@@ -83,7 +83,7 @@ template<class T>
 inline Foam::Xfer<T>::~Xfer()
 {
     delete ptr_;
-    ptr_ = 0;
+    ptr_ = nullptr;
 }
 
 

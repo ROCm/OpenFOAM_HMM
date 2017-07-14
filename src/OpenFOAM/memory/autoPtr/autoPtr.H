@@ -64,15 +64,15 @@ public:
     // Constructors
 
         //- Store object pointer
-        inline explicit autoPtr(T* = 0);
+        inline explicit autoPtr(T* p = nullptr);
 
         //- Construct as copy by transferring pointer to this autoPtr and
         //  setting the arguments pointer to nullptr
-        inline autoPtr(const autoPtr<T>&);
+        inline autoPtr(const autoPtr<T>& ap);
 
         //- Construct either by transferring pointer or cloning.
         //  Should only be called with type that supports cloning
-        inline autoPtr(const autoPtr<T>&, const bool reuse);
+        inline autoPtr(const autoPtr<T>& ap, const bool reuse);
 
 
     //- Destructor, delete object if pointer is not nullptr
@@ -97,11 +97,11 @@ public:
 
             //- Set pointer to that given.
             //  If object pointer already set issue a FatalError
-            inline void set(T*);
+            inline void set(T* p);
 
             //- If object pointer already set, delete object and set to given
             //  pointer
-            inline void reset(T* = 0);
+            inline void reset(T* p = nullptr);
 
             //- Delete object (if the pointer is valid) and set pointer to
             //  nullptr
@@ -143,10 +143,10 @@ public:
             inline const T* operator->() const;
 
             //- Take over the object pointer from parameter
-            inline void operator=(T*);
+            inline void operator=(T* p);
 
             //- Take over the object pointer from parameter
-            inline void operator=(const autoPtr<T>&);
+            inline void operator=(const autoPtr<T>& ap);
 };
 
 
