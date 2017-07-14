@@ -95,10 +95,19 @@ class triSurfaceMesh
         //- Return fileName to load IOobject from
         static fileName checkFile(const IOobject& io, const bool isGlobal);
 
+        //- Return fileName. If fileName is relative gets treated local to
+        //  IOobject
+        static fileName relativeFilePath
+        (
+            const regIOobject&,
+            const fileName&,
+            const bool isGlobal
+        );
+
         //- Return fileName to load IOobject from. Optional override of fileName
         static fileName checkFile
         (
-            const IOobject&,
+            const regIOobject&,
             const dictionary&,
             const bool isGlobal
         );
