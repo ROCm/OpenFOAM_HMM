@@ -109,9 +109,9 @@ OptimisationSwitches
 profiling
 {
     active      true;
-    cpuInfo     true;
+    cpuInfo     false;
     memInfo     false;
-    sysInfo     true;
+    sysInfo     false;
 }
 */
 

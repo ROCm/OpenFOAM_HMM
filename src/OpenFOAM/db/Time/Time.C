@@ -357,7 +357,7 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     else if
     (
         profilingDict
-     && profilingDict->lookupOrDefault<Switch>("active", true)
+     && profilingDict->lookupOrDefault<bool>("active", true)
     )
     {
         profiling::initialize
