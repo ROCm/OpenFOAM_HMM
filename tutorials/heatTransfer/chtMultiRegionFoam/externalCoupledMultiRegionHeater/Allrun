@@ -6,6 +6,9 @@ cd ${0%/*} || exit 1    # Run from this directory
 
 ./Allrun.pre
 
+# Remove lock file on interrupt
+trap '\rm -f comms/OpenFOAM.lock 2>/dev/null' INT
+
 #-- Run on single processor
 #runApplication $(getApplication) &
 # Simulated external solver

@@ -83,13 +83,14 @@ Foam::lumpedPointMovement::threshold(const point& position) const
 }
 
 
-inline const Foam::externalCoupler& Foam::lumpedPointMovement::coupler() const
+inline const Foam::externalFileCoupler&
+Foam::lumpedPointMovement::coupler() const
 {
     return coupler_;
 }
 
 
-inline Foam::externalCoupler& Foam::lumpedPointMovement::coupler()
+inline Foam::externalFileCoupler& Foam::lumpedPointMovement::coupler()
 {
     return coupler_;
 }

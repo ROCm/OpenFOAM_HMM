@@ -62,7 +62,7 @@ bool Foam::functionObjects::externalCoupled::readData
     {
         const fileName transferFile
         (
-            groupDir(commsDir_, compositeName(regionNames), groupName)
+            groupDir(commDirectory(), compositeName(regionNames), groupName)
           / fieldName + ".in"
         );
 
@@ -280,7 +280,7 @@ bool Foam::functionObjects::externalCoupled::readData
                     << exit(FatalError);
             }
 
-            initialised_ = true;
+            initialisedCoupling_ = true;
         }
     }
 
@@ -357,7 +357,7 @@ bool Foam::functionObjects::externalCoupled::writeData
     {
         const fileName transferFile
         (
-            groupDir(commsDir_, compositeName(regionNames), groupName)
+            groupDir(commDirectory(), compositeName(regionNames), groupName)
           / fieldName + ".out"
         );
 

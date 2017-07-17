@@ -14,9 +14,6 @@ externalCoupled
     // Does external process start first
     initByExternal  true;
 
-    // Cleanup behaviour on termination (remove|done)
-    stateEnd        done;
-
     // Additional output
     log             true;
 
