@@ -32,7 +32,6 @@ License
 #include "polyMeshFilter.H"
 #include "polyTopoChange.H"
 #include "PrintTable.H"
-#include "pointMesh.H"
 #include "indexedVertexOps.H"
 #include "DelaunayMeshTools.H"
 #include "syncTools.H"

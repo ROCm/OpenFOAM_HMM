@@ -28,7 +28,6 @@ License
 #include "emptyPolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "wallPolyPatch.H"
-#include "SortableList.H"
 #include "IFstream.H"
 #include "OFstream.H"
 #include "IOdictionary.H"

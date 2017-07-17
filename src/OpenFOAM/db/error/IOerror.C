@@ -29,7 +29,6 @@ License
 #include "dictionary.H"
 #include "JobInfo.H"
 #include "Pstream.H"
-#include "JobInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

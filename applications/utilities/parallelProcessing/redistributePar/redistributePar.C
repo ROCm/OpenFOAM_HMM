@@ -76,7 +76,6 @@ Usage
 #include "loadOrCreateMesh.H"
 #include "processorFvPatchField.H"
 #include "zeroGradientFvPatchFields.H"
-#include "decompositionModel.H"
 #include "topoSet.H"
 
 #include "parFvFieldReconstructor.H"
