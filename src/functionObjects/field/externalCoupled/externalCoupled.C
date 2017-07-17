@@ -277,21 +277,19 @@ void Foam::functionObjects::externalCoupled::writeGeometry
 
     labelList pointToGlobal;
     labelList uniquePointIDs;
-    forAll(meshes, meshi)
+    for (const fvMesh& mesh : meshes)
     {
-        const fvMesh& mesh = meshes[meshi];
-
         const labelList patchIDs
         (
             mesh.boundaryMesh().patchSet
             (
-                List<wordRe>(1, groupName)
+                List<wordRe>{groupName}
             ).sortedToc()
         );
 
-        forAll(patchIDs, i)
+        for (const label patchi : patchIDs)
         {
-            const polyPatch& p = mesh.boundaryMesh()[patchIDs[i]];
+            const polyPatch& p = mesh.boundaryMesh()[patchi];
 
             mesh.globalData().mergePoints
             (
@@ -412,37 +410,38 @@ void Foam::functionObjects::externalCoupled::initCoupling()
     }
 
     // Write the geometry if not already there
-    forAll(regionGroupRegions_, i)
+    forAll(regionGroupNames_, regioni)
     {
-        const word& compName = regionGroupNames_[i];
-        const wordList& regionNames = regionGroupRegions_[i];
+        const word& compName = regionGroupNames_[regioni];
+        const wordList& regionNames = regionGroupRegions_[regioni];
 
         // Get the meshes for the region-group
         UPtrList<const fvMesh> meshes(regionNames.size());
-        forAll(regionNames, j)
+        forAll(regionNames, regi)
         {
-            const word& regionName = regionNames[j];
-            meshes.set(j, &time_.lookupObject<fvMesh>(regionName));
+            const word& regionName = regionNames[regi];
+            meshes.set(regi, &time_.lookupObject<fvMesh>(regionName));
         }
 
         const labelList& groups = regionToGroups_[compName];
 
-        forAll(groups, i)
+        for (const label groupi : groups)
         {
-            label groupi = groups[i];
             const wordRe& groupName = groupNames_[groupi];
 
-            bool exists = false;
+            bool geomExists = false;
             if (Pstream::master())
             {
                 fileName dir(groupDir(commDirectory(), compName, groupName));
 
-                exists =
+                geomExists =
                     isFile(dir/"patchPoints")
                  || isFile(dir/"patchFaces");
             }
 
-            if (!returnReduce(exists, orOp<bool>()))
+            Pstream::scatter(geomExists);
+
+            if (!geomExists)
             {
                 writeGeometry(meshes, commDirectory(), groupName);
             }
@@ -596,7 +595,7 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
                 regionToGroups_.insert
                 (
                     regionGroupNames_.last(),
-                    labelList(1, nGroups)
+                    labelList{nGroups}
                 );
             }
             groupNames_.append(groupName);
@@ -607,16 +606,12 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
 
 
     Info<< type() << ": Communicating with regions:" << endl;
-    forAll(regionGroupNames_, rgi)
+    for (const word& compName : regionGroupNames_)
     {
-        //const wordList& regionNames = regionGroupRegions_[rgi];
-        const word& compName = regionGroupNames_[rgi];
-
         Info<< "Region: " << compName << endl << incrIndent;
         const labelList& groups = regionToGroups_[compName];
-        forAll(groups, i)
+        for (const label groupi : groups)
         {
-            label groupi = groups[i];
             const wordRe& groupName = groupNames_[groupi];
 
             Info<< indent << "patchGroup: " << groupName << "\t"
@@ -639,14 +634,11 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     //       should already be written - but just make sure
     if (Pstream::master())
     {
-        forAll(regionGroupNames_, rgi)
+        for (const word& compName : regionGroupNames_)
         {
-            const word& compName = regionGroupNames_[rgi];
-
             const labelList& groups = regionToGroups_[compName];
-            forAll(groups, i)
+            for (const label groupi : groups)
             {
-                label groupi = groups[i];
                 const wordRe& groupName = groupNames_[groupi];
 
                 fileName dir(groupDir(commDirectory(), compName, groupName));
@@ -682,48 +674,20 @@ void Foam::functionObjects::externalCoupled::readDataMaster()
 
         const labelList& groups = regionToGroups_[compName];
 
-        forAll(groups, i)
+        for (const label groupi : groups)
         {
-            label groupi = groups[i];
             const wordRe& groupName = groupNames_[groupi];
             const wordList& fieldNames = groupReadFields_[groupi];
 
-            forAll(fieldNames, fieldi)
+            for (const word& fieldName : fieldNames)
             {
-                const word& fieldName = fieldNames[fieldi];
-
                 const bool ok =
                 (
-                    readData<scalar>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || readData<vector>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || readData<sphericalTensor>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || readData<symmTensor>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || readData<tensor>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
+                    readData<scalar>(meshes, groupName, fieldName)
+                 || readData<vector>(meshes, groupName, fieldName)
+                 || readData<sphericalTensor>(meshes, groupName, fieldName)
+                 || readData<symmTensor>(meshes, groupName, fieldName)
+                 || readData<tensor>(meshes, groupName, fieldName)
                 );
 
                 if (!ok)
@@ -755,48 +719,20 @@ void Foam::functionObjects::externalCoupled::writeDataMaster() const
 
         const labelList& groups = regionToGroups_[compName];
 
-        forAll(groups, i)
+        for (const label groupi : groups)
         {
-            label groupi = groups[i];
             const wordRe& groupName = groupNames_[groupi];
             const wordList& fieldNames = groupWriteFields_[groupi];
 
-            forAll(fieldNames, fieldi)
+            for (const word& fieldName : fieldNames)
             {
-                const word& fieldName = fieldNames[fieldi];
-
                 const bool ok =
                 (
-                    writeData<scalar>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || writeData<vector>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || writeData<sphericalTensor>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || writeData<symmTensor>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
-                 || writeData<tensor>
-                    (
-                        meshes,
-                        groupName,
-                        fieldName
-                    )
+                    writeData<scalar>(meshes, groupName, fieldName)
+                 || writeData<vector>(meshes, groupName, fieldName)
+                 || writeData<sphericalTensor>(meshes, groupName, fieldName)
+                 || writeData<symmTensor>(meshes, groupName, fieldName)
+                 || writeData<tensor>(meshes, groupName, fieldName)
                 );
 
                 if (!ok)
@@ -820,20 +756,17 @@ void Foam::functionObjects::externalCoupled::removeDataMaster() const
 
     Log << type() << ": removing data files written by master" << nl;
 
-    forAll(regionGroupNames_, regioni)
+    for (const word& compName : regionGroupNames_)
     {
-        const word& compName = regionGroupNames_[regioni];
-
         const labelList& groups = regionToGroups_[compName];
-        forAll(groups, i)
+        for (const label groupi : groups)
         {
-            label groupi = groups[i];
             const wordRe& groupName = groupNames_[groupi];
+            const wordList& fieldNames = groupReadFields_[groupi];
 
-            forAll(groupReadFields_[groupi], fieldi)
+            for (const word& fieldName : fieldNames)
             {
-                const word& fieldName = groupReadFields_[groupi][fieldi];
-                rm
+                Foam::rm
                 (
                     groupDir(commDirectory(), compName, groupName)
                   / fieldName + ".out"
@@ -853,20 +786,17 @@ void Foam::functionObjects::externalCoupled::removeDataSlave() const
 
     Log << type() << ": removing data files written by slave" << nl;
 
-    forAll(regionGroupNames_, regioni)
+    for (const word& compName : regionGroupNames_)
     {
-        const word& compName = regionGroupNames_[regioni];
-
         const labelList& groups = regionToGroups_[compName];
-        forAll(groups, i)
+        for (const label groupi : groups)
         {
-            label groupi = groups[i];
             const wordRe& groupName = groupNames_[groupi];
+            const wordList& fieldNames = groupReadFields_[groupi];
 
-            forAll(groupReadFields_[groupi], fieldi)
+            for (const word& fieldName : fieldNames)
             {
-                const word& fieldName = groupReadFields_[groupi][fieldi];
-                rm
+                Foam::rm
                 (
                     groupDir(commDirectory(), compName, groupName)
                   / fieldName + ".in"
