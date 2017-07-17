@@ -226,7 +226,7 @@ public:
       // Access
 
         //- Return SHA1::Digest for the data processed until now
-        Foam::SHA1Digest digest()
+        SHA1Digest digest()
         {
             return sha1().digest();
         }
@@ -235,6 +235,13 @@ public:
       // Edit
 
         //- Clear the SHA1 calculation
+        void reset()
+        {
+            sha1().clear();
+        }
+
+        //- Clear the SHA1 calculation
+        //  \deprecated use reset instead (deprecated Jul 2017)
         void rewind()
         {
             sha1().clear();

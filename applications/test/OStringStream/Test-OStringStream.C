@@ -52,9 +52,11 @@ int main(int argc, char *argv[])
     Info<< "overwrite with short string:" << nl
         << os.str() << endl;
 
-//  os.reset();
-//  Info<< "after reset:" << nl
-//      << os.str() << endl;
+    os.reset();
+    os << "%%%% reset";
+
+    Info<< "after reset:" << nl
+        << os.str() << endl;
 
     Info<< "End\n" << endl;
 

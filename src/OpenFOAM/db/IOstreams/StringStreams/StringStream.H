@@ -223,6 +223,13 @@ public:
 
     // Member Functions
 
+        //- Reset the output buffer and rewind the stream
+        void reset()
+        {
+            this->str("");  // No other way to reset the end
+            this->rewind();
+        }
+
         //- Rewind the output stream
         void rewind()
         {
