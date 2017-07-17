@@ -55,42 +55,21 @@ namespace functionEntries
 }
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// we could combine this into execute() directly, but leave it here for now
-void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
+const Foam::Enum
+<
+    Foam::functionEntries::inputModeEntry::inputMode
+>
+Foam::functionEntries::inputModeEntry::inputModeNames
 {
-    clear();
-
-    const word mode(is);
-    if (mode == "merge" || mode == "default")
-    {
-        mode_ = MERGE;
-    }
-    else if (mode == "overwrite")
-    {
-        mode_ = OVERWRITE;
-    }
-    else if (mode == "protect")
-    {
-        mode_ = PROTECT;
-    }
-    else if (mode == "warn")
-    {
-        mode_ = WARN;
-    }
-    else if (mode == "error")
-    {
-        mode_ = ERROR;
-    }
-    else
-    {
-        WarningInFunction
-            << "unsupported input mode '" << mode
-            << "' ... defaulting to 'merge'"
-            << endl;
-    }
-}
+    { inputMode::MERGE,  "merge" },
+    { inputMode::OVERWRITE, "overwrite" },
+    { inputMode::PROTECT, "protect" },
+    { inputMode::WARN, "warn" },
+    { inputMode::ERROR, "error" },
+    // Aliases
+    { inputMode::MERGE, "default" },
+};
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -101,14 +80,36 @@ bool Foam::functionEntries::inputModeEntry::execute
     Istream& is
 )
 {
-    setMode(is);
+    const word modeName(is);
+
+    // Bheaviour like Enum lookupOrFailsafe()
+    if (inputModeNames.hasEnum(modeName))
+    {
+        mode_ = inputModeNames[modeName];
+    }
+    else
+    {
+        WarningInFunction
+            << "Unsupported inputMode '" << modeName
+            << "' ... defaulting to 'merge'"
+            << endl;
+
+        reset();
+    }
+
     return true;
+}
+
+
+void Foam::functionEntries::inputModeEntry::reset()
+{
+    mode_ = MERGE;
 }
 
 
 void Foam::functionEntries::inputModeEntry::clear()
 {
-    mode_ = MERGE;
+    reset();
 }
 
 

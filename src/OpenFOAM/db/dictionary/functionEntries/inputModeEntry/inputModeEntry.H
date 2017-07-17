@@ -58,6 +58,7 @@ SourceFiles
 #define inputModeEntry_H
 
 #include "functionEntry.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,14 +85,14 @@ class inputModeEntry
             ERROR
         };
 
+        //- Text representations of the input modes
+        const static Enum<inputMode> inputModeNames;
+
         //- The current input mode
         static inputMode mode_;
 
 
     // Private Member Functions
-
-        //- Read the mode as a word and set enum appropriately
-        static void setMode(Istream& is);
 
         //- Disallow default bitwise copy construct
         inputModeEntry(const inputModeEntry&) = delete;
@@ -112,6 +113,9 @@ public:
         static bool execute(dictionary& parentDict, Istream& is);
 
         //- Reset the inputMode to %default (ie, %merge)
+        static void reset();
+
+        //- Identical to reset.
         static void clear();
 
         //- Return true if the inputMode is %merge
