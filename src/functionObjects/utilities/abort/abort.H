@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +30,20 @@ Group
 Description
     Watches for presence of the named file in the $FOAM_CASE directory
     and aborts the calculation if it is present.
+    The presence of the abort file is only checked on the master process.
 
     Currently the following action types are supported:
     - noWriteNow
     - writeNow
     - nextWrite
+
+    \heading Function object usage
+    \table
+        Property  | Description         | Required  | Default value
+        type      | Type name: abort    | yes       |
+        file      | The abort filename  | no        | $FOAM_CASE/name
+        action    | Abort action        | no        | nextWrite
+    \endtable
 
 SourceFiles
     abort.C
@@ -55,7 +64,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class abort Declaration
+                            Class abort Declaration
 \*---------------------------------------------------------------------------*/
 
 class abort
@@ -76,11 +85,11 @@ class abort
         //- The type of action
         Time::stopAtControls action_;
 
+        //- Only trigger action once
+        bool triggered_;
+
 
     // Private Member Functions
-
-        //- Remove abort file.
-        void removeFile() const;
 
         //- Disallow default bitwise copy construct
         abort(const abort&) = delete;
@@ -102,7 +111,7 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary&
+            const dictionary& dict
         );
 
 
@@ -115,13 +124,13 @@ public:
         //- Read the dictionary settings
         virtual bool read(const dictionary& dict);
 
-        //- Execute, check existence of abort file and take action
+        //- Check existence of abort file and take action
         virtual bool execute();
 
-        //- Execute, check existence of abort file and take action
+        //- No-op
         virtual bool write();
 
-        //- Execute at the final time-loop, used for cleanup
+        //- Remove abort file after the final time-loop.
         virtual bool end();
 };
 

@@ -1,0 +1,13 @@
+// OpenFOAM dictionary -*- C++ -*-
+
+ABORT
+{
+    type    abort;
+    libs    ("libutilityFunctionObjects.so");
+    //file    "$FOAM_CASE/ABORT";   // default name
+    // action  writeNow;
+    action  nextWrite;
+}
+
+
+// ************************************************************************* //

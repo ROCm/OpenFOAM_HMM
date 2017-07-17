@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,18 +61,42 @@ Foam::functionObjects::abort::actionNames_
 };
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-void Foam::functionObjects::abort::removeFile() const
+// file-scope
+// Long description for the action name
+namespace Foam
 {
-    bool hasAbort = isFile(abortFile_);
-    reduce(hasAbort, orOp<bool>());
-
-    if (hasAbort && Pstream::master())
+static std::string longDescription(const Time::stopAtControls ctrl)
+{
+    switch (ctrl)
     {
-        // Cleanup ABORT file (on master only)
-        rm(abortFile_);
+        case Foam::Time::saNoWriteNow :
+        {
+            return "stop without writing data";
+            break;
+        }
+
+        case Time::saWriteNow :
+        {
+            return "stop and write data";
+            break;
+        }
+
+        case Time::saNextWrite :
+        {
+            return "stop after next data write";
+            break;
+        }
+
+        default:
+        {
+            // Invalid choices already filtered out by Enum
+            return "abort";
+            break;
+        }
     }
+}
 }
 
 
@@ -88,13 +112,17 @@ Foam::functionObjects::abort::abort
     functionObject(name),
     time_(runTime),
     abortFile_("$FOAM_CASE/" + name),
-    action_(Time::stopAtControls::saNextWrite)
+    action_(Time::stopAtControls::saNextWrite),
+    triggered_(false)
 {
     abortFile_.expand();
     read(dict);
 
-    // Remove any old files from previous runs
-    removeFile();
+    // Cleanup old files from previous runs
+    if (Pstream::master())
+    {
+        Foam::rm(abortFile_);
+    }
 }
 
 
@@ -110,6 +138,13 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
 {
     functionObject::read(dict);
 
+    if (dict.readIfPresent("file", abortFile_))
+    {
+        abortFile_.expand();
+    }
+
+    const auto oldAction = action_;
+
     action_ = actionNames_.lookupOrDefault
     (
         "action",
@@ -117,10 +152,16 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
         Time::stopAtControls::saNextWrite
     );
 
-    if (dict.readIfPresent("file", abortFile_))
+    // User can change action and re-trigger the abort.
+    // eg, they had nextWrite, but actually wanted writeNow.
+    if (oldAction != action_)
     {
-        abortFile_.expand();
+        triggered_ = false;
     }
+
+    Info<< type() << " activated ("
+        << longDescription(action_).c_str() <<")" << nl
+        << "    File: " << abortFile_ << endl;
 
     return true;
 }
@@ -128,53 +169,25 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
 
 bool Foam::functionObjects::abort::execute()
 {
-    bool hasAbort = isFile(abortFile_);
-    reduce(hasAbort, orOp<bool>());
-
-    if (hasAbort)
+    // If it has been triggered (eg, nextWrite) don't need to check it again
+    if (!triggered_)
     {
-        switch (action_)
+        bool hasAbort = (Pstream::master() && isFile(abortFile_));
+        Pstream::scatter(hasAbort);
+
+        if (hasAbort)
         {
-            case Time::saNoWriteNow :
+            triggered_ = time_.stopAt(action_);
+
+            if (triggered_)
             {
-                if (time_.stopAt(action_))
-                {
-                    Info<< "USER REQUESTED ABORT (timeIndex="
-                        << time_.timeIndex()
-                        << "): stop without writing data"
-                        << endl;
-                }
-                break;
+                Info<< "USER REQUESTED ABORT (timeIndex="
+                    << time_.timeIndex()
+                    << "): " << longDescription(action_).c_str()
+                    << endl;
             }
 
-            case Time::saWriteNow :
-            {
-                if (time_.stopAt(action_))
-                {
-                    Info<< "USER REQUESTED ABORT (timeIndex="
-                        << time_.timeIndex()
-                        << "): stop+write data"
-                        << endl;
-                }
-                break;
-            }
-
-            case Time::saNextWrite :
-            {
-                if (time_.stopAt(action_))
-                {
-                    Info<< "USER REQUESTED ABORT (timeIndex="
-                        << time_.timeIndex()
-                        << "): stop after next data write"
-                        << endl;
-                }
-                break;
-            }
-
-            default:
-            {
-                // Invalid choices already filtered out by Enum
-            }
+            Pstream::scatter(triggered_);
         }
     }
 
@@ -190,7 +203,12 @@ bool Foam::functionObjects::abort::write()
 
 bool Foam::functionObjects::abort::end()
 {
-    removeFile();
+    // Cleanup ABORT file
+    if (Pstream::master())
+    {
+        Foam::rm(abortFile_);
+    }
+
     return true;
 }
 
