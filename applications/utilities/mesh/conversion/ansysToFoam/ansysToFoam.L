@@ -46,7 +46,7 @@ Description
 #include <cstdio>
 
 #include "scalar.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 
@@ -271,7 +271,6 @@ elementType           ^{space}"TYPE"{cspace}
 
 #include "fileName.H"
 #include <fstream>
-using std::ifstream;
 
 
 label findFace(const polyMesh& mesh, const face& f)
@@ -318,8 +317,8 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    fileName ansysFile(args[1]);
-    ifstream ansysStream(ansysFile.c_str());
+    const fileName ansysFile(args[1]);
+    std::ifstream ansysStream(ansysFile);
 
     if (!ansysStream)
     {

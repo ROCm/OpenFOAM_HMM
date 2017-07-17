@@ -43,7 +43,7 @@ inline void Foam::prefixOSstream::checkWritePrefix()
 
 Foam::prefixOSstream::prefixOSstream
 (
-    ostream& os,
+    std::ostream& os,
     const string& name,
     streamFormat format,
     versionNumber version,
@@ -181,5 +181,6 @@ void Foam::prefixOSstream::indent()
     checkWritePrefix();
     OSstream::indent();
 }
+
 
 // ************************************************************************* //

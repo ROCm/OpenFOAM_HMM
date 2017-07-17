@@ -59,8 +59,8 @@ namespace Foam
 
 class token;
 
-Istream& operator>>(Istream&, token&);
-Ostream& operator<<(Ostream&, const token&);
+Istream& operator>>(Istream& is, token& t);
+Ostream& operator<<(Ostream& os, const token& t);
 
 
 /*---------------------------------------------------------------------------*\
@@ -418,8 +418,8 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, token&);
-        friend Ostream& operator<<(Ostream&, const token&);
+        friend Istream& operator>>(Istream& is, token& t);
+        friend Ostream& operator<<(Ostream& os, const token& t);
 
         friend Ostream& operator<<(Ostream&, const punctuationToken&);
         friend ostream& operator<<(ostream&, const punctuationToken&);

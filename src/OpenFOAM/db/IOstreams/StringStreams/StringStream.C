@@ -23,21 +23,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "primitiveEntry.H"
-#include "dictionary.H"
 #include "StringStream.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-Foam::primitiveEntry::primitiveEntry(const keyType& key, const T& t)
-:
-    entry(key),
-    ITstream(key, tokenList(10))
+void Foam::IStringStream::print(Ostream& os) const
 {
-    OStringStream os;
-    os  << t << token::END_STATEMENT;
-    readEntry(dictionary::null, IStringStream(os.str())());
+    os  << "IStringStream " << name() << " : "
+        << "buffer =\n" << str() << Foam::endl;
+
+    ISstream::print(os);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::OStringStream::print(Ostream& os) const
+{
+    os  << "OStringStream " << name() << " : "
+        << "buffer =\n" << str() << Foam::endl;
+
+    OSstream::print(os);
 }
 
 

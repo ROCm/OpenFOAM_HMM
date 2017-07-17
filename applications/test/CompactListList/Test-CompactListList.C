@@ -31,8 +31,7 @@ Description
 
 #include "CompactListList.H"
 #include "IOstreams.H"
-#include "OStringStream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "faceList.H"
 
 using namespace Foam;

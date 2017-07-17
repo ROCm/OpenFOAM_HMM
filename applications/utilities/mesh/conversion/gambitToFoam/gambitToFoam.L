@@ -41,7 +41,7 @@ Description
  \* ------------------------------------------------------------------------- */
 
 #include "scalarList.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // For EOF only
 #include <cstdio>
@@ -622,7 +622,6 @@ mtype                 {space}"MTYPE:"{space}
 
 #include "fileName.H"
 #include <fstream>
-using std::ifstream;
 
 int main(int argc, char *argv[])
 {
@@ -647,7 +646,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const fileName gambitFile = args[1];
-    ifstream gambitStream(gambitFile.c_str());
+    std::ifstream gambitStream(gambitFile);
 
     if (!gambitStream)
     {

@@ -25,7 +25,7 @@ License
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -25,7 +25,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "wordList.H"
 #include "IOstreams.H"
 

@@ -25,8 +25,7 @@ License
 
 #include "codeStream.H"
 #include "addToMemberFunctionSelectionTable.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 #include "Time.H"

@@ -36,7 +36,7 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "globalMeshData.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"

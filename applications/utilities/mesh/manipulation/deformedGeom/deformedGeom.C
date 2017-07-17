@@ -36,7 +36,6 @@ Description
 #include "argList.H"
 #include "fvMesh.H"
 #include "pointFields.H"
-#include "IStringStream.H"
 #include "volPointInterpolation.H"
 
 using namespace Foam;

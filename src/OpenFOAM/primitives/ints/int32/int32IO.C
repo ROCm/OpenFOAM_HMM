@@ -28,7 +28,6 @@ License
 #include "IOstreams.H"
 
 #include <inttypes.h>
-#include <sstream>
 #include <cerrno>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

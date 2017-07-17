@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "fileName.H"
 #include "dictionary.H"
 #include "JobInfo.H"

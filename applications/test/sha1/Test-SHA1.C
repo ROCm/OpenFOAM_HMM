@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSHA1stream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "dictionary.H"
 
 using namespace Foam;

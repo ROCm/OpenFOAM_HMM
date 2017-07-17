@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASCore.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

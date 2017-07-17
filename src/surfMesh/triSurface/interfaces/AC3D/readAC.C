@@ -30,7 +30,7 @@ Description
 
 #include "triSurface.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "transform.H"
 #include "tensor.H"
 

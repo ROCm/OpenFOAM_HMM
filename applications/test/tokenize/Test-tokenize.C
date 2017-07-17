@@ -31,7 +31,7 @@ Description
 #include "IOobject.H"
 #include "IOstreams.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "cpuTime.H"
 
 using namespace Foam;

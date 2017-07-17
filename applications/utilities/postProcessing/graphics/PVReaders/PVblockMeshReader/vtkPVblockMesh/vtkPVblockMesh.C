@@ -31,7 +31,7 @@ License
 #include "blockMeshTools.H"
 #include "Time.H"
 #include "patchZones.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // VTK includes
 #include "vtkDataArraySelection.h"

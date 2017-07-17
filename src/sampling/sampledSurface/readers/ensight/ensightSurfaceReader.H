@@ -37,6 +37,7 @@ SourceFiles
 
 #include "surfaceReader.H"
 #include "ensightReadFile.H"
+#include "StringStream.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

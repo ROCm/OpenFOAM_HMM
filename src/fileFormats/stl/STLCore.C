@@ -89,9 +89,9 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
 )
 {
     bool compressed = false;
-    autoPtr<istream> streamPtr
+    autoPtr<std::istream> streamPtr
     (
-        new ifstream(filename.c_str(), std::ios::binary)
+        new std::ifstream(filename, std::ios::binary)
     );
 
     // If the file is compressed, decompress it before further checking.
@@ -100,7 +100,7 @@ int Foam::fileFormats::STLCore::detectBinaryHeader
         compressed = true;
         streamPtr.reset(new igzstream((filename + ".gz").c_str()));
     }
-    istream& is = streamPtr();
+    std::istream& is = streamPtr();
 
     if (!is.good())
     {
@@ -165,9 +165,9 @@ Foam::fileFormats::STLCore::readBinaryHeader
     bool compressed = false;
     nTrisEstimated = 0;
 
-    autoPtr<istream> streamPtr
+    autoPtr<std::istream> streamPtr
     (
-        new ifstream(filename.c_str(), std::ios::binary)
+        new std::ifstream(filename, std::ios::binary)
     );
 
     // If the file is compressed, decompress it before reading.
@@ -176,7 +176,7 @@ Foam::fileFormats::STLCore::readBinaryHeader
         compressed = true;
         streamPtr.reset(new igzstream((filename + ".gz").c_str()));
     }
-    istream& is = streamPtr();
+    std::istream& is = streamPtr();
 
     if (!is.good())
     {

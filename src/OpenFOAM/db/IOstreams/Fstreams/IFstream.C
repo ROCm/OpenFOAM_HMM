@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,11 +35,11 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 :
-    ifPtr_(nullptr),
+    allocatedPtr_(nullptr),
     compression_(IOstream::UNCOMPRESSED)
 {
     if (pathname.empty())
@@ -50,21 +50,21 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
         }
     }
 
-    ifPtr_ = new ifstream(pathname.c_str());
+    allocatedPtr_ = new std::ifstream(pathname);
 
     // If the file is compressed, decompress it before reading.
-    if (!ifPtr_->good() && isFile(pathname + ".gz", false))
+    if (!allocatedPtr_->good() && isFile(pathname + ".gz", false))
     {
         if (IFstream::debug)
         {
             InfoInFunction << "Decompressing " << pathname + ".gz" << endl;
         }
 
-        delete ifPtr_;
+        delete allocatedPtr_;
 
-        ifPtr_ = new igzstream((pathname + ".gz").c_str());
+        allocatedPtr_ = new igzstream((pathname + ".gz").c_str());
 
-        if (ifPtr_->good())
+        if (allocatedPtr_->good())
         {
             compression_ = IOstream::COMPRESSED;
         }
@@ -72,9 +72,23 @@ Foam::IFstreamAllocator::IFstreamAllocator(const fileName& pathname)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::IFstreamAllocator::~IFstreamAllocator()
 {
-    delete ifPtr_;
+    deallocate();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::IFstreamAllocator::deallocate()
+{
+    if (allocatedPtr_)
+    {
+        delete allocatedPtr_;
+        allocatedPtr_ = nullptr;
+    }
 }
 
 
@@ -90,7 +104,7 @@ Foam::IFstream::IFstream
     IFstreamAllocator(pathname),
     ISstream
     (
-        *ifPtr_,
+        *allocatedPtr_,
         pathname,
         format,
         version,
@@ -99,14 +113,15 @@ Foam::IFstream::IFstream
 {
     setClosed();
 
-    setState(ifPtr_->rdstate());
+    setState(allocatedPtr_->rdstate());
 
     if (!good())
     {
         if (debug)
         {
             InfoInFunction
-                << "Could not open file for input" << endl << info() << endl;
+                << "Could not open file " << pathname
+                << " for input" << nl << info() << Foam::endl;
         }
 
         setBad();
@@ -130,29 +145,30 @@ Foam::IFstream::~IFstream()
 
 std::istream& Foam::IFstream::stdStream()
 {
-    if (!ifPtr_)
+    if (!allocatedPtr_)
     {
         FatalErrorInFunction
-            << "No stream allocated" << abort(FatalError);
+            << "No stream allocated"
+            << abort(FatalError);
     }
-    return *ifPtr_;
+    return *allocatedPtr_;
 }
 
 
 const std::istream& Foam::IFstream::stdStream() const
 {
-    if (!ifPtr_)
+    if (!allocatedPtr_)
     {
         FatalErrorInFunction
-            << "No stream allocated" << abort(FatalError);
+            << "No stream allocated"
+            << abort(FatalError);
     }
-    return *ifPtr_;
+    return *allocatedPtr_;
 }
 
 
 void Foam::IFstream::print(Ostream& os) const
 {
-    // Print File data
     os  << "IFstream: ";
     ISstream::print(os);
 }
@@ -164,10 +180,10 @@ Foam::IFstream& Foam::IFstream::operator()() const
 {
     if (!good())
     {
-        // also checks .gz file
+        // Also checks .gz file
         if (isFile(this->name(), true))
         {
-            check("IFstream::operator()");
+            check(FUNCTION_NAME);
             FatalIOError.exit();
         }
         else
