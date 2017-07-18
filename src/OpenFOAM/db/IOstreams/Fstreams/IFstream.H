@@ -129,6 +129,9 @@ public:
         //- Const access to underlying std::istream
         virtual const std::istream& stdStream() const;
 
+        //- Rewind the stream so that it may be read again
+        virtual Istream& rewind();
+
 
       // Print
 

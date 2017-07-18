@@ -167,6 +167,39 @@ const std::istream& Foam::IFstream::stdStream() const
 }
 
 
+Foam::Istream& Foam::IFstream::rewind()
+{
+    lineNumber_ = 1;      // Reset line number
+
+    igzstream* gzPtr = nullptr;
+
+    try
+    {
+        gzPtr = dynamic_cast<igzstream*>(allocatedPtr_);
+    }
+    catch (std::bad_cast)
+    {
+        gzPtr = nullptr;
+    }
+
+    if (gzPtr)
+    {
+        // Need special treatment for gzstream.
+        gzPtr->close();
+        gzPtr->clear();
+        gzPtr->open((this->name() + ".gz").c_str());
+
+        setState(gzPtr->rdstate());
+    }
+    else
+    {
+        ISstream::rewind();
+    }
+
+    return *this;
+}
+
+
 void Foam::IFstream::print(Ostream& os) const
 {
     os  << "IFstream: ";
