@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::IFstream
 
 Description
-    Input from file stream.
+    Input from file stream, using a ISstream
 
 SourceFiles
     IFstream.C
@@ -47,20 +47,21 @@ using std::ifstream;
 namespace Foam
 {
 
-class IFstream;
-
 /*---------------------------------------------------------------------------*\
                       Class IFstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
-//- A std::istream with ability to handle compressed files
+//- A std::istream with the ability to handle compressed files
 class IFstreamAllocator
 {
-    friend class IFstream;
+protected:
 
-    // Private data
+    // Member Data
 
-        istream* ifPtr_;
+        //- The allocated stream pointer (ifstream or igzstream).
+        std::istream* allocatedPtr_;
+
+        //- The requested compression type
         IOstream::compressionType compression_;
 
 
@@ -72,6 +73,13 @@ class IFstreamAllocator
 
     //- Destructor
     ~IFstreamAllocator();
+
+
+    // Protected Member Functions
+
+        //- Delete the stream pointer
+        void deallocate();
+
 };
 
 
@@ -105,27 +113,30 @@ public:
     ~IFstream();
 
 
-    // Member functions
+    // Member Functions
 
-        // Access
+      // Access
 
-            //- Read/write access to the name of the stream
-            using ISstream::name;
-
-
-        // STL stream
-
-            //- Access to underlying std::istream
-            virtual istream& stdStream();
-
-            //- Const access to underlying std::istream
-            virtual const istream& stdStream() const;
+        //- Read/write access to the name of the stream
+        using ISstream::name;
 
 
-        // Print
+      // STL stream
 
-            //- Print description of IOstream to Ostream
-            virtual void print(Ostream&) const;
+        //- Access to underlying std::istream
+        virtual std::istream& stdStream();
+
+        //- Const access to underlying std::istream
+        virtual const std::istream& stdStream() const;
+
+        //- Rewind the stream so that it may be read again
+        virtual Istream& rewind();
+
+
+      // Print
+
+        //- Print description of IOstream to Ostream
+        virtual void print(Ostream& os) const;
 
 
     // Member operators

@@ -29,7 +29,7 @@ License
 
 inline Foam::OSstream::OSstream
 (
-    ostream& os,
+    std::ostream& os,
     const string& name,
     streamFormat format,
     versionNumber version,

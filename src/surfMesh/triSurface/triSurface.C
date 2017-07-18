@@ -508,7 +508,7 @@ void Foam::triSurface::write
     }
     else if (ext == "stlb")
     {
-        std::ofstream outFile(name.c_str(), std::ios::binary);
+        std::ofstream outFile(name, std::ios::binary);
 
         writeSTLBINARY(outFile);
     }
@@ -526,7 +526,7 @@ void Foam::triSurface::write
     }
     else if (ext == "vtk")
     {
-        std::ofstream outFile(name.c_str(), std::ios::binary);
+        std::ofstream outFile(name, std::ios::binary);
         writeVTK(sort, outFile);
     }
     else if

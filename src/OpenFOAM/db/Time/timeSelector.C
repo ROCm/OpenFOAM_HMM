@@ -27,7 +27,7 @@ License
 #include "ListOps.H"
 #include "argList.H"
 #include "Time.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

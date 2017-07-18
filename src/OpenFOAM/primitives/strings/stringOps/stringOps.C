@@ -27,7 +27,7 @@ License
 #include "typeInfo.H"
 #include "OSspecific.H"
 #include "etcFiles.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::OFstream
 
 Description
-    Output to file stream.
+    Output to file stream, using a OSstream
 
 SourceFiles
     OFstream.C
@@ -47,18 +47,20 @@ using std::ofstream;
 namespace Foam
 {
 
-class OFstream;
-
 /*---------------------------------------------------------------------------*\
                       Class OFstreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
-//- A std::ostream with ability to handle compressed files
+//- A std::ostream with the ability to handle compressed files
 class OFstreamAllocator
 {
-    friend class OFstream;
+protected:
 
-    ostream* ofPtr_;
+    // Member Data
+
+        //- The allocated stream pointer (ofstream or ogzstream).
+        std::ostream* allocatedPtr_;
+
 
     // Constructors
 
@@ -69,8 +71,15 @@ class OFstreamAllocator
             IOstream::compressionType compression=IOstream::UNCOMPRESSED
         );
 
+
     //- Destructor
     ~OFstreamAllocator();
+
+
+    // Protected Member Functions
+
+        //- Delete the stream pointer
+        void deallocate();
 
 };
 
@@ -81,7 +90,7 @@ class OFstreamAllocator
 
 class OFstream
 :
-    private OFstreamAllocator,
+    public OFstreamAllocator,
     public OSstream
 {
 public:
@@ -108,25 +117,25 @@ public:
 
     // Member functions
 
-        // Access
+      // Access
 
-            //- Read/write access to the name of the stream
-            using OSstream::name;
-
-
-        // STL stream
-
-            //- Access to underlying std::ostream
-            virtual ostream& stdStream();
-
-            //- Const access to underlying std::ostream
-            virtual const ostream& stdStream() const;
+        //- Read/write access to the name of the stream
+        using OSstream::name;
 
 
-        // Print
+      // STL stream
 
-            //- Print description of IOstream to Ostream
-            void print(Ostream&) const;
+        //- Access to underlying std::ostream
+        virtual std::ostream& stdStream();
+
+        //- Const access to underlying std::ostream
+        virtual const std::ostream& stdStream() const;
+
+
+      // Print
+
+        //- Print description of IOstream to Ostream
+        void print(Ostream& os) const;
 };
 
 

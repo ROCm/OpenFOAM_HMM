@@ -30,7 +30,7 @@ License
 #include "ensightPartFaces.H"
 #include "ensightSerialOutput.H"
 #include "ensightPTraits.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

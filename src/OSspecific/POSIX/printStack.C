@@ -24,9 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "OStringStream.H"
 #include "OSspecific.H"
 #include "IFstream.H"
+#include "StringStream.H"
 
 #include <inttypes.h>
 #include <cxxabi.h>
@@ -55,7 +55,7 @@ string pOpen(const string &cmd, label line=0)
         {
             size_t linecap = 0;
             ssize_t linelen;
-            linelen = getline(&buf, &linecap, cmdPipe);
+            linelen = ::getline(&buf, &linecap, cmdPipe);
 
             if (linelen < 0)
             {

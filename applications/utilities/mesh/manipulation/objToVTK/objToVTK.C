@@ -34,15 +34,11 @@ Description
 
 #include "argList.H"
 #include "OFstream.H"
-#include <fstream>
-#include <sstream>
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "point.H"
 #include "DynamicList.H"
 
-
 using namespace Foam;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -122,7 +118,7 @@ int main(int argc, char *argv[])
     const fileName objName = args[1];
     const fileName outName = args[2];
 
-    std::ifstream OBJfile(objName.c_str());
+    std::ifstream OBJfile(objName);
 
     if (!OBJfile.good())
     {

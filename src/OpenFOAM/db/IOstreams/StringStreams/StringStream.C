@@ -21,46 +21,29 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "IOstreams.H"
 #include "StringStream.H"
 
-using namespace Foam;
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
-
-int main(int argc, char *argv[])
+void Foam::IStringStream::print(Ostream& os) const
 {
-    Info<< "Begin test OStringStream" << endl;
+    os  << "IStringStream " << name() << " : "
+        << "buffer =\n" << str() << Foam::endl;
 
-    OStringStream os;
-    os << "output with some values " << 1 << " entry" << endl;
+    ISstream::print(os);
+}
 
-    Info<< "contains:" << nl
-        << os.str() << endl;
-    os.rewind();
 
-    Info<< "after rewind:" << nl
-        << os.str() << endl;
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-    os << "####";
+void Foam::OStringStream::print(Ostream& os) const
+{
+    os  << "OStringStream " << name() << " : "
+        << "buffer =\n" << str() << Foam::endl;
 
-    Info<< "overwrite with short string:" << nl
-        << os.str() << endl;
-
-    os.reset();
-    os << "%%%% reset";
-
-    Info<< "after reset:" << nl
-        << os.str() << endl;
-
-    Info<< "End\n" << endl;
-
-    return 0;
+    OSstream::print(os);
 }
 
 

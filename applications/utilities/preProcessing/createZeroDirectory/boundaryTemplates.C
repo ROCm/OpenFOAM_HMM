@@ -26,7 +26,7 @@ License
 #include "boundaryTemplates.H"
 #include "Time.H"
 #include "IFstream.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 

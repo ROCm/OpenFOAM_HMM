@@ -1,4 +1,4 @@
-ifstream kivaFile(kivaFileName.c_str());
+std::ifstream kivaFile(kivaFileName);
 
 if (!kivaFile.good())
 {

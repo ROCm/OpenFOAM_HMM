@@ -26,8 +26,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "stringListOps.H"
-#include "IStringStream.H"
 #include "IOstreams.H"
+#include "StringStream.H"
 
 using namespace Foam;
 
@@ -37,22 +37,17 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     stringList strLst
-    (
-        IStringStream
-        (
-            "("
-            "\"hello\""
-            "\"heello\""
-            "\"heeello\""
-            "\"bye\""
-            "\"bbye\""
-            "\"bbbye\""
-            "\"okey\""
-            "\"okkey\""
-            "\"okkkey\""
-            ")"
-        )()
-    );
+    {
+        "hello",
+        "heello",
+        "heeello",
+        "bye",
+        "bbye",
+        "bbbye",
+        "okey",
+        "okkey",
+        "okkkey",
+    };
 
     wordReList reLst(IStringStream("( okey \"[hy]e+.*\" )")());
 

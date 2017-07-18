@@ -68,7 +68,7 @@ Usage
 #include "pointFields.H"
 #include "transformField.H"
 #include "transformGeometricField.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "mathematicalConstants.H"
 
 using namespace Foam;

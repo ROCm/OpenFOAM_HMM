@@ -25,7 +25,7 @@ License
 
 #include "entry.H"
 #include "dictionary.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

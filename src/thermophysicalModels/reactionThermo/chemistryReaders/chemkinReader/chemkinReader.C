@@ -782,9 +782,9 @@ void Foam::chemkinReader::read
 {
     transportDict_.read(IFstream(transportFileName)());
 
-    if (thermoFileName != fileName::null)
+    if (!thermoFileName.empty())
     {
-        std::ifstream thermoStream(thermoFileName.c_str());
+        std::ifstream thermoStream(thermoFileName);
 
         if (!thermoStream)
         {
@@ -804,7 +804,7 @@ void Foam::chemkinReader::read
         lineNo_ = 1;
     }
 
-    std::ifstream CHEMKINStream(CHEMKINFileName.c_str());
+    std::ifstream CHEMKINStream(CHEMKINFileName);
 
     if (!CHEMKINStream)
     {

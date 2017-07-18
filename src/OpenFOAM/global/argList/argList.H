@@ -100,7 +100,7 @@ SourceFiles
 #include "word.H"
 #include "fileName.H"
 #include "parRun.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

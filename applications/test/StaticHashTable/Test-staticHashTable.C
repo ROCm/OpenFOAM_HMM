@@ -25,8 +25,7 @@ License
 
 #include "StaticHashTable.H"
 #include "IOstreams.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 

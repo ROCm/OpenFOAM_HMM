@@ -26,7 +26,7 @@ License
 #include "ccmWriter.H"
 #include "dictionary.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "ccmInternal.H"  // include last to avoid any strange interactions

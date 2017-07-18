@@ -45,7 +45,7 @@ void Foam::vtk::writeSurfFields
 
     const bool legacy_(opts.legacy());
 
-    std::ofstream os((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
+    std::ofstream os(baseName + (legacy_ ? ".vtk" : ".vtp"));
     autoPtr<vtk::formatter> format = opts.newFormatter(os);
 
     // Same payload size for points and vector fields!

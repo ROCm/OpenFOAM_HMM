@@ -28,8 +28,8 @@ Description
     Class to handle messaging in a simple, consistent stream-based
     manner.
 
-    The messageStream class is globaly instantiated with a title string a
-    given severity, which controls the program termination, and a number of
+    The messageStream class is globaly instantiated with a title string and
+    a severity (which controls the program termination) and a number of
     errors before termination.  Errors, messages and other data are piped to
     the messageStream class in the standard manner.
 
@@ -104,13 +104,13 @@ public:
         messageStream
         (
             const string& title,
-            errorSeverity,
+            const errorSeverity severity,
             const int maxErrors = 0
         );
 
 
-        //- Construct from dictionary
-        messageStream(const dictionary&);
+        //- Construct as Fatal from dictionary, extracting the 'title'.
+        messageStream(const dictionary& dict);
 
 
     // Member functions
