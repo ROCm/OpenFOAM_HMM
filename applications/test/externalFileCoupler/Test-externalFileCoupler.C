@@ -22,14 +22,14 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    Test-externalCoupler
+    Test-externalFileCoupler
 
 Description
     Test of master/slave communication etc.
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "externalCoupler.H"
+#include "externalFileCoupler.H"
 
 using namespace Foam;
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
     const label maxCount = args.optionLookupOrDefault<label>("max", 1000);
 
-    externalCoupler coupler;
+    externalFileCoupler coupler;
 
     if (args.optionFound("slave"))
     {

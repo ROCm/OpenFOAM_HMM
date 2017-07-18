@@ -14,19 +14,17 @@ set -u
 echo "Executing dummy external solver"
 
 commsDir="comms"
-regionGroupName="heater_topAir"
-patchGroupName="coupleGroup"
+patchDir="heater_topAir/coupleGroup"
 fieldName="T"
 
 lockFile="${commsDir}/OpenFOAM.lock"
-dataFile="${commsDir}/${regionGroupName}/${patchGroupName}/${fieldName}"
+dataFile="${commsDir}/${patchDir}/${fieldName}"
 waitSec=5
 timeOut=100
 nSteps=1000 # maximum number of time steps. Note: should be more than
             # number of iterations on the OpenFOAM side
 refGrad=0
 valueFraction=1
-
 
 # Remove any old junk
 \rm -f $lockFile 2>/dev/null
@@ -36,36 +34,53 @@ log()
     echo "External: $@"
 }
 
-init()
+
+# Create lock file to pass control to OpenFOAM
+useMaster()
 {
-    log "init - creating ${dataFile}.in"
-
-    # Hard-coded for patch of size 8 (heater/minY)
-    n1=8
-    refValue1=500
-    touch "${dataFile}.in"
-    log "init - adding $n1 data elements with refValue $refValue1"
-    for i in $(seq 1 $n1); do
-        echo "$refValue1 $refGrad $valueFraction" >> "${dataFile}.in"
-    done
-
-    # Hard-coded for patch of size 40 (topAir/minX)
-    n2=40
-    refValue2=300
-    log "init - adding $n2 data elements with refValue $refValue2"
-    for i in $(seq 1 $n2); do
-        echo "$refValue2 $refGrad $valueFraction" >> "${dataFile}.in"
-    done
-
-    # Create lock file to pass control to OpenFOAM
-    touch ${lockFile}
+    log "creating lock file '${lockFile}'"
+    echo "status=openfoam" >| ${lockFile}
 }
 
 
-# create the comms directory
-mkdir -p ${commsDir}/${regionGroupName}/${patchGroupName}
+init()
+{
+    log "init - creating ${dataFile}.in"
+    cat /dev/null >| "${dataFile}.in"
 
-# Tutorial case uses 'initByExternalOption', so we must provide initial values
+    # Hard-coded for patch of size 8 (heater/minY)
+    local n1=8
+    local refValue1=500
+
+    log "init - adding $n1 data elements with refValue $refValue1"
+    for i in $(seq 1 $n1)
+    do
+        echo "$refValue1 $refGrad $valueFraction"
+    done >> "${dataFile}.in"
+
+    # Hard-coded for patch of size 40 (topAir/minX)
+    local n2=40
+    local refValue2=300
+    log "init - adding $n2 data elements with refValue $refValue2"
+    for i in $(seq 1 $n2)
+    do
+        echo "$refValue2 $refGrad $valueFraction"
+    done >> "${dataFile}.in"
+
+    # Verify line count?
+    # log "init ($(wc -l ${dataFile}.in))"
+
+    # Give time for T.in file to flush
+    sleep 1
+
+    useMaster
+}
+
+
+# Create the comms directory
+mkdir -p ${commsDir}/${patchDir}
+
+# Tutorial case uses 'initByExternal' option, so we must provide initial values
 init
 
 
@@ -108,8 +123,7 @@ do
         awk '{if( $1 != "#" ){print $1+1 " 0 1"}}' \
             ${dataFile}.out >| ${dataFile}.in
 
-        log "creating lock file '${lockFile}'"
-        touch ${lockFile}
+        useMaster
     fi
 done
 

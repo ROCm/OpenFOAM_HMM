@@ -59,6 +59,7 @@ writeInterval   100;
 
 functions
 {
+    #include "abort"
     #include "scalarTransport"
     #include "sampling"
 }

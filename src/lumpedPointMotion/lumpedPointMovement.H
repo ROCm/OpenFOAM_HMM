@@ -50,7 +50,7 @@ SourceFiles
 #include "IOobject.H"
 #include "tmp.H"
 #include "faceZoneMeshFwd.H"
-#include "externalCoupler.H"
+#include "externalFileCoupler.H"
 #include "lumpedPointState.H"
 #include "boundBox.H"
 #include "Enum.H"
@@ -120,7 +120,7 @@ private:
         dictionary forcesDict_;
 
         //- Communication control
-        externalCoupler coupler_;
+        externalFileCoupler coupler_;
 
         //- File io
         word inputName_;
@@ -223,10 +223,10 @@ public:
 
 
         //- Communication control
-        inline const externalCoupler& coupler() const;
+        inline const externalFileCoupler& coupler() const;
 
         //- Communication control
-        inline externalCoupler& coupler();
+        inline externalFileCoupler& coupler();
 
         //- The initial state (positions/rotations)
         inline const lumpedPointState& state0() const;
