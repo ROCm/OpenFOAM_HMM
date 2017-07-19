@@ -174,15 +174,15 @@ protected:
     // Protected Member Functions
 
         //- Construct and return an IFstream for the object.
-        //  The results is nullptr if the stream construction failed
+        // \Return nullptr if the stream construction failed
         Istream* objectStream();
 
-        //- Construct and return an IFstream for the object given the
-        //  exact file. The results is nullptr if the stream construction failed
-        Istream* objectStream(const fileName&);
+        //- Return an IFstream for the object given the exact file.
+        // \Return nullptr if the stream construction failed
+        Istream* objectStream(const fileName& fName);
 
         //- Set the object state to bad
-        void setBad(const string&);
+        void setBad(const string& s);
 
 
 public:
@@ -200,6 +200,20 @@ public:
     // Static Member Functions
 
         //- Split path into instance, local, name components
+        //
+        // The splitting behaviour is as follows:
+        // \verbatim
+        //    input       | instance   | local | name
+        //    ----------- | ---------- | ----- | ----
+        //    a           |            |       | a
+        //    a/b         | a          |       | b
+        //    a/b/c/d     | a          | b/c   | d
+        //    /a/b/c      | /a/b       |       | c
+        //    ./a/b/c     | PWD/a/b    |       | c
+        //    ../a/b/c    | PWD/../a/b |       | c
+        //    a/b/        | ERROR      |       |
+        // \endverbatim
+        // where PWD is the Foam::cwd() current working directory
         static bool fileNameComponents
         (
             const fileName& path,
@@ -240,9 +254,11 @@ public:
         );
 
         //- Construct from path, registry, io options.
-        //  Uses fileNameComponents() to split path into components. The
-        //  path argument is regarded as a file system path, not a case-relative
-        //  path. Any './' gets expanded to the current working directory.
+        //  Uses fileNameComponents() to split path into components.
+        //  A path that starts with a '/' is regarded as a file system path.
+        //  Paths starting with either './' or '../' are relative to
+        //  current working directory (and replaced with absolute equivalents).
+        //  All other paths are considered to be relative to the case.
         IOobject
         (
             const fileName& path,
@@ -299,6 +315,9 @@ public:
 
         //- Return name of the class name read from header
         inline const word& headerClassName() const;
+
+        //- Return non-constant access to the class name read from header
+        inline word& headerClassName();
 
         //- Return the optional note
         inline const string& note() const;

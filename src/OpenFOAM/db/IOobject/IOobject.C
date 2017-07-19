@@ -108,28 +108,22 @@ static inline bool isOutsideOfCase(const std::string& file)
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-// Return components following the IOobject requirements
-//
-// behaviour
-//    input               IOobject(instance, local, name)
-//    -----               ------
-//    "foo"               ("", "", "foo")
-//    "foo/bar"           ("foo", "", "bar")
-//    "foo/bar/"          ERROR - no name
-//    "foo/xxx/bar"       ("foo", "xxx", "bar")
-//    "foo/xxx/yyy/bar"   ("foo", "xxx/yyy", "bar")
-//    "/xxx/yyy/bar"      ("/xxx/yyy", "", "bar")
 bool Foam::IOobject::fileNameComponents
 (
-    const fileName& rawPath,
+    const fileName& path,
     fileName& instance,
     fileName& local,
     word& name
 )
 {
-    // Re-interpret the path as a file-system path.
-    fileName path(rawPath);
-    path.toAbsolute();
+    // Convert explicit relative file-system path to absolute file-system path.
+    if (path.startsWith("./") || path.startsWith("../"))
+    {
+        fileName absPath = cwd()/path;
+        absPath.clean();
+
+        return fileNameComponents(absPath, instance, local, name);
+    }
 
     instance.clear();
     local.clear();
