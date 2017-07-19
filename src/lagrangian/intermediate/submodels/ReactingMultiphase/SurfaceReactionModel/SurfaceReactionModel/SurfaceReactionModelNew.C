@@ -39,15 +39,14 @@ Foam::SurfaceReactionModel<CloudType>::New
 
     Info<< "Selecting surface reaction model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown surface reaction model type "
+            << "Unknown surfaceReactionModel type "
             << modelType << nl << nl
-            << "Valid surface reaction model types are:" << nl
+            << "Valid surfaceReactionModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

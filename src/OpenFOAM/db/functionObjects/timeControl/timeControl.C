@@ -28,27 +28,22 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::timeControl::timeControls
+>
+Foam::timeControl::timeControlNames_
 {
-    template<>
-    const char* NamedEnum<timeControl::timeControls, 9>::
-    names[] =
-    {
-        "timeStep",
-        "writeTime",
-        "outputTime",
-        "adjustableRunTime",
-        "runTime",
-        "clockTime",
-        "cpuTime",
-        "onEnd",
-        "none"
-    };
-}
-
-const Foam::NamedEnum<Foam::timeControl::timeControls, 9>
-    Foam::timeControl::timeControlNames_;
-
+    { timeControl::ocTimeStep, "timeStep" },
+    { timeControl::ocWriteTime, "writeTime" },
+    { timeControl::ocOutputTime, "outputTime" },
+    { timeControl::ocAdjustableRunTime, "adjustableRunTime" },
+    { timeControl::ocRunTime, "runTime" },
+    { timeControl::ocClockTime, "clockTime" },
+    { timeControl::ocCpuTime, "cpuTime" },
+    { timeControl::ocOnEnd, "onEnd" },
+    { timeControl::ocNone, "none" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -117,7 +112,7 @@ void Foam::timeControl::read(const dictionary& dict)
 
     if (dict.found(controlName))
     {
-        timeControl_ = timeControlNames_.read(dict.lookup(controlName));
+        timeControl_ = timeControlNames_.lookup(controlName, dict);
     }
     else
     {

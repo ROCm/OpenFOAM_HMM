@@ -38,20 +38,18 @@ Foam::autoPtr<Foam::surfaceTensionModel> Foam::surfaceTensionModel::New
     {
         const dictionary& sigmaDict = surfaceTensionModel::sigmaDict(dict);
 
-        word surfaceTensionModelType(sigmaDict.lookup("type"));
+        const word modelType(sigmaDict.lookup("type"));
 
-        Info<< "Selecting surfaceTensionModel "
-            << surfaceTensionModelType << endl;
+        Info<< "Selecting surfaceTensionModel " << modelType << endl;
 
-        dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(surfaceTensionModelType);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
-                << "Unknown surfaceTensionModelType type "
-                << surfaceTensionModelType << endl << endl
-                << "Valid surfaceTensionModel types are : " << endl
+                << "Unknown surfaceTensionModel type "
+                << modelType << nl << nl
+                << "Valid surfaceTensionModel types :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }

@@ -108,7 +108,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<samplingSource, 3> samplingSourceNames_;
+        static const Enum<samplingSource> samplingSourceNames_;
 
         //- Surface to sample on
         const triSurfaceMesh surface_;

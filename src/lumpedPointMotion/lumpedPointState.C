@@ -33,12 +33,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::lumpedPointState::inputFormatType>
-    Foam::lumpedPointState::formatNames
-    {
-        { inputFormatType::PLAIN, "plain" },
-        { inputFormatType::DICTIONARY, "dictionary" }
-    };
+const Foam::Enum
+<
+    Foam::lumpedPointState::inputFormatType
+>
+Foam::lumpedPointState::formatNames
+{
+    { inputFormatType::PLAIN, "plain" },
+    { inputFormatType::DICTIONARY, "dictionary" }
+};
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -175,12 +178,12 @@ void Foam::lumpedPointState::relax
         if (prev.degrees_)
         {
             // Was degrees, now radians
-            convert = degToRad(1);
+            convert = degToRad();
         }
         else
         {
             // Was radians, now degrees
-            convert = radToDeg(1);
+            convert = radToDeg();
         }
     }
 

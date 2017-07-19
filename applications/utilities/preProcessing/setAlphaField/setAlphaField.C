@@ -59,7 +59,12 @@ class shapeSelector
     static const Foam::Enum<shapeType> shapeTypeNames;
 };
 
-const Foam::Enum<shapeSelector::shapeType> shapeSelector::shapeTypeNames
+
+const Foam::Enum
+<
+    shapeSelector::shapeType
+>
+shapeSelector::shapeTypeNames
 {
     { shapeSelector::shapeType::PLANE, "plane" },
     { shapeSelector::shapeType::SPHERE, "sphere" },

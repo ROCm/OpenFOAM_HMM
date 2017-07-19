@@ -35,14 +35,14 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
     const dictionary& preconditionerDict
 )
 {
-    word preconditionerName = preconditionerDict.lookup("preconditioner");
+    const word preconditionerName = preconditionerDict.lookup("preconditioner");
 
     if (sol.matrix().symmetric())
     {
-        typename symMatrixConstructorTable::iterator constructorIter =
-            symMatrixConstructorTablePtr_->find(preconditionerName);
+        auto cstrIter =
+            symMatrixConstructorTablePtr_->cfind(preconditionerName);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -50,13 +50,13 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
             )   << "Unknown symmetric matrix preconditioner "
                 << preconditionerName << endl << endl
                 << "Valid symmetric matrix preconditioners are :" << endl
-                << symMatrixConstructorTablePtr_->toc()
+                << symMatrixConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
         (
-            constructorIter()
+            cstrIter()
             (
                 sol,
                 preconditionerDict
@@ -65,10 +65,10 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
     }
     else if (sol.matrix().asymmetric())
     {
-        typename asymMatrixConstructorTable::iterator constructorIter =
-            asymMatrixConstructorTablePtr_->find(preconditionerName);
+        auto cstrIter =
+            asymMatrixConstructorTablePtr_->cfind(preconditionerName);
 
-        if (!constructorIter.found())
+        if (!cstrIter.found())
         {
             FatalIOErrorInFunction
             (
@@ -76,13 +76,13 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
             )   << "Unknown asymmetric matrix preconditioner "
                 << preconditionerName << endl << endl
                 << "Valid asymmetric matrix preconditioners are :" << endl
-                << asymMatrixConstructorTablePtr_->toc()
+                << asymMatrixConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
 
         return autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
         (
-            constructorIter()
+            cstrIter()
             (
                 sol,
                 preconditionerDict

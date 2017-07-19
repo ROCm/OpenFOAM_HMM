@@ -40,15 +40,14 @@ Foam::CloudFunctionObject<CloudType>::New
     Info<< "    Selecting cloud function " << modelName << " of type "
         << objectType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(objectType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(objectType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown cloud function type "
             << objectType << nl << nl
-            << "Valid cloud function types are:" << nl
+            << "Valid cloud function types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

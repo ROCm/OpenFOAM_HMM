@@ -27,17 +27,24 @@ Class
 Description
     Set up trapping for floating point exceptions (signal FPE).
 
-    Controlled by two env vars:
-      - \par FOAM_SIGFPE
-        Exception trapping
-      - \par FOAM_SETNAN
-        Initialization of all malloced memory to NaN. If FOAM_SIGFPE
-        also set, this will cause usage of uninitialized scalars to trigger
-        an abort.
+    Defined by controlDict InfoSwitch entries:
+    - \par trapFpe
+      Enable floating point exception trapping.
 
-    Can be used either directly through the static member functions or
-    through the scope of the object (constructor sets trapping; destructor
-    restores original).
+    - \par setNaN
+      Initialization all malloced memory to NaN.
+      Combined with \c trapFpe, this causes usage of uninitialized scalars
+      to trigger an abort.
+
+    Environment variables:
+      - \par FOAM_SIGFPE (true|false)
+        overrides \c trapFpe
+      - \par FOAM_SETNAN  (true|false)
+        overrides \c setNaN
+
+    Note that trapping can be set/removed through the static member functions
+    or through the scope of the object (constructor sets trapping; destructor
+    restores original). The class behaves as a singleton.
 
 SourceFiles
     sigFpe.C
@@ -73,11 +80,19 @@ class sigFpe
 {
     // Private data
 
+        //- Flag that floating point trapping should be used.
+        //  Can override with FOAM_SIGFPE env variable
+        static bool switchFpe_;
+
+        //- Flag that NaN initialisation should be used.
+        //  Can override with FOAM_SETNAN env variable
+        static bool switchNan_;
+
+        //- Flag to indicate floating point trapping is currently active
+        static bool sigActive_;
+
         //- Saved old signal trapping setting
         static struct sigaction oldAction_;
-
-        //- Flag to indicate floating point trapping is enabled
-        static bool sigFpeActive_;
 
 
     // Static data members
@@ -89,6 +104,11 @@ class sigFpe
 
 
 public:
+
+    // Public data
+
+        //- Flag to indicate mallocNan is enabled
+        static bool mallocNanActive_;
 
 
     // Constructors
@@ -103,6 +123,11 @@ public:
 
     // Member functions
 
+        //- Check if SIGFPE signals handler is to be enabled.
+        //  This is controlled by the trapFpe entry or the FOAM_SIGFPE
+        //  environment variable
+        static bool requested();
+
         //- Activate SIGFPE signal handler when FOAM_SIGFPE is %set
         //  Fill memory with NaN when FOAM_SETNAN is %set
         static void set(const bool verbose);
@@ -110,16 +135,13 @@ public:
         //- Deactivate SIGFPE signal handler and NaN memory initialisation
         static void unset(const bool verbose);
 
-        //- Flag to indicate mallocNan is enabled
-        static bool mallocNanActive_;
-
         #ifdef LINUX
         //- Malloc function which initializes to NaN
         static void* mallocNan(size_t size);
         #endif
 
         //- Fill block of data with NaN
-        static void fillNan(UList<scalar>&);
+        static void fillNan(UList<scalar>& lst);
 };
 
 

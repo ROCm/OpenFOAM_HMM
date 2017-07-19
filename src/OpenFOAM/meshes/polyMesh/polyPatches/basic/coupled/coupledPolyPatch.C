@@ -35,20 +35,21 @@ namespace Foam
     defineTypeNameAndDebug(coupledPolyPatch, 0);
 
     const scalar coupledPolyPatch::defaultMatchTol_ = 1e-4;
-
-    template<>
-    const char* NamedEnum<coupledPolyPatch::transformType, 5>::names[] =
-    {
-        "unknown",
-        "rotational",
-        "translational",
-        "coincidentFullMatch",
-        "noOrdering"
-    };
-
-    const NamedEnum<coupledPolyPatch::transformType, 5>
-        coupledPolyPatch::transformTypeNames;
 }
+
+
+const Foam::Enum
+<
+    Foam::coupledPolyPatch::transformType
+>
+Foam::coupledPolyPatch::transformTypeNames
+{
+    { transformType::UNKNOWN, "unknown" },
+    { transformType::ROTATIONAL, "rotational" },
+    { transformType::TRANSLATIONAL, "translational" },
+    { transformType::COINCIDENTFULLMATCH, "coincidentFullMatch" },
+    { transformType::NOORDERING, "noOrdering" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -500,9 +501,12 @@ Foam::coupledPolyPatch::coupledPolyPatch
     matchTolerance_(dict.lookupOrDefault("matchTolerance", defaultMatchTol_)),
     transform_
     (
-        dict.found("transform")
-      ? transformTypeNames.read(dict.lookup("transform"))
-      : UNKNOWN
+        transformTypeNames.lookupOrDefault
+        (
+            "transform",
+            dict,
+            transformType::UNKNOWN
+        )
     )
 {}
 
@@ -562,10 +566,8 @@ void Foam::coupledPolyPatch::write(Ostream& os) const
     polyPatch::write(os);
     //if (matchTolerance_ != defaultMatchTol_)
     {
-        os.writeKeyword("matchTolerance") << matchTolerance_
-            << token::END_STATEMENT << nl;
-        os.writeKeyword("transform") << transformTypeNames[transform_]
-            << token::END_STATEMENT << nl;
+        os.writeEntry("matchTolerance", matchTolerance_);
+        os.writeEntry("transform", transformTypeNames[transform_]);
     }
 }
 

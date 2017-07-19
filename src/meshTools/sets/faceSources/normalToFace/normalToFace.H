@@ -36,7 +36,6 @@ SourceFiles
 #define normalToFace_H
 
 #include "topoSetSource.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

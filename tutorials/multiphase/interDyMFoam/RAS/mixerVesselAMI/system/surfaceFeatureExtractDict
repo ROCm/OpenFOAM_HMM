@@ -14,24 +14,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// includedAngle:
+// Mark edges whose adjacent surface normals are at an angle less
+// than includedAngle as features
+// - 0  : selects no edges
+// - 180: selects all edges
+
 vessel.stl
 {
     // How to obtain raw features (extractFromFile || extractFromSurface)
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   120;
-    }
+    includedAngle       120;
 
     // Write options
 
-        // Write features to obj format for postprocessing
-        writeObj                no;
+    // Write features to obj format for postprocessing
+    writeObj            no;
 }
 
 gasInlet.stl
@@ -39,36 +38,27 @@ gasInlet.stl
 
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
-    writeObj                no;
+    writeObj            no;
 }
 
 stirrer.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
-    writeObj                no;
+    writeObj            no;
 }
 
 outlet.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
-    writeObj                no;
+    writeObj            no;
 }
 
 /*
@@ -76,36 +66,27 @@ baffles.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
-    writeObj                no;
+    writeObj            no;
 }
 
 rotating.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
-    writeObj                no;
+    writeObj            no;
 }
 
 sparger.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle   120;
-    }
+    includedAngle       120;
 
-    writeObj                no;
+    writeObj            no;
 }
 */
 

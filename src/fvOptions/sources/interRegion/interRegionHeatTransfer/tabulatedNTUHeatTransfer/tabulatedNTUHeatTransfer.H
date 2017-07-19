@@ -107,7 +107,7 @@ SeeAlso
 #include "interRegionHeatTransferModel.H"
 #include "autoPtr.H"
 #include "interpolation2DTable.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -135,7 +135,7 @@ public:
             gmUser
         };
 
-        static const NamedEnum<geometryModeType, 2> geometryModelNames_;
+        static const Enum<geometryModeType> geometryModelNames_;
 
 
 private:

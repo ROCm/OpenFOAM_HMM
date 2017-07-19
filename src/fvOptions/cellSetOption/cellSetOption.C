@@ -34,22 +34,20 @@ namespace Foam
     {
         defineTypeNameAndDebug(cellSetOption, 0);
     }
-
-    template<> const char* NamedEnum
-    <
-        fv::cellSetOption::selectionModeType,
-        4
-        >::names[] =
-    {
-        "points",
-        "cellSet",
-        "cellZone",
-        "all"
-    };
-
-    const NamedEnum<fv::cellSetOption::selectionModeType, 4>
-        fv::cellSetOption::selectionModeTypeNames_;
 }
+
+
+const Foam::Enum
+<
+    Foam::fv::cellSetOption::selectionModeType
+>
+Foam::fv::cellSetOption::selectionModeTypeNames_
+{
+    { selectionModeType::smPoints, "points" },
+    { selectionModeType::smCellSet, "cellSet" },
+    { selectionModeType::smCellZone, "cellZone" },
+    { selectionModeType::smAll, "all" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -82,7 +80,7 @@ void Foam::fv::cellSetOption::setSelection(const dictionary& dict)
             FatalErrorInFunction
                 << "Unknown selectionMode "
                 << selectionModeTypeNames_[selectionMode_]
-                << ". Valid selectionMode types are "
+                << ". Valid selectionMode types : "
                 << selectionModeTypeNames_
                 << exit(FatalError);
         }
@@ -210,7 +208,7 @@ Foam::fv::cellSetOption::cellSetOption
     duration_(0.0),
     selectionMode_
     (
-        selectionModeTypeNames_.read(coeffs_.lookup("selectionMode"))
+        selectionModeTypeNames_.lookup("selectionMode", coeffs_)
     ),
     cellSetName_("none"),
     V_(0.0)

@@ -36,8 +36,7 @@ Description
 #include "argList.H"
 #include "chemkinReader.H"
 #include "OFstream.H"
-#include "OStringStream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 

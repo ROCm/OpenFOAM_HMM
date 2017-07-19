@@ -43,7 +43,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "polyMesh.H"
 #include "emptyPolyPatch.H"
 #include "wallPolyPatch.H"
@@ -906,7 +906,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const fileName fluentFile = args[1];
-    std::ifstream fluentStream(fluentFile.c_str());
+    std::ifstream fluentStream(fluentFile);
 
     if (!fluentStream)
     {

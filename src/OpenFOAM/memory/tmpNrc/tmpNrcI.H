@@ -78,7 +78,7 @@ inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t, bool allowTransfer)
         {
             if (allowTransfer)
             {
-                t.ptr_ = 0;
+                t.ptr_ = nullptr;
             }
             else
             {
@@ -169,7 +169,7 @@ inline T* Foam::tmpNrc<T>::ptr() const
         }
 
         T* ptr = ptr_;
-        ptr_ = 0;
+        ptr_ = nullptr;
 
         return ptr;
     }
@@ -186,7 +186,7 @@ inline void Foam::tmpNrc<T>::clear() const
     if (isTmp() && ptr_)
     {
         delete ptr_;
-        ptr_ = 0;
+        ptr_ = nullptr;
     }
 }
 
@@ -289,7 +289,7 @@ inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
         }
 
         ptr_ = t.ptr_;
-        t.ptr_ = 0;
+        t.ptr_ = nullptr;
     }
     else
     {

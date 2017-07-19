@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,11 +30,20 @@ Group
 Description
     Watches for presence of the named file in the $FOAM_CASE directory
     and aborts the calculation if it is present.
+    The presence of the abort file is only checked on the master process.
 
     Currently the following action types are supported:
     - noWriteNow
     - writeNow
     - nextWrite
+
+    \heading Function object usage
+    \table
+        Property  | Description         | Required  | Default value
+        type      | Type name: abort    | yes       |
+        file      | The abort filename  | no        | $FOAM_CASE/name
+        action    | Abort action        | no        | nextWrite
+    \endtable
 
 SourceFiles
     abort.C
@@ -45,7 +54,7 @@ SourceFiles
 #define functionObjects_abort_H
 
 #include "functionObject.H"
-#include "NamedEnum.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,28 +64,17 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class abort Declaration
+                            Class abort Declaration
 \*---------------------------------------------------------------------------*/
 
 class abort
 :
     public functionObject
 {
-public:
-
-    // Public data
-
-        //- Enumeration defining the type of action
-        enum actionType
-        {
-            noWriteNow,    //!< stop immediately without writing data
-            writeNow,      //!< write data and stop immediately
-            nextWrite      //!< stop the next time data are written
-        };
-
-private:
-
     // Private data
+
+        //- A subset of Time stopAtControls
+        static const Enum<Time::stopAtControls> actionNames_;
 
         //- Reference to the Time
         const Time& time_;
@@ -84,23 +82,20 @@ private:
         //- The fully-qualified name of the abort file
         fileName abortFile_;
 
-        //- Action type names
-        static const NamedEnum<actionType, 3> actionTypeNames_;
-
         //- The type of action
-        actionType action_;
+        Time::stopAtControls action_;
+
+        //- Only trigger action once
+        bool triggered_;
 
 
     // Private Member Functions
 
-        //- Remove abort file.
-        void removeFile() const;
-
         //- Disallow default bitwise copy construct
-        abort(const abort&);
+        abort(const abort&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const abort&);
+        void operator=(const abort&) = delete;
 
 
 public:
@@ -116,7 +111,7 @@ public:
         (
             const word& name,
             const Time& runTime,
-            const dictionary&
+            const dictionary& dict
         );
 
 
@@ -127,15 +122,15 @@ public:
     // Member Functions
 
         //- Read the dictionary settings
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
-        //- Execute, check existence of abort file and take action
+        //- Check existence of abort file and take action
         virtual bool execute();
 
-        //- Execute, check existence of abort file and take action
+        //- No-op
         virtual bool write();
 
-        //- Execute at the final time-loop, used for cleanup
+        //- Remove abort file after the final time-loop.
         virtual bool end();
 };
 

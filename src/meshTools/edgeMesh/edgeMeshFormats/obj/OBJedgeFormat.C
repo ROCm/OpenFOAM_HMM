@@ -26,7 +26,7 @@ License
 #include "OBJedgeFormat.H"
 #include "clock.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "Ostream.H"
 #include "OFstream.H"
 #include "ListOps.H"

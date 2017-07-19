@@ -123,15 +123,17 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
               + thermoTypeName + ">>";
         }
 
-        typename ChemistryModel::fvMeshConstructorTable::iterator cstrIter =
-            ChemistryModel::fvMeshConstructorTablePtr_->find(chemistryTypeName);
+        auto cstrIter = ChemistryModel::fvMeshConstructorTablePtr_->cfind
+        (
+            chemistryTypeName
+        );
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown " << ChemistryModel::typeName << " type " << nl
                 << "chemistryType" << chemistryTypeDict << nl << nl
-                << "Valid " << ChemistryModel ::typeName << " types are:"
+                << "Valid " << ChemistryModel ::typeName << " types :"
                 << nl << nl;
 
             // Get the list of all the suitable chemistry packages available
@@ -179,15 +181,17 @@ Foam::autoPtr<ChemistryModel> Foam::basicChemistryModel::New
 
         Info<< "Selecting chemistry type " << chemistryTypeName << endl;
 
-        typename ChemistryModel::fvMeshConstructorTable::iterator cstrIter =
-            ChemistryModel::fvMeshConstructorTablePtr_->find(chemistryTypeName);
+        auto cstrIter = ChemistryModel::fvMeshConstructorTablePtr_->cfind
+        (
+            chemistryTypeName
+        );
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown " << ChemistryModel::typeName << " type "
                 << chemistryTypeName << nl << nl
-                << "Valid ChemistryModel types are:" << nl
+                << "Valid ChemistryModel types :" << nl
                 << ChemistryModel::fvMeshConstructorTablePtr_->sortedToc() << nl
                 << exit(FatalError);
         }

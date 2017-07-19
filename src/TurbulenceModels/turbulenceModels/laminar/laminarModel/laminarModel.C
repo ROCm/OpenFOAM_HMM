@@ -114,15 +114,14 @@ Foam::laminarModel<BasicTurbulenceModel>::New
 
         Info<< "Selecting laminar stress model " << modelType << endl;
 
-        typename dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(modelType);
+        auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown laminarModel type "
                 << modelType << nl << nl
-                << "Valid laminarModel types:" << endl
+                << "Valid laminarModel types :" << endl
                 << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }

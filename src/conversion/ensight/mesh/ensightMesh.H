@@ -293,9 +293,6 @@ public:
         //- Using internalMesh?
         inline bool useInternalMesh() const;
 
-        //- Using deprecated order? (hex prism pyr tet poly)
-        inline bool deprecatedOrder() const;
-
         //- The volume cells (internalMesh)
         inline const ensightCells& meshCells() const;
 
@@ -369,9 +366,6 @@ class ensightMesh::options
     //- Suppress patches
     bool noPatches_;
 
-    //- Using deprecated order (hex prism pyr tet poly)
-    bool deprecatedOrder_;
-
     //- Output selected patches only
     autoPtr<wordReList> patchPatterns_;
 
@@ -399,9 +393,6 @@ public:
         //- Using internalMesh?
         bool useInternalMesh() const;
 
-        //- Using deprecated order? (hex prism pyr tet poly)
-        bool deprecatedOrder() const;
-
         //- Using patches?
         bool usePatches() const;
 
@@ -425,9 +416,6 @@ public:
 
         //- Lazy creation - ensightMesh starts as needsUpdate.
         void lazy(const bool);
-
-        //- Alter deprecated order.
-        void deprecatedOrder(const bool);
 
         //- Alter the patches/no-patches state
         void noPatches(const bool);

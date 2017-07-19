@@ -38,7 +38,7 @@ SourceFiles
 #include "Istream.H"
 #include "Ostream.H"
 #include "dictionary.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,9 +49,9 @@ namespace Foam
 
 class orientedType;
 
-Istream& operator>>(Istream&, orientedType&);
+Istream& operator>>(Istream& is, orientedType& ot);
 
-Ostream& operator<<(Ostream&, const orientedType&);
+Ostream& operator<<(Ostream& os, const orientedType& ot);
 
 /*---------------------------------------------------------------------------*\
                         Class orientedType Declaration
@@ -71,7 +71,7 @@ public:
             UNKNOWN
         };
 
-        static const NamedEnum<orientedOption, 3> orientedOptionNames;
+        static const Enum<orientedOption> orientedOptionNames;
 
 
 private:

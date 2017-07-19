@@ -25,7 +25,7 @@ License
 
 #include "NASsurfaceFormat.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

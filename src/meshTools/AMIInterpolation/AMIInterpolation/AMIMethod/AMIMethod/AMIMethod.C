@@ -301,7 +301,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 
             scalar cosI = n1 & n2;
 
-            if (cosI > Foam::cos(degToRad(89.0)))
+            if (cosI > Foam::cos(89.0_deg))
             {
                 faceIDs.append(nbrFacei);
             }

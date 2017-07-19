@@ -71,7 +71,7 @@ SourceFiles
 #define functionObjects_volRegion_H
 
 #include "writeFile.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -111,7 +111,7 @@ public:
         };
 
         //- Region type names
-        static const NamedEnum<regionTypes, 2> regionTypeNames_;
+        static const Enum<regionTypes> regionTypeNames_;
 
 
 protected:

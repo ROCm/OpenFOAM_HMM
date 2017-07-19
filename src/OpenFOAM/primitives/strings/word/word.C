@@ -35,10 +35,10 @@ const Foam::word Foam::word::null;
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::word Foam::word::validated(const std::string& s)
+Foam::word Foam::word::validated(const std::string& s, const bool prefix)
 {
     std::string::size_type count = 0;
-    bool prefix = false;
+    bool extra = false;
 
     // Count number of valid characters and detect if the first character
     // happens to be a digit, which we'd like to avoid having since this
@@ -49,10 +49,10 @@ Foam::word Foam::word::validated(const std::string& s)
 
         if (word::valid(c))
         {
-            if (!count && isdigit(c))
+            if (prefix && !count && isdigit(c))
             {
                 // First valid character was a digit - prefix with '_'
-                prefix = true;
+                extra = true;
                 ++count;
             }
 
@@ -60,7 +60,7 @@ Foam::word Foam::word::validated(const std::string& s)
         }
     }
 
-    if (count == s.size() && !prefix)
+    if (count == s.size() && !extra)
     {
         return word(s, false);  // Already checked, can just return as word
     }
@@ -70,7 +70,7 @@ Foam::word Foam::word::validated(const std::string& s)
     count = 0;
 
     // Copy valid content.
-    if (prefix)
+    if (extra)
     {
         out[count++] = '_';
     }

@@ -39,15 +39,14 @@ Foam::PhaseChangeModel<CloudType>::New
 
     Info<< "Selecting phase change model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown phase change model type "
+            << "Unknown phaseChangeModel type "
             << modelType << nl << nl
-            << "Valid phase change model types are:" << nl
+            << "Valid phaseChangeModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

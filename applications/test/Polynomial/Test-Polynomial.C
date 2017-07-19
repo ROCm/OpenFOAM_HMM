@@ -29,7 +29,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "Polynomial.H"
 #include "polynomialFunction.H"
 #include "Random.H"

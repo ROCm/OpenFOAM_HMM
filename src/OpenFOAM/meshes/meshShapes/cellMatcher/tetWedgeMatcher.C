@@ -26,7 +26,6 @@ License
 #include "tetWedgeMatcher.H"
 #include "cellMatcher.H"
 #include "primitiveMesh.H"
-#include "primitiveMesh.H"
 #include "cellModeller.H"
 #include "ListOps.H"
 

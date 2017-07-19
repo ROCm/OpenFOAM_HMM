@@ -25,7 +25,7 @@ License
 
 #include "quaternion.H"
 #include "IOstreams.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -44,7 +44,7 @@ namespace Foam
 
 //- Read a hex label from an input stream
 template<class T>
-T ReadHex(ISstream&);
+T ReadHex(ISstream& is);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

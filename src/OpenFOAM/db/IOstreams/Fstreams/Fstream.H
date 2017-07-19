@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,32 +21,20 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+InClass
+    Foam::Fstream
+
 Description
-    Prints out a description of the StringStream
+    Input/output from file streams.
 
 \*---------------------------------------------------------------------------*/
 
-#include "IStringStream.H"
-#include "OStringStream.H"
+#ifndef Fstream_H
+#define Fstream_H
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "IFstream.H"
+#include "OFstream.H"
 
-void Foam::IStringStream::print(Ostream& os) const
-{
-    os  << "IStringStream " << name() << " : "
-        << "buffer = \n" << str() << Foam::endl;
-
-    ISstream::print(os);
-}
-
-
-void Foam::OStringStream::print(Ostream& os) const
-{
-    os  << "OStringStream " << name() << " : "
-        << "buffer = \n" << str() << Foam::endl;
-
-    OSstream::print(os);
-}
-
+#endif
 
 // ************************************************************************* //

@@ -37,7 +37,7 @@ License
 #include "sigInt.H"
 #include "sigQuit.H"
 #include "sigSegv.H"
-#include "endian.H"
+#include "foamVersion.H"
 
 #include <cctype>
 
@@ -53,22 +53,6 @@ Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
 Foam::word Foam::argList::postProcessOptionName("postProcess");
-
-// file-scope
-// Hint about machine endian, OpenFOAM label and scalar sizes
-static const std::string archHint =
-(
-#ifdef WM_LITTLE_ENDIAN
-    "LSB"
-#elif defined (WM_BIG_ENDIAN)
-    "MSB"
-#else
-    "???"
-#endif
-    ";label="  + std::to_string(8*sizeof(Foam::label))
-  + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
-);
-
 
 Foam::argList::initValidTables::initValidTables()
 {
@@ -407,11 +391,11 @@ void Foam::argList::getRootCase()
     fileName casePath;
 
     // [-case dir] specified
-    HashTable<string>::const_iterator iter = options_.find("case");
+    auto optIter = options_.cfind("case");
 
-    if (iter != options_.end())
+    if (optIter.found())
     {
-        casePath = iter();
+        casePath = optIter.object();
         casePath.clean();
 
         if (casePath.empty() || casePath == ".")
@@ -639,7 +623,7 @@ void Foam::argList::parse
         {
             IOobject::writeBanner(Info, true)
                 << "Build  : " << Foam::FOAMbuild << nl
-                << "Arch   : " << archHint << nl
+                << "Arch   : " << Foam::FOAMbuildArch << nl
                 << "Exec   : " << argListStr_.c_str() << nl
                 << "Date   : " << dateString.c_str() << nl
                 << "Time   : " << timeString.c_str() << nl
@@ -650,7 +634,7 @@ void Foam::argList::parse
         jobInfo.add("startDate", dateString);
         jobInfo.add("startTime", timeString);
         jobInfo.add("userName", userName());
-        jobInfo.add("foamVersion", word(FOAMversion));
+        jobInfo.add("foamVersion", word(Foam::FOAMversion));
         jobInfo.add("code", executable_);
         jobInfo.add("argList", argListStr_);
         jobInfo.add("currentDir", cwd());
@@ -660,10 +644,10 @@ void Foam::argList::parse
         // Add build information - only use the first word
         {
             std::string build(Foam::FOAMbuild);
-            std::string::size_type found = build.find(' ');
-            if (found != std::string::npos)
+            std::string::size_type space = build.find(' ');
+            if (space != std::string::npos)
             {
-                build.resize(found);
+                build.resize(space);
             }
             jobInfo.add("foamBuild", build);
         }
@@ -695,15 +679,12 @@ void Foam::argList::parse
                 source = options_["decomposeParDict"];
                 if (isDir(source))
                 {
-                    adjustOpt = true;
                     source = source/"decomposeParDict";
+                    adjustOpt = true;
                 }
 
-                if
-                (
-                   !source.isAbsolute()
-                && !(source.size() && source[0] == '.')
-                )
+                // Case-relative if not absolute and not "./" etc
+                if (!source.isAbsolute() && !source.startsWith("."))
                 {
                     source = rootPath_/globalCase_/source;
                     adjustOpt = true;
@@ -904,10 +885,9 @@ void Foam::argList::parse
         case_ = globalCase_;
     }
 
-
     stringList slaveProcs;
 
-    // Collect slave machine/pid
+    // Collect slave machine/pid, and check that the build is identical
     if (parRunControl_.parRun())
     {
         if (Pstream::master())
@@ -953,6 +933,18 @@ void Foam::argList::parse
         }
     }
 
+    // Keep or discard slave and root information for reporting:
+    if (Pstream::master() && parRunControl_.parRun())
+    {
+        if (!debug::infoSwitch("writeSlaves", 1))
+        {
+            slaveProcs.clear();
+        }
+        if (!debug::infoSwitch("writeRoots", 1))
+        {
+            roots.clear();
+        }
+    }
 
     if (Pstream::master() && bannerEnabled_)
     {
@@ -961,7 +953,10 @@ void Foam::argList::parse
 
         if (parRunControl_.parRun())
         {
-            Info<< "Slaves : " << slaveProcs << nl;
+            if (slaveProcs.size())
+            {
+                Info<< "Slaves : " << slaveProcs << nl;
+            }
             if (roots.size())
             {
                 Info<< "Roots  : " << roots << nl;
@@ -1185,32 +1180,26 @@ void Foam::argList::printUsage() const
 
     Info<< "\noptions:\n";
 
-    wordList opts = validOptions.sortedToc();
-    forAll(opts, optI)
+    const wordList opts = validOptions.sortedToc();
+    for (const word& optionName : opts)
     {
-        const word& optionName = opts[optI];
-
-        HashTable<string>::const_iterator iter = validOptions.find(optionName);
         Info<< "  -" << optionName;
         label len = optionName.size() + 3;  // Length includes leading '  -'
 
-        if (iter().size())
+        auto optIter = validOptions.cfind(optionName);
+
+        if (optIter().size())
         {
-            // Length includes space and between option/param and '<>'
-            len += iter().size() + 3;
-            Info<< " <" << iter().c_str() << '>';
+            // Length includes space between option/param and '<>'
+            len += optIter().size() + 3;
+            Info<< " <" << optIter().c_str() << '>';
         }
 
-        HashTable<string>::const_iterator usageIter =
-            optionUsage.find(optionName);
+        auto usageIter = optionUsage.cfind(optionName);
 
-        if (usageIter != optionUsage.end())
+        if (usageIter.found())
         {
-            printOptionUsage
-            (
-                len,
-                usageIter()
-            );
+            printOptionUsage(len, usageIter());
         }
         else
         {
@@ -1220,26 +1209,13 @@ void Foam::argList::printUsage() const
 
     // Place srcDoc/doc/help options at the end
     Info<< "  -srcDoc";
-    printOptionUsage
-    (
-        9,
-        "display source code in browser"
-    );
+    printOptionUsage(9, "display source code in browser" );
 
     Info<< "  -doc";
-    printOptionUsage
-    (
-        6,
-        "display application documentation in browser"
-    );
+    printOptionUsage(6, "display application documentation in browser");
 
     Info<< "  -help";
-    printOptionUsage
-    (
-        7,
-        "print the usage"
-    );
-
+    printOptionUsage(7, "print the usage");
 
     printNotes();
 
@@ -1247,7 +1223,7 @@ void Foam::argList::printUsage() const
         <<"Using: OpenFOAM-" << Foam::FOAMversion
         << " (see www.OpenFOAM.com)" << nl
         << "Build: " << Foam::FOAMbuild << nl
-        << "Arch:  " << archHint << nl
+        << "Arch:  " << Foam::FOAMbuildArch << nl
         << endl;
 }
 
@@ -1261,20 +1237,20 @@ void Foam::argList::displayDoc(bool source) const
     // For source code: change foo_8C.html to foo_8C_source.html
     if (source)
     {
-        forAll(docExts, extI)
+        for (fileName& ext : docExts)
         {
-            docExts[extI].replace(".", "_source.");
+            ext.replace(".", "_source.");
         }
     }
 
     fileName docFile;
     bool found = false;
 
-    forAll(docDirs, dirI)
+    for (const fileName& dir : docDirs)
     {
-        forAll(docExts, extI)
+        for (const fileName& ext : docExts)
         {
-            docFile = docDirs[dirI]/executable_ + docExts[extI];
+            docFile = dir/executable_ + ext;
             docFile.expand();
 
             if (isFile(docFile))

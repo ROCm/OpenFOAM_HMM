@@ -103,7 +103,7 @@ SourceFiles
 #include "cellSetOption.H"
 #include "cylindricalCS.H"
 #include "cylindrical.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "bladeModel.H"
 #include "profileModelList.H"
 #include "volFieldsFwd.H"
@@ -134,7 +134,7 @@ public:
         gmAuto,
         gmSpecified
     };
-    static const NamedEnum<geometryModeType, 2> geometryModeTypeNames_;
+    static const Enum<geometryModeType> geometryModeTypeNames_;
 
     enum inletFlowType
     {
@@ -142,7 +142,7 @@ public:
         ifSurfaceNormal,
         ifLocal
     };
-    static const NamedEnum<inletFlowType, 3> inletFlowTypeNames_;
+    static const Enum<inletFlowType> inletFlowTypeNames_;
 
 
 protected:

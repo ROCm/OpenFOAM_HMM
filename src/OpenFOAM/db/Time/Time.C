@@ -37,40 +37,34 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(Time, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::Time::stopAtControls,
-        4
-    >::names[] =
-    {
-        "endTime",
-        "noWriteNow",
-        "writeNow",
-        "nextWrite"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::Time::writeControls,
-        5
-    >::names[] =
-    {
-        "timeStep",
-        "runTime",
-        "adjustableRunTime",
-        "clockTime",
-        "cpuTime"
-    };
 }
 
-const Foam::NamedEnum<Foam::Time::stopAtControls, 4>
-    Foam::Time::stopAtControlNames_;
+const Foam::Enum
+<
+    Foam::Time::stopAtControls
+>
+Foam::Time::stopAtControlNames_
+{
+    { stopAtControls::saEndTime, "endTime" },
+    { stopAtControls::saNoWriteNow, "noWriteNow" },
+    { stopAtControls::saWriteNow, "writeNow" },
+    { stopAtControls::saNextWrite, "nextWrite" },
+};
 
-const Foam::NamedEnum<Foam::Time::writeControls, 5>
-    Foam::Time::writeControlNames_;
+
+const Foam::Enum
+<
+    Foam::Time::writeControls
+>
+Foam::Time::writeControlNames_
+{
+    { writeControls::wcTimeStep, "timeStep" },
+    { writeControls::wcRunTime, "runTime" },
+    { writeControls::wcAdjustableRunTime, "adjustableRunTime" },
+    { writeControls::wcClockTime, "clockTime" },
+    { writeControls::wcCpuTime, "cpuTime" },
+};
+
 
 Foam::Time::fmtflags Foam::Time::format_(Foam::Time::general);
 
@@ -363,7 +357,7 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     else if
     (
         profilingDict
-     && profilingDict->lookupOrDefault<Switch>("active", true)
+     && profilingDict->lookupOrDefault<bool>("active", true)
     )
     {
         profiling::initialize

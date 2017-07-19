@@ -25,7 +25,7 @@ License
 
 #include "vectorTensorTransform.H"
 #include "IOstreams.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

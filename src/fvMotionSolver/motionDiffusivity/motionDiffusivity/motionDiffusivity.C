@@ -54,15 +54,14 @@ Foam::autoPtr<Foam::motionDiffusivity> Foam::motionDiffusivity::New
 
     Info<< "Selecting motion diffusion: " << motionType << endl;
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(motionType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(motionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown diffusion type "
             << motionType << nl << nl
-            << "Valid diffusion types are :" << endl
+            << "Valid diffusion types :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

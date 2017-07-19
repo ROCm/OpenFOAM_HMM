@@ -74,7 +74,7 @@ public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         Ostream
         (
             streamFormat format=ASCII,

@@ -51,15 +51,14 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
     writeOption w
 )
 {
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(setType);
+    auto cstrIter = wordConstructorTablePtr_->cfind(setType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown set type " << setType
-            << endl << endl
-            << "Valid set types : " << endl
+            << "Unknown set type "
+            << setType << nl << nl
+            << "Valid set types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -77,15 +76,14 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
     writeOption w
 )
 {
-    sizeConstructorTable::iterator cstrIter =
-        sizeConstructorTablePtr_->find(setType);
+    auto cstrIter = sizeConstructorTablePtr_->cfind(setType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown set type " << setType
-            << endl << endl
-            << "Valid set types : " << endl
+            << "Unknown set type "
+            << setType << nl << nl
+            << "Valid set types :" << endl
             << sizeConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -103,15 +101,14 @@ Foam::autoPtr<Foam::topoSet> Foam::topoSet::New
     writeOption w
 )
 {
-    setConstructorTable::iterator cstrIter =
-        setConstructorTablePtr_->find(setType);
+    auto cstrIter = setConstructorTablePtr_->cfind(setType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown set type " << setType
-            << endl << endl
-            << "Valid set types : " << endl
+            << "Unknown set type "
+            << setType << nl << nl
+            << "Valid set types :" << endl
             << setConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

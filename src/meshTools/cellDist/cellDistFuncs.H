@@ -36,7 +36,6 @@ SourceFiles
 #ifndef cellDistFuncs_H
 #define cellDistFuncs_H
 
-#include "scalarField.H"
 #include "HashSet.H"
 #include "Map.H"
 #include "wordReList.H"

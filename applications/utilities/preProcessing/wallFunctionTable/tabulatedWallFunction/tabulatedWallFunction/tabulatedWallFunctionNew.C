@@ -25,44 +25,32 @@ License
 
 #include "tabulatedWallFunction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-namespace tabulatedWallFunctions
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<tabulatedWallFunction> tabulatedWallFunction::New
+Foam::autoPtr<Foam::tabulatedWallFunctions::tabulatedWallFunction>
+Foam::tabulatedWallFunctions::tabulatedWallFunction::New
 (
     const dictionary& dict,
     const polyMesh& mesh
 )
 {
-    word twfTypeName = dict.lookup("tabulatedWallFunction");
+    const word functionName = dict.lookup("tabulatedWallFunction");
 
-    Info<< "Selecting tabulatedWallFunction " << twfTypeName << endl;
+    Info<< "Selecting tabulatedWallFunction " << functionName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(twfTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown tabulatedWallFunction type " << twfTypeName
+            << "Unknown tabulatedWallFunction type " << functionName
             << nl << nl << "Valid tabulatedWallFunction types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return autoPtr<tabulatedWallFunction>(cstrIter()(dict, mesh));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace tabulatedWallFunctions
-} // End namespace Foam
 
 // ************************************************************************* //

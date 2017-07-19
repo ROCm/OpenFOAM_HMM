@@ -55,11 +55,11 @@ namespace Foam
 
 class dictionaryEntry;
 
-Ostream& operator<<(Ostream&, const dictionaryEntry&);
+Ostream& operator<<(Ostream& os, const dictionaryEntry& de);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class dictionaryEntry Declaration
+                       Class dictionaryEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class dictionaryEntry
@@ -69,10 +69,8 @@ class dictionaryEntry
 {
     // Private Member Functions
 
-        void readData(Istream&);
-
-        //- Dissallow bitwise copy
-        dictionaryEntry(const dictionary&);
+        //- Disallow bitwise copy
+        dictionaryEntry(const dictionaryEntry&) = delete;
 
 
 public:
@@ -80,20 +78,20 @@ public:
     // Constructors
 
         //- Construct from the parent dictionary and Istream
-        dictionaryEntry(const dictionary& parentDict, Istream&);
+        dictionaryEntry(const dictionary& parentDict, Istream& is);
 
         //- Construct from the keyword, parent dictionary and a Istream
         dictionaryEntry
         (
-            const keyType&,
+            const keyType& key,
             const dictionary& parentDict,
-            Istream&
+            Istream& is
         );
 
         //- Construct from the keyword, parent dictionary and a dictionary
         dictionaryEntry
         (
-            const keyType&,
+            const keyType& key,
             const dictionary& parentDict,
             const dictionary& dict
         );
@@ -102,7 +100,7 @@ public:
         dictionaryEntry
         (
             const dictionary& parentDict,
-            const dictionaryEntry&
+            const dictionaryEntry& dictEnt
         );
 
         autoPtr<entry> clone(const dictionary& parentDict) const
@@ -112,12 +110,6 @@ public:
 
 
     // Member functions
-
-        //- Return the local dictionary name (final part of scoped name)
-        const word dictName() const
-        {
-            return dictionary::dictName();
-        }
 
         //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
         const fileName& name() const
@@ -153,8 +145,9 @@ public:
         //- Return non-const access to dictionary
         dictionary& dict();
 
+
         //- Write
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream
@@ -166,12 +159,12 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const dictionaryEntry&);
+        friend Ostream& operator<<(Ostream& os, const dictionaryEntry& de);
 };
 
 
 template<>
-Ostream& operator<<(Ostream&, const InfoProxy<dictionaryEntry>&);
+Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,23 +27,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::orientedType::orientedOption
+>
+Foam::orientedType::orientedOptionNames
 {
-    template<>
-    const char* NamedEnum
-    <
-        orientedType::orientedOption,
-        3
-    >::names[] =
-    {
-        "oriented",
-        "unoriented",
-        "unknown"
-    };
-}
-
-const Foam::NamedEnum<Foam::orientedType::orientedOption, 3>
-    Foam::orientedType::orientedOptionNames;
+    { orientedOption::ORIENTED, "oriented" },
+    { orientedOption::UNORIENTED, "unoriented" },
+    { orientedOption::UNKNOWN, "unknown" },
+};
 
 
 bool Foam::orientedType::checkType
@@ -118,14 +111,12 @@ void Foam::orientedType::setOriented(const bool oriented)
 
 void Foam::orientedType::read(const dictionary& dict)
 {
-    if (dict.found("oriented"))
-    {
-        oriented_ = orientedOptionNames.read(dict.lookup("oriented"));
-    }
-    else
-    {
-        oriented_ = UNKNOWN;
-    }
+    oriented_ = orientedOptionNames.lookupOrDefault
+    (
+        "oriented",
+        dict,
+        orientedOption::UNKNOWN
+    );
 }
 
 

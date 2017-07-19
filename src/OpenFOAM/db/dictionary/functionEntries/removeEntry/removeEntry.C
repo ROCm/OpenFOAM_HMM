@@ -26,8 +26,7 @@ License
 #include "removeEntry.H"
 #include "dictionary.H"
 #include "stringListOps.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

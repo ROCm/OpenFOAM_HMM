@@ -366,15 +366,14 @@ Foam::Reaction<ReactionThermo>::New
 {
     const word& reactionTypeName = dict.lookup("type");
 
-    typename dictionaryConstructorTable::iterator cstrIter
-        = dictionaryConstructorTablePtr_->find(reactionTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(reactionTypeName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown reaction type "
             << reactionTypeName << nl << nl
-            << "Valid reaction types are :" << nl
+            << "Valid reaction types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

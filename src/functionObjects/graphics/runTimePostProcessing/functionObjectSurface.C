@@ -101,8 +101,7 @@ addGeometryToScene
 
     if (representation_ == rtGlyph)
     {
-        vtkSmartPointer<vtkPolyDataReader> surf =
-            vtkSmartPointer<vtkPolyDataReader>::New();
+        auto surf = vtkSmartPointer<vtkPolyDataReader>::New();
         surf->SetFileName(fName.c_str());
         surf->Update();
 
@@ -121,15 +120,13 @@ addGeometryToScene
     {
         if (fName.ext() == "vtk")
         {
-            vtkSmartPointer<vtkPolyDataReader> surf =
-                vtkSmartPointer<vtkPolyDataReader>::New();
+            auto surf = vtkSmartPointer<vtkPolyDataReader>::New();
             surf->SetFileName(fName.c_str());
             surf->Update();
 
             addFeatureEdges(renderer, surf->GetOutput());
 
-            vtkSmartPointer<vtkPolyDataMapper> mapper =
-                vtkSmartPointer<vtkPolyDataMapper>::New();
+            auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
             mapper->SetInputConnection(surf->GetOutputPort());
 
             setField(position, fieldName_, mapper, renderer, surf->GetOutput());

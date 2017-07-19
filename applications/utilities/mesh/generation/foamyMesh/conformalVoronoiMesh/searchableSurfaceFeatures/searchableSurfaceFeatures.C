@@ -43,17 +43,16 @@ Foam::searchableSurfaceFeatures::New
     const dictionary& dict
 )
 {
-    word searchableSurfaceFeaturesType = surface.type() + "Features";
+    const word featuresType = surface.type() + "Features";
 
-    dictConstructorTable::iterator cstrIter =
-        dictConstructorTablePtr_->find(searchableSurfaceFeaturesType);
+    auto cstrIter = dictConstructorTablePtr_->cfind(featuresType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown searchableSurfaceFeatures type "
-            << searchableSurfaceFeaturesType << endl << endl
-            << "Valid searchableSurfaceFeatures types : " << endl
+            << featuresType << nl << nl
+            << "Valid searchableSurfaceFeatures types :" << endl
             << dictConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

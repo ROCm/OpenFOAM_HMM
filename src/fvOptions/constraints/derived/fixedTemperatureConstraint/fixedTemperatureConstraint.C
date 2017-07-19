@@ -43,18 +43,17 @@ namespace Foam
             dictionary
         );
     }
-
-    template<>
-    const char* NamedEnum<fv::fixedTemperatureConstraint::temperatureMode, 2>::
-    names[] =
-    {
-        "uniform",
-        "lookup"
-    };
 }
 
-const Foam::NamedEnum<Foam::fv::fixedTemperatureConstraint::temperatureMode, 2>
-    Foam::fv::fixedTemperatureConstraint::temperatureModeNames_;
+const Foam::Enum
+<
+    Foam::fv::fixedTemperatureConstraint::temperatureMode
+>
+Foam::fv::fixedTemperatureConstraint::temperatureModeNames_
+{
+    { temperatureMode::tmUniform, "uniform" },
+    { temperatureMode::tmLookup, "lookup" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -68,7 +67,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
 )
 :
     cellSetOption(name, modelType, dict, mesh),
-    mode_(temperatureModeNames_.read(coeffs_.lookup("mode"))),
+    mode_(temperatureModeNames_.lookup("mode", coeffs_)),
     Tuniform_(nullptr),
     TName_("T")
 {
@@ -89,7 +88,7 @@ Foam::fv::fixedTemperatureConstraint::fixedTemperatureConstraint
         }
         default:
         {
-            // error handling done by NamedEnum
+            // Error handling already done by Enum
         }
     }
 
@@ -139,7 +138,7 @@ void Foam::fv::fixedTemperatureConstraint::constrain
         }
         default:
         {
-            // error handling done by NamedEnum
+            // Error handling already done by Enum
         }
     }
 }

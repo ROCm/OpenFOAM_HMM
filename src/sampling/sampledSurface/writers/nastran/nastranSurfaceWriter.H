@@ -56,7 +56,7 @@ SourceFiles
 #define nastranSurfaceWriter_H
 
 #include "surfaceWriter.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "OFstream.H"
 #include "HashTable.H"
 
@@ -93,8 +93,8 @@ private:
 
     // Private data
 
-        static const NamedEnum<writeFormat, 3> writeFormatNames_;
-        static const NamedEnum<dataFormat,  2> dataFormatNames_;
+        static const Enum<writeFormat> writeFormatNames_;
+        static const Enum<dataFormat> dataFormatNames_;
 
         //- Write option
         writeFormat writeFormat_;

@@ -32,7 +32,6 @@ Description
 #include "dictionary.H"
 #include "nil.H"
 #include "IOstreams.H"
-#include "IStringStream.H"
 
 namespace Foam
 {

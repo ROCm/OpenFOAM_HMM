@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ Foam::OFstreamAllocator::OFstreamAllocator
     IOstream::compressionType compression
 )
 :
-    ofPtr_(nullptr)
+    allocatedPtr_(nullptr)
 {
     if (pathname.empty())
     {
@@ -55,30 +55,40 @@ Foam::OFstreamAllocator::OFstreamAllocator
 
     if (compression == IOstream::COMPRESSED)
     {
-        // get identically named uncompressed version out of the way
+        // Get identically named uncompressed version out of the way
         if (isFile(pathname, false))
         {
             rm(pathname);
         }
 
-        ofPtr_ = new ogzstream((pathname + ".gz").c_str());
+        allocatedPtr_ = new ogzstream((pathname + ".gz").c_str());
     }
     else
     {
-        // get identically named compressed version out of the way
+        // Get identically named compressed version out of the way
         if (isFile(pathname + ".gz", false))
         {
             rm(pathname + ".gz");
         }
 
-        ofPtr_ = new ofstream(pathname.c_str());
+        allocatedPtr_ = new std::ofstream(pathname);
     }
 }
 
 
 Foam::OFstreamAllocator::~OFstreamAllocator()
 {
-    delete ofPtr_;
+    deallocate();
+}
+
+
+void Foam::OFstreamAllocator::deallocate()
+{
+    if (allocatedPtr_)
+    {
+        delete allocatedPtr_;
+        allocatedPtr_ = nullptr;
+    }
 }
 
 
@@ -93,11 +103,10 @@ Foam::OFstream::OFstream
 )
 :
     OFstreamAllocator(pathname, compression),
-    OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
-    pathname_(pathname)
+    OSstream(*allocatedPtr_, pathname, format, version, compression)
 {
     setClosed();
-    setState(ofPtr_->rdstate());
+    setState(allocatedPtr_->rdstate());
 
     if (!good())
     {
@@ -105,8 +114,7 @@ Foam::OFstream::OFstream
         {
             InfoInFunction
                 << "Could not open file " << pathname
-                << "for input\n"
-                   "in stream " << info() << Foam::endl;
+                << " for output" << nl << info() << Foam::endl;
         }
 
         setBad();
@@ -130,29 +138,29 @@ Foam::OFstream::~OFstream()
 
 std::ostream& Foam::OFstream::stdStream()
 {
-    if (!ofPtr_)
+    if (!allocatedPtr_)
     {
         FatalErrorInFunction
             << "No stream allocated." << abort(FatalError);
     }
-    return *ofPtr_;
+    return *allocatedPtr_;
 }
 
 
 const std::ostream& Foam::OFstream::stdStream() const
 {
-    if (!ofPtr_)
+    if (!allocatedPtr_)
     {
         FatalErrorInFunction
             << "No stream allocated." << abort(FatalError);
     }
-    return *ofPtr_;
+    return *allocatedPtr_;
 }
 
 
 void Foam::OFstream::print(Ostream& os) const
 {
-    os  << "    OFstream: ";
+    os  << "OFstream: ";
     OSstream::print(os);
 }
 

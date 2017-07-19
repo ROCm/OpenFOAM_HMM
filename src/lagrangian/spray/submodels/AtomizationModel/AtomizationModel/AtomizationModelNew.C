@@ -35,21 +35,20 @@ Foam::AtomizationModel<CloudType>::New
     CloudType& owner
 )
 {
-    word AtomizationModelType(dict.lookup("atomizationModel"));
+    const word modelType(dict.lookup("atomizationModel"));
 
-    Info<< "Selecting AtomizationModel " << AtomizationModelType << endl;
+    Info<< "Selecting atomizationModel " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(AtomizationModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown AtomizationModelType type "
-            << AtomizationModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid AtomizationModel types are:" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Unknown atomizationModel type "
+            << modelType
+            << "Valid atomizationModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<AtomizationModel<CloudType>>(cstrIter()(dict, owner));

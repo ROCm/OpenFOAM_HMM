@@ -33,19 +33,18 @@ Foam::autoPtr<Foam::sixDoFSolver> Foam::sixDoFSolver::New
     sixDoFRigidBodyMotion& body
 )
 {
-    word sixDoFSolverType(dict.lookup("type"));
+    word solverType(dict.lookup("type"));
 
-    Info<< "Selecting sixDoFSolver " << sixDoFSolverType << endl;
+    Info<< "Selecting sixDoFSolver " << solverType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(sixDoFSolverType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(solverType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown sixDoFSolverType type "
-            << sixDoFSolverType << endl << endl
-            << "Valid sixDoFSolver types are : " << endl
+            << "Unknown sixDoFSolver type "
+            << solverType << nl << nl
+            << "Valid sixDoFSolver types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

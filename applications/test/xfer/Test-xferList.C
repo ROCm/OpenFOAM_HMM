@@ -30,7 +30,6 @@ Description
 #include "OSspecific.H"
 
 #include "IOstreams.H"
-#include "IStringStream.H"
 #include "labelList.H"
 #include "DynamicList.H"
 #include "face.H"

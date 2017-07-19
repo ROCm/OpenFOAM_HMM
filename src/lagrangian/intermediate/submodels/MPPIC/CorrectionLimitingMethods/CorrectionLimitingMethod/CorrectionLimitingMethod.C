@@ -60,15 +60,14 @@ Foam::CorrectionLimitingMethod::New
 
     Info<< "Selecting correction limiter " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown correction limiter type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid correction limiter types are:" << nl
+            << "Unknown correction limiter type "
+            << modelType << nl << nl
+            << "Valid correction limiter types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

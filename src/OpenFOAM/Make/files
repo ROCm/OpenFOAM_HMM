@@ -123,6 +123,7 @@ $(ranges)/labelRange/labelRange.C
 $(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C
 $(ranges)/scalarRange/scalarRanges.C
+$(ranges)/tableBounds/tableBounds.C
 
 spatialVectorAlgebra = primitives/spatialVectorAlgebra
 $(spatialVectorAlgebra)/SpatialVector/spatialVector/spatialVector.C
@@ -170,7 +171,7 @@ Tstreams = $(Streams)/Tstreams
 $(Tstreams)/ITstream.C
 
 StringStreams = $(Streams)/StringStreams
-$(StringStreams)/StringStreamsPrint.C
+$(StringStreams)/StringStream.C
 
 Pstreams = $(Streams)/Pstreams
 $(Pstreams)/UIPstream.C

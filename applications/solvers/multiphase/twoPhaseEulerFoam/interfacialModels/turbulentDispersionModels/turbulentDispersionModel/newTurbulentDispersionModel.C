@@ -35,20 +35,19 @@ Foam::turbulentDispersionModel::New
     const phasePair& pair
 )
 {
-    word turbulentDispersionModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting turbulentDispersionModel for "
-        << pair << ": " << turbulentDispersionModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(turbulentDispersionModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown turbulentDispersionModelType type "
-            << turbulentDispersionModelType << endl << endl
-            << "Valid turbulentDispersionModel types are : " << endl
+            << "Unknown turbulentDispersionModel type "
+            << modelType << nl << nl
+            << "Valid turbulentDispersionModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

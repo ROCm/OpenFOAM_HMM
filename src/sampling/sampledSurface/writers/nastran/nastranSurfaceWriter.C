@@ -38,29 +38,30 @@ namespace Foam
 
     // Create write methods
     defineSurfaceWriterWriteFields(nastranSurfaceWriter);
-
-    template<>
-    const char* NamedEnum<nastranSurfaceWriter::writeFormat, 3>::names[] =
-    {
-        "short",
-        "long",
-        "free"
-    };
-
-
-    const NamedEnum<nastranSurfaceWriter::writeFormat, 3>
-        nastranSurfaceWriter::writeFormatNames_;
-
-    template<>
-    const char* NamedEnum<nastranSurfaceWriter::dataFormat, 2>::names[] =
-    {
-        "PLOAD2",
-        "PLOAD4"
-    };
-
-    const NamedEnum<nastranSurfaceWriter::dataFormat, 2>
-        nastranSurfaceWriter::dataFormatNames_;
 }
+
+
+const Foam::Enum
+<
+    Foam::nastranSurfaceWriter::writeFormat
+>
+Foam::nastranSurfaceWriter::writeFormatNames_
+{
+    { writeFormat::wfShort, "short" },
+    { writeFormat::wfLong, "long" },
+    { writeFormat::wfFree, "free" },
+};
+
+
+const Foam::Enum
+<
+    Foam::nastranSurfaceWriter::dataFormat
+>
+Foam::nastranSurfaceWriter::dataFormatNames_
+{
+    { dataFormat::dfPLOAD2, "PLOAD2" },
+    { dataFormat::dfPLOAD4, "PLOAD4" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -405,18 +406,17 @@ Foam::nastranSurfaceWriter::nastranSurfaceWriter()
 Foam::nastranSurfaceWriter::nastranSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
-    writeFormat_(wfLong),
+    writeFormat_(writeFormat::wfLong),
     fieldMap_(),
     scale_(options.lookupOrDefault("scale", 1.0)),
     separator_("")
 {
-    if (options.found("format"))
-    {
-        writeFormat_ = writeFormatNames_.read
-        (
-            options.lookup("format")
-        );
-    }
+    writeFormat_ = writeFormatNames_.lookupOrDefault
+    (
+        "format",
+        options,
+        writeFormat::wfLong
+    );
 
     if (writeFormat_ == wfFree)
     {

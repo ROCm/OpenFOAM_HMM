@@ -25,6 +25,7 @@ License
 
 #include "primitiveEntry.H"
 #include "dictionary.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

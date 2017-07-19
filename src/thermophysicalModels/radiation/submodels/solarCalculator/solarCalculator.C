@@ -35,36 +35,34 @@ using namespace Foam::constant;
 namespace Foam
 {
     defineTypeNameAndDebug(solarCalculator, 0);
-
-    template<>
-    const char* NamedEnum
-    <
-        solarCalculator::sunDirModel,
-        2
-    >::names[] =
-    {
-        "sunDirConstant",
-        "sunDirTracking"
-    };
-
-    template<>
-    const char* NamedEnum
-    <
-        solarCalculator::sunLModel,
-        3
-    >::names[] =
-    {
-        "sunLoadConstant",
-        "sunLoadFairWeatherConditions",
-        "sunLoadTheoreticalMaximum"
-    };
 }
 
-const Foam::NamedEnum<Foam::solarCalculator::sunDirModel, 2>
-  Foam::solarCalculator::sunDirectionModelTypeNames_;
 
-const Foam::NamedEnum<Foam::solarCalculator::sunLModel, 3>
-   Foam::solarCalculator::sunLoadModelTypeNames_;
+const Foam::Enum
+<
+    Foam::solarCalculator::sunDirModel
+>
+Foam::solarCalculator::sunDirectionModelTypeNames_
+{
+    { sunDirModel::mSunDirConstant, "sunDirConstant" },
+    { sunDirModel::mSunDirTracking, "sunDirTracking" },
+};
+
+
+const Foam::Enum
+<
+    Foam::solarCalculator::sunLModel
+>
+Foam::solarCalculator::sunLoadModelTypeNames_
+{
+    { sunLModel::mSunLoadConstant, "sunLoadConstant" },
+    {
+        sunLModel::mSunLoadFairWeatherConditions,
+        "sunLoadFairWeatherConditions"
+    },
+    { sunLModel::mSunLoadTheoreticalMaximum, "sunLoadTheoreticalMaximum" },
+};
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -271,11 +269,11 @@ Foam::solarCalculator::solarCalculator
     C_(readScalar(dict.lookup("C"))),
     sunDirectionModel_
     (
-        sunDirectionModelTypeNames_.read(dict.lookup("sunDirectionModel"))
+        sunDirectionModelTypeNames_.lookup("sunDirectionModel", dict)
     ),
     sunLoadModel_
     (
-        sunLoadModelTypeNames_.read(dict.lookup("sunLoadModel"))
+        sunLoadModelTypeNames_.lookup("sunLoadModel", dict)
     ),
     coord_()
 {

@@ -70,13 +70,7 @@ Foam::wordList Foam::fvPatch::constraintTypes()
 
     label i = 0;
 
-    for
-    (
-        polyPatchConstructorTable::iterator cstrIter =
-            polyPatchConstructorTablePtr_->begin();
-        cstrIter != polyPatchConstructorTablePtr_->end();
-        ++cstrIter
-    )
+    forAllConstIters(*polyPatchConstructorTablePtr_, cstrIter)
     {
         if (constraintType(cstrIter.key()))
         {

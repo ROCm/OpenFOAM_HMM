@@ -34,7 +34,7 @@ SourceFiles
 #ifndef indexedVertexEnum_H
 #define indexedVertexEnum_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,9 +72,9 @@ public:
         movable = 1
     };
 
-    static const Foam::NamedEnum<vertexType, 15> vertexTypeNames_;
+    static const Enum<vertexType> vertexTypeNames_;
 
-    static const Foam::NamedEnum<vertexMotion, 2> vertexMotionNames_;
+    static const Enum<vertexMotion> vertexMotionNames_;
 
     friend Ostream& operator<<(Foam::Ostream&, const vertexType&);
 

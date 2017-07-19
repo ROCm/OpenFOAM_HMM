@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,7 @@ SourceFiles
 #include "stateFunctionObject.H"
 #include "writeFile.H"
 #include "fieldValue.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -116,7 +117,7 @@ public:
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 5> operationTypeNames_;
+        static const Enum<operationType> operationTypeNames_;
 
 
 private:

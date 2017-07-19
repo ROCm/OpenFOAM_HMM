@@ -14,18 +14,17 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// includedAngle:
+// Mark edges whose adjacent surface normals are at an angle less
+// than includedAngle as features
+// - 0   : selects no edges
+// - 180 : selects all edges
+
 bottomAir.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   150;
-    }
+    includedAngle       150;
 
     // Write options
     writeFeatureEdgeMesh    yes;
@@ -34,14 +33,7 @@ heater.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   150;
-    }
+    includedAngle       150;
 
     // Write options
     writeFeatureEdgeMesh    yes;
@@ -50,14 +42,7 @@ leftSolid.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   150;
-    }
+    includedAngle       150;
 
     // Write options
     writeFeatureEdgeMesh    yes;
@@ -66,14 +51,7 @@ rightSolid.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   150;
-    }
+    includedAngle       150;
 
     // Write options
     writeFeatureEdgeMesh    yes;
@@ -82,14 +60,7 @@ topAir.stl
 {
     extractionMethod    extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        // Mark edges whose adjacent surface normals are at an angle less
-        // than includedAngle as features
-        // - 0  : selects no edges
-        // - 180: selects all edges
-        includedAngle   150;
-    }
+    includedAngle       150;
 
     // Write options
     writeFeatureEdgeMesh    yes;

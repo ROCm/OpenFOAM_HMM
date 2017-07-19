@@ -47,8 +47,24 @@ int main(int argc, char *argv[])
 
         IOWarningInFunction(dict) << "warning 3" << endl;
 
-        FatalErrorInFunction << "error 1" << endl;
-        FatalErrorInFunction << "error 2" << exit(FatalError);
+        FatalErrorInFunction
+            << "This is an error from 1" << nl
+            << "Explanation to follow:" << endl;
+
+        FatalErrorInFunction
+            << "Error 2"
+            << exit(FatalError);
+    }
+    catch (Foam::error& fErr)
+    {
+        Serr<< "Caught Foam error " << fErr << nl << endl;
+    }
+
+    try
+    {
+        FatalErrorInFunction
+            << "Error# 3"
+            << exit(FatalError);
     }
     catch (Foam::error& fErr)
     {

@@ -48,7 +48,10 @@ namespace functionObjects
 }
 
 
-const Foam::Enum<Foam::functionObjects::setFlow::modeType>
+const Foam::Enum
+<
+    Foam::functionObjects::setFlow::modeType
+>
 Foam::functionObjects::setFlow::modeTypeNames
 {
     { functionObjects::setFlow::modeType::FUNCTION, "function" },

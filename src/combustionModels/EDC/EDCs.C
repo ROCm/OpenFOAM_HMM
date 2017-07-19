@@ -31,31 +31,26 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::combustionModels::EDCversions,
-    4
->::names[] =
+    Foam::combustionModels::EDCversions
+>
+Foam::combustionModels::EDCversionNames
 {
-    "v1981",
-    "v1996",
-    "v2005",
-    "v2016"
+    { EDCversions::v1981, "v1981" },
+    { EDCversions::v1996, "v1996" },
+    { EDCversions::v2005, "v2005" },
+    { EDCversions::v2016, "v2016" },
 };
 
-const Foam::NamedEnum<Foam::combustionModels::EDCversions, 4>
-    Foam::combustionModels::EDCversionNames;
-
 const Foam::combustionModels::EDCversions
-Foam::combustionModels::EDCdefaultVersion
-(
-    Foam::combustionModels::EDCversions::v2005
-);
+Foam::combustionModels::EDCdefaultVersion(EDCversions::v2005);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 makeCombustionTypes(EDC, psiChemistryCombustion, psiCombustionModel);
 makeCombustionTypes(EDC, rhoChemistryCombustion, rhoCombustionModel);
+
 
 // ************************************************************************* //

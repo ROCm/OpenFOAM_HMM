@@ -43,7 +43,7 @@ SourceFiles
 
 #include "List.H"
 #include "vectorField.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "point.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,7 +82,7 @@ public:
 
 private:
 
-        static const NamedEnum<directionType, 3> directionTypeNames_;
+        static const Enum<directionType> directionTypeNames_;
 
 
     // Private Member Functions

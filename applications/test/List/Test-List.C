@@ -37,7 +37,7 @@ See also
 #include "wordReList.H"
 
 #include "IOstreams.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "scalar.H"
 #include "vector.H"
 

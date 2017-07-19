@@ -53,15 +53,14 @@ Foam::autoPtr<Foam::RBD::joint> Foam::RBD::joint::New
 {
     const word bodyType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(bodyType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(bodyType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown joint type "
             << bodyType << nl << nl
-            << "Valid joint types are : " << endl
+            << "Valid joint types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

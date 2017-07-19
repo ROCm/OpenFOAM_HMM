@@ -45,15 +45,14 @@ autoPtr<force> force::New
 {
     Info<< "        " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
-        FatalErrorInFunction
-            << "Unknown force type " << modelType
-            << nl << nl << "Valid force types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+        FatalErrorInFunction << "Unknown force type "
+            << modelType << nl << nl
+            << "Valid force types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

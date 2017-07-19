@@ -35,24 +35,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-
-namespace Foam
+const Foam::Enum
+<
+    Foam::shellSurfaces::refineMode
+>
+Foam::shellSurfaces::refineModeNames_
 {
-
-template<>
-const char*
-NamedEnum<shellSurfaces::refineMode, 3>::
-names[] =
-{
-    "inside",
-    "outside",
-    "distance"
+    { refineMode::INSIDE, "inside" },
+    { refineMode::OUTSIDE, "outside" },
+    { refineMode::DISTANCE, "distance" },
 };
-
-const NamedEnum<shellSurfaces::refineMode, 3> shellSurfaces::refineModeNames_;
-
-} // End namespace Foam
-
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -617,7 +609,7 @@ Foam::shellSurfaces::shellSurfaces
             unmatchedKeys.erase(ePtr->keyword());
 
             shells_[shellI] = geomI;
-            modes_[shellI] = refineModeNames_.read(dict.lookup("mode"));
+            modes_[shellI] = refineModeNames_.lookup("mode", dict);
 
             // Read pairs of distance+level
             setAndCheckLevels(shellI, dict.lookup("levels"));

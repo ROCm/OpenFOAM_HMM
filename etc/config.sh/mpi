@@ -33,6 +33,7 @@
 #
 #------------------------------------------------------------------------------
 unset MPI_ARCH_PATH MPI_HOME
+export FOAM_MPI=dummy  # Fallback value
 
 case "$WM_MPLIB" in
 SYSTEMOPENMPI)
@@ -45,7 +46,7 @@ SYSTEMOPENMPI)
         unset OPAL_PREFIX
     fi
 
-    # Bit of a hack: strip off 'lib' and hope this is the prefix for openmpi
+    # Bit of a hack: strip off 'lib' and assume it is the prefix for openmpi
     # include files and libraries.
     libDir=$(mpicc --showme:link | sed -e 's/.*-L\([^ ]*\).*/\1/')
 
@@ -65,9 +66,9 @@ OPENMPI)
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using OPENMPI:" 1>&2
-        echo "    OPAL_PREFIX : $OPAL_PREFIX" 1>&2
+        echo "Using $WM_MPLIB" 1>&2
         echo "    FOAM_MPI    : $FOAM_MPI" 1>&2
+        echo "    OPAL_PREFIX : $MPI_ARCH_PATH" 1>&2
     fi
 
     # Could be sourced from ThirdParty with incomplete environment
@@ -208,25 +209,23 @@ QSMPI)
 
 SGIMPI)
     # No trailing slash
-    [ "${MPI_ROOT%/}" = "${MPI_ROOT}" ] || MPI_ROOT="${MPI_ROOT%/}"
+    MPI_ROOT="${MPI_ROOT%/}" # Remove trailing slash
 
-    export FOAM_MPI="${MPI_ROOT##*/}"
-    export MPI_ARCH_PATH=$MPI_ROOT
+    export MPI_ARCH_PATH="${MPI_ROOT%/}" # Remove trailing slash
+    export FOAM_MPI="${MPI_ARCH_PATH##*/}"
 
-    if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
-    then
+    [ -d "$MPI_ARCH_PATH" ] || {
         echo "Warning in $WM_PROJECT_DIR/etc/config.sh/mpi:" 1>&2
-        echo "    MPI_ROOT not a valid mpt installation directory or ending" \
-             " in a '/'." 1>&2
-        echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
-        echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
-    fi
+        echo "    Not a valid $WM_MPLIB installation directory." 1>&2
+        echo "    Please set MPI_ROOT properly (usually via the mpt module)" 1>&2
+        echo "    Currently using '$MPI_ARCH_PATH'" 1>&2
+    }
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then
-        echo "Using SGI MPT:" 1>&2
-        echo "    MPI_ROOT : $MPI_ROOT" 1>&2
+        echo "Using $WM_MPLIB" 1>&2
         echo "    FOAM_MPI : $FOAM_MPI" 1>&2
+        echo "    MPI_ROOT : $MPI_ARCH_PATH" 1>&2
     fi
 
     _foamAddPath    $MPI_ARCH_PATH/bin
@@ -234,34 +233,52 @@ SGIMPI)
     ;;
 
 INTELMPI)
-    MPI_ROOT="${MPI_ROOT%/}" # No trailing slash
-
-    export FOAM_MPI="${MPI_ROOT##*/}"
-    export MPI_ARCH_PATH=$MPI_ROOT
-
-    if [ ! -d "$MPI_ROOT" -o -z "$MPI_ARCH_PATH" ]
+    if [ -n "$I_MPI_ROOT" ]
     then
+        # I_MPI_ROOT: The Intel MPI Library installation directory
+
+        MPI_ARCH_PATH="${I_MPI_ROOT%/}" # Remove trailing slash
+        FOAM_MPI="${MPI_ARCH_PATH##*/}"
+
+        # If subdirectory is version number only, prefix with 'impi-'
+        case "$FOAM_MPI" in ([0-9]*) FOAM_MPI="impi-$FOAM_MPI";; esac
+
+        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        then
+            echo "Using $WM_MPLIB" 1>&2
+            echo "    FOAM_MPI   : $FOAM_MPI" 1>&2
+            echo "    I_MPI_ROOT : $MPI_ARCH_PATH" 1>&2
+        fi
+    else
+        # MPI_ROOT: General specification
+        MPI_ARCH_PATH="${MPI_ROOT%/}" # Remove trailing slash
+        FOAM_MPI="${MPI_ARCH_PATH##*/}"
+
+        # If subdirectory is version number only, prefix with 'impi-'
+        case "$FOAM_MPI" in ([0-9]*) FOAM_MPI="impi-$FOAM_MPI";; esac
+
+        if [ "$FOAM_VERBOSE" -a "$PS1" ]
+        then
+            echo "Using $WM_MPLIB" 1>&2
+            echo "    FOAM_MPI : $FOAM_MPI" 1>&2
+            echo "    MPI_ROOT : $MPI_ARCH_PATH" 1>&2
+        fi
+    fi
+
+    [ -d "$MPI_ARCH_PATH" ] || {
         echo "Warning in $WM_PROJECT_DIR/etc/config.sh/mpi:" 1>&2
-        echo "    MPI_ROOT not a valid mpt installation directory or ending" \
-             " in a '/'." 1>&2
-        echo "    Please set MPI_ROOT to the mpt installation directory." 1>&2
-        echo "    MPI_ROOT currently set to '$MPI_ROOT'" 1>&2
-    fi
+        echo "    Not a valid $WM_MPLIB installation directory." 1>&2
+        echo "    Please set I_MPI_ROOT or MPI_ROOT properly." 1>&2
+        echo "    Currently using '$MPI_ARCH_PATH'" 1>&2
+    }
 
-    if [ "$FOAM_VERBOSE" -a "$PS1" ]
-    then
-        echo "Using INTEL MPI:" 1>&2
-        echo "    MPI_ROOT : $MPI_ROOT" 1>&2
-        echo "    FOAM_MPI : $FOAM_MPI" 1>&2
-    fi
+    export FOAM_MPI MPI_ARCH_PATH
 
     _foamAddPath    $MPI_ARCH_PATH/bin64
     _foamAddLib     $MPI_ARCH_PATH/lib64
     ;;
-*)
-    export FOAM_MPI=dummy
-    ;;
 esac
+
 
 # Add (non-dummy) MPI implementation
 # - dummy MPI already added to LD_LIBRARY_PATH and has no external libraries
@@ -274,18 +291,7 @@ then
     _foamAddLib $FOAM_LIBBIN/$FOAM_MPI
 fi
 
-
-# Minimum MPI buffer size (used by all except SGI MPI)
-: ${minBufferSize:=20000000}
-if [ "${MPI_BUFFER_SIZE:=$minBufferSize}" -lt $minBufferSize ]
-then
-    MPI_BUFFER_SIZE=$minBufferSize
-fi
-export MPI_BUFFER_SIZE
-
-
-# Cleanup environment
-# ~~~~~~~~~~~~~~~~~~~
-unset minBufferSize
+# Alternative to 'mpiBufferSize' controlDict entry
+#export MPI_BUFFER_SIZE=20000000
 
 #------------------------------------------------------------------------------

@@ -32,9 +32,9 @@ License
 
 template<class Type>
 const Foam::wordList Foam::fv::SemiImplicitSource<Type>::volumeModeTypeNames_
-(
-    IStringStream("(absolute specific)")()
-);
+{
+    "absolute", "specific"
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //

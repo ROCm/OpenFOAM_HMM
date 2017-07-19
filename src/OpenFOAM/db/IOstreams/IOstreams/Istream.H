@@ -72,7 +72,7 @@ public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         Istream
         (
             streamFormat format=ASCII,

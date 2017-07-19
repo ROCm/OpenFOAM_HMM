@@ -38,16 +38,14 @@ Foam::autoPtr<Foam::facePointPatch> Foam::facePointPatch::New
         InfoInFunction << "Constructing facePointPatch" << endl;
     }
 
-    polyPatchConstructorTable::iterator cstrIter =
-        polyPatchConstructorTablePtr_->find(patch.type());
+    auto cstrIter = polyPatchConstructorTablePtr_->cfind(patch.type());
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown facePointPatch type "
-            << patch.type()
-            << nl << nl
-            << "Valid facePointPatch types are :" << endl
+            << patch.type() << nl << nl
+            << "Valid facePointPatch types :" << endl
             << polyPatchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

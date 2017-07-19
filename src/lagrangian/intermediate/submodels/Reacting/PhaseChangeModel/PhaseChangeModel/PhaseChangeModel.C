@@ -30,15 +30,9 @@ License
 template<class CloudType>
 const Foam::wordList Foam::PhaseChangeModel<CloudType>::
 enthalpyTransferTypeNames
-(
-    IStringStream
-    (
-        "("
-            "latentHeat "
-            "enthalpyDifference"
-        ")"
-    )()
-);
+{
+    "latentHeat", "enthalpyDifference"
+};
 
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //

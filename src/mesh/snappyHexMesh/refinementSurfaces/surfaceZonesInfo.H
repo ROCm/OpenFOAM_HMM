@@ -34,7 +34,7 @@ SourceFiles
 #ifndef surfaceZonesInfo_H
 #define surfaceZonesInfo_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "point.H"
 #include "word.H"
 #include "PtrList.H"
@@ -68,7 +68,7 @@ public:
         NONE
     };
 
-    static const NamedEnum<areaSelectionAlgo, 4> areaSelectionAlgoNames;
+    static const Enum<areaSelectionAlgo> areaSelectionAlgoNames;
 
     //- What to do with faceZone faces
     enum faceZoneType
@@ -78,7 +78,7 @@ public:
         BOUNDARY
     };
 
-    static const NamedEnum<faceZoneType, 3> faceZoneTypeNames;
+    static const Enum<faceZoneType> faceZoneTypeNames;
 
 
 private:

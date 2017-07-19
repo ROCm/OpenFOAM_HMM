@@ -26,7 +26,6 @@ License
 #include <fstream>
 #include <iostream>
 
-using std::ofstream;
 using std::ios;
 
 #include "Time.H"
@@ -49,18 +48,16 @@ Foam::fluentFvMesh::fluentFvMesh(const IOobject& io)
 
 void Foam::fluentFvMesh::writeFluentMesh() const
 {
-    // make a directory called proInterface in the case
+    // Make a directory called fluentInterface in the case
     mkDir(time().rootPath()/time().caseName()/"fluentInterface");
 
-    // open a file for the mesh
-    ofstream fluentMeshFile
+    // Open a file for the mesh
+    std::ofstream fluentMeshFile
     (
-        (
-            time().rootPath()/
-            time().caseName()/
-            "fluentInterface"/
-            time().caseName() + ".msh"
-        ).c_str()
+        time().rootPath()
+      / time().caseName()
+      / "fluentInterface"
+      / time().caseName() + ".msh"
     );
 
     Info<< "Writing Header" << endl;

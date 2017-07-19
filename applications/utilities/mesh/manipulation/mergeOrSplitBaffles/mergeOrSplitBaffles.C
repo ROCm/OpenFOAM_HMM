@@ -35,11 +35,8 @@ Usage
     \b mergeOrSplitBaffles [OPTION]
 
     Options:
-      - \par -detect
+      - \par -detectOnly
         Detect baffles and write to faceSet duplicateFaces.
-
-      - \par -merge
-        Detect baffles and convert to internal faces.
 
       - \par -split
         Detect baffles and duplicate the points (used so the two sides

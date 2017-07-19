@@ -42,24 +42,20 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(conformalVoronoiMesh, 0);
-
-    template<>
-    const char* NamedEnum
-    <
-        conformalVoronoiMesh::dualMeshPointType,
-        5
-    >::names[] =
-    {
-        "internal",
-        "surface",
-        "featureEdge",
-        "featurePoint",
-        "constrained"
-    };
 }
 
-const Foam::NamedEnum<Foam::conformalVoronoiMesh::dualMeshPointType, 5>
-    Foam::conformalVoronoiMesh::dualMeshPointTypeNames_;
+const Foam::Enum
+<
+    Foam::conformalVoronoiMesh::dualMeshPointType
+>
+Foam::conformalVoronoiMesh::dualMeshPointTypeNames_
+{
+    { dualMeshPointType::internal, "internal" },
+    { dualMeshPointType::surface, "surface" },
+    { dualMeshPointType::featureEdge, "featureEdge" },
+    { dualMeshPointType::featurePoint, "featurePoint" },
+    { dualMeshPointType::constrained, "constrained" },
+};
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //

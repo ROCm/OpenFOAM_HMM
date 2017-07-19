@@ -31,17 +31,18 @@ License
 
 int Foam::messageStream::level(Foam::debug::debugSwitch("level", 2));
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::messageStream::messageStream
 (
     const string& title,
-    errorSeverity sev,
+    const errorSeverity severity,
     const int maxErrors
 )
 :
     title_(title),
-    severity_(sev),
+    severity_(severity),
     maxErrors_(maxErrors),
     errorCount_(0)
 {}
@@ -55,6 +56,8 @@ Foam::messageStream::messageStream(const dictionary& dict)
     errorCount_(0)
 {}
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 {
@@ -75,6 +78,8 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
     }
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::OSstream& Foam::messageStream::operator()
 (
@@ -237,7 +242,7 @@ Foam::messageStream::operator Foam::OSstream&()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * //
 
 Foam::messageStream Foam::SeriousError
 (

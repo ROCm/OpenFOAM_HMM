@@ -78,8 +78,7 @@ Foam::surfMeshSampler::New
 {
     const word sampleType(dict.lookup("type"));
 
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(sampleType);
+    auto cstrIter = wordConstructorTablePtr_->cfind(sampleType);
 
     if (!cstrIter.found())
     {

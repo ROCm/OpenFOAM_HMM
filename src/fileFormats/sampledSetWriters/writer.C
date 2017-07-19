@@ -36,15 +36,14 @@ Foam::autoPtr<Foam::writer<Type>> Foam::writer<Type>::New
     const word& writeType
 )
 {
-    typename wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(writeType);
+    auto cstrIter = wordConstructorTablePtr_->cfind(writeType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown write type "
             << writeType << nl << nl
-            << "Valid write types : " << endl
+            << "Valid write types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

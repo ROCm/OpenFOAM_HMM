@@ -34,20 +34,19 @@ Foam::autoPtr<Foam::liftModel> Foam::liftModel::New
     const phasePair& pair
 )
 {
-    word liftModelType(dict.lookup("type"));
+    const word modelType(dict.lookup("type"));
 
     Info<< "Selecting liftModel for "
-        << pair << ": " << liftModelType << endl;
+        << pair << ": " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(liftModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown liftModelType type "
-            << liftModelType << endl << endl
-            << "Valid liftModel types are : " << endl
+            << "Unknown liftModel type "
+            << modelType << nl << nl
+            << "Valid liftModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

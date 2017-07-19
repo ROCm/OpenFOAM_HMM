@@ -45,15 +45,15 @@ autoPtr<injectionModel> injectionModel::New
 {
     Info<< "        " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown injectionModel type " << modelType
-            << nl << nl << "Valid injectionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Unknown injectionModel type "
+            << modelType << nl << nl
+            << "Valid injectionModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

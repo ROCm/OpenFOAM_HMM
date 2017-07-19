@@ -39,30 +39,25 @@ License
     #define EVENT_SIZE  ( sizeof (struct inotify_event) )
     #define EVENT_LEN   (EVENT_SIZE + 16)
     #define EVENT_BUF_LEN     ( 1024 * EVENT_LEN )
-#else
-    #include "OSspecific.H"
 #endif
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::NamedEnum<Foam::fileMonitor::fileState, 3>
-    Foam::fileMonitor::fileStateNames_;
+const Foam::Enum
+<
+    Foam::fileMonitor::fileState
+>
+Foam::fileMonitor::fileStateNames_
+{
+    { fileState::UNMODIFIED, "unmodified" },
+    { fileState::MODIFIED, "modified" },
+    { fileState::DELETED, "deleted" },
+};
+
 
 namespace Foam
 {
     defineTypeNameAndDebug(fileMonitor, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fileMonitor::fileState,
-        3
-    >::names[] =
-    {
-        "unmodified",
-        "modified",
-        "deleted"
-    };
 
     //- Reduction operator for PackedList of fileState
     class reduceFileStates

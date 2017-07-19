@@ -35,10 +35,20 @@ Documentation
 
 InfoSwitches
 {
+    // The default ASCII write precision
     writePrecision  6;
+
+    // Enable job info
     writeJobInfo    0;
+
     writeDictionaries 0;
     writeOptionalEntries 0;
+
+    // Report list of slaves/pids used (parallel)
+    writeSlaves     1;
+
+    // Report list of roots used (parallel)
+    writeRoots      1;
 
     // Allow profiling
     allowProfiling  1;
@@ -65,6 +75,11 @@ OptimisationSwitches
     floatTransfer   0;
     nProcsSimpleSum 0;
 
+    // MPI buffer size (bytes)
+    // Can override with the MPI_BUFFER_SIZE env variable.
+    // The default and minimum is (20000000).
+    mpiBufferSize   0;
+
     // Optional max size (bytes) for unstructured data exchanges. In some
     // phases of OpenFOAM it can send over very large data chunks
     // (e.g. in parallel load balancing) and some Pstream implementations have
@@ -74,20 +89,29 @@ OptimisationSwitches
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
 
+    // Trap floating point exception.
+    // Can override with FOAM_SIGFPE (true|false)
+    trapFpe         1;
+
+    // Initialization malloced memory to NaN.
+    // Can override with FOAM_SETNAN (true|false)
+    setNaN          0;
+
     // Force dumping (at next timestep) upon signal (-1 to disable)
-    writeNowSignal              -1; // 10;
+    // See 'kill -l' for signal numbers (eg, 10=USR1, 12=USR2)
+    writeNowSignal          -1; // 10;
 
     // Force dumping (at next timestep) upon signal (-1 to disable) and exit
-    stopAtWriteNowSignal        -1;
+    stopAtWriteNowSignal    -1;
 }
 
 /* Can specify fallback profiling settings
 profiling
 {
     active      true;
-    cpuInfo     true;
+    cpuInfo     false;
     memInfo     false;
-    sysInfo     true;
+    sysInfo     false;
 }
 */
 

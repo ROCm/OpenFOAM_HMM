@@ -31,41 +31,29 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::surfaceZonesInfo::areaSelectionAlgo
+>
+Foam::surfaceZonesInfo::areaSelectionAlgoNames
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::surfaceZonesInfo::areaSelectionAlgo,
-        4
-    >::names[] =
-    {
-        "inside",
-        "outside",
-        "insidePoint",
-        "none"
-    };
-}
-const Foam::NamedEnum<Foam::surfaceZonesInfo::areaSelectionAlgo, 4>
-    Foam::surfaceZonesInfo::areaSelectionAlgoNames;
+    { areaSelectionAlgo::INSIDE, "inside" },
+    { areaSelectionAlgo::OUTSIDE, "outside" },
+    { areaSelectionAlgo::INSIDEPOINT, "insidePoint" },
+    { areaSelectionAlgo::NONE, "none" },
+};
 
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::surfaceZonesInfo::faceZoneType
+>
+Foam::surfaceZonesInfo::faceZoneTypeNames
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::surfaceZonesInfo::faceZoneType,
-        3
-    >::names[] =
-    {
-        "internal",
-        "baffle",
-        "boundary"
-    };
-}
-const Foam::NamedEnum<Foam::surfaceZonesInfo::faceZoneType, 3>
-    Foam::surfaceZonesInfo::faceZoneTypeNames;
+    { faceZoneType::INTERNAL, "internal" },
+    { faceZoneType::BAFFLE, "baffle" },
+    { faceZoneType::BOUNDARY, "boundary" },
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

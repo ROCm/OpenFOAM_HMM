@@ -34,31 +34,27 @@ namespace Foam
     defineTypeNameAndDebug(topoSetSource, 0);
     defineRunTimeSelectionTable(topoSetSource, word);
     defineRunTimeSelectionTable(topoSetSource, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::topoSetSource::setAction,
-        8
-    >::names[] =
-    {
-        "clear",
-        "new",
-        "invert",
-        "add",
-        "delete",
-        "subset",
-        "list",
-        "remove"
-    };
 }
 
 
 Foam::HashTable<Foam::string>* Foam::topoSetSource::usageTablePtr_ = nullptr;
 
 
-const Foam::NamedEnum<Foam::topoSetSource::setAction, 8>
-    Foam::topoSetSource::actionNames_;
+const Foam::Enum
+<
+    Foam::topoSetSource::setAction
+>
+Foam::topoSetSource::actionNames_
+{
+    { setAction::CLEAR, "clear" },
+    { setAction::NEW, "new" },
+    { setAction::INVERT, "invert" },
+    { setAction::ADD, "add" },
+    { setAction::DELETE, "delete" },
+    { setAction::SUBSET, "subset" },
+    { setAction::LIST, "list" },
+    { setAction::REMOVE, "remove" },
+};
 
 
 const Foam::string Foam::topoSetSource::illegalSource_
@@ -77,15 +73,14 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
     const dictionary& dict
 )
 {
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(topoSetSourceType);
+    auto cstrIter = wordConstructorTablePtr_->cfind(topoSetSourceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown topoSetSource type " << topoSetSourceType
-            << endl << endl
-            << "Valid topoSetSource types : " << endl
+            << "Unknown topoSetSource type "
+            << topoSetSourceType << nl << nl
+            << "Valid topoSetSource types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -101,15 +96,14 @@ Foam::autoPtr<Foam::topoSetSource> Foam::topoSetSource::New
     Istream& is
 )
 {
-    istreamConstructorTable::iterator cstrIter =
-        istreamConstructorTablePtr_->find(topoSetSourceType);
+    auto cstrIter = istreamConstructorTablePtr_->cfind(topoSetSourceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown topoSetSource type " << topoSetSourceType
-            << endl << endl
-            << "Valid topoSetSource types : " << endl
+            << "Unknown topoSetSource type "
+            << topoSetSourceType << nl << nl
+            << "Valid topoSetSource types :" << endl
             << istreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

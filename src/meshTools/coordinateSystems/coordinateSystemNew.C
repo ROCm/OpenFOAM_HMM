@@ -46,7 +46,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
             dict
         )   << "Unknown coordinateSystem type "
             << coordType << nl << nl
-            << "Valid coordinateSystem types are :" << nl
+            << "Valid coordinateSystem types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

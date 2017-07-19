@@ -71,8 +71,7 @@ Note
 #include "ModifiableMeshedSurface.H"
 #include "UnsortedMeshedSurfaces.H"
 
-#include "IStringStream.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 

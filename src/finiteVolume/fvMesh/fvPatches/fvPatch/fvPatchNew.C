@@ -40,14 +40,13 @@ Foam::autoPtr<Foam::fvPatch> Foam::fvPatch::New
         InfoInFunction << "Constructing fvPatch" << endl;
     }
 
-    polyPatchConstructorTable::iterator cstrIter =
-        polyPatchConstructorTablePtr_->find(patch.type());
+    auto cstrIter = polyPatchConstructorTablePtr_->cfind(patch.type());
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown fvPatch type " << patch.type() << nl
-            << "Valid fvPatch types are :"
+            << "Valid fvPatch types :"
             << polyPatchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

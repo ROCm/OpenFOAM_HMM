@@ -97,7 +97,7 @@ public:
         );
 
 
-    //- Destuctor
+    //- Destructor
     virtual ~windowModel();
 
 

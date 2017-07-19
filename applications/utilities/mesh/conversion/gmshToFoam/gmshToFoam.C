@@ -49,7 +49,6 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "polyMesh.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,13 +25,13 @@ Class
     Foam::primitiveEntry
 
 Description
-    A keyword and a list of tokens is a 'primitiveEntry'.
-    An primitiveEntry can be read, written and printed, and the types and
+    A keyword and a list of tokens comprise a primitiveEntry.
+    A primitiveEntry can be read, written and printed, and the types and
     values of its tokens analysed.
 
-    A primitiveEntry is a high-level building block for data description. It
-    is a front-end for the token parser. A list of entries can be used as a
-    set of keyword syntax elements, for example.
+    A primitiveEntry is a high-level building block for data description.
+    It is a front-end for the token parser. A list of entries can be used
+    as a set of keyword syntax elements, for example.
 
 SourceFiles
     primitiveEntry.C
@@ -41,9 +41,6 @@ SourceFiles
 
 #ifndef primitiveEntry_H
 #define primitiveEntry_H
-
-#include "IStringStream.H"
-#include "OStringStream.H"
 
 #include "entry.H"
 #include "ITstream.H"
@@ -68,29 +65,38 @@ class primitiveEntry
     // Private Member Functions
 
         //- Append the given tokens starting at the current tokenIndex
-        void append(const UList<token>&);
+        void append(const UList<token>& varTokens);
 
         //- Append the given token to this entry
         void append
         (
             const token& currToken,
-            const dictionary&,
-            Istream&
+            const dictionary& dict,
+            Istream& is
         );
 
-        //- Expand the given variable (keyword starts with $)
-        bool expandVariable(const string&, const dictionary&);
+        //- Expand the given variable.
+        //  The keyword starts with '$', but has been removed by the caller
+        //  and thus passed as a varName.
+        //  Keywords with '${}' are expanded recursively.
+        bool expandVariable
+        (
+            const string& varName,
+            const dictionary& dict
+        );
 
-        //- Expand the given function (keyword starts with #)
+        //- Expand the given function.
+        //  The keyword starts with '#', but has been removed by the caller.
+        //  and thus passed as a functionName.
         bool expandFunction
         (
-            const word&,
-            const dictionary&,
-            Istream&
+            const word& functionName,
+            const dictionary& dict,
+            Istream& is
         );
 
         //- Read the complete entry from the given stream
-        void readEntry(const dictionary&, Istream&);
+        void readEntry(const dictionary& dict, Istream& is);
 
 
 public:
@@ -98,26 +104,26 @@ public:
     // Constructors
 
         //- Construct from keyword and a Istream
-        primitiveEntry(const keyType&, Istream&);
+        primitiveEntry(const keyType& key, Istream& is);
 
         //- Construct from keyword, parent dictionary and Istream
-        primitiveEntry(const keyType&, const dictionary& parentDict, Istream&);
+        primitiveEntry(const keyType& key, const dictionary& dict, Istream& is);
 
         //- Construct from keyword and a ITstream
-        primitiveEntry(const keyType&, const ITstream&);
+        primitiveEntry(const keyType& key, const ITstream& is);
 
         //- Construct from keyword and a single token
-        primitiveEntry(const keyType&, const token&);
+        primitiveEntry(const keyType& key, const token& t);
 
         //- Construct from keyword and a list of tokens
-        primitiveEntry(const keyType&, const UList<token>&);
+        primitiveEntry(const keyType& key, const UList<token>& tokens);
 
         //- Construct from keyword and by transferring a list of tokens
-        primitiveEntry(const keyType&, const Xfer<List<token>>&);
+        primitiveEntry(const keyType& key, const Xfer<List<token>>& tokens);
 
         //- Construct from keyword and a T
         template<class T>
-        primitiveEntry(const keyType&, const T&);
+        primitiveEntry(const keyType& key, const T& t);
 
         autoPtr<entry> clone(const dictionary&) const
         {
@@ -166,13 +172,13 @@ public:
         dictionary& dict();
 
         //- Read tokens from the given stream
-        virtual bool read(const dictionary&, Istream&);
+        virtual bool read(const dictionary& dict, Istream& is);
 
         //- Write
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
         //- Write, optionally with contents only (no keyword, etc)
-        void write(Ostream&, const bool contentsOnly) const;
+        void write(Ostream& os, const bool contentsOnly) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream
@@ -184,7 +190,7 @@ public:
 
 
 template<>
-Ostream& operator<<(Ostream&, const InfoProxy<primitiveEntry>&);
+Ostream& operator<<(Ostream& os, const InfoProxy<primitiveEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

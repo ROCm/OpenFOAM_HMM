@@ -49,75 +49,54 @@ namespace fieldValues
 }
 }
 
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes,
-    4
->::names[] =
-{
-    "faceZone",
-    "patch",
-    "surface",
-    "sampledSurface"
-};
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
-    17
->::names[] =
-{
-    "none",
-    "sum",
-    "weightedSum",
-    "sumMag",
-    "sumDirection",
-    "sumDirectionBalance",
-    "average",
-    "weightedAverage",
-    "areaAverage",
-    "weightedAreaAverage",
-    "areaIntegrate",
-    "weightedAreaIntegrate",
-    "min",
-    "max",
-    "CoV",
-    "areaNormalAverage",
-    "areaNormalIntegrate"
-};
-
-template<>
-const char* Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationType,
-    2
->::names[] =
-{
-    "none",
-    "sqrt"
-};
-
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes,
-    4
-> Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypeNames_;
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::surfaceFieldValue::operationType,
-    17
-> Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_;
-
-const Foam::NamedEnum
-<
-    Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationType,
-    2
+    Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes
 >
-Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_;
+Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypeNames_
+{
+    { regionTypes::stFaceZone, "faceZone" },
+    { regionTypes::stPatch, "patch" },
+    { regionTypes::stSurface, "surface" },
+    { regionTypes::stSampledSurface, "sampledSurface" },
+};
+
+
+const Foam::Enum
+<
+    Foam::functionObjects::fieldValues::surfaceFieldValue::operationType
+>
+Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_
+{
+    { operationType::opNone, "none" },
+    { operationType::opSum, "sum" },
+    { operationType::opWeightedSum, "weightedSum" },
+    { operationType::opSumMag, "sumMag" },
+    { operationType::opSumDirection, "sumDirection" },
+    { operationType::opSumDirectionBalance, "sumDirectionBalance" },
+    { operationType::opAverage, "average" },
+    { operationType::opWeightedAverage, "weightedAverage" },
+    { operationType::opAreaAverage, "areaAverage" },
+    { operationType::opWeightedAreaAverage, "weightedAreaAverage" },
+    { operationType::opAreaIntegrate, "areaIntegrate" },
+    { operationType::opWeightedAreaIntegrate, "weightedAreaIntegrate" },
+    { operationType::opMin, "min" },
+    { operationType::opMax, "max" },
+    { operationType::opCoV, "CoV" },
+    { operationType::opAreaNormalAverage, "areaNormalAverage" },
+    { operationType::opAreaNormalIntegrate, "areaNormalIntegrate" },
+};
+
+const Foam::Enum
+<
+    Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationType
+>
+Foam::functionObjects::fieldValues::surfaceFieldValue::postOperationTypeNames_
+{
+    { postOperationType::postOpNone, "none" },
+    { postOperationType::postOpSqrt, "sqrt" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -832,12 +811,16 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 )
 :
     fieldValue(name, runTime, dict, typeName),
-    regionType_(regionTypeNames_.read(dict.lookup("regionType"))),
-    operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    regionType_(regionTypeNames_.lookup("regionType", dict)),
+    operation_(operationTypeNames_.lookup("operation", dict)),
     postOperation_
     (
-        postOperationTypeNames_
-        [dict.lookupOrDefault<word>("postOperation", "none")]
+        postOperationTypeNames_.lookupOrDefault
+        (
+            "postOperation",
+            dict,
+            postOperationType::postOpNone
+        )
     ),
     weightFieldName_("none"),
     writeArea_(dict.lookupOrDefault("writeArea", false)),
@@ -859,12 +842,16 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::surfaceFieldValue
 )
 :
     fieldValue(name, obr, dict, typeName),
-    regionType_(regionTypeNames_.read(dict.lookup("regionType"))),
-    operation_(operationTypeNames_.read(dict.lookup("operation"))),
+    regionType_(regionTypeNames_.lookup("regionType", dict)),
+    operation_(operationTypeNames_.lookup("operation", dict)),
     postOperation_
     (
-        postOperationTypeNames_
-        [dict.lookupOrDefault<word>("postOperation", "none")]
+        postOperationTypeNames_.lookupOrDefault
+        (
+            "postOperation",
+            dict,
+            postOperationType::postOpNone
+        )
     ),
     weightFieldName_("none"),
     writeArea_(dict.lookupOrDefault("writeArea", false)),

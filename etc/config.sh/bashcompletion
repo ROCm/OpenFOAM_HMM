@@ -2309,7 +2309,7 @@ _of_foamToEnsight()
     local cur="${COMP_WORDS[COMP_CWORD]}"
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    local opts="-ascii -constant -deprecatedOrder -latestTime -newTimes -noFunctionObjects -noLagrangian -noPatches -noZero -nodeValues -parallel -srcDoc -doc -help "
+    local opts="-ascii -constant -latestTime -newTimes -noFunctionObjects -noLagrangian -noPatches -noZero -nodeValues -parallel -srcDoc -doc -help "
     local optsWithArgs="-case -cellZone -decomposeParDict -faceZones -fields -name -patches -region -roots -time -width "
 
     case ${prev} in
@@ -4931,7 +4931,7 @@ _of_postProcess()
     local cur="${COMP_WORDS[COMP_CWORD]}"
     local prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-    local opts="-constant -latestTime -list -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help "
+    local opts="-constant -latestTime -list -newTimes -noFunctionObjects -noZero -parallel -profiling -srcDoc -doc -help "
     local optsWithArgs="-case -decomposeParDict -dict -field -fields -func -funcs -region -roots -time "
 
     case ${prev} in

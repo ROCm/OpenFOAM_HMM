@@ -30,7 +30,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSHA1stream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "dictionary.H"
 
 using namespace Foam;
@@ -96,7 +96,7 @@ int main(int argc, char * argv[])
         os  << str;
         Info<< os.digest() << endl;
 
-        os.rewind();
+        os.reset();
         os  << "The quick brown fox jumps over the lazy dog";
         Info<< os.digest() << endl;
     }

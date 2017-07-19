@@ -59,8 +59,8 @@ namespace Foam
 
 class token;
 
-Istream& operator>>(Istream&, token&);
-Ostream& operator<<(Ostream&, const token&);
+Istream& operator>>(Istream& is, token& t);
+Ostream& operator<<(Ostream& os, const token& t);
 
 
 /*---------------------------------------------------------------------------*\
@@ -134,10 +134,10 @@ public:
         // Private Member Functions
 
             //- Disallow default bitwise copy construct
-            compound(const compound&);
+            compound(const compound&) = delete;
 
             //- Disallow default bitwise assignment
-            void operator=(const compound&);
+            void operator=(const compound&) = delete;
 
 
     public:
@@ -194,11 +194,6 @@ public:
                 }
 
                 virtual label size() const = 0;
-
-
-            // Check
-
-            // Edit
 
             // Write
 
@@ -423,8 +418,8 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>>(Istream&, token&);
-        friend Ostream& operator<<(Ostream&, const token&);
+        friend Istream& operator>>(Istream& is, token& t);
+        friend Ostream& operator<<(Ostream& os, const token& t);
 
         friend Ostream& operator<<(Ostream&, const punctuationToken&);
         friend ostream& operator<<(ostream&, const punctuationToken&);

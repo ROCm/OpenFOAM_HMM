@@ -36,17 +36,6 @@ License
 
 namespace Foam
 {
-    template<>
-    const char* NamedEnum
-    <
-        fv::solidificationMeltingSource::thermoMode,
-        2
-    >::names[] =
-    {
-        "thermo",
-        "lookup"
-    };
-
     namespace fv
     {
         defineTypeNameAndDebug(solidificationMeltingSource, 0);
@@ -60,8 +49,15 @@ namespace Foam
     }
 }
 
-const Foam::NamedEnum<Foam::fv::solidificationMeltingSource::thermoMode, 2>
-    Foam::fv::solidificationMeltingSource::thermoModeTypeNames_;
+const Foam::Enum
+<
+    Foam::fv::solidificationMeltingSource::thermoMode
+>
+Foam::fv::solidificationMeltingSource::thermoModeTypeNames_
+{
+    { thermoMode::mdThermo, "thermo" },
+    { thermoMode::mdLookup, "lookup" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -191,7 +187,7 @@ Foam::fv::solidificationMeltingSource::solidificationMeltingSource
     Tmelt_(readScalar(coeffs_.lookup("Tmelt"))),
     L_(readScalar(coeffs_.lookup("L"))),
     relax_(coeffs_.lookupOrDefault("relax", 0.9)),
-    mode_(thermoModeTypeNames_.read(coeffs_.lookup("thermoMode"))),
+    mode_(thermoModeTypeNames_.lookup("thermoMode", coeffs_)),
     rhoRef_(readScalar(coeffs_.lookup("rhoRef"))),
     TName_(coeffs_.lookupOrDefault<word>("T", "T")),
     CpName_(coeffs_.lookupOrDefault<word>("Cp", "Cp")),

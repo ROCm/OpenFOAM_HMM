@@ -31,7 +31,7 @@ Description
 #include "IOobject.H"
 #include "IOstreams.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "cpuTime.H"
 
 using namespace Foam;
@@ -41,22 +41,28 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::noBanner();
     argList::noParallel();
     argList::validArgs.insert("string .. stringN");
     argList::addOption("file", "name");
     argList::addOption("repeat", "count");
+    argList::addBoolOption("verbose", "report for each repeat");
 
     argList args(argc, argv, false, true);
 
     const label repeat = args.optionLookupOrDefault<label>("repeat", 1);
 
+    const bool optVerbose = args.optionFound("verbose");
+
     cpuTime timer;
     for (label count = 0; count < repeat; ++count)
     {
+        const bool verbose = (optVerbose || count == 0);
+
         for (label argI=1; argI < args.size(); ++argI)
         {
             const string& rawArg = args[argI];
-            if (count == 0)
+            if (verbose)
             {
                 Info<< "input string: " << rawArg << nl;
             }
@@ -71,14 +77,15 @@ int main(int argc, char *argv[])
                 // is.putback(ch);
                 int lookahead = is.peek();
 
-                if (count == 0)
+                if (verbose)
                 {
-                    Info<< "token: " << tok.info();
-                    Info<< "  lookahead: '" << char(lookahead) << "'" << endl;
+                    Info<< "token: " << tok.info()
+                        << "  lookahead: '" << char(lookahead) << "'"
+                        << endl;
                 }
             }
 
-            if (count == 0)
+            if (verbose)
             {
                 Info<< nl;
                 IOobject::writeDivider(Info);
@@ -89,31 +96,44 @@ int main(int argc, char *argv[])
     Info<< "tokenized args " << repeat << " times in "
         << timer.cpuTimeIncrement() << " s\n\n";
 
-    if (args.optionFound("file"))
+    fileName inputFile;
+    if (args.optionReadIfPresent("file", inputFile))
     {
+        IFstream is(inputFile);
+
         for (label count = 0; count < repeat; ++count)
         {
-            IFstream is(args["file"]);
+            const bool verbose = (optVerbose || count == 0);
+            label nTokens = 0;
 
-            if (count == 0)
+            if (count)
             {
-                Info<< "tokenizing file: " << args["file"] << nl;
+                is.rewind();
             }
+
+            Info<< nl
+                << "tokenizing file (pass #" << (count+1) << ") "
+                << inputFile << nl
+                << "state: " << is.info() << endl;
 
             while (is.good())
             {
                 token tok(is);
-                if (count == 0)
+                if (verbose)
                 {
                     Info<< "token: " << tok.info() << endl;
                 }
+                ++nTokens;
             }
 
-            if (count == 0)
+            if (verbose)
             {
                 Info<< nl;
                 IOobject::writeDivider(Info);
             }
+
+            Info<<"pass #" << (count+1)
+                << " extracted " << nTokens << " tokens" << endl;
         }
 
         Info<< "tokenized file " << repeat << " times in "

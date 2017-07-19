@@ -86,7 +86,7 @@ private:
     // Private data
 
         //- Project mode names
-        static const NamedEnum<projectMode, 3> projectModeNames_;
+        static const Enum<projectMode> projectModeNames_;
 
         //- Names of surfaces
         const dictionary surfacesDict_;

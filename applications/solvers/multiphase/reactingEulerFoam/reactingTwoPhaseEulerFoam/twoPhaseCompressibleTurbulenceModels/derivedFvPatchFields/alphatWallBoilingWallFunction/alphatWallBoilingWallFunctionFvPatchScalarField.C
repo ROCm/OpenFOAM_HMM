@@ -43,26 +43,17 @@ using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
     Foam::compressible::
-    alphatWallBoilingWallFunctionFvPatchScalarField::phaseType,
-    2
->::names[] =
-{
-    "vapor",
-    "liquid"
-};
-
-const Foam::NamedEnum
-<
-    Foam::compressible::
-    alphatWallBoilingWallFunctionFvPatchScalarField::phaseType,
-    2
+    alphatWallBoilingWallFunctionFvPatchScalarField::phaseType
 >
 Foam::compressible::
-alphatWallBoilingWallFunctionFvPatchScalarField::phaseTypeNames_;
+alphatWallBoilingWallFunctionFvPatchScalarField::phaseTypeNames_
+{
+    { phaseType::vaporPhase, "vapor" },
+    { phaseType::liquidPhase, "liquid" },
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -111,7 +102,7 @@ alphatWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
-    phaseType_(phaseTypeNames_.read(dict.lookup("phaseType"))),
+    phaseType_(phaseTypeNames_.lookup("phaseType", dict)),
     relax_(dict.lookupOrDefault<scalar>("relax", 0.5)),
     AbyV_(p.size(), 0),
     alphatConv_(p.size(), 0),

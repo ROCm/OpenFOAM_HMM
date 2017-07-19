@@ -36,7 +36,7 @@ bool Foam::fv::solidificationMeltingSource::read(const dictionary& dict)
 
         coeffs_.readIfPresent("relax", relax_);
 
-        mode_ = thermoModeTypeNames_.read(coeffs_.lookup("thermoMode"));
+        mode_ = thermoModeTypeNames_.lookup("thermoMode", coeffs_);
 
         coeffs_.lookup("rhoRef") >> rhoRef_;
         coeffs_.readIfPresent("T", TName_);

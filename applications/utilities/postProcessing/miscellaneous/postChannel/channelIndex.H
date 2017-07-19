@@ -55,7 +55,7 @@ class channelIndex
 
     // Private data
 
-        static const NamedEnum<vector::components, 3> vectorComponentsNames_;
+        static const Enum<vector::components> vectorComponentsNames_;
 
         //- Is mesh symmetric
         const bool symmetric_;

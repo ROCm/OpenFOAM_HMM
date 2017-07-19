@@ -47,7 +47,7 @@ SourceFiles
 #include "TimeState.H"
 #include "Switch.H"
 #include "instantList.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "typeInfo.H"
 #include "dlLibraryTable.H"
 #include "functionObjectList.H"
@@ -130,10 +130,10 @@ protected:
         scalar startTime_;
         mutable scalar endTime_;
 
-        static const NamedEnum<stopAtControls, 4> stopAtControlNames_;
+        static const Enum<stopAtControls> stopAtControlNames_;
         mutable stopAtControls stopAt_;
 
-        static const NamedEnum<writeControls, 5> writeControlNames_;
+        static const Enum<writeControls> writeControlNames_;
         writeControls writeControl_;
 
         scalar writeInterval_;

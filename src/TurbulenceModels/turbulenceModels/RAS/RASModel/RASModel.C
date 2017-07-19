@@ -143,8 +143,7 @@ Foam::RASModel<BasicTurbulenceModel>::New
 
     Info<< "Selecting RAS turbulence model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {

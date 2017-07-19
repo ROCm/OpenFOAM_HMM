@@ -27,15 +27,18 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::coordSet::coordFormat>
-    Foam::coordSet::coordFormatNames_
-    {
-        { coordFormat::XYZ, "xyz" },
-        { coordFormat::X, "x" },
-        { coordFormat::Y, "y" },
-        { coordFormat::Z, "z" },
-        { coordFormat::DISTANCE, "distance" }
-    };
+const Foam::Enum
+<
+    Foam::coordSet::coordFormat
+>
+Foam::coordSet::coordFormatNames_
+{
+    { coordFormat::XYZ, "xyz" },
+    { coordFormat::X, "x" },
+    { coordFormat::Y, "y" },
+    { coordFormat::Z, "z" },
+    { coordFormat::DISTANCE, "distance" }
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

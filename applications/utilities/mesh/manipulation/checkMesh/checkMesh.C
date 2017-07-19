@@ -47,15 +47,10 @@ Usage
       - \par -region \<name\>
         Specify an alternative mesh region.
 
-      - \par -writeSets \<surfaceFormat\>
-        Reconstruct all cellSets and faceSets geometry and write to
-        postProcessing directory according to surfaceFormat
-        (e.g. vtk or ensight). Additionally reconstructs all pointSets and
-        writes as vtk format.
-
     \param -writeSets \<surfaceFormat\> \n
-    Reconstruct all cellSets and faceSets geometry and write to postProcessing/
-    directory according to surfaceFormat (e.g. vtk or ensight)
+    Reconstruct all cellSets and faceSets geometry and write to postProcessing
+    directory according to surfaceFormat (e.g. vtk or ensight). Additionally
+    reconstructs all pointSets and writes as vtk format.
 
     \param -writeAllFields \n
     Writes all mesh quality measures as fields.

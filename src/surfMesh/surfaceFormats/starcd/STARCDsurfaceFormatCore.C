@@ -26,7 +26,7 @@ License
 #include "STARCDsurfaceFormatCore.H"
 #include "clock.H"
 #include "regExp.H"
-#include "IStringStream.H"
+#include "IFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -47,7 +47,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
         return lookup;
     }
 
-    regExp ctnameRE
+    const regExp ctnameRE
     (
         " *CTNA[^ ]*"        // keyword - min 4 chars
         "[[:space:]]+"       // space delimited
@@ -64,13 +64,11 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
         if (ctnameRE.match(line, groups))
         {
             const label tableId = atoi(groups[0].c_str());
+            const word tableName = word::validated(groups[1]);
 
-            // strip bad chars
-            string::stripInvalid<word>(groups[1]);
-
-            if (!groups[1].empty())
+            if (!tableName.empty())
             {
-                lookup.insert(tableId, groups[1]);
+                lookup.insert(tableId, tableName);
             }
         }
     }

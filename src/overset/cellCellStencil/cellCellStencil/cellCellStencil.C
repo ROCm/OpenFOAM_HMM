@@ -35,22 +35,19 @@ namespace Foam
 {
     defineTypeNameAndDebug(cellCellStencil, 0);
     defineRunTimeSelectionTable(cellCellStencil, mesh);
-
-    template<>
-    const char* NamedEnum
-    <
-        cellCellStencil::cellType,
-        3
-    >::names[] =
-    {
-        "calculated",
-        "interpolated",
-        "hole"
-    };
 }
 
-const Foam::NamedEnum<Foam::cellCellStencil::cellType, 3>
-Foam::cellCellStencil::cellTypeNames_;
+const Foam::Enum
+<
+    Foam::cellCellStencil::cellType
+>
+Foam::cellCellStencil::cellTypeNames_
+{
+    { cellType::CALCULATED, "calculated" },
+    { cellType::INTERPOLATED, "interpolated" },
+    { cellType::HOLE, "hole" },
+};
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -71,18 +68,16 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
         InfoInFunction << "Constructing cellCellStencil" << endl;
     }
 
-    word type(dict.lookup("method"));
+    const word stencilType(dict.lookup("method"));
 
-
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(type);
+    auto cstrIter = meshConstructorTablePtr_->cfind(stencilType);
 
     if (cstrIter == meshConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unknown cellCellStencil type "
-            << type << nl << nl
-            << "Valid cellCellStencil types are" << endl
+            << stencilType << nl << nl
+            << "Valid cellCellStencil types :" << endl
             << meshConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

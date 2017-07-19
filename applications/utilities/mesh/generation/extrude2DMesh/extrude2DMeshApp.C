@@ -60,17 +60,11 @@ enum ExtrudeMode
     MESHEDSURFACE
 };
 
-namespace Foam
+static const Enum<ExtrudeMode> ExtrudeModeNames
 {
-    template<>
-    const char* NamedEnum<ExtrudeMode, 2>::names[] =
-    {
-        "polyMesh2D",
-        "MeshedSurface"
-    };
-}
-
-static const NamedEnum<ExtrudeMode, 2> ExtrudeModeNames;
+    { ExtrudeMode::POLYMESH2D, "polyMesh2D" },
+    { ExtrudeMode::MESHEDSURFACE, "MeshedSurface" },
+};
 
 
 //pointField moveInitialPoints

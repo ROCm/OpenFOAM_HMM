@@ -56,26 +56,26 @@ class ISstream
     // Private data
 
         fileName name_;
-        istream& is_;
+        std::istream& is_;
 
 
     // Private Member Functions
 
         char nextValid();
 
-        void readWordToken(token&);
+        void readWordToken(token& t);
 
     // Private Member Functions
 
 
         //- Read a verbatim string (excluding block delimiters).
-        Istream& readVerbatim(string&);
+        Istream& readVerbatim(string& str);
 
         //- Read a variable name (includes '{')
-        Istream& readVariable(string&);
+        Istream& readVariable(string& str);
 
         //- Disallow default bitwise assignment
-        void operator=(const ISstream&);
+        void operator=(const ISstream&) = delete;
 
 
 public:
@@ -85,7 +85,7 @@ public:
         //- Construct as wrapper around istream
         inline ISstream
         (
-            istream& is,
+            std::istream& is,
             const string& name,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
@@ -123,7 +123,7 @@ public:
         // Read functions
 
             //- Raw, low-level get character function.
-            inline ISstream& get(char&);
+            inline ISstream& get(char& c);
 
             //- Raw, low-level peek function.
             //  Does not remove the character from the stream.
@@ -132,36 +132,36 @@ public:
             inline int peek();
 
             //- Raw, low-level getline into a string function.
-            inline ISstream& getLine(string&);
+            inline ISstream& getLine(string& str);
 
             //- Raw, low-level putback character function.
-            inline ISstream& putback(const char&);
+            inline ISstream& putback(const char c);
 
             //- Return next token from stream
-            virtual Istream& read(token&);
+            virtual Istream& read(token& t);
 
             //- Read a character
-            virtual Istream& read(char&);
+            virtual Istream& read(char& c);
 
             //- Read a word
-            virtual Istream& read(word&);
+            virtual Istream& read(word& str);
 
             //- Read a string (including enclosing double-quotes).
             //  Backslashes are retained, except when escaping double-quotes
             //  and an embedded newline character.
-            virtual Istream& read(string&);
+            virtual Istream& read(string& str);
 
             //- Read a label
-            virtual Istream& read(label&);
+            virtual Istream& read(label& val);
 
             //- Read a floatScalar
-            virtual Istream& read(floatScalar&);
+            virtual Istream& read(floatScalar& val);
 
             //- Read a doubleScalar
-            virtual Istream& read(doubleScalar&);
+            virtual Istream& read(doubleScalar& val);
 
             //- Read binary block
-            virtual Istream& read(char*, std::streamsize);
+            virtual Istream& read(char* buf, std::streamsize count);
 
             //- Rewind and return the stream so that it may be read again
             virtual Istream& rewind();
@@ -169,20 +169,20 @@ public:
 
         // Stream state functions
 
-            //- Set flags of output stream
+            //- Set stream flags
             virtual ios_base::fmtflags flags(const ios_base::fmtflags flags);
 
 
         // STL stream
 
             //- Access to underlying std::istream
-            virtual istream& stdStream()
+            virtual std::istream& stdStream()
             {
                 return is_;
             }
 
             //- Const access to underlying std::istream
-            virtual const istream& stdStream() const
+            virtual const std::istream& stdStream() const
             {
                 return is_;
             }
@@ -191,7 +191,7 @@ public:
         // Print
 
             //- Print description of IOstream to Ostream
-            virtual void print(Ostream&) const;
+            virtual void print(Ostream& os) const;
 };
 
 

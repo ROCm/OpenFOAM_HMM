@@ -27,28 +27,36 @@ License
 #include "ListOps.H"
 #include "clock.H"
 #include "PackedBoolList.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "OSspecific.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::fileFormats::STARCDCore::fileHeader>
-    Foam::fileFormats::STARCDCore::fileHeaders_
-    {
-        { fileHeader::HEADER_CEL, "PROSTAR_CELL" },
-        { fileHeader::HEADER_VRT, "PROSTAR_VERTEX" },
-        { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" }
-    };
+const Foam::Enum
+<
+    Foam::fileFormats::STARCDCore::fileHeader
+>
+Foam::fileFormats::STARCDCore::fileHeaders_
+{
+    { fileHeader::HEADER_CEL, "PROSTAR_CELL" },
+    { fileHeader::HEADER_VRT, "PROSTAR_VERTEX" },
+    { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" }
+};
 
-const Foam::Enum<Foam::fileFormats::STARCDCore::fileExt>
-    Foam::fileFormats::STARCDCore::fileExtensions_
-    {
-        { fileExt::CEL_FILE, "cel" },
-        { fileExt::VRT_FILE, "vrt" },
-        { fileExt::BND_FILE, "bnd" },
-        { fileExt::INP_FILE, "inp" }
-    };
+
+const Foam::Enum
+<
+    Foam::fileFormats::STARCDCore::fileExt
+>
+Foam::fileFormats::STARCDCore::fileExtensions_
+{
+    { fileExt::CEL_FILE, "cel" },
+    { fileExt::VRT_FILE, "vrt" },
+    { fileExt::BND_FILE, "bnd" },
+    { fileExt::INP_FILE, "inp" }
+};
+
 
 const char* const Foam::fileFormats::STARCDCore::defaultBoundaryName =
     "Default_Boundary_Region";

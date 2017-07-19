@@ -1632,7 +1632,7 @@ bool Foam::meshRefinement::isNormalGap
             d /= magD;
 
             // Check average normal with respect to intersection locations
-            if (mag(avg&d) > Foam::cos(degToRad(45)))
+            if (mag(avg&d) > Foam::cos(45.0_deg))
             {
                 return true;
             }

@@ -25,8 +25,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "OStringStream.H"
 #include "IOstreams.H"
+#include "StringStream.H"
 
 using namespace Foam;
 
@@ -35,15 +35,28 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Info<< "khkj" << endl;
+    Info<< "Begin test OStringStream" << endl;
 
-    OStringStream testStream;
-    testStream << "hello " << 1 << endl;
-    Info<< testStream.str() << endl;
-    testStream.rewind();
-    Info<< testStream.str() << endl;
-    testStream << "hello " << 2 << endl;
-    Info<< testStream.str() << endl;
+    OStringStream os;
+    os << "output with some values " << 1 << " entry" << endl;
+
+    Info<< "contains:" << nl
+        << os.str() << endl;
+    os.rewind();
+
+    Info<< "after rewind:" << nl
+        << os.str() << endl;
+
+    os << "####";
+
+    Info<< "overwrite with short string:" << nl
+        << os.str() << endl;
+
+    os.reset();
+    os << "%%%% reset";
+
+    Info<< "after reset:" << nl
+        << os.str() << endl;
 
     Info<< "End\n" << endl;
 
