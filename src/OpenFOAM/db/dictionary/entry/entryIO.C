@@ -246,6 +246,15 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
             token nextToken(is);
             is.putBack(nextToken);
 
+            if (nextToken == token::END_LIST)
+            {
+                FatalIOErrorInFunction(is)
+                    << "Unexpected token encountered for "
+                    << keyword << " - " << nextToken.info()
+                    << exit(FatalIOError);
+                return false;
+            }
+
             // Deal with duplicate entries
             bool mergeEntry = false;
 
@@ -288,7 +297,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
                 else if (functionEntries::inputModeEntry::error())
                 {
                     FatalIOErrorInFunction(is)
-                        << "ERROR! duplicate entry: " << keyword
+                        << "duplicate entry: " << keyword
                         << exit(FatalIOError);
 
                     return false;
@@ -320,33 +329,28 @@ Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    keyType keyword;
+    autoPtr<entry> ptr(nullptr);
 
     // Get the next keyword and if invalid return false
-    if (!getKeyword(keyword, is))
+    keyType keyword;
+    if (getKeyword(keyword, is))
     {
-        return autoPtr<entry>(nullptr);
-    }
-    else // Keyword starts entry ...
-    {
+        // Keyword starts entry ...
         token nextToken(is);
         is.putBack(nextToken);
 
         if (nextToken == token::BEGIN_BLOCK)
         {
-            return autoPtr<entry>
-            (
-                new dictionaryEntry(keyword, dictionary::null, is)
-            );
+            // A sub-dictionary
+            ptr.reset(new dictionaryEntry(keyword, dictionary::null, is));
         }
         else
         {
-            return autoPtr<entry>
-            (
-                new primitiveEntry(keyword, is)
-            );
+            ptr.reset(new primitiveEntry(keyword, is));
         }
     }
+
+    return ptr;
 }
 
 

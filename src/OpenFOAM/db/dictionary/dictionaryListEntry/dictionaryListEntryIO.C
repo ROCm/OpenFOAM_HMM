@@ -60,11 +60,11 @@ Foam::dictionaryListEntry::dictionaryListEntry
     token firstToken(is);
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label sz = firstToken.labelToken();
 
         is.readBeginList("List");
 
-        for (label i=0; i<s; i++)
+        for (label i=0; i<sz; ++i)
         {
             entry::New(*this, is);
         }
@@ -79,7 +79,13 @@ Foam::dictionaryListEntry::dictionaryListEntry
         while (true)
         {
             token nextToken(is);
-            if
+            if (nextToken.error())
+            {
+                FatalIOErrorInFunction(is)
+                    << "parsing error " << nextToken.info()
+                    << exit(FatalIOError);
+            }
+            else if
             (
                 nextToken.isPunctuation()
              && nextToken.pToken() == token::END_LIST
