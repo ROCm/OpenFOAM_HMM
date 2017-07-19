@@ -30,7 +30,7 @@ Description
 #include "uLabel.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 

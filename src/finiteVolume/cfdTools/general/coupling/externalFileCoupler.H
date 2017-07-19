@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::externalCoupler
+    Foam::externalFileCoupler
 
 Description
     Encapsulates the logic for coordinating between OpenFOAM and an
@@ -57,13 +57,32 @@ Description
     }
     \endverbatim
 
+    A typical coupling loop would look like this (on the master-side):
+    \verbatim
+        initialize - master takes control
+        write data for slave
+        use slave, wait for slave
+        cleanup old data from master
+        read data from slave
+        use master
+    \endverbatim
+
+    On the slave-side:
+    \verbatim
+        wait for master
+        read data from master
+        write data for master
+        use master
+    \endverbatim
+
 SourceFiles
-    externalCoupler.C
+    externalFileCoupler.C
+    externalFileCouplerI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef externalCoupler_H
-#define externalCoupler_H
+#ifndef externalFileCoupler_H
+#define externalFileCoupler_H
 
 #include "fileName.H"
 #include "dictionary.H"
@@ -74,20 +93,26 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class externalCoupler Declaration
+                     Class externalFileCoupler Declaration
 \*---------------------------------------------------------------------------*/
 
-class externalCoupler
+class externalFileCoupler
 {
-    //- The run state (ie, who is currently in charge)
-    enum runState
-    {
-        NONE,       //!< Not initialized
-        MASTER,     //!< The master (OpenFOAM) is in charge
-        SLAVE,      //!< The slave (external program) is in charge
-        DONE        //!< Finished
-    };
+public:
 
+    // Public data types
+
+        //- The run state (ie, who is currently in charge)
+        enum runState
+        {
+            NONE,       //!< Not initialized
+            MASTER,     //!< The master (OpenFOAM) is in charge
+            SLAVE,      //!< The slave (external program) is in charge
+            DONE        //!< Finished
+        };
+
+
+private:
 
     // Private data
 
@@ -103,7 +128,7 @@ class externalCoupler
         //- Timeout [s] while waiting for the external application
         unsigned timeOut_;
 
-        //- Flag to indicate values are initialized by external application
+        //- Flag to indicate values are initialized by external program
         bool slaveFirst_;
 
         //- Local logging/verbosity flag
@@ -112,22 +137,17 @@ class externalCoupler
 
     // Private Member Functions
 
-        //- Return the file path to the base communications directory
-        const fileName& baseDir() const;
-
-        //- Return the file path to the lock file
-        fileName lockFile() const;
-
-        //- Disallow default bitwise copy construc
-        externalCoupler(const externalCoupler&) = delete;
+        //- Disallow default bitwise copy construct
+        externalFileCoupler(const externalFileCoupler&) = delete;
 
         //- Disallow default bitwise assignmen
-        void operator=(const externalCoupler&) = delete;
+        void operator=(const externalFileCoupler&) = delete;
+
 
 public:
 
     //- Runtime type information
-    TypeName("externalCoupler");
+    TypeName("externalFileCoupler");
 
 
     // Static data members
@@ -138,48 +158,98 @@ public:
 
     // Constructors
 
-        //- Construct null using standard defaults
-        externalCoupler();
+        //- Construct using standard defaults.
+        //  Does not create communications directory.
+        externalFileCoupler();
+
+        //- Construct with specified communications directory.
+        //  Creates the communications directory upon construction.
+        externalFileCoupler(const fileName& commsDir);
 
         //- Construct from dictionary
-        externalCoupler(const dictionary& dict);
+        //  Creates the communications directory upon construction.
+        externalFileCoupler(const dictionary& dict);
 
 
     //- Destructor
-    virtual ~externalCoupler();
+    virtual ~externalFileCoupler();
 
 
     // Member Functions
 
-      // Access
+      // Initialization
 
         //- True if state has been initialized
-        bool initialized() const;
+        inline bool initialized() const;
 
         //- External application provides initial values
-        bool slaveFirst() const;
+        inline bool slaveFirst() const;
+
+
+      // File locations
+
+        //- Return the file path to the base communications directory
+        inline const fileName& commDirectory() const;
+
+        //- Return the file path in the communications directory
+        inline fileName resolveFile(const word& file) const;
+
+        //- Return the file path to the lock file
+        inline fileName lockFile() const;
+
+
+      // Settings
+
+        //- Read communication settings from dictionary
+        bool readDict(const dictionary& dict);
+
+
+      // Handshaking
 
         //- Create lock file to indicate that OpenFOAM is in charge
-        //  Optionally wait for master as well.
+        //  Optionally wait for master to complete as well.
         void useMaster(const bool wait=false) const;
 
-        //- Wait for indication that OpenFOAM has supplied output.
-        //  This is when the lock file disappears, or it exists but with
+        //- Remove lock file to indicate that the external program is in charge
+        //  Optionally wait for slave to complete as well.
+        void useSlave(const bool wait=false) const;
+
+
+        //- Wait for master to complete.
+        //  This is when the lock file disappears, or exists but has
         //  "status=done" content.
         //  \return False if lock file contains "status=done"
         bool waitForMaster() const;
 
-        //- Remove lock file to indicate that the external program is in charge
-        //  Optionally wait for slave as well.
-        void useSlave(const bool wait=false) const;
-
-        //- Wait for indication that the external program has supplied input.
+        //- Wait for slave to complete.
         //  This is when the lock file appears.
         //  \return False if lock file contains "status=done"
         bool waitForSlave() const;
 
-        //- Return the file path in the communications directory
-        fileName resolveFile(const word& file) const;
+
+      // File creation, removal
+
+        //- Read data files on master (OpenFOAM).
+        //  These data files are normally created by the slave.
+        virtual void readDataMaster();
+
+        //- Read data files on slave (external program).
+        //  These data files are normally created by the master.
+        virtual void readDataSlave();
+
+
+        //- Write data files from master (OpenFOAM)
+        virtual void writeDataMaster() const;
+
+        //- Write data files from slave (external program)
+        virtual void writeDataSlave() const;
+
+
+        //- Remove data files written by master (OpenFOAM)
+        virtual void removeDataMaster() const;
+
+        //- Remove data files written by slave (external program)
+        virtual void removeDataSlave() const;
 
         //- Generate status=done in lock (only when run-state = master)
         void shutdown() const;
@@ -188,17 +258,16 @@ public:
         void removeDirectory() const;
 
 
-      // Edit
-
-        //- Read communication settings from dictionary
-        bool readDict(const dictionary& dict);
-
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "externalFileCouplerI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -274,7 +274,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
-    std::ofstream os(filename.c_str());
+    std::ofstream os(filename);
 
     autoPtr<vtk::formatter> format =
         vtk::newFormatter(os, fmtType);
@@ -332,7 +332,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    std::ofstream os(filename.c_str());
+    std::ofstream os(filename);
 
     autoPtr<vtk::formatter> format =
         vtk::newFormatter(os, fmtType);

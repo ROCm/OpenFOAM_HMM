@@ -84,19 +84,19 @@ public:
     // Constructors
 
         //- Store object pointer
-        inline explicit tmp(T* = 0);
+        inline explicit tmp(T* tPtr = nullptr);
 
         //- Store object const reference
-        inline tmp(const T&);
+        inline tmp(const T& tRef);
 
         //- Construct copy and increment reference count
-        inline tmp(const tmp<T>&);
+        inline tmp(const tmp<T>& t);
 
         //- Construct copy moving content, does not increment reference count
-        inline tmp(const tmp<T>&&);
+        inline tmp(const tmp<T>&& t);
 
         //- Construct copy transferring content of temporary if required
-        inline tmp(const tmp<T>&, bool allowTransfer);
+        inline tmp(const tmp<T>& t, bool allowTransfer);
 
 
     //- Destructor: deletes temporary object when the reference count is 0
@@ -159,10 +159,10 @@ public:
         inline const T* operator->() const;
 
         //- Assignment to pointer changing this tmp to a temporary T
-        inline void operator=(T*);
+        inline void operator=(T* tPtr);
 
         //- Assignment transfering the temporary T to this tmp
-        inline void operator=(const tmp<T>&);
+        inline void operator=(const tmp<T>& t);
 };
 
 

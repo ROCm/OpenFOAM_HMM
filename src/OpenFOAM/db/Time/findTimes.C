@@ -30,7 +30,7 @@ Description
 
 #include "Time.H"
 #include "OSspecific.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

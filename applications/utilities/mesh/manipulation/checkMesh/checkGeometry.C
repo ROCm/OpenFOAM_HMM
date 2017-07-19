@@ -14,7 +14,6 @@
 #include "vtkSurfaceWriter.H"
 #include "writer.H"
 
-#include "checkTools.H"
 #include "cyclicAMIPolyPatch.H"
 #include "Time.H"
 

@@ -266,7 +266,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     const MeshedSurfaceProxy<Face>& surf
 )
 {
-    std::ofstream os(filename.c_str(), std::ios::binary);
+    std::ofstream os(filename, std::ios::binary);
     if (!os.good())
     {
         FatalErrorInFunction
@@ -381,7 +381,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    std::ofstream os(filename.c_str(), std::ios::binary);
+    std::ofstream os(filename, std::ios::binary);
     if (!os.good())
     {
         FatalErrorInFunction

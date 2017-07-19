@@ -42,7 +42,7 @@ Description
 
     where the actual entries depend on the bc type:
     - mixed: value, snGrad, refValue, refGrad, valueFraction
-    - externalCoupledMixed: output of writeData
+    - externalCoupledMixed: output of writeDataMaster
     - other: value, snGrad
 
     These text files are located in a user specified communications directory
@@ -146,6 +146,7 @@ SourceFiles
 #define functionObjects_externalCoupled_H
 
 #include "functionObject.H"
+#include "externalFileCoupler.H"
 #include "DynamicList.H"
 #include "wordReList.H"
 #include "scalarField.H"
@@ -171,7 +172,8 @@ namespace functionObjects
 
 class externalCoupled
 :
-    public functionObject
+    public functionObject,
+    public externalFileCoupler
 {
 public:
 
@@ -190,29 +192,13 @@ private:
         //- State end names (NB, only selectable values itemized)
         static const Enum<stateEnd> stateEndNames_;
 
-
     // Private data
 
         //- Reference to the time database
         const Time& time_;
 
-        //- Path to communications directory
-        fileName commsDir_;
-
-        //- Interval time between checking for return data [s]
-        unsigned waitInterval_;
-
-        //- Time out time [s]
-        unsigned timeOut_;
-
         //- Calculation frequency
         label calcFrequency_;
-
-        //- Flag to indicate values are initialised by external application
-        bool slaveFirst_;
-
-        //- Lockfile state on termination
-        mutable stateEnd stateEnd_;
 
         //- Names of (composite) regions
         DynamicList<word> regionGroupNames_;
@@ -232,8 +218,8 @@ private:
         // Per group the names of the fields to write
         DynamicList<wordList> groupWriteFields_;
 
-        //- Initialised flag
-        bool initialised_;
+        //- Initialised coupling
+        bool initialisedCoupling_;
 
 
     // Private Member Functions
@@ -246,32 +232,6 @@ private:
             const wordRe& groupName
         );
 
-        //- Return the file path to the base communications directory
-        fileName baseDir() const;
-
-        //- Return the file path to the lock file
-        fileName lockFile() const;
-
-
-        //- Create lock file to indicate that OpenFOAM is in charge
-        void useMaster() const;
-
-        //- Remove lock file to indicate that the external program is in charge
-        void useSlave() const;
-
-        //- Remove lock file or status=done in lock.
-        void cleanup() const;
-
-        //- Remove files written by OpenFOAM
-        void removeDataMaster() const;
-
-        //- Remove files written by external code
-        void removeDataSlave() const;
-
-        //- Wait for indication that the external program has supplied input
-        //  (ie, for the lock file to reappear).
-        void waitForSlave() const;
-
 
         //- Read data for a single region, single field
         template<class Type>
@@ -281,8 +241,6 @@ private:
             const wordRe& groupName,
             const word& fieldName
         );
-        //- Read data for all regions, all fields
-        void readData();
 
         //- Write data for a single region, single field
         template<class Type>
@@ -293,10 +251,7 @@ private:
             const word& fieldName
         ) const;
 
-        //- Write data for all regions, all fields
-        void writeData() const;
-
-        void initialise();
+        void initCoupling();
 
         //- Read (and distribute) scalar columns from stream. Every processor
         //  gets nRows (= patch size) of these. Note: could make its argument
@@ -339,11 +294,11 @@ public:
     //- Runtime type information
     TypeName("externalCoupled");
 
-    //- Name of lock file (normally 'OpenFOAM.lock')
-    static word lockName;
-
     //- Name of patch key, e.g. '// Patch:' when looking for start of patch data
     static string patchKey;
+
+    //- Inherited variable for logging
+    using functionObject::log;
 
 
     // Constructors
@@ -376,6 +331,21 @@ public:
 
         //- Write, currently a no-op
         virtual bool write();
+
+
+      // File creation, removal
+
+        //- Write data files (all regions, all fields) from master (OpenFOAM)
+        virtual void writeDataMaster() const;
+
+        //- Read data files (all regions, all fields) on master (OpenFOAM)
+        virtual void readDataMaster();
+
+        //- Remove data files written by master (OpenFOAM)
+        virtual void removeDataMaster() const;
+
+        //- Remove data files written by slave (external code)
+        virtual void removeDataSlave() const;
 
 
       // Other

@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "fileName.H"
 #include "dictionary.H"
 #include "JobInfo.H"
@@ -188,8 +188,8 @@ void Foam::error::exit(const int errNo)
             // Make a copy of the error to throw
             error errorException(*this);
 
-            // Rewind the message buffer for the next error message
-            messageStreamPtr_->rewind();
+            // Reset the message buffer for the next error message
+            messageStreamPtr_->reset();
 
             throw errorException;
         }
@@ -233,8 +233,8 @@ void Foam::error::abort()
             // Make a copy of the error to throw
             error errorException(*this);
 
-            // Rewind the message buffer for the next error message
-            messageStreamPtr_->rewind();
+            // Reset the message buffer for the next error message
+            messageStreamPtr_->reset();
 
             throw errorException;
         }

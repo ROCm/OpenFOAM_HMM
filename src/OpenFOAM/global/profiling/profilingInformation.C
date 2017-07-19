@@ -150,11 +150,7 @@ Foam::Ostream& Foam::profilingInformation::write
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const profilingInformation& info
-)
+Foam::Ostream& Foam::operator<<(Ostream& os, const profilingInformation& info)
 {
     return info.write(os);
 }

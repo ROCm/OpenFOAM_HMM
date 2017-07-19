@@ -26,7 +26,7 @@ License
 #include "TRIsurfaceFormat.H"
 #include "IFstream.H"
 #include "IOmanip.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "mergePoints.H"
 #include "Map.H"
 

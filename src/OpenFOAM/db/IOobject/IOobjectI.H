@@ -55,6 +55,12 @@ inline const Foam::word& Foam::IOobject::headerClassName() const
 }
 
 
+inline Foam::word& Foam::IOobject::headerClassName()
+{
+    return headerClassName_;
+}
+
+
 inline const Foam::string& Foam::IOobject::note() const
 {
     return note_;

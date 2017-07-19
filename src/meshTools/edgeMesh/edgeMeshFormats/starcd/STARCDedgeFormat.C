@@ -27,7 +27,7 @@ License
 #include "ListOps.H"
 #include "clock.H"
 #include "PackedBoolList.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

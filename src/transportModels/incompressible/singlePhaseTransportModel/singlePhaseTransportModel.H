@@ -28,7 +28,7 @@ Description
     A simple single-phase transport model based on viscosityModel.
 
     Used by the incompressible single-phase solvers like simpleFoam,
-    turbFoam etc.
+    pimpleFoam etc.
 
 SourceFiles
     singlePhaseTransportModel.C

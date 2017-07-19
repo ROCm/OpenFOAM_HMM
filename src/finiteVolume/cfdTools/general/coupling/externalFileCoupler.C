@@ -23,22 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "externalCoupler.H"
+#include "externalFileCoupler.H"
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
-#include "IFstream.H"
-#include "OFstream.H"
 #include "Switch.H"
+#include <fstream>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(externalCoupler, 0);
+    defineTypeNameAndDebug(externalFileCoupler, 0);
 }
 
-Foam::word Foam::externalCoupler::lockName = "OpenFOAM";
+Foam::word Foam::externalFileCoupler::lockName = "OpenFOAM";
 
 
 // file-scope
@@ -46,30 +45,16 @@ Foam::word Foam::externalCoupler::lockName = "OpenFOAM";
 static bool checkIsDone(const std::string& lck)
 {
     std::string content;
-    std::ifstream is(lck.c_str());
+    std::ifstream is(lck);
     is >> content;
 
     return (content.find("done") != std::string::npos);
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-const Foam::fileName& Foam::externalCoupler::baseDir() const
-{
-    return commsDir_;
-}
-
-
-Foam::fileName Foam::externalCoupler::lockFile() const
-{
-    return resolveFile(lockName + ".lock");
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::externalCoupler::externalCoupler()
+Foam::externalFileCoupler::externalFileCoupler()
 :
     runState_(NONE),
     commsDir_("$FOAM_CASE/comms"),
@@ -83,22 +68,41 @@ Foam::externalCoupler::externalCoupler()
 }
 
 
-Foam::externalCoupler::externalCoupler(const dictionary& dict)
+Foam::externalFileCoupler::externalFileCoupler(const fileName& commsDir)
 :
-    externalCoupler()
+    runState_(NONE),
+    commsDir_(commsDir),
+    waitInterval_(1u),
+    timeOut_(100u),
+    slaveFirst_(false),
+    log(false)
+{
+    commsDir_.expand();
+    commsDir_.clean();
+
+    if (Pstream::master())
+    {
+        mkDir(commsDir_);
+    }
+}
+
+
+Foam::externalFileCoupler::externalFileCoupler(const dictionary& dict)
+:
+    externalFileCoupler()
 {
     readDict(dict);
 
     if (Pstream::master())
     {
-        mkDir(baseDir());
+        mkDir(commsDir_);
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::externalCoupler::~externalCoupler()
+Foam::externalFileCoupler::~externalFileCoupler()
 {
     shutdown();
 }
@@ -106,14 +110,21 @@ Foam::externalCoupler::~externalCoupler()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::externalCoupler::readDict(const dictionary& dict)
+bool Foam::externalFileCoupler::readDict(const dictionary& dict)
 {
     // Normally cannot change directory or initialization
     // if things have already been initialized
-    dict.lookup("commsDir") >> commsDir_;
-    commsDir_.expand();
-    commsDir_.clean();
-    slaveFirst_ = dict.lookupOrDefault<bool>("initByExternal", false);
+    if (!initialized())
+    {
+        dict.lookup("commsDir") >> commsDir_;
+        commsDir_.expand();
+        commsDir_.clean();
+        slaveFirst_ = dict.lookupOrDefault<bool>("initByExternal", false);
+
+        Info<< type() << ": initialize" << nl
+            << "    directory: " << commsDir_ << nl
+            << "    slave-first: " << Switch(slaveFirst_) << endl;
+    }
 
     waitInterval_ = dict.lookupOrDefault("waitInterval", 1u);
     if (!waitInterval_)
@@ -130,19 +141,7 @@ bool Foam::externalCoupler::readDict(const dictionary& dict)
 }
 
 
-bool Foam::externalCoupler::initialized() const
-{
-    return runState_ != NONE;
-}
-
-
-bool Foam::externalCoupler::slaveFirst() const
-{
-    return slaveFirst_;
-}
-
-
-void Foam::externalCoupler::useMaster(const bool wait) const
+void Foam::externalFileCoupler::useMaster(const bool wait) const
 {
     const bool wasInit = initialized();
     runState_ = MASTER;
@@ -162,7 +161,7 @@ void Foam::externalCoupler::useMaster(const bool wait) const
         {
             Log << type() << ": creating lock file" << endl;
 
-            OFstream os(lck);
+            std::ofstream os(lck);
             os << "status=openfoam\n";
             os.flush();
         }
@@ -175,7 +174,7 @@ void Foam::externalCoupler::useMaster(const bool wait) const
 }
 
 
-void Foam::externalCoupler::useSlave(const bool wait) const
+void Foam::externalFileCoupler::useSlave(const bool wait) const
 {
     const bool wasInit = initialized();
     runState_ = SLAVE;
@@ -200,7 +199,7 @@ void Foam::externalCoupler::useSlave(const bool wait) const
 }
 
 
-bool Foam::externalCoupler::waitForMaster() const
+bool Foam::externalFileCoupler::waitForMaster() const
 {
     if (!initialized())
     {
@@ -212,7 +211,7 @@ bool Foam::externalCoupler::waitForMaster() const
     {
         const fileName lck(lockFile());
 
-        double prevTime = -1;
+        double prevTime = 0;
         double modTime = 0;
 
         // Wait until file disappears (modTime == 0)
@@ -239,7 +238,7 @@ bool Foam::externalCoupler::waitForMaster() const
 }
 
 
-bool Foam::externalCoupler::waitForSlave() const
+bool Foam::externalFileCoupler::waitForSlave() const
 {
     if (!initialized())
     {
@@ -281,23 +280,38 @@ bool Foam::externalCoupler::waitForSlave() const
 }
 
 
-Foam::fileName Foam::externalCoupler::resolveFile
-(
-    const word& file
-) const
-{
-    return fileName(baseDir()/file);
-}
+void Foam::externalFileCoupler::readDataMaster()
+{}
 
 
-void Foam::externalCoupler::shutdown() const
+void Foam::externalFileCoupler::readDataSlave()
+{}
+
+
+void Foam::externalFileCoupler::writeDataMaster() const
+{}
+
+
+void Foam::externalFileCoupler::writeDataSlave() const
+{}
+
+
+void Foam::externalFileCoupler::removeDataMaster() const
+{}
+
+
+void Foam::externalFileCoupler::removeDataSlave() const
+{}
+
+
+void Foam::externalFileCoupler::shutdown() const
 {
     if (Pstream::master() && runState_ == MASTER && Foam::isDir(commsDir_))
     {
         const fileName lck(lockFile());
 
         Log << type() << ": lock file status=done" << endl;
-        OFstream os(lck);
+        std::ofstream os(lck);
         os  << "status=done\n";
         os.flush();
     }

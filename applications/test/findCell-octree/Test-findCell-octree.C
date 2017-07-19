@@ -26,7 +26,6 @@ License
 #include "argList.H"
 #include "Time.H"
 #include "fvMesh.H"
-#include "IStringStream.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "OFstream.H"

@@ -55,8 +55,8 @@ namespace Foam
 
 class fileStat;
 
-Istream& operator>>(Istream&, fileStat&);
-Ostream& operator<<(Ostream&, const fileStat&);
+Istream& operator>>(Istream& is, fileStat& fStat);
+Ostream& operator<<(Ostream& os, const fileStat& fStat);
 
 
 /*---------------------------------------------------------------------------*\
@@ -96,7 +96,7 @@ public:
         );
 
         //- Construct from Istream
-        fileStat(Istream&);
+        fileStat(Istream& is);
 
 
     // Member Functions
@@ -115,6 +115,9 @@ public:
                 return isValid_;
             }
 
+            //- Size in bytes. Zero for invalid file-stat.
+            label size() const;
+
 
         // Check
 
@@ -130,8 +133,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, fileStat&);
-        friend Ostream& operator<<(Ostream&, const fileStat&);
+        friend Istream& operator>>(Istream& is, fileStat& fStat);
+        friend Ostream& operator<<(Ostream& os, const fileStat& fStat);
 };
 
 

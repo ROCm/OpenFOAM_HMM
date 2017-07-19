@@ -27,7 +27,6 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "processorPolyPatch.H"
-#include "stringListOps.H"
 #include "PstreamBuffers.H"
 #include "lduSchedule.H"
 #include "globalMeshData.H"

@@ -75,9 +75,9 @@ void Foam::functionObjects::wallHeatFlux::calcHeatFlux
         wallHeatFluxBf[patchi] = heatFluxBf[patchi];
     }
 
-    if (foundObject<volScalarField>("qr"))
+    if (foundObject<volScalarField>(qrName_))
     {
-        const volScalarField& qr = lookupObject<volScalarField>("qr");
+        const volScalarField& qr = lookupObject<volScalarField>(qrName_);
 
         const volScalarField::Boundary& radHeatFluxBf = qr.boundaryField();
 
@@ -100,7 +100,8 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    patchSet_()
+    patchSet_(),
+    qrName_("qr")
 {
     volScalarField* wallHeatFluxPtr
     (
@@ -147,6 +148,8 @@ bool Foam::functionObjects::wallHeatFlux::read(const dictionary& dict)
         (
             wordReList(dict.lookupOrDefault("patches", wordReList()))
         );
+
+    dict.readIfPresent("qr", qrName_);
 
     Info<< type() << " " << name() << ":" << nl;
 

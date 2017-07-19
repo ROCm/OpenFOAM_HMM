@@ -27,7 +27,7 @@ License
 #include "surfaceFormatsCore.H"
 #include "clock.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "OFstream.H"
 #include "faceTraits.H"
 

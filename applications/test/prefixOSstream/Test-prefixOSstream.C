@@ -31,7 +31,6 @@ Description
 #include "OSspecific.H"
 
 #include "IOstreams.H"
-#include "IStringStream.H"
 #include "scalar.H"
 #include "vector.H"
 #include "ListOps.H"
@@ -49,31 +48,26 @@ int main(int argc, char *argv[])
 
     //Pout.prefix() = '[' + name(Pstream::myProcNo()) + "] ";
 
-    List<vector> list(IStringStream("1 ((0 1 2))")());
+    List<vector> list{{0, 1, 2}};
     Info<< list << endl;
 
     List<vector> list2
-    (
-        IStringStream
-        (
-            "(\
-                 (0 1 2)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-                 (3 4 5)\
-             )"
-        )()
-    );
+    {
+        {0, 1, 2},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+        {3, 4, 5},
+    };
     Pout<< list2 << endl;
 
     Info<< findIndex(list2, vector(3, 4, 5)) << endl;

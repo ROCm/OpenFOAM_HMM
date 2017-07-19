@@ -411,6 +411,9 @@ $(general)/bound/bound.C
 $(general)/CorrectPhi/correctUphiBCs.C
 $(general)/pressureControl/pressureControl.C
 
+coupling = $(general)/coupling
+$(coupling)/externalFileCoupler.C
+
 solutionControl = $(general)/solutionControl
 $(solutionControl)/solutionControl/solutionControl.C
 $(solutionControl)/simpleControl/simpleControl.C

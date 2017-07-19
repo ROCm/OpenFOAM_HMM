@@ -96,7 +96,7 @@ public:
     //- Construct from dictionary
     Hanning(const dictionary& dict, const label nSamples);
 
-    //- Destuctor
+    //- Destructor
     virtual ~Hanning();
 
 

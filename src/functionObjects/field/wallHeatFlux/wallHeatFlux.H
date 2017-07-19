@@ -51,6 +51,7 @@ Usage
         Property | Description                | Required   | Default value
         type     | type name: wallHeatFlux    | yes        |
         patches  | list of patches to process | no         | all wall patches
+        qr       | name of radiative heat flux field | no  | qr
     \endtable
 
 See also
@@ -95,6 +96,9 @@ protected:
 
         //- Optional list of patches to process
         labelHashSet patchSet_;
+
+        //- Name of radiative heat flux name, default = qr
+        word qrName_;
 
 
     // Protected Member Functions

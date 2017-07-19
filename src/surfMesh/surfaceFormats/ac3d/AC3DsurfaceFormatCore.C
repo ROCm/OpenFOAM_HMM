@@ -26,7 +26,7 @@ License
 #include "AC3DsurfaceFormatCore.H"
 #include "clock.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 

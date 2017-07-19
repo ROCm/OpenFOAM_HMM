@@ -37,7 +37,7 @@ Description
 
 #include "triSurface.H"
 #include "IFstream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

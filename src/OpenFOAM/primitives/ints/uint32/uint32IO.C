@@ -27,8 +27,6 @@ License
 #include "stringOps.H"
 #include "IOstreams.H"
 
-#include <sstream>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::word Foam::name(const char* fmt, const uint32_t val)

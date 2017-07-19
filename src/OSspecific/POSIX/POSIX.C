@@ -724,13 +724,13 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         }
 
         // Open and check streams.
-        std::ifstream srcStream(src.c_str());
+        std::ifstream srcStream(src);
         if (!srcStream)
         {
             return false;
         }
 
-        std::ofstream destStream(destFile.c_str());
+        std::ofstream destStream(destFile);
         if (!destStream)
         {
             return false;

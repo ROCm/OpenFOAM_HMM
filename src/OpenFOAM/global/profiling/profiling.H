@@ -128,7 +128,7 @@ private:
     // Private Static Data Members
 
         //- Only one global pool object is possible
-        static profiling *pool_;
+        static profiling* pool_;
 
 
     // Private Data Members
@@ -200,14 +200,14 @@ protected:
         profilingInformation* find(const string& descr, const label parentId);
 
         //- Add to hashed storage,
-        //  returns pointer to newly stored element for chaining
+        //  \return pointer to newly stored element for chaining
         profilingInformation* store(profilingInformation* info);
 
         //- Add to stack and set timer lookup (based on Id)
         void push(profilingInformation* info, clockTime& timer);
 
         //- Remove from stack and remove timer lookup (based on Id).
-        //  Returns pointer to profiling information element
+        //  \return pointer to profiling information element
         profilingInformation* pop();
 
 

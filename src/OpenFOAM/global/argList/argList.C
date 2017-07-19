@@ -885,10 +885,9 @@ void Foam::argList::parse
         case_ = globalCase_;
     }
 
-
     stringList slaveProcs;
 
-    // Collect slave machine/pid
+    // Collect slave machine/pid, and check that the build is identical
     if (parRunControl_.parRun())
     {
         if (Pstream::master())
@@ -934,6 +933,18 @@ void Foam::argList::parse
         }
     }
 
+    // Keep or discard slave and root information for reporting:
+    if (Pstream::master() && parRunControl_.parRun())
+    {
+        if (!debug::infoSwitch("writeSlaves", 1))
+        {
+            slaveProcs.clear();
+        }
+        if (!debug::infoSwitch("writeRoots", 1))
+        {
+            roots.clear();
+        }
+    }
 
     if (Pstream::master() && bannerEnabled_)
     {
@@ -942,7 +953,10 @@ void Foam::argList::parse
 
         if (parRunControl_.parRun())
         {
-            Info<< "Slaves : " << slaveProcs << nl;
+            if (slaveProcs.size())
+            {
+                Info<< "Slaves : " << slaveProcs << nl;
+            }
             if (roots.size())
             {
                 Info<< "Roots  : " << roots << nl;

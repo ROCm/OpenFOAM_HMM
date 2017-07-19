@@ -26,7 +26,6 @@ License
 #include "fvMeshTools.H"
 #include "processorCyclicPolyPatch.H"
 #include "polyBoundaryMeshEntries.H"
-#include "fvMeshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

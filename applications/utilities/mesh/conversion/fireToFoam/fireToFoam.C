@@ -35,7 +35,7 @@ Usage
 
     Options:
 
-      - \param -ascii
+      - \par -ascii
         Write in ASCII format instead of binary
 
       - \par -check

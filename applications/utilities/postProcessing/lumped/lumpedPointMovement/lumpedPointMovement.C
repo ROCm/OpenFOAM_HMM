@@ -29,7 +29,7 @@ Description
     points/rotations and the corresponding movement of the building surfaces.
     Uses the tabulated responses from the specified file.
     Optionally, it can also be used to a dummy responder for the
-    externalCoupler logic, which makes it useful as a debugging facility
+    externalFileCoupler logic, which makes it useful as a debugging facility
     as well demonstrating how an external application could communicate
     with the lumpedPointMovement point-patch boundary condition.
 
@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Running as slave responder" << endl;
 
-        externalCoupler& coupler = movement().coupler();
+        externalFileCoupler& coupler = movement().coupler();
 
         label count = 0;
         for (label index = 0; index < responseTable.size(); index += span)

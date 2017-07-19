@@ -34,8 +34,6 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "IOstreams.H"
-#include "OStringStream.H"
-#include "IStringStream.H"
 
 using namespace Foam;
 

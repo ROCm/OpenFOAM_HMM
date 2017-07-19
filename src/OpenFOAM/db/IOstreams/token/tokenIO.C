@@ -39,7 +39,7 @@ Foam::token::token(Istream& is)
 }
 
 
-// * * * * * * * * * * * * IOstream operators  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, token& t)
 {
