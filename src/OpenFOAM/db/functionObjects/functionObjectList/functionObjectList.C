@@ -334,15 +334,15 @@ bool Foam::functionObjectList::readFunctionObject
 
 Foam::functionObjectList::functionObjectList
 (
-    const Time& t,
+    const Time& runTime,
     const bool execution
 )
 :
     PtrList<functionObject>(),
     digests_(),
     indices_(),
-    time_(t),
-    parentDict_(t.controlDict()),
+    time_(runTime),
+    parentDict_(runTime.controlDict()),
     stateDictPtr_(),
     execution_(execution),
     updated_(false)
@@ -351,7 +351,7 @@ Foam::functionObjectList::functionObjectList
 
 Foam::functionObjectList::functionObjectList
 (
-    const Time& t,
+    const Time& runTime,
     const dictionary& parentDict,
     const bool execution
 )
@@ -359,7 +359,7 @@ Foam::functionObjectList::functionObjectList
     PtrList<functionObject>(),
     digests_(),
     indices_(),
-    time_(t),
+    time_(runTime),
     parentDict_(parentDict),
     stateDictPtr_(),
     execution_(execution),

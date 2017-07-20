@@ -211,7 +211,8 @@ void Foam::ccm::reader::readProblemDescription
 
 
 // readInterfaceDefinitions:
-// - get /InterfaceDefinitions. used by STARCCM to define in-place interfaces, etc
+// - get /InterfaceDefinitions.
+//   used by STARCCM to define in-place interfaces, etc
 // - only handle in-place one here
 void Foam::ccm::reader::readInterfaceDefinitions()
 {
@@ -388,7 +389,8 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             )
             {
 #ifdef DEBUG_CCMIOREAD
-                Info<< "boundary is on an interface: remap name for  " << Id << endl;
+                Info<< "boundary is on an interface: remap name for  "
+                    << Id << endl;
 #endif
                 // Substitute immediately with interface name
                 str = interfaceDefinitions_.interfaceName(Id);

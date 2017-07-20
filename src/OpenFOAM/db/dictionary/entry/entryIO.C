@@ -190,8 +190,8 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
                 // Do not allow empty substitutions.
                 stringOps::inplaceExpand(expanded, parentDict, true, false);
 
-                // Restore the '$' prefix. Use replace since operator= is private
-
+                // Restore the '$' prefix.
+                // Use replace since operator= is private
                 keyword.std::string::replace(1, keyword.size()-1, expanded);
             }
 

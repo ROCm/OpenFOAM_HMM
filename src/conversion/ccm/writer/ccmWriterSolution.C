@@ -253,8 +253,8 @@ void Foam::ccm::writer::writeSolution
             processorNode,
             topoFileName.c_str(), &verticesNode,// verticesFile, verticesNode
             topoFileName.c_str(), &topoNode,    // topologyFile, topologyNode
-            nullptr, nullptr,                   // initialField unchanged
-            nullptr, nullptr                    // no solutionFile, solution unchanged
+            nullptr, nullptr,   // initialField unchanged
+            nullptr, nullptr    // no solutionFile, solution unchanged
         );
     }
     assertNoError("Error after writing geometry processor");

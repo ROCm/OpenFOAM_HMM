@@ -302,7 +302,8 @@ void Foam::lumpedPointMovement::setBoundBox
         centre_ -= (centre_ & axis_) * axis_;
         if (lumpedPointIOMovement::debug)
         {
-            Pout<<"autoCentre on " << centre_ << " boundBox: " << boundBox_ << endl;
+            Pout<<"autoCentre on " << centre_
+                << " boundBox: " << boundBox_ << endl;
         }
     }
     else
@@ -310,7 +311,8 @@ void Foam::lumpedPointMovement::setBoundBox
         // User-specified centre
         if (lumpedPointIOMovement::debug)
         {
-            Pout<<"centre on " << centre_ << " boundBox: " << boundBox_ << endl;
+            Pout<<"centre on " << centre_
+                << " boundBox: " << boundBox_ << endl;
         }
     }
 }

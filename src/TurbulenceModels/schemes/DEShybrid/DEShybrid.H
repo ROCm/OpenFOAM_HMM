@@ -76,14 +76,14 @@ Description
         .
         .
         div(phi,U)      Gauss DEShybrid
-            linear                        // scheme 1
-            linearUpwind grad(U)          // scheme 2
-            0.65                          // DES coefficient, typically = 0.65
-            30                            // Reference velocity scale
-            2                             // Reference length scale
-            0                             // Minimum sigma limit (0-1)
-            1                             // Maximum sigma limit (0-1)
-            1.0e-03;                      // Limiter of B function, typically 1.0e-03
+            linear                    // scheme 1
+            linearUpwind grad(U)      // scheme 2
+            0.65                      // DES coefficient, typically = 0.65
+            30                        // Reference velocity scale
+            2                         // Reference length scale
+            0                         // Minimum sigma limit (0-1)
+            1                         // Maximum sigma limit (0-1)
+            1.0e-03;                  // Limiter of B function, typically 1e-03
         .
         .
     }
@@ -98,8 +98,9 @@ Notes
     solvers by default.  In order to use the scheme, add the library as a
     run-time loaded library in the \$FOAM\_CASE/system/controlDict
     dictionary, e.g.:
-
+    \verbatim
         libs ("libturbulenceModelSchemes.so");
+    \endverbatim
 
 SourceFiles
     DEShybrid.C
@@ -122,7 +123,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          class DEShybrid Declaration
+                          Class DEShybrid Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -199,7 +200,11 @@ class DEShybrid
             const volScalarField g(tanh(pow4(B)));
             const volScalarField A
             (
-                 CH2_*max(scalar(0), CDES_*delta/max(lTurb*g, 1.0e-15*L0_) - 0.5)
+                CH2_*max
+                (
+                    scalar(0),
+                    CDES_*delta/max(lTurb*g, 1.0e-15*L0_) - 0.5
+                )
             );
 
             const volScalarField factor
@@ -266,37 +271,37 @@ public:
             if (U0_.value() <= 0)
             {
                 FatalErrorInFunction
-                    << "U0 coefficient must be greater than 0. "
+                    << "U0 coefficient must be > 0. "
                     << "Current value: " << U0_ << exit(FatalError);
             }
             if (L0_.value() <= 0)
             {
                 FatalErrorInFunction
-                    << "L0 coefficient must be greater than 0. "
+                    << "L0 coefficient must be > 0. "
                     << "Current value: " << L0_ << exit(FatalError);
             }
             if (sigmaMin_ < 0)
             {
                 FatalErrorInFunction
-                    << "sigmaMin coefficient must be greater than or equal to 0. "
+                    << "sigmaMin coefficient must be >= 0. "
                     << "Current value: " << sigmaMin_ << exit(FatalError);
             }
             if (sigmaMax_ < 0)
             {
                 FatalErrorInFunction
-                    << "sigmaMax coefficient must be greater than or equal to 0. "
+                    << "sigmaMax coefficient must be >= 0. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
             }
             if (sigmaMin_ > 1)
             {
                 FatalErrorInFunction
-                    << "sigmaMin coefficient must be less than or equal to 1. "
+                    << "sigmaMin coefficient must be <= 1. "
                     << "Current value: " << sigmaMin_ << exit(FatalError);
             }
             if (sigmaMax_ > 1)
             {
                 FatalErrorInFunction
-                    << "sigmaMax coefficient must be less than or equal to 1. "
+                    << "sigmaMax coefficient must be <= 1. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
             }
         }
@@ -331,37 +336,37 @@ public:
             if (U0_.value() <= 0)
             {
                 FatalErrorInFunction
-                    << "U0 coefficient must be greater than 0. "
+                    << "U0 coefficient must be > 0. "
                     << "Current value: " << U0_ << exit(FatalError);
             }
             if (L0_.value() <= 0)
             {
                 FatalErrorInFunction
-                    << "L0 coefficient must be greater than 0. "
+                    << "L0 coefficient must be > 0. "
                     << "Current value: " << U0_ << exit(FatalError);
             }
             if (sigmaMin_ < 0)
             {
                 FatalErrorInFunction
-                    << "sigmaMin coefficient must be greater than or equal to 0. "
+                    << "sigmaMin coefficient must be >= 0. "
                     << "Current value: " << sigmaMin_ << exit(FatalError);
             }
             if (sigmaMax_ < 0)
             {
                 FatalErrorInFunction
-                    << "sigmaMax coefficient must be greater than or equal to 0. "
+                    << "sigmaMax coefficient must be >= 0. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
             }
             if (sigmaMin_ > 1)
             {
                 FatalErrorInFunction
-                    << "sigmaMin coefficient must be less than or equal to 1. "
+                    << "sigmaMin coefficient must be <= 1. "
                     << "Current value: " << sigmaMin_ << exit(FatalError);
             }
             if (sigmaMax_ > 1)
             {
                 FatalErrorInFunction
-                    << "sigmaMax coefficient must be less than or equal to 1. "
+                    << "sigmaMax coefficient must be <= 1. "
                     << "Current value: " << sigmaMax_ << exit(FatalError);
             }
         }

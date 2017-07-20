@@ -287,7 +287,8 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::updateCoeffs()
             }
             else
             {
-                Info<< "Area-averaged pressure difference = " << valueDiff << endl;
+                Info<< "Area-averaged pressure difference = "
+                    << valueDiff << endl;
             }
         }
 

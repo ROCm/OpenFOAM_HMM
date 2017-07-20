@@ -380,7 +380,9 @@ Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::R
 
     if (this->active())
     {
-        const label specieI = this->thermo().composition().species()[Y.member()];
+        const label specieI =
+            this->thermo().composition().species()[Y.member()];
+
         Su += this->chemistryPtr_->RR(specieI);
     }
 

@@ -130,7 +130,8 @@ Foam::functionObjects::runTimePostPro::pointData::pointData
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::functionObjects::runTimePostPro::pointData> Foam::functionObjects::runTimePostPro::pointData::New
+Foam::autoPtr<Foam::functionObjects::runTimePostPro::pointData>
+Foam::functionObjects::runTimePostPro::pointData::New
 (
     const runTimePostProcessing& parent,
     const dictionary& dict,

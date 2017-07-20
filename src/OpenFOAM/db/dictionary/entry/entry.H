@@ -85,7 +85,8 @@ class entry
         );
 
         //- Get the next valid keyword.
-        //  Warn when an invalid token is encountered that is not an end-of-block or eof
+        //  Warn when an invalid token is encountered that is not EOF or
+        //  end-of-block
         //  \return True if it is a valid keyType.
         static bool getKeyword(keyType& keyword, Istream& is);
 

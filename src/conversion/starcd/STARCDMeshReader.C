@@ -864,7 +864,9 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
                     if (prostarShapeLookup.found(mapIndex))
                     {
                         mapIndex = prostarShapeLookup[mapIndex];
-                        cellFaceId = STARCDCore::starToFoamFaceAddr[mapIndex][cellFaceId];
+                        cellFaceId =
+                            STARCDCore::starToFoamFaceAddr
+                            [mapIndex][cellFaceId];
                     }
                 }
                 else
