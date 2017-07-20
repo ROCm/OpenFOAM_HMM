@@ -262,7 +262,7 @@ bool Foam::entry::New
     }
     else
     {
-        // Normal entry
+        // Normal or scoped entry
 
         token nextToken(is);
         is.putBack(nextToken);
@@ -279,11 +279,25 @@ bool Foam::entry::New
         // How to manage duplicate entries
         bool mergeEntry = false;
 
+        const bool scoped =
+        (
+            !disableFunctionEntries
+         && (keyword.find('/') != string::npos)
+        );
+
         // See (using exact match) if entry already present
-        auto finder = parentDict.search(keyword, false, false);
+        auto finder =
+        (
+            scoped
+          ? parentDict.searchScoped(keyword, false, false)
+          : parentDict.search(keyword, false, false)
+        );
 
         if (finder.found())
         {
+            // Use keyword from the found entry (ie, eliminate scoping chars)
+            const keyType key = finder.ref().keyword();
+
             if (mode == inputMode::MERGE)
             {
                 mergeEntry = true;
@@ -306,11 +320,11 @@ bool Foam::entry::New
 
                 if (nextToken == token::BEGIN_BLOCK)
                 {
-                    dictionaryEntry dummy("dummy", parentDict, is);
+                    dictionaryEntry dummy("dummy", finder.context(), is);
                 }
                 else
                 {
-                    primitiveEntry  dummy("dummy", parentDict, is);
+                    primitiveEntry  dummy("dummy", finder.context(), is);
                 }
 
                 entry::disableFunctionEntries = oldFlag;
@@ -319,29 +333,109 @@ bool Foam::entry::New
             else if (mode == inputMode::ERROR)
             {
                 FatalIOErrorInFunction(is)
-                    << "duplicate entry: " << keyword
+                    << "duplicate entry: " << key
                     << exit(FatalIOError);
 
                 return false;
             }
+
+            // Merge/overwrite data entry
+
+            if (nextToken == token::BEGIN_BLOCK)
+            {
+                return finder.context().add
+                (
+                    new dictionaryEntry(key, finder.context(), is),
+                    mergeEntry
+                );
+            }
+            else
+            {
+                return finder.context().add
+                (
+                    new primitiveEntry(key, finder.context(), is),
+                    mergeEntry
+                );
+            }
         }
-
-
-        if (nextToken == token::BEGIN_BLOCK)
+        else if (scoped)
         {
-            return parentDict.add
-            (
-                new dictionaryEntry(keyword, parentDict, is),
-                mergeEntry
-            );
+            // A slash-scoped entry - did not previously exist
+
+            string fullPath(keyword);
+            fileName::clean(fullPath);
+
+            // Get or create the dictionary-path.
+            // fileName::path == dictionary-path
+            dictionary* subDictPtr =
+                parentDict.makeScopedDictPtr
+                (
+                    fileName::path(fullPath)
+                );
+
+            if (subDictPtr)
+            {
+                // fileName::name == keyword-name
+                string keyName = fileName::name(fullPath);
+                keyType key;
+
+                // Patterns allowed for the final element.
+                // - use if key name begins with a (single|double) quote
+
+                if (keyName.find_first_of("\"'") == 0)
+                {
+                    // Begins with a quote - treat as pattern
+                    key = keyType(string::validate<keyType>(keyName), true);
+                }
+                else
+                {
+                    // Treat as a word
+                    key = word::validate(keyName, false);
+                }
+
+                if (nextToken == token::BEGIN_BLOCK)
+                {
+                    return subDictPtr->add
+                    (
+                        new dictionaryEntry(key, *subDictPtr, is),
+                        mergeEntry
+                    );
+                }
+                else
+                {
+                    return subDictPtr->add
+                    (
+                        new primitiveEntry(key, *subDictPtr, is),
+                        mergeEntry
+                    );
+                }
+            }
+            else
+            {
+                // Some error finding/creating intermediate dictionaries
+                return false;
+            }
         }
         else
         {
-            return parentDict.add
-            (
-                new primitiveEntry(keyword, parentDict, is),
-                mergeEntry
-            );
+            // A non-scoped entry - did not previously exist
+
+            if (nextToken == token::BEGIN_BLOCK)
+            {
+                return parentDict.add
+                (
+                    new dictionaryEntry(keyword, parentDict, is),
+                    mergeEntry
+                );
+            }
+            else
+            {
+                return parentDict.add
+                (
+                    new primitiveEntry(keyword, parentDict, is),
+                    mergeEntry
+                );
+            }
         }
     }
 }
