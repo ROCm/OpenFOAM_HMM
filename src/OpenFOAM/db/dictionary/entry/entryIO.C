@@ -283,15 +283,21 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
                 }
                 else if (functionEntries::inputModeEntry::protect())
                 {
-                    // read and discard the entry
+                    // Read and discard the entry.
+                    // Disable function/variable expansion to avoid side-effects
+                    const int oldFlag = entry::disableFunctionEntries;
+                    entry::disableFunctionEntries = 1;
+
                     if (nextToken == token::BEGIN_BLOCK)
                     {
-                        dictionaryEntry dummy(keyword, parentDict, is);
+                        dictionaryEntry dummy("dummy", parentDict, is);
                     }
                     else
                     {
-                        primitiveEntry  dummy(keyword, parentDict, is);
+                        primitiveEntry  dummy("dummy", parentDict, is);
                     }
+
+                    entry::disableFunctionEntries = oldFlag;
                     return true;
                 }
                 else if (functionEntries::inputModeEntry::error())
