@@ -30,12 +30,14 @@ Description
 
 SourceFiles
     stringOps.C
+    stringOpsTemplates.C
 
 \*---------------------------------------------------------------------------*/
 #ifndef stringOps_H
 #define stringOps_H
 
 #include "string.H"
+#include "SubStrings.H"
 #include "word.H"
 #include "dictionary.H"
 #include "HashTable.H"
@@ -302,13 +304,20 @@ namespace stringOps
     Foam::word name(const std::string& fmt, const PrimitiveType& val);
 
 
-} // End namespace stringOps
+    //- Split a string into sub-strings at the delimiter character.
+    //  An empty sub-strings are suppressed.
+    template<class StringType>
+    Foam::SubStrings<StringType> split
+    (
+        const StringType& str,
+        const char delimiter
+    );
 
+} // End namespace stringOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

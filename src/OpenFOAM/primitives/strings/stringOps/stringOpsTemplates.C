@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,6 +62,38 @@ Foam::word Foam::stringOps::name
 )
 {
     return stringOps::name(fmt.c_str(), val);
+}
+
+
+template<class StringType>
+Foam::SubStrings<StringType> Foam::stringOps::split
+(
+    const StringType& str,
+    const char delimiter
+)
+{
+    Foam::SubStrings<StringType> lst;
+    lst.reserve(20);
+
+    std::string::size_type beg = 0, end = 0;
+
+    while ((end = str.find(delimiter, beg)) != std::string::npos)
+    {
+        if (beg < end)
+        {
+            // (Non-empty) intermediate element
+            lst.append(str.cbegin() + beg, str.cbegin() + end);
+        }
+        beg = end + 1;
+    }
+
+    // (Non-empty) trailing element
+    if (beg < str.size())
+    {
+        lst.append(str.cbegin() + beg, str.cbegin() + str.size());
+    }
+
+    return lst;
 }
 
 
