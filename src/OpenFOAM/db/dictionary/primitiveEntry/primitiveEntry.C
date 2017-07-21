@@ -32,9 +32,9 @@ License
 
 void Foam::primitiveEntry::append(const UList<token>& varTokens)
 {
-    forAll(varTokens, i)
+    for (const token& tok : varTokens)
     {
-        newElmt(tokenIndex()++) = varTokens[i];
+        newElmt(tokenIndex()++) = tok;
     }
 }
 

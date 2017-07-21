@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,37 +153,54 @@ public:
         //- Return line number of last token in dictionary
         virtual label endLineNumber() const = 0;
 
+
         //- Return true if this entry is a stream
         virtual bool isStream() const
         {
             return false;
         }
 
-        //- Return token stream if this entry is a primitive entry
+        //- Return token stream, if entry is a primitive entry
         virtual ITstream& stream() const = 0;
+
 
         //- Return true if this entry is a dictionary
         virtual bool isDict() const
         {
-            return false;
+            return !this->dictPtr();
         }
 
-        //- Return dictionary if this entry is a dictionary
+        //- Return pointer to dictionary, if entry is a dictionary.
+        //  Return nullptr if the entry is not a dictionary.
+        virtual const dictionary* dictPtr() const
+        {
+            return nullptr;
+        }
+
+        //- Return non-const pointer to dictionary, if entry is a dictionary
+        //  Return nullptr if the entry is not a dictionary.
+        virtual dictionary* dictPtr()
+        {
+            return nullptr;
+        }
+
+        //- Return dictionary, if entry is a dictionary
         virtual const dictionary& dict() const = 0;
 
-        //- Return non-const access to dictionary if this entry is a dictionary
+        //- Return non-const access to dictionary, if entry is a dictionary
         virtual dictionary& dict() = 0;
 
+
         //- Write
-        virtual void write(Ostream&) const = 0;
+        virtual void write(Ostream& os) const = 0;
 
 
     // Member operators
 
-        void operator=(const entry&);
+        void operator=(const entry& e);
 
-        bool operator==(const entry&) const;
-        bool operator!=(const entry&) const;
+        bool operator==(const entry& e) const;
+        bool operator!=(const entry& e) const;
 
 
     // Ostream operator

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,10 +52,8 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-
 class dictionaryEntry;
-
-Ostream& operator<<(Ostream& os, const dictionaryEntry& de);
+Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 
 
 /*---------------------------------------------------------------------------*\
@@ -111,13 +109,13 @@ public:
 
     // Member functions
 
-        //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
+        //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
         const fileName& name() const
         {
             return dictionary::name();
         }
 
-        //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
+        //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
         fileName& name()
         {
             return dictionary::name();
@@ -133,11 +131,12 @@ public:
         //  calling this function generates a FatalError
         ITstream& stream() const;
 
-        //- Return true because this entry is a dictionary
-        bool isDict() const
-        {
-            return true;
-        }
+
+        //- Return pointer to this dictionary
+        virtual const dictionary* dictPtr() const;
+
+        //- Return non-const pointer to this dictionary
+        virtual dictionary* dictPtr();
 
         //- Return dictionary
         const dictionary& dict() const;
@@ -159,7 +158,7 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream& os, const dictionaryEntry& de);
+        friend Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 };
 
 

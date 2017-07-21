@@ -24,12 +24,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dictionaryListEntry.H"
-#include "keyType.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::label Foam::dictionaryListEntry::realSize(const dictionary& dict)
+// File-scope: The dictionary size without the "FoamFile" entry
+static Foam::label realSize(const Foam::dictionary& dict)
 {
     if (dict.size() < 1 || dict.first()->keyword() != "FoamFile")
     {
@@ -127,9 +127,9 @@ void Foam::dictionaryListEntry::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryListEntry& de)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryListEntry& e)
 {
-    de.write(os);
+    e.write(os);
     return os;
 }
 
