@@ -191,9 +191,8 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
     dicts[bottomPatchID].add("inGroups", inGroups);
     dicts[bottomPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
 
-    const label sepPos = coupleGroup.find('_');
-
-    const word coupleGroupSlave = coupleGroup(0, sepPos) + "_slave";
+    const word coupleGroupSlave =
+        coupleGroup.substr(0, coupleGroup.find('_')) + "_slave";
 
     inGroups[0] = coupleGroupSlave;
     dicts[topPatchID].add("coupleGroup", coupleGroupSlave);

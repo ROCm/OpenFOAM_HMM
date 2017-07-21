@@ -130,7 +130,7 @@ bool Foam::dictionary::read(Istream& is)
 
 bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
 {
-    const word varName = keyword(1, keyword.size()-1);
+    const word varName = keyword.substr(1);
 
     // Lookup the variable name in the given dictionary
     const entry* ePtr = lookupEntryPtr(varName, true, true);

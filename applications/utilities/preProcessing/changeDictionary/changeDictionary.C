@@ -254,7 +254,7 @@ bool merge
 
         if (key[0] == '~')
         {
-            word eraseKey = key(1, key.size()-1);
+            const word eraseKey = key.substr(1);
             if (thisDict.remove(eraseKey))
             {
                 // Mark thisDict entry as having been match for wildcard
@@ -325,7 +325,7 @@ bool merge
 
             if (key[0] == '~')
             {
-                word eraseKey = key(1, key.size()-1);
+                const word eraseKey = key.substr(1);
 
                 // List of indices into thisKeys
                 labelList matches

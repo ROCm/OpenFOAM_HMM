@@ -32,7 +32,6 @@ Description
         GRID          28        10.20269-.030265-2.358-8
     \endverbatim
 
-
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
@@ -78,11 +77,8 @@ static std::string readNASToken
     size_t& index
 )
 {
-    size_t indexStart, indexEnd;
-
-    indexStart = index;
-
-    indexEnd = line.find(',', indexStart);
+    size_t indexStart = index;
+    size_t indexEnd = line.find(',', indexStart);
     index = indexEnd + 1;
 
     if (indexEnd == std::string::npos)
@@ -134,12 +130,12 @@ bool triSurface::readNAS(const fileName& fName)
         string line;
         is.getLine(line);
 
-        // Ansa extension
-        if (line.substr(0, 10) == "$ANSA_NAME")
+        // ANSA extension
+        if (line.startsWith("$ANSA_NAME"))
         {
-            string::size_type sem0 = line.find (';', 0);
-            string::size_type sem1 = line.find (';', sem0+1);
-            string::size_type sem2 = line.find (';', sem1+1);
+            string::size_type sem0 = line.find(';', 0);
+            string::size_type sem1 = line.find(';', sem0+1);
+            string::size_type sem2 = line.find(';', sem1+1);
 
             if
             (
@@ -156,15 +152,11 @@ bool triSurface::readNAS(const fileName& fName)
 
                 string nameString;
                 is.getLine(ansaName);
-                if (ansaName[ansaName.size()-1] == '\r')
+                if (ansaName.back() == '\r')
                 {
-                    ansaName = ansaName.substr(1, ansaName.size()-2);
+                    ansaName.resize(ansaName.size()-1);
                 }
-                else
-                {
-                    ansaName = ansaName.substr(1, ansaName.size()-1);
-                }
-
+                ansaName = ansaName.substr(1);
                 // Info<< "ANSA tag for NastranID:" << ansaId
                 //     << " of type " << ansaType
                 //     << " name " << ansaName << endl;
@@ -174,11 +166,7 @@ bool triSurface::readNAS(const fileName& fName)
 
         // Hypermesh extension
         // $HMNAME COMP                   1"partName"
-        if
-        (
-            line.substr(0, 12) == "$HMNAME COMP"
-         && line.find ('"') != string::npos
-        )
+        if (line.startsWith("$HMNAME COMP") && line.find('"') != string::npos)
         {
             label groupId = readLabel
             (
@@ -204,20 +192,20 @@ bool triSurface::readNAS(const fileName& fName)
         // Check if character 72 is continuation
         if (line.size() > 72 && line[72] == '+')
         {
-            line = line.substr(0, 72);
+            line.resize(72);
 
             while (true)
             {
                 string buf;
                 is.getLine(buf);
 
-                if (buf.size() > 72 && buf[72]=='+')
+                if (buf.size() > 72 && buf[72] == '+')
                 {
                     line += buf.substr(8, 64);
                 }
                 else
                 {
-                    line += buf.substr(8, buf.size()-8);
+                    line += buf.substr(8);
                     break;
                 }
             }

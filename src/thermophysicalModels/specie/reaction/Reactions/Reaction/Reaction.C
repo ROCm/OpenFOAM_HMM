@@ -211,17 +211,12 @@ Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
     {
         word specieName = t.wordToken();
 
-        size_t i = specieName.find('^');
+        const size_t i = specieName.find('^');
 
         if (i != word::npos)
         {
-            string exponentStr = specieName
-            (
-                i + 1,
-                specieName.size() - i - 1
-            );
-            exponent = atof(exponentStr.c_str());
-            specieName = specieName(0, i);
+            exponent = atof(specieName.substr(i + 1).c_str());
+            specieName.resize(i);
         }
 
         if (species.contains(specieName))
