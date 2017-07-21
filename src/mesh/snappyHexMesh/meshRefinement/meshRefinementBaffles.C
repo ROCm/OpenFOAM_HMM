@@ -148,14 +148,14 @@ Foam::label Foam::meshRefinement::createBaffle
 //    {
 //        return true;
 //    }
-//    else if (mag(n1&n2) > cos(30.0_deg))
+//    else if (mag(n1&n2) > cos(degToRad(30.0)))
 //    {
 //        // Both normals aligned. Check that test vector perpendicularish to
 //        // surface normal
 //        scalar magTestDir = mag(testDir);
 //        if (magTestDir > VSMALL)
 //        {
-//            if (mag(n1&(testDir/magTestDir)) < cos(45.0_deg))
+//            if (mag(n1&(testDir/magTestDir)) < cos(degToRad(45.0)))
 //            {
 //                //Pout<< "** disabling baffling face "
 //                //    << mesh_.faceCentres()[faceI] << endl;

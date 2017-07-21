@@ -33,10 +33,10 @@ License
 using namespace Foam::vectorTools;
 
 const Foam::scalar Foam::conformalVoronoiMesh::searchConeAngle
-    = Foam::cos(30.0_deg);
+    = Foam::cos(degToRad(30.0));
 
 const Foam::scalar Foam::conformalVoronoiMesh::searchAngleOppositeSurface
-    = Foam::cos(150.0_deg);
+    = Foam::cos(degToRad(150.0));
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
