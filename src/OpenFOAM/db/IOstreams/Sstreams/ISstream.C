@@ -604,13 +604,14 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
         // Read, counting brackets
         buf[nChar++] = c;
 
+        // Also allow '/' between ${...} blocks for slash-scoping of entries
         while
         (
             get(c)
          && (
                 c == token::BEGIN_BLOCK
              || c == token::END_BLOCK
-             || word::valid(c)
+             || word::valid(c) || c == '/'
             )
         )
         {
@@ -620,7 +621,7 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
                 buf[errLen] = '\0';
 
                 FatalIOErrorInFunction(*this)
-                    << "word '" << buf << "...'\n"
+                    << "variable '" << buf << "...'\n"
                     << "    is too long (max. " << maxLen << " characters)"
                     << exit(FatalIOError);
 
@@ -656,7 +657,7 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
                 buf[errLen] = '\0';
 
                 FatalIOErrorInFunction(*this)
-                    << "word '" << buf << "...'\n"
+                    << "variable '" << buf << "...'\n"
                     << "    is too long (max. " << maxLen << " characters)"
                     << exit(FatalIOError);
 

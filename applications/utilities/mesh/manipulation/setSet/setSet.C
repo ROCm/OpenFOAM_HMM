@@ -903,10 +903,10 @@ int main(int argc, char *argv[])
             }
 
             // Strip off anything after #
-            string::size_type i = rawLine.find_first_of("#");
+            string::size_type i = rawLine.find('#');
             if (i != string::npos)
             {
-                rawLine = rawLine(0, i);
+                rawLine.resize(i);
             }
 
             if (rawLine.empty())

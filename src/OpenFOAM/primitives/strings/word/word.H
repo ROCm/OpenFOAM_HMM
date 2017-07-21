@@ -113,9 +113,9 @@ public:
         inline static bool valid(char c);
 
         //- Construct a validated word, in which all invalid characters have
-        //  been stripped out. Normally also prefix any leading digit
+        //  been stripped out. Optionally prefix any leading digit
         //  with '_' to have words that work nicely as dictionary keywords.
-        static word validated(const std::string& s, const bool prefix=true);
+        static word validated(const std::string& s, const bool prefix=false);
 
 
       // File-like functions

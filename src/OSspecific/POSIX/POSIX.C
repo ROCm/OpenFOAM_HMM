@@ -88,7 +88,7 @@ static inline bool isBackupName(const Foam::fileName& name)
     {
         return false;
     }
-    else if (name[name.size()-1] == '~')
+    else if (name.back() == '~')
     {
         return true;
     }

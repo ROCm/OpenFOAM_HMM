@@ -210,7 +210,7 @@ bool Foam::functionObjectList::readFunctionObject
         {
             if (argLevel == 0)
             {
-                funcName = funcNameArgs(start, i - start);
+                funcName = funcNameArgs.substr(start, i - start);
                 start = i+1;
             }
             ++argLevel;
@@ -226,7 +226,7 @@ bool Foam::functionObjectList::readFunctionObject
                         Tuple2<word, string>
                         (
                             argName,
-                            funcNameArgs(start, i - start)
+                            funcNameArgs.substr(start, i - start)
                         )
                     );
                     namedArg = false;
@@ -235,7 +235,10 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        string::validate<word>(funcNameArgs(start, i - start))
+                        string::validate<word>
+                        (
+                            funcNameArgs.substr(start, i - start)
+                        )
                     );
                 }
                 start = i+1;
@@ -252,7 +255,11 @@ bool Foam::functionObjectList::readFunctionObject
         }
         else if (c == '=')
         {
-            argName = string::validate<word>(funcNameArgs(start, i - start));
+            argName = string::validate<word>
+            (
+                funcNameArgs.substr(start, i - start)
+            );
+
             start = i+1;
             namedArg = true;
         }

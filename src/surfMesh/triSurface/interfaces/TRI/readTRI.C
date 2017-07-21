@@ -99,19 +99,18 @@ bool Foam::triSurface::readTRI(const fileName& TRIfileName)
 
         // Region/colour in .tri file starts with 0x. Skip.
 
-        char zero;
-        lineStream >> zero;
+        char zeroChar;
+        lineStream >> zeroChar;
 
-        word rawSolidName(lineStream);
+        const word rawSolidName(lineStream);
 
-        word solidName("patch" + rawSolidName(1, rawSolidName.size()-1));
+        const word solidName("patch" + rawSolidName.substr(1));
 
         label region  = -1;
 
-        HashTable<label, string>::const_iterator fnd =
-            STLsolidNames.find(solidName);
+        auto fnd = STLsolidNames.cfind(solidName);
 
-        if (fnd != STLsolidNames.end())
+        if (fnd.found())
         {
             region = fnd();
         }

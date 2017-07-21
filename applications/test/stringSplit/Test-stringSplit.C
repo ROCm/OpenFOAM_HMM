@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,45 +21,60 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Application
+    Test-stringSplit
+
+Description
+    Test string splitting
+
 \*---------------------------------------------------------------------------*/
 
-#include "reactionRateFlameArea.H"
+#include "argList.H"
+#include "fileName.H"
+#include "stringOps.H"
+
+using namespace Foam;
+
+template<class String>
+void printSplitting(const String& str, const char delimiter)
+{
+    auto split = stringOps::split(str, delimiter);
+
+    Info<< "string {" << str.size() << " chars} = " << str << nl
+        << split.size() << " elements {" << split.length() << " chars}"
+        << nl;
+
+    unsigned i = 0;
+    for (const auto s : split)
+    {
+        Info<< "[" << i++ << "] {" << s.length() << " chars} = "
+            << s.str() << nl;
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
-(
-    const dictionary& dict,
-    const fvMesh& mesh,
-    const combustionModel& combModel
-)
+int main(int argc, char *argv[])
 {
-    const word modelType
-    (
-        dict.lookup("reactionRateFlameArea")
-    );
+    argList::noBanner();
+    argList::noParallel();
 
-    Info<< "Selecting reaction rate flame area correlation "
-        << modelType << endl;
+    argList args(argc, argv, false, true);
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
-
-    if (!cstrIter.found())
+    if (args.size() <= 1 && args.options().empty())
     {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Unknown reactionRateFlameArea type "
-            << modelType << nl << nl
-            << "Valid reaction rate flame area types :" << endl
-            << dictionaryConstructorTablePtr_->sortedToc()
-            << exit(FatalIOError);
+        args.printUsage();
     }
 
-    const word className = modelType.substr(0, modelType.find('<'));
+    for (label argi=1; argi < args.size(); ++argi)
+    {
+        printSplitting(args[argi], '/');
+    }
 
-    return autoPtr<reactionRateFlameArea>
-        (cstrIter()(className, dict, mesh, combModel));
+    Info<< "\nEnd\n" << endl;
+    return 0;
 }
 
 

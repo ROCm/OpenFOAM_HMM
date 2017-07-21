@@ -186,7 +186,7 @@ void Foam::ensightSurfaceReader::readCase(IFstream& is)
         //   surfaceName.****.fieldName
         // This is not parser friendly - simply take remainder of buffer
         label iPos = iss.stdStream().tellg();
-        fieldFileName = buffer(iPos, buffer.size() - iPos);
+        fieldFileName = buffer.substr(iPos);
         size_t p0  = fieldFileName.find_first_not_of(' ');
         if (p0 == string::npos)
         {
