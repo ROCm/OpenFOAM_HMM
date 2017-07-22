@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     #include "addToolOption.H"
 
     // Intercept request for help
-    if ((argc > 0) && (strcmp(argv[1], "-help") == 0))
+    if ((argc > 1) && (strcmp(argv[1], "-help") == 0))
     {
         #include "setRootCase.H"
     }
