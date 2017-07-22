@@ -167,7 +167,7 @@ public:
         //- Return true if this entry is a dictionary
         virtual bool isDict() const
         {
-            return !this->dictPtr();
+            return this->dictPtr();
         }
 
         //- Return pointer to dictionary, if entry is a dictionary.
