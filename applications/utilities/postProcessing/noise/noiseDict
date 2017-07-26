@@ -48,8 +48,11 @@ surfaceNoiseCoeffs
 */
 
 
-    // Input file
-    inputFile   "postProcessing/faceSource1/surface/patch_motorBike_rider-helmet%65/patch_motorBike_rider-helmet%65.case";
+    // Input file(s)
+    file   "postProcessing/faceSource1/surface/patch1/patch1.case";
+    // Multiple inputs
+    //files   ( "postProcessing/faceSource1/surface/patch1/patch1.case"
+    //          "postProcessing/faceSource2/surface/patch2/patch2.case" );
 
     // Surface reader
     reader      ensight;
@@ -83,20 +86,25 @@ surfaceNoiseCoeffs
     //startTime       0;
 
     // Write interval for FFT data, default = 1
-//    fftWriteInterval 100;
+    //fftWriteInterval 100;
+
+    // Bounds for valid pressure from input source
+        // Maximum pressure, default 0.5*VGREAT
+        //maxPressure 150e5;
+
+        // Minimum pressure, default -0.5*VGREAT
+        //minPressure -150e5;
 }
 
 pointNoiseCoeffs
 {
-    csvFileData
-    {
-        file            "pressureData";
-        nHeaderLine     1;
-        refColumn       0;
-        componentColumns (1);
-        separator       " ";
-        mergeSeparators yes;
-    }
+    file            "pressureData";
+    //files           ( "pressureData" "pressureData2");
+    nHeaderLine     1;
+    refColumn       0;
+    componentColumns (1);
+    separator       " ";
+    mergeSeparators yes;
 
     HanningCoeffs
     {
@@ -130,6 +138,13 @@ pointNoiseCoeffs
 
     // Write interval for FFT data, default = 1
     fftWriteInterval 100;
+
+    // Bounds for valid pressure from input source
+        // Maximum pressure, default 0.5*VGREAT
+        //maxPressure 150e5;
+
+        // Minimum pressure, default -0.5*VGREAT
+        //minPressure -150e5;
 }
 
 
