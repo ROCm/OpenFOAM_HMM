@@ -41,6 +41,51 @@ namespace functionEntries
         dictionaryIstream,
         inputMode
     );
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        inputModeDefault,
+        execute,
+        dictionaryIstream,
+        default
+    );
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        inputModeMerge,
+        execute,
+        dictionaryIstream,
+        merge
+    );
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        inputModeOverwrite,
+        execute,
+        dictionaryIstream,
+        overwrite
+    );
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        inputModeWarn,
+        execute,
+        dictionaryIstream,
+        warn
+    );
+
+    addNamedToMemberFunctionSelectionTable
+    (
+        functionEntry,
+        inputModeError,
+        execute,
+        dictionaryIstream,
+        error
+    );
 }
 }
 
@@ -87,6 +132,56 @@ bool Foam::functionEntries::inputMode::execute
     }
 
     return true;
+}
+
+
+bool Foam::functionEntries::inputModeDefault::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return entry::New(parentDict, is, entry::inputMode::PROTECT);
+}
+
+
+bool Foam::functionEntries::inputModeMerge::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return entry::New(parentDict, is, entry::inputMode::MERGE);
+}
+
+
+bool Foam::functionEntries::inputModeOverwrite::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return entry::New(parentDict, is, entry::inputMode::OVERWRITE);
+}
+
+
+bool Foam::functionEntries::inputModeWarn::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return entry::New(parentDict, is, entry::inputMode::WARN);
+}
+
+
+bool Foam::functionEntries::inputModeError::execute
+(
+    dictionary& parentDict,
+    Istream& is
+)
+{
+    return entry::New(parentDict, is, entry::inputMode::ERROR);
 }
 
 
