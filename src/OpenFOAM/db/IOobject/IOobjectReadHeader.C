@@ -65,7 +65,7 @@ bool Foam::IOobject::readHeader(Istream& is)
      && firstToken.wordToken() == "FoamFile"
     )
     {
-        dictionary headerDict(is);
+        const dictionary headerDict(is);
 
         is.version(headerDict.lookup("version"));
         is.format(headerDict.lookup("format"));

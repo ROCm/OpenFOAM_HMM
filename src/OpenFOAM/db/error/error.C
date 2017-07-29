@@ -31,7 +31,8 @@ License
 #include "Pstream.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::error::error(const string& title)
 :
@@ -88,11 +89,15 @@ Foam::error::error(const error& err)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::error::~error() throw()
 {
     delete messageStreamPtr_;
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::OSstream& Foam::error::operator()
 (
@@ -155,6 +160,8 @@ Foam::error::operator Foam::dictionary() const
     return errDict;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::string Foam::error::message() const
 {
@@ -249,18 +256,20 @@ void Foam::error::abort()
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
-{
-    os  << endl
-        << fErr.title().c_str() << endl
-        << fErr.message().c_str();
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-    if (error::level >= 2 && fErr.sourceFileLineNumber())
+Foam::Ostream& Foam::operator<<(Ostream& os, const error& err)
+{
+    os  << nl
+        << err.title().c_str() << endl
+        << err.message().c_str();
+
+    if (error::level >= 2 && err.sourceFileLineNumber())
     {
-        os  << endl << endl
-            << "    From function " << fErr.functionName().c_str() << endl
-            << "    in file " << fErr.sourceFileName().c_str()
-            << " at line " << fErr.sourceFileLineNumber() << '.';
+        os  << nl << nl
+            << "    From function " << err.functionName().c_str() << endl
+            << "    in file " << err.sourceFileName().c_str()
+            << " at line " << err.sourceFileLineNumber() << '.';
     }
 
     return os;
@@ -271,5 +280,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
 // Global error definitions
 
 Foam::error Foam::FatalError("--> FOAM FATAL ERROR: ");
+
 
 // ************************************************************************* //

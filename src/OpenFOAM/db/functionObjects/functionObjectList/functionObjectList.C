@@ -752,8 +752,10 @@ bool Foam::functionObjectList::read()
             {
                 autoPtr<functionObject> foPtr;
 
-                FatalError.throwExceptions();
-                FatalIOError.throwExceptions();
+                // Throw FatalError, FatalIOError as exceptions
+                const bool throwingError = FatalError.throwExceptions();
+                const bool throwingIOerr = FatalIOError.throwExceptions();
+
                 try
                 {
                     // New functionObject
@@ -784,8 +786,10 @@ bool Foam::functionObjectList::read()
                     WarningInFunction
                         << "Caught FatalError " << err << nl << endl;
                 }
-                FatalError.dontThrowExceptions();
-                FatalIOError.dontThrowExceptions();
+
+                // Restore previous exception throwing state
+                FatalError.throwExceptions(throwingError);
+                FatalIOError.throwExceptions(throwingIOerr);
 
                 if (foPtr.valid())
                 {

@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
             );
         }
 
-        FatalIOError.throwExceptions();
+        const bool throwingIOErr = FatalIOError.throwExceptions();
 
         try
         {
@@ -208,12 +208,15 @@ int main(int argc, char *argv[])
             // Report to output (avoid overwriting values from simulation)
             profiling::print(Info);
         }
-        catch (IOerror& err)
+        catch (Foam::IOerror& err)
         {
             Warning<< err << endl;
         }
 
         Info<< endl;
+
+        // Restore previous exception throwing state
+        FatalIOError.throwExceptions(throwingIOErr);
     }
 
     Info<< "End\n" << endl;
