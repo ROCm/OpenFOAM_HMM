@@ -183,9 +183,9 @@ unset -f foamPV     2>/dev/null
 
 # Cleanup bash completions, which look like this:
 #     "complete ... -F _of_APPNAME APPNAME
-# For economy, obtain list first but also add in 'filter_opts' helper
+# For economy, obtain list first but also remove the 'of_complete_' backend
 foamClean="$(complete 2>/dev/null | sed -n -e 's/complete.*-F _of_.* \(..*\)$/\1/p')"
-for cleaned in $foamClean filter_opts
+for cleaned in $foamClean complete_
 do
     unset -f _of_$cleaned 2>/dev/null
     complete -r $cleaned  2>/dev/null

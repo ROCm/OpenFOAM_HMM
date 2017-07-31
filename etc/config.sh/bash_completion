@@ -1,0 +1,2260 @@
+#----------------------------------*-sh-*--------------------------------------
+# Bash completions for OpenFOAM applications
+# Recreate with "foamCreateBashCompletions"
+#
+# Formatted as "complete ... -F _of_APPNAME APPNAME
+
+#
+# Generic completion handler for OpenFOAM applications
+# - arg1 = command-name
+# - arg2 = current word
+# - arg3 = previous word
+# - arg4 = options with args
+# - arg5 = options without args
+#
+unset -f _of_complete_ 2>/dev/null
+_of_complete_()
+{
+    # Unused: local cmd=$1
+    local cur=$2
+    local prev=$3
+    local optsWithArgs="$4 "   # Trailing space added for easier matching
+    local opts="$5 "
+
+    case ${prev} in
+    -help|-doc|-srcDoc)
+        COMPREPLY=()
+        ;;
+    -case)
+        COMPREPLY=($(compgen -d -- ${cur}))
+        ;;
+    -time)
+        COMPREPLY=($(compgen -d -X '![-0-9]*' -- ${cur}))
+        ;;
+    -region)
+        local list=$(\ls -d system/*/ 2>/dev/null | sed -e 's#/$##' -e 's#^.*/##')
+        COMPREPLY=($(compgen -W "$list" -- ${cur}))
+        ;;
+    -fileHandler)
+        COMPREPLY=($(compgen -W "uncollated collated masterUncollated" -- ${cur}))
+        ;;
+    *Dict)
+        # local dirs=$(\ls -d s*/)
+        # local files=$(\ls -f | grep Dict)
+        # COMPREPLY=($(compgen -W \"$dirs $files\" -- ${cur}))
+        COMPREPLY=($(compgen -f -- ${cur}))
+        ;;
+    *)
+        if [ "${optsWithArgs/${prev} /}" != "${optsWithArgs}" ]
+        then
+            # Option with unknown type of arg - set to files.
+            # Not always correct but can still navigate path if needed...
+            COMPREPLY=($(compgen -f -- ${cur}))
+        else
+            # Catchall
+            # - Present remaining options (not already seen in )
+            opts=$(
+                for o in ${opts} ${optsWithArgs}
+                do
+                    [ "${COMP_LINE/$o/}" = "${COMP_LINE}" ] && echo $o
+                done
+            )
+            COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+        fi
+        ;;
+    esac
+
+    return 0
+}
+
+#------------------------------------------------------------------------------
+
+
+# adiabaticFlameT
+unset -f _of_adiabaticFlameT 2>/dev/null
+_of_adiabaticFlameT() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_adiabaticFlameT adiabaticFlameT
+
+
+# adjointShapeOptimizationFoam
+unset -f _of_adjointShapeOptimizationFoam 2>/dev/null
+_of_adjointShapeOptimizationFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_adjointShapeOptimizationFoam adjointShapeOptimizationFoam
+
+
+# ansysToFoam
+unset -f _of_ansysToFoam 2>/dev/null
+_of_ansysToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_ansysToFoam ansysToFoam
+
+
+# applyBoundaryLayer
+unset -f _of_applyBoundaryLayer 2>/dev/null
+_of_applyBoundaryLayer() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -ybl" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_applyBoundaryLayer applyBoundaryLayer
+
+
+# attachMesh
+unset -f _of_attachMesh 2>/dev/null
+_of_attachMesh() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -overwrite -srcDoc -doc -help"
+} && complete -o filenames -F _of_attachMesh attachMesh
+
+
+# autoPatch
+unset -f _of_autoPatch 2>/dev/null
+_of_autoPatch() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -overwrite -srcDoc -doc -help"
+} && complete -o filenames -F _of_autoPatch autoPatch
+
+
+# blockMesh
+unset -f _of_blockMesh 2>/dev/null
+_of_blockMesh() {
+    _of_complete_ "$@" \
+    "-case -dict -region" \
+    "-blockTopology -noClean -noFunctionObjects -sets -srcDoc -doc -help"
+} && complete -o filenames -F _of_blockMesh blockMesh
+
+
+# boundaryFoam
+unset -f _of_boundaryFoam 2>/dev/null
+_of_boundaryFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_boundaryFoam boundaryFoam
+
+
+# boxTurb
+unset -f _of_boxTurb 2>/dev/null
+_of_boxTurb() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_boxTurb boxTurb
+
+
+# buoyantBoussinesqPimpleFoam
+unset -f _of_buoyantBoussinesqPimpleFoam 2>/dev/null
+_of_buoyantBoussinesqPimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_buoyantBoussinesqPimpleFoam buoyantBoussinesqPimpleFoam
+
+
+# buoyantBoussinesqSimpleFoam
+unset -f _of_buoyantBoussinesqSimpleFoam 2>/dev/null
+_of_buoyantBoussinesqSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_buoyantBoussinesqSimpleFoam buoyantBoussinesqSimpleFoam
+
+
+# buoyantPimpleFoam
+unset -f _of_buoyantPimpleFoam 2>/dev/null
+_of_buoyantPimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_buoyantPimpleFoam buoyantPimpleFoam
+
+
+# buoyantSimpleFoam
+unset -f _of_buoyantSimpleFoam 2>/dev/null
+_of_buoyantSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_buoyantSimpleFoam buoyantSimpleFoam
+
+
+# cavitatingDyMFoam
+unset -f _of_cavitatingDyMFoam 2>/dev/null
+_of_cavitatingDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_cavitatingDyMFoam cavitatingDyMFoam
+
+
+# cavitatingFoam
+unset -f _of_cavitatingFoam 2>/dev/null
+_of_cavitatingFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_cavitatingFoam cavitatingFoam
+
+
+# cfx4ToFoam
+unset -f _of_cfx4ToFoam 2>/dev/null
+_of_cfx4ToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_cfx4ToFoam cfx4ToFoam
+
+
+# changeDictionary
+unset -f _of_changeDictionary 2>/dev/null
+_of_changeDictionary() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -instance -region -roots -subDict -time" \
+    "-constant -disablePatchGroups -enableFunctionEntries -latestTime -literalRE -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_changeDictionary changeDictionary
+
+
+# checkMesh
+unset -f _of_checkMesh 2>/dev/null
+_of_checkMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time -writeFields -writeSets" \
+    "-allGeometry -allTopology -constant -latestTime -meshQuality -newTimes -noFunctionObjects -noTopology -noZero -parallel -writeAllFields -srcDoc -doc -help"
+} && complete -o filenames -F _of_checkMesh checkMesh
+
+
+# chemFoam
+unset -f _of_chemFoam 2>/dev/null
+_of_chemFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_chemFoam chemFoam
+
+
+# chemkinToFoam
+unset -f _of_chemkinToFoam 2>/dev/null
+_of_chemkinToFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-newFormat -srcDoc -doc -help"
+} && complete -o filenames -F _of_chemkinToFoam chemkinToFoam
+
+
+# chtMultiRegionFoam
+unset -f _of_chtMultiRegionFoam 2>/dev/null
+_of_chtMultiRegionFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_chtMultiRegionFoam chtMultiRegionFoam
+
+
+# chtMultiRegionSimpleFoam
+unset -f _of_chtMultiRegionSimpleFoam 2>/dev/null
+_of_chtMultiRegionSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_chtMultiRegionSimpleFoam chtMultiRegionSimpleFoam
+
+
+# coalChemistryFoam
+unset -f _of_coalChemistryFoam 2>/dev/null
+_of_coalChemistryFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_coalChemistryFoam coalChemistryFoam
+
+
+# coldEngineFoam
+unset -f _of_coldEngineFoam 2>/dev/null
+_of_coldEngineFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_coldEngineFoam coldEngineFoam
+
+
+# collapseEdges
+unset -f _of_collapseEdges 2>/dev/null
+_of_collapseEdges() {
+    _of_complete_ "$@" \
+    "-case -collapseFaceSet -decomposeParDict -dict -roots -time" \
+    "-collapseFaces -constant -latestTime -newTimes -noFunctionObjects -noZero -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_collapseEdges collapseEdges
+
+
+# combinePatchFaces
+unset -f _of_combinePatchFaces 2>/dev/null
+_of_combinePatchFaces() {
+    _of_complete_ "$@" \
+    "-case -concaveAngle -decomposeParDict -roots" \
+    "-meshQuality -noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_combinePatchFaces combinePatchFaces
+
+
+# compressibleInterDyMFoam
+unset -f _of_compressibleInterDyMFoam 2>/dev/null
+_of_compressibleInterDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_compressibleInterDyMFoam compressibleInterDyMFoam
+
+
+# compressibleInterFoam
+unset -f _of_compressibleInterFoam 2>/dev/null
+_of_compressibleInterFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_compressibleInterFoam compressibleInterFoam
+
+
+# compressibleMultiphaseInterFoam
+unset -f _of_compressibleMultiphaseInterFoam 2>/dev/null
+_of_compressibleMultiphaseInterFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_compressibleMultiphaseInterFoam compressibleMultiphaseInterFoam
+
+
+# createBaffles
+unset -f _of_createBaffles 2>/dev/null
+_of_createBaffles() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_createBaffles createBaffles
+
+
+# createExternalCoupledPatchGeometry
+unset -f _of_createExternalCoupledPatchGeometry 2>/dev/null
+_of_createExternalCoupledPatchGeometry() {
+    _of_complete_ "$@" \
+    "-case -commsDir -decomposeParDict -region -regions -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_createExternalCoupledPatchGeometry createExternalCoupledPatchGeometry
+
+
+# createPatch
+unset -f _of_createPatch 2>/dev/null
+_of_createPatch() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-noFunctionObjects -overwrite -parallel -writeObj -srcDoc -doc -help"
+} && complete -o filenames -F _of_createPatch createPatch
+
+
+# createZeroDirectory
+unset -f _of_createZeroDirectory 2>/dev/null
+_of_createZeroDirectory() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots -templateDir" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_createZeroDirectory createZeroDirectory
+
+
+# datToFoam
+unset -f _of_datToFoam 2>/dev/null
+_of_datToFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_datToFoam datToFoam
+
+
+# decomposePar
+unset -f _of_decomposePar 2>/dev/null
+_of_decomposePar() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -time" \
+    "-allRegions -cellDist -constant -copyUniform -copyZero -fields -force -ifRequired -latestTime -newTimes -noFunctionObjects -noSets -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_decomposePar decomposePar
+
+
+# deformedGeom
+unset -f _of_deformedGeom 2>/dev/null
+_of_deformedGeom() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_deformedGeom deformedGeom
+
+
+# dnsFoam
+unset -f _of_dnsFoam 2>/dev/null
+_of_dnsFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_dnsFoam dnsFoam
+
+
+# DPMDyMFoam
+unset -f _of_DPMDyMFoam 2>/dev/null
+_of_DPMDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -cloudName -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_DPMDyMFoam DPMDyMFoam
+
+
+# DPMFoam
+unset -f _of_DPMFoam 2>/dev/null
+_of_DPMFoam() {
+    _of_complete_ "$@" \
+    "-case -cloud -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_DPMFoam DPMFoam
+
+
+# driftFluxFoam
+unset -f _of_driftFluxFoam 2>/dev/null
+_of_driftFluxFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_driftFluxFoam driftFluxFoam
+
+
+# dsmcFoam
+unset -f _of_dsmcFoam 2>/dev/null
+_of_dsmcFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_dsmcFoam dsmcFoam
+
+
+# dsmcInitialise
+unset -f _of_dsmcInitialise 2>/dev/null
+_of_dsmcInitialise() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_dsmcInitialise dsmcInitialise
+
+
+# electrostaticFoam
+unset -f _of_electrostaticFoam 2>/dev/null
+_of_electrostaticFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_electrostaticFoam electrostaticFoam
+
+
+# engineCompRatio
+unset -f _of_engineCompRatio 2>/dev/null
+_of_engineCompRatio() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_engineCompRatio engineCompRatio
+
+
+# engineFoam
+unset -f _of_engineFoam 2>/dev/null
+_of_engineFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_engineFoam engineFoam
+
+
+# engineSwirl
+unset -f _of_engineSwirl 2>/dev/null
+_of_engineSwirl() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_engineSwirl engineSwirl
+
+
+# equilibriumCO
+unset -f _of_equilibriumCO 2>/dev/null
+_of_equilibriumCO() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_equilibriumCO equilibriumCO
+
+
+# equilibriumFlameT
+unset -f _of_equilibriumFlameT 2>/dev/null
+_of_equilibriumFlameT() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_equilibriumFlameT equilibriumFlameT
+
+
+# extrude2DMesh
+unset -f _of_extrude2DMesh 2>/dev/null
+_of_extrude2DMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_extrude2DMesh extrude2DMesh
+
+
+# extrudeMesh
+unset -f _of_extrudeMesh 2>/dev/null
+_of_extrudeMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_extrudeMesh extrudeMesh
+
+
+# extrudeToRegionMesh
+unset -f _of_extrudeToRegionMesh 2>/dev/null
+_of_extrudeToRegionMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_extrudeToRegionMesh extrudeToRegionMesh
+
+
+# faceAgglomerate
+unset -f _of_faceAgglomerate 2>/dev/null
+_of_faceAgglomerate() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_faceAgglomerate faceAgglomerate
+
+
+# financialFoam
+unset -f _of_financialFoam 2>/dev/null
+_of_financialFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_financialFoam financialFoam
+
+
+# fireFoam
+unset -f _of_fireFoam 2>/dev/null
+_of_fireFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_fireFoam fireFoam
+
+
+# fireToFoam
+unset -f _of_fireToFoam 2>/dev/null
+_of_fireToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-ascii -check -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_fireToFoam fireToFoam
+
+
+# flattenMesh
+unset -f _of_flattenMesh 2>/dev/null
+_of_flattenMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_flattenMesh flattenMesh
+
+
+# fluent3DMeshToFoam
+unset -f _of_fluent3DMeshToFoam 2>/dev/null
+_of_fluent3DMeshToFoam() {
+    _of_complete_ "$@" \
+    "-case -ignoreCellGroups -ignoreFaceGroups -scale" \
+    "-cubit -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_fluent3DMeshToFoam fluent3DMeshToFoam
+
+
+# fluentMeshToFoam
+unset -f _of_fluentMeshToFoam 2>/dev/null
+_of_fluentMeshToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-noFunctionObjects -writeSets -writeZones -srcDoc -doc -help"
+} && complete -o filenames -F _of_fluentMeshToFoam fluentMeshToFoam
+
+
+# foamDataToFluent
+unset -f _of_foamDataToFluent 2>/dev/null
+_of_foamDataToFluent() {
+    _of_complete_ "$@" \
+    "-case -time" \
+    "-latestTime -newTimes -noFunctionObjects -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamDataToFluent foamDataToFluent
+
+
+# foamDictionary
+unset -f _of_foamDictionary 2>/dev/null
+_of_foamDictionary() {
+    _of_complete_ "$@" \
+    "-add -case -decomposeParDict -diff -entry -roots -set" \
+    "-disableFunctionEntries -expand -includes -keywords -noFunctionObjects -parallel -remove -value -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamDictionary foamDictionary
+
+
+# foamFormatConvert
+unset -f _of_foamFormatConvert 2>/dev/null
+_of_foamFormatConvert() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time" \
+    "-constant -enableFunctionEntries -latestTime -newTimes -noConstant -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamFormatConvert foamFormatConvert
+
+
+# foamHelp
+unset -f _of_foamHelp 2>/dev/null
+_of_foamHelp() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamHelp foamHelp
+
+
+# foamList
+unset -f _of_foamList 2>/dev/null
+_of_foamList() {
+    _of_complete_ "$@" \
+    "-case -scalarBCs -vectorBCs" \
+    "-compressibleTurbulenceModels -functionObjects -fvOptions -incompressibleTurbulenceModels -noFunctionObjects -registeredSwitches -switches -unset -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamList foamList
+
+
+# foamListTimes
+unset -f _of_foamListTimes 2>/dev/null
+_of_foamListTimes() {
+    _of_complete_ "$@" \
+    "-case -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -processor -rm -withZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamListTimes foamListTimes
+
+
+# foamMeshToFluent
+unset -f _of_foamMeshToFluent 2>/dev/null
+_of_foamMeshToFluent() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamMeshToFluent foamMeshToFluent
+
+
+# foamToEnsight
+unset -f _of_foamToEnsight 2>/dev/null
+_of_foamToEnsight() {
+    _of_complete_ "$@" \
+    "-case -cellZone -decomposeParDict -faceZones -fields -name -patches -region -roots -time -width" \
+    "-ascii -constant -latestTime -newTimes -noFunctionObjects -noLagrangian -noPatches -noZero -nodeValues -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToEnsight foamToEnsight
+
+
+# foamToEnsightParts
+unset -f _of_foamToEnsightParts 2>/dev/null
+_of_foamToEnsightParts() {
+    _of_complete_ "$@" \
+    "-case -index -name -time -width" \
+    "-ascii -constant -latestTime -newTimes -noFunctionObjects -noLagrangian -noMesh -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToEnsightParts foamToEnsightParts
+
+
+# foamToFireMesh
+unset -f _of_foamToFireMesh 2>/dev/null
+_of_foamToFireMesh() {
+    _of_complete_ "$@" \
+    "-case -scale -time" \
+    "-ascii -constant -latestTime -newTimes -noFunctionObjects -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToFireMesh foamToFireMesh
+
+
+# foamToGMV
+unset -f _of_foamToGMV 2>/dev/null
+_of_foamToGMV() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToGMV foamToGMV
+
+
+# foamToStarMesh
+unset -f _of_foamToStarMesh 2>/dev/null
+_of_foamToStarMesh() {
+    _of_complete_ "$@" \
+    "-case -scale -time" \
+    "-constant -latestTime -newTimes -noBnd -noFunctionObjects -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToStarMesh foamToStarMesh
+
+
+# foamToSurface
+unset -f _of_foamToSurface 2>/dev/null
+_of_foamToSurface() {
+    _of_complete_ "$@" \
+    "-case -scale -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -tri -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToSurface foamToSurface
+
+
+# foamToTetDualMesh
+unset -f _of_foamToTetDualMesh 2>/dev/null
+_of_foamToTetDualMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots -time" \
+    "-constant -latestTime -noFunctionObjects -noZero -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToTetDualMesh foamToTetDualMesh
+
+
+# foamToVTK
+unset -f _of_foamToVTK 2>/dev/null
+_of_foamToVTK() {
+    _of_complete_ "$@" \
+    "-case -cellSet -decomposeParDict -excludePatches -faceSet -fields -name -pointSet -region -roots -time" \
+    "-allPatches -ascii -constant -latestTime -nearCellValue -newTimes -noFaceZones -noFunctionObjects -noInternal -noLagrangian -noLinks -noPointValues -noZero -parallel -poly -surfaceFields -useTimeName -xml -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamToVTK foamToVTK
+
+
+# foamUpgradeCyclics
+unset -f _of_foamUpgradeCyclics 2>/dev/null
+_of_foamUpgradeCyclics() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time" \
+    "-constant -enableFunctionEntries -latestTime -newTimes -noFunctionObjects -noZero -parallel -test -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamUpgradeCyclics foamUpgradeCyclics
+
+
+# foamyHexMesh
+unset -f _of_foamyHexMesh 2>/dev/null
+_of_foamyHexMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-checkGeometry -conformationOnly -noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamyHexMesh foamyHexMesh
+
+
+# foamyQuadMesh
+unset -f _of_foamyQuadMesh 2>/dev/null
+_of_foamyQuadMesh() {
+    _of_complete_ "$@" \
+    "-case -pointsFile" \
+    "-noFunctionObjects -overwrite -srcDoc -doc -help"
+} && complete -o filenames -F _of_foamyQuadMesh foamyQuadMesh
+
+
+# gambitToFoam
+unset -f _of_gambitToFoam 2>/dev/null
+_of_gambitToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_gambitToFoam gambitToFoam
+
+
+# gmshToFoam
+unset -f _of_gmshToFoam 2>/dev/null
+_of_gmshToFoam() {
+    _of_complete_ "$@" \
+    "-case -region" \
+    "-keepOrientation -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_gmshToFoam gmshToFoam
+
+
+# icoFoam
+unset -f _of_icoFoam 2>/dev/null
+_of_icoFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_icoFoam icoFoam
+
+
+# icoUncoupledKinematicParcelDyMFoam
+unset -f _of_icoUncoupledKinematicParcelDyMFoam 2>/dev/null
+_of_icoUncoupledKinematicParcelDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -cloud -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_icoUncoupledKinematicParcelDyMFoam icoUncoupledKinematicParcelDyMFoam
+
+
+# icoUncoupledKinematicParcelFoam
+unset -f _of_icoUncoupledKinematicParcelFoam 2>/dev/null
+_of_icoUncoupledKinematicParcelFoam() {
+    _of_complete_ "$@" \
+    "-case -cloud -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_icoUncoupledKinematicParcelFoam icoUncoupledKinematicParcelFoam
+
+
+# ideasUnvToFoam
+unset -f _of_ideasUnvToFoam 2>/dev/null
+_of_ideasUnvToFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-dump -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_ideasUnvToFoam ideasUnvToFoam
+
+
+# insideCells
+unset -f _of_insideCells 2>/dev/null
+_of_insideCells() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_insideCells insideCells
+
+
+# interCondensatingEvaporatingFoam
+unset -f _of_interCondensatingEvaporatingFoam 2>/dev/null
+_of_interCondensatingEvaporatingFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interCondensatingEvaporatingFoam interCondensatingEvaporatingFoam
+
+
+# interDyMFoam
+unset -f _of_interDyMFoam 2>/dev/null
+_of_interDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interDyMFoam interDyMFoam
+
+
+# interFoam
+unset -f _of_interFoam 2>/dev/null
+_of_interFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interFoam interFoam
+
+
+# interIsoFoam
+unset -f _of_interIsoFoam 2>/dev/null
+_of_interIsoFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interIsoFoam interIsoFoam
+
+
+# interMixingFoam
+unset -f _of_interMixingFoam 2>/dev/null
+_of_interMixingFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interMixingFoam interMixingFoam
+
+
+# interPhaseChangeDyMFoam
+unset -f _of_interPhaseChangeDyMFoam 2>/dev/null
+_of_interPhaseChangeDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interPhaseChangeDyMFoam interPhaseChangeDyMFoam
+
+
+# interPhaseChangeFoam
+unset -f _of_interPhaseChangeFoam 2>/dev/null
+_of_interPhaseChangeFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_interPhaseChangeFoam interPhaseChangeFoam
+
+
+# kivaToFoam
+unset -f _of_kivaToFoam 2>/dev/null
+_of_kivaToFoam() {
+    _of_complete_ "$@" \
+    "-case -file -version -zHeadMin" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_kivaToFoam kivaToFoam
+
+
+# laplacianFoam
+unset -f _of_laplacianFoam 2>/dev/null
+_of_laplacianFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_laplacianFoam laplacianFoam
+
+
+# lumpedPointForces
+unset -f _of_lumpedPointForces 2>/dev/null
+_of_lumpedPointForces() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time" \
+    "-constant -latestTime -newTimes -noZero -parallel -vtk -srcDoc -doc -help"
+} && complete -o filenames -F _of_lumpedPointForces lumpedPointForces
+
+
+# lumpedPointMovement
+unset -f _of_lumpedPointMovement 2>/dev/null
+_of_lumpedPointMovement() {
+    _of_complete_ "$@" \
+    "-case -max -scale -span" \
+    "-removeLock -slave -srcDoc -doc -help"
+} && complete -o filenames -F _of_lumpedPointMovement lumpedPointMovement
+
+
+# lumpedPointZones
+unset -f _of_lumpedPointZones 2>/dev/null
+_of_lumpedPointZones() {
+    _of_complete_ "$@" \
+    "-case -region" \
+    "-verbose -srcDoc -doc -help"
+} && complete -o filenames -F _of_lumpedPointZones lumpedPointZones
+
+
+# magneticFoam
+unset -f _of_magneticFoam 2>/dev/null
+_of_magneticFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noB -noFunctionObjects -noH -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_magneticFoam magneticFoam
+
+
+# mapFields
+unset -f _of_mapFields 2>/dev/null
+_of_mapFields() {
+    _of_complete_ "$@" \
+    "-case -mapMethod -sourceDecomposeParDict -sourceRegion -sourceTime -targetDecomposeParDict -targetRegion" \
+    "-consistent -noFunctionObjects -parallelSource -parallelTarget -subtract -srcDoc -doc -help"
+} && complete -o filenames -F _of_mapFields mapFields
+
+
+# mapFieldsPar
+unset -f _of_mapFieldsPar 2>/dev/null
+_of_mapFieldsPar() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -fields -mapMethod -patchMapMethod -roots -sourceRegion -sourceTime -targetRegion" \
+    "-consistent -noFunctionObjects -noLagrangian -parallel -subtract -srcDoc -doc -help"
+} && complete -o filenames -F _of_mapFieldsPar mapFieldsPar
+
+
+# mdEquilibrationFoam
+unset -f _of_mdEquilibrationFoam 2>/dev/null
+_of_mdEquilibrationFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_mdEquilibrationFoam mdEquilibrationFoam
+
+
+# mdFoam
+unset -f _of_mdFoam 2>/dev/null
+_of_mdFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_mdFoam mdFoam
+
+
+# mdInitialise
+unset -f _of_mdInitialise 2>/dev/null
+_of_mdInitialise() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_mdInitialise mdInitialise
+
+
+# mergeMeshes
+unset -f _of_mergeMeshes 2>/dev/null
+_of_mergeMeshes() {
+    _of_complete_ "$@" \
+    "-addRegion -case -decomposeParDict -masterRegion -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_mergeMeshes mergeMeshes
+
+
+# mergeOrSplitBaffles
+unset -f _of_mergeOrSplitBaffles 2>/dev/null
+_of_mergeOrSplitBaffles() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-detectOnly -noFunctionObjects -overwrite -parallel -split -srcDoc -doc -help"
+} && complete -o filenames -F _of_mergeOrSplitBaffles mergeOrSplitBaffles
+
+
+# mhdFoam
+unset -f _of_mhdFoam 2>/dev/null
+_of_mhdFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_mhdFoam mhdFoam
+
+
+# mirrorMesh
+unset -f _of_mirrorMesh 2>/dev/null
+_of_mirrorMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_mirrorMesh mirrorMesh
+
+
+# mixtureAdiabaticFlameT
+unset -f _of_mixtureAdiabaticFlameT 2>/dev/null
+_of_mixtureAdiabaticFlameT() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_mixtureAdiabaticFlameT mixtureAdiabaticFlameT
+
+
+# modifyMesh
+unset -f _of_modifyMesh 2>/dev/null
+_of_modifyMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_modifyMesh modifyMesh
+
+
+# moveDynamicMesh
+unset -f _of_moveDynamicMesh 2>/dev/null
+_of_moveDynamicMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-checkAMI -noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_moveDynamicMesh moveDynamicMesh
+
+
+# moveEngineMesh
+unset -f _of_moveEngineMesh 2>/dev/null
+_of_moveEngineMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_moveEngineMesh moveEngineMesh
+
+
+# moveMesh
+unset -f _of_moveMesh 2>/dev/null
+_of_moveMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_moveMesh moveMesh
+
+
+# MPPICDyMFoam
+unset -f _of_MPPICDyMFoam 2>/dev/null
+_of_MPPICDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -cloudName -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_MPPICDyMFoam MPPICDyMFoam
+
+
+# MPPICFoam
+unset -f _of_MPPICFoam 2>/dev/null
+_of_MPPICFoam() {
+    _of_complete_ "$@" \
+    "-case -cloud -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_MPPICFoam MPPICFoam
+
+
+# MPPICInterFoam
+unset -f _of_MPPICInterFoam 2>/dev/null
+_of_MPPICInterFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_MPPICInterFoam MPPICInterFoam
+
+
+# mshToFoam
+unset -f _of_mshToFoam 2>/dev/null
+_of_mshToFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-hex -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_mshToFoam mshToFoam
+
+
+# multiphaseEulerFoam
+unset -f _of_multiphaseEulerFoam 2>/dev/null
+_of_multiphaseEulerFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_multiphaseEulerFoam multiphaseEulerFoam
+
+
+# multiphaseInterDyMFoam
+unset -f _of_multiphaseInterDyMFoam 2>/dev/null
+_of_multiphaseInterDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_multiphaseInterDyMFoam multiphaseInterDyMFoam
+
+
+# multiphaseInterFoam
+unset -f _of_multiphaseInterFoam 2>/dev/null
+_of_multiphaseInterFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_multiphaseInterFoam multiphaseInterFoam
+
+
+# netgenNeutralToFoam
+unset -f _of_netgenNeutralToFoam 2>/dev/null
+_of_netgenNeutralToFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_netgenNeutralToFoam netgenNeutralToFoam
+
+
+# noise
+unset -f _of_noise 2>/dev/null
+_of_noise() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_noise noise
+
+
+# nonNewtonianIcoFoam
+unset -f _of_nonNewtonianIcoFoam 2>/dev/null
+_of_nonNewtonianIcoFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_nonNewtonianIcoFoam nonNewtonianIcoFoam
+
+
+# objToVTK
+unset -f _of_objToVTK 2>/dev/null
+_of_objToVTK() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_objToVTK objToVTK
+
+
+# orientFaceZone
+unset -f _of_orientFaceZone 2>/dev/null
+_of_orientFaceZone() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_orientFaceZone orientFaceZone
+
+
+# overInterDyMFoam
+unset -f _of_overInterDyMFoam 2>/dev/null
+_of_overInterDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_overInterDyMFoam overInterDyMFoam
+
+
+# overLaplacianDyMFoam
+unset -f _of_overLaplacianDyMFoam 2>/dev/null
+_of_overLaplacianDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_overLaplacianDyMFoam overLaplacianDyMFoam
+
+
+# overPimpleDyMFoam
+unset -f _of_overPimpleDyMFoam 2>/dev/null
+_of_overPimpleDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_overPimpleDyMFoam overPimpleDyMFoam
+
+
+# overRhoPimpleDyMFoam
+unset -f _of_overRhoPimpleDyMFoam 2>/dev/null
+_of_overRhoPimpleDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_overRhoPimpleDyMFoam overRhoPimpleDyMFoam
+
+
+# overSimpleFoam
+unset -f _of_overSimpleFoam 2>/dev/null
+_of_overSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_overSimpleFoam overSimpleFoam
+
+
+# particleTracks
+unset -f _of_particleTracks 2>/dev/null
+_of_particleTracks() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_particleTracks particleTracks
+
+
+# patchSummary
+unset -f _of_patchSummary 2>/dev/null
+_of_patchSummary() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time" \
+    "-constant -expand -latestTime -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_patchSummary patchSummary
+
+
+# pdfPlot
+unset -f _of_pdfPlot 2>/dev/null
+_of_pdfPlot() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_pdfPlot pdfPlot
+
+
+# PDRFoam
+unset -f _of_PDRFoam 2>/dev/null
+_of_PDRFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_PDRFoam PDRFoam
+
+
+# PDRMesh
+unset -f _of_PDRMesh 2>/dev/null
+_of_PDRMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_PDRMesh PDRMesh
+
+
+# pimpleDyMFoam
+unset -f _of_pimpleDyMFoam 2>/dev/null
+_of_pimpleDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_pimpleDyMFoam pimpleDyMFoam
+
+
+# pimpleFoam
+unset -f _of_pimpleFoam 2>/dev/null
+_of_pimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_pimpleFoam pimpleFoam
+
+
+# pisoFoam
+unset -f _of_pisoFoam 2>/dev/null
+_of_pisoFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_pisoFoam pisoFoam
+
+
+# plot3dToFoam
+unset -f _of_plot3dToFoam 2>/dev/null
+_of_plot3dToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-noBlank -noFunctionObjects -singleBlock -srcDoc -doc -help"
+} && complete -o filenames -F _of_plot3dToFoam plot3dToFoam
+
+
+# polyDualMesh
+unset -f _of_polyDualMesh 2>/dev/null
+_of_polyDualMesh() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-concaveMultiCells -doNotPreserveFaceZones -noFunctionObjects -overwrite -splitAllFaces -srcDoc -doc -help"
+} && complete -o filenames -F _of_polyDualMesh polyDualMesh
+
+
+# porousSimpleFoam
+unset -f _of_porousSimpleFoam 2>/dev/null
+_of_porousSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_porousSimpleFoam porousSimpleFoam
+
+
+# postChannel
+unset -f _of_postChannel 2>/dev/null
+_of_postChannel() {
+    _of_complete_ "$@" \
+    "-case -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_postChannel postChannel
+
+
+# postProcess
+unset -f _of_postProcess 2>/dev/null
+_of_postProcess() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -field -fields -func -funcs -region -roots -time" \
+    "-constant -latestTime -list -newTimes -noFunctionObjects -noZero -parallel -profiling -srcDoc -doc -help"
+} && complete -o filenames -F _of_postProcess postProcess
+
+
+# potentialFoam
+unset -f _of_potentialFoam 2>/dev/null
+_of_potentialFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -pName -roots" \
+    "-initialiseUBCs -noFunctionObjects -parallel -withFunctionObjects -writePhi -writep -srcDoc -doc -help"
+} && complete -o filenames -F _of_potentialFoam potentialFoam
+
+
+# potentialFreeSurfaceDyMFoam
+unset -f _of_potentialFreeSurfaceDyMFoam 2>/dev/null
+_of_potentialFreeSurfaceDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_potentialFreeSurfaceDyMFoam potentialFreeSurfaceDyMFoam
+
+
+# potentialFreeSurfaceFoam
+unset -f _of_potentialFreeSurfaceFoam 2>/dev/null
+_of_potentialFreeSurfaceFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_potentialFreeSurfaceFoam potentialFreeSurfaceFoam
+
+
+# reactingFoam
+unset -f _of_reactingFoam 2>/dev/null
+_of_reactingFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_reactingFoam reactingFoam
+
+
+# reactingMultiphaseEulerFoam
+unset -f _of_reactingMultiphaseEulerFoam 2>/dev/null
+_of_reactingMultiphaseEulerFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_reactingMultiphaseEulerFoam reactingMultiphaseEulerFoam
+
+
+# reactingParcelFilmFoam
+unset -f _of_reactingParcelFilmFoam 2>/dev/null
+_of_reactingParcelFilmFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_reactingParcelFilmFoam reactingParcelFilmFoam
+
+
+# reactingParcelFoam
+unset -f _of_reactingParcelFoam 2>/dev/null
+_of_reactingParcelFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_reactingParcelFoam reactingParcelFoam
+
+
+# reactingTwoPhaseEulerFoam
+unset -f _of_reactingTwoPhaseEulerFoam 2>/dev/null
+_of_reactingTwoPhaseEulerFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_reactingTwoPhaseEulerFoam reactingTwoPhaseEulerFoam
+
+
+# reconstructPar
+unset -f _of_reconstructPar 2>/dev/null
+_of_reconstructPar() {
+    _of_complete_ "$@" \
+    "-case -fields -lagrangianFields -region -time" \
+    "-allRegions -constant -latestTime -newTimes -noFields -noFunctionObjects -noLagrangian -noSets -noZero -withZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_reconstructPar reconstructPar
+
+
+# reconstructParMesh
+unset -f _of_reconstructParMesh 2>/dev/null
+_of_reconstructParMesh() {
+    _of_complete_ "$@" \
+    "-case -mergeTol -region -time" \
+    "-cellDist -constant -fullMatch -latestTime -newTimes -noFunctionObjects -noZero -withZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_reconstructParMesh reconstructParMesh
+
+
+# redistributePar
+unset -f _of_redistributePar 2>/dev/null
+_of_redistributePar() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -mergeTol -region -roots -time" \
+    "-cellDist -constant -decompose -latestTime -newTimes -noFunctionObjects -noZero -overwrite -parallel -reconstruct -withZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_redistributePar redistributePar
+
+
+# refineHexMesh
+unset -f _of_refineHexMesh 2>/dev/null
+_of_refineHexMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-minSet -noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_refineHexMesh refineHexMesh
+
+
+# refinementLevel
+unset -f _of_refinementLevel 2>/dev/null
+_of_refinementLevel() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -readLevel -srcDoc -doc -help"
+} && complete -o filenames -F _of_refinementLevel refinementLevel
+
+
+# refineMesh
+unset -f _of_refineMesh 2>/dev/null
+_of_refineMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-all -noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_refineMesh refineMesh
+
+
+# refineWallLayer
+unset -f _of_refineWallLayer 2>/dev/null
+_of_refineWallLayer() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots -useSet" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_refineWallLayer refineWallLayer
+
+
+# removeFaces
+unset -f _of_removeFaces 2>/dev/null
+_of_removeFaces() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_removeFaces removeFaces
+
+
+# renumberMesh
+unset -f _of_renumberMesh 2>/dev/null
+_of_renumberMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots -time" \
+    "-constant -frontWidth -latestTime -noFunctionObjects -noZero -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_renumberMesh renumberMesh
+
+
+# rhoCentralDyMFoam
+unset -f _of_rhoCentralDyMFoam 2>/dev/null
+_of_rhoCentralDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoCentralDyMFoam rhoCentralDyMFoam
+
+
+# rhoCentralFoam
+unset -f _of_rhoCentralFoam 2>/dev/null
+_of_rhoCentralFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoCentralFoam rhoCentralFoam
+
+
+# rhoPimpleAdiabaticFoam
+unset -f _of_rhoPimpleAdiabaticFoam 2>/dev/null
+_of_rhoPimpleAdiabaticFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoPimpleAdiabaticFoam rhoPimpleAdiabaticFoam
+
+
+# rhoPimpleDyMFoam
+unset -f _of_rhoPimpleDyMFoam 2>/dev/null
+_of_rhoPimpleDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoPimpleDyMFoam rhoPimpleDyMFoam
+
+
+# rhoPimpleFoam
+unset -f _of_rhoPimpleFoam 2>/dev/null
+_of_rhoPimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoPimpleFoam rhoPimpleFoam
+
+
+# rhoPorousSimpleFoam
+unset -f _of_rhoPorousSimpleFoam 2>/dev/null
+_of_rhoPorousSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoPorousSimpleFoam rhoPorousSimpleFoam
+
+
+# rhoReactingBuoyantFoam
+unset -f _of_rhoReactingBuoyantFoam 2>/dev/null
+_of_rhoReactingBuoyantFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoReactingBuoyantFoam rhoReactingBuoyantFoam
+
+
+# rhoReactingFoam
+unset -f _of_rhoReactingFoam 2>/dev/null
+_of_rhoReactingFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoReactingFoam rhoReactingFoam
+
+
+# rhoSimpleFoam
+unset -f _of_rhoSimpleFoam 2>/dev/null
+_of_rhoSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_rhoSimpleFoam rhoSimpleFoam
+
+
+# rotateMesh
+unset -f _of_rotateMesh 2>/dev/null
+_of_rotateMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_rotateMesh rotateMesh
+
+
+# scalarTransportFoam
+unset -f _of_scalarTransportFoam 2>/dev/null
+_of_scalarTransportFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_scalarTransportFoam scalarTransportFoam
+
+
+# selectCells
+unset -f _of_selectCells 2>/dev/null
+_of_selectCells() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_selectCells selectCells
+
+
+# setAlphaField
+unset -f _of_setAlphaField 2>/dev/null
+_of_setAlphaField() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_setAlphaField setAlphaField
+
+
+# setFields
+unset -f _of_setFields 2>/dev/null
+_of_setFields() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_setFields setFields
+
+
+# setSet
+unset -f _of_setSet 2>/dev/null
+_of_setSet() {
+    _of_complete_ "$@" \
+    "-batch -case -decomposeParDict -region -roots -time" \
+    "-constant -latestTime -loop -newTimes -noFunctionObjects -noSync -noVTK -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_setSet setSet
+
+
+# setsToZones
+unset -f _of_setsToZones 2>/dev/null
+_of_setsToZones() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots -time" \
+    "-constant -latestTime -newTimes -noFlipMap -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_setsToZones setsToZones
+
+
+# shallowWaterFoam
+unset -f _of_shallowWaterFoam 2>/dev/null
+_of_shallowWaterFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_shallowWaterFoam shallowWaterFoam
+
+
+# simpleCoalParcelFoam
+unset -f _of_simpleCoalParcelFoam 2>/dev/null
+_of_simpleCoalParcelFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_simpleCoalParcelFoam simpleCoalParcelFoam
+
+
+# simpleFoam
+unset -f _of_simpleFoam 2>/dev/null
+_of_simpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_simpleFoam simpleFoam
+
+
+# simpleReactingParcelFoam
+unset -f _of_simpleReactingParcelFoam 2>/dev/null
+_of_simpleReactingParcelFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_simpleReactingParcelFoam simpleReactingParcelFoam
+
+
+# singleCellMesh
+unset -f _of_singleCellMesh 2>/dev/null
+_of_singleCellMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_singleCellMesh singleCellMesh
+
+
+# smapToFoam
+unset -f _of_smapToFoam 2>/dev/null
+_of_smapToFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_smapToFoam smapToFoam
+
+
+# snappyHexMesh
+unset -f _of_snappyHexMesh 2>/dev/null
+_of_snappyHexMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -outFile -patches -region -roots -surfaceSimplify" \
+    "-checkGeometry -noFunctionObjects -overwrite -parallel -profiling -srcDoc -doc -help"
+} && complete -o filenames -F _of_snappyHexMesh snappyHexMesh
+
+
+# snappyRefineMesh
+unset -f _of_snappyRefineMesh 2>/dev/null
+_of_snappyRefineMesh() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_snappyRefineMesh snappyRefineMesh
+
+
+# solidDisplacementFoam
+unset -f _of_solidDisplacementFoam 2>/dev/null
+_of_solidDisplacementFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_solidDisplacementFoam solidDisplacementFoam
+
+
+# solidEquilibriumDisplacementFoam
+unset -f _of_solidEquilibriumDisplacementFoam 2>/dev/null
+_of_solidEquilibriumDisplacementFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_solidEquilibriumDisplacementFoam solidEquilibriumDisplacementFoam
+
+
+# sonicDyMFoam
+unset -f _of_sonicDyMFoam 2>/dev/null
+_of_sonicDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_sonicDyMFoam sonicDyMFoam
+
+
+# sonicFoam
+unset -f _of_sonicFoam 2>/dev/null
+_of_sonicFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_sonicFoam sonicFoam
+
+
+# sonicLiquidFoam
+unset -f _of_sonicLiquidFoam 2>/dev/null
+_of_sonicLiquidFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_sonicLiquidFoam sonicLiquidFoam
+
+
+# splitCells
+unset -f _of_splitCells 2>/dev/null
+_of_splitCells() {
+    _of_complete_ "$@" \
+    "-case -set -tol" \
+    "-geometry -noFunctionObjects -overwrite -srcDoc -doc -help"
+} && complete -o filenames -F _of_splitCells splitCells
+
+
+# splitMesh
+unset -f _of_splitMesh 2>/dev/null
+_of_splitMesh() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -overwrite -srcDoc -doc -help"
+} && complete -o filenames -F _of_splitMesh splitMesh
+
+
+# splitMeshRegions
+unset -f _of_splitMeshRegions 2>/dev/null
+_of_splitMeshRegions() {
+    _of_complete_ "$@" \
+    "-blockedFaces -case -cellZonesFileOnly -decomposeParDict -insidePoint -region -roots" \
+    "-cellZones -cellZonesOnly -detectOnly -largestOnly -makeCellZones -noFunctionObjects -overwrite -parallel -prefixRegion -sloppyCellZones -useFaceZones -srcDoc -doc -help"
+} && complete -o filenames -F _of_splitMeshRegions splitMeshRegions
+
+
+# sprayDyMFoam
+unset -f _of_sprayDyMFoam 2>/dev/null
+_of_sprayDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_sprayDyMFoam sprayDyMFoam
+
+
+# sprayEngineFoam
+unset -f _of_sprayEngineFoam 2>/dev/null
+_of_sprayEngineFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_sprayEngineFoam sprayEngineFoam
+
+
+# sprayFoam
+unset -f _of_sprayFoam 2>/dev/null
+_of_sprayFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_sprayFoam sprayFoam
+
+
+# SRFPimpleFoam
+unset -f _of_SRFPimpleFoam 2>/dev/null
+_of_SRFPimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_SRFPimpleFoam SRFPimpleFoam
+
+
+# SRFSimpleFoam
+unset -f _of_SRFSimpleFoam 2>/dev/null
+_of_SRFSimpleFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_SRFSimpleFoam SRFSimpleFoam
+
+
+# star4ToFoam
+unset -f _of_star4ToFoam 2>/dev/null
+_of_star4ToFoam() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-ascii -noFunctionObjects -solids -srcDoc -doc -help"
+} && complete -o filenames -F _of_star4ToFoam star4ToFoam
+
+
+# steadyParticleTracks
+unset -f _of_steadyParticleTracks 2>/dev/null
+_of_steadyParticleTracks() {
+    _of_complete_ "$@" \
+    "-case -dict -region -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -srcDoc -doc -help"
+} && complete -o filenames -F _of_steadyParticleTracks steadyParticleTracks
+
+
+# stitchMesh
+unset -f _of_stitchMesh 2>/dev/null
+_of_stitchMesh() {
+    _of_complete_ "$@" \
+    "-case -region -toleranceDict" \
+    "-noFunctionObjects -overwrite -partial -perfect -srcDoc -doc -help"
+} && complete -o filenames -F _of_stitchMesh stitchMesh
+
+
+# subsetMesh
+unset -f _of_subsetMesh 2>/dev/null
+_of_subsetMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -patch -patches -region -resultTime -roots" \
+    "-noFunctionObjects -overwrite -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_subsetMesh subsetMesh
+
+
+# surfaceAdd
+unset -f _of_surfaceAdd 2>/dev/null
+_of_surfaceAdd() {
+    _of_complete_ "$@" \
+    "-case -points" \
+    "-mergeRegions -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceAdd surfaceAdd
+
+
+# surfaceBooleanFeatures
+unset -f _of_surfaceBooleanFeatures 2>/dev/null
+_of_surfaceBooleanFeatures() {
+    _of_complete_ "$@" \
+    "-case -trim" \
+    "-invertedSpace -noFunctionObjects -perturb -surf1Baffle -surf2Baffle -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceBooleanFeatures surfaceBooleanFeatures
+
+
+# surfaceCheck
+unset -f _of_surfaceCheck 2>/dev/null
+_of_surfaceCheck() {
+    _of_complete_ "$@" \
+    "-case -outputThreshold" \
+    "-blockMesh -checkSelfIntersection -noFunctionObjects -splitNonManifold -verbose -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceCheck surfaceCheck
+
+
+# surfaceClean
+unset -f _of_surfaceClean 2>/dev/null
+_of_surfaceClean() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noClean -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceClean surfaceClean
+
+
+# surfaceCoarsen
+unset -f _of_surfaceCoarsen 2>/dev/null
+_of_surfaceCoarsen() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceCoarsen surfaceCoarsen
+
+
+# surfaceConvert
+unset -f _of_surfaceConvert 2>/dev/null
+_of_surfaceConvert() {
+    _of_complete_ "$@" \
+    "-case -scale -writePrecision" \
+    "-clean -group -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceConvert surfaceConvert
+
+
+# surfaceFeatureConvert
+unset -f _of_surfaceFeatureConvert 2>/dev/null
+_of_surfaceFeatureConvert() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceFeatureConvert surfaceFeatureConvert
+
+
+# surfaceFeatureExtract
+unset -f _of_surfaceFeatureExtract 2>/dev/null
+_of_surfaceFeatureExtract() {
+    _of_complete_ "$@" \
+    "-case -dict" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceFeatureExtract surfaceFeatureExtract
+
+
+# surfaceFind
+unset -f _of_surfaceFind 2>/dev/null
+_of_surfaceFind() {
+    _of_complete_ "$@" \
+    "-case -x -y -z" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceFind surfaceFind
+
+
+# surfaceHookUp
+unset -f _of_surfaceHookUp 2>/dev/null
+_of_surfaceHookUp() {
+    _of_complete_ "$@" \
+    "-case -dict" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceHookUp surfaceHookUp
+
+
+# surfaceInertia
+unset -f _of_surfaceInertia 2>/dev/null
+_of_surfaceInertia() {
+    _of_complete_ "$@" \
+    "-case -density -referencePoint" \
+    "-noFunctionObjects -shellProperties -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceInertia surfaceInertia
+
+
+# surfaceInflate
+unset -f _of_surfaceInflate 2>/dev/null
+_of_surfaceInflate() {
+    _of_complete_ "$@" \
+    "-case -featureAngle -nSmooth" \
+    "-checkSelfIntersection -debug -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceInflate surfaceInflate
+
+
+# surfaceLambdaMuSmooth
+unset -f _of_surfaceLambdaMuSmooth 2>/dev/null
+_of_surfaceLambdaMuSmooth() {
+    _of_complete_ "$@" \
+    "-featureFile" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceLambdaMuSmooth surfaceLambdaMuSmooth
+
+
+# surfaceMeshConvert
+unset -f _of_surfaceMeshConvert 2>/dev/null
+_of_surfaceMeshConvert() {
+    _of_complete_ "$@" \
+    "-case -dict -from -scaleIn -scaleOut -to" \
+    "-clean -noFunctionObjects -tri -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceMeshConvert surfaceMeshConvert
+
+
+# surfaceMeshConvertTesting
+unset -f _of_surfaceMeshConvertTesting 2>/dev/null
+_of_surfaceMeshConvertTesting() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-clean -noFunctionObjects -orient -stdout -surfMesh -testModify -triFace -triSurface -unsorted -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceMeshConvertTesting surfaceMeshConvertTesting
+
+
+# surfaceMeshExport
+unset -f _of_surfaceMeshExport 2>/dev/null
+_of_surfaceMeshExport() {
+    _of_complete_ "$@" \
+    "-case -dict -from -name -scaleIn -scaleOut -to" \
+    "-clean -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceMeshExport surfaceMeshExport
+
+
+# surfaceMeshImport
+unset -f _of_surfaceMeshImport 2>/dev/null
+_of_surfaceMeshImport() {
+    _of_complete_ "$@" \
+    "-case -dict -from -name -scaleIn -scaleOut -to" \
+    "-clean -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceMeshImport surfaceMeshImport
+
+
+# surfaceMeshInfo
+unset -f _of_surfaceMeshInfo 2>/dev/null
+_of_surfaceMeshInfo() {
+    _of_complete_ "$@" \
+    "-case -scale" \
+    "-areas -noFunctionObjects -xml -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceMeshInfo surfaceMeshInfo
+
+
+# surfaceMeshTriangulate
+unset -f _of_surfaceMeshTriangulate 2>/dev/null
+_of_surfaceMeshTriangulate() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -faceZones -patches -region -roots -time" \
+    "-constant -excludeProcPatches -latestTime -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceMeshTriangulate surfaceMeshTriangulate
+
+
+# surfaceOrient
+unset -f _of_surfaceOrient 2>/dev/null
+_of_surfaceOrient() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-inside -noFunctionObjects -usePierceTest -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceOrient surfaceOrient
+
+
+# surfacePatch
+unset -f _of_surfacePatch 2>/dev/null
+_of_surfacePatch() {
+    _of_complete_ "$@" \
+    "-case -dict" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfacePatch surfacePatch
+
+
+# surfacePointMerge
+unset -f _of_surfacePointMerge 2>/dev/null
+_of_surfacePointMerge() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfacePointMerge surfacePointMerge
+
+
+# surfaceRedistributePar
+unset -f _of_surfaceRedistributePar 2>/dev/null
+_of_surfaceRedistributePar() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-keepNonMapped -noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceRedistributePar surfaceRedistributePar
+
+
+# surfaceRefineRedGreen
+unset -f _of_surfaceRefineRedGreen 2>/dev/null
+_of_surfaceRefineRedGreen() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceRefineRedGreen surfaceRefineRedGreen
+
+
+# surfaceSplitByPatch
+unset -f _of_surfaceSplitByPatch 2>/dev/null
+_of_surfaceSplitByPatch() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceSplitByPatch surfaceSplitByPatch
+
+
+# surfaceSplitByTopology
+unset -f _of_surfaceSplitByTopology 2>/dev/null
+_of_surfaceSplitByTopology() {
+    _of_complete_ "$@" \
+    "" \
+    "-srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceSplitByTopology surfaceSplitByTopology
+
+
+# surfaceSplitNonManifolds
+unset -f _of_surfaceSplitNonManifolds 2>/dev/null
+_of_surfaceSplitNonManifolds() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-debug -noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceSplitNonManifolds surfaceSplitNonManifolds
+
+
+# surfaceSubset
+unset -f _of_surfaceSubset 2>/dev/null
+_of_surfaceSubset() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceSubset surfaceSubset
+
+
+# surfaceToPatch
+unset -f _of_surfaceToPatch 2>/dev/null
+_of_surfaceToPatch() {
+    _of_complete_ "$@" \
+    "-case -faceSet -tol" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceToPatch surfaceToPatch
+
+
+# surfaceTransformPoints
+unset -f _of_surfaceTransformPoints 2>/dev/null
+_of_surfaceTransformPoints() {
+    _of_complete_ "$@" \
+    "-case -rollPitchYaw -rotate -scale -translate -yawPitchRoll" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_surfaceTransformPoints surfaceTransformPoints
+
+
+# temporalInterpolate
+unset -f _of_temporalInterpolate 2>/dev/null
+_of_temporalInterpolate() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -divisions -fields -interpolationType -region -roots -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_temporalInterpolate temporalInterpolate
+
+
+# tetgenToFoam
+unset -f _of_tetgenToFoam 2>/dev/null
+_of_tetgenToFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFaceFile -noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_tetgenToFoam tetgenToFoam
+
+
+# thermoFoam
+unset -f _of_thermoFoam 2>/dev/null
+_of_thermoFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_thermoFoam thermoFoam
+
+
+# topoSet
+unset -f _of_topoSet 2>/dev/null
+_of_topoSet() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -dict -region -roots -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noSync -noZero -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_topoSet topoSet
+
+
+# transformPoints
+unset -f _of_transformPoints 2>/dev/null
+_of_transformPoints() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -rollPitchYaw -roots -rotate -scale -translate -yawPitchRoll" \
+    "-noFunctionObjects -parallel -rotateFields -srcDoc -doc -help"
+} && complete -o filenames -F _of_transformPoints transformPoints
+
+
+# twoLiquidMixingFoam
+unset -f _of_twoLiquidMixingFoam 2>/dev/null
+_of_twoLiquidMixingFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_twoLiquidMixingFoam twoLiquidMixingFoam
+
+
+# twoPhaseEulerFoam
+unset -f _of_twoPhaseEulerFoam 2>/dev/null
+_of_twoPhaseEulerFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_twoPhaseEulerFoam twoPhaseEulerFoam
+
+
+# uncoupledKinematicParcelFoam
+unset -f _of_uncoupledKinematicParcelFoam 2>/dev/null
+_of_uncoupledKinematicParcelFoam() {
+    _of_complete_ "$@" \
+    "-case -cloud -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_uncoupledKinematicParcelFoam uncoupledKinematicParcelFoam
+
+
+# viewFactorsGen
+unset -f _of_viewFactorsGen 2>/dev/null
+_of_viewFactorsGen() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_viewFactorsGen viewFactorsGen
+
+
+# vtkUnstructuredToFoam
+unset -f _of_vtkUnstructuredToFoam 2>/dev/null
+_of_vtkUnstructuredToFoam() {
+    _of_complete_ "$@" \
+    "-case" \
+    "-noFunctionObjects -srcDoc -doc -help"
+} && complete -o filenames -F _of_vtkUnstructuredToFoam vtkUnstructuredToFoam
+
+
+# wallFunctionTable
+unset -f _of_wallFunctionTable 2>/dev/null
+_of_wallFunctionTable() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_wallFunctionTable wallFunctionTable
+
+
+# writeMeshObj
+unset -f _of_writeMeshObj 2>/dev/null
+_of_writeMeshObj() {
+    _of_complete_ "$@" \
+    "-case -cell -cellSet -decomposeParDict -face -faceSet -point -region -roots -time" \
+    "-constant -latestTime -newTimes -noFunctionObjects -noZero -parallel -patchEdges -patchFaces -srcDoc -doc -help"
+} && complete -o filenames -F _of_writeMeshObj writeMeshObj
+
+
+# XiDyMFoam
+unset -f _of_XiDyMFoam 2>/dev/null
+_of_XiDyMFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_XiDyMFoam XiDyMFoam
+
+
+# XiFoam
+unset -f _of_XiFoam 2>/dev/null
+_of_XiFoam() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -roots" \
+    "-noFunctionObjects -parallel -postProcess -srcDoc -doc -help"
+} && complete -o filenames -F _of_XiFoam XiFoam
+
+
+# zipUpMesh
+unset -f _of_zipUpMesh 2>/dev/null
+_of_zipUpMesh() {
+    _of_complete_ "$@" \
+    "-case -decomposeParDict -region -roots" \
+    "-noFunctionObjects -parallel -srcDoc -doc -help"
+} && complete -o filenames -F _of_zipUpMesh zipUpMesh
+
+
+#------------------------------------------------------------------------------

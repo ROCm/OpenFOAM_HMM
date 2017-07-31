@@ -34,37 +34,27 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-Usage: ${0##*/} [OPTION] <outputFile>
+Usage: ${0##*/} [OPTION] [appName .. [appNameN]]
 options:
   -d dir | -dir dir       Directory to process
   -u | -user              Add \$FOAM_USER_APPBIN to the search directories
+  -head | -header         Generate header
   -h | -help              Print the usage
 
-Create bash completions for OpenFOAM applications and write to <outputFile>.
+Create bash completions for OpenFOAM applications and write to stdout.
 By default searches \$FOAM_APPBIN only.
+Alternatively, scan the output from individual applications for single completion
+commands (using the '_of_complete_' backend).
 
 USAGE
     exit 1
 }
 
-# Report error and exit
-die()
-{
-    exec 1>&2
-    echo
-    echo "Error encountered:"
-    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
-    echo
-    echo "See '${0##*/} -help' for usage"
-    echo
-    exit 1
-}
 
 #-------------------------------------------------------------------------------
-#set -x
 
-unset outFile
 searchDirs="$FOAM_APPBIN"
+unset optHeader
 while [ "$#" -gt 0 ]
 do
     case "$1" in
@@ -79,149 +69,195 @@ do
         -u | -user)
             searchDirs="$searchDirs $FOAM_USER_APPBIN"
             ;;
+        -head | -header)
+            optHeader=true
+            ;;
         -*)
             usage "unknown option: '$1'"
             ;;
         *)
-            outFile=$1
             break
             ;;
     esac
     shift
 done
 
-[ -n "$outFile" ] || usage "No output file specified"
+# No applications given, then always generate a header
+if [ "$#" -eq 0 ]
+then
+    optHeader=true
+fi
 
-
-# Generate header
-cat << HEADER > $outFile
+# Header requested or required
+[ "$optHeader" = true ] && cat << HEADER
 #----------------------------------*-sh-*--------------------------------------
 # Bash completions for OpenFOAM applications
+# Recreate with "${0##*/}"
+#
 # Formatted as "complete ... -F _of_APPNAME APPNAME
 
-unset -f _of_filter_opts 2>/dev/null
-_of_filter_opts()
-{
-    local allOpts=\$1
-    local applied=\$2
-    for o in \${allOpts}; do
-        [ "\${applied/\$o/}" == "\${applied}" ] && echo \$o
-    done
-}
-
-HEADER
-
-#------------------------------------------------------------------------------
-
 #
-# Produce contents for switch for common options
+# Generic completion handler for OpenFOAM applications
+# - arg1 = command-name
+# - arg2 = current word
+# - arg3 = previous word
+# - arg4 = options with args
+# - arg5 = options without args
 #
-commonOptions()
+unset -f _of_complete_ 2>/dev/null
+_of_complete_()
 {
-    local indent1="    "
-    local indent2="        "
-    for opt
-    do
-        case $opt in
-        -case)
-            echo "${indent1}-case)"
-            echo "${indent2}COMPREPLY=(\$(compgen -d -- \${cur}))"
-            echo "${indent2};;"
-            ;;
-        -srcDoc|-help)
-            echo "${indent1}-srcDoc|-help)"
-            echo "${indent2}COMPREPLY=()"
-            echo "${indent2};;"
-            ;;
-        -time)
-            echo "${indent1}-time)"
-            echo "${indent2}COMPREPLY=(\$(compgen -d -X '![-0-9]*' -- \${cur}))"
-            echo "${indent2};;"
-            ;;
-        -region)
-            echo "${indent1}-region)"
-            echo "${indent2}local regions=\$(sed 's#/##g' <<< \$([ -d system ] && (\cd system && (\ls -d */ 2>/dev/null))))"
-            echo "${indent2}COMPREPLY=(\$(compgen -W \"\$regions\" -- \${cur}))"
-            echo "${indent2};;"
-            ;;
-        *Dict)
-            echo "${indent1}*Dict)"
-#           echo "${indent2}local dirs=\$(\ls -d s*/)"
-#           echo "${indent2}local files=\$(\ls -f | grep Dict)"
-#           echo "${indent2}COMPREPLY=(\$(compgen -W \"\$dirs \$files\" -- \${cur}))"
-            echo "${indent2}COMPREPLY=(\$(compgen -f -- \${cur}))"
-            echo "${indent2};;"
-            ;;
-        esac
-    done
-}
-
-
-#------------------------------------------------------------------------------
-
-for dir in ${searchDirs}
-do
-    if [ -d "$dir" ]
-    then
-        echo "Processing directory $dir" 1>&2
-    else
-        echo "No such directory: $dir" 1>&2
-        continue
-    fi
-
-    # Sort with ignore-case
-    set -- $(\ls $dir | sort -f)
-    for appName
-    do
-        [ -f "$dir/$appName" -a -x "$dir/$appName" ] || continue
-        appHelp=$($appName -help)
-
-        echo "    $appName" 1>&2
-
-        # Options with args
-        optsWithArgs=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
-
-        # Options without args
-        opts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
-
-        cat << WRITECOMPLETION >> $outFile
-unset -f _of_${appName} 2>/dev/null
-_of_${appName}()
-{
-    local cur="\${COMP_WORDS[COMP_CWORD]}"
-    local prev="\${COMP_WORDS[COMP_CWORD-1]}"
-
-    local opts="${opts[@]} "
-    local optsWithArgs="${optsWithArgs[@]} "
+    # Unused: local cmd=\$1
+    local cur=\$2
+    local prev=\$3
+    local optsWithArgs="\$4 "   # Trailing space added for easier matching
+    local opts="\$5 "
 
     case \${prev} in
-$(commonOptions ${optsWithArgs[@]})
+    -help|-doc|-srcDoc)
+        COMPREPLY=()
+        ;;
+    -case)
+        COMPREPLY=(\$(compgen -d -- \${cur}))
+        ;;
+    -time)
+        # Could use "foamListTimes -withZero", but still doesn't address ranges
+        COMPREPLY=(\$(compgen -d -X '![-0-9]*' -- \${cur}))
+        ;;
+    -region)
+        local list=\$(\ls -d system/*/ 2>/dev/null | sed -e 's#/\$##' -e 's#^.*/##')
+        COMPREPLY=(\$(compgen -W "\$list" -- \${cur}))
+        ;;
+    -fileHandler)
+        COMPREPLY=(\$(compgen -W "collated uncollated masterUncollated" -- \${cur}))
+        ;;
+    *Dict)
+        # local dirs=\$(\ls -d s*/)
+        # local files=\$(\ls -f | grep Dict)
+        # COMPREPLY=(\$(compgen -W \"\$dirs \$files\" -- \${cur}))
+        COMPREPLY=(\$(compgen -f -- \${cur}))
+        ;;
     *)
         if [ "\${optsWithArgs/\${prev} /}" != "\${optsWithArgs}" ]
         then
-            # Unknown type of arg follows - set to files.
+            # Option with unknown type of arg - set to files.
             # Not always correct but can still navigate path if needed...
             COMPREPLY=(\$(compgen -f -- \${cur}))
         else
-            # Catch-all - present all remaining options
-            opts=\$(_of_filter_opts "\${opts}" "\${COMP_LINE}")
-            optsWithArgs=\$(_of_filter_opts "\${optsWithArgs}" "\${COMP_LINE}")
-            COMPREPLY=(\$(compgen -W "\${opts} \${optsWithArgs}" -- \${cur}))
+            # Catchall
+            # - Present remaining options (not already seen in $COMP_LINE)
+            opts=\$(
+                for o in \${opts} \${optsWithArgs}
+                do
+                    [ "\${COMP_LINE/\$o/}" = "\${COMP_LINE}" ] && echo \$o
+                done
+            )
+            COMPREPLY=(\$(compgen -W "\${opts}" -- \${cur}))
         fi
         ;;
     esac
 
     return 0
 }
-complete -o nospace -F _of_${appName} $appName
 
-WRITECOMPLETION
+#------------------------------------------------------------------------------
+
+HEADER
+
+#-------------------------------------------------------------------------------
+
+# Scans the output of the application -help to detect options with/without
+# arguments.  Dispatch via _of_complete_
+#
+generateCompletion()
+{
+    local fullName="$1"
+    local appName="${1##*/}"
+    local appHelp
+
+    [ -f "$fullName" -a -x "$fullName" ] || {
+        echo "skip $fullName" 1>&2
+        return 1
+    }
+    if [ "$appName" = "complete_" ]
+    then
+        echo "skip $appName ... reserved name?" 1>&2
+        return 1
+    fi
+
+    appHelp=$($fullName -help) || {
+        echo "error calling $fullName" 1>&2
+        return 1
+    }
+
+    echo "    $appName" 1>&2
+
+    # Options with args - as array
+    local optsWithArgs=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
+
+    # Options without args - as array
+    local opts=($(awk '/^ {0,4}-[a-z]/ && !/</ {print $1}' <<< "$appHelp"))
+
+    # See bash(1) for some details. Completion functions are called with
+    # arg1 = command-name, arg2 = current word, arg3 = previous word
+    #
+    # Append known option types and dispatch to _of_complete_
+    cat << COMPLETION
+
+# $appName
+unset -f _of_${appName} 2>/dev/null
+_of_${appName}() {
+    _of_complete_ "\$@" \\
+    "${optsWithArgs[@]}" \\
+    "${opts[@]}"
+} && complete -o filenames -F _of_${appName} $appName
+
+COMPLETION
+}
+#------------------------------------------------------------------------------
+
+
+if [ "$#" -eq 0 ]
+then
+
+    for dir in ${searchDirs}
+    do
+        if [ -d "$dir" ]
+        then
+            echo "Processing directory $dir" 1>&2
+        else
+            echo "No such directory: $dir" 1>&2
+            continue
+        fi
+
+        # Sort with ignore-case
+        set -- $(\ls $dir | sort -f)
+        for appName
+        do
+            generateCompletion "$dir/$appName"
+        done
     done
-done
+
+else
+
+    for appName
+    do
+        if [ -f "$appName" -a -x "$appName" ]
+        then
+            generateCompletion "$appName"
+        elif fullName=$(command -v $appName 2>/dev/null)
+        then
+            generateCompletion "$fullName"
+        else
+            echo "No application found: $appName" 1>&2
+        fi
+    done
+
+fi
 
 
 # Generate footer
-cat << FOOTER >> $outFile
+[ "$optHeader" = true ] && cat << FOOTER
 
 #------------------------------------------------------------------------------
 FOOTER

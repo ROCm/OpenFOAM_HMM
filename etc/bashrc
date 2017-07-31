@@ -177,7 +177,7 @@ then
     # Bash completions
     if command -v complete > /dev/null 2>&1
     then
-        _foamEtc config.sh/bashcompletion
+        _foamEtc config.sh/bash_completion
     fi
 fi
 
