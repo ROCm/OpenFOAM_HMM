@@ -195,6 +195,7 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
                     << "value (" << lookupValue << ") underflow" << nl
                     << "    Zero rate of change."
                     << endl;
+
                 // Behaviour as per CLAMP
                 return 0;
                 break;
@@ -230,6 +231,7 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
                     << "value (" << lookupValue << ") overflow" << nl
                     << "    Zero rate of change."
                     << endl;
+
                 // Behaviour as per CLAMP
                 return 0;
                 break;
@@ -341,6 +343,7 @@ Foam::interpolationTable<Type>::operator[](const label i) const
                     << "index (" << ii << ") underflow" << nl
                     << "    Continuing with the first entry"
                     << endl;
+
                 // Behaviour as per 'CLAMP'
                 ii = 0;
                 break;
@@ -377,6 +380,7 @@ Foam::interpolationTable<Type>::operator[](const label i) const
                     << "index (" << ii << ") overflow" << nl
                     << "    Continuing with the last entry"
                     << endl;
+
                 // Behaviour as per 'CLAMP'
                 ii = n - 1;
                 break;
@@ -432,6 +436,7 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
                     << "value (" << lookupValue << ") underflow" << nl
                     << "    Continuing with the first entry"
                     << endl;
+
                 // Behaviour as per CLAMP
                 return this->first().second();
                 break;
@@ -467,6 +472,7 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
                     << "value (" << lookupValue << ") overflow" << nl
                     << "    Continuing with the last entry"
                     << endl;
+
                 // Behaviour as per 'CLAMP'
                 return this->last().second();
                 break;
