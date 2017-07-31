@@ -480,6 +480,7 @@ Foam::argList::argList
 
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
+    HashTable<string>::const_iterator optIter;
     for (int argI = 1; argI < args_.size(); ++argI)
     {
         argListStr_ += ' ';
@@ -489,15 +490,20 @@ Foam::argList::argList
         {
             const char *optionName = &args_[argI][1];
 
-            if
+            if (!*optionName)
+            {
+                Warning
+                    <<"Ignoring lone '-' on the command-line" << endl;
+            }
+            else if
             (
                 (
-                    validOptions.found(optionName)
-                 && !validOptions[optionName].empty()
+                    (optIter = validOptions.cfind(optionName)).found()
+                 && !optIter.object().empty()
                 )
              || (
-                    validParOptions.found(optionName)
-                 && !validParOptions[optionName].empty()
+                    (optIter = validParOptions.cfind(optionName)).found()
+                 && !optIter.object().empty()
                 )
             )
             {
