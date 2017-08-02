@@ -635,8 +635,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
 
     if (debug)
     {
-        Info<< "<end> updateInfoLagrangianFields - "
-            << "lagrangian objects.size() = " << objects.size() << endl;
+        Info<< "<end> " << FUNCTION_NAME << endl;
     }
 }
 
