@@ -23,6 +23,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+inline bool Foam::keyType::valid(char c)
+{
+    return
+    (
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+     && c != '/'   // path separator
+     && c != ';'   // end statement
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::keyType::keyType()

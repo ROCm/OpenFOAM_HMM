@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     for (const auto& s : { " text with \"spaces'", "08/15 value" })
     {
         Info<<"validated \"" << s << "\" => "
-            << word::validated(s, true) << nl;
+            << word::validate(s, true) << nl;
     }
     Info<< nl;
 

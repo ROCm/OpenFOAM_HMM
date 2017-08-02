@@ -190,22 +190,22 @@ public:
         //- Avoid masking the normal std::string replace
         using std::string::replace;
 
-        //- Replace first occurence of sub-string oldStr with newStr
-        //  starting at start
+        //- Replace first occurence of sub-string oldStr with newStr,
+        //  beginning at start
         string& replace
         (
             const string& oldStr,
             const string& newStr,
-            size_type start = 0
+            const size_type start = 0
         );
 
-        //- Replace all occurences of sub-string oldStr with newStr
-        //  starting at start
+        //- Replace all occurences of sub-string oldStr with newStr,
+        //  beginning at start. This is a no-op if oldStr is empty.
         string& replaceAll
         (
             const string& oldStr,
             const string& newStr,
-            size_type start = 0
+            const size_type start = 0
         );
 
         //- Expand initial tildes and all occurences of environment variables
@@ -224,20 +224,23 @@ public:
         //  Foam::findEtcFile
         string& expand(const bool allowEmpty = false);
 
-        //- Remove repeated characters returning true if string changed
+        //- Remove repeated characters
+        //  \return True if string changed
         bool removeRepeated(const char character);
 
         //- Return string with repeated characters removed
         string removeRepeated(const char character) const;
 
-        //- Remove trailing character returning true if string changed
+        //- Remove trailing character, unless string is a single character
+        //  \return True if string changed
         bool removeTrailing(const char character);
 
-        //- Return string with trailing character removed
+        //- Return string with trailing character removed,
+        //  unless string is a single character
         string removeTrailing(const char character) const;
 
         //- Remove the given text from the start of the string.
-        //  Always true if the removal occurred or the given text is empty.
+        //  \return True if the removal occurred or the given text is empty.
         bool removeStart(const std::string& text);
 
         //- Remove the given text from the end of the string.

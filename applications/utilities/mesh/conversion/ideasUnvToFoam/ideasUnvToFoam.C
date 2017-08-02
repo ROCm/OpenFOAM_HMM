@@ -512,7 +512,7 @@ void readSets
             >> dofSet >> tempSet >> contactSet >> nFaces;
 
         is.getLine(line);
-        word groupName = string::validate<word>(line);
+        const word groupName = word::validate(line);
 
         Info<< "For group " << group
             << " named " << groupName

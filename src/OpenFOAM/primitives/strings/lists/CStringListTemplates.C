@@ -33,8 +33,8 @@ Foam::CStringList::CStringList
 :
     argc_(0),
     len_(0),
-    argv_(0),
-    data_(0)
+    argv_(nullptr),
+    data_(nullptr)
 {
     reset(input);
 }
@@ -50,42 +50,40 @@ void Foam::CStringList::reset
 {
     clear();
 
-    argc_ = input.size();
-    forAll(input, argI)
+    if (input.empty())
     {
-        len_ += input[argI].size();
-        ++len_;  // nul terminator for C-strings
+        // Special handling of an empty list
+        argv_ = new char*[1];
+        argv_[0] = nullptr;     // Final nullptr terminator
+        return;
     }
 
-    argv_ = new char*[argc_+1];
-    argv_[argc_] = nullptr; // extra terminator
-
-    if (argc_ > 0)
+    // Count overall required string length, including each trailing nul char
+    for (const auto& str : input)
     {
-        // allocation includes final nul terminator,
-        // but overall count does not
-        data_ = new char[len_--];
+        len_ += str.size() + 1;
+    }
 
-        char* ptr = data_;
-        forAll(input, argI)
+    argv_ = new char*[input.size()+1];
+    data_ = new char[len_];
+    --len_; // Do not include final nul terminator in overall count
+
+    argv_[argc_] = nullptr;     // extra terminator
+
+    // Copy contents
+    char* ptr = data_;
+    for (const auto& str : input)
+    {
+        argv_[argc_++] = ptr;   // The start of this string
+
+        for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
         {
-            argv_[argI] = ptr;
-
-            const std::string& str =
-                static_cast<const std::string&>(input[argI]);
-
-            for
-            (
-                std::string::const_iterator iter = str.begin();
-                iter != str.end();
-                ++iter
-            )
-            {
-                *(ptr++) = *iter;
-            }
-            *(ptr++) = '\0';
+            *(ptr++) = *iter;
         }
+        *(ptr++) = '\0';
     }
+
+    argv_[argc_] = nullptr;     // Final nullptr terminator
 }
 
 

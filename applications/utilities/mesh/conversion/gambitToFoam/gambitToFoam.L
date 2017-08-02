@@ -488,7 +488,7 @@ mtype                 {space}"MTYPE:"{space}
 
 <cellStreamTitle>{spaceNl}{word}{spaceNl} {
 
-        word streamName(Foam::string::validate<word>(YYText()));
+        const word streamName(word::validate(YYText()));
 
         BEGIN(cellStreamFlags);
     }

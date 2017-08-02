@@ -64,7 +64,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
         if (ctnameRE.match(line, groups))
         {
             const label tableId = atoi(groups[0].c_str());
-            const word tableName = word::validated(groups[1], true);
+            const word tableName = word::validate(groups[1], true);
 
             if (!tableName.empty())
             {

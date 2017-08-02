@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <iostream>
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -76,21 +75,18 @@ inline Foam::string::string(const std::string& str)
 {}
 
 
-// Copy character array
 inline Foam::string::string(const char* str)
 :
     std::string(str)
 {}
 
 
-// Construct from a given number of characters in a character array
 inline Foam::string::string(const char* str, const size_type len)
 :
     std::string(str, len)
 {}
 
 
-// Construct from a single character
 inline Foam::string::string(const char c)
 :
     std::string(1, c)
@@ -102,13 +98,14 @@ inline Foam::string::string(const char c)
 template<class String>
 inline bool Foam::string::valid(const std::string& str)
 {
-    for (const_iterator iter = str.begin(); iter != str.end(); ++iter)
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
         if (!String::valid(*iter))
         {
             return false;
         }
     }
+
     return true;
 }
 
@@ -118,27 +115,22 @@ inline bool Foam::string::stripInvalid(std::string& str)
 {
     if (!valid<String>(str))
     {
-        size_type nValid = 0;
-        iterator iter2 = str.begin();
+        size_type nChar = 0;
+        iterator outIter = str.begin();
 
-        for
-        (
-            const_iterator iter1 = iter2;
-            iter1 != const_cast<const std::string&>(str).end();
-            iter1++
-        )
+        for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
         {
-            const char c = *iter1;
+            const char c = *iter;
 
             if (String::valid(c))
             {
-                *iter2 = c;
-                ++iter2;
-                ++nValid;
+                *outIter = c;
+                ++outIter;
+                ++nChar;
             }
         }
 
-        str.resize(nValid);
+        str.resize(nChar);
 
         return true;
     }
@@ -151,7 +143,7 @@ template<class String>
 inline bool Foam::string::meta(const std::string& str, const char quote)
 {
     int escaped = 0;
-    for (const_iterator iter = str.begin(); iter != str.end(); ++iter)
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
         const char c = *iter;
         if (quote && c == quote)
@@ -181,10 +173,10 @@ Foam::string::quotemeta(const std::string& str, const char quote)
     }
 
     string sQuoted;
-    sQuoted.reserve(2*str.length());
+    sQuoted.reserve(2*str.size());
 
     int escaped = 0;
-    for (const_iterator iter = str.begin(); iter != str.end(); ++iter)
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
         const char c = *iter;
         if (c == quote)
@@ -203,7 +195,7 @@ Foam::string::quotemeta(const std::string& str, const char quote)
         sQuoted += c;
     }
 
-    sQuoted.resize(sQuoted.length());
+    sQuoted.resize(sQuoted.size());
 
     return sQuoted;
 }
@@ -212,9 +204,22 @@ Foam::string::quotemeta(const std::string& str, const char quote)
 template<class String>
 inline String Foam::string::validate(const std::string& str)
 {
-    string ss = str;
-    stripInvalid<String>(ss);
-    return ss;
+    String out;
+    out.resize(str.size());
+
+    size_type count = 0;
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    {
+        const char c = *iter;
+        if (String::valid(c))
+        {
+            out[count++] = c;
+        }
+    }
+
+    out.resize(count);
+
+    return out;
 }
 
 
@@ -256,5 +261,6 @@ inline unsigned Foam::string::hash::operator()
 {
     return Hasher(str.data(), str.size(), seed);
 }
+
 
 // ************************************************************************* //

@@ -51,13 +51,10 @@ bool Foam::triSurface::readOBJ(const fileName& OBJfileName)
     {
         string line = getLineNoComment(OBJfile);
 
-        const label sz = line.size();
-
-        if (sz)
+        if (line.size())
         {
-            if (line.back() == '\\')
+            if (line.removeEnd("\\"))
             {
-                line.resize(sz-1);
                 line += getLineNoComment(OBJfile);
             }
 

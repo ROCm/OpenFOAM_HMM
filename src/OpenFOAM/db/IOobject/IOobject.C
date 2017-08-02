@@ -149,7 +149,7 @@ bool Foam::IOobject::fileNameComponents
         // No '/' found (or empty entirely)
         // => no instance or local
 
-        name = word::validated(path, false);
+        name = word::validate(path);
     }
     else if (first == 0)
     {
@@ -160,7 +160,7 @@ bool Foam::IOobject::fileNameComponents
 
         const std::string ending = path.substr(last+1);
         nameLen = ending.size();  // The raw length of name
-        name = word::validated(ending, false);
+        name = word::validate(ending);
     }
     else
     {
@@ -176,7 +176,7 @@ bool Foam::IOobject::fileNameComponents
 
         const std::string ending = path.substr(last+1);
         nameLen = ending.size();  // The raw length of name
-        name = word::validated(ending, false);
+        name = word::validate(ending);
     }
 
     // Check for valid (and stripped) name, regardless of the debug level

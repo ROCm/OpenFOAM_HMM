@@ -40,7 +40,8 @@ using namespace Foam;
 int main(void)
 {
     string st("sfdsf  sdfs23df sdf32f .  sdfsdff23/2sf32");
-    Info<< word(string::validate<word>(st)) << "END" << endl;
+    Info<<"string: " << st << nl;
+    Info<<"word:   \"" << string::validate<word>(st) << "\"" << endl;
 
     string st1("1234567");
 

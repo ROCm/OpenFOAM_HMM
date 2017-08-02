@@ -24,12 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <cctype>
+#include <iostream>  // for std::cerr
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::word::stripInvalid()
 {
-    // skip stripping unless debug is active (to avoid costly operations)
+    // Skip stripping unless debug is active (to avoid costly operations)
     if (debug && string::stripInvalid<word>(*this))
     {
         std::cerr

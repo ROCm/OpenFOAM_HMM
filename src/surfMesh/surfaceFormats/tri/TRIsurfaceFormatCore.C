@@ -86,12 +86,11 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     {
         string line = this->getLineNoComment(is);
 
-        // handle continuations ?
-        //          if (line.back() == '\\')
-        //          {
-        //              line.resize(line.size()-1);
-        //              line += this->getLineNoComment(is);
-        //          }
+        // Handle continuations?
+        // if (line.removeEnd("\\"))
+        // {
+        //     line += this->getLineNoComment(is);
+        // }
 
         IStringStream lineStream(line);
 

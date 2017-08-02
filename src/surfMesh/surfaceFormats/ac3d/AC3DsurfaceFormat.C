@@ -121,10 +121,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
             if (cmd == "name")
             {
                 // name %s
-                string str = parse<string>(args);
-                string::stripInvalid<word>(str);
-
-                names[zoneI] = str;
+                const string str = parse<string>(args);
+                names[zoneI] = word::validate(str);
             }
             else if (cmd == "rot")
             {
