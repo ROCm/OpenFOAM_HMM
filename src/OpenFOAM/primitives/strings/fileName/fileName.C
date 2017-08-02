@@ -104,25 +104,26 @@ Foam::fileName& Foam::fileName::toAbsolute()
 }
 
 
-bool Foam::fileName::clean()
+bool Foam::fileName::clean(std::string& str)
 {
-    // The top slash - we are never allowed to go above it
-    string::size_type top = this->find('/');
+    // Start with the top slash found - we are never allowed to go above it
+    char prev = '/';
+    auto top = str.find(prev);
 
     // No slashes - nothing to do
-    if (top == string::npos)
+    if (top == std::string::npos)
     {
         return false;
     }
 
-    // Start with the '/' found:
-    char prev = '/';
-    string::size_type nChar  = top+1;
-    string::size_type maxLen = this->size();
+    // Number of output characters
+    std::string::size_type nChar = top+1;
+
+    const string::size_type maxLen = str.size();
 
     for (string::size_type src = nChar; src < maxLen; /*nil*/)
     {
-        const char c = operator[](src++);
+        const char c = str[src++];
 
         if (prev == '/')
         {
@@ -132,28 +133,27 @@ bool Foam::fileName::clean()
                 continue;
             }
 
-            // Could be '/./' or '/../'
+            // Could be "/./", "/../" or a trailing "/."
             if (c == '.')
             {
-                // Found trailing '/.' - skip it
+                // Trailing "/." - skip it
                 if (src >= maxLen)
                 {
-                    continue;
+                    break;
                 }
 
-
                 // Peek at the next character
-                const char c1 = operator[](src);
+                const char c1 = str[src];
 
-                // Found '/./' - skip it
+                // Found "/./" - skip it
                 if (c1 == '/')
                 {
                     ++src;
                     continue;
                 }
 
-                // It is '/..' or '/../'
-                if (c1 == '.' && (src+1 >= maxLen || operator[](src+1) == '/'))
+                // Trailing "/.." or intermediate "/../"
+                if (c1 == '.' && (src+1 >= maxLen || str[src+1] == '/'))
                 {
                     string::size_type parent;
 
@@ -163,7 +163,7 @@ bool Foam::fileName::clean()
                     if
                     (
                         nChar > 2
-                     && (parent = this->rfind('/', nChar-2)) != string::npos
+                     && (parent = str.rfind('/', nChar-2)) != string::npos
                      && parent >= top
                     )
                     {
@@ -179,47 +179,60 @@ bool Foam::fileName::clean()
                 }
             }
         }
-        operator[](nChar++) = prev = c;
+        str[nChar++] = prev = c;
     }
 
     // Remove trailing slash
-    if (nChar > 1 && operator[](nChar-1) == '/')
+    if (nChar > 1 && str[nChar-1] == '/')
     {
         nChar--;
     }
 
-    this->resize(nChar);
+    str.resize(nChar);
 
     return (nChar != maxLen);
 }
 
 
+bool Foam::fileName::clean()
+{
+    return fileName::clean(*this);
+}
+
+
 Foam::fileName Foam::fileName::clean() const
 {
-    fileName fName(*this);
-    fName.clean();
-    return fName;
+    fileName cleaned(*this);
+    fileName::clean(cleaned);
+    return cleaned;
+}
+
+
+std::string Foam::fileName::name(const std::string& str)
+{
+    const auto beg = str.rfind('/');
+
+    if (beg == npos)
+    {
+        return str;
+    }
+    else
+    {
+        return str.substr(beg+1);
+    }
 }
 
 
 Foam::word Foam::fileName::name() const
 {
-    const size_type i = rfind('/');
-
-    if (i == npos)
-    {
-        return *this;
-    }
-    else
-    {
-        return substr(i+1);
-    }
+    return fileName::name(*this);
 }
 
 
-Foam::word Foam::fileName::nameLessExt() const
+std::string Foam::fileName::nameLessExt(const std::string& str)
 {
-    size_type beg = rfind('/');
+    size_type beg = str.rfind('/');
+    size_type dot = str.rfind('.');
 
     if (beg == npos)
     {
@@ -230,7 +243,6 @@ Foam::word Foam::fileName::nameLessExt() const
         ++beg;
     }
 
-    size_type dot = rfind('.');
     if (dot != npos && dot <= beg)
     {
         dot = npos;
@@ -238,18 +250,24 @@ Foam::word Foam::fileName::nameLessExt() const
 
     if (dot == npos)
     {
-        return substr(beg, npos);
+        return str.substr(beg);
     }
     else
     {
-        return substr(beg, dot - beg);
+        return str.substr(beg, dot - beg);
     }
 }
 
 
-Foam::fileName Foam::fileName::path() const
+Foam::word Foam::fileName::nameLessExt() const
 {
-    const size_type i = rfind('/');
+    return nameLessExt(*this);
+}
+
+
+std::string Foam::fileName::path(const std::string& str)
+{
+    const auto i = str.rfind('/');
 
     if (i == npos)
     {
@@ -257,7 +275,7 @@ Foam::fileName Foam::fileName::path() const
     }
     else if (i)
     {
-        return substr(0, i);
+        return str.substr(0, i);
     }
     else
     {
@@ -266,9 +284,15 @@ Foam::fileName Foam::fileName::path() const
 }
 
 
+Foam::fileName Foam::fileName::path() const
+{
+    return path(*this);
+}
+
+
 Foam::fileName Foam::fileName::lessExt() const
 {
-    const size_type i = find_ext();
+    const auto i = find_ext();
 
     if (i == npos)
     {
@@ -325,7 +349,7 @@ Foam::wordList Foam::fileName::components(const char delimiter) const
     // Avoid empty trailing element
     if (beg < size())
     {
-        wrdList.append(substr(beg, npos));
+        wrdList.append(substr(beg));
     }
 
     // Transfer to wordList
