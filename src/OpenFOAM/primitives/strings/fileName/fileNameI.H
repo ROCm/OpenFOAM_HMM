@@ -23,12 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <iostream>  // for std::cerr
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::fileName::stripInvalid()
 {
-    // skip stripping unless debug is active to avoid
-    // costly operations
+    // Skip stripping unless debug is active (to avoid costly operations)
     if (debug && string::stripInvalid<fileName>(*this))
     {
         std::cerr

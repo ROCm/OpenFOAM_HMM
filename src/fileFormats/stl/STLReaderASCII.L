@@ -243,7 +243,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 }
 
 <readSolidName>{string} {
-    const word solidName(Foam::string::validate<word>(YYText()));
+    const word solidName(word::validate(YYText()));
 
     auto iter = lookup_.cfind(solidName);
     if (iter.found())

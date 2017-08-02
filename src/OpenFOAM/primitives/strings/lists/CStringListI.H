@@ -46,8 +46,8 @@ inline Foam::CStringList::CStringList()
 :
     argc_(0),
     len_(0),
-    argv_(0),
-    data_(0)
+    argv_(nullptr),
+    data_(nullptr)
 {}
 
 
@@ -69,12 +69,12 @@ inline void Foam::CStringList::clear()
     if (data_)
     {
         delete[] data_;
-        data_ = 0;
+        data_ = nullptr;
     }
     if (argv_)
     {
         delete[] argv_;
-        argv_ = 0;
+        argv_ = nullptr;
     }
 }
 

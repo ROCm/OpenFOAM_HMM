@@ -235,7 +235,7 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        string::validate<word>
+                        word::validate
                         (
                             funcNameArgs.substr(start, i - start)
                         )
@@ -255,7 +255,7 @@ bool Foam::functionObjectList::readFunctionObject
         }
         else if (c == '=')
         {
-            argName = string::validate<word>
+            argName = word::validate
             (
                 funcNameArgs.substr(start, i - start)
             );
@@ -330,7 +330,7 @@ bool Foam::functionObjectList::readFunctionObject
 
     // Merge this functionObject dictionary into functionsDict
     dictionary funcArgsDict;
-    funcArgsDict.add(string::validate<word>(funcNameArgs), funcDict);
+    funcArgsDict.add(word::validate(funcNameArgs), funcDict);
     functionsDict.merge(funcArgsDict);
 
     return true;

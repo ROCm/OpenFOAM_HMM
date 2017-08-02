@@ -120,14 +120,9 @@ bool Foam::fileName::clean()
     string::size_type nChar  = top+1;
     string::size_type maxLen = this->size();
 
-    for
-    (
-        string::size_type src = nChar;
-        src < maxLen;
-        /*nil*/
-    )
+    for (string::size_type src = nChar; src < maxLen; /*nil*/)
     {
-        char c = operator[](src++);
+        const char c = operator[](src++);
 
         if (prev == '/')
         {
@@ -148,12 +143,12 @@ bool Foam::fileName::clean()
 
 
                 // Peek at the next character
-                char c1 = operator[](src);
+                const char c1 = operator[](src);
 
                 // Found '/./' - skip it
                 if (c1 == '/')
                 {
-                    src++;
+                    ++src;
                     continue;
                 }
 

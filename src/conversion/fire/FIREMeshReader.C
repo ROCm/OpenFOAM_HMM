@@ -155,7 +155,7 @@ void Foam::fileFormats::FIREMeshReader::readSelections(ISstream& is)
             // index starting at 1
             const label selId = ++nCellSelections;
 
-            cellTable_.setName(selId, word::validated(name, true));
+            cellTable_.setName(selId, word::validate(name, true));
             cellTable_.setMaterial(selId, "fluid");
 
             for (label i = 0; i < count; ++i)
@@ -170,7 +170,7 @@ void Foam::fileFormats::FIREMeshReader::readSelections(ISstream& is)
             // index starting at 0
             const label selId = nFaceSelections++;
 
-            faceNames.append(word::validated(name, true));
+            faceNames.append(word::validate(name, true));
 
             for (label i = 0; i < count; ++i)
             {

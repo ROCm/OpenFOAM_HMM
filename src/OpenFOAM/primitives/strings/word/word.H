@@ -64,6 +64,7 @@ class word
     // Private Member Functions
 
         //- Strip invalid characters from this word
+        //  Trips an abort on invalid characters for debug 2 or greater
         inline void stripInvalid();
 
 
@@ -112,10 +113,10 @@ public:
         //- Is this character valid for a word?
         inline static bool valid(char c);
 
-        //- Construct a validated word, in which all invalid characters have
-        //  been stripped out. Optionally prefix any leading digit
-        //  with '_' to have words that work nicely as dictionary keywords.
-        static word validated(const std::string& s, const bool prefix=false);
+        //- Construct validated word (no invalid characters).
+        //  Optionally prefix any leading digit with '_' to have words
+        //  that work nicely as dictionary keywords.
+        static word validate(const std::string& s, const bool prefix=false);
 
 
       // File-like functions

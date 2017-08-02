@@ -35,52 +35,28 @@ const Foam::word Foam::word::null;
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::word Foam::word::validated(const std::string& s, const bool prefix)
+Foam::word Foam::word::validate(const std::string& s, const bool prefix)
 {
-    std::string::size_type count = 0;
-    bool extra = false;
+    word out;
+    out.resize(s.size() + (prefix ? 1 : 0));
 
-    // Count number of valid characters and detect if the first character
-    // happens to be a digit, which we'd like to avoid having since this
-    // will cause parse issues when read back later.
-    for (std::string::const_iterator it = s.cbegin(); it != s.cend(); ++it)
+    std::string::size_type count = 0;
+
+    // As per validate, but optionally detect if the first character
+    // is a digit, which we'd like to avoid having since this will
+    // cause parse issues when read back later.
+    for (auto iter = s.cbegin(); iter != s.cend(); ++iter)
     {
-        const char c = *it;
+        const char c = *iter;
 
         if (word::valid(c))
         {
-            if (prefix && !count && isdigit(c))
+            if (!count && prefix && isdigit(c))
             {
                 // First valid character was a digit - prefix with '_'
-                extra = true;
-                ++count;
+                out[count++] = '_';
             }
 
-            ++count;
-        }
-    }
-
-    if (count == s.size() && !extra)
-    {
-        return word(s, false);  // Already checked, can just return as word
-    }
-
-    word out;
-    out.resize(count);
-    count = 0;
-
-    // Copy valid content.
-    if (extra)
-    {
-        out[count++] = '_';
-    }
-
-    for (std::string::const_iterator it = s.cbegin(); it != s.cend(); ++it)
-    {
-        const char c = *it;
-
-        if (word::valid(c))
-        {
             out[count++] = c;
         }
     }

@@ -598,10 +598,7 @@ int main(int argc, char *argv[])
                     // Pass2: reconstruct the cloud
                     forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)
                     {
-                        const word cloudName = string::validate<word>
-                        (
-                            iter.key()
-                        );
+                        const word cloudName = word::validate(iter.key());
 
                         // Objects (on arbitrary processor)
                         const IOobjectList& sprayObjs = iter();

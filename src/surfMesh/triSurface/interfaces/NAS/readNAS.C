@@ -152,10 +152,9 @@ bool triSurface::readNAS(const fileName& fName)
 
                 string nameString;
                 is.getLine(ansaName);
-                if (ansaName.back() == '\r')
-                {
-                    ansaName.resize(ansaName.size()-1);
-                }
+
+                ansaName.removeEnd("\r");  // Possible CR-NL
+
                 ansaName = ansaName.substr(1);
                 // Info<< "ANSA tag for NastranID:" << ansaId
                 //     << " of type " << ansaType
@@ -178,8 +177,9 @@ bool triSurface::readNAS(const fileName& fName)
             string rawName;
             lineStream >> rawName;
 
-            groupToName.insert(groupId, string::validate<word>(rawName));
-            Info<< "group " << groupId << " => " << rawName << endl;
+            const word groupName = word::validate(rawName);
+            groupToName.insert(groupId, groupName);
+            Info<< "group " << groupId << " => " << groupName << endl;
         }
 
 
@@ -275,8 +275,9 @@ bool triSurface::readNAS(const fileName& fName)
                 readLabel(IStringStream(readNASToken(line, 8, linei))());
             if (groupId == ansaId && ansaType == "PSHELL")
             {
-                groupToName.insert(groupId, string::validate<word>(ansaName));
-                Info<< "group " << groupId << " => " << ansaName << endl;
+                const word groupName = word::validate(ansaName);
+                groupToName.insert(groupId, groupName);
+                Info<< "group " << groupId << " => " << groupName << endl;
             }
         }
         else if (cmd == "GRID")

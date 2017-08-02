@@ -108,7 +108,7 @@ public:
         inline fileName(const fileName& fn);
 
         //- Construct as copy of word
-        inline fileName(const word& s);
+        inline fileName(const word& w);
 
         //- Construct as copy of string
         inline fileName(const string& s, const bool doStripInvalid=true);

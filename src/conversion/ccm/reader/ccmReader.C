@@ -365,7 +365,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             }
             else
             {
-                dict.add(opt, word::validated(str, true));
+                dict.add(opt, word::validate(str, true));
             }
         }
 
@@ -407,7 +407,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
 
             if (!str.empty())
             {
-                dict.add(opt, word::validated(str, true));
+                dict.add(opt, word::validate(str, true));
             }
         }
 
@@ -472,7 +472,7 @@ void Foam::ccm::reader::readProblemDescription_cellTable
                 str = "zone_" + ::Foam::name(Id);
             }
 
-            dict.add(opt, word::validated(str, true));
+            dict.add(opt, word::validate(str, true));
         }
 
 
@@ -484,7 +484,7 @@ void Foam::ccm::reader::readProblemDescription_cellTable
 
             if (!str.empty())
             {
-                dict.add(opt, word::validated(str, true));
+                dict.add(opt, word::validate(str, true));
             }
         }
 

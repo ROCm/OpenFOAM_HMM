@@ -207,7 +207,7 @@ int main(int argc, char *argv[])
         // #include "checkHasMovingMesh.H"
         // #include "checkHasLagrangian.H"
 
-        IOobjectList objects(mesh, timeDirs[timeDirs.size()-1].name());
+        IOobjectList objects(mesh, timeDirs.last().name());
 
         forAll(timeDirs, timeI)
         {

@@ -370,7 +370,7 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
             lineStr >> regionI >> regionName;
 
             Info<< "    " << regionI << '\t'
-                << string::validate<word>(regionName) << endl;
+                << word::validate(regionName) << endl;
         }
         else if (nSpaces == 2)
         {
@@ -380,21 +380,21 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
             if (physType == 1)
             {
                 Info<< "    " << "Line " << regionI << '\t'
-                    << string::validate<word>(regionName) << endl;
+                    << word::validate(regionName) << endl;
             }
             else if (physType == 2)
             {
                 Info<< "    " << "Surface " << regionI << '\t'
-                    << string::validate<word>(regionName) << endl;
+                    << word::validate(regionName) << endl;
             }
             else if (physType == 3)
             {
                 Info<< "    " << "Volume " << regionI << '\t'
-                    << string::validate<word>(regionName) << endl;
+                    << word::validate(regionName) << endl;
             }
         }
 
-        physicalNames.insert(regionI, string::validate<word>(regionName));
+        physicalNames.insert(regionI, word::validate(regionName));
     }
 
     inFile.getLine(line);

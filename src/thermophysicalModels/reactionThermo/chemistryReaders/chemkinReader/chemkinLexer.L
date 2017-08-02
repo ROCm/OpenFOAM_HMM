@@ -65,29 +65,6 @@ int yyFlexLexer::yywrap()
 //! \endcond
 
 
-Foam::string foamSpecieString(const char* YYText)
-{
-    Foam::string specieString(YYText);
-    return specieString;
-}
-
-
-Foam::word foamName(const char* YYText)
-{
-    Foam::string fn(YYText);
-    Foam::string::stripInvalid<Foam::word>(fn);
-    return fn;
-}
-
-
-Foam::word foamName(const Foam::string& s)
-{
-    Foam::string fn(s);
-    Foam::string::stripInvalid<Foam::word>(fn);
-    return fn;
-}
-
-
  /* ------------------------------------------------------------------------- *\
    ------ cppLexer::yylex()
  \* ------------------------------------------------------------------------- */
@@ -344,7 +321,7 @@ bool finishReaction = false;
     }
 
 <readElements>{elementName} {
-        currentElementName = foamName(YYText());
+        currentElementName = word::validate(YYText());
         correctElementName(currentElementName);
 
         if (!elementIndices_.found(currentElementName))
@@ -382,7 +359,7 @@ bool finishReaction = false;
     }
 
 <readSpecies>{specieName} {
-        const word specieName(foamName(foamSpecieString(YYText())));
+        const word specieName = word::validate(YYText());
 
         if (specieName == "THERMO")
         {
@@ -437,7 +414,7 @@ bool finishReaction = false;
     }
 
 <readThermoSpecieName>{thermoSpecieName} {
-        string specieString(foamSpecieString(YYText()));
+        string specieString(YYText());
         if (newFormat_)
         {
             specieString.replaceAll(" ", "_");
@@ -474,7 +451,7 @@ bool finishReaction = false;
 
         for (int i=0; i<4; i++)
         {
-            word elementName(foamName(thermoFormula.substr(5*i, 2)));
+            word elementName = word::validate(thermoFormula.substr(5*i, 2));
             label nAtoms = atoi(thermoFormula.substr(5*i + 2, 3).c_str());
 
             if (elementName.size() && nAtoms)
@@ -494,17 +471,9 @@ bool finishReaction = false;
 
         switch (phaseChar)
         {
-            case 'S':
-                speciePhase_.insert(currentSpecieName, solid);
-            break;
-
-            case 'L':
-                speciePhase_.insert(currentSpecieName, liquid);
-            break;
-
-            case 'G':
-                speciePhase_.insert(currentSpecieName, gas);
-            break;
+            case 'S': speciePhase_.insert(currentSpecieName, solid); break;
+            case 'L': speciePhase_.insert(currentSpecieName, liquid); break;
+            case 'G': speciePhase_.insert(currentSpecieName, gas); break;
         }
 
         BEGIN(readThermoTemps);
@@ -526,7 +495,7 @@ bool finishReaction = false;
 
 <readThermoFormula2>{thermoFormula2} {
         const string thermoFormula(YYText());
-        word elementName(foamName(thermoFormula.substr(0, 2)));
+        word elementName = word::validate(thermoFormula.substr(0, 2));
         const label nAtoms = atoi(thermoFormula.substr(2, 3).c_str());
 
         if
@@ -695,7 +664,7 @@ bool finishReaction = false;
 
 <readReactionKeyword>{reactionKeyword} {
 
-        word keyword(foamName(YYText()));
+        const word keyword = word::validate(YYText());
 
         HashTable<int>::iterator reactionKeywordIter
         (
@@ -807,7 +776,7 @@ bool finishReaction = false;
         }
         else
         {
-            currentSpecieName = foamName(foamSpecieString(YYText()));
+            currentSpecieName = word::validate(YYText());
 
             HashTable<label>::iterator specieIndexIter
             (
@@ -853,7 +822,7 @@ bool finishReaction = false;
 
 <readReactionKeyword>{reactionKeywordSlash} {
 
-        word keyword(foamName(YYText()));
+        word keyword = word::validate(YYText());
 
         HashTable<int>::iterator reactionKeywordIter
         (
@@ -1328,8 +1297,7 @@ bool finishReaction = false;
 <readPDependentSpecie>{pDependentSpecie} {
 
         const word rhsPDependentSpecieName = pDependentSpecieName;
-        pDependentSpecieName =
-            foamName(foamSpecieString(YYText()));
+        pDependentSpecieName = word::validate(YYText());
         pDependentSpecieName.resize(pDependentSpecieName.size()-1);
 
         if (rrType == thirdBodyArrhenius)
@@ -1399,7 +1367,7 @@ bool finishReaction = false;
     }
 
 <readTdepSpecie>{specieName} {
-        word specieName(foamName(foamSpecieString(YYText())));
+        word specieName = word::validate(YYText());
         FatalErrorInFunction
             << "Temperature-dependent reaction on line "
             << lineNo_ << "not yet supported"
@@ -1408,8 +1376,7 @@ bool finishReaction = false;
     }
 
 <readReactionOrderSpecie>{specieName} {
-        currentSpecieName =
-            word(foamName(foamSpecieString(YYText())));
+        currentSpecieName = word::validate(YYText());
 
         HashTable<label>::iterator specieIndexIter
         (

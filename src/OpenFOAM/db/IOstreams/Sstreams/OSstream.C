@@ -81,9 +81,9 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
     os_ << token::BEGIN_STRING;
 
     int backslash = 0;
-    for (string::const_iterator iter = str.begin(); iter != str.end(); ++iter)
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
-        char c = *iter;
+        const char c = *iter;
 
         if (c == '\\')
         {
@@ -132,14 +132,9 @@ Foam::Ostream& Foam::OSstream::writeQuoted
         os_ << token::BEGIN_STRING;
 
         int backslash = 0;
-        for
-        (
-            string::const_iterator iter = str.begin();
-            iter != str.end();
-            ++iter
-        )
+        for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
         {
-            char c = *iter;
+            const char c = *iter;
 
             if (c == '\\')
             {

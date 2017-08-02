@@ -31,6 +31,12 @@ inline bool Foam::wordRe::meta(const char c)
 }
 
 
+inline bool Foam::wordRe::valid(char c)
+{
+    return keyType::valid(c);
+}
+
+
 inline bool Foam::wordRe::isPattern(const std::string& str)
 {
     return string::meta<regExp>(str);

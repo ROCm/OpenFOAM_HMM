@@ -111,14 +111,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
                 string rawName;
                 is.getLine(rawName);
-                if (rawName.back() == '\r')
-                {
-                    rawName.resize(rawName.size()-1);
-                }
-                rawName = rawName.substr(1);
-
-                string::stripInvalid<word>(rawName);
-                ansaName = rawName;
+                rawName.removeEnd("\r");
+                ansaName = word::validate(rawName.substr(1));
 
                 // Info<< "ANSA tag for NastranID:" << ansaId
                 //     << " of type " << ansaType
@@ -140,11 +134,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
             string rawName;
             lineStream >> rawName;
-            string::stripInvalid<word>(rawName);
 
-            word groupName(rawName);
+            const word groupName = word::validate(rawName);
             nameLookup.insert(groupId, groupName);
-
             // Info<< "group " << groupId << " => " << groupName << endl;
         }
 

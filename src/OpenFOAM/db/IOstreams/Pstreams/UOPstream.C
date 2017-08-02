@@ -185,7 +185,7 @@ Foam::Ostream& Foam::UOPstream::write(const char c)
 
 Foam::Ostream& Foam::UOPstream::write(const char* str)
 {
-    word nonWhiteChars(string::validate<word>(str));
+    const word nonWhiteChars(string::validate<word>(str));
 
     if (nonWhiteChars.size() == 1)
     {
