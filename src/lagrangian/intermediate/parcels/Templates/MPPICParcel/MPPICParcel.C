@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -79,6 +79,7 @@ bool Foam::MPPICParcel<ParcelType>::move
                 td.cloud().dampingModel().velocityCorrection(p, trackTime);
 
             td.keepParticle = true;
+            td.switchProcessor = false;
 
             break;
         }
@@ -88,6 +89,7 @@ bool Foam::MPPICParcel<ParcelType>::move
                 td.cloud().packingModel().velocityCorrection(p, trackTime);
 
             td.keepParticle = true;
+            td.switchProcessor = false;
 
             break;
         }
