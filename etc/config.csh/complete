@@ -1,0 +1,59 @@
+#!bash
+# A bash -*- sh -*- adapter for re-using OpenFOAM bash completions with tcsh
+#
+# Called with appName and COMMAND_LINE
+#
+# Source the bash completions
+. $WM_PROJECT_DIR/etc/config.sh/bash_completion
+
+appName=$1
+
+# Ensure COMP_LINE is available for bash function
+if [ "$#" -eq 2 ]
+then
+    COMP_LINE=$2
+else
+    COMP_LINE=$COMMAND_LINE
+fi
+
+# Remove the colon as a completion separator because tcsh cannot handle it
+COMP_WORDBREAKS=${COMP_WORDBREAKS//:}
+
+# Set COMP_WORDS in a way that can be handled by the bash script.
+COMP_WORDS=($COMP_LINE)
+
+# The cursor is at the end of parameter #1.
+# We must check for a space as the last character which will
+# tell us that the previous word is complete and the cursor
+# is on the next word.
+if [ "${COMP_LINE: -1}" = " " ]
+then
+    # The last character is a space, so our location is at the end
+    # of the command-line array
+    COMP_CWORD=${#COMP_WORDS[@]}
+else
+    # The last character is not a space, so our location is on the
+    # last word of the command-line array, so we must decrement the
+    # count by 1
+    COMP_CWORD=$((${#COMP_WORDS[@]}-1))
+fi
+
+# bash completions are "complete ... -F _of_APPNAME APPNAME
+_of_${appName} \
+    "$appName" "${COMP_WORDS[COMP_CWORD]}" "${COMP_WORDS[COMP_CWORD-1]}"
+
+# Need slash on the end of directories for tcsh
+reply=($(for i in ${COMPREPLY[@]}
+    do
+        if [ -d "$i" -a "${i#/}" = "$i" ]
+        then
+            echo "$i/"
+        else
+            echo "$i"
+        fi
+    done
+))
+
+echo ${reply[@]}
+
+#------------------------------------------------------------------------------

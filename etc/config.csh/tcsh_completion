@@ -1,0 +1,17 @@
+#----------------------------------*-sh-*--------------------------------------
+# Tcsh completions for OpenFOAM applications
+# Using bash_completion functions for the hard work
+
+if ($?tcsh) then  # tcsh only
+    if ( -f $WM_PROJECT_DIR/etc/config.sh/bash_completion \
+      && -f $WM_PROJECT_DIR/etc/config.csh/complete) then
+        foreach appName (`sed -ne 's/^.*&& complete.* //p' $WM_PROJECT_DIR/etc/config.sh/bash_completion`)
+            # Pass explicitly
+            ## complete $appName 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete '$appName' "${COMMAND_LINE}"`,'
+            # Pass via environment
+            complete $appName 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete '$appName'`,'
+        end
+    endif
+endif
+
+#------------------------------------------------------------------------------
