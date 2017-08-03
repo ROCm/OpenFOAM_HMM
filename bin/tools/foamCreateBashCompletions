@@ -102,7 +102,7 @@ fi
 # - arg2 = current word
 # - arg3 = previous word
 # - arg4 = options with args
-# - arg5 = options without args
+# - arg5 = boolean options
 #
 unset -f _of_complete_ 2>/dev/null
 _of_complete_()
@@ -112,10 +112,13 @@ _of_complete_()
     local prev=\$3
     local optsWithArgs="\$4 "   # Trailing space added for easier matching
     local opts="\$5 "
+    local choices
 
     case \${prev} in
     -help|-doc|-srcDoc)
+        # These options are usage and we can stop here.
         COMPREPLY=()
+        return 0
         ;;
     -case)
         COMPREPLY=(\$(compgen -d -- \${cur}))
@@ -125,11 +128,12 @@ _of_complete_()
         COMPREPLY=(\$(compgen -d -X '![-0-9]*' -- \${cur}))
         ;;
     -region)
-        local list=\$(\ls -d system/*/ 2>/dev/null | sed -e 's#/\$##' -e 's#^.*/##')
-        COMPREPLY=(\$(compgen -W "\$list" -- \${cur}))
+        choices=\$(\ls -d system/*/ 2>/dev/null | sed -e 's#/\$##' -e 's#^.*/##')
+        COMPREPLY=(\$(compgen -W "\$choices" -- \${cur}))
         ;;
     -fileHandler)
-        COMPREPLY=(\$(compgen -W "collated uncollated masterUncollated" -- \${cur}))
+        choices="collated uncollated masterUncollated"
+        COMPREPLY=(\$(compgen -W "\$choices" -- \${cur}))
         ;;
     *Dict)
         # local dirs=\$(\ls -d s*/)
@@ -143,16 +147,21 @@ _of_complete_()
             # Option with unknown type of arg - set to files.
             # Not always correct but can still navigate path if needed...
             COMPREPLY=(\$(compgen -f -- \${cur}))
+        elif [ -n "\$cur" -a "\${cur#-}" = "\${cur}" ]
+        then
+            # Already started a (non-empty) word that isn't an option,
+            # use files in which case revert to filenames.
+            COMPREPLY=(\$(compgen -f -- \${cur}))
         else
             # Catchall
-            # - Present remaining options (not already seen in $COMP_LINE)
-            opts=\$(
+            # - Present remaining options (not already seen in \$COMP_LINE)
+            choices=\$(
                 for o in \${opts} \${optsWithArgs}
                 do
                     [ "\${COMP_LINE/\$o/}" = "\${COMP_LINE}" ] && echo \$o
                 done
             )
-            COMPREPLY=(\$(compgen -W "\${opts}" -- \${cur}))
+            COMPREPLY=(\$(compgen -W "\$choices" -- \${cur}))
         fi
         ;;
     esac
@@ -190,8 +199,6 @@ generateCompletion()
         return 1
     }
 
-    echo "    $appName" 1>&2
-
     # Options with args - as array
     local optsWithArgs=($(awk '/^ {0,4}-[a-z]/ && /</ {print $1}' <<< "$appHelp"))
 
@@ -202,15 +209,17 @@ generateCompletion()
     # arg1 = command-name, arg2 = current word, arg3 = previous word
     #
     # Append known option types and dispatch to _of_complete_
+    echo "    $appName" 1>&2
     cat << COMPLETION
 
-# $appName
+# [$appName]
 unset -f _of_${appName} 2>/dev/null
 _of_${appName}() {
     _of_complete_ "\$@" \\
     "${optsWithArgs[@]}" \\
     "${opts[@]}"
-} && complete -o filenames -F _of_${appName} $appName
+}
+complete -o filenames -F _of_${appName} $appName
 
 COMPLETION
 }
