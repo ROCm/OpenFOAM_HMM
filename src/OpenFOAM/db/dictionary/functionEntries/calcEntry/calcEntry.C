@@ -35,22 +35,22 @@ namespace Foam
 {
 namespace functionEntries
 {
-    defineTypeNameAndDebug(calcEntry, 0);
-
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         calcEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        calc
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         calcEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        calc
     );
 
 }

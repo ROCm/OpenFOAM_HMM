@@ -31,33 +31,26 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::word Foam::functionEntries::includeIfPresentEntry::typeName
-(
-    Foam::functionEntries::includeIfPresentEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include includeIfPresentEntry
-int Foam::functionEntries::includeIfPresentEntry::debug(0);
-
 namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeIfPresentEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        includeIfPresent
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeIfPresentEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        includeIfPresent
     );
 }
 }
@@ -70,7 +63,7 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    const fileName fName(includeFileName(is, parentDict));
+    const fileName fName(resolveFile(is, parentDict));
     IFstream ifs(fName);
 
     if (ifs)
@@ -105,7 +98,7 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    const fileName fName(includeFileName(is, parentDict));
+    const fileName fName(resolveFile(is, parentDict));
     IFstream ifs(fName);
 
     if (ifs)

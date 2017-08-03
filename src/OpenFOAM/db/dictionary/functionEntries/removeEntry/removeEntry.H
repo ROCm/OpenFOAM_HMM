@@ -64,25 +64,10 @@ class removeEntry
 :
     public functionEntry
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        removeEntry(const removeEntry&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const removeEntry&) = delete;
-
-
 public:
 
-    //- Runtime type information
-    ClassName("remove");
-
-
-    // Member Functions
-
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream& is);
+    //- Remove entries from the current sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
 };
 
 

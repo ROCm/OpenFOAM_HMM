@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,34 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "inputModeEntry.H"
+#include "inputMode.H"
 #include "dictionary.H"
 #include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::word Foam::functionEntries::inputModeEntry::typeName
-(
-    Foam::functionEntries::inputModeEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include inputModeEntries
-int Foam::functionEntries::inputModeEntry::debug(0);
-
-Foam::functionEntries::inputModeEntry::inputMode
-    Foam::functionEntries::inputModeEntry::mode_(MERGE);
-
 namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
-        inputModeEntry,
+        inputMode,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        inputMode
     );
 }
 }
@@ -58,23 +47,23 @@ namespace functionEntries
 
 const Foam::Enum
 <
-    Foam::functionEntries::inputModeEntry::inputMode
+    Foam::entry::inputMode
 >
-Foam::functionEntries::inputModeEntry::inputModeNames
+Foam::functionEntries::inputMode::selectableNames
 {
-    { inputMode::MERGE,  "merge" },
-    { inputMode::OVERWRITE, "overwrite" },
-    { inputMode::PROTECT, "protect" },
-    { inputMode::WARN, "warn" },
-    { inputMode::ERROR, "error" },
+    { entry::inputMode::MERGE,  "merge" },
+    { entry::inputMode::OVERWRITE, "overwrite" },
+    { entry::inputMode::PROTECT, "protect" },
+    { entry::inputMode::WARN, "warn" },
+    { entry::inputMode::ERROR, "error" },
     // Aliases
-    { inputMode::MERGE, "default" },
+    { entry::inputMode::MERGE, "default" },
 };
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-bool Foam::functionEntries::inputModeEntry::execute
+bool Foam::functionEntries::inputMode::execute
 (
     dictionary& unused,
     Istream& is
@@ -82,10 +71,10 @@ bool Foam::functionEntries::inputModeEntry::execute
 {
     const word modeName(is);
 
-    // Bheaviour like Enum lookupOrFailsafe()
-    if (inputModeNames.hasEnum(modeName))
+    // Behaviour like Enum lookupOrFailsafe()
+    if (selectableNames.hasEnum(modeName))
     {
-        mode_ = inputModeNames[modeName];
+        entry::globalInputMode = selectableNames[modeName];
     }
     else
     {
@@ -94,45 +83,10 @@ bool Foam::functionEntries::inputModeEntry::execute
             << "' ... defaulting to 'merge'"
             << endl;
 
-        reset();
+        entry::resetInputMode();
     }
 
     return true;
-}
-
-
-void Foam::functionEntries::inputModeEntry::reset()
-{
-    mode_ = MERGE;
-}
-
-
-void Foam::functionEntries::inputModeEntry::clear()
-{
-    reset();
-}
-
-
-bool Foam::functionEntries::inputModeEntry::merge()
-{
-    return mode_ == MERGE;
-}
-
-
-bool Foam::functionEntries::inputModeEntry::overwrite()
-{
-    return mode_ == OVERWRITE;
-}
-
-
-bool Foam::functionEntries::inputModeEntry::protect()
-{
-    return mode_ == PROTECT;
-}
-
-bool Foam::functionEntries::inputModeEntry::error()
-{
-    return mode_ == ERROR;
 }
 
 

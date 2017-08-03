@@ -33,14 +33,13 @@ namespace Foam
 {
 namespace functionEntries
 {
-    defineTypeNameAndDebug(includeFuncEntry, 0);
-
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeFuncEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        includeFunc
     );
 }
 }

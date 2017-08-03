@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,11 +22,11 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::functionEntries::inputModeEntry
+    Foam::functionEntries::inputMode
 
 Description
-    Specify the input mode when reading dictionaries, expects
-    a single word to follow.
+    Specify the global input mode when reading further dictionaries,
+    expects a single word to follow.
 
     An example of \c \#inputMode directive:
     \verbatim
@@ -47,16 +47,15 @@ Description
       - \par default
         The default treatment - currently identical to \b merge.
 
-      Note that the clear() method resets to the default mode (merge).
-
 SourceFiles
-    inputModeEntry.C
+    inputMode.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef inputModeEntry_H
-#define inputModeEntry_H
+#ifndef inputMode_H
+#define inputMode_H
 
+#include "entry.H"
 #include "functionEntry.H"
 #include "Enum.H"
 
@@ -68,67 +67,20 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class inputModeEntry Declaration
+                          Class inputMode Declaration
 \*---------------------------------------------------------------------------*/
 
-class inputModeEntry
+class inputMode
 :
     public functionEntry
 {
-        //- The input mode options
-        enum inputMode
-        {
-            MERGE,
-            OVERWRITE,
-            PROTECT,
-            WARN,
-            ERROR
-        };
-
-        //- Text representations of the input modes
-        const static Enum<inputMode> inputModeNames;
-
-        //- The current input mode
-        static inputMode mode_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        inputModeEntry(const inputModeEntry&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const inputModeEntry&) = delete;
-
-
 public:
 
-    //- Runtime type information
-    ClassName("inputMode");
+    //- Text representations of the selectable input modes
+    static const Enum<entry::inputMode> selectableNames;
 
-
-    // Member Functions
-
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream& is);
-
-        //- Reset the inputMode to %default (ie, %merge)
-        static void reset();
-
-        //- Identical to reset.
-        static void clear();
-
-        //- Return true if the inputMode is %merge
-        static bool merge();
-
-        //- Return true if the inputMode is %overwrite
-        static bool overwrite();
-
-        //- Return true if the inputMode is %protect
-        static bool protect();
-
-        //- Return true if the inputMode is %error
-        static bool error();
+    //- Change the global input-mode.
+    static bool execute(dictionary& unused, Istream& is);
 };
 
 

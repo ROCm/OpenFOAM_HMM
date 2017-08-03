@@ -79,45 +79,29 @@ class includeEtcEntry
 :
     public functionEntry
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        includeEtcEntry(const includeEtcEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const includeEtcEntry&);
-
-        //- Expand include fileName and return
-        static fileName includeEtcFileName
-        (
-            const fileName&,
-            const dictionary&
-        );
+    //- Expand include fileName and return
+    static fileName resolveFile(const fileName& f, const dictionary& dict);
 
 
 public:
 
     // Static data members
 
-        //- Report which file is included to stdout
+        //- Report to stdout which file is included
         static bool log;
-
-
-    //- Runtime type information
-    ClassName("includeEtc");
 
 
     // Member Functions
 
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
+        //- Include file in a sub-dict context
+        static bool execute(dictionary& parentDict, Istream& is);
 
-        //- Execute the functionEntry in a primitiveEntry context
+        //- Include file in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
+            primitiveEntry& entry,
+            Istream& is
         );
 };
 

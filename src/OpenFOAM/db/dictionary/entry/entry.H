@@ -67,6 +67,24 @@ class entry
 :
     public IDLList<entry>::link
 {
+public:
+
+    // Enums/Typedefs
+
+        //- The input mode options
+        enum class inputMode
+        {
+            MERGE,      //!< Merge sub-dictionaries when possible
+            OVERWRITE,  //!< Keep last entry. Silently remove previous ones
+            PROTECT,    //!< Keep initial entry. Silently ignore subsequent ones
+            WARN,       //!< Keep initial entry. Warn about subsequent ones.
+            ERROR,      //!< FatalError for duplicate entries
+            GLOBAL      //!< Use global value from #globalInputMode variable
+        };
+
+
+private:
+
     // Private data
 
         //- Keyword of entry
@@ -93,7 +111,11 @@ class entry
 
 public:
 
+    //- Enable or disable use of function entries and variable expansions.
     static int disableFunctionEntries;
+
+    //- The current global input-mode.
+    static inputMode globalInputMode;
 
 
     // Constructors
@@ -116,10 +138,18 @@ public:
         virtual autoPtr<entry> clone() const;
 
         //- Construct from Istream and insert into dictionary
-        static bool New(dictionary& parentDict, Istream& is);
+        static bool New
+        (
+            dictionary& parentDict,
+            Istream& is,
+            const inputMode inMode = inputMode::GLOBAL
+        );
 
         //- Construct on freestore from Istream and return
         static autoPtr<entry> New(Istream& is);
+
+        //- Reset the #globalInputMode to %merge
+        static void resetInputMode();
 
 
     //- Destructor

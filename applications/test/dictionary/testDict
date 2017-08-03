@@ -64,7 +64,8 @@ boundaryField
     inlet_4  { $inactive }
     inlet_5  "a primitiveEntry is squashed by a directory entry";
     inlet_5  { $inactive }
-    inlet_6  { $.inactive }     // Test scoping
+    inlet_6a { $...inactive }   // Relative scoping - fairly horrible to use
+    inlet_6b { $^inactive }     // Absolute scoping
     inlet_7  { ${inactive}}     // Test variable expansion
     inlet_8  { $inactive }
     ${key}   { $inactive }
