@@ -31,10 +31,7 @@ Foam::CStringList::CStringList
     const UList<StringType>& input
 )
 :
-    argc_(0),
-    len_(0),
-    argv_(nullptr),
-    data_(nullptr)
+    CStringList()
 {
     reset(input);
 }
@@ -63,12 +60,10 @@ void Foam::CStringList::reset
     {
         len_ += str.size() + 1;
     }
+    --len_; // No final nul in overall count
 
-    argv_ = new char*[input.size()+1];
-    data_ = new char[len_];
-    --len_; // Do not include final nul terminator in overall count
-
-    argv_[argc_] = nullptr;     // extra terminator
+    argv_ = new char*[input.size()+1];  // Extra +1 for terminating nullptr
+    data_ = new char[len_+1];           // Extra +1 for terminating nul char
 
     // Copy contents
     char* ptr = data_;

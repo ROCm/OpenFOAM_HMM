@@ -97,7 +97,7 @@ inline char** Foam::CStringList::strings() const
 }
 
 
-inline char* Foam::CStringList::data() const
+inline const char* Foam::CStringList::data() const
 {
     return data_;
 }
