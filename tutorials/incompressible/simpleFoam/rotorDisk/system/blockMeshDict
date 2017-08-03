@@ -27,7 +27,7 @@ backgroundMesh
     zCells    12;
 }
 
-convertToMeters 1;
+scale   1;
 
 vertices
 (

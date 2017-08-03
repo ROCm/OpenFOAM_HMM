@@ -23,7 +23,7 @@ define(vlabel, [[// ]Vertex $1 = VCOUNT define($1, VCOUNT)define([VCOUNT], incr(
 define(pi, 3.14159265)
 define(angle, 45)
 
-convertToMeters 1;
+scale   1;
 
 /*  User parameter for geometry  */
 define(L_square, 0.06)

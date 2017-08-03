@@ -58,7 +58,7 @@ geometry
     }
 }
 
-convertToMeters 1;
+scale   1;
 
 vertices
 (

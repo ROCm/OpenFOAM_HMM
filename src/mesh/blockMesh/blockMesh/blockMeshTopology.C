@@ -362,6 +362,12 @@ Foam::polyMesh* Foam::blockMesh::createTopology
         meshDescription.readIfPresent("scale", scaleFactor_);
     }
 
+    // Require (scale > 0), treat (scale <= 0) as scaling == 1 (no scaling).
+    if (scaleFactor_ <= 0)
+    {
+        scaleFactor_ = 1.0;
+    }
+
     // Read the block edges
     if (meshDescription.found("edges"))
     {

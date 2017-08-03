@@ -15,7 +15,7 @@ FoamFile
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 0.001;
+scale   0.001;
 
 changecom(//)changequote([,])
 define(calc, [esyscmd(perl -e 'printf ($1)')])
