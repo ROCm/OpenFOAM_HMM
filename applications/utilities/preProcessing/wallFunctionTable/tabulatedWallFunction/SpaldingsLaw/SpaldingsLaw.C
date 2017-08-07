@@ -91,7 +91,7 @@ void Foam::tabulatedWallFunctions::SpaldingsLaw::invertFunction()
                 (
                     2*E_*uPlus
                   + exp(kUPlus)*(kUPlus + 1)
-                  - 2/3*pow3(kUPlus)
+                  - 2.0/3.0*pow3(kUPlus)
                   - 1.5*sqr(kUPlus)
                   - 2*kUPlus
                   - 1

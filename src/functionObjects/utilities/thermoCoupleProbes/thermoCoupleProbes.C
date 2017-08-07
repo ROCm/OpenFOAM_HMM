@@ -128,13 +128,13 @@ void Foam::functionObjects::thermoCoupleProbes::derivatives
     scalarField Re(rhoc*Uc*d_/muc);
     scalarField Pr(Cpc*muc/kappac);
     Pr = max(ROOTVSMALL, Pr);
-    scalarField Nu(2.0 + (0.4*sqrt(Re) + 0.06*pow(Re, 2/3))*pow(Pr, 0.4));
+    scalarField Nu(2.0 + (0.4*sqrt(Re) + 0.06*pow(Re, 2.0/3.0))*pow(Pr, 0.4));
     scalarField htc(Nu*kappac/d_);
 
     const scalar sigma = physicoChemical::sigma.value();
 
     scalar area = 4*constant::mathematical::pi*sqr(0.5*d_);
-    scalar volume = (4/3)*constant::mathematical::pi*pow3(0.5*d_);
+    scalar volume = (4.0/3.0)*constant::mathematical::pi*pow3(0.5*d_);
 
     dydx =
         (epsilon_*(G/4 - sigma*pow4(y))*area + htc*(Tc - y)*area)
