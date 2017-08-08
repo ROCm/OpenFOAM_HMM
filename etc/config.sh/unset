@@ -181,16 +181,21 @@ unset -f wmRefresh  2>/dev/null
 unset -f foamVersion 2>/dev/null
 unset -f foamPV     2>/dev/null
 
-# Cleanup bash completions, which look like this:
-#     "complete ... -F _of_APPNAME APPNAME
-# For economy, obtain list first but also remove the 'of_complete_' backend
-foamClean="$(complete 2>/dev/null | sed -n -e 's/complete.*-F _of_.* \(..*\)$/\1/p')"
-for cleaned in $foamClean complete_
+# Remove old completions, which look like
+#     "complete ... -F _of_complete_ APPNAME
+# For economy, obtain list first
+foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
+for cleaned in $foamOldDirs
 do
-    unset -f _of_$cleaned 2>/dev/null
-    complete -r $cleaned  2>/dev/null
+    complete -r $cleaned 2>/dev/null
 done
 
+# Completion functions
+unset -f foamAddCompletion 2>/dev/null
+unset -f _of_complete_  2>/dev/null
+
+# Completion cache
+unset _of_complete_cache_
 
 #------------------------------------------------------------------------------
 # Intermediate variables (do as last for a clean exit code)
