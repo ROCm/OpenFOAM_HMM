@@ -102,7 +102,7 @@ Foam::Ostream& Foam::prefixOSstream::write(const char* str)
     checkWritePrefix();
     OSstream::write(str);
 
-    size_t len = strlen(str);
+    const size_t len = strlen(str);
     if (len && str[len-1] == token::NL)
     {
         printPrefix_ = true;
