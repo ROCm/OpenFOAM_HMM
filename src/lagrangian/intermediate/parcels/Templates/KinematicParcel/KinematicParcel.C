@@ -292,8 +292,8 @@ bool Foam::KinematicParcel<ParcelType>::move
         f = min(f, maxCo*l/max(SMALL*l, mag(s)));
         if (p.active())
         {
-            // Track to the next face
-            p.trackToFace(f*s, f, td);
+            // Track to and hit the next face
+            p.trackToAndHitFace(f*s, f, td);
         }
         else
         {
@@ -304,7 +304,6 @@ bool Foam::KinematicParcel<ParcelType>::move
             // perform the relevant interactions with the fixed particle.
             p.stepFraction() += f;
         }
-
 
         const scalar dt = (p.stepFraction() - sfrac)*trackTime;
 
@@ -332,27 +331,16 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         p.age() += dt;
 
+        if (p.onFace())
+        {
+            td.cloud().functions().postFace(p, p.face(), td.keepParticle);
+        }
+
         td.cloud().functions().postMove(p, celli, dt, start, td.keepParticle);
     }
 
     return td.keepParticle;
 }
-
-
-template<class ParcelType>
-template<class TrackData>
-void Foam::KinematicParcel<ParcelType>::hitFace(TrackData& td)
-{
-    typename TrackData::cloudType::parcelType& p =
-        static_cast<typename TrackData::cloudType::parcelType&>(*this);
-
-    td.cloud().functions().postFace(p, p.face(), td.keepParticle);
-}
-
-
-template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitFace(int& td)
-{}
 
 
 template<class ParcelType>
