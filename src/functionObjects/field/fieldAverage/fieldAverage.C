@@ -44,21 +44,21 @@ namespace functionObjects
 
 void Foam::functionObjects::fieldAverage::resetFields()
 {
-    forAll(faItems_, i)
+    for (const fieldAverageItem& item : faItems_)
     {
-        if (faItems_[i].mean())
+        if (item.mean())
         {
-            if (obr().found(faItems_[i].meanFieldName()))
+            if (obr().found(item.meanFieldName()))
             {
-                obr().checkOut(*obr()[faItems_[i].meanFieldName()]);
+                obr().checkOut(*obr()[item.meanFieldName()]);
             }
         }
 
-        if (faItems_[i].prime2Mean())
+        if (item.prime2Mean())
         {
-            if (obr().found(faItems_[i].prime2MeanFieldName()))
+            if (obr().found(item.prime2MeanFieldName()))
             {
-                obr().checkOut(*obr()[faItems_[i].prime2MeanFieldName()]);
+                obr().checkOut(*obr()[item.prime2MeanFieldName()]);
             }
         }
     }
@@ -67,25 +67,9 @@ void Foam::functionObjects::fieldAverage::resetFields()
 
 void Foam::functionObjects::fieldAverage::initialize()
 {
-    if (!totalIter_.size())
+    for (fieldAverageItem& item : faItems_)
     {
-        totalIter_.setSize(faItems_.size(), 1);
-    }
-
-    if (!totalTime_.size())
-    {
-        totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
-    }
-    else
-    {
-        // Check if totalTime_ has been set otherwise initialize
-        forAll(totalTime_, fieldi)
-        {
-            if (totalTime_[fieldi] < 0)
-            {
-                totalTime_[fieldi] = obr_.time().deltaTValue();
-            }
-        }
+        item.restart(0, false);
     }
 
     resetFields();
@@ -93,28 +77,39 @@ void Foam::functionObjects::fieldAverage::initialize()
     Log << type() << " " << name() << ":" << nl;
 
     // Add mean fields to the field lists
-    forAll(faItems_, fieldi)
+    for (fieldAverageItem& item : faItems_)
     {
-        addMeanField<scalar>(fieldi);
-        addMeanField<vector>(fieldi);
-        addMeanField<sphericalTensor>(fieldi);
-        addMeanField<symmTensor>(fieldi);
-        addMeanField<tensor>(fieldi);
+        addMeanField<scalar>(item);
+        addMeanField<vector>(item);
+        addMeanField<sphericalTensor>(item);
+        addMeanField<symmTensor>(item);
+        addMeanField<tensor>(item);
     }
 
     // Add prime-squared mean fields to the field lists
-    forAll(faItems_, fieldi)
+    for (fieldAverageItem& item : faItems_)
     {
-        addPrime2MeanField<scalar, scalar>(fieldi);
-        addPrime2MeanField<vector, symmTensor>(fieldi);
+        addPrime2MeanField<scalar, scalar>(item);
+        addPrime2MeanField<vector, symmTensor>(item);
     }
 
-    forAll(faItems_, fieldi)
+    // Add window fields to the field lists
+    for (const fieldAverageItem& item : faItems_)
     {
-        if (!faItems_[fieldi].active())
+        restoreWindowFields<scalar>(item);
+        restoreWindowFields<vector>(item);
+        restoreWindowFields<sphericalTensor>(item);
+        restoreWindowFields<symmTensor>(item);
+        restoreWindowFields<tensor>(item);
+    }
+
+
+    for (const fieldAverageItem& item : faItems_)
+    {
+        if (!item.active())
         {
             WarningInFunction
-                << "Field " << faItems_[fieldi].fieldName()
+                << "Field " << item.fieldName()
                 << " not found in database for averaging";
         }
     }
@@ -133,8 +128,10 @@ void Foam::functionObjects::fieldAverage::restart()
         << obr().time().timeOutputValue()
         << nl << endl;
 
-    totalIter_.clear();
-    totalTime_.clear();
+    for (fieldAverageItem& item : faItems_)
+    {
+        item.restart(0, true);
+    }
 
     initialize();
 }
@@ -180,6 +177,17 @@ void Foam::functionObjects::fieldAverage::calcAverages()
     Log << type() << " " << name() << " write:" << nl
         << "    Calculating averages" << nl;
 
+    forAll(faItems_, fieldi)
+    {
+        faItems_[fieldi].evolve(obr());
+    }
+
+    storeWindowFields<scalar>();
+    storeWindowFields<vector>();
+    storeWindowFields<sphericalTensor>();
+    storeWindowFields<symmTensor>();
+    storeWindowFields<tensor>();
+
     addMeanSqrToPrime2Mean<scalar, scalar>();
     addMeanSqrToPrime2Mean<vector, symmTensor>();
 
@@ -191,12 +199,6 @@ void Foam::functionObjects::fieldAverage::calcAverages()
 
     calculatePrime2MeanFields<scalar, scalar>();
     calculatePrime2MeanFields<vector, symmTensor>();
-
-    forAll(faItems_, fieldi)
-    {
-        totalIter_[fieldi]++;
-        totalTime_[fieldi] += obr().time().deltaTValue();
-    }
 
     Log << endl;
 }
@@ -218,28 +220,17 @@ void Foam::functionObjects::fieldAverage::writeAverages() const
 
 void Foam::functionObjects::fieldAverage::writeAveragingProperties()
 {
-    forAll(faItems_, fieldi)
+    for (const fieldAverageItem& item : faItems_)
     {
-        const word& fieldName = faItems_[fieldi].fieldName();
-
         dictionary propsDict;
-        propsDict.add("totalIter", totalIter_[fieldi]);
-        propsDict.add("totalTime", totalTime_[fieldi]);
-        setProperty(fieldName, propsDict);
+        item.writeState(propsDict);
+        setProperty(item.fieldName(), propsDict);
     }
 }
 
 
 void Foam::functionObjects::fieldAverage::readAveragingProperties()
 {
-    totalIter_.clear();
-    totalIter_.setSize(faItems_.size(), 1);
-
-    // Initialize totalTime with negative values
-    // to indicate that it has not been set
-    totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), -1);
-
     if (restartOnRestart_ || restartOnOutput_)
     {
         Info<< "    Starting averaging at time "
@@ -251,22 +242,20 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
         Info<< "    Restarting averaging for fields:" << nl;
 
 
-        forAll(faItems_, fieldi)
+        for (fieldAverageItem& item : faItems_)
         {
-            const word& fieldName = faItems_[fieldi].fieldName();
+            const word& fieldName = item.fieldName();
             if (foundProperty(fieldName))
             {
                 dictionary fieldDict;
                 getDict(fieldName, fieldDict);
-
-                totalIter_[fieldi] = readLabel(fieldDict.lookup("totalIter"));
-                totalTime_[fieldi] = readScalar(fieldDict.lookup("totalTime"));
+                item.readState(fieldDict);
 
                 scalar userTotalTime =
-                    obr().time().timeToUserTime(totalTime_[fieldi]);
+                    obr().time().timeToUserTime(item.totalTime());
 
                 Info<< "        " << fieldName
-                    << " iters = " << totalIter_[fieldi]
+                    << " iters = " << item.totalIter()
                     << " time = " << userTotalTime << nl;
             }
             else
@@ -298,8 +287,6 @@ Foam::functionObjects::fieldAverage::fieldAverage
     restartTime_(GREAT),
     initialised_(false),
     faItems_(),
-    totalIter_(),
-    totalTime_(),
     periodIndex_(1)
 {
     read(dict);
@@ -321,10 +308,10 @@ bool Foam::functionObjects::fieldAverage::read(const dictionary& dict)
     // Make certain that the values are consistent with the defaults:
     initialised_ = false;
     restartOnRestart_ = false;
-    restartOnOutput_  = false;
-    periodicRestart_  = false;
-    restartPeriod_    = GREAT;
-    restartTime_      = GREAT;
+    restartOnOutput_ = false;
+    periodicRestart_ = false;
+    restartPeriod_ = GREAT;
+    restartTime_ = GREAT;
 
     Info<< type() << " " << name() << ":" << nl;
 

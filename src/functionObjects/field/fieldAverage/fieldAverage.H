@@ -86,6 +86,7 @@ Usage
                 mean            on;
                 prime2Mean      on;
                 base            time;
+                windowType      exact;
                 window          10.0;
                 windowName      w1;
             }
@@ -131,6 +132,7 @@ SourceFiles
 #define functionObjects_fieldAverage_H
 
 #include "fvMeshFunctionObject.H"
+#include "FIFOStack.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -208,19 +210,19 @@ protected:
 
             //- Add mean average field to database
             template<class Type>
-            void addMeanFieldType(const label fieldi);
+            void addMeanFieldType(fieldAverageItem& item);
 
             //- Add mean average field to database
             template<class Type>
-            void addMeanField(const label fieldi);
+            void addMeanField(fieldAverageItem& item);
 
             //- Add prime-squared average field to database
             template<class Type1, class Type2>
-            void addPrime2MeanFieldType(const label fieldi);
+            void addPrime2MeanFieldType(fieldAverageItem& item);
 
             //- Add prime-squared average field to database
             template<class Type1, class Type2>
-            void addPrime2MeanField(const label fieldi);
+            void addPrime2MeanField(fieldAverageItem& item);
 
 
         // Calculation functions
@@ -230,15 +232,7 @@ protected:
 
             //- Calculate mean average fields
             template<class Type>
-            void calculateMeanFieldType(const label fieldi) const;
-
-            //- Calculate mean average fields
-            template<class Type>
             void calculateMeanFields() const;
-
-            //- Calculate prime-squared average fields
-            template<class Type1, class Type2>
-            void calculatePrime2MeanFieldType(const label fieldi) const;
 
             //- Calculate prime-squared average fields
             template<class Type1, class Type2>
@@ -246,12 +240,23 @@ protected:
 
             //- Add mean-squared field value to prime-squared mean field
             template<class Type1, class Type2>
-            void addMeanSqrToPrime2MeanType(const label fieldi) const;
+            void addMeanSqrToPrime2MeanType(const fieldAverageItem& item) const;
 
             //- Add mean-squared field value to prime-squared mean field
             template<class Type1, class Type2>
             void addMeanSqrToPrime2Mean() const;
 
+            template<class Type>
+            void storeWindowFieldType(fieldAverageItem& item);
+
+            template<class Type>
+            void storeWindowFields();
+
+            template<class Type>
+            void restoreWindowFieldsType(const fieldAverageItem& item);
+
+            template<class Type>
+            void restoreWindowFields(const fieldAverageItem& item);
 
         // I-O
 
