@@ -196,11 +196,10 @@ unalias wmRefresh
 unalias foamVersion
 unalias foamPV
 
-# Cleanup completions, which look like this:
-#   complete blockMesh 'p,*,`bash $WM_PROJECT_DIR/etc/ ...
-
+# Remove old completions, which look like:
+#   complete APPNAME 'p,*,`bash $WM_PROJECT_DIR/etc/ ...
 if ($?prompt && $?tcsh) then  # Interactive tcsh only
-    foreach cleaned (`complete | sed -n -e '/WM_PROJECT/s/\t.*$//p'`)
+    foreach cleaned (`complete | sed -ne '/WM_PROJECT/s/\t.*$//p'`)
         uncomplete $cleaned
     end
 endif

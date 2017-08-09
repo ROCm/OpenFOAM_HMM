@@ -3,15 +3,23 @@
 # Using bash_completion functions for the hard work
 
 if ($?tcsh) then  # tcsh only
-    if ( -f $WM_PROJECT_DIR/etc/config.sh/bash_completion \
-      && -f $WM_PROJECT_DIR/etc/config.csh/complete) then
-        foreach appName (`sed -ne 's/^complete.* //p' $WM_PROJECT_DIR/etc/config.sh/bash_completion`)
+
+    # Remove old completions, which look like:
+    #   complete APPNAME 'p,*,`bash $WM_PROJECT_DIR/etc/ ...
+    foreach appName (`complete | sed -ne '/WM_PROJECT/s/\t.*$//p'`)
+        uncomplete $cleaned
+    end
+
+    # Generate completions for predefined directories
+    foreach dirName ("$FOAM_APPBIN")
+        if ( ! -d $dirName || ! -f $WM_PROJECT_DIR/etc/config.csh/complete-wrapper ) continue
+        foreach appName (`find $dirName -maxdepth 1 -executable -type f`)
             # Pass explicitly
-            ## complete $appName 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete '$appName' "${COMMAND_LINE}"`,'
+            ## complete $appName:t 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper '$appName:t' "${COMMAND_LINE}"`,'
             # Pass via environment
-            complete $appName 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete '$appName'`,'
+            complete $appName:t 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper '$appName:t'`,'
         end
-    endif
+    end
 endif
 
 #------------------------------------------------------------------------------
