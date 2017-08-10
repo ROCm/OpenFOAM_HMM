@@ -1,25 +1,47 @@
 #----------------------------------*-sh-*--------------------------------------
-# Tcsh completions for OpenFOAM applications
-# Using bash_completion functions for the hard work
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# This file is part of OpenFOAM, licensed under the GNU General Public License
+# <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.csh/tcsh_completion
+#
+# Description
+#     Tcsh completions for OpenFOAM applications
+#     Using bash completion for the hard work
+#
+# Requires
+#     bash 4.2 or newer
+#
+#------------------------------------------------------------------------------
 
 if ($?tcsh) then  # tcsh only
 
     # Remove old completions, which look like:
     #   complete APPNAME 'p,*,`bash $WM_PROJECT_DIR/etc/ ...
     foreach appName (`complete | sed -ne '/WM_PROJECT/s/\t.*$//p'`)
-        uncomplete $cleaned
+        uncomplete $appName
     end
 
-    # Generate completions for predefined directories
-    foreach dirName ("$FOAM_APPBIN")
-        if ( ! -d $dirName || ! -f $WM_PROJECT_DIR/etc/config.csh/complete-wrapper ) continue
-        foreach appName (`find $dirName -maxdepth 1 -executable -type f`)
-            # Pass explicitly
-            ## complete $appName:t 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper '$appName:t' "${COMMAND_LINE}"`,'
-            # Pass via environment
-            complete $appName:t 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper '$appName:t'`,'
+    # Generate completions for predefined directories (if support is possible)
+    bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper -test
+    if ($status == 0) then
+        foreach dirName ("$FOAM_APPBIN")
+            if ( ! -d $dirName ) continue
+            foreach appName (`find $dirName -maxdepth 1 -executable -type f`)
+                # Pass explicitly
+                ## complete $appName:t 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper '$appName:t' "${COMMAND_LINE}"`,'
+                # Pass via environment
+                complete $appName:t 'p,*,`bash $WM_PROJECT_DIR/etc/config.csh/complete-wrapper '$appName:t'`,'
+            end
         end
-    end
+    endif
+
 endif
 
 #------------------------------------------------------------------------------

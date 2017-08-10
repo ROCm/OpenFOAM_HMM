@@ -25,6 +25,15 @@
 #------------------------------------------------------------------------------
 [ "$#" -ge 1 ] || exit 1
 
+# Support '-test' option to check bash version
+if [ "$1" = "-test" ]
+then
+    # Uses 'declare -gA' for the implementation
+    # The '-A' requires bash >= 4.0 and the '-g' requires bash >= 4.2
+    [ "${BASH_VERSINFO[0]:-0}${BASH_VERSINFO[1]:-0}" -ge 42 ]
+    exit $?
+fi
+
 # Preload completion cache
 if [ -f $WM_PROJECT_DIR/etc/config.sh/completion_cache ]
 then  . $WM_PROJECT_DIR/etc/config.sh/completion_cache

@@ -22,7 +22,23 @@
 # Uses
 #     _of_complete_cache_
 #
+# Requires
+#     bash 4.2 or newer
+#
 #------------------------------------------------------------------------------
+
+# Remove old completions (skip for tcsh wrapper), which look like:
+#     "complete ... -F _of_complete_ APPNAME
+if [ -z "$_of_complete_tcsh" ]
+then
+    # For economy, obtain list first
+    foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
+    for cleaned in $foamOldDirs
+    do
+        complete -r $cleaned 2>/dev/null
+    done
+fi
+
 
 # Add completion for command or directory of commands
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,26 +189,34 @@ _of_complete_()
 
 #------------------------------------------------------------------------------
 
-# Global associative array (cached options for OpenFOAM applications)
-declare -gA _of_complete_cache_;
 
-# Clear existing cache and reassign bash completions.
-# But for tcsh wrapper make use of caching and avoid this overhead.
-if [ -z "$_of_complete_tcsh" ]
+# Uses 'declare -gA' for the implementation
+# The '-A' requires bash >= 4.0 and the '-g' requires bash >= 4.2
+if [ "${BASH_VERSINFO[0]:-0}${BASH_VERSINFO[1]:-0}" -ge 42 ]
 then
-    _of_complete_cache_=()
+    # Global associative array (cached options for OpenFOAM applications)
+    declare -gA _of_complete_cache_;
 
-    # Remove old completions, which look like:
-    #     "complete ... -F _of_complete_ APPNAME
-    # For economy, obtain list first
-    foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
-    for cleaned in $foamOldDirs
-    do
-        complete -r $cleaned 2>/dev/null
-    done
+    # Clear existing cache and reassign bash completions.
+    # But for tcsh wrapper make use of caching and avoid this overhead.
+    if [ -z "$_of_complete_tcsh" ]
+    then
+        _of_complete_cache_=()
 
-    # Generate completions for predefined directories
-    foamAddCompletion $FOAM_APPBIN
+        # Generate completions for predefined directories
+        foamAddCompletion $FOAM_APPBIN
+    fi
+else
+    # Bash version is too old.
+    ## echo "No bash completions - requires bash >= 4.2" 1>&2
+
+    unset -f foamAddCompletion 2>/dev/null
+    foamAddCompletion()
+    {
+        echo "foamAddCompletion disabled - requires bash >= 4.2" 1>&2
+    }
+
+    unset -f _of_complete_ 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------
