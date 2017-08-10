@@ -59,9 +59,8 @@ public:
 
     // Constructors
 
-
         //- Construct from IOobject
-        faceSet(const IOobject& obj);
+        explicit faceSet(const IOobject& obj);
 
         //- Construct from objectRegistry and name
         faceSet
