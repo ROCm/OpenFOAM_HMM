@@ -1,0 +1,137 @@
+    Info<< "Reading field p_rgh\n" << endl;
+    volScalarField p_rgh
+    (
+        IOobject
+        (
+            "p_rgh",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< "Reading field U\n" << endl;
+    volVectorField U
+    (
+        IOobject
+        (
+            "U",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+
+    Info<< "Calculating field g.h\n" << endl;
+    volScalarField gh("gh", g & mesh.C());
+    surfaceScalarField ghf("ghf", g & mesh.Cf());
+
+    volScalarField  p
+    (
+        IOobject
+        (
+            "p",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        p_rgh //+ rho*gh
+    );
+
+    Info<< "Creating multiphaseSystem\n" << endl;
+    autoPtr<multiphaseSystem> fluidPtr = multiphaseSystem::New(mesh);
+
+    multiphaseSystem& fluid = fluidPtr();
+
+    //volScalarField& e = fluid.he();
+    volScalarField& T = fluid.T();
+
+    // Need to store rho for ddt(rho, U)
+    volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        fluid.rho()
+    );
+    rho.oldTime();
+
+    // Update p using fluid.rho()
+    p = p_rgh + rho*gh;
+
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
+    setRefCell
+    (
+        p,
+        p_rgh,
+        pimple.dict(),
+        pRefCell,
+        pRefValue
+    );
+
+    if (p_rgh.needReference())
+    {
+        p += dimensionedScalar
+        (
+            "p",
+            p.dimensions(),
+            pRefValue - getRefCellValue(p, pRefCell)
+        );
+        p_rgh = p - rho*gh;
+    }
+
+    // Total volumetric flux
+    surfaceScalarField& phi = fluid.phi();
+
+    // Mass flux
+    surfaceScalarField& rhoPhi = fluid.rhoPhi();
+
+    // Construct incompressible turbulence model
+    autoPtr<CompressibleTurbulenceModel<multiphaseSystem> > turbulence
+    (
+        CompressibleTurbulenceModel<multiphaseSystem>::New
+        (
+            rho,
+            U,
+            rhoPhi,
+            fluid
+        )
+    );
+
+    // Creating radiation model
+    autoPtr<radiation::radiationModel> radiation
+    (
+        radiation::radiationModel::New(T)
+    );
+/*
+    Info<< "Calculating field kappaEff\n" << endl;
+    volScalarField kappaEff
+    (
+        IOobject
+        (
+            "kappaEff",
+            runTime.timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        fluid.kappa()
+    );
+
+    kappaEff.correctBoundaryConditions();
+*/
+
+    Info<< "Creating field kinetic energy K\n" << endl;
+    volScalarField K("K", 0.5*magSqr(U));

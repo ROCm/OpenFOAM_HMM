@@ -1,0 +1,23 @@
+interfaceModels/surfaceTensionModels/surfaceTensionModel/surfaceTensionModel.C
+interfaceModels/surfaceTensionModels/surfaceTensionModel/newSurfaceTensionModel.C
+interfaceModels/surfaceTensionModels/constantSurfaceTensionCoefficient/constantSurfaceTensionCoefficient.C
+
+interfaceModels/porousModels/porousModel/porousModel.C
+interfaceModels/porousModels/porousModel/newPorousModel.C
+interfaceModels/porousModels/VollerPrakash/VollerPrakash.C
+
+phasePair/phasePairKey/phasePairKey.C
+phasePair/phasePair/phasePair.C
+phasePair/orderedPhasePair/orderedPhasePair.C
+
+phaseModel/phaseModel/phaseModel.C
+phaseModel/phaseModel/newphaseModel.C
+phaseModel/phaseModel/phaseModels.C
+
+phaseSystem/phaseSystem.C
+
+phaseSystem/multiphaseSystem/multiphaseSystem.C
+phaseSystem/multiphaseSystem/newMultiphaseSystem.C
+phaseSystem/multiphaseSystem/multiphaseSystems.C
+
+LIB = $(FOAM_LIBBIN)/libIncompressibleMultiphaseSystems

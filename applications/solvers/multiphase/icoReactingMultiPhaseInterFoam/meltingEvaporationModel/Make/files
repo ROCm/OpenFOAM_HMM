@@ -1,0 +1,10 @@
+interfaceCompositionModel/interfaceCompositionModel.C
+interfaceCompositionModel/newInterfaceCompositionModel.C
+InterfaceCompositionModel/InterfaceCompositionModels.C
+
+saturationPressureModels/saturationPressureModel/saturationPressureModel.C
+saturationPressureModels/saturationPressureModel/newSaturationPressureModel.C
+saturationPressureModels/ClausiusClapeyron/ClausiusClapeyron.C
+
+
+LIB = $(FOAM_LIBBIN)/libmeltingEvaporationModels
