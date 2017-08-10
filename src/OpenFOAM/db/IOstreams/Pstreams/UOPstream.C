@@ -51,8 +51,8 @@ inline void Foam::UOPstream::writeToBuffer(const char& c)
 inline void Foam::UOPstream::writeToBuffer
 (
     const void* data,
-    size_t count,
-    size_t align
+    const size_t count,
+    const size_t align
 )
 {
     if (!sendBuf_.capacity())
@@ -76,6 +76,13 @@ inline void Foam::UOPstream::writeToBuffer
     while (i--) sendBuf_[alignedPos++] = *dataPtr++;
 }
 
+
+inline void Foam::UOPstream::writeStringToBuffer(const std::string& str)
+{
+    const size_t len = str.size();
+    writeToBuffer(len);
+    writeToBuffer(str.c_str(), len + 1, 1);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
@@ -153,14 +160,14 @@ Foam::UOPstream::~UOPstream()
 Foam::Ostream& Foam::UOPstream::write(const token& t)
 {
     // Raw token output only supported for verbatim strings for now
-    if (t.type() == token::VERBATIMSTRING)
+    if (t.type() == token::tokenType::VERBATIMSTRING)
     {
-        write(char(token::VERBATIMSTRING));
+        writeToBuffer(char(token::tokenType::VERBATIMSTRING));
         write(t.stringToken());
     }
-    else if (t.type() == token::VARIABLE)
+    else if (t.type() == token::tokenType::VARIABLE)
     {
-        write(char(token::VARIABLE));
+        writeToBuffer(char(token::tokenType::VARIABLE));
         write(t.stringToken());
     }
     else
@@ -204,11 +211,8 @@ Foam::Ostream& Foam::UOPstream::write(const char* str)
 
 Foam::Ostream& Foam::UOPstream::write(const word& str)
 {
-    write(char(token::WORD));
-
-    size_t len = str.size();
-    writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeToBuffer(char(token::tokenType::WORD));
+    writeStringToBuffer(str);
 
     return *this;
 }
@@ -216,11 +220,8 @@ Foam::Ostream& Foam::UOPstream::write(const word& str)
 
 Foam::Ostream& Foam::UOPstream::write(const string& str)
 {
-    write(char(token::STRING));
-
-    size_t len = str.size();
-    writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeToBuffer(char(token::tokenType::STRING));
+    writeStringToBuffer(str);
 
     return *this;
 }
@@ -234,16 +235,13 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 {
     if (quoted)
     {
-        write(char(token::STRING));
+        writeToBuffer(char(token::tokenType::STRING));
     }
     else
     {
-        write(char(token::WORD));
+        writeToBuffer(char(token::tokenType::WORD));
     }
-
-    size_t len = str.size();
-    writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeStringToBuffer(str);
 
     return *this;
 }
@@ -251,7 +249,7 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 
 Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 {
-    write(char(token::LABEL));
+    writeToBuffer(char(token::tokenType::LABEL));
     writeToBuffer(val);
     return *this;
 }
@@ -259,7 +257,7 @@ Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 {
-    write(char(token::LABEL));
+    writeToBuffer(char(token::tokenType::LABEL));
     writeToBuffer(val);
     return *this;
 }
@@ -267,7 +265,7 @@ Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 {
-    write(char(token::FLOAT_SCALAR));
+    writeToBuffer(char(token::tokenType::FLOAT_SCALAR));
     writeToBuffer(val);
     return *this;
 }
@@ -275,13 +273,17 @@ Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 
 Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
 {
-    write(char(token::DOUBLE_SCALAR));
+    writeToBuffer(char(token::tokenType::DOUBLE_SCALAR));
     writeToBuffer(val);
     return *this;
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
+Foam::Ostream& Foam::UOPstream::write
+(
+    const char* data,
+    const std::streamsize count
+)
 {
     if (format() != BINARY)
     {

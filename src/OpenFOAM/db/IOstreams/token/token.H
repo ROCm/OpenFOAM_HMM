@@ -197,7 +197,7 @@ public:
 
             // Write
 
-                virtual void write(Ostream&) const = 0;
+                virtual void write(Ostream& os) const = 0;
 
 
         // IOstream Operators
@@ -284,28 +284,47 @@ public:
         inline token();
 
         //- Construct as copy
-        inline token(const token&);
+        inline token(const token& t);
 
         //- Construct punctuation character token
-        inline token(punctuationToken, label lineNumber=0);
+        inline explicit token(punctuationToken p);
 
         //- Construct word token
-        inline token(const word&, label lineNumber=0);
+        inline explicit token(const word& w);
 
         //- Construct string token
-        inline token(const string&, label lineNumber=0);
+        inline explicit token(const string& str);
 
         //- Construct label token
-        inline token(const label, label lineNumber=0);
+        inline explicit token(const label val);
 
         //- Construct floatScalar token
-        inline token(const floatScalar, label lineNumber=0);
+        inline explicit token(const floatScalar val);
 
         //- Construct doubleScalar token
-        inline token(const doubleScalar, label lineNumber=0);
+        inline explicit token(const doubleScalar val);
+
+
+        //- Construct punctuation character token
+        inline token(punctuationToken p, const label lineNumber);
+
+        //- Construct word token
+        inline token(const word& w, const label lineNumber);
+
+        //- Construct string token
+        inline token(const string& str, const label lineNumber);
+
+        //- Construct label token
+        inline token(const label val, const label lineNumber);
+
+        //- Construct floatScalar token
+        inline token(const floatScalar val, const label lineNumber);
+
+        //- Construct doubleScalar token
+        inline token(const doubleScalar val, const label lineNumber);
 
         //- Construct from Istream
-        token(Istream&);
+        token(Istream& is);
 
 
     //- Destructor
@@ -377,43 +396,43 @@ public:
 
         // Assignment
 
-            inline void operator=(const token&);
+            inline void operator=(const token& t);
 
-            inline void operator=(const punctuationToken);
+            inline void operator=(const punctuationToken p);
 
-            inline void operator=(word*);
-            inline void operator=(const word&);
+            inline void operator=(word* wPtr);
+            inline void operator=(const word& w);
 
-            inline void operator=(string*);
-            inline void operator=(const string&);
+            inline void operator=(string* strPtr);
+            inline void operator=(const string& str);
 
-            inline void operator=(const label);
-            inline void operator=(const floatScalar);
-            inline void operator=(const doubleScalar);
+            inline void operator=(const label val);
+            inline void operator=(const floatScalar val);
+            inline void operator=(const doubleScalar val);
 
-            inline void operator=(compound*);
+            inline void operator=(compound* compPtr);
 
 
         // Equality
 
-            inline bool operator==(const token&) const;
-            inline bool operator==(const punctuationToken) const;
-            inline bool operator==(const word&) const;
-            inline bool operator==(const string&) const;
-            inline bool operator==(const label) const;
-            inline bool operator==(const floatScalar) const;
-            inline bool operator==(const doubleScalar) const;
+            inline bool operator==(const token& t) const;
+            inline bool operator==(const punctuationToken p) const;
+            inline bool operator==(const word& w) const;
+            inline bool operator==(const string& str) const;
+            inline bool operator==(const label val) const;
+            inline bool operator==(const floatScalar val) const;
+            inline bool operator==(const doubleScalar val) const;
 
 
         // Inequality
 
-            inline bool operator!=(const token&) const;
-            inline bool operator!=(const punctuationToken) const;
-            inline bool operator!=(const word&) const;
-            inline bool operator!=(const string&) const;
-            inline bool operator!=(const label) const;
-            inline bool operator!=(const floatScalar) const;
-            inline bool operator!=(const doubleScalar) const;
+            inline bool operator!=(const token& t) const;
+            inline bool operator!=(const punctuationToken p) const;
+            inline bool operator!=(const word& w) const;
+            inline bool operator!=(const string& str) const;
+            inline bool operator!=(const label val) const;
+            inline bool operator!=(const floatScalar val) const;
+            inline bool operator!=(const doubleScalar val) const;
 
 
     // IOstream operators

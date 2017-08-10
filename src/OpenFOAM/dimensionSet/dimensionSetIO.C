@@ -158,7 +158,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
                 }
                 else
                 {
-                    push(token::punctuationToken(w[i]));
+                    push(token(token::punctuationToken(w[i])));
                 }
             }
             start = i+1;

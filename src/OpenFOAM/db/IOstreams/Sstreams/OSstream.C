@@ -31,7 +31,7 @@ License
 
 Foam::Ostream& Foam::OSstream::write(const token& t)
 {
-    if (t.type() == token::VERBATIMSTRING)
+    if (t.type() == token::tokenType::VERBATIMSTRING)
     {
         write(char(token::HASH));
         write(char(token::BEGIN_BLOCK));
@@ -39,9 +39,9 @@ Foam::Ostream& Foam::OSstream::write(const token& t)
         write(char(token::HASH));
         write(char(token::END_BLOCK));
     }
-    else if (t.type() == token::VARIABLE)
+    else if (t.type() == token::tokenType::VARIABLE)
     {
-        writeQuoted( t.stringToken(), false);
+        writeQuoted(t.stringToken(), false);
     }
     return *this;
 }

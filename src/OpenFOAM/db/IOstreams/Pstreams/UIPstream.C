@@ -56,8 +56,8 @@ inline void Foam::UIPstream::readFromBuffer(T& t)
 inline void Foam::UIPstream::readFromBuffer
 (
     void* data,
-    size_t count,
-    size_t align
+    const size_t count,
+    const size_t align
 )
 {
     if (align > 1)
@@ -73,6 +73,22 @@ inline void Foam::UIPstream::readFromBuffer
     while (i--) *dataPtr++ = *bufPtr++;
     externalBufPosition_ += count;
     checkEof();
+}
+
+
+inline Foam::Istream& Foam::UIPstream::readStringFromBuffer(std::string& str)
+{
+    size_t len;
+    readFromBuffer(len);
+    // Uses the underlying std::string::operator=()
+    // - no stripInvalid invoked (the sending side should have done that)
+    // - relies on trailing '\0' char (so cannot send anything with an embedded
+    //   nul char)
+    str = &externalBuf_[externalBufPosition_];
+    externalBufPosition_ += len + 1;
+    checkEof();
+
+    return *this;
 }
 
 
@@ -107,7 +123,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
 
     char c;
 
-    // return on error
+    // Return on error
     if (!read(c))
     {
         t.setBad();
@@ -141,7 +157,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // Word
-        case token::WORD :
+        case token::tokenType::WORD :
         {
             word* pval = new word;
             if (read(*pval))
@@ -165,30 +181,26 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // String
-        case token::VERBATIMSTRING :
+        case token::tokenType::VERBATIMSTRING :
         {
             // Recurse to read actual string
             read(t);
-            t.type() = token::VERBATIMSTRING;
+            t.type() = token::tokenType::VERBATIMSTRING;
             return *this;
         }
-        case token::VARIABLE :
+        case token::tokenType::VARIABLE :
         {
             // Recurse to read actual string
             read(t);
-            t.type() = token::VARIABLE;
+            t.type() = token::tokenType::VARIABLE;
             return *this;
         }
-        case token::STRING :
+        case token::tokenType::STRING :
         {
             string* pval = new string;
             if (read(*pval))
             {
                 t = pval;
-                if (c == token::VERBATIMSTRING)
-                {
-                    t.type() = token::VERBATIMSTRING;
-                }
             }
             else
             {
@@ -199,7 +211,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // Label
-        case token::LABEL :
+        case token::tokenType::LABEL :
         {
             label val;
             if (read(val))
@@ -214,7 +226,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // floatScalar
-        case token::FLOAT_SCALAR :
+        case token::tokenType::FLOAT_SCALAR :
         {
             floatScalar val;
             if (read(val))
@@ -229,7 +241,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         }
 
         // doubleScalar
-        case token::DOUBLE_SCALAR :
+        case token::tokenType::DOUBLE_SCALAR :
         {
             doubleScalar val;
             if (read(val))
@@ -272,23 +284,13 @@ Foam::Istream& Foam::UIPstream::read(char& c)
 
 Foam::Istream& Foam::UIPstream::read(word& str)
 {
-    size_t len;
-    readFromBuffer(len);
-    str = &externalBuf_[externalBufPosition_];
-    externalBufPosition_ += len + 1;
-    checkEof();
-    return *this;
+    return readStringFromBuffer(str);
 }
 
 
 Foam::Istream& Foam::UIPstream::read(string& str)
 {
-    size_t len;
-    readFromBuffer(len);
-    str = &externalBuf_[externalBufPosition_];
-    externalBufPosition_ += len + 1;
-    checkEof();
-    return *this;
+    return readStringFromBuffer(str);
 }
 
 
