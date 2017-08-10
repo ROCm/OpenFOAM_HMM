@@ -74,13 +74,23 @@ class UOPstream
 
         //- Write a T to the transfer buffer
         template<class T>
-        inline void writeToBuffer(const T&);
+        inline void writeToBuffer(const T& t);
 
         //- Write a char to the transfer buffer
-        inline void writeToBuffer(const char&);
+        inline void writeToBuffer(const char& c);
 
-        //- Write data to the transfer buffer
-        inline void writeToBuffer(const void* data, size_t count, size_t align);
+        //- Write count bytes of data to the transfer buffer
+        //  using align byte alignment
+        inline void writeToBuffer
+        (
+            const void* data,
+            const size_t count,
+            const size_t align
+        );
+
+        //- Write string length and content.
+        //  The content includes the trailing nul char.
+        inline void writeStringToBuffer(const std::string& str);
 
 
 public:
@@ -102,7 +112,7 @@ public:
         );
 
         //- Construct given buffers
-        UOPstream(const int toProcNo, PstreamBuffers&);
+        UOPstream(const int toProcNo, PstreamBuffers& buffers);
 
 
     //- Destructor
@@ -134,42 +144,43 @@ public:
             );
 
             //- Write next token to stream
-            Ostream& write(const token&);
+            Ostream& write(const token& t);
 
-            //- Write character
-            Ostream& write(const char);
+            //- Write single character. Whitespace is suppressed.
+            Ostream& write(const char c);
 
-            //- Write character string
-            Ostream& write(const char*);
+            //- Write the word-characters of a character string.
+            //  Sends as a single char, or as word.
+            Ostream& write(const char* str);
 
             //- Write word
-            Ostream& write(const word&);
+            Ostream& write(const word& str);
 
             //- Write string
-            Ostream& write(const string&);
+            Ostream& write(const string& str);
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& str,
                 const bool quoted=true
             );
 
-            //- Write int32_t
-            virtual Ostream& write(const int32_t);
+            //- Write int32_t as a label
+            virtual Ostream& write(const int32_t val);
 
-            //- Write int64_t
-            Ostream& write(const int64_t);
+            //- Write int64_t as a label
+            Ostream& write(const int64_t val);
 
             //- Write floatScalar
-            Ostream& write(const floatScalar);
+            Ostream& write(const floatScalar val);
 
             //- Write doubleScalar
-            Ostream& write(const doubleScalar);
+            Ostream& write(const doubleScalar val);
 
-            //- Write binary block
-            Ostream& write(const char*, std::streamsize);
+            //- Write binary block with 8-byte alignment.
+            Ostream& write(const char* data, const std::streamsize count);
 
             //- Add indentation characters
             void indent()
@@ -223,7 +234,7 @@ public:
         // Print
 
             //- Print description of IOstream to Ostream
-            void print(Ostream&) const;
+            void print(Ostream& os) const;
 };
 
 
