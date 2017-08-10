@@ -204,7 +204,7 @@ Foam::targetCoeffTrim::targetCoeffTrim
     nIter_(50),
     tol_(1e-8),
     relax_(1.0),
-    dTheta_(0.1_deg),
+    dTheta_(degToRad(0.1)),
     alpha_(1.0)
 {
     read(dict);

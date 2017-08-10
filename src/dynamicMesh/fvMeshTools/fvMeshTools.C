@@ -483,7 +483,11 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
     else
     {
         // Receive patches
-        IPstream fromMaster(Pstream::commsTypes::scheduled, Pstream::masterNo());
+        IPstream fromMaster
+        (
+            Pstream::commsTypes::scheduled,
+            Pstream::masterNo()
+        );
         fromMaster >> patchEntries;
     }
 

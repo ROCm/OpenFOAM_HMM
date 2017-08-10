@@ -130,7 +130,7 @@ public:
 
         //- Construct from Time, a dictionary with "functions" entry
         //  and the execution setting.
-        //  \param[in]  t - the other Time instance to construct from
+        //  \param[in]  runTime - the other Time instance to construct from
         //  \param[in]  parentDict - the parent dictionary containing
         //    a "functions" entry, which can either be a list or a dictionary
         //    of functionObject specifications.

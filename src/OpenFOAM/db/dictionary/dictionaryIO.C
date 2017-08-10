@@ -25,7 +25,6 @@ License
 
 #include "dictionary.H"
 #include "IFstream.H"
-#include "inputModeEntry.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -49,7 +48,7 @@ Foam::dictionary::dictionary(Istream& is)
     parent_(dictionary::null)
 {
     // Reset input mode as this is a "top-level" dictionary
-    functionEntries::inputModeEntry::clear();
+    entry::resetInputMode();
 
     read(is);
 }
@@ -61,7 +60,7 @@ Foam::dictionary::dictionary(Istream& is, const bool keepHeader)
     parent_(dictionary::null)
 {
     // Reset input mode as this is a "top-level" dictionary
-    functionEntries::inputModeEntry::clear();
+    entry::resetInputMode();
 
     read(is, keepHeader);
 }
@@ -130,7 +129,7 @@ bool Foam::dictionary::read(Istream& is)
 
 bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
 {
-    const word varName = keyword(1, keyword.size()-1);
+    const word varName = keyword.substr(1);
 
     // Lookup the variable name in the given dictionary
     const entry* ePtr = lookupEntryPtr(varName, true, true);
@@ -157,7 +156,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
 Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)
 {
     // Reset input mode assuming this is a "top-level" dictionary
-    functionEntries::inputModeEntry::clear();
+    entry::resetInputMode();
 
     dict.clear();
     dict.name() = is.name();

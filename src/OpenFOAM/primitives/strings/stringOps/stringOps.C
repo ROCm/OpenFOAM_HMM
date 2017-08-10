@@ -123,12 +123,12 @@ Foam::string& Foam::stringOps::inplaceExpand
             }
             else
             {
-                string::iterator iter = s.begin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + begVar + 1;
 
                 // more generous in accepting keywords than for env variables
                 while
                 (
-                    iter != s.end()
+                    iter != s.cend()
                  &&
                     (
                         std::isalnum(*iter)
@@ -180,8 +180,7 @@ Foam::string& Foam::stringOps::inplaceExpand
                 }
 
 
-                HashTable<string, word, string::hash>::const_iterator fnd =
-                    mapping.find(varName);
+                auto fnd = mapping.cfind(varName);
 
                 if (fnd.found())
                 {
@@ -290,7 +289,9 @@ Foam::string Foam::stringOps::getVariable
             string::size_type altPos = 0;
 
             // check for parameter:-word or parameter:+word
-            int altType = findParameterAlternative(name, altPos, name.size()-1);
+            const int altType =
+                findParameterAlternative(name, altPos, name.size()-1);
+
             if (altType)
             {
                 value = getEnv
@@ -414,13 +415,13 @@ Foam::string& Foam::stringOps::inplaceExpand
             }
             else
             {
-                string::iterator iter = s.begin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + begVar + 1;
                 string::size_type endVar = begVar;
 
                 // more generous in accepting keywords than for env variables
                 while
                 (
-                    iter != s.end()
+                    iter != s.cend()
                  &&
                     (
                         std::isalnum(*iter)
@@ -552,12 +553,12 @@ Foam::string& Foam::stringOps::inplaceExpand
             }
             else
             {
-                string::iterator iter = s.begin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + begVar + 1;
 
                 // more generous in accepting keywords than for env variables
                 while
                 (
-                    iter != s.end()
+                    iter != s.cend()
                  &&
                     (
                         std::isalnum(*iter)
@@ -700,11 +701,11 @@ Foam::string& Foam::stringOps::inplaceExpand
             }
             else
             {
-                string::iterator iter = s.begin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + begVar + 1;
 
                 while
                 (
-                    iter != s.end()
+                    iter != s.cend()
                  && (std::isalnum(*iter) || *iter == '_')
                 )
                 {

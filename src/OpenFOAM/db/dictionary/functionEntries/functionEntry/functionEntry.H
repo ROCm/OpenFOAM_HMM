@@ -58,7 +58,7 @@ namespace Foam
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                           Class functionEntry Declaration
+                        Class functionEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class functionEntry
@@ -71,10 +71,10 @@ class functionEntry
         static token readLine(const word& key, Istream& is);
 
         //- Disallow default bitwise copy construct
-        functionEntry(const functionEntry&);
+        functionEntry(const functionEntry&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const functionEntry&);
+        void operator=(const functionEntry&) = delete;
 
 
 public:
@@ -82,7 +82,7 @@ public:
     // Constructors
 
         //- Construct from keyword, parent dictionary and Istream
-        functionEntry(const word&, const dictionary&, Istream&);
+        functionEntry(const word& key, const dictionary& dict, Istream& is);
 
 
     // Member Function Selectors
@@ -105,7 +105,7 @@ public:
         (
             const word& functionName,
             dictionary& parentDict,
-            Istream&
+            Istream& is
         );
 
         declareMemberFunctionSelectionTable
@@ -127,12 +127,12 @@ public:
         (
             const word& functionName,
             const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
+            primitiveEntry& entry,
+            Istream& is
         );
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 };
 
 

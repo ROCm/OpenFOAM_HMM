@@ -38,22 +38,23 @@ namespace functionEntries
 {
     defineTypeNameAndDebug(codeStream, 0);
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         codeStream,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        codeStream
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         codeStream,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        codeStream
     );
-
 }
 }
 
@@ -175,7 +176,7 @@ Foam::functionEntries::codeStream::getFunction
     // create library if required
     if (!lib)
     {
-        bool create =
+        const bool create =
             Pstream::master()
          || (regIOobject::fileModificationSkew <= 0);   // not NFS
 

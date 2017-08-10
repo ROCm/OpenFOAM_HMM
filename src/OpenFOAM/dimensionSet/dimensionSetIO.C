@@ -140,7 +140,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
         {
             if (i > start)
             {
-                word subWord = w(start, i-start);
+                const word subWord = w.substr(start, i-start);
                 if (isdigit(subWord[0]) || subWord[0] == token::SUBTRACT)
                 {
                     push(token(readScalar(IStringStream(subWord)())));
@@ -158,7 +158,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
                 }
                 else
                 {
-                    push(token::punctuationToken(w[i]));
+                    push(token(token::punctuationToken(w[i])));
                 }
             }
             start = i+1;
@@ -166,7 +166,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
     }
     if (start < w.size())
     {
-        word subWord = w(start, w.size()-start);
+        const word subWord = w.substr(start);
         if (isdigit(subWord[0]) || subWord[0] == token::SUBTRACT)
         {
             push(token(readScalar(IStringStream(subWord)())));
@@ -524,9 +524,9 @@ Foam::Istream& Foam::dimensionSet::read
         do
         {
             word symbolPow = nextToken.wordToken();
-            if (symbolPow[symbolPow.size()-1] == token::END_SQR)
+            if (symbolPow.back() == token::END_SQR)
             {
-                symbolPow = symbolPow(0, symbolPow.size()-1);
+                symbolPow.resize(symbolPow.size()-1);
                 continueParsing = false;
             }
 
@@ -537,8 +537,8 @@ Foam::Istream& Foam::dimensionSet::read
             size_t index = symbolPow.find('^');
             if (index != string::npos)
             {
-                word symbol = symbolPow(0, index);
-                word exp = symbolPow(index+1, symbolPow.size()-index+1);
+                const word symbol = symbolPow.substr(0, index);
+                const word exp = symbolPow.substr(index+1);
                 scalar exponent = readScalar(IStringStream(exp)());
 
                 dimensionedScalar s;
@@ -580,9 +580,9 @@ Foam::Istream& Foam::dimensionSet::read
     {
         // Read first five dimensions
         exponents_[dimensionSet::MASS] = nextToken.number();
-        for (int Dimension=1; Dimension<dimensionSet::CURRENT; Dimension++)
+        for (int d=1; d < dimensionSet::CURRENT; ++d)
         {
-            is >> exponents_[Dimension];
+            is >> exponents_[d];
         }
 
         // Read next token

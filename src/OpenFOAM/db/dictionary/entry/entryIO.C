@@ -28,7 +28,6 @@ License
 #include "dictionaryEntry.H"
 #include "functionEntry.H"
 #include "includeEntry.H"
-#include "inputModeEntry.H"
 #include "stringOps.H"
 #include "dictionaryListEntry.H"
 
@@ -88,13 +87,13 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
     else
     {
         // Otherwise the token is invalid
-        cerr<< "--> FOAM Warning : " << std::endl
+        cerr<< "--> FOAM Warning :" << nl
             << "    From function "
-            << FUNCTION_NAME << std::endl
+            << FUNCTION_NAME << nl
             << "    in file " << __FILE__
-            << " at line " << __LINE__ << std::endl
-            << "    Reading " << is.name().c_str() << std::endl
-            << "    found " << keyToken << std::endl
+            << " at line " << __LINE__ << nl
+            << "    Reading " << is.name().c_str() << nl
+            << "    found " << keyToken << nl
             << "    expected either " << token::END_BLOCK << " or EOF"
             << std::endl;
         return false;
@@ -102,8 +101,31 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 }
 
 
-bool Foam::entry::New(dictionary& parentDict, Istream& is)
+bool Foam::entry::New
+(
+    dictionary& parentDict,
+    Istream& is,
+    const entry::inputMode inMode
+)
 {
+    // The inputMode for dealing with duplicate entries
+    const entry::inputMode mode =
+    (
+        inMode == inputMode::GLOBAL
+      ? globalInputMode
+      : inMode
+    );
+
+    // If somehow the global itself is 'global' - this is a severe logic error.
+    if (mode == inputMode::GLOBAL)
+    {
+        FatalIOErrorInFunction
+        (
+            is
+        )   << "Cannot use 'GLOBAL' as an inputMode"
+            << exit(FatalIOError);
+    }
+
     is.fatalCheck(FUNCTION_NAME);
 
     keyType keyword;
@@ -135,191 +157,201 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
         else
         {
             // Otherwise the token is invalid
-            cerr<< "--> FOAM Warning : " << std::endl
+            cerr<< "--> FOAM Warning :" << nl
                 << "    From function "
-                << FUNCTION_NAME << std::endl
+                << FUNCTION_NAME << nl
                 << "    in file " << __FILE__
-                << " at line " << __LINE__ << std::endl
-                << "    Reading " << is.name().c_str() << std::endl
-                << "    found " << keyToken << std::endl
+                << " at line " << __LINE__ << nl
+                << "    Reading " << is.name().c_str() << nl
+                << "    found " << keyToken << nl
                 << "    expected either " << token::END_BLOCK << " or EOF"
                 << std::endl;
             return false;
         }
     }
-    else  // Keyword starts entry ...
+    else if (keyword[0] == '#')
     {
-        if (keyword[0] == '#')      // ... Function entry
+        // Function entry
+
+        if (disableFunctionEntries)
         {
-            if (disableFunctionEntries)
+            return parentDict.add
+            (
+                new functionEntry
+                (
+                    keyword,
+                    parentDict,
+                    is
+                ),
+                false
+            );
+        }
+        else
+        {
+            const word functionName(keyword.substr(1), false);
+            return functionEntry::execute(functionName, parentDict, is);
+        }
+    }
+    else if
+    (
+        !disableFunctionEntries
+     && keyword[0] == '$'
+    )
+    {
+        // Substitution entry
+
+        token nextToken(is);
+        is.putBack(nextToken);
+
+        if (keyword.size() > 2 && keyword[1] == token::BEGIN_BLOCK)
+        {
+            // Recursive substitution mode.
+            // Content between {} is replaced with expansion.
+            // Then let standard variable expansion deal with rest.
+            string expanded = keyword.substr(2, keyword.size()-3);
+
+            // Substitute dictionary and environment variables.
+            // Do not allow empty substitutions.
+            stringOps::inplaceExpand(expanded, parentDict, true, false);
+
+            // Restore the '$' prefix.
+            // Use replace since operator= is private
+            keyword.std::string::replace(1, keyword.size()-1, expanded);
+        }
+
+        if (nextToken == token::BEGIN_BLOCK)
+        {
+            const word varName = keyword.substr(1);
+
+            // Lookup the variable name in the given dictionary
+            const entry* ePtr = parentDict.lookupScopedEntryPtr
+            (
+                varName,
+                true,
+                true
+            );
+
+            if (ePtr)
             {
+                // Read as primitiveEntry
+                const keyType newKeyword(ePtr->stream());
+
                 return parentDict.add
                 (
-                    new functionEntry
-                    (
-                        keyword,
-                        parentDict,
-                        is
-                    ),
+                    new dictionaryEntry(newKeyword, parentDict, is),
                     false
                 );
             }
             else
             {
-                const word functionName(keyword.substr(1), false);
-                return functionEntry::execute(functionName, parentDict, is);
-            }
-        }
-        else if
-        (
-           !disableFunctionEntries
-         && keyword[0] == '$'
-        )                           // ... Substitution entry
-        {
-            token nextToken(is);
-            is.putBack(nextToken);
-
-            if (keyword.size() > 2 && keyword[1] == token::BEGIN_BLOCK)
-            {
-                // Recursive substitution mode.
-                // Content between {} is replaced with expansion.
-                // Then let standard variable expansion deal with rest.
-                string expanded = keyword.substr(2, keyword.size()-3);
-
-                // Substitute dictionary and environment variables.
-                // Do not allow empty substitutions.
-                stringOps::inplaceExpand(expanded, parentDict, true, false);
-
-                // Restore the '$' prefix. Use replace since operator= is private
-
-                keyword.std::string::replace(1, keyword.size()-1, expanded);
-            }
-
-            if (nextToken == token::BEGIN_BLOCK)
-            {
-                const word varName = keyword.substr(1);
-
-                // lookup the variable name in the given dictionary
-                const entry* ePtr = parentDict.lookupScopedEntryPtr
-                (
-                    varName,
-                    true,
-                    true
-                );
-
-                if (ePtr)
-                {
-                    // Read as primitiveEntry
-                    const keyType newKeyword(ePtr->stream());
-
-                    return parentDict.add
-                    (
-                        new dictionaryEntry(newKeyword, parentDict, is),
-                        false
-                    );
-                }
-                else
-                {
-                    FatalIOErrorInFunction(is)
-                        << "Attempt to use undefined variable " << varName
-                        << " as keyword"
-                        << exit(FatalIOError);
-                    return false;
-                }
-            }
-            else
-            {
-                // Deal with duplicate entries (at least partially)
-                const bool mergeEntry =
-                (
-                    functionEntries::inputModeEntry::merge()
-                 || functionEntries::inputModeEntry::overwrite()
-                );
-
-                parentDict.substituteScopedKeyword(keyword, mergeEntry);
-            }
-
-            return true;
-        }
-        else                        // ... Data entries
-        {
-            token nextToken(is);
-            is.putBack(nextToken);
-
-            if (nextToken == token::END_LIST)
-            {
                 FatalIOErrorInFunction(is)
-                    << "Unexpected token encountered for "
-                    << keyword << " - " << nextToken.info()
+                    << "Attempt to use undefined variable " << varName
+                    << " as keyword"
                     << exit(FatalIOError);
                 return false;
             }
-
-            // Deal with duplicate entries
-            bool mergeEntry = false;
-
-            // See (using exact match) if entry already present
-            entry* existingPtr = parentDict.lookupEntryPtr
+        }
+        else
+        {
+            // Deal with duplicate entries (at least partially)
+            const bool mergeEntry =
             (
-                keyword,
-                false,
-                false
+                mode == inputMode::MERGE
+             || mode == inputMode::OVERWRITE
             );
 
-            if (existingPtr)
-            {
-                if (functionEntries::inputModeEntry::merge())
-                {
-                    mergeEntry = true;
-                }
-                else if (functionEntries::inputModeEntry::overwrite())
-                {
-                    // clear dictionary so merge acts like overwrite
-                    if (existingPtr->isDict())
-                    {
-                        existingPtr->dict().clear();
-                    }
-                    mergeEntry = true;
-                }
-                else if (functionEntries::inputModeEntry::protect())
-                {
-                    // read and discard the entry
-                    if (nextToken == token::BEGIN_BLOCK)
-                    {
-                        dictionaryEntry dummy(keyword, parentDict, is);
-                    }
-                    else
-                    {
-                        primitiveEntry  dummy(keyword, parentDict, is);
-                    }
-                    return true;
-                }
-                else if (functionEntries::inputModeEntry::error())
-                {
-                    FatalIOErrorInFunction(is)
-                        << "duplicate entry: " << keyword
-                        << exit(FatalIOError);
+            parentDict.substituteScopedKeyword(keyword, mergeEntry);
+        }
 
-                    return false;
-                }
-            }
+        return true;
+    }
+    else
+    {
+        // Normal entry
 
-            if (nextToken == token::BEGIN_BLOCK)
+        token nextToken(is);
+        is.putBack(nextToken);
+
+        if (nextToken == token::END_LIST)
+        {
+            FatalIOErrorInFunction(is)
+                << "Unexpected token encountered for "
+                << keyword << " - " << nextToken.info()
+                << exit(FatalIOError);
+            return false;
+        }
+
+        // How to manage duplicate entries
+        bool mergeEntry = false;
+
+        // See (using exact match) if entry already present
+        entry* existingPtr = parentDict.lookupEntryPtr
+        (
+            keyword,
+            false,
+            false
+        );
+
+        if (existingPtr)
+        {
+            if (mode == inputMode::MERGE)
             {
-                return parentDict.add
-                (
-                    new dictionaryEntry(keyword, parentDict, is),
-                    mergeEntry
-                );
+                mergeEntry = true;
             }
-            else
+            else if (mode == inputMode::OVERWRITE)
             {
-                return parentDict.add
-                (
-                    new primitiveEntry(keyword, parentDict, is),
-                    mergeEntry
-                );
+                // Clear existing dictionary so merge acts like overwrite
+                if (existingPtr->isDict())
+                {
+                    existingPtr->dict().clear();
+                }
+                mergeEntry = true;
             }
+            else if (mode == inputMode::PROTECT)
+            {
+                // Read and discard the entry.
+                // Disable function/variable expansion to avoid side-effects
+                const int oldFlag = entry::disableFunctionEntries;
+                entry::disableFunctionEntries = 1;
+
+                if (nextToken == token::BEGIN_BLOCK)
+                {
+                    dictionaryEntry dummy("dummy", parentDict, is);
+                }
+                else
+                {
+                    primitiveEntry  dummy("dummy", parentDict, is);
+                }
+
+                entry::disableFunctionEntries = oldFlag;
+                return true;
+            }
+            else if (mode == inputMode::ERROR)
+            {
+                FatalIOErrorInFunction(is)
+                    << "duplicate entry: " << keyword
+                    << exit(FatalIOError);
+
+                return false;
+            }
+        }
+
+
+        if (nextToken == token::BEGIN_BLOCK)
+        {
+            return parentDict.add
+            (
+                new dictionaryEntry(keyword, parentDict, is),
+                mergeEntry
+            );
+        }
+        else
+        {
+            return parentDict.add
+            (
+                new primitiveEntry(keyword, parentDict, is),
+                mergeEntry
+            );
         }
     }
 }

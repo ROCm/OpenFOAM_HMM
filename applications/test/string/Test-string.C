@@ -83,7 +83,8 @@ int main(int argc, char *argv[])
     Info<<"camel-case => " << (word("camel") & "case") << nl;
     for (const auto& s : { " text with \"spaces'", "08/15 value" })
     {
-        Info<<"validated \"" << s << "\" => " <<  word::validated(s) << nl;
+        Info<<"validated \"" << s << "\" => "
+            << word::validate(s, true) << nl;
     }
     Info<< nl;
 

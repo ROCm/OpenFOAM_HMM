@@ -1117,7 +1117,7 @@ void Foam::snappySnapDriver::detectNearSurfaces
     //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     //
     //{
-    //    const scalar cos45 = Foam::cos(45.0_deg);
+    //    const scalar cos45 = Foam::cos(degToRad(45.0));
     //    vector n(cos45, cos45, cos45);
     //    n /= mag(n);
     //

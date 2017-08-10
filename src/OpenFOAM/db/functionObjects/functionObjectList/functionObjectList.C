@@ -210,7 +210,7 @@ bool Foam::functionObjectList::readFunctionObject
         {
             if (argLevel == 0)
             {
-                funcName = funcNameArgs(start, i - start);
+                funcName = funcNameArgs.substr(start, i - start);
                 start = i+1;
             }
             ++argLevel;
@@ -226,7 +226,7 @@ bool Foam::functionObjectList::readFunctionObject
                         Tuple2<word, string>
                         (
                             argName,
-                            funcNameArgs(start, i - start)
+                            funcNameArgs.substr(start, i - start)
                         )
                     );
                     namedArg = false;
@@ -235,7 +235,10 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        string::validate<word>(funcNameArgs(start, i - start))
+                        word::validate
+                        (
+                            funcNameArgs.substr(start, i - start)
+                        )
                     );
                 }
                 start = i+1;
@@ -252,7 +255,11 @@ bool Foam::functionObjectList::readFunctionObject
         }
         else if (c == '=')
         {
-            argName = string::validate<word>(funcNameArgs(start, i - start));
+            argName = word::validate
+            (
+                funcNameArgs.substr(start, i - start)
+            );
+
             start = i+1;
             namedArg = true;
         }
@@ -323,7 +330,7 @@ bool Foam::functionObjectList::readFunctionObject
 
     // Merge this functionObject dictionary into functionsDict
     dictionary funcArgsDict;
-    funcArgsDict.add(string::validate<word>(funcNameArgs), funcDict);
+    funcArgsDict.add(word::validate(funcNameArgs), funcDict);
     functionsDict.merge(funcArgsDict);
 
     return true;
@@ -334,15 +341,15 @@ bool Foam::functionObjectList::readFunctionObject
 
 Foam::functionObjectList::functionObjectList
 (
-    const Time& t,
+    const Time& runTime,
     const bool execution
 )
 :
     PtrList<functionObject>(),
     digests_(),
     indices_(),
-    time_(t),
-    parentDict_(t.controlDict()),
+    time_(runTime),
+    parentDict_(runTime.controlDict()),
     stateDictPtr_(),
     execution_(execution),
     updated_(false)
@@ -351,7 +358,7 @@ Foam::functionObjectList::functionObjectList
 
 Foam::functionObjectList::functionObjectList
 (
-    const Time& t,
+    const Time& runTime,
     const dictionary& parentDict,
     const bool execution
 )
@@ -359,7 +366,7 @@ Foam::functionObjectList::functionObjectList
     PtrList<functionObject>(),
     digests_(),
     indices_(),
-    time_(t),
+    time_(runTime),
     parentDict_(parentDict),
     stateDictPtr_(),
     execution_(execution),
@@ -745,8 +752,10 @@ bool Foam::functionObjectList::read()
             {
                 autoPtr<functionObject> foPtr;
 
-                FatalError.throwExceptions();
-                FatalIOError.throwExceptions();
+                // Throw FatalError, FatalIOError as exceptions
+                const bool throwingError = FatalError.throwExceptions();
+                const bool throwingIOerr = FatalIOError.throwExceptions();
+
                 try
                 {
                     // New functionObject
@@ -777,8 +786,10 @@ bool Foam::functionObjectList::read()
                     WarningInFunction
                         << "Caught FatalError " << err << nl << endl;
                 }
-                FatalError.dontThrowExceptions();
-                FatalIOError.dontThrowExceptions();
+
+                // Restore previous exception throwing state
+                FatalError.throwExceptions(throwingError);
+                FatalIOError.throwExceptions(throwingIOerr);
 
                 if (foPtr.valid())
                 {

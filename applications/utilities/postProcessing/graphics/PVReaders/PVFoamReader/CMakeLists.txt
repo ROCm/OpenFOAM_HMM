@@ -1,6 +1,6 @@
 # Create a plugin to add a reader to the ParaView GUI
 
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 
 find_package(ParaView REQUIRED)
 include(${PARAVIEW_USE_FILE})
@@ -12,9 +12,10 @@ link_directories(
 include_directories(
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/OSspecific/$ENV{WM_OSTYPE}/lnInclude
-    $ENV{WM_PROJECT_DIR}/src/meshing/blockMesh/lnInclude
-    ${PROJECT_SOURCE_DIR}/../vtkPVblockMesh
-    ${PROJECT_SOURCE_DIR}/../../foamPv/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/conversion/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
+    ${PROJECT_SOURCE_DIR}/../foamPv
+    ${PROJECT_SOURCE_DIR}/../vtkPVFoam
 )
 
 add_definitions(
@@ -33,38 +34,39 @@ set(
 
 if (PARAVIEW_QT_VERSION VERSION_GREATER "4")
   qt5_wrap_cpp(MOC_SRCS
-      pqFoamBlockMeshControls.h
+      pqFoamReaderControls.h
   )
 else()
   qt4_wrap_cpp(MOC_SRCS
-      pqFoamBlockMeshControls.h
+      pqFoamReaderControls.h
   )
 endif()
 
 add_paraview_property_group_widget(IFACES0 IFACES0_SRCS
-    TYPE "openfoam_blockMesh_general_controls"
-    CLASS_NAME pqFoamBlockMeshControls
+    TYPE "openfoam_reader_general_controls"
+    CLASS_NAME pqFoamReaderControls
 )
 
 add_paraview_plugin(
-    PVblockMeshReader_SM "1.0"
-    SERVER_MANAGER_XML PVblockMeshReader_SM.xml
-    SERVER_MANAGER_SOURCES  vtkPVblockMeshReader.cxx
+    PVFoamReader_SM "1.0"
+    SERVER_MANAGER_XML PVFoamReader_SM.xml
+    SERVER_MANAGER_SOURCES vtkPVFoamReader.cxx
     GUI_INTERFACES
         ${IFACES0}
     SOURCES
         ${IFACES0_SRCS}
         ${MOC_SRCS}
-        pqFoamBlockMeshControls.cxx
+        pqFoamReaderControls.cxx
 )
 
 
 target_link_libraries(
-    PVblockMeshReader_SM
+    PVFoamReader_SM
     LINK_PUBLIC
-    vtkPVblockMesh-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
+    vtkPVFoam-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
     foamPv-pv${PARAVIEW_VERSION_MAJOR}.${PARAVIEW_VERSION_MINOR}
-    blockMesh
+    conversion
+    finiteVolume
     OpenFOAM
 )
 

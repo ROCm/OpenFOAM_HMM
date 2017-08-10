@@ -89,12 +89,12 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         string line;
         is.getLine(line);
 
-        // Ansa extension
-        if (line.substr(0, 10) == "$ANSA_NAME")
+        // ANSA extension
+        if (line.startsWith("$ANSA_NAME"))
         {
-            string::size_type sem0 = line.find (';', 0);
-            string::size_type sem1 = line.find (';', sem0+1);
-            string::size_type sem2 = line.find (';', sem1+1);
+            string::size_type sem0 = line.find(';', 0);
+            string::size_type sem1 = line.find(';', sem0+1);
+            string::size_type sem2 = line.find(';', sem1+1);
 
             if
             (
@@ -111,17 +111,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
                 string rawName;
                 is.getLine(rawName);
-                if (rawName[rawName.size()-1] == '\r')
-                {
-                    rawName = rawName.substr(1, rawName.size()-2);
-                }
-                else
-                {
-                    rawName = rawName.substr(1, rawName.size()-1);
-                }
-
-                string::stripInvalid<word>(rawName);
-                ansaName = rawName;
+                rawName.removeEnd("\r");
+                ansaName = word::validate(rawName.substr(1));
 
                 // Info<< "ANSA tag for NastranID:" << ansaId
                 //     << " of type " << ansaType
@@ -132,11 +123,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
         // Hypermesh extension
         // $HMNAME COMP                   1"partName"
-        if
-        (
-            line.substr(0, 12) == "$HMNAME COMP"
-         && line.find ('"') != string::npos
-        )
+        if (line.startsWith("$HMNAME COMP") && line.find('"') != string::npos)
         {
             label groupId = readLabel
             (
@@ -147,11 +134,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
             string rawName;
             lineStream >> rawName;
-            string::stripInvalid<word>(rawName);
 
-            word groupName(rawName);
+            const word groupName = word::validate(rawName);
             nameLookup.insert(groupId, groupName);
-
             // Info<< "group " << groupId << " => " << groupName << endl;
         }
 
@@ -165,7 +150,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         // Check if character 72 is continuation
         if (line.size() > 72 && line[72] == '+')
         {
-            line = line.substr(0, 72);
+            line.resize(72);
 
             while (true)
             {
@@ -178,7 +163,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                 }
                 else
                 {
-                    line += buf.substr(8, buf.size()-8);
+                    line += buf.substr(8);
                     break;
                 }
             }

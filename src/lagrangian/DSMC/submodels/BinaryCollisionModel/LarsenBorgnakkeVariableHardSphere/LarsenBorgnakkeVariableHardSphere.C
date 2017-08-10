@@ -245,12 +245,14 @@ void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
 
             if (iDofQ == 2)
             {
-                scalar energyRatio = 1.0 - pow(rndGen.sample01<scalar>(), (1.0/ChiB));
+                const scalar energyRatio =
+                    1.0 - pow(rndGen.sample01<scalar>(), (1.0/ChiB));
+
                 EiQ = energyRatio*availableEnergy;
             }
             else
             {
-                scalar ChiA = 0.5*iDofQ;
+                const scalar ChiA = 0.5*iDofQ;
                 EiQ = energyRatio(ChiA, ChiB)*availableEnergy;
             }
 

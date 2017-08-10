@@ -35,7 +35,7 @@ Foam::combustionModels::rhoCombustionModel::New
     const word& phaseName
 )
 {
-    const word combTypeName
+    const word modelType
     (
         IOdictionary
         (
@@ -51,23 +51,21 @@ Foam::combustionModels::rhoCombustionModel::New
         ).lookup("combustionModel")
     );
 
-    Info<< "Selecting combustion model " << combTypeName << endl;
+    Info<< "Selecting combustion model " << modelType << endl;
 
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(combTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rhoCombustionModel type "
-            << combTypeName << endl << endl
-            << "Valid combustionModel types :" << endl
+            << modelType << nl << nl
+            << "Valid combustionModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
-    const label tempOpen = combTypeName.find('<');
-
-    const word className = combTypeName(0, tempOpen);
+    const word className = modelType.substr(0, modelType.find('<'));
 
     return autoPtr<rhoCombustionModel>
     (

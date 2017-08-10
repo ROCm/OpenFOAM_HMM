@@ -221,6 +221,7 @@ redundantBlock             {space}({comment}|{unknownPeriodicFace}|{periodicFace
 endOfSection               {space}")"{space}
 
 
+/* balance "-quoted for editor */
 
  /* ------------------------------------------------------------------------ *\
                       -----  Exclusive start states -----
@@ -693,7 +694,7 @@ endOfSection               {space}")"{space}
 {lbrac}{label} {
         Warning
             << "Found unknown block of type: "
-            << Foam::string(YYText())(1, YYLeng()-1) << nl
+            << std::string(YYText()).substr(1, YYLeng()-1) << nl
             << "    on line " << lineNo << endl;
 
         yy_push_state(ignoreBlock);

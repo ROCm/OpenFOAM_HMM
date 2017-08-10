@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ Description
 
     The error class is globally instantiated with a title string. Errors,
     messages and other data are piped to the messageStream class in the
-    standard manner.  Manipulators are supplied for exit and abort which may
+    standard manner.  Manipulators are supplied for exit and abort that may
     terminate the program or throw an exception depending on whether the
     exception handling has been switched on (off by default).
 
@@ -57,7 +57,7 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 class error;
-Ostream& operator<<(Ostream&, const error&);
+Ostream& operator<<(Ostream& os, const error& err);
 
 
 /*---------------------------------------------------------------------------*\
@@ -90,10 +90,10 @@ public:
         error(const string& title);
 
         //- Construct from dictionary
-        error(const dictionary&);
+        error(const dictionary& errDict);
 
         //- Construct as copy
-        error(const error&);
+        error(const error& err);
 
 
     //- Destructor
@@ -104,29 +104,48 @@ public:
 
         string message() const;
 
-        const string& functionName() const
+        inline const string& functionName() const
         {
             return functionName_;
         }
 
-        const string& sourceFileName() const
+        inline const string& sourceFileName() const
         {
             return sourceFileName_;
         }
 
-        label sourceFileLineNumber() const
+        inline label sourceFileLineNumber() const
         {
             return sourceFileLineNumber_;
         }
 
-        void throwExceptions()
+        //- Return the current exception throwing (on or off)
+        inline bool throwing() const
         {
-            throwExceptions_ = true;
+            return throwExceptions_;
         }
 
-        void dontThrowExceptions()
+        //- Activate/deactivate exception throwing
+        //  \return the previous throwing state
+        inline bool throwExceptions(bool doThrow)
         {
-            throwExceptions_ = false;
+            const bool prev = throwExceptions_;
+            throwExceptions_ = doThrow;
+            return prev;
+        }
+
+        //- Activate exception throwing
+        //  \return the previous throwing state
+        inline bool throwExceptions()
+        {
+            return throwExceptions(true);
+        }
+
+        //- Deactivate exception throwing
+        //  \return the previous throwing state
+        inline bool dontThrowExceptions()
+        {
+            return throwExceptions(false);
         }
 
         //- Convert to OSstream
@@ -157,16 +176,16 @@ public:
             return operator OSstream&();
         }
 
-        //- Create and return a dictionary
+        //- Create and return a dictionary representation of the error
         operator dictionary() const;
 
 
         //- Helper function to print a stack (if OpenFOAM IO not yet
         //  initialised)
-        static void safePrintStack(std::ostream&);
+        static void safePrintStack(std::ostream& os);
 
         //- Helper function to print a stack
-        static void printStack(Ostream&);
+        static void printStack(Ostream& os);
 
         //- Exit : can be called for any error to exit program.
         //  Prints stack before exiting.
@@ -179,13 +198,13 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const error&);
+        friend Ostream& operator<<(Ostream& os, const error& err);
 };
 
 
 // Forward declaration of friend functions and operators
 class IOerror;
-Ostream& operator<<(Ostream&, const IOerror&);
+Ostream& operator<<(Ostream& os, const IOerror& err);
 
 
 /*---------------------------------------------------------------------------*\
@@ -212,7 +231,7 @@ public:
         IOerror(const string& title);
 
         //- Construct from dictionary
-        IOerror(const dictionary&);
+        IOerror(const dictionary& errDict);
 
 
     //- Destructor
@@ -221,17 +240,17 @@ public:
 
     // Member functions
 
-        const string& ioFileName() const
+        inline const string& ioFileName() const
         {
             return ioFileName_;
         }
 
-        label ioStartLineNumber() const
+        inline label ioStartLineNumber() const
         {
             return ioStartLineNumber_;
         }
 
-        label ioEndLineNumber() const
+        inline label ioEndLineNumber() const
         {
             return ioEndLineNumber_;
         }
@@ -279,7 +298,7 @@ public:
             const string& msg
         );
 
-        //- Create and return a dictionary
+        //- Create and return a dictionary representation of the error
         operator dictionary() const;
 
 
@@ -292,7 +311,7 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const IOerror&);
+        friend Ostream& operator<<(Ostream& os, const IOerror& err);
 };
 
 

@@ -44,10 +44,11 @@ Usage
         No backup of existing output files.
 
       - \par -remap \<name\>
-        use specified remapping dictionary instead of <tt>constant/remapping</tt>
+        Use specified remapping dictionary instead of
+        <tt>constant/remapping</tt>
 
       - \par -results
-        convert results only to CCM format
+        Convert results only to CCM format
 
 Note
     - No parallel data
@@ -206,8 +207,7 @@ int main(int argc, char *argv[])
         // #include "checkHasMovingMesh.H"
         // #include "checkHasLagrangian.H"
 
-        IOobjectList objects(mesh, timeDirs[timeDirs.size()-1].name());
-        //  IOobjectList sprayObjects(mesh, Times[Times.size()-1].name(), "lagrangian");
+        IOobjectList objects(mesh, timeDirs.last().name());
 
         forAll(timeDirs, timeI)
         {

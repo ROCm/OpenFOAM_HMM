@@ -162,7 +162,8 @@ void Foam::ccm::writer::writeFaces
 
     if (ccm::debug)
     {
-        Info<<"CCMIOWriteFaces()  size:" << size << " streamSize:" << streamSize << endl;
+        Info<<"CCMIOWriteFaces()  size:" << size << " streamSize:"
+            << streamSize << endl;
     }
 
     CCMIOWriteFaces

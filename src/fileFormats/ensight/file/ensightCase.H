@@ -280,12 +280,12 @@ public:
         ) const;
 
 
-        //- Open stream for new data file (on master), using the current index.
+        //- Open stream for new data file (on master), with current index.
         template<class Type>
         autoPtr<ensightFile> newData(const word& varName) const;
 
 
-        //- Open stream for new cloud data file (on master), using the current index.
+        //- Open stream for new cloud data file (on master), with current index.
         template<class Type>
         autoPtr<ensightFile> newCloudData
         (

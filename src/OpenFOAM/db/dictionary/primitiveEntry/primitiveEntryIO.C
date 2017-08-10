@@ -227,10 +227,16 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
         os.writeKeyword(keyword());
     }
 
-    for (label i=0; i<size(); ++i)
+    bool space = false;  // Separate from previous tokens with a space
+    for (const token& t : *this)
     {
-        const token& t = operator[](i);
-        if (t.type() == token::VERBATIMSTRING)
+        if (space)
+        {
+            os  << token::SPACE;
+        }
+        space = true;  // Prefix any following tokens
+
+        if (t.type() == token::tokenType::VERBATIMSTRING)
         {
             // Bypass token output operator to avoid losing verbatimness.
             // Handle in Ostreams themselves
@@ -239,11 +245,6 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
         else
         {
             os  << t;
-        }
-
-        if (i < size()-1)
-        {
-            os  << token::SPACE;
         }
     }
 

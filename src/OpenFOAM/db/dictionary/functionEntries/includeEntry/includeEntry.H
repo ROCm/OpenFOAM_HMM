@@ -64,52 +64,40 @@ class includeEntry
 :
     public functionEntry
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        includeEntry(const includeEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const includeEntry&);
-
 protected:
 
     // Protected Member Functions
 
         //- Read the include fileName from Istream, expand and return
-        static fileName includeFileName(Istream&, const dictionary&);
+        static fileName resolveFile(Istream& is, const dictionary& dict);
 
         //- Expand include fileName and return
-        static fileName includeFileName
+        static fileName resolveFile
         (
             const fileName& dir,
-            const fileName&,
-            const dictionary&
+            const fileName& f,
+            const dictionary& dict
         );
 
 public:
 
     // Static data members
 
-        //- Report which file is included to stdout
+        //- Report to stdout which file is included
         static bool log;
-
-
-    //- Runtime type information
-    ClassName("include");
 
 
     // Member Functions
 
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
+        //- Include file in a sub-dict context
+        static bool execute(dictionary& parentDict, Istream& is);
 
-        //- Execute the functionEntry in a primitiveEntry context
+        //- Include file in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
+            primitiveEntry& entry,
+            Istream& is
         );
 
 };

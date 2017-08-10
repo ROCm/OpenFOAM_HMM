@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     Info<< "face:" << f1 << nl;
 
     // expect these to fail
-    FatalError.throwExceptions();
+    const bool throwingError = FatalError.throwExceptions();
     try
     {
         labelledTri l1{ 1, 2, 3, 10, 24 };
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         WarningInFunction
             << "Caught FatalError " << err << nl << endl;
     }
-    FatalError.dontThrowExceptions();
+    FatalError.throwExceptions(throwingError);
 
     labelledTri l2{ 1, 2, 3 };
     Info<< "labelled:" << l2 << nl;

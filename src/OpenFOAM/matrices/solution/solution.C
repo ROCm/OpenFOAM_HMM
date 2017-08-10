@@ -76,16 +76,13 @@ void Foam::solution::read(const dictionary& dict)
                 const word& e = entryNames[i];
                 scalar value = readScalar(relaxDict.lookup(e));
 
-                if (e(0, 1) == "p")
+                if (e.startsWith("p"))
                 {
                     fieldRelaxDict_.add(e, value);
                 }
-                else if (e.length() >= 3)
+                else if (e.startsWith("rho"))
                 {
-                    if (e(0, 3) == "rho")
-                    {
-                        fieldRelaxDict_.add(e, value);
-                    }
+                    fieldRelaxDict_.add(e, value);
                 }
 
             }

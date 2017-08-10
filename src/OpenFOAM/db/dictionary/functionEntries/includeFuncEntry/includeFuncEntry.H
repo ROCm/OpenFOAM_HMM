@@ -83,17 +83,10 @@ class includeFuncEntry
 :
     public functionEntry
 {
-
 public:
 
-    //- Runtime type information
-    ClassName("includeFunc");
-
-
-    // Member Functions
-
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
+    //- Run function in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
 };
 
 

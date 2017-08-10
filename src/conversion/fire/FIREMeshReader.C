@@ -155,7 +155,7 @@ void Foam::fileFormats::FIREMeshReader::readSelections(ISstream& is)
             // index starting at 1
             const label selId = ++nCellSelections;
 
-            cellTable_.setName(selId, word::validated(name));
+            cellTable_.setName(selId, word::validate(name, true));
             cellTable_.setMaterial(selId, "fluid");
 
             for (label i = 0; i < count; ++i)
@@ -170,7 +170,7 @@ void Foam::fileFormats::FIREMeshReader::readSelections(ISstream& is)
             // index starting at 0
             const label selId = nFaceSelections++;
 
-            faceNames.append(word::validated(name));
+            faceNames.append(word::validate(name, true));
 
             for (label i = 0; i < count; ++i)
             {
@@ -241,7 +241,8 @@ void Foam::fileFormats::FIREMeshReader::reorganize()
     inplaceReorder(oldToNew, neigh_);
     inplaceReorder(oldToNew, faceZoneId_);
 
-    // determine the patch sizes - faceNames_ already has extra place for missed faces
+    // Determine the patch sizes
+    // - faceNames_ already has extra place for missed faces
     const label zoneMissed = faceNames_.size() - 1;
     patchSizes_.setSize(faceNames_.size());
     patchSizes_ = 0;
@@ -292,7 +293,8 @@ void Foam::fileFormats::FIREMeshReader::reorganize()
         label patchI = faceZoneId_[faceI];
         if (patchI == -1)
         {
-            oldToNew[faceI] = patchStarts_[zoneMissed] + patchSizes_[zoneMissed];
+            oldToNew[faceI] =
+                patchStarts_[zoneMissed] + patchSizes_[zoneMissed];
             ++patchSizes_[zoneMissed];
         }
         else

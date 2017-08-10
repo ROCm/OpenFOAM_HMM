@@ -70,34 +70,18 @@ class calcEntry
 :
     public functionEntry
 {
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        calcEntry(const calcEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const calcEntry&);
-
-
 public:
 
-    //- Runtime type information
-    ClassName("calc");
+    //- Execute in a primitiveEntry context
+    static bool execute
+    (
+        const dictionary& parentDict,
+        primitiveEntry& thisEntry,
+        Istream& is
+    );
 
-
-    // Member Functions
-
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
-
-        //- Execute the functionEntry in a primitiveEntry context
-        static bool execute
-        (
-            const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
-        );
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
 
 };
 

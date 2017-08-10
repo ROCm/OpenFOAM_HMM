@@ -174,11 +174,11 @@ protected:
     // Protected Member Functions
 
         //- Construct and return an IFstream for the object.
-        // \Return nullptr if the stream construction failed
+        // \return nullptr if the stream construction failed
         Istream* objectStream();
 
         //- Return an IFstream for the object given the exact file.
-        // \Return nullptr if the stream construction failed
+        // \return nullptr if the stream construction failed
         Istream* objectStream(const fileName& fName);
 
         //- Set the object state to bad

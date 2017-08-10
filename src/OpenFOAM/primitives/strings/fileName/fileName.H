@@ -108,7 +108,7 @@ public:
         inline fileName(const fileName& fn);
 
         //- Construct as copy of word
-        inline fileName(const word& s);
+        inline fileName(const word& w);
 
         //- Construct as copy of string
         inline fileName(const string& s, const bool doStripInvalid=true);
@@ -135,26 +135,42 @@ public:
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
 
-        //- Cleanup file name
+        //- Cleanup filename
         //
-        // * Removes repeated slashes
+        // Removes trailing \c /
+        //   \verbatim
+        //       /                 -->   /
+        //       /abc/             -->   /abc
+        //   \endverbatim
+        //
+        // Removes repeated slashes
+        //   \verbatim
         //       /abc////def        -->   /abc/def
+        //   \endverbatim
         //
-        // * Removes '/./'
-        //       /abc/def/./ghi/.   -->   /abc/def/./ghi
+        // Removes \c /./ (current directory)
+        //   \verbatim
+        //       /abc/def/./ghi/.   -->   /abc/def/ghi
         //       abc/def/./         -->   abc/def
+        //       ./abc/             -->   ./abc
+        //   \endverbatim
         //
-        // * Removes '/../'
+        // Removes \c /../ (parent directory)
+        //   \verbatim
         //       /abc/def/../ghi/jkl/nmo/..   -->   /abc/ghi/jkl
         //       abc/../def/ghi/../jkl        -->   abc/../def/jkl
+        //   \endverbatim
         //
-        // * Removes trailing '/'
-        //
-        // \return True if any contents changed
+        // \return True if the content changed
+        static bool clean(std::string& str);
+
+
+        //- Cleanup filename inplace
+        //  \return True if any contents changed
         bool clean();
 
-        //- Cleanup file name
-        //  eg, remove repeated slashes, etc.
+        //- Cleanup filename
+        //  \return cleaned copy of fileName
         fileName clean() const;
 
 
@@ -163,6 +179,9 @@ public:
         //- Return the file type: FILE, DIRECTORY, UNDEFINED or
         //  LINK (only if followLink=false)
         Type type(const bool followLink = true) const;
+
+        //- Return true if string starts with a '/'
+        inline static bool isAbsolute(const std::string& str);
 
         //- Return true if file name is absolute (starts with a '/')
         inline bool isAbsolute() const;
@@ -174,18 +193,27 @@ public:
       // Decomposition
 
         //- Return basename (part beyond last /), including its extension
+        //  The result normally coresponds to a Foam::word
         //
         // Behaviour compared to /usr/bin/basename:
         // \verbatim
         //    input           name()    basename
         //    -----           ------    --------
         //    "foo"           "foo"     "foo"
+        //    "/"             ""        "/"
         //    "/foo"          "foo"     "foo"
         //    "foo/bar"       "bar"     "bar"
         //    "/foo/bar"      "bar"     "bar"
         //    "/foo/bar/"     ""        "bar"
         // \endverbatim
+        static std::string name(const std::string& str);
+
+        //- Return basename (part beyond last /), including its extension
         word name() const;
+
+        //- Return basename, without extension
+        //  The result normally coresponds to a Foam::word
+        static std::string nameLessExt(const std::string& str);
 
         //- Return basename, without extension
         word nameLessExt() const;
@@ -199,17 +227,22 @@ public:
         }
 
         //- Return directory path name (part before last /)
+        //  The result normally coresponds to a Foam::fileName
         //
         //  Behaviour compared to /usr/bin/dirname:
         //  \verbatim
         //    input           path()          dirname
         //    -----           ------          -------
         //    "foo"           "."             "."
+        //    "/"             "/"             "/"
         //    "/foo"          "/"             "foo"
         //    "foo/bar"       "foo"           "foo"
         //    "/foo/bar"      "/foo"          "/foo"
         //    "/foo/bar/"     "/foo/bar/"     "/foo"
         // \endverbatim
+        static std::string path(const std::string& str);
+
+        //- Return directory path name (part before last /)
         fileName path() const;
 
         //- Return file name without extension (part before last .)
@@ -242,11 +275,11 @@ public:
         //  \verbatim
         //    Input           components()
         //    -----           ------
-        //    "foo"           1("foo")
-        //    "/foo"          1("foo")
-        //    "foo/bar"       2("foo", "bar")
-        //    "/foo/bar"      2("foo", "bar")
-        //    "/foo/bar/"     2("foo", "bar")
+        //    "foo"           ("foo")
+        //    "/foo"          ("foo")
+        //    "foo/bar"       ("foo", "bar")
+        //    "/foo/bar"      ("foo", "bar")
+        //    "/foo/bar/"     ("foo", "bar")
         //  \endverbatim
         wordList components(const char delimiter = '/') const;
 

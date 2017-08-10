@@ -128,7 +128,7 @@ public:
         inline size_t length() const;
 
         //- The flattened character content, with interspersed nul-chars
-        inline char* data() const;
+        inline const char* data() const;
 
 
     // Edit

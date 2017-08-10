@@ -160,7 +160,7 @@ public:
             return true;
         }
 
-        //- Return token stream if this entry is a primitive entry
+        //- Return token stream for this primitive entry
         ITstream& stream() const;
 
         //- This entry is not a dictionary,

@@ -88,7 +88,6 @@ Usage
         operation    | operation to perform    | yes         |
         postOperation | post-operation to perform    | no | none |
         weightField  | name of field to apply weighting | no |
-        orientedWeightField  | name of oriented field to apply weighting | no |
         scaleFactor  | scale factor            | no          | 1
         fields       | list of fields to operate on | yes    |
     \endtable

@@ -211,7 +211,7 @@ $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
-$(functionEntries)/inputModeEntry/inputModeEntry.C
+$(functionEntries)/inputMode/inputMode.C
 $(functionEntries)/removeEntry/removeEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary

@@ -74,7 +74,7 @@ bool Foam::fileFormats::NASedgeFormat::read
         // Check if character 72 is continuation
         if (line.size() > 72 && line[72] == '+')
         {
-            line = line.substr(0, 72);
+            line.resize(72);
 
             while (true)
             {
@@ -87,7 +87,7 @@ bool Foam::fileFormats::NASedgeFormat::read
                 }
                 else
                 {
-                    line += buf.substr(8, buf.size()-8);
+                    line += buf.substr(8);
                     break;
                 }
             }

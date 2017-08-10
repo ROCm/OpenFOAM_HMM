@@ -409,7 +409,8 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
                 }
 
                 mapIndex = prostarShapeLookup[mapIndex];
-                cellFaceId = STARCDCore::foamToStarFaceAddr[mapIndex][cellFaceId];
+                cellFaceId =
+                    STARCDCore::foamToStarFaceAddr[mapIndex][cellFaceId];
             }
             // Info<< endl;
 

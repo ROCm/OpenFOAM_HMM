@@ -35,6 +35,17 @@ int Foam::entry::disableFunctionEntries
 );
 
 
+Foam::entry::inputMode Foam::entry::globalInputMode = inputMode::MERGE;
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::entry::resetInputMode()
+{
+    globalInputMode = inputMode::MERGE;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::entry::entry(const keyType& keyword)

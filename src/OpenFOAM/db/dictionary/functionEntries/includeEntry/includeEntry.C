@@ -31,15 +31,6 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::word Foam::functionEntries::includeEntry::typeName
-(
-    Foam::functionEntries::includeEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include includeEntry
-int Foam::functionEntries::includeEntry::debug(0);
-
 bool Foam::functionEntries::includeEntry::log(false);
 
 
@@ -47,50 +38,50 @@ namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        include
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        include
     );
 }
 }
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-Foam::fileName Foam::functionEntries::includeEntry::includeFileName
+Foam::fileName Foam::functionEntries::includeEntry::resolveFile
 (
     Istream& is,
     const dictionary& dict
 )
 {
     fileName fName(is);
-    // Substitute dictionary and environment variables. Allow empty
-    // substitutions.
+    // Substitute dictionary and environment variables.
+    // Allow empty substitutions.
     stringOps::inplaceExpand(fName, dict, true, true);
 
     if (fName.empty() || fName.isAbsolute())
     {
         return fName;
     }
-    else
-    {
-        // relative name
-        return fileName(is.name()).path()/fName;
-    }
+
+    // Relative name
+    return fileName(is.name()).path()/fName;
 }
 
 
-Foam::fileName Foam::functionEntries::includeEntry::includeFileName
+Foam::fileName Foam::functionEntries::includeEntry::resolveFile
 (
     const fileName& dir,
     const fileName& f,
@@ -98,19 +89,17 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 )
 {
     fileName fName(f);
-    // Substitute dictionary and environment variables. Allow empty
-    // substitutions.
+    // Substitute dictionary and environment variables.
+    // Allow empty substitutions.
     stringOps::inplaceExpand(fName, dict, true, true);
 
     if (fName.empty() || fName.isAbsolute())
     {
         return fName;
     }
-    else
-    {
-        // relative name
-        return dir/fName;
-    }
+
+    // Relative name
+    return dir/fName;
 }
 
 
@@ -122,11 +111,8 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    const fileName rawFName(is);
-    const fileName fName
-    (
-        includeFileName(is.name().path(), rawFName, parentDict)
-    );
+    const fileName rawName(is);
+    const fileName fName = resolveFile(is.name().path(), rawName, parentDict);
 
 
     // Read contents of file into parentDict
@@ -147,7 +133,7 @@ bool Foam::functionEntries::includeEntry::execute
             (
                 dynamic_cast<const regIOobject&>(top)
             );
-            //Info<< rio.name() << " : adding depenency on included file "
+            //Info<< rio.name() << " : adding dependency on included file "
             //    << fName << endl;
 
             rio.addWatch(fName);
@@ -162,7 +148,7 @@ bool Foam::functionEntries::includeEntry::execute
         (
             is
         )   << "Cannot open include file "
-            << (ifs.name().size() ? ifs.name() : rawFName)
+            << (ifs.name().size() ? ifs.name() : rawName)
             << " while reading dictionary " << parentDict.name()
             << exit(FatalIOError);
 
@@ -178,12 +164,8 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    const fileName rawFName(is);
-    const fileName fName
-    (
-        includeFileName(is.name().path(), rawFName, parentDict)
-    );
-
+    const fileName rawName(is);
+    const fileName fName = resolveFile(is.name().path(), rawName, parentDict);
 
     // Read contents of file into parentDict
     IFstream ifs(fName);
@@ -203,7 +185,7 @@ bool Foam::functionEntries::includeEntry::execute
             (
                 dynamic_cast<const regIOobject&>(top)
             );
-            //Info<< rio.name() << " : adding depenency on included file "
+            //Info<< rio.name() << " : adding dependency on included file "
             //    << fName << endl;
 
             rio.addWatch(fName);
@@ -218,7 +200,7 @@ bool Foam::functionEntries::includeEntry::execute
         (
             is
         )   << "Cannot open include file "
-            << (ifs.name().size() ? ifs.name() : rawFName)
+            << (ifs.name().size() ? ifs.name() : rawName)
             << " while reading dictionary " << parentDict.name()
             << exit(FatalIOError);
 

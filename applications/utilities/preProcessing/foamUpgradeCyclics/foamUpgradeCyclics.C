@@ -500,7 +500,7 @@ int main(int argc, char *argv[])
         IOobjectList objects(runTime, runTime.timeName());
 
 
-        int oldFlag = entry::disableFunctionEntries;
+        const int oldFlag = entry::disableFunctionEntries;
         if (!enableEntries)
         {
             // By default disable dictionary expansion for fields

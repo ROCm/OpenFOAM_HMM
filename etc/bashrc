@@ -175,9 +175,9 @@ then
     _foamEtc config.sh/aliases
 
     # Bash completions
-    if command -v complete > /dev/null 2>&1
+    if [ "${BASH_VERSINFO:-0}" -ge 4 ]
     then
-        _foamEtc config.sh/bashcompletion
+        _foamEtc config.sh/bash_completion
     fi
 fi
 

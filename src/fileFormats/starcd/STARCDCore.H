@@ -147,7 +147,11 @@ public:
     // Public Member Functions
 
         //- Resolve base file-name for the given file-type
-        static fileName starFileName(const fileName& baseName, const enum fileExt);
+        static fileName starFileName
+        (
+            const fileName& baseName,
+            const enum fileExt
+        );
 
 
         //- Remove existing PROSTAR files for the given base file-name

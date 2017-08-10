@@ -157,7 +157,7 @@ class blockMesh
         void createPatches() const;
 
         //- As copy (not implemented)
-        blockMesh(const blockMesh&);
+        blockMesh(const blockMesh&) = delete;
 
 
 public:

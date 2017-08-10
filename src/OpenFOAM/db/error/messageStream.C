@@ -90,8 +90,8 @@ Foam::OSstream& Foam::messageStream::operator()
 {
     OSstream& os = operator OSstream&();
 
-    os  << endl
-        << "    From function " << functionName << endl
+    os  << nl
+        << "    From function " << functionName << nl
         << "    in file " << sourceFileName
         << " at line " << sourceFileLineNumber << endl
         << "    ";
@@ -194,7 +194,7 @@ Foam::messageStream::operator Foam::OSstream&()
 {
     if (level)
     {
-        bool collect = (severity_ == INFO || severity_ == WARNING);
+        const bool collect = (severity_ == INFO || severity_ == WARNING);
 
         // Report the error
         if (!Pstream::master() && collect)

@@ -65,29 +65,6 @@ int yyFlexLexer::yywrap()
 //! \endcond
 
 
-Foam::string foamSpecieString(const char* YYText)
-{
-    Foam::string specieString(YYText);
-    return specieString;
-}
-
-
-Foam::word foamName(const char* YYText)
-{
-    Foam::string fn(YYText);
-    Foam::string::stripInvalid<Foam::word>(fn);
-    return fn;
-}
-
-
-Foam::word foamName(const Foam::string& s)
-{
-    Foam::string fn(s);
-    Foam::string::stripInvalid<Foam::word>(fn);
-    return fn;
-}
-
-
  /* ------------------------------------------------------------------------- *\
    ------ cppLexer::yylex()
  \* ------------------------------------------------------------------------- */
@@ -344,7 +321,7 @@ bool finishReaction = false;
     }
 
 <readElements>{elementName} {
-        currentElementName = foamName(YYText());
+        currentElementName = word::validate(YYText());
         correctElementName(currentElementName);
 
         if (!elementIndices_.found(currentElementName))
@@ -382,7 +359,7 @@ bool finishReaction = false;
     }
 
 <readSpecies>{specieName} {
-        word specieName(foamName(foamSpecieString(YYText())));
+        const word specieName = word::validate(YYText());
 
         if (specieName == "THERMO")
         {
@@ -429,15 +406,15 @@ bool finishReaction = false;
     }
 
 <readThermoAll>{thermoTemp}{thermoTemp}{thermoTemp} {
-        string temperaturesString(YYText());
-        //scalar lowestT(stringToScalar(temperaturesString(0, 10)));
-        allCommonT = stringToScalar(temperaturesString(10, 10));
-        //scalar highestT(stringToScalar(temperaturesString(20, 10)));
+        const string temperaturesString(YYText());
+        //scalar lowestT(stringToScalar(temperaturesString.substr(0, 10)));
+        allCommonT = stringToScalar(temperaturesString.substr(10, 10));
+        //scalar highestT(stringToScalar(temperaturesString.substr(20, 10)));
         BEGIN(readThermoSpecieName);
     }
 
 <readThermoSpecieName>{thermoSpecieName} {
-        string specieString(foamSpecieString(YYText()));
+        string specieString(YYText());
         if (newFormat_)
         {
             specieString.replaceAll(" ", "_");
@@ -449,7 +426,7 @@ bool finishReaction = false;
             size_t spacePos = specieString.find(' ');
             if (spacePos != string::npos)
             {
-                currentSpecieName = specieString(0, spacePos);
+                currentSpecieName = specieString.substr(0, spacePos);
             }
             else
             {
@@ -467,15 +444,15 @@ bool finishReaction = false;
     }
 
 <readThermoFormula>{thermoFormula} {
-        string thermoFormula(YYText());
+        const string thermoFormula(YYText());
 
         nSpecieElements = 0;
         currentSpecieComposition.setSize(5);
 
         for (int i=0; i<4; i++)
         {
-            word elementName(foamName(thermoFormula(5*i, 2)));
-            label nAtoms = atoi(thermoFormula(5*i + 2, 3).c_str());
+            word elementName = word::validate(thermoFormula.substr(5*i, 2));
+            label nAtoms = atoi(thermoFormula.substr(5*i + 2, 3).c_str());
 
             if (elementName.size() && nAtoms)
             {
@@ -490,31 +467,23 @@ bool finishReaction = false;
     }
 
 <readThermoPhase>{thermoPhase} {
-        char phaseChar = YYText()[0];
+        const char phaseChar = YYText()[0];
 
         switch (phaseChar)
         {
-            case 'S':
-                speciePhase_.insert(currentSpecieName, solid);
-            break;
-
-            case 'L':
-                speciePhase_.insert(currentSpecieName, liquid);
-            break;
-
-            case 'G':
-                speciePhase_.insert(currentSpecieName, gas);
-            break;
+            case 'S': speciePhase_.insert(currentSpecieName, solid); break;
+            case 'L': speciePhase_.insert(currentSpecieName, liquid); break;
+            case 'G': speciePhase_.insert(currentSpecieName, gas); break;
         }
 
         BEGIN(readThermoTemps);
     }
 
 <readThermoTemps>{thermoLowTemp}{thermoHighTemp}{thermoCommonTemp} {
-        string temperaturesString(YYText());
-        currentLowT = stringToScalar(temperaturesString(0, 10));
-        currentHighT = stringToScalar(temperaturesString(10, 10));
-        currentCommonT = stringToScalar(temperaturesString(20, 8));
+        const string temperaturesString(YYText());
+        currentLowT = stringToScalar(temperaturesString.substr(0, 10));
+        currentHighT = stringToScalar(temperaturesString.substr(10, 10));
+        currentCommonT = stringToScalar(temperaturesString.substr(20, 8));
 
         if (currentCommonT < SMALL)
         {
@@ -525,9 +494,9 @@ bool finishReaction = false;
     }
 
 <readThermoFormula2>{thermoFormula2} {
-        string thermoFormula(YYText());
-        word elementName(foamName(thermoFormula(0, 2)));
-        label nAtoms = atoi(thermoFormula(2, 3).c_str());
+        const string thermoFormula(YYText());
+        word elementName = word::validate(thermoFormula.substr(0, 2));
+        const label nAtoms = atoi(thermoFormula.substr(2, 3).c_str());
 
         if
         (
@@ -568,13 +537,13 @@ bool finishReaction = false;
     }
 
 <readThermoCoeff1>{thermoCoeff}{thermoCoeff}{thermoCoeff}{thermoCoeff}{thermoCoeff} {
-        string thermoCoeffString(YYText());
+        const string thermoCoeffString(YYText());
 
-        highCpCoeffs[0] = stringToScalar(thermoCoeffString(0, 15));
-        highCpCoeffs[1] = stringToScalar(thermoCoeffString(15, 15));
-        highCpCoeffs[2] = stringToScalar(thermoCoeffString(30, 15));
-        highCpCoeffs[3] = stringToScalar(thermoCoeffString(45, 15));
-        highCpCoeffs[4] = stringToScalar(thermoCoeffString(60, 15));
+        highCpCoeffs[0] = stringToScalar(thermoCoeffString.substr(0, 15));
+        highCpCoeffs[1] = stringToScalar(thermoCoeffString.substr(15, 15));
+        highCpCoeffs[2] = stringToScalar(thermoCoeffString.substr(30, 15));
+        highCpCoeffs[3] = stringToScalar(thermoCoeffString.substr(45, 15));
+        highCpCoeffs[4] = stringToScalar(thermoCoeffString.substr(60, 15));
 
         BEGIN(readThermoLineLabel2);
     }
@@ -586,12 +555,12 @@ bool finishReaction = false;
 <readThermoCoeff2>{thermoCoeff}{thermoCoeff}{thermoCoeff}{thermoCoeff}{thermoCoeff} {
         string thermoCoeffString(YYText());
 
-        highCpCoeffs[5] = stringToScalar(thermoCoeffString(0, 15));
-        highCpCoeffs[6] = stringToScalar(thermoCoeffString(15, 15));
+        highCpCoeffs[5] = stringToScalar(thermoCoeffString.substr(0, 15));
+        highCpCoeffs[6] = stringToScalar(thermoCoeffString.substr(15, 15));
 
-        lowCpCoeffs[0] = stringToScalar(thermoCoeffString(30, 15));
-        lowCpCoeffs[1] = stringToScalar(thermoCoeffString(45, 15));
-        lowCpCoeffs[2] = stringToScalar(thermoCoeffString(60, 15));
+        lowCpCoeffs[0] = stringToScalar(thermoCoeffString.substr(30, 15));
+        lowCpCoeffs[1] = stringToScalar(thermoCoeffString.substr(45, 15));
+        lowCpCoeffs[2] = stringToScalar(thermoCoeffString.substr(60, 15));
 
         BEGIN(readThermoLineLabel3);
     }
@@ -603,10 +572,10 @@ bool finishReaction = false;
 <readThermoCoeff3>{thermoCoeff}{thermoCoeff}{thermoCoeff}{thermoCoeff}{thermoCoeff} {
         string thermoCoeffString(YYText());
 
-        lowCpCoeffs[3] = stringToScalar(thermoCoeffString(0, 15));
-        lowCpCoeffs[4] = stringToScalar(thermoCoeffString(15, 15));
-        lowCpCoeffs[5] = stringToScalar(thermoCoeffString(30, 15));
-        lowCpCoeffs[6] = stringToScalar(thermoCoeffString(45, 15));
+        lowCpCoeffs[3] = stringToScalar(thermoCoeffString.substr(0, 15));
+        lowCpCoeffs[4] = stringToScalar(thermoCoeffString.substr(15, 15));
+        lowCpCoeffs[5] = stringToScalar(thermoCoeffString.substr(30, 15));
+        lowCpCoeffs[6] = stringToScalar(thermoCoeffString.substr(45, 15));
 
         BEGIN(readThermoLineLabel4);
     }
@@ -695,7 +664,7 @@ bool finishReaction = false;
 
 <readReactionKeyword>{reactionKeyword} {
 
-        word keyword(foamName(YYText()));
+        const word keyword = word::validate(YYText());
 
         HashTable<int>::iterator reactionKeywordIter
         (
@@ -807,7 +776,7 @@ bool finishReaction = false;
         }
         else
         {
-            currentSpecieName = foamName(foamSpecieString(YYText()));
+            currentSpecieName = word::validate(YYText());
 
             HashTable<label>::iterator specieIndexIter
             (
@@ -853,7 +822,7 @@ bool finishReaction = false;
 
 <readReactionKeyword>{reactionKeywordSlash} {
 
-        word keyword(foamName(YYText()));
+        word keyword = word::validate(YYText());
 
         HashTable<int>::iterator reactionKeywordIter
         (
@@ -1327,11 +1296,9 @@ bool finishReaction = false;
 
 <readPDependentSpecie>{pDependentSpecie} {
 
-        word rhsPDependentSpecieName = pDependentSpecieName;
-        pDependentSpecieName =
-            foamName(foamSpecieString(YYText()));
-        pDependentSpecieName =
-            pDependentSpecieName(0, pDependentSpecieName.size() - 1);
+        const word rhsPDependentSpecieName = pDependentSpecieName;
+        pDependentSpecieName = word::validate(YYText());
+        pDependentSpecieName.resize(pDependentSpecieName.size()-1);
 
         if (rrType == thirdBodyArrhenius)
         {
@@ -1400,7 +1367,7 @@ bool finishReaction = false;
     }
 
 <readTdepSpecie>{specieName} {
-        word specieName(foamName(foamSpecieString(YYText())));
+        word specieName = word::validate(YYText());
         FatalErrorInFunction
             << "Temperature-dependent reaction on line "
             << lineNo_ << "not yet supported"
@@ -1409,8 +1376,7 @@ bool finishReaction = false;
     }
 
 <readReactionOrderSpecie>{specieName} {
-        currentSpecieName =
-            word(foamName(foamSpecieString(YYText())));
+        currentSpecieName = word::validate(YYText());
 
         HashTable<label>::iterator specieIndexIter
         (

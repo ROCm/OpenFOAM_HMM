@@ -219,6 +219,7 @@ _foamEtc config.csh/settings
 
 if ($?prompt) then  # Interactive shell
     _foamEtc config.csh/aliases
+    _foamEtc config.csh/tcsh_completion
 endif
 
 

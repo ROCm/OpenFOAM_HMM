@@ -59,7 +59,7 @@ define(xoutlet,calc(xporo + Cos*lenoutlet)) dnl>
 define(youtlet,calc(yporo + Sin*lenoutlet)) dnl>
 dnl>
 
-convertToMeters 0.001;
+scale   0.001;
 
 vertices
 (

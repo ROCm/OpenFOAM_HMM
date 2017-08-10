@@ -111,6 +111,11 @@ public:
 
     // Member functions
 
+        //- Is this character valid for a keyType?
+        //  This is largely identical with what word accepts, but also
+        //  permit brace-brackets, which are valid for some regexs.
+        inline static bool valid(char c);
+
         //- Treat as a pattern rather than a literal string?
         inline bool isPattern() const;
 

@@ -1053,7 +1053,11 @@ void Foam::ccm::reader::readMonitoring
             //
             //- simulate ReadFaceCells with kCCMIOBoundaryFaces
             // CCMIOGetNode(nullptr, childNode, "Cells", &subNode);
-            // CCMIORead1i(nullptr, subNode, faceCells.begin(), kCCMIOStart, kCCMIOEnd);
+            // CCMIORead1i
+            // (
+            //     nullptr, subNode, faceCells.begin(),
+            //     kCCMIOStart, kCCMIOEnd
+            // );
             //
             // Info << "cells: " << faceCells << endl;
         }
@@ -1159,7 +1163,8 @@ void Foam::ccm::reader::juggleSolids()
     // Adjust start and sizes
     patchSizes_[patchIndex] -= adjustPatch;
     patchSizes_[patchIndex+1] = adjustPatch;
-    patchStarts[patchIndex+1] = patchStarts[patchIndex] + patchSizes_[patchIndex];
+    patchStarts[patchIndex+1] =
+        patchStarts[patchIndex] + patchSizes_[patchIndex];
 
     origBndId_[patchIndex+1] = boundaryRegion_.append
     (
@@ -1686,8 +1691,9 @@ void Foam::ccm::reader::cleanupInterfaces()
                         oldToNew[face0] = pos + nsorted;
                         oldToNew[face1] = pos + nsorted + nsizeby2;
 
-                        // Mark destination of the faces, but cannot renumber yet
-                        // use negative to potential overlap with other patch regions
+                        // Mark destination of the faces, but cannot renumber
+                        // yet. Use negative to potential overlap with other
+                        // patch regions
                         bafInterfaces_[elemI][0] = -oldToNew[face0];
                         bafInterfaces_[elemI][1] = -oldToNew[face1];
 
@@ -1742,14 +1748,6 @@ void Foam::ccm::reader::cleanupInterfaces()
             label face1 = domInterfaces_[elemI][1];
             oldToNew[face1] = oldToNew[face0];
         }
-
-//         Info<< "nInternalFaces " << nInternalFaces_ << nl
-//             << "oldToNew (internal) "
-//             << SubList<label>(oldToNew, nInternalFaces_)
-//             << nl
-//             << "oldToNew (extern) "
-//             << SubList<label>(oldToNew, nFaces_ - nInternalFaces_, nInternalFaces_)
-//             << endl;
 
         forAllIters(monitoringSets_, iter)
         {

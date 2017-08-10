@@ -56,9 +56,7 @@ Foam::radiation::sootModel::New
             << exit(FatalError);
     }
 
-    const label tempOpen = modelType.find('<');
-
-    const word className = modelType(0, tempOpen);
+    const word className = modelType.substr(0, modelType.find('<'));
 
     return autoPtr<sootModel>(cstrIter()(dict, mesh, className));
 }

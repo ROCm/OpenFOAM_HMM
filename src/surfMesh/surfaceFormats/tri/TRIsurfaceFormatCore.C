@@ -86,12 +86,11 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     {
         string line = this->getLineNoComment(is);
 
-        // handle continuations ?
-        //          if (line[line.size()-1] == '\\')
-        //          {
-        //              line.substr(0, line.size()-1);
-        //              line += this->getLineNoComment(is);
-        //          }
+        // Handle continuations?
+        // if (line.removeEnd("\\"))
+        // {
+        //     line += this->getLineNoComment(is);
+        // }
 
         IStringStream lineStream(line);
 
@@ -128,14 +127,14 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
         // ie, instead of having 0xFF, skip 0 and leave xFF to
         // get read as a word and name it "zoneFF"
 
-        char zero;
-        lineStream >> zero;
+        char zeroChar;
+        lineStream >> zeroChar;
 
-        word rawName(lineStream);
-        word name("zone" + rawName(1, rawName.size()-1));
+        const word rawName(lineStream);
+        const word name("zone" + rawName.substr(1));
 
-        HashTable<label>::const_iterator fnd = lookup.find(name);
-        if (fnd != lookup.end())
+        HashTable<label>::const_iterator fnd = lookup.cfind(name);
+        if (fnd.found())
         {
             if (zoneI != fnd())
             {

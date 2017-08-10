@@ -154,14 +154,14 @@ Foam::IOobjectList::IOobjectList
     }
 
     // Create a list of file names in this directory
-    fileNameList objNames =
+    const auto objNames =
         readDir(db.path(newInstance, db.dbDir()/local), fileName::FILE);
 
-    forAll(objNames, i)
+    for (const auto& objName : objNames)
     {
         IOobject* objectPtr = new IOobject
         (
-            objNames[i],
+            objName,
             newInstance,
             local,
             db,
@@ -170,8 +170,23 @@ Foam::IOobjectList::IOobjectList
             registerObject
         );
 
-        // Use object with local scope
-        if (objectPtr->typeHeaderOk<IOList<label>>(false))
+        bool ok = false;
+        const bool throwingIOerr = FatalIOError.throwExceptions();
+
+        try
+        {
+            // Use object with local scope and current instance (no searching)
+            ok = objectPtr->typeHeaderOk<IOList<label>>(false, false);
+        }
+        catch (Foam::IOerror& err)
+        {
+            Warning
+                << err << nl << endl;
+        }
+
+        FatalIOError.throwExceptions(throwingIOerr);
+
+        if (ok)
         {
             insert(objectPtr->name(), objectPtr);
         }

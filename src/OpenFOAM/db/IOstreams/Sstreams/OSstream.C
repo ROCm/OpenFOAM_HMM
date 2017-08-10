@@ -31,7 +31,7 @@ License
 
 Foam::Ostream& Foam::OSstream::write(const token& t)
 {
-    if (t.type() == token::VERBATIMSTRING)
+    if (t.type() == token::tokenType::VERBATIMSTRING)
     {
         write(char(token::HASH));
         write(char(token::BEGIN_BLOCK));
@@ -39,9 +39,9 @@ Foam::Ostream& Foam::OSstream::write(const token& t)
         write(char(token::HASH));
         write(char(token::END_BLOCK));
     }
-    else if (t.type() == token::VARIABLE)
+    else if (t.type() == token::tokenType::VARIABLE)
     {
-        writeQuoted( t.stringToken(), false);
+        writeQuoted(t.stringToken(), false);
     }
     return *this;
 }
@@ -81,9 +81,9 @@ Foam::Ostream& Foam::OSstream::write(const string& str)
     os_ << token::BEGIN_STRING;
 
     int backslash = 0;
-    for (string::const_iterator iter = str.begin(); iter != str.end(); ++iter)
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
     {
-        char c = *iter;
+        const char c = *iter;
 
         if (c == '\\')
         {
@@ -132,14 +132,9 @@ Foam::Ostream& Foam::OSstream::writeQuoted
         os_ << token::BEGIN_STRING;
 
         int backslash = 0;
-        for
-        (
-            string::const_iterator iter = str.begin();
-            iter != str.end();
-            ++iter
-        )
+        for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
         {
-            char c = *iter;
+            const char c = *iter;
 
             if (c == '\\')
             {

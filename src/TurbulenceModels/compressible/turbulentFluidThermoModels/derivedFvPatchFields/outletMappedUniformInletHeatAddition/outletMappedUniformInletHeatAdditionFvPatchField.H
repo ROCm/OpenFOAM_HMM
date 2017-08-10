@@ -125,8 +125,7 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given outletMappedUniformInletHeatAdditionFvPatchField
-        //  onto a new patch
+        //- Construct by mapping onto a new patch
         outletMappedUniformInletHeatAdditionFvPatchField
         (
             const outletMappedUniformInletHeatAdditionFvPatchField&,

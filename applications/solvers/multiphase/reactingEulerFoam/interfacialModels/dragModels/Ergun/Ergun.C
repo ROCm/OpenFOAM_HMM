@@ -63,7 +63,7 @@ Foam::dragModels::Ergun::~Ergun()
 Foam::tmp<Foam::volScalarField> Foam::dragModels::Ergun::CdRe() const
 {
     return
-        (4/3)
+        (4.0/3.0)
        *(
             150
            *max

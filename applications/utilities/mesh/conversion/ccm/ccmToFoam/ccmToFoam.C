@@ -45,7 +45,8 @@ Usage
         List some information about the geometry
 
       - \par -name \<name\>
-        Provide alternative base name for export. Default is <tt>meshExport</tt>.
+        Provide alternative base name for export.
+        Default is <tt>meshExport</tt>.
 
       - \par -noBaffles
         Remove any baffles by merging the faces.
@@ -57,7 +58,8 @@ Usage
         Use numbered patch/zone (not names) directly from ccm ids.
 
       - \par -remap \<name\>
-        use specified remapping dictionary instead of <tt>constant/remapping</tt>
+        Use specified remapping dictionary instead of
+        <tt>constant/remapping</tt>
 
       - \par -scale \<factor\>
         Specify an alternative geometry scaling factor.
@@ -92,7 +94,8 @@ int main(int argc, char *argv[])
     (
         "Reads CCM files as written by PROSTAR/STARCCM and writes an OPENFOAM "
         " polyMesh. Multi-region support for PROSTAR meshes should be stable."
-        " Multi-region merging for STARCCM meshes will not always be successful."
+        " Multi-region merging for STARCCM meshes will not always be"
+        " successful."
     );
 
     argList::noParallel();

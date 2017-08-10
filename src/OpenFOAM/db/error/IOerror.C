@@ -30,7 +30,7 @@ License
 #include "JobInfo.H"
 #include "Pstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::IOerror::IOerror(const string& title)
 :
@@ -50,9 +50,13 @@ Foam::IOerror::IOerror(const dictionary& errDict)
 {}
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::IOerror::~IOerror() throw()
 {}
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::OSstream& Foam::IOerror::operator()
 (
@@ -167,6 +171,8 @@ Foam::IOerror::operator Foam::dictionary() const
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::IOerror::exit(const int)
 {
     if (!throwExceptions_ && JobInfo::constructed)
@@ -254,32 +260,32 @@ void Foam::IOerror::abort()
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& ioErr)
+Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& err)
 {
     if (!os.bad())
     {
-        os  << endl
-            << ioErr.title().c_str() << endl
-            << ioErr.message().c_str() << endl << endl;
+        os  << nl
+            << err.title().c_str() << nl
+            << err.message().c_str() << nl << endl;
 
-        os  << "file: " << ioErr.ioFileName().c_str();
+        os  << "file: " << err.ioFileName().c_str();
 
-        if (ioErr.ioStartLineNumber() >= 0 && ioErr.ioEndLineNumber() >= 0)
+        if (err.ioStartLineNumber() >= 0 && err.ioEndLineNumber() >= 0)
         {
-            os  << " from line " << ioErr.ioStartLineNumber()
-                << " to line " << ioErr.ioEndLineNumber() << '.';
+            os  << " from line " << err.ioStartLineNumber()
+                << " to line " << err.ioEndLineNumber() << '.';
         }
-        else if (ioErr.ioStartLineNumber() >= 0)
+        else if (err.ioStartLineNumber() >= 0)
         {
-            os  << " at line " << ioErr.ioStartLineNumber() << '.';
+            os  << " at line " << err.ioStartLineNumber() << '.';
         }
 
-        if (IOerror::level >= 2 && ioErr.sourceFileLineNumber())
+        if (IOerror::level >= 2 && err.sourceFileLineNumber())
         {
-            os  << endl << endl
-                << "    From function " << ioErr.functionName().c_str() << endl
-                << "    in file " << ioErr.sourceFileName().c_str()
-                << " at line " << ioErr.sourceFileLineNumber() << '.';
+            os  << nl << nl
+                << "    From function " << err.functionName().c_str() << endl
+                << "    in file " << err.sourceFileName().c_str()
+                << " at line " << err.sourceFileLineNumber() << '.';
         }
     }
 
@@ -291,5 +297,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& ioErr)
 // Global error definitions
 
 Foam::IOerror Foam::FatalIOError("--> FOAM FATAL IO ERROR: ");
+
 
 // ************************************************************************* //
