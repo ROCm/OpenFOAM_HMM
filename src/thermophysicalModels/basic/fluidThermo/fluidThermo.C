@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ namespace Foam
 {
     defineTypeNameAndDebug(fluidThermo, 0);
     defineRunTimeSelectionTable(fluidThermo, fvMesh);
+    defineRunTimeSelectionTable(fluidThermo, fvMeshDictPhase);
 }
 
 
@@ -54,6 +55,17 @@ Foam::fluidThermo::fluidThermo
 {}
 
 
+Foam::fluidThermo::fluidThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictionaryName
+)
+:
+    basicThermo(mesh, phaseName, dictionaryName)
+{}
+
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::fluidThermo> Foam::fluidThermo::New
@@ -63,6 +75,17 @@ Foam::autoPtr<Foam::fluidThermo> Foam::fluidThermo::New
 )
 {
     return basicThermo::New<fluidThermo>(mesh, phaseName);
+}
+
+
+Foam::autoPtr<Foam::fluidThermo> Foam::fluidThermo::New
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+{
+    return basicThermo::New<fluidThermo>(mesh, phaseName, dictName);
 }
 
 

@@ -84,6 +84,13 @@ private:
             volScalarField& he
         );
 
+        //- Lookup or construct he
+//         volScalarField& lookupOrConstruct
+//         (
+//             const fvMesh& mesh,
+//             const word& name
+//         );
+
 
 public:
 
@@ -102,6 +109,14 @@ public:
             const fvMesh&,
             const dictionary&,
             const word& phaseName
+        );
+
+        //- Construct from mesh,dictionary,phase name with a single temperature
+        heThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictionaryName
         );
 
 

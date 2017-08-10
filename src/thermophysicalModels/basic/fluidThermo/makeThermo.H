@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,6 +83,13 @@ Description
         CThermoMixtureThermoPhys,                                              \
         fvMesh                                                                 \
     );                                                                         \
+                                                                               \
+    addToRunTimeSelectionTable                                                 \
+    (                                                                          \
+        BaseThermo,                                                            \
+        CThermoMixtureThermoPhys,                                              \
+        fvMeshDictPhase                                                        \
+    );
 
 
 #define makeThermoPhysicsThermo(BaseThermo,CThermo,Mixture,ThermoPhys)         \
@@ -95,6 +102,7 @@ Description
 #define makeThermoPhysicsThermos(BaseThermo,CThermo,Mixture,ThermoPhys)        \
                                                                                \
     defineThermoPhysicsThermo(BaseThermo, CThermo, Mixture, ThermoPhys);       \
+                                                                               \
                                                                                \
     addThermoPhysicsThermo(basicThermo, CThermo##Mixture##ThermoPhys);         \
     addThermoPhysicsThermo(fluidThermo, CThermo##Mixture##ThermoPhys);         \

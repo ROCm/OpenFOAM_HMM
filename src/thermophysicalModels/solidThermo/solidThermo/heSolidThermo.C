@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,12 +46,15 @@ void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
         const typename MixtureType::thermoType& volMixture_ =
             this->cellVolMixture(pCells[celli], TCells[celli], celli);
 
-        TCells[celli] = mixture_.THE
-        (
-            hCells[celli],
-            pCells[celli],
-            TCells[celli]
-        );
+        if (!this->tempBased())
+        {
+            TCells[celli] = mixture_.THE
+            (
+                hCells[celli],
+                pCells[celli],
+                TCells[celli]
+            );
+        }
 
         rhoCells[celli] = volMixture_.rho(pCells[celli], TCells[celli]);
 
@@ -125,7 +128,11 @@ void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
                         facei
                     );
 
-                pT[facei] = mixture_.THE(phe[facei], pp[facei] ,pT[facei]);
+                if (!this->tempBased())
+                {
+                    pT[facei] = mixture_.THE(phe[facei], pp[facei] ,pT[facei]);
+                }
+
                 prho[facei] = volMixture_.rho(pp[facei], pT[facei]);
 
                 palpha[facei] =
@@ -137,7 +144,6 @@ void Foam::heSolidThermo<BasicSolidThermo, MixtureType>::calculate()
 
     this->alpha_.correctBoundaryConditions();
 }
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -169,6 +175,20 @@ heSolidThermo
     calculate();
 }
 
+
+template<class BasicSolidThermo, class MixtureType>
+Foam::heSolidThermo<BasicSolidThermo, MixtureType>::
+heSolidThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+:
+    heThermo<BasicSolidThermo, MixtureType>(mesh, phaseName, dictName)
+{
+    calculate();
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

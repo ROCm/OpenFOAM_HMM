@@ -121,6 +121,9 @@ public:
             //- Integrate between two (scalar) values
             virtual Type integrate(const scalar x1, const scalar x2) const;
 
+            //- Return true for Constant type
+            virtual bool isConstant() const;
+
 
     // I/O
 

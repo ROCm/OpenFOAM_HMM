@@ -66,6 +66,9 @@ class hePsiThermo
             const bool doOldTimes
         );
 
+        //- Calculate the thermo variables for thermos based on T
+        void calculateT();
+
         //- Construct as copy (not implemented)
         hePsiThermo(const hePsiThermo<BasicPsiThermo, MixtureType>&);
 
@@ -85,6 +88,14 @@ public:
             const word& phaseName
         );
 
+        //-  Construct from mesh and phase name and dict name
+        hePsiThermo
+        (
+            const fvMesh&,
+            const word& phaseName,
+            const word& dictionaryName
+        );
+
 
     //- Destructor
     virtual ~hePsiThermo();
@@ -94,6 +105,10 @@ public:
 
         //- Update properties
         virtual void correct();
+
+
+        //- Update properties from T
+        //virtual void correctT();
 };
 
 

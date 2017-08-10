@@ -71,12 +71,15 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
         const typename MixtureType::thermoType& mixture_ =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.THE
-        (
-            hCells[celli],
-            pCells[celli],
-            TCells[celli]
-        );
+        if (!this->tempBased())
+        {
+            TCells[celli] = mixture_.THE
+            (
+                hCells[celli],
+                pCells[celli],
+                TCells[celli]
+            );
+        }
 
         psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
         rhoCells[celli] = mixture_.rho(pCells[celli], TCells[celli]);
@@ -125,7 +128,10 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
                 const typename MixtureType::thermoType& mixture_ =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                if (!this->tempBased())
+                {
+                    pT[facei] = mixture_.THE(phe[facei], pp[facei], pT[facei]);
+                }
 
                 ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
                 prho[facei] = mixture_.rho(pp[facei], pT[facei]);
@@ -136,7 +142,83 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculate
     }
 }
 
+/*
+template<class BasicPsiThermo, class MixtureType>
+void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::calculateT()
+{
+    //const scalarField& hCells = this->he().internalField();
+    const scalarField& pCells = this->p_.primitiveFieldRef();
 
+    scalarField& TCells = this->T_.primitiveFieldRef();
+    scalarField& psiCells = this->psi_.primitiveFieldRef();
+    scalarField& rhoCells = this->rho_.primitiveFieldRef();
+    scalarField& muCells = this->mu_.primitiveFieldRef();
+    scalarField& alphaCells = this->alpha_.primitiveFieldRef();
+
+    forAll(TCells, celli)
+    {
+        const typename MixtureType::thermoType& mixture_ =
+            this->cellMixture(celli);
+
+//         TCells[celli] = mixture_.THE
+//         (
+//             hCells[celli],
+//             pCells[celli],
+//             TCells[celli]
+//         );
+
+        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
+        rhoCells[celli] = mixture_.rho(pCells[celli], TCells[celli]);
+
+        muCells[celli] = mixture_.mu(pCells[celli], TCells[celli]);
+        alphaCells[celli] = mixture_.alphah(pCells[celli], TCells[celli]);
+    }
+
+    forAll(this->T_.boundaryField(), patchi)
+    {
+        fvPatchScalarField& pp = this->p_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& pT = this->T_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& ppsi = this->psi_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& prho = this->rho_.boundaryFieldRef()[patchi];
+
+        //fvPatchScalarField& ph = this->he().boundaryField()[patchi];
+
+        fvPatchScalarField& pmu = this->mu_.boundaryFieldRef()[patchi];
+        fvPatchScalarField& palpha = this->alpha_.boundaryFieldRef()[patchi];
+
+        if (pT.fixesValue())
+        {
+            forAll(pT, facei)
+            {
+                const typename MixtureType::thermoType& mixture_ =
+                    this->patchFaceMixture(patchi, facei);
+
+                //ph[facei] = mixture_.HE(pp[facei], pT[facei]);
+
+                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
+                prho[facei] = mixture_.rho(pp[facei], pT[facei]);
+                pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha[facei] = mixture_.alphah(pp[facei], pT[facei]);
+            }
+        }
+        else
+        {
+            forAll(pT, facei)
+            {
+                const typename MixtureType::thermoType& mixture_ =
+                    this->patchFaceMixture(patchi, facei);
+
+                //pT[facei] = mixture_.THE(ph[facei], pp[facei], pT[facei]);
+
+                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
+                prho[facei] = mixture_.rho(pp[facei], pT[facei]);
+                pmu[facei] = mixture_.mu(pp[facei], pT[facei]);
+                palpha[facei] = mixture_.alphah(pp[facei], pT[facei]);
+            }
+        }
+    }
+}
+*/
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class BasicPsiThermo, class MixtureType>
@@ -159,6 +241,20 @@ Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo
         this->alpha_,
         true                    // Create old time fields
     );
+}
+
+
+template<class BasicPsiThermo, class MixtureType>
+Foam::heRhoThermo<BasicPsiThermo, MixtureType>::heRhoThermo
+(
+    const fvMesh& mesh,
+    const word& phaseName,
+    const word& dictName
+)
+:
+    heThermo<BasicPsiThermo, MixtureType>(mesh, phaseName, dictName)
+{
+    calculate();
 }
 
 
@@ -190,6 +286,22 @@ void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::correct()
 
     DebugInFunction << "Finished" << endl;
 }
+/*
+template<class BasicPsiThermo, class MixtureType>
+void Foam::heRhoThermo<BasicPsiThermo, MixtureType>::correctT()
+{
+    if (debug)
+    {
+        InfoInFunction << endl;
+    }
 
+    calculateT();
+
+    if (debug)
+    {
+        Info<< "    Finished" << endl;
+    }
+}
+*/
 
 // ************************************************************************* //
