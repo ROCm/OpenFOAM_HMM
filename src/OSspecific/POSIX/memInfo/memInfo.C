@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,21 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "memInfo.H"
-#include "IFstream.H"
+#include "OSspecific.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-// file-scope function
-template<class T>
-inline static void writeEntry
-(
-    Foam::Ostream& os, const Foam::word& key, const T& value
-)
-{
-    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
-}
-
+#include <fstream>
+#include <string>
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -59,34 +49,64 @@ Foam::memInfo::~memInfo()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+//
+// Parse the following type of content.
+//
+// ===========================
+// VmPeak:    15920 kB
+// VmSize:    15916 kB
+// VmLck:         0 kB
+// VmPin:         0 kB
+// VmHWM:      6972 kB
+// VmRSS:      6972 kB
+// VmLib:      2208 kB
+// VmPTE:        52 kB
+// VmPMD:        12 kB
+// VmSwap:        0 kB
 
 const Foam::memInfo& Foam::memInfo::update()
 {
-    // reset to invalid values first
+    // Clear (invalidate) values first
     peak_ = size_ = rss_ = 0;
-    IFstream is("/proc/" + name(pid()) + "/status");
+    std::string line;
 
-    while (is.good())
+    unsigned nKeys = 0;
+
+    std::ifstream is("/proc/" + std::to_string(Foam::pid()) + "/status");
+    while (is.good() && nKeys < 3)  // Stop after getting the known keys
     {
-        string line;
-        is.getLine(line);
-        char tag[32];
-        int value;
+        std::getline(is, line);
 
-        if (sscanf(line.c_str(), "%30s %d", tag, &value) == 2)
+        const auto keyLen = line.find(':');
+        if (keyLen == std::string::npos)
         {
-            if (!strcmp(tag, "VmPeak:"))
-            {
-                peak_ = value;
-            }
-            else if (!strcmp(tag, "VmSize:"))
-            {
-                size_ = value;
-            }
-            else if (!strcmp(tag, "VmRSS:"))
-            {
-                rss_ = value;
-            }
+            continue;
+        }
+
+        // Value is after the ':', but skip any leading whitespace since
+        // strtoi will do it anyhow
+        const auto begVal = line.find_first_not_of("\t :", keyLen);
+        if (begVal == std::string::npos)
+        {
+            continue;
+        }
+
+        const std::string key = line.substr(0, keyLen);
+
+        if (key == "VmPeak")
+        {
+            peak_ = std::stoi(line.substr(begVal));
+            ++nKeys;
+        }
+        else if (key == "VmSize")
+        {
+            size_ = std::stoi(line.substr(begVal));
+            ++nKeys;
+        }
+        else if (key == "VmRSS")
+        {
+            rss_ = std::stoi(line.substr(begVal));
+            ++nKeys;
         }
     }
 
@@ -102,9 +122,9 @@ bool Foam::memInfo::valid() const
 
 void Foam::memInfo::write(Ostream& os) const
 {
-    writeEntry(os, "size",  size_);
-    writeEntry(os, "peak",  peak_);
-    writeEntry(os, "rss",   rss_);
+    os.writeEntry("size", size_);
+    os.writeEntry("peak", peak_);
+    os.writeEntry("rss", rss_);
 }
 
 
@@ -113,9 +133,7 @@ void Foam::memInfo::write(Ostream& os) const
 Foam::Istream& Foam::operator>>(Istream& is, memInfo& m)
 {
     is.readBegin("memInfo");
-
     is  >> m.peak_ >> m.size_ >> m.rss_;
-
     is.readEnd("memInfo");
 
     is.check(FUNCTION_NAME);

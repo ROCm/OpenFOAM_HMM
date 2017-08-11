@@ -47,7 +47,8 @@ SourceFiles
 
 namespace Foam
 {
-// forward declarations
+
+// Forward declarations
 class Ostream;
 
 /*---------------------------------------------------------------------------*\
@@ -68,6 +69,7 @@ class cpuInfo
         int siblings;
         int cpu_cores;
 
+
     // Private Member Functions
 
         //- Parse /proc/cpuinfo
@@ -83,7 +85,7 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct and populate with information
         cpuInfo();
 
 
@@ -94,7 +96,7 @@ public:
     // Member Functions
 
         //- Write content as dictionary entries
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
 };
 
