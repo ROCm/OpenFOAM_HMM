@@ -49,32 +49,35 @@ const Foam::Enum
 >
 Foam::functionObjects::fieldValues::volFieldValue::operationTypeNames_
 {
+    // Normal operations
     { operationType::opNone, "none" },
-    { operationType::opSum, "sum" },
-    { operationType::opWeightedSum, "weightedSum" },
-    { operationType::opSumMag, "sumMag" },
-    { operationType::opAverage, "average" },
-    { operationType::opWeightedAverage, "weightedAverage" },
-    { operationType::opVolAverage, "volAverage" },
-    { operationType::opWeightedVolAverage, "weightedVolAverage" },
-    { operationType::opVolIntegrate, "volIntegrate" },
-    { operationType::opWeightedVolIntegrate, "weightedVolIntegrate" },
     { operationType::opMin, "min" },
     { operationType::opMax, "max" },
+    { operationType::opSum, "sum" },
+    { operationType::opSumMag, "sumMag" },
+    { operationType::opAverage, "average" },
+    { operationType::opVolAverage, "volAverage" },
+    { operationType::opVolIntegrate, "volIntegrate" },
     { operationType::opCoV, "CoV" },
+
+    // Using weighting
+    { operationType::opWeightedSum, "weightedSum" },
+    { operationType::opWeightedAverage, "weightedAverage" },
+    { operationType::opWeightedVolAverage, "weightedVolAverage" },
+    { operationType::opWeightedVolIntegrate, "weightedVolIntegrate" },
 };
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::fieldValues::volFieldValue::needsVol() const
+bool Foam::functionObjects::fieldValues::volFieldValue::usesVol() const
 {
-    // Only some operations need the cell volume
+    // Only a few operations require the cell volume
     switch (operation_)
     {
         case opVolAverage:
-        case opWeightedVolAverage:
         case opVolIntegrate:
+        case opWeightedVolAverage:
         case opWeightedVolIntegrate:
         case opCoV:
             return true;
@@ -85,20 +88,23 @@ bool Foam::functionObjects::fieldValues::volFieldValue::needsVol() const
 }
 
 
-bool Foam::functionObjects::fieldValues::volFieldValue::needsWeight() const
+bool Foam::functionObjects::fieldValues::volFieldValue::usesWeight() const
 {
-    // Only a few operations use weight field
-    switch (operation_)
-    {
-        case opWeightedSum:
-        case opWeightedAverage:
-        case opWeightedVolAverage:
-        case opWeightedVolIntegrate:
-            return true;
+    // Operation specifically tagged to require a weight field
+    return (operation_ & typeWeighted);
+}
 
-        default:
-            return false;
-    }
+
+bool Foam::functionObjects::fieldValues::volFieldValue::canWeight
+(
+    const scalarField& weightField
+) const
+{
+    return
+    (
+        usesWeight()
+     && returnReduce(!weightField.empty(), orOp<bool>()) // On some processor
+    );
 }
 
 
@@ -108,12 +114,9 @@ void Foam::functionObjects::fieldValues::volFieldValue::initialise
 )
 {
     weightFieldName_ = "none";
-    if (needsWeight())
+    if (usesWeight() && dict.readIfPresent("weightField", weightFieldName_))
     {
-        if (dict.readIfPresent("weightField", weightFieldName_))
-        {
-            Info<< "    weight field = " << weightFieldName_;
-        }
+        Info<< "    weight field = " << weightFieldName_;
     }
 
     Info<< nl << endl;
@@ -133,10 +136,10 @@ void Foam::functionObjects::fieldValues::volFieldValue::writeFileHeader
 
     writeCommented(os, "Time");
 
-    forAll(fields_, fieldi)
+    for (const word& fieldName : fields_)
     {
         os  << tab << operationTypeNames_[operation_]
-            << "(" << fields_[fieldi] << ")";
+            << "(" << fieldName << ")";
     }
 
     os  << endl;
@@ -151,10 +154,8 @@ Foam::label Foam::functionObjects::fieldValues::volFieldValue::writeAll
 {
     label nProcessed = 0;
 
-    forAll(fields_, i)
+    for (const word& fieldName : fields_)
     {
-        const word& fieldName = fields_[i];
-
         if
         (
             writeValues<scalar>(fieldName, V, weightField)
@@ -245,7 +246,7 @@ bool Foam::functionObjects::fieldValues::volFieldValue::write()
 
     // Only some operations need the cell volume
     scalarField V;
-    if (needsVol())
+    if (usesVol())
     {
         V = filterField(fieldValue::mesh_.V());
     }

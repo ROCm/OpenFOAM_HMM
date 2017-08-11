@@ -33,6 +33,20 @@ License
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
+template<class WeightType>
+inline bool Foam::functionObjects::fieldValues::surfaceFieldValue::canWeight
+(
+    const Field<WeightType>& weightField
+) const
+{
+    return
+    (
+        usesWeight()
+     && returnReduce(!weightField.empty(), orOp<bool>()) // On some processor
+    );
+}
+
+
 template<class Type>
 bool Foam::functionObjects::fieldValues::surfaceFieldValue::validField
 (
@@ -142,28 +156,36 @@ processSameTypeValues
         {
             break;
         }
-        case opSum:
+        case opMin:
         {
-            result = gSum(values);
+            result = gMin(values);
             break;
         }
-        case opWeightedSum:
+        case opMax:
         {
-            if (returnReduce(weightField.empty(), andOp<bool>()))
-            {
-                result = gSum(values);
-            }
-            else
-            {
-                tmp<scalarField> weight(weightingFactor(weightField));
-
-                result = gSum(weight*values);
-            }
+            result = gMax(values);
             break;
         }
         case opSumMag:
         {
             result = gSum(cmptMag(values));
+            break;
+        }
+        case opSum:
+        case opWeightedSum:
+        case opAbsWeightedSum:
+        {
+            if (canWeight(weightField))
+            {
+                tmp<scalarField> weight(weightingFactor(weightField));
+
+                result = gSum(weight*values);
+            }
+            else
+            {
+                // Unweighted form
+                result = gSum(values);
+            }
             break;
         }
         case opSumDirection:
@@ -178,62 +200,56 @@ processSameTypeValues
             break;
         }
         case opAverage:
-        {
-            const label n = returnReduce(values.size(), sumOp<label>());
-            result = gSum(values)/(scalar(n) + ROOTVSMALL);
-            break;
-        }
         case opWeightedAverage:
+        case opAbsWeightedAverage:
         {
-            if (returnReduce(weightField.empty(), andOp<bool>()))
-            {
-                const label n = returnReduce(values.size(), sumOp<label>());
-                result = gSum(values)/(scalar(n) + ROOTVSMALL);
-            }
-            else
+            if (canWeight(weightField))
             {
                 const scalarField factor(weightingFactor(weightField));
 
                 result = gSum(factor*values)/(gSum(factor) + ROOTVSMALL);
             }
+            else
+            {
+                // Unweighted form
+                const label n = returnReduce(values.size(), sumOp<label>());
+                result = gSum(values)/(scalar(n) + ROOTVSMALL);
+            }
             break;
         }
         case opAreaAverage:
-        {
-            const scalarField factor(mag(Sf));
-
-            result = gSum(factor*values)/gSum(factor);
-            break;
-        }
         case opWeightedAreaAverage:
+        case opAbsWeightedAreaAverage:
         {
-            const scalarField factor(weightingFactor(weightField, Sf));
+            if (canWeight(weightField))
+            {
+                const scalarField factor(weightingFactor(weightField, Sf));
 
-            result = gSum(factor*values)/gSum(factor + ROOTVSMALL);
+                result = gSum(factor*values)/gSum(factor + ROOTVSMALL);
+            }
+            else
+            {
+                // Unweighted form
+                const scalarField factor(mag(Sf));
+                result = gSum(factor*values)/gSum(factor);
+            }
             break;
         }
         case opAreaIntegrate:
-        {
-            const scalarField factor(mag(Sf));
-
-            result = gSum(factor*values);
-            break;
-        }
         case opWeightedAreaIntegrate:
+        case opAbsWeightedAreaIntegrate:
         {
-            const scalarField factor(weightingFactor(weightField, Sf));
-
-            result = gSum(factor*values);
-            break;
-        }
-        case opMin:
-        {
-            result = gMin(values);
-            break;
-        }
-        case opMax:
-        {
-            result = gMax(values);
+            if (canWeight(weightField))
+            {
+                tmp<scalarField> factor(weightingFactor(weightField, Sf));
+                result = gSum(factor*values);
+            }
+            else
+            {
+                // Unweighted form
+                tmp<scalarField> factor(mag(Sf));
+                result = gSum(factor*values);
+            }
             break;
         }
         case opCoV:
@@ -245,8 +261,8 @@ processSameTypeValues
 
             for (direction d=0; d < pTraits<Type>::nComponents; ++d)
             {
-                tmp<scalarField> vals = values.component(d);
-                scalar mean = component(meanValue, d);
+                tmp<scalarField> vals(values.component(d));
+                const scalar mean = component(meanValue, d);
                 scalar& res = setComponent(result, d);
 
                 res =
@@ -286,8 +302,10 @@ Foam::tmp<Foam::scalarField>
 Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
     const Field<WeightType>& weightField
-)
+) const
 {
+    // The scalar form is specialized.
+    // For other types always need mag() to generate a scalar field.
     return mag(weightField);
 }
 
@@ -302,10 +320,8 @@ Foam::label Foam::functionObjects::fieldValues::surfaceFieldValue::writeAll
 {
     label nProcessed = 0;
 
-    forAll(fields_, i)
+    for (const word& fieldName : fields_)
     {
-        const word& fieldName = fields_[i];
-
         if
         (
             writeValues<scalar>(fieldName, Sf, weightField, surfToWrite)
@@ -437,8 +453,8 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
 
     forAll(values, i)
     {
-        label facei = faceId_[i];
-        label patchi = facePatchId_[i];
+        const label facei = faceId_[i];
+        const label patchi = facePatchId_[i];
         if (patchi >= 0)
         {
             values[i] = field.boundaryField()[patchi][facei];
@@ -472,8 +488,8 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::filterField
 
     forAll(values, i)
     {
-        label facei = faceId_[i];
-        label patchi = facePatchId_[i];
+        const label facei = faceId_[i];
+        const label patchi = facePatchId_[i];
         if (patchi >= 0)
         {
             values[i] = field.boundaryField()[patchi][facei];
