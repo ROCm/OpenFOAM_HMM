@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,10 +32,8 @@ License
 const char* Foam::Switch::names[Foam::Switch::INVALID+1] =
 {
     "false", "true",
-    "off",   "on",
     "no",    "yes",
-    "n",     "y",
-    "f",     "t",
+    "off",   "on",
     "none",  "true",  // Is there a reasonable counterpart to "none"?
     "invalid"
 };
@@ -49,55 +47,53 @@ Foam::Switch::switchType Foam::Switch::asEnum
     const bool allowInvalid
 )
 {
-    for (int sw = 0; sw < Switch::INVALID; ++sw)
+    const std::string::size_type len = str.size();
+    switch (len)
     {
-        if (str == names[sw])
+        case 1: // (f|n|t|y) - single-character forms
         {
-            // handle aliases
-            switch (sw)
+            switch (str[0])
             {
-                case Switch::NO_1:
-                case Switch::NONE:
-                {
-                    return Switch::NO;
-                    break;
-                }
-
-                case Switch::YES_1:
-                {
-                    return Switch::YES;
-                    break;
-                }
-
-                case Switch::FALSE_1:
-                {
-                    return Switch::FALSE;
-                    break;
-                }
-
-                case Switch::TRUE_1:
-                {
-                    return Switch::TRUE;
-                    break;
-                }
-
-                default:
-                {
-                    return switchType(sw);
-                    break;
-                }
+                case 'f': return switchType::FALSE;
+                case 'n': return switchType::NO;
+                case 't': return switchType::TRUE;
+                case 'y': return switchType::YES;
             }
+            break;
+        }
+        case 2: // (no|on)
+        {
+            if (str == names[switchType::NO]) return switchType::NO;
+            if (str == names[switchType::ON]) return switchType::ON;
+            break;
+        }
+        case 3: // (off|yes)
+        {
+            if (str == names[switchType::OFF]) return switchType::OFF;
+            if (str == names[switchType::YES]) return switchType::YES;
+            break;
+        }
+        case 4: // (none|true)
+        {
+            if (str == names[switchType::NONE]) return switchType::NONE;
+            if (str == names[switchType::TRUE]) return switchType::TRUE;
+            break;
+        }
+        case 5: // (false)
+        {
+            if (str == names[switchType::FALSE]) return switchType::FALSE;
+            break;
         }
     }
 
     if (!allowInvalid)
     {
         FatalErrorInFunction
-            << "unknown switch word " << str << nl
+            << "Unknown switch word " << str << nl
             << abort(FatalError);
     }
 
-    return Switch::INVALID;
+    return switchType::INVALID;
 }
 
 
@@ -116,7 +112,7 @@ Foam::Switch Foam::Switch::lookupOrAddToDict
 
 bool Foam::Switch::valid() const
 {
-    return switch_ <= Switch::NONE;
+    return switch_ <= switchType::NONE;
 }
 
 
