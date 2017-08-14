@@ -74,24 +74,24 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "clean",
-        "perform some surface checking/cleanup on the input surface"
+        "Perform some surface checking/cleanup on the input surface"
     );
     argList::addBoolOption
     (
         "group",
-        "reorder faces into groups; one per region"
+        "Reorder faces into groups; one per region"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Input geometry scaling factor"
     );
     argList::addOption
     (
         "writePrecision",
         "label",
-        "write to output with the specified precision"
+        "Write to output with the specified precision"
     );
 
     argList args(argc, argv);
@@ -116,8 +116,10 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
+    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+
     Info<< "Reading : " << importName << endl;
-    triSurface surf(importName);
+    triSurface surf(importName, scaleFactor);
 
     Info<< "Read surface:" << endl;
     surf.writeStats(Info);
@@ -144,13 +146,6 @@ int main(int argc, char *argv[])
     }
 
     Info<< "writing " << exportName;
-
-    scalar scaleFactor = 0;
-    if (args.optionReadIfPresent("scale", scaleFactor) && scaleFactor > 0)
-    {
-        Info<< " with scaling " << scaleFactor;
-        surf.scalePoints(scaleFactor);
-    }
     Info<< endl;
 
     surf.write(exportName, sortByRegion);

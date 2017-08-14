@@ -264,46 +264,55 @@ public:
         //- Construct from triangles, patches, points.
         triSurface
         (
-            const List<labelledTri>&,
-            const geometricSurfacePatchList&,
-            const pointField&
+            const List<labelledTri>& triangles,
+            const geometricSurfacePatchList& patches,
+            const pointField& points
         );
 
         //- Construct from triangles, patches, points. Reuse storage.
         triSurface
         (
-            List<labelledTri>&,
-            const geometricSurfacePatchList&,
-            pointField&,
+            List<labelledTri>& triangles,
+            const geometricSurfacePatchList& patches,
+            pointField& points,
             const bool reuse
         );
 
         //- Construct by transferring (triangles, points) components.
         triSurface
         (
-            const Xfer<List<labelledTri>>&,
-            const geometricSurfacePatchList&,
-            const Xfer<List<point>>&
+            const Xfer<List<labelledTri>>& triangles,
+            const geometricSurfacePatchList& patches,
+            const Xfer<List<point>>& points
         );
 
         //- Construct from triangles, points. Set patch names to default.
-        triSurface(const List<labelledTri>&, const pointField&);
+        triSurface
+        (
+            const List<labelledTri>& triangles,
+            const pointField& points
+        );
 
         //- Construct from triangles, points. Set region to 0 and default
         //  patchName.
-        triSurface(const triFaceList&, const pointField&);
+        triSurface
+        (
+            const triFaceList& triangles,
+            const pointField& points
+        );
 
-        //- Construct from file name (uses extension to determine type)
-        triSurface(const fileName&);
+        //- Construct from file name (uses extension to determine type).
+        //  Optional (positive, non-zero) point scaling is possible.
+        triSurface(const fileName& name, const scalar scaleFactor = -1);
 
         //- Construct from Istream
-        triSurface(Istream&);
+        triSurface(Istream& is);
 
         //- Construct from objectRegistry
         triSurface(const Time& d);
 
         //- Construct as copy
-        triSurface(const triSurface&);
+        triSurface(const triSurface& ts);
 
 
     //- Destructor
@@ -382,10 +391,10 @@ public:
       // Edit
 
         //- Move points
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(const pointField& newPoints);
 
-        //- Scale points. A non-positive factor is ignored
-        virtual void scalePoints(const scalar);
+        //- Scale points. A non-positive factor is ignored.
+        virtual void scalePoints(const scalar scaleFactor);
 
         //- Check/remove duplicate/degenerate triangles
         void checkTriangles(const bool verbose);
@@ -447,13 +456,13 @@ public:
       // Write
 
         //- Write to Ostream in simple FOAM format
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
         //- Generic write routine. Chooses writer based on extension.
         void write(const fileName&, const bool sortByRegion = false) const;
 
         //- Write to database
-        void write(const Time&) const;
+        void write(const Time& d) const;
 
         //- Write some statistics
         void writeStats(Ostream& os) const;

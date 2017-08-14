@@ -97,7 +97,8 @@ public:
 
     // Constructors
 
-        //- Prepare for writing, optionally with scaling
+        //- Prepare for writing, optionally with scaling.
+        //  Treats a zero or negative scale factor as unity scaling.
         FIREMeshWriter(const polyMesh&, const scalar scaleFactor = 1.0);
 
 

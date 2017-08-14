@@ -123,9 +123,8 @@ int main(int argc, char *argv[])
         Info<< "        " << points[f[fp]] << "\n";
     }
 
-    Info<< endl;
-
-    Info<< "End\n" << endl;
+    Info<< nl
+        << "End\n" << endl;
 
     return 0;
 }

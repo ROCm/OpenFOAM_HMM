@@ -44,7 +44,7 @@ Usage
     Specify a feature angle
 
 
-    E.g. inflate surface by 2cm with 1.5 safety factor:
+    E.g. inflate surface by 20mm with 1.5 safety factor:
         surfaceInflate DTC-scaled.obj 0.02 1.5 -featureAngle 45 -nSmooth 2
 
 \*---------------------------------------------------------------------------*/

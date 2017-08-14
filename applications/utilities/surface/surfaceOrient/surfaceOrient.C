@@ -63,6 +63,12 @@ int main(int argc, char *argv[])
         "usePierceTest",
         "determine orientation by counting number of intersections"
     );
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "input geometry scaling factor"
+    );
 
     argList args(argc, argv);
 
@@ -86,11 +92,14 @@ int main(int argc, char *argv[])
         Info<< "outside" << endl;
     }
 
-
+    const scalar scaling = args.optionLookupOrDefault<scalar>("scale", -1);
+    if (scaling > 0)
+    {
+        Info<< "Input scaling: " << scaling << nl;
+    }
 
     // Load surface
-    triSurface surf(surfFileName);
-
+    triSurface surf(surfFileName, scaling);
 
     bool anyFlipped = false;
 
@@ -118,11 +127,11 @@ int main(int argc, char *argv[])
 
     if (anyFlipped)
     {
-        Info<< "Flipped orientation of (part of) surface." << endl;
+        Info<< "Flipped orientation of (part of) surface." << nl;
     }
     else
     {
-        Info<< "Did not flip orientation of any triangle of surface." << endl;
+        Info<< "Did not flip orientation of any triangle of surface." << nl;
     }
 
     Info<< "Writing new surface to " << outFileName << endl;
