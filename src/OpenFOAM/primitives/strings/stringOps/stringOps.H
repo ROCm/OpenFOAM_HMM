@@ -304,14 +304,43 @@ namespace stringOps
     Foam::word name(const std::string& fmt, const PrimitiveType& val);
 
 
-    //- Split a string into sub-strings at the delimiter character.
-    //  An empty sub-strings are suppressed.
+    //- Split string into sub-strings at the delimiter character.
+    //  Empty sub-strings are suppressed.
     template<class StringType>
     Foam::SubStrings<StringType> split
     (
         const StringType& str,
-        const char delimiter
+        const char delim
     );
+
+    //- Split string into sub-strings using delimiter string.
+    //  Empty sub-strings are suppressed.
+    template<class StringType>
+    Foam::SubStrings<StringType> split
+    (
+        const StringType& str,
+        const std::string& delim
+    );
+
+
+    //- Split string into sub-strings using any characters in delimiter.
+    //  Empty sub-strings are suppressed.
+    template<class StringType>
+    Foam::SubStrings<StringType> splitAny
+    (
+        const StringType& str,
+        const std::string& delim
+    );
+
+
+    //- Split string into sub-strings at whitespace (TAB, NL, VT, FF, CR, SPC)
+    //  Empty sub-strings are suppressed.
+    template<class StringType>
+    Foam::SubStrings<StringType> splitSpace
+    (
+        const StringType& str
+    );
+
 
 } // End namespace stringOps
 
