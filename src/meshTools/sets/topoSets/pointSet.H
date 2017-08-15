@@ -60,9 +60,8 @@ public:
 
     // Constructors
 
-
         //- Construct from IOobject
-        pointSet(const IOobject& obj);
+        explicit pointSet(const IOobject& obj);
 
         //- Construct from objectRegistry and name
         pointSet

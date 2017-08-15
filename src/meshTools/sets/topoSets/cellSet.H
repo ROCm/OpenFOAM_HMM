@@ -65,7 +65,7 @@ public:
     // Constructors
 
         //- Construct from IOobject. No checking.
-        cellSet(const IOobject& obj);
+        explicit cellSet(const IOobject& obj);
 
         //- Construct from polyMesh and name. Checks for valid cell ids.
         cellSet

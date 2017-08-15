@@ -35,11 +35,10 @@ Description
 
 using namespace Foam;
 
+// Simple utility
 template<class String>
-void printSplitting(const String& str, const char delimiter)
+void printSubStrings(const String& str, const SubStrings<String>& split)
 {
-    auto split = stringOps::split(str, delimiter);
-
     Info<< "string {" << str.size() << " chars} = " << str << nl
         << split.size() << " elements {" << split.length() << " chars}"
         << nl;
@@ -60,7 +59,28 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-
+    argList::addOption
+    (
+        "any",
+        "delimChars",
+        "test split on any delimiter characters"
+    );
+    argList::addOption
+    (
+        "sub",
+        "string",
+        "test split on substring"
+    );
+    argList::addBoolOption
+    (
+        "slash",
+        "test split on slash (default)"
+    );
+    argList::addBoolOption
+    (
+        "space",
+        "test split on space"
+    );
     argList args(argc, argv, false, true);
 
     if (args.size() <= 1 && args.options().empty())
@@ -68,12 +88,83 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    for (label argi=1; argi < args.size(); ++argi)
+    int nopts = 0;
+    for (auto optName : { "any", "slash", "space", "sub" })
     {
-        printSplitting(args[argi], '/');
+        if (args.optionFound(optName))
+        {
+            ++nopts;
+        }
     }
 
-    Info<< "\nEnd\n" << endl;
+    if (args.optionFound("any"))
+    {
+        const std::string& str = args["any"];
+        Info<< "split on any chars" << nl
+            << "=" << str << nl
+            << "~~~~~~~~~~~~~~~" << nl;
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const auto split = stringOps::splitAny(args[argi], str);
+            printSubStrings(args[argi], split);
+        }
+
+        if (nopts == 1)
+        {
+            return 0;
+        }
+    }
+
+    if (args.optionFound("sub"))
+    {
+        const std::string& str = args["sub"];
+        Info<< "split on substring" << nl
+            << "=" << str << nl
+            << "~~~~~~~~~~~~~~~" << nl;
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const auto split = stringOps::split(args[argi], str);
+            printSubStrings(args[argi], split);
+        }
+
+        if (nopts == 1)
+        {
+            return 0;
+        }
+    }
+
+    if (args.optionFound("space"))
+    {
+        Info<< "split on space" << nl
+            << "~~~~~~~~~~~~~~" << nl;
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const auto split = stringOps::splitSpace(args[argi]);
+            printSubStrings(args[argi], split);
+        }
+
+        if (nopts == 1)
+        {
+            return 0;
+        }
+    }
+
+    // Default
+    if (!nopts || args.optionFound("slash"))
+    {
+        Info<< "split on slash" << nl
+            << "~~~~~~~~~~~~~~" << nl;
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const auto split = stringOps::split(args[argi], '/');
+            printSubStrings(args[argi], split);
+        }
+    }
+
     return 0;
 }
 

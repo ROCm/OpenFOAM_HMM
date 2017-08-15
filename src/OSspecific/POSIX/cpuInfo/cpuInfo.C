@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,102 +24,61 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cpuInfo.H"
-#include "IFstream.H"
 #include "IOstreams.H"
+
+#include <fstream>
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 // file-scope function
-template<class T>
-inline static void writeEntry
-(
-    Foam::Ostream& os, const Foam::word& key, const T& value
-)
+// split things like "a key word\t: value information"
+// into ("a_key_word", "value information")
+//
+static bool split(const std::string& line, std::string& key, std::string& val)
 {
-    os.writeKeyword(key) << value << Foam::token::END_STATEMENT << '\n';
-}
+    key.clear();
+    val.clear();
 
+    const auto keyLen = line.find_first_of("\t:");
+    const auto sep = line.find(':');
 
-// file-scope function
-static bool split(std::string& line, std::string& key, std::string& val)
-{
-    std::string::size_type sep = line.find(':');
-
-    if (sep == std::string::npos)
+    if (keyLen == std::string::npos || sep == std::string::npos)
     {
         return false;
     }
 
-    std::string::size_type endKey = line.find_last_not_of("\t:", sep);
-    std::string::size_type begVal = line.find_first_not_of(" :", sep);
+    const auto begVal = line.find_first_not_of(" :", sep);
 
-    if (endKey == std::string::npos || begVal == std::string::npos)
+    if (begVal == std::string::npos)
     {
         return false;
     }
-    ++endKey;
 
-    // replace spaces in key with '_' for ease of use/consistency
-    for
-    (
-        std::string::iterator iter = line.begin();
-        iter != line.end();
-        ++iter
-    )
+    key = line.substr(0, keyLen);
+    val = line.substr(begVal);
+
+    // Avoid spaces in key - replace with '_'
+    for (auto iter = key.begin(); iter < key.end(); ++iter)
     {
         if (*iter == ' ')
         {
             *iter = '_';
         }
-        else if (*iter == ':')
-        {
-            break;
-        }
     }
 
-    key = line.substr(0, endKey);
-    val = line.substr(begVal);
-
-    // std::cerr<<"key=" << key << " val= " << val << '\n';
+    // std::cerr<<"key=<" << key << "> val=<" << val << ">\n";
 
     return true;
 }
 
 
-// file-scope function - get int
-static inline bool getInt(const std::string& str, int& val)
-{
-    int i;
-    if (sscanf(str.c_str(), "%d", &i) == 1)
-    {
-        val = i;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-// file-scope function - get float
-static inline bool getFlt(const std::string& str, float& val)
-{
-    float f;
-    if (sscanf(str.c_str(), "%f", &f) == 1)
-    {
-        val = f;
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// parse this type of content:
+// Parse the following type of content.
+// A TAB separates the keyword from content. Eg,
+//
+// "cpu cores\t: 6"
+//
 // ===========================
 // processor       : 0
 // vendor_id       : GenuineIntel
@@ -151,14 +110,14 @@ static inline bool getFlt(const std::string& str, float& val)
 void Foam::cpuInfo::parse()
 {
     int ncpu = 0;
+    std::string line, key, val;
 
-    IFstream is("/proc/cpuinfo");
+    std::ifstream is("/proc/cpuinfo");
     while (is.good())
     {
-        string line, key, value;
-        is.getLine(line);
+        std::getline(is, line);
 
-        if (!split(line, key, value))
+        if (!split(line, key, val))
         {
             continue;
         }
@@ -170,13 +129,13 @@ void Foam::cpuInfo::parse()
                 break; // stop after the first cpu
             }
         }
-        else if (key == "vendor_id")   { vendor_id  = value;        }
-        else if (key == "model_name")  { model_name = value;        }
-        else if (key == "cpu_family")  { getInt(value, cpu_family); }
-        else if (key == "model")       { getInt(value, model);      }
-        else if (key == "cpu_MHz")     { getFlt(value, cpu_MHz);    }
-        else if (key == "cpu_cores")   { getInt(value, cpu_cores);  }
-        else if (key == "siblings")    { getInt(value, siblings);   }
+        else if (key == "vendor_id")   { vendor_id  = val; }
+        else if (key == "model_name")  { model_name = val; }
+        else if (key == "cpu_family")  { cpu_family = std::stoi(val); }
+        else if (key == "model")       { model = std::stoi(val); }
+        else if (key == "cpu_MHz")     { cpu_MHz = std::stof(val); }
+        else if (key == "cpu_cores")   { cpu_cores = std::stoi(val);  }
+        else if (key == "siblings")    { siblings = std::stoi(val); }
     }
 }
 
@@ -209,31 +168,31 @@ void Foam::cpuInfo::write(Ostream& os) const
 {
     if (!vendor_id.empty())
     {
-        writeEntry(os, "vendor_id",     vendor_id);
+        os.writeEntry("vendor_id", vendor_id);
     }
     if (!model_name.empty())
     {
-        writeEntry(os, "model_name",    model_name);
+        os.writeEntry("model_name", model_name);
     }
     if (cpu_family != -1)
     {
-        writeEntry(os, "cpu_family",    cpu_family);
+        os.writeEntry("cpu_family", cpu_family);
     }
     if (model != -1)
     {
-        writeEntry(os, "model",         model);
+        os.writeEntry("model", model);
     }
     if (cpu_MHz > 0)
     {
-        writeEntry(os, "cpu_MHz",       cpu_MHz);
+        os.writeEntry("cpu_MHz", cpu_MHz);
     }
     if (cpu_cores > 0)
     {
-        writeEntry(os, "cpu_cores",     cpu_cores);
+        os.writeEntry("cpu_cores", cpu_cores);
     }
     if (siblings > 0)
     {
-        writeEntry(os, "siblings",      siblings);
+        os.writeEntry("siblings", siblings);
     }
 }
 

@@ -38,26 +38,19 @@ SourceFiles
 #ifndef memInfo_H
 #define memInfo_H
 
-#include "OSspecific.H"
-#include "POSIX.H"
-#include "IFstream.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-
 class memInfo;
-
-Istream& operator>>(Istream&, memInfo&);
-Ostream& operator<<(Ostream&, const memInfo&);
-
-
-// forward declarations
 class Istream;
 class Ostream;
+
+Istream& operator>>(Istream& is, memInfo& m);
+Ostream& operator<<(Ostream& os, const memInfo& m);
+
 
 /*---------------------------------------------------------------------------*\
                            Class memInfo Declaration
@@ -76,12 +69,6 @@ class memInfo
         //- Resident set size of the process (VmRSS in /proc/PID/status)
         int rss_;
 
-        //- Disallow default bitwise assignment
-        void operator=(const memInfo&) = delete;
-
-        //- Disallow default copy constructor
-        memInfo(const memInfo&) = delete;
-
 public:
 
     // Constructors
@@ -96,44 +83,47 @@ public:
 
     // Member Functions
 
-        //- Parse /proc/PID/status and update accordingly
+        //- Update according to /proc/PID/status contents
         const memInfo& update();
 
-        // Access
 
-            //- Peak memory (VmPeak in /proc/PID/status) at last update()
-            int peak() const
-            {
-                return peak_;
-            }
+      // Access
 
-            //- Memory size (VmSize in /proc/PID/status) at last update()
-            int size() const
-            {
-                return size_;
-            }
+        //- Peak memory (VmPeak in /proc/PID/status) at last update()
+        inline int peak() const
+        {
+            return peak_;
+        }
 
-            //- Resident set size (VmRSS in /proc/PID/status) at last update()
-            int rss() const
-            {
-                return rss_;
-            }
+        //- Memory size (VmSize in /proc/PID/status) at last update()
+        inline int size() const
+        {
+            return size_;
+        }
 
-            //- True if the memory information appears valid
-            bool valid() const;
+        //- Resident set size (VmRSS in /proc/PID/status) at last update()
+        inline int rss() const
+        {
+            return rss_;
+        }
 
+        //- True if the memory information appears valid
+        bool valid() const;
+
+
+      // Write
 
         //- Write content as dictionary entries
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
 
     // IOstream Operators
 
         //- Read peak/size/rss from stream
-        friend Istream& operator>>(Istream&, memInfo&);
+        friend Istream& operator>>(Istream& is, memInfo& m);
 
         //- Write peak/size/rss to stream
-        friend Ostream& operator<<(Ostream&, const memInfo&);
+        friend Ostream& operator<<(Ostream& os, const memInfo& m);
 };
 
 

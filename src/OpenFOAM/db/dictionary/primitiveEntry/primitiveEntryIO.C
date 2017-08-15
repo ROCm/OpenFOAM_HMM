@@ -236,7 +236,7 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
         }
         space = true;  // Prefix any following tokens
 
-        if (t.type() == token::VERBATIMSTRING)
+        if (t.type() == token::tokenType::VERBATIMSTRING)
         {
             // Bypass token output operator to avoid losing verbatimness.
             // Handle in Ostreams themselves

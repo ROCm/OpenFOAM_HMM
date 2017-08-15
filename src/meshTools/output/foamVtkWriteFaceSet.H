@@ -26,7 +26,7 @@ InNamespace
 
 Description
     Write faceSet to vtk polydata file.
-    The data are the original point ids.
+    The data are the mesh face ids.
 
 SourceFiles
     foamVtkWritePointSet.C
@@ -49,7 +49,7 @@ class fileName;
 namespace vtk
 {
 
-//- Write pointSet to vtk polydata file.
+//- Write faceSet to vtk polydata file.
 //  Only one data which is original pointID.
 void writeFaceSet
 (

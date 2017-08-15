@@ -89,11 +89,7 @@ int main(int argc, char *argv[])
             break;
         }
 
-        if
-        (
-            fieldName.type() != token::WORD
-         && fieldName.wordToken() != "CELL"
-        )
+        if (!fieldName.isWord() || fieldName.wordToken() != "CELL")
         {
             FatalErrorInFunction
                 << "Expected first CELL, found "
@@ -103,7 +99,7 @@ int main(int argc, char *argv[])
 
         label nCols = 0;
         smapFile >> fieldName;
-        while (fieldName.type() == token::WORD)
+        while (fieldName.isWord())
         {
             starFieldNames[nCols++] = fieldName.wordToken();
             smapFile >> fieldName;

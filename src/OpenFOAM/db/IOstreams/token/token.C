@@ -92,7 +92,7 @@ bool Foam::token::compound::isCompound(const word& name)
 
 Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
 {
-    if (type_ == COMPOUND)
+    if (type_ == tokenType::COMPOUND)
     {
         if (compoundTokenPtr_->empty())
         {

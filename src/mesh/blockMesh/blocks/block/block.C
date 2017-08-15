@@ -82,7 +82,7 @@ Foam::autoPtr<Foam::block> Foam::block::New
 
     if (!cstrIter.found())
     {
-        is.putBack(blockOrCellShapeType);
+        is.putBack(token(blockOrCellShapeType));
         return autoPtr<block>(new block(dict, index, points, edges, faces, is));
     }
     else

@@ -28,6 +28,14 @@
         fvc::makeAbsolute(phiHbyA, U);
     }
 
+    if (adjustFringe)
+    {
+        fvc::makeRelative(phiHbyA, U);
+        oversetAdjustPhi(phiHbyA, U);
+        fvc::makeAbsolute(phiHbyA, U);
+    }
+
+
     surfaceScalarField phig
     (
         (

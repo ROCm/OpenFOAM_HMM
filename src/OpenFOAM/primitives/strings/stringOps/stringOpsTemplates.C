@@ -69,7 +69,7 @@ template<class StringType>
 Foam::SubStrings<StringType> Foam::stringOps::split
 (
     const StringType& str,
-    const char delimiter
+    const char delim
 )
 {
     Foam::SubStrings<StringType> lst;
@@ -77,7 +77,7 @@ Foam::SubStrings<StringType> Foam::stringOps::split
 
     std::string::size_type beg = 0, end = 0;
 
-    while ((end = str.find(delimiter, beg)) != std::string::npos)
+    while ((end = str.find(delim, beg)) != std::string::npos)
     {
         if (beg < end)
         {
@@ -94,6 +94,86 @@ Foam::SubStrings<StringType> Foam::stringOps::split
     }
 
     return lst;
+}
+
+
+template<class StringType>
+Foam::SubStrings<StringType> Foam::stringOps::split
+(
+    const StringType& str,
+    const std::string& delim
+)
+{
+    Foam::SubStrings<StringType> lst;
+    lst.reserve(20);
+
+    std::string::size_type beg = 0, end = 0;
+
+    while ((end = str.find(delim, beg)) != std::string::npos)
+    {
+        if (beg < end)
+        {
+            // (Non-empty) intermediate element
+            lst.append(str.cbegin() + beg, str.cbegin() + end);
+        }
+        beg = end + delim.size();
+    }
+
+    // (Non-empty) trailing element
+    if (beg < str.size())
+    {
+        lst.append(str.cbegin() + beg, str.cbegin() + str.size());
+    }
+
+    return lst;
+}
+
+
+template<class StringType>
+Foam::SubStrings<StringType> Foam::stringOps::splitAny
+(
+    const StringType& str,
+    const std::string& delim
+)
+{
+    Foam::SubStrings<StringType> lst;
+    lst.reserve(20);
+
+    std::string::size_type beg = 0;
+
+    while
+    (
+        (beg = str.find_first_not_of(delim, beg))
+     != std::string::npos
+    )
+    {
+        const auto end = str.find_first_of(delim, beg);
+
+        if (end == std::string::npos)
+        {
+            // Trailing element
+            lst.append(str.cbegin() + beg, str.cbegin() + str.size());
+            break;
+        }
+        else
+        {
+            // Intermediate element
+            lst.append(str.cbegin() + beg, str.cbegin() + end);
+            beg = end + 1;
+        }
+    }
+
+    return lst;
+}
+
+
+template<class StringType>
+Foam::SubStrings<StringType> Foam::stringOps::splitSpace
+(
+    const StringType& str
+)
+{
+    return splitAny(str, "\t\n\v\f\r ");
 }
 
 

@@ -68,7 +68,7 @@ EXE_LIBS = \
     -lrigidBodyDynamics \
     -lrigidBodyMeshMotion \
     -lsampling \
-    -lscotchDecomp \
+    -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
     -lsixDoFRigidBodyMotion \
     -lSLGThermo \
     -lsnappyHexMesh \

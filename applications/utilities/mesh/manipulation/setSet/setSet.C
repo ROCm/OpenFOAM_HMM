@@ -85,7 +85,7 @@ void writeVTK
         vtk::writeFaceSet
         (
             mesh,
-            currentSet,
+            dynamicCast<const faceSet&>(currentSet),
             mesh.time().path()/vtkBaseName,
             vtk::formatType::LEGACY_BINARY
         );
@@ -96,7 +96,7 @@ void writeVTK
         vtk::writeCellSetFaces
         (
             mesh,
-            currentSet,
+            dynamicCast<const cellSet&>(currentSet),
             mesh.time().path()/vtkBaseName,
             vtk::formatType::LEGACY_BINARY
         );
@@ -106,7 +106,7 @@ void writeVTK
         vtk::writePointSet
         (
             mesh,
-            currentSet,
+            dynamicCast<const pointSet&>(currentSet),
             mesh.time().path()/vtkBaseName,
             vtk::formatType::LEGACY_BINARY
         );

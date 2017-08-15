@@ -53,6 +53,7 @@ Description
 #include "interpolationCellPoint.H"
 #include "transform.H"
 #include "fvMeshSubset.H"
+#include "oversetAdjustPhi.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
