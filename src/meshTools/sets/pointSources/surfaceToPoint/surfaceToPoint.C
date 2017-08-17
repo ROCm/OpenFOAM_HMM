@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,7 +59,7 @@ void Foam::surfaceToPoint::combine(topoSet& set, const bool add) const
 {
     cpuTime timer;
 
-    triSurface surf(surfName_);
+    triSurface surf(surfName_, scale_);
 
     Info<< "    Read surface from " << surfName_
         << " in = "<< timer.cpuTimeIncrement() << " s" << endl << endl;
@@ -131,6 +131,7 @@ Foam::surfaceToPoint::surfaceToPoint
 :
     topoSetSource(mesh),
     surfName_(surfName),
+    scale_(1.0),
     nearDist_(nearDist),
     includeInside_(includeInside),
     includeOutside_(includeOutside)
@@ -147,6 +148,7 @@ Foam::surfaceToPoint::surfaceToPoint
 :
     topoSetSource(mesh),
     surfName_(fileName(dict.lookup("file")).expand()),
+    scale_(dict.lookupOrDefault<scalar>("scale", 1.0)),
     nearDist_(readScalar(dict.lookup("nearDistance"))),
     includeInside_(readBool(dict.lookup("includeInside"))),
     includeOutside_(readBool(dict.lookup("includeOutside")))
@@ -163,6 +165,7 @@ Foam::surfaceToPoint::surfaceToPoint
 :
     topoSetSource(mesh),
     surfName_(checkIs(is)),
+    scale_(1.0),
     nearDist_(readScalar(checkIs(is))),
     includeInside_(readBool(checkIs(is))),
     includeOutside_(readBool(checkIs(is)))

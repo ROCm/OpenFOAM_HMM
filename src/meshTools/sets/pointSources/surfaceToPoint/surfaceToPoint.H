@@ -67,6 +67,9 @@ class surfaceToPoint
         //- Name of surface file
         const fileName surfName_;
 
+        //- Optional scaling for surface
+        const scalar scale_;
+
         //- If > 0 : include points with distance to surface less than nearDist.
         const scalar nearDist_;
 
