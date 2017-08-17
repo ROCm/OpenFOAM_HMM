@@ -554,7 +554,13 @@ bool Foam::Time::writeObject
 
                 while (previousWriteTimes_.size() > purgeWrite_)
                 {
-                    rmDir(objectRegistry::path(previousWriteTimes_.pop()));
+                    fileHandler().rmDir
+                    (
+                        fileHandler().filePath
+                        (
+                            objectRegistry::path(previousWriteTimes_.pop())
+                        )
+                    );
                 }
             }
         }
