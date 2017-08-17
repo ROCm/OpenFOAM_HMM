@@ -231,12 +231,10 @@ Foam::List<T>::List(const PtrList<T>& lst)
 }
 
 
-// Note: using first/last is not entirely accurate.
-// But since the list size is correct, last() is actually ignored.
 template<class T>
 Foam::List<T>::List(const SLList<T>& lst)
 :
-    List<T>(lst.first(), lst.last(), lst.size())
+    List<T>(lst.begin(), lst.end(), lst.size())
 {}
 
 
