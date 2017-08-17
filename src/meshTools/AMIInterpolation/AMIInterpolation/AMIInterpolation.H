@@ -57,6 +57,7 @@ SourceFiles
 #include "faceAreaIntersect.H"
 #include "globalIndex.H"
 #include "ops.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,6 +92,8 @@ public:
             imFaceAreaWeight,
             imPartialFaceAreaWeight
         };
+
+        static const Enum<interpolationMethod> interpolationMethodNames_;
 
         //- Convert interpolationMethod to word representation
         static word interpolationMethodToWord

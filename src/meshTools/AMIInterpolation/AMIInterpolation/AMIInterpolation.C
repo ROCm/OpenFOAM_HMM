@@ -32,45 +32,27 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class SourcePatch, class TargetPatch>
+const Foam::Enum
+<
+    typename Foam::AMIInterpolation<SourcePatch, TargetPatch>::
+    interpolationMethod
+>
+Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodNames_
+{
+    { interpolationMethod::imDirect, "directAMI" },
+    { interpolationMethod::imMapNearest, "mapNearestAMI" },
+    { interpolationMethod::imFaceAreaWeight, "faceAreaWeightAMI" },
+    { interpolationMethod::imPartialFaceAreaWeight, "partialFaceAreaWeightAMI" }
+};
+
+template<class SourcePatch, class TargetPatch>
 Foam::word
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodToWord
 (
     const interpolationMethod& im
 )
 {
-    word method = "unknown-interpolationMethod";
-
-    switch (im)
-    {
-        case imDirect:
-        {
-            method = "directAMI";
-            break;
-        }
-        case imMapNearest:
-        {
-            method = "mapNearestAMI";
-            break;
-        }
-        case imFaceAreaWeight:
-        {
-            method = "faceAreaWeightAMI";
-            break;
-        }
-        case imPartialFaceAreaWeight:
-        {
-            method = "partialFaceAreaWeightAMI";
-            break;
-        }
-        default:
-        {
-            FatalErrorInFunction
-                << "Unhandled interpolationMethod enumeration " << method
-                << abort(FatalError);
-        }
-    }
-
-    return method;
+    return interpolationMethodNames_[im];
 }
 
 
@@ -81,41 +63,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::wordTointerpolationMethod
     const word& im
 )
 {
-    interpolationMethod method = imDirect;
-
-    const wordList methods
-    {
-        "directAMI",
-        "mapNearestAMI",
-        "faceAreaWeightAMI",
-        "partialFaceAreaWeightAMI"
-    };
-
-    if (im == "directAMI")
-    {
-        method = imDirect;
-    }
-    else if (im == "mapNearestAMI")
-    {
-        method = imMapNearest;
-    }
-    else if (im == "faceAreaWeightAMI")
-    {
-        method = imFaceAreaWeight;
-    }
-    else if (im == "partialFaceAreaWeightAMI")
-    {
-        method = imPartialFaceAreaWeight;
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Invalid interpolationMethod " << im
-            << ".  Valid methods are:" << methods
-            << exit(FatalError);
-    }
-
-    return method;
+    return interpolationMethodNames_[im];
 }
 
 
@@ -910,11 +858,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
 
     if (srcTotalSize == 0)
     {
-        if (debug)
-        {
-            Info<< "AMI: no source faces present - no addressing constructed"
-                << endl;
-        }
+        DebugInfo<< "AMI: no source faces present - no addressing constructed"
+            << endl;
 
         return;
     }
