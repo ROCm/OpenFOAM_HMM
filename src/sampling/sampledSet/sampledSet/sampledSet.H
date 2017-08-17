@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -266,6 +266,10 @@ public:
 
         //- Output for debugging
         Ostream& write(Ostream&) const;
+
+        //- Helper: gather onto master and sort. Return (on master) gathered set
+        //  and overall sort order
+        autoPtr<coordSet> gather(labelList& indexSet) const;
 };
 
 

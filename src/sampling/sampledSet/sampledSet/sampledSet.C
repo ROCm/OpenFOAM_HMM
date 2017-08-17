@@ -29,6 +29,7 @@ License
 #include "meshSearch.H"
 #include "writer.H"
 #include "particle.H"
+#include "SortableList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -391,6 +392,77 @@ void Foam::sampledSet::setSamples
     cells_ = samplingCells;
     faces_ = samplingFaces;
     segments_ = samplingSegments;
+}
+
+
+Foam::autoPtr<Foam::coordSet> Foam::sampledSet::gather
+(
+    labelList& indexSet
+) const
+{
+    // Combine sampleSet from processors. Sort by curveDist. Return
+    // ordering in indexSet.
+    // Note: only master results are valid
+
+    // Collect data from all processors
+    List<List<point>> gatheredPts(Pstream::nProcs());
+    gatheredPts[Pstream::myProcNo()] = *this;
+    Pstream::gatherList(gatheredPts);
+
+    List<labelList> gatheredSegments(Pstream::nProcs());
+    gatheredSegments[Pstream::myProcNo()] = segments();
+    Pstream::gatherList(gatheredSegments);
+
+    List<scalarList> gatheredDist(Pstream::nProcs());
+    gatheredDist[Pstream::myProcNo()] = curveDist();
+    Pstream::gatherList(gatheredDist);
+
+
+    // Combine processor lists into one big list.
+    List<point> allPts
+    (
+        ListListOps::combine<List<point>>
+        (
+            gatheredPts, accessOp<List<point>>()
+        )
+    );
+    labelList allSegments
+    (
+        ListListOps::combine<labelList>
+        (
+            gatheredSegments, accessOp<labelList>()
+        )
+    );
+    scalarList allCurveDist
+    (
+        ListListOps::combine<scalarList>
+        (
+            gatheredDist, accessOp<scalarList>()
+        )
+    );
+
+
+    if (Pstream::master() && allCurveDist.size() == 0)
+    {
+        WarningInFunction
+            << "Sample set " << name()
+            << " has zero points." << endl;
+    }
+
+    // Sort curveDist and use to fill masterSamplePts
+    SortableList<scalar> sortedDist(allCurveDist);
+    indexSet = sortedDist.indices();
+
+    return autoPtr<coordSet>
+    (
+        new coordSet
+        (
+            name(),
+            axis(),
+            List<point>(UIndirectList<point>(allPts, indexSet)),
+            sortedDist
+        )
+    );
 }
 
 

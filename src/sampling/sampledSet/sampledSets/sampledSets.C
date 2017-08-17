@@ -70,67 +70,10 @@ void Foam::sampledSets::combineSampledSets
 
     forAll(sampledSets, setI)
     {
-        const sampledSet& samplePts = sampledSets[setI];
-
-        // Collect data from all processors
-        List<List<point>> gatheredPts(Pstream::nProcs());
-        gatheredPts[Pstream::myProcNo()] = samplePts;
-        Pstream::gatherList(gatheredPts);
-
-        List<labelList> gatheredSegments(Pstream::nProcs());
-        gatheredSegments[Pstream::myProcNo()] = samplePts.segments();
-        Pstream::gatherList(gatheredSegments);
-
-        List<scalarList> gatheredDist(Pstream::nProcs());
-        gatheredDist[Pstream::myProcNo()] = samplePts.curveDist();
-        Pstream::gatherList(gatheredDist);
-
-
-        // Combine processor lists into one big list.
-        List<point> allPts
-        (
-            ListListOps::combine<List<point>>
-            (
-                gatheredPts, accessOp<List<point>>()
-            )
-        );
-        labelList allSegments
-        (
-            ListListOps::combine<labelList>
-            (
-                gatheredSegments, accessOp<labelList>()
-            )
-        );
-        scalarList allCurveDist
-        (
-            ListListOps::combine<scalarList>
-            (
-                gatheredDist, accessOp<scalarList>()
-            )
-        );
-
-
-        if (Pstream::master() && allCurveDist.size() == 0)
-        {
-            WarningInFunction
-                << "Sample set " << samplePts.name()
-                << " has zero points." << endl;
-        }
-
-        // Sort curveDist and use to fill masterSamplePts
-        SortableList<scalar> sortedDist(allCurveDist);
-        indexSets[setI] = sortedDist.indices();
-
         masterSampledSets.set
         (
             setI,
-            new coordSet
-            (
-                samplePts.name(),
-                samplePts.axis(),
-                List<point>(UIndirectList<point>(allPts, indexSets[setI])),
-                sortedDist
-            )
+            sampledSets[setI].gather(indexSets[setI])
         );
     }
 }
