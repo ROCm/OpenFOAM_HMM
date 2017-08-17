@@ -107,7 +107,7 @@ protected:
             //- Set the source and target seed faces
             virtual void setNextFaces
             (
-                label& startSeedI,
+                label& startSeedi,
                 label& srcFacei,
                 label& tgtFacei,
                 const boolList& mapFlag,

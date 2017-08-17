@@ -75,7 +75,9 @@ inline Foam::point Foam::faceAreaIntersect::planeIntersection
     const label posI
 ) const
 {
-    return (d[posI]*t[negI] - d[negI]*t[posI])/(-d[negI] + d[posI]);
+    scalar dp = d[posI];
+    scalar dn = d[negI];
+    return (dp*t[negI] - dn*t[posI])/(-dn + dp);
 }
 
 
@@ -92,5 +94,23 @@ Foam::scalar& Foam::faceAreaIntersect::tolerance()
     return tol;
 }
 
+
+bool Foam::faceAreaIntersect::cacheTriangulation() const
+{
+    return cacheTriangulation_;
+}
+
+
+const Foam::DynamicList<Foam::triPoints>
+Foam::faceAreaIntersect::triangles() const
+{
+    return triangles_;
+}
+
+
+Foam::DynamicList<Foam::triPoints>& Foam::faceAreaIntersect::triangles()
+{
+    return triangles_;
+}
 
 // ************************************************************************* //

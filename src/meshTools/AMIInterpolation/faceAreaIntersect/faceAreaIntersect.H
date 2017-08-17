@@ -79,6 +79,12 @@ private:
         //- Flag to reverse B faces
         const bool reverseB_;
 
+        //- Flag to cache the final triangulation
+        bool cacheTriangulation_;
+
+        //- Final triangulation
+        DynamicList<triPoints> triangles_;
+
 
     // Static data members
 
@@ -146,7 +152,8 @@ public:
         (
             const pointField& pointsA,
             const pointField& pointsB,
-            const bool reverseB = false
+            const bool reverseB = false,
+            const bool cacheTriangulation = false
         );
 
 
@@ -163,6 +170,15 @@ public:
             const triangulationMode& triMode,
             faceList& faceTris
         );
+
+        //- Const access to the cacheTriangulation flag
+        inline bool cacheTriangulation() const;
+
+        //- Const access to the triangulation
+        inline const DynamicList<triPoints> triangles() const;
+
+        //- Non-const access to the triangulation
+        inline DynamicList<triPoints>& triangles();
 
         //- Return area of intersection of faceA with faceB
         scalar calc

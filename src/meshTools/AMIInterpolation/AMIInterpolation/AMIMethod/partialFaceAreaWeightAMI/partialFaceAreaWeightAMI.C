@@ -30,7 +30,7 @@ License
 template<class SourcePatch, class TargetPatch>
 void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 (
-    label& startSeedI,
+    label& startSeedi,
     label& srcFacei,
     label& tgtFacei,
     const boolList& mapFlag,
@@ -41,7 +41,7 @@ void Foam::partialFaceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 {
     faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     (
-        startSeedI,
+        startSeedi,
         srcFacei,
         tgtFacei,
         mapFlag,

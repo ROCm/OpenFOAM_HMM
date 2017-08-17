@@ -57,7 +57,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
     boolList mapFlag(nFacesRemaining, true);
 
     // reset starting seed
-    label startSeedI = 0;
+    label startSeedi = 0;
 
     DynamicList<label> nonOverlapFaces;
     do
@@ -91,7 +91,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
         {
             setNextFaces
             (
-                startSeedI,
+                startSeedi,
                 srcFacei,
                 tgtFacei,
                 mapFlag,
@@ -179,7 +179,7 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
 template<class SourcePatch, class TargetPatch>
 void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 (
-    label& startSeedI,
+    label& startSeedi,
     label& srcFacei,
     label& tgtFacei,
     const boolList& mapFlag,
@@ -195,15 +195,12 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
 
     // set possible seeds for later use
     bool valuesSet = false;
-    forAll(srcNbrFaces, i)
+    for (label faceS: srcNbrFaces)
     {
-        label faceS = srcNbrFaces[i];
-
         if (mapFlag[faceS] && seedFaces[faceS] == -1)
         {
-            forAll(visitedFaces, j)
+            for (label faceT : visitedFaces)
             {
-                label faceT = visitedFaces[j];
                 scalar area = interArea(faceS, faceT);
                 scalar areaTotal = this->srcMagSf_[srcFacei];
 
@@ -234,13 +231,13 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     {
         // try to use existing seed
         bool foundNextSeed = false;
-        for (label facei = startSeedI; facei < mapFlag.size(); facei++)
+        for (label facei = startSeedi; facei < mapFlag.size(); facei++)
         {
             if (mapFlag[facei])
             {
                 if (!foundNextSeed)
                 {
-                    startSeedI = facei;
+                    startSeedi = facei;
                     foundNextSeed = true;
                 }
 
@@ -262,13 +259,13 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
         }
 
         foundNextSeed = false;
-        for (label facei = startSeedI; facei < mapFlag.size(); facei++)
+        for (label facei = startSeedi; facei < mapFlag.size(); facei++)
         {
             if (mapFlag[facei])
             {
                 if (!foundNextSeed)
                 {
-                    startSeedI = facei + 1;
+                    startSeedi = facei + 1;
                     foundNextSeed = true;
                 }
 
@@ -316,7 +313,8 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     }
 
     // create intersection object
-    faceAreaIntersect inter(srcPoints, tgtPoints, this->reverseTarget_);
+    bool cache = true;
+    faceAreaIntersect inter(srcPoints, tgtPoints, this->reverseTarget_, cache);
 
     // crude resultant norm
     vector n(-this->srcPatch_.faceNormals()[srcFacei]);
@@ -333,6 +331,8 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     if (magN > ROOTVSMALL)
     {
         area = inter.calc(src, tgt, n/magN, this->triMode_);
+        DebugVar(inter.triangles());
+        DebugVar(inter.triangles().size());
     }
     else
     {
