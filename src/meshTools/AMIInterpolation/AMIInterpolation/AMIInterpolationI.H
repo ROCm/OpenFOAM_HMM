@@ -49,7 +49,7 @@ applyLowWeightCorrection() const
 
 
 template<class SourcePatch, class TargetPatch>
-inline const Foam::scalarField&
+inline const Foam::List<Foam::scalar>&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf() const
 {
     return srcMagSf_;
@@ -57,7 +57,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf() const
 
 
 template<class SourcePatch, class TargetPatch>
-inline Foam::scalarField&
+inline Foam::List<Foam::scalar>&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMagSf()
 {
     return srcMagSf_;
@@ -121,7 +121,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMap() const
 
 
 template<class SourcePatch, class TargetPatch>
-inline const Foam::scalarField&
+inline const Foam::List<Foam::scalar>&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf() const
 {
     return tgtMagSf_;
@@ -129,7 +129,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf() const
 
 
 template<class SourcePatch, class TargetPatch>
-inline Foam::scalarField&
+inline Foam::List<Foam::scalar>&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMagSf()
 {
     return tgtMagSf_;

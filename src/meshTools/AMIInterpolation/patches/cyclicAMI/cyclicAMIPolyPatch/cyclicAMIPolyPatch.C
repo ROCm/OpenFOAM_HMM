@@ -526,17 +526,17 @@ Foam::cyclicAMIPolyPatch::cyclicAMIPolyPatch
     AMIPtr_(nullptr),
     AMIMethod_
     (
-        AMIPatchToPatchInterpolation::wordTointerpolationMethod
-        (
+        AMIPatchToPatchInterpolation::interpolationMethodNames_
+        [
             dict.lookupOrDefault
             (
                 "method",
-                AMIPatchToPatchInterpolation::interpolationMethodToWord
-                (
+                AMIPatchToPatchInterpolation::interpolationMethodNames_
+                [
                     AMIPatchToPatchInterpolation::imFaceAreaWeight
-                )
+                ]
             )
-        )
+        ]
     ),
     AMIReverse_(dict.lookupOrDefault("flipNormals", false)),
     AMIRequireMatch_(true),
@@ -1096,10 +1096,10 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
         os.writeEntry
         (
             "method",
-            AMIPatchToPatchInterpolation::interpolationMethodToWord
-            (
+            AMIPatchToPatchInterpolation::interpolationMethodNames_
+            [
                 AMIMethod_
-            )
+            ]
         );
     }
 

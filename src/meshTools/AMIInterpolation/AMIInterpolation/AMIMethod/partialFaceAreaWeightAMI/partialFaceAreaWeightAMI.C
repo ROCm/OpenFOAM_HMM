@@ -60,8 +60,6 @@ partialFaceAreaWeightAMI
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const scalarField& srcMagSf,
-    const scalarField& tgtMagSf,
     const faceAreaIntersect::triangulationMode& triMode,
     const bool reverseTarget,
     const bool requireMatch
@@ -71,8 +69,6 @@ partialFaceAreaWeightAMI
     (
         srcPatch,
         tgtPatch,
-        srcMagSf,
-        tgtMagSf,
         triMode,
         reverseTarget,
         requireMatch

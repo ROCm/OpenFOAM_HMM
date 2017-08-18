@@ -89,10 +89,10 @@ void Foam::functionObjects::mapFields::createInterpolation
 
     // Lookup corresponding AMI method
     word patchMapMethodName =
-        AMIPatchToPatchInterpolation::interpolationMethodToWord
-        (
+        AMIPatchToPatchInterpolation::interpolationMethodNames_
+        [
             meshToMesh::interpolationMethodAMI(mapMethod)
-        );
+        ];
 
     // Optionally override
     if (dict.readIfPresent("patchMapMethod", patchMapMethodName))

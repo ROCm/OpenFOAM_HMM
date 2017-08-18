@@ -850,10 +850,10 @@ Foam::meshToMesh::meshToMesh
     constructNoCuttingPatches
     (
         interpolationMethodNames_[method],
-        AMIPatchToPatchInterpolation::interpolationMethodToWord
-        (
+        AMIPatchToPatchInterpolation::interpolationMethodNames_
+        [
             interpolationMethodAMI(method)
-        ),
+        ],
         interpAllPatches
     );
 }
@@ -917,10 +917,10 @@ Foam::meshToMesh::meshToMesh
     constructFromCuttingPatches
     (
         interpolationMethodNames_[method],
-        AMIPatchToPatchInterpolation::interpolationMethodToWord
-        (
+        AMIPatchToPatchInterpolation::interpolationMethodNames_
+        [
             interpolationMethodAMI(method)
-        ),
+        ],
         patchMap,
         cuttingPatches,
         normalise

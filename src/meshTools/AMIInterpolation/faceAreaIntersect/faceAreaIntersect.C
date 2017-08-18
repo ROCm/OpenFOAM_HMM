@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,11 +34,10 @@ const Foam::Enum
 Foam::faceAreaIntersect::triangulationModeNames_
 {
     { triangulationMode::tmFan, "fan" },
-    { triangulationMode::tmMesh, "mesh" },
+    { triangulationMode::tmMesh, "mesh" }
 };
 
 Foam::scalar Foam::faceAreaIntersect::tol = 1e-6;
-
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -49,7 +48,7 @@ void Foam::faceAreaIntersect::triSliceWithPlane
     FixedList<triPoints, 10>& tris,
     label& nTris,
     const scalar len
-)
+) const
 {
     // distance to cutting plane
     FixedList<scalar, 3> d;
@@ -220,9 +219,11 @@ void Foam::faceAreaIntersect::triSliceWithPlane
 Foam::scalar Foam::faceAreaIntersect::triangleIntersect
 (
     const triPoints& src,
-    const triPoints& tgt,
+    const point& tgt0,
+    const point& tgt1,
+    const point& tgt2,
     const vector& n
-)
+) const
 {
     // Work storage
     FixedList<triPoints, 10> workTris1;
@@ -241,8 +242,9 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         // Cut triangle src with plane and put resulting sub-triangles in
         // workTris1 list
 
-        scalar s = mag(tgt[1] - tgt[0]);
-        plane pl0(tgt[0], tgt[1], tgt[1] + s*n);
+        scalar s = mag(tgt1 - tgt0);
+        //plane pl0(tgt0, tgt1, tgt1 + s*n);
+        plane pl0(tgt0, (tgt0 - tgt1)^(-s*n), true);
         triSliceWithPlane(src, pl0, workTris1, nWorkTris1, t);
     }
 
@@ -256,12 +258,13 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         // Cut workTris1 with plane and put resulting sub-triangles in
         // workTris2 list (re-use tris storage)
 
-        scalar s = mag(tgt[2] - tgt[1]);
-        plane pl1(tgt[1], tgt[2], tgt[2] + s*n);
+        scalar s = mag(tgt2 - tgt1);
+        //plane pl1(tgt1, tgt2, tgt2 + s*n);
+        plane pl1(tgt1, (tgt1 - tgt2)^(-s*n), true);
 
         nWorkTris2 = 0;
 
-        for (label i = 0; i < nWorkTris1; i++)
+        for (label i = 0; i < nWorkTris1; ++i)
         {
             triSliceWithPlane(workTris1[i], pl1, workTris2, nWorkTris2, t);
         }
@@ -277,12 +280,13 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         // Cut workTris2 with plane and put resulting sub-triangles in
         // workTris1 list (re-use workTris1 storage)
 
-        scalar s = mag(tgt[2] - tgt[0]);
-        plane pl2(tgt[2], tgt[0], tgt[0] + s*n);
+        scalar s = mag(tgt2 - tgt0);
+        //plane pl2(tgt2, tgt0, tgt0 + s*n);
+        plane pl2(tgt2, (tgt2 - tgt0)^(-s*n), true);
 
         nWorkTris1 = 0;
 
-        for (label i = 0; i < nWorkTris2; i++)
+        for (label i = 0; i < nWorkTris2; ++i)
         {
             triSliceWithPlane(workTris2[i], pl2, workTris1, nWorkTris1, t);
         }
@@ -295,7 +299,7 @@ Foam::scalar Foam::faceAreaIntersect::triangleIntersect
         {
             // Calculate area of sub-triangles
             scalar area = 0.0;
-            for (label i = 0; i < nWorkTris1; i++)
+            for (label i = 0; i < nWorkTris1; ++i)
             {
                 area += triArea(workTris1[i]);
 
@@ -317,12 +321,16 @@ Foam::faceAreaIntersect::faceAreaIntersect
 (
     const pointField& pointsA,
     const pointField& pointsB,
+    const DynamicList<face>& trisA,
+    const DynamicList<face>& trisB,
     const bool reverseB,
     const bool cacheTriangulation
 )
 :
     pointsA_(pointsA),
     pointsB_(pointsB),
+    trisA_(trisA),
+    trisB_(trisB),
     reverseB_(reverseB),
     cacheTriangulation_(cacheTriangulation),
     triangles_(cacheTriangulation ? 10 : 0)
@@ -343,7 +351,7 @@ void Foam::faceAreaIntersect::triangulate
 
     switch (triMode)
     {
-        case tmFan:
+        case triangulationMode::tmFan:
         {
             for (label i = 0; i < f.nTriangles(); ++i)
             {
@@ -355,7 +363,7 @@ void Foam::faceAreaIntersect::triangulate
 
             break;
         }
-        case tmMesh:
+        case triangulationMode::tmMesh:
         {
             const label nFaceTris = f.nTriangles();
 
@@ -374,42 +382,107 @@ void Foam::faceAreaIntersect::triangulate
 }
 
 
+
 Foam::scalar Foam::faceAreaIntersect::calc
 (
     const face& faceA,
     const face& faceB,
-    const vector& n,
-    const triangulationMode& triMode
-)
+    const vector& n
+) const
 {
-    // split faces into triangles
-    faceList trisA, trisB;
-    triangulate(faceA, pointsA_, triMode, trisA);
-    triangulate(faceB, pointsB_, triMode, trisB);
+    if (cacheTriangulation_)
+    {
+        triangles_.clear();
+    }
 
     // Intersect triangles
     scalar totalArea = 0.0;
-    triangles_.clear();
-
-    forAll(trisA, tA)
+    for (const face& triA : trisA_)
     {
-        triPoints tpA = getTriPoints(pointsA_, trisA[tA], false);
+        triPoints tpA = getTriPoints(pointsA_, triA, false);
 
-//        if (triArea(tpA) > ROOTVSMALL)
+        for (const face& triB : trisB_)
         {
-            forAll(trisB, tB)
+            if (reverseB_)
             {
-                triPoints tpB = getTriPoints(pointsB_, trisB[tB], !reverseB_);
-
-//                if (triArea(tpB) > ROOTVSMALL)
-                {
-                    totalArea += triangleIntersect(tpA, tpB, n);
-                }
+                totalArea +=
+                    triangleIntersect
+                    (
+                        tpA,
+                        pointsB_[triB[0]],
+                        pointsB_[triB[1]],
+                        pointsB_[triB[2]],
+                        n
+                    );
+            }
+            else
+            {
+                totalArea +=
+                    triangleIntersect
+                    (
+                        tpA,
+                        pointsB_[triB[2]],
+                        pointsB_[triB[1]],
+                        pointsB_[triB[0]],
+                        n
+                    );
             }
         }
     }
 
     return totalArea;
+}
+
+
+bool Foam::faceAreaIntersect::overlaps
+(
+    const face& faceA,
+    const face& faceB,
+    const vector& n,
+    const scalar threshold
+) const
+{
+    // Intersect triangles
+    scalar totalArea = 0.0;
+    for (const face& triA : trisA_)
+    {
+        const triPoints tpA = getTriPoints(pointsA_, triA, false);
+
+        for (const face& triB : trisB_)
+        {
+            if (reverseB_)
+            {
+                totalArea +=
+                    triangleIntersect
+                    (
+                        tpA,
+                        pointsB_[triB[0]],
+                        pointsB_[triB[1]],
+                        pointsB_[triB[2]],
+                        n
+                    );
+            }
+            else
+            {
+                totalArea +=
+                    triangleIntersect
+                    (
+                        tpA,
+                        pointsB_[triB[2]],
+                        pointsB_[triB[1]],
+                        pointsB_[triB[0]],
+                        n
+                    );
+            }
+
+            if (totalArea > threshold)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 

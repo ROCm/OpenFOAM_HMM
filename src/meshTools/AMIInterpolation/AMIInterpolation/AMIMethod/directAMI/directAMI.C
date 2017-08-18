@@ -46,10 +46,8 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
 
     const vectorField& srcCf = this->srcPatch_.faceCentres();
 
-    forAll(srcNbr, i)
+    for (const label srcI : srcNbr)
     {
-        label srcI = srcNbr[i];
-
         if ((mapFlag[srcI] == 0) && (srcTgtSeed[srcI] == -1))
         {
             // first attempt: match by comparing face centres
@@ -69,9 +67,8 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
             tol = max(SMALL, 0.0001*sqrt(tol));
 
             bool found = false;
-            forAll(tgtNbr, j)
+            for (const label tgtI : tgtNbr)
             {
-                label tgtI = tgtNbr[j];
                 const face& tgtF = this->tgtPatch_[tgtI];
                 const point tgtC = tgtF.centre(tgtPoints);
 
@@ -92,9 +89,8 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
             {
                 const vector srcN = srcF.normal(srcPoints);
 
-                forAll(tgtNbr, j)
+                for (const label tgtI : tgtNbr)
                 {
-                    label tgtI = tgtNbr[j];
                     const face& tgtF = this->tgtPatch_[tgtI];
                     pointHit ray = tgtF.ray(srcCf[srcI], srcN, tgtPoints);
 
@@ -126,9 +122,8 @@ void Foam::directAMI<SourcePatch, TargetPatch>::appendToDirectSeeds
                         << endl;
 
                     Pout<< "target neighbours:" << nl;
-                    forAll(tgtNbr, j)
+                    for (const label tgtI : tgtNbr)
                     {
-                        label tgtI = tgtNbr[j];
                         const face& tgtF = this->tgtPatch_[tgtI];
 
                         Pout<< "face id: " << tgtI
@@ -192,8 +187,6 @@ Foam::directAMI<SourcePatch, TargetPatch>::directAMI
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const scalarField& srcMagSf,
-    const scalarField& tgtMagSf,
     const faceAreaIntersect::triangulationMode& triMode,
     const bool reverseTarget,
     const bool requireMatch
@@ -203,8 +196,6 @@ Foam::directAMI<SourcePatch, TargetPatch>::directAMI
     (
         srcPatch,
         tgtPatch,
-        srcMagSf,
-        tgtMagSf,
         triMode,
         reverseTarget,
         requireMatch

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,9 +167,9 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::writeIntersectionOBJ
 
     OFstream os("areas" + name(count) + ".obj");
 
-    forAll(f1pts, i)
+    for (const point& pt : f1pts)
     {
-        meshTools::writeOBJ(os, f1pts[i]);
+        meshTools::writeOBJ(os, pt);
     }
     os<< "l";
     forAll(f1pts, i)
@@ -178,19 +178,19 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::writeIntersectionOBJ
     }
     os<< " 1" << endl;
 
-
-    forAll(f2pts, i)
+    for (const point& pt : f2pts)
     {
-        meshTools::writeOBJ(os, f2pts[i]);
+        meshTools::writeOBJ(os, pt);
     }
     os<< "l";
+    const label n = f1pts.size();
     forAll(f2pts, i)
     {
-        os<< " " << f1pts.size() + i + 1;
+        os<< " " << n + i + 1;
     }
-    os<< " " << f1pts.size() + 1 << endl;
+    os<< " " << n + 1 << endl;
 
-    count++;
+    ++count;
 }
 
 
@@ -265,16 +265,17 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
     DynamicList<label>& faceIDs
 ) const
 {
+    static const scalar thetaCos = Foam::cos(degToRad(89.0));
+
     const labelList& nbrFaces = patch.faceFaces()[facei];
 
     // filter out faces already visited from face neighbours
-    forAll(nbrFaces, i)
+    for (const label nbrFacei : nbrFaces)
     {
-        label nbrFacei = nbrFaces[i];
         bool valid = true;
-        forAll(visitedFaces, j)
+        for (const label visitedFacei : visitedFaces)
         {
-            if (nbrFacei == visitedFaces[j])
+            if (nbrFacei == visitedFacei)
             {
                 valid = false;
                 break;
@@ -283,9 +284,9 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 
         if (valid)
         {
-            forAll(faceIDs, j)
+            for (const label testFacei : faceIDs)
             {
-                if (nbrFacei == faceIDs[j])
+                if (nbrFacei == testFacei)
                 {
                     valid = false;
                     break;
@@ -301,10 +302,56 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
 
             const scalar cosI = n1 & n2;
 
-            if (cosI > Foam::cos(degToRad(89.0)))
+            if (cosI > thetaCos)
             {
                 faceIDs.append(nbrFacei);
             }
+        }
+    }
+}
+
+
+template<class SourcePatch, class TargetPatch>
+template<class PatchType>
+void Foam::AMIMethod<SourcePatch, TargetPatch>::triangulatePatch
+(
+    const PatchType& patch,
+    List<DynamicList<face>>& tris,
+    List<scalar>& magSf
+) const
+{
+    const pointField& points = patch.points();
+    tris.setSize(patch.size());
+    magSf.setSize(patch.size());
+
+    // Using methods that index into existing points
+    forAll(patch, facei)
+    {
+        switch (triMode_)
+        {
+            case faceAreaIntersect::tmFan:
+            {
+                faceAreaIntersect::triangleFan(patch[facei], tris[facei]);
+                break;
+            }
+            case faceAreaIntersect::tmMesh:
+            {
+                patch[facei].triangles(points, tris[facei]);
+                break;
+            }
+        }
+
+        const DynamicList<face>& triFaces = tris[facei];
+        magSf[facei] = 0;
+        for (const face& f : triFaces)
+        {
+            magSf[facei] +=
+                triPointRef
+                (
+                    points[f[0]],
+                    points[f[1]],
+                    points[f[2]]
+                ).mag();
         }
     }
 }
@@ -317,8 +364,6 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const scalarField& srcMagSf,
-    const scalarField& tgtMagSf,
     const faceAreaIntersect::triangulationMode& triMode,
     const bool reverseTarget,
     const bool requireMatch
@@ -328,18 +373,14 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::AMIMethod
     tgtPatch_(tgtPatch),
     reverseTarget_(reverseTarget),
     requireMatch_(requireMatch),
-    srcMagSf_(srcMagSf),
-    tgtMagSf_(tgtMagSf),
+    srcMagSf_(srcPatch.size(), 1.0),
+    tgtMagSf_(tgtPatch.size(), 1.0),
     srcNonOverlap_(),
     triMode_(triMode)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
-
-template<class SourcePatch, class TargetPatch>
-Foam::AMIMethod<SourcePatch, TargetPatch>::~AMIMethod()
-{}
+{
+    // Note: setting srcMagSf and tgtMagSf to 1 by default for 1-to-1 methods
+    // - others will need to overwrite as necessary
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

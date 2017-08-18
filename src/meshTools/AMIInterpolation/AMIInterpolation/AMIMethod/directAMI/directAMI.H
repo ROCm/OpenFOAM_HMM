@@ -109,8 +109,6 @@ public:
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
-            const scalarField& srcMagSf,
-            const scalarField& tgtMagSf,
             const faceAreaIntersect::triangulationMode& triMode,
             const bool reverseTarget = false,
             const bool requireMatch = true

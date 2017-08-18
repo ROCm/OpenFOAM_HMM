@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -95,17 +95,7 @@ public:
 
         static const Enum<interpolationMethod> interpolationMethodNames_;
 
-        //- Convert interpolationMethod to word representation
-        static word interpolationMethodToWord
-        (
-            const interpolationMethod& method
-        );
-
-        //- Convert word to interpolationMethod
-        static interpolationMethod wordTointerpolationMethod
-        (
-            const word& method
-        );
+        static bool cacheIntersections_;
 
         //- Calculate the patch face magnitudes for the given tri-mode
         template<class Patch>
@@ -142,7 +132,7 @@ private:
         // Source patch
 
             //- Source face areas
-            scalarField srcMagSf_;
+            scalarList srcMagSf_;
 
             //- Addresses of target faces per source face
             labelListList srcAddress_;
@@ -157,7 +147,7 @@ private:
         // Target patch
 
             //- Target face areas
-            scalarField tgtMagSf_;
+            scalarList tgtMagSf_;
 
             //- Addresses of source faces per target face
             labelListList tgtAddress_;
@@ -250,7 +240,7 @@ private:
             //     numerical error!
             static void normaliseWeights
             (
-                const scalarField& patchAreas,
+                const scalarList& patchAreas,
                 const word& patchName,
                 const labelListList& addr,
                 scalarListList& wght,
@@ -266,14 +256,14 @@ private:
             static void agglomerate
             (
                 const autoPtr<mapDistribute>& targetMap,
-                const scalarField& fineSrcMagSf,
+                const scalarList& fineSrcMagSf,
                 const labelListList& fineSrcAddress,
                 const scalarListList& fineSrcWeights,
 
                 const labelList& sourceRestrictAddressing,
                 const labelList& targetRestrictAddressing,
 
-                scalarField& srcMagSf,
+                scalarList& srcMagSf,
                 labelListList& srcAddress,
                 scalarListList& srcWeights,
                 scalarField& srcWeightsSum,
@@ -311,7 +301,7 @@ public:
             const faceAreaIntersect::triangulationMode& triMode,
             const bool requireMatch = true,
             const word& methodName =
-                interpolationMethodToWord(imFaceAreaWeight),
+                interpolationMethodNames_[imFaceAreaWeight],
             const scalar lowWeightCorrection = -1,
             const bool reverseTarget = false
         );
@@ -338,7 +328,7 @@ public:
             const faceAreaIntersect::triangulationMode& triMode,
             const bool requireMatch = true,
             const word& methodName =
-                interpolationMethodToWord(imFaceAreaWeight),
+                interpolationMethodNames_[imFaceAreaWeight],
             const scalar lowWeightCorrection = -1,
             const bool reverseTarget = false
         );
@@ -381,10 +371,10 @@ public:
             // Source patch
 
                 //- Return const access to source patch face areas
-                inline const scalarField& srcMagSf() const;
+                inline const List<scalar>& srcMagSf() const;
 
                 //- Return access to source patch face areas
-                inline scalarField& srcMagSf();
+                inline List<scalar>& srcMagSf();
 
                 //- Return const access to source patch addressing
                 inline const labelListList& srcAddress() const;
@@ -415,10 +405,10 @@ public:
             // Target patch
 
                 //- Return const access to target patch face areas
-                inline const scalarField& tgtMagSf() const;
+                inline const List<scalar>& tgtMagSf() const;
 
                 //- Return access to target patch face areas
-                inline scalarField& tgtMagSf();
+                inline List<scalar>& tgtMagSf();
 
                 //- Return const access to target patch addressing
                 inline const labelListList& tgtAddress() const;

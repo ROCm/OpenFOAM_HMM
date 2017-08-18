@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,26 +46,8 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodNames_
 };
 
 template<class SourcePatch, class TargetPatch>
-Foam::word
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethodToWord
-(
-    const interpolationMethod& im
-)
-{
-    return interpolationMethodNames_[im];
-}
-
-
-template<class SourcePatch, class TargetPatch>
-typename Foam::AMIInterpolation<SourcePatch, TargetPatch>::interpolationMethod
-Foam::AMIInterpolation<SourcePatch, TargetPatch>::wordTointerpolationMethod
-(
-    const word& im
-)
-{
-    return interpolationMethodNames_[im];
-}
-
+bool Foam::AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_ =
+    false;
 
 template<class SourcePatch, class TargetPatch>
 template<class Patch>
@@ -156,7 +138,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::projectPointsToSurface
 template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::normaliseWeights
 (
-    const scalarField& patchAreas,
+    const scalarList& patchAreas,
     const word& patchName,
     const labelListList& addr,
     scalarListList& wght,
@@ -237,14 +219,14 @@ template<class SourcePatch, class TargetPatch>
 void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 (
     const autoPtr<mapDistribute>& targetMapPtr,
-    const scalarField& fineSrcMagSf,
+    const scalarList& fineSrcMagSf,
     const labelListList& fineSrcAddress,
     const scalarListList& fineSrcWeights,
 
     const labelList& sourceRestrictAddressing,
     const labelList& targetRestrictAddressing,
 
-    scalarField& srcMagSf,
+    scalarList& srcMagSf,
     labelListList& srcAddress,
     scalarListList& srcWeights,
     scalarField& srcWeightsSum,
@@ -339,9 +321,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 labelList oldToNew(targetCoarseSize, -1);
                 label newi = 0;
 
-                forAll(elems, i)
+                for (const label elemi : elems)
                 {
-                    label fineElem = elemsMap[elems[i]];
+                    label fineElem = elemsMap[elemi];
                     label coarseElem = allRestrict[fineElem];
                     if (oldToNew[coarseElem] == -1)
                     {
@@ -375,9 +357,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
             // reachable elements (using the local constructMap)
 
             const labelList& elemsMap = map.constructMap()[Pstream::myProcNo()];
-            forAll(elemsMap, i)
+            for (const label fineElem : elemsMap)
             {
-                label fineElem = elemsMap[i];
                 label coarseElem = allRestrict[fineElem];
                 tgtCompactMap[fineElem] = coarseElem;
             }
@@ -403,12 +384,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                     // Get the maximum target coarse size for this set of
                     // received data.
                     label remoteTargetCoarseSize = labelMin;
-                    forAll(elems, i)
+                    for (const label elemi : elems)
                     {
                         remoteTargetCoarseSize = max
                         (
                             remoteTargetCoarseSize,
-                            allRestrict[elems[i]]
+                            allRestrict[elemi]
                         );
                     }
                     remoteTargetCoarseSize += 1;
@@ -417,9 +398,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                     labelList oldToNew(remoteTargetCoarseSize, -1);
                     label newi = 0;
 
-                    forAll(elems, i)
+                    for (const label fineElem : elems)
                     {
-                        label fineElem = elems[i];
                         // fineElem now points to section from proci
                         label coarseElem = allRestrict[fineElem];
                         if (oldToNew[coarseElem] == -1)
@@ -563,9 +543,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::constructFromSurface
         if (debug)
         {
             OFstream os("amiSrcPoints.obj");
-            forAll(srcPoints, i)
+            for (const point& pt : srcPoints)
             {
-                meshTools::writeOBJ(os, srcPoints[i]);
+                meshTools::writeOBJ(os, pt);
             }
         }
 
@@ -584,9 +564,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::constructFromSurface
         if (debug)
         {
             OFstream os("amiTgtPoints.obj");
-            forAll(tgtPoints, i)
+            for (const point& pt : tgtPoints)
             {
-                meshTools::writeOBJ(os, tgtPoints[i]);
+                meshTools::writeOBJ(os, pt);
             }
         }
 
@@ -620,7 +600,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const bool reverseTarget
 )
 :
-    methodName_(interpolationMethodToWord(method)),
+    methodName_(interpolationMethodNames_[method]),
     reverseTarget_(reverseTarget),
     requireMatch_(requireMatch),
     singlePatchProc_(-999),
@@ -683,7 +663,7 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::AMIInterpolation
     const bool reverseTarget
 )
 :
-    methodName_(interpolationMethodToWord(method)),
+    methodName_(interpolationMethodNames_[method]),
     reverseTarget_(reverseTarget),
     requireMatch_(requireMatch),
     singlePatchProc_(-999),
@@ -870,10 +850,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         << tgtTotalSize << " target faces"
         << endl;
 
-    // Calculate face areas
-    srcMagSf_ = patchMagSf(srcPatch, triMode_);
-    tgtMagSf_ = patchMagSf(tgtPatch, triMode_);
-
     // Calculate if patches present on multiple processors
     singlePatchProc_ = calcDistribution(srcPatch, tgtPatch);
 
@@ -919,13 +895,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 newTgtPoints
             );
 
-        scalarField newTgtMagSf(newTgtPatch.size());
-        forAll(newTgtPatch, facei)
-        {
-            newTgtMagSf[facei] = newTgtPatch[facei].mag(newTgtPatch.points());
-        }
-
-
         // Calculate AMI interpolation
         autoPtr<AMIMethod<SourcePatch, TargetPatch>> AMIPtr
         (
@@ -934,8 +903,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 methodName_,
                 srcPatch,
                 newTgtPatch,
-                srcMagSf_,
-                newTgtMagSf,
                 triMode_,
                 reverseTarget_,
                 requireMatch_ && (lowWeightCorrection_ < 0)
@@ -949,6 +916,12 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtAddress_,
             tgtWeights_
         );
+
+        // Note: using patch face areas calculated by the AMI method
+        // - TODO: should move into the calculate method
+        srcMagSf_.transfer(AMIPtr->srcMagSf());
+        tgtMagSf_.transfer(AMIPtr->tgtMagSf());
+        map.reverseDistribute(tgtPatch.size(), tgtMagSf_);
 
         // Now
         // ~~~
@@ -967,21 +940,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-        forAll(srcAddress_, i)
+        for (labelList& addressing : srcAddress_)
         {
-            labelList& addressing = srcAddress_[i];
-            forAll(addressing, addri)
+            for (label& addr : addressing)
             {
-                addressing[addri] = tgtFaceIDs[addressing[addri]];
+                addr = tgtFaceIDs[addr];
             }
         }
 
-        forAll(tgtAddress_, i)
+        for (labelList& addressing : tgtAddress_)
         {
-            labelList& addressing = tgtAddress_[i];
-            forAll(addressing, addri)
+            for (label& addr : addressing)
             {
-                addressing[addri] = globalSrcFaces.toGlobal(addressing[addri]);
+                addr = globalSrcFaces.toGlobal(addr);
             }
         }
 
@@ -1036,8 +1007,6 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
                 methodName_,
                 srcPatch,
                 tgtPatch,
-                srcMagSf_,
-                tgtMagSf_,
                 triMode_,
                 reverseTarget_,
                 requireMatch_ && (lowWeightCorrection_ < 0)
@@ -1051,6 +1020,9 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             tgtAddress_,
             tgtWeights_
         );
+
+        srcMagSf_.transfer(AMIPtr->srcMagSf());
+        tgtMagSf_.transfer(AMIPtr->tgtMagSf());
 
         AMIPtr->normaliseWeights(true, *this);
     }
@@ -1623,9 +1595,8 @@ const
     nearest.setDistance(GREAT);
     label nearestFacei = -1;
 
-    forAll(addr, i)
+    for (const label srcFacei : addr)
     {
-        const label srcFacei = addr[i];
         const face& f = srcPatch[srcFacei];
 
         pointHit ray = f.ray(tgtPoint, n, srcPoints);
@@ -1672,9 +1643,8 @@ const
     // Target face addresses that intersect source face srcFacei
     const labelList& addr = srcAddress_[srcFacei];
 
-    forAll(addr, i)
+    for (const label tgtFacei : addr)
     {
-        const label tgtFacei = addr[i];
         const face& f = tgtPatch[tgtFacei];
 
         pointHit ray = f.ray(srcPoint, n, tgtPoints);
@@ -1719,9 +1689,8 @@ const
         const labelList& addr = srcAddress[i];
         const point& srcPt = srcPatch.faceCentres()[i];
 
-        forAll(addr, j)
+        for (const label tgtPti : addr)
         {
-            label tgtPti = addr[j];
             const point& tgtPt = tgtPatch.faceCentres()[tgtPti];
 
             meshTools::writeOBJ(os, srcPt);

@@ -24,6 +24,38 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class SourcePatch, class TargetPatch>
+inline const Foam::List<Foam::scalar>&
+Foam::AMIMethod<SourcePatch, TargetPatch>::srcMagSf() const
+{
+    return srcMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::List<Foam::scalar>&
+Foam::AMIMethod<SourcePatch, TargetPatch>::srcMagSf()
+{
+    return srcMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline const Foam::List<Foam::scalar>&
+Foam::AMIMethod<SourcePatch, TargetPatch>::tgtMagSf() const
+{
+    return tgtMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+inline Foam::List<Foam::scalar>&
+Foam::AMIMethod<SourcePatch, TargetPatch>::tgtMagSf()
+{
+    return tgtMagSf_;
+}
+
+
+template<class SourcePatch, class TargetPatch>
 inline const Foam::labelList&
 Foam::AMIMethod<SourcePatch, TargetPatch>::srcNonOverlap() const
 {

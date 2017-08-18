@@ -143,6 +143,8 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
 
     bool faceProcessed = false;
 
+    label maxNeighbourFaces = nbrFaces.size();
+
     do
     {
         // process new target face
@@ -168,9 +170,16 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
             );
 
             faceProcessed = true;
+
+            maxNeighbourFaces = max(maxNeighbourFaces, nbrFaces.size());
         }
 
     } while (nbrFaces.size() > 0);
+
+    if (debug > 1)
+    {
+        DebugVar(maxNeighbourFaces);
+    }
 
     return faceProcessed;
 }
@@ -201,14 +210,13 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
         {
             for (label faceT : visitedFaces)
             {
-                scalar area = interArea(faceS, faceT);
-                scalar areaTotal = this->srcMagSf_[srcFacei];
+                const scalar threshold =
+                    this->srcMagSf_[faceS]*faceAreaIntersect::tolerance();
 
+                // store when intersection fractional area > tolerance
                 // Check that faces have enough overlap for robust walking
-                if (area/areaTotal > faceAreaIntersect::tolerance())
+                if (overlaps(faceS, faceT, threshold))
                 {
-                    // TODO - throwing area away - re-use in next iteration?
-
                     seedFaces[faceS] = faceT;
 
                     if (!valuesSet)
@@ -231,7 +239,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     {
         // try to use existing seed
         bool foundNextSeed = false;
-        for (label facei = startSeedi; facei < mapFlag.size(); facei++)
+        for (label facei = startSeedi; facei < mapFlag.size(); ++facei)
         {
             if (mapFlag[facei])
             {
@@ -259,7 +267,7 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
         }
 
         foundNextSeed = false;
-        for (label facei = startSeedi; facei < mapFlag.size(); facei++)
+        for (label facei = startSeedi; facei < mapFlag.size(); ++facei)
         {
             if (mapFlag[facei])
             {
@@ -305,16 +313,25 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     const face& tgt = this->tgtPatch_[tgtFacei];
 
     // quick reject if either face has zero area
-    // Note: do not use stored face areas for target patch
-    const scalar tgtMag = tgt.mag(tgtPoints);
-    if ((this->srcMagSf_[srcFacei] < ROOTVSMALL) || (tgtMag < ROOTVSMALL))
+    if
+    (
+        (this->srcMagSf_[srcFacei] < ROOTVSMALL)
+     || (this->tgtMagSf_[tgtFacei] < ROOTVSMALL)
+    )
     {
         return area;
     }
 
     // create intersection object
-    bool cache = true;
-    faceAreaIntersect inter(srcPoints, tgtPoints, this->reverseTarget_, cache);
+    faceAreaIntersect inter
+    (
+        srcPoints,
+        tgtPoints,
+        this->srcTris_[srcFacei],
+        this->tgtTris_[tgtFacei],
+        this->reverseTarget_,
+        AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_
+    );
 
     // crude resultant norm
     vector n(-this->srcPatch_.faceNormals()[srcFacei]);
@@ -330,9 +347,7 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
 
     if (magN > ROOTVSMALL)
     {
-        area = inter.calc(src, tgt, n/magN, this->triMode_);
-        DebugVar(inter.triangles());
-        DebugVar(inter.triangles().size());
+        area = inter.calc(src, tgt, n/magN);
     }
     else
     {
@@ -351,6 +366,71 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     }
 
     return area;
+}
+
+
+template<class SourcePatch, class TargetPatch>
+bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::overlaps
+(
+    const label srcFacei,
+    const label tgtFacei,
+    const scalar threshold
+) const
+{
+    const pointField& srcPoints = this->srcPatch_.points();
+    const pointField& tgtPoints = this->tgtPatch_.points();
+
+    // references to candidate faces
+    const face& src = this->srcPatch_[srcFacei];
+    const face& tgt = this->tgtPatch_[tgtFacei];
+
+    // quick reject if either face has zero area
+    if
+    (
+        (this->srcMagSf_[srcFacei] < ROOTVSMALL)
+     || (this->tgtMagSf_[tgtFacei] < ROOTVSMALL)
+    )
+    {
+        return false;
+    }
+
+    faceAreaIntersect inter
+    (
+        srcPoints,
+        tgtPoints,
+        this->srcTris_[srcFacei],
+        this->tgtTris_[tgtFacei],
+        this->reverseTarget_,
+        AMIInterpolation<SourcePatch, TargetPatch>::cacheIntersections_
+    );
+
+    // crude resultant norm
+    vector n(-this->srcPatch_.faceNormals()[srcFacei]);
+    if (this->reverseTarget_)
+    {
+        n -= this->tgtPatch_.faceNormals()[tgtFacei];
+    }
+    else
+    {
+        n += this->tgtPatch_.faceNormals()[tgtFacei];
+    }
+    scalar magN = mag(n);
+
+    if (magN > ROOTVSMALL)
+    {
+        return inter.overlaps(src, tgt, n/magN, threshold);
+    }
+    else
+    {
+        WarningInFunction
+            << "Invalid normal for source face " << srcFacei
+            << " points " << UIndirectList<point>(srcPoints, src)
+            << " target face " << tgtFacei
+            << " points " << UIndirectList<point>(tgtPoints, tgt)
+            << endl;
+    }
+
+    return false;
 }
 
 
@@ -458,8 +538,6 @@ Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
 (
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const scalarField& srcMagSf,
-    const scalarField& tgtMagSf,
     const faceAreaIntersect::triangulationMode& triMode,
     const bool reverseTarget,
     const bool requireMatch,
@@ -470,14 +548,17 @@ Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::faceAreaWeightAMI
     (
         srcPatch,
         tgtPatch,
-        srcMagSf,
-        tgtMagSf,
         triMode,
         reverseTarget,
         requireMatch
     ),
-    restartUncoveredSourceFace_(restartUncoveredSourceFace)
-{}
+    restartUncoveredSourceFace_(restartUncoveredSourceFace),
+    srcTris_(),
+    tgtTris_()
+{
+    this->triangulatePatch(srcPatch, srcTris_, this->srcMagSf_);
+    this->triangulatePatch(tgtPatch, tgtTris_, this->tgtMagSf_);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //

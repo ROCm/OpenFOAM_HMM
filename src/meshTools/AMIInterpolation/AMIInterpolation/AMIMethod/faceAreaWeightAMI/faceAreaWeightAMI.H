@@ -58,6 +58,12 @@ private:
         //- Flag to restart uncovered source faces
         const bool restartUncoveredSourceFace_;
 
+        //- Storage for src-side triangle decomposition
+        List<DynamicList<face>> srcTris_;
+
+        //- Storage for tgt-side triangle decomposition
+        List<DynamicList<face>> tgtTris_;
+
 
 protected:
 
@@ -126,6 +132,14 @@ protected:
                 const label tgtFacei
             ) const;
 
+            //- Return true if faces overlap
+            virtual bool overlaps
+            (
+                const label srcFacei,
+                const label tgtFacei,
+                const scalar threshold
+            ) const;
+
 
 public:
 
@@ -140,8 +154,6 @@ public:
         (
             const SourcePatch& srcPatch,
             const TargetPatch& tgtPatch,
-            const scalarField& srcMagSf,
-            const scalarField& tgtMagSf,
             const faceAreaIntersect::triangulationMode& triMode,
             const bool reverseTarget = false,
             const bool requireMatch = true,

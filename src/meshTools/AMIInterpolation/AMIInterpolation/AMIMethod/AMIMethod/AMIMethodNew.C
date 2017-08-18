@@ -32,8 +32,6 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::New
     const word& methodName,
     const SourcePatch& srcPatch,
     const TargetPatch& tgtPatch,
-    const scalarField& srcMagSf,
-    const scalarField& tgtMagSf,
     const faceAreaIntersect::triangulationMode& triMode,
     const bool reverseTarget,
     const bool requireMatch
@@ -62,8 +60,6 @@ Foam::AMIMethod<SourcePatch, TargetPatch>::New
         (
             srcPatch,
             tgtPatch,
-            srcMagSf,
-            tgtMagSf,
             triMode,
             reverseTarget,
             requireMatch
