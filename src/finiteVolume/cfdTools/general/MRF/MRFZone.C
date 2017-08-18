@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -597,6 +597,15 @@ bool Foam::MRFZone::read(const dictionary& dict)
     cellZoneID_ = mesh_.cellZones().findZoneID(cellZoneName_);
 
     return true;
+}
+
+
+void Foam::MRFZone::update()
+{
+    if (mesh_.topoChanging())
+    {
+        setMRFFaces();
+    }
 }
 
 

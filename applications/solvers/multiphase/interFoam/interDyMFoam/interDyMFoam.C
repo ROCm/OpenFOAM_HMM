@@ -136,6 +136,8 @@ int main(int argc, char *argv[])
 
                     gh = (g & mesh.C()) - ghRef;
                     ghf = (g & mesh.Cf()) - ghRef;
+
+                    MRF.update();
                 }
 
                 if ((mesh.changing() && correctPhi) || mesh.topoChanging())

@@ -110,6 +110,8 @@ int main(int argc, char *argv[])
 
                 if (mesh.changing())
                 {
+                    MRF.update();
+
                     Info<< "Execution time for mesh.update() = "
                         << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
                         << " s" << endl;
