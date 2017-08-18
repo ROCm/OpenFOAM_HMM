@@ -583,6 +583,97 @@ Foam::label Foam::checkTopology
         //Info.setf(ios_base::right);
     }
 
+    {
+        Info<< "\nChecking basic faceZone addressing..." << endl;
+
+        Pout.setf(ios_base::left);
+
+        Info<< "    "
+            << setw(20) << "FaceZone"
+            << setw(9) << "Faces"
+            << setw(9) << "Points"
+            << setw(13) << "BoundingBox" <<endl;
+
+        const pointField& points = mesh.points();
+        const faceList& faces = mesh.faces();
+
+        const faceZoneMesh& faceZones = mesh.faceZones();
+        DynamicList<point> localPoints;
+        forAll(faceZones, zoneI)
+        {
+            const faceZone& fZone = faceZones[zoneI];
+            localPoints.setCapacity(10*faces.size());
+
+            forAll(fZone, i)
+            {
+                const label faceI = fZone[i];
+                const face& f = faces[faceI];
+                const pointField facePoints(f.points(points));
+
+                forAll(facePoints, pointI)
+                {
+                    const point& pt = facePoints[pointI];
+                    localPoints.append(pt);
+                }
+            }
+            boundBox bb(localPoints, true);
+
+            Info<< "    "
+                << setw(20) << fZone.name()
+                << setw(9) << returnReduce(fZone.size(), sumOp<label>())
+                << setw(9) << returnReduce(localPoints.size(), sumOp<label>())
+                << setw(3) << bb;
+
+        }
+        Info<< endl;
+    }
+
+    {
+        Info<< "\nChecking basic cellZone addressing..." << endl;
+
+        Pout.setf(ios_base::left);
+
+        Info<< "    "
+            << setw(20) << "CellZone"
+            << setw(9) << "Cells"
+            << setw(9) << "Points"
+            << setw(13) << "BoundingBox" <<endl;
+
+        const pointField& points = mesh.points();
+        const cellList& cells = mesh.cells();
+        const faceList& faces = mesh.faces();
+
+        const cellZoneMesh& cellZones = mesh.cellZones();
+        DynamicList<point> localPoints;
+        forAll(cellZones, zoneI)
+        {
+            const cellZone& cZone = cellZones[zoneI];
+            localPoints.setCapacity(10*faces.size());
+
+            forAll(cZone, i)
+            {
+                const label cellI = cZone[i];
+                const cell& c = cells[cellI];
+                const pointField cellPoints(c.points(faces, points));
+
+                forAll(cellPoints, pointI)
+                {
+                    const point& pt = cellPoints[pointI];
+                    localPoints.append(pt);
+                }
+            }
+            boundBox bb(localPoints, true);
+
+            Info<< "    "
+                << setw(20) << cZone.name()
+                << setw(9) << returnReduce(cZone.size(), sumOp<label>())
+                << setw(9) << returnReduce(localPoints.size(), sumOp<label>())
+                << setw(3) << bb;
+
+        }
+        Info<< endl;
+    }
+
     // Force creation of all addressing if requested.
     // Errors will be reported as required
     if (allTopology)
