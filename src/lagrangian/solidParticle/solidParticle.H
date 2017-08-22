@@ -83,7 +83,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<solidParticleCloud>
+        public particle::trackingData
     {
         // Interpolators for continuous phase fields
 
@@ -101,7 +101,7 @@ public:
 
             inline trackingData
             (
-                solidParticleCloud& spc,
+                const solidParticleCloud& spc,
                 const interpolationCellPoint<scalar>& rhoInterp,
                 const interpolationCellPoint<vector>& UInterp,
                 const interpolationCellPoint<scalar>& nuInterp,
@@ -192,7 +192,7 @@ public:
         // Tracking
 
             //- Move
-            bool move(trackingData&, const scalar);
+            bool move(solidParticleCloud&, trackingData&, const scalar);
 
 
         // Patch interactions
@@ -202,6 +202,7 @@ public:
             bool hitPatch
             (
                 const polyPatch&,
+                solidParticleCloud& cloud,
                 trackingData& td,
                 const label patchi,
                 const scalar trackFraction,
@@ -213,6 +214,7 @@ public:
             void hitProcessorPatch
             (
                 const processorPolyPatch&,
+                solidParticleCloud& cloud,
                 trackingData& td
             );
 
@@ -220,6 +222,7 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
+                solidParticleCloud& cloud,
                 trackingData& td,
                 const tetIndices&
             );
@@ -228,6 +231,7 @@ public:
             void hitPatch
             (
                 const polyPatch&,
+                solidParticleCloud& cloud,
                 trackingData& td
             );
 

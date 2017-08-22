@@ -154,10 +154,9 @@ public:
     };
 
 
-    template<class CloudType>
-    class TrackingData
+    class trackingData
     :
-        public ParcelType::template TrackingData<CloudType>
+        public ParcelType::trackingData
     {
     public:
 
@@ -198,9 +197,10 @@ public:
         // Constructors
 
             //- Construct from components
-            inline TrackingData
+            template <class TrackCloudType>
+            inline trackingData
             (
-                CloudType& cloud,
+                const TrackCloudType& cloud,
                 trackPart part = tpLinearTrack
             );
 
@@ -283,10 +283,11 @@ protected:
     // Protected Member Functions
 
         //- Calculate new particle velocity
-        template<class TrackData>
+        template<class TrackCloudType>
         const vector calcVelocity
         (
-            TrackData& td,
+            TrackCloudType& cloud,
+            trackingData& td,
             const scalar dt,           // timestep
             const label celli,         // owner cell
             const scalar Re,           // Reynolds number
@@ -561,28 +562,31 @@ public:
         // Main calculation loop
 
             //- Set cell values
-            template<class TrackData>
+            template<class TrackCloudType>
             void setCellValues
             (
-                TrackData& td,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const scalar dt,
                 const label celli
             );
 
             //- Correct cell values using latest transfer information
-            template<class TrackData>
+            template<class TrackCloudType>
             void cellValueSourceCorrection
             (
-                TrackData& td,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const scalar dt,
                 const label celli
             );
 
             //- Update parcel properties over the time interval
-            template<class TrackData>
+            template<class TrackCloudType>
             void calc
             (
-                TrackData& td,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const scalar dt,
                 const label celli
             );
@@ -591,19 +595,25 @@ public:
         // Tracking
 
             //- Move the parcel
-            template<class TrackData>
-            bool move(TrackData& td, const scalar trackTime);
+            template<class TrackCloudType>
+            bool move
+            (
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar trackTime
+            );
 
 
         // Patch interactions
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
-            template<class TrackData>
+            template<class TrackCloudType>
             bool hitPatch
             (
                 const polyPatch& p,
-                TrackData& td,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const label patchi,
                 const scalar trackFraction,
                 const tetIndices& tetIs
@@ -611,28 +621,31 @@ public:
 
             //- Overridable function to handle the particle hitting a
             //  processorPatch
-            template<class TrackData>
+            template<class TrackCloudType>
             void hitProcessorPatch
             (
                 const processorPolyPatch&,
-                TrackData& td
+                TrackCloudType& cloud,
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a wallPatch
-            template<class TrackData>
+            template<class TrackCloudType>
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                TrackData& td,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const tetIndices&
             );
 
             //- Overridable function to handle the particle hitting a polyPatch
-            template<class TrackData>
+            template<class TrackCloudType>
             void hitPatch
             (
                 const polyPatch&,
-                TrackData& td
+                TrackCloudType& cloud,
+                trackingData& td
             );
 
             //- Transform the physical properties of the particle
@@ -651,12 +664,12 @@ public:
         // I-O
 
             //- Read
-            template<class CloudType>
-            static void readFields(CloudType& c);
+            template<class TrackCloudType>
+            static void readFields(TrackCloudType& c);
 
             //- Write
-            template<class CloudType>
-            static void writeFields(const CloudType& c);
+            template<class TrackCloudType>
+            static void writeFields(const TrackCloudType& c);
 
             //- Write particle fields as objects into the obr registry
             template<class CloudType>

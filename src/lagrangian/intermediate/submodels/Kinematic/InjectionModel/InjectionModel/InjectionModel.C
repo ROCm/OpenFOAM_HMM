@@ -419,8 +419,12 @@ Foam::scalar Foam::InjectionModel<CloudType>::averageParcelMass()
 
 
 template<class CloudType>
-template<class TrackData>
-void Foam::InjectionModel<CloudType>::inject(TrackData& td)
+template<class TrackCloudType>
+void Foam::InjectionModel<CloudType>::inject
+(
+    TrackCloudType& cloud,
+    typename CloudType::parcelType::trackingData& td
+)
 {
     if (!this->active())
     {
@@ -440,7 +444,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     {
         const scalar trackTime = this->owner().solution().trackTime();
         const polyMesh& mesh = this->owner().mesh();
-        typename TrackData::cloudType& cloud = td.cloud();
 
         // Duration of injection period during this timestep
         const scalar deltaT =
@@ -519,7 +522,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                         parcelsAdded++;
                         massAdded += pPtr->nParticle()*pPtr->mass();
 
-                        if (pPtr->move(td, dt))
+                        if (pPtr->move(cloud, td, dt))
                         {
                             pPtr->typeId() = injectorID_;
                             cloud.addParticle(pPtr);
@@ -546,10 +549,11 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
 
 template<class CloudType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::InjectionModel<CloudType>::injectSteadyState
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    typename CloudType::parcelType::trackingData& td,
     const scalar trackTime
 )
 {
@@ -566,7 +570,6 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
     }
 
     const polyMesh& mesh = this->owner().mesh();
-    typename TrackData::cloudType& cloud = td.cloud();
 
     massTotal_ = massFlowRate_.value(mesh.time().value());
 

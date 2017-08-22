@@ -37,11 +37,12 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::prepareForParallelTransfer
 (
     const label patchi,
-    TrackData& td
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {
     // Convert the face index to be local to the processor patch
@@ -49,11 +50,12 @@ void Foam::particle::prepareForParallelTransfer
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::correctAfterParallelTransfer
 (
     const label patchi,
-    TrackData& td
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {
     const coupledPolyPatch& ppp =
@@ -101,8 +103,8 @@ void Foam::particle::correctAfterParallelTransfer
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CloudType>
-void Foam::particle::readFields(CloudType& c)
+template<class TrackCloudType>
+void Foam::particle::readFields(TrackCloudType& c)
 {
     bool valid = c.size();
 
@@ -120,7 +122,7 @@ void Foam::particle::readFields(CloudType& c)
     c.checkFieldIOobject(c, origId);
 
     label i = 0;
-    forAllIter(typename CloudType, c, iter)
+    forAllIter(typename TrackCloudType, c, iter)
     {
         particle& p = iter();
 
@@ -131,12 +133,12 @@ void Foam::particle::readFields(CloudType& c)
 }
 
 
-template<class CloudType>
-void Foam::particle::writeFields(const CloudType& c)
+template<class TrackCloudType>
+void Foam::particle::writeFields(const TrackCloudType& c)
 {
     label np = c.size();
 
-    IOPosition<CloudType> ioP(c);
+    IOPosition<TrackCloudType> ioP(c);
     ioP.write(np > 0);
 
     IOField<label> origProc
@@ -151,7 +153,7 @@ void Foam::particle::writeFields(const CloudType& c)
     );
 
     label i = 0;
-    forAllConstIter(typename CloudType, c, iter)
+    forAllConstIter(typename TrackCloudType, c, iter)
     {
         origProc[i] = iter().origProc_;
         origId[i] = iter().origId_;
@@ -181,13 +183,19 @@ void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitFace
 (
     const vector& direction,
-    TrackData& td
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {
+    typename TrackCloudType::particleType& p =
+        static_cast<typename TrackCloudType::particleType&>(*this);
+    typename TrackCloudType::particleType::trackingData& ttd =
+        static_cast<typename TrackCloudType::particleType::trackingData&>(td);
+
     if (!onFace())
     {
         return;
@@ -198,9 +206,6 @@ void Foam::particle::hitFace
     }
     else if (onBoundaryFace())
     {
-        typename TrackData::cloudType::particleType& p =
-            static_cast<typename TrackData::cloudType::particleType&>(*this);
-
         const tetIndices faceHitTetIs(celli_, tetFacei_, tetPti_);
 
         if
@@ -208,7 +213,8 @@ void Foam::particle::hitFace
            !p.hitPatch
             (
                 mesh_.boundaryMesh()[patch()],
-                td,
+                cloud,
+                ttd,
                 patch(),
                 stepFraction(),
                 faceHitTetIs
@@ -221,28 +227,30 @@ void Foam::particle::hitFace
             {
                 p.hitWedgePatch
                 (
-                    static_cast<const wedgePolyPatch&>(patch), td
+                    static_cast<const wedgePolyPatch&>(patch), cloud, ttd
                 );
             }
             else if (isA<symmetryPlanePolyPatch>(patch))
             {
                 p.hitSymmetryPlanePatch
                 (
-                    static_cast<const symmetryPlanePolyPatch&>(patch), td
+                    static_cast<const symmetryPlanePolyPatch&>(patch),
+                    cloud,
+                    ttd
                 );
             }
             else if (isA<symmetryPolyPatch>(patch))
             {
                 p.hitSymmetryPatch
                 (
-                    static_cast<const symmetryPolyPatch&>(patch), td
+                    static_cast<const symmetryPolyPatch&>(patch), cloud, ttd
                 );
             }
             else if (isA<cyclicPolyPatch>(patch))
             {
                 p.hitCyclicPatch
                 (
-                    static_cast<const cyclicPolyPatch&>(patch), td
+                    static_cast<const cyclicPolyPatch&>(patch), cloud, ttd
                 );
             }
             else if (isA<cyclicACMIPolyPatch>(patch))
@@ -250,7 +258,8 @@ void Foam::particle::hitFace
                 p.hitCyclicACMIPatch
                 (
                     static_cast<const cyclicACMIPolyPatch&>(patch),
-                    td,
+                    cloud,
+                    ttd,
                     direction
                 );
             }
@@ -259,7 +268,8 @@ void Foam::particle::hitFace
                 p.hitCyclicAMIPatch
                 (
                     static_cast<const cyclicAMIPolyPatch&>(patch),
-                    td,
+                    cloud,
+                    ttd,
                     direction
                 );
             }
@@ -267,31 +277,35 @@ void Foam::particle::hitFace
             {
                 p.hitProcessorPatch
                 (
-                    static_cast<const processorPolyPatch&>(patch), td
+                    static_cast<const processorPolyPatch&>(patch), cloud, ttd
                 );
             }
             else if (isA<wallPolyPatch>(patch))
             {
                 p.hitWallPatch
                 (
-                    static_cast<const wallPolyPatch&>(patch), td, faceHitTetIs
+                    static_cast<const wallPolyPatch&>(patch),
+                    cloud,
+                    ttd,
+                    faceHitTetIs
                 );
             }
             else
             {
-                p.hitPatch(patch, td);
+                p.hitPatch(patch, cloud, ttd);
             }
         }
     }
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::trackToAndHitFace
 (
     const vector& direction,
     const scalar fraction,
-    TrackData& td
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {
     trackToFace(direction, fraction);
@@ -301,15 +315,16 @@ void Foam::particle::trackToAndHitFace
         changeToMasterPatch();
     }
 
-    hitFace(direction, td);
+    hitFace(direction, cloud, td);
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 bool Foam::particle::hitPatch
 (
     const polyPatch&,
-    TrackData&,
+    TrackCloudType&,
+    trackingData&,
     const label,
     const scalar,
     const tetIndices&
@@ -319,11 +334,12 @@ bool Foam::particle::hitPatch
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitWedgePatch
 (
     const wedgePolyPatch& wpp,
-    TrackData&
+    TrackCloudType&,
+    trackingData&
 )
 {
     FatalErrorInFunction
@@ -337,11 +353,12 @@ void Foam::particle::hitWedgePatch
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitSymmetryPlanePatch
 (
     const symmetryPlanePolyPatch& spp,
-    TrackData&
+    TrackCloudType&,
+    trackingData&
 )
 {
     vector nf = normal();
@@ -351,11 +368,12 @@ void Foam::particle::hitSymmetryPlanePatch
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitSymmetryPatch
 (
     const symmetryPolyPatch& spp,
-    TrackData&
+    TrackCloudType&,
+    trackingData&
 )
 {
     vector nf = normal();
@@ -365,11 +383,12 @@ void Foam::particle::hitSymmetryPatch
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitCyclicPatch
 (
     const cyclicPolyPatch& cpp,
-    TrackData& td
+    TrackCloudType&,
+    trackingData&
 )
 {
     const cyclicPolyPatch& receiveCpp = cpp.neighbPatch();
@@ -408,11 +427,12 @@ void Foam::particle::hitCyclicPatch
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitCyclicAMIPatch
 (
     const cyclicAMIPolyPatch& cpp,
-    TrackData& td,
+    TrackCloudType& cloud,
+    trackingData& td,
     const vector& direction
 )
 {
@@ -478,11 +498,12 @@ void Foam::particle::hitCyclicAMIPatch
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitCyclicACMIPatch
 (
     const cyclicACMIPolyPatch& cpp,
-    TrackData& td,
+    TrackCloudType& cloud,
+    trackingData& td,
     const vector& direction
 )
 {
@@ -506,35 +527,41 @@ void Foam::particle::hitCyclicACMIPatch
 
     if (couple)
     {
-        hitCyclicAMIPatch(cpp, td, direction);
+        hitCyclicAMIPatch(cpp, cloud, td, direction);
     }
     else
     {
         // Move to the face associated with the non-overlap patch and redo the
         // face interaction.
         tetFacei_ = facei_ = cpp.nonOverlapPatch().start() + localFacei;
-        hitFace(direction, td);
+        hitFace(direction, cloud, td);
     }
 }
 
 
-template<class TrackData>
-void Foam::particle::hitProcessorPatch(const processorPolyPatch&, TrackData&)
+template<class TrackCloudType>
+void Foam::particle::hitProcessorPatch
+(
+    const processorPolyPatch&,
+    TrackCloudType&,
+    trackingData&
+)
 {}
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::particle::hitWallPatch
 (
     const wallPolyPatch&,
-    TrackData&,
+    TrackCloudType&,
+    trackingData&,
     const tetIndices&
 )
 {}
 
 
-template<class TrackData>
-void Foam::particle::hitPatch(const polyPatch&, TrackData&)
+template<class TrackCloudType>
+void Foam::particle::hitPatch(const polyPatch&, TrackCloudType&, trackingData&)
 {}
 
 

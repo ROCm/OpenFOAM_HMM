@@ -189,7 +189,7 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
     }
 
 
-    cloud.move(td, maxTrackLen);
+    cloud.move(cloud, td, maxTrackLen);
 
 
     // Rework cell-to-globalpatchface into a map

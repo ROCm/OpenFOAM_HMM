@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "streamLineParticle.H"
+#include "streamLineParticleCloud.H"
 #include "vectorFieldIOField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -140,6 +141,7 @@ Foam::streamLineParticle::streamLineParticle
 
 bool Foam::streamLineParticle::move
 (
+    streamLineParticleCloud& cloud,
     trackingData& td,
     const scalar
 )
@@ -198,7 +200,7 @@ bool Foam::streamLineParticle::move
                 dt = maxDt;
             }
 
-            trackToAndHitFace(dt*U, 0, td);
+            trackToAndHitFace(dt*U, 0, cloud, td);
 
             if
             (
@@ -266,6 +268,7 @@ bool Foam::streamLineParticle::move
 bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
+    streamLineParticleCloud& cloud,
     trackingData& td,
     const label patchi,
     const scalar trackFraction,
@@ -280,6 +283,7 @@ bool Foam::streamLineParticle::hitPatch
 void Foam::streamLineParticle::hitWedgePatch
 (
     const wedgePolyPatch& pp,
+    streamLineParticleCloud& cloud,
     trackingData& td
 )
 {
@@ -291,6 +295,7 @@ void Foam::streamLineParticle::hitWedgePatch
 void Foam::streamLineParticle::hitSymmetryPlanePatch
 (
     const symmetryPlanePolyPatch& pp,
+    streamLineParticleCloud& cloud,
     trackingData& td
 )
 {
@@ -302,6 +307,7 @@ void Foam::streamLineParticle::hitSymmetryPlanePatch
 void Foam::streamLineParticle::hitSymmetryPatch
 (
     const symmetryPolyPatch& pp,
+    streamLineParticleCloud& cloud,
     trackingData& td
 )
 {
@@ -313,6 +319,7 @@ void Foam::streamLineParticle::hitSymmetryPatch
 void Foam::streamLineParticle::hitCyclicPatch
 (
     const cyclicPolyPatch& pp,
+    streamLineParticleCloud& cloud,
     trackingData& td
 )
 {
@@ -324,6 +331,7 @@ void Foam::streamLineParticle::hitCyclicPatch
 void Foam::streamLineParticle::hitProcessorPatch
 (
     const processorPolyPatch&,
+    streamLineParticleCloud& cloud,
     trackingData& td
 )
 {
@@ -335,6 +343,7 @@ void Foam::streamLineParticle::hitProcessorPatch
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
+    streamLineParticleCloud& cloud,
     trackingData& td,
     const tetIndices&
 )
@@ -347,6 +356,7 @@ void Foam::streamLineParticle::hitWallPatch
 void Foam::streamLineParticle::hitPatch
 (
     const polyPatch& wpp,
+    streamLineParticleCloud& cloud,
     trackingData& td
 )
 {

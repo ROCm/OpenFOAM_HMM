@@ -133,7 +133,7 @@ void mapLagrangian(const meshToMesh& interp)
                 IDLList<passiveParticle>()
             );
 
-            particle::TrackingData<passiveParticleCloud> td(targetParcels);
+            passiveParticle::trackingData td(targetParcels);
 
             label sourceParticleI = 0;
 

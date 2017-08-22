@@ -82,11 +82,9 @@ public:
     static const std::size_t sizeofFields;
 
 
-    //- Tracking data
-    template<class CloudType>
-    class TrackingData
+    class trackingData
     :
-        public ParcelType::template TrackingData<CloudType>
+        public ParcelType::trackingData
     {
 
     public:
@@ -137,15 +135,17 @@ public:
         //- Constructors
 
             //- Construct from components
-            inline TrackingData
+            template<class TrackCloudType>
+            inline trackingData
             (
-                CloudType& cloud,
+                const TrackCloudType& cloud,
                 trackPart part = tpLinearTrack
             );
 
 
         //- Update the MPPIC averages
-        inline void updateAverages(CloudType& cloud);
+        template<class TrackCloudType>
+        inline void updateAverages(const TrackCloudType& cloud);
 
 
         //- Access
@@ -290,8 +290,13 @@ public:
         // Tracking
 
             //- Move the parcel
-            template<class TrackData>
-            bool move(TrackData& td, const scalar trackTime);
+            template<class TrackCloudType>
+            bool move
+            (
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar trackTime
+            );
 
 
     // Friend Functions
