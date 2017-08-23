@@ -354,13 +354,14 @@ template<class ParcelType>
 template<class TrackCloudType>
 bool Foam::KinematicParcel<ParcelType>::hitPatch
 (
-    const polyPatch& pp,
     TrackCloudType& cloud,
     trackingData& td
 )
 {
     typename TrackCloudType::parcelType& p =
         static_cast<typename TrackCloudType::parcelType&>(*this);
+
+    const polyPatch& pp = p.mesh().boundaryMesh()[p.patch()];
 
     // Invoke post-processing model
     cloud.functions().postPatch(p, pp, td.keepParticle);
@@ -393,8 +394,7 @@ template<class ParcelType>
 template<class TrackCloudType>
 void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 (
-    const processorPolyPatch&,
-    TrackCloudType& cloud,
+    TrackCloudType&,
     trackingData& td
 )
 {
@@ -406,12 +406,11 @@ template<class ParcelType>
 template<class TrackCloudType>
 void Foam::KinematicParcel<ParcelType>::hitWallPatch
 (
-    const wallPolyPatch& wpp,
-    TrackCloudType& cloud,
-    trackingData& td
+    TrackCloudType&,
+    trackingData&
 )
 {
-    // Wall interactions handled by generic hitPatch function
+    // wall interactions are handled by the generic hitPatch method
 }
 
 

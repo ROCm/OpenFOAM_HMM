@@ -121,12 +121,7 @@ bool Foam::findCellParticle::move
 }
 
 
-bool Foam::findCellParticle::hitPatch
-(
-    const polyPatch&,
-    Cloud<findCellParticle>& cloud,
-    trackingData& td
-)
+bool Foam::findCellParticle::hitPatch(Cloud<findCellParticle>&, trackingData&)
 {
     return false;
 }
@@ -134,8 +129,7 @@ bool Foam::findCellParticle::hitPatch
 
 void Foam::findCellParticle::hitWedgePatch
 (
-    const wedgePolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td
 )
 {
@@ -146,8 +140,7 @@ void Foam::findCellParticle::hitWedgePatch
 
 void Foam::findCellParticle::hitSymmetryPlanePatch
 (
-    const symmetryPlanePolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td
 )
 {
@@ -158,8 +151,7 @@ void Foam::findCellParticle::hitSymmetryPlanePatch
 
 void Foam::findCellParticle::hitSymmetryPatch
 (
-    const symmetryPolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td
 )
 {
@@ -170,8 +162,7 @@ void Foam::findCellParticle::hitSymmetryPatch
 
 void Foam::findCellParticle::hitCyclicPatch
 (
-    const cyclicPolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td
 )
 {
@@ -182,8 +173,7 @@ void Foam::findCellParticle::hitCyclicPatch
 
 void Foam::findCellParticle::hitCyclicAMIPatch
 (
-    const cyclicAMIPolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td,
     const vector&
 )
@@ -195,8 +185,7 @@ void Foam::findCellParticle::hitCyclicAMIPatch
 
 void Foam::findCellParticle::hitCyclicACMIPatch
 (
-    const cyclicACMIPolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td,
     const vector&
 )
@@ -208,8 +197,7 @@ void Foam::findCellParticle::hitCyclicACMIPatch
 
 void Foam::findCellParticle::hitProcessorPatch
 (
-    const processorPolyPatch&,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td
 )
 {
@@ -220,8 +208,7 @@ void Foam::findCellParticle::hitProcessorPatch
 
 void Foam::findCellParticle::hitWallPatch
 (
-    const wallPolyPatch& wpp,
-    Cloud<findCellParticle>& cloud,
+    Cloud<findCellParticle>&,
     trackingData& td
 )
 {
