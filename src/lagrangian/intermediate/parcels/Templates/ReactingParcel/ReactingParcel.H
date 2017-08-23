@@ -179,7 +179,6 @@ protected:
             TrackCloudType& cloud,
             trackingData& td,
             const scalar dt,           // timestep
-            const label celli,         // owner cell
             const scalar Re,           // Reynolds number
             const scalar Pr,           // Prandtl number
             const scalar Ts,           // Surface temperature
@@ -361,8 +360,7 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const scalar dt,
-                const label celli
+                const scalar dt
             );
 
             //- Correct cell values using latest transfer information
@@ -371,8 +369,7 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const scalar dt,
-                const label celli
+                const scalar dt
             );
 
             //- Correct surface values due to emitted species
@@ -381,7 +378,6 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const label celli,
                 const scalar T,
                 const scalarField& Cs,
                 scalar& rhos,
@@ -396,8 +392,7 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const scalar dt,
-                const label celli
+                const scalar dt
             );
 
 

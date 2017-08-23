@@ -140,22 +140,9 @@ void Foam::particle::hitFace
     }
     else if (onBoundaryFace())
     {
-        const tetIndices faceHitTetIs(celli_, tetFacei_, tetPti_);
-
-        if
-        (
-           !p.hitPatch
-            (
-                mesh_.boundaryMesh()[patch()],
-                cloud,
-                ttd,
-                patch(),
-                stepFraction(),
-                faceHitTetIs
-            )
-        )
+        if(!p.hitPatch(mesh_.boundaryMesh()[p.patch()], cloud, ttd))
         {
-            const polyPatch& patch = mesh_.boundaryMesh()[this->patch()];
+            const polyPatch& patch = mesh_.boundaryMesh()[p.patch()];
 
             if (isA<wedgePolyPatch>(patch))
             {
@@ -218,15 +205,12 @@ void Foam::particle::hitFace
             {
                 p.hitWallPatch
                 (
-                    static_cast<const wallPolyPatch&>(patch),
-                    cloud,
-                    ttd,
-                    faceHitTetIs
+                    static_cast<const wallPolyPatch&>(patch), cloud, ttd
                 );
             }
             else
             {
-                p.hitPatch(patch, cloud, ttd);
+                td.keepParticle = false;
             }
         }
     }
@@ -258,10 +242,7 @@ bool Foam::particle::hitPatch
 (
     const polyPatch&,
     TrackCloudType&,
-    trackingData&,
-    const label,
-    const scalar,
-    const tetIndices&
+    trackingData&
 )
 {
     return false;
@@ -488,14 +469,8 @@ void Foam::particle::hitWallPatch
 (
     const wallPolyPatch&,
     TrackCloudType&,
-    trackingData&,
-    const tetIndices&
+    trackingData&
 )
-{}
-
-
-template<class TrackCloudType>
-void Foam::particle::hitPatch(const polyPatch&, TrackCloudType&, trackingData&)
 {}
 
 

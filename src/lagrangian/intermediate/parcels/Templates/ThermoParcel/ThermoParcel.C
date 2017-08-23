@@ -36,11 +36,10 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
 (
     TrackCloudType& cloud,
     trackingData& td,
-    const scalar dt,
-    const label celli
+    const scalar dt
 )
 {
-    ParcelType::setCellValues(cloud, td, dt, celli);
+    ParcelType::setCellValues(cloud, td, dt);
 
     tetIndices tetIs = this->currentTetIndices();
 
@@ -53,8 +52,8 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
         if (debug)
         {
             WarningInFunction
-                << "Limiting observed temperature in cell " << celli << " to "
-                << cloud.constProps().TMin() <<  nl << endl;
+                << "Limiting observed temperature in cell " << this->cell()
+                << " to " << cloud.constProps().TMin() <<  nl << endl;
         }
 
         Tc_ = cloud.constProps().TMin();
@@ -68,25 +67,27 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 (
     TrackCloudType& cloud,
     trackingData& td,
-    const scalar dt,
-    const label celli
+    const scalar dt
 )
 {
-    this->Uc_ += cloud.UTrans()[celli]/this->massCell(celli);
+    const label celli = this->cell();
+    const scalar massCell = this->massCell(celli);
+
+    this->Uc_ += cloud.UTrans()[celli]/massCell;
 
 //    tetIndices tetIs = this->currentTetIndices();
 //    Tc_ = td.TInterp().interpolate(this->coordinates(), tetIs);
 
     const scalar CpMean = td.CpInterp().psi()[celli];
-    Tc_ += cloud.hsTrans()[celli]/(CpMean*this->massCell(celli));
+    Tc_ += cloud.hsTrans()[celli]/(CpMean*massCell);
 
     if (Tc_ < cloud.constProps().TMin())
     {
         if (debug)
         {
             WarningInFunction
-                << "Limiting observed temperature in cell " << celli << " to "
-                << cloud.constProps().TMin() <<  nl << endl;
+                << "Limiting observed temperature in cell " << celli
+                << " to " << cloud.constProps().TMin() <<  nl << endl;
         }
 
         Tc_ = cloud.constProps().TMin();
@@ -100,7 +101,6 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
 (
     TrackCloudType& cloud,
     trackingData& td,
-    const label celli,
     const scalar T,
     scalar& Ts,
     scalar& rhos,
@@ -144,8 +144,7 @@ void Foam::ThermoParcel<ParcelType>::calc
 (
     TrackCloudType& cloud,
     trackingData& td,
-    const scalar dt,
-    const label celli
+    const scalar dt
 )
 {
     // Define local properties at beginning of time step
@@ -160,7 +159,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
     scalar Ts, rhos, mus, Pr, kappas;
-    calcSurfaceValues(cloud, td, celli, this->T_, Ts, rhos, mus, Pr, kappas);
+    calcSurfaceValues(cloud, td, this->T_, Ts, rhos, mus, Pr, kappas);
 
     // Reynolds number
     scalar Re = this->Re(this->U_, this->d_, rhos, mus);
@@ -201,7 +200,6 @@ void Foam::ThermoParcel<ParcelType>::calc
             cloud,
             td,
             dt,
-            celli,
             Re,
             Pr,
             kappas,
@@ -217,19 +215,7 @@ void Foam::ThermoParcel<ParcelType>::calc
 
     // Calculate new particle velocity
     this->U_ =
-        this->calcVelocity
-        (
-            cloud,
-            td,
-            dt,
-            celli,
-            Re,
-            mus,
-            mass0,
-            Su,
-            dUTrans,
-            Spu
-        );
+        this->calcVelocity(cloud, td, dt, Re, mus, mass0, Su, dUTrans, Spu);
 
 
     //  Accumulate carrier phase source terms
@@ -237,25 +223,25 @@ void Foam::ThermoParcel<ParcelType>::calc
     if (cloud.solution().coupled())
     {
         // Update momentum transfer
-        cloud.UTrans()[celli] += np0*dUTrans;
+        cloud.UTrans()[this->cell()] += np0*dUTrans;
 
         // Update momentum transfer coefficient
-        cloud.UCoeff()[celli] += np0*Spu;
+        cloud.UCoeff()[this->cell()] += np0*Spu;
 
         // Update sensible enthalpy transfer
-        cloud.hsTrans()[celli] += np0*dhsTrans;
+        cloud.hsTrans()[this->cell()] += np0*dhsTrans;
 
         // Update sensible enthalpy coefficient
-        cloud.hsCoeff()[celli] += np0*Sph;
+        cloud.hsCoeff()[this->cell()] += np0*Sph;
 
         // Update radiation fields
         if (cloud.radiation())
         {
             const scalar ap = this->areaP();
             const scalar T4 = pow4(T0);
-            cloud.radAreaP()[celli] += dt*np0*ap;
-            cloud.radT4()[celli] += dt*np0*T4;
-            cloud.radAreaPT4()[celli] += dt*np0*ap*T4;
+            cloud.radAreaP()[this->cell()] += dt*np0*ap;
+            cloud.radT4()[this->cell()] += dt*np0*T4;
+            cloud.radAreaPT4()[this->cell()] += dt*np0*ap*T4;
         }
     }
 }
@@ -268,7 +254,6 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     TrackCloudType& cloud,
     trackingData& td,
     const scalar dt,
-    const label celli,
     const scalar Re,
     const scalar Pr,
     const scalar kappa,

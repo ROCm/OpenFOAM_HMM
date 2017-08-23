@@ -289,7 +289,6 @@ protected:
             TrackCloudType& cloud,
             trackingData& td,
             const scalar dt,           // timestep
-            const label celli,         // owner cell
             const scalar Re,           // Reynolds number
             const scalar mu,           // local carrier viscosity
             const scalar mass,         // mass
@@ -567,8 +566,7 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const scalar dt,
-                const label celli
+                const scalar dt
             );
 
             //- Correct cell values using latest transfer information
@@ -577,8 +575,7 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const scalar dt,
-                const label celli
+                const scalar dt
             );
 
             //- Update parcel properties over the time interval
@@ -587,8 +584,7 @@ public:
             (
                 TrackCloudType& cloud,
                 trackingData& td,
-                const scalar dt,
-                const label celli
+                const scalar dt
             );
 
 
@@ -613,10 +609,7 @@ public:
             (
                 const polyPatch& p,
                 TrackCloudType& cloud,
-                trackingData& td,
-                const label patchi,
-                const scalar trackFraction,
-                const tetIndices& tetIs
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a
@@ -634,16 +627,6 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                TrackCloudType& cloud,
-                trackingData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            template<class TrackCloudType>
-            void hitPatch
-            (
-                const polyPatch&,
                 TrackCloudType& cloud,
                 trackingData& td
             );

@@ -264,10 +264,7 @@ public:
             (
                 const polyPatch&,
                 TrackCloudType& cloud,
-                trackingData& td,
-                const label patchi,
-                const scalar trackFraction,
-                const tetIndices& tetIs
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a
@@ -285,16 +282,6 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                TrackCloudType& cloud,
-                trackingData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            template<class TrackCloudType>
-            void hitPatch
-            (
-                const polyPatch&,
                 TrackCloudType& cloud,
                 trackingData& td
             );

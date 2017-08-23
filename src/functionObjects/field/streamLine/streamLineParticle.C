@@ -269,10 +269,7 @@ bool Foam::streamLineParticle::hitPatch
 (
     const polyPatch&,
     streamLineParticleCloud& cloud,
-    trackingData& td,
-    const label patchi,
-    const scalar trackFraction,
-    const tetIndices& tetIs
+    trackingData& td
 )
 {
     // Disable generic patch interaction
@@ -328,6 +325,32 @@ void Foam::streamLineParticle::hitCyclicPatch
 }
 
 
+void Foam::streamLineParticle::hitCyclicAMIPatch
+(
+    const cyclicAMIPolyPatch&,
+    streamLineParticleCloud& cloud,
+    trackingData& td,
+    const vector&
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
+void Foam::streamLineParticle::hitCyclicACMIPatch
+(
+    const cyclicACMIPolyPatch&,
+    streamLineParticleCloud& cloud,
+    trackingData& td,
+    const vector&
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
 void Foam::streamLineParticle::hitProcessorPatch
 (
     const processorPolyPatch&,
@@ -343,19 +366,6 @@ void Foam::streamLineParticle::hitProcessorPatch
 void Foam::streamLineParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    streamLineParticleCloud& cloud,
-    trackingData& td,
-    const tetIndices&
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-void Foam::streamLineParticle::hitPatch
-(
-    const polyPatch& wpp,
     streamLineParticleCloud& cloud,
     trackingData& td
 )

@@ -125,10 +125,7 @@ bool Foam::findCellParticle::hitPatch
 (
     const polyPatch&,
     Cloud<findCellParticle>& cloud,
-    trackingData& td,
-    const label patchi,
-    const scalar trackFraction,
-    const tetIndices& tetIs
+    trackingData& td
 )
 {
     return false;
@@ -183,6 +180,32 @@ void Foam::findCellParticle::hitCyclicPatch
 }
 
 
+void Foam::findCellParticle::hitCyclicAMIPatch
+(
+    const cyclicAMIPolyPatch&,
+    Cloud<findCellParticle>& cloud,
+    trackingData& td,
+    const vector&
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
+void Foam::findCellParticle::hitCyclicACMIPatch
+(
+    const cyclicACMIPolyPatch&,
+    Cloud<findCellParticle>& cloud,
+    trackingData& td,
+    const vector&
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
 void Foam::findCellParticle::hitProcessorPatch
 (
     const processorPolyPatch&,
@@ -198,19 +221,6 @@ void Foam::findCellParticle::hitProcessorPatch
 void Foam::findCellParticle::hitWallPatch
 (
     const wallPolyPatch& wpp,
-    Cloud<findCellParticle>& cloud,
-    trackingData& td,
-    const tetIndices&
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-void Foam::findCellParticle::hitPatch
-(
-    const polyPatch& wpp,
     Cloud<findCellParticle>& cloud,
     trackingData& td
 )

@@ -203,10 +203,7 @@ public:
             (
                 const polyPatch&,
                 solidParticleCloud& cloud,
-                trackingData& td,
-                const label patchi,
-                const scalar trackFraction,
-                const tetIndices& tetIs
+                trackingData& td
             );
 
             //- Overridable function to handle the particle hitting a
@@ -222,15 +219,6 @@ public:
             void hitWallPatch
             (
                 const wallPolyPatch&,
-                solidParticleCloud& cloud,
-                trackingData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            void hitPatch
-            (
-                const polyPatch&,
                 solidParticleCloud& cloud,
                 trackingData& td
             );
