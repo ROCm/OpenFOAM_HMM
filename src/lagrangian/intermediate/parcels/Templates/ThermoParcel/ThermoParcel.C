@@ -35,19 +35,18 @@ template<class TrackCloudType>
 void Foam::ThermoParcel<ParcelType>::setCellValues
 (
     TrackCloudType& cloud,
-    trackingData& td,
-    const scalar dt
+    trackingData& td
 )
 {
-    ParcelType::setCellValues(cloud, td, dt);
+    ParcelType::setCellValues(cloud, td);
 
     tetIndices tetIs = this->currentTetIndices();
 
-    Cpc_ = td.CpInterp().interpolate(this->coordinates(), tetIs);
+    td.Cpc() = td.CpInterp().interpolate(this->coordinates(), tetIs);
 
-    Tc_ = td.TInterp().interpolate(this->coordinates(), tetIs);
+    td.Tc() = td.TInterp().interpolate(this->coordinates(), tetIs);
 
-    if (Tc_ < cloud.constProps().TMin())
+    if (td.Tc() < cloud.constProps().TMin())
     {
         if (debug)
         {
@@ -56,7 +55,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
                 << " to " << cloud.constProps().TMin() <<  nl << endl;
         }
 
-        Tc_ = cloud.constProps().TMin();
+        td.Tc() = cloud.constProps().TMin();
     }
 }
 
@@ -71,7 +70,7 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 )
 {
     const label celli = this->cell();
-    const scalar massCell = this->massCell(celli);
+    const scalar massCell = this->massCell(td);
 
     td.Uc() += cloud.UTrans()[celli]/massCell;
 
@@ -79,9 +78,9 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 //    Tc_ = td.TInterp().interpolate(this->coordinates(), tetIs);
 
     const scalar CpMean = td.CpInterp().psi()[celli];
-    Tc_ += cloud.hsTrans()[celli]/(CpMean*massCell);
+    td.Tc() += cloud.hsTrans()[celli]/(CpMean*massCell);
 
-    if (Tc_ < cloud.constProps().TMin())
+    if (td.Tc() < cloud.constProps().TMin())
     {
         if (debug)
         {
@@ -90,7 +89,7 @@ void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
                 << " to " << cloud.constProps().TMin() <<  nl << endl;
         }
 
-        Tc_ = cloud.constProps().TMin();
+        td.Tc() = cloud.constProps().TMin();
     }
 }
 
@@ -110,7 +109,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
 ) const
 {
     // Surface temperature using two thirds rule
-    Ts = (2.0*T + Tc_)/3.0;
+    Ts = (2.0*T + td.Tc())/3.0;
 
     if (Ts < cloud.constProps().TMin())
     {
@@ -125,7 +124,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     }
 
     // Assuming thermo props vary linearly with T for small d(T)
-    const scalar TRatio = Tc_/Ts;
+    const scalar TRatio = td.Tc()/Ts;
 
     rhos = td.rhoc()*TRatio;
 
@@ -133,7 +132,7 @@ void Foam::ThermoParcel<ParcelType>::calcSurfaceValues
     mus = td.muInterp().interpolate(this->coordinates(), tetIs)/TRatio;
     kappas = td.kappaInterp().interpolate(this->coordinates(), tetIs)/TRatio;
 
-    Pr = Cpc_*mus/kappas;
+    Pr = td.Cpc()*mus/kappas;
     Pr = max(ROOTVSMALL, Pr);
 }
 
@@ -287,7 +286,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     htc = max(htc, ROOTVSMALL);
     const scalar As = this->areaS(d);
 
-    scalar ap = Tc_ + Sh/(As*htc);
+    scalar ap = td.Tc() + Sh/(As*htc);
     const scalar bp = 6.0*htc/max(rho*d*Cp_, ROOTVSMALL);
 
     if (cloud.radiation())
@@ -320,7 +319,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     Sph = dt*htc*As;
 
-    dhsTrans += Sph*(Tres.average() - Tc_);
+    dhsTrans += Sph*(Tres.average() - td.Tc());
 
     return Tnew;
 }
@@ -336,9 +335,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 :
     ParcelType(p),
     T_(p.T_),
-    Cp_(p.Cp_),
-    Tc_(p.Tc_),
-    Cpc_(p.Cpc_)
+    Cp_(p.Cp_)
 {}
 
 
@@ -351,9 +348,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 :
     ParcelType(p, mesh),
     T_(p.T_),
-    Cp_(p.Cp_),
-    Tc_(p.Tc_),
-    Cpc_(p.Cpc_)
+    Cp_(p.Cp_)
 {}
 
 

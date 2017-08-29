@@ -35,11 +35,10 @@ template<class TrackCloudType>
 void Foam::SprayParcel<ParcelType>::setCellValues
 (
     TrackCloudType& cloud,
-    trackingData& td,
-    const scalar dt
+    trackingData& td
 )
 {
-    ParcelType::setCellValues(cloud, td, dt);
+    ParcelType::setCellValues(cloud, td);
 }
 
 
@@ -81,7 +80,7 @@ void Foam::SprayParcel<ParcelType>::calc
     // Check if we have critical or boiling conditions
     scalar TMax = liquids.Tc(X0);
     const scalar T0 = this->T();
-    const scalar pc0 = this->pc_;
+    const scalar pc0 = td.pc();
     if (liquids.pv(pc0, T0, X0) >= pc0*0.999)
     {
         // Set TMax to boiling temperature
@@ -112,14 +111,14 @@ void Foam::SprayParcel<ParcelType>::calc
         scalar T1 = this->T();
         scalarField X1(liquids.X(this->Y()));
 
-        this->Cp() = liquids.Cp(this->pc_, T1, X1);
+        this->Cp() = liquids.Cp(td.pc(), T1, X1);
 
-        sigma_ = liquids.sigma(this->pc_, T1, X1);
+        sigma_ = liquids.sigma(td.pc(), T1, X1);
 
-        scalar rho1 = liquids.rho(this->pc_, T1, X1);
+        scalar rho1 = liquids.rho(td.pc(), T1, X1);
         this->rho() = rho1;
 
-        mu_ = liquids.mu(this->pc_, T1, X1);
+        mu_ = liquids.mu(td.pc(), T1, X1);
 
         scalar d1 = this->d()*cbrt(rho0/rho1);
         this->d() = d1;
@@ -164,12 +163,12 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
     const auto& liquids = composition.liquids();
 
     // Average molecular weight of carrier mix - assumes perfect gas
-    scalar Wc = td.rhoc()*RR*this->Tc()/this->pc();
+    scalar Wc = td.rhoc()*RR*td.Tc()/td.pc();
     scalar R = RR/Wc;
-    scalar Tav = atomization.Taverage(this->T(), this->Tc());
+    scalar Tav = atomization.Taverage(this->T(), td.Tc());
 
     // Calculate average gas density based on average temperature
-    scalar rhoAv = this->pc()/(R*Tav);
+    scalar rhoAv = td.pc()/(R*Tav);
 
     scalar soi = cloud.injectors().timeStart();
     scalar currentTime = cloud.db().time().value();
@@ -235,12 +234,12 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     }
 
     // Average molecular weight of carrier mix - assumes perfect gas
-    scalar Wc = td.rhoc()*RR*this->Tc()/this->pc();
+    scalar Wc = td.rhoc()*RR*td.Tc()/td.pc();
     scalar R = RR/Wc;
-    scalar Tav = cloud.atomization().Taverage(this->T(), this->Tc());
+    scalar Tav = cloud.atomization().Taverage(this->T(), td.Tc());
 
     // Calculate average gas density based on average temperature
-    scalar rhoAv = this->pc()/(R*Tav);
+    scalar rhoAv = td.pc()/(R*Tav);
     scalar muAv = td.muc();
     vector Urel = this->U() - td.Uc();
     scalar Urmag = mag(Urel);
@@ -314,7 +313,7 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         child->injector() = this->injector();
         child->tMom() = massChild/(Fcp.Sp() + Fncp.Sp());
         child->user() = 0.0;
-        child->setCellValues(cloud, td, dt);
+        child->calcDispersion(cloud, td, dt);
 
         cloud.addParticle(child);
     }
@@ -337,7 +336,7 @@ Foam::scalar Foam::SprayParcel<ParcelType>::chi
 
     scalar chi = 0.0;
     scalar T0 = this->T();
-    scalar p0 = this->pc();
+    scalar p0 = td.pc();
     scalar pAmb = cloud.pAmbient();
 
     scalar pv = liquids.pv(p0, T0, X);

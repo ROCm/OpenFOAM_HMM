@@ -42,8 +42,7 @@ template<class TrackCloudType>
 void Foam::KinematicParcel<ParcelType>::setCellValues
 (
     TrackCloudType& cloud,
-    trackingData& td,
-    const scalar dt
+    trackingData& td
 )
 {
     tetIndices tetIs = this->currentTetIndices();
@@ -65,8 +64,18 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
     td.Uc() = td.UInterp().interpolate(this->coordinates(), tetIs);
 
     td.muc() = td.muInterp().interpolate(this->coordinates(), tetIs);
+}
 
-    // Apply dispersion components to carrier phase velocity
+
+template<class ParcelType>
+template<class TrackCloudType>
+void Foam::KinematicParcel<ParcelType>::calcDispersion
+(
+    TrackCloudType& cloud,
+    trackingData& td,
+    const scalar dt
+)
+{
     td.Uc() = cloud.dispersion().update
     (
         dt,
@@ -307,7 +316,9 @@ bool Foam::KinematicParcel<ParcelType>::move
         if (dt > ROOTVSMALL)
         {
             // Update cell based properties
-            p.setCellValues(cloud, ttd, dt);
+            p.setCellValues(cloud, ttd);
+
+            p.calcDispersion(cloud, ttd, dt);
 
             if (solution.cellValueSourceCorrection())
             {

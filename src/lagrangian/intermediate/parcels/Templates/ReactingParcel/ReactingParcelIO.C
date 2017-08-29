@@ -55,8 +55,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 :
     ParcelType(mesh, is, readFields),
     mass0_(0.0),
-    Y_(0),
-    pc_(0.0)
+    Y_(0)
 {
     if (readFields)
     {

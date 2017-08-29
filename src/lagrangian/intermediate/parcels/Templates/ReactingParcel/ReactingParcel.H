@@ -128,6 +128,12 @@ public:
                 autoPtr<interpolation<scalar>> pInterp_;
 
 
+            // Cached continuous phase properties
+
+                //- Pressure [Pa]
+                scalar pc_;
+
+
     public:
 
         typedef typename ParcelType::trackingData::trackPart trackPart;
@@ -148,6 +154,12 @@ public:
             //- Return const access to the interpolator for continuous phase
             //  pressure field
             inline const interpolation<scalar>& pInterp() const;
+
+            //- Return the continuous phase pressure
+            inline scalar pc() const;
+
+            //- Access the continuous phase pressure
+            inline scalar& pc();
     };
 
 
@@ -162,12 +174,6 @@ protected:
 
             //- Mass fractions of mixture []
             scalarField Y_;
-
-
-        // Cell-based quantities
-
-            //- Pressure [Pa]
-            scalar pc_;
 
 
     // Protected Member Functions
@@ -336,12 +342,6 @@ public:
             //- Return const access to mass fractions of mixture []
             inline const scalarField& Y() const;
 
-            //- Return the owner cell pressure [Pa]
-            inline scalar pc() const;
-
-            //- Return reference to the owner cell pressure [Pa]
-            inline scalar& pc();
-
 
         // Edit
 
@@ -356,12 +356,7 @@ public:
 
             //- Set cell values
             template<class TrackCloudType>
-            void setCellValues
-            (
-                TrackCloudType& cloud,
-                trackingData& td,
-                const scalar dt
-            );
+            void setCellValues(TrackCloudType& cloud, trackingData& td);
 
             //- Correct cell values using latest transfer information
             template<class TrackCloudType>
