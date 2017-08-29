@@ -55,7 +55,7 @@ namespace surfaceFilmModels
 
 defineTypeNameAndDebug(thermoSingleLayer, 0);
 
-addToRunTimeSelectionTable(surfaceFilmModel, thermoSingleLayer, mesh);
+addToRunTimeSelectionTable(surfaceFilmRegionModel, thermoSingleLayer, mesh);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 

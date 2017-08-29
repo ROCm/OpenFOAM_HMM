@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ namespace regionModels
 {
     namespace surfaceFilmModels
     {
-        class surfaceFilmModel;
+        class surfaceFilmRegionModel;
     }
 }
 
@@ -117,7 +117,7 @@ protected:
         (
             const label filmPatchi,
             const label primaryPatchi,
-            const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
+            const regionModels::surfaceFilmModels::surfaceFilmRegionModel&
         );
 
         //- Set the individual parcel properties
