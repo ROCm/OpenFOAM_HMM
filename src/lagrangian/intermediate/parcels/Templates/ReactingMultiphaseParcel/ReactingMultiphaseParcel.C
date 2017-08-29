@@ -198,7 +198,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // Calc surface values
     scalar Ts, rhos, mus, Prs, kappas;
     this->calcSurfaceValues(cloud, td, T0, Ts, rhos, mus, Prs, kappas);
-    scalar Res = this->Re(U0, d0, rhos, mus);
+    scalar Res = this->Re(rhos, U0, td.Uc(), d0, mus);
 
 
     // Sources
@@ -390,7 +390,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
     // Correct surface values due to emitted species
     this->correctSurfaceValues(cloud, td, Ts, Cs, rhos, mus, Prs, kappas);
-    Res = this->Re(U0, this->d_, rhos, mus);
+    Res = this->Re(rhos, U0, td.Uc(), this->d_, mus);
 
 
     // 3. Compute heat- and momentum transfers
@@ -572,7 +572,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     {
         // Molar average molecular weight of carrier mix
         const scalar Wc =
-            max(SMALL, this->rhoc_*RR*this->Tc_/this->pc_);
+            max(SMALL, td.rhoc()*RR*this->Tc_/this->pc_);
 
         // Note: hardcoded gaseous diffusivities for now
         // TODO: add to carrier thermo
@@ -649,7 +649,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
         T,
         this->Tc_,
         this->pc_,
-        this->rhoc_,
+        td.rhoc(),
         mass,
         YGas,
         YLiquid,

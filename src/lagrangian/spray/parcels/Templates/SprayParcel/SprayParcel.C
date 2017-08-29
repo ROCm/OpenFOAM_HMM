@@ -164,7 +164,7 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
     const auto& liquids = composition.liquids();
 
     // Average molecular weight of carrier mix - assumes perfect gas
-    scalar Wc = this->rhoc_*RR*this->Tc()/this->pc();
+    scalar Wc = td.rhoc()*RR*this->Tc()/this->pc();
     scalar R = RR/Wc;
     scalar Tav = atomization.Taverage(this->T(), this->Tc());
 
@@ -229,32 +229,27 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         return;
     }
 
-    typedef typename TrackCloudType::parcelType parcelType;
-    typedef typename TrackCloudType::forceType forceType;
-
-    const parcelType& p = static_cast<const parcelType&>(*this);
-    const forceType& forces = cloud.forces();
-
     if (breakup.solveOscillationEq())
     {
         solveTABEq(cloud, td, dt);
     }
 
     // Average molecular weight of carrier mix - assumes perfect gas
-    scalar Wc = this->rhoc()*RR*this->Tc()/this->pc();
+    scalar Wc = td.rhoc()*RR*this->Tc()/this->pc();
     scalar R = RR/Wc;
     scalar Tav = cloud.atomization().Taverage(this->T(), this->Tc());
 
     // Calculate average gas density based on average temperature
     scalar rhoAv = this->pc()/(R*Tav);
-    scalar muAv = this->muc();
-    vector Urel = this->U() - this->Uc();
+    scalar muAv = td.muc();
+    vector Urel = this->U() - td.Uc();
     scalar Urmag = mag(Urel);
-    scalar Re = this->Re(this->U(), this->d(), rhoAv, muAv);
+    scalar Re = this->Re(rhoAv, this->U(), td.Uc(), this->d(), muAv);
 
     const scalar mass = p.mass();
-    const forceSuSp Fcp = forces.calcCoupled(p, dt, mass, Re, muAv);
-    const forceSuSp Fncp = forces.calcNonCoupled(p, dt, mass, Re, muAv);
+    const typename TrackCloudType::forceType& forces = cloud.forces();
+    const forceSuSp Fcp = forces.calcCoupled(p, ttd, dt, mass, Re, muAv);
+    const forceSuSp Fncp = forces.calcNonCoupled(p, ttd, dt, mass, Re, muAv);
     this->tMom() = mass/(Fcp.Sp() + Fncp.Sp() + ROOTVSMALL);
 
     const vector g = cloud.g().value();
@@ -301,9 +296,9 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
         child->nParticle() = parcelMassChild/massChild;
 
         const forceSuSp Fcp =
-            forces.calcCoupled(*child, dt, massChild, Re, muAv);
+            forces.calcCoupled(*child, ttd, dt, massChild, Re, muAv);
         const forceSuSp Fncp =
-            forces.calcNonCoupled(*child, dt, massChild, Re, muAv);
+            forces.calcNonCoupled(*child, ttd, dt, massChild, Re, muAv);
 
         child->age() = 0.0;
         child->liquidCore() = 0.0;
@@ -392,8 +387,8 @@ void Foam::SprayParcel<ParcelType>::solveTABEq
     if (omega2 > 0)
     {
         scalar omega = sqrt(omega2);
-        scalar rhoc = this->rhoc();
-        scalar We = this->We(this->U(), r, rhoc, sigma_)/TABtwoWeCrit;
+        scalar We =
+            this->We(td.rhoc(), this->U(), td.Uc(), r, sigma_)/TABtwoWeCrit;
 
         // Initial values for y and yDot
         scalar y0 = this->y() - We;
