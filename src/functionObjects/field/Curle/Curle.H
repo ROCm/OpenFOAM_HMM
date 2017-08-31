@@ -33,7 +33,7 @@ Description
     Curle's analogy is implemented as:
 
     \f[
-        p' = 4 \frac{\pi}{c_0}\frac{\vec d}{|\vec d|^2}\frac{d(F)}{d(t)} 
+        p' = \frac{1}{4 \pi c_0}\frac{\vec d}{|\vec d|^2}\frac{d(F)}{d(t)}
     \f]
 
 
@@ -68,8 +68,8 @@ Usage
         type         | Type name: Curle             | yes      |
         field        | Pressure field name          | no       | p
         result       | Acoustic pressure field name | no       | Curle
-        patches      | Sound generation patch names | yes      | 
-        c0           | Reference speed of sound     | yes      | 
+        patches      | Sound generation patch names | yes      |
+        c0           | Reference speed of sound     | yes      |
     \endtable
 
 
