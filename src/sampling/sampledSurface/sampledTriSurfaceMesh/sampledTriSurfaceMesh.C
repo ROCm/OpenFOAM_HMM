@@ -683,7 +683,8 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
-        )
+        ),
+        dict
     ),
     sampleSource_(samplingSourceNames_.lookup("source", dict)),
     needsUpdate_(true),
@@ -779,15 +780,28 @@ bool Foam::sampledTriSurfaceMesh::update()
         surface_.triSurface::meshPoints()
     );
 
-    bb.intersect(mesh().bounds());
+    // Check for overlap with (global!) mesh bb
+    const bool intersect = bb.intersect(mesh().bounds());
 
-    // Extend a bit
-    const vector span(bb.span());
+    if (!intersect)
+    {
+        // Surface and mesh do not overlap at all. Guarantee a valid
+        // bounding box so we don't get any 'invalid bounding box' errors.
+        bb = treeBoundBox(mesh().bounds());
+        const vector span(bb.span());
 
-    bb.min() -= 0.5*span;
-    bb.max() += 0.5*span;
+        bb.min() += (0.5-1e-6)*span;
+        bb.max() -= (0.5-1e-6)*span;
+    }
+    else
+    {
+        // Extend a bit
+        const vector span(bb.span());
+        bb.min() -= 0.5*span;
+        bb.max() += 0.5*span;
 
-    bb.inflate(1e-6);
+        bb.inflate(1e-6);
+    }
 
     // Mesh search engine, no triangulation of faces.
     meshSearch meshSearcher(mesh(), bb, polyMesh::FACE_PLANES);

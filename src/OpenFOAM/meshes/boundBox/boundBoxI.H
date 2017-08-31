@@ -59,7 +59,16 @@ inline Foam::boundBox::boundBox(Istream& is)
 
 inline bool Foam::boundBox::empty() const
 {
-    return (min_ > max_);
+    // Note: cannot use min_ > max_ here since that tests for -all- components
+    // of min_ being larger than max_.
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        if (min_[dir] > max_[dir])
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 

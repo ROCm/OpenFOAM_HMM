@@ -791,7 +791,9 @@ bool Foam::functionObjectList::read()
                 FatalError.throwExceptions(throwingError);
                 FatalIOError.throwExceptions(throwingIOerr);
 
-                if (foPtr.valid())
+                // If one processor only has thrown an exception (so exited the
+                // constructor) invalidate the whole functionObject
+                if (returnReduce(foPtr.valid(), andOp<bool>()))
                 {
                     objPtr = foPtr.ptr();
                 }
