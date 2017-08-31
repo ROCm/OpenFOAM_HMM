@@ -35,8 +35,77 @@ License
 #include "processorPolyPatch.H"
 #include "surfaceWriter.H"
 #include "checkTools.H"
+#include "treeBoundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class PatchType>
+void Foam::checkPatch
+(
+    const bool allGeometry,
+    const word& name,
+    const PatchType& pp,
+    pointSet& points
+)
+{
+    Info<< "    "
+        << setw(20) << name
+        << setw(9) << returnReduce(pp.size(), sumOp<label>())
+        << setw(9) << returnReduce(pp.nPoints(), sumOp<label>());
+
+    if (!Pstream::parRun())
+    {
+        typedef typename PatchType::surfaceTopo TopoType;
+        TopoType pTyp = pp.surfaceType();
+
+        if (pp.empty())
+        {
+            Info<< setw(34) << "ok (empty)";
+        }
+        else if (pTyp == TopoType::MANIFOLD)
+        {
+            if (pp.checkPointManifold(true, &points))
+            {
+                Info<< setw(34)
+                    << "multiply connected (shared point)";
+            }
+            else
+            {
+                Info<< setw(34) << "ok (closed singly connected)";
+            }
+
+            // Add points on non-manifold edges to make set complete
+            pp.checkTopology(false, &points);
+        }
+        else
+        {
+            pp.checkTopology(false, &points);
+
+            if (pTyp == TopoType::OPEN)
+            {
+                Info<< setw(34)
+                    << "ok (non-closed singly connected)";
+            }
+            else
+            {
+                Info<< setw(34)
+                    << "multiply connected (shared edge)";
+            }
+        }
+    }
+
+    if (allGeometry)
+    {
+        const labelList& mp = pp.meshPoints();
+
+        if (returnReduce(mp.size(), sumOp<label>()) > 0)
+        {
+            boundBox bb(pp.points(), mp, true); // reduce
+            Info<< ' ' << bb;
+        }
+    }
+}
+
 
 Foam::label Foam::checkTopology
 (
@@ -466,6 +535,13 @@ Foam::label Foam::checkTopology
         }
     }
 
+    // Non-manifold points
+    pointSet points
+    (
+        mesh,
+        "nonManifoldPoints",
+        mesh.nPoints()/1000
+    );
 
     {
         if (!Pstream::parRun())
@@ -478,16 +554,7 @@ Foam::label Foam::checkTopology
             Info<< "\nChecking basic patch addressing..." << endl;
         }
 
-
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-        // Non-manifold points
-        pointSet points
-        (
-            mesh,
-            "nonManifoldPoints",
-            mesh.nPoints()/1000
-        );
 
         Pout.setf(ios_base::left);
 
@@ -511,80 +578,24 @@ Foam::label Foam::checkTopology
 
             if (!isA<processorPolyPatch>(pp))
             {
-                Info<< "    "
-                    << setw(20) << pp.name()
-                    << setw(9) << returnReduce(pp.size(), sumOp<label>())
-                    << setw(9) << returnReduce(pp.nPoints(), sumOp<label>());
-
-                if (!Pstream::parRun())
-                {
-                    primitivePatch::surfaceTopo pTyp = pp.surfaceType();
-
-                    if (pp.empty())
-                    {
-                        Info<< setw(34) << "ok (empty)";
-                    }
-                    else if (pTyp == primitivePatch::MANIFOLD)
-                    {
-                        if (pp.checkPointManifold(true, &points))
-                        {
-                            Info<< setw(34)
-                                << "multiply connected (shared point)";
-                        }
-                        else
-                        {
-                            Info<< setw(34) << "ok (closed singly connected)";
-                        }
-
-                        // Add points on non-manifold edges to make set complete
-                        pp.checkTopology(false, &points);
-                    }
-                    else
-                    {
-                        pp.checkTopology(false, &points);
-
-                        if (pTyp == primitivePatch::OPEN)
-                        {
-                            Info<< setw(34)
-                                << "ok (non-closed singly connected)";
-                        }
-                        else
-                        {
-                            Info<< setw(34)
-                                << "multiply connected (shared edge)";
-                        }
-                    }
-                }
-
-                if (allGeometry)
-                {
-                    const labelList& mp = pp.meshPoints();
-
-                    if (returnReduce(mp.size(), sumOp<label>()) > 0)
-                    {
-                        boundBox bb(pp.points(), mp, true); // reduce
-                        Info<< ' ' << bb;
-                    }
-                }
+                checkPatch(allGeometry, pp.name(), pp, points);
                 Info<< endl;
             }
-        }
-
-        if (points.size())
-        {
-            Info<< "  <<Writing " << returnReduce(points.size(), sumOp<label>())
-                << " conflicting points to set "
-                << points.name() << endl;
-
-            points.instance() = mesh.pointsInstance();
-            points.write();
         }
 
         //Info.setf(ios_base::right);
     }
 
     {
-        Info<< "\nChecking basic faceZone addressing..." << endl;
+        if (!Pstream::parRun())
+        {
+            Info<< "\nChecking faceZone topology for multiply connected"
+                << " surfaces..." << endl;
+        }
+        else
+        {
+            Info<< "\nChecking basic faceZone addressing..." << endl;
+        }
 
         Pout.setf(ios_base::left);
 
@@ -595,43 +606,42 @@ Foam::label Foam::checkTopology
             Info<< "    "
                 << setw(20) << "FaceZone"
                 << setw(9) << "Faces"
-                << setw(9) << "Points"
-                << setw(13) << "BoundingBox" <<endl;
+                << setw(9) << "Points";
 
-            const pointField& points = mesh.points();
-            const faceList& faces = mesh.faces();
+            if (!Pstream::parRun())
+            {
+                Info<< setw(34) << "Surface topology";
+            }
+            if (allGeometry)
+            {
+                Info<< " Bounding box";
+            }
+            Info<< endl;
 
-            DynamicList<point> localPoints;
             forAll(faceZones, zoneI)
             {
-                const faceZone& fZone = faceZones[zoneI];
-                localPoints.setCapacity(10*faces.size());
-
-                forAll(fZone, i)
-                {
-                    const label faceI = fZone[i];
-                    const face& f = faces[faceI];
-                    const pointField facePoints(f.points(points));
-
-                    forAll(facePoints, pointI)
-                    {
-                        const point& pt = facePoints[pointI];
-                        localPoints.append(pt);
-                    }
-                }
-                boundBox bb(localPoints, true);
-
-                Info<< "    "
-                    << setw(20) << fZone.name()
-                    << setw(9) << returnReduce(fZone.size(), sumOp<label>())
-                    << setw(9) 
-                    << returnReduce(localPoints.size(), sumOp<label>())
-                    << setw(3) << bb << endl;
+                const faceZone& fz = faceZones[zoneI];
+                checkPatch(allGeometry, fz.name(), fz(), points);
+                Info<< endl;
             }
         }
         else
         {
             Info<< "    No faceZones found."<<endl;
+        }
+    }
+
+    label nPoints = returnReduce(points.size(), sumOp<label>());
+
+    if (nPoints)
+    {
+        Info<< "  <<Writing " << nPoints
+            << " conflicting points to set " << points.name() << endl;
+        points.instance() = mesh.pointsInstance();
+        points.write();
+        if (setWriter.valid())
+        {
+            mergeAndWrite(setWriter, points);
         }
     }
 
@@ -651,37 +661,38 @@ Foam::label Foam::checkTopology
                 << setw(9) << "Points"
                 << setw(13) << "BoundingBox" <<endl;
 
-            const pointField& points = mesh.points();
             const cellList& cells = mesh.cells();
             const faceList& faces = mesh.faces();
+            treeBoundBox bb(boundBox::invertedBox);
+            PackedBoolList isZonePoint(mesh.nPoints());
 
-            DynamicList<point> localPoints;
             forAll(cellZones, zoneI)
             {
                 const cellZone& cZone = cellZones[zoneI];
-                localPoints.setCapacity(10*faces.size());
 
                 forAll(cZone, i)
                 {
                     const label cellI = cZone[i];
-                    const cell& c = cells[cellI];
-                    const pointField cellPoints(c.points(faces, points));
-
-                    forAll(cellPoints, pointI)
+                    const cell& cFaces = cells[cellI];
+                    forAll(cFaces, cFacei)
                     {
-                        const point& pt = cellPoints[pointI];
-                        localPoints.append(pt);
+                        const face& f = faces[cFaces[cFacei]];
+                        forAll(f, fp)
+                        {
+                            if (isZonePoint.set(f[fp]))
+                            {
+                                bb.add(mesh.points()[f[fp]]);
+                            }
+                         }
                     }
                 }
-                boundBox bb(localPoints, true);
 
                 Info<< "    "
                     << setw(20) << cZone.name()
                     << setw(9) << returnReduce(cZone.size(), sumOp<label>())
                     << setw(9) 
-                    << returnReduce(localPoints.size(), sumOp<label>())
+                    << returnReduce(isZonePoint.count(), sumOp<label>())
                     << setw(3) << bb << endl;
-
             }
         }
         else
