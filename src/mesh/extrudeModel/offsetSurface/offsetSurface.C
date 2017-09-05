@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
+#include "barycentric2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,9 +116,7 @@ point offsetSurface::operator()
 
         const triSurface& base = baseSurfPtr_();
         const triPointRef baseTri(base[triI].tri(base.points()));
-
-        FixedList<scalar, 3> bary;
-        baseTri.barycentric(surfacePoint, bary);
+        const barycentric2D bary = baseTri.pointToBarycentric(surfacePoint);
 
         const triSurface& offset = offsetSurfPtr_();
         const triPointRef offsetTri(offset[triI].tri(offset.points()));
@@ -125,8 +124,8 @@ point offsetSurface::operator()
         const point offsetPoint
         (
             bary[0]*offsetTri.a()
-           +bary[1]*offsetTri.b()
-           +bary[2]*offsetTri.c()
+          + bary[1]*offsetTri.b()
+          + bary[2]*offsetTri.c()
         );
 
         point interpolatedPoint

@@ -88,7 +88,7 @@ class particle
     // Private member data
 
         //- Size in bytes of the position data
-        static const std::size_t sizeofPosition_;
+        static const std::size_t sizeofPosition;
 
         //- Size in bytes of the fields
         static const std::size_t sizeofFields;
@@ -180,8 +180,6 @@ private:
         label origId_;
 
 
-private:
-
     // Private Member Functions
 
         // Tetrahedra functions
@@ -197,8 +195,8 @@ private:
 
             //- Get the transformation associated with the current tet. This
             //  will convert a barycentric position within the tet to a
-            //  cartesian position in the global coordinate system. The
-            //  conversion is x = A & y, where x is the cartesian position, y is
+            //  Cartesian position in the global coordinate system. The
+            //  conversion is x = A & y, where x is the Cartesian position, y is
             //  the barycentric position and A is the transformation tensor.
             barycentricTensor stationaryTetTransform() const;
 
@@ -398,7 +396,7 @@ public:
             "{vector label label scalar label label label label}"
         );
 
-        //- Cumulative particle counter - used to provode unique ID
+        //- Cumulative particle counter - used to provide unique ID
         static label particleCount_;
 
 
@@ -429,7 +427,7 @@ public:
         //- Construct as a copy
         particle(const particle& p);
 
-        //- Construct as a copy with refernce to a new mesh
+        //- Construct as a copy with reference to a new mesh
         particle(const particle& p, const polyMesh& mesh);
 
         //- Construct a clone
@@ -610,7 +608,7 @@ public:
             TrackData& td
         );
 
-        //- Convenience function. Cobines trackToFace and hitFace
+        //- Convenience function. Combines trackToFace and hitFace
         template<class TrackData>
         void trackToAndHitFace
         (
@@ -674,7 +672,7 @@ public:
 
     // Decompose and reconstruct
 
-        //- Return the tet point approproate for decomposition or reconstruction
+        //- Return the tet point appropriate for decomposition or reconstruction
         //  to or from the given mesh.
         label procTetPt
         (

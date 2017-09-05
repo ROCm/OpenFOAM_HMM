@@ -53,7 +53,6 @@ typedef Barycentric<scalar> barycentric;
 
 //- Generate a random barycentric coordinate within the unit tetrahedron
 barycentric barycentric01(Random& rndGen);
-barycentric barycentric01(cachedRandom& rndGen);
 
 
 template<>

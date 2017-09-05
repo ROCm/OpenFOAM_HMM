@@ -31,7 +31,7 @@ License
 Foam::string Foam::particle::propertyList_  = Foam::particle::propertyList();
 Foam::string Foam::particle::propertyTypes_ = Foam::particle::propertyTypes();
 
-const std::size_t Foam::particle::sizeofPosition_
+const std::size_t Foam::particle::sizeofPosition
 (
     offsetof(particle, facei_) - offsetof(particle, coordinates_)
 );
@@ -69,11 +69,11 @@ Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
     {
         if (readFields)
         {
-            is.read(reinterpret_cast<char*>(&coordinates_), sizeofFields_);
+            is.read(reinterpret_cast<char*>(&coordinates_), sizeofFields);
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&coordinates_), sizeofPosition_);
+            is.read(reinterpret_cast<char*>(&coordinates_), sizeofPosition);
         }
     }
 
@@ -93,7 +93,7 @@ void Foam::particle::writePosition(Ostream& os) const
     }
     else
     {
-        os.write(reinterpret_cast<const char*>(&coordinates_), sizeofPosition_);
+        os.write(reinterpret_cast<const char*>(&coordinates_), sizeofPosition);
     }
 
     // Check state of Ostream
@@ -119,7 +119,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const particle& p)
         os.write
         (
             reinterpret_cast<const char*>(&p.coordinates_),
-            particle::sizeofFields_
+            particle::sizeofFields
         );
     }
 

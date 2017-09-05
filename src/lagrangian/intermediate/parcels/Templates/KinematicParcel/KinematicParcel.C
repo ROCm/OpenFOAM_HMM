@@ -267,6 +267,7 @@ bool Foam::KinematicParcel<ParcelType>::move
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
     const cloudSolution& solution = td.cloud().solution();
     const scalarField& cellLengthScale = td.cloud().cellLengthScale();
+    const scalar maxCo = solution.maxCo();
 
     while (td.keepParticle && !td.switchProcessor && p.stepFraction() < 1)
     {

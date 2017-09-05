@@ -25,6 +25,13 @@ streamLine/streamLineBase.C
 streamLine/streamLineParticle.C
 streamLine/streamLineParticleCloud.C
 
+/*
+wallBoundedStreamLine/wallBoundedStreamLine.C
+wallBoundedStreamLine/wallBoundedStreamLineParticle.C
+wallBoundedStreamLine/wallBoundedStreamLineParticleCloud.C
+wallBoundedStreamLine/wallBoundedParticle.C
+*/
+
 surfaceInterpolate/surfaceInterpolate.C
 
 regionSizeDistribution/regionSizeDistribution.C

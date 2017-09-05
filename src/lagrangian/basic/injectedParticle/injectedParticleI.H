@@ -36,7 +36,7 @@ inline Foam::injectedParticle::injectedParticle
     const vector& U
 )
 :
-    particle(mesh, position, -1, false),
+    particle(mesh, position, -1),
     tag_(tag),
     soi_(soi),
     d_(d),

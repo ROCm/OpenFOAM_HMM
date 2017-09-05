@@ -39,6 +39,7 @@ Description
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "tetIndices.H"
+#include "barycentric.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -140,7 +140,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
     {
-        // List of lists of particles to be transfered for all of the
+        // List of lists of particles to be transferred for all of the
         // neighbour processors
         List<IDLList<passiveParticle>> particleTransferLists
         (

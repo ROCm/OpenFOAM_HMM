@@ -25,7 +25,6 @@ License
 
 #include "barycentric2D.H"
 #include "Random.H"
-#include "cachedRandom.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,17 +50,6 @@ Foam::barycentric2D barycentric2D01
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 Foam::barycentric2D Foam::barycentric2D01(Random& rndGen)
-{
-    return
-        ::barycentric2D01
-        (
-            rndGen.scalar01(),
-            rndGen.scalar01()
-        );
-}
-
-
-Foam::barycentric2D Foam::barycentric2D01(cachedRandom& rndGen)
 {
     return
         ::barycentric2D01
