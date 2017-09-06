@@ -61,7 +61,7 @@ inline bool writeMeshObject
 
     bool writeOk = false;
 
-    if (io.typeHeaderOk<T>(true, true, false))
+    if (io.typeHeaderOk<CheckType>(true, true, false))
     {
         Info<< "        Reading " << io.headerClassName()
             << " : " << name << endl;

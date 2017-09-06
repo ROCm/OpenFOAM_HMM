@@ -59,7 +59,8 @@ class uncollatedFileOperation
         (
             const bool checkGlobal,
             const bool isFile,
-            const IOobject&
+            const IOobject& io,
+            const bool search
         ) const;
 
 
@@ -208,8 +209,9 @@ public:
             virtual fileName filePath
             (
                 const bool checkGlobal,
-                const IOobject&,
-                const word& typeName
+                const IOobject& io,
+                const word& typeName,
+                const bool search
             ) const;
 
             //- Search for a directory. checkGlobal : also check undecomposed
@@ -217,7 +219,8 @@ public:
             virtual fileName dirPath
             (
                 const bool checkGlobal,
-                const IOobject&
+                const IOobject& io,
+                const bool search
             ) const;
 
             //- Search directory for objects. Used in IOobjectList.

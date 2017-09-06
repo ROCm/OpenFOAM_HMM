@@ -68,7 +68,6 @@ Foam::direction Foam::edgeStats::getNormalDir
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::edgeStats::edgeStats(const polyMesh& mesh)
 :
     mesh_(mesh),
@@ -144,7 +143,7 @@ Foam::scalar Foam::edgeStats::minLen(Ostream& os) const
 
     const edgeList& edges = mesh_.edges();
 
-    forAll(const edge& e : edges)
+    for (const edge& e : edges)
     {
         vector eVec(e.vec(mesh_.points()));
 
@@ -206,7 +205,6 @@ Foam::scalar Foam::edgeStats::minLen(Ostream& os) const
         return min(minX, min(minY, min(minZ, minOther)));
     }
 }
-
 
 
 // ************************************************************************* //

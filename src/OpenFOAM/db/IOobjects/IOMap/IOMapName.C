@@ -39,9 +39,13 @@ namespace Foam
 
     //- Template specialisation for obtaining filePath
     template<>
-    fileName typeFilePath<IOMap<dictionary>>(const IOobject& io)
+    fileName typeFilePath<IOMap<dictionary>>
+    (
+        const IOobject& io,
+        const bool search
+    )
     {
-        return io.globalFilePath(IOMap<dictionary>::typeName);
+        return io.globalFilePath(IOMap<dictionary>::typeName, search);
     }
 }
 

@@ -50,7 +50,8 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
 (
     const bool checkGlobal,
     const bool isFile,
-    const IOobject& io
+    const IOobject& io,
+    const bool search
 ) const
 {
     if (io.instance().isAbsolute())
@@ -119,7 +120,7 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePathInfo
 
             // Check for approximately same time. E.g. if time = 1e-2 and
             // directory is 0.01 (due to different time formats)
-            if (!Foam::isDir(path))
+            if (search && !Foam::isDir(path))
             {
                 word newInstancePath = io.time().findInstancePath
                 (
@@ -347,7 +348,8 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePath
 (
     const bool checkGlobal,
     const IOobject& io,
-    const word& typeName
+    const word& typeName,
+    const bool search
 ) const
 {
     if (debug)
@@ -373,7 +375,8 @@ Foam::fileName Foam::fileOperations::uncollatedFileOperation::filePath
 Foam::fileName Foam::fileOperations::uncollatedFileOperation::dirPath
 (
     const bool checkGlobal,
-    const IOobject& io
+    const IOobject& io,
+    const bool search
 ) const
 {
     if (debug)

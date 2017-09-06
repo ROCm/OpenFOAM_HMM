@@ -274,7 +274,8 @@ public:
             (
                 const bool checkGlobal,
                 const IOobject&,
-                const word& typeName
+                const word& typeName,
+                const bool search = true
             ) const = 0;
 
             //- Search for a directory. checkGlobal : also check undecomposed
@@ -282,7 +283,8 @@ public:
             virtual fileName dirPath
             (
                 const bool checkGlobal,
-                const IOobject&
+                const IOobject& io,
+                const bool search = true
             ) const = 0;
 
             //- Search directory for objects. Used in IOobjectList.

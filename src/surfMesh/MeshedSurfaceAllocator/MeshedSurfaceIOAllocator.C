@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,14 +164,15 @@ bool Foam::MeshedSurfaceIOAllocator::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     return
     (
-        points_.writeObject(fmt, ver, cmp)
-     && faces_.writeObject(fmt, ver, cmp)
-     && zones_.writeObject(fmt, ver, cmp)
+        points_.writeObject(fmt, ver, cmp, valid)
+     && faces_.writeObject(fmt, ver, cmp, valid)
+     && zones_.writeObject(fmt, ver, cmp, valid)
     );
 }
 

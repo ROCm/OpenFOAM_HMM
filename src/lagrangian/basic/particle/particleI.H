@@ -60,6 +60,12 @@ inline Foam::label Foam::particle::cell() const
 }
 
 
+inline Foam::label& Foam::particle::cell()
+{
+    return celli_;
+}
+
+
 inline Foam::label Foam::particle::tetFace() const
 {
     return tetFacei_;

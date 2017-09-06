@@ -224,7 +224,7 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
 
         const_cast<word&>(typeName) = IOList<T>::typeName;
 
-        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp);
+        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
 
         // Change type back
         const_cast<word&>(typeName) = oldTypeName;

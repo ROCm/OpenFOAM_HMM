@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016 OpenCFD-2017 Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -307,7 +307,8 @@ public:
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,
-            IOstream::compressionType cmp
+            IOstream::compressionType cmp,
+            const bool valid
         ) const;
 
         //- Write to file

@@ -95,6 +95,7 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
     const bool checkGlobal,
     const bool isFile,
     const IOobject& io,
+    const bool search,
     pathType& searchType,
     word& newInstancePath
 ) const
@@ -163,47 +164,47 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::filePathInfo
             }
         }
 
-       // Check for approximately same time. E.g. if time = 1e-2 and
-       // directory is 0.01 (due to different time formats)
-       HashPtrTable<instantList>::const_iterator pathFnd
+        // Check for approximately same time. E.g. if time = 1e-2 and
+        // directory is 0.01 (due to different time formats)
+        HashPtrTable<instantList>::const_iterator pathFnd
         (
             times_.find
             (
                 io.time().path()
             )
         );
-       if (pathFnd != times_.end())
-       {
-           newInstancePath = findInstancePath
-           (
-               *pathFnd(),
-               instant(io.instance())
-           );
+        if (search && (pathFnd != times_.end()))
+        {
+            newInstancePath = findInstancePath
+            (
+                *pathFnd(),
+                instant(io.instance())
+            );
 
-           if (newInstancePath.size())
-           {
-               // 1. Try processors equivalent
+            if (newInstancePath.size())
+            {
+                // 1. Try processors equivalent
 
-               fileName fName =
-                   processorsPath(io, newInstancePath)
-                  /io.name();
-               if (isFileOrDir(isFile, fName))
-               {
-                   searchType = fileOperation::PROCESSORSFINDINSTANCE;
-                   return fName;
-               }
+                fileName fName =
+                    processorsPath(io, newInstancePath)
+                   /io.name();
+                if (isFileOrDir(isFile, fName))
+                {
+                    searchType = fileOperation::PROCESSORSFINDINSTANCE;
+                    return fName;
+                }
 
-               fName =
-                   io.rootPath()/io.caseName()
-                  /newInstancePath/io.db().dbDir()/io.local()/io.name();
+                fName =
+                    io.rootPath()/io.caseName()
+                   /newInstancePath/io.db().dbDir()/io.local()/io.name();
 
-               if (isFileOrDir(isFile, fName))
-               {
-                   searchType = fileOperation::FINDINSTANCE;
-                   return fName;
-               }
-           }
-       }
+                if (isFileOrDir(isFile, fName))
+                {
+                    searchType = fileOperation::FINDINSTANCE;
+                    return fName;
+                }
+            }
+        }
 
         searchType = fileOperation::NOTFOUND;
         return fileName::null;
@@ -688,7 +689,8 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::filePath
 (
     const bool checkGlobal,
     const IOobject& io,
-    const word& typeName
+    const word& typeName,
+    const bool search
 ) const
 {
     if (debug)
@@ -773,7 +775,8 @@ Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::filePath
 Foam::fileName Foam::fileOperations::masterUncollatedFileOperation::dirPath
 (
     const bool checkGlobal,
-    const IOobject& io
+    const IOobject& io,
+    const bool search
 ) const
 {
     if (debug)
@@ -1252,7 +1255,16 @@ Foam::fileOperations::masterUncollatedFileOperation::readStream
                     Pout<< "masterUncollatedFileOperation::readStream:"
                         << " Done reading " << buf.size() << " bytes" << endl;
                 }
-                isPtr.reset(new IStringStream(fName, buf));
+                isPtr.reset
+                (
+                    new IStringStream
+                    (
+                        buf,
+                        IOstream::ASCII,
+                        IOstream::currentVersion,
+                        fName
+                    )
+                );
 
                 if (!io.readHeader(isPtr()))
                 {
@@ -1617,7 +1629,16 @@ Foam::fileOperations::masterUncollatedFileOperation::NewIFstream
             // Note: IPstream is not an IStream so use a IStringStream to
             //       convert the buffer. Note that we construct with a string
             //       so it holds a copy of the buffer.
-            return autoPtr<ISstream>(new IStringStream(filePath, buf));
+            return autoPtr<ISstream>
+            (
+                new IStringStream
+                (
+                    buf,
+                    IOstream::ASCII,
+                    IOstream::currentVersion,
+                    filePath
+                )
+            );
         }
     }
     else

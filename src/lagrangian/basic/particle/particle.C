@@ -475,7 +475,7 @@ void Foam::particle::locate
     const vector* direction,
     const label celli,
     const bool boundaryFail,
-    const string boundaryMsg
+    const string& boundaryMsg
 )
 {
     celli_ = celli;
@@ -1124,6 +1124,19 @@ void Foam::particle::autoMap
         position,
         nullptr,
         mapper.reverseCellMap()[celli_],
+        true,
+        "Particle mapped to a location outside of the mesh."
+    );
+}
+
+
+void Foam::particle::relocate()
+{
+    locate
+    (
+        position(),
+        nullptr,
+        celli_,
         true,
         "Particle mapped to a location outside of the mesh."
     );

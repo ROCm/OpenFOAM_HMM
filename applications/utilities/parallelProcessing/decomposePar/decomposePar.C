@@ -451,6 +451,8 @@ int main(int argc, char *argv[])
                 fileOperations::collatedFileOperation::maxThreadFileBufferSize;
             fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
 
+            mesh.decomposeMesh();
+
             mesh.writeDecomposition(decomposeSets);
 
             if (writeCellDist)

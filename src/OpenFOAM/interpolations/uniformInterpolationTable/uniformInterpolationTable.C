@@ -234,7 +234,8 @@ void Foam::uniformInterpolationTable<Type>::write() const
     (
         IOstream::ASCII,
         IOstream::currentVersion,
-        dict.time().writeCompression()
+        dict.time().writeCompression(),
+        true
     );
 }
 

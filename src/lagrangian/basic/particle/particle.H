@@ -293,7 +293,7 @@ private:
                 const vector* direction,
                 const label celli,
                 const bool boundaryFail,
-                const string boundaryMsg
+                const string& boundaryMsg
             );
 
 
@@ -476,6 +476,9 @@ public:
 
             //- Return current cell particle is in
             inline label cell() const;
+
+            //- Return current cell particle is in for manipulation
+            inline label& cell();
 
             //- Return current tet face particle is in
             inline label tetFace() const;
@@ -686,6 +689,10 @@ public:
 
         //- Map after a topology change
         void autoMap(const vector& position, const mapPolyMesh& mapper);
+
+        //- Set the addressing based on the current position and cell
+        //  Used for e.g. redistributePar
+        void relocate();
 
 
     // I-O

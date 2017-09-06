@@ -231,6 +231,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
                 )
                 {
                     passiveParticle& newp = newpIter();
+                    newp.relocate();
 
                     lagrangianPositions.addParticle(newParticles.remove(&newp));
                 }

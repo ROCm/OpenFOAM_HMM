@@ -177,7 +177,13 @@ bool Foam::decomposedBlockData::readMasterHeader(IOobject& io, Istream& is)
     List<char> data(is);
     is.fatalCheck("read(Istream&) : reading entry");
     string buf(data.begin(), data.size());
-    IStringStream str(is.name(), buf);
+    IStringStream str
+    (
+        buf,
+        IOstream::ASCII,
+        IOstream::currentVersion,
+        is.name()
+    );
 
     return io.readHeader(str);
 }
@@ -241,7 +247,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         is.fatalCheck("read(Istream&) : reading entry");
 
         string buf(data.begin(), data.size());
-        realIsPtr = new IStringStream(is.name(), buf);
+        realIsPtr = new IStringStream
+        (
+            buf,
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            is.name()
+        );
 
         // Read header
         if (!headerIO.readHeader(realIsPtr()))
@@ -261,7 +273,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         IOstream::streamFormat fmt;
         {
             string buf(data.begin(), data.size());
-            IStringStream headerStream(is.name(), buf);
+            IStringStream headerStream
+            (
+                buf,
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                is.name()
+            );
 
             // Read header
             if (!headerIO.readHeader(headerStream))
@@ -281,7 +299,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
             is.fatalCheck("read(Istream&) : reading entry");
         }
         string buf(data.begin(), data.size());
-        realIsPtr = new IStringStream(is.name(), buf);
+        realIsPtr = new IStringStream
+        (
+            buf,
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            is.name()
+        );
 
         // Apply master stream settings to realIsPtr
         realIsPtr().format(fmt);
@@ -445,7 +469,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
                 is.fatalCheck("read(Istream&) : reading entry");
 
                 string buf(data.begin(), data.size());
-                realIsPtr = new IStringStream(fName, buf);
+                realIsPtr = new IStringStream
+                (
+                    buf,
+                    IOstream::ASCII,
+                    IOstream::currentVersion,
+                    fName
+                );
 
                 // Read header
                 if (!headerIO.readHeader(realIsPtr()))
@@ -493,7 +523,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             is >> data;
 
             string buf(data.begin(), data.size());
-            realIsPtr = new IStringStream(fName, buf);
+            realIsPtr = new IStringStream
+            (
+                buf,
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                fName
+            );
         }
     }
     else
@@ -516,7 +552,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
                 is.fatalCheck("read(Istream&) : reading entry");
 
                 string buf(data.begin(), data.size());
-                realIsPtr = new IStringStream(fName, buf);
+                realIsPtr = new IStringStream
+                (
+                    buf,
+                    IOstream::ASCII,
+                    IOstream::currentVersion,
+                    fName
+                );
 
                 // Read header
                 if (!headerIO.readHeader(realIsPtr()))
@@ -554,7 +596,13 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             is >> data;
 
             string buf(data.begin(), data.size());
-            realIsPtr = new IStringStream(fName, buf);
+            realIsPtr = new IStringStream
+            (
+                buf,
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                fName
+            );
         }
     }
 
@@ -797,7 +845,13 @@ bool Foam::decomposedBlockData::writeData(Ostream& os) const
     IOobject io(*this);
     if (Pstream::master())
     {
-        IStringStream is(name(), str);
+        IStringStream is
+        (
+            str,
+            IOstream::ASCII,
+            IOstream::currentVersion,
+            name()
+        );
         io.readHeader(is);
     }
 

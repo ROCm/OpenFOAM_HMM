@@ -590,7 +590,8 @@ bool Foam::functionObjectList::execute()
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            time_.writeCompression()
+            time_.writeCompression(),
+            true
         );
 
         IOstream::precision_ = oldPrecision;
