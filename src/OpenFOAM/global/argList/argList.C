@@ -1384,10 +1384,9 @@ bool Foam::argList::checkRootCase() const
 
         return false;
     }
-
     fileName pathDir(fileHandler().filePath(path()));
 
-    if ((checkProcessorDirectories_ && pathDir.empty()) && Pstream::master())
+    if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())
     {
         // Allow slaves on non-existing processor directories, created later
         // (e.g. redistributePar)
@@ -1397,18 +1396,6 @@ bool Foam::argList::checkRootCase() const
             << endl;
 
         return false;
-    }
-    else
-    {
-        if (!isDir(path()))
-        {
-            FatalError
-                << executable_
-                << ": cannot open case directory " << path()
-                << endl;
-
-            return false;
-        }
     }
 
     return true;
