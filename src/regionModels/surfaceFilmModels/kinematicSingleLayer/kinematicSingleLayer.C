@@ -890,8 +890,7 @@ void kinematicSingleLayer::preEvolveRegion()
     correctAlpha();
 
     // Reset transfer fields
-    //availableMass_ = mass();
-    availableMass_ = netMass();
+    availableMass_ = mass();
     cloudMassTrans_ == dimensionedScalar(dimMass, Zero);
     cloudDiameterTrans_ == dimensionedScalar(dimLength, Zero);
     primaryMassTrans_ == dimensionedScalar(dimMass, Zero);
