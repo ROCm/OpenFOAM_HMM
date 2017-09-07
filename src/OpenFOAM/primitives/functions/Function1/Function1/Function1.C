@@ -72,6 +72,17 @@ Type Foam::Function1<Type>::value(const scalar x) const
     return Zero;
 }
 
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::value
+(
+    const scalarField& x
+) const
+{
+    NotImplemented;
+
+    return tmp<Foam::Field<Type>>(nullptr);
+}
+
 
 template<class Type>
 Type Foam::Function1<Type>::integrate(const scalar x1, const scalar x2) const
@@ -79,6 +90,19 @@ Type Foam::Function1<Type>::integrate(const scalar x1, const scalar x2) const
     NotImplemented;
 
     return Zero;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::integrate
+(
+    const scalarField& x1,
+    const scalarField& x2
+) const
+{
+    NotImplemented;
+
+    return tmp<Foam::Field<Type>>(nullptr);
 }
 
 
