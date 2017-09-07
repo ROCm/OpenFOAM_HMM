@@ -49,7 +49,7 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class halfCosineRamp Declaration
+                       Class halfCosineRamp Declaration
 \*---------------------------------------------------------------------------*/
 
 class halfCosineRamp
@@ -59,7 +59,7 @@ class halfCosineRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const halfCosineRamp&);
+        void operator=(const halfCosineRamp&) = delete;
 
 
 public:

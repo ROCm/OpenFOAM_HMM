@@ -49,7 +49,7 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quarterCosineRamp Declaration
+                      Class quarterCosineRamp Declaration
 \*---------------------------------------------------------------------------*/
 
 class quarterCosineRamp
@@ -59,7 +59,7 @@ class quarterCosineRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const quarterCosineRamp&);
+        void operator=(const quarterCosineRamp&) = delete;
 
 
 public:

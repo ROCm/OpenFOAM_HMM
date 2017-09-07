@@ -67,7 +67,7 @@ class Constant
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Constant<Type>&);
+        void operator=(const Constant<Type>&) = delete;
 
 
 public:
@@ -90,7 +90,7 @@ public:
         Constant(const word& entryName, Istream& is);
 
         //- Copy constructor
-        Constant(const Constant<Type>& cnst);
+        explicit Constant(const Constant<Type>& cnst);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const

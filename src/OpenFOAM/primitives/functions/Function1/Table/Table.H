@@ -69,7 +69,7 @@ class Table
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Table<Type>&);
+        void operator=(const Table<Type>&) = delete;
 
 
 public:
@@ -84,7 +84,7 @@ public:
         Table(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
-        Table(const Table<Type>& tbl);
+        explicit Table(const Table<Type>& tbl);
 
 
     //- Destructor

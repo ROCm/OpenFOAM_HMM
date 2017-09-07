@@ -59,7 +59,7 @@ class linearRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const linearRamp&);
+        void operator=(const linearRamp&) = delete;
 
 
 public:

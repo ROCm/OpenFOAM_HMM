@@ -109,7 +109,7 @@ private:
         void read(const dictionary& coeffs);
 
         //- Disallow default bitwise assignment
-        void operator=(const ramp&);
+        void operator=(const ramp&) = delete;
 
 
 public:

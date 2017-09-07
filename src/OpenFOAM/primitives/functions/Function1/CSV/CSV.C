@@ -232,15 +232,15 @@ Foam::Function1Types::CSV<Type>::CSV
 
 
 template<class Type>
-Foam::Function1Types::CSV<Type>::CSV(const CSV<Type>& tbl)
+Foam::Function1Types::CSV<Type>::CSV(const CSV<Type>& csv)
 :
-    TableBase<Type>(tbl),
-    nHeaderLine_(tbl.nHeaderLine_),
-    refColumn_(tbl.refColumn_),
-    componentColumns_(tbl.componentColumns_),
-    separator_(tbl.separator_),
-    mergeSeparators_(tbl.mergeSeparators_),
-    fName_(tbl.fName_)
+    TableBase<Type>(csv),
+    nHeaderLine_(csv.nHeaderLine_),
+    refColumn_(csv.refColumn_),
+    componentColumns_(csv.componentColumns_),
+    separator_(csv.separator_),
+    mergeSeparators_(csv.mergeSeparators_),
+    fName_(csv.fName_)
 {}
 
 

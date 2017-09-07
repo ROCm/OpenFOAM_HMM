@@ -49,7 +49,7 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quadraticRamp Declaration
+                        Class quadraticRamp Declaration
 \*---------------------------------------------------------------------------*/
 
 class quadraticRamp
@@ -59,7 +59,7 @@ class quadraticRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const quadraticRamp&);
+        void operator=(const quadraticRamp&) = delete;
 
 
 public:

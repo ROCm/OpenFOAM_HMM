@@ -117,7 +117,7 @@ class Sine
         void read(const dictionary& coeffs);
 
         //- Disallow default bitwise assignment
-        void operator=(const Sine<Type>&);
+        void operator=(const Sine<Type>&) = delete;
 
 
 public:
@@ -136,7 +136,7 @@ public:
         );
 
         //- Copy constructor
-        Sine(const Sine<Type>& se);
+        explicit Sine(const Sine<Type>& se);
 
 
     //- Destructor

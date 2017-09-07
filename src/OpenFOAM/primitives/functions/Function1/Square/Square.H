@@ -124,7 +124,7 @@ class Square
         void read(const dictionary& coeffs);
 
         //- Disallow default bitwise assignment
-        void operator=(const Square<Type>&);
+        void operator=(const Square<Type>&) = delete;
 
 
 public:
@@ -143,7 +143,7 @@ public:
         );
 
         //- Copy constructor
-        Square(const Square<Type>& se);
+        explicit Square(const Square<Type>& se);
 
 
     //- Destructor

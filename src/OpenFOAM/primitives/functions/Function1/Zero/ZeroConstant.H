@@ -61,7 +61,7 @@ class ZeroConstant
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const ZeroConstant<Type>&);
+        void operator=(const ZeroConstant<Type>&) = delete;
 
 
 public:

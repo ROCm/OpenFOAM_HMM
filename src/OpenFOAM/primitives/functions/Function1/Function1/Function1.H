@@ -66,7 +66,7 @@ class Function1
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Function1<Type>&);
+        void operator=(const Function1<Type>&) = delete;
 
 
 protected:
@@ -101,10 +101,10 @@ public:
     // Constructors
 
         //- Construct from entry name
-        Function1(const word& entryName);
+        explicit Function1(const word& entryName);
 
         //- Copy constructor
-        Function1(const Function1<Type>& f1);
+        explicit Function1(const Function1<Type>& f1);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const = 0;
@@ -255,7 +255,6 @@ public:
 
 #ifdef NoRepository
     #include "Function1.C"
-    #include "Constant.H"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

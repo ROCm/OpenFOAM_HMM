@@ -106,7 +106,7 @@ public:
         TableBase(const word& name, const dictionary& dict);
 
         //- Copy constructor. Note: steals interpolator, tableSamples
-        TableBase(const TableBase<Type>& tbl);
+        explicit TableBase(const TableBase<Type>& tbl);
 
 
     //- Destructor

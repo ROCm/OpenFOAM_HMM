@@ -105,7 +105,7 @@ class Scale
         void read(const dictionary& coeffs);
 
         //- Disallow default bitwise assignment
-        void operator=(const Scale<Type>&);
+        void operator=(const Scale<Type>&) = delete;
 
 
 public:
@@ -124,7 +124,7 @@ public:
         );
 
         //- Copy constructor
-        Scale(const Scale<Type>& se);
+        explicit Scale(const Scale<Type>& se);
 
 
     //- Destructor

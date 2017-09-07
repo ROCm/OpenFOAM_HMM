@@ -61,7 +61,7 @@ class OneConstant
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const OneConstant<Type>&);
+        void operator=(const OneConstant<Type>&) = delete;
 
 
 public:
@@ -73,7 +73,7 @@ public:
     // Constructors
 
         //- Construct from entry name
-        OneConstant(const word& entryName);
+        explicit OneConstant(const word& entryName);
 
         //- Construct from entry name and dictionary
         OneConstant(const word& entryName, const dictionary& dict);
