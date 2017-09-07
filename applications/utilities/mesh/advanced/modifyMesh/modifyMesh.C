@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -336,6 +336,7 @@ label findCell(const primitiveMesh& mesh, const point& nearPoint)
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
+    #include "addDictOption.H"
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -347,17 +348,10 @@ int main(int argc, char *argv[])
 
     Info<< "Reading modifyMeshDict\n" << endl;
 
-    IOdictionary dict
-    (
-        IOobject
-        (
-            "modifyMeshDict",
-            runTime.system(),
-            mesh,
-            IOobject::MUST_READ_IF_MODIFIED,
-            IOobject::NO_WRITE
-        )
-    );
+    // Read meshing dictionary
+    const word dictName("modifyMeshDict");
+    #include "setSystemMeshDictionaryIO.H"
+    const IOdictionary dict(dictIO);
 
     // Read all from the dictionary.
     List<Pair<point>> pointsToMove(dict.lookup("pointsToMove"));
