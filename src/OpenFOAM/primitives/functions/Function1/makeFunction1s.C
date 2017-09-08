@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Constant.H"
+#include "Uniform.H"
 #include "ZeroConstant.H"
 #include "OneConstant.H"
 #include "PolynomialEntry.H"
