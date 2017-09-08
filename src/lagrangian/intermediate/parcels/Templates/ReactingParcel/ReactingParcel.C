@@ -58,10 +58,8 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarField& Cs
 )
 {
-    typedef typename TrackCloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        cloud.composition();
-    PhaseChangeModel<reactingCloudType>& phaseChange = cloud.phaseChange();
+    const auto& composition = cloud.composition();
+    auto& phaseChange = cloud.phaseChange();
 
     if (!phaseChange.active() || (YPhase < SMALL))
     {
@@ -396,9 +394,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     const label celli
 )
 {
-    typedef typename TrackCloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        cloud.composition();
+    const auto& composition = cloud.composition();
 
 
     // Define local properties at beginning of time step

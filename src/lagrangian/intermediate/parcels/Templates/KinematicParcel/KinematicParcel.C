@@ -285,7 +285,7 @@ bool Foam::KinematicParcel<ParcelType>::move
     const polyMesh& mesh = cloud.pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
     const cloudSolution& solution = cloud.solution();
-    const scalarField& cellLengthScale = td.cloud().cellLengthScale();
+    const scalarField& cellLengthScale = cloud.cellLengthScale();
     const scalar maxCo = solution.maxCo();
 
     while (ttd.keepParticle && !ttd.switchProcessor && p.stepFraction() < 1)
@@ -457,7 +457,7 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 {
     td.keepParticle = false;
 
-    td.cloud().patchInteraction().addToEscapedParcels(nParticle_*mass());
+    cloud.patchInteraction().addToEscapedParcels(nParticle_*mass());
 }
 
 

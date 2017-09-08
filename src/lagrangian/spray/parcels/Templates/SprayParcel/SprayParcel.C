@@ -68,9 +68,8 @@ void Foam::SprayParcel<ParcelType>::calc
     const label celli
 )
 {
-    typedef typename TrackCloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        cloud.composition();
+    const auto& composition = cloud.composition();
+    const auto& liquids = composition.liquids();
 
     // Check if parcel belongs to liquid core
     if (liquidCore() > 0.5)
@@ -80,28 +79,28 @@ void Foam::SprayParcel<ParcelType>::calc
     }
 
     // Get old mixture composition
-    scalarField X0(composition.liquids().X(this->Y()));
+    scalarField X0(liquids.X(this->Y()));
 
     // Check if we have critical or boiling conditions
-    scalar TMax = composition.liquids().Tc(X0);
+    scalar TMax = liquids.Tc(X0);
     const scalar T0 = this->T();
     const scalar pc0 = this->pc_;
-    if (composition.liquids().pv(pc0, T0, X0) >= pc0*0.999)
+    if (liquids.pv(pc0, T0, X0) >= pc0*0.999)
     {
         // Set TMax to boiling temperature
-        TMax = composition.liquids().pvInvert(pc0, X0);
+        TMax = liquids.pvInvert(pc0, X0);
     }
 
     // Set the maximum temperature limit
     cloud.constProps().setTMax(TMax);
 
     // Store the parcel properties
-    this->Cp() = composition.liquids().Cp(pc0, T0, X0);
-    sigma_ = composition.liquids().sigma(pc0, T0, X0);
-    const scalar rho0 = composition.liquids().rho(pc0, T0, X0);
+    this->Cp() = liquids.Cp(pc0, T0, X0);
+    sigma_ = liquids.sigma(pc0, T0, X0);
+    const scalar rho0 = liquids.rho(pc0, T0, X0);
     this->rho() = rho0;
     const scalar mass0 = this->mass();
-    mu_ = composition.liquids().mu(pc0, T0, X0);
+    mu_ = liquids.mu(pc0, T0, X0);
 
     ParcelType::calc(cloud,td, dt, celli);
 
@@ -114,16 +113,16 @@ void Foam::SprayParcel<ParcelType>::calc
         // Update Cp, sigma, density and diameter due to change in temperature
         // and/or composition
         scalar T1 = this->T();
-        scalarField X1(composition.liquids().X(this->Y()));
+        scalarField X1(liquids.X(this->Y()));
 
-        this->Cp() = composition.liquids().Cp(this->pc_, T1, X1);
+        this->Cp() = liquids.Cp(this->pc_, T1, X1);
 
-        sigma_ = composition.liquids().sigma(this->pc_, T1, X1);
+        sigma_ = liquids.sigma(this->pc_, T1, X1);
 
-        scalar rho1 = composition.liquids().rho(this->pc_, T1, X1);
+        scalar rho1 = liquids.rho(this->pc_, T1, X1);
         this->rho() = rho1;
 
-        mu_ = composition.liquids().mu(this->pc_, T1, X1);
+        mu_ = liquids.mu(this->pc_, T1, X1);
 
         scalar d1 = this->d()*cbrt(rho0/rho1);
         this->d() = d1;
@@ -158,29 +157,15 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
     const label celli
 )
 {
-<<<<<<< HEAD
-    typedef typename TrackData::cloudType::sprayCloudType sprayCloudType;
-    const AtomizationModel<sprayCloudType>& atomization =
-        td.cloud().atomization();
+    const auto& atomization = cloud.atomization();
 
     if (!atomization.active())
     {
         return;
     }
 
-    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
-=======
-    typedef typename TrackCloudType::reactingCloudType reactingCloudType;
->>>>>>> 4fd4fadab... lagrangian: Un-templated the tracking data
-    const CompositionModel<reactingCloudType>& composition =
-        cloud.composition();
-
-<<<<<<< HEAD
-=======
-    typedef typename TrackCloudType::sprayCloudType sprayCloudType;
-    const AtomizationModel<sprayCloudType>& atomization =
-        cloud.atomization();
->>>>>>> 4fd4fadab... lagrangian: Un-templated the tracking data
+    const auto& composition = cloud.composition();
+    const auto& liquids = composition.liquids();
 
     // Average molecular weight of carrier mix - assumes perfect gas
     scalar Wc = this->rhoc_*RR*this->Tc()/this->pc();
@@ -208,7 +193,7 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
     scalar chi = 0.0;
     if (atomization.calcChi())
     {
-        chi = this->chi(cloud, td, composition.liquids().X(this->Y()));
+        chi = this->chi(cloud, td, liquids.X(this->Y()));
     }
 
     atomization.update
@@ -353,24 +338,23 @@ Foam::scalar Foam::SprayParcel<ParcelType>::chi
 {
     // Modifications to take account of the flash boiling on primary break-up
 
-    typedef typename TrackCloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        cloud.composition();
+    const auto& composition = cloud.composition();
+    const auto& liquids = composition.liquids();
 
     scalar chi = 0.0;
     scalar T0 = this->T();
     scalar p0 = this->pc();
     scalar pAmb = cloud.pAmbient();
 
-    scalar pv = composition.liquids().pv(p0, T0, X);
+    scalar pv = liquids.pv(p0, T0, X);
 
-    forAll(composition.liquids(), i)
+    forAll(liquids, i)
     {
         if (pv >= 0.999*pAmb)
         {
             // Liquid is boiling - calc boiling temperature
 
-            const liquidProperties& liq = composition.liquids().properties()[i];
+            const liquidProperties& liq = liquids.properties()[i];
             scalar TBoil = liq.pvInvert(p0);
 
             scalar hl = liq.hl(pAmb, TBoil);
