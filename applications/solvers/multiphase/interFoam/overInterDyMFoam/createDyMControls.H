@@ -23,3 +23,8 @@ bool ddtCorr
 (
     pimple.dict().lookupOrDefault("ddtCorr", true)
 );
+
+bool adjustFringe
+(
+    pimple.dict().lookupOrDefault("oversetAdjustPhi", false)
+);

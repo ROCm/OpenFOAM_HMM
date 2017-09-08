@@ -38,6 +38,13 @@
 
     phiHbyA += phig;
 
+    if (adjustFringe)
+    {
+        fvc::makeRelative(phiHbyA, U);
+        oversetAdjustPhi(phiHbyA, U);
+        fvc::makeAbsolute(phiHbyA, U);
+    }
+
     // Update the pressure BCs to ensure flux consistency
     constrainPressure(p_rgh, U, phiHbyA, rAUf, MRF);
 
@@ -64,7 +71,8 @@
                 "minGradP",
                 fvc::reconstruct((phig - p_rghEqn.flux())/rAUf)
             );
-            U = HbyA + rAU*cellMask*minGradP;
+            //U = HbyA + rAU*cellMask*minGradP;
+            U = fvc::reconstruct(phi);
             U.correctBoundaryConditions();
             fvOptions.correct(U);
         }

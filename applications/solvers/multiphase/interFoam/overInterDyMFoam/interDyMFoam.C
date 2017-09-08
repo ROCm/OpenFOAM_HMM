@@ -53,6 +53,7 @@ Description
 #include "interpolationCellPoint.H"
 #include "transform.H"
 #include "fvMeshSubset.H"
+#include "oversetAdjustPhi.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +65,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
     #include "initContinuityErrs.H"
-    #include "createControl.H"
+    pimpleControl pimple(mesh);
     #include "createTimeControls.H"
     #include "createDyMControls.H"
     #include "createFields.H"

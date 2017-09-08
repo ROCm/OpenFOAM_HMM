@@ -11,5 +11,6 @@ moveMeshOuterCorrectors =
 massFluxInterpolation =
     pimple.dict().lookupOrDefault("massFluxInterpolation", false);
 
-ddtCorr =
-    pimple.dict().lookupOrDefault("ddtCorr", true);
+ddtCorr = pimple.dict().lookupOrDefault("ddtCorr", true);
+
+adjustFringe =  pimple.dict().lookupOrDefault("oversetAdjustPhi", false);
