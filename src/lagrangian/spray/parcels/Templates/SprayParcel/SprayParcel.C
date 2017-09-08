@@ -99,7 +99,7 @@ void Foam::SprayParcel<ParcelType>::calc
     const scalar mass0 = this->mass();
     mu_ = liquids.mu(pc0, T0, X0);
 
-    ParcelType::calc(cloud,td, dt);
+    ParcelType::calc(cloud, td, dt);
 
     if (td.keepParticle)
     {
@@ -246,6 +246,10 @@ void Foam::SprayParcel<ParcelType>::calcBreakup
     scalar Urmag = mag(Urel);
     scalar Re = this->Re(rhoAv, this->U(), td.Uc(), this->d(), muAv);
 
+    const typename TrackCloudType::parcelType& p =
+        static_cast<const typename TrackCloudType::parcelType&>(*this);
+    typename TrackCloudType::parcelType::trackingData& ttd =
+        static_cast<typename TrackCloudType::parcelType::trackingData&>(td);
     const scalar mass = p.mass();
     const typename TrackCloudType::forceType& forces = cloud.forces();
     const forceSuSp Fcp = forces.calcCoupled(p, ttd, dt, mass, Re, muAv);

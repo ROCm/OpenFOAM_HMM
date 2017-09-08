@@ -260,7 +260,7 @@ inline const Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb() const
 
 
 template<class ParcelType>
-inline bool& Foam::KinematicParcel<ParcelType>::active()
+inline void Foam::KinematicParcel<ParcelType>::active(const bool state)
 {
     active_ = state;
 }
