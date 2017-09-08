@@ -378,6 +378,11 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     }
     else
     {
+        if (!isA<wallPolyPatch>(pp) && !polyPatch::constraintType(pp.type()))
+        {
+            cloud.patchInteraction().addToEscapedParcels(nParticle_*mass());
+        }
+
         // Invoke patch interaction model
         return cloud.patchInteraction().correct(p, pp, td.keepParticle);
     }
