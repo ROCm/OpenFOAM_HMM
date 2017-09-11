@@ -114,9 +114,23 @@ void Foam::functionObjects::fieldValues::volFieldValue::initialise
 )
 {
     weightFieldName_ = "none";
-    if (usesWeight() && dict.readIfPresent("weightField", weightFieldName_))
+    if (usesWeight())
     {
-        Info<< "    weight field = " << weightFieldName_;
+        if (dict.readIfPresent("weightField", weightFieldName_))
+        {
+            Info<< "    weight field = " << weightFieldName_;
+        }
+        else
+        {
+            // Suggest possible alternative unweighted operation?
+            FatalIOErrorInFunction(dict)
+                << "The '" << operationTypeNames_[operation_]
+                << "' operation is missing a weightField." << nl
+                << "Either provide the weightField, "
+                << "use weightField 'none' to suppress weighting," << nl
+                << "or use a different operation."
+                << exit(FatalIOError);
+        }
     }
 
     Info<< nl << endl;

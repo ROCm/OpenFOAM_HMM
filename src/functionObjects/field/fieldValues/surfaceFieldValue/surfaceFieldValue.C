@@ -571,16 +571,32 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 
 
     weightFieldName_ = "none";
-    if (usesWeight() && dict.readIfPresent("weightField", weightFieldName_))
+    if (usesWeight())
     {
         if (regionType_ == stSampledSurface)
         {
             FatalIOErrorInFunction(dict)
-                << "Cannot use weightField for sampledSurface"
+                << "Cannot use weighted operation '"
+                << operationTypeNames_[operation_]
+                << "' for sampledSurface"
                 << exit(FatalIOError);
         }
 
-        Info<< "    weight field  = " << weightFieldName_ << nl;
+        if (dict.readIfPresent("weightField", weightFieldName_))
+        {
+            Info<< "    weight field  = " << weightFieldName_ << nl;
+        }
+        else
+        {
+            // Suggest possible alternative unweighted operation?
+            FatalIOErrorInFunction(dict)
+                << "The '" << operationTypeNames_[operation_]
+                << "' operation is missing a weightField." << nl
+                << "Either provide the weightField, "
+                << "use weightField 'none' to suppress weighting," << nl
+                << "or use a different operation."
+                << exit(FatalIOError);
+        }
     }
 
     // Backwards compatibility for v1612+ and older
