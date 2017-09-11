@@ -224,7 +224,6 @@ _of_complete_cache_[surfaceInertia]="-case -density -referencePoint | -noFunctio
 _of_complete_cache_[surfaceInflate]="-case -featureAngle -nSmooth | -checkSelfIntersection -debug -noFunctionObjects -srcDoc -doc -help"
 _of_complete_cache_[surfaceLambdaMuSmooth]="-featureFile | -srcDoc -doc -help"
 _of_complete_cache_[surfaceMeshConvert]="-case -dict -from -scaleIn -scaleOut -to | -clean -noFunctionObjects -tri -srcDoc -doc -help"
-_of_complete_cache_[surfaceMeshConvertTesting]="-case -scale | -clean -noFunctionObjects -orient -stdout -surfMesh -testModify -triFace -triSurface -unsorted -srcDoc -doc -help"
 _of_complete_cache_[surfaceMeshExport]="-case -dict -from -name -scaleIn -scaleOut -to | -clean -noFunctionObjects -srcDoc -doc -help"
 _of_complete_cache_[surfaceMeshImport]="-case -dict -from -name -scaleIn -scaleOut -to | -clean -noFunctionObjects -srcDoc -doc -help"
 _of_complete_cache_[surfaceMeshInfo]="-case -scale | -areas -noFunctionObjects -xml -srcDoc -doc -help"
