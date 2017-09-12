@@ -43,8 +43,8 @@ Usage
      or -yawPitchRoll (yawdegrees pitchdegrees rolldegrees)
      or -rollPitchYaw (rolldegrees pitchdegrees yawdegrees)
 
-    -scale vector
-        Scales the points by the given vector.
+    -scale scalar|vector
+        Scales the points by the given scalar or vector.
 
     The any or all of the three options may be specified and are processed
     in the above order.
@@ -182,9 +182,9 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "scale",
-        "vector",
-        "scale by the specified amount - eg, '(0.001 0.001 0.001)' for a "
-        "uniform [mm] to [m] scaling"
+        "scalar | vector",
+        "scale by the specified amount - eg, for a uniform [mm] to [m] scaling "
+        "use either (0.001 0.001 0.001)' or simply '0.001'"
     );
 
     #include "addRegionOption.H"
@@ -262,10 +262,10 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        // Convert to radians
+        // degToRad
         v *= pi/180.0;
 
-        quaternion R(quaternion::rotationSequence::XYZ, v);
+        const quaternion R(quaternion::rotationSequence::XYZ, v);
 
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
@@ -282,16 +282,10 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-        // Convert to radians
+        // degToRad
         v *= pi/180.0;
 
-        scalar yaw = v.x();
-        scalar pitch = v.y();
-        scalar roll = v.z();
-
-        quaternion R = quaternion(vector(0, 0, 1), yaw);
-        R *= quaternion(vector(0, 1, 0), pitch);
-        R *= quaternion(vector(1, 0, 0), roll);
+        const quaternion R(quaternion::rotationSequence::ZYX, v);
 
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
@@ -302,13 +296,34 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionReadIfPresent("scale", v))
+    if (args.optionFound("scale"))
     {
-        Info<< "Scaling points by " << v << endl;
+        // Use readList to handle single or multiple values
+        const List<scalar> scaling = args.optionReadList<scalar>("scale");
 
-        points.replace(vector::X, v.x()*points.component(vector::X));
-        points.replace(vector::Y, v.y()*points.component(vector::Y));
-        points.replace(vector::Z, v.z()*points.component(vector::Z));
+        if (scaling.size() == 1)
+        {
+            Info<< "Scaling points uniformly by " << scaling[0] << nl;
+            points *= scaling[0];
+        }
+        else if (scaling.size() == 3)
+        {
+            Info<< "Scaling points by ("
+                << scaling[0] << " "
+                << scaling[1] << " "
+                << scaling[2] << ")" << nl;
+
+            points.replace(vector::X, scaling[0]*points.component(vector::X));
+            points.replace(vector::Y, scaling[1]*points.component(vector::Y));
+            points.replace(vector::Z, scaling[2]*points.component(vector::Z));
+        }
+        else
+        {
+            FatalError
+                << "-scale with 1 or 3 components only" << nl
+                << "given: " << args["scale"] << endl
+                << exit(FatalError);
+        }
     }
 
     // Set the precision of the points data to 10

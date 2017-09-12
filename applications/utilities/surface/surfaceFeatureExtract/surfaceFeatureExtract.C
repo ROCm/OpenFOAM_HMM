@@ -339,8 +339,15 @@ int main(int argc, char *argv[])
             << " writeObj=" << writeObj
             << " writeVTK=" << writeVTK << nl;
 
+        scalar scaleFactor = -1;
+        // Allow rescaling of the surface points (eg, mm -> m)
+        if (surfaceDict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
+        {
+            Info<<"Scaling : " << scaleFactor << nl;
+        }
+
         // Load a single file, or load and combine multiple selected files
-        autoPtr<triSurface> surfPtr = loader.load(loadingOption);
+        autoPtr<triSurface> surfPtr = loader.load(loadingOption, scaleFactor);
         if (!surfPtr.valid() || surfPtr().empty())
         {
             FatalErrorInFunction

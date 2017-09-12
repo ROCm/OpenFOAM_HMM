@@ -125,7 +125,8 @@ public:
 
     // Constructors
 
-        //- Create a writer object with given output scaling
+        //- Create a writer object with given output scaling.
+        //  Treats a zero or negative scale factor as unity scaling.
         meshWriter
         (
             const polyMesh&,
