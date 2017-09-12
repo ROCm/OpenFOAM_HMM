@@ -85,11 +85,11 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames
     wordList names(zmesh.size());
     label nZone = 0;
 
-    forAll(zmesh, zonei)
+    for (const auto& zn : zmesh)
     {
-        if (!zmesh[zonei].empty())
+        if (!zn.empty())
         {
-            names[nZone++] = zmesh[zonei].name();
+            names[nZone++] = zn.name();
         }
     }
     names.setSize(nZone);
@@ -100,8 +100,6 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames
 
 Foam::wordList Foam::vtkPVFoam::getZoneNames(const word& zoneType) const
 {
-    wordList names;
-
     // mesh not loaded - read from file
     IOobject ioObj
     (
@@ -119,14 +117,17 @@ Foam::wordList Foam::vtkPVFoam::getZoneNames(const word& zoneType) const
         false
     );
 
+    wordList names;
     if (ioObj.typeHeaderOk<cellZoneMesh>(false, false))
     {
         zonesEntries zones(ioObj);
 
         names.setSize(zones.size());
-        forAll(zones, zonei)
+        label nZone = 0;
+
+        for (const auto& zn : zones)
         {
-            names[zonei] = zones[zonei].keyword();
+            names[nZone++] = zn.keyword();
         }
     }
 
@@ -167,7 +168,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
             << "    " << dbPtr_->timePath()/cloud::prefix << endl;
     }
 
-    // use the db directly since this might be called without a mesh,
+    // Use the db directly since this might be called without a mesh,
     // but the region must get added back in
     fileName lagrangianPrefix(cloud::prefix);
     if (meshRegion_ != polyMesh::defaultRegion)
@@ -175,22 +176,23 @@ void Foam::vtkPVFoam::updateInfoLagrangian
         lagrangianPrefix = meshRegion_/cloud::prefix;
     }
 
-    // Search for list of lagrangian objects for this time
-    fileNameList cloudDirs
-    (
-        readDir(dbPtr_->timePath()/lagrangianPrefix, fileName::DIRECTORY)
-    );
+    // List of lagrangian objects across all times
+    HashSet<fileName> names;
+
+    for (const instant& t : dbPtr_().times())
+    {
+        names.insert
+        (
+            readDir
+            (
+                dbPtr_->path()/t.name()/lagrangianPrefix,
+                fileName::DIRECTORY
+            )
+        );
+    }
 
     rangeLagrangian_.reset(select->GetNumberOfArrays());
-    forAll(cloudDirs, cloudi)
-    {
-        // Add cloud to GUI list
-        select->AddArray
-        (
-            ("lagrangian/" + cloudDirs[cloudi]).c_str()
-        );
-        ++rangeLagrangian_;
-    }
+    rangeLagrangian_ += addToArray(select, "lagrangian/", names.sortedToc());
 
     if (debug)
     {
@@ -257,39 +259,26 @@ void Foam::vtkPVFoam::updateInfoPatches
                     const polyPatch& pp = patches[patchId];
                     if (pp.size())
                     {
-                        enabledEntries.insert
-                        (
-                            "patch/" + pp.name()
-                        );
+                        enabledEntries.insert("patch/" + pp.name());
                     }
                 }
             }
         }
 
-        // Sort group names
-        Foam::sort(displayNames);
-        for (const auto& name : displayNames)
-        {
-            select->AddArray(name.c_str());
-            ++rangePatches_;
-        }
+        Foam::sort(displayNames);  // Sorted group names
+        rangePatches_ += addToArray(select, displayNames);
 
         // Add (non-zero) patches to the list of mesh parts
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         if (!reader_->GetShowGroupsOnly())
         {
-            forAll(patches, patchi)
+            for (const polyPatch& pp : patches)
             {
-                const polyPatch& pp = patches[patchi];
-
                 if (pp.size())
                 {
                     // Add patch to GUI list
-                    select->AddArray
-                    (
-                        ("patch/" + pp.name()).c_str()
-                    );
+                    select->AddArray(("patch/" + pp.name()).c_str());
                     ++rangePatches_;
                 }
             }
@@ -339,9 +328,9 @@ void Foam::vtkPVFoam::updateInfoPatches
                  && patchDict.readIfPresent("inGroups", groupNames)
                 )
                 {
-                    forAll(groupNames, groupI)
+                    for (const auto& groupName : groupNames)
                     {
-                        groups(groupNames[groupI]).insert(patchi);
+                        groups(groupName).insert(patchi);
                     }
                 }
             }
@@ -370,21 +359,13 @@ void Foam::vtkPVFoam::updateInfoPatches
                 {
                     for (auto patchId : patchIDs)
                     {
-                        enabledEntries.insert
-                        (
-                            "patch/" + names[patchId]
-                        );
+                        enabledEntries.insert("patch/" + names[patchId]);
                     }
                 }
             }
 
-            // Sort group names
-            Foam::sort(displayNames);
-            for (const auto& name : displayNames)
-            {
-                select->AddArray(name.c_str());
-                ++rangePatches_;
-            }
+            Foam::sort(displayNames);  // Sorted group names
+            rangePatches_ += addToArray(select, displayNames);
 
             // Add (non-zero) patches to the list of mesh parts
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -396,10 +377,7 @@ void Foam::vtkPVFoam::updateInfoPatches
                     // Valid patch if nFace > 0 - add patch to GUI list
                     if (sizes[patchi])
                     {
-                        select->AddArray
-                        (
-                            ("patch/" + names[patchi]).c_str()
-                        );
+                        select->AddArray(("patch/" + names[patchi]).c_str());
                         ++rangePatches_;
                     }
                 }
@@ -430,74 +408,44 @@ void Foam::vtkPVFoam::updateInfoZones
             << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
     }
 
-    wordList namesLst;
 
-    //
-    // cellZones information
-    // ~~~~~~~~~~~~~~~~~~~~~
-    if (meshPtr_)
+    // cellZones
     {
-        namesLst = getZoneNames(meshPtr_->cellZones());
-    }
-    else
-    {
-        namesLst = getZoneNames("cellZones");
-    }
-
-    rangeCellZones_.reset(select->GetNumberOfArrays());
-    forAll(namesLst, elemI)
-    {
-        select->AddArray
+        const wordList names =
         (
-            ("cellZone/" + namesLst[elemI]).c_str()
+            meshPtr_
+          ? getZoneNames(meshPtr_->cellZones())
+          : getZoneNames("cellZones")
         );
-        ++rangeCellZones_;
+
+        rangeCellZones_.reset(select->GetNumberOfArrays());
+        rangeCellZones_ += addToArray(select, "cellZone/", names);
     }
 
-
-    //
-    // faceZones information
-    // ~~~~~~~~~~~~~~~~~~~~~
-    if (meshPtr_)
+    // faceZones
     {
-        namesLst = getZoneNames(meshPtr_->faceZones());
-    }
-    else
-    {
-        namesLst = getZoneNames("faceZones");
-    }
-
-    rangeFaceZones_.reset(select->GetNumberOfArrays());
-    forAll(namesLst, elemI)
-    {
-        select->AddArray
+        const wordList names =
         (
-            ("faceZone/" + namesLst[elemI]).c_str()
+            meshPtr_
+          ? getZoneNames(meshPtr_->faceZones())
+          : getZoneNames("faceZones")
         );
-        ++rangeFaceZones_;
+
+        rangeFaceZones_.reset(select->GetNumberOfArrays());
+        rangeFaceZones_ += addToArray(select, "faceZone/", names);
     }
 
-
-    //
-    // pointZones information
-    // ~~~~~~~~~~~~~~~~~~~~~~
-    if (meshPtr_)
+    // pointZones
     {
-        namesLst = getZoneNames(meshPtr_->pointZones());
-    }
-    else
-    {
-        namesLst = getZoneNames("pointZones");
-    }
-
-    rangePointZones_.reset(select->GetNumberOfArrays());
-    forAll(namesLst, elemI)
-    {
-        select->AddArray
+        const wordList names =
         (
-            ("pointZone/" + namesLst[elemI]).c_str()
+            meshPtr_
+          ? getZoneNames(meshPtr_->pointZones())
+          : getZoneNames("pointZones")
         );
-        ++rangePointZones_;
+
+        rangePointZones_.reset(select->GetNumberOfArrays());
+        rangePointZones_ += addToArray(select, "pointZone/", names);
     }
 
     if (debug)
@@ -525,14 +473,14 @@ void Foam::vtkPVFoam::updateInfoSets
     // Add names of sets. Search for last time directory with a sets
     // subdirectory. Take care not to search beyond the last mesh.
 
-    word facesInstance = dbPtr_().findInstance
+    const word facesInstance = dbPtr_().findInstance
     (
         meshDir_,
         "faces",
         IOobject::READ_IF_PRESENT
     );
 
-    word setsInstance = dbPtr_().findInstance
+    const word setsInstance = dbPtr_().findInstance
     (
         meshDir_/"sets",
         word::null,
@@ -540,7 +488,7 @@ void Foam::vtkPVFoam::updateInfoSets
         facesInstance
     );
 
-    IOobjectList objects(dbPtr_(), setsInstance, meshDir_/"sets");
+    const IOobjectList objects(dbPtr_(), setsInstance, meshDir_/"sets");
 
     if (debug)
     {
@@ -553,24 +501,24 @@ void Foam::vtkPVFoam::updateInfoSets
     rangeCellSets_ += addToSelection<cellSet>
     (
         select,
-        objects,
-        "cellSet/"
+        "cellSet/",
+        objects
     );
 
     rangeFaceSets_.reset(select->GetNumberOfArrays());
     rangeFaceSets_ += addToSelection<faceSet>
     (
         select,
-        objects,
-        "faceSet/"
+        "faceSet/",
+        objects
     );
 
     rangePointSets_.reset(select->GetNumberOfArrays());
     rangePointSets_ += addToSelection<pointSet>
     (
         select,
-        objects,
-        "pointSet/"
+        "pointSet/",
+        objects
     );
 
     if (debug)
@@ -594,21 +542,20 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
     HashSet<string> enabled = getSelectedArraySet(select);
     select->RemoveAllArrays();
 
-    // TODO - currently only get fields from ONE cloud
-    // have to decide if the second set of fields get mixed in
-    // or dealt with separately
-
     const arrayRange& range = rangeLagrangian_;
     if (range.empty())
     {
         return;
     }
 
-    // Add Lagrangian fields even if particles are not enabled?
-    const int partId = range.start();
-    const word cloudName = getReaderPartName(partId);
+    // Reuse the previously determined cloud information.
+    DynamicList<word> cloudNames(range.size());
+    for (auto partId : range)
+    {
+        cloudNames.append(getReaderPartName(partId));
+    }
 
-    // use the db directly since this might be called without a mesh,
+    // Use the db directly since this might be called without a mesh,
     // but the region must get added back in
     fileName lagrangianPrefix(cloud::prefix);
     if (meshRegion_ != polyMesh::defaultRegion)
@@ -616,19 +563,37 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
         lagrangianPrefix = meshRegion_/cloud::prefix;
     }
 
-    IOobjectList objects
-    (
-        dbPtr_(),
-        dbPtr_().timeName(),
-        lagrangianPrefix/cloudName
-    );
+    // List of lagrangian fields across all clouds and all times.
+    // ParaView displays "(partial)" after field names that only apply
+    // to some of the clouds.
+    HashTable<wordHashSet> fields;
 
-    addToSelection<IOField<label>>(select, objects);
-    addToSelection<IOField<scalar>>(select, objects);
-    addToSelection<IOField<vector>>(select, objects);
-    addToSelection<IOField<sphericalTensor>>(select, objects);
-    addToSelection<IOField<symmTensor>>(select, objects);
-    addToSelection<IOField<tensor>>(select, objects);
+    for (const instant& t : dbPtr_().times())
+    {
+        for (const auto& cloudName : cloudNames)
+        {
+            const HashTable<wordHashSet> localFields =
+                IOobjectList
+                (
+                    dbPtr_(),
+                    t.name(),
+                    lagrangianPrefix/cloudName
+                ).classes();
+
+            forAllConstIters(localFields, iter)
+            {
+                fields(iter.key()) |= iter.object();
+            }
+        }
+    }
+
+    // Known/supported field-types
+    addToSelection<IOField<label>>(select, fields);
+    addToSelection<IOField<scalar>>(select, fields);
+    addToSelection<IOField<vector>>(select, fields);
+    addToSelection<IOField<sphericalTensor>>(select, fields);
+    addToSelection<IOField<symmTensor>>(select, fields);
+    addToSelection<IOField<tensor>>(select, fields);
 
     // Restore the enabled selections
     setSelectedArrayEntries(select, enabled);
