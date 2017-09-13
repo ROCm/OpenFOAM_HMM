@@ -586,8 +586,10 @@ int main(int argc, char *argv[])
 
                             IOobject* positionsPtr =
                                 sprayObjs.lookup(word("positions"));
+                            IOobject* coordsPtr =
+                                sprayObjs.lookup(word("coordinates"));
 
-                            if (positionsPtr)
+                            if (coordsPtr || positionsPtr)
                             {
                                 cloudObjects.insert(cloudDirs[i], sprayObjs);
                             }

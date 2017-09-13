@@ -1344,7 +1344,7 @@ int main(int argc, char *argv[])
                 cloud::prefix/cloudName
             );
 
-            if (sprayObjs.found("positions"))
+            if (sprayObjs.found("positions") || sprayObjs.found("coordinates"))
             {
                 wordList labelNames(sprayObjs.names(labelIOField::typeName));
                 Info<< "        labels      :";

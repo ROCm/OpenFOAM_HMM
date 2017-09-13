@@ -44,10 +44,11 @@ Foam::DSMCParcel<ParcelType>::DSMCParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     U_(Zero),
     Ei_(0.0),
     typeId_(-1)

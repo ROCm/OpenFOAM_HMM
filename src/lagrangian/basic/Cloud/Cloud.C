@@ -40,12 +40,12 @@ void Foam::Cloud<ParticleType>::checkPatches() const
 {
     const polyBoundaryMesh& pbm = polyMesh_.boundaryMesh();
     bool ok = true;
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : pbm)
     {
-        if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
+        if (isA<cyclicAMIPolyPatch>(pp))
         {
             const cyclicAMIPolyPatch& cami =
-                refCast<const cyclicAMIPolyPatch>(pbm[patchi]);
+                refCast<const cyclicAMIPolyPatch>(pp);
 
             if (cami.owner())
             {
@@ -76,6 +76,7 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh, cloudName),
     IDLList<ParticleType>(),
+    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES),
     polyMesh_(pMesh),
     labels_(),
     globalPositionsPtr_()
@@ -113,7 +114,7 @@ void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::deleteLostParticles()
 {
-    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    forAllIters(*this, pIter)
     {
         ParticleType& p = pIter();
 
@@ -170,7 +171,7 @@ void Foam::Cloud<ParticleType>::move
     }
 
     // Initialise the stepFraction moved for the particles
-    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    forAllIters(*this, pIter)
     {
         pIter().stepFraction() = 0;
     }
@@ -205,7 +206,7 @@ void Foam::Cloud<ParticleType>::move
         }
 
         // Loop over all particles
-        forAllIter(typename Cloud<ParticleType>, *this, pIter)
+        forAllIters(*this, pIter)
         {
             ParticleType& p = pIter();
 
@@ -293,9 +294,9 @@ void Foam::Cloud<ParticleType>::move
 
         bool transfered = false;
 
-        forAll(allNTrans, i)
+        for (const label n : allNTrans)
         {
-            if (allNTrans[i])
+            if (n)
             {
                 transfered = true;
                 break;
@@ -309,10 +310,8 @@ void Foam::Cloud<ParticleType>::move
         }
 
         // Retrieve from receive buffers
-        forAll(neighbourProcs, i)
+        for (const label neighbProci : neighbourProcs)
         {
-            label neighbProci = neighbourProcs[i];
-
             label nRec = allNTrans[neighbProci];
 
             if (nRec)
@@ -329,7 +328,7 @@ void Foam::Cloud<ParticleType>::move
 
                 label pI = 0;
 
-                forAllIter(typename Cloud<ParticleType>, newParticles, newpIter)
+                forAllIters(newParticles, newpIter)
                 {
                     ParticleType& newp = newpIter();
 
@@ -368,10 +367,10 @@ void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
     const vectorField& positions = globalPositionsPtr_();
 
     label i = 0;
-    forAllIter(typename Cloud<ParticleType>, *this, iter)
+    forAllIters(*this, iter)
     {
         iter().autoMap(positions[i], mapper);
-        ++ i;
+        ++i;
     }
 }
 
@@ -384,11 +383,12 @@ void Foam::Cloud<ParticleType>::writePositions() const
         this->db().time().path()/this->name() + "_positions.obj"
     );
 
-    forAllConstIter(typename Cloud<ParticleType>, *this, pIter)
+    forAllConstIters(*this, pIter)
     {
         const ParticleType& p = pIter();
-        pObj<< "v " << p.position().x() << " " << p.position().y() << " "
-            << p.position().z() << nl;
+        const point position(p.position());
+        pObj<< "v " << position.x() << " " << position.y() << " "
+            << position.z() << nl;
     }
 
     pObj.flush();
@@ -408,10 +408,10 @@ void Foam::Cloud<ParticleType>::storeGlobalPositions() const
     vectorField& positions = globalPositionsPtr_();
 
     label i = 0;
-    forAllConstIter(typename Cloud<ParticleType>, *this, iter)
+    forAllConstIters(*this, iter)
     {
         positions[i] = iter().position();
-        ++ i;
+        ++i;
     }
 }
 

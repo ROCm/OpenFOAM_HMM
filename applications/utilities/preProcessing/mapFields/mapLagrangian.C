@@ -120,8 +120,9 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
         );
 
         IOobject* positionsPtr = objects.lookup("positions");
+        IOobject* coordinatesPtr = objects.lookup("coordinates");
 
-        if (positionsPtr)
+        if (positionsPtr || coordinatesPtr)
         {
             Info<< nl << "    processing cloud " << cloudDirs[cloudI] << endl;
 

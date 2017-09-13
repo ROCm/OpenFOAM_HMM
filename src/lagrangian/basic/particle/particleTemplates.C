@@ -56,7 +56,7 @@ void Foam::particle::readFields(TrackCloudType& c)
     c.checkFieldIOobject(c, origId);
 
     label i = 0;
-    forAllIter(typename TrackCloudType, c, iter)
+    forAllIters(c, iter)
     {
         particle& p = iter();
 
@@ -72,8 +72,21 @@ void Foam::particle::writeFields(const TrackCloudType& c)
 {
     label np = c.size();
 
-    IOPosition<TrackCloudType> ioP(c);
-    ioP.write(np > 0);
+    {
+        IOPosition<TrackCloudType> ioP(c);
+        ioP.write(np > 0);
+    }
+
+    // Optionally write positions file in v1706 format and earlier
+    if (writeLagrangianPositions)
+    {
+        IOPosition<TrackCloudType> ioP
+        (
+            c,
+            IOPosition<TrackCloudType>::geometryType::POSITIONS
+        );
+        ioP.write(np > 0);
+    }
 
     IOField<label> origProc
     (
@@ -87,11 +100,11 @@ void Foam::particle::writeFields(const TrackCloudType& c)
     );
 
     label i = 0;
-    forAllConstIter(typename TrackCloudType, c, iter)
+    forAllConstIters(c, iter)
     {
         origProc[i] = iter().origProc_;
         origId[i] = iter().origId_;
-        i++;
+        ++i;
     }
 
     origProc.write(np > 0);
@@ -106,13 +119,15 @@ void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
 
     IOField<label>& origProc(cloud::createIOField<label>("origProc", np, obr));
     IOField<label>& origId(cloud::createIOField<label>("origId", np, obr));
+    IOField<point>& position(cloud::createIOField<point>("position", np, obr));
 
     label i = 0;
-    forAllConstIter(typename CloudType, c, iter)
+    forAllConstIters(c, iter)
     {
         origProc[i] = iter().origProc_;
         origId[i] = iter().origId_;
-        i++;
+        position[i] = iter().position();
+        ++i;
     }
 }
 
@@ -140,7 +155,7 @@ void Foam::particle::hitFace
     }
     else if (onBoundaryFace())
     {
-        if(!p.hitPatch(cloud, ttd))
+        if (!p.hitPatch(cloud, ttd))
         {
             const polyPatch& patch = mesh_.boundaryMesh()[p.patch()];
 

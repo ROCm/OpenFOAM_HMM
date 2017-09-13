@@ -50,10 +50,11 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     mass0_(0.0),
     Y_(0)
 {

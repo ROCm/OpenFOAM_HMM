@@ -44,6 +44,9 @@ InfoSwitches
     writeDictionaries 0;
     writeOptionalEntries 0;
 
+    // Write lagrangian "positions" file in v1706 format (at earlier)
+    writeLagrangianPositions 0;
+
     // Report list of slaves/pids used (parallel)
     writeSlaves     1;
 

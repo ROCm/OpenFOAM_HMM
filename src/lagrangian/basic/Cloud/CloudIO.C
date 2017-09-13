@@ -54,6 +54,16 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
     {
         const IOdictionary uniformPropsDict(dictObj);
 
+        // Fall back to positions mode if the entry is not present for
+        // backwards compatibility
+        geometryType_ =
+            IOPosition<Cloud<ParticleType>>::geometryTypeNames_.lookupOrDefault
+            (
+                "geometry",
+                uniformPropsDict,
+                IOPosition<Cloud<ParticleType>>::geometryType::POSITIONS
+            );
+
         const word procName("processor" + Foam::name(Pstream::myProcNo()));
         if (uniformPropsDict.found(procName))
         {
@@ -91,6 +101,12 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
     Pstream::listCombineGather(np, maxEqOp<label>());
     Pstream::listCombineScatter(np);
 
+    uniformPropsDict.add
+    (
+        "geometry",
+        IOPosition<Cloud<ParticleType>>::geometryTypeNames_[geometryType_]
+    );
+
     forAll(np, i)
     {
         word procName("processor" + Foam::name(i));
@@ -113,7 +129,7 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
 {
     readCloudUniformProperties();
 
-    IOPosition<Cloud<ParticleType>> ioP(*this);
+    IOPosition<Cloud<ParticleType>> ioP(*this, geometryType_);
 
     bool valid = ioP.headerOk();
     Istream& is = ioP.readStream(checkClass ? typeName : "", valid);
@@ -129,6 +145,9 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
             << "    " << ioP.objectPath() << nl
             << "Assuming the initial cloud contains 0 particles." << endl;
     }
+
+    // Always operate in co-ordinates mode after reading
+    geometryType_ = IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES;
 
     // Ask for the tetBasePtIs to trigger all processors to build
     // them, otherwise, if some processors have no particles then
@@ -148,6 +167,7 @@ Foam::Cloud<ParticleType>::Cloud
 )
 :
     cloud(pMesh, cloudName),
+    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES),
     polyMesh_(pMesh),
     labels_(),
     cellWallFacesPtr_()

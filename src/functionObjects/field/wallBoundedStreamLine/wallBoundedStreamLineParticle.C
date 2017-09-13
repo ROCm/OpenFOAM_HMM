@@ -161,10 +161,11 @@ Foam::wallBoundedStreamLineParticle::wallBoundedStreamLineParticle
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    wallBoundedParticle(mesh, is, readFields)
+    wallBoundedParticle(mesh, is, readFields, newFormat)
 {
     if (readFields)
     {

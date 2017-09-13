@@ -87,6 +87,9 @@ class particle
 {
     // Private member data
 
+        //- Write particle positions file (v1706 format and earlier)
+        static bool writeLagrangianPositions;
+
         //- Size in bytes of the position data
         static const std::size_t sizeofPosition;
 
@@ -368,7 +371,13 @@ public:
         );
 
         //- Construct from Istream
-        particle(const polyMesh& mesh, Istream&, bool readFields = true);
+        particle
+        (
+            const polyMesh& mesh,
+            Istream&,
+            bool readFields = true,
+            bool newFormat = true
+        );
 
         //- Construct as a copy
         particle(const particle& p);
@@ -558,7 +567,7 @@ public:
             trackingData& td
         );
 
-        //- Convenience function. Cobines trackToFace and hitFace
+        //- Convenience function. Combines trackToFace and hitFace
         template<class TrackCloudType>
         void trackToAndHitFace
         (
@@ -649,6 +658,9 @@ public:
         //- Write particle fields as objects into the obr registry
         template<class CloudType>
         static void writeObjects(const CloudType& c, objectRegistry& obr);
+
+        //- Write the particle barycentric coordinates and cell info
+        void writeCoordinates(Ostream&) const;
 
         //- Write the particle position and cell
         void writePosition(Ostream&) const;

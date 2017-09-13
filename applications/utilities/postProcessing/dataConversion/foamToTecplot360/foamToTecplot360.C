@@ -1168,8 +1168,9 @@ int main(int argc, char *argv[])
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
+            IOobject* coordinatesPtr = sprayObjs.lookup("coordinates");
 
-            if (positionsPtr)
+            if (positionsPtr || coordinatesPtr)
             {
                 mkDir(fvPath/cloud::prefix/cloudDirs[cloudI]);
 

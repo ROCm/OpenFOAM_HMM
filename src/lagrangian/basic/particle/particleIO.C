@@ -44,7 +44,13 @@ const std::size_t Foam::particle::sizeofFields
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
+Foam::particle::particle
+(
+    const polyMesh& mesh,
+    Istream& is,
+    bool readFields,
+    bool newFormat
+)
 :
     mesh_(mesh),
     coordinates_(),
@@ -56,25 +62,88 @@ Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
     origProc_(Pstream::myProcNo()),
     origId_(-1)
 {
-    if (is.format() == IOstream::ASCII)
+    if (newFormat)
     {
-        is  >> coordinates_ >> celli_ >> tetFacei_ >> tetPti_;
-
-        if (readFields)
+        if (is.format() == IOstream::ASCII)
         {
-            is  >> facei_ >> stepFraction_ >> origProc_ >> origId_;
+            is  >> coordinates_ >> celli_ >> tetFacei_ >> tetPti_;
+            if (readFields)
+            {
+                is  >> facei_ >> stepFraction_ >> origProc_ >> origId_;
+            }
+        }
+        else
+        {
+            if (readFields)
+            {
+                is.read(reinterpret_cast<char*>(&coordinates_), sizeofFields);
+            }
+            else
+            {
+                is.read(reinterpret_cast<char*>(&coordinates_), sizeofPosition);
+            }
         }
     }
     else
     {
-        if (readFields)
+        struct oldParticle
         {
-            is.read(reinterpret_cast<char*>(&coordinates_), sizeofFields);
+            vector position;
+            label celli;
+            label facei;
+            scalar stepFraction;
+            label tetFacei;
+            label tetPti;
+            label origProc;
+            label origId;
+        } p;
+
+        if (is.format() == IOstream::ASCII)
+        {
+            is >> p.position >> p.celli;
+
+            if (readFields)
+            {
+                is  >> p.facei
+                    >> p.stepFraction
+                    >> p.tetFacei
+                    >> p.tetPti
+                    >> p.origProc
+                    >> p.origId;
+            }
         }
         else
         {
-            is.read(reinterpret_cast<char*>(&coordinates_), sizeofPosition);
+            const size_t s =
+                offsetof(oldParticle, facei) - offsetof(oldParticle, position);
+
+            is.read(reinterpret_cast<char*>(&p.position), s);
+
+            if (readFields)
+            {
+                const size_t s =
+                    sizeof(oldParticle) - offsetof(oldParticle, facei);
+
+                is.read(reinterpret_cast<char*>(&p.facei), s);
+            }
         }
+
+        if (readFields)
+        {
+            // Note: other position-based properties are set using locate(...)
+            stepFraction_ = p.stepFraction;
+            origProc_ = p.origProc;
+            origId_ = p.origId;
+        }
+
+        locate
+        (
+            p.position,
+            nullptr,
+            p.celli,
+            false,
+            "Particle initialised with a location outside of the mesh."
+        );
     }
 
     // Check state of Istream
@@ -82,7 +151,7 @@ Foam::particle::particle(const polyMesh& mesh, Istream& is, bool readFields)
 }
 
 
-void Foam::particle::writePosition(Ostream& os) const
+void Foam::particle::writeCoordinates(Ostream& os) const
 {
     if (os.format() == IOstream::ASCII)
     {
@@ -94,6 +163,41 @@ void Foam::particle::writePosition(Ostream& os) const
     else
     {
         os.write(reinterpret_cast<const char*>(&coordinates_), sizeofPosition);
+    }
+
+    // Check state of Ostream
+    os.check(FUNCTION_NAME);
+}
+
+
+void Foam::particle::writePosition(Ostream& os) const
+{
+    if (os.format() == IOstream::ASCII)
+    {
+        os  << position() << token::SPACE << celli_;
+    }
+    else
+    {
+        struct oldParticle
+        {
+            vector position;
+            label celli;
+            label facei;
+            scalar stepFraction;
+            label tetFacei;
+            label tetPti;
+            label origProc;
+            label origId;
+        } p;
+
+        const size_t s =
+            offsetof(oldParticle, facei) - offsetof(oldParticle, position);
+
+        p.position = position();
+        p.celli = celli_;
+
+        vector pos(position());
+        os.write(reinterpret_cast<const char*>(&p.position), s);
     }
 
     // Check state of Ostream

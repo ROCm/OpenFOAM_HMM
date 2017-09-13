@@ -60,16 +60,16 @@ if (timeDirs.size())
             cloudPrefix/cloudName
         );
 
-        bool hasPositions = false;
+        bool hasCoordinates = false;
         forAllConstIter(IOobjectList, objs, fieldIter)
         {
             const IOobject obj = *fieldIter();
             const word& fieldName = obj.name();
             const word& fieldType = obj.headerClassName();
 
-            if (fieldName == "positions")
+            if (fieldName == "positions" || fieldName == "coordinates")
             {
-                hasPositions = true;
+                hasCoordinates = true;
             }
             else if (cloudFieldTypes.found(fieldType))
             {
@@ -79,7 +79,7 @@ if (timeDirs.size())
         }
 
         // drop this cloud if it has no positions or is otherwise empty
-        if (!hasPositions || cloudIter().empty())
+        if (!hasCoordinates || cloudIter().empty())
         {
             Info<< "removing cloud " << cloudName << endl;
             cloudFields.erase(cloudIter);

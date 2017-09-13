@@ -75,6 +75,10 @@ class Cloud
 {
     // Private data
 
+        //- Geometry type
+        typename IOPosition<Cloud<ParticleType>>::geometryType geometryType_;
+
+        //- Reference to the mesh database
         const polyMesh& polyMesh_;
 
         //- Temporary storage for addressing. Used in findTris.

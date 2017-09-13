@@ -23,10 +23,8 @@ if (timeDirs.size() && !noLagrangian)
             fileName::DIRECTORY
         );
 
-        forAll(cloudDirs, cloudI)
+        for (const word& cloudName : cloudDirs)
         {
-            const word& cloudName = cloudDirs[cloudI];
-
             IOobjectList cloudObjs
             (
                 mesh,
@@ -34,8 +32,8 @@ if (timeDirs.size() && !noLagrangian)
                 cloudPrefix/cloudName
             );
 
-            // clouds always require "positions"
-            if (cloudObjs.found("positions"))
+            // Clouds always require "positions"/"coordinates"
+            if (cloudObjs.found("positions") || cloudObjs.found("coordinates"))
             {
                 if (allCloudDirs.insert(cloudName))
                 {
@@ -60,9 +58,9 @@ if (cloudNames.size())
 {
     // complete the echo information
     Info<< "(";
-    forAll(cloudNames, cloudNo)
+    for (const word& cloudName : cloudNames)
     {
-        Info<< ' ' << cloudNames[cloudNo];
+        Info<< ' ' << cloudName;
     }
     Info<< " ) " << endl;
 }

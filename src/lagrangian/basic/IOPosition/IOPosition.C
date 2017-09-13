@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,22 +25,38 @@ License
 
 #include "IOPosition.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class CloudType>
+const Foam::Enum<typename Foam::IOPosition<CloudType>::geometryType>
+Foam::IOPosition<CloudType>::geometryTypeNames_
+{
+    { geometryType::POSITIONS, "positions" },
+    { geometryType::COORDINATES, "coordinates" }
+};
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::IOPosition<CloudType>::IOPosition(const CloudType& c)
+Foam::IOPosition<CloudType>::IOPosition
+(
+    const CloudType& c,
+    const geometryType& geomType
+)
 :
     regIOobject
     (
         IOobject
         (
-            "positions",
+            geometryTypeNames_[geomType],
             c.time().timeName(),
             c,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
+    geometryType_(geomType),
     cloud_(c)
 {}
 
@@ -59,10 +75,26 @@ bool Foam::IOPosition<CloudType>::writeData(Ostream& os) const
 {
     os  << cloud_.size() << nl << token::BEGIN_LIST << nl;
 
-    forAllConstIter(typename CloudType, cloud_, iter)
+    switch (geometryType_)
     {
-        iter().writePosition(os);
-        os  << nl;
+        case geometryType::POSITIONS:
+        {
+            forAllConstIters(cloud_, iter)
+            {
+                iter().writePosition(os);
+                os  << nl;
+            }
+            break;
+        }
+        case geometryType::COORDINATES:
+        {
+            forAllConstIters(cloud_, iter)
+            {
+                iter().writeCoordinates(os);
+                os  << nl;
+            }
+            break;
+        }
     }
 
     os  << token::END_LIST << endl;
@@ -78,33 +110,39 @@ void Foam::IOPosition<CloudType>::readData(Istream& is, CloudType& c)
 
     token firstToken(is);
 
+    bool newFormat = geometryType_ == geometryType::COORDINATES;
+
     if (firstToken.isLabel())
     {
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        is.readBeginList
-        (
-            "IOPosition<CloudType>::readData(Istream&, CloudType&)"
-        );
+        is.readBeginList(FUNCTION_NAME);
 
         for (label i=0; i<s; i++)
         {
             // Read position only
-            c.append(new typename CloudType::particleType(mesh, is, false));
+            c.append
+            (
+                new typename CloudType::particleType
+                (
+                    mesh,
+                    is,
+                    false,
+                    newFormat
+                )
+            );
         }
 
         // Read end of contents
-        is.readEndList("IOPosition<CloudType>::readData(Istream&, CloudType&)");
+        is.readEndList(FUNCTION_NAME);
     }
     else if (firstToken.isPunctuation())
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
-            FatalIOErrorInFunction
-            (
-                is
-            )   << "incorrect first token, '(', found "
+            FatalIOErrorInFunction(is)
+                << "incorrect first token, '(', found "
                 << firstToken.info() << exit(FatalIOError);
         }
 
@@ -120,16 +158,17 @@ void Foam::IOPosition<CloudType>::readData(Istream& is, CloudType& c)
             is.putBack(lastToken);
 
             // Read position only
-            c.append(new typename CloudType::particleType(mesh, is, false));
+            c.append
+            (
+                new typename CloudType::particleType(mesh, is, false, newFormat)
+            );
             is  >> lastToken;
         }
     }
     else
     {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "incorrect first token, expected <int> or '(', found "
+        FatalIOErrorInFunction(is)
+            << "incorrect first token, expected <int> or '(', found "
             << firstToken.info() << exit(FatalIOError);
     }
 

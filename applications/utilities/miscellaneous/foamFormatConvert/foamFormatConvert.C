@@ -478,6 +478,7 @@ int main(int argc, char *argv[])
                     if
                     (
                         name == "positions"
+                     || name == "coordinates"
                      || name == "origProcId"
                      || name == "origId"
                     )

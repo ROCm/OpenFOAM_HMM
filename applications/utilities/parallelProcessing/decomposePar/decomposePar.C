@@ -745,12 +745,12 @@ int main(int argc, char *argv[])
                         false
                     );
 
-                    IOobject* positionsPtr = sprayObjs.lookup
-                    (
-                        word("positions")
-                    );
+                    // Note: looking up "positions" for backwards compatibility
+                    IOobject* positionsPtr =
+                        sprayObjs.lookup(word("positions"));
+                    IOobject* coordsPtr = sprayObjs.lookup(word("coordinates"));
 
-                    if (positionsPtr)
+                    if (positionsPtr || coordsPtr)
                     {
                         // Read lagrangian particles
                         // ~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -249,7 +249,8 @@ public:
         (
             const polyMesh& c,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct copy

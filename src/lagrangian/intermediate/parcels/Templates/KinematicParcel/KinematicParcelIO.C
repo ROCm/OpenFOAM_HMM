@@ -53,10 +53,11 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     active_(false),
     typeId_(0),
     nParticle_(0.0),

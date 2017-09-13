@@ -51,10 +51,11 @@ Foam::SprayParcel<ParcelType>::SprayParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     d0_(0.0),
     position0_(Zero),
     sigma_(0.0),

@@ -96,9 +96,14 @@ void Foam::parLagrangianRedistributor::findClouds
             cloud::prefix/localCloudDirs[i]
         );
 
-        if (sprayObjs.lookup(word("positions")))
+        if
+        (
+            sprayObjs.lookup(word("coordinates"))
+         || sprayObjs.lookup(word("positions"))
+        )
         {
-            // One of the objects is positions so must be valid cloud
+            // One of the objects is coordinates/positions so must be valid
+            // cloud
 
             label cloudI = findIndex(cloudNames, localCloudDirs[i]);
 
@@ -107,7 +112,7 @@ void Foam::parLagrangianRedistributor::findClouds
             forAllConstIter(IOobjectList, sprayObjs, iter)
             {
                 const word& name = iter.key();
-                if (name != "positions")
+                if (name != "coordinates" && name != "positions")
                 {
                     objectNames[cloudI][objectI++] = name;
                 }

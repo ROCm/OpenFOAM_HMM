@@ -63,7 +63,7 @@ Foam::label Foam::polyMeshTetDecomposition::findSharedBasePoint
 
         const point& tetBasePt = pPts[f[faceBasePtI]];
 
-        for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)
+        for (label tetPtI = 1; tetPtI < f.size() - 1; ++tetPtI)
         {
             label facePtI = (tetPtI + faceBasePtI) % f.size();
             label otherFacePtI = f.fcIndex(facePtI);
@@ -158,7 +158,7 @@ Foam::label Foam::polyMeshTetDecomposition::findBasePoint
 
         const point& tetBasePt = pPts[f[faceBasePtI]];
 
-        for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)
+        for (label tetPtI = 1; tetPtI < f.size() - 1; ++tetPtI)
         {
             label facePtI = (tetPtI + faceBasePtI) % f.size();
             label otherFacePtI = f.fcIndex(facePtI);
@@ -219,17 +219,16 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
 
     label nInternalFaces = mesh.nInternalFaces();
 
-    for (label fI = 0; fI < nInternalFaces; fI++)
+    for (label fI = 0; fI < nInternalFaces; ++fI)
     {
         tetBasePtIs[fI] = findSharedBasePoint(mesh, fI, tol, report);
     }
 
     pointField neighbourCellCentres(mesh.nFaces() - nInternalFaces);
 
-    for(label facei = nInternalFaces; facei < mesh.nFaces(); facei++)
+    for (label facei = nInternalFaces; facei < mesh.nFaces(); ++facei)
     {
-        neighbourCellCentres[facei - nInternalFaces] =
-            pC[pOwner[facei]];
+        neighbourCellCentres[facei - nInternalFaces] = pC[pOwner[facei]];
     }
 
     syncTools::swapBoundaryFacePositions(mesh, neighbourCellCentres);
@@ -250,8 +249,7 @@ Foam::labelList Foam::polyMeshTetDecomposition::findFaceBasePts
         fI++, bFI++
     )
     {
-        label patchi =
-            mesh.boundaryMesh().patchID()[bFI];
+        label patchi = mesh.boundaryMesh().patchID()[bFI];
 
         if (patches[patchi].coupled())
         {
@@ -381,7 +379,7 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
     // Calculate coupled cell centre
     pointField neiCc(mesh.nFaces() - mesh.nInternalFaces());
 
-    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); facei++)
+    for (label facei = mesh.nInternalFaces(); facei < mesh.nFaces(); ++facei)
     {
         neiCc[facei - mesh.nInternalFaces()] = cc[own[facei]];
     }
@@ -526,21 +524,21 @@ bool Foam::polyMeshTetDecomposition::checkFaceTets
 Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
 (
     const polyMesh& mesh,
-    label fI,
-    label cI
+    label facei,
+    label celli
 )
 {
     const faceList& pFaces = mesh.faces();
 
-    const face& f = pFaces[fI];
+    const face& f = pFaces[facei];
 
     label nTets = f.size() - 2;
 
     List<tetIndices> faceTets(nTets);
 
-    for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI ++)
+    for (label tetPti = 1; tetPti < f.size() - 1; ++tetPti)
     {
-        faceTets[tetPtI - 1] = tetIndices(cI, fI, tetPtI);
+        faceTets[tetPti - 1] = tetIndices(celli, facei, tetPti);
     }
 
     return faceTets;
@@ -550,28 +548,26 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::faceTetIndices
 Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::cellTetIndices
 (
     const polyMesh& mesh,
-    label cI
+    label celli
 )
 {
     const faceList& pFaces = mesh.faces();
     const cellList& pCells = mesh.cells();
 
-    const cell& thisCell = pCells[cI];
+    const cell& thisCell = pCells[celli];
 
     label nTets = 0;
 
-    forAll(thisCell, cFI)
+    for (const label facei : thisCell)
     {
-        nTets += pFaces[thisCell[cFI]].size() - 2;
+        nTets += pFaces[facei].size() - 2;
     }
 
     DynamicList<tetIndices> cellTets(nTets);
 
-    forAll(thisCell, cFI)
+    for (const label facei : thisCell)
     {
-        label fI = thisCell[cFI];
-
-        cellTets.append(faceTetIndices(mesh, fI, cI));
+        cellTets.append(faceTetIndices(mesh, facei, celli));
     }
 
     return cellTets;
@@ -581,27 +577,26 @@ Foam::List<Foam::tetIndices> Foam::polyMeshTetDecomposition::cellTetIndices
 Foam::tetIndices Foam::polyMeshTetDecomposition::findTet
 (
     const polyMesh& mesh,
-    label cI,
+    label celli,
     const point& pt
 )
 {
     const faceList& pFaces = mesh.faces();
     const cellList& pCells = mesh.cells();
 
-    const cell& thisCell = pCells[cI];
+    const cell& thisCell = pCells[celli];
 
     tetIndices tetContainingPt;
 
 
-    forAll(thisCell, cFI)
+    for (const label facei : thisCell)
     {
-        label fI = thisCell[cFI];
-        const face& f = pFaces[fI];
+        const face& f = pFaces[facei];
 
-        for (label tetPtI = 1; tetPtI < f.size() - 1; tetPtI++)
+        for (label tetPti = 1; tetPti < f.size() - 1; ++tetPti)
         {
             // Get tetIndices of face triangle
-            tetIndices faceTetIs(cI, fI, tetPtI);
+            tetIndices faceTetIs(celli, facei, tetPti);
 
             // Check if inside
             if (faceTetIs.tet(mesh).inside(pt))

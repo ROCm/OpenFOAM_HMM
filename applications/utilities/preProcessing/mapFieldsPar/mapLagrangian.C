@@ -111,7 +111,10 @@ void mapLagrangian(const meshToMesh& interp)
         bool foundPositions =
             returnReduce(objects.found("positions"), orOp<bool>());;
 
-        if (foundPositions)
+        bool foundCoordinates =
+            returnReduce(objects.found("coordinates"), orOp<bool>());;
+
+        if (foundPositions || foundCoordinates)
         {
             Info<< nl << "    processing cloud " << cloudDirs[cloudI] << endl;
 

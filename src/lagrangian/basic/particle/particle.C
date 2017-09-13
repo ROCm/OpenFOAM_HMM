@@ -37,6 +37,10 @@ Foam::label Foam::particle::particleCount_ = 0;
 namespace Foam
 {
     defineTypeNameAndDebug(particle, 0);
+    bool particle::writeLagrangianPositions
+    (
+        debug::infoSwitch("writeLagrangianPositions", 0)
+    );
 }
 
 
@@ -540,14 +544,14 @@ void Foam::particle::locate
         if (nWarnings < maxNWarnings)
         {
             WarningInFunction << boundaryMsg << endl;
-            ++ nWarnings;
+            ++nWarnings;
         }
         if (nWarnings == maxNWarnings)
         {
             WarningInFunction
                 << "Suppressing any further warnings about particles being "
                 << "located outside of the mesh." << endl;
-            ++ nWarnings;
+            ++nWarnings;
         }
     }
 }
