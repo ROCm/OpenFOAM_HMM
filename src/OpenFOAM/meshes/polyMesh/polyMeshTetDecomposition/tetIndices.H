@@ -142,18 +142,30 @@ public:
             inline label& tetPt();
 
             //- Return the indices corresponding to the tri on the face for
-            //  this tet. The normal of the tri points out of the cell.
-            inline triFace faceTriIs(const polyMesh& mesh) const;
+            //  this tet. The normal of the tri points out of the cell
+            inline triFace faceTriIs
+            (
+                const polyMesh& mesh,
+                const bool warn = true
+            ) const;
+
+            //- Return the local indices corresponding to the tri on the face
+            //  for this tet. The normal of the tri points out of the cell
+            inline triFace triIs
+            (
+                const polyMesh& mesh,
+                const bool warn = true
+            ) const;
 
             //- Return the geometry corresponding to this tet
             inline tetPointRef tet(const polyMesh& mesh) const;
 
             //- Return the geometry corresponding to the tri on the face for
-            //  this tet. The normal of the tri points out of the cell.
+            //  this tet. The normal of the tri points out of the cell
             inline triPointRef faceTri(const polyMesh& mesh) const;
 
             //- Return the geometry corresponding to the tri on the face for
-            //  this tet using the old positions.
+            //  this tet using the old positions
             inline triPointRef oldFaceTri(const polyMesh& mesh) const;
 
 

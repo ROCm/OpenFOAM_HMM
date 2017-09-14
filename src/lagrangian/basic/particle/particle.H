@@ -370,6 +370,18 @@ public:
             const label celli
         );
 
+        //- Construct from components
+        particle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli,
+            const label tetFacei,
+            const label tetPti,
+            const bool doLocate = true
+        );
+
+
         //- Construct from Istream
         particle
         (
@@ -438,11 +450,20 @@ public:
             //- Return current tet face particle is in
             inline label tetFace() const;
 
+            //- Return current tet face particle is in for manipulation
+            inline label& tetFace();
+
             //- Return current tet face particle is in
             inline label tetPt() const;
 
+            //- Return current tet face particle is in for manipulation
+            inline label& tetPt();
+
             //- Return current face particle is on otherwise -1
             inline label face() const;
+
+            //- Return current face particle is on for manipulation
+            inline label& face();
 
             //- Return the fraction of time-step completed
             inline scalar stepFraction() const;

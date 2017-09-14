@@ -588,7 +588,7 @@ Foam::particle::particle
 )
 :
     mesh_(mesh),
-    coordinates_(- VGREAT, - VGREAT, - VGREAT, - VGREAT),
+    coordinates_(-VGREAT, -VGREAT, -VGREAT, -VGREAT),
     celli_(celli),
     tetFacei_(-1),
     tetPti_(-1),
@@ -605,6 +605,40 @@ Foam::particle::particle
         false,
         "Particle initialised with a location outside of the mesh."
     );
+}
+
+
+Foam::particle::particle
+(
+    const polyMesh& mesh,
+    const vector& position,
+    const label celli,
+    const label tetFacei,
+    const label tetPti,
+    bool doLocate
+)
+:
+    mesh_(mesh),
+    coordinates_(-VGREAT, -VGREAT, -VGREAT, -VGREAT),
+    celli_(celli),
+    tetFacei_(tetFacei),
+    tetPti_(tetPti),
+    facei_(-1),
+    stepFraction_(0.0),
+    origProc_(Pstream::myProcNo()),
+    origId_(getNewParticleID())
+{
+    if (doLocate)
+    {
+        locate
+        (
+            position,
+            nullptr,
+            celli,
+            false,
+            "Particle initialised with a location outside of the mesh."
+        );
+    }
 }
 
 

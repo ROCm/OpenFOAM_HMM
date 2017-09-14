@@ -71,10 +71,9 @@ class wallBoundedParticle
 public:
 
     //- Class used to pass tracking data to the trackToFace function
-    template<class CloudType>
-    class TrackingData
+    class trackingData
     :
-        public particle::TrackingData<CloudType>
+        public particle::trackingData
     {
 
     public:
@@ -83,16 +82,14 @@ public:
 
         // Constructors
 
-            inline TrackingData
+            template <class TrackCloudType>
+            inline trackingData
             (
-                CloudType& cloud,
+                const TrackCloudType& cloud,
                 const PackedBoolList& isWallPatch
             )
             :
-                particle::TrackingData<CloudType>
-                (
-                    cloud
-                ),
+                particle::trackingData(cloud),
                 isWallPatch_(isWallPatch)
             {}
     };
@@ -101,6 +98,10 @@ public:
 protected:
 
     // Protected data
+
+        //- Particle position is updated locally as opposed to via track
+        //  functions of the base Foam::particle class
+        point localPosition_;
 
         //- Particle is on mesh edge:
         //      const face& f = mesh.faces()[tetFace()]
@@ -122,10 +123,6 @@ protected:
 
         //- Construct current edge
         edge currentEdge() const;
-
-        //- Replacement for particle::currentTetIndices() that avoids bombing
-        //  out on invalid tet decomposition (tetBasePtIs = -1)
-        tetIndices currentTetIndices() const;
 
         //- Replacement for particle::crossEdgeConnectedFace that avoids bombing
         //  out on invalid tet decomposition (tetBasePtIs = -1)
@@ -150,84 +147,6 @@ protected:
         bool isTriAlongTrack(const vector& n, const point& endPosition) const;
 
 
-    // Patch interactions
-
-        //- Do all patch interaction
-        template<class TrackData>
-        void patchInteraction(TrackData& td, const scalar trackFraction);
-
-        //- Overridable function to handle the particle hitting a patch
-        //  Executed before other patch-hitting functions
-        template<class TrackData>
-        bool hitPatch
-        (
-            const polyPatch&,
-            TrackData& td,
-            const label patchi,
-            const scalar trackFraction,
-            const tetIndices& tetIs
-        );
-
-        //- Overridable function to handle the particle hitting a wedge
-        template<class TrackData>
-        void hitWedgePatch
-        (
-            const wedgePolyPatch&,
-            TrackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a
-        //  symmetry plane
-        template<class TrackData>
-        void hitSymmetryPlanePatch
-        (
-            const symmetryPlanePolyPatch&,
-            TrackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a
-        //  symmetry patch
-        template<class TrackData>
-        void hitSymmetryPatch
-        (
-            const symmetryPolyPatch&,
-            TrackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a cyclic
-        template<class TrackData>
-        void hitCyclicPatch
-        (
-            const cyclicPolyPatch&,
-            TrackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a
-        //- processorPatch
-        template<class TrackData>
-        void hitProcessorPatch
-        (
-            const processorPolyPatch&,
-            TrackData& td
-        );
-
-        //- Overridable function to handle the particle hitting a wallPatch
-        template<class TrackData>
-        void hitWallPatch
-        (
-            const wallPolyPatch&,
-            TrackData& td,
-            const tetIndices&
-        );
-
-        //- Overridable function to handle the particle hitting a polyPatch
-        template<class TrackData>
-        void hitPatch
-        (
-            const polyPatch&,
-            TrackData& td
-        );
-
 public:
 
     // Constructors
@@ -236,7 +155,7 @@ public:
         wallBoundedParticle
         (
             const polyMesh& c,
-            const vector& position,
+            const point& position,
             const label celli,
             const label tetFacei,
             const label tetPti,
@@ -308,12 +227,42 @@ public:
         // Track
 
             //- Equivalent of trackToFace
-            template<class TrackData>
+            template<class TrackCloudType>
             scalar trackToEdge
             (
-                TrackData& td,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const vector& endPosition
             );
+
+
+            // Patch interactions
+
+                //- Do all patch interaction
+                template<class TrackCloudType>
+                void patchInteraction
+                (
+                    TrackCloudType& cloud,
+                    trackingData& td,
+                    const scalar trackFraction
+                );
+
+                //- Overridable function to handle the particle hitting a
+                //- processorPatch
+                template<class TrackCloudType>
+                void hitProcessorPatch
+                (
+                    TrackCloudType& cloud,
+                    trackingData& td
+                );
+
+                //- Overridable function to handle the particle hitting a wallPatch
+                template<class TrackCloudType>
+                void hitWallPatch
+                (
+                    TrackCloudType& cloud,
+                    trackingData& td
+                );
 
 
         // Info

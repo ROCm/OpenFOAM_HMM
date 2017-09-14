@@ -72,13 +72,31 @@ inline Foam::label Foam::particle::tetFace() const
 }
 
 
+inline Foam::label& Foam::particle::tetFace()
+{
+    return tetFacei_;
+}
+
+
 inline Foam::label Foam::particle::tetPt() const
 {
     return tetPti_;
 }
 
 
+inline Foam::label& Foam::particle::tetPt()
+{
+    return tetPti_;
+}
+
+
 inline Foam::label Foam::particle::face() const
+{
+    return facei_;
+}
+
+
+inline Foam::label& Foam::particle::face()
 {
     return facei_;
 }

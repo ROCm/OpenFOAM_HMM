@@ -47,6 +47,7 @@ runTimeModifiable true;
 functions
 {
     #include "streamLines"
+    #include "wallBoundedStreamLines"
     #include "cuttingPlane"
     #include "forceCoeffs"
     #include "ensightWrite"

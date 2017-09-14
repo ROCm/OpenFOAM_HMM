@@ -111,11 +111,12 @@ void Foam::functionObjects::nearWallFields::calcAddressing()
                 tetPti = (startInfo.index()+1) % f.size();
 
                 start = startInfo.hitPoint();
+
                 //// Uncomment below to shift slightly in:
-                //tetIndices tet(celli, meshFacei, tetPti, mesh_);
-                //start =
-                //    (1.0-1e-6)*startInfo.hitPoint()
-                //  + 1e-6*tet.tet(mesh_).centre();
+                tetIndices tet(celli, meshFacei, tetPti);
+                start =
+                    (1.0 - 1e-6)*startInfo.hitPoint()
+                  + 1e-6*tet.tet(mesh_).centre();
             }
             else
             {

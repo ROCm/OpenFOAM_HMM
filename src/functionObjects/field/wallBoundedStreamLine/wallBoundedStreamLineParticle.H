@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ Ostream& operator<<(Ostream&, const wallBoundedStreamLineParticle&);
 
 
 /*---------------------------------------------------------------------------*\
-                 Class wallBoundedStreamLineParticle Declaration
+                Class wallBoundedStreamLineParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class wallBoundedStreamLineParticle
@@ -71,10 +71,7 @@ public:
     //- Class used to pass tracking data to the trackToEdge function
     class trackingData
     :
-        public wallBoundedParticle::TrackingData
-        <
-            Cloud<wallBoundedStreamLineParticle>
-        >
+        public wallBoundedParticle::trackingData
     {
 
     public:
@@ -93,9 +90,10 @@ public:
 
         // Constructors
 
+            template <class TrackCloudType>
             trackingData
             (
-                Cloud<wallBoundedStreamLineParticle>& cloud,
+                TrackCloudType& cloud,
                 const PtrList<interpolation<scalar>>& vsInterp,
                 const PtrList<interpolation<vector>>& vvInterp,
                 const label UIndex,
@@ -108,10 +106,7 @@ public:
                 List<DynamicList<vectorList>>& allVectors
             )
             :
-                wallBoundedParticle::TrackingData
-                <
-                    Cloud<wallBoundedStreamLineParticle>
-                >
+                wallBoundedParticle::trackingData
                 (
                     cloud,
                     isWallPatch
@@ -167,7 +162,7 @@ public:
         wallBoundedStreamLineParticle
         (
             const polyMesh& c,
-            const vector& position,
+            const point& position,
             const label celli,
             const label tetFacei,
             const label tetPti,
@@ -225,7 +220,13 @@ public:
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackingData&, const scalar trackTime);
+            template<class TrackCloudType>
+            bool move
+            (
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar trackTime
+            );
 
 
         // I-O
@@ -253,6 +254,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "wallBoundedStreamLineParticleTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

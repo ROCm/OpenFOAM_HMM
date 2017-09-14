@@ -61,7 +61,11 @@ inline Foam::label& Foam::tetIndices::tetPt()
 }
 
 
-inline Foam::triFace Foam::tetIndices::faceTriIs(const polyMesh& mesh) const
+inline Foam::triFace Foam::tetIndices::faceTriIs
+(
+    const polyMesh& mesh,
+    const bool warn
+) const
 {
     const Foam::face& f = mesh.faces()[face()];
 
@@ -70,22 +74,26 @@ inline Foam::triFace Foam::tetIndices::faceTriIs(const polyMesh& mesh) const
     if (faceBasePtI < 0)
     {
         faceBasePtI = 0;
-        if (nWarnings < maxNWarnings)
+
+        if (warn)
         {
-            WarningInFunction
-                << "No base point for face " << face() << ", " << f
-                << ", produces a valid tet decomposition." << endl;
-            ++ nWarnings;
-        }
-        if (nWarnings == maxNWarnings)
-        {
-            Warning
-                << "Suppressing any further warnings." << endl;
-            ++ nWarnings;
+            if (nWarnings < maxNWarnings)
+            {
+                WarningInFunction
+                    << "No base point for face " << face() << ", " << f
+                    << ", produces a valid tet decomposition." << endl;
+                ++nWarnings;
+            }
+            if (nWarnings == maxNWarnings)
+            {
+                Warning
+                    << "Suppressing any further warnings." << endl;
+                ++nWarnings;
+            }
         }
     }
 
-    label facePtI = (tetPt() + faceBasePtI) % f.size();
+    label facePtI = (tetPti_ + faceBasePtI) % f.size();
     label faceOtherPtI = f.fcIndex(facePtI);
 
     if (mesh.faceOwner()[face()] != cell())
@@ -94,6 +102,50 @@ inline Foam::triFace Foam::tetIndices::faceTriIs(const polyMesh& mesh) const
     }
 
     return triFace(f[faceBasePtI], f[facePtI], f[faceOtherPtI]);
+}
+
+
+inline Foam::triFace Foam::tetIndices::triIs
+(
+    const polyMesh& mesh,
+    const bool warn
+) const
+{
+    const Foam::face& f = mesh.faces()[face()];
+
+    label faceBasePtI = mesh.tetBasePtIs()[face()];
+
+    if (faceBasePtI < 0)
+    {
+        faceBasePtI = 0;
+
+        if (warn)
+        {
+            if (nWarnings < maxNWarnings)
+            {
+                WarningInFunction
+                    << "No base point for face " << face() << ", " << f
+                    << ", produces a valid tet decomposition." << endl;
+                ++nWarnings;
+            }
+            if (nWarnings == maxNWarnings)
+            {
+                Warning
+                    << "Suppressing any further warnings." << endl;
+                ++nWarnings;
+            }
+        }
+    }
+
+    label facePtI = (tetPti_ + faceBasePtI) % f.size();
+    label faceOtherPtI = f.fcIndex(facePtI);
+
+    if (mesh.faceOwner()[face()] != cell())
+    {
+        Swap(facePtI, faceOtherPtI);
+    }
+
+    return triFace(faceBasePtI, facePtI, faceOtherPtI);
 }
 
 
