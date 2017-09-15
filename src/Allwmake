@@ -42,6 +42,8 @@ wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
 wmake $targetType genericPatchFields
 
+wmake $targetType finiteArea
+
 conversion/Allwmake $targetType $*
 wmake $targetType mesh/extrudeModel
 wmake $targetType dynamicMesh

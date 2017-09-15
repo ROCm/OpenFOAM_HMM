@@ -147,6 +147,12 @@ cleanUcomponents()
 }
 
 
+cleanFaMesh ()
+{
+    rm -rf ./constant/faMesh/{faceLabels*,faBoundary*} \
+           > /dev/null 2>&1
+}
+
 cleanApplication()
 {
     echo "Cleaning application $PWD"
