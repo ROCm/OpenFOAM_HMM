@@ -68,6 +68,8 @@ motionControl
 {
     maxSmoothingIterations      100;
 
+    maxRefinementIterations     0;
+
     cellAspectRatioControl
     {
         aspectRatio             1.0;
@@ -114,9 +116,9 @@ polyMeshFiltering
 {
     filterEdges                         on;
     filterFaces                         off;
-    writeTetDualMesh                    true;
-    writeCellShapeControlMesh           true;
-    writeBackgroundMeshDecomposition    true;
+    writeTetDualMesh                    false;
+    writeCellShapeControlMesh           false;
+    writeBackgroundMeshDecomposition    false;
 }
 
 
