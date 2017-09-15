@@ -85,6 +85,8 @@ PIMPLE
     ddtCorr         yes;
     correctPhi      no;
 
+    oversetAdjustPhi    no;
+
     moveMeshOuterCorrectors no;
     turbOnFinalIterOnly no;
 }
