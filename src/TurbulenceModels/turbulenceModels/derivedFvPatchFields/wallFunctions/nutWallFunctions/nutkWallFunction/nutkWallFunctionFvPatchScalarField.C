@@ -151,8 +151,7 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
     tmp<scalarField> kwc = k.boundaryField()[patchi].patchInternalField();
-    const tmp<scalarField> tnuw = turbModel.nu(patchi);
-    const scalarField& nuw = tnuw();
+    tmp<scalarField> nuw = turbModel.nu(patchi);
 
     return pow025(Cmu_)*y*sqrt(kwc)/nuw;
 }

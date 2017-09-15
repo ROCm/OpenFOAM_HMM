@@ -28,7 +28,7 @@ Group
     grpODESolvers
 
 Description
-    4/5th Order Dormand–Prince Runge-Kutta ODE solver.
+    4/5th Order Dormand-Prince Runge-Kutta ODE solver.
 
     References:
     \verbatim
