@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,42 +23,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uint32.H"
-#include "stringOps.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::word Foam::name(const char* fmt, const uint32_t val)
+inline Foam::parsing::errorType Foam::parsing::checkConversion
+(
+    const char* buf,
+    char* endptr
+)
 {
-    return stringOps::name(fmt, val);
-}
+    if (errno || endptr == buf)
+    {
+        // Some type of error OR no conversion
+        return errorType::GENERAL;
+    }
 
+    // Trailing spaces are permitted
+    while (isspace(*endptr))
+    {
+        ++endptr;
+    }
 
-Foam::word Foam::name(const std::string& fmt, const uint32_t val)
-{
-    return stringOps::name(fmt, val);
-}
+    if (*endptr != '\0')
+    {
+        // Trailing content
+        return errorType::TRAILING;
+    }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-const uint32_t Foam::pTraits<uint32_t>::zero = 0;
-const uint32_t Foam::pTraits<uint32_t>::one = 1;
-const uint32_t Foam::pTraits<uint32_t>::min = 0;
-const uint32_t Foam::pTraits<uint32_t>::max = UINT32_MAX;
-const uint32_t Foam::pTraits<uint32_t>::rootMin = 0;
-const uint32_t Foam::pTraits<uint32_t>::rootMax = pTraits<uint32_t>::max;
-
-const char* const Foam::pTraits<uint32_t>::componentNames[] = { "" };
-
-Foam::pTraits<uint32_t>::pTraits(const uint32_t& val)
-:
-    p_(val)
-{}
-
-Foam::pTraits<uint32_t>::pTraits(Istream& is)
-{
-    is >> p_;
+    // Valid conversion
+    return errorType::NONE;
 }
 
 

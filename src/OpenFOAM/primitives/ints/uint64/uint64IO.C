@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,26 +24,68 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uint64.H"
-#include "stringOps.H"
+#include "parsing.H"
 #include "IOstreams.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::word Foam::name(const char* fmt, const uint64_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
-Foam::word Foam::name(const std::string& fmt, const uint64_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
+#include <cinttypes>
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, uint64_t& i)
+uint64_t Foam::readUint64(const char* buf)
+{
+    char *endptr = nullptr;
+    errno = 0;
+    const uintmax_t parsed = ::strtoumax(buf, &endptr, 10);
+
+    const uint64_t val = uint64_t(parsed);
+
+    if (parsed > UINT64_MAX)
+    {
+        // Range error
+        errno = ERANGE;
+    }
+
+    const parsing::errorType err = parsing::checkConversion(buf, endptr);
+    if (err != parsing::errorType::NONE)
+    {
+        FatalIOErrorInFunction("unknown")
+            << parsing::errorNames[err] << " '" << buf << "'"
+            << exit(FatalIOError);
+    }
+
+    return val;
+}
+
+
+bool Foam::readUint64(const char* buf, uint64_t& val)
+{
+    char *endptr = nullptr;
+    errno = 0;
+    const uintmax_t parsed = ::strtoumax(buf, &endptr, 10);
+
+    val = uint64_t(parsed);
+
+    if (parsed > UINT64_MAX)
+    {
+        // Range error
+        errno = ERANGE;
+    }
+
+    const parsing::errorType err = parsing::checkConversion(buf, endptr);
+    if (err != parsing::errorType::NONE)
+    {
+        #ifdef FULLDEBUG
+        IOWarningInFunction("unknown")
+            << parsing::errorNames[err] << " '" << buf << "'"
+            << endl;
+        #endif
+        return false;
+    }
+
+    return true;
+}
+
+
+Foam::Istream& Foam::operator>>(Istream& is, uint64_t& val)
 {
     token t(is);
 
@@ -55,7 +97,7 @@ Foam::Istream& Foam::operator>>(Istream& is, uint64_t& i)
 
     if (t.isLabel())
     {
-        i = uint64_t(t.labelToken());
+        val = uint64_t(t.labelToken());
     }
     else
     {
@@ -81,18 +123,9 @@ uint64_t Foam::readUint64(Istream& is)
 }
 
 
-bool Foam::read(const char* buf, uint64_t& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t val)
 {
-    char *endptr = nullptr;
-    long l = strtol(buf, &endptr, 10);
-    s = uint64_t(l);
-    return (*endptr == 0);
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const uint64_t i)
-{
-    os.write(label(i));
+    os.write(label(val));
     os.check(FUNCTION_NAME);
     return os;
 }

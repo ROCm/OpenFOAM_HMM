@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,43 +23,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uint32.H"
-#include "stringOps.H"
+#include "parsing.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Global Data * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const char* fmt, const uint32_t val)
+const Foam::Enum<Foam::parsing::errorType>
+Foam::parsing::errorNames
 {
-    return stringOps::name(fmt, val);
-}
-
-
-Foam::word Foam::name(const std::string& fmt, const uint32_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-const uint32_t Foam::pTraits<uint32_t>::zero = 0;
-const uint32_t Foam::pTraits<uint32_t>::one = 1;
-const uint32_t Foam::pTraits<uint32_t>::min = 0;
-const uint32_t Foam::pTraits<uint32_t>::max = UINT32_MAX;
-const uint32_t Foam::pTraits<uint32_t>::rootMin = 0;
-const uint32_t Foam::pTraits<uint32_t>::rootMax = pTraits<uint32_t>::max;
-
-const char* const Foam::pTraits<uint32_t>::componentNames[] = { "" };
-
-Foam::pTraits<uint32_t>::pTraits(const uint32_t& val)
-:
-    p_(val)
-{}
-
-Foam::pTraits<uint32_t>::pTraits(Istream& is)
-{
-    is >> p_;
-}
+    { errorType::GENERAL,  "General error parsing" },
+    { errorType::TRAILING, "Trailing content found parsing" },
+};
 
 
 // ************************************************************************* //
