@@ -37,25 +37,25 @@ Foam::chemistryReductionMethods::DRGEP<CompType, ThermoType>::DRGEP
 :
     chemistryReductionMethod<CompType, ThermoType>(dict, chemistry),
     searchInitSet_(this->coeffsDict_.subDict("initialSet").size()),
-    sC_(this->nSpecie_,0),
-    sH_(this->nSpecie_,0),
-    sO_(this->nSpecie_,0),
-    sN_(this->nSpecie_,0),
+    sC_(this->nSpecie_, 0),
+    sH_(this->nSpecie_, 0),
+    sO_(this->nSpecie_, 0),
+    sN_(this->nSpecie_, 0),
     NGroupBased_(50)
 {
-    label j=0;
+    label j = 0;
     dictionary initSet = this->coeffsDict_.subDict("initialSet");
-    for (label i=0; i<chemistry.nSpecie(); i++)
+    for (label i=0; i<chemistry.nSpecie(); ++i)
     {
         if (initSet.found(chemistry.Y()[i].name()))
         {
-            searchInitSet_[j++]=i;
+            searchInitSet_[j++] = i;
         }
     }
     if (j<searchInitSet_.size())
     {
         FatalErrorInFunction
-            << searchInitSet_.size()-j
+            << searchInitSet_.size() - j
             << " species in the intial set is not in the mechanism "
             << initSet
             << exit(FatalError);
@@ -68,15 +68,14 @@ Foam::chemistryReductionMethods::DRGEP<CompType, ThermoType>::DRGEP
 
     const List<List<specieElement>>& specieComposition =
         this->chemistry_.specieComp();
-    for (label i=0; i<this->nSpecie_; i++)
+
+    for (label i=0; i<this->nSpecie_; ++i)
     {
-        const List<specieElement>& curSpecieComposition =
-            specieComposition[i];
+        const List<specieElement>& curSpecieComposition = specieComposition[i];
+
         // for all elements in the current species
-        forAll(curSpecieComposition, j)
+        for (const specieElement& curElement : curSpecieComposition)
         {
-            const specieElement& curElement =
-                curSpecieComposition[j];
             if (curElement.name() == "C")
             {
                 sC_[i] = curElement.nAtoms();
@@ -123,7 +122,7 @@ reduceMechanism
     scalarField& completeC(this->chemistry_.completeC());
     scalarField c1(this->chemistry_.nEqns(), 0.0);
 
-    for (label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<this->nSpecie_; ++i)
     {
         c1[i] = c[i];
         completeC[i] = c[i];
@@ -133,12 +132,12 @@ reduceMechanism
     c1[this->nSpecie_+1] = p;
 
     // Compute the rAB matrix
-    RectangularMatrix<scalar> rABNum(this->nSpecie_,this->nSpecie_,0.0);
-    scalarField PA(this->nSpecie_,0.0);
-    scalarField CA(this->nSpecie_,0.0);
+    RectangularMatrix<scalar> rABNum(this->nSpecie_, this->nSpecie_, 0.0);
+    scalarField PA(this->nSpecie_, 0.0);
+    scalarField CA(this->nSpecie_, 0.0);
 
     // Number of initialized rAB for each lines
-    Field<label> NbrABInit(this->nSpecie_,0);
+    Field<label> NbrABInit(this->nSpecie_, 0);
     // Position of the initialized rAB, -1 when not initialized
     RectangularMatrix<label> rABPos(this->nSpecie_, this->nSpecie_, -1);
     // Index of the other species involved in the rABNum
@@ -150,11 +149,12 @@ reduceMechanism
     forAll(this->chemistry_.reactions(), i)
     {
         const Reaction<ThermoType>& R = this->chemistry_.reactions()[i];
+
         // for each reaction compute omegai
         scalar omegai = this->chemistry_.omega
         (
-         R, c1, T, p, pf, cf, lRef, pr, cr, rRef
-         );
+            R, c1, T, p, pf, cf, lRef, pr, cr, rRef
+        );
         omegaV[i] = omegai;
 
         // then for each pair of species composing this reaction,
@@ -185,7 +185,7 @@ reduceMechanism
             // Disable for self reference (by definition rAA=0)
             deltaBi[ss] = false;
 
-            while(!usedIndex.empty())
+            while (!usedIndex.empty())
             {
                 label curIndex = usedIndex.pop();
                 if (deltaBi[curIndex])
@@ -193,7 +193,7 @@ reduceMechanism
                     // disable to avoid counting it more than once
                     deltaBi[curIndex] = false;
                     // test if this rAB is not initialized
-                    if (rABPos(ss, curIndex)==-1)
+                    if (rABPos(ss, curIndex) == -1)
                     {
                         rABPos(ss, curIndex) = NbrABInit[ss];
                         NbrABInit[ss]++;
@@ -209,7 +209,7 @@ reduceMechanism
             bool found(false);
             forAll(wAID, id)
             {
-                if (ss==wAID[id])
+                if (ss == wAID[id])
                 {
                     wA[id] += sl*omegai;
                     found = true;
@@ -245,7 +245,7 @@ reduceMechanism
             // Disable for self reference (by definition rAA=0)
             deltaBi[ss] = false;
 
-            while(!usedIndex.empty())
+            while (!usedIndex.empty())
             {
                 label curIndex = usedIndex.pop();
                 if (deltaBi[curIndex])
@@ -253,7 +253,7 @@ reduceMechanism
                     // disable to avoid counting it more than once
                     deltaBi[curIndex] = false;
                     // test if this rAB is not initialized
-                    if (rABPos(ss, curIndex)==-1)
+                    if (rABPos(ss, curIndex) == -1)
                     {
                         rABPos(ss, curIndex) = NbrABInit[ss];
                         NbrABInit[ss]++;
@@ -270,7 +270,7 @@ reduceMechanism
             bool found(false);
             forAll(wAID, id)
             {
-                if (ss==wAID[id])
+                if (ss == wAID[id])
                 {
                     wA[id] += sl*omegai;
                     found = true;
@@ -320,28 +320,28 @@ reduceMechanism
     scalarList Pa(nElements,0.0);
     scalarList Ca(nElements,0.0);
 
-    // for (label q=0; q<SIS.size(); q++)
-    for (label i=0; i<this->nSpecie_; i++)
+    // for (label q=0; q<SIS.size(); ++q)
+    for (label i=0; i<this->nSpecie_; ++i)
     {
-        Pa[0] += sC_[i]*max(0.0,(PA[i]-CA[i]));
+        Pa[0] += sC_[i]*max(0.0, (PA[i]-CA[i]));
         Ca[0] += sC_[i]*max(0.0,-(PA[i]-CA[i]));
-        Pa[1] += sH_[i]*max(0.0,(PA[i]-CA[i]));
+        Pa[1] += sH_[i]*max(0.0, (PA[i]-CA[i]));
         Ca[1] += sH_[i]*max(0.0,-(PA[i]-CA[i]));
-        Pa[2] += sO_[i]*max(0.0,(PA[i]-CA[i]));
+        Pa[2] += sO_[i]*max(0.0, (PA[i]-CA[i]));
         Ca[2] += sO_[i]*max(0.0,-(PA[i]-CA[i]));
-        Pa[3] += sN_[i]*max(0.0,(PA[i]-CA[i]));
+        Pa[3] += sN_[i]*max(0.0, (PA[i]-CA[i]));
         Ca[3] += sN_[i]*max(0.0,-(PA[i]-CA[i]));
     }
 
     // Using the rAB matrix (numerator and denominator separated)
     // compute the R value according to the search initiating set
-    scalarField Rvalue(this->nSpecie_,0.0);
+    scalarField Rvalue(this->nSpecie_, 0.0);
     label speciesNumber = 0;
-    List<bool> disabledSpecies(this->nSpecie_,false);
+    List<bool> disabledSpecies(this->nSpecie_, false);
 
     // set all species to inactive and activate them according
     // to rAB and initial set
-    for (label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<this->nSpecie_; ++i)
     {
         this->activeSpecies_[i] = false;
     }
@@ -353,7 +353,7 @@ reduceMechanism
 
     // Compute the alpha coefficient and initialize the R value of the species
     // in the SIS
-    for (label i=0; i<SIS.size(); i++)
+    for (label i=0; i<SIS.size(); ++i)
     {
         label q = SIS[i];
         // compute alpha
@@ -397,7 +397,7 @@ reduceMechanism
         if (alphaA > this->tolerance())
         {
             this->activeSpecies_[q] = true;
-            speciesNumber++;
+            ++speciesNumber;
             Q.push(q);
             QStart.append(q);
             alphaQ.append(1.0);
@@ -415,18 +415,19 @@ reduceMechanism
     {
         scalar Rmax=0.0;
         label specID=-1;
-        forAll(SIS, i)
+        for (const label sis : SIS)
         {
-            if (Rvalue[SIS[i]] > Rmax)
+            if (Rvalue[sis] > Rmax)
             {
-                Rmax = Rvalue[SIS[i]];
-                specID=SIS[i];
+                Rmax = Rvalue[sis];
+                specID = sis;
             }
         }
+
         Q.push(specID);
         QStart.append(specID);
         alphaQ.append(1.0);
-        speciesNumber++;
+        ++speciesNumber;
         Rvalue[specID] = 1.0;
         this->activeSpecies_[specID] = true;
     }
@@ -435,18 +436,22 @@ reduceMechanism
     while (!Q.empty())
     {
         label u = Q.pop();
-        scalar Den = max(PA[u],CA[u]);
+        scalar Den = max(PA[u], CA[u]);
         if (Den > VSMALL)
         {
-            for (label v=0; v<NbrABInit[u]; v++)
+            for (label v=0; v<NbrABInit[u]; ++v)
             {
                 label otherSpec = rABOtherSpec(u, v);
                 scalar rAB = mag(rABNum(u, v))/Den;
-                if (rAB>1)
+
+                if (rAB > 1)
                 {
                     Info<< "Badly Conditioned rAB : " << rAB
-                    << "species involved : "<<u << "," << otherSpec << endl;
-                    rAB=1.0;
+                    << " for species : "
+                    << this->chemistry_.Y()[u].name() << ","
+                    << this->chemistry_.Y()[otherSpec].name()
+                    << endl;
+                    rAB = 1.0;
                 }
 
                 scalar Rtemp = Rvalue[u]*rAB;
@@ -461,7 +466,7 @@ reduceMechanism
                         if (!this->activeSpecies_[otherSpec])
                         {
                             this->activeSpecies_[otherSpec] = true;
-                            speciesNumber++;
+                            ++speciesNumber;
                         }
                     }
                 }
@@ -471,14 +476,14 @@ reduceMechanism
 
     // Group-based reduction
     // number of species disabled in the first step
-    label NDisabledSpecies(this->nSpecie_-speciesNumber);
+    label NDisabledSpecies(this->nSpecie_ - speciesNumber);
 
     // while the number of removed species is greater than NGroupBased, the rAB
     // are reevaluated according to the group based definition for each loop the
     // temporary disabled species (in the first reduction) are sorted to disable
     // definitely the NGroupBased species with lower R then these R value a
     // reevaluated taking into account these disabled species
-    while(NDisabledSpecies > NGroupBased_)
+    while (NDisabledSpecies > NGroupBased_)
     {
         // keep track of disabled species using sortablelist to extract only
         // NGroupBased lower R value
@@ -500,7 +505,7 @@ reduceMechanism
         labelList tmpIndex(Rdisabled.indices());
 
         // disable definitely NGroupBased species in this loop
-        for (label i=0; i<NGroupBased_; i++)
+        for (label i=0; i<NGroupBased_; ++i)
         {
             disabledSpecies[Rindex[tmpIndex[i]]] = true;
         }
@@ -510,7 +515,7 @@ reduceMechanism
         // only update the numerator
         forAll(NbrABInit, i)
         {
-            for (label v=0; v<NbrABInit[i]; v++)
+            for (label v=0; v<NbrABInit[i]; ++v)
             {
                 rABNum(i, v) = 0.0;
             }
@@ -555,7 +560,7 @@ reduceMechanism
                 {
                     // if one of the species in this reaction is disabled, all
                     // species connected to species ss are modified
-                    for (label v=0; v<NbrABInit[ss]; v++)
+                    for (label v=0; v<NbrABInit[ss]; ++v)
                     {
                         rABNum(ss, v) += sl*omegai;
                     }
@@ -589,7 +594,7 @@ reduceMechanism
                     deltaBi[sj] = true;
                     if (disabledSpecies[sj])
                     {
-                        alreadyDisabled=true;
+                        alreadyDisabled = true;
                     }
                 }
                 forAll(R.rhs(), j)
@@ -599,7 +604,7 @@ reduceMechanism
                     deltaBi[sj] = true;
                     if (disabledSpecies[sj])
                     {
-                        alreadyDisabled=true;
+                        alreadyDisabled = true;
                     }
                 }
 
@@ -609,7 +614,7 @@ reduceMechanism
                 {
                     // if one of the species in this reaction is disabled, all
                     // species connected to species ss are modified
-                    for (label v=0; v<NbrABInit[ss]; v++)
+                    for (label v=0; v<NbrABInit[ss]; ++v)
                     {
                         rABNum(ss, v) += sl*omegai;
                     }
@@ -629,32 +634,31 @@ reduceMechanism
             }
         }
 
-        forAll(QStart, qi)
+        for (const label q : QStart)
         {
-            label u = QStart[qi];
-            Q.push(u);
+            Q.push(q);
         }
 
         while (!Q.empty())
         {
             label u = Q.pop();
             scalar Den = max(PA[u],CA[u]);
-            if (Den!=0.0)
+            if (Den != 0.0)
             {
-                for (label v=0; v<NbrABInit[u]; v++)
+                for (label v=0; v<NbrABInit[u]; ++v)
                 {
                     label otherSpec = rABOtherSpec(u, v);
                     if (!disabledSpecies[otherSpec])
                     {
                         scalar rAB = mag(rABNum(u, v))/Den;
-                        if (rAB>1.0)
+                        if (rAB > 1)
                         {
                             Info<< "Badly Conditioned rAB : " << rAB
-                            << "species involved : "
-                            <<this->chemistry_.Y()[u].name() << ","
+                            << " for species : "
+                            << this->chemistry_.Y()[u].name() << ","
                             << this->chemistry_.Y()[otherSpec].name()
                             << endl;
-                            rAB=1.0;
+                            rAB = 1.0;
                         }
 
                         scalar Rtemp = Rvalue[u]*rAB;
@@ -668,7 +672,7 @@ reduceMechanism
                                 if (!this->activeSpecies_[otherSpec])
                                 {
                                     this->activeSpecies_[otherSpec] = true;
-                                    speciesNumber++;
+                                    ++speciesNumber;
                                     NDisabledSpecies--;
                                 }
                             }
@@ -717,13 +721,13 @@ reduceMechanism
     Field<label>& c2s(this->chemistry_.completeToSimplifiedIndex());
 
     label j = 0;
-    for (label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<this->nSpecie_; ++i)
     {
         if (this->activeSpecies_[i])
         {
             s2c[j] = i;
             simplifiedC[j] = c[i];
-            c2s[i] = j++;
+            c2s[i] = ++j;
             if (!this->chemistry_.active(i))
             {
                 this->chemistry_.setActive(i);

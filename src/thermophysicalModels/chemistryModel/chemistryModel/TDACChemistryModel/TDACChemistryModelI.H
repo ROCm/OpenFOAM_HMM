@@ -168,9 +168,9 @@ Foam::TDACChemistryModel<CompType, ThermoType>::specieComp()
 template<class CompType, class ThermoType>
 void Foam::TDACChemistryModel<CompType, ThermoType>::resetTabulationResults()
 {
-    forAll(tabulationResults_, tabi)
+    for (auto& res : tabulationResults_)
     {
-        tabulationResults_[tabi] = 2;
+        res = 2;
     }
 }
 

@@ -82,19 +82,16 @@ Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::ISAT
         dictionary scaleDict(this->coeffsDict_.subDict("scaleFactor"));
         label Ysize = this->chemistry_.Y().size();
         scalar otherScaleFactor = readScalar(scaleDict.lookup("otherSpecies"));
-        for (label i=0; i<Ysize; i++)
+        for (label i=0; i<Ysize; ++i)
         {
-            if (!scaleDict.found(this->chemistry_.Y()[i].name()))
+            const word& yName = this->chemistry_.Y()[i].name();
+            if (!scaleDict.found(yName))
             {
                 scaleFactor_[i] = otherScaleFactor;
             }
             else
             {
-                scaleFactor_[i] =
-                    readScalar
-                    (
-                        scaleDict.lookup(this->chemistry_.Y()[i].name())
-                    );
+                scaleFactor_[i] = readScalar(scaleDict.lookup(yName));
             }
         }
         scaleFactor_[Ysize] = readScalar(scaleDict.lookup("Temperature"));
@@ -141,10 +138,11 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::addToMRU
 {
     if (maxMRUSize_ > 0 && MRURetrieve_)
     {
+        typename SLList<chemPointISAT<CompType, ThermoType>*>::iterator iter =
+            MRUList_.begin();
+
         // First search if the chemPoint is already in the list
         bool isInList = false;
-        typename SLList <chemPointISAT<CompType, ThermoType>*>::iterator iter =
-            MRUList_.begin();
         for ( ; iter != MRUList_.end(); ++iter)
         {
             if (iter() == phi0)
@@ -153,10 +151,11 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::addToMRU
                 break;
             }
         }
-        // If it is in the list, then move it to front
+
         if (isInList)
         {
-            if (iter() != MRUList_.first())
+            // If it is in the list, then move it to front
+            if (iter != MRUList_.begin())
             {
                 // iter hold the position of the element to move
                 MRUList_.remove(iter);
@@ -165,11 +164,12 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::addToMRU
                 MRUList_.insert(phi0);
             }
         }
-        else // chemPoint not yet in the list, iter is last
+        else
         {
+            // chemPoint not yet in the list, iter is last
             if (MRUList_.size() == maxMRUSize_)
             {
-                if (iter() == MRUList_.last())
+                if (iter == MRUList_.end())
                 {
                     MRUList_.remove(iter);
                     MRUList_.insert(phi0);
@@ -177,7 +177,7 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::addToMRU
                 else
                 {
                     FatalErrorInFunction
-                        << "wrong MRUList construction"
+                        << "Error in MRUList construction"
                         << exit(FatalError);
                 }
             }
@@ -207,7 +207,7 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::calcNewC
 
     // Rphiq[i]=Rphi0[i]+A(i, j)dphi[j]
     // where Aij is dRi/dphi_j
-    for (label i=0; i<nEqns-nAdditionalEqns_; i++)
+    for (label i=0; i<nEqns-nAdditionalEqns_; ++i)
     {
         if (mechRedActive)
         {
@@ -238,24 +238,24 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::calcNewC
 
                 // As we use an approximation of A, Rphiq should be checked for
                 // negative values
-                Rphiq[i] = max(0.0,Rphiq[i]);
+                Rphiq[i] = max(0.0, Rphiq[i]);
             }
             // The species is not active A(i, j) = I(i, j)
             else
             {
                 Rphiq[i] += dphi[i];
-                Rphiq[i] = max(0.0,Rphiq[i]);
+                Rphiq[i] = max(0.0, Rphiq[i]);
             }
         }
         else // Mechanism reduction is not active
         {
-            for (label j=0; j<nEqns; j++)
+            for (label j=0; j<nEqns; ++j)
             {
                 Rphiq[i] += gradientsMatrix(i, j)*dphi[j];
             }
             // As we use a first order gradient matrix, Rphiq should be checked
             // for negative values
-            Rphiq[i] = max(0.0,Rphiq[i]);
+            Rphiq[i] = max(0.0, Rphiq[i]);
         }
     }
 }
@@ -270,7 +270,7 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::grow
 )
 {
     // If the pointer to the chemPoint is nullptr, the function stops
-    if (!phi0)
+    if (phi0 == nullptr)
     {
         return false;
     }
@@ -306,9 +306,9 @@ Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::cleanAndBalance()
     bool treeModified(false);
 
     // Check all chemPoints to see if we need to delete some of the chemPoints
-    // according to the ellapsed time and number of growths
+    // according to the elapsed time and number of growths
     chemPointISAT<CompType, ThermoType>* x = chemisTree_.treeMin();
-    while(x != nullptr)
+    while (x != nullptr)
     {
         chemPointISAT<CompType, ThermoType>* xtmp =
             chemisTree_.treeSuccessor(x);
@@ -323,7 +323,7 @@ Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::cleanAndBalance()
         x = xtmp;
     }
     // Check if the tree should be balanced according to criterion:
-    //  -the depth of the tree bigger than a*log2(size), log2(size) being the
+    // - the depth of the tree bigger than a*log2(size), log2(size) being the
     //      ideal depth (e.g. 4 leafs can be stored in a tree of depth 2)
     if
     (
@@ -355,7 +355,7 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::computeA
     bool mechRedActive = this->chemistry_.mechRed()->active();
     label speciesNumber = this->chemistry_.nSpecie();
     scalarField Rcq(this->chemistry_.nEqns() + nAdditionalEqns_ - 2);
-    for (label i=0; i<speciesNumber; i++)
+    for (label i=0; i<speciesNumber; ++i)
     {
         label s2c = i;
         if (mechRedActive)
@@ -371,10 +371,10 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::computeA
         Rcq[speciesNumber + 2] = Rphiq[Rphiq.size() - nAdditionalEqns_ + 2];
     }
 
-    // Aaa is computed implicitely,
+    // Aaa is computed implicitly,
     // A is given by A = C(psi0, t0+dt), where C is obtained through solving
     // d/dt C(psi0,t) = J(psi(t))C(psi0,t)
-    // If we solve it implicitely:
+    // If we solve it implicitly:
     // (C(psi0, t0+dt) - C(psi0,t0))/dt = J(psi(t0+dt))C(psi0,t0+dt)
     // The Jacobian is thus computed according to the mapping
     // C(psi0,t0+dt)*(I-dt*J(psi(t0+dt))) = C(psi0, t0)
@@ -385,7 +385,7 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::computeA
 
     // The jacobian is computed according to the molar concentration
     // the following conversion allows the code to use A with mass fraction
-    for (label i=0; i<speciesNumber; i++)
+    for (label i=0; i<speciesNumber; ++i)
     {
         label si = i;
 
@@ -394,7 +394,7 @@ void Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::computeA
             si = this->chemistry_.simplifiedToCompleteIndex()[i];
         }
 
-        for (label j=0; j<speciesNumber; j++)
+        for (label j=0; j<speciesNumber; ++j)
         {
             label sj = j;
             if (mechRedActive)
@@ -460,12 +460,7 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::retrieve
         }
         else if (MRURetrieve_)
         {
-            typename SLList
-            <
-                chemPointISAT<CompType, ThermoType>*
-            >::iterator iter = MRUList_.begin();
-
-            for ( ; iter != MRUList_.end(); ++iter)
+            forAllConstIters(MRUList_, iter)
             {
                 phi0 = iter();
                 if (phi0->inEOA(phiq))
@@ -499,7 +494,7 @@ bool Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::retrieve
         lastSearch_->lastTimeUsed() = this->chemistry_.timeSteps();
         addToMRU(phi0);
         calcNewC(phi0,phiq, Rphiq);
-        nRetrieved_++;
+        ++nRetrieved_;
         return true;
     }
     else
@@ -521,15 +516,17 @@ Foam::label Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::add
 )
 {
     label growthOrAddFlag = 1;
+
     // If lastSearch_ holds a valid pointer to a chemPoint AND the growPoints_
     // option is on, the code first tries to grow the point hold by lastSearch_
     if (lastSearch_ && growPoints_)
     {
         if (grow(lastSearch_,phiq, Rphiq))
         {
-            nGrowth_++;
+            ++nGrowth_;
             growthOrAddFlag = 0;
-            //the structure of the tree is not modified, return false
+
+            // The structure of the tree is not modified, return false
             return growthOrAddFlag;
         }
     }
@@ -541,7 +538,7 @@ Foam::label Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::add
     {
         // If cleanAndBalance operation do not result in a reduction of the tree
         // size, the last possibility is to delete completely the tree.
-        // It can be partially rebuild with the MRU list if this is used.
+        // It can be partially rebuilt with the MRU list if this is used.
         if (!cleanAndBalance())
         {
             DynamicList<chemPointISAT<CompType, ThermoType>*> tempList;
@@ -549,11 +546,7 @@ Foam::label Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::add
             {
                 // Create a copy of each chemPointISAT of the MRUList_ before
                 // they are deleted
-                typename SLList
-                <
-                    chemPointISAT<CompType, ThermoType>*
-                >::iterator iter = MRUList_.begin();
-                for ( ; iter != MRUList_.end(); ++iter)
+                forAllConstIters(MRUList_, iter)
                 {
                     tempList.append
                     (
@@ -568,20 +561,20 @@ Foam::label Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::add
 
             // Construct the tree without giving a reference to attach to it
             // since the structure has been completely discarded
-            chemPointISAT<CompType, ThermoType>* nulPhi = 0;
-            forAll(tempList, i)
+            chemPointISAT<CompType, ThermoType>* nulPhi = nullptr;
+            for (auto& t : tempList)
             {
                 chemisTree().insertNewLeaf
                 (
-                     tempList[i]->phi(),
-                     tempList[i]->Rphi(),
-                     tempList[i]->A(),
+                     t->phi(),
+                     t->Rphi(),
+                     t->A(),
                      scaleFactor(),
                      this->tolerance(),
                      scaleFactor_.size(),
                      nulPhi
                 );
-                deleteDemandDrivenData(tempList[i]);
+                deleteDemandDrivenData(t);
             }
         }
 
@@ -606,7 +599,7 @@ Foam::label Foam::chemistryTabulationMethods::ISAT<CompType, ThermoType>::add
         lastSearch_ // lastSearch_ may be nullptr (handled by binaryTree)
     );
 
-    nAdd_++;
+    ++nAdd_;
 
     return growthOrAddFlag;
 }

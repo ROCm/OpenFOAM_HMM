@@ -59,8 +59,10 @@ class binaryTree
 {
 
 public:
-    typedef binaryNode<CompType, ThermoType> bn;
-    typedef chemPointISAT<CompType, ThermoType> chP;
+
+    typedef binaryNode<CompType, ThermoType> node;
+    typedef chemPointISAT<CompType, ThermoType> chemPoint;
+
 
 private:
 
@@ -68,7 +70,7 @@ private:
     TDACChemistryModel<CompType, ThermoType>& chemistry_;
 
     //- Root node of the binary tree
-    bn *root_;
+    node *root_;
 
     //- Maximum number of elements in the binary tree
     label maxNLeafs_;
@@ -85,8 +87,8 @@ private:
     //  will be lost
     void insertNode
     (
-        chP*& phi0,
-        bn*& newNode
+        chemPoint*& phi0,
+        node*& newNode
     );
 
     //- Perform a search in the subtree starting from the subtree node y
@@ -95,8 +97,8 @@ private:
     bool inSubTree
     (
         const scalarField& phiq,
-        bn* y,
-        chP* x
+        node* y,
+        chemPoint* x
     );
 
     void deleteSubTree(binaryNode<CompType, ThermoType>* subTreeRoot);
@@ -107,20 +109,22 @@ private:
     }
 
     //- Replace the binaryNode u with v
-    void transplant(bn* u, bn* v);
+    void transplant(node* u, node* v);
 
-    chP* chemPSibling(bn* y);
-    chP* chemPSibling(chP* x);
+    chemPoint* chemPSibling(node* y);
+    chemPoint* chemPSibling(chemPoint* x);
 
-    bn* nodeSibling(bn* y);
-    bn* nodeSibling(chP* x);
+    node* nodeSibling(node* y);
+    node* nodeSibling(chemPoint* x);
 
-    void deleteAllNode(bn* subTreeRoot);
+    void deleteAllNode(node* subTreeRoot);
 
     dictionary coeffsDict_;
 
+
 public:
-    //- Constructors
+
+    // Constructors
 
         //- Construct from dictionary and chemistryOnLineLibrary
         binaryTree
@@ -129,21 +133,23 @@ public:
             dictionary coeffsDict
         );
 
-    //- Member functions
+
+    // Member functions
+
         inline label size()
         {
             return size_;
         }
 
         //- Computes iteratively the depth of the subTree
-        label depth(bn* subTreeRoot);
+        label depth(node* subTreeRoot);
 
         inline label depth()
         {
             return depth(root_);
         }
 
-        inline bn* root()
+        inline node* root()
         {
             return root_;
         }
@@ -177,7 +183,7 @@ public:
             const scalarField& scaleFactor,
             const scalar& epsTol,
             const label nCols,
-            chP*& phi0
+            chemPoint*& phi0
         );
 
 
@@ -187,20 +193,20 @@ public:
         void binaryTreeSearch
         (
             const scalarField& phiq,
-            bn* node,
-            chP*& nearest
+            node* node,
+            chemPoint*& nearest
         );
 
         // Perform a secondary binary tree search starting from a failed
         // chemPoint x, with a depth-first search algorithm
         // If another candidate is found return true and x points to the chemP
-        bool secondaryBTSearch(const scalarField& phiq, chP*& x);
+        bool secondaryBTSearch(const scalarField& phiq, chemPoint*& x);
 
         //- Delete a leaf from the binary tree and reshape the binary tree for
         //  the following binary tree search
         //  Return the index in the nodeList of the removed node
         //  (-1 when no node)
-        void deleteLeaf(chP*& phi0);
+        void deleteLeaf(chemPoint*& phi0);
 
         //- Cheap balance function
         //  This function just roughly separate the space in two parts
@@ -216,14 +222,14 @@ public:
             deleteAllNode(root_);
         }
 
-        chP* treeMin(bn* subTreeRoot);
+        chemPoint* treeMin(node* subTreeRoot);
 
-        inline chP* treeMin()
+        inline chemPoint* treeMin()
         {
             return treeMin(root_);
         }
 
-        chP* treeSuccessor(chP* x);
+        chemPoint* treeSuccessor(chemPoint* x);
 
         //- Removes every entries of the tree and delete the associated objects
         void clear();

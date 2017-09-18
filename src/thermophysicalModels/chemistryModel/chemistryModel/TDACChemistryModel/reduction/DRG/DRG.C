@@ -105,8 +105,8 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         // For each reaction compute omegai
         scalar omegai = this->chemistry_.omega
         (
-         R, c1, T, p, pf, cf, lRef, pr, cr, rRef
-         );
+            R, c1, T, p, pf, cf, lRef, pr, cr, rRef
+        );
 
 
         // Then for each pair of species composing this reaction,
@@ -253,12 +253,14 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
                 label otherSpec = rABOtherSpec(u, v);
                 scalar rAB = rABNum(u, v)/Den;
 
-                if (rAB>1)
+                if (rAB > 1)
                 {
                     Info<< "Badly Conditioned rAB : " << rAB
-                        << "species involved : " << u << "," << otherSpec
-                        << endl;
-                    rAB = 1;
+                    << " for species : "
+                    << this->chemistry_.Y()[u].name() << ","
+                    << this->chemistry_.Y()[otherSpec].name()
+                    << endl;
+                    rAB = 1.0;
                 }
 
                 // Include B only if rAB is above the tolerance and if the
