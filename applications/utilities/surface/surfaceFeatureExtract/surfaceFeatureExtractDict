@@ -50,6 +50,9 @@ outputName1
 
     surfaces            (surface1.stl surface2.nas);
 
+    // mm -> m scaling
+    // scale               0.001;
+
     // Generate additional intersection features (none | self | region)
     intersectionMethod  self;
 

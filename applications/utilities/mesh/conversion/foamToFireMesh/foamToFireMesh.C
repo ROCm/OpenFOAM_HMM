@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~~
     fileFormats::FIREMeshWriter::binary = !args.optionFound("ascii");
 
-    // default: rescale from [m] to [mm]
+    // Default: no rescaling
     scalar scaleFactor = 1;
     if (args.optionReadIfPresent("scale", scaleFactor))
     {

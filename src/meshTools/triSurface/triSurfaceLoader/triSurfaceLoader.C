@@ -218,7 +218,8 @@ Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
 
 Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
 (
-    const enum loadingOption opt
+    const enum loadingOption opt,
+    const scalar scaleFactor
 ) const
 {
     autoPtr<triSurface> output;
@@ -229,7 +230,8 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
     }
     else if (selected_.size() == 1)
     {
-        output.set(new triSurface(directory_/selected_[0]));
+        // Use scaling (if any)
+        output.set(new triSurface(directory_/selected_[0], scaleFactor));
 
         triSurface& surf = output();
 
@@ -390,6 +392,12 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
             faces.transfer(addfaces);
             points.transfer(addpoints);
         }
+    }
+
+    // Apply scaling (if any)
+    if (scaleFactor > VSMALL)
+    {
+        points *= scaleFactor;
     }
 
     output.set(new triSurface(faces, patches, points, true));

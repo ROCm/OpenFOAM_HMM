@@ -22,17 +22,16 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
-    surfaceMeshConvertTesting
+    Test-surfaceMeshConvert
 
 Group
     grpSurfaceUtilities
 
 Description
-    Converts from one surface mesh format to another, but primarily
-    used for testing functionality.
+    Test conversions from one surface mesh format to another.
 
 Usage
-    \b surfaceMeshConvertTesting inputFile outputFile [OPTION]
+    \b Test-surfaceMeshConvert inputFile outputFile [OPTION]
 
     Options:
       - \par -clean

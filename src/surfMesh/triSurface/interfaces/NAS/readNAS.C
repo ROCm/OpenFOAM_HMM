@@ -35,6 +35,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
+#include "NASCore.H"
 #include "IFstream.H"
 #include "StringStream.H"
 
@@ -46,25 +47,9 @@ namespace Foam
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Do weird things to extract number
-static scalar parseNASCoord(const string& s)
+static inline scalar parseNASCoord(const string& s)
 {
-    size_t expSign = s.find_last_of("+-");
-
-    if (expSign != string::npos && expSign > 0 && !isspace(s[expSign-1]))
-    {
-        scalar mantissa = readScalar(IStringStream(s.substr(0, expSign))());
-        scalar exponent = readScalar(IStringStream(s.substr(expSign+1))());
-
-        if (s[expSign] == '-')
-        {
-            exponent = -exponent;
-        }
-        return mantissa*pow(10, exponent);
-    }
-    else
-    {
-        return readScalar(IStringStream(s)());
-    }
+    return fileFormats::NASCore::parseNASCoord(s);
 }
 
 
@@ -300,8 +285,8 @@ bool triSurface::readNAS(const fileName& fName)
             // GRID*      126   0 -5.55999875E+02 -5.68730474E+02
             // *         2.14897901E+02
             label index =
-                readLabel(IStringStream(readNASToken(line, 8, linei))());
-            readNASToken(line, 8, linei);
+                readLabel(IStringStream(readNASToken(line, 16, linei))());
+            readNASToken(line, 16, linei);
             scalar x = parseNASCoord(readNASToken(line, 16, linei));
             scalar y = parseNASCoord(readNASToken(line, 16, linei));
 

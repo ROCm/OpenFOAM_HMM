@@ -103,22 +103,26 @@ Usage
     The \c operation is one of:
     \plaintable
        none          | no operation
-       sum           | sum
-       weightedSum   | weighted sum
-       sumMag        | sum of component magnitudes
-       sumDirection  | sum values which are positive in given direction
-       sumDirectionBalance | sum of balance of values in given direction
-       average       | ensemble average
-       weightedAverage | weighted average
-       areaAverage   | area-weighted average
-       weightedAreaAverage | weighted area average
-       areaIntegrate | area integral
-       weightedAreaIntegrate | weighted area integral
        min           | minimum
        max           | maximum
+       sum           | sum
+       sumMag        | sum of component magnitudes
+       sumDirection  | sum values that are positive in given direction
+       sumDirectionBalance | sum of balance of values in given direction
+       average       | ensemble average
+       areaAverage   | area-weighted average
+       areaIntegrate | area integral
        CoV           | coefficient of variation: standard deviation/mean
        areaNormalAverage| area-weighted average in face normal direction
        areaNormalIntegrate | area-weighted integral in face normal directon
+       weightedSum   | weighted sum
+       weightedAverage | weighted average
+       weightedAreaAverage | weighted area average
+       weightedAreaIntegrate | weighted area integral
+       absWeightedSum | sum using absolute weighting
+       absWeightedAverage | average using absolute weighting
+       absWeightedAreaAverage | area average using absolute weighting
+       absWeightedAreaIntegrate | area integral using absolute weighting
     \endplaintable
 
 Note
@@ -190,36 +194,73 @@ public:
         //- Region type enumeration
         enum regionTypes
         {
-            stFaceZone,
-            stPatch,
-            stSurface,
-            stSampledSurface
+            stFaceZone,         //!< Calculate on a faceZone
+            stPatch,            //!< Calculate on a patch
+            stSurface,          //!< Calculate with fields on a surfMesh
+            stSampledSurface    //!< Sample onto surface and calculate
         };
 
         //- Region type names
         static const Enum<regionTypes> regionTypeNames_;
 
+        //- Bitmask values for operation variants
+        enum operationVariant
+        {
+            typeBase = 0,         //!< Base operation
+            typeWeighted = 0x100, //!< Operation using weighting
+            typeAbsolute = 0x200, //!< Operation using mag (eg, for weighting)
+        };
 
         //- Operation type enumeration
         enum operationType
         {
-            opNone,                 //!< None
-            opSum,                  //!< Sum
-            opWeightedSum,          //!< Weighted sum
-            opSumMag,               //!< Magnitude of sum
+            // Normal operations
+
+            opNone = 0,             //!< No operation
+            opMin,                  //!< Minimum value
+            opMax,                  //!< Maximum value
+            opSum,                  //!< Sum of values
+            opSumMag,               //!< Sum of component magnitudes
             opSumDirection,         //!< Sum in a given direction
-            opSumDirectionBalance,  //!< Sum in a given direction for multiple
-            opAverage,              //!< Average
-            opWeightedAverage,      //!< Weighted average
+
+            //! Sum of balance of values in given direction
+            opSumDirectionBalance,
+
+            opAverage,              //!< Ensemble average
             opAreaAverage,          //!< Area average
-            opWeightedAreaAverage,  //!< Weighted area average
             opAreaIntegrate,        //!< Area integral
-            opWeightedAreaIntegrate, //!< Weighted area integral
-            opMin,                  //!< Minimum
-            opMax,                  //!< Maximum
             opCoV,                  //!< Coefficient of variation
             opAreaNormalAverage,    //!< Area average in normal direction
-            opAreaNormalIntegrate   //!< Area integral in normal direction
+            opAreaNormalIntegrate,  //!< Area integral in normal direction
+
+            // Weighted variants
+
+            //! Weighted sum
+            opWeightedSum = (opSum | typeWeighted),
+
+            //! Weighted average
+            opWeightedAverage = (opAverage | typeWeighted),
+
+            //! Weighted area average
+            opWeightedAreaAverage = (opAreaAverage | typeWeighted),
+
+            //! Weighted area integral
+            opWeightedAreaIntegrate = (opAreaIntegrate | typeWeighted),
+
+            // Variants using absolute weighting
+
+            //! Sum using abs weighting
+            opAbsWeightedSum = (opWeightedSum | typeAbsolute),
+
+            //! Average using abs weighting
+            opAbsWeightedAverage = (opWeightedAverage | typeAbsolute),
+
+            //! Area average using abs weighting
+            opAbsWeightedAreaAverage = (opWeightedAreaAverage | typeAbsolute),
+
+            //! Area integral using abs weighting
+            opAbsWeightedAreaIntegrate =
+                (opWeightedAreaIntegrate | typeAbsolute),
         };
 
         //- Operation type names
@@ -229,8 +270,8 @@ public:
         //- Post-operation type enumeration
         enum postOperationType
         {
-            postOpNone,
-            postOpSqrt
+            postOpNone,   //!< No additional operation after calculation
+            postOpSqrt    //!< Perform sqrt after normal operation
         };
 
         //- Operation type names
@@ -325,11 +366,19 @@ protected:
         //- Return the local true/false list representing the face flip map
         inline const boolList& faceFlip() const;
 
-        //- True if the specified operation needs a surface Sf
-        bool needsSf() const;
+        //- True if the operation needs a surface Sf
+        bool usesSf() const;
 
-        //- True if the specified operation needs a weight-field
-        bool needsWeight() const;
+        //- True if the operation variant uses mag
+        inline bool usesMag() const;
+
+        //- True if the operation variant uses a weight-field
+        inline bool usesWeight() const;
+
+        //- True if operation variant uses a weight-field that is available.
+        //  Checks for availability on any processor.
+        template<class WeightType>
+        inline bool canWeight(const Field<WeightType>& weightField) const;
 
         //- Initialise, e.g. face addressing
         void initialise(const dictionary& dict);
@@ -365,6 +414,7 @@ protected:
             const Field<WeightType>& weightField
         ) const;
 
+
         //- Filter a surface field according to faceIds
         template<class Type>
         tmp<Field<Type>> filterField
@@ -379,20 +429,24 @@ protected:
             const GeometricField<Type, fvPatchField, volMesh>& field
         ) const;
 
-        //- Weighting factor
+
+        //- Weighting factor.
+        //  Possibly applies mag() depending on the operation type.
         template<class WeightType>
-        static tmp<scalarField> weightingFactor
+        tmp<scalarField> weightingFactor
         (
             const Field<WeightType>& weightField
-        );
+        ) const;
 
-        //- Weighting factor, weight field with the area
+        //- Weighting factor, weight field with the area.
+        //  Possibly applies mag() depending on the operation type.
+        //  Reverts to mag(Sf) if the weight field is not available.
         template<class WeightType>
-        static tmp<scalarField> weightingFactor
+        tmp<scalarField> weightingFactor
         (
             const Field<WeightType>& weightField,
             const vectorField& Sf
-        );
+        ) const;
 
 
         //- Templated helper function to output field values
@@ -489,7 +543,7 @@ template<>
 tmp<scalarField> surfaceFieldValue::weightingFactor
 (
     const Field<scalar>& weightField
-);
+) const;
 
 
 //- Specialisation for scalar - scalar * Area
@@ -498,7 +552,7 @@ tmp<scalarField> surfaceFieldValue::weightingFactor
 (
     const Field<scalar>& weightField,
     const vectorField& Sf
-);
+) const;
 
 
 //- Specialisation for vector - vector (dot) Area
@@ -507,7 +561,7 @@ tmp<scalarField> surfaceFieldValue::weightingFactor
 (
     const Field<vector>& weightField,
     const vectorField& Sf
-);
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

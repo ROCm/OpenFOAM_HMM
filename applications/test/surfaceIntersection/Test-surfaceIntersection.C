@@ -41,10 +41,15 @@ using namespace Foam;
 autoPtr<triSurface> loadSurface
 (
     const Foam::Time& runTime,
-    const fileName& surfName
+    const fileName& surfName,
+    const scalar scaleFactor
 )
 {
-    Info<< "Reading surface " << surfName << endl;
+    Info<< "Reading surface " << surfName << nl;
+    if (scaleFactor > 0)
+    {
+        Info<<"Scaling : " << scaleFactor << nl;
+    }
 
     const fileName fallback =
         runTime.constantPath()/triSurfaceMesh::meshSubDir/surfName;
@@ -52,11 +57,11 @@ autoPtr<triSurface> loadSurface
     autoPtr<triSurface> surfPtr;
     if (isFile(surfName))
     {
-        surfPtr.set(new triSurface(surfName));
+        surfPtr.set(new triSurface(surfName, scaleFactor));
     }
     else if (isFile(fallback))
     {
-        surfPtr.set(new triSurface(fallback));
+        surfPtr.set(new triSurface(fallback, scaleFactor));
     }
     else
     {
@@ -102,6 +107,12 @@ int main(int argc, char *argv[])
         "mergeTol",
         "merge points (and edges) using the specified tolerance"
     );
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor"
+    );
 
     #include "addDictOption.H"
 
@@ -117,16 +128,18 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
+    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+
     const word outputFile(args.executable() + ".obj");
 
     const fileName surf1Name(args[1]);
-    triSurface surf1 = loadSurface(runTime, surf1Name)();
+    triSurface surf1 = loadSurface(runTime, surf1Name, scaleFactor)();
     Info<< surf1Name << " statistics:" << endl;
     surf1.writeStats(Info);
     Info<< endl;
 
     const fileName surf2Name(args[2]);
-    triSurface surf2 = loadSurface(runTime, surf2Name)();
+    triSurface surf2 = loadSurface(runTime, surf2Name, scaleFactor)();
     Info<< surf2Name << " statistics:" << endl;
     surf2.writeStats(Info);
     Info<< endl;

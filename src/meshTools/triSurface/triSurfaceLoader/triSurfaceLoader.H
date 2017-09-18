@@ -154,9 +154,12 @@ public:
         label select(const wordReList& matcher);
 
         //- Load a single file, or load and combine multiple selected files
+        //  Optionally scale the surface(s) on input, with a zero or negative
+        //  scale factor treated as no scaling.
         autoPtr<triSurface> load
         (
-            const enum loadingOption opt = loadingOption::OFFSET_REGION
+            const enum loadingOption opt = loadingOption::OFFSET_REGION,
+            const scalar scaleFactor = -1
         ) const;
 
 };

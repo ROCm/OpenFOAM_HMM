@@ -760,16 +760,18 @@ Foam::triSurface::triSurface
 }
 
 
-Foam::triSurface::triSurface(const fileName& name)
+Foam::triSurface::triSurface(const fileName& name, const scalar scaleFactor)
 :
     ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(nullptr),
     edgeOwnerPtr_(nullptr)
 {
-    word ext = name.ext();
+    const word ext = name.ext();
 
     read(name, ext);
+
+    scalePoints(scaleFactor);
 
     setDefaultPatches();
 }
@@ -886,8 +888,8 @@ void Foam::triSurface::movePoints(const pointField& newPoints)
 
 void Foam::triSurface::scalePoints(const scalar scaleFactor)
 {
-    // avoid bad scaling
-    if (scaleFactor > 0 && scaleFactor != 1.0)
+    // Avoid bad scaling
+    if (scaleFactor > VSMALL && scaleFactor != 1.0)
     {
         // Remove all geometry dependent data
         clearTopology();
