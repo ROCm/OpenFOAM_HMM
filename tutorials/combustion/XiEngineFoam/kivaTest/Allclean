@@ -1,0 +1,11 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
+
+mv ./-180 temp180
+
+cleanCase0
+
+mv temp180 ./-180
+
+#------------------------------------------------------------------------------
