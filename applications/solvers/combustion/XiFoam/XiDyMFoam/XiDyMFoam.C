@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
     #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createFieldRefs.H"
-    #include "createFvOptions.H"
     #include "initContinuityErrs.H"
     #include "createRhoUf.H"
     #include "createControls.H"

@@ -24,9 +24,6 @@ License
 Application
     engineFoam
 
-Group
-    grpLagrangianSolvers grpMovingMeshSolvers
-
 Description
     Transient solver for compressible, turbulent engine flow with a spray
     particle cloud.
@@ -59,6 +56,7 @@ int main(int argc, char *argv[])
     #include "readEngineTimeControls.H"
     #include "createFields.H"
     #include "createFieldRefs.H"
+    #include "createFvOptions.H"
     #include "createRhoUf.H"
     #include "compressibleCourantNo.H"
     #include "setInitialDeltaT.H"
@@ -115,7 +113,9 @@ int main(int argc, char *argv[])
             combustion->Qdot()().write();
         }
 
-        runTime.printExecutionTime(Info);
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     Info<< "End\n" << endl;

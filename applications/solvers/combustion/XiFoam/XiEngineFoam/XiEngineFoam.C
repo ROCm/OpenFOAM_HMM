@@ -24,9 +24,6 @@ License
 Application
     XiEngineFoam
 
-Group
-    grpCombustionSolvers
-
 Description
     Solver for internal combustion engines.
 
@@ -139,7 +136,9 @@ int main(int argc, char *argv[])
 
         runTime.write();
 
-        runTime.printExecutionTime(Info);
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     Info<< "End\n" << endl;

@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  plus                                  |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -55,9 +55,13 @@ functions
 {
     timeStep
     {
-        type            coded;
+        type coded;
         libs            ("libutilityFunctionObjects.so");
-        name            setDeltaT;
+        name setDeltaT;
+
+        code
+        #{
+        #};
 
         codeExecute
         #{
@@ -71,14 +75,6 @@ functions
             }
         #};
     }
-
-    fieldMinMax
-    {
-        type            fieldMinMax;
-        libs            ("libfieldFunctionObjects.so");
-        fields          (p);
-    }
 }
-
 
 // ************************************************************************* //
