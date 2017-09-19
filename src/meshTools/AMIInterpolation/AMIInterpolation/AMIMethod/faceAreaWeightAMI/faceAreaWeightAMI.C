@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "faceAreaWeightAMI.H"
+#include "profiling.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -38,6 +39,8 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calcAddressing
     label tgtFacei
 )
 {
+    addProfiling(ami, "faceAreaWeightAMI::calcAddressing");
+
     // construct weights and addressing
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -123,6 +126,8 @@ bool Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::processSourceFace
     List<DynamicList<scalar>>& tgtWght
 )
 {
+    addProfiling(ami, "faceAreaWeightAMI::processSourceFace");
+
     if (tgtStartFacei == -1)
     {
         return false;
@@ -188,6 +193,8 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::setNextFaces
     bool errorOnNotFound
 ) const
 {
+    addProfiling(ami, "faceAreaWeightAMI::setNextFaces");
+
     const labelList& srcNbrFaces = this->srcPatch_.faceFaces()[srcFacei];
 
     // initialise tgtFacei
@@ -298,6 +305,8 @@ Foam::scalar Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::interArea
     const label tgtFacei
 ) const
 {
+    addProfiling(ami, "faceAreaWeightAMI::interArea");
+
     scalar area = 0;
 
     const pointField& srcPoints = this->srcPatch_.points();
@@ -364,6 +373,8 @@ restartUncoveredSourceFace
     List<DynamicList<scalar>>& tgtWght
 )
 {
+    addProfiling(ami, "faceAreaWeightAMI::restartUncoveredSourceFace");
+
     // Collect all src faces with a low weight
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -501,6 +512,8 @@ void Foam::faceAreaWeightAMI<SourcePatch, TargetPatch>::calculate
     label tgtFacei
 )
 {
+    addProfiling(ami, "faceAreaWeightAMI::calculate");
+
     bool ok =
         this->initialise
         (
