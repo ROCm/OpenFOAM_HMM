@@ -57,8 +57,8 @@
 
 
     const areaVectorField& Ns = aMesh.faceAreaNormals();
-    areaVectorField Gs = g - Ns*(Ns & g);
-    areaScalarField Gn = mag(g - Gs);
+    areaVectorField Gs(g - Ns*(Ns & g));
+    areaScalarField Gn(mag(g - Gs));
 
     // Mass source
     areaScalarField Sm

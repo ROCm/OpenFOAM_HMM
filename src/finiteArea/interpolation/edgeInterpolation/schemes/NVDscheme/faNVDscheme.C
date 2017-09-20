@@ -55,10 +55,12 @@ inline tmp<areaScalarField> limiter(const areaScalarField& phi)
     return phi;
 }
 
+
 inline tmp<areaScalarField> limiter(const areaVectorField& phi)
 {
     return magSqr(phi);
 }
+
 
 inline tmp<areaScalarField> limiter(const areaTensorField& phi)
 {
@@ -88,11 +90,13 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
     tmp<areaScalarField> tvf = limiter(phi);
     const areaScalarField& vf = tvf();
 
-    areaVectorField gradc(fac::grad(vf));
+    const areaVectorField gradc(fac::grad(vf));
 
-//     edgeVectorField d =
+//     edgeVectorField d
+//     (
 //         mesh.Le()
-//        /(mesh.magLe()*mesh.edgeInterpolation::deltaCoeffs());
+//        /(mesh.magLe()*mesh.edgeInterpolation::deltaCoeffs())
+//     );
 
 //     if (!mesh.orthogonal())
 //     {
@@ -110,7 +114,7 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
     {
         vector d = vector::zero;
 
-        if(edgeFlux_[edge] > 0)
+        if (edgeFlux_[edge] > 0)
         {
             d = c[neighbour[edge]] - c[owner[edge]];
             d -= n[owner[edge]]*(n[owner[edge]]&d);
@@ -148,41 +152,53 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
 
             const scalarField& pEdgeFlux = edgeFlux_.boundaryField()[patchI];
 
-            scalarField pVfP =
-                vf.boundaryField()[patchI].patchInternalField();
+            scalarField pVfP(vf.boundaryField()[patchI].patchInternalField());
 
-            scalarField pVfN =
-                vf.boundaryField()[patchI].patchNeighbourField();
+            scalarField pVfN(vf.boundaryField()[patchI].patchNeighbourField());
 
-            vectorField pGradcP =
-                gradc.boundaryField()[patchI].patchInternalField();
+            vectorField pGradcP
+            (
+                gradc.boundaryField()[patchI].patchInternalField()
+            );
 
-            vectorField pGradcN =
-                gradc.boundaryField()[patchI].patchNeighbourField();
+            vectorField pGradcN
+            (
+                gradc.boundaryField()[patchI].patchNeighbourField()
+            );
 
-            vectorField CP = mesh.areaCentres().boundaryField()[patchI]
-                .patchInternalField();
+            vectorField CP
+            (
+                mesh.areaCentres().boundaryField()[patchI].patchInternalField()
+            );
 
-            vectorField CN =
+            vectorField CN
+            (
                 mesh.areaCentres().boundaryField()[patchI]
-                .patchNeighbourField();
+                .patchNeighbourField()
+            );
 
-            vectorField nP =
+            vectorField nP
+            (
                 mesh.faceAreaNormals().boundaryField()[patchI]
-               .patchInternalField();
+               .patchInternalField()
+            );
 
-            vectorField nN =
+            vectorField nN
+            (
                 mesh.faceAreaNormals().boundaryField()[patchI]
-               .patchNeighbourField();
+               .patchNeighbourField()
+            );
 
-            scalarField pLPN =
-                mesh.edgeInterpolation::lPN().boundaryField()[patchI];
+            scalarField pLPN
+            (
+                mesh.edgeInterpolation::lPN().boundaryField()[patchI]
+            );
 
             forAll(pWeights, edgeI)
             {
                 vector d = vector::zero;
 
-                if(pEdgeFlux[edgeI] > 0)
+                if (pEdgeFlux[edgeI] > 0)
                 {
                     d = CN[edgeI] - CP[edgeI];
                     d -= nP[edgeI]*(nP[edgeI]&d);

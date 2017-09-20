@@ -127,7 +127,7 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 template<class Type>
 tmp<Field<Type> > wedgeFaPatchField<Type>::snGrad() const
 {
-    Field<Type> pif = this->patchInternalField();
+    const Field<Type> pif(this->patchInternalField());
 
     return
     (

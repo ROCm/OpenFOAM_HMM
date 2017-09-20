@@ -68,9 +68,9 @@ SolverPerformance<Type> faMatrix<Type>::solve(const dictionary& solverControls)
         psi_.name()
     );
 
-    scalarField saveDiag = diag();
+    scalarField saveDiag(diag());
 
-    Field<Type> source = source_;
+    Field<Type> source(source_);
     addBoundarySource(source);
 
     // Make a copy of interfaces: no longer a reference
@@ -80,16 +80,16 @@ SolverPerformance<Type> faMatrix<Type>::solve(const dictionary& solverControls)
 
     // Cast into a non-const to solve.  HJ, 6/May/2016
     GeometricField<Type, faPatchField, areaMesh>& psi =
-       const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
+        const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
 
     for (direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
     {
         // copy field and source
 
-        scalarField psiCmpt = psi_.primitiveField().component(cmpt);
+        scalarField psiCmpt(psi_.primitiveField().component(cmpt));
         addBoundaryDiag(diag(), cmpt);
 
-        scalarField sourceCmpt = source.component(cmpt);
+        scalarField sourceCmpt(source.component(cmpt));
 
         FieldField<Field, scalar> bouCoeffsCmpt
         (
@@ -186,7 +186,7 @@ template<class Type>
 tmp<Field<Type> > faMatrix<Type>::residual() const
 {
     tmp<Field<Type> > tres(source_);
-    Field<Type>& res = tres();
+    Field<Type>& res = tres().ref();
 
     addBoundarySource(res);
 
@@ -198,7 +198,7 @@ tmp<Field<Type> > faMatrix<Type>::residual() const
     // Loop over field components
     for (direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi_.internalField().component(cmpt);
+        scalarField psiCmpt(psi_.internalField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);

@@ -238,7 +238,7 @@ faMatrix<Type>::faMatrix
 
     // Update the boundary coefficients of psi without changing its event No.
     GeometricField<Type, faPatchField, areaMesh>& psiRef =
-       const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
+        const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
 
     label currentStatePsi = psiRef.eventNo();
     psiRef.boundaryFieldRef().updateCoeffs();
@@ -627,7 +627,7 @@ tmp<GeometricField<Type, faPatchField, areaMesh> > faMatrix<Type>::H() const
     // Loop over field components
     for (direction cmpt=0; cmpt<Type::nComponents; cmpt++)
     {
-        scalarField psiCmpt = psi_.primitiveField().component(cmpt);
+        scalarField psiCmpt(psi_.primitiveField().component(cmpt));
 
         scalarField boundaryDiagCmpt(psi_.size(), 0.0);
         addBoundaryDiag(boundaryDiagCmpt, cmpt);
@@ -760,7 +760,7 @@ void faMatrix<Type>::operator=(const faMatrix<Type>& famv)
     {
         faceFluxCorrectionPtr_ =
             new GeometricField<Type, faePatchField, edgeMesh>
-        (*famv.faceFluxCorrectionPtr_);
+            (*famv.faceFluxCorrectionPtr_);
     }
 }
 
@@ -841,7 +841,7 @@ void faMatrix<Type>::operator-=(const faMatrix<Type>& famv)
     {
         faceFluxCorrectionPtr_ =
             new GeometricField<Type, faePatchField, edgeMesh>
-        (-*famv.faceFluxCorrectionPtr_);
+            (-*famv.faceFluxCorrectionPtr_);
     }
 }
 
@@ -930,7 +930,7 @@ void faMatrix<Type>::operator*=
 
     forAll(boundaryCoeffs_, patchI)
     {
-        scalarField psf = vsf.boundaryField()[patchI].patchInternalField();
+        const scalarField psf(vsf.boundaryField()[patchI].patchInternalField());
         internalCoeffs_[patchI] *= psf;
         boundaryCoeffs_[patchI] *= psf;
     }

@@ -100,7 +100,8 @@ basicSymmetryFaPatchField<Type>::basicSymmetryFaPatchField
 template<class Type>
 tmp<Field<Type> > basicSymmetryFaPatchField<Type>::snGrad() const
 {
-    vectorField nHat = this->patch().edgeNormals();
+    const vectorField nHat(this->patch().edgeNormals());
+
     return
     (
         transform(I - 2.0*sqr(nHat), this->patchInternalField())
@@ -118,7 +119,7 @@ void basicSymmetryFaPatchField<Type>::evaluate(const Pstream::commsTypes)
         this->updateCoeffs();
     }
 
-    vectorField nHat = this->patch().edgeNormals();
+    const vectorField nHat(this->patch().edgeNormals());
     Field<Type>::operator=
     (
         (
@@ -135,7 +136,7 @@ void basicSymmetryFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 template<class Type>
 tmp<Field<Type> > basicSymmetryFaPatchField<Type>::snGradTransformDiag() const
 {
-    vectorField nHat = this->patch().edgeNormals();
+    const vectorField nHat(this->patch().edgeNormals());
     vectorField diag(nHat.size());
 
     diag.replace(vector::X, mag(nHat.component(vector::X)));

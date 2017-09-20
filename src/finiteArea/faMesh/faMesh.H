@@ -76,7 +76,7 @@ class faMeshMapper;
 class faMesh
 :
     public GeoMesh<polyMesh>,
-    public MeshObject<polyMesh, UpdateableMeshObject, faMesh>,
+    public MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>,
     public lduMesh,
     public edgeInterpolation
 {
@@ -317,7 +317,12 @@ public:
             const polyMesh& mesh() const
             {
                 return
-                    MeshObject<polyMesh, UpdateableMeshObject, faMesh>::mesh();
+                    MeshObject
+                    <
+                        polyMesh,
+                        Foam::UpdateableMeshObject,
+                        faMesh
+                    >::mesh();
             }
 
             //- Return the local mesh directory (dbDir()/meshSubDir)

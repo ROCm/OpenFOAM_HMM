@@ -683,8 +683,7 @@ void faMesh::calcFaceCurvatures() const
 //         fac::edgeIntegrate(Le()*edgeLengthCorrection())
 //         &faceAreaNormals();
 
-    areaVectorField kN =
-        fac::edgeIntegrate(Le()*edgeLengthCorrection());
+    areaVectorField kN(fac::edgeIntegrate(Le()*edgeLengthCorrection()));
 
     faceCurvatures = sign(kN&faceAreaNormals())*mag(kN);
 }
@@ -795,11 +794,9 @@ void faMesh::calcEdgeTransformTensors() const
             const labelUList& edgeFaces =
                 boundary()[patchI].edgeFaces();
 
-            vectorField ngbCf =
-                Cf.boundaryField()[patchI].patchNeighbourField();
+            vectorField ngbCf(Cf.boundaryField()[patchI].patchNeighbourField());
 
-            vectorField ngbNf =
-                Nf.boundaryField()[patchI].patchNeighbourField();
+            vectorField ngbNf(Nf.boundaryField()[patchI].patchNeighbourField());
 
             forAll(edgeFaces, edgeI)
             {
@@ -1304,7 +1301,7 @@ void faMesh::calcPointAreaNormals() const
 
             labelList patchPoints = boundary()[patchI].pointLabels();
 
-            vectorField N = boundary()[patchI].ngbPolyPatchPointNormals();
+            const vectorField N(boundary()[patchI].ngbPolyPatchPointNormals());
 
             forAll (patchPoints, pointI)
             {

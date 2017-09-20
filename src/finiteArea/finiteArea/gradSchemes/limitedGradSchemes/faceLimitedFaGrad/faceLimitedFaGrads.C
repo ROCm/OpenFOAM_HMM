@@ -78,7 +78,7 @@ inline void faceLimitedGrad<Type>::limitEdge
     const Type& extrapolate
 )
 {
-    for(direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
     {
         faceLimitedGrad<scalar>::limitEdge
         (
@@ -145,7 +145,7 @@ tmp<areaVectorField> faceLimitedGrad<scalar>::grad
 
         if (psf.coupled())
         {
-            scalarField psfNei = psf.patchNeighbourField();
+            scalarField psfNei(psf.patchNeighbourField());
 
             forAll(pOwner, pFacei)
             {
@@ -174,7 +174,7 @@ tmp<areaVectorField> faceLimitedGrad<scalar>::grad
 
     if (k_ < 1.0)
     {
-        scalarField maxMinVsf = (1.0/k_ - 1.0)*(maxVsf - minVsf);
+        scalarField maxMinVsf((1.0/k_ - 1.0)*(maxVsf - minVsf));
         maxVsf += maxMinVsf;
         minVsf -= maxMinVsf;
     }
@@ -293,7 +293,7 @@ tmp<areaTensorField> faceLimitedGrad<vector>::grad
 
         if (psf.coupled())
         {
-            vectorField psfNei = psf.patchNeighbourField();
+            vectorField psfNei(psf.patchNeighbourField());
 
             forAll(pOwner, pFacei)
             {
@@ -322,7 +322,7 @@ tmp<areaTensorField> faceLimitedGrad<vector>::grad
 
     if (k_ < 1.0)
     {
-        vectorField maxMinVsf = (1.0/k_ - 1.0)*(maxVsf - minVsf);
+        vectorField maxMinVsf((1.0/k_ - 1.0)*(maxVsf - minVsf));
         maxVsf += maxMinVsf;
         minVsf -= maxMinVsf;
 

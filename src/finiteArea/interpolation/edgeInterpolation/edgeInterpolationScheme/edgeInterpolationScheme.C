@@ -209,7 +209,7 @@ edgeInterpolationScheme<Type>::interpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
-    for (register label fi=0; fi<P.size(); fi++)
+    for (label fi=0; fi<P.size(); fi++)
     {
         // ZT, 22/Apr/2003
         const tensorField& curT = mesh.edgeTransformTensors()[fi];
@@ -330,7 +330,7 @@ edgeInterpolationScheme<Type>::interpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
-    for (register label eI = 0; eI < P.size(); eI++)
+    for (label eI = 0; eI < P.size(); eI++)
     {
         // ZT, 22/Apr/2003
         const tensorField& curT = mesh.edgeTransformTensors()[eI];
@@ -360,8 +360,8 @@ edgeInterpolationScheme<Type>::interpolate
             label size = vf.boundaryField()[pi].patch().size();
             label start = vf.boundaryField()[pi].patch().start();
 
-            Field<Type> pOwnVf = vf.boundaryField()[pi].patchInternalField();
-            Field<Type> pNgbVf = vf.boundaryField()[pi].patchNeighbourField();
+            Field<Type> pOwnVf(vf.boundaryField()[pi].patchInternalField());
+            Field<Type> pNgbVf(vf.boundaryField()[pi].patchNeighbourField());
 
             Field<Type>& pSf = sf.boundaryFieldRef()[pi];
 
@@ -449,7 +449,7 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
-    for (register label eI = 0; eI < P.size(); eI++)
+    for (label eI = 0; eI < P.size(); eI++)
     {
         sfi[eI] = lambda[eI]*vfi[P[eI]] + (1 - lambda[eI])*vfi[N[eI]];
     }

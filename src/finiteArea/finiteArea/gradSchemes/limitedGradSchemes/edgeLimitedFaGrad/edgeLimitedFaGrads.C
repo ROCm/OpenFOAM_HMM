@@ -141,7 +141,7 @@ tmp<areaVectorField> edgeLimitedGrad<scalar>::grad
 
         if (psf.coupled())
         {
-            scalarField psfNei = psf.patchNeighbourField();
+            const scalarField psfNei(psf.patchNeighbourField());
 
             forAll(pOwner, pEdgei)
             {
@@ -290,7 +290,7 @@ tmp<areaTensorField> edgeLimitedGrad<vector>::grad
 
         if (psf.coupled())
         {
-            vectorField psfNei = psf.patchNeighbourField();
+            const vectorField psfNei(psf.patchNeighbourField());
 
             forAll(pOwner, pEdgei)
             {

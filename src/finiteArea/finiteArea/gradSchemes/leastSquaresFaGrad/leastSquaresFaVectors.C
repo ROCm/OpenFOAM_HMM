@@ -42,7 +42,7 @@ namespace Foam
 
 Foam::leastSquaresFaVectors::leastSquaresFaVectors(const faMesh& mesh)
 :
-    MeshObject<faMesh, MoveableMeshObject, leastSquaresFaVectors>(mesh),
+    MeshObject<faMesh, Foam::MoveableMeshObject, leastSquaresFaVectors>(mesh),
     pVectorsPtr_(NULL),
     nVectorsPtr_(NULL)
 {}
@@ -135,7 +135,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         // HJ, reconsider deltas at the boundary, consistent with FVM
         // Current implementation is good for fixedValue boudaries, but may
         // cause problems with fixedGradient.  HJ, 4/Oct/2010
-        vectorField pd = p.delta();
+        const vectorField pd(p.delta());
 
         if (p.coupled())
         {
@@ -161,7 +161,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
 
 
     // Invert the dd tensor
-    symmTensorField invDd = inv(dd);
+    const symmTensorField invDd(inv(dd));
 
 
     // Revisit all faces and calculate the lsP and lsN vectors
@@ -187,7 +187,7 @@ void Foam::leastSquaresFaVectors::makeLeastSquaresVectors() const
         const labelUList& edgeFaces = p.edgeFaces();
 
         // Build the d-vectors
-        vectorField pd = p.delta();
+        const vectorField pd(p.delta());
 
         if (p.coupled())
         {

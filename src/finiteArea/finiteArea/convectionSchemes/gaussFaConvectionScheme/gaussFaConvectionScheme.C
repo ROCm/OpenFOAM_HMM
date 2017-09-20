@@ -96,9 +96,11 @@ gaussConvectionScheme<Type>::famDiv
 //     }
 
     // Non-euclidian and other corrections
-    GeometricField<Type, faePatchField, edgeMesh> convFluxCorr =
+    GeometricField<Type, faePatchField, edgeMesh> convFluxCorr
+    (
         flux(faceFlux, vf)
-      - faceFlux*tinterpScheme_().euclidianInterpolate(vf);;
+      - faceFlux*tinterpScheme_().euclidianInterpolate(vf)
+    );
 
     fam += fac::edgeIntegrate(convFluxCorr);
 

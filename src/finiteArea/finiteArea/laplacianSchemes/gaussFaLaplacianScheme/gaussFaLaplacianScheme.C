@@ -52,7 +52,7 @@ gaussLaplacianScheme<Type>::famLaplacian
     tmp<edgeScalarField> tdeltaCoeffs = this->tlnGradScheme_().deltaCoeffs(vf);
     const edgeScalarField& deltaCoeffs = tdeltaCoeffs();
 
-    edgeScalarField gammaMagSf = gamma*this->mesh().magLe();
+    const edgeScalarField gammaMagSf(gamma*this->mesh().magLe());
 
     tmp<faMatrix<Type> > tfam
     (

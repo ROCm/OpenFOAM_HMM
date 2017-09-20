@@ -92,9 +92,11 @@ void gaussGrad<Type>::correctBoundaryConditions
     {
         if (!vsf.boundaryField()[patchI].coupled())
         {
-            vectorField m =
+            const vectorField m
+            (
                 vsf.mesh().Le().boundaryField()[patchI]/
-                vsf.mesh().magLe().boundaryField()[patchI];
+                vsf.mesh().magLe().boundaryField()[patchI]
+            );
 
             gGrad.boundaryFieldRef()[patchI] += m*
             (

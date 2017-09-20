@@ -58,7 +58,7 @@ class mapPolyMesh;
 
 class leastSquaresFaVectors
 :
-    public MeshObject<faMesh, MoveableMeshObject, leastSquaresFaVectors>
+    public MeshObject<faMesh, Foam::MoveableMeshObject, leastSquaresFaVectors>
 {
     // Private data
 

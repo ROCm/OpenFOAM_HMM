@@ -197,7 +197,8 @@ boundedBackwardFaDdtScheme::facDdt
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    areaScalarField phict =
+    areaScalarField phict
+    (
         mag
         (
             vf.oldTime().oldTime()
@@ -210,13 +211,14 @@ boundedBackwardFaDdtScheme::facDdt
               - vf.oldTime().oldTime()
             )
           + dimensionedScalar("small", vf.dimensions(), SMALL)
-        );
+        )
+    );
 
-    areaScalarField limiter = pos(phict) - pos(phict - scalar(1));
+    areaScalarField limiter(pos(phict) - pos(phict - scalar(1)));
 
-    areaScalarField coefft   = scalar(1) + limiter*deltaT/(deltaT + deltaT0);
-    areaScalarField coefft00 = limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0));
-    areaScalarField coefft0  = coefft + coefft00;
+    areaScalarField coefft(scalar(1) + limiter*deltaT/(deltaT + deltaT0));
+    areaScalarField coefft00(limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0)));
+    areaScalarField coefft0(coefft + coefft00);
 
     if (mesh().moving())
     {
@@ -293,7 +295,8 @@ boundedBackwardFaDdtScheme::facDdt0
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    areaScalarField phict =
+    areaScalarField phict
+    (
         mag
         (
             vf.oldTime().oldTime()
@@ -306,13 +309,14 @@ boundedBackwardFaDdtScheme::facDdt0
               - vf.oldTime().oldTime()
             )
           + dimensionedScalar("small", vf.dimensions(), SMALL)
-        );
+        )
+    );
 
-    areaScalarField limiter = pos(phict) - pos(phict - scalar(1));
+    areaScalarField limiter(pos(phict) - pos(phict - scalar(1)));
 
-    areaScalarField coefft   = scalar(1) + limiter*deltaT/(deltaT + deltaT0);
-    areaScalarField coefft00 = limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0));
-    areaScalarField coefft0  = coefft + coefft00;
+    areaScalarField coefft(scalar(1) + limiter*deltaT/(deltaT + deltaT0));
+    areaScalarField coefft00(limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0)));
+    areaScalarField coefft0(coefft + coefft00);
 
     if (mesh().moving())
     {
@@ -387,7 +391,8 @@ boundedBackwardFaDdtScheme::facDdt
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    areaScalarField phict =
+    areaScalarField phict
+    (
         mag
         (
             vf.oldTime().oldTime()
@@ -400,13 +405,14 @@ boundedBackwardFaDdtScheme::facDdt
               - vf.oldTime().oldTime()
             )
           + dimensionedScalar("small", vf.dimensions(), SMALL)
-        );
+        )
+    );
 
-    areaScalarField limiter = pos(phict) - pos(phict - scalar(1));
+    areaScalarField limiter(pos(phict) - pos(phict - scalar(1)));
 
-    areaScalarField coefft   = scalar(1) + limiter*deltaT/(deltaT + deltaT0);
-    areaScalarField coefft00 = limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0));
-    areaScalarField coefft0  = coefft + coefft00;
+    areaScalarField coefft(scalar(1) + limiter*deltaT/(deltaT + deltaT0));
+    areaScalarField coefft00(limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0)));
+    areaScalarField coefft0(coefft + coefft00);
 
     if (mesh().moving())
     {
@@ -483,7 +489,8 @@ boundedBackwardFaDdtScheme::facDdt0
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    areaScalarField phict =
+    areaScalarField phict
+    (
         mag
         (
             vf.oldTime().oldTime()
@@ -496,13 +503,14 @@ boundedBackwardFaDdtScheme::facDdt0
               - vf.oldTime().oldTime()
             )
           + dimensionedScalar("small", vf.dimensions(), SMALL)
-        );
+        )
+    );
 
-    areaScalarField limiter = pos(phict) - pos(phict - scalar(1));
+    areaScalarField limiter(pos(phict) - pos(phict - scalar(1)));
 
-    areaScalarField coefft   = scalar(1) + limiter*deltaT/(deltaT + deltaT0);
-    areaScalarField coefft00 = limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0));
-    areaScalarField coefft0  = coefft + coefft00;
+    areaScalarField coefft(scalar(1) + limiter*deltaT/(deltaT + deltaT0));
+    areaScalarField coefft00(limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0)));
+    areaScalarField coefft0(coefft + coefft00);
 
     if (mesh().moving())
     {
@@ -577,7 +585,8 @@ boundedBackwardFaDdtScheme::facDdt
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    areaScalarField phict =
+    areaScalarField phict
+    (
         mag
         (
             rho.oldTime().oldTime()*vf.oldTime().oldTime()
@@ -590,13 +599,14 @@ boundedBackwardFaDdtScheme::facDdt
               - rho.oldTime().oldTime()*vf.oldTime().oldTime()
             )
           + dimensionedScalar("small", rho.dimensions()*vf.dimensions(), SMALL)
-        );
+        )
+    );
 
-    areaScalarField limiter = pos(phict) - pos(phict - scalar(1));
+    areaScalarField limiter(pos(phict) - pos(phict - scalar(1)));
 
-    areaScalarField coefft   = scalar(1) + limiter*deltaT/(deltaT + deltaT0);
-    areaScalarField coefft00 = limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0));
-    areaScalarField coefft0  = coefft + coefft00;
+    areaScalarField coefft(scalar(1) + limiter*deltaT/(deltaT + deltaT0));
+    areaScalarField coefft00(limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0)));
+    areaScalarField coefft0(coefft + coefft00);
 
     if (mesh().moving())
     {
@@ -677,7 +687,8 @@ boundedBackwardFaDdtScheme::facDdt0
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    areaScalarField phict =
+    areaScalarField phict
+    (
         mag
         (
             rho.oldTime().oldTime()*vf.oldTime().oldTime()
@@ -690,13 +701,14 @@ boundedBackwardFaDdtScheme::facDdt0
               - rho.oldTime().oldTime()*vf.oldTime().oldTime()
             )
           + dimensionedScalar("small", rho.dimensions()*vf.dimensions(), SMALL)
-        );
+        )
+    );
 
-    areaScalarField limiter = pos(phict) - pos(phict - scalar(1));
+    areaScalarField limiter(pos(phict) - pos(phict - scalar(1)));
 
-    areaScalarField coefft   = scalar(1) + limiter*deltaT/(deltaT + deltaT0);
-    areaScalarField coefft00 = limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0));
-    areaScalarField coefft0  = coefft + coefft00;
+    areaScalarField coefft(scalar(1) + limiter*deltaT/(deltaT + deltaT0));
+    areaScalarField coefft00(limiter*sqr(deltaT)/(deltaT0*(deltaT + deltaT0)));
+    areaScalarField coefft0(coefft + coefft00);
 
     if (mesh().moving())
     {
@@ -775,7 +787,8 @@ boundedBackwardFaDdtScheme::famDdt
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    scalarField phict =
+    scalarField phict
+    (
         mag
         (
             vf.oldTime().oldTime().internalField()
@@ -788,13 +801,14 @@ boundedBackwardFaDdtScheme::famDdt
               - vf.oldTime().oldTime().internalField()
             )
             + SMALL
-        );
+        )
+    );
 
     scalarField limiter(pos(phict) - pos(phict - 1.0));
 
-    scalarField coefft   = 1.0 + limiter*deltaT/(deltaT + deltaT0);
-    scalarField coefft00 = limiter*deltaT*deltaT/(deltaT0*(deltaT + deltaT0));
-    scalarField coefft0  = coefft + coefft00;
+    scalarField coefft(1.0 + limiter*deltaT/(deltaT + deltaT0));
+    scalarField coefft00(limiter*deltaT*deltaT/(deltaT0*(deltaT + deltaT0)));
+    scalarField coefft0(coefft + coefft00);
 
     fam.diag() = (coefft*rDeltaT)*mesh().S();
 
@@ -845,7 +859,8 @@ boundedBackwardFaDdtScheme::famDdt
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    scalarField phict =
+    scalarField phict
+    (
         mag
         (
             vf.oldTime().oldTime().internalField()
@@ -858,13 +873,14 @@ boundedBackwardFaDdtScheme::famDdt
               - vf.oldTime().oldTime().internalField()
             )
             + SMALL
-        );
+        )
+    );
 
     scalarField limiter(pos(phict) - pos(phict - 1.0));
 
-    scalarField coefft   = 1.0 + limiter*deltaT/(deltaT + deltaT0);
-    scalarField coefft00 = limiter*deltaT*deltaT/(deltaT0*(deltaT + deltaT0));
-    scalarField coefft0  = coefft + coefft00;
+    scalarField coefft(1.0 + limiter*deltaT/(deltaT + deltaT0));
+    scalarField coefft00(limiter*deltaT*deltaT/(deltaT0*(deltaT + deltaT0)));
+    scalarField coefft0(coefft + coefft00);
 
     fam.diag() = (coefft*rDeltaT*rho.value())*mesh().S();
 
@@ -915,7 +931,8 @@ boundedBackwardFaDdtScheme::famDdt
     // Calculate unboundedness indicator
     // Note: all times moved by one because access to internal field
     // copies current field into the old-time level.
-    scalarField phict =
+    scalarField phict
+    (
         mag
         (
             rho.oldTime().oldTime().internalField()*
@@ -932,13 +949,14 @@ boundedBackwardFaDdtScheme::famDdt
                 vf.oldTime().oldTime().internalField()
             )
             + SMALL
-        );
+        )
+    );
 
     scalarField limiter(pos(phict) - pos(phict - 1.0));
 
-    scalarField coefft   = 1.0 + limiter*deltaT/(deltaT + deltaT0);
-    scalarField coefft00 = limiter*deltaT*deltaT/(deltaT0*(deltaT + deltaT0));
-    scalarField coefft0  = coefft + coefft00;
+    scalarField coefft(1.0 + limiter*deltaT/(deltaT + deltaT0));
+    scalarField coefft00(limiter*deltaT*deltaT/(deltaT0*(deltaT + deltaT0)));
+    scalarField coefft0(coefft + coefft00);
 
     fam.diag() = (coefft*rDeltaT)*rho.primitiveField()*mesh().S();
 

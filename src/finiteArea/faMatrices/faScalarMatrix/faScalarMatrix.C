@@ -49,11 +49,9 @@ void faMatrix<scalar>::setComponentReference
     const scalar value
 )
 {
-    const labelUList& faceLabels =
-        psi_.mesh().boundary()[patchI].edgeFaces();
+    const labelUList& faceLabels = psi_.mesh().boundary()[patchI].edgeFaces();
 
-    internalCoeffs_[patchI][edgeI] +=
-        diag()[faceLabels[edgeI]];
+    internalCoeffs_[patchI][edgeI] += diag()[faceLabels[edgeI]];
 
     boundaryCoeffs_[patchI][edgeI] = value;
 }
@@ -75,10 +73,10 @@ solverPerformance faMatrix<scalar>::solve
     GeometricField<scalar, faPatchField, areaMesh>& psi =
         const_cast<GeometricField<scalar, faPatchField, areaMesh>&>(psi_);
 
-    scalarField saveDiag = diag();
+    scalarField saveDiag(diag());
     addBoundaryDiag(diag(), 0);
 
-    scalarField totalSource = source_;
+    scalarField totalSource(source_);
     addBoundarySource(totalSource, 0);
 
     // Solver call
@@ -148,7 +146,7 @@ tmp<areaScalarField> faMatrix<scalar>::H() const
             zeroGradientFaPatchScalarField::typeName
         )
     );
-    areaScalarField Hphi = tHphi();
+    areaScalarField& Hphi = tHphi.ref();
 
     Hphi.primitiveFieldRef() = (lduMatrix::H(psi_.primitiveField()) + source_);
     addBoundarySource(Hphi.primitiveFieldRef());

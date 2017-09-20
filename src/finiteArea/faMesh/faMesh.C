@@ -188,7 +188,7 @@ void Foam::faMesh::clearOut() const
 Foam::faMesh::faMesh(const polyMesh& pMesh)
 :
     GeoMesh<polyMesh>(pMesh),
-    MeshObject<polyMesh, UpdateableMeshObject, faMesh>(pMesh),
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
     faceLabels_
     (
@@ -282,7 +282,7 @@ Foam::faMesh::faMesh
 )
 :
     GeoMesh<polyMesh>(pMesh),
-    MeshObject<polyMesh, UpdateableMeshObject, faMesh>(pMesh),
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
     faceLabels_
     (
@@ -347,7 +347,7 @@ Foam::faMesh::faMesh
 )
 :
     GeoMesh<polyMesh>(pMesh),
-    MeshObject<polyMesh, UpdateableMeshObject, faMesh>(pMesh),
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
     faceLabels_
     (
@@ -831,7 +831,7 @@ Foam::faMesh::faMesh
 )
 :
     GeoMesh<polyMesh>(pMesh),
-    MeshObject<polyMesh, UpdateableMeshObject, faMesh>(pMesh),
+    MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
     faceLabels_
     (

@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
             UsEqn.relax();
             solve(UsEqn == - fac::grad(ps*h)/rhol + ps*fac::grad(h)/rhol);
 
-            areaScalarField UsA = UsEqn.A();
+            areaScalarField UsA(UsEqn.A());
 
             Us = UsEqn.H()/UsA;
             Us.correctBoundaryConditions();

@@ -61,7 +61,7 @@ void Foam::cyclicFaPatch::calcTransforms()
         vectorField half0Normals(size()/2);
         vectorField half1Normals(size()/2);
 
-        vectorField eN = edgeNormals()*magEdgeLengths();
+        const vectorField eN(edgeNormals()*magEdgeLengths());
 
         scalar maxMatchError = 0;
         label errorEdge = -1;
@@ -159,7 +159,7 @@ void cyclicFaPatch::makeWeights(scalarField& w) const
 {
     const scalarField& magL = magEdgeLengths();
 
-    scalarField deltas = edgeNormals() & faPatch::delta();
+    const scalarField deltas(edgeNormals() & faPatch::delta());
     label sizeby2 = deltas.size()/2;
 
     scalar maxMatchError = 0;
@@ -213,7 +213,7 @@ void cyclicFaPatch::makeWeights(scalarField& w) const
 // Make patch edge - neighbour cell distances
 void cyclicFaPatch::makeDeltaCoeffs(scalarField& dc) const
 {
-    scalarField deltas = edgeNormals() & faPatch::delta();
+    const scalarField deltas(edgeNormals() & faPatch::delta());
     label sizeby2 = deltas.size()/2;
 
     for (label edgei = 0; edgei < sizeby2; edgei++)
@@ -255,7 +255,7 @@ void Foam::cyclicFaPatch::movePoints(const pointField& p)
 // Return delta (P to N) vectors across coupled patch
 tmp<vectorField> cyclicFaPatch::delta() const
 {
-    vectorField patchD = faPatch::delta();
+    const vectorField patchD(faPatch::delta());
     label sizeby2 = patchD.size()/2;
 
     tmp<vectorField> tpdv(new vectorField(patchD.size()));

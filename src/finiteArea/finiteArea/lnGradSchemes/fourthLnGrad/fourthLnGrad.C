@@ -79,7 +79,7 @@ fourthLnGrad<Type>::correction
     );
     GeometricField<Type, faePatchField, edgeMesh>& corr = tcorr.ref();
 
-    edgeVectorField m = mesh.Le()/mesh.magLe();
+    edgeVectorField m(mesh.Le()/mesh.magLe());
 
     for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
     {

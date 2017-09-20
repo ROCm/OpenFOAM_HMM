@@ -98,8 +98,8 @@ leastSquaresFaGrad<Type>::grad
 
     forAll(own, edgei)
     {
-        register label ownEdgeI = own[edgei];
-        register label neiEdgeI = nei[edgei];
+        label ownEdgeI = own[edgei];
+        label neiEdgeI = nei[edgei];
 
         Type deltaVsf = vsf[neiEdgeI] - vsf[ownEdgeI];
 
@@ -117,8 +117,10 @@ leastSquaresFaGrad<Type>::grad
 
         if (vsf.boundaryField()[patchi].coupled())
         {
-            Field<Type> neiVsf =
-                vsf.boundaryField()[patchi].patchNeighbourField();
+            Field<Type> neiVsf
+            (
+                vsf.boundaryField()[patchi].patchNeighbourField()
+            );
 
             forAll(neiVsf, patchEdgeI)
             {
