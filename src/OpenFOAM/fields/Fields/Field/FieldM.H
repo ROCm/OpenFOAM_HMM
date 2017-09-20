@@ -120,8 +120,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP FUNC(List_ELEM(f2, f2P, i));                  \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 #define TFOR_ALL_F_OP_F_FUNC(typeF1, f1, OP, typeF2, f2, FUNC)                 \
@@ -135,13 +136,14 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP List_ELEM(f2, f2P, i).FUNC();                 \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member function : this field f1 OP fUNC f2, f3
 
-#define TFOR_ALL_F_OP_FUNC_F_F(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3)\
+#define TFOR_ALL_F_OP_FUNC_F_F(typeF1, f1, OP, FUNC, typeF2, f2, typeF3, f3)   \
                                                                                \
     /* check the three fields have same Field<Type> mesh */                    \
     checkFields(f1, f2, f3, "f1 " #OP " " #FUNC "(f2, f3)");                   \
@@ -153,9 +155,10 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i)                                                  \
         OP FUNC(List_ELEM(f2, f2P, i), List_ELEM(f3, f3P, i));                 \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member function : this field f1 OP fUNC f2, f3
@@ -171,8 +174,9 @@ void checkFields
                                                                                \
     /* loop through fields performing s OP FUNC(f1, f2) */                     \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         (s) OP FUNC(List_ELEM(f1, f1P, i), List_ELEM(f2, f2P, i));             \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member function : this f1 OP fUNC f2, s
@@ -188,8 +192,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP FUNC(List_ELEM(f2, f2P, i), (s));             \
-    List_END_FOR_ALL
+    }
 
 
 // member function : s1 OP fUNC f, s2
@@ -201,8 +206,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f, i)                                                         \
+    {                                                                          \
         (s1) OP FUNC(List_ELEM(f, fP, i), (s2));                               \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member function : this f1 OP fUNC s, f2
@@ -218,21 +224,23 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP FUNC((s), List_ELEM(f2, f2P, i));             \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member function : this f1 OP fUNC s, f2
 
-#define TFOR_ALL_F_OP_FUNC_S_S(typeF1, f1, OP, FUNC, typeS1, s1, typeS2, s2)\
+#define TFOR_ALL_F_OP_FUNC_S_S(typeF1, f1, OP, FUNC, typeS1, s1, typeS2, s2)   \
                                                                                \
     /* set access to f1 at end of field */                                     \
     List_ACCESS(typeF1, f1, f1P);                                              \
                                                                                \
     /* loop through fields performing f1 OP1 FUNC(s1, s2) */                   \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP FUNC((s1), (s2));                             \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member function : this f1 OP1 f2 OP2 FUNC s
@@ -248,8 +256,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP List_ELEM(f2, f2P, i) FUNC((s));              \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // define high performance macro functions for Field<Type> operations
@@ -268,9 +277,10 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 f2 OP2 f3 */                      \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP1 List_ELEM(f2, f2P, i)                        \
                               OP2 List_ELEM(f3, f3P, i);                       \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member operator : this field f1 OP1 s OP2 f2
@@ -286,8 +296,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 s OP2 f2 */                       \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP1 (s) OP2 List_ELEM(f2, f2P, i);               \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member operator : this field f1 OP1 f2 OP2 s
@@ -303,8 +314,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 s OP2 f2 */                       \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP1 List_ELEM(f2, f2P, i) OP2 (s);               \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member operator : this field f1 OP f2
@@ -321,8 +333,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP f2 */                              \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP List_ELEM(f2, f2P, i);                        \
-    List_END_FOR_ALL                                                           \
+    }
 
 // member operator : this field f1 OP1 OP2 f2
 
@@ -338,8 +351,9 @@ void checkFields
                                                                                \
     /* loop through fields performing f1 OP1 OP2 f2 */                         \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         List_ELEM(f1, f1P, i) OP1 OP2 List_ELEM(f2, f2P, i);                   \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // member operator : this field f OP s
@@ -351,8 +365,9 @@ void checkFields
                                                                                \
     /* loop through field performing f OP s */                                 \
     List_FOR_ALL(f, i)                                                         \
+    {                                                                          \
         List_ELEM(f, fP, i) OP (s);                                            \
-    List_END_FOR_ALL                                                           \
+    }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -367,8 +382,9 @@ void checkFields
                                                                                \
     /* loop through field performing s OP f */                                 \
     List_FOR_ALL(f, i)                                                         \
+    {                                                                          \
         (s) OP List_ELEM(f, fP, i);                                            \
-    List_END_FOR_ALL
+    }
 
 
 // friend operator function : s OP1 f1 OP2 f2, allocates storage for s
@@ -381,8 +397,9 @@ void checkFields
                                                                                \
     /* loop through field performing s OP f */                                 \
     List_FOR_ALL(f1, i)                                                        \
+    {                                                                          \
         (s) OP1 List_ELEM(f1, f1P, i) OP2 List_ELEM(f2, f2P, i);               \
-    List_END_FOR_ALL
+    }
 
 
 // friend operator function : s OP FUNC(f), allocates storage for s
@@ -394,8 +411,9 @@ void checkFields
                                                                                \
     /* loop through field performing s OP f */                                 \
     List_FOR_ALL(f, i)                                                         \
+    {                                                                          \
         (s) OP FUNC(List_ELEM(f, fP, i));                                      \
-    List_END_FOR_ALL
+    }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

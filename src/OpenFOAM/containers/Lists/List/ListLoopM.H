@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,10 +37,7 @@ Description
 
 #define List_FOR_ALL(f, i)                      \
         const label _n##i = (f).size();         \
-        for (label i=0; i<_n##i; ++i)           \
-        {
-
-#define List_END_FOR_ALL  }
+        for (label i=0; i<_n##i; ++i)
 
 // Provide current element
 #define List_CELEM(f, fp, i)  (fp[i])
@@ -60,10 +57,7 @@ Description
 
 #define List_FOR_ALL(f, i)                      \
         label i = (f).size();                   \
-        while (i--)                             \
-        {                                       \
-
-#define List_END_FOR_ALL  }
+        while (i--)
 
 // Provide current element without incrementing pointer
 #define List_CELEM(f, fp, i)  (*fp)

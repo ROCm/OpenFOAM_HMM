@@ -69,8 +69,9 @@ Foam::List<T>::List(const label s, const T& a)
     {
         List_ACCESS(T, (*this), vp);
         List_FOR_ALL((*this), i)
+        {
             List_ELEM((*this), vp, i) = a;
-        List_END_FOR_ALL
+        }
     }
 }
 
@@ -93,8 +94,9 @@ Foam::List<T>::List(const label s, const zero)
     {
         List_ACCESS(T, (*this), vp);
         List_FOR_ALL((*this), i)
+        {
             List_ELEM((*this), vp, i) = Zero;
-        List_END_FOR_ALL
+        }
     }
 }
 
@@ -119,8 +121,9 @@ Foam::List<T>::List(const List<T>& a)
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
             List_FOR_ALL((*this), i)
+            {
                 List_ELEM((*this), vp, i) = List_ELEM(a, ap, i);
-            List_END_FOR_ALL
+            }
         }
     }
 }
@@ -139,8 +142,9 @@ Foam::List<T>::List(const List<T2>& a)
         List_ACCESS(T, (*this), vp);
         List_CONST_ACCESS(T2, a, ap);
         List_FOR_ALL((*this), i)
+        {
             List_ELEM((*this), vp, i) = T(List_ELEM(a, ap, i));
-        List_END_FOR_ALL
+        }
     }
 }
 
@@ -178,8 +182,9 @@ Foam::List<T>::List(List<T>& a, bool reuse)
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
             List_FOR_ALL((*this), i)
+            {
                 List_ELEM((*this), vp, i) = List_ELEM(a, ap, i);
-            List_END_FOR_ALL
+            }
         }
     }
 }
@@ -390,8 +395,9 @@ void Foam::List<T>::operator=(const UList<T>& a)
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
             List_FOR_ALL((*this), i)
+            {
                 List_ELEM((*this), vp, i) = List_ELEM(a, ap, i);
-            List_END_FOR_ALL
+            }
         }
     }
 }

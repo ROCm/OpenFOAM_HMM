@@ -95,8 +95,9 @@ void Foam::UList<T>::deepCopy(const UList<T>& a)
             List_ACCESS(T, (*this), vp);
             List_CONST_ACCESS(T, a, ap);
             List_FOR_ALL((*this), i)
+            {
                 List_ELEM((*this), vp, i) = List_ELEM(a, ap, i);
-            List_END_FOR_ALL
+            }
         }
     }
 }
@@ -152,8 +153,9 @@ void Foam::UList<T>::operator=(const T& t)
 {
     List_ACCESS(T, (*this), vp);
     List_FOR_ALL((*this), i)
+    {
         List_ELEM((*this), vp, i) = t;
-    List_END_FOR_ALL
+    }
 }
 
 
@@ -162,8 +164,9 @@ void Foam::UList<T>::operator=(const zero)
 {
     List_ACCESS(T, (*this), vp);
     List_FOR_ALL((*this), i)
+    {
         List_ELEM((*this), vp, i) = Zero;
-    List_END_FOR_ALL
+    }
 }
 
 
@@ -244,9 +247,10 @@ bool Foam::UList<T>::operator==(const UList<T>& a) const
     List_CONST_ACCESS(T, (a), ap);
 
     List_FOR_ALL((*this), i)
+    {
         equal = (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
         if (!equal) break;
-    List_END_FOR_ALL
+    }
 
     return equal;
 }

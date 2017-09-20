@@ -35,10 +35,11 @@ void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& a)
     List_ACCESS(T, a, ap);
     T tmp;
     List_FOR_ALL((*this), i)
+    {
         tmp = List_CELEM((*this), vp, i);
         List_ELEM((*this), vp, i) = List_CELEM(a, ap, i);
         List_ELEM(a, ap, i) = tmp;
-    List_END_FOR_ALL
+    }
 }
 
 
@@ -53,9 +54,10 @@ bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
     List_CONST_ACCESS(T, (a), ap);
 
     List_FOR_ALL((*this), i)
+    {
         equal = (List_ELEM((*this), vp, i) == List_ELEM((a), ap, i));
         if (!equal) break;
-    List_END_FOR_ALL
+    }
 
     return equal;
 }
