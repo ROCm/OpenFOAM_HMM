@@ -46,21 +46,20 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-class DynamicField;
+template<class T, int SizeMin> class DynamicField;
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Ostream& operator<<
 (
     Ostream&,
-    const DynamicField<T, SizeInc, SizeMult, SizeDiv>&
+    const DynamicField<T, SizeMin>&
 );
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Istream& operator>>
 (
     Istream&,
-    DynamicField<T, SizeInc, SizeMult, SizeDiv>&
+    DynamicField<T, SizeMin>&
 );
 
 
@@ -68,16 +67,12 @@ Istream& operator>>
                            Class DynamicField Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, unsigned SizeInc=0, unsigned SizeMult=2, unsigned SizeDiv=1>
+template<class T, int SizeMin=64>
 class DynamicField
 :
     public Field<T>
 {
-    static_assert
-    (
-        (SizeInc || SizeMult) && SizeDiv,
-        "Avoid invalid sizing parameters"
-    );
+    static_assert(SizeMin > 0, "Invalid min size parameter");
 
     // Private data
 
@@ -85,17 +80,20 @@ class DynamicField
         label capacity_;
 
 
+    // Private Member Functions
+
+        //- Copy assignment from another list
+        template<class ListType>
+        inline void assignDynField(const ListType& lst);
+
 public:
 
     // Static Member Functions
 
         //- Return a null field
-        inline static const DynamicField<T, SizeInc, SizeMult, SizeDiv>& null()
+        inline static const DynamicField<T, SizeMin>& null()
         {
-            return *reinterpret_cast
-            <
-                DynamicField<T, SizeInc, SizeMult, SizeDiv>*
-            >(0);
+            return *reinterpret_cast<DynamicField<T, SizeMin>*>(0);
         }
 
 
@@ -140,19 +138,19 @@ public:
         );
 
         //- Construct copy
-        inline DynamicField(const DynamicField<T, SizeInc, SizeMult, SizeDiv>&);
+        inline DynamicField(const DynamicField<T, SizeMin>&);
 
         //- Construct by transferring the Field contents
         inline DynamicField
         (
-            const Xfer<DynamicField<T, SizeInc, SizeMult, SizeDiv>>&
+            const Xfer<DynamicField<T, SizeMin>>&
         );
 
         //- Construct from Istream. Size set to size of list read.
         explicit DynamicField(Istream&);
 
         //- Clone
-        tmp<DynamicField<T, SizeInc, SizeMult, SizeDiv>> clone() const;
+        tmp<DynamicField<T, SizeMin>> clone() const;
 
 
     // Member Functions
@@ -188,7 +186,7 @@ public:
 
             //- Alter the addressed list size and fill new space with a
             //  constant.
-            inline void resize(const label, const T&);
+            inline void resize(const label, const T& val);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size, use setCapacity() for that.
@@ -203,7 +201,7 @@ public:
 
             //- Shrink the allocated space to the number of elements used.
             //  Returns a reference to the DynamicField.
-            inline DynamicField<T, SizeInc, SizeMult, SizeDiv>& shrink();
+            inline DynamicField<T, SizeMin>& shrink();
 
             //- Transfer contents to the Xfer container as a plain List
             inline Xfer<List<T>> xfer();
@@ -212,16 +210,12 @@ public:
         // Member Operators
 
             //- Append an element at the end of the list
-            inline DynamicField<T, SizeInc, SizeMult, SizeDiv>& append
-            (
-                const T&
-            );
+            inline DynamicField<T, SizeMin>&
+            append(const T& val);
 
             //- Append a List at the end of this list
-            inline DynamicField<T, SizeInc, SizeMult, SizeDiv>& append
-            (
-                const UList<T>&
-            );
+            inline DynamicField<T, SizeMin>&
+            append(const UList<T>& lst);
 
             //- Remove and return the top element
             inline T remove();
@@ -236,7 +230,7 @@ public:
             //- Assignment to DynamicField
             inline void operator=
             (
-                const DynamicField<T, SizeInc, SizeMult, SizeDiv>&
+                const DynamicField<T, SizeMin>&
             );
 
             //- Assignment to UList

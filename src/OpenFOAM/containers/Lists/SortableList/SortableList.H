@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,13 +67,7 @@ public:
         //- Null constructor, sort later (eg, after assignment or transfer)
         inline SortableList();
 
-        //- Construct from UList, sorting immediately
-        explicit SortableList(const UList<T>& values);
-
-        //- Construct from transferred List, sorting immediately
-        explicit SortableList(const Xfer<List<T>>& values);
-
-        //- Construct given size. Sort later on
+        //- Construct given size, sort later.
         //  The indices remain empty until the list is sorted
         explicit inline SortableList(const label size);
 
@@ -81,16 +75,28 @@ public:
         //  The indices remain empty until the list is sorted
         inline SortableList(const label size, const T& val);
 
+        //- Copy construct
+        inline SortableList(const SortableList<T>& lst);
+
+        //- Move construct
+        inline SortableList(SortableList<T>&& lst);
+
+        //- Copy construct from UList, sorting immediately
+        explicit SortableList(const UList<T>& values);
+
+        //- Move construct from List, sorting immediately
+        SortableList(List<T>&& values);
+
         //- Construct given begin/end iterators.
         //  Uses std::distance to determine the size.
         template<class InputIterator>
         inline SortableList(InputIterator begIter, InputIterator endIter);
 
-        //- Construct as copy
-        inline SortableList(const SortableList<T>& lst);
-
         //- Construct from an initializer list, sorting immediately
         SortableList(std::initializer_list<T> values);
+
+        //- Construct from transferred List, sorting immediately
+        explicit SortableList(const Xfer<List<T>>& values);
 
 
     // Member Functions
@@ -120,24 +126,40 @@ public:
         //- Reverse (stable) sort the list
         void reverseSort();
 
+        //- Swap content with another SortableList in constant time
+        inline void swap(SortableList<T>& lst);
+
         //- Transfer contents to the Xfer container as a plain List
         inline Xfer<List<T>> xfer();
 
 
     // Member Operators
 
-        //- Assignment of all entries to the given value
+        //- Assignment of all entries to the given value, removing indices.
         inline void operator=(const T& val);
 
-        //- Assignment to UList operator. Takes linear time
+        //- Assignment to UList operator, removing indices. Takes linear time
         inline void operator=(const UList<T>& lst);
 
         //- Assignment operator. Takes linear time
         inline void operator=(const SortableList<T>& lst);
 
+        //- Move assignment, removing indices. Takes linear time
+        inline void operator=(List<T>&& lst);
+
+        //- Move operator. Takes linear time
+        inline void operator=(SortableList<T>&& lst);
+
         //- Assignment to an initializer list
         void operator=(std::initializer_list<T> lst);
 };
+
+
+// Global Functions
+
+// Exchange contents of lists - see SortableList::swap().
+template<class T>
+inline void Swap(SortableList<T>& a, SortableList<T>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

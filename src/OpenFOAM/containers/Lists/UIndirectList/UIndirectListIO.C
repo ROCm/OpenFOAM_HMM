@@ -131,10 +131,10 @@ template<class T>
 Foam::Ostream& Foam::operator<<
 (
     Foam::Ostream& os,
-    const Foam::UIndirectList<T>& L
+    const Foam::UIndirectList<T>& lst
 )
 {
-    return L.writeList(os, 10);
+    return lst.writeList(os, 10);
 }
 
 

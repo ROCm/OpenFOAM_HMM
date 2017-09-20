@@ -33,7 +33,7 @@ License
 bool Foam::triSurfaceSearch::checkUniqueHit
 (
     const pointIndexHit& currHit,
-    const DynamicList<pointIndexHit, 1, 1>& hits,
+    const UList<pointIndexHit>& hits,
     const vector& lineVec
 ) const
 {
@@ -387,7 +387,7 @@ void Foam::triSurfaceSearch::findLineAll
     indexedOctree<treeDataTriSurface>::perturbTol() = tolerance();
 
     // Work array
-    DynamicList<pointIndexHit, 1, 1> hits;
+    DynamicList<pointIndexHit> hits;
 
     DynamicList<label> shapeMask;
 

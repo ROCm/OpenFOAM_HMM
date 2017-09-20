@@ -62,8 +62,7 @@ namespace Foam
 class face;
 class triFace;
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-class DynamicList;
+template<class T, int SizeMin> class DynamicList;
 
 inline Istream& operator>>(Istream& is, face& f);
 
@@ -344,11 +343,11 @@ public:
             //- Split into triangles using existing points.
             //  Append to DynamicList.
             //  Returns number of faces created.
-            template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+            template<int SizeMin>
             label triangles
             (
                 const UList<point>& points,
-                DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
+                DynamicList<face, SizeMin>& triFaces
             ) const;
 
             //- Number of triangles and quads after splitting

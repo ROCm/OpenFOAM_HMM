@@ -62,9 +62,37 @@ inline Foam::label Foam::UList<T>::fcIndex(const label i) const
 
 
 template<class T>
+inline const T& Foam::UList<T>::fcValue(const label i) const
+{
+    return this->operator[](this->fcIndex(i));
+}
+
+
+template<class T>
+inline T& Foam::UList<T>::fcValue(const label i)
+{
+    return this->operator[](this->fcIndex(i));
+}
+
+
+template<class T>
 inline Foam::label Foam::UList<T>::rcIndex(const label i) const
 {
     return (i ? i-1 : size()-1);
+}
+
+
+template<class T>
+inline const T& Foam::UList<T>::rcValue(const label i) const
+{
+    return this->operator[](this->rcIndex(i));
+}
+
+
+template<class T>
+inline T& Foam::UList<T>::rcValue(const label i)
+{
+    return this->operator[](this->rcIndex(i));
 }
 
 
@@ -149,6 +177,13 @@ template<class T>
 inline T* Foam::UList<T>::data()
 {
     return v_;
+}
+
+
+template<class T>
+inline bool Foam::UList<T>::found(const T& val, const label start) const
+{
+    return (this->find(val, start) >= 0);
 }
 
 
@@ -313,21 +348,37 @@ inline bool Foam::UList<T>::empty() const
 }
 
 
+template<class T>
+inline void Foam::UList<T>::swap(UList<T>& lst)
+{
+    Foam::Swap(size_, lst.size_);
+    Foam::Swap(v_, lst.v_);
+}
+
+
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::reverse(UList<T>& ul, const label n)
+inline void Foam::reverse(UList<T>& lst, const label n)
 {
     for (int i=0; i<n/2; ++i)
     {
-        Swap(ul[i], ul[n-1-i]);
+        Foam::Swap(lst[i], lst[n-1-i]);
     }
 }
 
+
 template<class T>
-inline void Foam::reverse(UList<T>& ul)
+inline void Foam::reverse(UList<T>& lst)
 {
-    reverse(ul, ul.size());
+    reverse(lst, lst.size());
+}
+
+
+template<class T>
+inline void Foam::Swap(UList<T>& a, UList<T>& b)
+{
+    a.swap(b);
 }
 
 

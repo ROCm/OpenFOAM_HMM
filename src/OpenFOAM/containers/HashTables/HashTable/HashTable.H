@@ -293,6 +293,9 @@ public:
         //- Construct as copy
         HashTable(const HashTable<T, Key, Hash>& ht);
 
+        //- Move construct
+        HashTable(HashTable<T, Key, Hash>&& ht);
+
         //- Construct by transferring the parameter contents
         HashTable(const Xfer<HashTable<T, Key, Hash>>& ht);
 
@@ -528,6 +531,9 @@ public:
         //  Equivalent to clear() followed by resize(0)
         void clearStorage();
 
+        //- Swap contents of the argument table into this table
+        void swap(HashTable<T, Key, Hash>& ht);
+
         //- Transfer the contents of the argument table into this table
         //  and annul the argument table.
         void transfer(HashTable<T, Key, Hash>& ht);
@@ -560,6 +566,9 @@ public:
 
         //- Assignment from an initializer list
         void operator=(std::initializer_list<std::pair<Key, T>> lst);
+
+        //- Move assign
+        void operator=(HashTable<T, Key, Hash>&& rhs);
 
         //- Equality. Hash tables are equal if the keys and values are equal.
         //  Independent of table storage size and table order.
@@ -839,6 +848,17 @@ public:
             const HashTable<T, Key, Hash>& tbl
         );
 };
+
+
+// Global Functions
+
+// Exchange contents of hash tables - see HashTable::swap().
+template<class T, class Key, class Hash>
+inline void Swap
+(
+    HashTable<T, Key, Hash>& a,
+    HashTable<T, Key, Hash>& b
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

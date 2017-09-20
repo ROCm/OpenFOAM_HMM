@@ -324,6 +324,34 @@ int main()
         << nl;
 
 
+    // Start again with new value
+    table2.set("ada", 14.0);
+    table2.set("aeq", 15.0);
+    table2.set("aaw", 16.0);
+
+    Info<< nl << "input values" << nl;
+    Info<<"table1 =  " << table1 << nl <<"table2 =  " << table2 << nl;
+
+    Info<<"global Swap function" << nl;
+    Swap(table1, table2);
+    Info<<"table1 =  " << table1 << nl <<"table2 =  " << table2 << nl;
+
+    Info<<"swap method" << nl;
+    table1.swap(table2);
+    Info<<"table1 =  " << table1 << nl <<"table2 =  " << table2 << nl;
+
+    Info<<"transfer" << nl;
+    table1.transfer(table2);
+    Info<<"table1 =  " << table1 << nl <<"table2 =  " << table2 << nl;
+
+    Info<<"move assign" << nl;
+    table2 = std::move(table1);
+    Info<<"table1 =  " << table1 << nl <<"table2 =  " << table2 << nl;
+
+    Info<<"move construct" << nl;
+    HashTable<scalar> table1b(std::move(table2));
+    Info<<"table1 =  " << table1b << nl <<"table2 =  " << table2 << nl;
+
     Info<< "\nDone\n";
 
     return 0;

@@ -38,8 +38,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
     const cellShapeList& c
 ) const
 {
-    List<DynamicList<label, primitiveMesh::cellsPerPoint_>>
-        pc(points().size());
+    List<DynamicList<label>> pc(points().size());
 
     // For each cell
     forAll(c, i)
@@ -51,8 +50,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
         {
             // Set working point label
             label curPoint = labels[j];
-            DynamicList<label, primitiveMesh::cellsPerPoint_>& curPointCells =
-                pc[curPoint];
+            DynamicList<label>& curPointCells = pc[curPoint];
 
             // Enter the cell label in the point's cell list
             curPointCells.append(i);

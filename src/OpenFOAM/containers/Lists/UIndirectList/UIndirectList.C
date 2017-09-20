@@ -21,66 +21,67 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InNamespace
-    Foam
-
-Description
-    Swap arguments as per std::swap, but in Foam namespace.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef Swap_H
-#define Swap_H
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-#include <type_traits>
-#include <utility>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-//- Swap non-array types as per std::swap example, but in Foam namespace.
-//  \sa http://www.cplusplus.com/reference/utility/swap/
 template<class T>
-void Swap(T& a, T& b)
+inline Foam::label Foam::UIndirectList<T>::find
+(
+    const T& val,
+    const label start
+) const
 {
-    // compile-time resolution with std::enable_if not yet working
-    if (std::is_fundamental<T>::value || std::is_pointer<T>::value)
+    if (start >= 0)
     {
-        // Use copy/assign for simple types
-        const T tmp = a;
-        a = b;
-        b = tmp;
+        List_CONST_ACCESS(T, completeList_, lst);
+        List_CONST_ACCESS(label, addressing_, addr);
+
+        const label len = addressing_.size();
+
+        for (label i = start; i < len; ++i)
+        {
+            if (lst[addr[i]] == val)
+            {
+                return i;
+            }
+        }
     }
-    else
-    {
-        // Use move/assignment
-        T tmp(std::move(a));
-        a = std::move(b);
-        b = std::move(tmp);
-    }
+
+    return -1;
 }
 
 
-//- Swap array types as per std::swap example, but in Foam namespace.
-//  \sa http://www.cplusplus.com/reference/utility/swap/
-template<class T, size_t N>
-void Swap(T (&a)[N], T (&b)[N])
+template<class T>
+inline Foam::label Foam::UIndirectList<T>::rfind
+(
+    const T& val,
+    const label pos
+) const
 {
-    for (size_t i = 0; i < N; ++i)
+    List_CONST_ACCESS(T, completeList_, lst);
+    List_CONST_ACCESS(label, addressing_, addr);
+
+    for
+    (
+        label i =
+        (
+            pos < 0
+          ? (addressing_.size()-1)
+          : min(pos, (addressing_.size()-1))
+        );
+        i >= 0;
+        --i
+    )
     {
-        Foam::Swap(a[i], b[i]);
+        if (lst[addr[i]] == val)
+        {
+            return i;
+        }
     }
+
+    return -1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

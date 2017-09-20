@@ -124,13 +124,13 @@ inline bool Foam::face::found(const label globalIndex) const
 
 inline Foam::label Foam::face::nextLabel(const label i) const
 {
-    return operator[](fcIndex(i));
+    return this->fcValue(i);
 }
 
 
 inline Foam::label Foam::face::prevLabel(const label i) const
 {
-    return operator[](rcIndex(i));
+    return this->rcValue(i);
 }
 
 

@@ -890,7 +890,7 @@ void Foam::inplaceReverseList(ListType& list)
     label elemI = 0;
     while (elemI < nIterations)
     {
-        Swap(list[elemI], list[lastIndex - elemI]);
+        Foam::Swap(list[elemI], list[lastIndex - elemI]);
 
         elemI++;
     }

@@ -27,15 +27,32 @@ Description
 
 #include "IndirectList.H"
 #include "IOstreams.H"
+#include "ListOps.H"
+#include "labelIndList.H"
 
 using namespace Foam;
 
 template<class ListType>
 void printInfo(const ListType& lst)
 {
-    Info<< "addr: " << lst.addressing() << nl
-        << "list: " << lst << nl
+    Info<< "addr: " << flatOutput(lst.addressing()) << nl
+        << "list: " << flatOutput(lst) << nl
         << endl;
+}
+
+
+template<class T, class ListType>
+void testFind(const T& val, const ListType& lst)
+{
+    Info<< nl
+        << "Search for "<< val << " in " << flatOutput(lst) << nl
+        <<" found() = " << lst.found(val)
+        <<" find() = " << lst.find(val)
+        <<" rfind() = " << lst.rfind(val)
+        <<" find(2) = " << lst.find(val, 2)
+        <<" rfind(2) = " << lst.rfind(val, 2)
+        <<" findIndex = " << findIndex(lst, val) << nl
+        << nl;
 }
 
 
@@ -44,41 +61,36 @@ void printInfo(const ListType& lst)
 
 int main(int argc, char *argv[])
 {
-    List<double> completeList(10);
+    List<label> completeList(20);
 
     forAll(completeList, i)
     {
-        completeList[i] = 0.1*i;
+        completeList[i] = 10*i;
     }
 
-    Info<< "raw : " << completeList << nl << endl;
+    Info<< "raw : " << flatOutput(completeList) << nl << endl;
 
+    List<label> addresses{1, 0, 3, 7, 4, 8, 5, 1, 0, 3, 7, 4, 8, 5, };
 
-    List<label> addresses(5);
-    addresses[0] = 1;
-    addresses[1] = 0;
-    addresses[2] = 7;
-    addresses[3] = 8;
-    addresses[4] = 5;
-
-    IndirectList<double> idl1(completeList, addresses);
+    labelIndList idl1(completeList, addresses);
 
     printInfo(idl1);
 
-    addresses[4] = 1;
-    addresses[3] = 0;
-    addresses[2] = 7;
-    addresses[1] = 8;
-    addresses[0] = 5;
+    for (const label val : { 10, 30, 40, 50, 90, 80, 120 } )
+    {
+        testFind(val, idl1);
+    }
+
+    inplaceReverseList(addresses);
 
     idl1.resetAddressing(addresses.xfer());
 
     printInfo(idl1);
 
-    // test copying
-    UIndirectList<double> uidl1(idl1);
-    IndirectList<double> idl2(uidl1);
-    IndirectList<double> idl3(idl2);
+    // Test copying
+    labelUIndList uidl1(idl1);
+    labelIndList idl2(uidl1);
+    labelIndList idl3(idl2);
 
     printInfo(uidl1);
 
