@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,53 +23,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Euler.H"
+#include "error.H"
+#include "integrationScheme.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Euler<Type>::Euler
+Foam::autoPtr<Foam::integrationScheme> Foam::integrationScheme::New
 (
     const word& phiName,
     const dictionary& dict
 )
-:
-    IntegrationScheme<Type>(phiName, dict)
-{}
-
-
-template<class Type>
-Foam::Euler<Type>::Euler(const Euler& is)
-:
-    IntegrationScheme<Type>(is)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::Euler<Type>::~Euler()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-typename Foam::IntegrationScheme<Type>::integrationResult
-Foam::Euler<Type>::integrate
-(
-    const Type& phi,
-    const scalar dt,
-    const Type& alphaBeta,
-    const scalar beta
-) const
 {
-    typename IntegrationScheme<Type>::integrationResult retValue;
-    retValue.value() = (phi + alphaBeta*dt)/(1.0 + beta*dt);
-    retValue.average() = 0.5*(phi + retValue.value());
+    const word schemeName(dict.lookup(phiName));
 
-    return retValue;
+    Info<< "Selecting " << phiName << " integration scheme "
+        << schemeName << endl;
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(schemeName);
+
+    if (!cstrIter.found())
+    {
+        FatalErrorInFunction
+            << "Unknown integration scheme type "
+            << schemeName << nl << nl
+            << "Valid integration scheme types are:" << nl
+            << wordConstructorTablePtr_->sortedToc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<integrationScheme>(cstrIter()());
 }
-
 
 // ************************************************************************* //

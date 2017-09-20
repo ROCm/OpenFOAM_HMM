@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,37 +23,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "IntegrationScheme.H"
+#include "analytical.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace integrationSchemes
+{
+    defineTypeNameAndDebug(analytical, 0);
+    addToRunTimeSelectionTable(integrationScheme, analytical, word);
+}
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::autoPtr<Foam::IntegrationScheme<Type>>
-Foam::IntegrationScheme<Type>::New
+Foam::integrationSchemes::analytical::analytical()
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::integrationSchemes::analytical::~analytical()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::integrationSchemes::analytical::dtEff
 (
-    const word& phiName,
-    const dictionary& dict
-)
+    const scalar dt,
+    const scalar Beta
+) const
 {
-    const word schemeName(dict.lookup(phiName));
-
-    Info<< "Selecting " << phiName << " integration scheme "
-        << schemeName << endl;
-
-    auto cstrIter = dictionaryConstructorTablePtr_->cfind(schemeName);
-
-    if (!cstrIter.found())
-    {
-        FatalErrorInFunction
-            << "Unknown integration scheme type "
-            << schemeName << nl << nl
-            << "Valid integration scheme types :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << nl
-            << exit(FatalError);
-    }
-
-    return autoPtr<IntegrationScheme<Type>>(cstrIter()(phiName, dict));
+    return
+        mag(Beta*dt) > SMALL
+      ? (1 - exp(- Beta*dt))/Beta
+      : dt;
 }
+
+
+Foam::scalar Foam::integrationSchemes::analytical::sumDtEff
+(
+    const scalar dt,
+    const scalar Beta
+) const
+{
+    return
+        mag(Beta*dt) > SMALL
+      ? dt/Beta - (1 - exp(- Beta*dt))/sqr(Beta)
+      : sqr(dt);
+}
+
 
 // ************************************************************************* //

@@ -25,7 +25,7 @@ License
 
 #include "KinematicParcel.H"
 #include "forceSuSp.H"
-#include "IntegrationScheme.H"
+#include "integrationScheme.H"
 #include "meshTools.H"
 #include "cloudSolution.H"
 
@@ -178,26 +178,47 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Momentum source due to particle forces
     const forceSuSp Fcp = forces.calcCoupled(p, ttd, dt, mass, Re, mu);
     const forceSuSp Fncp = forces.calcNonCoupled(p, ttd, dt, mass, Re, mu);
-    const forceSuSp Feff = Fcp + Fncp;
     const scalar massEff = forces.massEff(p, ttd, mass);
 
+    /*
+    // Proper splitting ...
+    // Calculate the integration coefficients
+    const vector acp = (Fcp.Sp()*td.Uc() + Fcp.Su())/massEff;
+    const vector ancp = (Fncp.Sp()*td.Uc() + Fncp.Su() + Su)/massEff;
+    const scalar bcp = Fcp.Sp()/massEff;
+    const scalar bncp = Fncp.Sp()/massEff;
 
-    // New particle velocity
-    //~~~~~~~~~~~~~~~~~~~~~~
+    // Integrate to find the new parcel velocity
+    const vector deltaUcp =
+        cloud.UIntegrator().partialDelta
+        (
+            U_, dt, acp + ancp, bcp + bncp, acp, bcp
+        );
+    const vector deltaUncp =
+        cloud.UIntegrator().partialDelta
+        (
+            U_, dt, acp + ancp, bcp + bncp, ancp, bncp
+        );
+    const vector deltaT = deltaUcp + deltaUncp;
+    */
 
-    // Update velocity - treat as 3-D
-    const vector abp = (Feff.Sp()*td.Uc() + (Feff.Su() + Su))/massEff;
-    const scalar bp = Feff.Sp()/massEff;
+    // Shortcut splitting assuming no implicit non-coupled force ...
+    // Calculate the integration coefficients
+    const vector acp = (Fcp.Sp()*td.Uc() + Fcp.Su())/massEff;
+    const vector ancp = (Fncp.Su() + Su)/massEff;
+    const scalar bcp = Fcp.Sp()/massEff;
 
-    Spu = dt*Feff.Sp();
+    // Integrate to find the new parcel velocity
+    const vector deltaU = cloud.UIntegrator().delta(U_, dt, acp + ancp, bcp);
+    const vector deltaUncp = ancp*dt;
+    const vector deltaUcp = deltaU - deltaUncp;
 
-    IntegrationScheme<vector>::integrationResult Ures =
-        cloud.UIntegrator().integrate(U_, dt, abp, bp);
+    // Calculate the new velocity and the momentum transfer terms
+    vector Unew = U_ + deltaU;
 
-    vector Unew = Ures.value();
+    dUTrans -= massEff*deltaUcp;
 
-    // note: Feff.Sp() and Fc.Sp() must be the same
-    dUTrans += dt*(Feff.Sp()*(Ures.average() - td.Uc()) - Fcp.Su());
+    Spu = dt*Fcp.Sp();
 
     // Apply correction to velocity and dUTrans for reduced-D cases
     const polyMesh& mesh = cloud.pMesh();

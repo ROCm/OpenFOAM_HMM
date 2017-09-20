@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,39 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IntegrationScheme.H"
+#include "integrationScheme.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::IntegrationScheme<Type>::IntegrationScheme
+inline Type Foam::integrationScheme::explicitDelta
 (
-    const word& phiName,
-    const dictionary& dict
+    const Type& phi,
+    const scalar dtEff,
+    const Type& Alpha,
+    const scalar Beta
 )
-:
-   phiName_(phiName),
-   dict_(dict)
-{}
+{
+    return (Alpha - Beta*phi)*dtEff;
+}
 
 
 template<class Type>
-Foam::IntegrationScheme<Type>::IntegrationScheme(const IntegrationScheme& is)
-:
-    phiName_(is.phiName_),
-    dict_(is.dict_)
-{}
+inline Type Foam::integrationScheme::delta
+(
+    const Type& phi,
+    const scalar dt,
+    const Type& Alpha,
+    const scalar Beta
+) const
+{
+    return explicitDelta(phi, dtEff(dt, Beta), Alpha, Beta);
+}
 
-
-// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::IntegrationScheme<Type>::~IntegrationScheme()
-{}
+inline Type Foam::integrationScheme::partialDelta
+(
+    const Type& phi,
+    const scalar dt,
+    const Type& Alpha,
+    const scalar Beta,
+    const Type& alphai,
+    const scalar betai
+) const
+{
+    return
+        explicitDelta(phi, dt, alphai, betai)
+      - explicitDelta(phi, sumDtEff(dt, Beta), Alpha, Beta)*betai;
+}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "IntegrationSchemeNew.C"
 
 // ************************************************************************* //

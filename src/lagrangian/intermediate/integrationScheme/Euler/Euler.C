@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,64 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "Analytical.H"
+#include "Euler.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace integrationSchemes
+{
+    defineTypeNameAndDebug(Euler, 0);
+    addToRunTimeSelectionTable(integrationScheme, Euler, word);
+}
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Analytical<Type>::Analytical
-(
-    const word& phiName,
-    const dictionary& dict
-)
-:
-    IntegrationScheme<Type>(phiName, dict)
-{}
-
-
-template<class Type>
-Foam::Analytical<Type>::Analytical(const Analytical& is)
-:
-    IntegrationScheme<Type>(is)
+Foam::integrationSchemes::Euler::Euler()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Analytical<Type>::~Analytical()
+Foam::integrationSchemes::Euler::~Euler()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-typename Foam::IntegrationScheme<Type>::integrationResult
-Foam::Analytical<Type>::integrate
+Foam::scalar Foam::integrationSchemes::Euler::dtEff
 (
-    const Type& phi,
     const scalar dt,
-    const Type& alphaBeta,
-    const scalar beta
+    const scalar Beta
 ) const
 {
-    typename IntegrationScheme<Type>::integrationResult retValue;
+    return dt/(1 + Beta*dt);
+}
 
-    const scalar expTerm = exp(min(50, -beta*dt));
 
-    if (beta > ROOTVSMALL)
-    {
-        const Type alpha = alphaBeta/beta;
-        retValue.average() = alpha + (phi - alpha)*(1 - expTerm)/(beta*dt);
-        retValue.value() =  alpha + (phi - alpha)*expTerm;
-    }
-    else
-    {
-        retValue.value() = phi + alphaBeta*dt;
-        retValue.average() = 0.5*(phi + retValue.value());
-    }
-
-    return retValue;
+Foam::scalar Foam::integrationSchemes::Euler::sumDtEff
+(
+    const scalar dt,
+    const scalar Beta
+) const
+{
+    return sqr(dt)/(1 + Beta*dt);
 }
 
 

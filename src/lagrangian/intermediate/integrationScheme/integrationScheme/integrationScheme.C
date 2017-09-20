@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,45 +21,28 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::scalarIntegrationScheme
-
-Description
-    Foam::scalarIntegrationScheme
-
-Typedef
-    Foam::vectorIntegrationScheme;
-
-Description
-    Foam::vectorIntegrationScheme;
-
-SourceFiles
-    IntegrationScheme.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef IntegrationSchemesFwd_H
-#define IntegrationSchemesFwd_H
+#include "integrationScheme.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(integrationScheme, 0);
+    defineRunTimeSelectionTable(integrationScheme, word);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-class IntegrationScheme;
+Foam::integrationScheme::integrationScheme()
+{}
 
-typedef IntegrationScheme<scalar> scalarIntegrationScheme;
-typedef IntegrationScheme<vector> vectorIntegrationScheme;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::integrationScheme::~integrationScheme()
+{}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

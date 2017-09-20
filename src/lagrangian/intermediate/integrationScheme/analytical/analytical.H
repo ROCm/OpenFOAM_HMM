@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,79 +22,73 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::Euler
+    Foam::integrationSchemes::analytical
 
 Description
-    Euler-implicit integration
+    Analytical integration scheme
+
+    \f[
+        \Delta \phi = (A - B \phi^n) \frac{1}{B} (1 - e^{- B \Delta t})
+    \f]
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Euler_H
-#define Euler_H
+#ifndef analytical_H
+#define analytical_H
 
-#include "IntegrationScheme.H"
+#include "integrationScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace integrationSchemes
+{
 
 /*---------------------------------------------------------------------------*\
-                           Class Euler Declaration
+                         Class analytical Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class Euler
+class analytical
 :
-    public IntegrationScheme<Type>
+    public integrationScheme
 {
 public:
 
     //- Runtime type information
-    TypeName("Euler");
+    TypeName("analytical");
 
 
     // Constructors
 
-        //- Construct from components
-        Euler(const word& phiName, const dictionary& dict);
-
-        //- Copy constructor
-        Euler(const Euler& is);
+        //- Construct
+        analytical();
 
         //- Construct and return clone
-        virtual autoPtr<IntegrationScheme<Type>> clone() const
+        virtual autoPtr<integrationScheme> clone() const
         {
-            return autoPtr<IntegrationScheme<Type>>(new Euler<Type>(*this));
+            return autoPtr<integrationScheme>(new analytical(*this));
         }
 
 
     //- Destructor
-    virtual ~Euler();
+    virtual ~analytical();
 
 
     // Member Functions
 
-        //- Perform the integration
-        virtual typename IntegrationScheme<Type>::integrationResult integrate
-        (
-            const Type& phi,
-            const scalar dt,
-            const Type& alphaBeta,
-            const scalar beta
-        ) const;
+        //- Return the integration effective time step
+        virtual scalar dtEff(const scalar dt, const scalar Beta) const;
+
+        //- Return the integral of the effective time step
+        virtual scalar sumDtEff(const scalar dt, const scalar Beta) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace integrationSchemes
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "Euler.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
