@@ -71,7 +71,7 @@ namespace Foam
                 << exit(FatalError);
         }
 
-        return readScalar(IStringStream(splitted[componentColumns_[0]])());
+        return readScalar(splitted[componentColumns_[0]]);
     }
 
 
@@ -80,7 +80,7 @@ namespace Foam
     {
         Type result;
 
-        for(label i = 0;i < pTraits<Type>::nComponents; i++)
+        for (label i = 0; i < pTraits<Type>::nComponents; ++i)
         {
             if (componentColumns_[i] >= splitted.size())
             {
@@ -90,10 +90,7 @@ namespace Foam
                     << exit(FatalError);
             }
 
-            result[i] = readScalar
-            (
-                IStringStream(splitted[componentColumns_[i]])()
-            );
+            result[i] = readScalar(splitted[componentColumns_[i]]);
         }
 
         return result;
@@ -150,7 +147,7 @@ void Foam::csvTableReader<Type>::operator()
             break;
         }
 
-        scalar time = readScalar(IStringStream(splitted[timeColumn_])());
+        scalar time = readScalar(splitted[timeColumn_]);
         Type value = readValue(splitted);
 
         values.append(Tuple2<scalar,Type>(time, value));

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,9 +47,9 @@ namespace Foam
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Do weird things to extract number
-static inline scalar parseNASCoord(const string& s)
+static inline scalar readNasScalar(const string& s)
 {
-    return fileFormats::NASCore::parseNASCoord(s);
+    return Foam::fileFormats::NASCore::readNasScalar(s);
 }
 
 
@@ -118,9 +118,9 @@ bool triSurface::readNAS(const fileName& fName)
         // ANSA extension
         if (line.startsWith("$ANSA_NAME"))
         {
-            string::size_type sem0 = line.find(';', 0);
-            string::size_type sem1 = line.find(';', sem0+1);
-            string::size_type sem2 = line.find(';', sem1+1);
+            const auto sem0 = line.find(';', 0);
+            const auto sem1 = line.find(';', sem0+1);
+            const auto sem2 = line.find(';', sem1+1);
 
             if
             (
@@ -129,10 +129,7 @@ bool triSurface::readNAS(const fileName& fName)
              && sem2 != string::npos
             )
             {
-                ansaId = readLabel
-                (
-                    IStringStream(line.substr(sem0+1, sem1-sem0-1))()
-                );
+                ansaId = readLabel(line.substr(sem0+1, sem1-sem0-1));
                 ansaType = line.substr(sem1+1, sem2-sem1-1);
 
                 string nameString;
@@ -152,11 +149,7 @@ bool triSurface::readNAS(const fileName& fName)
         // $HMNAME COMP                   1"partName"
         if (line.startsWith("$HMNAME COMP") && line.find('"') != string::npos)
         {
-            label groupId = readLabel
-            (
-                IStringStream(line.substr(16, 16))()
-            );
-
+            label groupId = readLabel(line.substr(16, 16));
             IStringStream lineStream(line.substr(32));
 
             string rawName;
@@ -202,11 +195,10 @@ bool triSurface::readNAS(const fileName& fName)
         if (cmd == "CTRIA3")
         {
             readNASToken(line, 8, linei);
-            label groupId =
-                readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label a = readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label b = readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label c = readLabel(IStringStream(readNASToken(line, 8, linei))());
+            label groupId = readLabel(readNASToken(line, 8, linei));
+            label a = readLabel(readNASToken(line, 8, linei));
+            label b = readLabel(readNASToken(line, 8, linei));
+            label c = readLabel(readNASToken(line, 8, linei));
 
             // Convert group into patch
             Map<label>::const_iterator iter = groupToPatch.find(groupId);
@@ -228,12 +220,11 @@ bool triSurface::readNAS(const fileName& fName)
         else if (cmd == "CQUAD4")
         {
             readNASToken(line, 8, linei);
-            label groupId =
-                readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label a = readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label b = readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label c = readLabel(IStringStream(readNASToken(line, 8, linei))());
-            label d = readLabel(IStringStream(readNASToken(line, 8, linei))());
+            label groupId = readLabel(readNASToken(line, 8, linei));
+            label a = readLabel(readNASToken(line, 8, linei));
+            label b = readLabel(readNASToken(line, 8, linei));
+            label c = readLabel(readNASToken(line, 8, linei));
+            label d = readLabel(readNASToken(line, 8, linei));
 
             // Convert group into patch
             Map<label>::const_iterator iter = groupToPatch.find(groupId);
@@ -256,8 +247,7 @@ bool triSurface::readNAS(const fileName& fName)
         else if (cmd == "PSHELL")
         {
             // Read shell type since group gives patchnames
-            label groupId =
-                readLabel(IStringStream(readNASToken(line, 8, linei))());
+            label groupId = readLabel(readNASToken(line, 8, linei));
             if (groupId == ansaId && ansaType == "PSHELL")
             {
                 const word groupName = word::validate(ansaName);
@@ -267,12 +257,11 @@ bool triSurface::readNAS(const fileName& fName)
         }
         else if (cmd == "GRID")
         {
-            label index =
-                readLabel(IStringStream(readNASToken(line, 8, linei))());
+            label index = readLabel(readNASToken(line, 8, linei));
             readNASToken(line, 8, linei);
-            scalar x = parseNASCoord(readNASToken(line, 8, linei));
-            scalar y = parseNASCoord(readNASToken(line, 8, linei));
-            scalar z = parseNASCoord(readNASToken(line, 8, linei));
+            scalar x = readNasScalar(readNASToken(line, 8, linei));
+            scalar y = readNasScalar(readNASToken(line, 8, linei));
+            scalar z = readNasScalar(readNASToken(line, 8, linei));
 
             indices.append(index);
             points.append(point(x, y, z));
@@ -284,11 +273,10 @@ bool triSurface::readNAS(const fileName& fName)
             // Typical line (spaces compacted)
             // GRID*      126   0 -5.55999875E+02 -5.68730474E+02
             // *         2.14897901E+02
-            label index =
-                readLabel(IStringStream(readNASToken(line, 16, linei))());
+            label index = readLabel(readNASToken(line, 16, linei));
             readNASToken(line, 16, linei);
-            scalar x = parseNASCoord(readNASToken(line, 16, linei));
-            scalar y = parseNASCoord(readNASToken(line, 16, linei));
+            scalar x = readNasScalar(readNASToken(line, 16, linei));
+            scalar y = readNasScalar(readNASToken(line, 16, linei));
 
             linei = 0;
             is.getLine(line);
@@ -303,7 +291,7 @@ bool triSurface::readNAS(const fileName& fName)
                     << exit(FatalError);
             }
             readNASToken(line, 8, linei);
-            scalar z = parseNASCoord(readNASToken(line, 16, linei));
+            scalar z = readNasScalar(readNASToken(line, 16, linei));
 
             indices.append(index);
             points.append(point(x, y, z));

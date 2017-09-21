@@ -143,7 +143,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
                 const word subWord = w.substr(start, i-start);
                 if (isdigit(subWord[0]) || subWord[0] == token::SUBTRACT)
                 {
-                    push(token(readScalar(IStringStream(subWord)())));
+                    push(token(readScalar(subWord)));
                 }
                 else
                 {
@@ -154,7 +154,9 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
             {
                 if (isdigit(w[i]))
                 {
-                    push(token(readScalar(IStringStream(w[i])())));
+                    // Single digit: as scalar value
+                    const scalar val = (w[i] - '0');
+                    push(token(val));
                 }
                 else
                 {
@@ -169,7 +171,7 @@ void Foam::dimensionSet::tokeniser::splitWord(const word& w)
         const word subWord = w.substr(start);
         if (isdigit(subWord[0]) || subWord[0] == token::SUBTRACT)
         {
-            push(token(readScalar(IStringStream(subWord)())));
+            push(token(readScalar(subWord)));
         }
         else
         {
@@ -539,7 +541,7 @@ Foam::Istream& Foam::dimensionSet::read
             {
                 const word symbol = symbolPow.substr(0, index);
                 const word exp = symbolPow.substr(index+1);
-                scalar exponent = readScalar(IStringStream(exp)());
+                scalar exponent = readScalar(exp);
 
                 dimensionedScalar s;
                 s.read(readSet[symbol], readSet);

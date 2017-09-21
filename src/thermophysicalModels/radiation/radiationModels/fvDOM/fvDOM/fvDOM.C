@@ -531,11 +531,11 @@ void Foam::radiation::fvDOM::setRayIdLambdaId
 ) const
 {
     // assuming name is in the form: CHARS_rayId_lambdaId
-    const size_type i1 = name.find('_');
-    const size_type i2 = name.rfind('_');
+    const auto i1 = name.find('_');
+    const auto i2 = name.rfind('_');
 
-    rayId = readLabel(IStringStream(name.substr(i1+1, i2-1))());
-    lambdaId = readLabel(IStringStream(name.substr(i2+1))());
+    rayId = readLabel(name.substr(i1+1, i2-1));
+    lambdaId = readLabel(name.substr(i2+1));
 }
 
 
