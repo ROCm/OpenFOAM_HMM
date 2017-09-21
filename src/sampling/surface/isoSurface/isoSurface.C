@@ -894,6 +894,9 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
     // Check that enough merged.
     if (debug)
     {
+        Pout<< "isoSurface : merged from " << triPoints.size()
+            << " down to " << newPoints.size() << " unique points." << endl;
+
         pointField newNewPoints;
         labelList oldToNew;
         bool hasMerged = mergePoints
