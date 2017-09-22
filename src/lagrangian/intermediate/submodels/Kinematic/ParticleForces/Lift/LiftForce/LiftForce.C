@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ template<class CloudType>
 Foam::scalar Foam::LiftForce<CloudType>::LiftForce::Cl
 (
     const typename CloudType::parcelType& p,
+    const typename CloudType::parcelType::trackingData& td,
     const vector& curlUc,
     const scalar Re,
     const scalar muc
@@ -128,6 +129,7 @@ template<class CloudType>
 Foam::forceSuSp Foam::LiftForce<CloudType>::calcCoupled
 (
     const typename CloudType::parcelType& p,
+    const typename CloudType::parcelType::trackingData& td,
     const scalar dt,
     const scalar mass,
     const scalar Re,
@@ -137,11 +139,11 @@ Foam::forceSuSp Foam::LiftForce<CloudType>::calcCoupled
     forceSuSp value(Zero, 0.0);
 
     vector curlUc =
-        curlUcInterp().interpolate(p.position(), p.currentTetIndices());
+        curlUcInterp().interpolate(p.coordinates(), p.currentTetIndices());
 
-    scalar Cl = this->Cl(p, curlUc, Re, muc);
+    scalar Cl = this->Cl(p, td, curlUc, Re, muc);
 
-    value.Su() = mass/p.rho()*p.rhoc()*Cl*((p.Uc() - p.U())^curlUc);
+    value.Su() = mass/p.rho()*td.rhoc()*Cl*((td.Uc() - p.U())^curlUc);
 
     return value;
 }

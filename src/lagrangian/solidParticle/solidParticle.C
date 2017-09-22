@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ namespace Foam
 
 bool Foam::solidParticle::move
 (
+    solidParticleCloud& cloud,
     trackingData& td,
     const scalar trackTime
 )
@@ -43,39 +44,29 @@ bool Foam::solidParticle::move
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    const polyBoundaryMesh& pbMesh = mesh_.boundaryMesh();
-
-    scalar tEnd = (1.0 - stepFraction())*trackTime;
-    scalar dtMax = tEnd;
-
-    while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
+    while (td.keepParticle && !td.switchProcessor && stepFraction() < 1)
     {
         if (debug)
         {
-            Info<< "Time = " << mesh_.time().timeName()
+            Info<< "Time = " << mesh().time().timeName()
                 << " trackTime = " << trackTime
-                << " tEnd = " << tEnd
                 << " steptFraction() = " << stepFraction() << endl;
         }
 
-        // set the lagrangian time-step
-        scalar dt = min(dtMax, tEnd);
 
-        // remember which cell the parcel is in
-        // since this will change if a face is hit
-        label celli = cell();
+        const scalar sfrac = stepFraction();
 
-        dt *= trackToFace(position() + dt*U_, td);
+        const scalar f = 1 - stepFraction();
+        trackToAndHitFace(f*trackTime*U_, f, cloud, td);
 
-        tEnd -= dt;
-        stepFraction() = 1.0 - tEnd/trackTime;
+        const scalar dt = (stepFraction() - sfrac)*trackTime;
 
-        cellPointWeight cpw(mesh_, position(), celli, face());
-        scalar rhoc = td.rhoInterp().interpolate(cpw);
-        vector Uc = td.UInterp().interpolate(cpw);
-        scalar nuc = td.nuInterp().interpolate(cpw);
+        const tetIndices tetIs = this->currentTetIndices();
+        scalar rhoc = td.rhoInterp().interpolate(this->coordinates(), tetIs);
+        vector Uc = td.UInterp().interpolate(this->coordinates(), tetIs);
+        scalar nuc = td.nuInterp().interpolate(this->coordinates(), tetIs);
 
-        scalar rhop = td.cloud().rhop();
+        scalar rhop = cloud.rhop();
         scalar magUr = mag(Uc - U_);
 
         scalar ReFunc = 1.0;
@@ -89,28 +80,13 @@ bool Foam::solidParticle::move
         scalar Dc = (24.0*nuc/d_)*ReFunc*(3.0/4.0)*(rhoc/(d_*rhop));
 
         U_ = (U_ + dt*(Dc*Uc + (1.0 - rhoc/rhop)*td.g()))/(1.0 + dt*Dc);
-
-        if (onBoundary() && td.keepParticle)
-        {
-            if (isA<processorPolyPatch>(pbMesh[patch(face())]))
-            {
-                td.switchProcessor = true;
-            }
-        }
     }
 
     return td.keepParticle;
 }
 
 
-bool Foam::solidParticle::hitPatch
-(
-    const polyPatch&,
-    trackingData&,
-    const label,
-    const scalar,
-    const tetIndices&
-)
+bool Foam::solidParticle::hitPatch(solidParticleCloud&, trackingData&)
 {
     return false;
 }
@@ -118,7 +94,7 @@ bool Foam::solidParticle::hitPatch
 
 void Foam::solidParticle::hitProcessorPatch
 (
-    const processorPolyPatch&,
+    solidParticleCloud&,
     trackingData& td
 )
 {
@@ -126,14 +102,9 @@ void Foam::solidParticle::hitProcessorPatch
 }
 
 
-void Foam::solidParticle::hitWallPatch
-(
-    const wallPolyPatch& wpp,
-    trackingData& td,
-    const tetIndices& tetIs
-)
+void Foam::solidParticle::hitWallPatch(solidParticleCloud& cloud, trackingData&)
 {
-    vector nw = tetIs.faceTri(mesh_).normal();
+    vector nw = normal();
     nw /= mag(nw);
 
     scalar Un = U_ & nw;
@@ -141,24 +112,14 @@ void Foam::solidParticle::hitWallPatch
 
     if (Un > 0)
     {
-        U_ -= (1.0 + td.cloud().e())*Un*nw;
+        U_ -= (1.0 + cloud.e())*Un*nw;
     }
 
-    U_ -= td.cloud().mu()*Ut;
+    U_ -= cloud.mu()*Ut;
 }
 
 
-void Foam::solidParticle::hitPatch
-(
-    const polyPatch&,
-    trackingData& td
-)
-{
-    td.keepParticle = false;
-}
-
-
-void Foam::solidParticle::transformProperties (const tensor& T)
+void Foam::solidParticle::transformProperties(const tensor& T)
 {
     particle::transformProperties(T);
     U_ = transform(T, U_);
@@ -168,12 +129,6 @@ void Foam::solidParticle::transformProperties (const tensor& T)
 void Foam::solidParticle::transformProperties(const vector& separation)
 {
     particle::transformProperties(separation);
-}
-
-
-Foam::scalar Foam::solidParticle::wallImpactDistance(const vector&) const
-{
-    return 0.5*d_;
 }
 
 

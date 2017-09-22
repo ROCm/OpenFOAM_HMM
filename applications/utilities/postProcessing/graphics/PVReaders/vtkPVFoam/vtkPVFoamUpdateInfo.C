@@ -58,7 +58,7 @@ public:
         explicit zonesEntries(const IOobject& io)
         :
             regIOobject(io),
-            PtrList<entry>(readStream("regIOobject"))
+            PtrList<entry>(readStream(word("regIOobject")))
         {
             close();
         }

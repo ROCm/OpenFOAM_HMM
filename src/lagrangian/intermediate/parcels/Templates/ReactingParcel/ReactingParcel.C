@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,12 +34,12 @@ using namespace Foam::constant::mathematical;
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    trackingData& td,
     const scalar dt,
-    const label celli,
     const scalar Re,
     const scalar Pr,
     const scalar Ts,
@@ -57,10 +57,8 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarField& Cs
 )
 {
-    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        td.cloud().composition();
-    PhaseChangeModel<reactingCloudType>& phaseChange = td.cloud().phaseChange();
+    const auto& composition = cloud.composition();
+    auto& phaseChange = cloud.phaseChange();
 
     if (!phaseChange.active() || (YPhase < SMALL))
     {
@@ -76,7 +74,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         return;
     }
 
-    const scalar TMax = phaseChange.TMax(pc_, X);
+    const scalar TMax = phaseChange.TMax(td.pc(), X);
     const scalar Tdash = min(T, TMax);
     const scalar Tsdash = min(Ts, TMax);
 
@@ -84,15 +82,15 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     phaseChange.calculate
     (
         dt,
-        celli,
+        this->cell(),
         Re,
         Pr,
         d,
         nus,
         Tdash,
         Tsdash,
-        pc_,
-        this->Tc_,
+        td.pc(),
+        td.Tc(),
         X,
         dMassPC
     );
@@ -109,27 +107,27 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     {
         const label cid = composition.localToCarrierId(idPhase, i);
 
-        const scalar dh = phaseChange.dh(cid, i, pc_, Tdash);
+        const scalar dh = phaseChange.dh(cid, i, td.pc(), Tdash);
         Sh -= dMassPC[i]*dh/dt;
     }
 
 
     // Update molar emissions
-    if (td.cloud().heatTransfer().BirdCorrection())
+    if (cloud.heatTransfer().BirdCorrection())
     {
         // Average molecular weight of carrier mix - assumes perfect gas
-        const scalar Wc = this->rhoc_*RR*this->Tc_/this->pc_;
+        const scalar Wc = td.rhoc()*RR*td.Tc()/td.pc();
 
         forAll(dMassPC, i)
         {
             const label cid = composition.localToCarrierId(idPhase, i);
 
-            const scalar Cp = composition.carrier().Cp(cid, pc_, Tsdash);
+            const scalar Cp = composition.carrier().Cp(cid, td.pc(), Tsdash);
             const scalar W = composition.carrier().W(cid);
             const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
 
             const scalar Dab =
-                composition.liquids().properties()[i].D(pc_, Tsdash, Wc);
+                composition.liquids().properties()[i].D(td.pc(), Tsdash, Wc);
 
             // Molar flux of species coming from the particle (kmol/m^2/s)
             N += Ni;
@@ -177,8 +175,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 :
     ParcelType(p),
     mass0_(p.mass0_),
-    Y_(p.Y_),
-    pc_(p.pc_)
+    Y_(p.Y_)
 {}
 
 
@@ -191,58 +188,56 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 :
     ParcelType(p, mesh),
     mass0_(p.mass0_),
-    Y_(p.Y_),
-    pc_(p.pc_)
+    Y_(p.Y_)
 {}
 
 
 // * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
 
 template<class ParcelType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::ReactingParcel<ParcelType>::setCellValues
 (
-    TrackData& td,
-    const scalar dt,
-    const label celli
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {
-    ParcelType::setCellValues(td, dt, celli);
+    ParcelType::setCellValues(cloud, td);
 
-    pc_ = td.pInterp().interpolate
+    td.pc() = td.pInterp().interpolate
     (
-        this->position(),
+        this->coordinates(),
         this->currentTetIndices()
     );
 
-    if (pc_ < td.cloud().constProps().pMin())
+    if (td.pc() < cloud.constProps().pMin())
     {
         if (debug)
         {
             WarningInFunction
-                << "Limiting observed pressure in cell " << celli << " to "
-                << td.cloud().constProps().pMin() <<  nl << endl;
+                << "Limiting observed pressure in cell " << this->cell()
+                << " to " << cloud.constProps().pMin() <<  nl << endl;
         }
 
-        pc_ = td.cloud().constProps().pMin();
+        td.pc() = cloud.constProps().pMin();
     }
 }
 
 
 template<class ParcelType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
 (
-    TrackData& td,
-    const scalar dt,
-    const label celli
+    TrackCloudType& cloud,
+    trackingData& td,
+    const scalar dt
 )
 {
     scalar addedMass = 0.0;
     scalar maxMassI = 0.0;
-    forAll(td.cloud().rhoTrans(), i)
+    forAll(cloud.rhoTrans(), i)
     {
-        scalar dm = td.cloud().rhoTrans(i)[celli];
+        scalar dm = cloud.rhoTrans(i)[this->cell()];
         maxMassI = max(maxMassI, mag(dm));
         addedMass += dm;
     }
@@ -252,50 +247,45 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
         return;
     }
 
-    const scalar massCell = this->massCell(celli);
+    const scalar massCell = this->massCell(td);
 
-    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[celli];
+    td.rhoc() += addedMass/cloud.pMesh().cellVolumes()[this->cell()];
 
     const scalar massCellNew = massCell + addedMass;
-    this->Uc_ = (this->Uc_*massCell + td.cloud().UTrans()[celli])/massCellNew;
+    td.Uc() = (td.Uc()*massCell + cloud.UTrans()[this->cell()])/massCellNew;
 
     scalar CpEff = 0.0;
-    forAll(td.cloud().rhoTrans(), i)
+    forAll(cloud.rhoTrans(), i)
     {
-        scalar Y = td.cloud().rhoTrans(i)[celli]/addedMass;
-        CpEff += Y*td.cloud().composition().carrier().Cp
-        (
-            i,
-            this->pc_,
-            this->Tc_
-        );
+        scalar Y = cloud.rhoTrans(i)[this->cell()]/addedMass;
+        CpEff += Y*cloud.composition().carrier().Cp(i, td.pc(), td.Tc());
     }
 
-    const scalar Cpc = td.CpInterp().psi()[celli];
-    this->Cpc_ = (massCell*Cpc + addedMass*CpEff)/massCellNew;
+    const scalar Cpc = td.CpInterp().psi()[this->cell()];
+    td.Cpc() = (massCell*Cpc + addedMass*CpEff)/massCellNew;
 
-    this->Tc_ += td.cloud().hsTrans()[celli]/(this->Cpc_*massCellNew);
+    td.Tc() += cloud.hsTrans()[this->cell()]/(td.Cpc()*massCellNew);
 
-    if (this->Tc_ < td.cloud().constProps().TMin())
+    if (td.Tc() < cloud.constProps().TMin())
     {
         if (debug)
         {
             WarningInFunction
-                << "Limiting observed temperature in cell " << celli << " to "
-                << td.cloud().constProps().TMin() <<  nl << endl;
+                << "Limiting observed temperature in cell " << this->cell()
+                << " to " << cloud.constProps().TMin() <<  nl << endl;
         }
 
-        this->Tc_ = td.cloud().constProps().TMin();
+        td.Tc() = cloud.constProps().TMin();
     }
 }
 
 
 template<class ParcelType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 (
-    TrackData& td,
-    const label celli,
+    TrackCloudType& cloud,
+    trackingData& td,
     const scalar T,
     const scalarField& Cs,
     scalar& rhos,
@@ -305,27 +295,27 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 )
 {
     // No correction if total concentration of emitted species is small
-    if (!td.cloud().heatTransfer().BirdCorrection() || (sum(Cs) < SMALL))
+    if (!cloud.heatTransfer().BirdCorrection() || (sum(Cs) < SMALL))
     {
         return;
     }
 
-    const SLGThermo& thermo = td.cloud().thermo();
+    const SLGThermo& thermo = cloud.thermo();
 
     // Far field carrier  molar fractions
     scalarField Xinf(thermo.carrier().species().size());
 
     forAll(Xinf, i)
     {
-        Xinf[i] = thermo.carrier().Y(i)[celli]/thermo.carrier().W(i);
+        Xinf[i] = thermo.carrier().Y(i)[this->cell()]/thermo.carrier().W(i);
     }
     Xinf /= sum(Xinf);
 
     // Molar fraction of far field species at particle surface
-    const scalar Xsff = 1.0 - min(sum(Cs)*RR*this->T_/pc_, 1.0);
+    const scalar Xsff = 1.0 - min(sum(Cs)*RR*this->T_/td.pc(), 1.0);
 
     // Surface carrier total molar concentration
-    const scalar CsTot = pc_/(RR*this->T_);
+    const scalar CsTot = td.pc()/(RR*this->T_);
 
     // Surface carrier composition (molar fraction)
     scalarField Xs(Xinf.size());
@@ -359,9 +349,9 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
         const scalar cbrtW = cbrt(W);
 
         rhos += Xs[i]*W;
-        mus += Ys[i]*sqrtW*thermo.carrier().mu(i, pc_, T);
-        kappas += Ys[i]*cbrtW*thermo.carrier().kappa(i, pc_, T);
-        Cps += Xs[i]*thermo.carrier().Cp(i, pc_, T);
+        mus += Ys[i]*sqrtW*thermo.carrier().mu(i, td.pc(), T);
+        kappas += Ys[i]*cbrtW*thermo.carrier().kappa(i, td.pc(), T);
+        Cps += Xs[i]*thermo.carrier().Cp(i, td.pc(), T);
 
         sumYiSqrtW += Ys[i]*sqrtW;
         sumYiCbrtW += Ys[i]*cbrtW;
@@ -369,7 +359,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
     Cps = max(Cps, ROOTVSMALL);
 
-    rhos *= pc_/(RR*T);
+    rhos *= td.pc()/(RR*T);
     rhos = max(rhos, ROOTVSMALL);
 
     mus /= sumYiSqrtW;
@@ -383,17 +373,15 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
 
 
 template<class ParcelType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::ReactingParcel<ParcelType>::calc
 (
-    TrackData& td,
-    const scalar dt,
-    const label celli
+    TrackCloudType& cloud,
+    trackingData& td,
+    const scalar dt
 )
 {
-    typedef typename TrackData::cloudType::reactingCloudType reactingCloudType;
-    const CompositionModel<reactingCloudType>& composition =
-        td.cloud().composition();
+    const auto& composition = cloud.composition();
 
 
     // Define local properties at beginning of time step
@@ -408,8 +396,8 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Calc surface values
     scalar Ts, rhos, mus, Prs, kappas;
-    this->calcSurfaceValues(td, celli, T0, Ts, rhos, mus, Prs, kappas);
-    scalar Res = this->Re(U0, d0, rhos, mus);
+    this->calcSurfaceValues(cloud, td, T0, Ts, rhos, mus, Prs, kappas);
+    scalar Res = this->Re(rhos, U0, td.Uc(), d0, mus);
 
 
     // Sources
@@ -455,9 +443,9 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange
     (
+        cloud,
         td,
         dt,
-        celli,
         Res,
         Prs,
         Ts,
@@ -482,10 +470,10 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalarField dMass(dMassPC);
     scalar mass1 = updateMassFraction(mass0, dMass, Y_);
 
-    this->Cp_ = composition.Cp(0, Y_, pc_, T0);
+    this->Cp_ = composition.Cp(0, Y_, td.pc(), T0);
 
     // Update particle density or diameter
-    if (td.cloud().constProps().constantVolume())
+    if (cloud.constProps().constantVolume())
     {
         this->rho_ = mass1/this->volume();
     }
@@ -495,11 +483,11 @@ void Foam::ReactingParcel<ParcelType>::calc
     }
 
     // Remove the particle when mass falls below minimum threshold
-    if (np0*mass1 < td.cloud().constProps().minParcelMass())
+    if (np0*mass1 < cloud.constProps().minParcelMass())
     {
         td.keepParticle = false;
 
-        if (td.cloud().solution().coupled())
+        if (cloud.solution().coupled())
         {
             scalar dm = np0*mass0;
 
@@ -508,22 +496,22 @@ void Foam::ReactingParcel<ParcelType>::calc
             {
                 scalar dmi = dm*Y_[i];
                 label gid = composition.localToCarrierId(0, i);
-                scalar hs = composition.carrier().Hs(gid, pc_, T0);
+                scalar hs = composition.carrier().Hs(gid, td.pc(), T0);
 
-                td.cloud().rhoTrans(gid)[celli] += dmi;
-                td.cloud().hsTrans()[celli] += dmi*hs;
+                cloud.rhoTrans(gid)[this->cell()] += dmi;
+                cloud.hsTrans()[this->cell()] += dmi*hs;
             }
-            td.cloud().UTrans()[celli] += dm*U0;
+            cloud.UTrans()[this->cell()] += dm*U0;
 
-            td.cloud().phaseChange().addToPhaseChangeMass(np0*mass1);
+            cloud.phaseChange().addToPhaseChangeMass(np0*mass1);
         }
 
         return;
     }
 
     // Correct surface values due to emitted species
-    correctSurfaceValues(td, celli, Ts, Cs, rhos, mus, Prs, kappas);
-    Res = this->Re(U0, this->d_, rhos, mus);
+    correctSurfaceValues(cloud, td, Ts, Cs, rhos, mus, Prs, kappas);
+    Res = this->Re(rhos, U0, td.Uc(), this->d(), mus);
 
 
     // 3. Compute heat- and momentum transfers
@@ -536,9 +524,9 @@ void Foam::ReactingParcel<ParcelType>::calc
     this->T_ =
         this->calcHeatTransfer
         (
+            cloud,
             td,
             dt,
-            celli,
             Res,
             Prs,
             kappas,
@@ -548,7 +536,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             Sph
         );
 
-    this->Cp_ = composition.Cp(0, Y_, pc_, T0);
+    this->Cp_ = composition.Cp(0, Y_, td.pc(), T0);
 
 
     // Motion
@@ -556,42 +544,42 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Calculate new particle velocity
     this->U_ =
-        this->calcVelocity(td, dt, celli, Res, mus, mass1, Su, dUTrans, Spu);
+        this->calcVelocity(cloud, td, dt, Res, mus, mass1, Su, dUTrans, Spu);
 
 
     // 4. Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (td.cloud().solution().coupled())
+    if (cloud.solution().coupled())
     {
         // Transfer mass lost to carrier mass, momentum and enthalpy sources
         forAll(dMass, i)
         {
             scalar dm = np0*dMass[i];
             label gid = composition.localToCarrierId(0, i);
-            scalar hs = composition.carrier().Hs(gid, pc_, T0);
+            scalar hs = composition.carrier().Hs(gid, td.pc(), T0);
 
-            td.cloud().rhoTrans(gid)[celli] += dm;
-            td.cloud().UTrans()[celli] += dm*U0;
-            td.cloud().hsTrans()[celli] += dm*hs;
+            cloud.rhoTrans(gid)[this->cell()] += dm;
+            cloud.UTrans()[this->cell()] += dm*U0;
+            cloud.hsTrans()[this->cell()] += dm*hs;
         }
 
         // Update momentum transfer
-        td.cloud().UTrans()[celli] += np0*dUTrans;
-        td.cloud().UCoeff()[celli] += np0*Spu;
+        cloud.UTrans()[this->cell()] += np0*dUTrans;
+        cloud.UCoeff()[this->cell()] += np0*Spu;
 
         // Update sensible enthalpy transfer
-        td.cloud().hsTrans()[celli] += np0*dhsTrans;
-        td.cloud().hsCoeff()[celli] += np0*Sph;
+        cloud.hsTrans()[this->cell()] += np0*dhsTrans;
+        cloud.hsCoeff()[this->cell()] += np0*Sph;
 
         // Update radiation fields
-        if (td.cloud().radiation())
+        if (cloud.radiation())
         {
             const scalar ap = this->areaP();
             const scalar T4 = pow4(T0);
-            td.cloud().radAreaP()[celli] += dt*np0*ap;
-            td.cloud().radT4()[celli] += dt*np0*T4;
-            td.cloud().radAreaPT4()[celli] += dt*np0*ap*T4;
+            cloud.radAreaP()[this->cell()] += dt*np0*ap;
+            cloud.radT4()[this->cell()] += dt*np0*T4;
+            cloud.radAreaPT4()[this->cell()] += dt*np0*ap*T4;
         }
     }
 }

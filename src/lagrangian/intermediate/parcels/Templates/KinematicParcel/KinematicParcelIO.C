@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ Foam::string Foam::KinematicParcel<ParcelType>::propertyTypes_ =
 template<class ParcelType>
 const std::size_t Foam::KinematicParcel<ParcelType>::sizeofFields
 (
-    offsetof(KinematicParcel<ParcelType>, rhoc_)
+    sizeof(KinematicParcel<ParcelType>)
   - offsetof(KinematicParcel<ParcelType>, active_)
 );
 
@@ -53,10 +53,11 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     active_(false),
     typeId_(0),
     nParticle_(0.0),
@@ -66,10 +67,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
     rho_(0.0),
     age_(0.0),
     tTurb_(0.0),
-    UTurb_(Zero),
-    rhoc_(0.0),
-    Uc_(Zero),
-    muc_(0.0)
+    UTurb_(Zero)
 {
     if (readFields)
     {
@@ -100,42 +98,78 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::KinematicParcel<ParcelType>::readFields(CloudType& c)
 {
-    if (!c.size())
-    {
-        return;
-    }
+    bool valid = c.size();
 
     ParcelType::readFields(c);
 
-    IOField<label> active(c.fieldIOobject("active", IOobject::MUST_READ));
+    IOField<label> active
+    (
+        c.fieldIOobject("active", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, active);
 
-    IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
+    IOField<label> typeId
+    (
+        c.fieldIOobject("typeId", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, typeId);
 
-    IOField<scalar>
-        nParticle(c.fieldIOobject("nParticle", IOobject::MUST_READ));
+    IOField<scalar> nParticle
+    (
+        c.fieldIOobject("nParticle", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, nParticle);
 
-    IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
+    IOField<scalar> d
+    (
+        c.fieldIOobject("d", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, d);
 
-    IOField<scalar> dTarget(c.fieldIOobject("dTarget", IOobject::MUST_READ));
+    IOField<scalar> dTarget
+    (
+        c.fieldIOobject("dTarget", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, dTarget);
 
-    IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
+    IOField<vector> U
+    (
+        c.fieldIOobject("U", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, U);
 
-    IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
+    IOField<scalar> rho
+    (
+        c.fieldIOobject("rho", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, rho);
 
-    IOField<scalar> age(c.fieldIOobject("age", IOobject::MUST_READ));
+    IOField<scalar> age
+    (
+        c.fieldIOobject("age", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, age);
 
-    IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::MUST_READ));
+    IOField<scalar> tTurb
+    (
+        c.fieldIOobject("tTurb", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, tTurb);
 
-    IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::MUST_READ));
+    IOField<vector> UTurb
+    (
+        c.fieldIOobject("UTurb", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, UTurb);
 
     label i = 0;
@@ -203,16 +237,18 @@ void Foam::KinematicParcel<ParcelType>::writeFields(const CloudType& c)
         i++;
     }
 
-    active.write();
-    typeId.write();
-    nParticle.write();
-    d.write();
-    dTarget.write();
-    U.write();
-    rho.write();
-    age.write();
-    tTurb.write();
-    UTurb.write();
+    const bool valid = np > 0;
+
+    active.write(valid);
+    typeId.write(valid);
+    nParticle.write(valid);
+    d.write(valid);
+    dTarget.write(valid);
+    U.write(valid);
+    rho.write(valid);
+    age.write(valid);
+    tTurb.write(valid);
+    UTurb.write(valid);
 }
 
 

@@ -49,7 +49,7 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quarterCosineRamp Declaration
+                      Class quarterCosineRamp Declaration
 \*---------------------------------------------------------------------------*/
 
 class quarterCosineRamp
@@ -59,7 +59,7 @@ class quarterCosineRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const quarterCosineRamp&);
+        void operator=(const quarterCosineRamp&) = delete;
 
 
 public:
@@ -85,7 +85,7 @@ public:
     // Member Functions
 
         //- Return value for time t
-        scalar value(const scalar t) const;
+        virtual inline scalar value(const scalar t) const;
 };
 
 
@@ -93,6 +93,10 @@ public:
 
 } // End namespace Function1Types
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "quarterCosineRampI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

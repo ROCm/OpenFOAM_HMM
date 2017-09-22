@@ -147,6 +147,7 @@ $(derivedFvPatchFields)/fixedMean/fixedMeanFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
 $(derivedFvPatchFields)/fixedPressureCompressibleDensity/fixedPressureCompressibleDensityFvPatchScalarField.C
 $(derivedFvPatchFields)/flowRateInletVelocity/flowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/flowRateOutletVelocity/flowRateOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/fluxCorrectedVelocity/fluxCorrectedVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/freestream/freestreamFvPatchFields.C
 $(derivedFvPatchFields)/freestreamPressure/freestreamPressureFvPatchScalarField.C
@@ -158,6 +159,7 @@ $(derivedFvPatchFields)/mappedFixedPushedInternalValue/mappedFixedPushedInternal
 $(derivedFvPatchFields)/mappedFixedValue/mappedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/mappedFlowRate/mappedFlowRateFvPatchVectorField.C
 $(derivedFvPatchFields)/mappedVelocityFluxFixedValue/mappedVelocityFluxFixedValueFvPatchField.C
+$(derivedFvPatchFields)/matchedFlowRateOutletVelocity/matchedFlowRateOutletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/noSlip/noSlipFvPatchVectorField.C
 $(derivedFvPatchFields)/movingWallVelocity/movingWallVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/outletInlet/outletInletFvPatchFields.C
@@ -180,6 +182,7 @@ $(derivedFvPatchFields)/slip/slipFvPatchFields.C
 $(derivedFvPatchFields)/supersonicFreestream/supersonicFreestreamFvPatchVectorField.C
 $(derivedFvPatchFields)/surfaceNormalFixedValue/surfaceNormalFixedValueFvPatchVectorField.C
 $(derivedFvPatchFields)/swirlFlowRateInletVelocity/swirlFlowRateInletVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/swirlInletVelocity/swirlInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/syringePressure/syringePressureFvPatchScalarField.C
 $(derivedFvPatchFields)/timeVaryingMappedFixedValue/timeVaryingMappedFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/totalPressure/totalPressureFvPatchScalarField.C
@@ -208,6 +211,7 @@ $(derivedFvPatchFields)/prghTotalPressure/prghTotalPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/prghTotalHydrostaticPressure/prghTotalHydrostaticPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedProfile/fixedProfileFvPatchFields.C
 $(derivedFvPatchFields)/plenumPressure/plenumPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/interfaceCompression/interfaceCompressionFvPatchScalarField.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
@@ -410,6 +414,7 @@ $(general)/adjustPhi/adjustPhi.C
 $(general)/bound/bound.C
 $(general)/CorrectPhi/correctUphiBCs.C
 $(general)/pressureControl/pressureControl.C
+$(general)/levelSet/levelSet.C
 
 coupling = $(general)/coupling
 $(coupling)/externalFileCoupler.C

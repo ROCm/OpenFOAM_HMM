@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class T>
+template<class Type, class CheckType = Type>
 inline bool writeMeshObject
 (
     const word& name,
@@ -61,7 +61,7 @@ inline bool writeMeshObject
 
     bool writeOk = false;
 
-    if (io.typeHeaderOk<T>(false))
+    if (io.typeHeaderOk<CheckType>(true, true, false))
     {
         Info<< "        Reading " << io.headerClassName()
             << " : " << name << endl;
@@ -71,15 +71,15 @@ inline bool writeMeshObject
         word oldTypeName;
         if (disableHeaderChecking)
         {
-            oldTypeName = T::typeName;
-            const_cast<word&>(T::typeName) = word::null;
+            oldTypeName = Type::typeName;
+            const_cast<word&>(Type::typeName) = word::null;
         }
 
-        T meshObject(io);
+        Type meshObject(io);
 
         if (disableHeaderChecking)
         {
-            const_cast<word&>(T::typeName) = oldTypeName;
+            const_cast<word&>(Type::typeName) = oldTypeName;
             // Fake type back to what was in field
             const_cast<word&>(meshObject.type()) = io.headerClassName();
         }

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #define IOPosition_H
 
 #include "regIOobject.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +52,22 @@ class IOPosition
 :
     public regIOobject
 {
+public:
+
+    enum class geometryType
+    {
+        POSITIONS,
+        COORDINATES
+    };
+
+    static const Enum<geometryType> geometryTypeNames_;
+
+
+private:
 
     // Private data
+
+        geometryType geometryType_;
 
         //- Reference to the cloud
         const CloudType& cloud_;
@@ -72,7 +87,11 @@ public:
     // Constructors
 
         //- Construct from cloud
-        IOPosition(const CloudType&);
+        IOPosition
+        (
+            const CloudType& c,
+            const geometryType& geomType = geometryType::COORDINATES
+        );
 
 
     // Member functions
@@ -80,9 +99,9 @@ public:
         //- Inherit readData from regIOobject
         using regIOobject::readData;
 
-        virtual void readData(CloudType& c, bool checkClass);
+        virtual void readData(Istream&, CloudType&);
 
-        virtual bool write() const;
+        virtual bool write(const bool valid = true) const;
 
         virtual bool writeData(Ostream& os) const;
 };

@@ -381,8 +381,13 @@ int main(int argc, char *argv[])
                 cloudPrefix/cloudName
             );
 
-            // Check that the positions field is present for this time
-            if (!cloudObjs.found("positions"))
+            // Check that the positions/coordinates field is present for this
+            // time
+            if
+            (
+                !cloudObjs.found("positions")
+             || !cloudObjs.found("coordinates")
+            )
             {
                 continue;
             }

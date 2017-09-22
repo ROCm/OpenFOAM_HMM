@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IFstream.H"
 #include "openFoamTableReader.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -155,6 +154,7 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
                     << "bound (" << minLimit << ")" << nl
                     << "    Continuing with the first entry"
                     << endl;
+
                 // Behaviour as per CLAMP
                 return data.first().second();
                 break;
@@ -185,6 +185,7 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
                     << "bound (" << maxLimit << ")" << nl
                     << "    Continuing with the last entry"
                     << endl;
+
                 // Behaviour as per CLAMP
                 return data.last().second();
                 break;
@@ -263,6 +264,7 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
                 WarningInFunction
                     << "value (" << valueX << ") out of bounds"
                     << endl;
+
                 // Behaviour as per CLAMP
                 return limitI;
                 break;

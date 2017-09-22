@@ -49,7 +49,7 @@ namespace Function1Types
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class quadraticRamp Declaration
+                        Class quadraticRamp Declaration
 \*---------------------------------------------------------------------------*/
 
 class quadraticRamp
@@ -59,7 +59,7 @@ class quadraticRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const quadraticRamp&);
+        void operator=(const quadraticRamp&) = delete;
 
 
 public:
@@ -85,7 +85,7 @@ public:
     // Member Functions
 
         //- Return value for time t
-        scalar value(const scalar t) const;
+        virtual inline scalar value(const scalar t) const;
 };
 
 
@@ -93,6 +93,10 @@ public:
 
 } // End namespace Function1Types
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "quadraticRampI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

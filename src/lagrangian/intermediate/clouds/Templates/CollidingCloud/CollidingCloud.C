@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 
 #include "CollidingCloud.H"
 #include "CollisionModel.H"
+#include "NoCollision.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -43,28 +44,29 @@ void Foam::CollidingCloud<CloudType>::setModels()
 
 
 template<class CloudType>
-template<class TrackData>
-void  Foam::CollidingCloud<CloudType>::moveCollide
+template<class TrackCloudType>
+void Foam::CollidingCloud<CloudType>::moveCollide
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    typename parcelType::trackingData& td,
     const scalar deltaT
 )
 {
-    td.part() = TrackData::tpVelocityHalfStep;
-    CloudType::move(td,  deltaT);
+    td.part() = parcelType::trackingData::tpVelocityHalfStep;
+    CloudType::move(cloud, td, deltaT);
 
-    td.part() = TrackData::tpLinearTrack;
-    CloudType::move(td,  deltaT);
+    td.part() = parcelType::trackingData::tpLinearTrack;
+    CloudType::move(cloud, td, deltaT);
 
-    // td.part() = TrackData::tpRotationalTrack;
-    // CloudType::move(td);
+    // td.part() = parcelType::trackingData::tpRotationalTrack;
+    // CloudType::move(cloud, td, deltaT);
 
     this->updateCellOccupancy();
 
     this->collision().collide();
 
-    td.part() = TrackData::tpVelocityHalfStep;
-    CloudType::move(td,  deltaT);
+    td.part() = parcelType::trackingData::tpVelocityHalfStep;
+    CloudType::move(cloud, td, deltaT);
 }
 
 
@@ -95,13 +97,6 @@ Foam::CollidingCloud<CloudType>::CollidingCloud
     constProps_(this->particleProperties()),
     collisionModel_(nullptr)
 {
-    if (this->solution().steadyState())
-    {
-        FatalErrorInFunction
-            << "Collision modelling not currently available for steady state "
-            << "calculations" << exit(FatalError);
-    }
-
     if (this->solution().active())
     {
         setModels();
@@ -110,6 +105,17 @@ Foam::CollidingCloud<CloudType>::CollidingCloud
         {
             parcelType::readFields(*this);
             this->deleteLostParticles();
+        }
+
+        if
+        (
+            this->solution().steadyState()
+         && !isType<NoCollision<CollidingCloud<CloudType>>>(collisionModel_())
+        )
+        {
+            FatalErrorInFunction
+                << "Collision modelling not currently available "
+                << "for steady state calculations" << exit(FatalError);
         }
     }
 }
@@ -150,13 +156,6 @@ Foam::CollidingCloud<CloudType>::~CollidingCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::CollidingCloud<CloudType>::hasWallImpactDistance() const
-{
-    return !collision().controlsWallInteraction();
-}
-
-
-template<class CloudType>
 void Foam::CollidingCloud<CloudType>::storeState()
 {
     cloudCopyPtr_.reset
@@ -182,17 +181,20 @@ void Foam::CollidingCloud<CloudType>::evolve()
 {
     if (this->solution().canEvolve())
     {
-        typename parcelType::template
-            TrackingData<CollidingCloud<CloudType>> td(*this);
+        typename parcelType::trackingData td(*this);
 
-        this->solve(td);
+        this->solve(*this, td);
     }
 }
 
 
 template<class CloudType>
-template<class TrackData>
-void  Foam::CollidingCloud<CloudType>::motion(TrackData& td)
+template<class TrackCloudType>
+void  Foam::CollidingCloud<CloudType>::motion
+(
+    TrackCloudType& cloud,
+    typename parcelType::trackingData& td
+)
 {
     // Sympletic leapfrog integration of particle forces:
     // + apply half deltaV with stored force
@@ -214,14 +216,14 @@ void  Foam::CollidingCloud<CloudType>::motion(TrackData& td)
 
         while(!(++moveCollideSubCycle).end())
         {
-            moveCollide(td, this->db().time().deltaTValue());
+            moveCollide(cloud, td, this->db().time().deltaTValue());
         }
 
         moveCollideSubCycle.endSubCycle();
     }
     else
     {
-        moveCollide(td, this->db().time().deltaTValue());
+        moveCollide(cloud, td, this->db().time().deltaTValue());
     }
 }
 

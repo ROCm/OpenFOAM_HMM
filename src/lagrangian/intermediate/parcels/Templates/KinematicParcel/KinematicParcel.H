@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -154,10 +154,9 @@ public:
     };
 
 
-    template<class CloudType>
-    class TrackingData
+    class trackingData
     :
-        public ParcelType::template TrackingData<CloudType>
+        public ParcelType::trackingData
     {
     public:
 
@@ -185,6 +184,18 @@ public:
                 autoPtr<interpolation<scalar>> muInterp_;
 
 
+            // Cached continuous phase properties
+
+                //- Density [kg/m3]
+                scalar rhoc_;
+
+                //- Velocity [m/s]
+                vector Uc_;
+
+                //- Viscosity [Pa.s]
+                scalar muc_;
+
+
             //- Local gravitational or other body-force acceleration
             const vector& g_;
 
@@ -198,9 +209,10 @@ public:
         // Constructors
 
             //- Construct from components
-            inline TrackingData
+            template <class TrackCloudType>
+            inline trackingData
             (
-                CloudType& cloud,
+                const TrackCloudType& cloud,
                 trackPart part = tpLinearTrack
             );
 
@@ -218,6 +230,24 @@ public:
             //- Return conat access to the interpolator for continuous
             //  phase dynamic viscosity field
             inline const interpolation<scalar>& muInterp() const;
+
+            //- Return the continuous phase density
+            inline scalar rhoc() const;
+
+            //- Access the continuous phase density
+            inline scalar& rhoc();
+
+            //- Return the continuous phase velocity
+            inline const vector& Uc() const;
+
+            //- Access the continuous phase velocity
+            inline vector& Uc();
+
+            //- Return the continuous phase viscosity
+            inline scalar muc() const;
+
+            //- Access the continuous phase viscosity
+            inline scalar& muc();
 
             // Return const access to the gravitational acceleration vector
             inline const vector& g() const;
@@ -268,27 +298,15 @@ protected:
             vector UTurb_;
 
 
-        // Cell-based quantities
-
-            //- Density [kg/m3]
-            scalar rhoc_;
-
-            //- Velocity [m/s]
-            vector Uc_;
-
-            //- Viscosity [Pa.s]
-            scalar muc_;
-
-
     // Protected Member Functions
 
         //- Calculate new particle velocity
-        template<class TrackData>
+        template<class TrackCloudType>
         const vector calcVelocity
         (
-            TrackData& td,
+            TrackCloudType& cloud,
+            trackingData& td,
             const scalar dt,           // timestep
-            const label celli,         // owner cell
             const scalar Re,           // Reynolds number
             const scalar mu,           // local carrier viscosity
             const scalar mass,         // mass
@@ -340,22 +358,31 @@ public:
 
     // Constructors
 
-        //- Construct from owner, position, and cloud owner
+        //- Construct from mesh, coordinates and topology
         //  Other properties initialised as null
         inline KinematicParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti
+        );
+
+        //- Construct from a position and a cell, searching for the rest of the
+        //  required topology. Other properties are initialised as null.
+        inline KinematicParcel
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli
         );
 
         //- Construct from components
         inline KinematicParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti,
@@ -363,7 +390,7 @@ public:
             const scalar nParticle0,
             const scalar d0,
             const scalar dTarget0,
-            const vector& torque0,
+            const vector& U0,
             const constantProperties& constProps
         );
 
@@ -372,7 +399,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct as a copy
@@ -450,15 +478,6 @@ public:
             //- Return const access to turbulent velocity fluctuation
             inline const vector& UTurb() const;
 
-            //- Return const access to carrier density [kg/m3]
-            inline scalar rhoc() const;
-
-            //- Return const access to carrier velocity [m/s]
-            inline const vector& Uc() const;
-
-            //- Return const access to carrier viscosity [Pa.s]
-            inline scalar muc() const;
-
 
         // Edit
 
@@ -495,11 +514,8 @@ public:
 
         // Helper functions
 
-            //- Return the index of the face used in the interpolation routine
-            inline label faceInterpolation() const;
-
             //- Cell owner mass
-            inline scalar massCell(const label celli) const;
+            inline scalar massCell(const trackingData& td) const;
 
             //- Particle mass
             inline scalar mass() const;
@@ -526,116 +542,116 @@ public:
             inline static scalar areaS(const scalar d);
 
             //- Reynolds number
-            inline scalar Re
+            inline scalar Re(const trackingData& td) const;
+
+            //- Reynolds number for given conditions
+            inline static scalar Re
             (
-                const vector& U,        // particle velocity
-                const scalar d,         // particle diameter
-                const scalar rhoc,      // carrier density
-                const scalar muc        // carrier dynamic viscosity
-            ) const;
+                const scalar rhoc,
+                const vector& U,
+                const vector& Uc,
+                const scalar d,
+                const scalar muc
+            );
 
             //- Weber number
             inline scalar We
             (
-                const vector& U,        // particle velocity
-                const scalar d,         // particle diameter
-                const scalar rhoc,      // carrier density
-                const scalar sigma      // particle surface tension
+                const trackingData& td,
+                const scalar sigma
             ) const;
+
+            //- Weber number for given conditions
+            inline static scalar We
+            (
+                const scalar rhoc,
+                const vector& U,
+                const vector& Uc,
+                const scalar d,
+                const scalar sigma
+            );
 
             //- Eotvos number
             inline scalar Eo
             (
-                const vector& a,        // acceleration
-                const scalar d,         // particle diameter
-                const scalar sigma      // particle surface tension
+                const trackingData& td,
+                const scalar sigma
             ) const;
+
+            //- Eotvos number for given conditions
+            inline static scalar Eo
+            (
+                const vector& g,
+                const scalar rho,
+                const scalar rhoc,
+                const vector& U,
+                const scalar d,
+                const scalar sigma
+            );
 
 
         // Main calculation loop
 
             //- Set cell values
-            template<class TrackData>
-            void setCellValues
+            template<class TrackCloudType>
+            void setCellValues(TrackCloudType& cloud, trackingData& td);
+
+            //- Apply dispersion to the carrier phase velocity and update
+            //  parcel turbulence parameters
+            template<class TrackCloudType>
+            void calcDispersion
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
             //- Correct cell values using latest transfer information
-            template<class TrackData>
+            template<class TrackCloudType>
             void cellValueSourceCorrection
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
             //- Update parcel properties over the time interval
-            template<class TrackData>
+            template<class TrackCloudType>
             void calc
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
 
         // Tracking
 
             //- Move the parcel
-            template<class TrackData>
-            bool move(TrackData& td, const scalar trackTime);
+            template<class TrackCloudType>
+            bool move
+            (
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar trackTime
+            );
 
 
         // Patch interactions
 
-            //- Overridable function to handle the particle hitting a face
-            //  without trackData
-            void hitFace(int& td);
-
-            //- Overridable function to handle the particle hitting a face
-            template<class TrackData>
-            void hitFace(TrackData& td);
-
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
-            template<class TrackData>
-            bool hitPatch
-            (
-                const polyPatch& p,
-                TrackData& td,
-                const label patchi,
-                const scalar trackFraction,
-                const tetIndices& tetIs
-            );
+            template<class TrackCloudType>
+            bool hitPatch(TrackCloudType& cloud, trackingData& td);
 
             //- Overridable function to handle the particle hitting a
             //  processorPatch
-            template<class TrackData>
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                TrackData& td
-            );
+            template<class TrackCloudType>
+            void hitProcessorPatch(TrackCloudType& cloud, trackingData& td);
 
             //- Overridable function to handle the particle hitting a wallPatch
-            template<class TrackData>
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                TrackData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            template<class TrackData>
-            void hitPatch
-            (
-                const polyPatch&,
-                TrackData& td
-            );
+            template<class TrackCloudType>
+            void hitWallPatch(TrackCloudType& cloud, trackingData& td);
 
             //- Transform the physical properties of the particle
             //  according to the given transformation tensor
@@ -645,20 +661,16 @@ public:
             //  according to the given separation vector
             virtual void transformProperties(const vector& separation);
 
-            //- The nearest distance to a wall that the particle can be
-            //  in the n direction
-            virtual scalar wallImpactDistance(const vector& n) const;
-
 
         // I-O
 
             //- Read
-            template<class CloudType>
-            static void readFields(CloudType& c);
+            template<class TrackCloudType>
+            static void readFields(TrackCloudType& c);
 
             //- Write
-            template<class CloudType>
-            static void writeFields(const CloudType& c);
+            template<class TrackCloudType>
+            static void writeFields(const TrackCloudType& c);
 
             //- Write particle fields as objects into the obr registry
             template<class CloudType>

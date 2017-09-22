@@ -138,11 +138,12 @@ public:
         (
             const Foam::string& buffer,
             streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            versionNumber version=currentVersion,
+            const Foam::string& name="input"
         )
         :
             StringStreamAllocator<std::istringstream>(buffer),
-            ISstream(*allocatedPtr_, "input", format, version)
+            ISstream(*allocatedPtr_, name, format, version)
         {}
 
 
@@ -151,11 +152,12 @@ public:
         (
             const char* buffer,
             streamFormat format=ASCII,
-            versionNumber version=currentVersion
+            versionNumber version=currentVersion,
+            const Foam::string& name="input"
         )
         :
             StringStreamAllocator<std::istringstream>(buffer),
-            ISstream(*allocatedPtr_, "input", format, version)
+            ISstream(*allocatedPtr_, name, format, version)
         {}
 
 

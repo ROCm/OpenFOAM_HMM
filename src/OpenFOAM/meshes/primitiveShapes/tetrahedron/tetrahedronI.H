@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -246,41 +246,37 @@ inline Point Foam::tetrahedron<Point, PointRef>::randomPoint
     Random& rndGen
 ) const
 {
-    // Adapted from
-    // http://vcg.isti.cnr.it/activities/geometryegraphics/pointintetraedro.html
-
-    scalar s = rndGen.sample01<scalar>();
-    scalar t = rndGen.sample01<scalar>();
-    scalar u = rndGen.sample01<scalar>();
-
-    if (s + t > 1.0)
-    {
-        s = 1.0 - s;
-        t = 1.0 - t;
-    }
-
-    if (t + u > 1.0)
-    {
-        scalar tmp = u;
-        u = 1.0 - s - t;
-        t = 1.0 - tmp;
-    }
-    else if (s + t + u > 1.0)
-    {
-        scalar tmp = u;
-        u = s + t + u - 1.0;
-        s = 1.0 - t - tmp;
-    }
-
-    return (1 - s - t - u)*a_ + s*b_ + t*c_ + u*d_;
+    return barycentricToPoint(barycentric01(rndGen));
 }
 
 
 template<class Point, class PointRef>
-Foam::scalar Foam::tetrahedron<Point, PointRef>::barycentric
+inline Point Foam::tetrahedron<Point, PointRef>::barycentricToPoint
+(
+    const barycentric& bary
+) const
+{
+    return bary[0]*a_ + bary[1]*b_ + bary[2]*c_ + bary[3]*d_;
+}
+
+
+template<class Point, class PointRef>
+inline Foam::barycentric Foam::tetrahedron<Point, PointRef>::pointToBarycentric
+(
+    const point& pt
+) const
+{
+    barycentric bary;
+    pointToBarycentric(pt, bary);
+    return bary;
+}
+
+
+template<class Point, class PointRef>
+inline Foam::scalar Foam::tetrahedron<Point, PointRef>::pointToBarycentric
 (
     const point& pt,
-    FixedList<scalar, 4>& bary
+    barycentric& bary
 ) const
 {
     // Reference:
@@ -301,9 +297,9 @@ Foam::scalar Foam::tetrahedron<Point, PointRef>::barycentric
 
     if (Foam::mag(detT) < SMALL)
     {
-        // Degenerate tetrahedron, returning 1/4 barycentric coordinates.
+        // Degenerate tetrahedron, returning 1/4 barycentric coordinates
 
-        bary = List<scalar>(4, 0.25);
+        bary = barycentric(0.25, 0.25, 0.25, 0.25);
 
         return detT;
     }
@@ -313,7 +309,7 @@ Foam::scalar Foam::tetrahedron<Point, PointRef>::barycentric
     bary[0] = res.x();
     bary[1] = res.y();
     bary[2] = res.z();
-    bary[3] = (1.0 - res.x() - res.y() - res.z());
+    bary[3] = 1 - cmptSum(res);
 
     return detT;
 }
@@ -568,8 +564,7 @@ inline void Foam::tetrahedron<Point, PointRef>::decomposePrism
 
 template<class Point, class PointRef>
 template<class AboveTetOp, class BelowTetOp>
-inline void Foam::tetrahedron<Point, PointRef>::
-tetSliceWithPlane
+inline void Foam::tetrahedron<Point, PointRef>::tetSliceWithPlane
 (
     const plane& pl,
     const tetPoints& tet,
@@ -582,7 +577,7 @@ tetSliceWithPlane
     label nPos = 0;
     forAll(tet, i)
     {
-        d[i] = ((tet[i]-pl.refPoint()) & pl.normal());
+        d[i] = ((tet[i] - pl.refPoint()) & pl.normal());
         if (d[i] > 0)
         {
             nPos++;
@@ -613,9 +608,9 @@ tetSliceWithPlane
         label i2 = d.fcIndex(i1);
         label i3 = d.fcIndex(i2);
 
-        point p01 = planeIntersection(d, tet, i0, i1);
-        point p02 = planeIntersection(d, tet, i0, i2);
-        point p03 = planeIntersection(d, tet, i0, i3);
+        point p01(planeIntersection(d, tet, i0, i1));
+        point p02(planeIntersection(d, tet, i0, i2));
+        point p03(planeIntersection(d, tet, i0, i3));
 
         // i0 = tetCell vertex 0: p01,p02,p03 outwards pointing triad
         //          ,,         1 :     ,,     inwards pointing triad
@@ -632,13 +627,18 @@ tetSliceWithPlane
             belowOp(t);
 
             // Prism
-            FixedList<point, 6> p;
-            p[0] = tet[i1];
-            p[1] = tet[i3];
-            p[2] = tet[i2];
-            p[3] = p01;
-            p[4] = p03;
-            p[5] = p02;
+            FixedList<point, 6> p
+            (
+                {
+                    tet[i1],
+                    tet[i3],
+                    tet[i2],
+                    p01,
+                    p03,
+                    p02
+                }
+            );
+
             //Pout<< "    aboveprism:" << p << endl;
             decomposePrism(p, aboveOp);
         }
@@ -650,13 +650,17 @@ tetSliceWithPlane
             belowOp(t);
 
             // Prism
-            FixedList<point, 6> p;
-            p[0] = tet[i3];
-            p[1] = tet[i1];
-            p[2] = tet[i2];
-            p[3] = p03;
-            p[4] = p01;
-            p[5] = p02;
+            FixedList<point, 6> p
+            (
+                {
+                    tet[i3],
+                    tet[i1],
+                    tet[i2],
+                    p03,
+                    p01,
+                    p02
+                }
+            );
             //Pout<< "    aboveprism:" << p << endl;
             decomposePrism(p, aboveOp);
         }
@@ -689,180 +693,240 @@ tetSliceWithPlane
 
         if (posEdge == edge(0, 1))
         {
-            point p02 = planeIntersection(d, tet, 0, 2);
-            point p03 = planeIntersection(d, tet, 0, 3);
-            point p12 = planeIntersection(d, tet, 1, 2);
-            point p13 = planeIntersection(d, tet, 1, 3);
+            point p02(planeIntersection(d, tet, 0, 2));
+            point p03(planeIntersection(d, tet, 0, 3));
+            point p12(planeIntersection(d, tet, 1, 2));
+            point p13(planeIntersection(d, tet, 1, 3));
             // Split the resulting prism
             {
-                FixedList<point, 6> p;
-                p[0] = tet[0];
-                p[1] = p02;
-                p[2] = p03;
-                p[3] = tet[1];
-                p[4] = p12;
-                p[5] = p13;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[0],
+                        p02,
+                        p03,
+                        tet[1],
+                        p12,
+                        p13
+                    }
+                );
+
                 //Pout<< "    01 aboveprism:" << p << endl;
                 decomposePrism(p, aboveOp);
             }
             {
-                FixedList<point, 6> p;
-                p[0] = tet[2];
-                p[1] = p02;
-                p[2] = p12;
-                p[3] = tet[3];
-                p[4] = p03;
-                p[5] = p13;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[2],
+                        p02,
+                        p12,
+                        tet[3],
+                        p03,
+                        p13
+                    }
+                );
+
                 //Pout<< "    01 belowprism:" << p << endl;
                 decomposePrism(p, belowOp);
             }
         }
         else if (posEdge == edge(1, 2))
         {
-            point p01 = planeIntersection(d, tet, 0, 1);
-            point p13 = planeIntersection(d, tet, 1, 3);
-            point p02 = planeIntersection(d, tet, 0, 2);
-            point p23 = planeIntersection(d, tet, 2, 3);
+            point p01(planeIntersection(d, tet, 0, 1));
+            point p13(planeIntersection(d, tet, 1, 3));
+            point p02(planeIntersection(d, tet, 0, 2));
+            point p23(planeIntersection(d, tet, 2, 3));
             // Split the resulting prism
             {
-                FixedList<point, 6> p;
-                p[0] = tet[1];
-                p[1] = p01;
-                p[2] = p13;
-                p[3] = tet[2];
-                p[4] = p02;
-                p[5] = p23;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[1],
+                        p01,
+                        p13,
+                        tet[2],
+                        p02,
+                        p23
+                    }
+                );
+
                 //Pout<< "    12 aboveprism:" << p << endl;
                 decomposePrism(p, aboveOp);
             }
             {
-                FixedList<point, 6> p;
-                p[0] = tet[3];
-                p[1] = p23;
-                p[2] = p13;
-                p[3] = tet[0];
-                p[4] = p02;
-                p[5] = p01;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[3],
+                        p23,
+                        p13,
+                        tet[0],
+                        p02,
+                        p01
+                    }
+                );
+
                 //Pout<< "    12 belowprism:" << p << endl;
                 decomposePrism(p, belowOp);
             }
         }
         else if (posEdge == edge(2, 0))
         {
-            point p01 = planeIntersection(d, tet, 0, 1);
-            point p03 = planeIntersection(d, tet, 0, 3);
-            point p12 = planeIntersection(d, tet, 1, 2);
-            point p23 = planeIntersection(d, tet, 2, 3);
+            point p01(planeIntersection(d, tet, 0, 1));
+            point p03(planeIntersection(d, tet, 0, 3));
+            point p12(planeIntersection(d, tet, 1, 2));
+            point p23(planeIntersection(d, tet, 2, 3));
             // Split the resulting prism
             {
-                FixedList<point, 6> p;
-                p[0] = tet[2];
-                p[1] = p12;
-                p[2] = p23;
-                p[3] = tet[0];
-                p[4] = p01;
-                p[5] = p03;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[2],
+                        p12,
+                        p23,
+                        tet[0],
+                        p01,
+                        p03
+                    }
+                );
+
                 //Pout<< "    20 aboveprism:" << p << endl;
                 decomposePrism(p, aboveOp);
             }
             {
-                FixedList<point, 6> p;
-                p[0] = tet[1];
-                p[1] = p12;
-                p[2] = p01;
-                p[3] = tet[3];
-                p[4] = p23;
-                p[5] = p03;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[1],
+                        p12,
+                        p01,
+                        tet[3],
+                        p23,
+                        p03
+                    }
+                );
+
                 //Pout<< "    20 belowprism:" << p << endl;
                 decomposePrism(p, belowOp);
             }
         }
         else if (posEdge == edge(0, 3))
         {
-            point p01 = planeIntersection(d, tet, 0, 1);
-            point p02 = planeIntersection(d, tet, 0, 2);
-            point p13 = planeIntersection(d, tet, 1, 3);
-            point p23 = planeIntersection(d, tet, 2, 3);
+            point p01(planeIntersection(d, tet, 0, 1));
+            point p02(planeIntersection(d, tet, 0, 2));
+            point p13(planeIntersection(d, tet, 1, 3));
+            point p23(planeIntersection(d, tet, 2, 3));
             // Split the resulting prism
             {
-                FixedList<point, 6> p;
-                p[0] = tet[3];
-                p[1] = p23;
-                p[2] = p13;
-                p[3] = tet[0];
-                p[4] = p02;
-                p[5] = p01;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[3],
+                        p23,
+                        p13,
+                        tet[0],
+                        p02,
+                        p01
+                    }
+                );
+
                 //Pout<< "    03 aboveprism:" << p << endl;
                 decomposePrism(p, aboveOp);
             }
             {
-                FixedList<point, 6> p;
-                p[0] = tet[2];
-                p[1] = p23;
-                p[2] = p02;
-                p[3] = tet[1];
-                p[4] = p13;
-                p[5] = p01;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[2],
+                        p23,
+                        p02,
+                        tet[1],
+                        p13,
+                        p01
+                    }
+                );
+
                 //Pout<< "    03 belowprism:" << p << endl;
                 decomposePrism(p, belowOp);
             }
         }
         else if (posEdge == edge(1, 3))
         {
-            point p01 = planeIntersection(d, tet, 0, 1);
-            point p12 = planeIntersection(d, tet, 1, 2);
-            point p03 = planeIntersection(d, tet, 0, 3);
-            point p23 = planeIntersection(d, tet, 2, 3);
+            point p01(planeIntersection(d, tet, 0, 1));
+            point p12(planeIntersection(d, tet, 1, 2));
+            point p03(planeIntersection(d, tet, 0, 3));
+            point p23(planeIntersection(d, tet, 2, 3));
             // Split the resulting prism
             {
-                FixedList<point, 6> p;
-                p[0] = tet[1];
-                p[1] = p12;
-                p[2] = p01;
-                p[3] = tet[3];
-                p[4] = p23;
-                p[5] = p03;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[1],
+                        p12,
+                        p01,
+                        tet[3],
+                        p23,
+                        p03
+                    }
+                );
+
                 //Pout<< "    13 aboveprism:" << p << endl;
                 decomposePrism(p, aboveOp);
             }
             {
-                FixedList<point, 6> p;
-                p[0] = tet[2];
-                p[1] = p12;
-                p[2] = p23;
-                p[3] = tet[0];
-                p[4] = p01;
-                p[5] = p03;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[2],
+                        p12,
+                        p23,
+                        tet[0],
+                        p01,
+                        p03
+                    }
+                );
+
                 //Pout<< "    13 belowprism:" << p << endl;
                 decomposePrism(p, belowOp);
             }
         }
         else if (posEdge == edge(2, 3))
         {
-            point p02 = planeIntersection(d, tet, 0, 2);
-            point p12 = planeIntersection(d, tet, 1, 2);
-            point p03 = planeIntersection(d, tet, 0, 3);
-            point p13 = planeIntersection(d, tet, 1, 3);
+            point p02(planeIntersection(d, tet, 0, 2));
+            point p12(planeIntersection(d, tet, 1, 2));
+            point p03(planeIntersection(d, tet, 0, 3));
+            point p13(planeIntersection(d, tet, 1, 3));
             // Split the resulting prism
             {
-                FixedList<point, 6> p;
-                p[0] = tet[2];
-                p[1] = p02;
-                p[2] = p12;
-                p[3] = tet[3];
-                p[4] = p03;
-                p[5] = p13;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[2],
+                        p02,
+                        p12,
+                        tet[3],
+                        p03,
+                        p13
+                    }
+                );
+
                 //Pout<< "    23 aboveprism:" << p << endl;
                 decomposePrism(p, aboveOp);
             }
             {
-                FixedList<point, 6> p;
-                p[0] = tet[0];
-                p[1] = p02;
-                p[2] = p03;
-                p[3] = tet[1];
-                p[4] = p12;
-                p[5] = p13;
+                FixedList<point, 6> p
+                (
+                    {
+                        tet[0],
+                        p02,
+                        p03,
+                        tet[1],
+                        p12,
+                        p13
+                    }
+                );
+
                 //Pout<< "    23 belowprism:" << p << endl;
                 decomposePrism(p, belowOp);
             }
@@ -891,9 +955,9 @@ tetSliceWithPlane
         label i2 = d.fcIndex(i1);
         label i3 = d.fcIndex(i2);
 
-        point p01 = planeIntersection(d, tet, i0, i1);
-        point p02 = planeIntersection(d, tet, i0, i2);
-        point p03 = planeIntersection(d, tet, i0, i3);
+        point p01(planeIntersection(d, tet, i0, i1));
+        point p02(planeIntersection(d, tet, i0, i2));
+        point p03(planeIntersection(d, tet, i0, i3));
 
         //Pout<< "Split 1pos tet " << tet << " d:" << d << " into" << nl;
 
@@ -905,13 +969,18 @@ tetSliceWithPlane
             aboveOp(t);
 
             // Prism
-            FixedList<point, 6> p;
-            p[0] = tet[i1];
-            p[1] = tet[i3];
-            p[2] = tet[i2];
-            p[3] = p01;
-            p[4] = p03;
-            p[5] = p02;
+            FixedList<point, 6> p
+            (
+                {
+                    tet[i1],
+                    tet[i3],
+                    tet[i2],
+                    p01,
+                    p03,
+                    p02
+                }
+            );
+
             //Pout<< "    belowprism:" << p << endl;
             decomposePrism(p, belowOp);
         }
@@ -923,13 +992,18 @@ tetSliceWithPlane
             aboveOp(t);
 
             // Prism
-            FixedList<point, 6> p;
-            p[0] = tet[i3];
-            p[1] = tet[i1];
-            p[2] = tet[i2];
-            p[3] = p03;
-            p[4] = p01;
-            p[5] = p02;
+            FixedList<point, 6> p
+            (
+                {
+                    tet[i3],
+                    tet[i1],
+                    tet[i2],
+                    p03,
+                    p01,
+                    p02
+                }
+            );
+
             //Pout<< "    belowprism:" << p << endl;
             decomposePrism(p, belowOp);
         }

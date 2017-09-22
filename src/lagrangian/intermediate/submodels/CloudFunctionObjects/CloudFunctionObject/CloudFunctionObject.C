@@ -70,6 +70,7 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
     {
         outputDir_ = outputDir_/relPath;
     }
+    outputDir_.clean();
 }
 
 
@@ -112,7 +113,6 @@ template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postMove
 (
     typename CloudType::parcelType&,
-    const label,
     const scalar,
     const point&,
     bool&
@@ -125,8 +125,6 @@ void Foam::CloudFunctionObject<CloudType>::postPatch
 (
     const typename CloudType::parcelType&,
     const polyPatch&,
-    const scalar,
-    const tetIndices&,
     bool&
 )
 {}
@@ -136,7 +134,6 @@ template<class CloudType>
 void Foam::CloudFunctionObject<CloudType>::postFace
 (
     const typename CloudType::parcelType&,
-    const label,
     bool&
 )
 {}

@@ -65,7 +65,7 @@ void Foam::ensightSerialCloud::writePositions
 
             forAllConstIter(Cloud<passiveParticle>, cloudPtr(), elmnt)
             {
-                const vector& p = elmnt().position();
+                const vector p(elmnt().position());
 
                 os.write(p.x());
                 os.write(p.y());
@@ -79,7 +79,7 @@ void Foam::ensightSerialCloud::writePositions
             label parcelId = 0;
             forAllConstIter(Cloud<passiveParticle>, cloudPtr(), elmnt)
             {
-                const vector& p = elmnt().position();
+                const vector p(elmnt().position());
 
                 os.write(++parcelId, 8); // unusual width
                 os.write(p.x());

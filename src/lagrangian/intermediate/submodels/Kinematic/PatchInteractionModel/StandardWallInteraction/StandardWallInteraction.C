@@ -103,9 +103,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 (
     typename CloudType::parcelType& p,
     const polyPatch& pp,
-    bool& keepParticle,
-    const scalar trackFraction,
-    const tetIndices& tetIs
+    bool& keepParticle
 )
 {
     vector& U = p.U();
@@ -144,7 +142,7 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 vector nw;
                 vector Up;
 
-                this->owner().patchData(p, pp, trackFraction, tetIs, nw, Up);
+                this->owner().patchData(p, pp, nw, Up);
 
                 // Calculate motion relative to patch velocity
                 U -= Up;

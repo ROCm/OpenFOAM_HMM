@@ -36,7 +36,7 @@ namespace surfaceFilmModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-injectionModelList::injectionModelList(surfaceFilmModel& film)
+injectionModelList::injectionModelList(surfaceFilmRegionModel& film)
 :
     PtrList<injectionModel>(),
     filmSubModelBase(film)
@@ -45,7 +45,7 @@ injectionModelList::injectionModelList(surfaceFilmModel& film)
 
 injectionModelList::injectionModelList
 (
-    surfaceFilmModel& film,
+    surfaceFilmRegionModel& film,
     const dictionary& dict
 )
 :
@@ -130,7 +130,11 @@ void injectionModelList::info(Ostream& os)
     const polyBoundaryMesh& pbm = film().regionMesh().boundaryMesh();
 
     scalar injectedMass = 0;
-    scalarField patchInjectedMasses(pbm.size(), 0);
+    scalarField patchInjectedMasses
+    (
+        pbm.size() - film().regionMesh().globalData().processorPatches().size(),
+        0
+    );
 
     forAll(*this, i)
     {
@@ -141,7 +145,7 @@ void injectionModelList::info(Ostream& os)
 
     os  << indent << "injected mass      = " << injectedMass << nl;
 
-    forAll(pbm, patchi)
+    forAll(patchInjectedMasses, patchi)
     {
         if (mag(patchInjectedMasses[patchi]) > VSMALL)
         {
@@ -150,7 +154,7 @@ void injectionModelList::info(Ostream& os)
         }
     }
 
-    scalarField mass0(massInjected_.size(), 0.0);
+    scalarField mass0(massInjected_.size(), 0);
     this->getBaseProperty("massInjected", mass0);
 
     scalarField mass(massInjected_);

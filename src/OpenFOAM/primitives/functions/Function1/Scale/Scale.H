@@ -105,7 +105,7 @@ class Scale
         void read(const dictionary& coeffs);
 
         //- Disallow default bitwise assignment
-        void operator=(const Scale<Type>&);
+        void operator=(const Scale<Type>&) = delete;
 
 
 public:
@@ -124,13 +124,7 @@ public:
         );
 
         //- Copy constructor
-        Scale(const Scale<Type>& se);
-
-        //- Construct and return a clone
-        virtual tmp<Function1<Type>> clone() const
-        {
-            return tmp<Function1<Type>>(new Scale<Type>(*this));
-        }
+        explicit Scale(const Scale<Type>& se);
 
 
     //- Destructor
@@ -140,7 +134,7 @@ public:
     // Member Functions
 
         //- Return value for time t
-        Type value(const scalar t) const;
+        virtual inline Type value(const scalar t) const;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
@@ -153,6 +147,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "ScaleI.H"
 
 #ifdef NoRepository
     #include "Scale.C"

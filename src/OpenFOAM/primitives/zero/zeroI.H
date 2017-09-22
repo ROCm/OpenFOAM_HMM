@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+inline zero operator+(const zero&, const zero&)
+{
+    return Zero;
+}
+
 template<class Type>
 inline const Type& operator+(const Type& t, const zero&)
 {
@@ -44,6 +49,11 @@ inline const Type& operator+(const zero&, const Type& t)
     return t;
 }
 
+inline zero operator-(const zero&, const zero&)
+{
+    return Zero;
+}
+
 template<class Type>
 inline const Type& operator-(const Type& t, const zero&)
 {
@@ -54,6 +64,11 @@ template<class Type>
 inline Type operator-(const zero&, const Type& t)
 {
     return -t;
+}
+
+inline zero operator*(const zero&, const zero&)
+{
+    return Zero;
 }
 
 template<class Type>

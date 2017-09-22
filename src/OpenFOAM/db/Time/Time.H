@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,6 @@ SourceFiles
 #include "typeInfo.H"
 #include "dlLibraryTable.H"
 #include "functionObjectList.H"
-#include "fileMonitor.H"
 #include "sigWriteNow.H"
 #include "sigStopAtWriteNow.H"
 
@@ -77,9 +76,6 @@ class Time
     public TimeState
 {
     // Private data
-
-        //- file-change monitor for all registered files
-        mutable autoPtr<fileMonitor> monitorPtr_;
 
         //- Profiling trigger for time-loop (for run, loop)
         mutable profilingTrigger* loopProfiling_;
@@ -181,6 +177,9 @@ protected:
 
         //- Read the control dictionary and set the write controls etc.
         virtual void readDict();
+
+        //- Find IOobject in the objectPath
+        static bool exists(IOobject&);
 
 
 private:
@@ -331,40 +330,8 @@ public:
             //- Read control dictionary, update controls and time
             virtual bool read();
 
-            // Automatic rereading
-
-                //- Read the objects that have been modified
-                void readModifiedObjects();
-
-                //- Helper: add watches for list of files
-                void addWatches
-                (
-                    regIOobject& rio,
-                    const fileNameList& files
-                ) const;
-
-                //- Find index (or -1) of file in list of handles
-                label findWatch
-                (
-                    const labelList& watchIndices,
-                    const fileName& fName
-                ) const;
-
-                //- Add watching of a file. Returns handle
-                label addTimeWatch(const fileName& fName) const;
-
-                //- Remove watch on a file (using handle)
-                bool removeWatch(const label watchIndex) const;
-
-                //- Get name of file being watched (using handle)
-                const fileName& getFile(const label watchIndex) const;
-
-                //- Get current state of file (using handle)
-                fileMonitor::fileState getState(const label watchIndex) const;
-
-                //- Set current state of file (using handle) to unmodified
-                void setUnmodified(const label watchIndex) const;
-
+            //- Read the objects that have been modified
+            void readModifiedObjects();
 
             //- Return the location of "dir" containing the file "name".
             //  (eg, used in reading mesh data)
@@ -410,9 +377,10 @@ public:
             //- Write using given format, version and compression
             virtual bool writeObject
             (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::streamFormat,
+                IOstream::versionNumber,
+                IOstream::compressionType,
+                const bool valid
             ) const;
 
             //- Write the objects now (not at end of iteration) and continue

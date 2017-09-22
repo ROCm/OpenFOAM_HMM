@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -162,8 +162,6 @@ void Foam::ParticleErosion<CloudType>::postPatch
 (
     const parcelType& p,
     const polyPatch& pp,
-    const scalar trackFraction,
-    const tetIndices& tetIs,
     bool&
 )
 {
@@ -177,7 +175,7 @@ void Foam::ParticleErosion<CloudType>::postPatch
         vector Up;
 
         // patch-normal direction
-        this->owner().patchData(p, pp, trackFraction, tetIs, nw, Up);
+        this->owner().patchData(p, pp, nw, Up);
 
         // particle velocity reletive to patch
         const vector& U = p.U() - Up;

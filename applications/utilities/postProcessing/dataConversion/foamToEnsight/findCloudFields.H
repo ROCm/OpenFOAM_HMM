@@ -35,8 +35,8 @@ if (timeDirs.size() && !noLagrangian)
                 cloudPrefix/cloudName
             );
 
-            // Clouds always have "positions"
-            if (cloudObjs.found("positions"))
+            // Clouds always have "positions" (v1706 and lower) or "coordinates"
+            if (cloudObjs.found("positions") || cloudObjs.found("coordinates"))
             {
                 // Save the cloud fields on a per cloud basis
                 auto fieldsPerCloud = cloudFields(cloudName);
@@ -52,9 +52,10 @@ if (timeDirs.size() && !noLagrangian)
         }
     }
 
-    // Prune out "positions" again since it gets treated specially
+    // Prune out geometry again since it gets treated specially
     forAllIters(cloudFields, cloudIter)
     {
+        cloudIter().erase("coordinates");
         cloudIter().erase("positions");
     }
 
@@ -73,5 +74,6 @@ if (cloudNames.size())
     // Complete the echo information - as flatOutput
     cloudNames.writeList(Info) << endl;
 }
+
 
 // ************************************************************************* //

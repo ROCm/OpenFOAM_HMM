@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,6 +64,9 @@ class trackedParticle
 {
     // Private data
 
+        //- Start point to track from
+        point start_;
+
         //- End point to track to
         point end_;
 
@@ -87,7 +90,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<Cloud<trackedParticle>>
+        public particle::trackingData
     {
     public:
 
@@ -105,7 +108,7 @@ public:
                 List<PackedBoolList>& featureEdgeVisited
             )
             :
-                particle::TrackingData<Cloud<trackedParticle>>(cloud),
+                particle::trackingData(cloud),
                 maxLevel_(maxLevel),
                 featureEdgeVisited_(featureEdgeVisited)
             {}
@@ -120,10 +123,24 @@ public:
         trackedParticle
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPtI,
+            const point& end,
+            const label level,
+            const label i,
+            const label j,
+            const label k
+        );
+
+        //- Construct from a position and a cell, searching for the rest of the
+        //  required topology
+        trackedParticle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli,
             const point& end,
             const label level,
             const label i,
@@ -136,7 +153,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct and return a clone
@@ -169,6 +187,12 @@ public:
 
 
     // Member Functions
+
+        //- Point to track from
+        point& start()
+        {
+            return start_;
+        }
 
         //- Point to track to
         point& end()
@@ -217,72 +241,48 @@ public:
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackingData&, const scalar);
-
+            bool move(Cloud<trackedParticle>&, trackingData&, const scalar);
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
-            bool hitPatch
-            (
-                const polyPatch&,
-                trackingData& td,
-                const label patchi,
-                const scalar trackFraction,
-                const tetIndices& tetIs
-            );
+            bool hitPatch(Cloud<trackedParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a wedge
-            void hitWedgePatch
-            (
-                const wedgePolyPatch&,
-                trackingData& td
-            );
+            void hitWedgePatch(Cloud<trackedParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a
             //  symmetry plane
-            void hitSymmetryPlanePatch
-            (
-                const symmetryPlanePolyPatch&,
-                trackingData& td
-            );
+            void hitSymmetryPlanePatch(Cloud<trackedParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a
             //  symmetry patch
-            void hitSymmetryPatch
-            (
-                const symmetryPolyPatch&,
-                trackingData& td
-            );
+            void hitSymmetryPatch(Cloud<trackedParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a cyclic
-            void hitCyclicPatch
+            void hitCyclicPatch(Cloud<trackedParticle>&, trackingData&);
+
+            //- Overridable function to handle the particle hitting a cyclicAMI
+            void hitCyclicAMIPatch
             (
-                const cyclicPolyPatch&,
-                trackingData& td
+                Cloud<trackedParticle>&,
+                trackingData&,
+                const vector&
+            );
+
+            //- Overridable function to handle the particle hitting a cyclicACMI
+            void hitCyclicACMIPatch
+            (
+                Cloud<trackedParticle>&,
+                trackingData&,
+                const vector&
             );
 
             //- Overridable function to handle the particle hitting a
             //- processorPatch
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                trackingData& td
-            );
+            void hitProcessorPatch(Cloud<trackedParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a wallPatch
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                trackingData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            void hitPatch
-            (
-                const polyPatch&,
-                trackingData& td
-            );
+            void hitWallPatch(Cloud<trackedParticle>&, trackingData&);
 
             //- Convert processor patch addressing to the global equivalents
             //  and set the celli to the face-neighbour

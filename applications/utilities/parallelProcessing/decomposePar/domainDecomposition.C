@@ -317,9 +317,6 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             time().caseName()/fileName(word("processor") + Foam::name(proci))
         );
 
-        // make the processor directory
-        mkDir(time().rootPath()/processorCasePath);
-
         // create a database
         Time processorDb
         (

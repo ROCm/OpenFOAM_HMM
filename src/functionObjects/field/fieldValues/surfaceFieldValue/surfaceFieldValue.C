@@ -687,14 +687,14 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
         case opSumDirection:
         {
             const vector n(dict_.lookup("direction"));
-            return gSum(pos(values*(Sf & n))*mag(values));
+            return gSum(pos0(values*(Sf & n))*mag(values));
         }
         case opSumDirectionBalance:
         {
             const vector n(dict_.lookup("direction"));
             const scalarField nv(values*(Sf & n));
 
-            return gSum(pos(nv)*mag(values) - neg(nv)*mag(values));
+            return gSum(pos0(nv)*mag(values) - neg(nv)*mag(values));
         }
         default:
         {
@@ -722,7 +722,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
             n /= mag(n) + ROOTVSMALL;
 
             const scalarField nv(n & values);
-            return gSum(pos(nv)*n*(nv));
+            return gSum(pos0(nv)*n*(nv));
         }
         case opSumDirectionBalance:
         {
@@ -730,7 +730,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
             n /= mag(n) + ROOTVSMALL;
 
             const scalarField nv(n & values);
-            return gSum(pos(nv)*n*(nv));
+            return gSum(pos0(nv)*n*(nv));
         }
         case opAreaNormalAverage:
         {

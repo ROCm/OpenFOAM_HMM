@@ -199,7 +199,8 @@ void createFieldFiles
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            IOstream::UNCOMPRESSED
+            IOstream::UNCOMPRESSED,
+            true
         );
     }
 }

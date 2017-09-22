@@ -64,7 +64,8 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
     );
 
     IOobject* positionsPtr = sprayObjs.lookup(word("positions"));
-    if (positionsPtr)
+    IOobject* coordinatesPtr = sprayObjs.lookup(word("coordinates"));
+    if (positionsPtr || coordinatesPtr)
     {
         Cloud<passiveParticle> parcels(mesh, cloudName, false);
 

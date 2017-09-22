@@ -5,6 +5,8 @@ cd ${0%/*} || exit 1    # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 restore0Dir
+
+# create mesh
 runApplication blockMesh
 
 # create sets

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,22 +59,23 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-template<class TrackData>
+template<class TrackCloudType>
 bool Foam::CollidingParcel<ParcelType>::move
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    trackingData& td,
     const scalar trackTime
 )
 {
-    typename TrackData::cloudType::parcelType& p =
-        static_cast<typename TrackData::cloudType::parcelType&>(*this);
+    typename TrackCloudType::parcelType& p =
+        static_cast<typename TrackCloudType::parcelType&>(*this);
 
     td.keepParticle = true;
     td.switchProcessor = false;
 
     switch (td.part())
     {
-        case TrackData::tpVelocityHalfStep:
+        case trackingData::tpVelocityHalfStep:
         {
             // First and last leapfrog velocity adjust part, required
             // before and after tracking and force calculation
@@ -84,18 +85,19 @@ bool Foam::CollidingParcel<ParcelType>::move
             p.angularMomentum() += 0.5*trackTime*p.torque();
 
             td.keepParticle = true;
+            td.switchProcessor = false;
 
             break;
         }
 
-        case TrackData::tpLinearTrack:
+        case trackingData::tpLinearTrack:
         {
-            ParcelType::move(td, trackTime);
+            ParcelType::move(cloud, td, trackTime);
 
             break;
         }
 
-        case TrackData::tpRotationalTrack:
+        case trackingData::tpRotationalTrack:
         {
             NotImplemented;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,12 +65,17 @@ Foam::tensor Foam::molecule::rotationTensorZ(scalar phi) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::molecule::move(molecule::trackingData& td, const scalar trackTime)
+bool Foam::molecule::move
+(
+    moleculeCloud& cloud,
+    trackingData& td,
+    const scalar trackTime
+)
 {
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    const constantProperties& constProps(td.cloud().constProps(id_));
+    const constantProperties& constProps(cloud.constProps(id_));
 
     if (td.part() == 0)
     {
@@ -85,18 +90,10 @@ bool Foam::molecule::move(molecule::trackingData& td, const scalar trackTime)
     {
         // Leapfrog tracking part
 
-        scalar tEnd = (1.0 - stepFraction())*trackTime;
-        scalar dtMax = tEnd;
-
-        while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+        while (td.keepParticle && !td.switchProcessor && stepFraction() < 1)
         {
-            // set the lagrangian time-step
-            scalar dt = min(dtMax, tEnd);
-
-            dt *= trackToFace(position() + dt*v_, td);
-
-            tEnd -= dt;
-            stepFraction() = 1.0 - tEnd/trackTime;
+            const scalar f = 1 - stepFraction();
+            trackToAndHitFace(f*trackTime*v_, f, cloud, td);
         }
     }
     else if (td.part() == 2)
@@ -205,7 +202,7 @@ void Foam::molecule::transformProperties(const tensor& T)
 
     rf_ = transform(T, rf_);
 
-    sitePositions_ = position_ + (T & (sitePositions_ - position_));
+    sitePositions_ = position() + (T & (sitePositions_ - position()));
 
     siteForces_ = T & siteForces_;
 }
@@ -226,7 +223,7 @@ void Foam::molecule::transformProperties(const vector& separation)
 
 void Foam::molecule::setSitePositions(const constantProperties& constProps)
 {
-    sitePositions_ = position_ + (Q_ & constProps.siteReferencePositions());
+    sitePositions_ = position() + (Q_ & constProps.siteReferencePositions());
 }
 
 
@@ -238,38 +235,20 @@ void Foam::molecule::setSiteSizes(label size)
 }
 
 
-bool Foam::molecule::hitPatch
-(
-    const polyPatch&,
-    trackingData&,
-    const label,
-    const scalar,
-    const tetIndices&
-)
+bool Foam::molecule::hitPatch(moleculeCloud&, trackingData&)
 {
     return false;
 }
 
 
-void Foam::molecule::hitProcessorPatch
-(
-    const processorPolyPatch&,
-    trackingData& td
-)
+void Foam::molecule::hitProcessorPatch(moleculeCloud&, trackingData& td)
 {
     td.switchProcessor = true;
 }
 
 
-void Foam::molecule::hitWallPatch
-(
-    const wallPolyPatch& wpp,
-    trackingData& td,
-    const tetIndices& tetIs
-)
+void Foam::molecule::hitWallPatch(moleculeCloud&, trackingData&)
 {
-    // Use of the normal from tetIs is not required as
-    // hasWallImpactDistance for a moleculeCloud is false.
     vector nw = normal();
     nw /= mag(nw);
 
@@ -280,16 +259,6 @@ void Foam::molecule::hitWallPatch
     {
         v_ -= 2*vn*nw;
     }
-}
-
-
-void Foam::molecule::hitPatch
-(
-    const polyPatch&,
-    trackingData& td
-)
-{
-    td.keepParticle = false;
 }
 
 

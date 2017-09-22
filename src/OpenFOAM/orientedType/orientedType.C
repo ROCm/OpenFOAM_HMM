@@ -362,7 +362,19 @@ Foam::orientedType  Foam::pos(const orientedType& ot)
 }
 
 
+Foam::orientedType  Foam::pos0(const orientedType& ot)
+{
+    return ot;
+}
+
+
 Foam::orientedType  Foam::neg(const orientedType& ot)
+{
+    return ot;
+}
+
+
+Foam::orientedType  Foam::neg0(const orientedType& ot)
 {
     return ot;
 }

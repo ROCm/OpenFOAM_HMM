@@ -100,9 +100,6 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     const Pstream::commsTypes commsType
 ) const
 {
-    label oldWarn = UPstream::warnComm;
-    UPstream::warnComm = comm();
-
     procInterface_.interfaceInternalField(psiInternal, scalarSendBuf_);
 
     if
@@ -141,8 +138,6 @@ void Foam::processorGAMGInterfaceField::initInterfaceMatrixUpdate
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = false;
-
-    UPstream::warnComm = oldWarn;
 }
 
 
@@ -160,9 +155,6 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     {
         return;
     }
-
-    label oldWarn = UPstream::warnComm;
-    UPstream::warnComm = comm();
 
     if
     (
@@ -203,8 +195,6 @@ void Foam::processorGAMGInterfaceField::updateInterfaceMatrix
     }
 
     const_cast<processorGAMGInterfaceField&>(*this).updatedMatrix() = true;
-
-    UPstream::warnComm = oldWarn;
 }
 
 

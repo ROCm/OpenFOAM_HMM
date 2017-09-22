@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,6 +83,9 @@ public:
 
 
     // Member Functions
+
+        //- Return the motionSolver
+        const motionSolver& motion() const;
 
         //- Update the mesh for both mesh motion and topology change
         virtual bool update();

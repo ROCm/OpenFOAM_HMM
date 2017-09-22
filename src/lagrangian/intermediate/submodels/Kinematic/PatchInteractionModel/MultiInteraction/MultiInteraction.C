@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,9 +136,7 @@ bool Foam::MultiInteraction<CloudType>::correct
 (
     typename CloudType::parcelType& p,
     const polyPatch& pp,
-    bool& keepParticle,
-    const scalar trackFraction,
-    const tetIndices& tetIs
+    bool& keepParticle
 )
 {
     label origFacei = p.face();
@@ -152,9 +150,7 @@ bool Foam::MultiInteraction<CloudType>::correct
         (
             p,
             this->owner().pMesh().boundaryMesh()[patchi],
-            keepParticle,
-            trackFraction,
-            tetIs
+            keepParticle
         );
 
         if (myInteracted && oneInteractionOnly_)
@@ -171,7 +167,7 @@ bool Foam::MultiInteraction<CloudType>::correct
         if (p.face() != origFacei)
         {
             origFacei = p.face();
-            patchi = p.patch(p.face());
+            patchi = p.patch();
 
             // Interaction model has moved particle off wall?
             if (patchi == -1)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,16 +63,15 @@ template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const polyMesh& mesh,
-    const vector& position,
+    const barycentric& coordinates,
     const label celli,
     const label tetFacei,
     const label tetPti
 )
 :
-    ParcelType(mesh, position, celli, tetFacei, tetPti),
+    ParcelType(mesh, coordinates, celli, tetFacei, tetPti),
     mass0_(0.0),
-    Y_(0),
-    pc_(0.0)
+    Y_(0)
 {}
 
 
@@ -81,6 +80,20 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     const polyMesh& mesh,
     const vector& position,
+    const label celli
+)
+:
+    ParcelType(mesh, position, celli),
+    mass0_(0.0),
+    Y_(0)
+{}
+
+
+template<class ParcelType>
+inline Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    const polyMesh& mesh,
+    const barycentric& coordinates,
     const label celli,
     const label tetFacei,
     const label tetPti,
@@ -99,7 +112,7 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     ParcelType
     (
         mesh,
-        position,
+        coordinates,
         celli,
         tetFacei,
         tetPti,
@@ -114,8 +127,7 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
         constProps
     ),
     mass0_(0.0),
-    Y_(Y0),
-    pc_(0.0)
+    Y_(Y0)
 {
     // Set initial parcel mass
     mass0_ = this->mass();
@@ -153,20 +165,6 @@ template<class ParcelType>
 inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y() const
 {
     return Y_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar Foam::ReactingParcel<ParcelType>::pc() const
-{
-    return pc_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar& Foam::ReactingParcel<ParcelType>::pc()
-{
-    return pc_;
 }
 
 

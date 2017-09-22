@@ -409,14 +409,16 @@ bool Foam::profiling::writeObject
 (
     IOstream::streamFormat,
     IOstream::versionNumber ver,
-    IOstream::compressionType
+    IOstream::compressionType,
+    const bool valid
 ) const
 {
     return regIOobject::writeObject
     (
         IOstream::ASCII,
         ver,
-        IOstream::UNCOMPRESSED
+        IOstream::UNCOMPRESSED,
+        true
     );
 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -141,7 +141,7 @@ bool Foam::AveragingMethod<Type>::writeData(Ostream& os) const
 
 
 template<class Type>
-bool Foam::AveragingMethod<Type>::write() const
+bool Foam::AveragingMethod<Type>::write(const bool valid) const
 {
     const pointMesh pointMesh_(mesh_);
 
@@ -194,6 +194,16 @@ bool Foam::AveragingMethod<Type>::write() const
         dimensioned<TypeGrad>("zero", dimless, Zero)
     );
 
+    // Barycentric coordinates of the tet vertices
+    const FixedList<barycentric, 4>
+        tetCrds
+        ({
+            barycentric(1, 0, 0, 0),
+            barycentric(0, 1, 0, 0),
+            barycentric(0, 0, 1, 0),
+            barycentric(0, 0, 0, 1)
+        });
+
     // tet-volume weighted sums
     forAll(mesh_.C(), celli)
     {
@@ -203,26 +213,19 @@ bool Foam::AveragingMethod<Type>::write() const
         forAll(cellTets, tetI)
         {
             const tetIndices& tetIs = cellTets[tetI];
+            const triFace triIs = tetIs.faceTriIs(mesh_);
             const scalar v = tetIs.tet(mesh_).mag();
 
-            cellValue[celli] += v*interpolate(mesh_.C()[celli], tetIs);
-            cellGrad[celli] += v*interpolateGrad(mesh_.C()[celli], tetIs);
+            cellValue[celli] += v*interpolate(tetCrds[0], tetIs);
+            cellGrad[celli] += v*interpolateGrad(tetCrds[0], tetIs);
 
-            const face& f = mesh_.faces()[tetIs.face()];
-            labelList vertices(3);
-            vertices[0] = f[tetIs.faceBasePt()];
-            vertices[1] = f[tetIs.facePtA()];
-            vertices[2] = f[tetIs.facePtB()];
-
-            forAll(vertices, vertexI)
+            forAll(triIs, vertexI)
             {
-                const label pointi = vertices[vertexI];
+                const label pointi = triIs[vertexI];
 
                 pointVolume[pointi] += v;
-                pointValue[pointi] +=
-                    v*interpolate(mesh_.points()[pointi], tetIs);
-                pointGrad[pointi] +=
-                    v*interpolateGrad(mesh_.points()[pointi], tetIs);
+                pointValue[pointi] += v*interpolate(tetCrds[vertexI], tetIs);
+                pointGrad[pointi] += v*interpolateGrad(tetCrds[vertexI], tetIs);
             }
         }
     }
@@ -234,10 +237,10 @@ bool Foam::AveragingMethod<Type>::write() const
     pointGrad.primitiveFieldRef() /= pointVolume;
 
     // write
-    if (!cellValue.write()) return false;
-    if (!cellGrad.write()) return false;
-    if (!pointValue.write()) return false;
-    if (!pointGrad.write()) return false;
+    if (!cellValue.write(valid)) return false;
+    if (!cellGrad.write(valid)) return false;
+    if (!pointValue.write(valid)) return false;
+    if (!pointGrad.write(valid)) return false;
 
     return true;
 }

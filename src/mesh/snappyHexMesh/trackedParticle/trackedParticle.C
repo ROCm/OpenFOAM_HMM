@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 Foam::trackedParticle::trackedParticle
 (
     const polyMesh& mesh,
-    const vector& position,
+    const barycentric& coordinates,
     const label celli,
     const label tetFacei,
     const label tetPtI,
@@ -42,7 +42,30 @@ Foam::trackedParticle::trackedParticle
     const label k
 )
 :
-    particle(mesh, position, celli, tetFacei, tetPtI),
+    particle(mesh, coordinates, celli, tetFacei, tetPtI),
+    start_(position()),
+    end_(end),
+    level_(level),
+    i_(i),
+    j_(j),
+    k_(k)
+{}
+
+
+Foam::trackedParticle::trackedParticle
+(
+    const polyMesh& mesh,
+    const vector& position,
+    const label celli,
+    const point& end,
+    const label level,
+    const label i,
+    const label j,
+    const label k
+)
+:
+    particle(mesh, position, celli),
+    start_(this->position()),
     end_(end),
     level_(level),
     i_(i),
@@ -55,16 +78,17 @@ Foam::trackedParticle::trackedParticle
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    particle(mesh, is, readFields)
+    particle(mesh, is, readFields, newFormat)
 {
     if (readFields)
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> end_;
+            is >> start_ >> end_;
             level_ = readLabel(is);
             i_ = readLabel(is);
             j_ = readLabel(is);
@@ -74,8 +98,8 @@ Foam::trackedParticle::trackedParticle
         {
             is.read
             (
-                reinterpret_cast<char*>(&end_),
-                sizeof(end_) + sizeof(level_)
+                reinterpret_cast<char*>(&start_),
+                sizeof(start_) + sizeof(end_) + sizeof(level_)
               + sizeof(i_) + sizeof(j_) + sizeof(k_)
             );
         }
@@ -89,6 +113,7 @@ Foam::trackedParticle::trackedParticle
 
 bool Foam::trackedParticle::move
 (
+    Cloud<trackedParticle>& cloud,
     trackingData& td,
     const scalar trackTime
 )
@@ -96,9 +121,8 @@ bool Foam::trackedParticle::move
     td.switchProcessor = false;
 
     scalar tEnd = (1.0 - stepFraction())*trackTime;
-    scalar dtMax = tEnd;
 
-    if (tEnd <= SMALL && onBoundary())
+    if (tEnd <= SMALL && onBoundaryFace())
     {
         // This is a hack to handle particles reaching their endpoint
         // on a processor boundary. If the endpoint is on a processor face
@@ -111,18 +135,14 @@ bool Foam::trackedParticle::move
     {
         td.keepParticle = true;
 
-        while (td.keepParticle && !td.switchProcessor && tEnd > SMALL)
+        while (td.keepParticle && !td.switchProcessor && stepFraction() < 1)
         {
-            // set the lagrangian time-step
-            scalar dt = min(dtMax, tEnd);
-
             // mark visited cell with max level.
             td.maxLevel_[cell()] = max(td.maxLevel_[cell()], level_);
 
-            dt *= trackToFace(end_, td);
-
-            tEnd -= dt;
-            stepFraction() = 1.0 - tEnd/trackTime;
+            const scalar f = 1 - stepFraction();
+            const vector s = end_ - start_;
+            trackToAndHitFace(f*s, f, cloud, td);
         }
     }
 
@@ -130,14 +150,7 @@ bool Foam::trackedParticle::move
 }
 
 
-bool Foam::trackedParticle::hitPatch
-(
-    const polyPatch&,
-    trackingData& td,
-    const label patchi,
-    const scalar trackFraction,
-    const tetIndices& tetIs
-)
+bool Foam::trackedParticle::hitPatch(Cloud<trackedParticle>&, trackingData&)
 {
     return false;
 }
@@ -145,7 +158,7 @@ bool Foam::trackedParticle::hitPatch
 
 void Foam::trackedParticle::hitWedgePatch
 (
-    const wedgePolyPatch&,
+    Cloud<trackedParticle>&,
     trackingData& td
 )
 {
@@ -156,7 +169,7 @@ void Foam::trackedParticle::hitWedgePatch
 
 void Foam::trackedParticle::hitSymmetryPlanePatch
 (
-    const symmetryPlanePolyPatch&,
+    Cloud<trackedParticle>&,
     trackingData& td
 )
 {
@@ -167,7 +180,7 @@ void Foam::trackedParticle::hitSymmetryPlanePatch
 
 void Foam::trackedParticle::hitSymmetryPatch
 (
-    const symmetryPolyPatch&,
+    Cloud<trackedParticle>&,
     trackingData& td
 )
 {
@@ -178,8 +191,32 @@ void Foam::trackedParticle::hitSymmetryPatch
 
 void Foam::trackedParticle::hitCyclicPatch
 (
-    const cyclicPolyPatch&,
+    Cloud<trackedParticle>&,
     trackingData& td
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
+void Foam::trackedParticle::hitCyclicAMIPatch
+(
+    Cloud<trackedParticle>&,
+    trackingData& td,
+    const vector& direction
+)
+{
+    // Remove particle
+    td.keepParticle = false;
+}
+
+
+void Foam::trackedParticle::hitCyclicACMIPatch
+(
+    Cloud<trackedParticle>&,
+    trackingData& td,
+    const vector&
 )
 {
     // Remove particle
@@ -189,7 +226,7 @@ void Foam::trackedParticle::hitCyclicPatch
 
 void Foam::trackedParticle::hitProcessorPatch
 (
-    const processorPolyPatch&,
+    Cloud<trackedParticle>&,
     trackingData& td
 )
 {
@@ -200,19 +237,7 @@ void Foam::trackedParticle::hitProcessorPatch
 
 void Foam::trackedParticle::hitWallPatch
 (
-    const wallPolyPatch& wpp,
-    trackingData& td,
-    const tetIndices&
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-void Foam::trackedParticle::hitPatch
-(
-    const polyPatch& wpp,
+    Cloud<trackedParticle>&,
     trackingData& td
 )
 {
@@ -248,6 +273,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
     if (os.format() == IOstream::ASCII)
     {
         os  << static_cast<const particle&>(p)
+            << token::SPACE << p.start_
             << token::SPACE << p.end_
             << token::SPACE << p.level_
             << token::SPACE << p.i_
@@ -259,8 +285,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const trackedParticle& p)
         os  << static_cast<const particle&>(p);
         os.write
         (
-            reinterpret_cast<const char*>(&p.end_),
-            sizeof(p.end_) + sizeof(p.level_)
+            reinterpret_cast<const char*>(&p.start_),
+            sizeof(p.start_) + sizeof(p.end_) + sizeof(p.level_)
           + sizeof(p.i_) + sizeof(p.j_) + sizeof(p.k_)
         );
     }
