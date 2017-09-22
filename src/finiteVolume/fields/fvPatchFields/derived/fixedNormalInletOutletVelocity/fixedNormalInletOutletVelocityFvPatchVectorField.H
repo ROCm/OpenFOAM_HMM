@@ -104,7 +104,9 @@ class fixedNormalInletOutletVelocityFvPatchVectorField
 :
     public directionMixedFvPatchVectorField
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Flux field name
         word phiName_;
