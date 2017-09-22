@@ -171,7 +171,11 @@ public:
         label findIndex(const keyType&) const;
 
         //- Find patch index given a name
-        label findPatchID(const word& patchName) const;
+        label findPatchID
+        (
+            const word& patchName,
+            const bool allowNotFound = true
+        ) const;
 
         //- Find patch indices for a given polyPatch type
         template<class Type>

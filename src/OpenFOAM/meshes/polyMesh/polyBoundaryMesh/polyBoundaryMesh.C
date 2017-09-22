@@ -656,7 +656,11 @@ Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
 }
 
 
-Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
+Foam::label Foam::polyBoundaryMesh::findPatchID
+(
+    const word& patchName,
+    bool allowNotFound
+) const
 {
     const polyPatchList& patches = *this;
 
@@ -666,6 +670,20 @@ Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
         {
             return patchi;
         }
+    }
+
+    if (!allowNotFound)
+    {
+        string regionStr("");
+        if (mesh_.name() != polyMesh::defaultRegion)
+        {
+            regionStr = "in region '" + mesh_.name() + "' ";
+        }
+
+        FatalErrorInFunction
+            << "Patch '" << patchName << "' not found. "
+            << "Available patch names " << regionStr << "include: " << names()
+            << exit(FatalError);
     }
 
     // Patch not found
