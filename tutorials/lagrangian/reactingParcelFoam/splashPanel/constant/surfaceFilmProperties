@@ -33,7 +33,7 @@ thermoSingleLayerCoeffs
 
     filmViscosityModel liquid;
 
-    deltaWet    1e-4;
+    deltaWet    2e-4;
     hydrophilic no;
 
     turbulence  laminar;
