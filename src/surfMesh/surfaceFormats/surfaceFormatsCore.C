@@ -27,8 +27,7 @@ License
 
 #include "Time.H"
 #include "ListOps.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "surfMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

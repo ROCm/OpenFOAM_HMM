@@ -29,8 +29,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "momentOfInertia.H"
 #include "cartesianCS.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

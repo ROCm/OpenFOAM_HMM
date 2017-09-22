@@ -25,8 +25,7 @@ License
 
 #include "triSurface.H"
 #include "demandDrivenData.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "Time.H"
 #include "boundBox.H"
 #include "SortableList.H"

@@ -24,8 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOmanip.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "OSspecific.H"
 #include "ensightPartFaces.H"
 #include "ensightSerialOutput.H"

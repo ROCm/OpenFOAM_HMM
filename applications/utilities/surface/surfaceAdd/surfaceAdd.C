@@ -38,8 +38,7 @@ Description
 #include "argList.H"
 #include "fileName.H"
 #include "triSurface.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "triFace.H"
 #include "triFaceList.H"
 

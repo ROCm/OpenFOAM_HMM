@@ -35,7 +35,7 @@ SourceFiles
 #ifndef masterOFstream_H
 #define masterOFstream_H
 
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

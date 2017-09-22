@@ -34,7 +34,7 @@ SourceFiles
 #ifndef dummyISstream_H
 #define dummyISstream_H
 
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

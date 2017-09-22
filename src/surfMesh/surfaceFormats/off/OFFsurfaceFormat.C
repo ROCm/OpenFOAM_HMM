@@ -25,10 +25,9 @@ License
 
 #include "OFFsurfaceFormat.H"
 #include "clock.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "StringStream.H"
 #include "faceTraits.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

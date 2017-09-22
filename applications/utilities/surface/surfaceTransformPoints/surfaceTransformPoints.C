@@ -41,8 +41,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "boundBox.H"
 #include "transformField.H"
 #include "Pair.H"
