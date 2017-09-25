@@ -28,7 +28,7 @@ License
 #include "IFstream.H"
 #include "StringStream.H"
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <cxxabi.h>
 #include <execinfo.h>
 #include <dlfcn.h>

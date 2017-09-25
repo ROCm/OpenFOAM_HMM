@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Typedef
     Foam::doubleScalar
 
 Description
-    Double precision floating point scalar type.
+    Floating-point double precision scalar type.
 
 SourceFiles
     doubleScalar.C
@@ -59,47 +59,19 @@ static const doubleScalar doubleScalarROOTSMALL = 3.0e-8;
 static const doubleScalar doubleScalarVSMALL = 1.0e-300;
 static const doubleScalar doubleScalarROOTVSMALL = 1.0e-150;
 
-//- Read whole of buf as a scalar. Return true if succesful.
-inline bool readScalar(const char* buf, doubleScalar& s)
-{
-    char* endPtr;
-    s = strtod(buf, &endPtr);
-
-    return (*endPtr == '\0');
-}
 
 #define Scalar doubleScalar
 #define ScalarVGREAT doubleScalarVGREAT
 #define ScalarVSMALL doubleScalarVSMALL
 #define ScalarROOTVGREAT doubleScalarROOTVGREAT
 #define ScalarROOTVSMALL doubleScalarROOTVSMALL
-#define readScalar readDoubleScalar
+#define ScalarRead readDouble
+
 
 inline Scalar mag(const Scalar s)
 {
     return ::fabs(s);
 }
-
-#define transFunc(func)            \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func(s);              \
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "Scalar.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 inline Scalar hypot(const Scalar x, const Scalar y)
 {
@@ -121,18 +93,29 @@ inline Scalar yn(const int n, const Scalar s)
     return ::yn(n, s);
 }
 
+// Normal (double-precision) transcendental functions
+#define transFunc(func)            \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::func(s);              \
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "Scalar.H"
+
 #undef Scalar
 #undef ScalarVGREAT
 #undef ScalarVSMALL
 #undef ScalarROOTVGREAT
 #undef ScalarROOTVSMALL
-#undef readScalar
+#undef ScalarRead
 #undef transFunc
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

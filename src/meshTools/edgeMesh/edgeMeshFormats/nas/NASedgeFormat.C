@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,9 +103,9 @@ bool Foam::fileFormats::NASedgeFormat::read
         {
             edge e;
 
-            // label groupId = readLabel(IStringStream(line.substr(16,8))());
-            e[0] = readLabel(IStringStream(line.substr(24,8))());
-            e[1] = readLabel(IStringStream(line.substr(32,8))());
+            // label groupId = readLabel(line.substr(16,8));
+            e[0] = readLabel(line.substr(24,8));
+            e[1] = readLabel(line.substr(32,8));
 
             // discard groupID
             dynEdges.append(e);
@@ -114,19 +114,19 @@ bool Foam::fileFormats::NASedgeFormat::read
         {
             edge e;
 
-            // label groupId = readLabel(IStringStream(line.substr(16,8))());
-            e[0] = readLabel(IStringStream(line.substr(16,8))());
-            e[1] = readLabel(IStringStream(line.substr(24,8))());
+            // label groupId = readLabel(line.substr(16,8));
+            e[0] = readLabel(line.substr(16,8));
+            e[1] = readLabel(line.substr(24,8));
 
             // discard groupID
             dynEdges.append(e);
         }
         else if (cmd == "GRID")
         {
-            label index = readLabel(IStringStream(line.substr(8,8))());
-            scalar x = parseNASCoord(line.substr(24, 8));
-            scalar y = parseNASCoord(line.substr(32, 8));
-            scalar z = parseNASCoord(line.substr(40, 8));
+            label index = readLabel(line.substr(8,8));
+            scalar x = readNasScalar(line.substr(24, 8));
+            scalar y = readNasScalar(line.substr(32, 8));
+            scalar z = readNasScalar(line.substr(40, 8));
 
             pointId.append(index);
             dynPoints.append(point(x, y, z));
@@ -139,9 +139,9 @@ bool Foam::fileFormats::NASedgeFormat::read
             // GRID*      126   0 -5.55999875E+02 -5.68730474E+02
             // *         2.14897901E+02
 
-            label index = readLabel(IStringStream(line.substr(8,16))());
-            scalar x = parseNASCoord(line.substr(40, 16));
-            scalar y = parseNASCoord(line.substr(56, 16));
+            label index = readLabel(line.substr(8,16));
+            scalar x = readNasScalar(line.substr(40, 16));
+            scalar y = readNasScalar(line.substr(56, 16));
 
             is.getLine(line);
             if (line[0] != '*')
@@ -153,7 +153,7 @@ bool Foam::fileFormats::NASedgeFormat::read
                     << "File:" << is.name() << " line:" << is.lineNumber()
                     << exit(FatalError);
             }
-            scalar z = parseNASCoord(line.substr(8, 16));
+            scalar z = readNasScalar(line.substr(8, 16));
 
             pointId.append(index);
             dynPoints.append(point(x, y, z));

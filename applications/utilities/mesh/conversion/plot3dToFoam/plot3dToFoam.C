@@ -93,8 +93,8 @@ int main(int argc, char *argv[])
 
     const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
-    bool readBlank = !args.optionFound("noBlank");
-    bool singleBlock = args.optionFound("singleBlock");
+    const bool readBlank = !args.optionFound("noBlank");
+    const bool singleBlock = args.optionFound("singleBlock");
     scalar twoDThickness = -1;
     if (args.optionReadIfPresent("2D", twoDThickness))
     {

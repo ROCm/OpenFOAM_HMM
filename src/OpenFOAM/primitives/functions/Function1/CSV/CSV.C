@@ -43,7 +43,7 @@ Foam::label Foam::Function1Types::CSV<Foam::label>::readValue
             << exit(FatalError);
     }
 
-    return readLabel(IStringStream(splitted[componentColumns_[0]])());
+    return readLabel(splitted[componentColumns_[0]]);
 }
 
 
@@ -61,7 +61,7 @@ Foam::scalar Foam::Function1Types::CSV<Foam::scalar>::readValue
             << exit(FatalError);
     }
 
-    return readScalar(IStringStream(splitted[componentColumns_[0]])());
+    return readScalar(splitted[componentColumns_[0]]);
 }
 
 
@@ -70,18 +70,17 @@ Type Foam::Function1Types::CSV<Type>::readValue(const List<string>& splitted)
 {
     Type result;
 
-    for (label i = 0; i < pTraits<Type>::nComponents; i++)
+    for (label i = 0; i < pTraits<Type>::nComponents; ++i)
     {
         if (componentColumns_[i] >= splitted.size())
         {
             FatalErrorInFunction
-            << "No column " << componentColumns_[i] << " in "
+                << "No column " << componentColumns_[i] << " in "
                 << splitted << endl
                 << exit(FatalError);
         }
 
-        result[i] =
-        readScalar(IStringStream(splitted[componentColumns_[i]])());
+        result[i] = readScalar(splitted[componentColumns_[i]]);
     }
 
     return result;
@@ -189,7 +188,7 @@ void Foam::Function1Types::CSV<Type>::read()
             break;
         }
 
-        scalar x = readScalar(IStringStream(splitted[refColumn_])());
+        scalar x = readScalar(splitted[refColumn_]);
         Type value = readValue(splitted);
 
         values.append(Tuple2<scalar,Type>(x, value));

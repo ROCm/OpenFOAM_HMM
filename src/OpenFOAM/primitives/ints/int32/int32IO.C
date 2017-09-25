@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,29 +24,69 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "int32.H"
-#include "stringOps.H"
+#include "error.H"
+#include "parsing.H"
 #include "IOstreams.H"
-
-#include <inttypes.h>
-#include <cerrno>
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::word Foam::name(const char* fmt, const int32_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
-Foam::word Foam::name(const std::string& fmt, const int32_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
+#include <cinttypes>
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, int32_t& i)
+int32_t Foam::readInt32(const char* buf)
+{
+    char *endptr = nullptr;
+    errno = 0;
+    const intmax_t parsed = ::strtoimax(buf, &endptr, 10);
+
+    const int32_t val = int32_t(parsed);
+
+    if (parsed < INT32_MIN || parsed > INT32_MAX)
+    {
+        // Range error
+        errno = ERANGE;
+    }
+
+    const parsing::errorType err = parsing::checkConversion(buf, endptr);
+    if (err != parsing::errorType::NONE)
+    {
+        FatalIOErrorInFunction("unknown")
+            << parsing::errorNames[err] << " '" << buf << "'"
+            << exit(FatalIOError);
+    }
+
+    return val;
+}
+
+
+bool Foam::readInt32(const char* buf, int32_t& val)
+{
+    char *endptr = nullptr;
+    errno = 0;
+    const intmax_t parsed = ::strtoimax(buf, &endptr, 10);
+
+    val = int32_t(parsed);
+
+    if (parsed < INT32_MIN || parsed > INT32_MAX)
+    {
+        // Range error
+        errno = ERANGE;
+    }
+
+    const parsing::errorType err = parsing::checkConversion(buf, endptr);
+    if (err != parsing::errorType::NONE)
+    {
+        #ifdef FULLDEBUG
+        IOWarningInFunction("unknown")
+            << parsing::errorNames[err] << " '" << buf << "'"
+            << endl;
+        #endif
+        return false;
+    }
+
+    return true;
+}
+
+
+Foam::Istream& Foam::operator>>(Istream& is, int32_t& val)
 {
     token t(is);
 
@@ -58,7 +98,7 @@ Foam::Istream& Foam::operator>>(Istream& is, int32_t& i)
 
     if (t.isLabel())
     {
-        i = int32_t(t.labelToken());
+        val = int32_t(t.labelToken());
     }
     else
     {
@@ -84,35 +124,23 @@ int32_t Foam::readInt32(Istream& is)
 }
 
 
-bool Foam::read(const char* buf, int32_t& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const int32_t val)
 {
-    char *endptr = nullptr;
-    errno = 0;
-    intmax_t l = strtoimax(buf, &endptr, 10);
-    s = int32_t(l);
-    return
-        (*endptr == 0) && (errno == 0)
-     && (l >= INT32_MIN) && (l <= INT32_MAX);
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const int32_t i)
-{
-    os.write(label(i));
+    os.write(label(val));
     os.check(FUNCTION_NAME);
     return os;
 }
 
 
 #if WM_ARCH_OPTION == 32
-Foam::Istream& Foam::operator>>(Istream& is, long& i)
+Foam::Istream& Foam::operator>>(Istream& is, long& val)
 {
-    return operator>>(is, reinterpret_cast<int32_t&>(i));
+    return operator>>(is, reinterpret_cast<int32_t&>(val));
 }
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const long i)
+Foam::Ostream& Foam::operator<<(Ostream& os, const long val)
 {
-    os << int32_t(i);
+    os << int32_t(val);
     return os;
 }
 #endif

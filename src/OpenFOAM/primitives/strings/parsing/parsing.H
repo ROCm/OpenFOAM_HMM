@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,62 +21,62 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Class
-    Foam::fileFormats::NASCore
+Namespace
+    Foam::parsing
 
 Description
-    Core routines used when reading/writing NASTRAN files.
+    Collection of static functions and data related to parsing
 
 SourceFiles
-    NASCore.C
+    parsing.C
+    parsingI.H
 
 \*---------------------------------------------------------------------------*/
+#ifndef parsing_H
+#define parsing_H
 
-#ifndef NASCore_H
-#define NASCore_H
-
-#include "scalar.H"
-#include "string.H"
+#include "Enum.H"
+#include <cerrno>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
 
 /*---------------------------------------------------------------------------*\
-                    Class fileFormats::NASCore Declaration
+                        Namespace parsing Declaration
 \*---------------------------------------------------------------------------*/
 
-class NASCore
+namespace parsing
 {
-public:
+  // Enumerations
 
-    // Public Member Functions
-
-        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
-        static scalar readNasScalar(const string& str);
-
-        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
-        // \deprecated use readNasScalar instead (deprecated Sep 2017)
-        inline static scalar parseNASCoord(const string& str)
-        {
-            return readNasScalar(str);
-        }
+    //- Enumeration for possible parsing error
+    enum class errorType
+    {
+        NONE = 0,         //!< No error encountered
+        GENERAL = 1,      //!< General parsing error
+        TRAILING = 2,     //!< Trailing content detected
+    };
 
 
-    // Constructors
+    //- Strings corresponding to the errorType
+    extern const Foam::Enum<errorType> errorNames;
 
-        //- Construct null
-        NASCore();
-};
+    //- Sanity check after strtof, strtod, etc.
+    //  Should set errno = 0 prior to the conversion.
+    inline errorType checkConversion(const char* buf, char* endptr);
 
+
+} // End namespace parsing
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fileFormats
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "parsingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

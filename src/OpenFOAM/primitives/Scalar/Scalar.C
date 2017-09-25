@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,9 +42,9 @@ const Scalar pTraits<Scalar>::rootMax = ScalarROOTVGREAT;
 
 const char* const pTraits<Scalar>::componentNames[] = { "" };
 
-pTraits<Scalar>::pTraits(const Scalar& p)
+pTraits<Scalar>::pTraits(const Scalar& val)
 :
-    p_(p)
+    p_(val)
 {}
 
 
@@ -54,7 +54,7 @@ pTraits<Scalar>::pTraits(Istream& is)
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IO/Conversion * * * * * * * * * * * * * * * //
 
 word name(const Scalar val)
 {
@@ -76,18 +76,59 @@ word name(const std::string& fmt, const Scalar val)
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Scalar readScalar(Istream& is)
+Scalar ScalarRead(const char* buf)
 {
-    Scalar rs;
-    is  >> rs;
+    char* endptr = nullptr;
+    errno = 0;
 
-    return rs;
+    const Scalar val = ScalarConvert(buf, &endptr);
+
+    const parsing::errorType err = parsing::checkConversion(buf, endptr);
+    if (err != parsing::errorType::NONE)
+    {
+        FatalIOErrorInFunction("unknown")
+            << parsing::errorNames[err] << " '" << buf << "'"
+            << exit(FatalIOError);
+    }
+
+    return val;
 }
 
 
-Istream& operator>>(Istream& is, Scalar& s)
+bool readScalar(const char* buf, Scalar& val)
+{
+    char* endptr = nullptr;
+    errno = 0;
+
+    val = ScalarConvert(buf, &endptr);
+
+    const parsing::errorType err = parsing::checkConversion(buf, endptr);
+    if (err != parsing::errorType::NONE)
+    {
+        #ifdef FULLDEBUG
+        IOWarningInFunction("unknown")
+            << parsing::errorNames[err] << " '" << buf << "'"
+            << endl;
+        #endif
+        return false;
+    }
+
+    return true;
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Scalar ScalarRead(Istream& is)
+{
+    Scalar val;
+    is  >> val;
+
+    return val;
+}
+
+
+Istream& operator>>(Istream& is, Scalar& val)
 {
     token t(is);
 
@@ -99,7 +140,7 @@ Istream& operator>>(Istream& is, Scalar& s)
 
     if (t.isNumber())
     {
-        s = t.number();
+        val = t.number();
     }
     else
     {
@@ -116,9 +157,9 @@ Istream& operator>>(Istream& is, Scalar& s)
 }
 
 
-Ostream& operator<<(Ostream& os, const Scalar s)
+Ostream& operator<<(Ostream& os, const Scalar val)
 {
-    os.write(s);
+    os.write(val);
     os.check(FUNCTION_NAME);
     return os;
 }

@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,44 +21,59 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "uint32.H"
-#include "stringOps.H"
+#include "argList.H"
+#include "IOstreams.H"
+#include "StringStream.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-Foam::word Foam::name(const char* fmt, const uint32_t val)
+int main(int argc, char *argv[])
 {
-    return stringOps::name(fmt, val);
-}
+    argList::noBanner();
+    argList::noParallel();
+    argList::noFunctionObjects();
+    argList::removeOption("case");
 
+    argList::addOption("label", "value", "Test parsing of label");
+    argList::addOption("scalar", "value", "Test parsing of scalar");
 
-Foam::word Foam::name(const std::string& fmt, const uint32_t val)
-{
-    return stringOps::name(fmt, val);
-}
+    argList args(argc, argv);
 
+    label ival;
+    scalar sval;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    Info<< nl;
 
-const uint32_t Foam::pTraits<uint32_t>::zero = 0;
-const uint32_t Foam::pTraits<uint32_t>::one = 1;
-const uint32_t Foam::pTraits<uint32_t>::min = 0;
-const uint32_t Foam::pTraits<uint32_t>::max = UINT32_MAX;
-const uint32_t Foam::pTraits<uint32_t>::rootMin = 0;
-const uint32_t Foam::pTraits<uint32_t>::rootMax = pTraits<uint32_t>::max;
+    Info<< "-label = " << flush;
+    if (args.optionReadIfPresent("label", ival))
+    {
+        Info<< ival << endl;
+    }
+    else
+    {
+        Info<< "not specified" << endl;
+    }
 
-const char* const Foam::pTraits<uint32_t>::componentNames[] = { "" };
+    Info<< "-scalar = " << flush;
+    if (args.optionReadIfPresent("scalar", sval))
+    {
+        Info<< sval << endl;
+    }
+    else
+    {
+        Info<< "not specified" << endl;
+    }
 
-Foam::pTraits<uint32_t>::pTraits(const uint32_t& val)
-:
-    p_(val)
-{}
+    Info<< "\nEnd\n" << endl;
 
-Foam::pTraits<uint32_t>::pTraits(Istream& is)
-{
-    is >> p_;
+    return 0;
 }
 
 

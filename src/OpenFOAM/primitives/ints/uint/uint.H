@@ -25,7 +25,7 @@ Primitive
     uint
 
 Description
-    System uinteger
+    System unsigned integer
 
 SourceFiles
     uintIO.C
@@ -67,7 +67,8 @@ MAXMIN(uint64_t, uint64_t, uint64_t)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-unsigned int readUint(Istream&);
+//- Read unsigned int from stream
+unsigned int readUint(Istream& is);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

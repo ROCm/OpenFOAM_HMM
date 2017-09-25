@@ -25,7 +25,7 @@ Primitive
     int
 
 Description
-    System integer
+    System signed integer
 
 SourceFiles
     intIO.C
@@ -67,7 +67,30 @@ MAXMIN(int64_t, int64_t, int64_t)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-int readInt(Istream&);
+//- Read int from stream
+int readInt(Istream& is);
+
+//- Parse entire buffer as an int, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+int readInt(const char* buf);
+
+//- Parse entire string as an int, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+inline int readInt(const std::string& str)
+{
+    return readInt(str.c_str());
+}
+
+//- Read entire buffer as an int, skipping leading/trailing whitespace.
+//  \return True if successful.
+bool readInt(const char* buf, int& val);
+
+//- Read entire string as an int32_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+inline bool readInt(const std::string& str, int& val)
+{
+    return readInt(str.c_str(), val);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
