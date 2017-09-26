@@ -131,7 +131,7 @@ Foam::OFstream::OFstream
     OSstream
     (
         *allocatedPtr_,
-        "OFstream.sinkFile_",
+        pathname,
         format,
         version,
         compression
