@@ -38,10 +38,8 @@ void Foam::faPatchMapper::calcAddressing() const
 {
     if (directAddrPtr_)
     {
-        FatalErrorIn
-        (
-            "void faPatchMapper::calcAddressing() const)"
-        )   << "Addressing already calculated"
+        FatalErrorInFunction
+            << "Addressing already calculated"
             << abort(FatalError);
     }
 
@@ -59,7 +57,7 @@ void Foam::faPatchMapper::calcAddressing() const
 
     const labelList& reverseFaceMap = mpm_.reverseFaceMap();
 
-    forAll (oldEdgeFaces_, oefI)
+    forAll(oldEdgeFaces_, oefI)
     {
         if (reverseFaceMap[oldEdgeFaces_[oefI]] > -1)
         {
@@ -71,7 +69,7 @@ void Foam::faPatchMapper::calcAddressing() const
     // Go through new edgeFaces and for each edge try to locate old index
     const labelList& ef = patch_.edgeFaces();
 
-    forAll (ef, efI)
+    forAll(ef, efI)
     {
         if (edgeIndexLookup.found(ef[efI]))
         {
@@ -98,7 +96,6 @@ void Foam::faPatchMapper::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::faPatchMapper::faPatchMapper
 (
     const faPatch& patch,
@@ -110,7 +107,7 @@ Foam::faPatchMapper::faPatchMapper
     sizeBeforeMapping_(patch.size()),
     oldEdgeFaces_(patch.edgeFaces()),
     hasUnmapped_(false),
-    directAddrPtr_(NULL)
+    directAddrPtr_(nullptr)
 {}
 
 
@@ -137,10 +134,8 @@ const Foam::labelUList& Foam::faPatchMapper::directAddressing() const
 
 const Foam::labelListList& Foam::faPatchMapper::addressing() const
 {
-    FatalErrorIn
-    (
-        "const labelListList& faPatchMapper::addressing() const"
-    )   << "Requested interpolative addressing for a direct mapper."
+    FatalErrorInFunction
+        << "Requested interpolative addressing for a direct mapper."
         << abort(FatalError);
 
     return labelListList::null();
@@ -149,10 +144,8 @@ const Foam::labelListList& Foam::faPatchMapper::addressing() const
 
 const Foam::scalarListList& Foam::faPatchMapper::weights() const
 {
-    FatalErrorIn
-    (
-        "const scalarListList& faPatchMapper::weights() const"
-    )   << "Requested interpolative weights for a direct mapper."
+    FatalErrorInFunction
+        << "Requested interpolative weights for a direct mapper."
         << abort(FatalError);
 
     return scalarListList::null();

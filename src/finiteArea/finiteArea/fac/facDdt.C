@@ -42,7 +42,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 ddt
 (
     const dimensioned<Type> dt,
@@ -58,7 +58,7 @@ ddt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 ddt
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -73,7 +73,7 @@ ddt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 ddt
 (
     const dimensionedScalar& rho,
@@ -92,7 +92,7 @@ ddt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 ddt
 (
     const areaScalarField& rho,

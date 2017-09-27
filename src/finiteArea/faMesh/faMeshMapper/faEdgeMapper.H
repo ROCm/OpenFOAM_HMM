@@ -89,7 +89,6 @@ class faEdgeMapper
         //- Disallow default bitwise assignment
         void operator=(const faEdgeMapper&);
 
-
         //- Calculate addressing
         void calcAddressing() const;
 
@@ -99,19 +98,16 @@ class faEdgeMapper
 
 public:
 
-    // Constructors
-
-        //- Construct from components
-        faEdgeMapper
-        (
-            const faMesh& mesh,
-            const mapPolyMesh& mpm
-        );
+    //- Construct from components
+    faEdgeMapper
+    (
+        const faMesh& mesh,
+        const mapPolyMesh& mpm
+    );
 
 
-    // Destructor
-
-        virtual ~faEdgeMapper();
+    //- Destructor
+    virtual ~faEdgeMapper();
 
 
     // Member Functions

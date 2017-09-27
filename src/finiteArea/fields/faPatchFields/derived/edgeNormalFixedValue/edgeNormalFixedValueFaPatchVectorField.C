@@ -128,7 +128,6 @@ void Foam::edgeNormalFixedValueFaPatchVectorField::updateCoeffs()
         return;
     }
 
-    // Bug fix: update for moving mesh.  HJ, 15/Oct/2010
     operator==(refValue_*patch().edgeNormals());
 }
 

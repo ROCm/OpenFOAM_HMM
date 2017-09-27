@@ -98,9 +98,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new symmetryFaPatchField<Type>(*this)
             );
@@ -114,12 +114,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new symmetryFaPatchField<Type>(*this, iF)
             );
@@ -134,7 +134,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "symmetryFaPatchField.C"
+    #include "symmetryFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

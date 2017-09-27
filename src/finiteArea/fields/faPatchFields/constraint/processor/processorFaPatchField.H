@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    processorFvPatchField
+    Foam::processorFaPatchField
 
 Description
 
@@ -51,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class processorFaPatchField Declaration
+                    Class processorFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -110,9 +110,9 @@ public:
         processorFaPatchField(const processorFaPatchField<Type>&);
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new processorFaPatchField<Type>(*this)
             );
@@ -126,12 +126,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new processorFaPatchField<Type>(*this, iF)
             );
@@ -161,7 +161,7 @@ public:
             }
 
             //- Return neighbour field given internal field
-            tmp<Field<Type> > patchNeighbourField() const;
+            tmp<Field<Type>> patchNeighbourField() const;
 
 
         // Evaluation functions
@@ -173,7 +173,7 @@ public:
             virtual void evaluate(const Pstream::commsTypes commsType);
 
             //- Return patch-normal gradient
-            virtual tmp<Field<Type> > snGrad() const;
+            virtual tmp<Field<Type>> snGrad() const;
 
         // Coupled interface functionality
 
@@ -276,7 +276,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "processorFaPatchField.C"
+    #include "processorFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

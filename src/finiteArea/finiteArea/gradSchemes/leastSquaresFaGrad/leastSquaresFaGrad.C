@@ -63,7 +63,7 @@ leastSquaresFaGrad<Type>::grad
 
     const faMesh& mesh = vsf.mesh();
 
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > tlsGrad
+    tmp<GeometricField<GradType, faPatchField, areaMesh>> tlsGrad
     (
         new GeometricField<GradType, faPatchField, areaMesh>
         (

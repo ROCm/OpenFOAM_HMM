@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    gaussGrad
+    Foam::fa::gaussGrad
 
 Description
     Basic second-order gradient scheme using face-interpolation
@@ -54,7 +54,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class gaussGrad Declaration
+                          Class gaussGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -64,16 +64,16 @@ class gaussGrad
 {
     // Private data
 
-        tmp<edgeInterpolationScheme<Type> > tinterpScheme_;
+        tmp<edgeInterpolationScheme<Type>> tinterpScheme_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        gaussGrad(const gaussGrad&);
+        gaussGrad(const gaussGrad&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const gaussGrad&);
+        void operator=(const gaussGrad&) = delete;
 
 
 public:
@@ -95,12 +95,12 @@ public:
         gaussGrad(const faMesh& mesh, Istream& is)
         :
             gradScheme<Type>(mesh),
-            tinterpScheme_(NULL)
+            tinterpScheme_(nullptr)
         {
             if (is.eof())
             {
                 tinterpScheme_ =
-                    tmp<edgeInterpolationScheme<Type> >
+                    tmp<edgeInterpolationScheme<Type>>
                     (
                         new linearEdgeInterpolation<Type>(mesh)
                     );
@@ -108,7 +108,7 @@ public:
             else
             {
                 tinterpScheme_ =
-                    tmp<edgeInterpolationScheme<Type> >
+                    tmp<edgeInterpolationScheme<Type>>
                     (
                         edgeInterpolationScheme<Type>::New(mesh, is)
                     );
@@ -151,7 +151,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussFaGrad.C"
+    #include "gaussFaGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

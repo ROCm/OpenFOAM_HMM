@@ -27,15 +27,10 @@ License
 
 #include "cyclicFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cyclicFaPatchField<Type>::cyclicFaPatchField
+Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -47,7 +42,7 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
 
 
 template<class Type>
-cyclicFaPatchField<Type>::cyclicFaPatchField
+Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
 (
     const cyclicFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -58,18 +53,10 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
     coupledFaPatchField<Type>(ptf, p, iF, mapper),
     cyclicPatch_(refCast<const cyclicFaPatch>(p))
 {
-    if (!isType<cyclicFaPatch>(this->patch()))
+    if (!isA<cyclicFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "cyclicFaPatchField<Type>::cyclicFaPatchField\n"
-            "(\n"
-            "    const cyclicFaPatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, areaMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+        FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -80,7 +67,7 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
 
 
 template<class Type>
-cyclicFaPatchField<Type>::cyclicFaPatchField
+Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -90,18 +77,10 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
     coupledFaPatchField<Type>(p, iF, dict),
     cyclicPatch_(refCast<const cyclicFaPatch>(p))
 {
-    if (!isType<cyclicFaPatch>(p))
+    if (!isA<cyclicFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "cyclicFaPatchField<Type>::cyclicFaPatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -114,7 +93,7 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
 
 
 template<class Type>
-cyclicFaPatchField<Type>::cyclicFaPatchField
+Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
 (
     const cyclicFaPatchField<Type>& ptf
 )
@@ -126,7 +105,7 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
 
 
 template<class Type>
-cyclicFaPatchField<Type>::cyclicFaPatchField
+Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
 (
     const cyclicFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -140,19 +119,20 @@ cyclicFaPatchField<Type>::cyclicFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > cyclicFaPatchField<Type>::patchNeighbourField() const
+Foam::tmp<Foam::Field<Type>>
+Foam::cyclicFaPatchField<Type>::patchNeighbourField() const
 {
     const Field<Type>& iField = this->internalField();
     const labelUList& faceCells = cyclicPatch_.faceCells();
 
-    tmp<Field<Type> > tpnf(new Field<Type>(this->size()));
+    tmp<Field<Type>> tpnf(new Field<Type>(this->size()));
     Field<Type>& pnf = tpnf.ref();
 
     label sizeby2 = this->size()/2;
 
     if (doTransform())
     {
-        for (label facei=0; facei<sizeby2; facei++)
+        for (label facei=0; facei<sizeby2; ++facei)
         {
             pnf[facei] = transform
             (
@@ -167,7 +147,7 @@ tmp<Field<Type> > cyclicFaPatchField<Type>::patchNeighbourField() const
     }
     else
     {
-        for (label facei=0; facei<sizeby2; facei++)
+        for (label facei=0; facei<sizeby2; ++facei)
         {
             pnf[facei] = iField[faceCells[facei + sizeby2]];
             pnf[facei + sizeby2] = iField[faceCells[facei]];
@@ -179,7 +159,7 @@ tmp<Field<Type> > cyclicFaPatchField<Type>::patchNeighbourField() const
 
 
 template<class Type>
-void cyclicFaPatchField<Type>::updateInterfaceMatrix
+void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
     const bool add,
@@ -194,7 +174,7 @@ void cyclicFaPatchField<Type>::updateInterfaceMatrix
     label sizeby2 = this->size()/2;
     const labelUList& faceCells = cyclicPatch_.faceCells();
 
-    for (label facei = 0; facei < sizeby2; facei++)
+    for (label facei = 0; facei < sizeby2; ++facei)
     {
         pnf[facei] = psiInternal[faceCells[facei + sizeby2]];
         pnf[facei + sizeby2] = psiInternal[faceCells[facei]];
@@ -222,7 +202,7 @@ void cyclicFaPatchField<Type>::updateInterfaceMatrix
 
 
 template<class Type>
-void cyclicFaPatchField<Type>::updateInterfaceMatrix
+void Foam::cyclicFaPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
     const bool add,
@@ -236,7 +216,7 @@ void cyclicFaPatchField<Type>::updateInterfaceMatrix
     label sizeby2 = this->size()/2;
     const labelUList& faceCells = cyclicPatch_.faceCells();
 
-    for (label facei = 0; facei < sizeby2; facei++)
+    for (label facei = 0; facei < sizeby2; ++facei)
     {
         pnf[facei] = psiInternal[faceCells[facei + sizeby2]];
         pnf[facei + sizeby2] = psiInternal[faceCells[facei]];
@@ -259,9 +239,5 @@ void cyclicFaPatchField<Type>::updateInterfaceMatrix
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

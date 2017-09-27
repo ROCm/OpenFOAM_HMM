@@ -27,15 +27,10 @@ License
 
 #include "coupledFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-coupledFaPatchField<Type>::coupledFaPatchField
+Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -47,7 +42,7 @@ coupledFaPatchField<Type>::coupledFaPatchField
 
 
 template<class Type>
-coupledFaPatchField<Type>::coupledFaPatchField
+Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -60,7 +55,7 @@ coupledFaPatchField<Type>::coupledFaPatchField
 
 
 template<class Type>
-coupledFaPatchField<Type>::coupledFaPatchField
+Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const coupledFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -74,7 +69,7 @@ coupledFaPatchField<Type>::coupledFaPatchField
 
 
 template<class Type>
-coupledFaPatchField<Type>::coupledFaPatchField
+Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -87,7 +82,7 @@ coupledFaPatchField<Type>::coupledFaPatchField
 
 
 template<class Type>
-coupledFaPatchField<Type>::coupledFaPatchField
+Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const coupledFaPatchField<Type>& ptf
 )
@@ -98,7 +93,7 @@ coupledFaPatchField<Type>::coupledFaPatchField
 
 
 template<class Type>
-coupledFaPatchField<Type>::coupledFaPatchField
+Foam::coupledFaPatchField<Type>::coupledFaPatchField
 (
     const coupledFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -112,7 +107,7 @@ coupledFaPatchField<Type>::coupledFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > coupledFaPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type>> Foam::coupledFaPatchField<Type>::snGrad() const
 {
     return
         (patchNeighbourField() - this->patchInternalField())
@@ -121,7 +116,7 @@ tmp<Field<Type> > coupledFaPatchField<Type>::snGrad() const
 
 
 template<class Type>
-void coupledFaPatchField<Type>::initEvaluate(const Pstream::commsTypes)
+void Foam::coupledFaPatchField<Type>::initEvaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -131,7 +126,7 @@ void coupledFaPatchField<Type>::initEvaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-void coupledFaPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::coupledFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     Field<Type>::operator=
     (
@@ -142,7 +137,8 @@ void coupledFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > coupledFaPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::coupledFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>& w
 ) const
@@ -152,7 +148,8 @@ tmp<Field<Type> > coupledFaPatchField<Type>::valueInternalCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > coupledFaPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::coupledFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>& w
 ) const
@@ -162,29 +159,27 @@ tmp<Field<Type> > coupledFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > coupledFaPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::coupledFaPatchField<Type>::gradientInternalCoeffs() const
 {
     return -Type(pTraits<Type>::one)*this->patch().deltaCoeffs();
 }
 
 
 template<class Type>
-tmp<Field<Type> > coupledFaPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::coupledFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return -gradientInternalCoeffs();
 }
 
 
 template<class Type>
-void coupledFaPatchField<Type>::write(Ostream& os) const
+void Foam::coupledFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

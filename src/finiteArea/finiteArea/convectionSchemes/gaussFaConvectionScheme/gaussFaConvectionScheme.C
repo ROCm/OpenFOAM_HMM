@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "gaussFaConvectionScheme.H"
@@ -44,7 +42,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 gaussConvectionScheme<Type>::flux
 (
     const edgeScalarField& faceFlux,
@@ -56,7 +54,7 @@ gaussConvectionScheme<Type>::flux
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 gaussConvectionScheme<Type>::famDiv
 (
     const edgeScalarField& faceFlux,
@@ -66,7 +64,7 @@ gaussConvectionScheme<Type>::famDiv
     tmp<edgeScalarField> tweights = tinterpScheme_().weights(vf);
     const edgeScalarField& weights = tweights();
 
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -109,14 +107,14 @@ gaussConvectionScheme<Type>::famDiv
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 gaussConvectionScheme<Type>::facDiv
 (
     const edgeScalarField& faceFlux,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 ) const
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tConvection
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tConvection
     (
         fac::edgeIntegrate(flux(faceFlux, vf))
     );

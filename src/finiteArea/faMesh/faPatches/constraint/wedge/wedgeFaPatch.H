@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    wedgeFaPatch
+    Foam::wedgeFaPatch
 
 Description
     Wedge front and back plane patch.
@@ -70,28 +70,25 @@ class wedgeFaPatch
         //- Finde axis point
         void findAxisPoint() const;
 
+
 public:
 
     //- Runtime type information
     TypeName("wedge");
 
-
-    // Constructors
-
-        //- Construct from dictionary
-        wedgeFaPatch
-        (
-            const word& name,
-            const dictionary& dict,
-            const label index,
-            const faBoundaryMesh& bm
-        );
+    //- Construct from dictionary
+    wedgeFaPatch
+    (
+        const word& name,
+        const dictionary& dict,
+        const label index,
+        const faBoundaryMesh& bm
+    );
 
 
-    // Destructor
-
-        virtual ~wedgeFaPatch()
-        {}
+    //- Destructor
+    virtual ~wedgeFaPatch()
+    {}
 
 
     // Member functions
@@ -125,7 +122,7 @@ public:
             //- Return axis point label
             label axisPoint() const
             {
-                if(axisPoint_ == -1 && !axisPointChecked_)
+                if (axisPoint_ == -1 && !axisPointChecked_)
                 {
                     findAxisPoint();
                 }

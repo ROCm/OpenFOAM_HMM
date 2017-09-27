@@ -52,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class cyclicFaPatchField Declaration
+                     Class cyclicFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -71,7 +71,7 @@ class cyclicFaPatchField
 
         //- Return neighbour side field given internal fields
         template<class Type2>
-        tmp<Field<Type2> > neighbourSideField
+        tmp<Field<Type2>> neighbourSideField
         (
             const Field<Type2>&
         ) const;
@@ -116,9 +116,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new cyclicFaPatchField<Type>(*this)
             );
@@ -132,12 +132,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new cyclicFaPatchField<Type>(*this, iF)
             );
@@ -158,7 +158,7 @@ public:
         // Evaluation functions
 
             //- Return neighbour coupled given internal cell data
-            virtual tmp<Field<Type> > patchNeighbourField() const;
+            virtual tmp<Field<Type>> patchNeighbourField() const;
 
 
         // Coupled interface functionality
@@ -230,7 +230,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "cyclicFaPatchField.C"
+    #include "cyclicFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

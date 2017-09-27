@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite area calculus div schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fa.H"
@@ -45,7 +42,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<divScheme<Type> > divScheme<Type>::New
+tmp<divScheme<Type>> divScheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData
@@ -53,37 +50,30 @@ tmp<divScheme<Type> > divScheme<Type>::New
 {
     if (fa::debug)
     {
-        Info<< "divScheme<Type>::New(const faMesh&, Istream&) : "
-               "constructing divScheme<Type>"
+        InfoInFunction
+            << "constructing divScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "divScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Div scheme not specified" << endl << endl
-            << "Valid div schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Div scheme not specified" << nl << nl
+            << "Valid div schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorIn
-        (
-            "divScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Unknown div scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown div scheme "
             << schemeName << nl << nl
-            << "Valid div schemes are :" << endl
+            << "Valid div schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -97,9 +87,6 @@ tmp<divScheme<Type> > divScheme<Type>::New
 template<class Type>
 divScheme<Type>::~divScheme()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

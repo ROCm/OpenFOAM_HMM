@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    gaussConvectionScheme
+    Foam::fa::gaussConvectionScheme
 
 Description
     Basic second-order convection using face-gradients and Gauss' theorem.
@@ -39,6 +39,7 @@ SourceFiles
 #define gaussFaConvectionScheme_H
 
 #include "faConvectionScheme.H"
+#include "edgeInterpolationScheme.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class gaussConvectionScheme Declaration
+                    Class gaussConvectionScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -61,7 +62,8 @@ class gaussConvectionScheme
 {
     // Private data
 
-        tmp<edgeInterpolationScheme<Type> > tinterpScheme_;
+        tmp<edgeInterpolationScheme<Type>> tinterpScheme_;
+
 
     // Private Member Functions
 
@@ -85,7 +87,7 @@ public:
         (
             const faMesh& mesh,
             const edgeScalarField& faceFlux,
-            const tmp<edgeInterpolationScheme<Type> >& scheme
+            const tmp<edgeInterpolationScheme<Type>>& scheme
         )
         :
             convectionScheme<Type>(mesh, faceFlux),
@@ -110,19 +112,19 @@ public:
 
     // Member Functions
 
-        tmp<GeometricField<Type, faePatchField, edgeMesh> > flux
+        tmp<GeometricField<Type, faePatchField, edgeMesh>> flux
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) const;
 
-        tmp<faMatrix<Type> > famDiv
+        tmp<faMatrix<Type>> famDiv
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) const;
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDiv
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDiv
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -141,7 +143,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussFaConvectionScheme.C"
+    #include "gaussFaConvectionScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

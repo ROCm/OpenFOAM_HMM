@@ -27,15 +27,10 @@ License
 
 #include "slipFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-slipFaPatchField<Type>::slipFaPatchField
+Foam::slipFaPatchField<Type>::slipFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -46,7 +41,7 @@ slipFaPatchField<Type>::slipFaPatchField
 
 
 template<class Type>
-slipFaPatchField<Type>::slipFaPatchField
+Foam::slipFaPatchField<Type>::slipFaPatchField
 (
     const slipFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -59,7 +54,7 @@ slipFaPatchField<Type>::slipFaPatchField
 
 
 template<class Type>
-slipFaPatchField<Type>::slipFaPatchField
+Foam::slipFaPatchField<Type>::slipFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -71,7 +66,7 @@ slipFaPatchField<Type>::slipFaPatchField
 
 
 template<class Type>
-slipFaPatchField<Type>::slipFaPatchField
+Foam::slipFaPatchField<Type>::slipFaPatchField
 (
     const slipFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -82,7 +77,7 @@ slipFaPatchField<Type>::slipFaPatchField
 
 
 template<class Type>
-slipFaPatchField<Type>::slipFaPatchField
+Foam::slipFaPatchField<Type>::slipFaPatchField
 (
     const slipFaPatchField<Type>& ptf
 )
@@ -90,9 +85,5 @@ slipFaPatchField<Type>::slipFaPatchField
     basicSymmetryFaPatchField<Type>(ptf)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

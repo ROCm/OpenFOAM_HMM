@@ -25,20 +25,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOobject.H"
-#include "dictionary.H"
-#include "faMesh.H"
+#include "faePatchField.H"
 #include "faPatchFieldMapper.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-faePatchField<Type>::faePatchField
+Foam::faePatchField<Type>::faePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -51,7 +44,7 @@ faePatchField<Type>::faePatchField
 
 
 template<class Type>
-faePatchField<Type>::faePatchField
+Foam::faePatchField<Type>::faePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -65,7 +58,7 @@ faePatchField<Type>::faePatchField
 
 
 template<class Type>
-faePatchField<Type>::faePatchField
+Foam::faePatchField<Type>::faePatchField
 (
     const faePatchField<Type>& ptf,
     const faPatch& p,
@@ -80,7 +73,7 @@ faePatchField<Type>::faePatchField
 
 
 template<class Type>
-faePatchField<Type>::faePatchField
+Foam::faePatchField<Type>::faePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -106,7 +99,7 @@ faePatchField<Type>::faePatchField
 
 
 template<class Type>
-faePatchField<Type>::faePatchField
+Foam::faePatchField<Type>::faePatchField
 (
     const faePatchField<Type>& ptf
 )
@@ -118,7 +111,7 @@ faePatchField<Type>::faePatchField
 
 
 template<class Type>
-faePatchField<Type>::faePatchField
+Foam::faePatchField<Type>::faePatchField
 (
     const faePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -133,28 +126,27 @@ faePatchField<Type>::faePatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const objectRegistry& faePatchField<Type>::db() const
+const Foam::objectRegistry& Foam::faePatchField<Type>::db() const
 {
-    //HR 12.3.10: Lookup fields from the field DB rather than the mesh
+    // Note: Lookup fields from the field DB rather than the mesh
     return internalField_.db();
 }
 
 
 template<class Type>
-void faePatchField<Type>::check(const faePatchField<Type>& ptf) const
+void Foam::faePatchField<Type>::check(const faePatchField<Type>& ptf) const
 {
     if (&patch_ != &(ptf.patch_))
     {
-        FatalErrorIn("PatchField<Type>::check(const faePatchField<Type>&)")
+        FatalErrorInFunction
             << "different patches for faePatchField<Type>s"
             << abort(FatalError);
     }
 }
 
 
-// Map from self
 template<class Type>
-void faePatchField<Type>::autoMap
+void Foam::faePatchField<Type>::autoMap
 (
     const faPatchFieldMapper& m
 )
@@ -163,9 +155,8 @@ void faePatchField<Type>::autoMap
 }
 
 
-// Reverse-map the given faePatchField onto this faePatchField
 template<class Type>
-void faePatchField<Type>::rmap
+void Foam::faePatchField<Type>::rmap
 (
     const faePatchField<Type>& ptf,
     const labelList& addr
@@ -175,9 +166,8 @@ void faePatchField<Type>::rmap
 }
 
 
-// Write
 template<class Type>
-void faePatchField<Type>::write(Ostream& os) const
+void Foam::faePatchField<Type>::write(Ostream& os) const
 {
     os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
 }
@@ -186,7 +176,7 @@ void faePatchField<Type>::write(Ostream& os) const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void faePatchField<Type>::operator=
+void Foam::faePatchField<Type>::operator=
 (
     const UList<Type>& ul
 )
@@ -196,7 +186,7 @@ void faePatchField<Type>::operator=
 
 
 template<class Type>
-void faePatchField<Type>::operator=
+void Foam::faePatchField<Type>::operator=
 (
     const faePatchField<Type>& ptf
 )
@@ -207,7 +197,7 @@ void faePatchField<Type>::operator=
 
 
 template<class Type>
-void faePatchField<Type>::operator+=
+void Foam::faePatchField<Type>::operator+=
 (
     const faePatchField<Type>& ptf
 )
@@ -218,7 +208,7 @@ void faePatchField<Type>::operator+=
 
 
 template<class Type>
-void faePatchField<Type>::operator-=
+void Foam::faePatchField<Type>::operator-=
 (
     const faePatchField<Type>& ptf
 )
@@ -229,17 +219,15 @@ void faePatchField<Type>::operator-=
 
 
 template<class Type>
-void faePatchField<Type>::operator*=
+void Foam::faePatchField<Type>::operator*=
 (
     const faePatchField<scalar>& ptf
 )
 {
     if (&patch_ != &ptf.patch())
     {
-        FatalErrorIn
-        (
-            "PatchField<Type>::operator*=(const faePatchField<scalar>& ptf)"
-        )   << "incompatible patches for patch fields"
+        FatalErrorInFunction
+            << "incompatible patches for patch fields"
             << abort(FatalError);
     }
 
@@ -248,17 +236,15 @@ void faePatchField<Type>::operator*=
 
 
 template<class Type>
-void faePatchField<Type>::operator/=
+void Foam::faePatchField<Type>::operator/=
 (
     const faePatchField<scalar>& ptf
 )
 {
     if (&patch_ != &ptf.patch())
     {
-        FatalErrorIn
-        (
-            "PatchField<Type>::operator/=(const faePatchField<scalar>& ptf)"
-        )   << "    incompatible patches for patch fields"
+        FatalErrorInFunction
+            << "    incompatible patches for patch fields"
             << abort(FatalError);
     }
 
@@ -267,7 +253,7 @@ void faePatchField<Type>::operator/=
 
 
 template<class Type>
-void faePatchField<Type>::operator+=
+void Foam::faePatchField<Type>::operator+=
 (
     const Field<Type>& tf
 )
@@ -277,7 +263,7 @@ void faePatchField<Type>::operator+=
 
 
 template<class Type>
-void faePatchField<Type>::operator-=
+void Foam::faePatchField<Type>::operator-=
 (
     const Field<Type>& tf
 )
@@ -287,7 +273,7 @@ void faePatchField<Type>::operator-=
 
 
 template<class Type>
-void faePatchField<Type>::operator*=
+void Foam::faePatchField<Type>::operator*=
 (
     const scalarField& tf
 )
@@ -297,7 +283,7 @@ void faePatchField<Type>::operator*=
 
 
 template<class Type>
-void faePatchField<Type>::operator/=
+void Foam::faePatchField<Type>::operator/=
 (
     const scalarField& tf
 )
@@ -307,7 +293,7 @@ void faePatchField<Type>::operator/=
 
 
 template<class Type>
-void faePatchField<Type>::operator=
+void Foam::faePatchField<Type>::operator=
 (
     const Type& t
 )
@@ -317,7 +303,7 @@ void faePatchField<Type>::operator=
 
 
 template<class Type>
-void faePatchField<Type>::operator+=
+void Foam::faePatchField<Type>::operator+=
 (
     const Type& t
 )
@@ -327,7 +313,7 @@ void faePatchField<Type>::operator+=
 
 
 template<class Type>
-void faePatchField<Type>::operator-=
+void Foam::faePatchField<Type>::operator-=
 (
     const Type& t
 )
@@ -337,7 +323,7 @@ void faePatchField<Type>::operator-=
 
 
 template<class Type>
-void faePatchField<Type>::operator*=
+void Foam::faePatchField<Type>::operator*=
 (
     const scalar s
 )
@@ -347,7 +333,7 @@ void faePatchField<Type>::operator*=
 
 
 template<class Type>
-void faePatchField<Type>::operator/=
+void Foam::faePatchField<Type>::operator/=
 (
     const scalar s
 )
@@ -356,9 +342,8 @@ void faePatchField<Type>::operator/=
 }
 
 
-// Force an assignment, overriding fixedValue status
 template<class Type>
-void faePatchField<Type>::operator==
+void Foam::faePatchField<Type>::operator==
 (
     const faePatchField<Type>& ptf
 )
@@ -368,7 +353,7 @@ void faePatchField<Type>::operator==
 
 
 template<class Type>
-void faePatchField<Type>::operator==
+void Foam::faePatchField<Type>::operator==
 (
     const Field<Type>& tf
 )
@@ -378,7 +363,7 @@ void faePatchField<Type>::operator==
 
 
 template<class Type>
-void faePatchField<Type>::operator==
+void Foam::faePatchField<Type>::operator==
 (
     const Type& t
 )
@@ -390,11 +375,11 @@ void faePatchField<Type>::operator==
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Type>
-Ostream& operator<<(Ostream& os, const faePatchField<Type>& ptf)
+Foam::Ostream& Foam::operator<<(Ostream& os, const faePatchField<Type>& ptf)
 {
     ptf.write(os);
 
-    os.check("Ostream& operator<<(Ostream&, const faePatchField<Type>&");
+    os.check(FUNCTION_NAME);
 
     return os;
 }
@@ -402,10 +387,6 @@ Ostream& operator<<(Ostream& os, const faePatchField<Type>& ptf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#   include "newFaePatchField.C"
+#include "faePatchFieldNew.C"
 
 // ************************************************************************* //

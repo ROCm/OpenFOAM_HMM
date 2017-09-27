@@ -72,14 +72,8 @@ void MapInternalField<Type, MeshMapper, areaMesh>::operator()
 {
     if (field.size() != mapper.areaMap().sizeBeforeMapping())
     {
-        FatalErrorIn
-        (
-            "void MapInternalField<Type, MeshMapper, areaMesh>::operator()\n"
-            "(\n"
-            "    Field<Type>& field,\n"
-            "    const MeshMapper& mapper\n"
-            ") const"
-        )  << "Incompatible size before mapping.  Field size: " << field.size()
+        FatalErrorInFunction
+           << "Incompatible size before mapping.  Field size: " << field.size()
            << " map size: " << mapper.areaMap().sizeBeforeMapping()
            << abort(FatalError);
     }

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    coupledFaePatchField
+    Foam::coupledFaePatchField
 
 Description
 
@@ -105,7 +105,7 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const = 0;
+        virtual tmp<faePatchField<Type>> clone() const = 0;
 
         //- Construct as copy setting internal field reference
         coupledFaePatchField
@@ -115,10 +115,15 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>&
         ) const = 0;
+
+
+    //- Destructor
+    virtual ~coupledFaePatchField()
+    {}
 
 
     // Member functions
@@ -145,7 +150,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "coupledFaePatchField.C"
+    #include "coupledFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

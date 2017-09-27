@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fam
+InNamespace
+    Foam::fam
 
 Description
     Calculate the matrix for the divergence of the given field and flux.
@@ -48,13 +48,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Namespace fam functions Declaration
+                      Namespace fam functions Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace fam
 {
     template<class Type>
-    tmp<faMatrix<Type> > ndiv
+    tmp<faMatrix<Type>> ndiv
     (
         const edgeScalarField&,
         GeometricField<Type, faPatchField, areaMesh>&,
@@ -62,7 +62,7 @@ namespace fam
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > ndiv
+    tmp<faMatrix<Type>> ndiv
     (
         const tmp<edgeScalarField>&,
         GeometricField<Type, faPatchField, areaMesh>&,
@@ -70,14 +70,14 @@ namespace fam
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > ndiv
+    tmp<faMatrix<Type>> ndiv
     (
         const edgeScalarField&,
         GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > ndiv
+    tmp<faMatrix<Type>> ndiv
     (
         const tmp<edgeScalarField>&,
         GeometricField<Type, faPatchField, areaMesh>&
@@ -92,7 +92,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "famNDiv.C"
+    #include "famNDiv.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

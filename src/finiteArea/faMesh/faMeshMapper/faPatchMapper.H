@@ -105,14 +105,12 @@ class faPatchMapper
 
 public:
 
-    // Constructors
-
-        //- Construct from mappers
-        faPatchMapper
-        (
-            const faPatch& patch,
-            const mapPolyMesh& mpm
-        );
+    //- Construct from mappers
+    faPatchMapper
+    (
+        const faPatch& patch,
+        const mapPolyMesh& mpm
+    );
 
 
     // Destructor

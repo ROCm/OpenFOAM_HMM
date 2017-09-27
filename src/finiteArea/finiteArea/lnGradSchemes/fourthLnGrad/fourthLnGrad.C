@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Fourth-order snGrad scheme with non-orthogonal correction.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fourthLnGrad.H"
@@ -55,7 +52,7 @@ fourthLnGrad<Type>::~fourthLnGrad()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 fourthLnGrad<Type>::correction
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -63,7 +60,7 @@ fourthLnGrad<Type>::correction
 {
     const faMesh& mesh = this->mesh();
 
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tcorr
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tcorr
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -81,7 +78,7 @@ fourthLnGrad<Type>::correction
 
     edgeVectorField m(mesh.Le()/mesh.magLe());
 
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
     {
         corr.replace
         (
@@ -102,13 +99,14 @@ fourthLnGrad<Type>::correction
     corr += (1.0/15.0)*correctedLnGrad<Type>(mesh).lnGrad(vf);
 
 
-//     tmp<GeometricField<Type, faePatchField, edgeMesh> > tcorr
+//     tmp<GeometricField<Type, faePatchField, edgeMesh>> tcorr
 //     (
 //         (1.0/15.0)
 //        *(
 //             correctedLnGrad<Type>(mesh).lnGrad(vf)
 //           - (
-//               linearEdgeInterpolate(gaussGrad<Type>(mesh).grad(vf)) & mesh.Le()
+//                 linearEdgeInterpolate(gaussGrad<Type>(mesh).grad(vf))
+//               & mesh.Le()
 //             )/mesh.magLe()
 //         )
 //     );

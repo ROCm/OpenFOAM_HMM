@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for lnGrad schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "lnGradScheme.H"
@@ -42,7 +39,6 @@ namespace fa
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Define the constructor function hash tables
 
 defineTemplateRunTimeSelectionTable(lnGradScheme<scalar>, Mesh);
 defineTemplateRunTimeSelectionTable(lnGradScheme<vector>, Mesh);

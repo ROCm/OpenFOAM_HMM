@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fac
+InNamespace
+    Foam::fac
 
 Description
     Calculate the divergence of the given field.
@@ -53,15 +53,15 @@ namespace Foam
 namespace fac
 {
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const GeometricField<Type, faePatchField, edgeMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
-        const tmp<GeometricField<Type, faePatchField, edgeMesh> >&
+        const tmp<GeometricField<Type, faePatchField, edgeMesh>>&
     );
 
 
@@ -83,7 +83,7 @@ namespace fac
         <typename innerProduct<vector, Type>::type, faPatchField, areaMesh>
     > ndiv
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
         const word& name
     );
 
@@ -105,12 +105,12 @@ namespace fac
         <typename innerProduct<vector, Type>::type, faPatchField, areaMesh>
     > ndiv
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&
     );
 
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const edgeScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -118,7 +118,7 @@ namespace fac
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const tmp<edgeScalarField>&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -126,48 +126,48 @@ namespace fac
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const edgeScalarField&,
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
         const word& name
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const tmp<edgeScalarField>&,
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
         const word& name
     );
 
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const edgeScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const tmp<edgeScalarField>&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const edgeScalarField&,
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ndiv
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ndiv
     (
         const tmp<edgeScalarField>&,
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&
     );
 }
 
@@ -179,7 +179,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "facNDiv.C"
+    #include "facNDiv.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    processorFaePatchField
+    Foam::processorFaePatchField
 
 Description
 
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class processorFaePatchField Declaration
+                   Class processorFaePatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -107,9 +107,9 @@ public:
         processorFaePatchField(const processorFaePatchField<Type>&);
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new processorFaePatchField<Type>(*this)
             );
@@ -123,12 +123,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new processorFaePatchField<Type>(*this, iF)
             );
@@ -136,8 +136,7 @@ public:
 
 
     // Destructor
-
-        ~processorFaePatchField();
+    virtual ~processorFaePatchField();
 
 
     // Member functions
@@ -166,7 +165,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "processorFaePatchField.C"
+    #include "processorFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -43,7 +43,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-tmp<faMatrix<scalar> >
+tmp<faMatrix<scalar>>
 div
 (
     const edgeScalarField& flux,

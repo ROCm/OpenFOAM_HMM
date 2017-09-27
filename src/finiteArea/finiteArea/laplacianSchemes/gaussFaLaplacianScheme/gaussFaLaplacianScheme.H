@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    gaussFaLaplacianScheme
+    Foam::fa::gaussLaplacianScheme
 
 Description
     Basic second-order laplacian using face-gradients and Gauss' theorem.
@@ -51,7 +51,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class gaussLaplacianScheme Declaration
+                    Class gaussLaplacianScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -62,10 +62,10 @@ class gaussLaplacianScheme
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        gaussLaplacianScheme(const gaussLaplacianScheme&);
+        gaussLaplacianScheme(const gaussLaplacianScheme&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const gaussLaplacianScheme&);
+        void operator=(const gaussLaplacianScheme&) = delete;
 
 
 public:
@@ -91,18 +91,18 @@ public:
 
     // Member Functions
 
-        tmp<faMatrix<Type> > famLaplacian
+        tmp<faMatrix<Type>> famLaplacian
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facLaplacian
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facLaplacian
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facLaplacian
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facLaplacian
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -121,7 +121,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussFaLaplacianScheme.C"
+    #include "gaussFaLaplacianScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

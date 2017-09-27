@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faMesh
+    Foam::faMesh
 
 Description
     Finite area mesh.  Used for 2-D non-Euclidian finite area method.
@@ -56,7 +56,6 @@ Author
 #include "indirectPrimitivePatch.H"
 #include "edgeInterpolation.H"
 #include "labelIOList.H"
-#include "scalarIOField.H"
 #include "FieldFields.H"
 #include "faGlobalMeshData.H"
 
@@ -70,7 +69,7 @@ class faMeshLduAddressing;
 class faMeshMapper;
 
 /*---------------------------------------------------------------------------*\
-                             Class faMesh Declaration
+                           Class faMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class faMesh
@@ -178,6 +177,7 @@ class faMesh
         //- Whether point normals must be corrected for a patch
         mutable boolList* correctPatchPointNormalsPtr_;
 
+
         // Other mesh-related data
 
             //- Parallel info
@@ -201,6 +201,7 @@ class faMesh
 
         //- Set primitive mesh data
         void setPrimitiveMeshData();
+
 
         // Private member functions to calculate demand driven data
 
@@ -340,7 +341,7 @@ public:
             const fileName& facesInstance() const;
 
 
-            //- Mesh size parameters
+            // Mesh size parameters
 
                 inline label nPoints() const
                 {
@@ -361,6 +362,7 @@ public:
                 {
                     return nFaces_;
                 }
+
 
             // Primitive mesh data
 
@@ -547,7 +549,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faPatchFaMeshTemplates.C"
+    #include "faPatchFaMeshTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

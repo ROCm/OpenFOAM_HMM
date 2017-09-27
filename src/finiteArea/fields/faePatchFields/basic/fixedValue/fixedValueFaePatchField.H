@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    fixedValueFaePatchField
+    Foam::fixedValueFaePatchField
 
 Description
 
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class fixedValueFaePatchField Declaration
+                   Class fixedValueFaePatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -97,9 +97,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new fixedValueFaePatchField<Type>(*this)
             );
@@ -113,16 +113,20 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new fixedValueFaePatchField<Type>(*this, iF)
             );
         }
+
+    //-Destructor
+    virtual ~fixedValueFaePatchField()
+    {}
 
 
     // Member functions
@@ -173,7 +177,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fixedValueFaePatchField.C"
+    #include "fixedValueFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

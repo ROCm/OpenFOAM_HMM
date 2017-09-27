@@ -57,7 +57,7 @@ gaussGrad<Type>::grad
 {
     typedef typename outerProduct<vector, Type>::type GradType;
 
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > tgGrad
+    tmp<GeometricField<GradType, faPatchField, areaMesh>> tgGrad
     (
         fac::edgeIntegrate
         (

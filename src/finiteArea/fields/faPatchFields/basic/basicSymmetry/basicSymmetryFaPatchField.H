@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class basicSymmetryFaPatchField Declaration
+                  Class basicSymmetryFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -60,10 +60,6 @@ class basicSymmetryFaPatchField
 {
 
 public:
-
-    //- Runtime type information
-    TypeName(symmetryFaPatch::typeName_());
-
 
     // Constructors
 
@@ -98,9 +94,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new basicSymmetryFaPatchField<Type>(*this)
             );
@@ -114,12 +110,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new basicSymmetryFaPatchField<Type>(*this, iF)
             );
@@ -131,7 +127,7 @@ public:
         // Evaluation functions
 
             //- Return gradient at boundary
-            virtual tmp<Field<Type> > snGrad() const;
+            virtual tmp<Field<Type>> snGrad() const;
 
             //- Evaluate the patch field
             //  Default argument needed to allow call in constructors
@@ -142,14 +138,14 @@ public:
             );
 
             //- Return face-gradient transform diagonal
-            virtual tmp<Field<Type> > snGradTransformDiag() const;
+            virtual tmp<Field<Type>> snGradTransformDiag() const;
 };
 
 
 // * * * * * * * * * * * Template Specialisations  * * * * * * * * * * * * * //
 
 template<>
-tmp<scalarField > basicSymmetryFaPatchField<scalar>::snGrad() const;
+tmp<scalarField> basicSymmetryFaPatchField<scalar>::snGrad() const;
 
 template<>
 void basicSymmetryFaPatchField<scalar>::evaluate
@@ -165,7 +161,7 @@ void basicSymmetryFaPatchField<scalar>::evaluate
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "basicSymmetryFaPatchField.C"
+    #include "basicSymmetryFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

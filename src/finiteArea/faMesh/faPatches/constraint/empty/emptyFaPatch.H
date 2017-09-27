@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    emptyFaPatch
+    Foam::emptyFaPatch
 
 Description
     A patch which will not exist in the faMesh. Typical example is a front and
@@ -79,7 +79,7 @@ public:
             faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
         {}
 
-       //- Construct from dictionary
+        //- Construct from dictionary
         emptyFaPatch
         (
             const word& name,

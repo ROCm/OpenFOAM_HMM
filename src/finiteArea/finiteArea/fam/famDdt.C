@@ -43,7 +43,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ddt
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -58,7 +58,7 @@ ddt
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ddt
 (
     const dimensionedScalar& rho,
@@ -77,7 +77,7 @@ ddt
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ddt
 (
     const areaScalarField& rho,

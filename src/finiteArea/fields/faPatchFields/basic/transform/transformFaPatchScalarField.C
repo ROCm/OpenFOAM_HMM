@@ -23,29 +23,18 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "transformFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return the matrix diagonal coefficients corresponding to the
-// evaluation of the gradient of this patchField
 template<>
-tmp<scalarField > transformFaPatchField<scalar>::gradientInternalCoeffs() const
+Foam::tmp<Foam::scalarField>
+Foam::transformFaPatchField<Foam::scalar>::gradientInternalCoeffs() const
 {
-    return tmp<scalarField >(new scalarField(size(), 0.0));
+    return tmp<scalarField>(new scalarField(size(), 0.0));
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

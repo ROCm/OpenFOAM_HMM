@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faBoundaryMesh
+    Foam::faBoundaryMesh
 
 Description
     Finite area boundary mesh
@@ -141,6 +141,7 @@ public:
 
             //- Check boundary definition
             bool checkDefinition(const bool report = false) const;
+
 
         // Edit
 

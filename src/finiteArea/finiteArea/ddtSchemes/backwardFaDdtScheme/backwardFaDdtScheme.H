@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    backwardFaDdtScheme
+    Foam::fa::backwardFaDdtScheme
 
 Description
     Second-order backward-differencing implicit ddt using the current and
@@ -51,7 +51,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class backwardFaDdtScheme Declaration
+                     Class backwardFaDdtScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -73,10 +73,10 @@ class backwardFaDdtScheme
         scalar deltaT0_(const GeoField&) const;
 
         //- Disallow default bitwise copy construct
-        backwardFaDdtScheme(const backwardFaDdtScheme&);
+        backwardFaDdtScheme(const backwardFaDdtScheme&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const backwardFaDdtScheme&);
+        void operator=(const backwardFaDdtScheme&) = delete;
 
 
 public:
@@ -108,62 +108,62 @@ public:
             return fa::faDdtScheme<Type>::mesh();
         }
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -182,7 +182,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "backwardFaDdtScheme.C"
+    #include "backwardFaDdtScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

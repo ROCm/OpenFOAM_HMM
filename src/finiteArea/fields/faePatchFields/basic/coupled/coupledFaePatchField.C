@@ -27,15 +27,10 @@ License
 
 #include "coupledFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-coupledFaePatchField<Type>::coupledFaePatchField
+Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -46,7 +41,7 @@ coupledFaePatchField<Type>::coupledFaePatchField
 
 
 template<class Type>
-coupledFaePatchField<Type>::coupledFaePatchField
+Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -58,7 +53,7 @@ coupledFaePatchField<Type>::coupledFaePatchField
 
 
 template<class Type>
-coupledFaePatchField<Type>::coupledFaePatchField
+Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const coupledFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -71,7 +66,7 @@ coupledFaePatchField<Type>::coupledFaePatchField
 
 
 template<class Type>
-coupledFaePatchField<Type>::coupledFaePatchField
+Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -83,7 +78,7 @@ coupledFaePatchField<Type>::coupledFaePatchField
 
 
 template<class Type>
-coupledFaePatchField<Type>::coupledFaePatchField
+Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const coupledFaePatchField<Type>& ptf
 )
@@ -93,7 +88,7 @@ coupledFaePatchField<Type>::coupledFaePatchField
 
 
 template<class Type>
-coupledFaePatchField<Type>::coupledFaePatchField
+Foam::coupledFaePatchField<Type>::coupledFaePatchField
 (
     const coupledFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -106,15 +101,11 @@ coupledFaePatchField<Type>::coupledFaePatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void coupledFaePatchField<Type>::write(Ostream& os) const
+void Foam::coupledFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

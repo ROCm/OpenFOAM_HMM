@@ -23,13 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
 #include "faMeshLduAddressing.H"
-#include "dimensionSet.H"
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "primitiveFacePatch.H"
@@ -42,27 +39,17 @@ Description
 #include "processorFaPatchFields.H"
 #include "emptyFaPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void faMesh::calcLduAddressing() const
+void Foam::faMesh::calcLduAddressing() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcLduAddressing() const : "
-            << "Calculating addressing" << endl;
-    }
+    DebugInFunction
+        << "Calculating addressing" << endl;
 
     if (lduPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcLduAddressing() const"
-        )   << "lduPtr_ already allocated"
+        FatalErrorInFunction
+            << "lduPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -70,20 +57,15 @@ void faMesh::calcLduAddressing() const
 }
 
 
-void faMesh::calcPatchStarts() const
+void Foam::faMesh::calcPatchStarts() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcPatchStarts() const : "
-            << "Calculating patch starts" << endl;
-    }
+    DebugInFunction
+        << "Calculating patch starts" << endl;
 
     if (patchStartsPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcPatchStarts() const"
-        )   << "patchStartsPtr_ already allocated"
+        FatalErrorInFunction
+            << "patchStartsPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -92,7 +74,7 @@ void faMesh::calcPatchStarts() const
 
     patchStarts[0] = nInternalEdges();
 
-    for (label i = 1; i < boundary().size(); i++)
+    for (label i = 1; i < boundary().size(); ++i)
     {
         patchStarts[i] =
             patchStarts[i - 1] + boundary()[i - 1].faPatch::size();
@@ -100,20 +82,15 @@ void faMesh::calcPatchStarts() const
 }
 
 
-void faMesh::calcLe() const
+void Foam::faMesh::calcLe() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcLe() const : "
-            << "Calculating local edges" << endl;
-    }
+    DebugInFunction
+        << "Calculating local edges" << endl;
 
     if (LePtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcLe() const"
-        )   << "LePtr_ already allocated"
+        FatalErrorInFunction
+            << "LePtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -148,7 +125,7 @@ void faMesh::calcLe() const
     const vectorField& eCentresInternal = eCentres.internalField();
     const scalarField& magLeInternal = magLe().internalField();
 
-    forAll (leInternal, edgeI)
+    forAll(leInternal, edgeI)
     {
         leInternal[edgeI] =
             pEdges[edgeI].vec(pPoints) ^ edgeNormalsInternal[edgeI];
@@ -167,10 +144,9 @@ void faMesh::calcLe() const
             magLeInternal[edgeI]/mag(leInternal[edgeI]);
     }
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
-        const labelUList& bndEdgeFaces =
-            boundary()[patchI].edgeFaces();
+        const labelUList& bndEdgeFaces = boundary()[patchI].edgeFaces();
 
         const edgeList::subList bndEdges =
             boundary()[patchI].patchSlice(pEdges);
@@ -181,7 +157,7 @@ void faMesh::calcLe() const
         vectorField& patchLe = Le.boundaryFieldRef()[patchI];
         const vectorField& patchECentres = eCentres.boundaryField()[patchI];
 
-        forAll (patchLe, edgeI)
+        forAll(patchLe, edgeI)
         {
             patchLe[edgeI] =
                 bndEdges[edgeI].vec(pPoints) ^ bndEdgeNormals[edgeI];
@@ -204,20 +180,15 @@ void faMesh::calcLe() const
 }
 
 
-void faMesh::calcMagLe() const
+void Foam::faMesh::calcMagLe() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcMagLe() const : "
-            << "Calculating local edge magnitudes" << endl;
-    }
+    DebugInFunction
+        << "Calculating local edge magnitudes" << endl;
 
     if (magLePtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcMagLe() const"
-        )   << "magLePtr_ already allocated"
+        FatalErrorInFunction
+            << "magLePtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -237,26 +208,24 @@ void faMesh::calcMagLe() const
 
     edgeScalarField& magLe = *magLePtr_;
 
-
     const pointField& localPoints = points();
 
     const edgeList::subList internalEdges =
         edgeList::subList(edges(), nInternalEdges());
 
 
-    forAll (internalEdges, edgeI)
+    forAll(internalEdges, edgeI)
     {
-        magLe.ref()[edgeI] =
-            internalEdges[edgeI].mag(localPoints);
+        magLe.ref()[edgeI] = internalEdges[edgeI].mag(localPoints);
     }
 
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
         const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
-        forAll (patchEdges, edgeI)
+        forAll(patchEdges, edgeI)
         {
             magLe.boundaryFieldRef()[patchI][edgeI] =
                 patchEdges[edgeI].mag(localPoints);
@@ -265,20 +234,15 @@ void faMesh::calcMagLe() const
 }
 
 
-void faMesh::calcAreaCentres() const
+void Foam::faMesh::calcAreaCentres() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcAreaCentres() const : "
-            << "Calculating face centres" << endl;
-    }
+    DebugInFunction
+        << "Calculating face centres" << endl;
 
     if (centresPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcAreaCentres() const"
-        )   << "centresPtr_ already allocated"
+        FatalErrorInFunction
+            << "centresPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -295,23 +259,23 @@ void faMesh::calcAreaCentres() const
             *this,
             dimLength
         );
+
     areaVectorField& centres = *centresPtr_;
 
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
 
-    forAll (localFaces, faceI)
+    forAll(localFaces, faceI)
     {
-        centres.ref()[faceI] =
-            localFaces[faceI].centre(localPoints);
+        centres.ref()[faceI] = localFaces[faceI].centre(localPoints);
     }
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
         const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
-        forAll (patchEdges, edgeI)
+        forAll(patchEdges, edgeI)
         {
             centres.boundaryFieldRef()[patchI][edgeI] =
                 patchEdges[edgeI].centre(localPoints);
@@ -336,20 +300,15 @@ void faMesh::calcAreaCentres() const
 }
 
 
-void faMesh::calcEdgeCentres() const
+void Foam::faMesh::calcEdgeCentres() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcEdgeCentres() const : "
-            << "Calculating edge centres" << endl;
-    }
+    DebugInFunction
+        << "Calculating edge centres" << endl;
 
     if (edgeCentresPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcEdgeCentres() const"
-        )   << "edgeCentresPtr_ already allocated"
+        FatalErrorInFunction
+            << "edgeCentresPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -375,19 +334,18 @@ void faMesh::calcEdgeCentres() const
         edgeList::subList(edges(), nInternalEdges());
 
 
-    forAll (internalEdges, edgeI)
+    forAll(internalEdges, edgeI)
     {
-        edgeCentres.ref()[edgeI] =
-            internalEdges[edgeI].centre(localPoints);
+        edgeCentres.ref()[edgeI] = internalEdges[edgeI].centre(localPoints);
     }
 
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
         const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
-        forAll (patchEdges, edgeI)
+        forAll(patchEdges, edgeI)
         {
             edgeCentres.boundaryFieldRef()[patchI][edgeI] =
                 patchEdges[edgeI].centre(localPoints);
@@ -396,20 +354,15 @@ void faMesh::calcEdgeCentres() const
 }
 
 
-void faMesh::calcS() const
+void Foam::faMesh::calcS() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcS() const : "
-            << "Calculating areas" << endl;
-    }
+    DebugInFunction
+        << "Calculating areas" << endl;
 
     if (SPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcS() const"
-        )   << "SPtr_ already allocated"
+        FatalErrorInFunction
+            << "SPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -431,27 +384,22 @@ void faMesh::calcS() const
     const pointField& localPoints = points();
     const faceList& localFaces = faces();
 
-    forAll (S, faceI)
+    forAll(S, faceI)
     {
         S[faceI] = localFaces[faceI].mag(localPoints);
     }
 }
 
 
-void faMesh::calcFaceAreaNormals() const
+void Foam::faMesh::calcFaceAreaNormals() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcFaceAreaNormals() const : "
-            << "Calculating face area normals" << endl;
-    }
+    DebugInFunction
+         << "Calculating face area normals" << endl;
 
     if (faceAreaNormalsPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcFaceAreaNormals() const"
-        )   << "faceAreaNormalsPtr_ already allocated"
+        FatalErrorInFunction
+            << "faceAreaNormalsPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -475,14 +423,14 @@ void faMesh::calcFaceAreaNormals() const
     const faceList& localFaces = faces();
 
     vectorField& nInternal = faceAreaNormals.ref();
-    forAll (localFaces, faceI)
+    forAll(localFaces, faceI)
     {
         nInternal[faceI] =
             localFaces[faceI].normal(localPoints)/
             localFaces[faceI].mag(localPoints);
     }
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
         faceAreaNormals.boundaryFieldRef()[patchI] =
             edgeAreaNormals().boundaryField()[patchI];
@@ -505,20 +453,15 @@ void faMesh::calcFaceAreaNormals() const
 }
 
 
-void faMesh::calcEdgeAreaNormals() const
+void Foam::faMesh::calcEdgeAreaNormals() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcEdgeAreaNormals() const : "
-            << "Calculating edge area normals" << endl;
-    }
+    DebugInFunction
+        << "Calculating edge area normals" << endl;
 
     if (edgeAreaNormalsPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcEdgeAreaNormals() const"
-        )   << "edgeAreaNormalsPtr_ already allocated"
+        FatalErrorInFunction
+            << "edgeAreaNormalsPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -548,11 +491,11 @@ void faMesh::calcEdgeAreaNormals() const
 
 //     vectorField patchEdgeNormals(nEdges(), vector::zero);
 
-//     forAll (pointNormals, pointI)
+//     forAll(pointNormals, pointI)
 //     {
 //         const labelList& curPointEdges = patchPointEdges[pointI];
 
-//         forAll (curPointEdges, edgeI)
+//         forAll(curPointEdges, edgeI)
 //         {
 //             label curEdge = curPointEdges[edgeI];
 
@@ -566,17 +509,17 @@ void faMesh::calcEdgeAreaNormals() const
 //     // Edge area normals
 //     label nIntEdges = patch().nInternalEdges();
 
-//     for (label edgeI = 0; edgeI < nIntEdges; edgeI++)
+//     for (label edgeI = 0; edgeI < nIntEdges; ++edgeI)
 //     {
 //         edgeAreaNormals.ref()[edgeI] =
 //             patchEdgeNormals[edgeI];
 //     }
 
-//     forAll (boundary(), patchI)
+//     forAll(boundary(), patchI)
 //     {
 //         const labelList& edgeLabels = boundary()[patchI];
 
-//         forAll (edgeAreaNormals.boundaryFieldRef()[patchI], edgeI)
+//         forAll(edgeAreaNormals.boundaryFieldRef()[patchI], edgeI)
 //         {
 //             edgeAreaNormals.boundaryFieldRef()[patchI][edgeI] =
 //                 patchEdgeNormals[edgeLabels[edgeI]];
@@ -584,7 +527,7 @@ void faMesh::calcEdgeAreaNormals() const
 //     }
 
 
-    forAll (edgeAreaNormals.internalField(), edgeI)
+    forAll(edgeAreaNormals.internalField(), edgeI)
     {
         vector e = edges()[edgeI].vec(points());
         e /= mag(e);
@@ -602,11 +545,17 @@ void faMesh::calcEdgeAreaNormals() const
 //             wStart*pointNormals[edges()[edgeI].start()]
 //           + wEnd*pointNormals[edges()[edgeI].end()];
 
-//         vector eC = 0.5*(points()[edges()[edgeI].start()] + points()[edges()[edgeI].end()]);
+//         vector eC =
+//             0.5
+//            *(
+//                  points()[edges()[edgeI].start()]
+//                + points()[edges()[edgeI].end()]
+//             );
 
 //         vector eCp = 0.5*
 //             (
-//                 points()[edges()[edgeI].start()] + pointNormals[edges()[edgeI].start()]
+//                 points()[edges()[edgeI].start()]
+//               + pointNormals[edges()[edgeI].start()]
 //                 points()[edges()[edgeI].end()] +
 //             );
 
@@ -618,15 +567,14 @@ void faMesh::calcEdgeAreaNormals() const
             e*(e&edgeAreaNormals.internalField()[edgeI]);
     }
 
-    edgeAreaNormals.ref() /=
-        mag(edgeAreaNormals.internalField());
+    edgeAreaNormals.ref() /= mag(edgeAreaNormals.internalField());
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
         const edgeList::subList patchEdges =
             boundary()[patchI].patchSlice(edges());
 
-        forAll (patchEdges, edgeI)
+        forAll(patchEdges, edgeI)
         {
             edgeAreaNormals.boundaryFieldRef()[patchI][edgeI] =
                 pointNormals[patchEdges[edgeI].start()]
@@ -645,20 +593,15 @@ void faMesh::calcEdgeAreaNormals() const
 }
 
 
-void faMesh::calcFaceCurvatures() const
+void Foam::faMesh::calcFaceCurvatures() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcFaceCurvatures() const : "
-            << "Calculating face curvatures" << endl;
-    }
+    DebugInFunction
+        << "Calculating face curvatures" << endl;
 
     if (faceCurvaturesPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcFaceCurvatures() const"
-        )   << "faceCurvaturesPtr_ already allocated"
+        FatalErrorInFunction
+            << "faceCurvaturesPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -689,20 +632,15 @@ void faMesh::calcFaceCurvatures() const
 }
 
 
-void faMesh::calcEdgeTransformTensors() const
+void Foam::faMesh::calcEdgeTransformTensors() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::calcEdgeTransformTensors() const : "
-            << "Calculating edge transformation tensors" << endl;
-    }
+    DebugInFunction
+        << "Calculating edge transformation tensors" << endl;
 
     if (edgeTransformTensorsPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcEdgeTransformTensors() const"
-        )   << "edgeTransformTensorsPtr_ already allocated"
+        FatalErrorInFunction
+            << "edgeTransformTensorsPtr_ already allocated"
             << abort(FatalError);
     }
 
@@ -717,7 +655,7 @@ void faMesh::calcEdgeTransformTensors() const
     const edgeVectorField& Ce = edgeCentres();
 
     // Internal edges transformation tensors
-    for (label edgeI=0; edgeI<nInternalEdges(); edgeI++)
+    for (label edgeI=0; edgeI<nInternalEdges(); ++edgeI)
     {
         edgeTransformTensors.set(edgeI, new Field<tensor>(3, I));
 
@@ -787,7 +725,7 @@ void faMesh::calcEdgeTransformTensors() const
     }
 
     // Boundary edges transformation tensors
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
         if (boundary()[patchI].coupled())
         {
@@ -826,12 +764,7 @@ void faMesh::calcEdgeTransformTensors() const
                 vector jl = kl^il;
 
                 edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
-                    tensor
-                    (
-                        il.x(), il.y(), il.z(),
-                        jl.x(), jl.y(), jl.z(),
-                        kl.x(), kl.y(), kl.z()
-                    );
+                    tensor(il, jl, kl);
 
                 // Owner transformation tensor
                 il = E - Cf.internalField()[edgeFaces[edgeI]];
@@ -845,12 +778,7 @@ void faMesh::calcEdgeTransformTensors() const
                 jl = kl^il;
 
                 edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
-                    tensor
-                    (
-                        il.x(), il.y(), il.z(),
-                        jl.x(), jl.y(), jl.z(),
-                        kl.x(), kl.y(), kl.z()
-                    );
+                    tensor(il, jl, kl);
 
                 // Neighbour transformation tensor
                 il = ngbCf[edgeI] - E;
@@ -864,12 +792,7 @@ void faMesh::calcEdgeTransformTensors() const
                 jl = kl^il;
 
                 edgeTransformTensors[boundary()[patchI].start() + edgeI][2] =
-                    tensor
-                    (
-                        il.x(), il.y(), il.z(),
-                        jl.x(), jl.y(), jl.z(),
-                        kl.x(), kl.y(), kl.z()
-                    );
+                    tensor(il, jl, kl);
             }
         }
         else
@@ -904,12 +827,7 @@ void faMesh::calcEdgeTransformTensors() const
                 vector jl = kl^il;
 
                 edgeTransformTensors[boundary()[patchI].start() + edgeI][0] =
-                    tensor
-                    (
-                        il.x(), il.y(), il.z(),
-                        jl.x(), jl.y(), jl.z(),
-                        kl.x(), kl.y(), kl.z()
-                    );
+                    tensor(il, jl, kl);
 
                 // Owner transformation tensor
                 il = E - Cf.internalField()[edgeFaces[edgeI]];
@@ -923,32 +841,24 @@ void faMesh::calcEdgeTransformTensors() const
                 jl = kl^il;
 
                 edgeTransformTensors[boundary()[patchI].start() + edgeI][1] =
-                    tensor
-                    (
-                        il.x(), il.y(), il.z(),
-                        jl.x(), jl.y(), jl.z(),
-                        kl.x(), kl.y(), kl.z()
-                    );
+                    tensor(il, jl, kl);
             }
         }
     }
 }
 
 
-labelList faMesh::internalPoints() const
+Foam::labelList Foam::faMesh::internalPoints() const
 {
-    if (debug)
-    {
-        Info<< "labelList faMesh::internalPoints() const : "
-            << "Calculating internal points" << endl;
-    }
+    DebugInFunction
+        << "Calculating internal points" << endl;
 
     const edgeList& edges = patch().edges();
     label nIntEdges = patch().nInternalEdges();
 
-    List<bool> internal (nPoints(), true);
+    List<bool> internal(nPoints(), true);
 
-    for (label curEdge = nIntEdges; curEdge < edges.size(); curEdge++)
+    for (label curEdge = nIntEdges; curEdge < edges.size(); ++curEdge)
     {
         internal[edges[curEdge].start()] = false;
 
@@ -957,7 +867,7 @@ labelList faMesh::internalPoints() const
 
     SLList<label> internalPoints;
 
-    forAll (internal, pointI)
+    forAll(internal, pointI)
     {
         if (internal[pointI])
         {
@@ -971,20 +881,17 @@ labelList faMesh::internalPoints() const
 }
 
 
-labelList faMesh::boundaryPoints() const
+Foam::labelList Foam::faMesh::boundaryPoints() const
 {
-    if (debug)
-    {
-        Info<< "labelList faMesh::boundaryPoints() const : "
-            << "Calculating boundary points" << endl;
-    }
+    DebugInFunction
+        << "Calculating boundary points" << endl;
 
     const edgeList& edges = patch().edges();
     label nIntEdges = patch().nInternalEdges();
 
-    List<bool> internal (nPoints(), true);
+    List<bool> internal(nPoints(), true);
 
-    for (label curEdge = nIntEdges; curEdge < edges.size(); curEdge++)
+    for (label curEdge = nIntEdges; curEdge < edges.size(); ++curEdge)
     {
         internal[edges[curEdge].start()] = false;
 
@@ -993,7 +900,7 @@ labelList faMesh::boundaryPoints() const
 
     SLList<label> boundaryPoints;
 
-    forAll (internal, pointI)
+    forAll(internal, pointI)
     {
         if (!internal[pointI])
         {
@@ -1007,41 +914,32 @@ labelList faMesh::boundaryPoints() const
 }
 
 
-void faMesh::calcPointAreaNormals() const
+void Foam::faMesh::calcPointAreaNormals() const
 {
     if (pointAreaNormalsPtr_)
     {
-        FatalErrorIn
-        (
-            "void faMesh::calcPointAreaNormals() const"
-        )   << "pointAreaNormalsPtr_ already allocated"
+        FatalErrorInFunction
+            << "pointAreaNormalsPtr_ already allocated"
             << abort(FatalError);
     }
 
 
-    pointAreaNormalsPtr_ =
-        new vectorField
-        (
-            nPoints(),
-            vector::zero
-        );
+    pointAreaNormalsPtr_ = new vectorField(nPoints(), vector::zero);
 
     vectorField& result = *pointAreaNormalsPtr_;
 
-    labelList intPoints = internalPoints();
-    labelList bndPoints = boundaryPoints();
+    labelList intPoints(internalPoints());
+    labelList bndPoints(boundaryPoints());
 
     const pointField& points = patch().localPoints();
     const faceList& faces = patch().localFaces();
     const labelListList& pointFaces = patch().pointFaces();
 
-    forAll (intPoints, pointI)
+    for (const label curPoint : intPoints)
     {
-        label curPoint = intPoints[pointI];
-
         faceList curFaceList(pointFaces[curPoint].size());
 
-        forAll (curFaceList, faceI)
+        forAll(curFaceList, faceI)
         {
             curFaceList[faceI] = faces[pointFaces[curPoint][faceI]];
         }
@@ -1050,7 +948,7 @@ void faMesh::calcPointAreaNormals() const
 
         labelList curPointPoints = curPatch.edgeLoops()[0];
 
-        for (int i = 0; i < curPointPoints.size(); i++)
+        for (int i = 0; i < curPointPoints.size(); ++i)
         {
             vector d1 =
                 points[curPatch.meshPoints()[curPointPoints[i]]]
@@ -1077,18 +975,16 @@ void faMesh::calcPointAreaNormals() const
         }
     }
 
-    forAll (bndPoints, pointI)
+    for (const label curPoint : bndPoints)
     {
-        label curPoint = bndPoints[pointI];
-
         faceList curFaceList(pointFaces[curPoint].size());
 
-        forAll (curFaceList, faceI)
+        forAll(curFaceList, faceI)
         {
             curFaceList[faceI] = faces[pointFaces[curPoint][faceI]];
         }
 
-        primitiveFacePatch curPatch (curFaceList, points);
+        primitiveFacePatch curPatch(curFaceList, points);
 
         labelList agglomFacePoints = curPatch.edgeLoops()[0];
 
@@ -1096,7 +992,7 @@ void faMesh::calcPointAreaNormals() const
 
         label curPointLabel = -1;
 
-        for (label i=0; i<agglomFacePoints.size(); i++)
+        for (label i=0; i<agglomFacePoints.size(); ++i)
         {
             if (curPatch.meshPoints()[agglomFacePoints[i]] == curPoint)
             {
@@ -1108,14 +1004,14 @@ void faMesh::calcPointAreaNormals() const
             }
         }
 
-        for (label i=0; i<curPointLabel; i++)
+        for (label i=0; i<curPointLabel; ++i)
         {
             slList.append(curPatch.meshPoints()[agglomFacePoints[i]]);
         }
 
         labelList curPointPoints(slList);
 
-        for (label i=0; i < (curPointPoints.size() - 1); i++)
+        for (label i=0; i < (curPointPoints.size() - 1); ++i)
         {
             vector d1 = points[curPointPoints[i]] - points[curPoint];
 
@@ -1131,15 +1027,16 @@ void faMesh::calcPointAreaNormals() const
         }
     }
 
-    // Correcte wedge points
-    forAll (boundary(), patchI)
+    // Correct wedge points
+    forAll(boundary(), patchI)
     {
-        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
-        {
-            const wedgeFaPatch& wedgePatch =
-                refCast<const wedgeFaPatch>(boundary()[patchI]);
+        const faPatch& fap = boundary()[patchI];
 
-            labelList patchPoints = wedgePatch.pointLabels();
+        if (isA<wedgeFaPatch>(fap))
+        {
+            const wedgeFaPatch& wedgePatch = refCast<const wedgeFaPatch>(fap);
+
+            const labelList& patchPoints = wedgePatch.pointLabels();
 
             vector N =
                 transform
@@ -1150,22 +1047,12 @@ void faMesh::calcPointAreaNormals() const
 
             N /= mag(N);
 
-            forAll (patchPoints, pointI)
+            for (const label pti : patchPoints)
             {
-                result[patchPoints[pointI]]
-                    -= N*(N&result[patchPoints[pointI]]);
+                result[pti] -= N*(N&result[pti]);
             }
-        }
-    }
 
-    // Axis point correction
-    forAll (boundary(), patchI)
-    {
-        if (boundary()[patchI].type() == wedgeFaPatch::typeName)
-        {
-            const wedgeFaPatch& wedgePatch =
-                refCast<const wedgeFaPatch>(boundary()[patchI]);
-
+            // Axis point correction
             if (wedgePatch.axisPoint() > -1)
             {
                 result[wedgePatch.axisPoint()] =
@@ -1175,21 +1062,19 @@ void faMesh::calcPointAreaNormals() const
                       &result[wedgePatch.axisPoint()]
                     );
             }
-
-            break;
         }
     }
 
 
     // Processor patch points correction
-    forAll (boundary(), patchI)
+    for (const faPatch& fap : boundary())
     {
-        if(boundary()[patchI].type() == processorFaPatch::typeName)
+        if (isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
-                refCast<const processorFaPatch>(boundary()[patchI]);
+                refCast<const processorFaPatch>(fap);
 
-            labelList patchPointLabels = procPatch.pointLabels();
+            const labelList& patchPointLabels = procPatch.pointLabels();
 
             vectorField patchPointNormals
             (
@@ -1197,10 +1082,9 @@ void faMesh::calcPointAreaNormals() const
                 vector::zero
             );
 
-            forAll (patchPointNormals, pointI)
+            forAll(patchPointNormals, pointI)
             {
-                patchPointNormals[pointI] =
-                    result[patchPointLabels[pointI]];
+                patchPointNormals[pointI] = result[patchPointLabels[pointI]];
             }
 
             {
@@ -1232,13 +1116,10 @@ void faMesh::calcPointAreaNormals() const
             const labelList& nonGlobalPatchPoints =
                 procPatch.nonGlobalPatchPoints();
 
-            forAll (nonGlobalPatchPoints, pointI)
+            for (const label pti : nonGlobalPatchPoints)
             {
-                result[patchPointLabels[nonGlobalPatchPoints[pointI]]] +=
-                    ngbPatchPointNormals
-                    [
-                        procPatch.neighbPoints()[nonGlobalPatchPoints[pointI]]
-                    ];
+                result[patchPointLabels[pti]] +=
+                    ngbPatchPointNormals[procPatch.neighbPoints()[pti]];
             }
         }
     }
@@ -1247,11 +1128,10 @@ void faMesh::calcPointAreaNormals() const
     // Correct global points
     if (globalData().nGlobalPoints() > 0)
     {
-        const labelList& spLabels =
-            globalData().sharedPointLabels();
+        const labelList& spLabels(globalData().sharedPointLabels());
 
         vectorField spNormals(spLabels.size(), vector::zero);
-        forAll (spNormals, pointI)
+        forAll(spNormals, pointI)
         {
             spNormals[pointI] = result[spLabels[pointI]];
         }
@@ -1264,7 +1144,7 @@ void faMesh::calcPointAreaNormals() const
             vector::zero
         );
 
-        forAll (addr, i)
+        forAll(addr, i)
         {
             gpNormals[addr[i]] += spNormals[i];
         }
@@ -1272,12 +1152,12 @@ void faMesh::calcPointAreaNormals() const
         combineReduce(gpNormals, plusEqOp<vectorField>());
 
         // Extract local data
-        forAll (addr, i)
+        forAll(addr, i)
         {
             spNormals[i] = gpNormals[addr[i]];
         }
 
-        forAll (spNormals, pointI)
+        forAll(spNormals, pointI)
         {
             result[spLabels[pointI]] = spNormals[pointI];
         }
@@ -1285,25 +1165,25 @@ void faMesh::calcPointAreaNormals() const
 
 
     // Boundary points correction
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
-        if (correctPatchPointNormals(patchI) && !boundary()[patchI].coupled())
+        const faPatch& fap = boundary()[patchI];
+
+        if (correctPatchPointNormals(patchI) && !fap.coupled())
         {
-            if (boundary()[patchI].ngbPolyPatchIndex() == -1)
+            if (fap.ngbPolyPatchIndex() == -1)
             {
-                FatalErrorIn
-                (
-                    "void faMesh::calcPointAreaNormals const"
-                )   << "Neighbour polyPatch index is not defined "
-                    << "for faPatch " << boundary()[patchI].name()
+                FatalErrorInFunction
+                    << "Neighbour polyPatch index is not defined "
+                    << "for faPatch " << fap.name()
                     << abort(FatalError);
             }
 
-            labelList patchPoints = boundary()[patchI].pointLabels();
+            const labelList& patchPoints = fap.pointLabels();
 
-            const vectorField N(boundary()[patchI].ngbPolyPatchPointNormals());
+            const vectorField N(fap.ngbPolyPatchPointNormals());
 
-            forAll (patchPoints, pointI)
+            forAll(patchPoints, pointI)
             {
                 result[patchPoints[pointI]]
                     -= N[pointI]*(N[pointI]&result[patchPoints[pointI]]);
@@ -1315,13 +1195,12 @@ void faMesh::calcPointAreaNormals() const
 }
 
 
-void faMesh::calcPointAreaNormalsByQuadricsFit() const
+void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
 {
     vectorField& result = *pointAreaNormalsPtr_;
 
-
-    labelList intPoints = internalPoints();
-    labelList bndPoints = boundaryPoints();
+    const labelList intPoints(internalPoints());
+    const labelList bndPoints(boundaryPoints());
 
     const pointField& points = patch().localPoints();
     const faceList& faces = patch().localFaces();
@@ -1331,29 +1210,25 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
     {
         label curPoint = intPoints[pointI];
 
-        labelHashSet faceSet;
-        forAll(pointFaces[curPoint], faceI)
-        {
-            faceSet.insert(pointFaces[curPoint][faceI]);
-        }
-        labelList curFaces = faceSet.toc();
+        const labelHashSet faceSet(pointFaces[curPoint]);
+        const labelList curFaces(faceSet.toc());
 
         labelHashSet pointSet;
 
         pointSet.insert(curPoint);
-        for(label i=0; i<curFaces.size(); i++)
+        for (label i=0; i<curFaces.size(); ++i)
         {
             const labelList& facePoints = faces[curFaces[i]];
-            for(label j=0; j<facePoints.size(); j++)
+            for (label j=0; j<facePoints.size(); ++j)
             {
-                if(!pointSet.found(facePoints[j]))
+                if (!pointSet.found(facePoints[j]))
                 {
                     pointSet.insert(facePoints[j]);
                 }
             }
         }
         pointSet.erase(curPoint);
-        labelList curPoints = pointSet.toc();
+        labelList curPoints(pointSet.toc());
 
         if (curPoints.size() < 5)
         {
@@ -1362,12 +1237,8 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 Info << "WARNING: Extending point set for fitting." << endl;
             }
 
-            labelHashSet faceSet;
-            forAll(pointFaces[curPoint], faceI)
-            {
-                faceSet.insert(pointFaces[curPoint][faceI]);
-            }
-            labelList curFaces = faceSet.toc();
+            labelHashSet faceSet(pointFaces[curPoint]);
+            labelList curFaces(faceSet.toc());
             forAll(curFaces, faceI)
             {
                 const labelList& curFaceFaces =
@@ -1377,7 +1248,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 {
                     label curFaceFace = curFaceFaces[fI];
 
-                    if(!faceSet.found(curFaceFace))
+                    if (!faceSet.found(curFaceFace))
                     {
                         faceSet.insert(curFaceFace);
                     }
@@ -1388,12 +1259,12 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
             labelHashSet pointSet;
 
             pointSet.insert(curPoint);
-            for(label i=0; i<curFaces.size(); i++)
+            for (label i=0; i<curFaces.size(); ++i)
             {
                 const labelList& facePoints = faces[curFaces[i]];
-                for(label j=0; j<facePoints.size(); j++)
+                for (label j=0; j<facePoints.size(); ++j)
                 {
-                    if(!pointSet.found(facePoints[j]))
+                    if (!pointSet.found(facePoints[j]))
                     {
                         pointSet.insert(facePoints[j]);
                     }
@@ -1406,16 +1277,16 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         vectorField allPoints(curPoints.size());
         scalarField W(curPoints.size(), 1.0);
-        for(label i=0; i<curPoints.size(); i++)
+        for (label i=0; i<curPoints.size(); ++i)
         {
             allPoints[i] = points[curPoints[i]];
             W[i] = 1.0/magSqr(allPoints[i] - points[curPoint]);
         }
 
         // Transforme points
-        vector origin = points[curPoint];
-        vector axis = result[curPoint]/mag(result[curPoint]);
-        vector dir = (allPoints[0] - points[curPoint]);
+        const vector& origin = points[curPoint];
+        vector axis(result[curPoint]/mag(result[curPoint]));
+        vector dir(allPoints[0] - points[curPoint]);
         dir -= axis*(axis&dir);
         dir /= mag(dir);
         coordinateSystem cs("cs", origin, axis, dir);
@@ -1432,7 +1303,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
             0.0
         );
 
-        for(label i = 0; i < allPoints.size(); i++)
+        for (label i = 0; i < allPoints.size(); ++i)
         {
             M[i][0] = sqr(allPoints[i].x());
             M[i][1] = sqr(allPoints[i].y());
@@ -1443,11 +1314,11 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         scalarSquareMatrix MtM(5, 0.0);
 
-        for (label i = 0; i < MtM.n(); i++)
+        for (label i = 0; i < MtM.n(); ++i)
         {
-            for (label j = 0; j < MtM.m(); j++)
+            for (label j = 0; j < MtM.m(); ++j)
             {
-                for (label k = 0; k < M.n(); k++)
+                for (label k = 0; k < M.n(); ++k)
                 {
                     MtM[i][j] += M[k][i]*M[k][j]*W[k];
                 }
@@ -1456,9 +1327,9 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
         scalarField MtR(5, 0);
 
-        for (label i=0; i<MtR.size(); i++)
+        for (label i=0; i<MtR.size(); ++i)
         {
-            for (label j=0; j<M.n(); j++)
+            for (label j=0; j<M.n(); ++j)
             {
                 MtR[i] += M[j][i]*allPoints[j].z()*W[j];
             }
@@ -1476,14 +1347,16 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
     }
 
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
-        if(boundary()[patchI].type() == processorFaPatch::typeName)
+        const faPatch& fap = boundary()[patchI];
+
+        if (isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
                 refCast<const processorFaPatch>(boundary()[patchI]);
 
-            labelList patchPointLabels = procPatch.pointLabels();
+            const labelList& patchPointLabels = procPatch.pointLabels();
 
             labelList toNgbProcLsPointStarts(patchPointLabels.size(), 0);
             vectorField toNgbProcLsPoints
@@ -1493,28 +1366,24 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
             );
             label nPoints = 0;
 
-            for (label pointI=0; pointI<patchPointLabels.size(); pointI++)
+            for (label pointI=0; pointI<patchPointLabels.size(); ++pointI)
             {
                 label curPoint = patchPointLabels[pointI];
 
                 toNgbProcLsPointStarts[pointI] = nPoints;
 
-                labelHashSet faceSet;
-                forAll(pointFaces[curPoint], faceI)
-                {
-                    faceSet.insert(pointFaces[curPoint][faceI]);
-                }
-                labelList curFaces = faceSet.toc();
+                const labelHashSet faceSet(pointFaces[curPoint]);
+                const labelList curFaces(faceSet.toc());
 
                 labelHashSet pointSet;
 
                 pointSet.insert(curPoint);
-                for (label i=0; i<curFaces.size(); i++)
+                for (label i=0; i<curFaces.size(); ++i)
                 {
                     const labelList& facePoints = faces[curFaces[i]];
-                    for (label j=0; j<facePoints.size(); j++)
+                    for (label j=0; j<facePoints.size(); ++j)
                     {
-                        if(!pointSet.found(facePoints[j]))
+                        if (!pointSet.found(facePoints[j]))
                         {
                             pointSet.insert(facePoints[j]);
                         }
@@ -1523,10 +1392,9 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 pointSet.erase(curPoint);
                 labelList curPoints = pointSet.toc();
 
-                for (label i=0; i<curPoints.size(); i++)
+                for (label i=0; i<curPoints.size(); ++i)
                 {
-                    toNgbProcLsPoints[nPoints++] =
-                        points[curPoints[i]];
+                    toNgbProcLsPoints[nPoints++] = points[curPoints[i]];
                 }
             }
 
@@ -1542,20 +1410,21 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                   + 10*sizeof(label)
                 );
 
-                toNeighbProc << toNgbProcLsPoints
+                toNeighbProc
+                    << toNgbProcLsPoints
                     << toNgbProcLsPointStarts;
             }
         }
     }
 
-    forAll (boundary(), patchI)
+    for (const faPatch& fap : boundary())
     {
-        if(boundary()[patchI].type() == processorFaPatch::typeName)
+        if (isA<processorFaPatch>(fap))
         {
             const processorFaPatch& procPatch =
-                refCast<const processorFaPatch>(boundary()[patchI]);
+                refCast<const processorFaPatch>(fap);
 
-            labelList patchPointLabels = procPatch.pointLabels();
+            const labelList& patchPointLabels = procPatch.pointLabels();
 
             labelList fromNgbProcLsPointStarts(patchPointLabels.size(), 0);
             vectorField fromNgbProcLsPoints;
@@ -1570,7 +1439,8 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                   + 10*sizeof(label)
                 );
 
-                fromNeighbProc >> fromNgbProcLsPoints
+                fromNeighbProc
+                    >> fromNgbProcLsPoints
                     >> fromNgbProcLsPointStarts;
             }
 
@@ -1594,12 +1464,12 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 labelHashSet pointSet;
 
                 pointSet.insert(curPoint);
-                for(label i=0; i<curFaces.size(); i++)
+                for (label i=0; i<curFaces.size(); ++i)
                 {
                     const labelList& facePoints = faces[curFaces[i]];
-                    for(label j=0; j<facePoints.size(); j++)
+                    for (label j=0; j<facePoints.size(); ++j)
                     {
-                        if(!pointSet.found(facePoints[j]))
+                        if (!pointSet.found(facePoints[j]))
                         {
                             pointSet.insert(facePoints[j]);
                         }
@@ -1625,7 +1495,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 vectorField allPointsExt(nAllPoints);
                 label counter = 0;
-                for (label i=0; i<curPoints.size(); i++)
+                for (label i=0; i<curPoints.size(); ++i)
                 {
                     allPointsExt[counter++] = points[curPoints[i]];
                 }
@@ -1636,7 +1506,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     (
                         label i=fromNgbProcLsPointStarts[curNgbPoint];
                         i<fromNgbProcLsPoints.size();
-                        i++
+                        ++i
                     )
                     {
                         allPointsExt[counter++] = fromNgbProcLsPoints[i];
@@ -1648,7 +1518,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     (
                         label i=fromNgbProcLsPointStarts[curNgbPoint];
                         i<fromNgbProcLsPointStarts[curNgbPoint+1];
-                        i++
+                        ++i
                     )
                     {
                         allPointsExt[counter++] = fromNgbProcLsPoints[i];
@@ -1664,7 +1534,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 forAll(allPointsExt, pI)
                 {
                     bool duplicate = false;
-                    for (label i=0; i<nAllPoints; i++)
+                    for (label i=0; i<nAllPoints; ++i)
                     {
                         if
                         (
@@ -1683,8 +1553,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                     if (!duplicate)
                     {
-                        allPoints[nAllPoints++] =
-                            allPointsExt[pI];
+                        allPoints[nAllPoints++] = allPointsExt[pI];
                     }
                 }
 
@@ -1692,21 +1561,19 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 if (nAllPoints < 5)
                 {
-                    FatalErrorIn
-                    (
-                        "void faMesh::calcPointAreaNormals() const"
-                    )   << "There are no enough points for quadrics "
+                    FatalErrorInFunction
+                        << "There are no enough points for quadrics "
                         << "fitting for a point at processor patch"
                         << abort(FatalError);
                 }
 
-                // Transforme points
-                vector origin = points[curPoint];
-                vector axis = result[curPoint]/mag(result[curPoint]);
-                vector dir = (allPoints[0] - points[curPoint]);
+                // Transform points
+                const vector& origin = points[curPoint];
+                vector axis(result[curPoint]/mag(result[curPoint]));
+                vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
                 dir /= mag(dir);
-                coordinateSystem cs("cs", origin, axis, dir);
+                const coordinateSystem cs("cs", origin, axis, dir);
 
                 scalarField W(allPoints.size(), 1.0);
 
@@ -1714,8 +1581,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 {
                     W[pI] = 1.0/magSqr(allPoints[pI] - points[curPoint]);
 
-                    allPoints[pI] =
-                        cs.localPosition(allPoints[pI]);
+                    allPoints[pI] = cs.localPosition(allPoints[pI]);
                 }
 
                 scalarRectangularMatrix M
@@ -1725,7 +1591,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     0.0
                 );
 
-                for(label i=0; i<allPoints.size(); i++)
+                for (label i=0; i<allPoints.size(); ++i)
                 {
                     M[i][0] = sqr(allPoints[i].x());
                     M[i][1] = sqr(allPoints[i].y());
@@ -1736,11 +1602,11 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 scalarSquareMatrix MtM(5, 0.0);
 
-                for (label i = 0; i < MtM.n(); i++)
+                for (label i = 0; i < MtM.n(); ++i)
                 {
-                    for (label j = 0; j < MtM.m(); j++)
+                    for (label j = 0; j < MtM.m(); ++j)
                     {
-                        for (label k = 0; k < M.n(); k++)
+                        for (label k = 0; k < M.n(); ++k)
                         {
                             MtM[i][j] += M[k][i]*M[k][j]*W[k];
                         }
@@ -1749,9 +1615,9 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 scalarField MtR(5, 0);
 
-                for (label i = 0; i < MtR.size(); i++)
+                for (label i = 0; i < MtR.size(); ++i)
                 {
-                    for (label j = 0; j < M.n(); j++)
+                    for (label j = 0; j < M.n(); ++j)
                     {
                         MtR[i] += M[j][i]*allPoints[j].z()*W[j];
                     }
@@ -1773,14 +1639,13 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
     // Correct global points
     if (globalData().nGlobalPoints() > 0)
     {
-        const labelList& spLabels =
-            globalData().sharedPointLabels();
+        const labelList& spLabels = globalData().sharedPointLabels();
 
         const labelList& addr = globalData().sharedPointAddr();
 
-        for (label k=0; k<globalData().nGlobalPoints(); k++)
+        for (label k=0; k<globalData().nGlobalPoints(); ++k)
         {
-            List<List<vector> > procLsPoints(Pstream::nProcs());
+            List<List<vector>> procLsPoints(Pstream::nProcs());
 
             label curSharedPointIndex = findIndex(addr, k);
 
@@ -1790,19 +1655,15 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
             {
                 label curPoint = spLabels[curSharedPointIndex];
 
-                labelHashSet faceSet;
-                forAll(pointFaces[curPoint], faceI)
-                {
-                    faceSet.insert(pointFaces[curPoint][faceI]);
-                }
-                labelList curFaces = faceSet.toc();
+                const labelHashSet faceSet(pointFaces[curPoint]);
+                const labelList curFaces(faceSet.toc());
 
                 labelHashSet pointSet;
                 pointSet.insert(curPoint);
-                for (label i=0; i<curFaces.size(); i++)
+                for (label i=0; i<curFaces.size(); ++i)
                 {
                     const labelList& facePoints = faces[curFaces[i]];
-                    for (label j=0; j<facePoints.size(); j++)
+                    for (label j=0; j<facePoints.size(); ++j)
                     {
                         if (!pointSet.found(facePoints[j]))
                         {
@@ -1817,7 +1678,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 procLsPoints[Pstream::myProcNo()] = locPoints;
 
-                boundBox bb(locPoints, false);
+                const boundBox bb(locPoints, false);
                 tol = 0.001*mag(bb.max() - bb.min());
             }
 
@@ -1842,7 +1703,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     forAll(procLsPoints[procI], pointI)
                     {
                         bool duplicate = false;
-                        for (label i=0; i<nAllPoints; i++)
+                        for (label i=0; i<nAllPoints; ++i)
                         {
                             if
                             (
@@ -1871,18 +1732,16 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 
                 if (nAllPoints < 5)
                 {
-                    FatalErrorIn
-                    (
-                        "void faMesh::calcPointAreaNormals() const"
-                    )   << "There are no enough points for quadrics "
+                    FatalErrorInFunction
+                        << "There are no enough points for quadratic "
                         << "fitting for a global processor point "
                         << abort(FatalError);
                 }
 
-                // Transforme points
-                vector origin = points[curPoint];
-                vector axis = result[curPoint]/mag(result[curPoint]);
-                vector dir = (allPoints[0] - points[curPoint]);
+                // Transform points
+                const vector& origin = points[curPoint];
+                vector axis(result[curPoint]/mag(result[curPoint]));
+                vector dir(allPoints[0] - points[curPoint]);
                 dir -= axis*(axis&dir);
                 dir /= mag(dir);
                 coordinateSystem cs("cs", origin, axis, dir);
@@ -1894,8 +1753,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     W[pointI]=
                         1.0/magSqr(allPoints[pointI] - points[curPoint]);
 
-                    allPoints[pointI] =
-                        cs.localPosition(allPoints[pointI]);
+                    allPoints[pointI] = cs.localPosition(allPoints[pointI]);
                 }
 
                 scalarRectangularMatrix M
@@ -1905,7 +1763,7 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                     0.0
                 );
 
-                for (label i=0; i<allPoints.size(); i++)
+                for (label i=0; i<allPoints.size(); ++i)
                 {
                     M[i][0] = sqr(allPoints[i].x());
                     M[i][1] = sqr(allPoints[i].y());
@@ -1915,11 +1773,11 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 }
 
                 scalarSquareMatrix MtM(5, 0.0);
-                for (label i = 0; i < MtM.n(); i++)
+                for (label i = 0; i < MtM.n(); ++i)
                 {
-                    for (label j = 0; j < MtM.m(); j++)
+                    for (label j = 0; j < MtM.m(); ++j)
                     {
-                        for (label k = 0; k < M.n(); k++)
+                        for (label k = 0; k < M.n(); ++k)
                         {
                             MtM[i][j] += M[k][i]*M[k][j]*W[k];
                         }
@@ -1927,9 +1785,9 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
                 }
 
                 scalarField MtR(5, 0);
-                for (label i = 0; i < MtR.size(); i++)
+                for (label i = 0; i < MtR.size(); ++i)
                 {
-                    for (label j = 0; j < M.n(); j++)
+                    for (label j = 0; j < M.n(); ++j)
                     {
                         MtR[i] += M[j][i]*allPoints[j].z()*W[j];
                     }
@@ -1952,13 +1810,10 @@ void faMesh::calcPointAreaNormalsByQuadricsFit() const
 }
 
 
-tmp<edgeScalarField> faMesh::edgeLengthCorrection() const
+Foam::tmp<Foam::edgeScalarField> Foam::faMesh::edgeLengthCorrection() const
 {
-    if (debug)
-    {
-        Info<< "tmp<edgeScalarField> faMesh::edgeLengthCorrection() const : "
-            << "Calculating edge length correction" << endl;
-    }
+    DebugInFunction
+        << "Calculating edge length correction" << endl;
 
     tmp<edgeScalarField> tcorrection
     (
@@ -1977,11 +1832,9 @@ tmp<edgeScalarField> faMesh::edgeLengthCorrection() const
     );
     edgeScalarField& correction = tcorrection.ref();
 
-
     const vectorField& pointNormals = pointAreaNormals();
 
-
-    forAll (correction.internalField(), edgeI)
+    forAll(correction.internalField(), edgeI)
     {
         scalar sinAlpha = mag
         (
@@ -1991,35 +1844,34 @@ tmp<edgeScalarField> faMesh::edgeLengthCorrection() const
 
         scalar alpha = asin(sinAlpha);
 
-        correction.ref()[edgeI] = cos(alpha/2.0);
+        correction.ref()[edgeI] = cos(0.5*alpha);
     }
 
 
-    forAll (boundary(), patchI)
+    forAll(boundary(), patchI)
     {
-        const edgeList::subList patchEdges =
-            boundary()[patchI].patchSlice(edges());
+        const edgeList::subList patchEdges
+        (
+             boundary()[patchI].patchSlice(edges())
+        );
 
-        forAll (patchEdges, edgeI)
+        forAll(patchEdges, edgeI)
         {
-            scalar sinAlpha = mag
+            scalar sinAlpha =
+                mag
                 (
-                    pointNormals[patchEdges[edgeI].start()]^
-                    pointNormals[patchEdges[edgeI].end()]
+                    pointNormals[patchEdges[edgeI].start()]
+                  ^ pointNormals[patchEdges[edgeI].end()]
                 );
 
             scalar alpha = asin(sinAlpha);
 
-            correction.boundaryFieldRef()[patchI][edgeI] = cos(alpha/2.0);
+            correction.boundaryFieldRef()[patchI][edgeI] = cos(0.5*alpha);
         }
     }
 
     return tcorrection;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

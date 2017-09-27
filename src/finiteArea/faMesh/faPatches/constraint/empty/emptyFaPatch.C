@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "emptyFaPatch.H"
@@ -47,7 +45,7 @@ addToRunTimeSelectionTable(faPatch, emptyFaPatch, dictionary);
 // This is the only piece of info used out of the underlying primitivePatch
 // I choose to store it there because it is used in primitive patch operations
 // and it should not be duplicated as before.  However, to ensure everything
-// in the empty patch is sized to zero, we shall here return a regerence to
+// in the empty patch is sized to zero, we shall here return a reference to
 // a zero-sized field (it does not matter what the field is
 //
 // const vectorField& emptyFaPatch::edgeNormals() const

@@ -54,31 +54,31 @@ namespace fac
 {
     //- Area-weighted average a edgeField creating a areaField
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > average
+    tmp<GeometricField<Type, faPatchField, areaMesh>> average
     (
         const GeometricField<Type,  faePatchField, edgeMesh>&
     );
 
     //- Area-weighted average a edgeField creating a areaField
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > average
+    tmp<GeometricField<Type, faPatchField, areaMesh>> average
     (
-        const tmp<GeometricField<Type,  faePatchField, edgeMesh> >&
+        const tmp<GeometricField<Type,  faePatchField, edgeMesh>>&
     );
 
 
     //- Area-weighted average a edgeField creating a areaField
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > average
+    tmp<GeometricField<Type, faPatchField, areaMesh>> average
     (
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     //- Area-weighted average a edgeField creating a areaField
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > average
+    tmp<GeometricField<Type, faPatchField, areaMesh>> average
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&
     );
 }
 
@@ -90,7 +90,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "facAverage.C"
+    #include "facAverage.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    edgeInterpolation
+    Foam::edgeInterpolation
 
 Description
-    Cell to edge interpolation scheme. Included in faMesh.
+    Face to edge interpolation scheme. Included in faMesh.
 
 Author
     Zeljko Tukovic, FMENA

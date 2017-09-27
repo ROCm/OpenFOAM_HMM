@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    convectionScheme
+    Foam::fa::convectionScheme
 
 Description
-    Abstract base class for convection schemes.
+    Abstract base class for finite area calculus convection schemes.
 
 SourceFiles
     faConvectionScheme.C
@@ -59,7 +59,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class convectionScheme Declaration
+                      Class convectionScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -75,10 +75,10 @@ class convectionScheme
     // Private Member Functions
 
         //- Disallow copy construct
-        convectionScheme(const convectionScheme&);
+        convectionScheme(const convectionScheme&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const convectionScheme&);
+        void operator=(const convectionScheme&) = delete;
 
 
 public:
@@ -115,7 +115,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new convectionScheme created on freestore
-        static tmp<convectionScheme<Type> > New
+        static tmp<convectionScheme<Type>> New
         (
             const faMesh& mesh,
             const edgeScalarField& faceFlux,
@@ -123,9 +123,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~convectionScheme();
+    //- Destructor
+    virtual ~convectionScheme();
 
 
     // Member Functions
@@ -136,19 +135,19 @@ public:
             return mesh_;
         }
 
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> > flux
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>> flux
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) const = 0;
 
-        virtual tmp<faMatrix<Type> > famDiv
+        virtual tmp<faMatrix<Type>> famDiv
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) const = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDiv
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDiv
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -176,7 +175,7 @@ public:
     {                                                                          \
         namespace fa                                                           \
         {                                                                      \
-            convectionScheme<Type>::addIstreamConstructorToTable<SS<Type> >    \
+            convectionScheme<Type>::addIstreamConstructorToTable<SS<Type>>     \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -191,7 +190,7 @@ makeFaConvectionTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faConvectionScheme.C"
+    #include "faConvectionScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

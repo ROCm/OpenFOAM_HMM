@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faSolution
+    Foam::faSolution
 
 Description
     Selector class for finite area solution.
@@ -64,13 +64,11 @@ class faSolution
 
 public:
 
-    // Constructors
-
-        //- Construct from objectRegistry
-        faSolution(const objectRegistry& obr)
-        :
-            solution(obr, "faSolution")
-        {}
+    //- Construct from objectRegistry
+    faSolution(const objectRegistry& obr)
+    :
+        solution(obr, "faSolution")
+    {}
 };
 
 

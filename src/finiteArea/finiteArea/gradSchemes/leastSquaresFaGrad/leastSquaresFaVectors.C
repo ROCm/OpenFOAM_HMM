@@ -43,8 +43,8 @@ namespace Foam
 Foam::leastSquaresFaVectors::leastSquaresFaVectors(const faMesh& mesh)
 :
     MeshObject<faMesh, Foam::MoveableMeshObject, leastSquaresFaVectors>(mesh),
-    pVectorsPtr_(NULL),
-    nVectorsPtr_(NULL)
+    pVectorsPtr_(nullptr),
+    nVectorsPtr_(nullptr)
 {}
 
 

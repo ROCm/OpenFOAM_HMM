@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    emptyFaePatchField
+    Foam::emptyFaePatchField
 
 Description
 
@@ -97,9 +97,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new emptyFaePatchField<Type>(*this)
             );
@@ -113,16 +113,20 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new emptyFaePatchField<Type>(*this, iF)
             );
         }
+
+    //- Destructor
+    virtual ~emptyFaePatchField()
+    {}
 
 
     // Member functions
@@ -153,7 +157,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "emptyFaePatchField.C"
+    #include "emptyFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

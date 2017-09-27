@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Description
-    FV edge mapper.
+    FA edge mapper.
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,7 +37,7 @@ void Foam::faEdgeMapper::calcAddressing() const
 {
     if (directAddrPtr_)
     {
-        FatalErrorIn("void faEdgeMapper::calcAddressing() const)")
+        FatalErrorInFunction
             << "Addressing already calculated"
             << abort(FatalError);
     }
@@ -58,7 +58,6 @@ void Foam::faEdgeMapper::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::faEdgeMapper::faEdgeMapper
 (
     const faMesh& mesh,
@@ -69,7 +68,7 @@ Foam::faEdgeMapper::faEdgeMapper
     mpm_(mpm),
     sizeBeforeMapping_(mesh.nInternalEdges()),
     hasUnmapped_(false),
-    directAddrPtr_(NULL)
+    directAddrPtr_(nullptr)
 {}
 
 
@@ -96,10 +95,8 @@ const Foam::labelUList& Foam::faEdgeMapper::directAddressing() const
 
 const Foam::labelListList& Foam::faEdgeMapper::addressing() const
 {
-    FatalErrorIn
-    (
-        "const labelListList& faEdgeMapper::addressing() const"
-    )   << "Requested interpolative addressing for a direct mapper."
+    FatalErrorInFunction
+        << "Requested interpolative addressing for a direct mapper."
         << abort(FatalError);
 
     return labelListList::null();
@@ -108,10 +105,8 @@ const Foam::labelListList& Foam::faEdgeMapper::addressing() const
 
 const Foam::scalarListList& Foam::faEdgeMapper::weights() const
 {
-    FatalErrorIn
-    (
-        "const scalarListList& faEdgeMapper::weights() const"
-    )   << "Requested interpolative weights for a direct mapper."
+    FatalErrorInFunction
+        << "Requested interpolative weights for a direct mapper."
         << abort(FatalError);
 
     return scalarListList::null();

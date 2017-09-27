@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    EulerDdtScheme
+    Foam::fa::EulerDdtScheme
 
 Description
     Basic first-order Euler implicit/explicit ddt using only the current and
@@ -51,7 +51,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class EulerFaDdtScheme Declaration
+                      Class EulerFaDdtScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -97,62 +97,62 @@ public:
             return fa::faDdtScheme<Type>::mesh();
         }
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -171,7 +171,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "EulerFaDdtScheme.C"
+    #include "EulerFaDdtScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

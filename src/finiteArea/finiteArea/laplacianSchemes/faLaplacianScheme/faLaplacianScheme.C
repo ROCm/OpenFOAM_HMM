@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite area calculus laplacian schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fa.H"
@@ -45,7 +42,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
+tmp<laplacianScheme<Type>> laplacianScheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData
@@ -53,36 +50,29 @@ tmp<laplacianScheme<Type> > laplacianScheme<Type>::New
 {
     if (fa::debug)
     {
-        Info<< "laplacianScheme<Type>::New(const faMesh&, Istream&) : "
-               "constructing laplacianScheme<Type>"
+        InfoInFunction
+            << "constructing laplacianScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "laplacianScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Laplacian scheme not specified" << nl << nl
-            << "Valid laplacian schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Laplacian scheme not specified" << nl << nl
+            << "Valid laplacian schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorIn
-        (
-            "laplacianScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Unknown laplacian scheme " << schemeName << nl << nl
-            << "Valid laplacian schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown laplacian scheme " << schemeName << nl << nl
+            << "Valid laplacian schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -101,7 +91,7 @@ laplacianScheme<Type>::~laplacianScheme()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacianScheme<Type>::famLaplacian
 (
     const areaScalarField& gamma,
@@ -113,7 +103,7 @@ laplacianScheme<Type>::famLaplacian
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 laplacianScheme<Type>::facLaplacian
 (
     const areaScalarField& gamma,

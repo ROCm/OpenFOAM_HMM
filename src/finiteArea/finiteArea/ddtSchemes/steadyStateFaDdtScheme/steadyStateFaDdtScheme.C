@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "steadyStateFaDdtScheme.H"
@@ -44,13 +42,13 @@ namespace fa
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt
 (
     const dimensioned<Type> dt
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -73,13 +71,13 @@ steadyStateFaDdtScheme<Type>::facDdt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt0
 (
     const dimensioned<Type> dt
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -102,13 +100,13 @@ steadyStateFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -131,13 +129,13 @@ steadyStateFaDdtScheme<Type>::facDdt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt0
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -160,14 +158,14 @@ steadyStateFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt
 (
     const dimensionedScalar& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -189,14 +187,14 @@ steadyStateFaDdtScheme<Type>::facDdt
 }
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt0
 (
     const dimensionedScalar& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -219,14 +217,14 @@ steadyStateFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt
 (
     const areaScalarField& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -249,14 +247,14 @@ steadyStateFaDdtScheme<Type>::facDdt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 steadyStateFaDdtScheme<Type>::facDdt0
 (
     const areaScalarField& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, faPatchField, areaMesh> >
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -278,13 +276,13 @@ steadyStateFaDdtScheme<Type>::facDdt0
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 steadyStateFaDdtScheme<Type>::famDdt
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -298,14 +296,14 @@ steadyStateFaDdtScheme<Type>::famDdt
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 steadyStateFaDdtScheme<Type>::famDdt
 (
     const dimensionedScalar& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -319,14 +317,14 @@ steadyStateFaDdtScheme<Type>::famDdt
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 steadyStateFaDdtScheme<Type>::famDdt
 (
     const areaScalarField& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (

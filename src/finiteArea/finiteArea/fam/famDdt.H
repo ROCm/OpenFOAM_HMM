@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fam
+InNamespace
+    Foam::fam
 
 Description
     Calulate the matrix for the first temporal derivative.
@@ -52,20 +52,20 @@ namespace Foam
 namespace fam
 {
     template<class Type>
-    tmp<faMatrix<Type> > ddt
+    tmp<faMatrix<Type>> ddt
     (
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > ddt
+    tmp<faMatrix<Type>> ddt
     (
         const dimensionedScalar&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > ddt
+    tmp<faMatrix<Type>> ddt
     (
         const areaScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&
@@ -80,7 +80,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "famDdt.C"
+    #include "famDdt.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

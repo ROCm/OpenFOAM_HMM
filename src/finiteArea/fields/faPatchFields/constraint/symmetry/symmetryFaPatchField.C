@@ -27,15 +27,10 @@ License
 
 #include "symmetryFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-symmetryFaPatchField<Type>::symmetryFaPatchField
+Foam::symmetryFaPatchField<Type>::symmetryFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -46,7 +41,7 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
 
 
 template<class Type>
-symmetryFaPatchField<Type>::symmetryFaPatchField
+Foam::symmetryFaPatchField<Type>::symmetryFaPatchField
 (
     const symmetryFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -58,16 +53,8 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
 {
     if (!isType<symmetryFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "symmetryFaPatchField<Type>::symmetryFaPatchField\n"
-            "(\n"
-            "    const symmetryFaPatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, areaMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+        FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -78,7 +65,7 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
 
 
 template<class Type>
-symmetryFaPatchField<Type>::symmetryFaPatchField
+Foam::symmetryFaPatchField<Type>::symmetryFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -89,16 +76,8 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
 {
     if (!isType<symmetryFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "symmetryFaPatchField<Type>::symmetryFaPatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -109,7 +88,7 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
 
 
 template<class Type>
-symmetryFaPatchField<Type>::symmetryFaPatchField
+Foam::symmetryFaPatchField<Type>::symmetryFaPatchField
 (
     const symmetryFaPatchField<Type>& ptf
 )
@@ -119,7 +98,7 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
 
 
 template<class Type>
-symmetryFaPatchField<Type>::symmetryFaPatchField
+Foam::symmetryFaPatchField<Type>::symmetryFaPatchField
 (
     const symmetryFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -128,9 +107,5 @@ symmetryFaPatchField<Type>::symmetryFaPatchField
     basicSymmetryFaPatchField<Type>(ptf, iF)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

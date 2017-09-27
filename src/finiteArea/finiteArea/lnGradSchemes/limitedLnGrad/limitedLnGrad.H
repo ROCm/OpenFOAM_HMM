@@ -103,11 +103,8 @@ public:
         {
             if (limitCoeff_ < 0 || limitCoeff_ > 1)
             {
-                FatalIOErrorIn
-                (
-                    "limitedLnGrad(const faMesh& mesh, Istream& is) : ",
-                    is
-                )   << "limitCoeff is specified as " << limitCoeff_
+                FatalIOErrorInFunction(is)
+                    << "limitCoeff is specified as " << limitCoeff_
                     << " but should be >= 0 && <= 1"
                     << exit(FatalIOError);
             }
@@ -138,7 +135,7 @@ public:
 
         //- Return the explicit correction to the limitedLnGrad
         //  for the given field
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         correction(const GeometricField<Type, faPatchField, areaMesh>&) const;
 };
 
@@ -154,7 +151,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "limitedLnGrad.C"
+    #include "limitedLnGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

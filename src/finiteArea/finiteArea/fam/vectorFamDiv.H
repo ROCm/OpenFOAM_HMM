@@ -23,7 +23,7 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
+InNamespace
     Foam::fam
 
 Description
@@ -52,7 +52,7 @@ namespace fam
 \*---------------------------------------------------------------------------*/
 
 template<>
-tmp<faMatrix<scalar> >
+tmp<faMatrix<scalar>>
 div
 (
     const edgeScalarField& flux,
@@ -60,7 +60,7 @@ div
     const word& name
 );
 
-    
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 }

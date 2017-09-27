@@ -42,7 +42,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 average
 (
     const GeometricField<Type,  faePatchField, edgeMesh>& ssf
@@ -50,7 +50,7 @@ average
 {
     const faMesh& mesh = ssf.mesh();
 
-    tmp<GeometricField<Type, faPatchField, areaMesh> > taverage
+    tmp<GeometricField<Type, faPatchField, areaMesh>> taverage
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -86,13 +86,13 @@ average
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 average
 (
-    const tmp<GeometricField<Type,  faePatchField, edgeMesh> >& tssf
+    const tmp<GeometricField<Type,  faePatchField, edgeMesh>>& tssf
 )
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > taverage
+    tmp<GeometricField<Type, faPatchField, areaMesh>> taverage
     (
         fac::average(tssf())
     );
@@ -102,7 +102,7 @@ average
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 average
 (
     const GeometricField<Type, faPatchField, areaMesh>& vtf
@@ -113,13 +113,13 @@ average
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 average
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tvtf
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvtf
 )
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > taverage
+    tmp<GeometricField<Type, faPatchField, areaMesh>> taverage
     (
         fac::average(tvtf())
     );

@@ -28,15 +28,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// Set reference level for a component of the solution
-// on a given patch face
 template<class Type>
-void faMatrix<Type>::setComponentReference
+void Foam::faMatrix<Type>::setComponentReference
 (
     const label patchi,
     const label facei,
@@ -53,14 +46,14 @@ void faMatrix<Type>::setComponentReference
 
 
 template<class Type>
-SolverPerformance<Type> faMatrix<Type>::solve(const dictionary& solverControls)
+Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
+(
+    const dictionary& solverControls
+)
 {
-    if (debug)
-    {
-        Info<< "faMatrix<Type>::solve(const dictionary&) : "
-               "solving faMatrix<Type>"
-            << endl;
-    }
+    DebugInFunction
+        << "solving faMatrix<Type>"
+        << endl;
 
     SolverPerformance<Type> solverPerfVec
     (
@@ -73,16 +66,15 @@ SolverPerformance<Type> faMatrix<Type>::solve(const dictionary& solverControls)
     Field<Type> source(source_);
     addBoundarySource(source);
 
-    // Make a copy of interfaces: no longer a reference
-    // HJ, 20/Nov/2007
+    // Note: make a copy of interfaces: no longer a reference
     lduInterfaceFieldPtrsList interfaces =
         psi_.boundaryField().scalarInterfaces();
 
-    // Cast into a non-const to solve.  HJ, 6/May/2016
+    // Cast into a non-const to solve
     GeometricField<Type, faPatchField, areaMesh>& psi =
         const_cast<GeometricField<Type, faPatchField, areaMesh>&>(psi_);
 
-    for (direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < Type::nComponents; ++cmpt)
     {
         // copy field and source
 
@@ -156,7 +148,7 @@ SolverPerformance<Type> faMatrix<Type>::solve(const dictionary& solverControls)
 
 
 template<class Type>
-SolverPerformance<Type> faMatrix<Type>::faSolver::solve()
+Foam::SolverPerformance<Type> Foam::faMatrix<Type>::faSolver::solve()
 {
     return solvei
     (
@@ -169,7 +161,7 @@ SolverPerformance<Type> faMatrix<Type>::faSolver::solve()
 
 
 template<class Type>
-SolverPerformance<Type> faMatrix<Type>::solve()
+Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve()
 {
     return solve
     (
@@ -181,22 +173,19 @@ SolverPerformance<Type> faMatrix<Type>::solve()
 }
 
 
-// Return the matrix residual
 template<class Type>
-tmp<Field<Type> > faMatrix<Type>::residual() const
+Foam::tmp<Foam::Field<Type>> Foam::faMatrix<Type>::residual() const
 {
-    tmp<Field<Type> > tres(source_);
+    tmp<Field<Type>> tres(source_);
     Field<Type>& res = tres().ref();
 
     addBoundarySource(res);
 
-    // Make a copy of interfaces: no longer a reference
-    // HJ, 20/Nov/2007
     lduInterfaceFieldPtrsList interfaces =
         psi_.boundaryField().scalarInterfaces();
 
     // Loop over field components
-    for (direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < Type::nComponents; ++cmpt)
     {
         scalarField psiCmpt(psi_.internalField().component(cmpt));
 
@@ -225,9 +214,5 @@ tmp<Field<Type> > faMatrix<Type>::residual() const
     return tres;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

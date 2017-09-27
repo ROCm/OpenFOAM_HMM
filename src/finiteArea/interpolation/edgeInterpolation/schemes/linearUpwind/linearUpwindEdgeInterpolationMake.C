@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    linearUpwind interpolation scheme class
-
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
@@ -36,7 +33,12 @@ Description
 
 namespace Foam
 {
-    makeNVDedgeInterpolationScheme(linearUpwindEdgeInterpolation, linearUpwindWeight, "linearUpwind")
+    makeNVDedgeInterpolationScheme
+    (
+        linearUpwindEdgeInterpolation,
+        linearUpwindWeight,
+        "linearUpwind"
+    )
 }
 
 // ************************************************************************* //

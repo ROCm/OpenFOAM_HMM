@@ -24,12 +24,12 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Gamma
+    Foam::faNVDscheme
 
 Description
-
     Class to create the weighting-factors based on the NVD
     (Normalised Variable Diagram).
+
     The particular differencing scheme class is supplied as a template argument,
     the weight function of which is called by the weight function of this class
     for the internal edges as well as edges of coupled patches
@@ -57,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class faNVDscheme Declaration
+                         Class faNVDscheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class NVDweight>
@@ -168,11 +168,11 @@ typedef faNVDscheme<TYPE, WEIGHT> faNVDscheme##TYPE##WEIGHT_;                  \
 defineTemplateTypeNameAndDebugWithName(faNVDscheme##TYPE##WEIGHT_, NAME, 0);   \
                                                                                \
 edgeInterpolationScheme<TYPE>::addMeshConstructorToTable                       \
-<faNVDscheme<TYPE, WEIGHT> >                                                   \
+<faNVDscheme<TYPE, WEIGHT>>                                                   \
     add##SS##TYPE##MeshConstructorToTable_;                                    \
                                                                                \
 edgeInterpolationScheme<TYPE>::addMeshFluxConstructorToTable                   \
-<faNVDscheme<TYPE, WEIGHT> >                                                   \
+<faNVDscheme<TYPE, WEIGHT>>                                                   \
     add##SS##TYPE##MeshFluxConstructorToTable_;
 
 
@@ -186,7 +186,7 @@ makeNVDedgeInterpolationTypeScheme(SS, WEIGHT, NAME, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faNVDscheme.C"
+    #include "faNVDscheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

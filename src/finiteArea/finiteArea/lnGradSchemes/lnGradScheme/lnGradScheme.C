@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for lnGrad schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fa.H"
@@ -47,7 +44,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<lnGradScheme<Type> > lnGradScheme<Type>::New
+tmp<lnGradScheme<Type>> lnGradScheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData
@@ -55,19 +52,15 @@ tmp<lnGradScheme<Type> > lnGradScheme<Type>::New
 {
     if (fa::debug)
     {
-        Info<< "lnGradScheme<Type>::New(const faMesh&, Istream&)"
-               " : constructing lnGradScheme<Type>"
+        InfoInFunction
+            << "constructing lnGradScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "lnGradScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Discretisation scheme not specified"
-            << endl << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Discretisation scheme not specified" << nl << nl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -78,15 +71,12 @@ tmp<lnGradScheme<Type> > lnGradScheme<Type>::New
     typename MeshConstructorTable::iterator constructorIter =
         MeshConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
-        FatalIOErrorIn
-        (
-            "lnGradScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Unknown discretisation scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown discretisation scheme "
             << schemeName << nl << nl
-            << "Valid schemes are :" << endl
+            << "Valid schemes are :" << nl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -104,10 +94,8 @@ lnGradScheme<Type>::~lnGradScheme()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return the face-lnGrad of the given cell field
-//  with the given weigting factors
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 lnGradScheme<Type>::lnGrad
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
@@ -118,7 +106,7 @@ lnGradScheme<Type>::lnGrad
     const faMesh& mesh = vf.mesh();
 
     // construct GeometricField<Type, faePatchField, edgeMesh>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tssf
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tssf
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -149,26 +137,27 @@ lnGradScheme<Type>::lnGrad
             deltaCoeffs[faceI]*(vf[neighbour[faceI]] - vf[owner[faceI]]);
     }
 
+    typename GeometricField<Type, faePatchField, edgeMesh>::Boundary& ssfb =
+        ssf.boundaryFieldRef();
+
     forAll(vf.boundaryField(), patchI)
     {
-        ssf.boundaryFieldRef()[patchI] = vf.boundaryField()[patchI].snGrad();
+        ssfb[patchI] = vf.boundaryField()[patchI].snGrad();
     }
 
     return tssf;
 }
 
 
-//- Return the face-lnGrad of the given cell field
-//  with explicit correction
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 lnGradScheme<Type>::lnGrad
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 ) const
 {
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tsf
-        = lnGrad(vf, deltaCoeffs(vf));
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf =
+        lnGrad(vf, deltaCoeffs(vf));
 
     if (corrected())
     {
@@ -179,17 +168,15 @@ lnGradScheme<Type>::lnGrad
 }
 
 
-//- Return the face-lnGrad of the given cell field
-//  with explicit correction
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 lnGradScheme<Type>::lnGrad
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tvf
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvf
 ) const
 {
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tinterpVf
-        = lnGrad(tvf());
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tinterpVf =
+        lnGrad(tvf());
     tvf.clear();
     return tinterpVf;
 }

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    wedgeFaePatchField
+    Foam::wedgeFaePatchField
 
 Description
 
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class wedgeFaePatchField Declaration
+                     Class wedgeFaePatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -97,9 +97,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new wedgeFaePatchField<Type>(*this)
             );
@@ -113,12 +113,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new wedgeFaePatchField<Type>(*this, iF)
             );
@@ -133,7 +133,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "wedgeFaePatchField.C"
+    #include "wedgeFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

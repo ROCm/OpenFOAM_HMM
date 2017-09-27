@@ -60,7 +60,7 @@ grad
     const areaVectorField &n = ssf.mesh().faceAreaNormals();
     typedef typename outerProduct<vector,Type>::type GradType;
 
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > tgGrad =
+    tmp<GeometricField<GradType, faPatchField, areaMesh>> tgGrad =
         fac::edgeIntegrate(ssf.mesh().Sf()*ssf);
 
     GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad();
@@ -81,11 +81,11 @@ tmp
 >
 grad
 (
-    const tmp<GeometricField<Type, faePatchField, edgeMesh> >& tssf
+    const tmp<GeometricField<Type, faePatchField, edgeMesh>>& tssf
 )
 {
     typedef typename outerProduct<vector, Type>::type GradType;
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > Grad
+    tmp<GeometricField<GradType, faPatchField, areaMesh>> Grad
     (
         fac::grad(tssf())
     );
@@ -111,7 +111,7 @@ grad
     const areaVectorField &n = vf.mesh().faceAreaNormals();
     typedef typename outerProduct<vector,Type>::type GradType;
 
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > tgGrad =
+    tmp<GeometricField<GradType, faPatchField, areaMesh>> tgGrad =
         fa::gradScheme<Type>::New
         (
             vf.mesh(),
@@ -137,7 +137,7 @@ tmp
 >
 grad
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tvf,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvf,
     const word& name
 )
 {
@@ -183,11 +183,11 @@ tmp
 >
 grad
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tvf
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvf
 )
 {
     typedef typename outerProduct<vector, Type>::type GradType;
-    tmp<GeometricField<GradType, faPatchField, areaMesh> > Grad
+    tmp<GeometricField<GradType, faPatchField, areaMesh>> Grad
     (
         fac::grad(tvf())
     );

@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class slipFaPatch Declaration
+                         Class slipFaPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -97,9 +97,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new slipFaPatchField<Type>(*this)
             );
@@ -113,16 +113,20 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new slipFaPatchField<Type>(*this, iF)
             );
         }
+
+    //- Destructor
+    virtual ~slipFaPatchField()
+    {}
 };
 
 
@@ -133,7 +137,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "slipFaPatchField.C"
+    #include "slipFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

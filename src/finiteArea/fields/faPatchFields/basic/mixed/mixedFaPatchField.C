@@ -27,15 +27,10 @@ License
 
 #include "mixedFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-mixedFaPatchField<Type>::mixedFaPatchField
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -49,7 +44,7 @@ mixedFaPatchField<Type>::mixedFaPatchField
 
 
 template<class Type>
-mixedFaPatchField<Type>::mixedFaPatchField
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
     const mixedFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -65,7 +60,7 @@ mixedFaPatchField<Type>::mixedFaPatchField
 
 
 template<class Type>
-mixedFaPatchField<Type>::mixedFaPatchField
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -82,7 +77,7 @@ mixedFaPatchField<Type>::mixedFaPatchField
 
 
 template<class Type>
-mixedFaPatchField<Type>::mixedFaPatchField
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
     const mixedFaPatchField<Type>& ptf
 )
@@ -95,7 +90,7 @@ mixedFaPatchField<Type>::mixedFaPatchField
 
 
 template<class Type>
-mixedFaPatchField<Type>::mixedFaPatchField
+Foam::mixedFaPatchField<Type>::mixedFaPatchField
 (
     const mixedFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -111,7 +106,7 @@ mixedFaPatchField<Type>::mixedFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void mixedFaPatchField<Type>::autoMap
+void Foam::mixedFaPatchField<Type>::autoMap
 (
     const faPatchFieldMapper& m
 )
@@ -124,7 +119,7 @@ void mixedFaPatchField<Type>::autoMap
 
 
 template<class Type>
-void mixedFaPatchField<Type>::rmap
+void Foam::mixedFaPatchField<Type>::rmap
 (
     const faPatchField<Type>& ptf,
     const labelList& addr
@@ -133,7 +128,7 @@ void mixedFaPatchField<Type>::rmap
     faPatchField<Type>::rmap(ptf, addr);
 
     const mixedFaPatchField<Type>& mptf =
-        refCast<const mixedFaPatchField<Type> >(ptf);
+        refCast<const mixedFaPatchField<Type>>(ptf);
 
     refValue_.rmap(mptf.refValue_, addr);
     refGrad_.rmap(mptf.refGrad_, addr);
@@ -142,7 +137,7 @@ void mixedFaPatchField<Type>::rmap
 
 
 template<class Type>
-void mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -165,7 +160,7 @@ void mixedFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > mixedFaPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::snGrad() const
 {
     return
         valueFraction_
@@ -176,18 +171,17 @@ tmp<Field<Type> > mixedFaPatchField<Type>::snGrad() const
 
 
 template<class Type>
-tmp<Field<Type> > mixedFaPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
     return Type(pTraits<Type>::one)*(1.0 - valueFraction_);
-
 }
 
 
 template<class Type>
-tmp<Field<Type> > mixedFaPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>> Foam::mixedFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -199,14 +193,16 @@ tmp<Field<Type> > mixedFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > mixedFaPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::mixedFaPatchField<Type>::gradientInternalCoeffs() const
 {
     return -Type(pTraits<Type>::one)*valueFraction_*this->patch().deltaCoeffs();
 }
 
 
 template<class Type>
-tmp<Field<Type> > mixedFaPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::mixedFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return
         valueFraction_*this->patch().deltaCoeffs()*refValue_
@@ -215,7 +211,7 @@ tmp<Field<Type> > mixedFaPatchField<Type>::gradientBoundaryCoeffs() const
 
 
 template<class Type>
-void mixedFaPatchField<Type>::write(Ostream& os) const
+void Foam::mixedFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
     refValue_.writeEntry("refValue", os);
@@ -224,9 +220,5 @@ void mixedFaPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

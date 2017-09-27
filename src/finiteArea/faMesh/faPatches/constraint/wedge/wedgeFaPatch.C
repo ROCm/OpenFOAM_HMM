@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "wedgeFaPatch.H"
@@ -38,21 +36,19 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(wedgeFaPatch, 0);
-addToRunTimeSelectionTable(faPatch, wedgeFaPatch, dictionary);
+    defineTypeNameAndDebug(wedgeFaPatch, 0);
+    addToRunTimeSelectionTable(faPatch, wedgeFaPatch, dictionary);
+}
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-void wedgeFaPatch::findAxisPoint() const
+void Foam::wedgeFaPatch::findAxisPoint() const
 {
     // Find axis point
 
-    labelList ptLabels = pointLabels();
+    const labelList& ptLabels = pointLabels();
 
-    labelListList ptEdges = pointEdges();
+    const labelListList& ptEdges = pointEdges();
 
     const vectorField& points = boundaryMesh().mesh().points();
 
@@ -60,11 +56,11 @@ void wedgeFaPatch::findAxisPoint() const
 
     forAll(ptEdges, pointI)
     {
-        if( ptEdges[pointI].size() == 1 )
+        if (ptEdges[pointI].size() == 1)
         {
             scalar r = mag((I-axis()*axis())&points[ptLabels[pointI]]);
 
-            if( r < magL[ptEdges[pointI][0]] )
+            if (r < magL[ptEdges[pointI][0]])
             {
                 axisPoint_ = ptLabels[pointI];
                 break;
@@ -78,8 +74,7 @@ void wedgeFaPatch::findAxisPoint() const
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-//- Construct from polyPatch
-wedgeFaPatch::wedgeFaPatch
+Foam::wedgeFaPatch::wedgeFaPatch
 (
     const word& name,
     const dictionary& dict,
@@ -88,24 +83,18 @@ wedgeFaPatch::wedgeFaPatch
 )
 :
     faPatch(name, dict, index, bm),
-    wedgePolyPatchPtr_(NULL),
+    wedgePolyPatchPtr_(nullptr),
     axisPoint_(-1),
     axisPointChecked_(false)
 {
-    if(ngbPolyPatchIndex() == -1)
+    if (ngbPolyPatchIndex() == -1)
     {
-        FatalErrorIn
-        (
-            "wedgeFaPatch::wedgeFaPatch(const word&, const dictionary&, const label, const faBoundaryMesh&)"
-        )   << "Neighbour polyPatch index is not specified for faPatch "
+        FatalErrorInFunction
+            << "Neighbour polyPatch index is not specified for faPatch "
             << this->name() << exit(FatalError);
     }
 
-    if
-    (
-        bm.mesh()().boundaryMesh()[ngbPolyPatchIndex()].type()
-     == wedgePolyPatch::typeName
-    )
+    if (isA<wedgePolyPatch>(bm.mesh()().boundaryMesh()[ngbPolyPatchIndex()]))
     {
         const wedgePolyPatch& wedge =
             refCast<const wedgePolyPatch>
@@ -117,18 +106,12 @@ wedgeFaPatch::wedgeFaPatch
     }
     else
     {
-        FatalErrorIn
-        (
-            "wedgeFaPatch::wedgeFaPatch(const word&, const dictionary&, const label, const faBoundaryMesh&)"
-        )   << "Neighbour polyPatch is not of type "
+        FatalErrorInFunction
+            << "Neighbour polyPatch is not of type "
             << wedgePolyPatch::typeName
             << exit(FatalError);
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    divScheme
+    Foam::fa::divScheme
 
 Description
-    Abstract base class for div schemes.
+    Abstract base class for finite area calculus div schemes.
 
 SourceFiles
     faDivScheme.C
@@ -61,7 +61,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class divScheme Declaration
+                          Class divScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -75,7 +75,7 @@ protected:
     // Protected data
 
         const faMesh& mesh_;
-        tmp<edgeInterpolationScheme<Type> > tinterpScheme_;
+        tmp<edgeInterpolationScheme<Type>> tinterpScheme_;
 
 
     // Private Member Functions
@@ -121,16 +121,15 @@ public:
     // Selectors
 
         //- Return a pointer to a new divScheme created on freestore
-        static tmp<divScheme<Type> > New
+        static tmp<divScheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
         );
 
 
-    // Destructor
-
-        virtual ~divScheme();
+    //- Destructor
+    virtual ~divScheme();
 
 
     // Member Functions
@@ -172,21 +171,21 @@ public:
     {                                                                          \
         namespace fa                                                           \
         {                                                                      \
-            divScheme<Type>::addIstreamConstructorToTable<SS<Type> >           \
+            divScheme<Type>::addIstreamConstructorToTable<SS<Type>>            \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
 
-#define makeFaDivScheme(SS)                                                   \
-                                                                              \
-makeFaDivTypeScheme(SS, vector)                                               \
+#define makeFaDivScheme(SS)                                                    \
+                                                                               \
+makeFaDivTypeScheme(SS, vector)                                                \
 makeFaDivTypeScheme(SS, tensor)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faDivScheme.C"
+    #include "faDivScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

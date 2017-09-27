@@ -26,18 +26,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "transformFaPatchField.H"
-#include "IOstreams.H"
 #include "transformField.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-transformFaPatchField<Type>::transformFaPatchField
+Foam::transformFaPatchField<Type>::transformFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -48,7 +42,7 @@ transformFaPatchField<Type>::transformFaPatchField
 
 
 template<class Type>
-transformFaPatchField<Type>::transformFaPatchField
+Foam::transformFaPatchField<Type>::transformFaPatchField
 (
     const transformFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -61,7 +55,7 @@ transformFaPatchField<Type>::transformFaPatchField
 
 
 template<class Type>
-transformFaPatchField<Type>::transformFaPatchField
+Foam::transformFaPatchField<Type>::transformFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -73,7 +67,7 @@ transformFaPatchField<Type>::transformFaPatchField
 
 
 template<class Type>
-transformFaPatchField<Type>::transformFaPatchField
+Foam::transformFaPatchField<Type>::transformFaPatchField
 (
     const transformFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -85,10 +79,9 @@ transformFaPatchField<Type>::transformFaPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return the matrix diagonal coefficients corresponding to the
-// evaluation of the value of this patchField
 template<class Type>
-tmp<Field<Type> > transformFaPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::transformFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -97,10 +90,9 @@ tmp<Field<Type> > transformFaPatchField<Type>::valueInternalCoeffs
 }
 
 
-// Return the matrix source coefficients corresponding to the
-// evaluation of the value of this patchField
 template<class Type>
-tmp<Field<Type> > transformFaPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::transformFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
@@ -115,19 +107,17 @@ tmp<Field<Type> > transformFaPatchField<Type>::valueBoundaryCoeffs
 }
 
 
-// Return the matrix diagonal coefficients corresponding to the
-// evaluation of the gradient of this patchField
 template<class Type>
-tmp<Field<Type> > transformFaPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::transformFaPatchField<Type>::gradientInternalCoeffs() const
 {
     return -this->patch().deltaCoeffs()*snGradTransformDiag();
 }
 
 
-// Return the matrix source coefficients corresponding to the
-// evaluation of the gradient of this patchField
 template<class Type>
-tmp<Field<Type> > transformFaPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::transformFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return
         snGrad()
@@ -138,7 +128,7 @@ tmp<Field<Type> > transformFaPatchField<Type>::gradientBoundaryCoeffs() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-void transformFaPatchField<Type>::operator=
+void Foam::transformFaPatchField<Type>::operator=
 (
     const faPatchField<Type>& ptf
 )
@@ -146,9 +136,5 @@ void transformFaPatchField<Type>::operator=
     this->evaluate();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

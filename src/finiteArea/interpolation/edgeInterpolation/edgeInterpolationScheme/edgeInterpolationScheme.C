@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for edge interpolation schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "edgeInterpolationScheme.H"
@@ -35,16 +32,11 @@ Description
 #include "coupledFaPatchField.H"
 #include "transform.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-// Return weighting factors for scheme given by name in dictionary
 template<class Type>
-tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
+Foam::tmp<Foam::edgeInterpolationScheme<Type>>
+Foam::edgeInterpolationScheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData
@@ -52,20 +44,16 @@ tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::New(const faMesh&, Istream&)"
-               " : constructing edgeInterpolationScheme<Type>"
+        InfoInFunction
+            << "constructing edgeInterpolationScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "edgeInterpolationScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Discretisation scheme not specified"
-            << endl << endl
-            << "Valid schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Discretisation scheme not specified" << nl << nl
+            << "Valid schemes are :" << nl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -75,15 +63,12 @@ tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
     typename MeshConstructorTable::iterator constructorIter =
         MeshConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
-        FatalIOErrorIn
-        (
-            "edgeInterpolationScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Unknown discretisation scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown discretisation scheme "
             << schemeName << nl << nl
-            << "Valid schemes are :" << endl
+            << "Valid schemes are :" << nl
             << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -92,9 +77,9 @@ tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
 }
 
 
-// Return weighting factors for scheme given by name in dictionary
 template<class Type>
-tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
+Foam::tmp<Foam::edgeInterpolationScheme<Type>>
+Foam::edgeInterpolationScheme<Type>::New
 (
     const faMesh& mesh,
     const edgeScalarField& faceFlux,
@@ -103,20 +88,15 @@ tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::New"
-               "(const faMesh&, const edgeScalarField&, Istream&) : "
-               "constructing edgeInterpolationScheme<Type>"
+        InfoInFunction
+            << "constructing edgeInterpolationScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "edgeInterpolationScheme<Type>::New"
-            "(const faMesh&, const edgeScalarField&, Istream&)",
-            schemeData
-        )   << "Discretisation scheme not specified"
+        FatalIOErrorInFunction(schemeData)
+            << "Discretisation scheme not specified"
             << endl << endl
             << "Valid schemes are :" << endl
             << MeshConstructorTablePtr_->sortedToc()
@@ -128,14 +108,10 @@ tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
     typename MeshFluxConstructorTable::iterator constructorIter =
         MeshFluxConstructorTablePtr_->find(schemeName);
 
-    if (constructorIter == MeshFluxConstructorTablePtr_->end())
+    if (!constructorIter.found())
     {
-        FatalIOErrorIn
-        (
-            "edgeInterpolationScheme<Type>::New"
-            "(const faMesh&, const edgeScalarField&, Istream&)",
-            schemeData
-        )   << "Unknown discretisation scheme "
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown discretisation scheme "
             << schemeName << nl << nl
             << "Valid schemes are :" << endl
             << MeshFluxConstructorTablePtr_->sortedToc()
@@ -149,17 +125,15 @@ tmp<edgeInterpolationScheme<Type> > edgeInterpolationScheme<Type>::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-edgeInterpolationScheme<Type>::~edgeInterpolationScheme()
+Foam::edgeInterpolationScheme<Type>::~edgeInterpolationScheme()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return the face-interpolate of the given cell field
-//  with the given owner and neighbour weighting factors
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
-edgeInterpolationScheme<Type>::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::edgeInterpolationScheme<Type>::interpolate
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
     const tmp<edgeScalarField>& tlambdas,
@@ -168,11 +142,8 @@ edgeInterpolationScheme<Type>::interpolate
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::uncorrectedInterpolate"
-               "(const GeometricField<Type, faPatchField, areaMesh>&, "
-               "const tmp<edgeScalarField>&, "
-               "const tmp<edgeScalarField>&) : "
-               "interpolating "
+        InfoInFunction
+            << "interpolating "
             << vf.type() << " "
             << vf.name()
             << " from areas to edges "
@@ -191,7 +162,7 @@ edgeInterpolationScheme<Type>::interpolate
     const labelUList& P = mesh.owner();
     const labelUList& N = mesh.neighbour();
 
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tsf
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -209,9 +180,8 @@ edgeInterpolationScheme<Type>::interpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
-    for (label fi=0; fi<P.size(); fi++)
+    for (label fi=0; fi<P.size(); ++fi)
     {
-        // ZT, 22/Apr/2003
         const tensorField& curT = mesh.edgeTransformTensors()[fi];
 
         const tensor& Te = curT[0];
@@ -230,7 +200,7 @@ edgeInterpolationScheme<Type>::interpolate
 
     // Interpolate across coupled patches using given lambdas and ys
 
-    forAll (lambdas.boundaryField(), pi)
+    forAll(lambdas.boundaryField(), pi)
     {
         const faePatchScalarField& pLambda = lambdas.boundaryField()[pi];
         const faePatchScalarField& pY = ys.boundaryField()[pi];
@@ -245,7 +215,7 @@ edgeInterpolationScheme<Type>::interpolate
 
             Field<Type>& pSf = sf.boundaryFieldRef()[pi];
 
-            for (label i=0; i<size; i++)
+            for (label i=0; i<size; ++i)
             {
                 const tensorField& curT =
                     mesh.edgeTransformTensors()[start + i];
@@ -280,11 +250,9 @@ edgeInterpolationScheme<Type>::interpolate
 }
 
 
-//- Return the face-interpolate of the given cell field
-//  with the given weigting factors
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
-edgeInterpolationScheme<Type>::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::edgeInterpolationScheme<Type>::interpolate
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
     const tmp<edgeScalarField>& tlambdas
@@ -292,10 +260,8 @@ edgeInterpolationScheme<Type>::interpolate
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::interpolate"
-               "(const GeometricField<Type, faPatchField, areaMesh>&, "
-               "const tmp<edgeScalarField>&) : "
-               "interpolating "
+        InfoInFunction
+            << "interpolating "
             << vf.type() << " "
             << vf.name()
             << " from area to edges "
@@ -312,7 +278,7 @@ edgeInterpolationScheme<Type>::interpolate
     const labelUList& P = mesh.owner();
     const labelUList& N = mesh.neighbour();
 
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tsf
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -330,9 +296,8 @@ edgeInterpolationScheme<Type>::interpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
-    for (label eI = 0; eI < P.size(); eI++)
+    for (label eI = 0; eI < P.size(); ++eI)
     {
-        // ZT, 22/Apr/2003
         const tensorField& curT = mesh.edgeTransformTensors()[eI];
 
         const tensor& Te = curT[0];
@@ -351,21 +316,24 @@ edgeInterpolationScheme<Type>::interpolate
 
     // Interpolate across coupled patches using given lambdas
 
-    forAll (lambdas.boundaryField(), pi)
+    const typename GeometricField<Type, faPatchField, areaMesh>::Boundary&
+        vfb = vf.boundaryField();
+
+    forAll(lambdas.boundaryField(), pi)
     {
         const faePatchScalarField& pLambda = lambdas.boundaryField()[pi];
 
         if (vf.boundaryField()[pi].coupled())
         {
-            label size = vf.boundaryField()[pi].patch().size();
-            label start = vf.boundaryField()[pi].patch().start();
+            label size = vfb[pi].patch().size();
+            label start = vfb[pi].patch().start();
 
-            Field<Type> pOwnVf(vf.boundaryField()[pi].patchInternalField());
-            Field<Type> pNgbVf(vf.boundaryField()[pi].patchNeighbourField());
+            Field<Type> pOwnVf(vfb[pi].patchInternalField());
+            Field<Type> pNgbVf(vfb[pi].patchNeighbourField());
 
             Field<Type>& pSf = sf.boundaryFieldRef()[pi];
 
-            for (label i=0; i<size; i++)
+            for (label i=0; i<size; ++i)
             {
                 const tensorField& curT =
                     mesh.edgeTransformTensors()[start + i];
@@ -399,11 +367,9 @@ edgeInterpolationScheme<Type>::interpolate
 }
 
 
-//- Return the euclidian edge-interpolate of the given area field
-//  with the given weigting factors
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
-edgeInterpolationScheme<Type>::euclidianInterpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::edgeInterpolationScheme<Type>::euclidianInterpolate
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
     const tmp<edgeScalarField>& tlambdas
@@ -411,9 +377,7 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::euclidianInterpolate"
-               "(const GeometricField<Type, faPatchField, areaMesh>&, "
-               "const tmp<edgeScalarField>&) : "
+        InfoInFunction
             << "interpolating "
             << vf.type() << " "
             << vf.name()
@@ -431,7 +395,7 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
     const labelUList& P = mesh.owner();
     const labelUList& N = mesh.neighbour();
 
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tsf
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -449,7 +413,7 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
 
     Field<Type>& sfi = sf.primitiveFieldRef();
 
-    for (label eI = 0; eI < P.size(); eI++)
+    for (label eI = 0; eI < P.size(); ++eI)
     {
         sfi[eI] = lambda[eI]*vfi[P[eI]] + (1 - lambda[eI])*vfi[N[eI]];
     }
@@ -457,7 +421,7 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
 
     // Interpolate across coupled patches using given lambdas
 
-    forAll (lambdas.boundaryField(), pi)
+    forAll(lambdas.boundaryField(), pi)
     {
         const faePatchScalarField& pLambda = lambdas.boundaryField()[pi];
 
@@ -479,28 +443,25 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
 }
 
 
-//- Return the face-interpolate of the given cell field
-//  with explicit correction
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
-edgeInterpolationScheme<Type>::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::edgeInterpolationScheme<Type>::interpolate
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 ) const
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::interpolate"
-               "(const GeometricField<Type, faPatchField, areaMesh>&) : "
-               "interpolating "
+        InfoInFunction
+            << "interpolating "
             << vf.type() << " "
             << vf.name()
             << " from areas to edges"
             << endl;
     }
 
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tsf
-        = interpolate(vf, weights(vf));
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf =
+        interpolate(vf, weights(vf));
 
     if (corrected())
     {
@@ -510,19 +471,17 @@ edgeInterpolationScheme<Type>::interpolate
     return tsf;
 }
 
-//- Return the euclidian edge-interpolate of the given area field
-//  without explicit correction
+
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
-edgeInterpolationScheme<Type>::euclidianInterpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::edgeInterpolationScheme<Type>::euclidianInterpolate
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 ) const
 {
     if (edgeInterpolation::debug)
     {
-        Info<< "edgeInterpolationScheme<Type>::interpolate"
-               "(const GeometricField<Type, faPatchField, areaMesh>&) : "
+        InfoInFunction
             << "interpolating "
             << vf.type() << " "
             << vf.name()
@@ -530,30 +489,25 @@ edgeInterpolationScheme<Type>::euclidianInterpolate
             << endl;
     }
 
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tsf
-        = euclidianInterpolate(vf, weights(vf));
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tsf =
+        euclidianInterpolate(vf, weights(vf));
 
     return tsf;
 }
 
-//- Return the face-interpolate of the given cell field
-//  with explicit correction
+
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
-edgeInterpolationScheme<Type>::interpolate
+Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
+Foam::edgeInterpolationScheme<Type>::interpolate
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tvf
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvf
 ) const
 {
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tinterpVf
-        = interpolate(tvf());
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tinterpVf =
+        interpolate(tvf());
     tvf.clear();
     return tinterpVf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

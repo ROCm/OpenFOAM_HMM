@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    emptyFaPatchField
+    Foam::emptyFaPatchField
 
 Description
 
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class emptyFaPatch Declaration
+                     Class emptyFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -97,9 +97,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new emptyFaPatchField<Type>(*this)
             );
@@ -113,16 +113,21 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new emptyFaPatchField<Type>(*this, iF)
             );
         }
+
+
+    //- Destructor
+    virtual ~emptyFaPatchField()
+    {}
 
 
     // Member functions
@@ -155,36 +160,36 @@ public:
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueInternalCoeffs
+            virtual tmp<Field<Type>> valueInternalCoeffs
             (
                 const tmp<scalarField>&
             ) const
             {
-                return tmp<Field<Type> >(new Field<Type>(0));
+                return tmp<Field<Type>>(new Field<Type>(0));
             }
 
             //- Return the matrix source coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            virtual tmp<Field<Type>> valueBoundaryCoeffs
             (
                 const tmp<scalarField>&
             ) const
             {
-                return tmp<Field<Type> >(new Field<Type>(0));
+                return tmp<Field<Type>>(new Field<Type>(0));
             }
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the gradient of this patchField
-            tmp<Field<Type> > gradientInternalCoeffs() const
+            tmp<Field<Type>> gradientInternalCoeffs() const
             {
-                return tmp<Field<Type> >(new Field<Type>(0));
+                return tmp<Field<Type>>(new Field<Type>(0));
             }
 
             //- Return the matrix source coefficients corresponding to the
             //  evaluation of the gradient of this patchField
-            tmp<Field<Type> > gradientBoundaryCoeffs() const
+            tmp<Field<Type>> gradientBoundaryCoeffs() const
             {
-                return tmp<Field<Type> >(new Field<Type>(0));
+                return tmp<Field<Type>>(new Field<Type>(0));
             }
 };
 
@@ -196,7 +201,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "emptyFaPatchField.C"
+    #include "emptyFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

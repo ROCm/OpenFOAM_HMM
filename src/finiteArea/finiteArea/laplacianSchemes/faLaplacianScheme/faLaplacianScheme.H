@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faLaplacianScheme
+    Foam::fa::laplacianScheme
 
 Description
-    Abstract base class for laplacian schemes.
+    Abstract base class for finite area calculus laplacian schemes.
 
 SourceFiles
     faLaplacianScheme.C
@@ -62,7 +62,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class laplacianScheme Declaration
+                       Class laplacianScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -76,8 +76,8 @@ protected:
     // Protected data
 
         const faMesh& mesh_;
-        tmp<edgeInterpolationScheme<scalar> > tinterpGammaScheme_;
-        tmp<lnGradScheme<Type> > tlnGradScheme_;
+        tmp<edgeInterpolationScheme<scalar>> tinterpGammaScheme_;
+        tmp<lnGradScheme<Type>> tlnGradScheme_;
 
 
     // Private Member Functions
@@ -117,29 +117,29 @@ public:
         laplacianScheme(const faMesh& mesh, Istream& is)
         :
             mesh_(mesh),
-            tinterpGammaScheme_(NULL),
-            tlnGradScheme_(NULL)
+            tinterpGammaScheme_(nullptr),
+            tlnGradScheme_(nullptr)
         {
             if (is.eof())
             {
-                tinterpGammaScheme_ = tmp<edgeInterpolationScheme<scalar> >
+                tinterpGammaScheme_ = tmp<edgeInterpolationScheme<scalar>>
                 (
                     new linearEdgeInterpolation<scalar>(mesh)
                 );
 
-                tlnGradScheme_ = tmp<lnGradScheme<Type> >
+                tlnGradScheme_ = tmp<lnGradScheme<Type>>
                 (
                     new correctedLnGrad<Type>(mesh)
                 );
             }
             else
             {
-                tinterpGammaScheme_ = tmp<edgeInterpolationScheme<scalar> >
+                tinterpGammaScheme_ = tmp<edgeInterpolationScheme<scalar>>
                 (
                     edgeInterpolationScheme<scalar>::New(mesh, is)
                 );
 
-                tlnGradScheme_ = tmp<lnGradScheme<Type> >
+                tlnGradScheme_ = tmp<lnGradScheme<Type>>
                 (
                     lnGradScheme<Type>::New(mesh, is)
                 );
@@ -150,16 +150,15 @@ public:
     // Selectors
 
         //- Return a pointer to a new laplacianScheme created on freestore
-        static tmp<laplacianScheme<Type> > New
+        static tmp<laplacianScheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
         );
 
 
-    // Destructor
-
-        virtual ~laplacianScheme();
+    //- Destructor
+    virtual ~laplacianScheme();
 
 
     // Member Functions
@@ -170,30 +169,30 @@ public:
             return mesh_;
         }
 
-        virtual tmp<faMatrix<Type> > famLaplacian
+        virtual tmp<faMatrix<Type>> famLaplacian
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famLaplacian
+        virtual tmp<faMatrix<Type>> famLaplacian
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facLaplacian
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facLaplacian
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facLaplacian
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facLaplacian
         (
             const edgeScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facLaplacian
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facLaplacian
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -221,7 +220,7 @@ public:
     {                                                                          \
         namespace fa                                                           \
         {                                                                      \
-            laplacianScheme<Type>::addIstreamConstructorToTable<SS<Type> >     \
+            laplacianScheme<Type>::addIstreamConstructorToTable<SS<Type>>     \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -237,7 +236,7 @@ makeFaLaplacianTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faLaplacianScheme.C"
+    #include "faLaplacianScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

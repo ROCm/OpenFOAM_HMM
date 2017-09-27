@@ -102,7 +102,6 @@ class faAreaMapper
         mutable labelList* insertedObjectLabelsPtr_;
 
 
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -110,7 +109,6 @@ class faAreaMapper
 
         //- Disallow default bitwise assignment
         void operator=(const faAreaMapper&);
-
 
         //- Calculate addressing
         void calcAddressing() const;
@@ -121,19 +119,16 @@ class faAreaMapper
 
 public:
 
-    // Constructors
-
-        //- Construct from components
-        faAreaMapper
-        (
-            const faMesh& mesh,
-            const mapPolyMesh& mpm
-        );
+    //- Construct from components
+    faAreaMapper
+    (
+        const faMesh& mesh,
+        const mapPolyMesh& mpm
+    );
 
 
-    // Destructor
-
-        virtual ~faAreaMapper();
+    //- Destructor
+    virtual ~faAreaMapper();
 
 
     // Member Functions

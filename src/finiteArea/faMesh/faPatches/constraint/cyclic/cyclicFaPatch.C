@@ -35,13 +35,11 @@ License
 
 namespace Foam
 {
+    defineTypeNameAndDebug(cyclicFaPatch, 0);
+    addToRunTimeSelectionTable(faPatch, cyclicFaPatch, dictionary);
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(cyclicFaPatch, 0);
-addToRunTimeSelectionTable(faPatch, cyclicFaPatch, dictionary);
-
-const Foam::scalar cyclicFaPatch::matchTol_ = 1e-3;
+const Foam::scalar Foam::cyclicFaPatch::matchTol_ = 1e-3;
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -52,7 +50,7 @@ void Foam::cyclicFaPatch::calcTransforms()
     {
         pointField half0Ctrs(size()/2);
         pointField half1Ctrs(size()/2);
-        for (label i=0; i<size()/2; i++)
+        for (label i=0; i<size()/2; ++i)
         {
             half0Ctrs[i] = this->edgeCentres()[i];
             half1Ctrs[i] = this->edgeCentres()[i+size()/2];
@@ -66,7 +64,7 @@ void Foam::cyclicFaPatch::calcTransforms()
         scalar maxMatchError = 0;
         label errorEdge = -1;
 
-        for (label edgei = 0; edgei < size()/2; edgei++)
+        for (label edgei = 0; edgei < size()/2; ++edgei)
         {
             half0Normals[edgei] = eN[edgei];
             label nbrEdgei = edgei + size()/2;
@@ -84,7 +82,7 @@ void Foam::cyclicFaPatch::calcTransforms()
                 half0Normals[edgei] = point(1, 0, 0);
                 half1Normals[edgei] = half0Normals[edgei];
             }
-            else if(mag(magLe - nbrMagLe)/avLe > matchTol_)
+            else if (mag(magLe - nbrMagLe)/avLe > matchTol_)
             {
                 // Error in area matching.  Find largest error
                 maxMatchError =
@@ -106,10 +104,8 @@ void Foam::cyclicFaPatch::calcTransforms()
             scalar nbrMagLe = mag(half1Normals[errorEdge]);
             scalar avLe = (magLe + nbrMagLe)/2.0;
 
-            FatalErrorIn
-            (
-                "cyclicFaPatch::calcTransforms()"
-            )   << "edge " << errorEdge
+            FatalErrorInFunction
+                << "edge " << errorEdge
                 << " area does not match neighbour "
                 << nbrEdgei << " by "
                 << 100*mag(magLe - nbrMagLe)/avLe
@@ -142,10 +138,8 @@ void Foam::cyclicFaPatch::calcTransforms()
         {
             if (forwardT().size() > 1 || reverseT().size() > 1)
             {
-                SeriousErrorIn
-                (
-                    "void cyclicFaPatch::calcTransforms()"
-                )   << "Transformation tensor is not constant for the cyclic "
+                SeriousErrorInFunction
+                    << "Transformation tensor is not constant for the cyclic "
                     << "patch.  Please reconsider your setup and definition of "
                     << "cyclic boundaries." << endl;
             }
@@ -154,8 +148,7 @@ void Foam::cyclicFaPatch::calcTransforms()
 }
 
 
-// Make patch weighting factors
-void cyclicFaPatch::makeWeights(scalarField& w) const
+void Foam::cyclicFaPatch::makeWeights(scalarField& w) const
 {
     const scalarField& magL = magEdgeLengths();
 
@@ -165,7 +158,7 @@ void cyclicFaPatch::makeWeights(scalarField& w) const
     scalar maxMatchError = 0;
     label errorEdge = -1;
 
-    for (label edgei = 0; edgei < sizeby2; edgei++)
+    for (label edgei = 0; edgei < sizeby2; ++edgei)
     {
         scalar avL = (magL[edgei] + magL[edgei + sizeby2])/2.0;
 
@@ -198,7 +191,7 @@ void cyclicFaPatch::makeWeights(scalarField& w) const
     {
         scalar avL = (magL[errorEdge] + magL[errorEdge + sizeby2])/2.0;
 
-        FatalErrorIn("cyclicFaPatch::makeWeights(scalarField& w) const")
+        FatalErrorInFunction
             << "edge " << errorEdge << " and " << errorEdge + sizeby2
             <<  " areas do not match by "
             << 100*mag(magL[errorEdge] - magL[errorEdge + sizeby2])/avL
@@ -210,13 +203,12 @@ void cyclicFaPatch::makeWeights(scalarField& w) const
 }
 
 
-// Make patch edge - neighbour cell distances
-void cyclicFaPatch::makeDeltaCoeffs(scalarField& dc) const
+void Foam::cyclicFaPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     const scalarField deltas(edgeNormals() & faPatch::delta());
     label sizeby2 = deltas.size()/2;
 
-    for (label edgei = 0; edgei < sizeby2; edgei++)
+    for (label edgei = 0; edgei < sizeby2; ++edgei)
     {
         scalar di = deltas[edgei];
         scalar dni = deltas[edgei + sizeby2];
@@ -252,8 +244,8 @@ void Foam::cyclicFaPatch::movePoints(const pointField& p)
     calcTransforms();
 }
 
-// Return delta (P to N) vectors across coupled patch
-tmp<vectorField> cyclicFaPatch::delta() const
+
+Foam::tmp<Foam::vectorField> Foam::cyclicFaPatch::delta() const
 {
     const vectorField patchD(faPatch::delta());
     label sizeby2 = patchD.size()/2;
@@ -264,9 +256,9 @@ tmp<vectorField> cyclicFaPatch::delta() const
     // Do the transformation if necessary
     if (parallel())
     {
-        for (label edgei = 0; edgei < sizeby2; edgei++)
+        for (label edgei = 0; edgei < sizeby2; ++edgei)
         {
-            vector ddi = patchD[edgei];
+            const vector& ddi = patchD[edgei];
             vector dni = patchD[edgei + sizeby2];
 
             pdv[edgei] = ddi - dni;
@@ -275,9 +267,9 @@ tmp<vectorField> cyclicFaPatch::delta() const
     }
     else
     {
-        for (label edgei = 0; edgei < sizeby2; edgei++)
+        for (label edgei = 0; edgei < sizeby2; ++edgei)
         {
-            vector ddi = patchD[edgei];
+            const vector& ddi = patchD[edgei];
             vector dni = patchD[edgei + sizeby2];
 
             pdv[edgei] = ddi - transform(forwardT()[0], dni);
@@ -289,14 +281,14 @@ tmp<vectorField> cyclicFaPatch::delta() const
 }
 
 
-label Foam::cyclicPolyPatch::neighbPatchID() const
+Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
 {
     NotImplemented;
     return -1;
 }
 
 
-tmp<labelField> cyclicFaPatch::interfaceInternalField
+Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::interfaceInternalField
 (
     const labelUList& internalData
 ) const
@@ -305,7 +297,7 @@ tmp<labelField> cyclicFaPatch::interfaceInternalField
 }
 
 
-tmp<labelField> cyclicFaPatch::transfer
+Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::transfer
 (
     const Pstream::commsTypes,
     const labelUList& interfaceData
@@ -316,7 +308,7 @@ tmp<labelField> cyclicFaPatch::transfer
 
     label sizeby2 = this->size()/2;
 
-    for (label edgei=0; edgei<sizeby2; edgei++)
+    for (label edgei=0; edgei<sizeby2; ++edgei)
     {
         pnf[edgei] = interfaceData[edgei + sizeby2];
         pnf[edgei + sizeby2] = interfaceData[edgei];
@@ -326,7 +318,7 @@ tmp<labelField> cyclicFaPatch::transfer
 }
 
 
-tmp<labelField> cyclicFaPatch::internalFieldTransfer
+Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
     const labelUList& iF
@@ -339,7 +331,7 @@ tmp<labelField> cyclicFaPatch::internalFieldTransfer
 
     label sizeby2 = this->size()/2;
 
-    for (label edgei=0; edgei<sizeby2; edgei++)
+    for (label edgei=0; edgei<sizeby2; ++edgei)
     {
         pnf[edgei] = iF[edgeCells[edgei + sizeby2]];
         pnf[edgei + sizeby2] = iF[edgeCells[edgei]];
@@ -348,9 +340,5 @@ tmp<labelField> cyclicFaPatch::internalFieldTransfer
     return tpnf;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

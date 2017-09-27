@@ -23,16 +23,10 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fam
-
 Description
     Namespace of functions to calculate implicit derivatives returning a matrix.
     Time derivatives are calculated using Euler-implicit, backward differencing
     or Crank-Nicholson. Spatial derivatives are calculated using Gauss' Theorem.
-
-SourceFiles
-    fam.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faDdtScheme
+    Foam::fa::DdtScheme
 
 Description
-    Abstract base class for ddt schemes.
+    Abstract base class for finite volume calculus ddt schemes.
 
 SourceFiles
     faDdtScheme.C
@@ -121,16 +121,15 @@ public:
     // Selectors
 
         //- Return a pointer to a new faDdtScheme created on freestore
-        static tmp<faDdtScheme<Type> > New
+        static tmp<faDdtScheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
         );
 
 
-    // Destructor
-
-        virtual ~faDdtScheme();
+    //- Destructor
+    virtual ~faDdtScheme();
 
 
     // Member Functions
@@ -141,62 +140,62 @@ public:
             return mesh_;
         }
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensioned<Type>
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensioned<Type>
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        virtual tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famDdt
+        virtual tmp<faMatrix<Type>> famDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famDdt
+        virtual tmp<faMatrix<Type>> famDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         ) = 0;
 
-        virtual tmp<faMatrix<Type> > famDdt
+        virtual tmp<faMatrix<Type>> famDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -224,7 +223,7 @@ public:
     {                                                                          \
         namespace fa                                                           \
         {                                                                      \
-            faDdtScheme<Type>::addIstreamConstructorToTable<SS<Type> >         \
+            faDdtScheme<Type>::addIstreamConstructorToTable<SS<Type>>          \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -240,7 +239,7 @@ makeFaDdtTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faDdtScheme.C"
+    #include "faDdtScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

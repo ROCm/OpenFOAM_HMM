@@ -65,7 +65,7 @@ class edgeLimitedGrad
 {
     // Private Data
 
-        tmp<fa::gradScheme<Type> > basicGradScheme_;
+        tmp<fa::gradScheme<Type>> basicGradScheme_;
 
         //- Limiter coefficient
         scalar k_;
@@ -106,11 +106,8 @@ public:
         {
             if (k_ < 0 || k_ > 1)
             {
-                FatalIOErrorIn
-                (
-                    "edgeLimitedGrad(const faMesh& mesh, Istream& schemeData)",
-                    schemeData
-                )   << "coefficient = " << k_
+                FatalIOErrorInFunction(schemeData)
+                    << "coefficient = " << k_
                     << " should be >= 0 and <= 1"
                     << exit(FatalIOError);
             }

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    lnGradScheme
+    Foam::fa::lnGradScheme
 
 Description
     Abstract base class for lnGrad schemes.
@@ -56,7 +56,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class lnGradScheme Declaration
+                        Class lnGradScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -73,7 +73,7 @@ class lnGradScheme
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const lnGradScheme&);
+        void operator=(const lnGradScheme&) = delete;
 
 
 public:
@@ -102,16 +102,15 @@ public:
     // Selectors
 
         //- Return new tmp interpolation scheme
-        static tmp<lnGradScheme<Type> > New
+        static tmp<lnGradScheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
         );
 
 
-    // Destructor
-
-        virtual ~lnGradScheme();
+    //- Destructor
+    virtual ~lnGradScheme();
 
 
     // Member Functions
@@ -124,7 +123,7 @@ public:
 
         //- Return the lnGrad of the given cell field
         //  with the given weigting factors
-        static tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         lnGrad
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
@@ -146,23 +145,23 @@ public:
 
         //- Return the explicit correction to the lnGrad
         //  for the given field
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         correction(const GeometricField<Type, faPatchField, areaMesh>&) const
         {
-            return tmp<GeometricField<Type, faePatchField, edgeMesh> >(NULL);
+            return tmp<GeometricField<Type, faePatchField, edgeMesh>>(nullptr);
         }
 
         //- Return the lnGrad of the given cell field
         //  with explicit correction
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         lnGrad(const GeometricField<Type, faPatchField, areaMesh>&) const;
 
         //- Return the lnGrad of the given tmp cell field
         //  with explicit correction
-        tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>
         lnGrad
         (
-            const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+            const tmp<GeometricField<Type, faPatchField, areaMesh>>&
         ) const;
 };
 
@@ -187,7 +186,7 @@ public:
     {                                                                          \
         namespace fa                                                           \
         {                                                                      \
-            lnGradScheme<Type>::addMeshConstructorToTable<SS<Type> >           \
+            lnGradScheme<Type>::addMeshConstructorToTable<SS<Type>>           \
                 add##SS##Type##MeshConstructorToTable_;                        \
         }                                                                      \
     }
@@ -202,7 +201,7 @@ makeLnGradTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "lnGradScheme.C"
+    #include "lnGradScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

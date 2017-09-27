@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    linearUpwind
+    Foam::linearUpwindWeight
 
 Description
     Class with operator() which returns the weighting factors for the

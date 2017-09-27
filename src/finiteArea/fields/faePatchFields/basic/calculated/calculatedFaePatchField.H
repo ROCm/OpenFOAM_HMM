@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    calculatedFaePatchField
+    Foam::calculatedFaePatchField
 
 Description
 
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class calculatedFaePatch Declaration
+                     Class calculatedFaePatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -96,9 +96,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new calculatedFaePatchField<Type>(*this)
             );
@@ -112,16 +112,20 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new calculatedFaePatchField<Type>(*this, iF)
             );
         }
+
+    //- Destructor
+    virtual ~calculatedFaePatchField()
+    {}
 
 
     // Member functions
@@ -149,7 +153,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "calculatedFaePatchField.C"
+    #include "calculatedFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

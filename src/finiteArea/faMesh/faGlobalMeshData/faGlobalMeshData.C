@@ -63,11 +63,9 @@ const Foam::faMesh& Foam::faGlobalMeshData::mesh() const
 }
 
 
-// Update all data after morph
 void Foam::faGlobalMeshData::updateMesh()
 {
-    label polyMeshNGlobalPoints =
-        mesh_().globalData().nGlobalPoints();
+    label polyMeshNGlobalPoints = mesh_().globalData().nGlobalPoints();
 
     const labelList& polyMeshSharedPointLabels =
         mesh_().globalData().sharedPointLabels();
@@ -81,10 +79,11 @@ void Foam::faGlobalMeshData::updateMesh()
 
     forAll(mesh_.boundary(), patchI)
     {
-        if(mesh_.boundary()[patchI].type() == processorFaPatch::typeName)
+        const faPatch& fap = mesh_.boundary()[patchI];
+
+        if (isA<processorFaPatch>(fap))
         {
-            const labelList& localPointLabels =
-                mesh_.boundary()[patchI].pointLabels();
+            const labelList& localPointLabels = fap.pointLabels();
 
             forAll(localPointLabels, pointI)
             {
@@ -111,12 +110,12 @@ void Foam::faGlobalMeshData::updateMesh()
 
     sharedPointLabels_ = sharedPointLabels.toc();
 
-    combineReduce(globalList, plusEqOp<labelField >());
+    combineReduce(globalList, plusEqOp<labelField>());
 
     nGlobalPoints_ = 0;
-    for (label i=0; i<globalList.size(); i++)
+    for (label i=0; i<globalList.size(); ++i)
     {
-        if(globalList[i] > 0)
+        if (globalList[i] > 0)
         {
             globalList[i] = ++nGlobalPoints_;
         }
@@ -136,5 +135,6 @@ void Foam::faGlobalMeshData::updateMesh()
           - 1;
     }
 }
+
 
 // ************************************************************************* //

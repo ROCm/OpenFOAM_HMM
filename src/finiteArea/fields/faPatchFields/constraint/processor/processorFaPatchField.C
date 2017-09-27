@@ -29,18 +29,12 @@ License
 #include "processorFaPatch.H"
 #include "IPstream.H"
 #include "OPstream.H"
-#include "demandDrivenData.H"
 #include "transformField.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 template<class Type>
-processorFaPatchField<Type>::processorFaPatchField
+Foam::processorFaPatchField<Type>::processorFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -52,7 +46,7 @@ processorFaPatchField<Type>::processorFaPatchField
 
 
 template<class Type>
-processorFaPatchField<Type>::processorFaPatchField
+Foam::processorFaPatchField<Type>::processorFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -64,9 +58,8 @@ processorFaPatchField<Type>::processorFaPatchField
 {}
 
 
-// Construct by mapping given processorFaPatchField<Type>
 template<class Type>
-processorFaPatchField<Type>::processorFaPatchField
+Foam::processorFaPatchField<Type>::processorFaPatchField
 (
     const processorFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -79,16 +72,8 @@ processorFaPatchField<Type>::processorFaPatchField
 {
     if (!isType<processorFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "processorFaPatchField<Type>::processorFaPatchField\n"
-            "(\n"
-            "    const processorFaPatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, volMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+        FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -99,7 +84,7 @@ processorFaPatchField<Type>::processorFaPatchField
 
 
 template<class Type>
-processorFaPatchField<Type>::processorFaPatchField
+Foam::processorFaPatchField<Type>::processorFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -111,16 +96,8 @@ processorFaPatchField<Type>::processorFaPatchField
 {
     if (!isType<processorFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "processorFaPatchField<Type>::processorFaPatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -131,7 +108,7 @@ processorFaPatchField<Type>::processorFaPatchField
 
 
 template<class Type>
-processorFaPatchField<Type>::processorFaPatchField
+Foam::processorFaPatchField<Type>::processorFaPatchField
 (
     const processorFaPatchField<Type>& ptf
 )
@@ -143,7 +120,7 @@ processorFaPatchField<Type>::processorFaPatchField
 
 
 template<class Type>
-processorFaPatchField<Type>::processorFaPatchField
+Foam::processorFaPatchField<Type>::processorFaPatchField
 (
     const processorFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -157,21 +134,22 @@ processorFaPatchField<Type>::processorFaPatchField
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class Type>
-processorFaPatchField<Type>::~processorFaPatchField()
+Foam::processorFaPatchField<Type>::~processorFaPatchField()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > processorFaPatchField<Type>::patchNeighbourField() const
+Foam::tmp<Foam::Field<Type>>
+Foam::processorFaPatchField<Type>::patchNeighbourField() const
 {
     return *this;
 }
 
 
 template<class Type>
-void processorFaPatchField<Type>::initEvaluate
+void Foam::processorFaPatchField<Type>::initEvaluate
 (
     const Pstream::commsTypes commsType
 )
@@ -184,7 +162,7 @@ void processorFaPatchField<Type>::initEvaluate
 
 
 template<class Type>
-void processorFaPatchField<Type>::evaluate
+void Foam::processorFaPatchField<Type>::evaluate
 (
     const Pstream::commsTypes commsType
 )
@@ -202,14 +180,14 @@ void processorFaPatchField<Type>::evaluate
 
 
 template<class Type>
-tmp<Field<Type> > processorFaPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type>> Foam::processorFaPatchField<Type>::snGrad() const
 {
     return this->patch().deltaCoeffs()*(*this - this->patchInternalField());
 }
 
 
 template<class Type>
-void processorFaPatchField<Type>::initInterfaceMatrixUpdate
+void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
 (
     scalarField& result,
     const bool add,
@@ -228,7 +206,7 @@ void processorFaPatchField<Type>::initInterfaceMatrixUpdate
 
 
 template<class Type>
-void processorFaPatchField<Type>::updateInterfaceMatrix
+void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
     const bool add,
@@ -268,7 +246,7 @@ void processorFaPatchField<Type>::updateInterfaceMatrix
 
 
 template<class Type>
-void processorFaPatchField<Type>::initInterfaceMatrixUpdate
+void Foam::processorFaPatchField<Type>::initInterfaceMatrixUpdate
 (
     Field<Type>& result,
     const bool add,
@@ -286,7 +264,7 @@ void processorFaPatchField<Type>::initInterfaceMatrixUpdate
 
 
 template<class Type>
-void processorFaPatchField<Type>::updateInterfaceMatrix
+void Foam::processorFaPatchField<Type>::updateInterfaceMatrix
 (
     Field<Type>& result,
     const bool add,
@@ -320,9 +298,5 @@ void processorFaPatchField<Type>::updateInterfaceMatrix
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

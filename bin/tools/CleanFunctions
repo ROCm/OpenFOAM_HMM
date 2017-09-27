@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -41,7 +41,8 @@ cleanTimeDirectories()
     done
     rm -rf \
         ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* \
-        ./.fxLock ./*.xml ./ParaView* ./paraFoam* ./*.OpenFOAM ./*.blockMesh \
+        ./.fxLock ./*.xml ./ParaView* ./paraFoam* \
+        ./*.blockMesh ./*.foam ./*.OpenFOAM \
         ./.setSet > /dev/null 2>&1
 }
 
@@ -149,8 +150,12 @@ cleanUcomponents()
 
 cleanFaMesh ()
 {
-    rm -rf ./constant/faMesh/{faceLabels*,faBoundary*} \
-           > /dev/null 2>&1
+    (
+        cd constant/faMesh 2>/dev/null && \
+        rm -rf \
+          faceLabels* faBoundary* \
+          > /dev/null 2>&1 \
+    )
 }
 
 cleanApplication()

@@ -31,15 +31,10 @@ License
 #include "symmTransform.H"
 #include "diagTensor.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-wedgeFaPatchField<Type>::wedgeFaPatchField
+Foam::wedgeFaPatchField<Type>::wedgeFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -50,7 +45,7 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 
 
 template<class Type>
-wedgeFaPatchField<Type>::wedgeFaPatchField
+Foam::wedgeFaPatchField<Type>::wedgeFaPatchField
 (
     const wedgeFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -62,16 +57,8 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 {
     if (!isType<wedgeFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "wedgeFaPatchField<Type>::wedgeFaPatchField\n"
-            "(\n"
-            "    const wedgeFaPatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "Field type does not correspond to patch type for patch "
+        FatalErrorInFunction
+            << "Field type does not correspond to patch type for patch "
             << this->patch().index() << "." << endl
             << "Field type: " << typeName << endl
             << "Patch type: " << this->patch().type()
@@ -81,7 +68,7 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 
 
 template<class Type>
-wedgeFaPatchField<Type>::wedgeFaPatchField
+Foam::wedgeFaPatchField<Type>::wedgeFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -92,16 +79,8 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 {
     if (!isType<wedgeFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "wedgeFaPatchField<Type>::wedgeFaPatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "patch " << this->patch().index() << " not wedge type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not wedge type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
@@ -111,7 +90,7 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 
 
 template<class Type>
-wedgeFaPatchField<Type>::wedgeFaPatchField
+Foam::wedgeFaPatchField<Type>::wedgeFaPatchField
 (
     const wedgeFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -123,11 +102,10 @@ wedgeFaPatchField<Type>::wedgeFaPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return gradient at boundary
 template<class Type>
-tmp<Field<Type> > wedgeFaPatchField<Type>::snGrad() const
+Foam::tmp<Foam::Field<Type>> Foam::wedgeFaPatchField<Type>::snGrad() const
 {
-    const Field<Type> pif(this->patchInternalField());
+    const Field<Type> pif (this->patchInternalField());
 
     return
     (
@@ -137,9 +115,8 @@ tmp<Field<Type> > wedgeFaPatchField<Type>::snGrad() const
 }
 
 
-// Evaluate the patch field
 template<class Type>
-void wedgeFaPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::wedgeFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -157,16 +134,16 @@ void wedgeFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 }
 
 
-// Return defining fields
 template<class Type>
-tmp<Field<Type> > wedgeFaPatchField<Type>::snGradTransformDiag() const
+Foam::tmp<Foam::Field<Type>>
+Foam::wedgeFaPatchField<Type>::snGradTransformDiag() const
 {
     const diagTensor diagT =
         0.5*diag(I - refCast<const wedgeFaPatch>(this->patch()).faceT());
 
     const vector diagV(diagT.xx(), diagT.yy(), diagT.zz());
 
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>
         (
@@ -184,9 +161,5 @@ tmp<Field<Type> > wedgeFaPatchField<Type>::snGradTransformDiag() const
     );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

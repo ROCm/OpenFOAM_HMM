@@ -44,7 +44,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -68,7 +68,7 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf,
@@ -93,7 +93,7 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const dimensionedScalar& gamma,
@@ -118,7 +118,7 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const dimensionedScalar& gamma,
@@ -144,7 +144,7 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const areaScalarField& gamma,
@@ -161,7 +161,7 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const areaScalarField& gamma,
@@ -178,21 +178,21 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<areaScalarField>& tgamma,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > Laplacian(fam::laplacian(tgamma(), vf));
+    tmp<faMatrix<Type>> Laplacian(fam::laplacian(tgamma(), vf));
     tgamma.clear();
     return Laplacian;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<areaScalarField>& tgamma,
@@ -200,14 +200,14 @@ laplacian
     const word& name
 )
 {
-    tmp<faMatrix<Type> > Laplacian(fam::laplacian(tgamma(), vf, name));
+    tmp<faMatrix<Type>> Laplacian(fam::laplacian(tgamma(), vf, name));
     tgamma.clear();
     return Laplacian;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const edgeScalarField& gamma,
@@ -224,7 +224,7 @@ laplacian
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<edgeScalarField>& tgamma,
@@ -232,14 +232,14 @@ laplacian
     const word& name
 )
 {
-    tmp<faMatrix<Type> > tLaplacian = fam::laplacian(tgamma(), vf, name);
+    tmp<faMatrix<Type>> tLaplacian = fam::laplacian(tgamma(), vf, name);
     tgamma.clear();
     return tLaplacian;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const edgeScalarField& gamma,
@@ -255,21 +255,21 @@ laplacian
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<edgeScalarField>& tgamma,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam(fam::laplacian(tgamma(), vf));
+    tmp<faMatrix<Type>> tfam(fam::laplacian(tgamma(), vf));
     tgamma.clear();
     return tfam;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const areaTensorField& gamma,
@@ -287,21 +287,21 @@ laplacian
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<areaTensorField>& tgamma,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > Laplacian = fam::laplacian(tgamma(), vf);
+    tmp<faMatrix<Type>> Laplacian = fam::laplacian(tgamma(), vf);
     tgamma.clear();
     return Laplacian;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const edgeTensorField& gamma,
@@ -318,21 +318,21 @@ laplacian
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<edgeTensorField>& tgamma,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > Laplacian = fam::laplacian(tgamma(), vf);
+    tmp<faMatrix<Type>> Laplacian = fam::laplacian(tgamma(), vf);
     tgamma.clear();
     return Laplacian;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const edgeTensorField& gamma,
@@ -351,7 +351,7 @@ laplacian
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 laplacian
 (
     const tmp<edgeTensorField>& tgamma,
@@ -359,7 +359,7 @@ laplacian
     const word& name
 )
 {
-    tmp<faMatrix<Type> > Laplacian = fam::laplacian(tgamma(), vf, name);
+    tmp<faMatrix<Type>> Laplacian = fam::laplacian(tgamma(), vf, name);
     tgamma.clear();
     return Laplacian;
 }

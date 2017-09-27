@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class symmetryFaePatch Declaration
+                    Class symmetryFaePatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -98,9 +98,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new symmetryFaePatchField<Type>(*this)
             );
@@ -114,16 +114,20 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new symmetryFaePatchField<Type>(*this, iF)
             );
         }
+
+    //- Destructor
+    virtual ~symmetryFaePatchField()
+    {}
 };
 
 
@@ -134,7 +138,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "symmetryFaePatchField.C"
+    #include "symmetryFaePatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

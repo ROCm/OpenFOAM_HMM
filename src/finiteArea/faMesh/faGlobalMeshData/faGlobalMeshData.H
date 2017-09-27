@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faGlobalMeshData
+    Foam::faGlobalMeshData
 
 Description
     Various mesh related information for a parallel run
@@ -87,16 +87,11 @@ public:
     //- Runtime type information
     ClassName("faGlobalMeshData");
 
+    //- Construct from mesh
+    faGlobalMeshData(const faMesh& mesh);
 
-    // Constructors
-
-        //- Construct from mesh
-        faGlobalMeshData(const faMesh& mesh);
-
-
-    // Destructor
-
-        ~faGlobalMeshData();
+    //- Destructor
+    ~faGlobalMeshData();
 
 
     // Member Functions

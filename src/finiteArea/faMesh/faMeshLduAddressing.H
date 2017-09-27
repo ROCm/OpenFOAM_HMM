@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faMeshLduAddressing
+    Foam::faMeshLduAddressing
 
 Description
     lduAddressing wrapper for faMesh
@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class faMeshLduAddressing Declaration
+                     Class faMeshLduAddressing Declaration
 \*---------------------------------------------------------------------------*/
 
 class faMeshLduAddressing
@@ -101,16 +101,15 @@ public:
             patchAddr_(mesh.boundary().size()),
             patchSchedule_(mesh.globalData().patchSchedule())
         {
-            forAll (mesh.boundary(), patchI)
+            forAll(mesh.boundary(), patchI)
             {
                 patchAddr_[patchI] = &mesh.boundary()[patchI].edgeFaces();
             }
         }
 
-    // Destructor
-
-        virtual ~faMeshLduAddressing()
-        {}
+    //-Destructor
+    virtual ~faMeshLduAddressing()
+    {}
 
 
     // Member Functions

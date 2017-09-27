@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faePatchField
+    Foam::faePatchField
 
 Description
     faePatchField<Type> abstract base class.  This class gives a fat-interface
@@ -186,9 +186,9 @@ public:
         faePatchField(const faePatchField<Type>&);
 
         //- Construct and return a clone
-        virtual tmp<faePatchField<Type> > clone() const
+        virtual tmp<faePatchField<Type>> clone() const
         {
-            return tmp<faePatchField<Type> >(new faePatchField<Type>(*this));
+            return tmp<faePatchField<Type>>(new faePatchField<Type>(*this));
         }
 
         //- Construct as copy setting internal field reference
@@ -199,16 +199,21 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faePatchField<Type> > clone
+        virtual tmp<faePatchField<Type>> clone
         (
             const DimensionedField<Type, edgeMesh>& iF
         ) const
         {
-            return tmp<faePatchField<Type> >
+            return tmp<faePatchField<Type>>
             (
                 new faePatchField<Type>(*this, iF)
             );
         }
+
+
+    //- Destructor
+    virtual ~faePatchField()
+    {}
 
 
     // Selectors
@@ -216,7 +221,7 @@ public:
         //- Return a pointer to a new patchField created on freestore given
         //  patch and internal field
         //  (does not set the patch field values)
-        static tmp<faePatchField<Type> > New
+        static tmp<faePatchField<Type>> New
         (
             const word&,
             const faPatch&,
@@ -225,7 +230,7 @@ public:
 
         //- Return a pointer to a new patchField created on freestore from
         //  a given faePatchField mapped onto a new patch
-        static tmp<faePatchField<Type> > New
+        static tmp<faePatchField<Type>> New
         (
             const faePatchField<Type>&,
             const faPatch&,
@@ -235,7 +240,7 @@ public:
 
         //- Return a pointer to a new patchField created on freestore
         //  from dictionary
-        static tmp<faePatchField<Type> > New
+        static tmp<faePatchField<Type>> New
         (
             const faPatch&,
             const DimensionedField<Type, edgeMesh>&,
@@ -245,15 +250,10 @@ public:
         //- Return a pointer to a new calculatedFaePatchField created on
         //  freestore without setting patchField values
         template<class Type2>
-        static tmp<faePatchField<Type> > NewCalculatedType
+        static tmp<faePatchField<Type>> NewCalculatedType
         (
             const faePatchField<Type2>&
         );
-
-
-    //- Destructor
-    virtual ~faePatchField<Type>()
-    {}
 
 
     // Member functions
@@ -369,66 +369,66 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faePatchField.C"
-#   include "calculatedFaePatchField.H"
+    #include "faePatchField.C"
+    #include "calculatedFaePatchField.H"
 #endif
 
 
-#define makeFaePatchTypeFieldTypeName(typePatchTypeField)                   \
-                                                                            \
+#define makeFaePatchTypeFieldTypeName(typePatchTypeField)                      \
+                                                                               \
 defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);
 
-#define makeFaePatchFieldsTypeName(typePatchField)                          \
-                                                                            \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchScalarField);         \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchVectorField);         \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSphericalTensorField); \
-makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSymmTensorField);     \
+#define makeFaePatchFieldsTypeName(typePatchField)                             \
+                                                                               \
+makeFaePatchTypeFieldTypeName(typePatchField##FaePatchScalarField);            \
+makeFaePatchTypeFieldTypeName(typePatchField##FaePatchVectorField);            \
+makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSphericalTensorField);   \
+makeFaePatchTypeFieldTypeName(typePatchField##FaePatchSymmTensorField);        \
 makeFaePatchTypeFieldTypeName(typePatchField##FaePatchTensorField);
 
 
-#define makeFaePatchTypeField(PatchTypeField, typePatchTypeField)           \
-                                                                            \
-defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);                 \
-                                                                            \
-addToRunTimeSelectionTable                                                  \
-(                                                                           \
-    PatchTypeField, typePatchTypeField, patch                               \
-);                                                                          \
-                                                                            \
-addToRunTimeSelectionTable                                                  \
-(                                                                           \
-    PatchTypeField,                                                         \
-    typePatchTypeField,                                                     \
-    patchMapper                                                             \
-);                                                                          \
-                                                                            \
-addToRunTimeSelectionTable                                                  \
-(                                                                           \
-    PatchTypeField, typePatchTypeField, dictionary                          \
+#define makeFaePatchTypeField(PatchTypeField, typePatchTypeField)              \
+                                                                               \
+defineNamedTemplateTypeNameAndDebug(typePatchTypeField, 0);                    \
+                                                                               \
+addToRunTimeSelectionTable                                                     \
+(                                                                              \
+    PatchTypeField, typePatchTypeField, patch                                  \
+);                                                                             \
+                                                                               \
+addToRunTimeSelectionTable                                                     \
+(                                                                              \
+    PatchTypeField,                                                            \
+    typePatchTypeField,                                                        \
+    patchMapper                                                                \
+);                                                                             \
+                                                                               \
+addToRunTimeSelectionTable                                                     \
+(                                                                              \
+    PatchTypeField, typePatchTypeField, dictionary                             \
 );
 
 
-#define makeFaePatchFields(type)                                            \
-                                                                            \
-makeFaePatchTypeField(faePatchScalarField, type##FaePatchScalarField);      \
-makeFaePatchTypeField(faePatchVectorField, type##FaePatchVectorField);      \
-makeFaePatchTypeField                                                       \
-(                                                                           \
-    faePatchSphericalTensorField,                                           \
-    type##FaePatchSphericalTensorField                                      \
-);                                                                          \
+#define makeFaePatchFields(type)                                               \
+                                                                               \
+makeFaePatchTypeField(faePatchScalarField, type##FaePatchScalarField);         \
+makeFaePatchTypeField(faePatchVectorField, type##FaePatchVectorField);         \
+makeFaePatchTypeField                                                          \
+(                                                                              \
+    faePatchSphericalTensorField,                                              \
+    type##FaePatchSphericalTensorField                                         \
+);                                                                             \
 makeFaePatchTypeField(faePatchSymmTensorField, type##FaePatchSymmTensorField); \
 makeFaePatchTypeField(faePatchTensorField, type##FaePatchTensorField);
 
 
-#define makeFaePatchTypeFieldTypedefs(type)                                 \
-                                                                            \
-typedef type##FaePatchField<scalar> type##FaePatchScalarField;              \
-typedef type##FaePatchField<vector> type##FaePatchVectorField;              \
-typedef type##FaePatchField<sphericalTensor>                                \
-    type##FaePatchSphericalTensorField;                                     \
-typedef type##FaePatchField<symmTensor> type##FaePatchSymmTensorField;      \
+#define makeFaePatchTypeFieldTypedefs(type)                                    \
+                                                                               \
+typedef type##FaePatchField<scalar> type##FaePatchScalarField;                 \
+typedef type##FaePatchField<vector> type##FaePatchVectorField;                 \
+typedef type##FaePatchField<sphericalTensor>                                   \
+    type##FaePatchSphericalTensorField;                                        \
+typedef type##FaePatchField<symmTensor> type##FaePatchSymmTensorField;         \
 typedef type##FaePatchField<tensor> type##FaePatchTensorField;
 
 

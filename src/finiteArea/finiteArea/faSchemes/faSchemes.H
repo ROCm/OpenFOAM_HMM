@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faSchemes
+    Foam::faSchemes
 
 Description
     Selector class for finite area differencing schemes.

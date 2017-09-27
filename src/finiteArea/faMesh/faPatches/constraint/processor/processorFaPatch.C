@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "processorFaPatch.H"
@@ -40,20 +38,18 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(processorFaPatch, 0);
-addToRunTimeSelectionTable(faPatch, processorFaPatch, dictionary);
-
+    defineTypeNameAndDebug(processorFaPatch, 0);
+    addToRunTimeSelectionTable(faPatch, processorFaPatch, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-processorFaPatch::~processorFaPatch()
+Foam::processorFaPatch::~processorFaPatch()
 {
     deleteDemandDrivenData(neighbPointsPtr_);
     deleteDemandDrivenData(nonGlobalPatchPointsPtr_);
 }
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -69,7 +65,7 @@ int Foam::processorFaPatch::tag() const
 }
 
 
-void processorFaPatch::makeNonGlobalPatchPoints() const
+void Foam::processorFaPatch::makeNonGlobalPatchPoints() const
 {
     // If it is not runing parallel or there are no global points
     // create a 1->1 map
@@ -79,8 +75,8 @@ void processorFaPatch::makeNonGlobalPatchPoints() const
     if
     (
         !Pstream::parRun()
-        || !boundaryMesh().mesh()().globalData().nGlobalPoints()
-//         || !boundaryMesh().mesh().globalData().nGlobalPoints()
+     || !boundaryMesh().mesh()().globalData().nGlobalPoints()
+//     || !boundaryMesh().mesh().globalData().nGlobalPoints()
     )
     {
         nonGlobalPatchPointsPtr_ = new labelList(nPoints());
@@ -92,7 +88,6 @@ void processorFaPatch::makeNonGlobalPatchPoints() const
     }
     else
     {
-
         // Get reference to shared points
         const labelList& sharedPoints =
             boundaryMesh().mesh()().globalData().sharedPointLabels();
@@ -107,13 +102,13 @@ void processorFaPatch::makeNonGlobalPatchPoints() const
 
         label noFiltPoints = 0;
 
-        forAll (faMeshPatchPoints, pointI)
+        forAll(faMeshPatchPoints, pointI)
         {
             label curP = meshPoints[faMeshPatchPoints[pointI]];
 
             bool found = false;
 
-            forAll (sharedPoints, sharedI)
+            forAll(sharedPoints, sharedI)
             {
                 if (sharedPoints[sharedI] == curP)
                 {
@@ -125,7 +120,7 @@ void processorFaPatch::makeNonGlobalPatchPoints() const
             if (!found)
             {
                 ngpp[noFiltPoints] = pointI;
-                noFiltPoints++;
+                ++noFiltPoints;
             }
         }
 
@@ -143,13 +138,13 @@ void processorFaPatch::makeNonGlobalPatchPoints() const
 
 //         label noFiltPoints = 0;
 
-//         forAll (patchPoints, pointI)
+//         forAll(patchPoints, pointI)
 //         {
 //             label curP = patchPoints[pointI];
 
 //             bool found = false;
 
-//             forAll (sharedPoints, pI)
+//             forAll(sharedPoints, pI)
 //             {
 //                 if (sharedPoints[pI] == curP)
 //                 {
@@ -170,7 +165,7 @@ void processorFaPatch::makeNonGlobalPatchPoints() const
 }
 
 
-void processorFaPatch::initGeometry()
+void Foam::processorFaPatch::initGeometry()
 {
     if (Pstream::parRun())
     {
@@ -189,7 +184,7 @@ void processorFaPatch::initGeometry()
 }
 
 
-void processorFaPatch::calcGeometry()
+void Foam::processorFaPatch::calcGeometry()
 {
     if (Pstream::parRun())
     {
@@ -215,10 +210,8 @@ void processorFaPatch::calcGeometry()
 
             if (mag(magEl[edgei] - nmagEl)/avEl > 1e-6)
             {
-                FatalErrorIn
-                (
-                    "processorFvPatch::makeWeights(scalarField& w) const"
-                )   << "edge " << edgei
+                FatalErrorInFunction
+                    << "edge " << edgei
                     << " length does not match neighbour by "
                     << 100*mag(magEl[edgei] - nmagEl)/avEl
                     << "% -- possible edge ordering problem"
@@ -237,20 +230,20 @@ void processorFaPatch::calcGeometry()
 }
 
 
-void processorFaPatch::initMovePoints(const pointField& p)
+void Foam::processorFaPatch::initMovePoints(const pointField& p)
 {
     faPatch::movePoints(p);
     initGeometry();
 }
 
 
-void processorFaPatch::movePoints(const pointField&)
+void Foam::processorFaPatch::movePoints(const pointField&)
 {
     calcGeometry();
 }
 
 
-void processorFaPatch::initUpdateMesh()
+void Foam::processorFaPatch::initUpdateMesh()
 {
     // For completeness
     faPatch::initUpdateMesh();
@@ -268,7 +261,7 @@ void processorFaPatch::initUpdateMesh()
 
         const labelListList& ptEdges = pointEdges();
 
-        for (label patchPointI = 0; patchPointI < nPoints(); patchPointI++)
+        for (label patchPointI = 0; patchPointI < nPoints(); ++patchPointI)
         {
             label edgeI = ptEdges[patchPointI][0];
 
@@ -277,11 +270,7 @@ void processorFaPatch::initUpdateMesh()
             const edge& e = patchEdges[edgeI];
 
             indexInEdge[patchPointI] =
-                findIndex
-                (
-                    e,
-                    pointLabels()[patchPointI]
-                );
+                findIndex(e, pointLabels()[patchPointI]);
         }
 
         OPstream toNeighbProc
@@ -298,7 +287,7 @@ void processorFaPatch::initUpdateMesh()
 }
 
 
-void processorFaPatch::updateMesh()
+void Foam::processorFaPatch::updateMesh()
 {
     // For completeness
     faPatch::updateMesh();
@@ -348,13 +337,13 @@ void processorFaPatch::updateMesh()
         {
             // Differing number of points. Probably patch includes
             // part of a cyclic.
-            neighbPointsPtr_ = NULL;
+            neighbPointsPtr_ = nullptr;
         }
     }
 }
 
 
-const labelList& processorFaPatch::neighbPoints() const
+const Foam::labelList& Foam::processorFaPatch::neighbPoints() const
 {
     if (!neighbPointsPtr_)
     {
@@ -363,7 +352,7 @@ const labelList& processorFaPatch::neighbPoints() const
         // sides of the processor patch since one side might have
         // it merged with another bit of geometry
 
-        FatalErrorIn("processorFaPatch::neighbPoints() const")
+        FatalErrorInFunction
             << "No extended addressing calculated for patch " << name()
             << nl
             << "This can happen if the number of points  on both"
@@ -377,8 +366,7 @@ const labelList& processorFaPatch::neighbPoints() const
 }
 
 
-// Make patch weighting factors
-void processorFaPatch::makeWeights(scalarField& w) const
+void Foam::processorFaPatch::makeWeights(scalarField& w) const
 {
     if (Pstream::parRun())
     {
@@ -391,7 +379,8 @@ void processorFaPatch::makeWeights(scalarField& w) const
             )
           & (
               neighbEdgeCentres()
-            - neighbEdgeFaceCentres())
+            - neighbEdgeFaceCentres()
+            )
         );
 
         w = neighbEdgeCentresCn/
@@ -407,8 +396,7 @@ void processorFaPatch::makeWeights(scalarField& w) const
 }
 
 
-// Make patch edge - neighbour face distances
-void processorFaPatch::makeDeltaCoeffs(scalarField& dc) const
+void Foam::processorFaPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     if (Pstream::parRun())
     {
@@ -421,8 +409,7 @@ void processorFaPatch::makeDeltaCoeffs(scalarField& dc) const
 }
 
 
-// Return delta (P to N) vectors across coupled patch
-tmp<vectorField> processorFaPatch::delta() const
+Foam::tmp<Foam::vectorField> Foam::processorFaPatch::delta() const
 {
     if (Pstream::parRun())
     {
@@ -457,7 +444,7 @@ tmp<vectorField> processorFaPatch::delta() const
 }
 
 
-const labelList& processorFaPatch::nonGlobalPatchPoints() const
+const Foam::labelList& Foam::processorFaPatch::nonGlobalPatchPoints() const
 {
     if (!nonGlobalPatchPointsPtr_)
     {
@@ -467,7 +454,8 @@ const labelList& processorFaPatch::nonGlobalPatchPoints() const
     return *nonGlobalPatchPointsPtr_;
 }
 
-tmp<labelField> processorFaPatch::interfaceInternalField
+
+Foam::tmp<Foam::labelField> Foam::processorFaPatch::interfaceInternalField
 (
     const labelUList& internalData
 ) const
@@ -476,7 +464,7 @@ tmp<labelField> processorFaPatch::interfaceInternalField
 }
 
 
-void processorFaPatch::initTransfer
+void Foam::processorFaPatch::initTransfer
 (
     const Pstream::commsTypes commsType,
     const labelUList& interfaceData
@@ -486,7 +474,7 @@ void processorFaPatch::initTransfer
 }
 
 
-tmp<labelField> processorFaPatch::transfer
+Foam::tmp<Foam::labelField> Foam::processorFaPatch::transfer
 (
     const Pstream::commsTypes commsType,
     const labelUList&
@@ -496,7 +484,7 @@ tmp<labelField> processorFaPatch::transfer
 }
 
 
-void processorFaPatch::initInternalFieldTransfer
+void Foam::processorFaPatch::initInternalFieldTransfer
 (
     const Pstream::commsTypes commsType,
     const labelUList& iF
@@ -506,7 +494,7 @@ void processorFaPatch::initInternalFieldTransfer
 }
 
 
-tmp<labelField> processorFaPatch::internalFieldTransfer
+Foam::tmp<Foam::labelField> Foam::processorFaPatch::internalFieldTransfer
 (
     const Pstream::commsTypes commsType,
     const labelUList&
@@ -516,8 +504,7 @@ tmp<labelField> processorFaPatch::internalFieldTransfer
 }
 
 
-// Write
-void processorFaPatch::write(Ostream& os) const
+void Foam::processorFaPatch::write(Ostream& os) const
 {
     faPatch::write(os);
     os.writeKeyword("myProcNo") << myProcNo_
@@ -526,9 +513,5 @@ void processorFaPatch::write(Ostream& os) const
         << token::END_STATEMENT << nl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

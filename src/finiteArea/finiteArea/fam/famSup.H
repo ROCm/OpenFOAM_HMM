@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fam
+InNamespace
+    Foam::fam
 
 Description
     Calculate the matrix for implicit and explicit sources.
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Namespace fam functions Declaration
+                      Namespace fam functions Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace fam
@@ -54,16 +54,16 @@ namespace fam
    // Explicit source
 
         template<class Type>
-        tmp<faMatrix<Type> > Su
+        tmp<faMatrix<Type>> Su
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
         template<class Type>
-        tmp<faMatrix<Type> > Su
+        tmp<faMatrix<Type>> Su
         (
-            const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+            const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
@@ -71,14 +71,14 @@ namespace fam
     // Implicit source
 
         template<class Type>
-        tmp<faMatrix<Type> > Sp
+        tmp<faMatrix<Type>> Sp
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
         template<class Type>
-        tmp<faMatrix<Type> > Sp
+        tmp<faMatrix<Type>> Sp
         (
             const tmp<areaScalarField>&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -86,7 +86,7 @@ namespace fam
 
 
         template<class Type>
-        tmp<faMatrix<Type> > Sp
+        tmp<faMatrix<Type>> Sp
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -96,14 +96,14 @@ namespace fam
     // Implicit/Explicit source depending on sign of coefficient
 
         template<class Type>
-        tmp<faMatrix<Type> > SuSp
+        tmp<faMatrix<Type>> SuSp
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
         template<class Type>
-        tmp<faMatrix<Type> > SuSp
+        tmp<faMatrix<Type>> SuSp
         (
             const tmp<areaScalarField>&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -118,7 +118,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "famSup.C"
+    #include "famSup.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

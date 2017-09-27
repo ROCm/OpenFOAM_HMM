@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    volSurfaceMapping
+    Foam::volSurfaceMapping
 
 Description
     Volume to surface and surface to volume mapping
@@ -50,7 +50,7 @@ namespace Foam
 template<class Type> class fvPatchField;
 
 /*---------------------------------------------------------------------------*\
-                        Class volSurfaceMapping Declaration
+                      Class volSurfaceMapping Declaration
 \*---------------------------------------------------------------------------*/
 
 class volSurfaceMapping
@@ -64,10 +64,10 @@ class volSurfaceMapping
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        volSurfaceMapping(const volSurfaceMapping&);
+        volSurfaceMapping(const volSurfaceMapping&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const volSurfaceMapping&);
+        void operator=(const volSurfaceMapping&) = delete;
 
 
 public:
@@ -91,7 +91,7 @@ public:
 
         //- Map droplet cloud sources to surface
         template<template<class> class PatchField, class Type>
-        tmp<Field<Type> > mapToSurface
+        tmp<Field<Type>> mapToSurface
         (
             const typename
             GeometricField<Type, fvPatchField, volMesh>::Boundary& df
@@ -108,7 +108,7 @@ public:
         template<class Type>
         void mapToVolume
         (
-            const tmp<GeometricField<Type, faPatchField, areaMesh> >& taf,
+            const tmp<GeometricField<Type, faPatchField, areaMesh>>& taf,
             typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
         ) const;
 };
@@ -121,7 +121,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "volSurfaceMapping.C"
+    #include "volSurfaceMapping.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

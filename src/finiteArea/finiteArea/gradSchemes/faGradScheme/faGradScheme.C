@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite area calculus gradient schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fa.H"
@@ -44,7 +41,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<gradScheme<Type> > gradScheme<Type>::New
+tmp<gradScheme<Type>> gradScheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData
@@ -52,38 +49,29 @@ tmp<gradScheme<Type> > gradScheme<Type>::New
 {
     if (fa::debug)
     {
-        Info<< "gradScheme<Type>::New(Istream& schemeData) : "
-               "constructing gradScheme<Type>"
+        InfoInFunction
+            << "constructing gradScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "gradScheme<Type>::New"
-            "(const faMesh& mesh, Istream& schemeData)",
-            schemeData
-        )   << "Grad scheme not specified" << endl << endl
-            << "Valid grad schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Grad scheme not specified" << nl << nl
+            << "Valid grad schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorIn
-        (
-            "gradScheme<Type>::New"
-            "(const faMesh& mesh, Istream& schemeData)",
-            schemeData
-        )   << "Unknown grad scheme " << schemeName << nl << nl
-            << "Valid grad schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown grad scheme " << schemeName << nl << nl
+            << "Valid grad schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

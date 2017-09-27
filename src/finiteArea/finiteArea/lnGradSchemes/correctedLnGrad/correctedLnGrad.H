@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    correctedLnGrad
+    Foam::fa::correctedLnGrad
 
 Description
     Simple central-difference lnGrad scheme with non-orthogonal correction.
@@ -50,7 +50,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class correctedLnGrad Declaration
+                       Class correctedLnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -61,7 +61,7 @@ class correctedLnGrad
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const correctedLnGrad&);
+        void operator=(const correctedLnGrad&) = delete;
 
 
 public:
@@ -86,9 +86,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~correctedLnGrad();
+    //- Destructor
+    virtual ~correctedLnGrad();
 
 
     // Member Functions
@@ -110,7 +109,7 @@ public:
 
         //- Return the explicit correction to the correctedLnGrad
         //  for the given field
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         correction(const GeometricField<Type, faPatchField, areaMesh>&) const;
 };
 
@@ -126,7 +125,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "correctedLnGrad.C"
+    #include "correctedLnGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

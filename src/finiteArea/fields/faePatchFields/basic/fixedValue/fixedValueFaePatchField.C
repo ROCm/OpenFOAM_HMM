@@ -23,21 +23,14 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "fixedValueFaePatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-fixedValueFaePatchField<Type>::fixedValueFaePatchField
+Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -48,7 +41,7 @@ fixedValueFaePatchField<Type>::fixedValueFaePatchField
 
 
 template<class Type>
-fixedValueFaePatchField<Type>::fixedValueFaePatchField
+Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -60,7 +53,7 @@ fixedValueFaePatchField<Type>::fixedValueFaePatchField
 
 
 template<class Type>
-fixedValueFaePatchField<Type>::fixedValueFaePatchField
+Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const fixedValueFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -71,7 +64,7 @@ fixedValueFaePatchField<Type>::fixedValueFaePatchField
 
 
 template<class Type>
-fixedValueFaePatchField<Type>::fixedValueFaePatchField
+Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const fixedValueFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -84,7 +77,7 @@ fixedValueFaePatchField<Type>::fixedValueFaePatchField
 
 
 template<class Type>
-fixedValueFaePatchField<Type>::fixedValueFaePatchField
+Foam::fixedValueFaePatchField<Type>::fixedValueFaePatchField
 (
     const fixedValueFaePatchField<Type>& ptf
 )
@@ -96,15 +89,11 @@ fixedValueFaePatchField<Type>::fixedValueFaePatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void fixedValueFaePatchField<Type>::write(Ostream& os) const
+void Foam::fixedValueFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

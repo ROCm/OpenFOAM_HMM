@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Face to edge interpolation scheme. Included in faMesh.
-
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
@@ -34,19 +31,16 @@ Description
 #include "demandDrivenData.H"
 #include "faPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(edgeInterpolation, 0);
-
+    defineTypeNameAndDebug(edgeInterpolation, 0);
+}
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void edgeInterpolation::clearOut()
+void Foam::edgeInterpolation::clearOut()
 {
     deleteDemandDrivenData(lPN_);
     deleteDemandDrivenData(weightingFactors_);
@@ -60,26 +54,26 @@ void edgeInterpolation::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-edgeInterpolation::edgeInterpolation(const faMesh& fam)
+Foam::edgeInterpolation::edgeInterpolation(const faMesh& fam)
 :
     faMesh_(fam),
     schemesDict_(fam()),
     solutionDict_(fam()),
-    lPN_(NULL),
-    weightingFactors_(NULL),
-    differenceFactors_(NULL),
+    lPN_(nullptr),
+    weightingFactors_(nullptr),
+    differenceFactors_(nullptr),
     orthogonal_(false),
-    correctionVectors_(NULL),
+    correctionVectors_(nullptr),
     skew_(true),
-    skewCorrectionVectors_(NULL)
-//     leastSquarePvectors_(NULL),
-//     leastSquareNvectors_(NULL)
+    skewCorrectionVectors_(nullptr)
+//     leastSquarePvectors_(nullptr),
+//     leastSquareNvectors_(nullptr)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * //
 
-edgeInterpolation::~edgeInterpolation()
+Foam::edgeInterpolation::~edgeInterpolation()
 {
     clearOut();
 }
@@ -87,7 +81,7 @@ edgeInterpolation::~edgeInterpolation()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const edgeScalarField& edgeInterpolation::lPN() const
+const Foam::edgeScalarField& Foam::edgeInterpolation::lPN() const
 {
     if (!lPN_)
     {
@@ -98,7 +92,7 @@ const edgeScalarField& edgeInterpolation::lPN() const
 }
 
 
-const edgeScalarField& edgeInterpolation::weights() const
+const Foam::edgeScalarField& Foam::edgeInterpolation::weights() const
 {
     if (!weightingFactors_)
     {
@@ -109,7 +103,7 @@ const edgeScalarField& edgeInterpolation::weights() const
 }
 
 
-const edgeScalarField& edgeInterpolation::deltaCoeffs() const
+const Foam::edgeScalarField& Foam::edgeInterpolation::deltaCoeffs() const
 {
     if (!differenceFactors_)
     {
@@ -120,7 +114,7 @@ const edgeScalarField& edgeInterpolation::deltaCoeffs() const
 }
 
 
-bool edgeInterpolation::orthogonal() const
+bool Foam::edgeInterpolation::orthogonal() const
 {
     if (orthogonal_ == false && !correctionVectors_)
     {
@@ -131,11 +125,11 @@ bool edgeInterpolation::orthogonal() const
 }
 
 
-const edgeVectorField& edgeInterpolation::correctionVectors() const
+const Foam::edgeVectorField& Foam::edgeInterpolation::correctionVectors() const
 {
     if (orthogonal())
     {
-        FatalErrorIn("edgeInterpolation::correctionVectors()")
+        FatalErrorInFunction
             << "cannot return correctionVectors; mesh is orthogonal"
             << abort(FatalError);
     }
@@ -144,7 +138,7 @@ const edgeVectorField& edgeInterpolation::correctionVectors() const
 }
 
 
-bool edgeInterpolation::skew() const
+bool Foam::edgeInterpolation::skew() const
 {
     if (skew_ == true && !skewCorrectionVectors_)
     {
@@ -155,11 +149,12 @@ bool edgeInterpolation::skew() const
 }
 
 
-const edgeVectorField& edgeInterpolation::skewCorrectionVectors() const
+const Foam::edgeVectorField&
+Foam::edgeInterpolation::skewCorrectionVectors() const
 {
     if (!skew())
     {
-        FatalErrorIn("edgeInterpolation::skewCorrectionVectors()")
+        FatalErrorInFunction
             << "cannot return skewCorrectionVectors; mesh is now skewed"
             << abort(FatalError);
     }
@@ -168,30 +163,31 @@ const edgeVectorField& edgeInterpolation::skewCorrectionVectors() const
 }
 
 
-// const edgeVectorField& edgeInterpolation::leastSquarePvectors() const
+// const Foam::edgeVectorField&
+// Foam::edgeInterpolation::leastSquarePvectors() const
 // {
 //     if (!leastSquarePvectors_)
 //     {
 //         makeLeastSquareVectors();
 //     }
-
+//
 //     return (*leastSquarePvectors_);
 // }
 
 
-// const edgeVectorField& edgeInterpolation::leastSquareNvectors() const
+// const Foam::edgeVectorField&
+// Foam::edgeInterpolation::leastSquareNvectors() const
 // {
 //     if (!leastSquareNvectors_)
 //     {
 //         makeLeastSquareVectors();
 //     }
-
+//
 //     return (*leastSquareNvectors_);
 // }
 
 
-// Do what is neccessary if the mesh has moved
-bool edgeInterpolation::movePoints() const
+bool Foam::edgeInterpolation::movePoints() const
 {
     deleteDemandDrivenData(lPN_);
     deleteDemandDrivenData(weightingFactors_);
@@ -210,14 +206,11 @@ bool edgeInterpolation::movePoints() const
 }
 
 
-void edgeInterpolation::makeLPN() const
+void Foam::edgeInterpolation::makeLPN() const
 {
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeLPN() : "
-            << "Constructing geodesic distance between points P and N"
-            << endl;
-    }
+    DebugInFunction
+        << "Constructing geodesic distance between points P and N"
+        << endl;
 
 
     lPN_ = new edgeScalarField
@@ -284,23 +277,17 @@ void edgeInterpolation::makeLPN() const
     }
 
 
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeLPN() : "
-            << "Finished constructing geodesic distance PN"
-            << endl;
-    }
+    DebugInFunction
+        << "Finished constructing geodesic distance PN"
+        << endl;
 }
 
 
-void edgeInterpolation::makeWeights() const
+void Foam::edgeInterpolation::makeWeights() const
 {
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeWeights() : "
-            << "Constructing weighting factors for edge interpolation"
-            << endl;
-    }
+    DebugInFunction
+        << "Constructing weighting factors for edge interpolation"
+        << endl;
 
 
     weightingFactors_ = new edgeScalarField
@@ -325,7 +312,6 @@ void edgeInterpolation::makeWeights() const
     const areaVectorField& faceCentres = mesh().areaCentres();
     const labelUList& owner = mesh().owner();
     const labelUList& neighbour = mesh().neighbour();
-
 
     scalarField& weightingFactorsIn = weightingFactors.primitiveFieldRef();
 
@@ -373,23 +359,17 @@ void edgeInterpolation::makeWeights() const
         );
     }
 
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeWeights() : "
-            << "Finished constructing weighting factors for face interpolation"
-            << endl;
-    }
+    DebugInFunction
+        << "Finished constructing weighting factors for face interpolation"
+        << endl;
 }
 
 
-void edgeInterpolation::makeDeltaCoeffs() const
+void Foam::edgeInterpolation::makeDeltaCoeffs() const
 {
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeDeltaCoeffs() : "
-            << "Constructing differencing factors array for edge gradient"
-            << endl;
-    }
+    DebugInFunction
+        << "Constructing differencing factors array for edge gradient"
+        << endl;
 
     // Force the construction of the weighting factors
     // needed to make sure deltaCoeffs are calculated for parallel runs.
@@ -489,14 +469,11 @@ void edgeInterpolation::makeDeltaCoeffs() const
 }
 
 
-void edgeInterpolation::makeCorrectionVectors() const
+void Foam::edgeInterpolation::makeCorrectionVectors() const
 {
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeCorrectionVectors() : "
-            << "Constructing non-orthogonal correction vectors"
-            << endl;
-    }
+    DebugInFunction
+        << "Constructing non-orthogonal correction vectors"
+        << endl;
 
     correctionVectors_ = new edgeVectorField
     (
@@ -557,11 +534,9 @@ void edgeInterpolation::makeCorrectionVectors() const
           - deltaCoeffs[edgeI]*unitDelta;
     }
 
-    forAll(CorrVecs.boundaryField(), patchI)
+    edgeVectorField::Boundary& CorrVecsbf = CorrVecs.boundaryFieldRef();
+    for (faePatchVectorField& patchCorrVecs : CorrVecsbf)
     {
-        faePatchVectorField& patchCorrVecs =
-            CorrVecs.boundaryFieldRef()[patchI];
-
         patchCorrVecs = vector::zero;
     }
 
@@ -579,15 +554,11 @@ void edgeInterpolation::makeCorrectionVectors() const
         NonOrthogCoeff = max(Foam::asin(sinAlpha)*180.0/M_PI);
     }
 
-    // ZT, 12/Nov/2010
     reduce(NonOrthogCoeff, maxOp<scalar>());
 
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeCorrectionVectors() : "
-            << "non-orthogonality coefficient = " << NonOrthogCoeff << " deg."
-            << endl;
-    }
+    DebugInFunction
+        << "non-orthogonality coefficient = " << NonOrthogCoeff << " deg."
+        << endl;
 
     if (NonOrthogCoeff < 0.1)
     {
@@ -599,23 +570,17 @@ void edgeInterpolation::makeCorrectionVectors() const
         orthogonal_ = false;
     }
 
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeCorrectionVectors() : "
-            << "Finished constructing non-orthogonal correction vectors"
-            << endl;
-    }
+    DebugInFunction
+        << "Finished constructing non-orthogonal correction vectors"
+        << endl;
 }
 
 
-void edgeInterpolation::makeSkewCorrectionVectors() const
+void Foam::edgeInterpolation::makeSkewCorrectionVectors() const
 {
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeSkewCorrectionVectors() : "
-            << "Constructing skew correction vectors"
-            << endl;
-    }
+    DebugInFunction
+        << "Constructing skew correction vectors"
+        << endl;
 
     skewCorrectionVectors_ = new edgeVectorField
     (
@@ -646,19 +611,18 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
 
     forAll(neighbour, edgeI)
     {
-        vector P = C[owner[edgeI]];
-        vector N = C[neighbour[edgeI]];
-        vector S = points[edges[edgeI].start()];
+        const vector& P = C[owner[edgeI]];
+        const vector& N = C[neighbour[edgeI]];
+        const vector& S = points[edges[edgeI].start()];
         vector e = edges[edgeI].vec(points);
 
-        scalar alpha = - ( ( (N - P)^(S - P) )&( (N - P)^e ) )/
-            ( ( (N - P)^e )&( (N - P)^e ) );
+        scalar alpha =
+            -(((N - P)^(S - P))&((N - P)^e ))/(((N - P)^e)&((N - P)^e));
 
-        vector E = S + alpha*e;
+        vector E(S + alpha*e);
 
         SkewCorrVecs[edgeI] = Ce[edgeI] - E;
     }
-
 
 
     edgeVectorField::Boundary& bSkewCorrVecs =
@@ -678,18 +642,18 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
 
             vectorField ngbC(C.boundaryField()[patchI].patchNeighbourField());
 
-            forAll (patchSkewCorrVecs, edgeI)
+            forAll(patchSkewCorrVecs, edgeI)
             {
-                vector P = C[edgeFaces[edgeI]];
-                vector N = ngbC[edgeI];
-                vector S = points[patchEdges[edgeI].start()];
+                const vector& P = C[edgeFaces[edgeI]];
+                const vector& N = ngbC[edgeI];
+                const vector& S = points[patchEdges[edgeI].start()];
                 vector e = patchEdges[edgeI].vec(points);
 
                 scalar alpha =
                   - (((N - P)^(S - P))&((N - P)^e))
                    /(((N - P)^e)&((N - P)^e));
 
-                vector E = S + alpha*e;
+                vector E(S + alpha*e);
 
                 patchSkewCorrVecs[edgeI] =
                     Ce.boundaryField()[patchI][edgeI] - E;
@@ -707,7 +671,7 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
     // Calculating PN arc length
     scalarField lPN(owner.size());
 
-    forAll (owner, edgeI)
+    forAll(owner, edgeI)
     {
         lPN[edgeI] =
             mag
@@ -729,11 +693,8 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
         skewCoeff = max(mag(SkewCorrVecs.internalField())/mag(lPN));
     }
 
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeSkewCorrectionVectors() : "
-            << "skew coefficient = " << skewCoeff << endl;
-    }
+    DebugInFunction
+        << "skew coefficient = " << skewCoeff << endl;
 
     if (skewCoeff < 0.1)
     {
@@ -745,17 +706,10 @@ void edgeInterpolation::makeSkewCorrectionVectors() const
         skew_ = true;
     }
 
-    if (debug)
-    {
-        Info<< "edgeInterpolation::makeSkewCorrectionVectors() : "
-            << "Finished constructing skew correction vectors"
-            << endl;
-    }
+    DebugInFunction
+        << "Finished constructing skew correction vectors"
+        << endl;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

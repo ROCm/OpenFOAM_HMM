@@ -31,7 +31,6 @@ Description
 SourceFiles
     edgeFields.C
 
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef edgeFieldsFwd_H

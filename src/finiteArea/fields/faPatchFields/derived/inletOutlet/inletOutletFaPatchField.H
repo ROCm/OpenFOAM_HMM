@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    inletOutletFaPatchField
+    Foam::inletOutletFaPatchField
 
 Description
 
@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class inletOutletFaPatchField Declaration
+                   Class inletOutletFaPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -103,9 +103,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new inletOutletFaPatchField<Type>(*this)
             );
@@ -119,16 +119,21 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new inletOutletFaPatchField<Type>(*this, iF)
             );
         }
+
+
+    //- Destructor
+    virtual ~inletOutletFaPatchField()
+    {}
 
 
     // Member functions
@@ -163,7 +168,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "inletOutletFaPatchField.C"
+    #include "inletOutletFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -27,15 +27,10 @@ License
 
 #include "fixedValueOutflowFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
+Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -46,7 +41,7 @@ fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 
 
 template<class Type>
-fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
+Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -58,7 +53,7 @@ fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 
 
 template<class Type>
-fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
+Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 (
     const fixedValueOutflowFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -69,7 +64,7 @@ fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 
 
 template<class Type>
-fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
+Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 (
     const fixedValueOutflowFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -82,7 +77,7 @@ fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 
 
 template<class Type>
-fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
+Foam::fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 (
     const fixedValueOutflowFaPatchField<Type>& ptf
 )
@@ -94,12 +89,13 @@ fixedValueOutflowFaPatchField<Type>::fixedValueOutflowFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > fixedValueOutflowFaPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::fixedValueOutflowFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>& weights
 ) const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>(Type(pTraits<Type>::one)*weights)
     );
@@ -107,7 +103,8 @@ tmp<Field<Type> > fixedValueOutflowFaPatchField<Type>::valueInternalCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > fixedValueOutflowFaPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::fixedValueOutflowFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>& weights
 ) const
@@ -117,32 +114,27 @@ tmp<Field<Type> > fixedValueOutflowFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> >
-fixedValueOutflowFaPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::fixedValueOutflowFaPatchField<Type>::gradientInternalCoeffs() const
 {
     return -Type(pTraits<Type>::one)*this->patch().deltaCoeffs();
 }
 
 
 template<class Type>
-tmp<Field<Type> >
-fixedValueOutflowFaPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::fixedValueOutflowFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
     return this->patch().deltaCoeffs()*(*this);
 }
 
 
-// Write
 template<class Type>
-void fixedValueOutflowFaPatchField<Type>::write(Ostream& os) const
+void Foam::fixedValueOutflowFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

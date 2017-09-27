@@ -78,7 +78,7 @@ inline void faceLimitedGrad<Type>::limitEdge
     const Type& extrapolate
 )
 {
-    for (direction cmpt = 0; cmpt < Type::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < Type::nComponents; ++cmpt)
     {
         faceLimitedGrad<scalar>::limitEdge
         (

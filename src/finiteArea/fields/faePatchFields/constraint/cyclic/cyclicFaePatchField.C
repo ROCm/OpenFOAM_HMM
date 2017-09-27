@@ -27,15 +27,10 @@ License
 
 #include "cyclicFaePatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-cyclicFaePatchField<Type>::cyclicFaePatchField
+Foam::cyclicFaePatchField<Type>::cyclicFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -47,7 +42,7 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
 
 
 template<class Type>
-cyclicFaePatchField<Type>::cyclicFaePatchField
+Foam::cyclicFaePatchField<Type>::cyclicFaePatchField
 (
     const cyclicFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -60,16 +55,8 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
 {
     if (!isType<cyclicFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "cyclicFaePatchField<Type>::cyclicFaePatchField\n"
-            "(\n"
-            "    const cyclicFaePatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, edgeMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "Field type does not correspond to patch type for patch "
+        FatalErrorInFunction
+            << "Field type does not correspond to patch type for patch "
             << this->patch().index() << "." << endl
             << "Field type: " << typeName << endl
             << "Patch type: " << this->patch().type()
@@ -79,7 +66,7 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
 
 
 template<class Type>
-cyclicFaePatchField<Type>::cyclicFaePatchField
+Foam::cyclicFaePatchField<Type>::cyclicFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -91,16 +78,8 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
 {
     if (!isType<cyclicFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "cyclicFaePatchField<Type>::cyclicFaePatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "patch " << this->patch().index() << " not cyclic type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not cyclic type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
@@ -108,7 +87,7 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
 
 
 template<class Type>
-cyclicFaePatchField<Type>::cyclicFaePatchField
+Foam::cyclicFaePatchField<Type>::cyclicFaePatchField
 (
     const cyclicFaePatchField<Type>& ptf
 )
@@ -119,7 +98,7 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
 
 
 template<class Type>
-cyclicFaePatchField<Type>::cyclicFaePatchField
+Foam::cyclicFaePatchField<Type>::cyclicFaePatchField
 (
     const cyclicFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -129,9 +108,5 @@ cyclicFaePatchField<Type>::cyclicFaePatchField
     cyclicPatch_(ptf.cyclicPatch_)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

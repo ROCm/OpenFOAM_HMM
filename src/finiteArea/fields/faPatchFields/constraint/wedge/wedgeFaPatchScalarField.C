@@ -23,31 +23,23 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "wedgeFaPatchField.H"
 #include "areaFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return gradient at boundary
 template<>
-tmp<scalarField> wedgeFaPatchField<scalar>::snGrad() const
+Foam::tmp<Foam::scalarField>
+Foam::wedgeFaPatchField<Foam::scalar>::snGrad() const
 {
-    return tmp<scalarField >(new scalarField(size(), 0.0));
+    return tmp<scalarField>(new scalarField(size(), 0.0));
 }
 
 
-// Evaluate the patch field
 template<>
-void wedgeFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
+void Foam::wedgeFaPatchField<Foam::scalar>::evaluate(const Pstream::commsTypes)
 {
     if (!updated())
     {
@@ -57,9 +49,5 @@ void wedgeFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
     this->operator==(patchInternalField());
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

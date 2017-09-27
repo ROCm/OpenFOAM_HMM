@@ -29,15 +29,10 @@ License
 #include "faPatchFieldMapper.H"
 #include "areaFaMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-emptyFaPatchField<Type>::emptyFaPatchField
+Foam::emptyFaPatchField<Type>::emptyFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -48,7 +43,7 @@ emptyFaPatchField<Type>::emptyFaPatchField
 
 
 template<class Type>
-emptyFaPatchField<Type>::emptyFaPatchField
+Foam::emptyFaPatchField<Type>::emptyFaPatchField
 (
     const emptyFaPatchField<Type>&,
     const faPatch& p,
@@ -60,16 +55,8 @@ emptyFaPatchField<Type>::emptyFaPatchField
 {
     if (!isType<emptyFaPatch>(p))
     {
-        FatalErrorIn
-        (
-            "emptyFaPatchField<Type>::emptyFaPatchField\n"
-            "(\n"
-            "    const emptyFaPatchField<Type>&,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, areaMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "\n    patch type '" << p.type()
+        FatalErrorInFunction
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -80,7 +67,7 @@ emptyFaPatchField<Type>::emptyFaPatchField
 
 
 template<class Type>
-emptyFaPatchField<Type>::emptyFaPatchField
+Foam::emptyFaPatchField<Type>::emptyFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -89,18 +76,10 @@ emptyFaPatchField<Type>::emptyFaPatchField
 :
     faPatchField<Type>(p, iF, Field<Type>(0))
 {
-    if (typeid(p) != typeid(emptyFaPatch))
+    if (!isA<emptyFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "emptyFaPatchField<Type>::emptyFaPatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, areaMesh>& iF,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )    << "\n    patch type '" << p.type()
+        FatalIOErrorInFunction(dict)
+            << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << this->dimensionedInternalField().name()
@@ -111,7 +90,7 @@ emptyFaPatchField<Type>::emptyFaPatchField
 
 
 template<class Type>
-emptyFaPatchField<Type>::emptyFaPatchField
+Foam::emptyFaPatchField<Type>::emptyFaPatchField
 (
     const emptyFaPatchField<Type>& ptf
 )
@@ -126,7 +105,7 @@ emptyFaPatchField<Type>::emptyFaPatchField
 
 
 template<class Type>
-emptyFaPatchField<Type>::emptyFaPatchField
+Foam::emptyFaPatchField<Type>::emptyFaPatchField
 (
     const emptyFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -139,9 +118,8 @@ emptyFaPatchField<Type>::emptyFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void emptyFaPatchField<Type>::updateCoeffs()
+void Foam::emptyFaPatchField<Type>::updateCoeffs()
 {
-    // ZT, 26/06/2010, bug-fix for faMesh of zero size
     if (this->dimensionedInternalField().mesh().nFaces())
     {
         if
@@ -150,18 +128,15 @@ void emptyFaPatchField<Type>::updateCoeffs()
           % this->dimensionedInternalField().mesh().nFaces()
         )
         {
-            FatalErrorIn("emptyFaPatchField<Type>::updateCoeffs()")
-                << "This mesh contains patches of type empty but is not 1D or 2D\n"
-                "    by virtue of the fact that the number of faces of this\n"
-                "    empty patch is not divisible by the number of cells."
-                    << exit(FatalError);
+            FatalErrorInFunction
+                << "This mesh contains patches of type empty but is "
+                << "not 1D or 2D by virtue of the fact that the number of "
+                << "faces of this empty patch is not divisible by the number "
+                << "of cells."
+                << exit(FatalError);
         }
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

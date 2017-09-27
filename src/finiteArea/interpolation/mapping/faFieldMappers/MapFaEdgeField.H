@@ -72,14 +72,8 @@ void MapInternalField<Type, MeshMapper, edgeMesh>::operator()
 {
     if (field.size() != mapper.edgeMap().sizeBeforeMapping())
     {
-        FatalErrorIn
-        (
-            "void MapInternalField<Type, MeshMapper, edgeMesh>::operator()\n"
-            "(\n"
-            "    Field<Type>& field,\n"
-            "    const MeshMapper& mapper\n"
-            ") const"
-        )  << "Incompatible size before mapping.  Field size: " << field.size()
+        FatalErrorInFunction
+           << "Incompatible size before mapping.  Field size: " << field.size()
            << " map size: " << mapper.edgeMap().sizeBeforeMapping()
            << abort(FatalError);
     }
@@ -92,7 +86,7 @@ void MapInternalField<Type, MeshMapper, edgeMesh>::operator()
     // Flip the flux
 //     const labelList flipFaces = mapper.edgeMap().flipFaceFlux().toc();
 
-//     forAll (flipFaces, i)
+//     forAll(flipFaces, i)
 //     {
 //         if (flipFaces[i] < field.size())
 //         {

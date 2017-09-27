@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faMatrix
+    Foam::faMatrix
 
 Description
     A special matrix type and solver, designed for finite area

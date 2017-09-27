@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faPatchField
+    Foam::faPatchField
 
 Description
     faPatchField<Type> abstract base class.  This class gives a fat-interface
@@ -75,7 +75,7 @@ template<class Type>
 Ostream& operator<<(Ostream&, const faPatchField<Type>&);
 
 /*---------------------------------------------------------------------------*\
-                         Class faPatchField Declaration
+                        Class faPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -189,9 +189,9 @@ public:
         faPatchField(const faPatchField<Type>&);
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >(new faPatchField<Type>(*this));
+            return tmp<faPatchField<Type>>(new faPatchField<Type>(*this));
         }
 
         //- Construct as copy setting internal field reference
@@ -202,12 +202,12 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >(new faPatchField<Type>(*this, iF));
+            return tmp<faPatchField<Type>>(new faPatchField<Type>(*this, iF));
         }
 
 
@@ -216,7 +216,7 @@ public:
         //- Return a pointer to a new patchField created on freestore given
         //  patch and internal field
         //  (does not set the patch field values)
-        static tmp<faPatchField<Type> > New
+        static tmp<faPatchField<Type>> New
         (
             const word&,
             const faPatch&,
@@ -225,7 +225,7 @@ public:
 
         //- Return a pointer to a new patchField created on freestore from
         //  a given faPatchField mapped onto a new patch
-        static tmp<faPatchField<Type> > New
+        static tmp<faPatchField<Type>> New
         (
             const faPatchField<Type>&,
             const faPatch&,
@@ -235,7 +235,7 @@ public:
 
         //- Return a pointer to a new patchField created on freestore
         //  from dictionary
-        static tmp<faPatchField<Type> > New
+        static tmp<faPatchField<Type>> New
         (
             const faPatch&,
             const DimensionedField<Type, areaMesh>&,
@@ -245,16 +245,15 @@ public:
         //- Return a pointer to a new calculatedFaPatchField created on
         //  freestore without setting patchField values
         template<class Type2>
-        static tmp<faPatchField<Type> > NewCalculatedType
+        static tmp<faPatchField<Type>> NewCalculatedType
         (
             const faPatchField<Type2>&
         );
 
 
-    // Destructor
-
-        virtual ~faPatchField<Type>()
-        {}
+    //- Destructor
+    virtual ~faPatchField<Type>()
+    {}
 
 
     // Member functions
@@ -326,7 +325,7 @@ public:
         // Evaluation functions
 
             //- Return patch-normal gradient
-            virtual tmp<Field<Type> > snGrad() const;
+            virtual tmp<Field<Type>> snGrad() const;
 
             //- Update the coefficients associated with the patch field
             //  Sets Updated to true
@@ -336,10 +335,10 @@ public:
             }
 
             //- Return internal field next to patch as patch field
-            virtual tmp<Field<Type> > patchInternalField() const;
+            virtual tmp<Field<Type>> patchInternalField() const;
 
             //- Return patchField on the opposite patch of a coupled patch
-            virtual tmp<Field<Type> > patchNeighbourField() const
+            virtual tmp<Field<Type>> patchNeighbourField() const
             {
                 notImplemented(type() + "patchNeighbourField()");
                 return *this;
@@ -363,37 +362,37 @@ public:
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueInternalCoeffs
+            virtual tmp<Field<Type>> valueInternalCoeffs
             (
-                const tmp<Field<scalar> >&
+                const tmp<Field<scalar>>&
             ) const
             {
                 notImplemented
                 (
                     type()
-                  + "::valueInternalCoeffs(const tmp<Field<scalar> >&)"
+                  + "::valueInternalCoeffs(const tmp<Field<scalar>>&)"
                 );
                 return *this;
             }
 
             //- Return the matrix source coefficients corresponding to the
             //  evaluation of the value of this patchField with given weights
-            virtual tmp<Field<Type> > valueBoundaryCoeffs
+            virtual tmp<Field<Type>> valueBoundaryCoeffs
             (
-                const tmp<Field<scalar> >&
+                const tmp<Field<scalar>>&
             ) const
             {
                 notImplemented
                 (
                     type()
-                  + "::valueBoundaryCoeffs(const tmp<Field<scalar> >&)"
+                  + "::valueBoundaryCoeffs(const tmp<Field<scalar>>&)"
                 );
                 return *this;
             }
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the gradient of this patchField
-            virtual tmp<Field<Type> > gradientInternalCoeffs() const
+            virtual tmp<Field<Type>> gradientInternalCoeffs() const
             {
                 notImplemented(type() + "::gradientInternalCoeffs()");
                 return *this;
@@ -401,7 +400,7 @@ public:
 
             //- Return the matrix source coefficients corresponding to the
             //  evaluation of the gradient of this patchField
-            virtual tmp<Field<Type> > gradientBoundaryCoeffs() const
+            virtual tmp<Field<Type>> gradientBoundaryCoeffs() const
             {
                 notImplemented(type() + "::gradientBoundaryCoeffs()");
                 return *this;
@@ -461,8 +460,8 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faPatchField.C"
-#   include "calculatedFaPatchField.H"
+    #include "faPatchField.C"
+    #include "calculatedFaPatchField.H"
 #endif
 
 

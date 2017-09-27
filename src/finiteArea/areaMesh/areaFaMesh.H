@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    areaMesh
+    Foam::areaMesh
 
 Description
     Mesh data needed to do the Finite Area discretisation.

@@ -30,11 +30,8 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 template<class Type>
-const word& faePatchField<Type>::calculatedType()
+const Foam::word& Foam::faePatchField<Type>::calculatedType()
 {
     return calculatedFaePatchField<Type>::typeName;
 }
@@ -42,7 +39,7 @@ const word& faePatchField<Type>::calculatedType()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-calculatedFaePatchField<Type>::calculatedFaePatchField
+Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -53,7 +50,7 @@ calculatedFaePatchField<Type>::calculatedFaePatchField
 
 
 template<class Type>
-calculatedFaePatchField<Type>::calculatedFaePatchField
+Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const calculatedFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -66,7 +63,7 @@ calculatedFaePatchField<Type>::calculatedFaePatchField
 
 
 template<class Type>
-calculatedFaePatchField<Type>::calculatedFaePatchField
+Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -78,7 +75,7 @@ calculatedFaePatchField<Type>::calculatedFaePatchField
 
 
 template<class Type>
-calculatedFaePatchField<Type>::calculatedFaePatchField
+Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const calculatedFaePatchField<Type>& ptf
 )
@@ -88,7 +85,7 @@ calculatedFaePatchField<Type>::calculatedFaePatchField
 
 
 template<class Type>
-calculatedFaePatchField<Type>::calculatedFaePatchField
+Foam::calculatedFaePatchField<Type>::calculatedFaePatchField
 (
     const calculatedFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -100,7 +97,8 @@ calculatedFaePatchField<Type>::calculatedFaePatchField
 
 template<class Type>
 template<class Type2>
-tmp<faePatchField<Type> > faePatchField<Type>::NewCalculatedType
+Foam::tmp<Foam::faePatchField<Type>>
+Foam::faePatchField<Type>::NewCalculatedType
 (
     const faePatchField<Type2>& pf
 )
@@ -108,7 +106,7 @@ tmp<faePatchField<Type> > faePatchField<Type>::NewCalculatedType
     typename patchConstructorTable::iterator patchTypeCstrIter =
         patchConstructorTablePtr_->find(pf.patch().type());
 
-    if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+    if (patchTypeCstrIter.found())
     {
         return patchTypeCstrIter()
         (
@@ -118,7 +116,7 @@ tmp<faePatchField<Type> > faePatchField<Type>::NewCalculatedType
     }
     else
     {
-        return tmp<faePatchField<Type> >
+        return tmp<faePatchField<Type>>
         (
             new calculatedFaePatchField<Type>
             (
@@ -132,17 +130,12 @@ tmp<faePatchField<Type> > faePatchField<Type>::NewCalculatedType
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Write
 template<class Type>
-void calculatedFaePatchField<Type>::write(Ostream& os) const
+void Foam::calculatedFaePatchField<Type>::write(Ostream& os) const
 {
     faePatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

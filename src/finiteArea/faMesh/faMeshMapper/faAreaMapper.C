@@ -45,7 +45,7 @@ void Foam::faAreaMapper::calcAddressing() const
      || insertedObjectLabelsPtr_
     )
     {
-        FatalErrorIn("void faAreaMapper::calcAddressing() const)")
+        FatalErrorInFunction
             << "Addressing already calculated"
             << abort(FatalError);
     }
@@ -63,7 +63,6 @@ void Foam::faAreaMapper::calcAddressing() const
 
     // Prepare a list of new face labels and (preliminary) addressing
     // Note: dimensioned to number of boundary faces of polyMesh
-    // HJ, 10/Aug/2011
     newFaceLabelsPtr_ = new labelList
     (
         mesh_().nFaces() - mesh_().nInternalFaces(),
@@ -86,7 +85,7 @@ void Foam::faAreaMapper::calcAddressing() const
     const labelList& reverseFaceMap = mpm_.reverseFaceMap();
 
     // Pick up live old faces
-    forAll (oldFaces, faceI)
+    forAll(oldFaces, faceI)
     {
         if (reverseFaceMap[oldFaces[faceI]] > -1)
         {
@@ -109,7 +108,7 @@ void Foam::faAreaMapper::calcAddressing() const
         labelList& addr = *directAddrPtr_;
 
         // Adjust for creation of a boundary face from an internal face
-        forAll (addr, faceI)
+        forAll(addr, faceI)
         {
             if (newFaceLabelsMap[faceI] < oldNInternal)
             {
@@ -132,7 +131,7 @@ void Foam::faAreaMapper::calcAddressing() const
         scalarListList& w = *weightsPtr_;
 
         // Insert single addressing and weights
-        for (label addrI = 0; addrI < nNewFaces; addrI++)
+        for (label addrI = 0; addrI < nNewFaces; ++addrI)
         {
             addr[addrI] = labelList(1, newFaceLabelsMap[addrI]);
             w[addrI] = scalarList(1, scalar(1));
@@ -150,7 +149,7 @@ void Foam::faAreaMapper::calcAddressing() const
 
         const List<objectMap>& ffp = mpm_.facesFromPointsMap();
 
-        forAll (ffp, ffpI)
+        forAll(ffp, ffpI)
         {
             // Get addressing
             const labelList& mo = ffp[ffpI].masterObjects();
@@ -159,7 +158,7 @@ void Foam::faAreaMapper::calcAddressing() const
             labelList validMo(mo.size());
             label nValidMo = 0;
 
-            forAll (mo, moI)
+            forAll(mo, moI)
             {
                 if (oldFaceLookup.found(mo[moI]))
                 {
@@ -186,7 +185,7 @@ void Foam::faAreaMapper::calcAddressing() const
 
         const List<objectMap>& ffe = mpm_.facesFromEdgesMap();
 
-        forAll (ffe, ffeI)
+        forAll(ffe, ffeI)
         {
             // Get addressing
             const labelList& mo = ffe[ffeI].masterObjects();
@@ -195,7 +194,7 @@ void Foam::faAreaMapper::calcAddressing() const
             labelList validMo(mo.size());
             label nValidMo = 0;
 
-            forAll (mo, moI)
+            forAll(mo, moI)
             {
                 if (oldFaceLookup.found(mo[moI]))
                 {
@@ -222,7 +221,7 @@ void Foam::faAreaMapper::calcAddressing() const
 
         const List<objectMap>& fff = mpm_.facesFromFacesMap();
 
-        forAll (fff, fffI)
+        forAll(fff, fffI)
         {
             // Get addressing
             const labelList& mo = fff[fffI].masterObjects();
@@ -231,7 +230,7 @@ void Foam::faAreaMapper::calcAddressing() const
             labelList validMo(mo.size());
             label nValidMo = 0;
 
-            forAll (mo, moI)
+            forAll(mo, moI)
             {
                 if (oldFaceLookup.found(mo[moI]))
                 {
@@ -287,7 +286,6 @@ void Foam::faAreaMapper::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::faAreaMapper::faAreaMapper
 (
     const faMesh& mesh,
@@ -300,12 +298,12 @@ Foam::faAreaMapper::faAreaMapper
     direct_(false),
     hasUnmapped_(false),
     sizeBeforeMapping_(mesh.nFaces()),
-    newFaceLabelsPtr_(NULL),
-    newFaceLabelsMapPtr_(NULL),
-    directAddrPtr_(NULL),
-    interpolationAddrPtr_(NULL),
-    weightsPtr_(NULL),
-    insertedObjectLabelsPtr_(NULL)
+    newFaceLabelsPtr_(nullptr),
+    newFaceLabelsMapPtr_(nullptr),
+    directAddrPtr_(nullptr),
+    interpolationAddrPtr_(nullptr),
+    weightsPtr_(nullptr),
+    insertedObjectLabelsPtr_(nullptr)
 {
     // Check for possibility of direct mapping
     if
@@ -323,7 +321,6 @@ Foam::faAreaMapper::faAreaMapper
     }
 
     // Inserted objects not suported: no master
-    // HJ, 10/Aug/2011
 }
 
 
@@ -363,11 +360,8 @@ const Foam::labelUList& Foam::faAreaMapper::directAddressing() const
 {
     if (!direct())
     {
-        FatalErrorIn
-        (
-            "const labelUList& faAreaMapper::"
-            "directAddressing() const"
-        )   << "Requested direct addressing for an interpolative mapper."
+        FatalErrorInFunction
+            << "Requested direct addressing for an interpolative mapper."
             << abort(FatalError);
     }
 
@@ -384,10 +378,8 @@ const Foam::labelListList& Foam::faAreaMapper::addressing() const
 {
     if (direct())
     {
-        FatalErrorIn
-        (
-            "const labelListList& faAreaMapper::addressing() const"
-        )   << "Requested interpolative addressing for a direct mapper."
+        FatalErrorInFunction
+            << "Requested interpolative addressing for a direct mapper."
             << abort(FatalError);
     }
 
@@ -404,10 +396,8 @@ const Foam::scalarListList& Foam::faAreaMapper::weights() const
 {
     if (direct())
     {
-        FatalErrorIn
-        (
-            "const scalarListList& faAreaMapper::weights() const"
-        )   << "Requested interpolative weights for a direct mapper."
+        FatalErrorInFunction
+            << "Requested interpolative weights for a direct mapper."
             << abort(FatalError);
     }
 

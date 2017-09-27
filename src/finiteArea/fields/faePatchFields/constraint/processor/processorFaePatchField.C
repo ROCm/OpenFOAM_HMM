@@ -27,15 +27,10 @@ License
 
 #include "processorFaePatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
 template<class Type>
-processorFaePatchField<Type>::processorFaePatchField
+Foam::processorFaePatchField<Type>::processorFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -47,7 +42,7 @@ processorFaePatchField<Type>::processorFaePatchField
 
 
 template<class Type>
-processorFaePatchField<Type>::processorFaePatchField
+Foam::processorFaePatchField<Type>::processorFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -59,9 +54,8 @@ processorFaePatchField<Type>::processorFaePatchField
 {}
 
 
-// Construct by mapping given processorFaePatchField<Type>
 template<class Type>
-processorFaePatchField<Type>::processorFaePatchField
+Foam::processorFaePatchField<Type>::processorFaePatchField
 (
     const processorFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -74,16 +68,8 @@ processorFaePatchField<Type>::processorFaePatchField
 {
     if (!isType<processorFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "processorFaePatchField<Type>::processorFaePatchField\n"
-            "(\n"
-            "    const processorFaePatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, edgeMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "Field type does not correspond to patch type for patch "
+        FatalErrorInFunction
+            << "Field type does not correspond to patch type for patch "
             << this->patch().index() << "." << endl
             << "Field type: " << typeName << endl
             << "Patch type: " << this->patch().type()
@@ -93,7 +79,7 @@ processorFaePatchField<Type>::processorFaePatchField
 
 
 template<class Type>
-processorFaePatchField<Type>::processorFaePatchField
+Foam::processorFaePatchField<Type>::processorFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -105,16 +91,8 @@ processorFaePatchField<Type>::processorFaePatchField
 {
     if (!isType<processorFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "processorFaePatchField<Type>::processorFaePatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "patch " << this->patch().index() << " not processor type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not processor type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
@@ -122,7 +100,7 @@ processorFaePatchField<Type>::processorFaePatchField
 
 
 template<class Type>
-processorFaePatchField<Type>::processorFaePatchField
+Foam::processorFaePatchField<Type>::processorFaePatchField
 (
     const processorFaePatchField<Type>& ptf
 )
@@ -133,7 +111,7 @@ processorFaePatchField<Type>::processorFaePatchField
 
 
 template<class Type>
-processorFaePatchField<Type>::processorFaePatchField
+Foam::processorFaePatchField<Type>::processorFaePatchField
 (
     const processorFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -147,12 +125,8 @@ processorFaePatchField<Type>::processorFaePatchField
 // * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
 
 template<class Type>
-processorFaePatchField<Type>::~processorFaePatchField()
+Foam::processorFaePatchField<Type>::~processorFaePatchField()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

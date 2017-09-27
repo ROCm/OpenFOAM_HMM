@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    boundedBackwardFaDdtScheme
+    Foam::boundedBackwardFaDdtScheme
 
 Description
     Second-order backward-differencing implicit ddt using the current and

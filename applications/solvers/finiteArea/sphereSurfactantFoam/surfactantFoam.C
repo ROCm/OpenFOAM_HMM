@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
         Info<< "Total mass of surfactant: "
             << sum(Cs.internalField()*aMesh.S()) << endl;
 
-        Info<< "ExecutionTime = "
-            << scalar(runTime.elapsedCpuTime())
-            << " s\n" << endl << endl;
+        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     return 0;

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    upwindEdgeInterpolation
+    Foam::upwindEdgeInterpolation
 
 Description
     Upwind differencing scheme class.

@@ -43,7 +43,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ndiv
 (
     const edgeScalarField& flux,
@@ -60,7 +60,7 @@ ndiv
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ndiv
 (
     const tmp<edgeScalarField>& tflux,
@@ -68,7 +68,7 @@ ndiv
     const word& name
 )
 {
-    tmp<faMatrix<Type> > Div(fam::ndiv(tflux(), vf, name));
+    tmp<faMatrix<Type>> Div(fam::ndiv(tflux(), vf, name));
     tflux.clear();
 
     return Div;
@@ -76,7 +76,7 @@ ndiv
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ndiv
 (
     const edgeScalarField& flux,
@@ -87,14 +87,14 @@ ndiv
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 ndiv
 (
     const tmp<edgeScalarField>& tflux,
     GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > Div(fam::ndiv(tflux(), vf));
+    tmp<faMatrix<Type>> Div(fam::ndiv(tflux(), vf));
     tflux.clear();
 
     return Div;

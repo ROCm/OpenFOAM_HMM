@@ -53,7 +53,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class leastSquaresFaGrad Declaration
+                     Class leastSquaresFaGrad Declaration\*-------------------
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -64,10 +64,10 @@ class leastSquaresFaGrad
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        leastSquaresFaGrad(const leastSquaresFaGrad&);
+        leastSquaresFaGrad(const leastSquaresFaGrad&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const leastSquaresFaGrad&);
+        void operator=(const leastSquaresFaGrad&) = delete;
 
 
 public:
@@ -115,7 +115,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "leastSquaresFaGrad.C"
+    #include "leastSquaresFaGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

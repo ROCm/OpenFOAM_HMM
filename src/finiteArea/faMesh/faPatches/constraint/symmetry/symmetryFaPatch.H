@@ -112,10 +112,9 @@ public:
             );
         }
 
-    // Destructor
-
-        virtual ~symmetryFaPatch()
-        {}
+    //- Destructor
+    virtual ~symmetryFaPatch()
+    {}
 };
 
 

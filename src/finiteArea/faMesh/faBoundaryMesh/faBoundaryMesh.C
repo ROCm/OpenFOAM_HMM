@@ -31,23 +31,17 @@ Description
 #include "faMesh.H"
 #include "primitiveMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(faBoundaryMesh, 0);
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+    defineTypeNameAndDebug(faBoundaryMesh, 0);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
-faBoundaryMesh::faBoundaryMesh
+Foam::faBoundaryMesh::faBoundaryMesh
 (
     const IOobject& io,
     const faMesh& mesh
@@ -83,19 +77,14 @@ faBoundaryMesh::faBoundaryMesh
         }
 
         // Check state of IOstream
-        is.check
-        (
-            "faBoundaryMesh::polyBoundaryMesh"
-            "(const IOobject&, const faMesh&)"
-        );
+        is.check(FUNCTION_NAME);
 
         close();
     }
 }
 
 
-// Construct given size. Patches will be set later
-faBoundaryMesh::faBoundaryMesh
+Foam::faBoundaryMesh::faBoundaryMesh
 (
     const IOobject& io,
     const faMesh& pm,
@@ -110,8 +99,7 @@ faBoundaryMesh::faBoundaryMesh
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Calculate the geometry for the patches (transformation tensors etc.)
-void faBoundaryMesh::calcGeometry()
+void Foam::faBoundaryMesh::calcGeometry()
 {
     forAll(*this, patchi)
     {
@@ -125,25 +113,24 @@ void faBoundaryMesh::calcGeometry()
 }
 
 
-// Return the mesh reference
-const faMesh& faBoundaryMesh::mesh() const
+const Foam::faMesh& Foam::faBoundaryMesh::mesh() const
 {
     return mesh_;
 }
 
 
-lduInterfacePtrsList faBoundaryMesh::interfaces() const
+Foam::lduInterfacePtrsList Foam::faBoundaryMesh::interfaces() const
 {
     lduInterfacePtrsList interfaces(size());
 
-    forAll (interfaces, patchi)
+    forAll(interfaces, patchi)
     {
         if (isA<lduInterface>(this->operator[](patchi)))
         {
             interfaces.set
             (
                 patchi,
-               &refCast<const lduInterface>(this->operator[](patchi))
+                &refCast<const lduInterface>(this->operator[](patchi))
             );
         }
     }
@@ -152,14 +139,13 @@ lduInterfacePtrsList faBoundaryMesh::interfaces() const
 }
 
 
-// Return a list of patch types
-wordList faBoundaryMesh::types() const
+Foam::wordList Foam::faBoundaryMesh::types() const
 {
     const faPatchList& patches = *this;
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].type();
     }
@@ -168,14 +154,13 @@ wordList faBoundaryMesh::types() const
 }
 
 
-// Return a list of patch names
-wordList faBoundaryMesh::names() const
+Foam::wordList Foam::faBoundaryMesh::names() const
 {
     const faPatchList& patches = *this;
 
     wordList t(patches.size());
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         t[patchI] = patches[patchI].name();
     }
@@ -184,11 +169,11 @@ wordList faBoundaryMesh::names() const
 }
 
 
-label faBoundaryMesh::findPatchID(const word& patchName) const
+Foam::label Foam::faBoundaryMesh::findPatchID(const word& patchName) const
 {
     const faPatchList& patches = *this;
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         if (patches[patchI].name() == patchName)
         {
@@ -236,8 +221,7 @@ Foam::labelList Foam::faBoundaryMesh::findIndices
 }
 
 
-// Return patch index for a given edge label
-label faBoundaryMesh::whichPatch(const label edgeIndex) const
+Foam::label Foam::faBoundaryMesh::whichPatch(const label edgeIndex) const
 {
     // Find out which patch the current face belongs to by comparing label
     // with patch start labels.
@@ -245,10 +229,8 @@ label faBoundaryMesh::whichPatch(const label edgeIndex) const
     // if it is off the end of the list, abort
     if (edgeIndex >= mesh().nEdges())
     {
-        FatalErrorIn
-        (
-            "faBoundaryMesh::whichPatch(const label edgeIndex) const"
-        )   << "given label greater than the number of edges"
+        FatalErrorInFunction
+            << "given label greater than the number of edges"
             << abort(FatalError);
     }
 
@@ -257,7 +239,7 @@ label faBoundaryMesh::whichPatch(const label edgeIndex) const
         return -1;
     }
 
-    forAll (*this, patchI)
+    forAll(*this, patchI)
     {
         label start = mesh_.patchStarts()[patchI];
         label size = operator[](patchI).faPatch::size();
@@ -273,32 +255,28 @@ label faBoundaryMesh::whichPatch(const label edgeIndex) const
     }
 
     // If not in any of above, it's trouble!
-    FatalErrorIn
-    (
-        "label faBoundaryMesh::whichPatch(const label edgeIndex) const"
-    )   << "error in patch search algorithm"
+    FatalErrorInFunction
+        << "error in patch search algorithm"
         << abort(FatalError);
 
     return -1;
 }
 
 
-bool faBoundaryMesh::checkDefinition(const bool report) const
+bool Foam::faBoundaryMesh::checkDefinition(const bool report) const
 {
     label nextPatchStart = mesh().nInternalEdges();
     const faBoundaryMesh& bm = *this;
 
     bool boundaryError = false;
 
-    forAll (bm, patchI)
+    forAll(bm, patchI)
     {
         if (bm[patchI].start() != nextPatchStart)
         {
             boundaryError = true;
 
-            Info
-                << "bool faBoundaryMesh::checkDefinition("
-                << "const bool report) const : "
+            InfoInFunction
                 << "Problem with boundary patch " << patchI
                 << ".\nThe patch should start on face no " << nextPatchStart
                 << " and the boundary file specifies " << bm[patchI].start()
@@ -310,11 +288,8 @@ bool faBoundaryMesh::checkDefinition(const bool report) const
 
     if (boundaryError)
     {
-        SeriousErrorIn
-        (
-            "bool faBoundaryMesh::checkDefinition("
-            "const bool report) const"
-        )   << "This mesh is not valid: boundary definition is in error."
+        SeriousErrorInFunction
+            << "This mesh is not valid: boundary definition is in error."
             << endl;
     }
     else
@@ -329,24 +304,23 @@ bool faBoundaryMesh::checkDefinition(const bool report) const
 }
 
 
-// Correct faBoundaryMesh after moving points
-void faBoundaryMesh::movePoints(const pointField& p)
+void Foam::faBoundaryMesh::movePoints(const pointField& p)
 {
     faPatchList& patches = *this;
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         patches[patchI].initMovePoints(p);
     }
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         patches[patchI].movePoints(p);
     }
 }
 
 
-void faBoundaryMesh::updateMesh()
+void Foam::faBoundaryMesh::updateMesh()
 {
     faPatchList& patches = *this;
 
@@ -362,8 +336,7 @@ void faBoundaryMesh::updateMesh()
 }
 
 
-// writeData member function required by regIOobject
-bool faBoundaryMesh::writeData(Ostream& os) const
+bool Foam::faBoundaryMesh::writeData(Ostream& os) const
 {
     const faPatchList& patches = *this;
 
@@ -380,21 +353,17 @@ bool faBoundaryMesh::writeData(Ostream& os) const
     os  << decrIndent << token::END_LIST;
 
     // Check state of IOstream
-    os.check("polyBoundaryMesh::writeData(Ostream& os) const");
+    os.check(FUNCTION_NAME);
 
     return os.good();
 }
 
 
-Ostream& operator<<(Ostream& os, const faBoundaryMesh& bm)
+Foam::Ostream& Foam::operator<<(Ostream& os, const faBoundaryMesh& bm)
 {
     bm.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

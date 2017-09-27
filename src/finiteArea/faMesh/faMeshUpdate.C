@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
@@ -83,7 +81,7 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
 
     const labelListList& oldPatchEdgeFaces = mapper.oldPatchEdgeFaces();
 
-    forAll (oldPatchEdgeFaces, patchI)
+    forAll(oldPatchEdgeFaces, patchI)
     {
         labelList& curPatchEdges = patchEdges[patchI];
         curPatchEdges.setSize(nTotalEdges - nInternalEdges);
@@ -95,7 +93,7 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
         // Make a fast lookup
         labelHashSet oldFaceLookup(oldPatchEdgeFaces[patchI]);
 
-        for  (label edgeI = nInternalEdges; edgeI < nTotalEdges; edgeI++)
+        for  (label edgeI = nInternalEdges; edgeI < nTotalEdges; ++edgeI)
         {
             if (edgeToPatch[edgeI - nInternalEdges] > -1)
             {
@@ -125,7 +123,7 @@ void Foam::faMesh::updateMesh(const mapPolyMesh& mpm)
     }
 
     // Set new edges for all patches
-    forAll (m.boundary_, patchI)
+    forAll(m.boundary_, patchI)
     {
         m.boundary_[patchI].resetEdges(patchEdges[patchI]);
     }
@@ -198,7 +196,7 @@ void Foam::faMesh::mapOldAreas(const faMeshMapper& mapper) const
         const labelList& faceMap = mapper.areaMap().newFaceLabelsMap();
 
         // Map existing old areas; for new faces set area to zero
-        forAll (faceMap, faceI)
+        forAll(faceMap, faceI)
         {
             if (faceMap[faceI] > -1)
             {
@@ -227,7 +225,7 @@ void Foam::faMesh::mapOldAreas(const faMeshMapper& mapper) const
         const labelList& faceMap = mapper.areaMap().newFaceLabelsMap();
 
         // Map old areas for existing faces; for new faces, set area to zero
-        forAll (faceMap, faceI)
+        forAll(faceMap, faceI)
         {
             if (faceMap[faceI] > -1)
             {

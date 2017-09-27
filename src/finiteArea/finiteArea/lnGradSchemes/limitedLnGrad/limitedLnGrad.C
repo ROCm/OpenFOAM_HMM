@@ -23,16 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    lnGrad scheme with limited non-orthogonal correction.
-
-    The limiter is controlled by a coefficient with a value between 0 and 1
-    which when 0 switches the correction off and the scheme behaves as
-    uncorrectedLnGrad, when set to 1 the full correction is applied and the
-    scheme behaves as correctedLnGrad and when set to 0.5 the limiter is
-    calculated such that the non-orthogonal contribution does not exceed the
-    orthogonal part.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fa.H"
@@ -61,7 +51,7 @@ limitedLnGrad<Type>::~limitedLnGrad()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 limitedLnGrad<Type>::correction
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf

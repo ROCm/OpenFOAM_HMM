@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Gamma
+    Foam::GammaWeight
 
 Description
     Class with operator() which returns the weighting factors for the
@@ -64,7 +64,7 @@ public:
     {
         if (k_ < 0 || k_ > 1)
         {
-            FatalIOErrorIn("GammaWeight(Istream& is)", is)
+            FatalIOErrorInFunction(is)
                 << "coefficient = " << k_
                 << " should be >= 0 and <= 1"
                 << exit(FatalIOError);

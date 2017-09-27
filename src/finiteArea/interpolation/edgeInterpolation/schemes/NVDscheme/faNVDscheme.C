@@ -23,27 +23,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Class to create the weighting-factors based on the NVD
-    (Normalised Variable Diagram).
-    The particular differencing scheme class is supplied as a template argument,
-    the weight function of which is called by the weight function of this class
-    for the internal edges as well as edges of coupled patches
-    (e.g. processor-processor patches). The weight function is supplied the
-    central-differencing weighting factor, the edge-flux, the cell and edge
-    gradients (from which the normalised variable distribution may be created)
-    and the cell centre distance.
-
-    This code organisation is both neat and efficient, allowing for convenient
-    implementation of new schemes to run on parallelised cases.
-
 \*---------------------------------------------------------------------------*/
 
 #include "areaFields.H"
 #include "edgeFields.H"
 #include "facGrad.H"
-#include "coupledFaPatchFields.H"
-#include "upwindEdgeInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,24 +39,22 @@ inline tmp<areaScalarField> limiter(const areaScalarField& phi)
     return phi;
 }
 
-
 inline tmp<areaScalarField> limiter(const areaVectorField& phi)
 {
     return magSqr(phi);
 }
-
 
 inline tmp<areaScalarField> limiter(const areaTensorField& phi)
 {
     return magSqr(phi);
 }
 
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-//- Return the interpolation weighting factors
 
 template<class Type, class NVDweight>
-tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
+Foam::tmp<Foam::edgeScalarField> Foam::faNVDscheme<Type,NVDweight>::weights
 (
     const GeometricField<Type, faPatchField, areaMesh>& phi
 ) const
@@ -229,9 +211,5 @@ tmp<edgeScalarField> faNVDscheme<Type,NVDweight>::weights
     return tWeightingFactors;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

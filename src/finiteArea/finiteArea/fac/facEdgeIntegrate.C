@@ -42,7 +42,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 edgeIntegrate
 (
     const GeometricField<Type, faePatchField, edgeMesh>& ssf
@@ -50,7 +50,7 @@ edgeIntegrate
 {
     const faMesh& mesh = ssf.mesh();
 
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tvf
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tvf
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -103,13 +103,13 @@ edgeIntegrate
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 edgeIntegrate
 (
-    const tmp<GeometricField<Type, faePatchField, edgeMesh> >& tssf
+    const tmp<GeometricField<Type, faePatchField, edgeMesh>>& tssf
 )
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tvf
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tvf
     (
         fac::edgeIntegrate(tssf())
     );
@@ -119,7 +119,7 @@ edgeIntegrate
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 edgeSum
 (
     const GeometricField<Type, faePatchField, edgeMesh>& ssf
@@ -127,7 +127,7 @@ edgeSum
 {
     const faMesh& mesh = ssf.mesh();
 
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tvf
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tvf
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -173,12 +173,12 @@ edgeSum
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> > edgeSum
+tmp<GeometricField<Type, faPatchField, areaMesh>> edgeSum
 (
-    const tmp<GeometricField<Type, faePatchField, edgeMesh> >& tssf
+    const tmp<GeometricField<Type, faePatchField, edgeMesh>>& tssf
 )
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tvf =
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tvf =
         edgeSum(tssf());
     tssf.clear();
     return tvf;

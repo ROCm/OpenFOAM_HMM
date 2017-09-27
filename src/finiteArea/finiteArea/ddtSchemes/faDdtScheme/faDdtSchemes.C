@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite volume calculus ddt schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "faDdtScheme.H"
@@ -41,7 +38,6 @@ namespace fa
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Define the constructor function hash tables
 
 defineTemplateRunTimeSelectionTable
 (

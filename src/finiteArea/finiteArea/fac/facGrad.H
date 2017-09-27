@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fac
+InNamespace
+   Foam::fac
 
 Description
     Calculate the gradient of the given field.
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Namespace fac functions Declaration
+                      Namespace fac functions Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace fac
@@ -69,7 +69,7 @@ namespace fac
         <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
     > grad
     (
-        const tmp<GeometricField<Type, faePatchField, edgeMesh> >&
+        const tmp<GeometricField<Type, faePatchField, edgeMesh>>&
     );
 
     template<class Type>
@@ -90,7 +90,7 @@ namespace fac
         <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
     > grad
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
         const word& name
     );
 
@@ -111,7 +111,7 @@ namespace fac
         <typename outerProduct<vector, Type>::type, faPatchField, areaMesh>
     > grad
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&
     );
 }
 
@@ -123,7 +123,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "facGrad.C"
+    #include "facGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

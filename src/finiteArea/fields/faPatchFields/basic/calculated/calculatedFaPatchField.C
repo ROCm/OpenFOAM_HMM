@@ -30,19 +30,17 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 template<class Type>
-const word& faPatchField<Type>::calculatedType()
+const Foam::word& Foam::faPatchField<Type>::calculatedType()
 {
     return calculatedFaPatchField<Type>::typeName;
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-calculatedFaPatchField<Type>::calculatedFaPatchField
+Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -53,7 +51,7 @@ calculatedFaPatchField<Type>::calculatedFaPatchField
 
 
 template<class Type>
-calculatedFaPatchField<Type>::calculatedFaPatchField
+Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 (
     const calculatedFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -66,7 +64,7 @@ calculatedFaPatchField<Type>::calculatedFaPatchField
 
 
 template<class Type>
-calculatedFaPatchField<Type>::calculatedFaPatchField
+Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -78,7 +76,7 @@ calculatedFaPatchField<Type>::calculatedFaPatchField
 
 
 template<class Type>
-calculatedFaPatchField<Type>::calculatedFaPatchField
+Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 (
     const calculatedFaPatchField<Type>& ptf
 )
@@ -88,7 +86,7 @@ calculatedFaPatchField<Type>::calculatedFaPatchField
 
 
 template<class Type>
-calculatedFaPatchField<Type>::calculatedFaPatchField
+Foam::calculatedFaPatchField<Type>::calculatedFaPatchField
 (
     const calculatedFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -100,7 +98,7 @@ calculatedFaPatchField<Type>::calculatedFaPatchField
 
 template<class Type>
 template<class Type2>
-tmp<faPatchField<Type> > faPatchField<Type>::NewCalculatedType
+Foam::tmp<Foam::faPatchField<Type>> Foam::faPatchField<Type>::NewCalculatedType
 (
     const faPatchField<Type2>& pf
 )
@@ -108,7 +106,7 @@ tmp<faPatchField<Type> > faPatchField<Type>::NewCalculatedType
     typename patchConstructorTable::iterator patchTypeCstrIter =
         patchConstructorTablePtr_->find(pf.patch().type());
 
-    if (patchTypeCstrIter != patchConstructorTablePtr_->end())
+    if (patchTypeCstrIter.found())
     {
         return patchTypeCstrIter()
         (
@@ -118,7 +116,7 @@ tmp<faPatchField<Type> > faPatchField<Type>::NewCalculatedType
     }
     else
     {
-        return tmp<faPatchField<Type> >
+        return tmp<faPatchField<Type>>
         (
             new calculatedFaPatchField<Type>
             (
@@ -133,17 +131,14 @@ tmp<faPatchField<Type> > faPatchField<Type>::NewCalculatedType
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<Field<Type> > calculatedFaPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::calculatedFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    FatalErrorIn
-    (
-        "calculatedFaPatchField<Type>::"
-        "valueInternalCoeffs(const tmp<scalarField>&) const"
-    )   << "\n    "
-           "valueInternalCoeffs cannot be called for a calculatedFaPatchField"
+    FatalErrorInFunction
+        << "valueInternalCoeffs cannot be called for a calculatedFaPatchField"
         << "\n    on patch " << this->patch().name()
         << " of field " << this->dimensionedInternalField().name()
         << " in file " << this->dimensionedInternalField().objectPath()
@@ -156,17 +151,14 @@ tmp<Field<Type> > calculatedFaPatchField<Type>::valueInternalCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > calculatedFaPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::calculatedFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    FatalErrorIn
-    (
-        "calculatedFaPatchField<Type>::"
-        "valueBoundaryCoeffs(const tmp<scalarField>&) const"
-    )   << "\n    "
-           "valueBoundaryCoeffs cannot be called for a calculatedFaPatchField"
+    FatalErrorInFunction
+        << "valueBoundaryCoeffs cannot be called for a calculatedFaPatchField"
         << "\n    on patch " << this->patch().name()
         << " of field " << this->dimensionedInternalField().name()
         << " in file " << this->dimensionedInternalField().objectPath()
@@ -179,14 +171,11 @@ tmp<Field<Type> > calculatedFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > calculatedFaPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::calculatedFaPatchField<Type>::gradientInternalCoeffs() const
 {
-    FatalErrorIn
-    (
-        "calculatedFaPatchField<Type>::"
-        "gradientInternalCoeffs() const"
-    )   << "\n    "
-           "gradientInternalCoeffs cannot be called for a "
+    FatalErrorInFunction
+        << "gradientInternalCoeffs cannot be called for a "
            "calculatedFaPatchField"
         << "\n    on patch " << this->patch().name()
         << " of field " << this->dimensionedInternalField().name()
@@ -200,13 +189,11 @@ tmp<Field<Type> > calculatedFaPatchField<Type>::gradientInternalCoeffs() const
 
 
 template<class Type>
-tmp<Field<Type> > calculatedFaPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::calculatedFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
-    FatalErrorIn
-    (
-        "calculatedFaPatchField<Type>::"
-        "gradientBoundaryCoeffs() const"
-    )   << "\n    "
+    FatalErrorInFunction
+        << "\n    "
            "gradientBoundaryCoeffs cannot be called for a "
            "calculatedFaPatchField"
         << "\n    on patch " << this->patch().name()
@@ -220,17 +207,12 @@ tmp<Field<Type> > calculatedFaPatchField<Type>::gradientBoundaryCoeffs() const
 }
 
 
-// Write
 template<class Type>
-void calculatedFaPatchField<Type>::write(Ostream& os) const
+void Foam::calculatedFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

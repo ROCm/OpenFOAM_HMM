@@ -27,9 +27,6 @@ License
 
 #include "faMeshMapper.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::faMeshMapper::faMeshMapper
@@ -53,7 +50,7 @@ Foam::faMeshMapper::faMeshMapper
     // Capture old patch information
     const faBoundaryMesh& patches = mesh.boundary();
 
-    forAll (patches, patchI)
+    forAll(patches, patchI)
     {
         oldPatchSizes_[patchI] = patches[patchI].size();
         oldPatchStarts_[patchI] = patches[patchI].start();

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    fourthLnGrad
+    Foam::fa::fourthLnGrad
 
 Description
     Fourth-order snGrad scheme with non-orthogonal correction.
@@ -50,7 +50,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class fourthLnGrad Declaration
+                        Class fourthLnGrad Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -61,7 +61,7 @@ class fourthLnGrad
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const fourthLnGrad&);
+        void operator=(const fourthLnGrad&) = delete;
 
 
 public:
@@ -86,9 +86,8 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~fourthLnGrad();
+    //- Destructor
+    virtual ~fourthLnGrad();
 
 
     // Member Functions
@@ -110,7 +109,7 @@ public:
 
         //- Return the explicit correction to the fourthLnGrad
         //  for the given field
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         correction(const GeometricField<Type, faPatchField, areaMesh>&) const;
 };
 
@@ -126,11 +125,11 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "fourthLnGrad.C"
+    #include "fourthLnGrad.C"
 #else
-#   ifdef xlC
-#   pragma implementation("fourthLnGrad.C")
-#   endif
+    #ifdef xlC
+    #pragma implementation("fourthLnGrad.C")
+    #endif
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

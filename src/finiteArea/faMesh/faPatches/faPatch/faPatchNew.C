@@ -23,21 +23,14 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faPatch.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-autoPtr<faPatch> faPatch::New
+Foam::autoPtr<Foam::faPatch> Foam::faPatch::New
 (
     const word& name,
     const dictionary& dict,
@@ -45,27 +38,18 @@ autoPtr<faPatch> faPatch::New
     const faBoundaryMesh& bm
 )
 {
-    if (debug)
-    {
-        Info<< "faPatch::New(const word&, const dictionary&, const label, "
-               "const faBoundaryMesh&) : constructing faPatch"
-            << endl;
-    }
+    DebugInFunction
+        << "constructing faPatch" << endl;
 
     word patchType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(patchType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(patchType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorIn
-        (
-            "faPatch::New(const word&, const dictionary&, "
-            "const label, const faBoundaryMesh&)",
-            dict
-        )   << "Unknown faPatch type " << patchType << endl << endl
-            << "Valid faPatch types are :" << endl
+        FatalIOErrorInFunction(dict)
+            << "Unknown faPatch type " << patchType << nl << nl
+            << "Valid faPatch types are :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -73,9 +57,5 @@ autoPtr<faPatch> faPatch::New
     return autoPtr<faPatch>(cstrIter()(name, dict, index, bm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

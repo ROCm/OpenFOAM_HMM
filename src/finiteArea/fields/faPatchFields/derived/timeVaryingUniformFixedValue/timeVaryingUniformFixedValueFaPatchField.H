@@ -31,14 +31,14 @@ Description
     boundary condition.
 
     Example of the boundary condition specification:
-    @verbatim
+    \verbatim
     inlet
     {
         type            timeVaryingUniformFixedValue;
         fileName        "$FOAM_CASE/time-series";
         outOfBounds     clamp;           // (error|warn|clamp|repeat)
     }
-    @endverbatim
+    \endverbatim
 
 Author
     Zeljko Tukovic, FMENA
@@ -68,7 +68,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-           Class timeVaryingUniformFixedValueFaPatch Declaration
+             Class timeVaryingUniformFixedValueFaPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -121,9 +121,9 @@ public:
         );
 
         //- Construct and return a clone
-        virtual tmp<faPatchField<Type> > clone() const
+        virtual tmp<faPatchField<Type>> clone() const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new timeVaryingUniformFixedValueFaPatchField<Type>(*this)
             );
@@ -137,16 +137,21 @@ public:
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<faPatchField<Type> > clone
+        virtual tmp<faPatchField<Type>> clone
         (
             const DimensionedField<Type, areaMesh>& iF
         ) const
         {
-            return tmp<faPatchField<Type> >
+            return tmp<faPatchField<Type>>
             (
                 new timeVaryingUniformFixedValueFaPatchField<Type>(*this, iF)
             );
         }
+
+
+    //- Destructor
+    virtual ~timeVaryingUniformFixedValueFaPatchField()
+    {}
 
 
     // Member functions
@@ -178,7 +183,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "timeVaryingUniformFixedValueFaPatchField.C"
+    #include "timeVaryingUniformFixedValueFaPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

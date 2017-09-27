@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    areaFields
+    Foam::areaFields
 
 Description
     Finite area area (element) fields
@@ -57,7 +57,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-tmp<GeometricField<scalar, faPatchField, areaMesh> >
+tmp<GeometricField<scalar, faPatchField, areaMesh>>
 GeometricField<scalar, faPatchField, areaMesh>::component
 (
     const direction

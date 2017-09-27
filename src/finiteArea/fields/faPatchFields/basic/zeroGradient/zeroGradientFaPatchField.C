@@ -28,15 +28,10 @@ License
 #include "zeroGradientFaPatchField.H"
 #include "faPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
+Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -47,7 +42,7 @@ zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 
 
 template<class Type>
-zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
+Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const zeroGradientFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -60,7 +55,7 @@ zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 
 
 template<class Type>
-zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
+Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -74,7 +69,7 @@ zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 
 
 template<class Type>
-zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
+Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const zeroGradientFaPatchField& zgpf
 )
@@ -84,7 +79,7 @@ zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 
 
 template<class Type>
-zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
+Foam::zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 (
     const zeroGradientFaPatchField& zgpf,
     const DimensionedField<Type, areaMesh>& iF
@@ -97,7 +92,7 @@ zeroGradientFaPatchField<Type>::zeroGradientFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
+void Foam::zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
     if (!this->updated())
     {
@@ -110,12 +105,13 @@ void zeroGradientFaPatchField<Type>::evaluate(const Pstream::commsTypes)
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFaPatchField<Type>::valueInternalCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFaPatchField<Type>::valueInternalCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>(this->size(), pTraits<Type>::one)
     );
@@ -123,12 +119,13 @@ tmp<Field<Type> > zeroGradientFaPatchField<Type>::valueInternalCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFaPatchField<Type>::valueBoundaryCoeffs
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFaPatchField<Type>::valueBoundaryCoeffs
 (
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>(this->size(), pTraits<Type>::zero)
     );
@@ -136,9 +133,10 @@ tmp<Field<Type> > zeroGradientFaPatchField<Type>::valueBoundaryCoeffs
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFaPatchField<Type>::gradientInternalCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFaPatchField<Type>::gradientInternalCoeffs() const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>(this->size(), pTraits<Type>::zero)
     );
@@ -146,17 +144,14 @@ tmp<Field<Type> > zeroGradientFaPatchField<Type>::gradientInternalCoeffs() const
 
 
 template<class Type>
-tmp<Field<Type> > zeroGradientFaPatchField<Type>::gradientBoundaryCoeffs() const
+Foam::tmp<Foam::Field<Type>>
+Foam::zeroGradientFaPatchField<Type>::gradientBoundaryCoeffs() const
 {
-    return tmp<Field<Type> >
+    return tmp<Field<Type>>
     (
         new Field<Type>(this->size(), pTraits<Type>::zero)
     );
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

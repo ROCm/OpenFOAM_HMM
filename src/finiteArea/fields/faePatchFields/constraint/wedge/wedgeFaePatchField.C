@@ -27,15 +27,10 @@ License
 
 #include "wedgeFaePatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-wedgeFaePatchField<Type>::wedgeFaePatchField
+Foam::wedgeFaePatchField<Type>::wedgeFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -46,7 +41,7 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
 
 
 template<class Type>
-wedgeFaePatchField<Type>::wedgeFaePatchField
+Foam::wedgeFaePatchField<Type>::wedgeFaePatchField
 (
     const wedgeFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -58,16 +53,8 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
 {
     if (!isType<wedgeFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "wedgeFaePatchField<Type>::wedgeFaePatchField\n"
-            "(\n"
-            "    const wedgeFaePatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, edgeMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "Field type does not correspond to patch type for patch "
+        FatalErrorInFunction
+            << "Field type does not correspond to patch type for patch "
             << this->patch().index() << "." << endl
             << "Field type: " << typeName << endl
             << "Patch type: " << this->patch().type()
@@ -77,7 +64,7 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
 
 
 template<class Type>
-wedgeFaePatchField<Type>::wedgeFaePatchField
+Foam::wedgeFaePatchField<Type>::wedgeFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -88,16 +75,8 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
 {
     if (!isType<wedgeFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "wedgeFaePatchField<Type>::wedgeFaePatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "patch " << this->patch().index() << " not wedge type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not wedge type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
@@ -105,7 +84,7 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
 
 
 template<class Type>
-wedgeFaePatchField<Type>::wedgeFaePatchField
+Foam::wedgeFaePatchField<Type>::wedgeFaePatchField
 (
     const wedgeFaePatchField<Type>& ptf
 )
@@ -115,7 +94,7 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
 
 
 template<class Type>
-wedgeFaePatchField<Type>::wedgeFaePatchField
+Foam::wedgeFaePatchField<Type>::wedgeFaePatchField
 (
     const wedgeFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -124,9 +103,5 @@ wedgeFaePatchField<Type>::wedgeFaePatchField
     faePatchField<Type>(ptf, iF)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faMatrix<Type>
+    Foam::faMatrix
 
 Description
     Finite-Area matrix.
@@ -65,7 +65,7 @@ Ostream& operator<<(Ostream&, const faMatrix<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class faMatrix Declaration
+                          Class faMatrix Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -114,7 +114,7 @@ class faMatrix
         void addToInternalField
         (
             const labelUList& addr,
-            const tmp<Field<Type2> >& tpf,
+            const tmp<Field<Type2>>& tpf,
             Field<Type2>& intf
         ) const;
 
@@ -131,7 +131,7 @@ class faMatrix
         void subtractFromInternalField
         (
             const labelUList& addr,
-            const tmp<Field<Type2> >& tpf,
+            const tmp<Field<Type2>>& tpf,
             Field<Type2>& intf
         ) const;
 
@@ -308,7 +308,7 @@ public:
             SolverPerformance<Type> solve();
 
             //- Return the matrix residual
-            tmp<Field<Type> > residual() const;
+            tmp<Field<Type>> residual() const;
 
             //- Return the matrix diagonal
             tmp<scalarField> D() const;
@@ -317,30 +317,30 @@ public:
             tmp<areaScalarField> A() const;
 
             //- Return the H operation source
-            tmp<GeometricField<Type, faPatchField, areaMesh> > H() const;
+            tmp<GeometricField<Type, faPatchField, areaMesh>> H() const;
 
             //- Return the face-flux field from the matrix
-            tmp<GeometricField<Type, faePatchField, edgeMesh> > flux() const;
+            tmp<GeometricField<Type, faePatchField, edgeMesh>> flux() const;
 
 
     // Member operators
 
         void operator=(const faMatrix<Type>&);
-        void operator=(const tmp<faMatrix<Type> >&);
+        void operator=(const tmp<faMatrix<Type>>&);
 
         void negate();
 
         void operator+=(const faMatrix<Type>&);
-        void operator+=(const tmp<faMatrix<Type> >&);
+        void operator+=(const tmp<faMatrix<Type>>&);
 
         void operator-=(const faMatrix<Type>&);
-        void operator-=(const tmp<faMatrix<Type> >&);
+        void operator-=(const tmp<faMatrix<Type>>&);
 
         void operator+=(const GeometricField<Type,faPatchField,areaMesh>&);
-        void operator+=(const tmp<GeometricField<Type,faPatchField,areaMesh> >&);
+        void operator+=(const tmp<GeometricField<Type,faPatchField,areaMesh>>&);
 
         void operator-=(const GeometricField<Type,faPatchField,areaMesh>&);
-        void operator-=(const tmp<GeometricField<Type,faPatchField,areaMesh> >&);
+        void operator-=(const tmp<GeometricField<Type,faPatchField,areaMesh>>&);
 
         void operator+=(const dimensioned<Type>&);
         void operator-=(const dimensioned<Type>&);
@@ -398,7 +398,7 @@ SolverPerformance<Type> solve(faMatrix<Type>&, Istream&);
 //  deleting temporary matrix after solution.
 //  Solver controls read Istream
 template<class Type>
-SolverPerformance<Type> solve(const tmp<faMatrix<Type> >&, Istream&);
+SolverPerformance<Type> solve(const tmp<faMatrix<Type>>&, Istream&);
 
 
 //- Solve returning the solution statistics given convergence tolerance
@@ -411,331 +411,358 @@ SolverPerformance<Type> solve(faMatrix<Type>&);
 //  deleting temporary matrix after solution.
 //  Solver controls read faSolution
 template<class Type>
-SolverPerformance<Type> solve(const tmp<faMatrix<Type> >&);
+SolverPerformance<Type> solve(const tmp<faMatrix<Type>>&);
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator-
 (
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator-
 (
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator+
 (
     const faMatrix<Type>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator+
 (
-    const tmp<faMatrix<Type> >&,
+    const tmp<faMatrix<Type>>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator+
 (
     const faMatrix<Type>&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator+
 (
-    const tmp<faMatrix<Type> >&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&,
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
-(
-    const faMatrix<Type>&,
-    const faMatrix<Type>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator-
-(
-    const tmp<faMatrix<Type> >&,
-    const faMatrix<Type>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator-
-(
-    const faMatrix<Type>&,
-    const tmp<faMatrix<Type> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator-
-(
-    const tmp<faMatrix<Type> >&,
-    const tmp<faMatrix<Type> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator==
+tmp<faMatrix<Type>> operator-
 (
     const faMatrix<Type>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator==
+tmp<faMatrix<Type>> operator-
 (
-    const tmp<faMatrix<Type> >&,
+    const tmp<faMatrix<Type>>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator==
+tmp<faMatrix<Type>> operator-
 (
     const faMatrix<Type>&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator==
+tmp<faMatrix<Type>> operator-
 (
-    const tmp<faMatrix<Type> >&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&,
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
-(
-    const faMatrix<Type>&,
-    const GeometricField<Type, faPatchField, areaMesh>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator+
-(
-    const tmp<faMatrix<Type> >&,
-    const GeometricField<Type, faPatchField, areaMesh>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator==
 (
     const faMatrix<Type>&,
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator+
-(
-    const tmp<faMatrix<Type> >&,
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator+
-(
-    const GeometricField<Type, faPatchField, areaMesh>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator==
 (
-    const GeometricField<Type, faPatchField, areaMesh>&,
-    const tmp<faMatrix<Type> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator+
-(
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+    const tmp<faMatrix<Type>>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator==
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
-    const tmp<faMatrix<Type> >&
+    const faMatrix<Type>&,
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator==
+(
+    const tmp<faMatrix<Type>>&,
+    const tmp<faMatrix<Type>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator+
 (
     const faMatrix<Type>&,
     const GeometricField<Type, faPatchField, areaMesh>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
-    const tmp<faMatrix<Type> >&,
+    const tmp<faMatrix<Type>>&,
     const GeometricField<Type, faPatchField, areaMesh>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
     const faMatrix<Type>&,
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
-    const tmp<faMatrix<Type> >&,
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+    const tmp<faMatrix<Type>>&,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
     const GeometricField<Type, faPatchField, areaMesh>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
     const GeometricField<Type, faPatchField, areaMesh>&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
-    const tmp<faMatrix<Type> >&
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator-
 (
-    const tmp<faMatrix<Type> >&,
+    const faMatrix<Type>&,
+    const GeometricField<Type, faPatchField, areaMesh>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const tmp<faMatrix<Type>>&,
+    const GeometricField<Type, faPatchField, areaMesh>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const faMatrix<Type>&,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const tmp<faMatrix<Type>>&,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const GeometricField<Type, faPatchField, areaMesh>&,
+    const faMatrix<Type>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const GeometricField<Type, faPatchField, areaMesh>&,
+    const tmp<faMatrix<Type>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
+    const faMatrix<Type>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
+    const tmp<faMatrix<Type>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator+
+(
+    const faMatrix<Type>&,
     const dimensioned<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator+
+tmp<faMatrix<Type>> operator+
+(
+    const tmp<faMatrix<Type>>&,
+    const dimensioned<Type>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator+
 (
     const dimensioned<Type>&,
-    const tmp<faMatrix<Type> >&
+    const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator-
-(
-    const tmp<faMatrix<Type> >&,
-    const dimensioned<Type>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator-
+tmp<faMatrix<Type>> operator+
 (
     const dimensioned<Type>&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator==
-(
-    const faMatrix<Type>&,
-    const GeometricField<Type, faPatchField, areaMesh>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator==
-(
-    const tmp<faMatrix<Type> >&,
-    const GeometricField<Type, faPatchField, areaMesh>&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator==
-(
-    const faMatrix<Type>&,
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator==
-(
-    const tmp<faMatrix<Type> >&,
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >&
-);
-
-template<class Type>
-tmp<faMatrix<Type> > operator==
+tmp<faMatrix<Type>> operator-
 (
     const faMatrix<Type>&,
     const dimensioned<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator==
+tmp<faMatrix<Type>> operator-
 (
-    const tmp<faMatrix<Type> >&,
+    const tmp<faMatrix<Type>>&,
+    const dimensioned<Type>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const dimensioned<Type>&,
+    const faMatrix<Type>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator-
+(
+    const dimensioned<Type>&,
+    const tmp<faMatrix<Type>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator==
+(
+    const faMatrix<Type>&,
+    const GeometricField<Type, faPatchField, areaMesh>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator==
+(
+    const tmp<faMatrix<Type>>&,
+    const GeometricField<Type, faPatchField, areaMesh>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator==
+(
+    const faMatrix<Type>&,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator==
+(
+    const tmp<faMatrix<Type>>&,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator==
+(
+    const faMatrix<Type>&,
+    const dimensioned<Type>&
+);
+
+template<class Type>
+tmp<faMatrix<Type>> operator==
+(
+    const tmp<faMatrix<Type>>&,
     const dimensioned<Type>&
 );
 
 
 template<class Type>
-tmp<faMatrix<Type> > operator*
+tmp<faMatrix<Type>> operator*
 (
     const areaScalarField&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator*
+tmp<faMatrix<Type>> operator*
 (
     const areaScalarField&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator*
+tmp<faMatrix<Type>> operator*
 (
     const tmp<areaScalarField>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator*
+tmp<faMatrix<Type>> operator*
 (
     const tmp<areaScalarField>&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
-
 template<class Type>
-tmp<faMatrix<Type> > operator*
+tmp<faMatrix<Type>> operator*
 (
     const dimensioned<scalar>&,
     const faMatrix<Type>&
 );
 
 template<class Type>
-tmp<faMatrix<Type> > operator*
+tmp<faMatrix<Type>> operator*
 (
     const dimensioned<scalar>&,
-    const tmp<faMatrix<Type> >&
+    const tmp<faMatrix<Type>>&
 );
 
 
@@ -746,7 +773,7 @@ tmp<faMatrix<Type> > operator*
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faMatrix.C"
+    #include "faMatrix.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

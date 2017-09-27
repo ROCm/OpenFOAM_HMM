@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    steadyStateFaDdtScheme
+    Foam::fa::steadyStateDdtScheme
 
 Description
     SteadyState implicit/explicit ddt which returns 0.
@@ -50,7 +50,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class steadyStateFaDdtScheme Declaration
+                   Class steadyStateFaDdtScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -61,10 +61,10 @@ class steadyStateFaDdtScheme
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        steadyStateFaDdtScheme(const steadyStateFaDdtScheme&);
+        steadyStateFaDdtScheme(const steadyStateFaDdtScheme&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const steadyStateFaDdtScheme&);
+        void operator=(const steadyStateFaDdtScheme&) = delete;
 
 
 public:
@@ -96,62 +96,62 @@ public:
             return fa::faDdtScheme<Type>::mesh();
         }
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensioned<Type>
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<GeometricField<Type, faPatchField, areaMesh> > facDdt0
+        tmp<GeometricField<Type, faPatchField, areaMesh>> facDdt0
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const dimensionedScalar&,
             const GeometricField<Type, faPatchField, areaMesh>&
         );
 
-        tmp<faMatrix<Type> > famDdt
+        tmp<faMatrix<Type>> famDdt
         (
             const areaScalarField&,
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -170,7 +170,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "steadyStateFaDdtScheme.C"
+    #include "steadyStateFaDdtScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

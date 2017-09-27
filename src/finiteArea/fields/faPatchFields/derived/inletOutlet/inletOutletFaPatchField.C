@@ -27,15 +27,10 @@ License
 
 #include "inletOutletFaPatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF
@@ -51,7 +46,7 @@ inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 (
     const inletOutletFaPatchField<Type>& ptf,
     const faPatch& p,
@@ -65,7 +60,7 @@ inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 (
     const faPatch& p,
     const DimensionedField<Type, areaMesh>& iF,
@@ -100,7 +95,7 @@ inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 (
     const inletOutletFaPatchField<Type>& ptf
 )
@@ -111,7 +106,7 @@ inletOutletFaPatchField<Type>::inletOutletFaPatchField
 
 
 template<class Type>
-inletOutletFaPatchField<Type>::inletOutletFaPatchField
+Foam::inletOutletFaPatchField<Type>::inletOutletFaPatchField
 (
     const inletOutletFaPatchField<Type>& ptf,
     const DimensionedField<Type, areaMesh>& iF
@@ -125,7 +120,7 @@ inletOutletFaPatchField<Type>::inletOutletFaPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void inletOutletFaPatchField<Type>::updateCoeffs()
+void Foam::inletOutletFaPatchField<Type>::updateCoeffs()
 {
     if (this->updated())
     {
@@ -134,9 +129,9 @@ void inletOutletFaPatchField<Type>::updateCoeffs()
 
     const Field<scalar>& phip =
         this->patch(). template lookupPatchField<edgeScalarField, scalar>
-    (
-        phiName_
-    );
+        (
+            phiName_
+        );
 
     this->valueFraction() = 1.0 - pos(phip);
 
@@ -145,7 +140,7 @@ void inletOutletFaPatchField<Type>::updateCoeffs()
 
 
 template<class Type>
-void inletOutletFaPatchField<Type>::write(Ostream& os) const
+void Foam::inletOutletFaPatchField<Type>::write(Ostream& os) const
 {
     faPatchField<Type>::write(os);
     if (phiName_ != "phi")
@@ -157,9 +152,5 @@ void inletOutletFaPatchField<Type>::write(Ostream& os) const
     this->writeEntry("value", os);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

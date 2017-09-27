@@ -31,17 +31,10 @@ Description
 #include "faScalarMatrix.H"
 #include "zeroGradientFaPatchFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Set reference level for a component of the solution
-// on a given patch face
 template<>
-void faMatrix<scalar>::setComponentReference
+void Foam::faMatrix<Foam::scalar>::setComponentReference
 (
     const label patchI,
     const label edgeI,
@@ -58,17 +51,14 @@ void faMatrix<scalar>::setComponentReference
 
 
 template<>
-solverPerformance faMatrix<scalar>::solve
+Foam::solverPerformance Foam::faMatrix<Foam::scalar>::solve
 (
     const dictionary& solverControls
 )
 {
-    if (debug)
-    {
-        Info<< "faMatrix<scalar>::solve(const dictionary&) : "
-               "solving faMatrix<scalar>"
-            << endl;
-    }
+    DebugInFunction
+        << "solving faMatrix<scalar>"
+        << endl;
 
     GeometricField<scalar, faPatchField, areaMesh>& psi =
         const_cast<GeometricField<scalar, faPatchField, areaMesh>&>(psi_);
@@ -100,9 +90,8 @@ solverPerformance faMatrix<scalar>::solve
 }
 
 
-// Return the matrix residual
 template<>
-tmp<scalarField> faMatrix<scalar>::residual() const
+Foam::tmp<Foam::scalarField> Foam::faMatrix<Foam::scalar>::residual() const
 {
     scalarField boundaryDiag(psi_.size(), 0.0);
     addBoundaryDiag(boundaryDiag, 0);
@@ -125,9 +114,8 @@ tmp<scalarField> faMatrix<scalar>::residual() const
 }
 
 
-// H operator
 template<>
-tmp<areaScalarField> faMatrix<scalar>::H() const
+Foam::tmp<Foam::areaScalarField> Foam::faMatrix<Foam::scalar>::H() const
 {
     tmp<areaScalarField> tHphi
     (
@@ -157,9 +145,5 @@ tmp<areaScalarField> faMatrix<scalar>::H() const
     return tHphi;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

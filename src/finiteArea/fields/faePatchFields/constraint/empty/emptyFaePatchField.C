@@ -28,15 +28,10 @@ License
 #include "emptyFaePatchField.H"
 #include "faPatchFieldMapper.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-emptyFaePatchField<Type>::emptyFaePatchField
+Foam::emptyFaePatchField<Type>::emptyFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -47,7 +42,7 @@ emptyFaePatchField<Type>::emptyFaePatchField
 
 
 template<class Type>
-emptyFaePatchField<Type>::emptyFaePatchField
+Foam::emptyFaePatchField<Type>::emptyFaePatchField
 (
     const emptyFaePatchField<Type>&,
     const faPatch& p,
@@ -59,16 +54,8 @@ emptyFaePatchField<Type>::emptyFaePatchField
 {
     if (!isType<emptyFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "emptyFaePatchField<Type>::emptyFaePatchField\n"
-            "(\n"
-            "    const emptyFaePatchField<Type>&,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, edgeMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "Field type does not correspond to patch type for patch "
+        FatalErrorInFunction
+            << "Field type does not correspond to patch type for patch "
             << this->patch().index() << "." << endl
             << "Field type: " << typeName << endl
             << "Patch type: " << this->patch().type()
@@ -78,7 +65,7 @@ emptyFaePatchField<Type>::emptyFaePatchField
 
 
 template<class Type>
-emptyFaePatchField<Type>::emptyFaePatchField
+Foam::emptyFaePatchField<Type>::emptyFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -89,16 +76,8 @@ emptyFaePatchField<Type>::emptyFaePatchField
 {
     if (!isType<emptyFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "emptyFaePatchField<Type>::emptyFaePatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, edgeMesh>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "patch " << this->patch().index() << " not empty type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not empty type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
@@ -106,7 +85,7 @@ emptyFaePatchField<Type>::emptyFaePatchField
 
 
 template<class Type>
-emptyFaePatchField<Type>::emptyFaePatchField
+Foam::emptyFaePatchField<Type>::emptyFaePatchField
 (
     const emptyFaePatchField<Type>& ptf
 )
@@ -121,7 +100,7 @@ emptyFaePatchField<Type>::emptyFaePatchField
 
 
 template<class Type>
-emptyFaePatchField<Type>::emptyFaePatchField
+Foam::emptyFaePatchField<Type>::emptyFaePatchField
 (
     const emptyFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -130,9 +109,5 @@ emptyFaePatchField<Type>::emptyFaePatchField
     faePatchField<Type>(ptf.patch(), iF, Field<Type>(0))
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -24,12 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faPatchData
+    Foam::faPatchData
 
 Description
     Class which holds data needed for faPatch construction
-
-SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class faPatchData Declaration
+                         Class faPatchData Declaration
 \*---------------------------------------------------------------------------*/
 
 struct faPatchData
@@ -68,9 +66,6 @@ struct faPatchData
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

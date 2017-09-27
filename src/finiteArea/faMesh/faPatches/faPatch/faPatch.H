@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faPatch
+    Foam::faPatch
 
 Description
     Finite area patch class.  Used for 2-D non-Euclidian finite area method.
@@ -92,19 +92,19 @@ private:
     // Private Member Functions
 
         //- Disallow construct as copy
-        faPatch(const faPatch&);
+        faPatch(const faPatch&) = delete;
 
         //- Disallow assignment
-        void operator=(const faPatch&);
+        void operator=(const faPatch&) = delete;
 
 
-       //- Clear out topological patch data
-       void clearOut();
+        //- Clear out topological patch data
+        void clearOut();
 
 
 protected:
 
-        // The faPatch geometry initialisation is called by faBoundaryMesh
+        //- The faPatch geometry initialisation is called by faBoundaryMesh
         friend class faBoundaryMesh;
 
         //- Calculate patch point labels
@@ -216,9 +216,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faPatch();
+    //- Destructor
+    virtual ~faPatch();
 
 
     // Member Functions
@@ -334,7 +333,7 @@ public:
 
             //- Return given internal field next to patch as patch field
             template<class Type>
-            tmp<Field<Type> > patchInternalField(const UList<Type>&) const;
+            tmp<Field<Type>> patchInternalField(const UList<Type>&) const;
 
             //- Return the corresponding patchField of the named field
             template<class GeometricField, class Type>
@@ -352,8 +351,8 @@ public:
             const typename GeometricField::Patch& lookupPatchField
             (
                 const word& name,
-                const GeometricField* = NULL,
-                const Type* = NULL
+                const GeometricField* = nullptr,
+                const Type* = nullptr
             ) const;
 
 
@@ -370,7 +369,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faPatchTemplates.C"
+    #include "faPatchTemplates.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

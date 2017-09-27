@@ -42,7 +42,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 gaussLaplacianScheme<Type>::famLaplacian
 (
     const edgeScalarField& gamma,
@@ -54,7 +54,7 @@ gaussLaplacianScheme<Type>::famLaplacian
 
     const edgeScalarField gammaMagSf(gamma*this->mesh().magLe());
 
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -111,13 +111,13 @@ gaussLaplacianScheme<Type>::famLaplacian
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 gaussLaplacianScheme<Type>::facLaplacian
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tLaplacian
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tLaplacian
     (
         fac::div(this->tlnGradScheme_().lnGrad(vf)*vf.mesh().magLe())
     );
@@ -129,14 +129,14 @@ gaussLaplacianScheme<Type>::facLaplacian
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 gaussLaplacianScheme<Type>::facLaplacian
 (
     const edgeScalarField& gamma,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tLaplacian
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tLaplacian
     (
         fac::div(gamma*this->tlnGradScheme_().lnGrad(vf)*vf.mesh().magLe())
     );

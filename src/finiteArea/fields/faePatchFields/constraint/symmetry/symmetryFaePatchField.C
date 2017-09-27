@@ -27,15 +27,10 @@ License
 
 #include "symmetryFaePatchField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-symmetryFaePatchField<Type>::symmetryFaePatchField
+Foam::symmetryFaePatchField<Type>::symmetryFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF
@@ -46,7 +41,7 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
 
 
 template<class Type>
-symmetryFaePatchField<Type>::symmetryFaePatchField
+Foam::symmetryFaePatchField<Type>::symmetryFaePatchField
 (
     const symmetryFaePatchField<Type>& ptf,
     const faPatch& p,
@@ -58,16 +53,8 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
 {
     if (!isType<symmetryFaPatch>(this->patch()))
     {
-        FatalErrorIn
-        (
-            "symmetryFaePatchField<Type>::symmetryFaePatchField\n"
-            "(\n"
-            "    const symmetryFaePatchField<Type>& ptf,\n"
-            "    const faPatch& p,\n"
-            "    const DimensionedField<Type, edgeMesh>& iF,\n"
-            "    const faPatchFieldMapper& mapper\n"
-            ")\n"
-        )   << "Field type does not correspond to patch type for patch "
+        FatalErrorInFunction
+            << "Field type does not correspond to patch type for patch "
             << this->patch().index() << "." << endl
             << "Field type: " << typeName << endl
             << "Patch type: " << this->patch().type()
@@ -77,7 +64,7 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
 
 
 template<class Type>
-symmetryFaePatchField<Type>::symmetryFaePatchField
+Foam::symmetryFaePatchField<Type>::symmetryFaePatchField
 (
     const faPatch& p,
     const DimensionedField<Type, edgeMesh>& iF,
@@ -88,16 +75,8 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
 {
     if (!isType<symmetryFaPatch>(p))
     {
-        FatalIOErrorIn
-        (
-            "symmetryFaePatchField<Type>::symmetryFaePatchField\n"
-            "(\n"
-            "    const faPatch& p,\n"
-            "    const Field<Type>& field,\n"
-            "    const dictionary& dict\n"
-            ")\n",
-            dict
-        )   << "patch " << this->patch().index() << " not symmetry type. "
+        FatalIOErrorInFunction(dict)
+            << "patch " << this->patch().index() << " not symmetry type. "
             << "Patch type = " << p.type()
             << exit(FatalIOError);
     }
@@ -105,7 +84,7 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
 
 
 template<class Type>
-symmetryFaePatchField<Type>::symmetryFaePatchField
+Foam::symmetryFaePatchField<Type>::symmetryFaePatchField
 (
     const symmetryFaePatchField<Type>& ptf
 )
@@ -115,7 +94,7 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
 
 
 template<class Type>
-symmetryFaePatchField<Type>::symmetryFaePatchField
+Foam::symmetryFaePatchField<Type>::symmetryFaePatchField
 (
     const symmetryFaePatchField<Type>& ptf,
     const DimensionedField<Type, edgeMesh>& iF
@@ -124,9 +103,5 @@ symmetryFaePatchField<Type>::symmetryFaePatchField
     faePatchField<Type>(ptf, iF)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

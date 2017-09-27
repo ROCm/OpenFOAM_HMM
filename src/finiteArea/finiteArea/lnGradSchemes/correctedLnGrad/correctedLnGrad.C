@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Simple central-difference lnGrad scheme with non-orthogonal correction.
-
 \*---------------------------------------------------------------------------*/
 
 #include "correctedLnGrad.H"
@@ -54,7 +51,7 @@ correctedLnGrad<Type>::~correctedLnGrad()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 correctedLnGrad<Type>::correction
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -62,8 +59,7 @@ correctedLnGrad<Type>::correction
 {
     const faMesh& mesh = this->mesh();
 
-    // construct GeometricField<Type, faePatchField, edgeMesh>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tssf
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tssf
     (
         new GeometricField<Type, faePatchField, edgeMesh>
         (
@@ -79,7 +75,7 @@ correctedLnGrad<Type>::correction
     );
     GeometricField<Type, faePatchField, edgeMesh>& ssf = tssf.ref();
 
-    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; cmpt++)
+    for (direction cmpt = 0; cmpt < pTraits<Type>::nComponents; ++cmpt)
     {
         ssf.replace
         (

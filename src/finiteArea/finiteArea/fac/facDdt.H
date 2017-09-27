@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fac
+InNamespace
+    Foam::fac
 
 Description
     Calculate the first temporal derivative.
@@ -57,27 +57,27 @@ namespace Foam
 namespace fac
 {
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ddt
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ddt
     (
         const dimensioned<Type>,
         const faMesh&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ddt
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ddt
     (
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ddt
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ddt
     (
         const dimensionedScalar&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > ddt
+    tmp<GeometricField<Type, faPatchField, areaMesh>> ddt
     (
         const areaScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&
@@ -92,7 +92,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "facDdt.C"
+    #include "facDdt.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

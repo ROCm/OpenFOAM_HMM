@@ -55,8 +55,7 @@ scalar boundedBackwardFaDdtScheme::deltaT0_() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
 (
     const dimensionedScalar dt
 )
@@ -126,8 +125,7 @@ boundedBackwardFaDdtScheme::facDdt
 }
 
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt0
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
 (
     const dimensionedScalar dt
 )
@@ -174,8 +172,7 @@ boundedBackwardFaDdtScheme::facDdt0
 }
 
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
 (
     const areaScalarField& vf
 )
@@ -272,8 +269,7 @@ boundedBackwardFaDdtScheme::facDdt
 }
 
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt0
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
 (
     const areaScalarField& vf
 )
@@ -367,8 +363,7 @@ boundedBackwardFaDdtScheme::facDdt0
 }
 
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
 (
     const dimensionedScalar& rho,
     const areaScalarField& vf
@@ -465,8 +460,7 @@ boundedBackwardFaDdtScheme::facDdt
     }
 }
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt0
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
 (
     const dimensionedScalar& rho,
     const areaScalarField& vf
@@ -561,8 +555,7 @@ boundedBackwardFaDdtScheme::facDdt0
 }
 
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt
 (
     const areaScalarField& rho,
     const areaScalarField& vf
@@ -663,8 +656,7 @@ boundedBackwardFaDdtScheme::facDdt
 }
 
 
-tmp<areaScalarField>
-boundedBackwardFaDdtScheme::facDdt0
+tmp<areaScalarField> boundedBackwardFaDdtScheme::facDdt0
 (
     const areaScalarField& rho,
     const areaScalarField& vf
@@ -762,8 +754,7 @@ boundedBackwardFaDdtScheme::facDdt0
 }
 
 
-tmp<faScalarMatrix>
-boundedBackwardFaDdtScheme::famDdt
+tmp<faScalarMatrix> boundedBackwardFaDdtScheme::famDdt
 (
     const areaScalarField& vf
 )
@@ -834,8 +825,7 @@ boundedBackwardFaDdtScheme::famDdt
 }
 
 
-tmp<faScalarMatrix>
-boundedBackwardFaDdtScheme::famDdt
+tmp<faScalarMatrix> boundedBackwardFaDdtScheme::famDdt
 (
     const dimensionedScalar& rho,
     const areaScalarField& vf
@@ -906,8 +896,7 @@ boundedBackwardFaDdtScheme::famDdt
 }
 
 
-tmp<faScalarMatrix>
-boundedBackwardFaDdtScheme::famDdt
+tmp<faScalarMatrix> boundedBackwardFaDdtScheme::famDdt
 (
     const areaScalarField& rho,
     const areaScalarField& vf

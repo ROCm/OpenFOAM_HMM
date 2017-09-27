@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite volume calculus ddt schemes.
-
 \*---------------------------------------------------------------------------*/
 
 #include "fa.H"
@@ -44,7 +41,7 @@ namespace fa
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faDdtScheme<Type> > faDdtScheme<Type>::New
+tmp<faDdtScheme<Type>> faDdtScheme<Type>::New
 (
     const faMesh& mesh,
     Istream& schemeData
@@ -52,18 +49,15 @@ tmp<faDdtScheme<Type> > faDdtScheme<Type>::New
 {
     if (fa::debug)
     {
-        Info<< "faDdtScheme<Type>::New(const faMesh&, Istream&) : "
-               "constructing faDdtScheme<Type>"
+        InfoInFunction
+            << "constructing faDdtScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "faDdtScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Ddt scheme not specified" << nl << nl
+        FatalIOErrorInFunction(schemeData)
+            << "Ddt scheme not specified" << nl << nl
             << "Valid ddt schemes are :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
@@ -71,17 +65,13 @@ tmp<faDdtScheme<Type> > faDdtScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorIn
-        (
-            "faDdtScheme<Type>::New(const faMesh&, Istream&)",
-            schemeData
-        )   << "Unknown ddt scheme " << schemeName << nl << nl
-            << "Valid ddt schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown ddt scheme " << schemeName << nl << nl
+            << "Valid ddt schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }

@@ -32,14 +32,12 @@ License
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(coupledFaPatch, 0);
+    defineTypeNameAndDebug(coupledFaPatch, 0);
+}
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-void coupledFaPatch::calcTransformTensors
+void Foam::coupledFaPatch::calcTransformTensors
 (
     const vector& Cf,
     const vector& Cr,
@@ -73,7 +71,7 @@ void coupledFaPatch::calcTransformTensors
 }
 
 
-void coupledFaPatch::calcTransformTensors
+void Foam::coupledFaPatch::calcTransformTensors
 (
     const vectorField& Cf,
     const vectorField& Cr,
@@ -88,7 +86,7 @@ void coupledFaPatch::calcTransformTensors
         forwardT_.setSize(size());
         reverseT_.setSize(size());
 
-        forAll (forwardT_, facei)
+        forAll(forwardT_, facei)
         {
             forwardT_[facei] = rotationTensor(-nr[facei], nf[facei]);
             reverseT_[facei] = rotationTensor(nf[facei], -nr[facei]);
@@ -121,12 +119,8 @@ void coupledFaPatch::calcTransformTensors
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-coupledFaPatch::~coupledFaPatch()
+Foam::coupledFaPatch::~coupledFaPatch()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

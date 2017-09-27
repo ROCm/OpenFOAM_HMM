@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faMesh.H"
@@ -50,7 +48,7 @@ defineTemplateTypeNameAndDebug(areaSymmTensorField, 0);
 defineTemplateTypeNameAndDebug(areaTensorField, 0);
 
 template<>
-tmp<GeometricField<scalar, faPatchField, areaMesh> >
+tmp<GeometricField<scalar, faPatchField, areaMesh>>
 GeometricField<scalar, faPatchField, areaMesh>::component
 (
     const direction
@@ -74,4 +72,3 @@ void GeometricField<scalar, faPatchField, areaMesh>::replace
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-

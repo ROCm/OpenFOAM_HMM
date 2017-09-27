@@ -27,23 +27,19 @@ License
 
 #include "processorFaPatchScalarField.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<>
-void processorFaPatchField<scalar>::transformCoupleField
+void Foam::processorFaPatchField<Foam::scalar>::transformCoupleField
 (
     scalarField& f,
     const direction cmpt
 ) const
 {}
 
+
 template<>
-void processorFaPatchField<scalar>::initInterfaceMatrixUpdate
+void Foam::processorFaPatchField<Foam::scalar>::initInterfaceMatrixUpdate
 (
     scalarField& result,
     const bool add,
@@ -62,7 +58,7 @@ void processorFaPatchField<scalar>::initInterfaceMatrixUpdate
 
 
 template<>
-void processorFaPatchField<scalar>::updateInterfaceMatrix
+void Foam::processorFaPatchField<Foam::scalar>::updateInterfaceMatrix
 (
     scalarField& result,
     const bool add,
@@ -95,9 +91,5 @@ void processorFaPatchField<scalar>::updateInterfaceMatrix
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

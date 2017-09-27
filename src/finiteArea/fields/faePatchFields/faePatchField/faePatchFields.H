@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    faePatchField
+    Foam::faePatchField
 
 Description
     Finite area edge-based patch fields

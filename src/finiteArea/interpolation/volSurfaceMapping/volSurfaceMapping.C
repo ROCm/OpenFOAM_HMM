@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<template<class> class PatchField, class Type>
-Foam::tmp<Foam::Field<Type> > Foam::volSurfaceMapping::mapToSurface
+Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
 (
     const typename GeometricField<Type, fvPatchField, volMesh>::Boundary& df
 ) const
@@ -38,7 +38,7 @@ Foam::tmp<Foam::Field<Type> > Foam::volSurfaceMapping::mapToSurface
     // Grab labels for all faces in faMesh
     const labelList& faceLabels = mesh_.faceLabels();
 
-    tmp<Field<Type> > tresult
+    tmp<Field<Type>> tresult
     (
         new Field<Type>
         (
@@ -55,7 +55,7 @@ Foam::tmp<Foam::Field<Type> > Foam::volSurfaceMapping::mapToSurface
     label patchID, faceID;
 
     // Grab droplet cloud source by identifying patch and face
-    forAll (faceLabels, i)
+    forAll(faceLabels, i)
     {
         // Escape if face is beyond active faces, eg belongs to a face zone
         if (faceLabels[i] < pMesh.nFaces())
@@ -89,7 +89,7 @@ void Foam::volSurfaceMapping::mapToVolume
 
     const Field<Type>& afi = af.internalField();
 
-    forAll (faceLabels, i)
+    forAll(faceLabels, i)
     {
         // Escape if face is beyond active faces, eg belongs to a face zone
         if (faceLabels[i] < pMesh.nFaces())
@@ -106,7 +106,7 @@ void Foam::volSurfaceMapping::mapToVolume
 template<class Type>
 void Foam::volSurfaceMapping::mapToVolume
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& taf,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& taf,
      typename GeometricField<Type, fvPatchField, volMesh>::Boundary& bf
 ) const
 {

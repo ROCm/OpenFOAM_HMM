@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    linearEdgeInterpolation
+    Foam::linearEdgeInterpolation
 
 Description
     Central-differencing interpolation scheme class
@@ -105,7 +105,7 @@ public:
 
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 linearEdgeInterpolate(const GeometricField<Type, faPatchField, areaMesh>& vf)
 {
     return edgeInterpolationScheme<Type>::interpolate
@@ -117,13 +117,13 @@ linearEdgeInterpolate(const GeometricField<Type, faPatchField, areaMesh>& vf)
 
 
 template<class Type>
-tmp<GeometricField<Type, faePatchField, edgeMesh> >
+tmp<GeometricField<Type, faePatchField, edgeMesh>>
 linearEdgeInterpolate
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tvf
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tvf
 )
 {
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > tinterp =
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> tinterp =
         linearEdgeInterpolate(tvf());
     tvf.clear();
     return tinterp;

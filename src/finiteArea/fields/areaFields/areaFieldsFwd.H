@@ -31,7 +31,6 @@ Description
 SourceFiles
     areaFields.C
 
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef areaFieldsFwd_H

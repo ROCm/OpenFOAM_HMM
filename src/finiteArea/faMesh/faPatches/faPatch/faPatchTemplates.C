@@ -30,12 +30,12 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::Field<Type> > Foam::faPatch::patchInternalField
+Foam::tmp<Foam::Field<Type>> Foam::faPatch::patchInternalField
 (
     const UList<Type>& f
 ) const
 {
-    tmp<Field<Type> > tpif(new Field<Type>(size()));
+    tmp<Field<Type>> tpif (new Field<Type>(size()));
     Field<Type>& pif = tpif.ref();
 
     const labelUList& edgeFaces = this->edgeFaces();

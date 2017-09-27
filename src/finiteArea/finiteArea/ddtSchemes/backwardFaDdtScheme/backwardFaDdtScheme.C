@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "backwardFaDdtScheme.H"
@@ -75,7 +73,7 @@ scalar backwardFaDdtScheme<Type>::deltaT0_(const GeoField& vf) const
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt
 (
     const dimensioned<Type> dt
@@ -101,7 +99,7 @@ backwardFaDdtScheme<Type>::facDdt
 
     if (mesh().moving())
     {
-        tmp<GeometricField<Type, faPatchField, areaMesh> > tdtdt
+        tmp<GeometricField<Type, faPatchField, areaMesh>> tdtdt
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -125,7 +123,7 @@ backwardFaDdtScheme<Type>::facDdt
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -145,7 +143,7 @@ backwardFaDdtScheme<Type>::facDdt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt0
 (
     const dimensioned<Type> dt
@@ -169,7 +167,7 @@ backwardFaDdtScheme<Type>::facDdt0
     scalar coefft00 = deltaT*deltaT/(deltaT0*(deltaT + deltaT0));
     scalar coefft0  = coefft + coefft00;
 
-    tmp<GeometricField<Type, faPatchField, areaMesh> > tdtdt0
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tdtdt0
     (
         new GeometricField<Type, faPatchField, areaMesh>
         (
@@ -192,7 +190,7 @@ backwardFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -218,7 +216,7 @@ backwardFaDdtScheme<Type>::facDdt
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -247,7 +245,7 @@ backwardFaDdtScheme<Type>::facDdt
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -265,7 +263,7 @@ backwardFaDdtScheme<Type>::facDdt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt0
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
@@ -291,7 +289,7 @@ backwardFaDdtScheme<Type>::facDdt0
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -318,7 +316,7 @@ backwardFaDdtScheme<Type>::facDdt0
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -335,7 +333,7 @@ backwardFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt
 (
     const dimensionedScalar& rho,
@@ -362,7 +360,7 @@ backwardFaDdtScheme<Type>::facDdt
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -391,7 +389,7 @@ backwardFaDdtScheme<Type>::facDdt
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -408,7 +406,7 @@ backwardFaDdtScheme<Type>::facDdt
 }
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt0
 (
     const dimensionedScalar& rho,
@@ -435,7 +433,7 @@ backwardFaDdtScheme<Type>::facDdt0
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -462,7 +460,7 @@ backwardFaDdtScheme<Type>::facDdt0
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -479,7 +477,7 @@ backwardFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt
 (
     const areaScalarField& rho,
@@ -506,7 +504,7 @@ backwardFaDdtScheme<Type>::facDdt
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -538,7 +536,7 @@ backwardFaDdtScheme<Type>::facDdt
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -556,7 +554,7 @@ backwardFaDdtScheme<Type>::facDdt
 
 
 template<class Type>
-tmp<GeometricField<Type, faPatchField, areaMesh> >
+tmp<GeometricField<Type, faPatchField, areaMesh>>
 backwardFaDdtScheme<Type>::facDdt0
 (
     const areaScalarField& rho,
@@ -583,7 +581,7 @@ backwardFaDdtScheme<Type>::facDdt0
 
     if (mesh().moving())
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -613,7 +611,7 @@ backwardFaDdtScheme<Type>::facDdt0
     }
     else
     {
-        return tmp<GeometricField<Type, faPatchField, areaMesh> >
+        return tmp<GeometricField<Type, faPatchField, areaMesh>>
         (
             new GeometricField<Type, faPatchField, areaMesh>
             (
@@ -630,13 +628,13 @@ backwardFaDdtScheme<Type>::facDdt0
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 backwardFaDdtScheme<Type>::famDdt
 (
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -681,14 +679,14 @@ backwardFaDdtScheme<Type>::famDdt
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 backwardFaDdtScheme<Type>::famDdt
 (
     const dimensionedScalar& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -732,14 +730,14 @@ backwardFaDdtScheme<Type>::famDdt
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 backwardFaDdtScheme<Type>::famDdt
 (
     const areaScalarField& rho,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (

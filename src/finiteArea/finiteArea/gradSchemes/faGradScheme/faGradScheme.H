@@ -24,10 +24,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    gradScheme
+    Foam::fa::gradScheme
 
 Description
-    Abstract base class for gradient schemes.
+    Abstract base class for finite area calculus gradient schemes.
 
 SourceFiles
     faGradScheme.C
@@ -57,7 +57,7 @@ namespace fa
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class gradScheme Declaration
+                         Class gradScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -73,10 +73,10 @@ class gradScheme
     // Private Member Functions
 
         //- Disallow copy construct
-        gradScheme(const gradScheme&);
+        gradScheme(const gradScheme&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const gradScheme&);
+        void operator=(const gradScheme&) = delete;
 
 
 public:
@@ -105,16 +105,15 @@ public:
     // Selectors
 
         //- Return a pointer to a new gradScheme created on freestore
-        static tmp<gradScheme<Type> > New
+        static tmp<gradScheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
         );
 
 
-    // Destructor
-
-        virtual ~gradScheme();
+    //- Destructor
+    virtual ~gradScheme();
 
 
     // Member Functions
@@ -157,7 +156,7 @@ public:
     {                                                                          \
         namespace fa                                                           \
         {                                                                      \
-            gradScheme<Type>::addIstreamConstructorToTable<SS<Type> >          \
+            gradScheme<Type>::addIstreamConstructorToTable<SS<Type>>          \
                 add##SS##Type##IstreamConstructorToTable_;                     \
         }                                                                      \
     }
@@ -172,7 +171,7 @@ makeFaGradTypeScheme(SS, vector)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "faGradScheme.C"
+    #include "faGradScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

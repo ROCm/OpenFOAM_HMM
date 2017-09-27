@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    edgeInterpolationScheme
+    Foam::edgeInterpolationScheme
 
 Description
     Abstract base class for edge interpolation schemes.
@@ -51,7 +51,7 @@ namespace Foam
 class faMesh;
 
 /*---------------------------------------------------------------------------*\
-                    Class edgeInterpolationScheme Declaration
+                   Class edgeInterpolationScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -68,7 +68,7 @@ class edgeInterpolationScheme
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const edgeInterpolationScheme&);
+        void operator=(const edgeInterpolationScheme&) = delete;
 
 
 public:
@@ -113,14 +113,14 @@ public:
     // Selectors
 
         //- Return new tmp interpolation scheme
-        static tmp<edgeInterpolationScheme<Type> > New
+        static tmp<edgeInterpolationScheme<Type>> New
         (
             const faMesh& mesh,
             Istream& schemeData
         );
 
         //- Return new tmp interpolation scheme
-        static tmp<edgeInterpolationScheme<Type> > New
+        static tmp<edgeInterpolationScheme<Type>> New
         (
             const faMesh& mesh,
             const edgeScalarField& faceFlux,
@@ -144,7 +144,7 @@ public:
 
         //- Return the face-interpolate of the given cell field
         //  with the given owner and neighbour weigting factors
-        static tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         interpolate
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
@@ -154,7 +154,7 @@ public:
 
         //- Return the face-interpolate of the given cell field
         //  with the given weigting factors
-        static tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         interpolate
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
@@ -164,7 +164,7 @@ public:
 
         //- Return the euclidian edge-interpolate of the given area field
         //  with the given weigting factors
-        static tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        static tmp<GeometricField<Type, faePatchField, edgeMesh>>
         euclidianInterpolate
         (
             const GeometricField<Type, faPatchField, areaMesh>&,
@@ -186,20 +186,20 @@ public:
 
         //- Return the explicit correction to the face-interpolate
         //  for the given field
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         correction(const GeometricField<Type, faPatchField, areaMesh>&) const
         {
-            return tmp<GeometricField<Type, faePatchField, edgeMesh> >(NULL);
+            return tmp<GeometricField<Type, faePatchField, edgeMesh>>(nullptr);
         }
 
         //- Return the face-interpolate of the given cell field
         //  with explicit correction
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         interpolate(const GeometricField<Type, faPatchField, areaMesh>&) const;
 
         //- Return the euclidian edge-interpolate of the given area field
         //  without explicit correction
-        virtual tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        virtual tmp<GeometricField<Type, faePatchField, edgeMesh>>
         euclidianInterpolate
         (
             const GeometricField<Type, faPatchField, areaMesh>&
@@ -207,10 +207,10 @@ public:
 
         //- Return the face-interpolate of the given tmp cell field
         //  with explicit correction
-        tmp<GeometricField<Type, faePatchField, edgeMesh> >
+        tmp<GeometricField<Type, faePatchField, edgeMesh>>
         interpolate
         (
-            const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+            const tmp<GeometricField<Type, faPatchField, areaMesh>>&
         ) const;
 };
 
@@ -227,10 +227,10 @@ public:
                                                                                \
 defineNamedTemplateTypeNameAndDebug(SS<Type>, 0);                              \
                                                                                \
-edgeInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type> >            \
+edgeInterpolationScheme<Type>::addMeshConstructorToTable<SS<Type>>            \
     add##SS##Type##MeshConstructorToTable_;                                    \
                                                                                \
-edgeInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type> >        \
+edgeInterpolationScheme<Type>::addMeshFluxConstructorToTable<SS<Type>>        \
     add##SS##Type##MeshFluxConstructorToTable_;
 
 #define makeEdgeInterpolationScheme(SS)                                        \
@@ -243,7 +243,7 @@ makeEdgeInterpolationTypeScheme(SS, tensor)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "edgeInterpolationScheme.C"
+    #include "edgeInterpolationScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

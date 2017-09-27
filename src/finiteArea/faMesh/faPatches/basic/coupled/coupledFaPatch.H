@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    coupledFaPatch
+    Foam::coupledFaPatch
 
 Author
     Zeljko Tukovic and Hrvoje Jasak
@@ -161,7 +161,7 @@ public:
             {
                 if (!separation_.size())
                 {
-                    FatalErrorIn("coupledFaPatch::separation() const")
+                    FatalErrorInFunction
                         << "Coupled patches are not separated"
                         << abort(FatalError);
                 }
@@ -174,7 +174,7 @@ public:
             {
                 if (!forwardT_.size())
                 {
-                    FatalErrorIn("coupledFaPatch::forwardT() const")
+                    FatalErrorInFunction
                         << "Coupled planes do not need transformation"
                         << abort(FatalError);
                 }
@@ -187,7 +187,7 @@ public:
             {
                 if (!reverseT_.size())
                 {
-                    FatalErrorIn("coupledFaPatch::forwardT() const")
+                    FatalErrorInFunction
                         << "Coupled planes do not need transformation"
                         << abort(FatalError);
                 }

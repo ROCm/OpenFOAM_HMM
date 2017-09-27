@@ -23,8 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "symmetryFaPatch.H"
@@ -34,25 +32,22 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(symmetryFaPatch, 0);
-addToRunTimeSelectionTable(faPatch, symmetryFaPatch, dictionary);
+    defineTypeNameAndDebug(symmetryFaPatch, 0);
+    addToRunTimeSelectionTable(faPatch, symmetryFaPatch, dictionary);
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void symmetryFaPatch::makeCorrVecs(vectorField& cv) const
+void Foam::symmetryFaPatch::makeCorrVecs(vectorField& cv) const
 {
-    // Non-orthogonal correction not allowed.  HJ, 16/Apr/2009
+    // Non-orthogonal correction not allowed
     cv = vector::zero;
 }
 
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-// Construct from components
-symmetryFaPatch::symmetryFaPatch
+Foam::symmetryFaPatch::symmetryFaPatch
 (
     const word& name,
     const labelList& edgeLabels,
@@ -64,8 +59,8 @@ symmetryFaPatch::symmetryFaPatch
     faPatch(name, edgeLabels, index, bm, ngbPolyPatchIndex)
 {}
 
-//- Construct from dictionary
-symmetryFaPatch::symmetryFaPatch
+
+Foam::symmetryFaPatch::symmetryFaPatch
 (
     const word& name,
     const dictionary& dict,
@@ -75,18 +70,13 @@ symmetryFaPatch::symmetryFaPatch
 :
     faPatch(name, dict, index, bm)
 {
-    if(ngbPolyPatchIndex() == -1)
+    if (ngbPolyPatchIndex() == -1)
     {
-        FatalErrorIn
-        (
-            "symmetryFaPatch::symmetryFaPatch(const word&, const dictionary&, const label, const faBoundaryMesh&)"
-        )   << "Neighbour polyPatch index is not specified for faPatch "
+        FatalErrorInFunction
+            << "Neighbour polyPatch index is not specified for faPatch "
             << this->name() << exit(FatalError);
     }
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

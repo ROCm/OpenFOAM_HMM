@@ -23,30 +23,16 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Abstract base class for finite area calculus convection schemes.
-
 \*---------------------------------------------------------------------------*/
 
-#include "faConvectionScheme.H"
 #include "fa.H"
-#include "HashTable.H"
-#include "linearEdgeInterpolation.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace fa
-{
+#include "faConvectionScheme.H"
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<convectionScheme<Type> > convectionScheme<Type>::New
+Foam::tmp<Foam::fa::convectionScheme<Type>>
+Foam::fa::convectionScheme<Type>::New
 (
     const faMesh& mesh,
     const edgeScalarField& faceFlux,
@@ -55,39 +41,29 @@ tmp<convectionScheme<Type> > convectionScheme<Type>::New
 {
     if (fa::debug)
     {
-        Info<< "convectionScheme<Type>::New"
-               "(const faMesh&, const edgeScalarField&, Istream&) : "
-               "constructing convectionScheme<Type>"
+        InfoInFunction
+            << "constructing convectionScheme<Type>"
             << endl;
     }
 
     if (schemeData.eof())
     {
-        FatalIOErrorIn
-        (
-            "convectionScheme<Type>::New"
-            "(const faMesh&, const edgeScalarField&, Istream&)",
-            schemeData
-        )   << "Convection scheme not specified" << endl << endl
-            << "Valid convection schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Convection scheme not specified" << nl << nl
+            << "Valid convection schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
-    if (cstrIter == IstreamConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
-        FatalIOErrorIn
-        (
-            "convectionScheme<Type>::New"
-            "(const faMesh&, const edgeScalarField&, Istream&)",
-            schemeData
-        )   << "Unknown convection scheme " << schemeName << nl << nl
-            << "Valid convection schemes are :" << endl
+        FatalIOErrorInFunction(schemeData)
+            << "Unknown convection scheme " << schemeName << nl << nl
+            << "Valid convection schemes are :" << nl
             << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -99,19 +75,8 @@ tmp<convectionScheme<Type> > convectionScheme<Type>::New
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-convectionScheme<Type>::~convectionScheme()
+Foam::fa::convectionScheme<Type>::~convectionScheme()
 {}
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fa
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

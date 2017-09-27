@@ -23,9 +23,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
-
 \*---------------------------------------------------------------------------*/
 
 #include "areaFields.H"
@@ -45,7 +42,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 Su
 (
     const GeometricField<Type, faPatchField, areaMesh>& su,
@@ -54,7 +51,7 @@ Su
 {
     const faMesh& mesh = vf.mesh();
 
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -70,21 +67,21 @@ Su
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 Su
 (
-    const tmp<GeometricField<Type, faPatchField, areaMesh> >& tsu,
+    const tmp<GeometricField<Type, faPatchField, areaMesh>>& tsu,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam = fam::Su(tsu(), vf);
+    tmp<faMatrix<Type>> tfam = fam::Su(tsu(), vf);
     tsu.clear();
     return tfam;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 Sp
 (
     const areaScalarField& sp,
@@ -93,7 +90,7 @@ Sp
 {
     const faMesh& mesh = vf.mesh();
 
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -109,21 +106,21 @@ Sp
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 Sp
 (
     const tmp<areaScalarField>& tsp,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam = fam::Sp(tsp(), vf);
+    tmp<faMatrix<Type>> tfam = fam::Sp(tsp(), vf);
     tsp.clear();
     return tfam;
 }
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 Sp
 (
     const dimensionedScalar& sp,
@@ -132,7 +129,7 @@ Sp
 {
     const faMesh& mesh = vf.mesh();
 
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -149,7 +146,7 @@ Sp
 
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 SuSp
 (
     const areaScalarField& sp,
@@ -158,7 +155,7 @@ SuSp
 {
     const faMesh& mesh = vf.mesh();
 
-    tmp<faMatrix<Type> > tfam
+    tmp<faMatrix<Type>> tfam
     (
         new faMatrix<Type>
         (
@@ -177,14 +174,14 @@ SuSp
 }
 
 template<class Type>
-tmp<faMatrix<Type> >
+tmp<faMatrix<Type>>
 SuSp
 (
     const tmp<areaScalarField>& tsp,
     const GeometricField<Type, faPatchField, areaMesh>& vf
 )
 {
-    tmp<faMatrix<Type> > tfam = fam::SuSp(tsp(), vf);
+    tmp<faMatrix<Type>> tfam = fam::SuSp(tsp(), vf);
     tsp.clear();
     return tfam;
 }

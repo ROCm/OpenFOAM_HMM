@@ -59,11 +59,9 @@ class cyclicFaPatch
     public coupledFaPatch,
     public cyclicLduInterface
 {
-    // Private data
-
     // Private member functions
 
-    void calcTransforms();
+        void calcTransforms();
 
 protected:
 
@@ -72,6 +70,7 @@ protected:
         //- Relative tolerance (for geometric matching). Is factor of
         //  maximum edge length per face.
         static const scalar matchTol_;
+
 
     // Protected Member functions
 

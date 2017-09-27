@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fac
+InNamespace
+    Foam::fac
 
 Description
     Calculate the lnGrad of the given areaField.
@@ -53,29 +53,29 @@ namespace Foam
 namespace fac
 {
     template<class Type>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > lnGrad
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> lnGrad
     (
         const GeometricField<Type, faPatchField, areaMesh>&,
         const word& name
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > lnGrad
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> lnGrad
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&,
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&,
         const word& name
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > lnGrad
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> lnGrad
     (
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faePatchField, edgeMesh> > lnGrad
+    tmp<GeometricField<Type, faePatchField, edgeMesh>> lnGrad
     (
-        const tmp<GeometricField<Type, faPatchField, areaMesh> >&
+        const tmp<GeometricField<Type, faPatchField, areaMesh>>&
     );
 }
 
@@ -87,7 +87,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "facLnGrad.C"
+    #include "facLnGrad.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

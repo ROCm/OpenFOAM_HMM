@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    blendedEdgeInterpolation
+    Foam::blendedEdgeInterpolation
 
 Description
     linear/upwind blended differencing scheme.

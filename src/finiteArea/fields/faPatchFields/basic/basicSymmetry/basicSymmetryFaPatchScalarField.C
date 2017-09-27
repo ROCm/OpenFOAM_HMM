@@ -28,22 +28,21 @@ License
 #include "basicSymmetryFaPatchField.H"
 #include "areaFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<>
-tmp<scalarField > basicSymmetryFaPatchField<scalar>::snGrad() const
+Foam::tmp<Foam::scalarField>
+Foam::basicSymmetryFaPatchField<Foam::scalar>::snGrad() const
 {
-    return tmp<scalarField >(new scalarField(size(), 0.0));
+    return tmp<scalarField>(new scalarField(size(), 0.0));
 }
 
 
 template<>
-void basicSymmetryFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
+void Foam::basicSymmetryFaPatchField<Foam::scalar>::evaluate
+(
+    const Pstream::commsTypes
+)
 {
     if (!updated())
     {
@@ -53,9 +52,5 @@ void basicSymmetryFaPatchField<scalar>::evaluate(const Pstream::commsTypes)
     transformFaPatchField<scalar>::evaluate();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

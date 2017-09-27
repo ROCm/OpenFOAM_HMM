@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    fac
+InNamespace
+    Foam::fac
 
 Description
     Edge integrate edgeField creating a areaField.
@@ -54,29 +54,29 @@ namespace Foam
 namespace fac
 {
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> >
+    tmp<GeometricField<Type, faPatchField, areaMesh>>
     edgeIntegrate
     (
         const GeometricField<Type, faePatchField, edgeMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> >
+    tmp<GeometricField<Type, faPatchField, areaMesh>>
     edgeIntegrate
     (
-        const tmp<GeometricField<Type, faePatchField, edgeMesh> >&
+        const tmp<GeometricField<Type, faePatchField, edgeMesh>>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > edgeSum
+    tmp<GeometricField<Type, faPatchField, areaMesh>> edgeSum
     (
         const GeometricField<Type, faePatchField, edgeMesh>&
     );
 
     template<class Type>
-    tmp<GeometricField<Type, faPatchField, areaMesh> > edgeSum
+    tmp<GeometricField<Type, faPatchField, areaMesh>> edgeSum
     (
-        const tmp<GeometricField<Type, faePatchField, edgeMesh> >&
+        const tmp<GeometricField<Type, faePatchField, edgeMesh>>&
     );
 }
 
@@ -88,7 +88,7 @@ namespace fac
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "facEdgeIntegrate.C"
+    #include "facEdgeIntegrate.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

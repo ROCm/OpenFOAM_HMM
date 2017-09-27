@@ -24,7 +24,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    gaussDivScheme
+    Foam::fa::gaussDivScheme
 
 Description
     Basic second-order div using face-gradients and Gauss' theorem.
@@ -62,10 +62,10 @@ class gaussDivScheme
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        gaussDivScheme(const gaussDivScheme&);
+        gaussDivScheme(const gaussDivScheme&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const gaussDivScheme&);
+        void operator=(const gaussDivScheme&) = delete;
 
 
 public:
@@ -113,7 +113,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gaussFaDivScheme.C"
+    #include "gaussFaDivScheme.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

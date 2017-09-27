@@ -23,8 +23,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    famLaplacian
+InNamespace
+    Foam::fam
 
 Description
     Calculate the matrix for the laplacian of the field.
@@ -53,14 +53,14 @@ namespace Foam
 namespace fam
 {
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const GeometricField<Type, faPatchField, areaMesh>&,
         const word&
@@ -68,7 +68,7 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const dimensionedScalar&,
         const GeometricField<Type, faPatchField, areaMesh>&
@@ -76,7 +76,7 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const dimensionedScalar&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -85,14 +85,14 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const areaScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const areaScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -100,21 +100,21 @@ namespace fam
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const areaScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<areaScalarField>&,
         const GeometricField<Type, faPatchField, areaMesh>&,
         const word&
     );
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<areaScalarField>&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -123,7 +123,7 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const edgeScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -131,7 +131,7 @@ namespace fam
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<edgeScalarField>&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -140,14 +140,14 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const edgeScalarField&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<edgeScalarField>&,
         const GeometricField<Type, faPatchField, areaMesh>&
@@ -155,14 +155,14 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const areaTensorField&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<areaTensorField>&,
         const GeometricField<Type, faPatchField, areaMesh>&
@@ -170,14 +170,14 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const edgeTensorField&,
         const GeometricField<Type, faPatchField, areaMesh>&
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<edgeTensorField>&,
         const GeometricField<Type, faPatchField, areaMesh>&
@@ -185,7 +185,7 @@ namespace fam
 
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const edgeTensorField&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -193,7 +193,7 @@ namespace fam
     );
 
     template<class Type>
-    tmp<faMatrix<Type> > laplacian
+    tmp<faMatrix<Type>> laplacian
     (
         const tmp<edgeTensorField>&,
         const GeometricField<Type, faPatchField, areaMesh>&,
@@ -209,7 +209,7 @@ namespace fam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "famLaplacian.C"
+    #include "famLaplacian.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

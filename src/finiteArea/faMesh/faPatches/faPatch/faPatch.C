@@ -55,7 +55,6 @@ void Foam::faPatch::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::faPatch::faPatch
 (
     const word& name,
@@ -69,13 +68,12 @@ Foam::faPatch::faPatch
     patchIdentifier(name, index),
     ngbPolyPatchIndex_(ngbPolyPatchIndex),
     boundaryMesh_(bm),
-    edgeFacesPtr_(NULL),
-    pointLabelsPtr_(NULL),
-    pointEdgesPtr_(NULL)
+    edgeFacesPtr_(nullptr),
+    pointLabelsPtr_(nullptr),
+    pointEdgesPtr_(nullptr)
 {}
 
 
-// Construct from dictionary
 Foam::faPatch::faPatch
 (
     const word& name,
@@ -88,10 +86,11 @@ Foam::faPatch::faPatch
     patchIdentifier(name, dict, index),
     ngbPolyPatchIndex_(readInt(dict.lookup("ngbPolyPatchIndex"))),
     boundaryMesh_(bm),
-    edgeFacesPtr_(NULL),
-    pointLabelsPtr_(NULL),
-    pointEdgesPtr_(NULL)
+    edgeFacesPtr_(nullptr),
+    pointLabelsPtr_(nullptr),
+    pointEdgesPtr_(nullptr)
 {}
+
 
 Foam::faPatch::faPatch(const faPatch& p, const faBoundaryMesh& bm)
 :
@@ -99,9 +98,9 @@ Foam::faPatch::faPatch(const faPatch& p, const faBoundaryMesh& bm)
     patchIdentifier(p, p.index()),
     ngbPolyPatchIndex_(p.ngbPolyPatchIndex_),
     boundaryMesh_(bm),
-    edgeFacesPtr_(NULL),
-    pointLabelsPtr_(NULL),
-    pointEdgesPtr_(NULL)
+    edgeFacesPtr_(nullptr),
+    pointLabelsPtr_(nullptr),
+    pointEdgesPtr_(nullptr)
 {}
 
 
@@ -119,6 +118,7 @@ Foam::label Foam::faPatch::ngbPolyPatchIndex() const
 {
     return ngbPolyPatchIndex_;
 }
+
 
 const Foam::faBoundaryMesh& Foam::faPatch::boundaryMesh() const
 {
@@ -147,38 +147,32 @@ void Foam::faPatch::calcPointLabels() const
 {
     SLList<label> labels;
 
-    UList<edge> edges =
-        patchSlice(boundaryMesh().mesh().edges());
+    UList<edge> edges = patchSlice(boundaryMesh().mesh().edges());
 
     forAll(edges, edgeI)
     {
         bool existStart = false;
         bool existEnd = false;
 
-        for
-        (
-            SLList<label>::iterator iter = labels.begin();
-            iter != labels.end();
-            ++iter
-        )
+        forAllIters(labels, iter)
         {
-            if(*iter == edges[edgeI].start())
+            if (*iter == edges[edgeI].start())
             {
                 existStart = true;
             }
 
-            if(*iter == edges[edgeI].end())
+            if (*iter == edges[edgeI].end())
             {
                 existEnd = true;
             }
         }
 
-        if(!existStart)
+        if (!existStart)
         {
             labels.append(edges[edgeI].start());
         }
 
-        if(!existEnd)
+        if (!existEnd)
         {
             labels.append(edges[edgeI].end());
         }
@@ -190,22 +184,20 @@ void Foam::faPatch::calcPointLabels() const
 
 void Foam::faPatch::calcPointEdges() const
 {
-    labelList points = pointLabels();
+    const labelList& points = pointLabels();
 
-    const edgeList::subList e =
-        patchSlice(boundaryMesh().mesh().edges());
+    const edgeList::subList e = patchSlice(boundaryMesh().mesh().edges());
 
     // set up storage for pointEdges
-    List<SLList<label> > pointEdgs(points.size());
+    List<SLList<label>> pointEdgs(points.size());
 
-    forAll (e, edgeI)
+    forAll(e, edgeI)
     {
         const edge& curPoints = e[edgeI];
 
-        forAll (curPoints, pointI)
+        forAll(curPoints, pointI)
         {
-            label localPointIndex =
-                findIndex(points, curPoints[pointI]);
+            label localPointIndex = findIndex(points, curPoints[pointI]);
 
             pointEdgs[localPointIndex].append(edgeI);
         }
@@ -215,7 +207,7 @@ void Foam::faPatch::calcPointEdges() const
     pointEdgesPtr_ = new labelListList(pointEdgs.size());
     labelListList& pEdges = *pointEdgesPtr_;
 
-    forAll (pointEdgs, pointI)
+    forAll(pointEdgs, pointI)
     {
         pEdges[pointI].setSize(pointEdgs[pointI].size());
 
@@ -248,7 +240,7 @@ Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
 {
     labelList ngbFaces;
 
-    if(ngbPolyPatchIndex() == -1)
+    if (ngbPolyPatchIndex() == -1)
     {
         return ngbFaces;
     }
@@ -261,22 +253,24 @@ Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
 
     const labelListList& edgeFaces = pMesh.edgeFaces();
 
-    labelList faceCells (patch.size(), -1);
+    labelList faceCells(patch.size(), -1);
 
-    forAll (faceCells, faceI)
+    forAll(faceCells, faceI)
     {
         label faceID = aMesh.faceLabels()[faceI];
 
         faceCells[faceI] = pMesh.faceOwner()[faceID];
     }
 
-    labelList meshEdges =
+    labelList meshEdges
+    (
         patch.meshEdges
         (
             pMesh.edges(),
             pMesh.cellEdges(),
             faceCells
-        );
+        )
+    );
 
     forAll(ngbFaces, edgeI)
     {
@@ -298,10 +292,11 @@ Foam::labelList Foam::faPatch::ngbPolyPatchFaces() const
             }
         }
 
-        if(ngbFaces[edgeI] == -1)
+        if (ngbFaces[edgeI] == -1)
         {
-            Info<< "faPatch::edgeNgbPolyPatchFaces(): "
-                << "Problem with determination of edge ngb faces!" << endl;
+            WarningInFunction
+                << "Problem with determination of edge ngb faces!"
+                << endl;
         }
     }
 
@@ -345,7 +340,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
         return tmp<vectorField>(new vectorField());
     }
 
-    labelListList pntEdges = pointEdges();
+    const labelListList& pntEdges = pointEdges();
 
     tmp<vectorField> tpN(new vectorField(pntEdges.size(), vector::zero));
     vectorField& pN = tpN.ref();
@@ -380,28 +375,24 @@ const Foam::labelUList& Foam::faPatch::edgeFaces() const
 }
 
 
-// Return the patch edge centres
 const Foam::vectorField& Foam::faPatch::edgeCentres() const
 {
     return boundaryMesh().mesh().edgeCentres().boundaryField()[index()];
 }
 
 
-// Return the patch edges length vectors
 const Foam::vectorField& Foam::faPatch::edgeLengths() const
 {
     return boundaryMesh().mesh().Le().boundaryField()[index()];
 }
 
 
-// Return the patch edge length magnitudes
 const Foam::scalarField& Foam::faPatch::magEdgeLengths() const
 {
     return boundaryMesh().mesh().magLe().boundaryField()[index()];
 }
 
 
-// Return the patch edge unit normals
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 {
     tmp<vectorField> eN(new vectorField(size()));
@@ -412,7 +403,6 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeNormals() const
 }
 
 
-// Return the patch edge neighbour face centres
 Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 {
     tmp<vectorField> tfc(new vectorField(size()));
@@ -424,7 +414,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 
     const labelUList& faceLabels = edgeFaces();
 
-    forAll (faceLabels, edgeI)
+    forAll(faceLabels, edgeI)
     {
         fc[edgeI] = gfc[faceLabels[edgeI]];
     }
@@ -433,21 +423,18 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::edgeFaceCentres() const
 }
 
 
-// Return cell-centre to face-centre vector
 Foam::tmp<Foam::vectorField> Foam::faPatch::delta() const
 {
     return edgeCentres() - edgeFaceCentres();
 }
 
 
-// Make delta coefficients as patch face - neighbour cell distances
 void Foam::faPatch::makeDeltaCoeffs(scalarField& dc) const
 {
     dc = 1.0/(edgeNormals() & delta());
 }
 
 
-// Return delta coefficients
 const Foam::scalarField& Foam::faPatch::deltaCoeffs() const
 {
     return boundaryMesh().mesh().deltaCoeffs().boundaryField()[index()];
@@ -496,7 +483,7 @@ void Foam::faPatch::write(Ostream& os) const
 Foam::Ostream& Foam::operator<<(Ostream& os, const faPatch& p)
 {
     p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const faPatch& p)");
+    os.check(FUNCTION_NAME);
     return os;
 }
 
