@@ -512,7 +512,10 @@ void Foam::particle::locate
     // We hit a boundary ...
     if (boundaryFail)
     {
-        FatalErrorInFunction << boundaryMsg << exit(FatalError);
+        FatalErrorInFunction << boundaryMsg
+            << " when tracking from centre " << mesh_.cellCentres()[celli_]
+            << " of cell " << celli_ << " to position " << position
+            << exit(FatalError);
     }
     else
     {
@@ -1210,11 +1213,11 @@ void Foam::particle::autoMap
 }
 
 
-void Foam::particle::relocate()
+void Foam::particle::relocate(const point& position)
 {
     locate
     (
-        position(),
+        position,
         nullptr,
         celli_,
         true,

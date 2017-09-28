@@ -22,21 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::unmappedPassiveParticleCloud
+    Foam::unmappedPassivePositionParticleCloud
 
 Description
-    passiveParticleCloud but with autoMap and writing disabled. Only used
-    for its objectRegistry to store lagrangian fields
+    passivePositionParticleCloud but with autoMap and writing disabled.
+    Only used for its objectRegistry to store lagrangian fields
 
 SourceFiles
-    unmappedPassiveParticleCloud.C
+    unmappedPassivePositionParticleCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef unmappedPassiveParticleCloud_H
-#define unmappedPassiveParticleCloud_H
+#ifndef unmappedPassivePositionParticleCloud_H
+#define unmappedPassivePositionParticleCloud_H
 
-#include "passiveParticleCloud.H"
+#include "passivePositionParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,9 +47,9 @@ namespace Foam
                 Class unmappedPassiveParticleCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-class unmappedPassiveParticleCloud
+class unmappedPassivePositionParticleCloud
 :
-    public passiveParticleCloud
+    public passivePositionParticleCloud
 {
 
 public:
@@ -57,29 +57,29 @@ public:
     // Constructors
 
         //- Construct given mesh
-        unmappedPassiveParticleCloud
+        unmappedPassivePositionParticleCloud
         (
             const polyMesh& mesh,
             const word& cloudName = "defaultCloud",
             bool readFields = true
         )
         :
-            passiveParticleCloud(mesh, cloudName, readFields)
+            passivePositionParticleCloud(mesh, cloudName, readFields)
         {}
 
         //- Construct from mesh, cloud name, and a list of particles
-        unmappedPassiveParticleCloud
+        unmappedPassivePositionParticleCloud
         (
             const polyMesh& mesh,
             const word& cloudName,
-            const IDLList<passiveParticle>& particles
+            const IDLList<passivePositionParticle>& particles
         )
         :
-            passiveParticleCloud(mesh, cloudName, particles)
+            passivePositionParticleCloud(mesh, cloudName, particles)
         {}
 
         //- Destructor
-        virtual ~unmappedPassiveParticleCloud()
+        virtual ~unmappedPassivePositionParticleCloud()
         {}
 
         //- Switch off remapping of cells of particles when
@@ -98,7 +98,6 @@ public:
         {
             return true;
         }
-
 };
 
 

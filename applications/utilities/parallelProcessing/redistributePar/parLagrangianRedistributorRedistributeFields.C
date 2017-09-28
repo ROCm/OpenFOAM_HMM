@@ -29,7 +29,7 @@ License
 #include "mapDistributePolyMesh.H"
 #include "cloud.H"
 #include "CompactIOField.H"
-#include "passiveParticleCloud.H"
+#include "passivePositionParticleCloud.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -223,7 +223,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
 template<class Container>
 void Foam::parLagrangianRedistributor::readLagrangianFields
 (
-    const passiveParticleCloud& cloud,
+    const passivePositionParticleCloud& cloud,
     const IOobjectList& objects,
     const HashSet<word>& selectedFields
 )
@@ -272,7 +272,7 @@ template<class Container>
 void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
 (
     const mapDistributeBase& map,
-    passiveParticleCloud& cloud
+    passivePositionParticleCloud& cloud
 ) const
 {
     HashTable<Container*> fields
