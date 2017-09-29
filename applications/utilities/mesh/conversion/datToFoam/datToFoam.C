@@ -35,8 +35,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "pointField.H"
 #include "unitConversion.H"
 

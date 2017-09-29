@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,21 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "int64.H"
+#include "stringOps.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+Foam::word Foam::name(const char* fmt, const int64_t val)
+{
+    return stringOps::name(fmt, val);
+}
+
+
+Foam::word Foam::name(const std::string& fmt, const int64_t val)
+{
+    return stringOps::name(fmt, val);
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -36,9 +51,9 @@ const int64_t Foam::pTraits<int64_t>::rootMax = pTraits<int64_t>::max;
 
 const char* const Foam::pTraits<int64_t>::componentNames[] = { "" };
 
-Foam::pTraits<int64_t>::pTraits(const int64_t& p)
+Foam::pTraits<int64_t>::pTraits(const int64_t& val)
 :
-    p_(p)
+    p_(val)
 {}
 
 Foam::pTraits<int64_t>::pTraits(Istream& is)

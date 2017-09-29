@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Typedef
     Foam::scalar
 
 Description
-    Single floating point number identical to float or double depending on
+    A floating-point number identical to float or double depending on
     whether WM_SP or WM_DP is defined.
 
 SourceFiles
@@ -58,6 +58,11 @@ namespace Foam
     static const scalar ROOTVSMALL = floatScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
+
+    inline scalar readScalar(const std::string& str)
+    {
+        return readFloat(str);
+    }
 }
 
 #elif defined(WM_DP)
@@ -77,6 +82,11 @@ namespace Foam
     static const scalar ROOTVSMALL = doubleScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
+
+    inline scalar readScalar(const std::string& str)
+    {
+        return readDouble(str);
+    }
 }
 
 #endif

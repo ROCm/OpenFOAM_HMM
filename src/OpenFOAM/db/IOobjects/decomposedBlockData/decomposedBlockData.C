@@ -27,9 +27,8 @@ License
 #include "OPstream.H"
 #include "IPstream.H"
 #include "PstreamBuffers.H"
-#include "OFstream.H"
-#include "IFstream.H"
-#include "IStringStream.H"
+#include "Fstream.H"
+#include "StringStream.H"
 #include "dictionary.H"
 #include <sys/time.h>
 #include "objectRegistry.H"

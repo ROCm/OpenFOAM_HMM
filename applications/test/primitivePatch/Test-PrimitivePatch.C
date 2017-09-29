@@ -31,8 +31,7 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "primitivePatch.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 
 using namespace Foam;
 

@@ -44,7 +44,7 @@ options:
   -region <name>    specify alternative mesh region
   -touch            create the file (eg, .blockMesh, .OpenFOAM, .foam, ...)
   -touch-all | -touchAll
-                    create .blockMesh, .OpenFOAM files (and for all regions)
+                    create .blockMesh, .foam, .OpenFOAM files (for all regions)
   -touch-proc       same as '-touch' but for each processor
   -vtk | -builtin   use VTK builtin OpenFOAM reader (uses .foam extension)
   -help             print the usage
@@ -58,6 +58,21 @@ Note that paraview options begin with double dashes.
 USAGE
     exit 1
 }
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+#-------------------------------------------------------------------------------
 
 # Do a nice exit to give paraview an opportunity to clean up
 unset FOAM_ABORT
@@ -90,12 +105,12 @@ do
         shift
         ;;
     -case)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        cd "$2" 2>/dev/null || usage "directory does not exist:  '$2'"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        cd "$2" 2>/dev/null || die "directory does not exist: '$2'"
         shift 2
         ;;
     -region)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         regionName=$2
         shift 2
         ;;
@@ -127,7 +142,7 @@ do
         break    # Stop here, treat this and balance as paraview options
         ;;
     *)
-        usage "unknown option/argument: '$1'"
+        die "unknown option/argument: '$1'"
         ;;
     esac
 done
@@ -198,8 +213,8 @@ all)
         touch "$caseName.blockMesh"
         echo "Created '$caseName.blockMesh'" 1>&2
     fi
-    touch "$caseName.$extension"
-    echo "Created '$caseName.$extension'" 1>&2
+    touch "$caseName.$extension" "$caseName.foam"
+    echo "Created '$caseName.$extension' '$caseName.foam'" 1>&2
     # Discover probable regions
     for region in constant/*
     do

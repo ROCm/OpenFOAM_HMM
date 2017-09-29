@@ -1,4 +1,4 @@
-SUFFIXES += .C
+SUFFIXES += .C .cc .cpp .cxx
 
 c++WARN     = -Wall -Wextra -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
               -diag-disable 654,1125,1292,2304

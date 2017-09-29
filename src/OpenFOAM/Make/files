@@ -114,6 +114,7 @@ $(strings)/wordRe/wordRe.C
 $(strings)/wordRes/wordRes.C
 $(strings)/lists/hashedWordList.C
 $(strings)/stringOps/stringOps.C
+$(strings)/parsing/parsing.C
 
 ops = primitives/ops
 $(ops)/flipOp.C

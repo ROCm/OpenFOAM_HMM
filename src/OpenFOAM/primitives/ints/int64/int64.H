@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Primitive
-    int64
+    int64_t
 
 Description
-    64bit integer
+    64bit signed integer
 
 SourceFiles
     int64.C
@@ -58,7 +58,7 @@ class Ostream;
 //- Return a word representation of an int64
 inline word name(const int64_t val)
 {
-    // no stripping required
+    // No stripping required
     return word(std::to_string(val), false);
 }
 
@@ -75,10 +75,48 @@ word name(const std::string& fmt, const int64_t);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-int64_t readInt64(Istream&);
-bool read(const char*, int64_t&);
-Istream& operator>>(Istream&, int64_t&);
-Ostream& operator<<(Ostream&, const int64_t);
+//- Read int64_t from stream
+int64_t readInt64(Istream& is);
+
+//- Parse entire buffer as a int64_t, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+int64_t readInt64(const char* buf);
+
+//- Parse entire string as a int64_t, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+inline int64_t readInt64(const std::string& str)
+{
+    return readInt64(str.c_str());
+}
+
+//- Read entire buffer as a int64_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+bool readInt64(const char* buf, int64_t& val);
+
+//- Read entire string as a int64_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+inline bool readInt64(const std::string& str, int64_t& val)
+{
+    return readInt64(str.c_str(), val);
+}
+
+//- Same as readInt64
+//  \return True if successful.
+inline bool read(const char* buf, int64_t& val)
+{
+    return readInt64(buf, val);
+}
+
+//- Same as readInt64
+//  \return True if successful.
+inline bool read(const std::string& str, int64_t& val)
+{
+    return readInt64(str, val);
+}
+
+
+Istream& operator>>(Istream& is, int64_t& val);
+Ostream& operator<<(Ostream& os, const int64_t val);
 
 //- Template specialization for pTraits<int64_t>
 template<>
@@ -119,10 +157,10 @@ public:
     // Constructors
 
         //- Construct from primitive
-        explicit pTraits(const int64_t&);
+        explicit pTraits(const int64_t& val);
 
         //- Construct from Istream
-        pTraits(Istream&);
+        pTraits(Istream& is);
 
 
     // Member Functions
@@ -141,9 +179,9 @@ public:
 };
 
 
-inline int64_t mag(const int64_t l)
+inline int64_t mag(const int64_t val)
 {
-    return ::labs(l);
+    return ::labs(val);
 }
 
 

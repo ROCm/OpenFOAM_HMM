@@ -587,7 +587,8 @@ void Foam::ccm::reader::writeMesh
     (
         fmt,
         IOstream::currentVersion,
-        IOstream::UNCOMPRESSED
+        IOstream::UNCOMPRESSED,
+        true
     );
     writeAux(mesh);
 }

@@ -80,7 +80,7 @@ Usage
 
 #include "parFvFieldReconstructor.H"
 #include "parLagrangianRedistributor.H"
-#include "unmappedPassiveParticleCloud.H"
+#include "unmappedPassivePositionParticleCloud.H"
 #include "hexRef8Data.H"
 #include "meshRefinement.H"
 #include "pointFields.H"
@@ -1908,7 +1908,7 @@ void readLagrangian
     const fvMesh& mesh,
     const wordList& cloudNames,
     const HashSet<word>& selectedLagrangianFields,
-    PtrList<unmappedPassiveParticleCloud>& clouds
+    PtrList<unmappedPassivePositionParticleCloud>& clouds
 )
 {
     (void)mesh.tetBasePtIs();
@@ -1919,13 +1919,13 @@ void readLagrangian
         clouds.set
         (
             i,
-            new unmappedPassiveParticleCloud(mesh, cloudNames[i], false)
+            new unmappedPassivePositionParticleCloud(mesh, cloudNames[i], false)
         );
 
 
         //forAllConstIter
         //(
-        //    unmappedPassiveParticleCloud,
+        //    unmappedPassivePositionParticleCloud,
         //    clouds[i],
         //    iter
         //)
@@ -2087,7 +2087,7 @@ void redistributeLagrangian
     const fvMesh& mesh,
     const label nOldCells,
     const mapDistributePolyMesh& distMap,
-    PtrList<unmappedPassiveParticleCloud>& clouds
+    PtrList<unmappedPassivePositionParticleCloud>& clouds
 )
 {
     if (clouds.size())
@@ -2958,7 +2958,7 @@ int main(int argc, char *argv[])
         );
 
         // Read lagrangian fields and store on cloud (objectRegistry)
-        PtrList<unmappedPassiveParticleCloud> clouds(cloudNames.size());
+        PtrList<unmappedPassivePositionParticleCloud> clouds(cloudNames.size());
         readLagrangian
         (
             mesh,

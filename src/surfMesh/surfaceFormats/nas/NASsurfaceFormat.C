@@ -92,9 +92,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         // ANSA extension
         if (line.startsWith("$ANSA_NAME"))
         {
-            string::size_type sem0 = line.find(';', 0);
-            string::size_type sem1 = line.find(';', sem0+1);
-            string::size_type sem2 = line.find(';', sem1+1);
+            const auto sem0 = line.find(';', 0);
+            const auto sem1 = line.find(';', sem0+1);
+            const auto sem2 = line.find(';', sem1+1);
 
             if
             (
@@ -103,10 +103,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
              && sem2 != string::npos
             )
             {
-                ansaId = readLabel
-                (
-                    IStringStream(line.substr(sem0+1, sem1-sem0-1))()
-                );
+                ansaId = readLabel(line.substr(sem0+1, sem1-sem0-1));
                 ansaType = line.substr(sem1+1, sem2-sem1-1);
 
                 string rawName;
@@ -125,11 +122,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         // $HMNAME COMP                   1"partName"
         if (line.startsWith("$HMNAME COMP") && line.find('"') != string::npos)
         {
-            label groupId = readLabel
-            (
-                IStringStream(line.substr(16, 16))()
-            );
-
+            label groupId = readLabel(line.substr(16, 16));
             IStringStream lineStream(line.substr(32));
 
             string rawName;
@@ -177,10 +170,10 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
         if (cmd == "CTRIA3")
         {
-            label groupId = readLabel(IStringStream(line.substr(16,8))());
-            label a = readLabel(IStringStream(line.substr(24,8))());
-            label b = readLabel(IStringStream(line.substr(32,8))());
-            label c = readLabel(IStringStream(line.substr(40,8))());
+            label groupId = readLabel(line.substr(16,8));
+            label a = readLabel(line.substr(24,8));
+            label b = readLabel(line.substr(32,8));
+            label c = readLabel(line.substr(40,8));
 
             // Convert groupID into zoneId
             Map<label>::const_iterator fnd = lookup.find(groupId);
@@ -207,11 +200,11 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         }
         else if (cmd == "CQUAD4")
         {
-            label groupId = readLabel(IStringStream(line.substr(16,8))());
-            label a = readLabel(IStringStream(line.substr(24,8))());
-            label b = readLabel(IStringStream(line.substr(32,8))());
-            label c = readLabel(IStringStream(line.substr(40,8))());
-            label d = readLabel(IStringStream(line.substr(48,8))());
+            label groupId = readLabel(line.substr(16,8));
+            label a = readLabel(line.substr(24,8));
+            label b = readLabel(line.substr(32,8));
+            label c = readLabel(line.substr(40,8));
+            label d = readLabel(line.substr(48,8));
 
             // Convert groupID into zoneId
             Map<label>::const_iterator fnd = lookup.find(groupId);
@@ -249,10 +242,10 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         }
         else if (cmd == "GRID")
         {
-            label index = readLabel(IStringStream(line.substr(8,8))());
-            scalar x = parseNASCoord(line.substr(24, 8));
-            scalar y = parseNASCoord(line.substr(32, 8));
-            scalar z = parseNASCoord(line.substr(40, 8));
+            label index = readLabel(line.substr(8,8));
+            scalar x = readNasScalar(line.substr(24, 8));
+            scalar y = readNasScalar(line.substr(32, 8));
+            scalar z = readNasScalar(line.substr(40, 8));
 
             pointId.append(index);
             dynPoints.append(point(x, y, z));
@@ -265,9 +258,9 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             // GRID*      126   0 -5.55999875E+02 -5.68730474E+02
             // *         2.14897901E+02
 
-            label index = readLabel(IStringStream(line.substr(8,16))());
-            scalar x = parseNASCoord(line.substr(40, 16));
-            scalar y = parseNASCoord(line.substr(56, 16));
+            label index = readLabel(line.substr(8,16));
+            scalar x = readNasScalar(line.substr(40, 16));
+            scalar y = readNasScalar(line.substr(56, 16));
 
             is.getLine(line);
             if (line[0] != '*')
@@ -279,7 +272,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
                     << "File:" << is.name() << " line:" << is.lineNumber()
                     << exit(FatalError);
             }
-            scalar z = parseNASCoord(line.substr(8, 16));
+            scalar z = readNasScalar(line.substr(8, 16));
 
             pointId.append(index);
             dynPoints.append(point(x, y, z));
@@ -287,7 +280,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
         else if (cmd == "PSHELL")
         {
             // pshell type for zone names with the Ansa extension
-            label groupId = readLabel(IStringStream(line.substr(8,8))());
+            label groupId = readLabel(line.substr(8,8));
 
             if (groupId == ansaId && ansaType == "PSHELL")
             {

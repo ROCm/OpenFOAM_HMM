@@ -114,17 +114,20 @@ Foam::particle::particle
         }
         else
         {
-            const size_t s =
-                offsetof(oldParticle, facei) - offsetof(oldParticle, position);
-
-            is.read(reinterpret_cast<char*>(&p.position), s);
-
             if (readFields)
             {
+                // Read whole struct
                 const size_t s =
-                    sizeof(oldParticle) - offsetof(oldParticle, facei);
-
-                is.read(reinterpret_cast<char*>(&p.facei), s);
+                    sizeof(oldParticle) - offsetof(oldParticle, position);
+                is.read(reinterpret_cast<char*>(&p.position), s);
+            }
+            else
+            {
+                // Read only position and cell
+                const size_t s =
+                    offsetof(oldParticle, facei)
+                  - offsetof(oldParticle, position);
+                is.read(reinterpret_cast<char*>(&p.position), s);
             }
         }
 

@@ -72,7 +72,7 @@ public:
         return true;
     }
 
-    //- Binary predicate returning false
+    //- Binary predicate returning true
     template<class T1, class T2>
     inline bool operator()(const T1&, const T2&) const
     {

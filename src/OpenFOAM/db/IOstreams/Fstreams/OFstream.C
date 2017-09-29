@@ -53,10 +53,11 @@ Foam::OFstreamAllocator::OFstreamAllocator
             InfoInFunction << "Cannot open null file " << endl;
         }
     }
-    ofstream::openmode mode(ofstream::out);
+
+    std::ios_base::openmode mode(std::ios_base::out);
     if (append)
     {
-        mode |= ofstream::app;
+        mode |= std::ios_base::app;
     }
 
     if (compression == IOstream::COMPRESSED)
@@ -130,7 +131,7 @@ Foam::OFstream::OFstream
     OSstream
     (
         *allocatedPtr_,
-        "OFstream.sinkFile_",
+        pathname,
         format,
         version,
         compression

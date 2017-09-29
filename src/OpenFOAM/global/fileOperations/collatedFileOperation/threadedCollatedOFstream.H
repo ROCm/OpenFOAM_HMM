@@ -35,7 +35,7 @@ SourceFiles
 #ifndef threadedCollatedOFstream_H
 #define threadedCollatedOFstream_H
 
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

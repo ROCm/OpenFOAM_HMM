@@ -73,15 +73,15 @@ const Foam::basicThermo& Foam::fv::tabulatedNTUHeatTransfer::thermo
     const fvMesh& mesh
 ) const
 {
-    if (!mesh.foundObject<basicThermo>("thermophysicalProperties"))
+    if (!mesh.foundObject<basicThermo>(basicThermo::dictName))
     {
         FatalErrorInFunction
             << " on mesh " << mesh.name()
-            << " could not find thermophysicalProperties "
+            << " could not find " << basicThermo::dictName
             << exit(FatalError);
     }
 
-    return mesh.lookupObject<basicThermo>("thermophysicalProperties");
+    return mesh.lookupObject<basicThermo>(basicThermo::dictName);
 }
 
 

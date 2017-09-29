@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -188,29 +188,22 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
 
 bool Foam::functionObjects::wallShearStress::execute()
 {
-    typedef compressible::turbulenceModel cmpModel;
-    typedef incompressible::turbulenceModel icoModel;
-
     volVectorField& wallShearStress =
-        const_cast<volVectorField&>
-        (
-            mesh_.lookupObject<volVectorField>(type())
-        );
+        mesh_.lookupObjectRef<volVectorField>(type());
 
-    tmp<volSymmTensorField> Reff;
-    if (mesh_.foundObject<cmpModel>(turbulenceModel::propertiesName))
+    const word& turbModelName = turbulenceModel::propertiesName;
+    auto cmpModelPtr =
+        mesh_.lookupObjectPtr<compressible::turbulenceModel>(turbModelName);
+    auto icoModelPtr =
+        mesh_.lookupObjectPtr<incompressible::turbulenceModel>(turbModelName);
+
+    if (cmpModelPtr)
     {
-        const cmpModel& model =
-            mesh_.lookupObject<cmpModel>(turbulenceModel::propertiesName);
-
-        Reff = model.devRhoReff();
+        calcShearStress(cmpModelPtr->devRhoReff(), wallShearStress);
     }
-    else if (mesh_.foundObject<icoModel>(turbulenceModel::propertiesName))
+    else if (icoModelPtr)
     {
-        const icoModel& model =
-            mesh_.lookupObject<icoModel>(turbulenceModel::propertiesName);
-
-        Reff = model.devReff();
+        calcShearStress(icoModelPtr->devReff(), wallShearStress);
     }
     else
     {
@@ -218,8 +211,6 @@ bool Foam::functionObjects::wallShearStress::execute()
             << "Unable to find turbulence model in the "
             << "database" << exit(FatalError);
     }
-
-    calcShearStress(Reff(), wallShearStress);
 
     return true;
 }

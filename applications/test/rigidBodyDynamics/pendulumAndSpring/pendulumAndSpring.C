@@ -35,8 +35,7 @@ Description
 #include "joints.H"
 #include "rigidBodyRestraint.H"
 #include "rigidBodyModelState.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "constants.H"
 
 using namespace Foam;
