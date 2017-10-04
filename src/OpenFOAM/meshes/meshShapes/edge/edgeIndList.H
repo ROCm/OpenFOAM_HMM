@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::indirectPointList
+    Foam::edgeIndList
 
 Description
+    An IndirectList of edges.
+
+Typedef
+    Foam::edgeUIndList
+
+Description
+    A UIndirectList of edges.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef indirectPointList_H
-#define indirectPointList_H
+#ifndef edgeIndList_H
+#define edgeIndList_H
 
-#include "point.H"
+// Include all normal list typedefs as well
+#include "edgeList.H"
 #include "IndirectList.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IndirectList<point> indirectPointList;
+    typedef IndirectList<edge>  edgeIndList;
+    typedef UIndirectList<edge> edgeUIndList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

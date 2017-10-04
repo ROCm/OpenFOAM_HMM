@@ -37,13 +37,19 @@ Typedef
     Foam::labelPairList
 
 Description
-    List of labelPairs
+    List of labelPairs.
 
 Typedef
     Foam::labelPairUList
 
 Description
-    UList of labelPairs
+    UList of labelPairs.
+
+Typedef
+    Foam::labelPairSubList
+
+Description
+    A SubList of labelPairs.
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,6 +57,7 @@ Description
 #define labelPair_H
 
 #include "List.H"
+#include "SubList.H"
 #include "Pair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -61,6 +68,7 @@ namespace Foam
     typedef Pair<labelPair> labelPairPair;
     typedef List<labelPair> labelPairList;
     typedef UList<labelPair> labelPairUList;
+    typedef SubList<labelPair> labelPairSubList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -25,7 +25,7 @@ Typedef
     Foam::uindirectPrimitivePatch
 
 Description
-    Foam::uindirectPrimitivePatch
+    A PrimitivePatch using a UIndirectList for the faces.
 
 \*---------------------------------------------------------------------------*/
 

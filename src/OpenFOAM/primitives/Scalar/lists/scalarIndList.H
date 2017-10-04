@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,23 +22,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::indirectCellList
+    Foam::scalarIndList
 
 Description
+    An IndirectList of scalars.
+
+Typedef
+    Foam::scalarUIndList
+
+Description
+    A UIndirectList of scalars.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef indirectCellList_H
-#define indirectCellList_H
+#ifndef scalarIndList_H
+#define scalarIndList_H
 
-#include "cell.H"
+// Include all normal list typedefs as well
+#include "scalarList.H"
 #include "IndirectList.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IndirectList<cell> indirectCellList;
+    typedef IndirectList<scalar>  scalarIndList;
+    typedef UIndirectList<scalar> scalarUIndList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

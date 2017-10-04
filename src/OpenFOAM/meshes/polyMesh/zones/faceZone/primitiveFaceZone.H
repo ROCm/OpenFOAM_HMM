@@ -33,7 +33,7 @@ Description
 
 #include "face.H"
 #include "PrimitivePatch.H"
-#include "indirectFaceList.H"
+#include "IndirectList.H"
 #include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
