@@ -42,6 +42,7 @@ namespace Foam
 
 const char* const Foam::pointZone::labelsName = "pointLabels";
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pointZone::pointZone
