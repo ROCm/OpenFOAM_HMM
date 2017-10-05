@@ -124,7 +124,7 @@ logReport()
 if [ -z "$optCollectOnly" ]
 then
     # Recursively run all tutorials
-    foamRunTutorials -test -skipFirst
+    foamRunTutorials -skipFirst $*
 fi
 
 

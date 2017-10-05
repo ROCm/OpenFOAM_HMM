@@ -51,6 +51,7 @@ do
     case "$1" in
     -t | -test)
         passArgs="-test"
+        runTests=true
         shift
         ;;
     -s | -skipFirst)
@@ -64,10 +65,14 @@ do
 done
 
 # If an argument is supplied do not execute ./Allrun to avoid recursion
-if ! $skipFirst && [ -f "./Allrun" ]
+if ! $skipFirst && $runTests && [ -f "./Alltest" ]
+then
+    # Run speciallised Alltest script.
+    ./Alltest $passArgs $*
+elif ! $skipFirst && [ -f "./Allrun" ]
 then
     # Run specialised Allrun script.
-    ./Allrun $passArgs
+    ./Allrun $passArgs $*
 elif [ -d system ]
 then
     # Run normal case.
@@ -89,7 +94,7 @@ else
     # Run all cases which have not already been run
     $make -k -f $WM_PROJECT_DIR/bin/tools/MakefileDirs \
           FOAM_TARGETS="$FOAM_TARGETS" \
-          FOAM_APP="$thisScript" FOAM_ARGS="$passArgs"
+          FOAM_APP="$thisScript" FOAM_ARGS="$passArgs $*"
 fi
 
 #------------------------------------------------------------------------------
