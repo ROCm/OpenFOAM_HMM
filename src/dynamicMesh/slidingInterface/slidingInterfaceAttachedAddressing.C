@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
 {
     if (debug)
     {
-        Pout<< "void Foam::slidingInterface::calcAttachedAddressing() const "
+        Pout<< FUNCTION_NAME
             << " for object " << name() << " : "
             << "Calculating zone face-cell addressing."
             << endl;
@@ -140,64 +140,85 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         // Calculate stick-out faces
         const labelListList& pointFaces = mesh.pointFaces();
 
-        // Master side
-        labelHashSet masterStickOutFaceMap
+        labelHashSet stickOutFaceMap
         (
-            primitiveMesh::facesPerCell_*(masterPatch.size())
+            primitiveMesh::facesPerCell_
+          * max(masterPatch.size(), slavePatch.size())
         );
 
+        // Master side
         const labelList& masterMeshPoints = masterPatch.meshPoints();
 
-        forAll(masterMeshPoints, pointi)
-        {
-            const labelList& curFaces = pointFaces[masterMeshPoints[pointi]];
+        stickOutFaceMap.clear();
 
-            forAll(curFaces, facei)
+        for (const label pointi : masterMeshPoints)
+        {
+            for (const label facei : pointFaces[pointi])
             {
-                // Check if the face belongs to the master face zone;
-                // if not add it
+                const label zoneIdx = faceZones.whichZone(facei);
+
+                // Add if face not already part of master or slave face zone
+                // This handles partially attached faces.
                 if
                 (
-                    faceZones.whichZone(curFaces[facei])
-                 != masterFaceZoneID_.index()
+                    zoneIdx != masterFaceZoneID_.index()
+                 && zoneIdx != slaveFaceZoneID_.index()
                 )
                 {
-                    masterStickOutFaceMap.insert(curFaces[facei]);
+                    stickOutFaceMap.insert(facei);
                 }
             }
         }
 
-        masterStickOutFacesPtr_ = new labelList(masterStickOutFaceMap.toc());
+        // Sort in debug mode for easier diagnostics
+        if (debug)
+        {
+            masterStickOutFacesPtr_ =
+                new labelList(std::move(stickOutFaceMap.sortedToc()));
+        }
+        else
+        {
+            masterStickOutFacesPtr_ =
+                new labelList(std::move(stickOutFaceMap.toc()));
+        }
 
         // Slave side
-        labelHashSet slaveStickOutFaceMap
-        (
-            primitiveMesh::facesPerCell_*(slavePatch.size())
-        );
-
         const labelList& slaveMeshPoints = slavePatch.meshPoints();
 
-        forAll(slaveMeshPoints, pointi)
-        {
-            const labelList& curFaces = pointFaces[slaveMeshPoints[pointi]];
+        stickOutFaceMap.clear();
 
-            forAll(curFaces, facei)
+        for (const label pointi : slaveMeshPoints)
+        {
+            for (const label facei : pointFaces[pointi])
             {
-                // Check if the face belongs to the slave face zone;
-                // if not add it
+                const label zoneIdx = faceZones.whichZone(facei);
+
+                // Add if face not already part of master or slave face zone
+                // This handles partially attached faces.
                 if
                 (
-                    faceZones.whichZone(curFaces[facei])
-                 != slaveFaceZoneID_.index()
+                    zoneIdx != masterFaceZoneID_.index()
+                 && zoneIdx != slaveFaceZoneID_.index()
                 )
                 {
-                    slaveStickOutFaceMap.insert(curFaces[facei]);
+                    stickOutFaceMap.insert(facei);
                 }
             }
         }
 
-        slaveStickOutFacesPtr_ = new labelList(slaveStickOutFaceMap.toc());
+        // Sort in debug mode for easier diagnostics
+        if (debug)
+        {
+            slaveStickOutFacesPtr_ =
+                new labelList(std::move(stickOutFaceMap.sortedToc()));
+        }
+        else
+        {
+            slaveStickOutFacesPtr_ =
+                new labelList(std::move(stickOutFaceMap.toc()));
+        }
 
+        stickOutFaceMap.clear();
 
         // Retired point addressing does not exist at this stage.
         // It will be filled when the interface is coupled.
@@ -208,7 +229,6 @@ void Foam::slidingInterface::calcAttachedAddressing() const
             );
 
         // Ditto for cut point edge map.  This is a rough guess of its size
-        //
         cutPointEdgePairMapPtr_ =
             new Map<Pair<edge>>
             (
@@ -224,7 +244,7 @@ void Foam::slidingInterface::calcAttachedAddressing() const
 
     if (debug)
     {
-        Pout<< "void Foam::slidingInterface::calcAttachedAddressing() const "
+        Pout<< FUNCTION_NAME
             << " for object " << name() << " : "
             << "Finished calculating zone face-cell addressing."
             << endl;
