@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,25 +28,14 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
-(
-    GeometricField<Type, fvPatchField, volMesh>& field
-)
-{
-    return this->operator()(field, field.name());
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
+Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::source
 (
     GeometricField<Type, fvPatchField, volMesh>& field,
-    const word& fieldName
+    const word& fieldName,
+    const dimensionSet& ds
 )
 {
     checkApplied();
-
-    const dimensionSet ds = field.dimensions()/dimTime*dimVolume;
 
     tmp<fvMatrix<Type>> tmtx(new fvMatrix<Type>(field, ds));
     fvMatrix<Type>& mtx = tmtx.ref();
@@ -77,6 +66,27 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
     }
 
     return tmtx;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
+(
+    GeometricField<Type, fvPatchField, volMesh>& field
+)
+{
+    return this->operator()(field, field.name());
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
+(
+    GeometricField<Type, fvPatchField, volMesh>& field,
+    const word& fieldName
+)
+{
+    return source(field, fieldName, field.dimensions()/dimTime*dimVolume);
 }
 
 
@@ -247,6 +257,27 @@ Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::operator()
 )
 {
     return this->operator()(rho, field, field.name());
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::d2dt2
+(
+    GeometricField<Type, fvPatchField, volMesh>& field
+)
+{
+    return this->d2dt2(field, field.name());
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type>> Foam::fv::optionList::d2dt2
+(
+    GeometricField<Type, fvPatchField, volMesh>& field,
+    const word& fieldName
+)
+{
+    return source(field, fieldName, field.dimensions()/sqr(dimTime)*dimVolume);
 }
 
 
