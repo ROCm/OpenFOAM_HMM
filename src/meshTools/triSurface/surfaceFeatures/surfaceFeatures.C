@@ -243,12 +243,16 @@ void Foam::surfaceFeatures::calcFeatPoints
 
                 if (edgeStat[edgeI] != NONE)
                 {
-                    edgeVecs.append(edges[edgeI].vec(localPoints));
-                    edgeVecs.last() /= mag(edgeVecs.last());
+                    vector vec = edges[edgeI].vec(localPoints);
+                    scalar magVec = mag(vec);
+                    if (magVec > SMALL)
+                    {
+                        edgeVecs.append(vec/magVec);
+                    }
                 }
             }
 
-            if (mag(edgeVecs[0] & edgeVecs[1]) < minCos)
+            if (edgeVecs.size() == 2 && mag(edgeVecs[0] & edgeVecs[1]) < minCos)
             {
                 featurePoints.append(pointi);
             }
