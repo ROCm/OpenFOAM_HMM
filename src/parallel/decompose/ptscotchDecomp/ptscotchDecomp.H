@@ -64,7 +64,16 @@ class ptscotchDecomp
 :
     public decompositionMethod
 {
+    // Private data
+
+        //- Output path and name for optional grf file.
+        fileName graphPath_;
+
+
     // Private Member Functions
+
+        //- Set graph path and name
+        void graphPath(const polyMesh& mesh);
 
         //- Check and print error message
         static void check(const int, const char*);
@@ -72,28 +81,26 @@ class ptscotchDecomp
         //- Decompose. Handles size 0 arrays
         label decompose
         (
-            const fileName& meshPath,
-            const List<label>& adjncy,
-            const List<label>& xadj,
-            const scalarField& cWeights,
+            const UList<label>& adjncy,
+            const UList<label>& xadj,
+            const UList<scalar>& cWeights,
             List<label>& finalDecomp
         ) const;
 
         //- Low level decompose
         label decompose
         (
-            const fileName& meshPath,
             const label adjncySize,
             const label adjncy[],
             const label xadjSize,
             const label xadj[],
-            const scalarField& cWeights,
+            const UList<scalar>& cWeights,
             List<label>& finalDecomp
         ) const;
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const ptscotchDecomp&);
-        ptscotchDecomp(const ptscotchDecomp&);
+        void operator=(const ptscotchDecomp&) = delete;
+        ptscotchDecomp(const ptscotchDecomp&) = delete;
 
 
 public:

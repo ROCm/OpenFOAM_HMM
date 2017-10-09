@@ -25,6 +25,54 @@ findFirstFile()
 }
 
 
+# Test for kahip.
+# - return 0 and export KAHIP_ARCH_PATH on success
+hasKahip()
+{
+    local warning="==> skip kahip"
+    local header label settings
+
+    unset KAHIP_ARCH_PATH KAHIP_VERSION
+    unset KAHIP_COMP_FLAGS KAHIP_LINK_FLAGS
+    settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/kahip) || {
+        echo "$warning (no config.sh/kahip settings)"
+        return 1
+    }
+
+    . $settings
+    if [ -z "$KAHIP_ARCH_PATH" -o "${KAHIP_ARCH_PATH##*-}" = none ]
+    then
+        echo "$warning (not available)"
+        return 1
+    fi
+
+    # Header
+    header=$(findFirstFile \
+        $KAHIP_ARCH_PATH/include/kaHIP_interface.h \
+        /usr/include/kaHIP_interface.h \
+    ) || {
+        echo "$warning (no header)"
+        return 2  # file not found
+    }
+
+    # Library
+    [ "${KAHIP_ARCH_PATH##*-}" = system ] || \
+    findFirstFile \
+        $KAHIP_ARCH_PATH/lib/libkahip.a  \
+        $KAHIP_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH/libkahip.a \
+    > /dev/null || {
+        echo "$warning (missing library)"
+        return 2
+    }
+
+    # kahip itself is 32-bit int, but our interface itself handles some
+    # 64-bit conversion (mesh size).
+
+    export KAHIP_ARCH_PATH
+    echo "kahip (label=32) - $KAHIP_ARCH_PATH"
+}
+
+
 # Test for metis.
 # - return 0 and export METIS_ARCH_PATH on success
 hasMetis()
@@ -206,6 +254,11 @@ fi
 if hasMetis
 then
     wmake $targetType metisDecomp
+fi
+
+if hasKahip
+then
+    wmake $targetType kahipDecomp
 fi
 
 wmake $targetType decompositionMethods
