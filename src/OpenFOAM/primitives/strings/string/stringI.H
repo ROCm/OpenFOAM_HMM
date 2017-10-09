@@ -243,22 +243,6 @@ inline bool Foam::string::operator()(const std::string& text) const
 }
 
 
-inline Foam::string Foam::string::operator()
-(
-    const size_type i,
-    const size_type n
-) const
-{
-    return substr(i, n);
-}
-
-
-inline Foam::string Foam::string::operator()(const size_type n) const
-{
-    return substr(0, n);
-}
-
-
 inline unsigned Foam::string::hash::operator()
 (
     const string& str,
