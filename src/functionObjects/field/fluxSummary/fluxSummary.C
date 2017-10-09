@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -258,7 +258,7 @@ void Foam::functionObjects::fluxSummary::initialiseFaceZone
         if (faceID >= 0)
         {
             // Orientation set by faceZone flip map
-            if (fZone.flipMap()[facei])
+            if (fZone.flipMap()[i])
             {
                 flips.append(true);
             }

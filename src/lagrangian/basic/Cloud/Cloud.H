@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,17 +75,20 @@ class Cloud
 {
     // Private data
 
+        //- Geometry type
+        typename IOPosition<Cloud<ParticleType>>::geometryType geometryType_;
+
+        //- Reference to the mesh database
         const polyMesh& polyMesh_;
 
         //- Temporary storage for addressing. Used in findTris.
         mutable DynamicList<label> labels_;
 
-        //- Count of how many tracking rescue corrections have been
-        //  applied
-        mutable label nTrackingRescues_;
-
         //- Does the cell have wall faces
         mutable autoPtr<PackedBoolList> cellWallFacesPtr_;
+
+        //- Temporary storage for the global particle positions
+        mutable autoPtr<vectorField> globalPositionsPtr_;
 
 
     // Private Member Functions
@@ -157,43 +160,16 @@ public:
                 return polyMesh_;
             }
 
+            //- Return the number of particles in the cloud
             label size() const
             {
                 return IDLList<ParticleType>::size();
             };
 
-            DynamicList<label>& labels()
+            //- Return temporary addressing
+            DynamicList<label>& labels() const
             {
                 return labels_;
-            }
-
-            //- Return nTrackingRescues
-            label nTrackingRescues() const
-            {
-                return nTrackingRescues_;
-            }
-
-            //- Increment the nTrackingRescues counter
-            void trackingRescue() const
-            {
-                nTrackingRescues_++;
-                if (cloud::debug && size() && (nTrackingRescues_ % size() == 0))
-                {
-                    Pout<< "    " << nTrackingRescues_
-                        << " tracking rescues " << endl;
-                }
-            }
-
-            //- Whether each cell has any wall faces (demand driven data)
-            const PackedBoolList& cellHasWallFaces() const;
-
-            //- Switch to specify if particles of the cloud can return
-            //  non-zero wall distance values.  By default, assume
-            //  that they can't (default for wallImpactDistance in
-            //  particle is 0.0).
-            bool hasWallImpactDistance() const
-            {
-                return false;
             }
 
 
@@ -250,14 +226,17 @@ public:
             void cloudReset(const Cloud<ParticleType>& c);
 
             //- Move the particles
-            //  passing the TrackingData to the track function
-            template<class TrackData>
-            void move(TrackData& td, const scalar trackTime);
+            template<class TrackCloudType>
+            void move
+            (
+                TrackCloudType& cloud,
+                typename ParticleType::trackingData& td,
+                const scalar trackTime
+            );
 
             //- Remap the cells of particles corresponding to the
             //  mesh topology change
-            template<class TrackData>
-            void autoMap(TrackData& td, const mapPolyMesh&);
+            void autoMap(const mapPolyMesh&);
 
 
         // Read
@@ -298,11 +277,16 @@ public:
             (
                 IOstream::streamFormat fmt,
                 IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::compressionType cmp,
+                const bool valid
             ) const;
 
             //- Write positions to \<cloudName\>_positions.obj file
             void writePositions() const;
+
+            //- Call this before a topology change. Stores the particles global
+            //  positions in the database for use during mapping.
+            void storeGlobalPositions() const;
 
 
     // Ostream Operator

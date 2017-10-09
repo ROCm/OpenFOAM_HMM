@@ -218,9 +218,9 @@ bool Foam::cuttingPlane::walkCell
         {
             WarningInFunction
                 << "Did not find closed walk along surface of cell " << celli
+                << " at " << mesh.cellCentres()[celli]
                 << " starting from edge " << startEdgeI
-                << " in " << nIter << " iterations." << nl
-                << "Collected cutPoints so far:" << faceVerts
+                << " in " << nIter << " iterations."
                 << endl;
             return false;
         }

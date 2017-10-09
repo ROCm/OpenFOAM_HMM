@@ -150,6 +150,9 @@ public:
         //- Construct from a single character
         inline string(const char c);
 
+        //- Construct from copies of a single character
+        inline string(const size_type len, const char c);
+
         //- Construct from Istream
         string(Istream& is);
 
@@ -263,19 +266,6 @@ public:
         //- Match text
         //  \return True when strings match literally.
         inline bool operator()(const std::string& text) const;
-
-        //- Return sub-string from the i-th character for \a n characters
-        inline string operator()
-        (
-            const size_type i,
-            const size_type n
-        ) const;
-
-        //- Return sub-string from the first character for \a n characters
-        inline string operator()
-        (
-            const size_type n
-        ) const;
 
 
     // IOstream Operators

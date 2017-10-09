@@ -60,7 +60,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption
     (
         "noClean",
-        "suppress surface checking/cleanup on the input surface"
+        "Suppress surface checking/cleanup on the input surface"
+    );
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "Input geometry scaling factor"
     );
     argList args(argc, argv);
 
@@ -77,7 +83,12 @@ int main(int argc, char *argv[])
 
 
     Info<< "Reading surface from " << inFileName << " ..." << nl << endl;
-    triSurface surf(inFileName);
+
+    triSurface surf
+    (
+        inFileName,
+        args.optionLookupOrDefault<scalar>("scale", -1)
+    );
     surf.writeStats(Info);
 
     if (!args.optionFound("noClean"))
@@ -90,7 +101,7 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        label nEdgeCollapse = collapseEdge(surf, minLen);
+        const label nEdgeCollapse = collapseEdge(surf, minLen);
 
         if (nEdgeCollapse == 0)
         {
@@ -99,7 +110,7 @@ int main(int argc, char *argv[])
     }
     while (true)
     {
-        label nSplitEdge = collapseBase(surf, minLen, minQuality);
+        const label nSplitEdge = collapseBase(surf, minLen, minQuality);
 
         if (nSplitEdge == 0)
         {

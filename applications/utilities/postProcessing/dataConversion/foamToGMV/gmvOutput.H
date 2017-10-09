@@ -62,7 +62,7 @@ for (label i=0; i < nTypes; i++)
 
     if (fieldTypes[i] == cloud::prefix)
     {
-        IOobject lagrangianHeader
+        IOobject positionsHeader
         (
             "positions",
             runTime.timeName(),
@@ -71,9 +71,22 @@ for (label i=0; i < nTypes; i++)
             IOobject::NO_READ
         );
 
+        IOobject coordinatesHeader
+        (
+            "coordinates",
+            runTime.timeName(),
+            cloud::prefix,
+            mesh,
+            IOobject::NO_READ
+        );
+
         if
         (
-            lagrangianHeader.typeHeaderOk<IOPosition<Cloud<passiveParticle>>>
+            positionsHeader.typeHeaderOk<IOPosition<Cloud<passiveParticle>>>
+            (
+                false
+            )
+         || coordinatesHeader.typeHeaderOk<IOPosition<Cloud<passiveParticle>>>
             (
                 false
             )

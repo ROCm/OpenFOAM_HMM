@@ -276,7 +276,8 @@ public:
         (
             IOstream::streamFormat ignoreAlwaysASCII,
             IOstream::versionNumber ver,
-            IOstream::compressionType ignoreAlwaysUncompressed
+            IOstream::compressionType ignoreAlwaysUncompressed,
+            const bool valid
         ) const;
 
 };

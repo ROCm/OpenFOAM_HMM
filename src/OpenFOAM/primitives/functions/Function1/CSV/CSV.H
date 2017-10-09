@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ class CSV
         Type readValue(const List<string>&);
 
         //- Disallow default bitwise assignment
-        void operator=(const CSV<Type>&);
+        void operator=(const CSV<Type>&) = delete;
 
 
 public:
@@ -125,7 +125,7 @@ public:
         );
 
         //- Copy constructor
-        CSV(const CSV<Type>& tbl);
+        explicit CSV(const CSV<Type>& csv);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const

@@ -24,9 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "VTKedgeFormat.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "clock.H"
-#include "IFstream.H"
 #include "vtkUnstructuredReader.H"
 #include "Time.H"
 

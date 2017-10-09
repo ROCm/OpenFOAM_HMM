@@ -49,7 +49,7 @@ namespace Foam
 class mapDistributePolyMesh;
 class mapDistributeBase;
 class IOobjectList;
-class passiveParticleCloud;
+class passivePositionParticleCloud;
 
 /*---------------------------------------------------------------------------*\
                     Class parLagrangianRedistributor Declaration
@@ -112,7 +112,7 @@ public:
         //- Redistribute and write lagrangian positions
         autoPtr<mapDistributeBase> redistributeLagrangianPositions
         (
-            passiveParticleCloud& cloud
+            passivePositionParticleCloud& cloud
         ) const;
 
         //- Read, redistribute and write lagrangian positions
@@ -153,7 +153,7 @@ public:
         template<class Container>
         static void readLagrangianFields
         (
-            const passiveParticleCloud& cloud,
+            const passivePositionParticleCloud& cloud,
             const IOobjectList& objects,
             const HashSet<word>& selectedFields
         );
@@ -163,7 +163,7 @@ public:
         void redistributeStoredLagrangianFields
         (
             const mapDistributeBase& map,
-            passiveParticleCloud& cloud
+            passivePositionParticleCloud& cloud
         ) const;
 
 };

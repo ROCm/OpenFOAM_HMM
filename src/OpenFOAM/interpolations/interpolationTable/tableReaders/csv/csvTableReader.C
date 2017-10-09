@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "csvTableReader.H"
-#include "IFstream.H"
+#include "fileOperation.H"
 #include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,7 +71,7 @@ namespace Foam
                 << exit(FatalError);
         }
 
-        return readScalar(IStringStream(splitted[componentColumns_[0]])());
+        return readScalar(splitted[componentColumns_[0]]);
     }
 
 
@@ -80,7 +80,7 @@ namespace Foam
     {
         Type result;
 
-        for(label i = 0;i < pTraits<Type>::nComponents; i++)
+        for (label i = 0; i < pTraits<Type>::nComponents; ++i)
         {
             if (componentColumns_[i] >= splitted.size())
             {
@@ -90,10 +90,7 @@ namespace Foam
                     << exit(FatalError);
             }
 
-            result[i] = readScalar
-            (
-                IStringStream(splitted[componentColumns_[i]])()
-            );
+            result[i] = readScalar(splitted[componentColumns_[i]]);
         }
 
         return result;
@@ -108,7 +105,9 @@ void Foam::csvTableReader<Type>::operator()
     List<Tuple2<scalar, Type>>& data
 )
 {
-    IFstream in(fName);
+    //IFstream in(fName);
+    autoPtr<ISstream> inPtr(fileHandler().NewIFstream(fName));
+    ISstream& in = inPtr();
 
     DynamicList<Tuple2<scalar, Type>> values;
 
@@ -148,7 +147,7 @@ void Foam::csvTableReader<Type>::operator()
             break;
         }
 
-        scalar time = readScalar(IStringStream(splitted[timeColumn_])());
+        scalar time = readScalar(splitted[timeColumn_]);
         Type value = readValue(splitted);
 
         values.append(Tuple2<scalar,Type>(time, value));

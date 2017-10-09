@@ -30,8 +30,7 @@ License
 #include "treeDataPoint.H"
 #include "meshTools.H"
 #include "linePointRef.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "unitConversion.H"
 #include "EdgeMap.H"
 

@@ -82,81 +82,8 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
     Type result = Zero;
     switch (operation_)
     {
-        case opSum:
+        case opNone:
         {
-            result = gSum(values);
-            break;
-        }
-        case opWeightedSum:
-        {
-            if (returnReduce(weightField.empty(), andOp<bool>()))
-            {
-                result = gSum(values);
-            }
-            else
-            {
-                result = gSum(weightField*values);
-            }
-            break;
-        }
-        case opSumMag:
-        {
-            result = gSum(cmptMag(values));
-            break;
-        }
-        case opAverage:
-        {
-            const label n = returnReduce(values.size(), sumOp<label>());
-            result = gSum(values)/(scalar(n) + ROOTVSMALL);
-            break;
-        }
-        case opWeightedAverage:
-        {
-            if (returnReduce(weightField.empty(), andOp<bool>()))
-            {
-                const label n = returnReduce(values.size(), sumOp<label>());
-                result = gSum(values)/(scalar(n) + ROOTVSMALL);
-            }
-            else
-            {
-                result =
-                    gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
-            }
-            break;
-        }
-        case opVolAverage:
-        {
-            result = gSum(values*V)/gSum(V);
-            break;
-        }
-        case opWeightedVolAverage:
-        {
-            if (returnReduce(weightField.empty(), andOp<bool>()))
-            {
-                result = gSum(V*values)/(gSum(V) + ROOTVSMALL);
-            }
-            else
-            {
-                result = gSum(weightField*V*values)
-                    /(gSum(weightField*V) + ROOTVSMALL);
-            }
-            break;
-        }
-        case opVolIntegrate:
-        {
-            result = gSum(V*values);
-            break;
-        }
-        case opWeightedVolIntegrate:
-        {
-            if (returnReduce(weightField.empty(), andOp<bool>()))
-            {
-                result = gSum(V*values);
-            }
-            else
-            {
-                result = gSum(weightField*V*values);
-            }
             break;
         }
         case opMin:
@@ -169,6 +96,70 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
             result = gMax(values);
             break;
         }
+        case opSumMag:
+        {
+            result = gSum(cmptMag(values));
+            break;
+        }
+        case opSum:
+        case opWeightedSum:
+        {
+            if (canWeight(weightField))
+            {
+                result = gSum(weightField*values);
+            }
+            else
+            {
+                // Unweighted form
+                result = gSum(values);
+            }
+            break;
+        }
+        case opAverage:
+        case opWeightedAverage:
+        {
+            if (canWeight(weightField))
+            {
+                result =
+                    gSum(weightField*values)/(gSum(weightField) + ROOTVSMALL);
+            }
+            else
+            {
+                // Unweighted form
+                const label n = returnReduce(values.size(), sumOp<label>());
+                result = gSum(values)/(scalar(n) + ROOTVSMALL);
+            }
+            break;
+        }
+        case opVolAverage:
+        case opWeightedVolAverage:
+        {
+            if (canWeight(weightField))
+            {
+                result = gSum(weightField*V*values)
+                    /(gSum(weightField*V) + ROOTVSMALL);
+            }
+            else
+            {
+                // Unweighted form
+                result = gSum(V*values)/(gSum(V) + ROOTVSMALL);
+            }
+            break;
+        }
+        case opVolIntegrate:
+        case opWeightedVolIntegrate:
+        {
+            if (canWeight(weightField))
+            {
+                result = gSum(weightField*V*values);
+            }
+            else
+            {
+                // Unweighted form
+                result = gSum(V*values);
+            }
+            break;
+        }
         case opCoV:
         {
             const scalar sumV = gSum(V);
@@ -177,8 +168,8 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
 
             for (direction d=0; d < pTraits<Type>::nComponents; ++d)
             {
-                scalarField vals(values.component(d));
-                scalar mean = component(meanValue, d);
+                tmp<scalarField> vals(values.component(d));
+                const scalar mean = component(meanValue, d);
                 scalar& res = setComponent(result, d);
 
                 res = sqrt(gSum(V*sqr(vals - mean))/sumV)/(mean + ROOTVSMALL);
@@ -186,8 +177,6 @@ Type Foam::functionObjects::fieldValues::volFieldValue::processValues
 
             break;
         }
-        case opNone:
-        {}
     }
 
     return result;

@@ -28,6 +28,8 @@ License
 #include "simpleObjectRegistry.H"
 #include "dimensionedConstants.H"
 #include "profiling.H"
+#include "IOdictionary.H"
+#include "fileOperation.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -126,6 +128,43 @@ void Foam::Time::readDict()
                     }
                 }
             }
+        }
+
+
+        // Handle fileHandler override explicitly since interacts with
+        // local dictionary monitoring.
+        word fileHandlerName;
+        if
+        (
+            localSettings.readIfPresent("fileHandler", fileHandlerName)
+         && fileHandler().type() != fileHandlerName
+        )
+        {
+            // Remove the old watches since destroying the file
+            fileNameList oldWatchedFiles(controlDict_.watchIndices());
+            forAllReverse(controlDict_.watchIndices(), i)
+            {
+                label watchi = controlDict_.watchIndices()[i];
+                oldWatchedFiles[i] = fileHandler().getFile(watchi);
+                fileHandler().removeWatch(watchi);
+            }
+            controlDict_.watchIndices().clear();
+
+            // Installing the new handler
+            Info<< "Overriding fileHandler to " << fileHandlerName << endl;
+
+            autoPtr<fileOperation> handler
+            (
+                fileOperation::New
+                (
+                    fileHandlerName,
+                    true
+                )
+            );
+            Foam::fileHandler(handler);
+
+            // Reinstall old watches
+            fileHandler().addWatches(controlDict_, oldWatchedFiles);
         }
     }
 
@@ -368,11 +407,12 @@ void Foam::Time::readDict()
     controlDict_.readIfPresent("graphFormat", graphFormat_);
     controlDict_.readIfPresent("runTimeModifiable", runTimeModifiable_);
 
+
     if (!runTimeModifiable_ && controlDict_.watchIndices().size())
     {
         forAllReverse(controlDict_.watchIndices(), i)
         {
-            removeWatch(controlDict_.watchIndices()[i]);
+            fileHandler().removeWatch(controlDict_.watchIndices()[i]);
         }
         controlDict_.watchIndices().clear();
     }
@@ -393,7 +433,7 @@ bool Foam::Time::read()
             // already updated all the watchIndices via the addWatch but
             // controlDict_ is an unwatchedIOdictionary so will only have
             // stored the dependencies as files.
-             addWatches(controlDict_, controlDict_.files());
+            fileHandler().addWatches(controlDict_, controlDict_.files());
         }
         controlDict_.files().clear();
 
@@ -414,7 +454,7 @@ void Foam::Time::readModifiedObjects()
         // valid filePath).
         // Note: requires same ordering in objectRegistries on different
         // processors!
-        monitorPtr_().updateStates
+        fileHandler().updateStates
         (
             (
                 regIOobject::fileModificationChecking == inotifyMaster
@@ -437,7 +477,7 @@ void Foam::Time::readModifiedObjects()
                 // controlDict_ is an unwatchedIOdictionary so will only have
                 // stored the dependencies as files.
 
-                addWatches(controlDict_, controlDict_.files());
+                fileHandler().addWatches(controlDict_, controlDict_.files());
             }
             controlDict_.files().clear();
         }
@@ -482,7 +522,8 @@ bool Foam::Time::writeTimeDict() const
     (
         IOstream::ASCII,
         IOstream::currentVersion,
-        IOstream::UNCOMPRESSED
+        IOstream::UNCOMPRESSED,
+        true
     );
 }
 
@@ -491,7 +532,8 @@ bool Foam::Time::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     if (writeTime())
@@ -500,7 +542,7 @@ bool Foam::Time::writeObject
 
         if (writeOK)
         {
-            writeOK = objectRegistry::writeObject(fmt, ver, cmp);
+            writeOK = objectRegistry::writeObject(fmt, ver, cmp, valid);
         }
 
         if (writeOK)
@@ -512,7 +554,13 @@ bool Foam::Time::writeObject
 
                 while (previousWriteTimes_.size() > purgeWrite_)
                 {
-                    rmDir(objectRegistry::path(previousWriteTimes_.pop()));
+                    fileHandler().rmDir
+                    (
+                        fileHandler().filePath
+                        (
+                            objectRegistry::path(previousWriteTimes_.pop())
+                        )
+                    );
                 }
             }
         }

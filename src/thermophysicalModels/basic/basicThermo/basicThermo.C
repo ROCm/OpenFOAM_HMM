@@ -49,8 +49,7 @@ const Foam::word Foam::basicThermo::dictName("thermophysicalProperties");
 
 Foam::wordList Foam::basicThermo::heBoundaryBaseTypes()
 {
-    const volScalarField::Boundary& tbf =
-        this->T_.boundaryField();
+    const volScalarField::Boundary& tbf = this->T_.boundaryField();
 
     wordList hbt(tbf.size(), word::null);
 
@@ -81,8 +80,7 @@ Foam::wordList Foam::basicThermo::heBoundaryBaseTypes()
 
 Foam::wordList Foam::basicThermo::heBoundaryTypes()
 {
-    const volScalarField::Boundary& tbf =
-        this->T_.boundaryField();
+    const volScalarField::Boundary& tbf = this->T_.boundaryField();
 
     wordList hbt = tbf.types();
 

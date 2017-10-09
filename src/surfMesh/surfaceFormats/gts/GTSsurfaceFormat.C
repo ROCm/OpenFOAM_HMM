@@ -26,9 +26,8 @@ License
 #include "GTSsurfaceFormat.H"
 #include "surfaceFormatsCore.H"
 #include "clock.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "StringStream.H"
-#include "OFstream.H"
 #include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

@@ -34,8 +34,7 @@ See also
 
 #include "argList.H"
 #include "FixedList.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "IPstream.H"
 #include "OPstream.H"
 

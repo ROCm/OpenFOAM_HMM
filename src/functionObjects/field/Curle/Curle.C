@@ -99,7 +99,7 @@ bool Foam::functionObjects::Curle::calc()
 
         volScalarField& pDash = tpDash.ref();
         const volVectorField d(scopedName("d"), C - x0_);
-        pDash = 4*mathematical::pi/c0_*(d/magSqr(d) & dfdt);
+        pDash = (d/magSqr(d) & dfdt)/(4.0*mathematical::pi*c0_);
 
         return store(resultName_, tpDash);
     }

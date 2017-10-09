@@ -155,7 +155,10 @@ class vtkPVFoam
             vtkSmartPointer<dataType> getCopy() const
             {
                 auto copy = vtkSmartPointer<dataType>::New();
-                copy->ShallowCopy(vtkgeom);
+                if (vtkgeom)
+                {
+                    copy->ShallowCopy(vtkgeom);
+                }
                 return copy;
             }
 
@@ -163,7 +166,10 @@ class vtkPVFoam
             void reuse()
             {
                 dataset = vtkSmartPointer<dataType>::New();
-                dataset->ShallowCopy(vtkgeom);
+                if (vtkgeom)
+                {
+                    dataset->ShallowCopy(vtkgeom);
+                }
             }
 
             //- Set the geometry and make a shallow copy to dataset

@@ -198,9 +198,9 @@ then
     #
     # Check if the case decomposed
     #
-    if [ -r "processor0" ]
+    if [ -r "processor0" -o -r "processors" ]
     then
-        NPROCS="`/bin/ls -1d processor* | wc -l`"
+        NPROCS="$(foamDictionary -entry numberOfSubdomains -value system/decomposeParDict)"
     else
         echo "Case is not currently decomposed"
         if [ -r system/decomposeParDict ]

@@ -142,7 +142,7 @@ class chemPointISAT
 {
     // Private data
 
-        //- Pointer to the chemistryModel object
+        //- Reference to the chemistryModel object
         TDACChemistryModel<CompType, ThermoType>& chemistry_;
 
         //- Vector storing the composition, temperature and pressure
@@ -195,7 +195,7 @@ class chemPointISAT
         label numRetrieve_;
 
         //- Variable to store the number of time steps the chempoint is allowed
-        //   to still live according to the maxChPLifeTime_ parameter
+        //  to still live according to the maxChPLifeTime_ parameter
         label nLifeTime_;
 
         List<label> completeToSimplifiedIndex_;
@@ -402,9 +402,9 @@ public:
         // ISAT functions
 
             //- To RETRIEVE the mapping from the stored chemPoint phi, the query
-            // point phiq has to be in the EOA of phi.
-            // To test if phiq is in the ellipsoid:
-            // ||L^T.dphi|| <= 1
+            //  point phiq has to be in the EOA of phi.
+            //  To test if phiq is in the ellipsoid:
+            //  ||L^T.dphi|| <= 1
             bool inEOA(const scalarField& phiq);
 
             //- More details about the minimum-volume ellipsoid covering an

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,6 +63,9 @@ class findCellParticle
 {
     // Private data
 
+        //- Start point to track from
+        point start_;
+
         //- End point to track to
         point end_;
 
@@ -77,7 +80,7 @@ public:
     //- Class used to pass tracking data to the trackToFace function
     class trackingData
     :
-        public particle::TrackingData<Cloud<findCellParticle>>
+        public particle::trackingData
     {
         labelListList& cellToData_;
         List<List<point>>& cellToEnd_;
@@ -93,7 +96,7 @@ public:
                 List<List<point>>& cellToEnd
             )
             :
-                particle::TrackingData<Cloud<findCellParticle>>(cloud),
+                particle::trackingData(cloud),
                 cellToData_(cellToData),
                 cellToEnd_(cellToEnd)
             {}
@@ -119,10 +122,21 @@ public:
         findCellParticle
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti,
+            const point& end,
+            const label data
+        );
+
+        //- Construct from a position and a cell, searching for the rest of the
+        //  required topology
+        findCellParticle
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli,
             const point& end,
             const label data
         );
@@ -132,7 +146,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct and return a clone
@@ -166,8 +181,26 @@ public:
 
     // Member Functions
 
+        //- Point to track from
+        const point& start() const
+        {
+            return start_;
+        }
+
+        //- Point to track from
+        point& start()
+        {
+            return start_;
+        }
+
         //- Point to track to
         const point& end() const
+        {
+            return end_;
+        }
+
+        //- Point to track to
+        point& end()
         {
             return end_;
         }
@@ -178,76 +211,58 @@ public:
             return data_;
         }
 
+        //- Transported label
+        label& data()
+        {
+            return data_;
+        }
+
 
         // Tracking
 
             //- Track all particles to their end point
-            bool move(trackingData&, const scalar);
-
+            bool move(Cloud<findCellParticle>&, trackingData&, const scalar);
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
-            bool hitPatch
-            (
-                const polyPatch&,
-                trackingData& td,
-                const label patchi,
-                const scalar trackFraction,
-                const tetIndices& tetIs
-            );
+            bool hitPatch(Cloud<findCellParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a wedge
-            void hitWedgePatch
-            (
-                const wedgePolyPatch&,
-                trackingData& td
-            );
+            void hitWedgePatch(Cloud<findCellParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a
             //  symmetry plane
-            void hitSymmetryPlanePatch
-            (
-                const symmetryPlanePolyPatch&,
-                trackingData& td
-            );
+            void hitSymmetryPlanePatch(Cloud<findCellParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a
             //  symmetry patch
-            void hitSymmetryPatch
-            (
-                const symmetryPolyPatch&,
-                trackingData& td
-            );
+            void hitSymmetryPatch(Cloud<findCellParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a cyclic
-            void hitCyclicPatch
+            void hitCyclicPatch(Cloud<findCellParticle>&, trackingData&);
+
+            //- Overridable function to handle the particle hitting a cyclicAMI
+            void hitCyclicAMIPatch
             (
-                const cyclicPolyPatch&,
-                trackingData& td
+                Cloud<findCellParticle>&,
+                trackingData&,
+                const vector&
+            );
+
+            //- Overridable function to handle the particle hitting a cyclicACMI
+            void hitCyclicACMIPatch
+            (
+                Cloud<findCellParticle>&,
+                trackingData&,
+                const vector&
             );
 
             //- Overridable function to handle the particle hitting a
             //- processorPatch
-            void hitProcessorPatch
-            (
-                const processorPolyPatch&,
-                trackingData& td
-            );
+            void hitProcessorPatch(Cloud<findCellParticle>&, trackingData&);
 
             //- Overridable function to handle the particle hitting a wallPatch
-            void hitWallPatch
-            (
-                const wallPolyPatch&,
-                trackingData& td,
-                const tetIndices&
-            );
-
-            //- Overridable function to handle the particle hitting a polyPatch
-            void hitPatch
-            (
-                const polyPatch&,
-                trackingData& td
-            );
+            void hitWallPatch(Cloud<findCellParticle>&, trackingData&);
 
 
     // Ostream Operator

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,12 @@ License
 #include "profiling.H"
 #include "argList.H"
 #include "timeControlFunctionObject.H"
-#include "IFstream.H"
+//#include "IFstream.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
+#include "IOdictionary.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -103,7 +104,7 @@ void Foam::functionObjectList::listDir
 {
     // Search specified directory for functionObject configuration files
     {
-        fileNameList foFiles(readDir(dir));
+        fileNameList foFiles(fileHandler().readDir(dir));
         forAll(foFiles, f)
         {
             if (foFiles[f].ext().empty())
@@ -115,7 +116,7 @@ void Foam::functionObjectList::listDir
 
     // Recurse into sub-directories
     {
-        fileNameList foDirs(readDir(dir, fileName::DIRECTORY));
+        fileNameList foDirs(fileHandler().readDir(dir, fileName::DIRECTORY));
         forAll(foDirs, fd)
         {
             listDir(dir/foDirs[fd], foMap);
@@ -278,7 +279,10 @@ bool Foam::functionObjectList::readFunctionObject
     }
 
     // Read the functionObject dictionary
-    IFstream fileStream(path);
+    //IFstream fileStream(path);
+    autoPtr<ISstream> fileStreamPtr(fileHandler().NewIFstream(path));
+    ISstream& fileStream = fileStreamPtr();
+
     dictionary funcsDict(fileStream);
     dictionary* funcDictPtr = &funcsDict;
 
@@ -586,7 +590,8 @@ bool Foam::functionObjectList::execute()
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            time_.writeCompression()
+            time_.writeCompression(),
+            true
         );
 
         IOstream::precision_ = oldPrecision;
@@ -791,7 +796,9 @@ bool Foam::functionObjectList::read()
                 FatalError.throwExceptions(throwingError);
                 FatalIOError.throwExceptions(throwingIOerr);
 
-                if (foPtr.valid())
+                // If one processor only has thrown an exception (so exited the
+                // constructor) invalidate the whole functionObject
+                if (returnReduce(foPtr.valid(), andOp<bool>()))
                 {
                     objPtr = foPtr.ptr();
                 }

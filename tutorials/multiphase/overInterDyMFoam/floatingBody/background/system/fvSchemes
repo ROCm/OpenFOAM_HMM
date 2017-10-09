@@ -57,6 +57,11 @@ oversetInterpolation
     method          inverseDistance;
 }
 
+oversetInterpolationRequired
+{
+    alpha.water;
+}
+
 fluxRequired
 {
     default         no;

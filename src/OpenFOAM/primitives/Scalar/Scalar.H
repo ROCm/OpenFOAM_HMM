@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Typedef
     Foam::Scalar
 
 Description
-    Single floating point number (float or double)
+    Floating-point number (float or double)
 
 SourceFiles
     Scalar.C
@@ -81,10 +81,10 @@ public:
     // Constructors
 
         //- Construct from primitive
-        explicit pTraits(const Scalar&);
+        explicit pTraits(const Scalar& val);
 
         //- Construct from Istream
-        pTraits(Istream&);
+        pTraits(Istream& is);
 
 
     // Member Functions
@@ -103,21 +103,47 @@ public:
 };
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IO/Conversion * * * * * * * * * * * * * * * //
 
 //- Return a string representation of a Scalar
-word name(const Scalar);
-
-
-//- Return a word representation of a Scalar, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const char* fmt, const Scalar);
-
+word name(const Scalar val);
 
 //- Return a word representation of a Scalar, using printf-style formatter.
 //  The representation is not checked for valid word characters.
-word name(const std::string& fmt, const Scalar);
+word name(const char* fmt, const Scalar val);
 
+//- Return a word representation of a Scalar, using printf-style formatter.
+//  The representation is not checked for valid word characters.
+word name(const std::string& fmt, const Scalar val);
+
+//- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+Scalar ScalarRead(const char* buf);
+
+//- Parse entire string as a float/double, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+inline Scalar ScalarRead(const std::string& str)
+{
+    return ScalarRead(str.c_str());
+}
+
+//- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
+//  \return True if successful.
+bool readScalar(const char* buf, Scalar& val);
+
+//- Parse entire string as a float/double, skipping leading/trailing whitespace.
+//  \return True if successful.
+inline bool readScalar(const std::string& str, Scalar& val)
+{
+    return readScalar(str.c_str(), val);
+}
+
+Scalar ScalarRead(Istream& is);
+Istream& operator>>(Istream& is, Scalar& val);
+Ostream& operator<<(Ostream& os, const Scalar val);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Standard C++ transcendental functions
 transFunc(sqrt)
@@ -165,21 +191,38 @@ inline Scalar component(const Scalar s, const direction)
 }
 
 
+//- Return 1 if s is positive or 0 otherwise -1
 inline Scalar sign(const Scalar s)
 {
     return (s >= 0)? 1: -1;
 }
 
 
+//- Return 1 if s is positive but not 0
 inline Scalar pos(const Scalar s)
+{
+    return (s > 0)? 1: 0;
+}
+
+
+//- Return 1 if s is positive or 0
+inline Scalar pos0(const Scalar s)
 {
     return (s >= 0)? 1: 0;
 }
 
 
+//- Return 1 if s is negative but not 0
 inline Scalar neg(const Scalar s)
 {
     return (s < 0)? 1: 0;
+}
+
+
+//- Return 1 if s is negative or 0
+inline Scalar neg0(const Scalar s)
+{
+    return (s <= 0)? 1: 0;
 }
 
 
@@ -327,8 +370,8 @@ inline Scalar cmptMag(const Scalar s)
 
 inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 {
-    Scalar maga = mag(a);
-    Scalar magb = mag(b);
+    const Scalar maga = mag(a);
+    const Scalar magb = mag(b);
 
     if (maga > magb)
     {
@@ -354,12 +397,6 @@ inline Scalar stabilise(const Scalar s, const Scalar small)
     }
 }
 
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Scalar readScalar(Istream&);
-Istream& operator>>(Istream&, Scalar&);
-Ostream& operator<<(Ostream&, const Scalar);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

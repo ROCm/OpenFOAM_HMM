@@ -25,9 +25,8 @@ License
 
 #include "OBJsurfaceFormat.H"
 #include "clock.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "StringStream.H"
-#include "OFstream.H"
 #include "ListOps.H"
 #include "faceTraits.H"
 

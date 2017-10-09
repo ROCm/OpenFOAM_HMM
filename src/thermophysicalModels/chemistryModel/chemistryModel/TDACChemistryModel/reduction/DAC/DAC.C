@@ -253,7 +253,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 {
     scalarField& completeC(this->chemistry_.completeC());
     scalarField c1(this->chemistry_.nEqns(), 0.0);
-    for(label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<this->nSpecie_; i++)
     {
         c1[i] = c[i];
         completeC[i] = c[i];
@@ -276,9 +276,8 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 
     scalar pf, cf, pr, cr;
     label lRef, rRef;
-    forAll(this->chemistry_.reactions(), i)
+    for (const Reaction<ThermoType>& R : this->chemistry_.reactions())
     {
-        const Reaction<ThermoType>& R = this->chemistry_.reactions()[i];
         // for each reaction compute omegai
         scalar omegai = this->chemistry_.omega
         (
@@ -511,7 +510,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
 
     // Set all species to inactive and activate them according
     // to rAB and initial set
-    for (label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<this->nSpecie_; ++i)
     {
         this->activeSpecies_[i] = false;
     }
@@ -530,19 +529,19 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             // When phiLarge and phiProgress >= phiTol then
             // CO, HO2 and fuel are in the SIS
             Q.push(COId_);
-            speciesNumber++;
+            ++speciesNumber;
             this->activeSpecies_[COId_] = true;
             Rvalue[COId_] = 1.0;
             Q.push(HO2Id_);
-            speciesNumber++;
+            ++speciesNumber;
             this->activeSpecies_[HO2Id_] = true;
             Rvalue[HO2Id_] = 1.0;
-            forAll(fuelSpeciesID_,i)
+            for (const label fuelId : fuelSpeciesID_)
             {
-                Q.push(fuelSpeciesID_[i]);
-                speciesNumber++;
-                this->activeSpecies_[fuelSpeciesID_[i]] = true;
-                Rvalue[fuelSpeciesID_[i]] = 1.0;
+                Q.push(fuelId);
+                ++speciesNumber;
+                this->activeSpecies_[fuelId] = true;
+                Rvalue[fuelId] = 1.0;
             }
 
         }
@@ -551,22 +550,22 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             // When phiLarge < phiTol and phiProgress >= phiTol then
             // CO, HO2 are in the SIS
             Q.push(COId_);
-            speciesNumber++;
+            ++speciesNumber;
             this->activeSpecies_[COId_] = true;
             Rvalue[COId_] = 1.0;
             Q.push(HO2Id_);
-            speciesNumber++;
+            ++speciesNumber;
             this->activeSpecies_[HO2Id_] = true;
             Rvalue[HO2Id_] = 1.0;
 
             if (forceFuelInclusion_)
             {
-                forAll(fuelSpeciesID_, i)
+                for (const label fuelId : fuelSpeciesID_)
                 {
-                    Q.push(fuelSpeciesID_[i]);
-                    speciesNumber++;
-                    this->activeSpecies_[fuelSpeciesID_[i]] = true;
-                    Rvalue[fuelSpeciesID_[i]] = 1.0;
+                    Q.push(fuelId);
+                    ++speciesNumber;
+                    this->activeSpecies_[fuelId] = true;
+                    Rvalue[fuelId] = 1.0;
                 }
             }
         }
@@ -585,12 +584,12 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             Rvalue[H2OId_] = 1.0;
             if (forceFuelInclusion_)
             {
-                forAll(fuelSpeciesID_, i)
+                for (const label fuelId : fuelSpeciesID_)
                 {
-                    Q.push(fuelSpeciesID_[i]);
-                    speciesNumber++;
-                    this->activeSpecies_[fuelSpeciesID_[i]] = true;
-                    Rvalue[fuelSpeciesID_[i]] = 1.0;
+                    Q.push(fuelId);
+                    ++speciesNumber;
+                    this->activeSpecies_[fuelId] = true;
+                    Rvalue[fuelId] = 1.0;
                 }
             }
         }
@@ -598,7 +597,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
         if (T > NOxThreshold_ && NOId_ != -1)
         {
             Q.push(NOId_);
-            speciesNumber++;
+            ++speciesNumber;
             this->activeSpecies_[NOId_] = true;
             Rvalue[NOId_] = 1.0;
         }
@@ -609,7 +608,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
         {
             label q = SIS[i];
             this->activeSpecies_[q] = true;
-            speciesNumber++;
+            ++speciesNumber;
             Q.push(q);
             Rvalue[q] = 1.0;
         }
@@ -620,18 +619,23 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
     {
         label u = Q.pop();
         scalar Den = max(PA[u], CA[u]);
-        if (Den!=0.0)
+        if (Den != 0.0)
         {
-            for (label v=0; v<NbrABInit[u]; v++)
+            for (label v=0; v<NbrABInit[u]; ++v)
             {
                 label otherSpec = rABOtherSpec(u, v);
                 scalar rAB = mag(rABNum(u, v))/Den;
-                if (rAB>1)
+
+                if (rAB > 1)
                 {
                     Info<< "Badly Conditioned rAB : " << rAB
-                        << "species involved : "<<u << "," << otherSpec << endl;
-                    rAB=1.0;
+                    << " for species : "
+                    << this->chemistry_.Y()[u].name() << ","
+                    << this->chemistry_.Y()[otherSpec].name()
+                    << endl;
+                    rAB = 1.0;
                 }
+
                 // The direct link is weaker than the user-defined tolerance
                 if (rAB >= this->tolerance())
                 {
@@ -646,7 +650,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
                         if (!this->activeSpecies_[otherSpec])
                         {
                             this->activeSpecies_[otherSpec] = true;
-                            speciesNumber++;
+                            ++speciesNumber;
                         }
                     }
                 }

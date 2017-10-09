@@ -93,6 +93,12 @@ inline Foam::string::string(const char c)
 {}
 
 
+inline Foam::string::string(const size_type len, const char c)
+:
+    std::string(len, c)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class String>
@@ -234,22 +240,6 @@ inline bool Foam::string::match(const std::string& text) const
 inline bool Foam::string::operator()(const std::string& text) const
 {
     return !compare(text);  // Always compare as literal string
-}
-
-
-inline Foam::string Foam::string::operator()
-(
-    const size_type i,
-    const size_type n
-) const
-{
-    return substr(i, n);
-}
-
-
-inline Foam::string Foam::string::operator()(const size_type n) const
-{
-    return substr(0, n);
 }
 
 

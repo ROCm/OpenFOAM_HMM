@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -141,23 +141,16 @@ Foam::IOobjectList::IOobjectList
 :
     HashPtrTable<IOobject>()
 {
-    word newInstance = instance;
+    word newInstance;
+    fileNameList ObjectNames = fileHandler().readObjects
+    (
+        db,
+        instance,
+        local,
+        newInstance
+    );
 
-    if (!isDir(db.path(instance)))
-    {
-        newInstance = db.time().findInstancePath(instant(instance));
-
-        if (newInstance.empty())
-        {
-            return;
-        }
-    }
-
-    // Create a list of file names in this directory
-    const auto objNames =
-        readDir(db.path(newInstance, db.dbDir()/local), fileName::FILE);
-
-    for (const auto& objName : objNames)
+    for (const auto& objName : ObjectNames)
     {
         IOobject* objectPtr = new IOobject
         (

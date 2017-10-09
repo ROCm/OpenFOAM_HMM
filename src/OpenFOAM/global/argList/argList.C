@@ -38,6 +38,8 @@ License
 #include "sigQuit.H"
 #include "sigSegv.H"
 #include "foamVersion.H"
+#include "uncollatedFileOperation.H"
+#include "masterUncollatedFileOperation.H"
 
 #include <cctype>
 
@@ -87,12 +89,66 @@ Foam::argList::initValidTables::initValidTables()
         "do not execute functionObjects"
     );
 
+    argList::addOption
+    (
+        "fileHandler",
+        "handler",
+        "override the fileHandler"
+     );
+
     Pstream::addValidParOptions(validParOptions);
 }
 
 
 Foam::argList::initValidTables dummyInitValidTables;
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Counted per machine name
+// Does not include any sorting since we wish to know the ordering according to
+// mpi rank.
+//
+// Always include the master too.
+// This provides a better overview of the subscription
+static void printHostsSubscription(const UList<string>& slaveProcs)
+{
+    Info<< "Hosts  :" << nl << "(" << nl;
+
+    std::string prev = hostName();
+    int count = 1;
+
+    for (const auto& str : slaveProcs)
+    {
+        const auto dot = str.rfind('.');
+        const std::string curr(std::move(str.substr(0, dot)));
+
+        if (prev != curr)
+        {
+            if (count)
+            {
+                // Finish previous
+                Info<<"    (" << prev.c_str() << " " << count << ")" << nl;
+                count = 0;
+            }
+
+            prev = std::move(curr);
+        }
+        ++count;
+    }
+
+    if (count)
+    {
+        // Finished last one
+        Info<<"    (" << prev.c_str() << " " << count << ")" << nl;
+    }
+
+    Info<< ")" << nl;
+}
+
+}
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -659,12 +715,42 @@ void Foam::argList::parse
         }
     }
 
+
+    // Set fileHandler. In increasing order of priority:
+    // 1. default = uncollated
+    // 2. environment var FOAM_FILEHANDLER
+    // 3. etc/controlDict optimisationSwitches 'fileHandler'
+    // 4. system/controlDict 'fileHandler' (not handled here; done in TimeIO.C)
+
+    {
+        word handlerType(getEnv("FOAM_FILEHANDLER"));
+        HashTable<string>::const_iterator iter = options_.find("fileHandler");
+        if (iter != options_.end())
+        {
+            handlerType = iter();
+        }
+
+        if (handlerType.empty())
+        {
+            handlerType = fileOperation::defaultFileHandler;
+        }
+
+        autoPtr<fileOperation> handler
+        (
+            fileOperation::New
+            (
+                handlerType,
+                bannerEnabled_
+            )
+        );
+        Foam::fileHandler(handler);
+    }
+
     // Case is a single processor run unless it is running parallel
     int nProcs = 1;
 
     // Roots if running distributed
     fileNameList roots;
-
 
     // If this actually is a parallel run
     if (parRunControl_.parRun())
@@ -892,6 +978,7 @@ void Foam::argList::parse
     }
 
     stringList slaveProcs;
+    const int writeHostsSwitch = debug::infoSwitch("writeHosts", 1);
 
     // Collect slave machine/pid, and check that the build is identical
     if (parRunControl_.parRun())
@@ -942,8 +1029,9 @@ void Foam::argList::parse
     // Keep or discard slave and root information for reporting:
     if (Pstream::master() && parRunControl_.parRun())
     {
-        if (!debug::infoSwitch("writeSlaves", 1))
+        if (!writeHostsSwitch)
         {
+            // Clear here to ensures it doesn't show in the jobInfo
             slaveProcs.clear();
         }
         if (!debug::infoSwitch("writeRoots", 1))
@@ -961,7 +1049,16 @@ void Foam::argList::parse
         {
             if (slaveProcs.size())
             {
-                Info<< "Slaves : " << slaveProcs << nl;
+                if (writeHostsSwitch == 1)
+                {
+                    // Compact output (see etc/controlDict)
+                    printHostsSubscription(slaveProcs);
+                }
+                else
+                {
+                    // Full output of "slave.pid"
+                    Info<< "Slaves : " << slaveProcs << nl;
+                }
             }
             if (roots.size())
             {
@@ -1046,6 +1143,10 @@ void Foam::argList::parse
 Foam::argList::~argList()
 {
     jobInfo.end();
+
+    // Delete file handler to flush any remaining IO
+    autoPtr<fileOperation> dummy(nullptr);
+    fileHandler(dummy);
 }
 
 
@@ -1339,7 +1440,7 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
 bool Foam::argList::checkRootCase() const
 {
-    if (!isDir(rootPath()))
+    if (!fileHandler().isDir(rootPath()))
     {
         FatalError
             << executable_
@@ -1348,31 +1449,18 @@ bool Foam::argList::checkRootCase() const
 
         return false;
     }
+    fileName pathDir(fileHandler().filePath(path()));
 
-    if (Pstream::parRun())
+    if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())
     {
-        if (Pstream::master() && (checkProcessorDirectories_ && !isDir(path())))
-        {
-            // Allow slaves on non-existing processor directories created later
-            FatalError
-                << executable_
-                << ": cannot open case directory " << path()
-                << endl;
+        // Allow slaves on non-existing processor directories, created later
+        // (e.g. redistributePar)
+        FatalError
+            << executable_
+            << ": cannot open case directory " << path()
+            << endl;
 
-            return false;
-        }
-    }
-    else
-    {
-        if (!isDir(path()))
-        {
-            FatalError
-                << executable_
-                << ": cannot open case directory " << path()
-                << endl;
-
-            return false;
-        }
+        return false;
     }
 
     return true;

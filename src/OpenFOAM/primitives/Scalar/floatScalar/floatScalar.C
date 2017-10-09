@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,24 +24,32 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "floatScalar.H"
+#include "error.H"
+#include "parsing.H"
 #include "IOstreams.H"
 
 #include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// Scalar.C is used for template-like substitution
+
 #define Scalar floatScalar
 #define ScalarVGREAT floatScalarVGREAT
 #define ScalarVSMALL floatScalarVSMALL
 #define ScalarROOTVGREAT floatScalarROOTVGREAT
 #define ScalarROOTVSMALL floatScalarROOTVSMALL
-#define readScalar readFloatScalar
+#define ScalarRead readFloat
+#define ScalarConvert ::strtof
+
 #include "Scalar.C"
+
 #undef Scalar
-#undef ScalarVSMALL
+#undef ScalarVGREAT
 #undef ScalarVSMALL
 #undef ScalarROOTVGREAT
 #undef ScalarROOTVSMALL
-#undef readScalar
+#undef ScalarRead
+#undef ScalarConvert
 
 // ************************************************************************* //

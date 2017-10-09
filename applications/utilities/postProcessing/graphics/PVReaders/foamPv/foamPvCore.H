@@ -160,13 +160,59 @@ public:
         const std::string& datasetName
     );
 
+    //- Add names to array selection
+    template<class StringType>
+    static label addToArray
+    (
+        vtkDataArraySelection* select,
+        const std::string& prefix,
+        const UList<StringType>& names
+    );
+
+    //- Add names to array selection
+    template<class StringType>
+    static label addToArray
+    (
+        vtkDataArraySelection* select,
+        const UList<StringType>& names,
+        const std::string& suffix = string::null
+    );
+
+    //- Add objects of Type to array selection
+    template<class Type>
+    static label addToSelection
+    (
+        vtkDataArraySelection* select,
+        const std::string& prefix,
+        const IOobjectList& objects
+    );
+
     //- Add objects of Type to array selection
     template<class Type>
     static label addToSelection
     (
         vtkDataArraySelection* select,
         const IOobjectList& objects,
-        const std::string& prefix = string::null
+        const std::string& suffix = string::null
+    );
+
+    //- Add objects of Type to array selection
+    template<class Type>
+    static label addToSelection
+    (
+        vtkDataArraySelection* select,
+        const std::string& prefix,
+        const HashTable<wordHashSet>& objects
+    );
+
+
+    //- Add objects of Type to array selection
+    template<class Type>
+    static label addToSelection
+    (
+        vtkDataArraySelection* select,
+        const HashTable<wordHashSet>& objects,
+        const std::string& suffix = string::null
     );
 
 

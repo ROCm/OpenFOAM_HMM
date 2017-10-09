@@ -127,53 +127,84 @@ inline Foam::IStringStream Foam::argList::optionLookup(const word& opt) const
 
 namespace Foam
 {
-    // Template specialization for string
+    //
+    // Specializations for argRead
+    //
+
     template<>
     inline Foam::string
-    Foam::argList::argRead<Foam::string>(const label index) const
+    argList::argRead<Foam::string>(const label index) const
     {
         return args_[index];
     }
 
-    // Template specialization for word
     template<>
     inline Foam::word
-    Foam::argList::argRead<Foam::word>(const label index) const
+    argList::argRead<Foam::word>(const label index) const
     {
         return args_[index];
     }
 
-    // Template specialization for fileName
     template<>
     inline Foam::fileName
-    Foam::argList::argRead<Foam::fileName>(const label index) const
+    argList::argRead<Foam::fileName>(const label index) const
     {
         return args_[index];
     }
 
-    // Template specialization for string
+    template<>
+    inline Foam::label
+    argList::argRead<Foam::label>(const label index) const
+    {
+        return Foam::readLabel(args_[index]);
+    }
+
+    template<>
+    inline Foam::scalar
+    argList::argRead<Foam::scalar>(const label index) const
+    {
+        return Foam::readScalar(args_[index]);
+    }
+
+    //
+    // Specializations for optionRead
+    //
+
     template<>
     inline Foam::string
-    Foam::argList::optionRead<Foam::string>(const word& opt) const
+    argList::optionRead<Foam::string>(const word& opt) const
     {
         return options_[opt];
     }
 
-    // Template specialization for word
     template<>
     inline Foam::word
-    Foam::argList::optionRead<Foam::word>(const word& opt) const
+    argList::optionRead<Foam::word>(const word& opt) const
     {
         return options_[opt];
     }
 
-    // Template specialization for fileName
     template<>
     inline Foam::fileName
-    Foam::argList::optionRead<Foam::fileName>(const word& opt) const
+    argList::optionRead<Foam::fileName>(const word& opt) const
     {
         return options_[opt];
     }
+
+    template<>
+    inline Foam::label
+    argList::optionRead<Foam::label>(const word& opt) const
+    {
+        return Foam::readLabel(options_[opt]);
+    }
+
+    template<>
+    inline Foam::scalar
+    argList::optionRead<Foam::scalar>(const word& opt) const
+    {
+        return Foam::readScalar(options_[opt]);
+    }
+
 }
 
 

@@ -281,7 +281,7 @@ void Foam::mergeAndWrite
         mesh.points()
     );
 
-    const fileName outputDir
+    fileName outputDir
     (
         set.time().path()
       / (Pstream::parRun() ? ".." : "")
@@ -289,6 +289,7 @@ void Foam::mergeAndWrite
       / mesh.pointsInstance()
       / set.name()
     );
+    outputDir.clean();
 
     mergeAndWrite(mesh, writer, set.name(), setPatch, outputDir);
 }
@@ -374,7 +375,7 @@ void Foam::mergeAndWrite
         mesh.points()
     );
 
-    const fileName outputDir
+    fileName outputDir
     (
         set.time().path()
       / (Pstream::parRun() ? ".." : "")
@@ -382,6 +383,7 @@ void Foam::mergeAndWrite
       / mesh.pointsInstance()
       / set.name()
     );
+    outputDir.clean();
 
     mergeAndWrite(mesh, writer, set.name(), setPatch, outputDir);
 }
@@ -477,7 +479,7 @@ void Foam::mergeAndWrite
 
         // Output e.g. pointSet p0 to
         // postProcessing/<time>/p0.vtk
-        const fileName outputDir
+        fileName outputDir
         (
             set.time().path()
           / (Pstream::parRun() ? ".." : "")
@@ -485,6 +487,7 @@ void Foam::mergeAndWrite
           / mesh.pointsInstance()
           // set.name()
         );
+        outputDir.clean();
         mkDir(outputDir);
 
         fileName outputFile(outputDir/writer.getFileName(points, wordList()));

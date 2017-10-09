@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -246,8 +246,12 @@ protected:
         // Cloud evolution functions
 
             //- Solve the cloud - calls all evolution functions
-            template<class TrackData>
-            void solve(TrackData& td);
+            template<class TrackCloudType>
+            void solve
+            (
+                TrackCloudType& cloud,
+                typename parcelType::trackingData& td
+            );
 
             //- Build the cellOccupancy
             void buildCellOccupancy();
@@ -257,8 +261,12 @@ protected:
             void updateCellOccupancy();
 
             //- Evolve the cloud
-            template<class TrackData>
-            void evolveCloud(TrackData& td);
+            template<class TrackCloudType>
+            void evolveCloud
+            (
+                TrackCloudType& cloud,
+                typename parcelType::trackingData& td
+            );
 
             //- Post-evolve
             void postEvolve();
@@ -326,10 +334,6 @@ public:
 
             //- Return a reference to the cloud copy
             inline const KinematicCloud& cloudCopy() const;
-
-            //- Switch to specify if particles of the cloud can return
-            //  non-zero wall distance values - true for kinematic parcels
-            bool hasWallImpactDistance() const;
 
 
             // References to the mesh and databases
@@ -582,8 +586,12 @@ public:
             void evolve();
 
             //- Particle motion
-            template<class TrackData>
-            void motion(TrackData& td);
+            template<class TrackCloudType>
+            void motion
+            (
+                TrackCloudType& cloud,
+                typename parcelType::trackingData& td
+            );
 
             //- Calculate the patch normal and velocity to interact with,
             //  accounting for patch motion if required.
@@ -591,8 +599,6 @@ public:
             (
                 const parcelType& p,
                 const polyPatch& pp,
-                const scalar trackFraction,
-                const tetIndices& tetIs,
                 vector& normal,
                 vector& Up
             ) const;

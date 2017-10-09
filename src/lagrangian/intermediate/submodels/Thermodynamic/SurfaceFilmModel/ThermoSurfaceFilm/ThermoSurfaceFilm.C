@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -128,7 +128,7 @@ Foam::vector Foam::ThermoSurfaceFilm<CloudType>::splashDirection
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::absorbInteraction
 (
-    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -205,7 +205,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::bounceInteraction
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
 (
-    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -261,7 +261,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::drySplashInteraction
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
 (
-    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
     parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -338,7 +338,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::wetSplashInteraction
 template<class CloudType>
 void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
 (
-    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel,
+    regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel,
     const parcelType& p,
     const polyPatch& pp,
     const label facei,
@@ -397,7 +397,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
     }
 
     // Incident kinetic energy [J]
-    const scalar EKIn = 0.5*m*magSqr(Urel);
+    const scalar EKIn = 0.5*m*magSqr(Un);
 
     // Incident surface energy [J]
     const scalar ESigmaIn = np*sigma*p.areaS(d);
@@ -446,7 +446,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::splashInteraction
         }
 
         // Perturb new parcels towards the owner cell centre
-        pPtr->position() += 0.5*rndGen_.sample01<scalar>()*(posC - posCf);
+        pPtr->track(0.5*rndGen_.sample01<scalar>()*(posC - posCf), 0);
 
         pPtr->nParticle() = npNew[i];
 
@@ -556,11 +556,12 @@ bool Foam::ThermoSurfaceFilm<CloudType>::transferParcel
 )
 {
     // Retrieve the film model from the owner database
-    regionModels::surfaceFilmModels::surfaceFilmModel& filmModel =
-        const_cast<regionModels::surfaceFilmModels::surfaceFilmModel&>
+    regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel =
+        const_cast<regionModels::surfaceFilmModels::surfaceFilmRegionModel&>
         (
             this->owner().db().time().objectRegistry::template
-                lookupObject<regionModels::surfaceFilmModels::surfaceFilmModel>
+                lookupObject
+                <regionModels::surfaceFilmModels::surfaceFilmRegionModel>
                 (
                     "surfaceFilmProperties"
                 )
@@ -624,7 +625,7 @@ void Foam::ThermoSurfaceFilm<CloudType>::cacheFilmFields
 (
     const label filmPatchi,
     const label primaryPatchi,
-    const regionModels::surfaceFilmModels::surfaceFilmModel& filmModel
+    const regionModels::surfaceFilmModels::surfaceFilmRegionModel& filmModel
 )
 {
     SurfaceFilmModel<CloudType>::cacheFilmFields

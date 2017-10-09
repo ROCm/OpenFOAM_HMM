@@ -38,17 +38,23 @@ InfoSwitches
     // The default ASCII write precision
     writePrecision  6;
 
-    // Enable job info
-    writeJobInfo    0;
-
     writeDictionaries 0;
     writeOptionalEntries 0;
 
-    // Report list of slaves/pids used (parallel)
-    writeSlaves     1;
+    // Write lagrangian "positions" file in v1706 format (at earlier)
+    writeLagrangianPositions 0;
+
+    // Report hosts used (parallel)
+    // - 0 = none
+    // - 1 = per-host-count, but unsorted
+    // - 2 = long output of "slave.pid" ...
+    writeHosts      1;
 
     // Report list of roots used (parallel)
     writeRoots      1;
+
+    // Enable job info
+    writeJobInfo    0;
 
     // Allow profiling
     allowProfiling  1;
@@ -70,6 +76,20 @@ OptimisationSwitches
     //  - timeStampMaster   : do time stamp (and file reading) only on master.
     //  - inotifyMaster     : do inotify (and file reading) only on master.
     fileModificationChecking timeStampMaster;
+
+    //- Parallel IO file handler
+    //  uncollated (default), collated or masterUncollated
+    fileHandler uncollated;
+
+    //- collated: thread buffer size for queued file writes.
+    //  If set to 0 or not sufficient for the file size threading is not used.
+    //  Default: 2e9
+    maxThreadFileBufferSize 2e9;
+
+    //- masterUncollated: non-blocking buffer size.
+    //  If the file exceeds this buffer size scheduled transfer is used.
+    //  Default: 2e9
+    maxMasterFileBufferSize 2e9;
 
     commsType       nonBlocking; //scheduled; //blocking;
     floatTransfer   0;

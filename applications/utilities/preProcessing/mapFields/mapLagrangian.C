@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,6 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
 
     const fvMesh& meshSource = meshToMesh0Interp.fromMesh();
     const fvMesh& meshTarget = meshToMesh0Interp.toMesh();
-    const pointField& targetCc = meshTarget.cellCentres();
 
 
     fileNameList cloudDirs
@@ -121,8 +120,9 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
         );
 
         IOobject* positionsPtr = objects.lookup("positions");
+        IOobject* coordinatesPtr = objects.lookup("coordinates");
 
-        if (positionsPtr)
+        if (positionsPtr || coordinatesPtr)
         {
             Info<< nl << "    processing cloud " << cloudDirs[cloudI] << endl;
 
@@ -144,7 +144,7 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                 IDLList<passiveParticle>()
             );
 
-            particle::TrackingData<passiveParticleCloud> td(targetParcels);
+            passiveParticle::trackingData td(targetParcels);
 
             label sourceParticleI = 0;
 
@@ -182,15 +182,17 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                             new passiveParticle
                             (
                                 meshTarget,
-                                targetCc[targetCells[i]],
-                                targetCells[i]
+                                barycentric(1, 0, 0, 0),
+                                targetCells[i],
+                                meshTarget.cells()[targetCells[i]][0],
+                                1
                             )
                         );
                         passiveParticle& newP = newPtr();
 
-                        label facei = newP.track(iter().position(), td);
+                        newP.track(iter().position() - newP.position(), 0);
 
-                        if (facei < 0 && newP.cell() >= 0)
+                        if (!newP.onFace())
                         {
                             // Hit position.
                             foundCell = true;
@@ -233,11 +235,16 @@ void mapLagrangian(const meshToMesh0& meshToMesh0Interp)
                         {
                             unmappedSource.erase(sourceParticleI);
                             addParticles.append(sourceParticleI);
-                            iter().cell() = targetCell;
                             targetParcels.addParticle
                             (
-                                sourceParcels.remove(&iter())
+                                new passiveParticle
+                                (
+                                    meshTarget,
+                                    iter().position(),
+                                    targetCell
+                                )
                             );
+                            sourceParcels.remove(&iter());
                         }
                     }
                     sourceParticleI++;

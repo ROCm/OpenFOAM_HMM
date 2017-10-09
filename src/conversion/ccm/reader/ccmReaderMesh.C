@@ -28,8 +28,7 @@ License
 #include "emptyPolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "wallPolyPatch.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "IOdictionary.H"
 
 #include "ccmBoundaryInfo.H"

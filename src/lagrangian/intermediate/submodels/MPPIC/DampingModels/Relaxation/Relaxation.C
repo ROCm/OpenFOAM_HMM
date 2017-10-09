@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -139,13 +139,12 @@ Foam::vector Foam::DampingModels::Relaxation<CloudType>::velocityCorrection
     const scalar deltaT
 ) const
 {
-    const tetIndices
-        tetIs(p.cell(), p.tetFace(), p.tetPt(), this->owner().mesh());
+    const tetIndices tetIs(p.currentTetIndices());
 
     const scalar x =
-        deltaT*oneByTimeScaleAverage_->interpolate(p.position(), tetIs);
+        deltaT*oneByTimeScaleAverage_->interpolate(p.coordinates(), tetIs);
 
-    const vector u = uAverage_->interpolate(p.position(), tetIs);
+    const vector u = uAverage_->interpolate(p.coordinates(), tetIs);
 
     return (u - p.U())*x/(x + 2.0);
 }

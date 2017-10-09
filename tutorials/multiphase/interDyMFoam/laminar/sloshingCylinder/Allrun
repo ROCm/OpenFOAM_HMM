@@ -8,6 +8,6 @@ runApplication blockMesh
 runApplication snappyHexMesh -overwrite
 cp 0/alpha.water.orig 0/alpha.water
 runApplication setFields
-runApplication `getApplication`
+runApplication $(getApplication)
 
 #------------------------------------------------------------------------------

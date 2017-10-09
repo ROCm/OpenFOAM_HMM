@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Primitive
-    uint64
+    uint64_t
 
 Description
-    64bit uinteger
+    64bit unsigned integer
 
 SourceFiles
     uint64.C
@@ -44,7 +44,6 @@ SourceFiles
 #include "pTraits.H"
 #include "direction.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -58,7 +57,7 @@ class Ostream;
 //- Return a word representation of a uint64
 inline word name(const uint64_t val)
 {
-    // no stripping required
+    // No stripping required
     return word(std::to_string(val), false);
 }
 
@@ -75,10 +74,48 @@ word name(const std::string& fmt, const uint64_t);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-uint64_t readUint64(Istream&);
-bool read(const char*, uint64_t&);
-Istream& operator>>(Istream&, uint64_t&);
-Ostream& operator<<(Ostream&, const uint64_t);
+//- Read uint64_t from stream.
+uint64_t readUint64(Istream& is);
+
+//- Parse entire buffer as uint64_t, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+uint64_t readUint64(const char* buf);
+
+//- Parse entire string as uint64_t, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+inline uint64_t readUint64(const std::string& str)
+{
+    return readUint64(str.c_str());
+}
+
+//- Parse entire buffer as uint64_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+bool readUint64(const char* buf, uint64_t& val);
+
+//- Parse entire string as uint64_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+inline bool readUint64(const std::string& str, uint64_t& val)
+{
+    return readUint64(str.c_str(), val);
+}
+
+//- Same as readUint64
+//  \return True if successful.
+inline bool read(const char* buf, uint64_t& val)
+{
+    return readUint64(buf, val);
+}
+
+//- Same as readUint64
+//  \return True if successful.
+inline bool read(const std::string& str, uint64_t& val)
+{
+    return readUint64(str, val);
+}
+
+
+Istream& operator>>(Istream& is, uint64_t& val);
+Ostream& operator<<(Ostream& os, const uint64_t val);
 
 //- Template specialization for pTraits<uint64_t>
 template<>
@@ -119,10 +156,10 @@ public:
     // Constructors
 
         //- Construct from primitive
-        explicit pTraits(const uint64_t&);
+        explicit pTraits(const uint64_t& val);
 
         //- Construct from Istream
-        pTraits(Istream&);
+        pTraits(Istream& is);
 
 
     // Member Functions

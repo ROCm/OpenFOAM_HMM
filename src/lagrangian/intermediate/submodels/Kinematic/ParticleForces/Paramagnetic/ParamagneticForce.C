@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -97,6 +97,7 @@ template<class CloudType>
 Foam::forceSuSp Foam::ParamagneticForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
+    const typename CloudType::parcelType::trackingData& td,
     const scalar dt,
     const scalar mass,
     const scalar Re,
@@ -110,7 +111,7 @@ Foam::forceSuSp Foam::ParamagneticForce<CloudType>::calcNonCoupled
     value.Su()=
         mass*3.0*constant::electromagnetic::mu0.value()/p.rho()
        *magneticSusceptibility_/(magneticSusceptibility_ + 3)
-       *HdotGradHInterp.interpolate(p.position(), p.currentTetIndices());
+       *HdotGradHInterp.interpolate(p.coordinates(), p.currentTetIndices());
 
     return value;
 }

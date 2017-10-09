@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,10 +48,11 @@ Foam::CollidingParcel<ParcelType>::CollidingParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     f_(Zero),
     angularMomentum_(Zero),
     torque_(Zero),
@@ -81,28 +82,31 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::CollidingParcel<ParcelType>::readFields(CloudType& c)
 {
-    if (!c.size())
-    {
-        return;
-    }
+    bool valid = c.size();
 
     ParcelType::readFields(c);
 
-    IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ));
+    IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ), valid);
     c.checkFieldIOobject(c, f);
 
     IOField<vector> angularMomentum
     (
-        c.fieldIOobject("angularMomentum", IOobject::MUST_READ)
+        c.fieldIOobject("angularMomentum", IOobject::MUST_READ),
+        valid
     );
     c.checkFieldIOobject(c, angularMomentum);
 
-    IOField<vector> torque(c.fieldIOobject("torque", IOobject::MUST_READ));
+    IOField<vector> torque
+    (
+        c.fieldIOobject("torque", IOobject::MUST_READ),
+        valid
+    );
     c.checkFieldIOobject(c, torque);
 
     labelFieldCompactIOField collisionRecordsPairAccessed
     (
-        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::MUST_READ)
+        c.fieldIOobject("collisionRecordsPairAccessed", IOobject::MUST_READ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairAccessed);
 
@@ -112,7 +116,8 @@ void Foam::CollidingParcel<ParcelType>::readFields(CloudType& c)
         (
             "collisionRecordsPairOrigProcOfOther",
             IOobject::MUST_READ
-        )
+        ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
 
@@ -122,31 +127,36 @@ void Foam::CollidingParcel<ParcelType>::readFields(CloudType& c)
         (
             "collisionRecordsPairOrigIdOfOther",
             IOobject::MUST_READ
-        )
+        ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairOrigProcOfOther);
 
     pairDataFieldCompactIOField collisionRecordsPairData
     (
-        c.fieldIOobject("collisionRecordsPairData", IOobject::MUST_READ)
+        c.fieldIOobject("collisionRecordsPairData", IOobject::MUST_READ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsPairData);
 
     labelFieldCompactIOField collisionRecordsWallAccessed
     (
-        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::MUST_READ)
+        c.fieldIOobject("collisionRecordsWallAccessed", IOobject::MUST_READ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsWallAccessed);
 
     vectorFieldCompactIOField collisionRecordsWallPRel
     (
-        c.fieldIOobject("collisionRecordsWallPRel", IOobject::MUST_READ)
+        c.fieldIOobject("collisionRecordsWallPRel", IOobject::MUST_READ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsWallPRel);
 
     wallDataFieldCompactIOField collisionRecordsWallData
     (
-        c.fieldIOobject("collisionRecordsWallData", IOobject::MUST_READ)
+        c.fieldIOobject("collisionRecordsWallData", IOobject::MUST_READ),
+        valid
     );
     c.checkFieldFieldIOobject(c, collisionRecordsWallData);
 
@@ -182,7 +192,7 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
 {
     ParcelType::writeFields(c);
 
-    label np =  c.size();
+    label np = c.size();
 
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
     IOField<vector> angularMomentum
@@ -255,17 +265,19 @@ void Foam::CollidingParcel<ParcelType>::writeFields(const CloudType& c)
         i++;
     }
 
-    f.write();
-    angularMomentum.write();
-    torque.write();
+    const bool valid = (np > 0);
 
-    collisionRecordsPairAccessed.write();
-    collisionRecordsPairOrigProcOfOther.write();
-    collisionRecordsPairOrigIdOfOther.write();
-    collisionRecordsPairData.write();
-    collisionRecordsWallAccessed.write();
-    collisionRecordsWallPRel.write();
-    collisionRecordsWallData.write();
+    f.write(valid);
+    angularMomentum.write(valid);
+    torque.write(valid);
+
+    collisionRecordsPairAccessed.write(valid);
+    collisionRecordsPairOrigProcOfOther.write(valid);
+    collisionRecordsPairOrigIdOfOther.write(valid);
+    collisionRecordsPairData.write(valid);
+    collisionRecordsWallAccessed.write(valid);
+    collisionRecordsWallPRel.write(valid);
+    collisionRecordsWallData.write(valid);
 }
 
 

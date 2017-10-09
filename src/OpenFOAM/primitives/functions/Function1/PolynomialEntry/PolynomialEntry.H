@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,7 +77,7 @@ class Polynomial
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Polynomial<Type>&);
+        void operator=(const Polynomial<Type>&) = delete;
 
 
 public:
@@ -98,13 +98,7 @@ public:
         );
 
         //- Copy constructor
-        Polynomial(const Polynomial& poly);
-
-        //- Construct and return a clone
-        virtual tmp<Function1<Type>> clone() const
-        {
-            return tmp<Function1<Type>>(new Polynomial(*this));
-        }
+        explicit Polynomial(const Polynomial& poly);
 
 
     //- Destructor
@@ -122,10 +116,10 @@ public:
         // Evaluation
 
             //- Return Polynomial value
-            Type value(const scalar x) const;
+            virtual Type value(const scalar x) const;
 
             //- Integrate between two (scalar) values
-            Type integrate(const scalar x1, const scalar x2) const;
+            virtual Type integrate(const scalar x1, const scalar x2) const;
 
 
         //- Write in dictionary format

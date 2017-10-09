@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     vector refPt = Zero;
     bool calcAroundRefPt = args.optionReadIfPresent("referencePoint", refPt);
 
-    triSurface surf(surfFileName);
+    const triSurface surf(surfFileName);
 
     scalar m = 0.0;
     vector cM = Zero;

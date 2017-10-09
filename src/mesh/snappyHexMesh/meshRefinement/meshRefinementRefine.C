@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -346,31 +346,18 @@ void Foam::meshRefinement::markFeatureCellLevel
     // what to seed. Do this on only the processor that
     // holds the keepPoint.
 
-    forAll(keepPoints, i)
+    for (const point& keepPoint : keepPoints)
     {
-        const point& keepPoint = keepPoints[i];
+        const label celli = mesh_.cellTree().findInside(keepPoint);
 
-        label cellI = -1;
-        label tetFaceI = -1;
-        label tetPtI = -1;
-
-
-        // Force construction of search tree even if processor holds no
-        // cells
-        (void)mesh_.cellTree();
-        if (mesh_.nCells())
-        {
-            mesh_.findCellFacePt(keepPoint, cellI, tetFaceI, tetPtI);
-        }
-
-        if (cellI != -1)
+        if (celli != -1)
         {
             // I am the processor that holds the keepPoint
 
-            forAll(features_, featI)
+            forAll(features_, feati)
             {
-                const edgeMesh& featureMesh = features_[featI];
-                const label featureLevel = features_.levels()[featI][0];
+                const edgeMesh& featureMesh = features_[feati];
+                const label featureLevel = features_.levels()[feati][0];
                 const labelListList& pointEdges = featureMesh.pointEdges();
 
                 // Find regions on edgeMesh
@@ -384,16 +371,16 @@ void Foam::meshRefinement::markFeatureCellLevel
                 // 1. Seed all 'knots' in edgeMesh
 
 
-                forAll(pointEdges, pointI)
+                forAll(pointEdges, pointi)
                 {
-                    if (pointEdges[pointI].size() != 2)
+                    if (pointEdges[pointi].size() != 2)
                     {
                         if (debug&meshRefinement::FEATURESEEDS)
                         {
-                            Pout<< "Adding particle from point:" << pointI
-                                << " coord:" << featureMesh.points()[pointI]
+                            Pout<< "Adding particle from point:" << pointi
+                                << " coord:" << featureMesh.points()[pointi]
                                 << " since number of emanating edges:"
-                                << pointEdges[pointI].size()
+                                << pointEdges[pointi].size()
                                 << endl;
                         }
 
@@ -404,23 +391,21 @@ void Foam::meshRefinement::markFeatureCellLevel
                             (
                                 mesh_,
                                 keepPoint,
-                                cellI,
-                                tetFaceI,
-                                tetPtI,
-                                featureMesh.points()[pointI],   // endpos
+                                celli,
+                                featureMesh.points()[pointi],   // endpos
                                 featureLevel,                   // level
-                                featI,                          // featureMesh
-                                pointI,                         // end point
+                                feati,                          // featureMesh
+                                pointi,                         // end point
                                 -1                              // feature edge
                             )
                         );
 
                         // Mark
-                        if (pointEdges[pointI].size() > 0)
+                        if (pointEdges[pointi].size() > 0)
                         {
-                            label e0 = pointEdges[pointI][0];
-                            label regionI = edgeRegion[e0];
-                            regionVisited[regionI] = 1u;
+                            label e0 = pointEdges[pointi][0];
+                            label regioni = edgeRegion[e0];
+                            regionVisited[regioni] = 1u;
                         }
                     }
                 }
@@ -428,17 +413,17 @@ void Foam::meshRefinement::markFeatureCellLevel
 
                 // 2. Any regions that have not been visited at all? These can
                 //    only be circular regions!
-                forAll(featureMesh.edges(), edgeI)
+                forAll(featureMesh.edges(), edgei)
                 {
-                    if (regionVisited.set(edgeRegion[edgeI], 1u))
+                    if (regionVisited.set(edgeRegion[edgei], 1u))
                     {
-                        const edge& e = featureMesh.edges()[edgeI];
-                        label pointI = e.start();
+                        const edge& e = featureMesh.edges()[edgei];
+                        label pointi = e.start();
                         if (debug&meshRefinement::FEATURESEEDS)
                         {
-                            Pout<< "Adding particle from point:" << pointI
-                                << " coord:" << featureMesh.points()[pointI]
-                                << " on circular region:" << edgeRegion[edgeI]
+                            Pout<< "Adding particle from point:" << pointi
+                                << " coord:" << featureMesh.points()[pointi]
+                                << " on circular region:" << edgeRegion[edgei]
                                 << endl;
                         }
 
@@ -449,13 +434,11 @@ void Foam::meshRefinement::markFeatureCellLevel
                             (
                                 mesh_,
                                 keepPoint,
-                                cellI,
-                                tetFaceI,
-                                tetPtI,
-                                featureMesh.points()[pointI],   // endpos
+                                celli,
+                                featureMesh.points()[pointi],   // endpos
                                 featureLevel,                   // level
-                                featI,                          // featureMesh
-                                pointI,                         // end point
+                                feati,                          // featureMesh
+                                pointi,                         // end point
                                 -1                              // feature edge
                             )
                         );
@@ -498,7 +481,7 @@ void Foam::meshRefinement::markFeatureCellLevel
             << " particles over distance " << maxTrackLen
             << " to find the starting cell" << endl;
     }
-    startPointCloud.move(td, maxTrackLen);
+    startPointCloud.move(startPointCloud, td, maxTrackLen);
 
 
     // Reset levels
@@ -542,11 +525,12 @@ void Foam::meshRefinement::markFeatureCellLevel
                 // on the edge.
 
                 const edge& e = featureMesh.edges()[edgeI];
-                label otherPointI = e.otherVertex(pointI);
+                label otherPointi = e.otherVertex(pointI);
 
                 trackedParticle* tp(new trackedParticle(startTp));
-                tp->end() = featureMesh.points()[otherPointI];
-                tp->j() = otherPointI;
+                tp->start() = tp->position();
+                tp->end() = featureMesh.points()[otherPointi];
+                tp->j() = otherPointi;
                 tp->k() = edgeI;
 
                 if (debug&meshRefinement::FEATURESEEDS)
@@ -575,7 +559,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                 << " particles over distance " << maxTrackLen
                 << " to mark cells" << endl;
         }
-        cloud.move(td, maxTrackLen);
+        cloud.move(cloud, td, maxTrackLen);
 
         // Make particle follow edge.
         forAllIter(Cloud<trackedParticle>, cloud, iter)
@@ -603,10 +587,11 @@ void Foam::meshRefinement::markFeatureCellLevel
                     // on the edge.
 
                     const edge& e = featureMesh.edges()[edgeI];
-                    label otherPointI = e.otherVertex(pointI);
+                    label otherPointi = e.otherVertex(pointI);
 
-                    tp.end() = featureMesh.points()[otherPointI];
-                    tp.j() = otherPointI;
+                    tp.start() = tp.position();
+                    tp.end() = featureMesh.points()[otherPointi];
+                    tp.j() = otherPointi;
                     tp.k() = edgeI;
                     keepParticle = true;
                     break;

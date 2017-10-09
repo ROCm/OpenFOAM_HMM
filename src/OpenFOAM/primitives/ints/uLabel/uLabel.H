@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,7 +28,7 @@ Description
     A uLabel is an uint32_t or uint64_t as specified by the pre-processor macro
     WM_LABEL_SIZE.
 
-    A readLabel function is defined so that uLabel can be constructed from
+    A readULabel function is defined so that uLabel can be constructed from
     Istream.
 
 \*---------------------------------------------------------------------------*/
@@ -60,9 +60,44 @@ typedef UINT_SIZE(uint, _t) uLabel;
 
 static const uLabel uLabelMax = UINT_SIZE(UINT, _MAX);
 
+//- Read uLabel from stream.
+//  Uses readUint32 or readUint64 according to WM_LABEL_SIZE
 inline uLabel readULabel(Istream& is)
 {
     return UINT_SIZE(readUint,) (is);
+}
+
+//- Parse entire buffer as a uLabel, skipping leading/trailing whitespace.
+//  Uses readUint32 or readUint64 according to WM_LABEL_SIZE
+//  \return Parsed value or FatalIOError on any problem
+inline uLabel readULabel(const char* buf)
+{
+    return UINT_SIZE(readUint,) (buf);
+}
+
+//- Parse entire string as a uLabel, skipping leading/trailing whitespace.
+//  Uses readUint32 or readUint64 according to WM_LABEL_SIZE
+//  \return Parsed value or FatalIOError on any problem
+inline uLabel readULabel(const std::string& str)
+{
+    return UINT_SIZE(readUint,) (str);
+}
+
+//- Parse entire buffer as a uLabel, skipping leading/trailing whitespace.
+//  Uses readUint32 or readUint64 according to WM_LABEL_SIZE
+//  \return True if successful.
+inline bool readULabel(const char* buf, uLabel& val)
+{
+    return UINT_SIZE(readUint,) (buf, val);
+}
+
+
+//- Parse entire string as a uLabel, skipping leading/trailing whitespace.
+//  Uses readUint32 or readUint64 according to WM_LABEL_SIZE
+//  \return True if successful.
+inline bool readULabel(const std::string& str, uLabel& val)
+{
+    return UINT_SIZE(readUint,) (str, val);
 }
 
 

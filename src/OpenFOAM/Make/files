@@ -9,6 +9,14 @@ global/profiling/profilingSysInfo.C
 global/profiling/profilingTrigger.C
 global/etcFiles/etcFiles.C
 
+fileOps = global/fileOperations
+$(fileOps)/fileOperation/fileOperation.C
+$(fileOps)/uncollatedFileOperation/uncollatedFileOperation.C
+$(fileOps)/masterUncollatedFileOperation/masterUncollatedFileOperation.C
+$(fileOps)/collatedFileOperation/collatedFileOperation.C
+$(fileOps)/collatedFileOperation/threadedCollatedOFstream.C
+$(fileOps)/collatedFileOperation/OFstreamCollator.C
+
 bools = primitives/bools
 $(bools)/bool/bool.C
 $(bools)/bool/boolIO.C
@@ -81,7 +89,7 @@ primitives/septernion/septernion.C
 primitives/triad/triad.C
 
 /* Run-time selectable functions */
-primitives/functions/Function1/makeDataEntries.C
+primitives/functions/Function1/makeFunction1s.C
 primitives/functions/Function1/ramp/ramp.C
 primitives/functions/Function1/linearRamp/linearRamp.C
 primitives/functions/Function1/quadraticRamp/quadraticRamp.C
@@ -106,6 +114,7 @@ $(strings)/wordRe/wordRe.C
 $(strings)/wordRes/wordRes.C
 $(strings)/lists/hashedWordList.C
 $(strings)/stringOps/stringOps.C
+$(strings)/parsing/parsing.C
 
 ops = primitives/ops
 $(ops)/flipOp.C
@@ -132,6 +141,9 @@ $(spatialVectorAlgebra)/CompactSpatialTensor/compactSpatialTensor/compactSpatial
 
 primitives/polynomialEqns/cubicEqn/cubicEqn.C
 primitives/polynomialEqns/quadraticEqn/quadraticEqn.C
+
+primitives/Barycentric/barycentric/barycentric.C
+primitives/Barycentric2D/barycentric2D/barycentric2D.C
 
 containers/HashTables/HashTable/HashTableCore.C
 containers/HashTables/StaticHashTable/StaticHashTableCore.C
@@ -166,6 +178,7 @@ $(gzstream)/gzstream.C
 Fstreams = $(Streams)/Fstreams
 $(Fstreams)/IFstream.C
 $(Fstreams)/OFstream.C
+$(Fstreams)/masterOFstream.C
 
 Tstreams = $(Streams)/Tstreams
 $(Tstreams)/ITstream.C
@@ -222,6 +235,9 @@ $(IOdictionary)/localIOdictionary.C
 $(IOdictionary)/unwatchedIOdictionary.C
 
 db/IOobjects/IOMap/IOMapName.C
+db/IOobjects/decomposedBlockData/decomposedBlockData.C
+db/IOobjects/GlobalIOField/GlobalIOFields.C
+
 
 db/IOobjects/GlobalIOList/globalIOLists.C
 
@@ -606,6 +622,8 @@ Fields = fields/Fields
 
 $(Fields)/labelField/labelField.C
 $(Fields)/scalarField/scalarField.C
+$(Fields)/vectorField/vectorField.C
+$(Fields)/vector2DField/vector2DField.C
 $(Fields)/sphericalTensorField/sphericalTensorField.C
 $(Fields)/diagTensorField/diagTensorField.C
 $(Fields)/symmTensorField/symmTensorField.C
@@ -633,8 +651,6 @@ $(Fields)/tensorField/tensorFieldIOField.C
 $(Fields)/quaternionField/quaternionIOField.C
 $(Fields)/triadField/triadIOField.C
 $(Fields)/transformField/transformField.C
-
-$(Fields)/globalFields/globalIOFields.C
 
 
 pointPatchFields = fields/pointPatchFields

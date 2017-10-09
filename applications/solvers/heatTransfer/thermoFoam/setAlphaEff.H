@@ -11,7 +11,7 @@ IOobject turbulencePropertiesHeader
     false
 );
 
-if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(false))
+if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(true))
 {
     autoPtr<compressible::turbulenceModel> turbulence
     (

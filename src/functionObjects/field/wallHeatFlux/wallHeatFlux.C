@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "wallHeatFlux.H"
+#include "turbulentFluidThermoModel.H"
+#include "solidThermo.H"
 #include "surfaceInterpolate.H"
 #include "fvcSnGrad.H"
 #include "wallPolyPatch.H"
@@ -196,10 +198,7 @@ bool Foam::functionObjects::wallHeatFlux::read(const dictionary& dict)
 
 bool Foam::functionObjects::wallHeatFlux::execute()
 {
-    volScalarField& wallHeatFlux = const_cast<volScalarField&>
-    (
-        lookupObject<volScalarField>(type())
-    );
+    volScalarField& wallHeatFlux = lookupObjectRef<volScalarField>(type());
 
     if
     (
@@ -233,6 +232,13 @@ bool Foam::functionObjects::wallHeatFlux::execute()
             thermo.he(),
             wallHeatFlux
         );
+    }
+    else if (foundObject<solidThermo>(solidThermo::dictName))
+    {
+        const solidThermo& thermo =
+            lookupObject<solidThermo>(solidThermo::dictName);
+
+        calcHeatFlux(thermo.alpha(), thermo.he(), wallHeatFlux);
     }
     else
     {

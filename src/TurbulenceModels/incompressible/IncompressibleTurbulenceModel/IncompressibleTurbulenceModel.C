@@ -118,8 +118,7 @@ Foam::IncompressibleTurbulenceModel<TransportModel>::divDevReff
 
 template<class TransportModel>
 Foam::tmp<Foam::volSymmTensorField>
-Foam::IncompressibleTurbulenceModel<TransportModel>::
-devRhoReff() const
+Foam::IncompressibleTurbulenceModel<TransportModel>::devRhoReff() const
 {
     NotImplemented;
 
@@ -129,8 +128,7 @@ devRhoReff() const
 
 template<class TransportModel>
 Foam::tmp<Foam::fvVectorMatrix>
-Foam::IncompressibleTurbulenceModel<TransportModel>::
-divDevRhoReff
+Foam::IncompressibleTurbulenceModel<TransportModel>::divDevRhoReff
 (
     volVectorField& U
 ) const
@@ -143,8 +141,7 @@ divDevRhoReff
 
 template<class TransportModel>
 Foam::tmp<Foam::fvVectorMatrix>
-Foam::IncompressibleTurbulenceModel<TransportModel>::
-divDevRhoReff
+Foam::IncompressibleTurbulenceModel<TransportModel>::divDevRhoReff
 (
     const volScalarField& rho,
     volVectorField& U

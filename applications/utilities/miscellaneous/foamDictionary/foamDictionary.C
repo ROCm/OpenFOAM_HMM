@@ -114,8 +114,7 @@ Usage
 #include "argList.H"
 #include "profiling.H"
 #include "Time.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "includeEntry.H"
 
 using namespace Foam;

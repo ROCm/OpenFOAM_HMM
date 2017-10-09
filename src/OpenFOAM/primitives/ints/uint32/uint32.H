@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,10 +22,10 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Primitive
-    uint32
+    uint32_t
 
 Description
-    32bit uinteger
+    32bit unsigned integer
 
 SourceFiles
     uint32.C
@@ -57,7 +57,7 @@ class Ostream;
 //- Return a word representation of a uint32
 inline word name(const uint32_t val)
 {
-    // no stripping required
+    // No stripping required
     return word(std::to_string(val), false);
 }
 
@@ -74,10 +74,48 @@ word name(const std::string& fmt, const uint32_t);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-uint32_t readUint32(Istream&);
-bool read(const char*, uint32_t&);
-Istream& operator>>(Istream&, uint32_t&);
-Ostream& operator<<(Ostream&, const uint32_t);
+//- Read uint32_t from stream
+uint32_t readUint32(Istream& is);
+
+//- Parse entire buffer as a uint32_t, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+uint32_t readUint32(const char* buf);
+
+//- Parse entire string as a uint32_t, skipping leading/trailing whitespace.
+//  \return Parsed value or FatalIOError on any problem
+inline uint32_t readUint32(const std::string& str)
+{
+    return readUint32(str.c_str());
+}
+
+//- Read entire buffer as a uint32_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+bool readUint32(const char* buf, uint32_t& val);
+
+//- Read entire string as a uint32_t, skipping leading/trailing whitespace.
+//  \return True if successful.
+inline bool readUint32(const std::string& str, uint32_t& val)
+{
+    return readUint32(str.c_str(), val);
+}
+
+//- Same as readUint32
+//  \return True if successful.
+inline bool read(const char* buf, uint32_t& val)
+{
+    return readUint32(buf, val);
+}
+
+//- Same as readUint32
+//  \return True if successful.
+inline bool read(const std::string& str, uint32_t& val)
+{
+    return readUint32(str, val);
+}
+
+
+Istream& operator>>(Istream& is, uint32_t& val);
+Ostream& operator<<(Ostream& os, const uint32_t val);
 
 //- Template specialization for pTraits<uint32_t>
 template<>
@@ -118,10 +156,10 @@ public:
     // Constructors
 
         //- Construct from primitive
-        explicit pTraits(const uint32_t&);
+        explicit pTraits(const uint32_t& val);
 
         //- Construct from Istream
-        pTraits(Istream&);
+        pTraits(Istream& is);
 
 
     // Member Functions

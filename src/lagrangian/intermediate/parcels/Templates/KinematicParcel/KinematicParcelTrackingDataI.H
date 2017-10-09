@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,14 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
-template<class CloudType>
-inline Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::TrackingData
+template<class TrackCloudType>
+inline Foam::KinematicParcel<ParcelType>::trackingData::trackingData
 (
-    CloudType& cloud,
+    const TrackCloudType& cloud,
     trackPart part
 )
 :
-    ParcelType::template TrackingData<CloudType>(cloud),
+    ParcelType::trackingData(cloud),
     rhoInterp_
     (
         interpolation<scalar>::New
@@ -56,62 +56,101 @@ inline Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::TrackingData
             cloud.mu()
         )
     ),
+    rhoc_(Zero),
+    Uc_(Zero),
+    muc_(Zero),
     g_(cloud.g().value()),
     part_(part)
 {}
 
 
 template<class ParcelType>
-template<class CloudType>
 inline const Foam::interpolation<Foam::scalar>&
-Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::rhoInterp() const
+Foam::KinematicParcel<ParcelType>::trackingData::rhoInterp() const
 {
     return rhoInterp_();
 }
 
 
 template<class ParcelType>
-template<class CloudType>
 inline const Foam::interpolation<Foam::vector>&
-Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::UInterp() const
+Foam::KinematicParcel<ParcelType>::trackingData::UInterp() const
 {
     return UInterp_();
 }
 
 
 template<class ParcelType>
-template<class CloudType>
 inline const Foam::interpolation<Foam::scalar>&
-Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::muInterp() const
+Foam::KinematicParcel<ParcelType>::trackingData::muInterp() const
 {
     return muInterp_();
 }
 
 
 template<class ParcelType>
-template<class CloudType>
 inline const Foam::vector&
-Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::g() const
+Foam::KinematicParcel<ParcelType>::trackingData::g() const
 {
     return g_;
 }
 
 
 template<class ParcelType>
-template<class CloudType>
-inline typename Foam::KinematicParcel<ParcelType>::template
-TrackingData<CloudType>::trackPart
-Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::part() const
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::trackingData::rhoc() const
+{
+    return rhoc_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::trackingData::rhoc()
+{
+    return rhoc_;
+}
+
+
+template<class ParcelType>
+inline const Foam::vector&
+Foam::KinematicParcel<ParcelType>::trackingData::Uc() const
+{
+    return Uc_;
+}
+
+
+template<class ParcelType>
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::trackingData::Uc()
+{
+    return Uc_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::trackingData::muc() const
+{
+    return muc_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::trackingData::muc()
+{
+    return muc_;
+}
+
+
+template<class ParcelType>
+inline typename Foam::KinematicParcel<ParcelType>::trackingData::trackPart
+Foam::KinematicParcel<ParcelType>::trackingData::part() const
 {
     return part_;
 }
 
 
 template<class ParcelType>
-template<class CloudType>
-inline typename Foam::KinematicParcel<ParcelType>::template
-TrackingData<CloudType>::trackPart&
-Foam::KinematicParcel<ParcelType>::TrackingData<CloudType>::part()
+inline typename Foam::KinematicParcel<ParcelType>::trackingData::trackPart&
+Foam::KinematicParcel<ParcelType>::trackingData::part()
 {
     return part_;
 }

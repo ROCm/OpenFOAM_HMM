@@ -48,10 +48,11 @@ Foam::injectedParticle::injectedParticle
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    particle(mesh, is, readFields),
+    particle(mesh, is, readFields, newFormat),
     tag_(-1),
     soi_(0.0),
     d_(0.0),

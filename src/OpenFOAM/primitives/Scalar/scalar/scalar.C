@@ -24,24 +24,17 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "scalar.H"
+#include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-namespace Foam
+Foam::scalar Foam::readScalar(Istream& is)
 {
+    scalar val;
+    is >> val;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-scalar readScalar(Istream& is)
-{
-    scalar rs;
-    is >> rs;
-
-    return rs;
+    return val;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

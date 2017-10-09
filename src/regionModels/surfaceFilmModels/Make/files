@@ -1,6 +1,7 @@
 /* Surface film models */
 surfaceFilmModel/surfaceFilmModel.C
 surfaceFilmModel/surfaceFilmModelNew.C
+surfaceFilmRegionModel/surfaceFilmRegionModel.C
 noFilm/noFilm.C
 kinematicSingleLayer/kinematicSingleLayer.C
 thermoSingleLayer/thermoSingleLayer.C
@@ -26,6 +27,10 @@ $(KINEMATICMODELS)/injectionModel/drippingInjection/drippingInjection.C
 $(KINEMATICMODELS)/injectionModel/BrunDrippingInjection/BrunDrippingInjection.C
 $(KINEMATICMODELS)/injectionModel/patchInjection/patchInjection.C
 $(KINEMATICMODELS)/injectionModel/curvatureSeparation/curvatureSeparation.C
+
+$(KINEMATICMODELS)/transferModels/transferModel/transferModel.C
+$(KINEMATICMODELS)/transferModels/transferModel/transferModelNew.C
+$(KINEMATICMODELS)/transferModels/transferModelList/transferModelList.C
 
 $(KINEMATICMODELS)/filmThermoModel/filmThermoModel/filmThermoModel.C
 $(KINEMATICMODELS)/filmThermoModel/filmThermoModel/filmThermoModelNew.C
@@ -61,6 +66,7 @@ $(THERMOMODELS)/filmViscosityModel/constantViscosity/constantViscosity.C
 $(THERMOMODELS)/filmViscosityModel/liquidViscosity/liquidViscosity.C
 $(THERMOMODELS)/filmViscosityModel/thixotropicViscosity/thixotropicViscosity.C
 $(THERMOMODELS)/filmViscosityModel/ArrheniusViscosity/ArrheniusViscosity.C
+$(THERMOMODELS)/filmViscosityModel/function1Viscosity/function1Viscosity.C
 
 
 /* Boundary conditions */

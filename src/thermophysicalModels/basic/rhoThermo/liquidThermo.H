@@ -28,6 +28,7 @@ License
 #include "pureMixture.H"
 #include "thermo.H"
 #include "sensibleInternalEnergy.H"
+#include "sensibleEnthalpy.H"
 #include "thermophysicalPropertiesSelector.H"
 #include "liquidProperties.H"
 
@@ -50,6 +51,20 @@ typedef heRhoThermo
         >
     >
 > heRhoThermopureMixtureliquidProperties;
+
+
+typedef heRhoThermo
+<
+    rhoThermo,
+    pureMixture
+    <
+        species::thermo
+        <
+            thermophysicalPropertiesSelector<liquidProperties>,
+            sensibleEnthalpy
+        >
+    >
+> heRhoThermopureMixtureEnthalpyliquidProperties;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

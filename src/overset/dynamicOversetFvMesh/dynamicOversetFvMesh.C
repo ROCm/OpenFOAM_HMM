@@ -286,10 +286,11 @@ bool Foam::dynamicOversetFvMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
-    bool ok = dynamicMotionSolverFvMesh::writeObject(fmt, ver, cmp);
+    bool ok = dynamicMotionSolverFvMesh::writeObject(fmt, ver, cmp, valid);
 
     // For postprocessing : write cellTypes and zoneID
     {
@@ -318,7 +319,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
             volTypes[cellI] = cellTypes[cellI];
         }
         volTypes.correctBoundaryConditions();
-        volTypes.writeObject(fmt, ver, cmp);
+        volTypes.writeObject(fmt, ver, cmp, valid);
     }
     {
         volScalarField volZoneID
@@ -345,7 +346,7 @@ bool Foam::dynamicOversetFvMesh::writeObject
             volZoneID[cellI] = zoneID[cellI];
         }
         volZoneID.correctBoundaryConditions();
-        volZoneID.writeObject(fmt, ver, cmp);
+        volZoneID.writeObject(fmt, ver, cmp, valid);
     }
     return ok;
 }

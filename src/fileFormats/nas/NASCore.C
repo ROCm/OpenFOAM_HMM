@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,39 +24,60 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASCore.H"
-#include "StringStream.H"
+#include "parsing.H"
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::scalar Foam::fileFormats::NASCore::readNasScalar(const string& str)
+{
+    const auto signPos = str.find_last_of("+-");
+
+    if
+    (
+        signPos == std::string::npos
+     || signPos == 0
+     || str[signPos-1] == 'E' || str[signPos-1] == 'e'
+     || isspace(str[signPos-1])
+    )
+    {
+        // A normal number format
+        return readScalar(str);
+    }
+
+
+    // Nastran compact number format.
+    // Eg, "1234-2" instead of "1234E-2"
+
+    scalar value = 0;
+    int exponent = 0; // Any integer
+
+    if
+    (
+        readScalar(str.substr(0, signPos), value)   // Mantissa
+     && readInt(str.substr(signPos),  exponent)     // Exponent (with sign)
+    )
+    {
+        // Note: this does not catch underflow/overflow
+        // (especially when scalar is a float)
+        value *= ::pow(10, exponent);
+    }
+    else
+    {
+        FatalIOErrorInFunction("unknown")
+            << parsing::errorNames[parsing::errorType::GENERAL] << str
+            << exit(FatalIOError);
+
+        value = 0;
+    }
+
+    return value;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::NASCore::NASCore()
 {}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-Foam::scalar Foam::fileFormats::NASCore::parseNASCoord
-(
-    const string& s
-)
-{
-    size_t expSign = s.find_last_of("+-");
-
-    if (expSign != string::npos && expSign > 0 && !isspace(s[expSign-1]))
-    {
-        scalar mantissa = readScalar(IStringStream(s.substr(0, expSign))());
-        scalar exponent = readScalar(IStringStream(s.substr(expSign+1))());
-
-        if (s[expSign] == '-')
-        {
-            exponent = -exponent;
-        }
-        return mantissa * pow(10, exponent);
-    }
-    else
-    {
-        return readScalar(IStringStream(s)());
-    }
-}
 
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -281,10 +281,10 @@ public:
             inline T argRead(const label index) const;
 
             //- Return options
-            inline const Foam::HashTable<string>& options() const;
+            inline const HashTable<string>& options() const;
 
             //- Return non-const access to options
-            inline Foam::HashTable<string>& options();
+            inline HashTable<string>& options();
 
             //- Return the argument string associated with the named option
             inline const string& option(const word& opt) const;
@@ -302,7 +302,7 @@ public:
             //- Read a value from the named option if present.
             //  Return true if the named option was found.
             template<class T>
-            inline bool optionReadIfPresent(const word& opt, T&) const;
+            inline bool optionReadIfPresent(const word& opt, T& val) const;
 
             //- Read a value from the named option if present.
             //  Return true if the named option was found, otherwise
@@ -311,7 +311,7 @@ public:
             inline bool optionReadIfPresent
             (
                 const word& opt,
-                T&,
+                T& val,
                 const T& deflt
             ) const;
 
@@ -328,7 +328,7 @@ public:
             template<class T>
             List<T> optionReadList(const word& opt) const
             {
-                return readList<T>(optionLookup(opt)());
+                return Foam::readList<T>(optionLookup(opt)());
             }
 
 
@@ -369,7 +369,7 @@ public:
 
             //- Add extra notes for the usage information
             //  This string is used "as-is" without additional formatting
-            static void addNote(const string&);
+            static void addNote(const string& note);
 
             //- Remove option from validOptions and from optionUsage
             static void removeOption(const word& opt);

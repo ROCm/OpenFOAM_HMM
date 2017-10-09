@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,8 +105,8 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         // For each reaction compute omegai
         scalar omegai = this->chemistry_.omega
         (
-         R, c1, T, p, pf, cf, lRef, pr, cr, rRef
-         );
+            R, c1, T, p, pf, cf, lRef, pr, cr, rRef
+        );
 
 
         // Then for each pair of species composing this reaction,
@@ -240,7 +240,7 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
         Q.push(q);
     }
 
-    // Depth first search with rAB
+    // Breadth first search with rAB
     while (!Q.empty())
     {
         label u = Q.pop();
@@ -253,15 +253,17 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
                 label otherSpec = rABOtherSpec(u, v);
                 scalar rAB = rABNum(u, v)/Den;
 
-                if (rAB>1)
+                if (rAB > 1)
                 {
                     Info<< "Badly Conditioned rAB : " << rAB
-                        << "species involved : " << u << "," << otherSpec
-                        << endl;
-                    rAB = 1;
+                    << " for species : "
+                    << this->chemistry_.Y()[u].name() << ","
+                    << this->chemistry_.Y()[otherSpec].name()
+                    << endl;
+                    rAB = 1.0;
                 }
 
-                // Do a DFS on B only if rAB is above the tolerance and if the
+                // Include B only if rAB is above the tolerance and if the
                 // species was not searched before
                 if
                 (

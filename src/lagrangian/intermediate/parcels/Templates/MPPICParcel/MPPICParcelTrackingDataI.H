@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,14 +28,14 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class ParcelType>
-template<class CloudType>
-inline Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::TrackingData
+template<class TrackCloudType>
+inline Foam::MPPICParcel<ParcelType>::trackingData::trackingData
 (
-    CloudType& cloud,
+    const TrackCloudType& cloud,
     trackPart part
 )
 :
-    ParcelType::template TrackingData<CloudType>(cloud),
+    ParcelType::trackingData(cloud),
     volumeAverage_
     (
         AveragingMethod<scalar>::New
@@ -139,11 +139,10 @@ inline Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::TrackingData
 
 
 template<class ParcelType>
-template<class CloudType>
-inline void
-Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::updateAverages
+template<class TrackCloudType>
+inline void Foam::MPPICParcel<ParcelType>::trackingData::updateAverages
 (
-    CloudType& cloud
+    const TrackCloudType& cloud
 )
 {
     // zero the sums
@@ -173,17 +172,17 @@ Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::updateAverages
     AveragingMethod<scalar>& weightAverage = weightAveragePtr();
 
     // averaging sums
-    forAllConstIter(typename CloudType, cloud, iter)
+    forAllConstIter(typename TrackCloudType, cloud, iter)
     {
-        const typename CloudType::parcelType& p = iter();
-        const tetIndices tetIs(p.cell(), p.tetFace(), p.tetPt(), cloud.mesh());
+        const typename TrackCloudType::parcelType& p = iter();
+        const tetIndices tetIs = p.currentTetIndices();
 
         const scalar m = p.nParticle()*p.mass();
 
-        volumeAverage_->add(p.position(), tetIs, p.nParticle()*p.volume());
-        rhoAverage_->add(p.position(), tetIs, m*p.rho());
-        uAverage_->add(p.position(), tetIs, m*p.U());
-        massAverage_->add(p.position(), tetIs, m);
+        volumeAverage_->add(p.coordinates(), tetIs, p.nParticle()*p.volume());
+        rhoAverage_->add(p.coordinates(), tetIs, m*p.rho());
+        uAverage_->add(p.coordinates(), tetIs, m*p.U());
+        massAverage_->add(p.coordinates(), tetIs, m);
     }
     volumeAverage_->average();
     massAverage_->average();
@@ -191,16 +190,16 @@ Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::updateAverages
     uAverage_->average(massAverage_);
 
     // squared velocity deviation
-    forAllConstIter(typename CloudType, cloud, iter)
+    forAllConstIter(typename TrackCloudType, cloud, iter)
     {
-        const typename CloudType::parcelType& p = iter();
-        const tetIndices tetIs(p.cell(), p.tetFace(), p.tetPt(), cloud.mesh());
+        const typename TrackCloudType::parcelType& p = iter();
+        const tetIndices tetIs = p.currentTetIndices();
 
-        const vector u = uAverage_->interpolate(p.position(), tetIs);
+        const vector u = uAverage_->interpolate(p.coordinates(), tetIs);
 
         uSqrAverage_->add
         (
-            p.position(),
+            p.coordinates(),
             tetIs,
             p.nParticle()*p.mass()*magSqr(p.U() - u)
         );
@@ -210,14 +209,14 @@ Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::updateAverages
     // sauter mean radius
     radiusAverage_() = volumeAverage_();
     weightAverage = 0;
-    forAllConstIter(typename CloudType, cloud, iter)
+    forAllConstIter(typename TrackCloudType, cloud, iter)
     {
-        const typename CloudType::parcelType& p = iter();
-        const tetIndices tetIs(p.cell(), p.tetFace(), p.tetPt(), cloud.mesh());
+        const typename TrackCloudType::parcelType& p = iter();
+        const tetIndices tetIs = p.currentTetIndices();
 
         weightAverage.add
         (
-            p.position(),
+            p.coordinates(),
             tetIs,
             p.nParticle()*pow(p.volume(), 2.0/3.0)
         );
@@ -227,40 +226,36 @@ Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::updateAverages
 
     // collision frequency
     weightAverage = 0;
-    forAllConstIter(typename CloudType, cloud, iter)
+    forAllConstIter(typename TrackCloudType, cloud, iter)
     {
-        const typename CloudType::parcelType& p = iter();
-        tetIndices tetIs(p.cell(), p.tetFace(), p.tetPt(), cloud.mesh());
+        const typename TrackCloudType::parcelType& p = iter();
+        const tetIndices tetIs = p.currentTetIndices();
 
-        const scalar a = volumeAverage_->interpolate(p.position(), tetIs);
-        const scalar r = radiusAverage_->interpolate(p.position(), tetIs);
-        const vector u = uAverage_->interpolate(p.position(), tetIs);
+        const scalar a = volumeAverage_->interpolate(p.coordinates(), tetIs);
+        const scalar r = radiusAverage_->interpolate(p.coordinates(), tetIs);
+        const vector u = uAverage_->interpolate(p.coordinates(), tetIs);
 
         const scalar f = 0.75*a/pow3(r)*sqr(0.5*p.d() + r)*mag(p.U() - u);
 
-        frequencyAverage_->add(p.position(), tetIs, p.nParticle()*f*f);
+        frequencyAverage_->add(p.coordinates(), tetIs, p.nParticle()*f*f);
 
-        weightAverage.add(p.position(), tetIs, p.nParticle()*f);
+        weightAverage.add(p.coordinates(), tetIs, p.nParticle()*f);
     }
     frequencyAverage_->average(weightAverage);
 }
 
 
 template<class ParcelType>
-template<class CloudType>
-inline typename Foam::MPPICParcel<ParcelType>::template
-TrackingData<CloudType>::trackPart
-Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::part() const
+inline typename Foam::MPPICParcel<ParcelType>::trackingData::trackPart
+Foam::MPPICParcel<ParcelType>::trackingData::part() const
 {
     return part_;
 }
 
 
 template<class ParcelType>
-template<class CloudType>
-inline typename Foam::MPPICParcel<ParcelType>::template
-TrackingData<CloudType>::trackPart&
-Foam::MPPICParcel<ParcelType>::TrackingData<CloudType>::part()
+inline typename Foam::MPPICParcel<ParcelType>::trackingData::trackPart&
+Foam::MPPICParcel<ParcelType>::trackingData::part()
 {
     return part_;
 }

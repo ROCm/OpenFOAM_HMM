@@ -598,7 +598,7 @@ Foam::multiphaseSystem::nearInterface() const
         tnearInt.ref() = max
         (
             tnearInt(),
-            pos(phases()[phasei] - 0.01)*pos(0.99 - phases()[phasei])
+            pos0(phases()[phasei] - 0.01)*pos0(0.99 - phases()[phasei])
         );
     }
 
@@ -699,6 +699,9 @@ void Foam::multiphaseSystem::solve()
     {
         phaseModel& phase = phases()[phasei];
         phase.alphaRhoPhi() = fvc::interpolate(phase.rho())*phase.alphaPhi();
+
+        // Ensure the phase-fractions are bounded
+        phase.maxMin(0, 1);
     }
 
     calcAlphas();

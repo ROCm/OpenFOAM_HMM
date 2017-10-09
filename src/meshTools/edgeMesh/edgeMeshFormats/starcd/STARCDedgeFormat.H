@@ -44,9 +44,8 @@ SourceFiles
 #include "edgeMesh.H"
 #include "STARCDCore.H"
 
-#include "IFstream.H"
+#include "Fstream.H"
 #include "Ostream.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -121,6 +121,10 @@ public:
     };
 
 
+    //- Use base tracking data
+    typedef typename ParcelType::trackingData trackingData;
+
+
 protected:
 
     // Protected data
@@ -172,22 +176,31 @@ public:
 
     // Constructors
 
-        //- Construct from owner, position, and cloud owner
+        //- Construct from mesh, coordinates and topology
         //  Other properties initialised as null
         inline CollidingParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti
+        );
+
+        //- Construct from a position and a cell, searching for the rest of the
+        //  required topology. Other properties are initialised as null.
+        inline CollidingParcel
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli
         );
 
         //- Construct from components
         inline CollidingParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti,
@@ -207,7 +220,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct as a copy
@@ -286,8 +300,13 @@ public:
         // Tracking
 
             //- Move the parcel
-            template<class TrackData>
-            bool move(TrackData& td, const scalar trackTime);
+            template<class TrackCloudType>
+            bool move
+            (
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar trackTime
+            );
 
             //- Transform the physical properties of the particle
             //  according to the given transformation tensor

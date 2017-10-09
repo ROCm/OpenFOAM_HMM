@@ -26,6 +26,7 @@ License
 #include "GeometricField.H"
 #include "Time.H"
 #include "demandDrivenData.H"
+#include "dictionary.H"
 #include "localIOdictionary.H"
 #include "data.H"
 
@@ -76,13 +77,14 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::readFields()
         IOobject
         (
             this->name(),
-            this->time().timeName(),
+            this->instance(),
+            this->local(),
             this->db(),
-            IOobject::NO_READ,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
         ),
-        this->readStream(typeName)
+        typeName
     );
 
     this->close();
@@ -719,6 +721,17 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
 #endif
 
 
+template<class Type, template<class> class PatchField, class GeoMesh>
+Foam::tmp<Foam::GeometricField<Type, PatchField, GeoMesh>>
+Foam::GeometricField<Type, PatchField, GeoMesh>::clone() const
+{
+    return tmp<GeometricField<Type, PatchField, GeoMesh>>
+    (
+        new GeometricField<Type, PatchField, GeoMesh>(*this)
+    );
+}
+
+
 // * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
 
 template<class Type, template<class> class PatchField, class GeoMesh>
@@ -1137,6 +1150,20 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::min
 {
     Foam::min(primitiveFieldRef(), primitiveField(), dt.value());
     Foam::min(boundaryFieldRef(), boundaryField(), dt.value());
+}
+
+
+template<class Type, template<class> class PatchField, class GeoMesh>
+void Foam::GeometricField<Type, PatchField, GeoMesh>::maxMin
+(
+    const dimensioned<Type>& minDt,
+    const dimensioned<Type>& maxDt
+)
+{
+    Foam::max(primitiveFieldRef(), primitiveField(), minDt.value());
+    Foam::max(boundaryFieldRef(), boundaryField(), minDt.value());
+    Foam::min(primitiveFieldRef(), primitiveField(), maxDt.value());
+    Foam::min(boundaryFieldRef(), boundaryField(), maxDt.value());
 }
 
 

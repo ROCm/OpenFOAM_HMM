@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -419,8 +419,12 @@ Foam::scalar Foam::InjectionModel<CloudType>::averageParcelMass()
 
 
 template<class CloudType>
-template<class TrackData>
-void Foam::InjectionModel<CloudType>::inject(TrackData& td)
+template<class TrackCloudType>
+void Foam::InjectionModel<CloudType>::inject
+(
+    TrackCloudType& cloud,
+    typename CloudType::parcelType::trackingData& td
+)
 {
     if (!this->active())
     {
@@ -440,7 +444,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     {
         const scalar trackTime = this->owner().solution().trackTime();
         const polyMesh& mesh = this->owner().mesh();
-        typename TrackData::cloudType& cloud = td.cloud();
 
         // Duration of injection period during this timestep
         const scalar deltaT =
@@ -485,8 +488,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                     meshTools::constrainToMeshCentre(mesh, pos);
 
                     // Create a new parcel
-                    parcelType* pPtr =
-                        new parcelType(mesh, pos, celli, tetFacei, tetPti);
+                    parcelType* pPtr = new parcelType(mesh, pos, celli);
 
                     // Check/set new parcel thermo properties
                     cloud.setParcelThermoProperties(*pPtr, dt);
@@ -520,7 +522,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                         parcelsAdded++;
                         massAdded += pPtr->nParticle()*pPtr->mass();
 
-                        if (pPtr->move(td, dt))
+                        if (pPtr->move(cloud, td, dt))
                         {
                             pPtr->typeId() = injectorID_;
                             cloud.addParticle(pPtr);
@@ -547,10 +549,11 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 
 
 template<class CloudType>
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::InjectionModel<CloudType>::injectSteadyState
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    typename CloudType::parcelType::trackingData& td,
     const scalar trackTime
 )
 {
@@ -567,7 +570,6 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
     }
 
     const polyMesh& mesh = this->owner().mesh();
-    typename TrackData::cloudType& cloud = td.cloud();
 
     massTotal_ = massFlowRate_.value(mesh.time().value());
 
@@ -610,8 +612,7 @@ void Foam::InjectionModel<CloudType>::injectSteadyState
             meshTools::constrainToMeshCentre(mesh, pos);
 
             // Create a new parcel
-            parcelType* pPtr =
-                new parcelType(mesh, pos, celli, tetFacei, tetPti);
+            parcelType* pPtr = new parcelType(mesh, pos, celli);
 
             // Check/set new parcel thermo properties
             cloud.setParcelThermoProperties(*pPtr, 0.0);

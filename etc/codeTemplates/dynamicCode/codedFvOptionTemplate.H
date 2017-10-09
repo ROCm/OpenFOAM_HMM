@@ -36,10 +36,10 @@ Description
         const label fieldi
     )
 
-    setValue
+    constrain
     (
-         fvMatrix<Type}>& eqn,
-         const label fieldi
+        fvMatrix<Type>& eqn,
+        const label fieldi
     )
 
     where :
@@ -172,7 +172,7 @@ public:
             );
 
             //- Set value
-            virtual void setValue
+            virtual void constrain
             (
                 fvMatrix<${TemplateType}>& eqn,
                 const label fieldi

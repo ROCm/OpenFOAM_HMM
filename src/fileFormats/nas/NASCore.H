@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,8 +55,15 @@ public:
 
     // Public Member Functions
 
-        //- Do weird things to extract number
-        static scalar parseNASCoord(const string&);
+        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
+        static scalar readNasScalar(const string& str);
+
+        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
+        // \deprecated use readNasScalar instead (deprecated Sep 2017)
+        inline static scalar parseNASCoord(const string& str)
+        {
+            return readNasScalar(str);
+        }
 
 
     // Constructors

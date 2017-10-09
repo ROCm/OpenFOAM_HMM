@@ -134,6 +134,18 @@ class surfMeshSamplers
             const UList<word>& names
         );
 
+        //- Access the sampling surfaces
+        inline const PtrList<surfMeshSampler>& surfaces() const
+        {
+            return static_cast<const PtrList<surfMeshSampler>&>(*this);
+        }
+
+        //- Access the sampling surfaces
+        inline PtrList<surfMeshSampler>& surfaces()
+        {
+            return static_cast<PtrList<surfMeshSampler>&>(*this);
+        }
+
 
         //- Filter acceptable fields types
         template<class Type>

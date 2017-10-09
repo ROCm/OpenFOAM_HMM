@@ -59,7 +59,7 @@ class linearRamp
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const linearRamp&);
+        void operator=(const linearRamp&) = delete;
 
 
 public:
@@ -85,7 +85,7 @@ public:
     // Member Functions
 
         //- Return value for time t
-        scalar value(const scalar t) const;
+        virtual inline scalar value(const scalar t) const;
 };
 
 
@@ -93,6 +93,10 @@ public:
 
 } // End namespace Function1Types
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "linearRampI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

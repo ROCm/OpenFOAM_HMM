@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ namespace surfaceFilmModels
 
 defineTypeNameAndDebug(thermoSingleLayer, 0);
 
-addToRunTimeSelectionTable(surfaceFilmModel, thermoSingleLayer, mesh);
+addToRunTimeSelectionTable(surfaceFilmRegionModel, thermoSingleLayer, mesh);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
@@ -181,10 +181,12 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
     const scalar deltaT = time_.deltaTValue();
     forAll(hsSpPrimaryBf, patchi)
     {
-        const scalarField& priMagSf =
-            primaryMesh().magSf().boundaryField()[patchi];
+        scalarField rpriMagSfdeltaT
+        (
+            (1.0/deltaT)/primaryMesh().magSf().boundaryField()[patchi]
+        );
 
-        hsSpPrimaryBf[patchi] /= priMagSf*deltaT;
+        hsSpPrimaryBf[patchi] *= rpriMagSfdeltaT;
     }
 
     // Retrieve the source fields from the primary region via direct mapped
@@ -192,17 +194,6 @@ void thermoSingleLayer::transferPrimaryRegionSourceFields()
     // - fields require transfer of values for both patch AND to push the
     //   values into the first layer of internal cells
     hsSp_.correctBoundaryConditions();
-
-    // Apply enthalpy source as difference between incoming and actual states
-    hsSp_ -= rhoSp_*hs_;
-
-    if (time().outputTime())
-    {
-        if (debug)
-        {
-            hsSp_.write();
-        }
-    }
 }
 
 
@@ -230,7 +221,7 @@ void thermoSingleLayer::correctAlpha()
     else
     {
         alpha_ ==
-            pos(delta_ - dimensionedScalar("deltaWet", dimLength, deltaWet_));
+            pos0(delta_ - dimensionedScalar("deltaWet", dimLength, deltaWet_));
     }
 }
 
@@ -246,48 +237,49 @@ void thermoSingleLayer::updateSubmodels()
     htcs_->correct();
     htcw_->correct();
 
-    scalarField availableMass(alpha_*availableMass_);
+    // Update radiation
+    radiation_->correct();
+
+    // Update injection model - mass returned is mass available for injection
+    injection_.correct(availableMass_, cloudMassTrans_, cloudDiameterTrans_);
 
     phaseChange_->correct
     (
         time_.deltaTValue(),
-        availableMass,
-        primaryMassPCTrans_,
-        primaryEnergyPCTrans_
+        availableMass_,
+        primaryMassTrans_,
+        primaryEnergyTrans_
     );
 
-    // Update radiation
-    radiation_->correct();
-
-    // Update kinematic sub-models
-    kinematicSingleLayer::updateSubmodels();
-
-    // Update source fields
-    hsSp_ += primaryEnergyPCTrans_/magSf()/time().deltaT();
-    rhoSp_ += primaryMassPCTrans_/magSf()/time().deltaT();
+    const volScalarField rMagSfDt((1/time().deltaT())/magSf());
 
     // Vapour recoil pressure
-    pSp_ -= sqr(primaryMassPCTrans_/magSf()/time().deltaT())/2.0/rhoPrimary_;
+    pSp_ -= sqr(rMagSfDt*primaryMassTrans_)/(2*rhoPrimary_);
+
+    // Update transfer model - mass returned is mass available for transfer
+    transfer_.correct(availableMass_, primaryMassTrans_, primaryEnergyTrans_);
+
+    // Update source fields
+    rhoSp_ += rMagSfDt*(cloudMassTrans_ + primaryMassTrans_);
+    hsSp_ += rMagSfDt*(cloudMassTrans_*hs_ + primaryEnergyTrans_);
+
+    turbulence_->correct();
 }
 
 
 tmp<fvScalarMatrix> thermoSingleLayer::q(volScalarField& hs) const
 {
-//    Only apply heat transfer where the film is present
-//    - leads to temperature unboundedness?
-//    volScalarField boundedAlpha(max(alpha_, ROOTVSMALL));
-//    volScalarField htcst(htcs_->h()*boundedAlpha);
-//    volScalarField htcwt(htcw_->h()*boundedAlpha);
+    const volScalarField alpha(pos(delta_ - deltaSmall_));
 
     return
     (
         // Heat-transfer to the primary region
       - fvm::Sp(htcs_->h()/Cp_, hs)
-      + htcs_->h()*(hs/Cp_ + alpha_*(TPrimary_ - T_))
+      + htcs_->h()*(hs/Cp_ + alpha*(TPrimary_ - T_))
 
         // Heat-transfer to the wall
       - fvm::Sp(htcw_->h()/Cp_, hs)
-      + htcw_->h()*(hs/Cp_ + alpha_*(Tw_- T_))
+      + htcw_->h()*(hs/Cp_ + alpha*(Tw_- T_))
     );
 }
 
@@ -313,8 +305,6 @@ void thermoSingleLayer::solveEnergy()
       + fvm::div(phi_, hs_)
      ==
       - hsSp_
-//      - fvm::SuSp(rhoSp_, hs_)
-      - rhoSp_*hs_
       + q(hs_)
       + radiation_->Shs()
     );
@@ -429,25 +419,11 @@ thermoSingleLayer::thermoSingleLayer
         hsBoundaryTypes()
     ),
 
-    primaryMassPCTrans_
+    primaryEnergyTrans_
     (
         IOobject
         (
-            "primaryMassPCTrans",
-            time().timeName(),
-            regionMesh(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        regionMesh(),
-        dimensionedScalar("zero", dimMass, 0),
-        zeroGradientFvPatchScalarField::typeName
-    ),
-    primaryEnergyPCTrans_
-    (
-        IOobject
-        (
-            "primaryEnergyPCTrans",
+            "primaryEnergyTrans",
             time().timeName(),
             regionMesh(),
             IOobject::NO_READ,
@@ -646,12 +622,7 @@ void thermoSingleLayer::preEvolveRegion()
     }
 
     kinematicSingleLayer::preEvolveRegion();
-
-    updateSurfaceTemperatures();
-
-    // Update phase change
-    primaryMassPCTrans_ == dimensionedScalar("zero", dimMass, 0.0);
-    primaryEnergyPCTrans_ == dimensionedScalar("zero", dimEnergy, 0.0);
+    primaryEnergyTrans_ == dimensionedScalar("zero", dimEnergy, 0.0);
 }
 
 
@@ -734,12 +705,6 @@ const volScalarField& thermoSingleLayer::hs() const
 }
 
 
-tmp<volScalarField> thermoSingleLayer::primaryMassTrans() const
-{
-    return primaryMassPCTrans_;
-}
-
-
 void thermoSingleLayer::info()
 {
     kinematicSingleLayer::info();
@@ -784,7 +749,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho() const
         const label filmPatchi = intCoupledPatchIDs()[i];
 
         scalarField patchMass =
-            primaryMassPCTrans_.boundaryField()[filmPatchi];
+            primaryMassTrans_.boundaryField()[filmPatchi];
 
         toPrimary(filmPatchi, patchMass);
 
@@ -794,7 +759,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho() const
 
         forAll(patchMass, j)
         {
-            Srho[cells[j]] = patchMass[j]/(V[cells[j]]*dt);
+            Srho[cells[j]] += patchMass[j]/(V[cells[j]]*dt);
         }
     }
 
@@ -838,7 +803,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho
             const label filmPatchi = intCoupledPatchIDs_[i];
 
             scalarField patchMass =
-                primaryMassPCTrans_.boundaryField()[filmPatchi];
+                primaryMassTrans_.boundaryField()[filmPatchi];
 
             toPrimary(filmPatchi, patchMass);
 
@@ -848,7 +813,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Srho
 
             forAll(patchMass, j)
             {
-                Srho[cells[j]] = patchMass[j]/(V[cells[j]]*dt);
+                Srho[cells[j]] += patchMass[j]/(V[cells[j]]*dt);
             }
         }
     }
@@ -876,8 +841,6 @@ tmp<volScalarField::Internal> thermoSingleLayer::Sh() const
             dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
         )
     );
-/*
-    phase change energy fed back into the film...
 
     scalarField& Sh = tSh.ref();
     const scalarField& V = primaryMesh().V();
@@ -888,7 +851,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Sh() const
         const label filmPatchi = intCoupledPatchIDs_[i];
 
         scalarField patchEnergy =
-            primaryEnergyPCTrans_.boundaryField()[filmPatchi];
+            primaryEnergyTrans_.boundaryField()[filmPatchi];
 
         toPrimary(filmPatchi, patchEnergy);
 
@@ -901,7 +864,7 @@ tmp<volScalarField::Internal> thermoSingleLayer::Sh() const
             Sh[cells[j]] += patchEnergy[j]/(V[cells[j]]*dt);
         }
     }
-*/
+
     return tSh;
 }
 

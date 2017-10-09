@@ -41,8 +41,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "boundBox.H"
 #include "transformField.H"
 #include "Pair.H"
@@ -85,9 +84,9 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "scale",
-        "vector",
-        "scale by the specified amount - eg, '(0.001 0.001 0.001)' for a "
-        "uniform [mm] to [m] scaling"
+        "scalar | vector",
+        "scale by the specified amount - eg, for a uniform [mm] to [m] scaling "
+        "use either (0.001 0.001 0.001)' or simply '0.001'"
     );
     argList::addOption
     (
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
 
-        tensor T = rotationTensor(n1n2[0], n1n2[1]);
+        const tensor T = rotationTensor(n1n2[0], n1n2[1]);
 
         Info<< "Rotating points by " << T << endl;
 
@@ -151,10 +150,10 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        // Convert to radians
+        // degToRad
         v *= pi/180.0;
 
-        quaternion R(quaternion::rotationSequence::XYZ, v);
+        const quaternion R(quaternion::rotationSequence::XYZ, v);
 
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
@@ -166,29 +165,43 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-
-        // Convert to radians
+        // degToRad
         v *= pi/180.0;
 
-        scalar yaw = v.x();
-        scalar pitch = v.y();
-        scalar roll = v.z();
-
-        quaternion R = quaternion(vector(0, 0, 1), yaw);
-        R *= quaternion(vector(0, 1, 0), pitch);
-        R *= quaternion(vector(1, 0, 0), roll);
+        const quaternion R(quaternion::rotationSequence::ZYX, v);
 
         Info<< "Rotating points by quaternion " << R << endl;
         points = transform(R, points);
     }
 
-    if (args.optionReadIfPresent("scale", v))
+    if (args.optionFound("scale"))
     {
-        Info<< "Scaling points by " << v << endl;
+        // Use readList to handle single or multiple values
+        const List<scalar> scaling = args.optionReadList<scalar>("scale");
 
-        points.replace(vector::X, v.x()*points.component(vector::X));
-        points.replace(vector::Y, v.y()*points.component(vector::Y));
-        points.replace(vector::Z, v.z()*points.component(vector::Z));
+        if (scaling.size() == 1)
+        {
+            Info<< "Scaling points uniformly by " << scaling[0] << nl;
+            points *= scaling[0];
+        }
+        else if (scaling.size() == 3)
+        {
+            Info<< "Scaling points by ("
+                << scaling[0] << " "
+                << scaling[1] << " "
+                << scaling[2] << ")" << nl;
+
+            points.replace(vector::X, scaling[0]*points.component(vector::X));
+            points.replace(vector::Y, scaling[1]*points.component(vector::Y));
+            points.replace(vector::Z, scaling[2]*points.component(vector::Z));
+        }
+        else
+        {
+            FatalError
+                << "-scale with 1 or 3 components only" << nl
+                << "given: " << args["scale"] << endl
+                << exit(FatalError);
+        }
     }
 
     surf1.movePoints(points);

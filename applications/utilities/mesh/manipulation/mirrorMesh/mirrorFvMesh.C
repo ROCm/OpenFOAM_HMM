@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -242,10 +242,8 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     }
 
     // Mirror boundary faces patch by patch
-    labelList newToOldPatch(boundary().size(), -1);
-    labelList newPatchSizes(boundary().size(), -1);
+    labelList newPatchSizes(boundary().size(), 0);
     labelList newPatchStarts(boundary().size(), -1);
-    label nNewPatches = 0;
 
     forAll(boundaryMesh(), patchi)
     {
@@ -253,7 +251,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
         const label curPatchStart = boundaryMesh()[patchi].start();
         const boolList& curInserted = insertedBouFace[patchi];
 
-        newPatchStarts[nNewPatches] = nNewFaces;
+        newPatchStarts[patchi] = nNewFaces;
 
         // Master side
         for (label facei = 0; facei < curPatchSize; facei++)
@@ -299,14 +297,10 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
         }
 
         // If patch exists, grab the name and type of the original patch
-        if (nNewFaces > newPatchStarts[nNewPatches])
+        if (nNewFaces > newPatchStarts[patchi])
         {
-            newToOldPatch[nNewPatches] = patchi;
-
-            newPatchSizes[nNewPatches] =
-                nNewFaces - newPatchStarts[nNewPatches];
-
-            nNewPatches++;
+            newPatchSizes[patchi] =
+                nNewFaces - newPatchStarts[patchi];
         }
     }
 
@@ -314,12 +308,8 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     newFaces.setSize(nNewFaces);
     Info<< " New faces: " << nNewFaces << endl;
 
-    newToOldPatch.setSize(nNewPatches);
-    newPatchSizes.setSize(nNewPatches);
-    newPatchStarts.setSize(nNewPatches);
-
     Info<< "Mirroring patches. Old patches: " << boundary().size()
-        << " New patches: " << nNewPatches << endl;
+        << " New patches: " << boundary().size() << endl;
 
     Info<< "Mirroring cells.  Old cells: " << oldCells.size()
         << " New cells: " << 2*oldCells.size() << endl;
@@ -378,7 +368,7 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 
     forAll(p, patchi)
     {
-        p[patchi] = boundaryMesh()[newToOldPatch[patchi]].clone
+        p[patchi] = boundaryMesh()[patchi].clone
         (
             pMesh.boundaryMesh(),
             patchi,

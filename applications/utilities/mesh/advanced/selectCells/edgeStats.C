@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "polyMesh.H"
 #include "Ostream.H"
 #include "twoDPointCorrector.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -67,7 +68,6 @@ Foam::direction Foam::edgeStats::getNormalDir
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::edgeStats::edgeStats(const polyMesh& mesh)
 :
     mesh_(mesh),
@@ -143,10 +143,8 @@ Foam::scalar Foam::edgeStats::minLen(Ostream& os) const
 
     const edgeList& edges = mesh_.edges();
 
-    forAll(edges, edgeI)
+    for (const edge& e : edges)
     {
-        const edge& e = edges[edgeI];
-
         vector eVec(e.vec(mesh_.points()));
 
         scalar eMag = mag(eVec);
@@ -207,15 +205,6 @@ Foam::scalar Foam::edgeStats::minLen(Ostream& os) const
         return min(minX, min(minY, min(minZ, minOther)));
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

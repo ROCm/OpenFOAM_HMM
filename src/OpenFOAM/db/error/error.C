@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -182,7 +182,17 @@ void Foam::error::exit(const int errNo)
         abort();
     }
 
-    if (Pstream::parRun())
+    if (throwExceptions_)
+    {
+        // Make a copy of the error to throw
+        error errorException(*this);
+
+        // Reset the message buffer for the next error message
+        messageStreamPtr_->reset();
+
+        throw errorException;
+    }
+    else if (Pstream::parRun())
     {
         Perr<< endl << *this << endl
             << "\nFOAM parallel run exiting\n" << endl;
@@ -190,22 +200,9 @@ void Foam::error::exit(const int errNo)
     }
     else
     {
-        if (throwExceptions_)
-        {
-            // Make a copy of the error to throw
-            error errorException(*this);
-
-            // Reset the message buffer for the next error message
-            messageStreamPtr_->reset();
-
-            throw errorException;
-        }
-        else
-        {
-            Perr<< endl << *this << endl
-                << "\nFOAM exiting\n" << endl;
-            ::exit(1);
-        }
+        Perr<< endl << *this << endl
+            << "\nFOAM exiting\n" << endl;
+        ::exit(1);
     }
 }
 
@@ -226,7 +223,17 @@ void Foam::error::abort()
         ::abort();
     }
 
-    if (Pstream::parRun())
+    if (throwExceptions_)
+    {
+        // Make a copy of the error to throw
+        error errorException(*this);
+
+        // Reset the message buffer for the next error message
+        messageStreamPtr_->reset();
+
+        throw errorException;
+    }
+    else if (Pstream::parRun())
     {
         Perr<< endl << *this << endl
             << "\nFOAM parallel run aborting\n" << endl;
@@ -235,23 +242,10 @@ void Foam::error::abort()
     }
     else
     {
-        if (throwExceptions_)
-        {
-            // Make a copy of the error to throw
-            error errorException(*this);
-
-            // Reset the message buffer for the next error message
-            messageStreamPtr_->reset();
-
-            throw errorException;
-        }
-        else
-        {
-            Perr<< endl << *this << endl
-                << "\nFOAM aborting\n" << endl;
-            printStack(Perr);
-            ::abort();
-        }
+        Perr<< endl << *this << endl
+            << "\nFOAM aborting\n" << endl;
+        printStack(Perr);
+        ::abort();
     }
 }
 

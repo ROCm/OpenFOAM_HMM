@@ -109,7 +109,7 @@ private:
         void read(const dictionary& coeffs);
 
         //- Disallow default bitwise assignment
-        void operator=(const ramp&);
+        void operator=(const ramp&) = delete;
 
 
 public:
@@ -131,7 +131,7 @@ public:
     // Member Functions
 
         //- Return value for time t
-        scalar value(const scalar t) const = 0;
+        virtual scalar value(const scalar t) const = 0;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;

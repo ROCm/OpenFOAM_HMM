@@ -69,23 +69,32 @@ const Foam::Enum
 >
 Foam::functionObjects::fieldValues::surfaceFieldValue::operationTypeNames_
 {
+    // Normal operations
     { operationType::opNone, "none" },
+    { operationType::opMin, "min" },
+    { operationType::opMax, "max" },
     { operationType::opSum, "sum" },
-    { operationType::opWeightedSum, "weightedSum" },
     { operationType::opSumMag, "sumMag" },
     { operationType::opSumDirection, "sumDirection" },
     { operationType::opSumDirectionBalance, "sumDirectionBalance" },
     { operationType::opAverage, "average" },
-    { operationType::opWeightedAverage, "weightedAverage" },
     { operationType::opAreaAverage, "areaAverage" },
-    { operationType::opWeightedAreaAverage, "weightedAreaAverage" },
     { operationType::opAreaIntegrate, "areaIntegrate" },
-    { operationType::opWeightedAreaIntegrate, "weightedAreaIntegrate" },
-    { operationType::opMin, "min" },
-    { operationType::opMax, "max" },
     { operationType::opCoV, "CoV" },
     { operationType::opAreaNormalAverage, "areaNormalAverage" },
     { operationType::opAreaNormalIntegrate, "areaNormalIntegrate" },
+
+    // Using weighting
+    { operationType::opWeightedSum, "weightedSum" },
+    { operationType::opWeightedAverage, "weightedAverage" },
+    { operationType::opWeightedAreaAverage, "weightedAreaAverage" },
+    { operationType::opWeightedAreaIntegrate, "weightedAreaIntegrate" },
+
+    // Using absolute weighting
+    { operationType::opAbsWeightedSum, "absWeightedSum" },
+    { operationType::opAbsWeightedAverage, "absWeightedAverage" },
+    { operationType::opAbsWeightedAreaAverage, "absWeightedAreaAverage" },
+    { operationType::opAbsWeightedAreaIntegrate, "absWeightedAreaIntegrate" },
 };
 
 const Foam::Enum
@@ -244,7 +253,7 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
     {
         if (facePatchId_[i] != -1)
         {
-            label patchi = facePatchId_[i];
+            const label patchi = facePatchId_[i];
             globalFacesIs[i] += mesh_.boundaryMesh()[patchi].start();
         }
     }
@@ -279,9 +288,8 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
     // My own data first
     {
         const faceList& fcs = allFaces[Pstream::myProcNo()];
-        forAll(fcs, i)
+        for (const face& f : fcs)
         {
-            const face& f = fcs[i];
             face& newF = faces[nFaces++];
             newF.setSize(f.size());
             forAll(f, fp)
@@ -291,9 +299,9 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
         }
 
         const pointField& pts = allPoints[Pstream::myProcNo()];
-        forAll(pts, i)
+        for (const point& pt : pts)
         {
-            points[nPoints++] = pts[i];
+            points[nPoints++] = pt;
         }
     }
 
@@ -303,9 +311,8 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
         if (proci != Pstream::myProcNo())
         {
             const faceList& fcs = allFaces[proci];
-            forAll(fcs, i)
+            for (const face& f : fcs)
             {
-                const face& f = fcs[i];
                 face& newF = faces[nFaces++];
                 newF.setSize(f.size());
                 forAll(f, fp)
@@ -315,9 +322,9 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
             }
 
             const pointField& pts = allPoints[proci];
-            forAll(pts, i)
+            for (const point& pt : pts)
             {
-                points[nPoints++] = pts[i];
+                points[nPoints++] = pt;
             }
         }
     }
@@ -343,9 +350,9 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::combineMeshGeometry
         }
 
         points.transfer(newPoints);
-        forAll(faces, i)
+        for (face& f : faces)
         {
-            inplaceRenumber(oldToNew, faces[i]);
+            inplaceRenumber(oldToNew, f);
         }
     }
 }
@@ -447,43 +454,25 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::totalArea() const
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-bool Foam::functionObjects::fieldValues::surfaceFieldValue::needsSf() const
+bool Foam::functionObjects::fieldValues::surfaceFieldValue::usesSf() const
 {
-    // Many operations use the Sf field
+    // Only a few operations do not require the Sf field
     switch (operation_)
     {
         case opNone:
+        case opMin:
+        case opMax:
         case opSum:
         case opSumMag:
         case opAverage:
-        case opMin:
-        case opMax:
+        case opSumDirection:
+        case opSumDirectionBalance:
         {
             return false;
         }
         default:
         {
             return true;
-        }
-    }
-}
-
-
-bool Foam::functionObjects::fieldValues::surfaceFieldValue::needsWeight() const
-{
-    // Only a few operations use weight field
-    switch (operation_)
-    {
-        case opWeightedSum:
-        case opWeightedAverage:
-        case opWeightedAreaAverage:
-        case opWeightedAreaIntegrate:
-        {
-            return true;
-        }
-        default:
-        {
-            return false;
         }
     }
 }
@@ -582,18 +571,31 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::initialise
 
 
     weightFieldName_ = "none";
-    if (needsWeight())
+    if (usesWeight())
     {
+        if (regionType_ == stSampledSurface)
+        {
+            FatalIOErrorInFunction(dict)
+                << "Cannot use weighted operation '"
+                << operationTypeNames_[operation_]
+                << "' for sampledSurface"
+                << exit(FatalIOError);
+        }
+
         if (dict.readIfPresent("weightField", weightFieldName_))
         {
-            if (regionType_ == stSampledSurface)
-            {
-                FatalIOErrorInFunction(dict)
-                    << "Cannot use weightField for sampledSurface"
-                    << exit(FatalIOError);
-            }
-
             Info<< "    weight field  = " << weightFieldName_ << nl;
+        }
+        else
+        {
+            // Suggest possible alternative unweighted operation?
+            FatalIOErrorInFunction(dict)
+                << "The '" << operationTypeNames_[operation_]
+                << "' operation is missing a weightField." << nl
+                << "Either provide the weightField, "
+                << "use weightField 'none' to suppress weighting," << nl
+                << "or use a different operation."
+                << exit(FatalIOError);
         }
     }
 
@@ -660,10 +662,10 @@ void Foam::functionObjects::fieldValues::surfaceFieldValue::writeFileHeader
             os  << tab << "Area";
         }
 
-        forAll(fields_, i)
+        for (const word& fieldName : fields_)
         {
             os  << tab << operationTypeNames_[operation_]
-                << "(" << fields_[i] << ")";
+                << "(" << fieldName << ")";
         }
 
         os  << endl;
@@ -684,15 +686,15 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
     {
         case opSumDirection:
         {
-            vector n(dict_.lookup("direction"));
-            return gSum(pos(values*(Sf & n))*mag(values));
+            const vector n(dict_.lookup("direction"));
+            return gSum(pos0(values*(Sf & n))*mag(values));
         }
         case opSumDirectionBalance:
         {
-            vector n(dict_.lookup("direction"));
+            const vector n(dict_.lookup("direction"));
             const scalarField nv(values*(Sf & n));
 
-            return gSum(pos(nv)*mag(values) - neg(nv)*mag(values));
+            return gSum(pos0(nv)*mag(values) - neg(nv)*mag(values));
         }
         default:
         {
@@ -720,7 +722,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
             n /= mag(n) + ROOTVSMALL;
 
             const scalarField nv(n & values);
-            return gSum(pos(nv)*n*(nv));
+            return gSum(pos0(nv)*n*(nv));
         }
         case opSumDirectionBalance:
         {
@@ -728,7 +730,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::processValues
             n /= mag(n) + ROOTVSMALL;
 
             const scalarField nv(n & values);
-            return gSum(pos(nv)*n*(nv));
+            return gSum(pos0(nv)*n*(nv));
         }
         case opAreaNormalAverage:
         {
@@ -754,10 +756,17 @@ Foam::tmp<Foam::scalarField>
 Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
     const Field<scalar>& weightField
-)
+) const
 {
-    // pass through
-    return weightField;
+    if (usesMag())
+    {
+        return mag(weightField);
+    }
+    else
+    {
+        // pass through
+        return weightField;
+    }
 }
 
 
@@ -767,16 +776,21 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
     const Field<scalar>& weightField,
     const vectorField& Sf
-)
+) const
 {
     // scalar * Area
     if (returnReduce(weightField.empty(), andOp<bool>()))
     {
+        // No weight field - revert to unweighted form
         return mag(Sf);
+    }
+    else if (usesMag())
+    {
+        return mag(weightField * mag(Sf));
     }
     else
     {
-        return weightField * mag(Sf);
+        return (weightField * mag(Sf));
     }
 }
 
@@ -787,16 +801,21 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::weightingFactor
 (
     const Field<vector>& weightField,
     const vectorField& Sf
-)
+) const
 {
     // vector (dot) Area
     if (returnReduce(weightField.empty(), andOp<bool>()))
     {
+        // No weight field - revert to unweighted form
         return mag(Sf);
+    }
+    else if (usesMag())
+    {
+        return mag(weightField & Sf);
     }
     else
     {
-        return weightField & Sf;
+        return (weightField & Sf);
     }
 }
 
@@ -915,7 +934,7 @@ bool Foam::functionObjects::fieldValues::surfaceFieldValue::write()
 
     // Many operations use the Sf field
     vectorField Sf;
-    if (needsSf())
+    if (usesSf())
     {
         if (regionType_ == stSurface)
         {

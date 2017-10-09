@@ -64,7 +64,8 @@ Usage
         // Surface writer
         writer      ensight;
 
-        // Collate times for ensight output - ensures geometry is only written once
+        // Collate times for ensight output
+        // - ensures geometry is only written once
         writeOptions
         {
             ensight

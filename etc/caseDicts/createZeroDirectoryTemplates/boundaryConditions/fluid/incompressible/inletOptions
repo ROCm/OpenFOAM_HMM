@@ -41,7 +41,7 @@ flowSpecification
         U
         {
             type        flowRateInletVelocity;
-            volumeFlowRate ${:VALUE.volumeFlowRate};
+            volumetricFlowRate ${:VALUE.volumetricFlowRate};
             value       ${:VALUE.U};
         }
         p

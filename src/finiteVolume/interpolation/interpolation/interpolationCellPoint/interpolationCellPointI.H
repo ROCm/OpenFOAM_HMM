@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,8 @@ inline Type Foam::interpolationCellPoint<Type>::interpolate
     const cellPointWeight& cpw
 ) const
 {
-    const FixedList<scalar, 4>& weights = cpw.weights();
-    const FixedList<label, 3>& faceVertices = cpw.faceVertices();
+    const barycentric& weights = cpw.weights();
+    const triFace& faceVertices = cpw.faceVertices();
 
     Type t = this->psi_[cpw.cell()]*weights[0];
     t += psip_[faceVertices[0]]*weights[1];
@@ -58,7 +58,7 @@ inline Type Foam::interpolationCellPoint<Type>::interpolate
 template<class Type>
 inline Type Foam::interpolationCellPoint<Type>::interpolate
 (
-    const vector& position,
+    const barycentric& coordinates,
     const tetIndices& tetIs,
     const label facei
 ) const
@@ -79,26 +79,13 @@ inline Type Foam::interpolationCellPoint<Type>::interpolate
         }
     }
 
-    FixedList<scalar, 4> weights;
+    const triFace triIs = tetIs.faceTriIs(this->pMesh_);
 
-    tetIs.tet(this->pMesh_).barycentric(position, weights);
-
-    const faceList& pFaces = this->pMesh_.faces();
-
-    const face& f = pFaces[tetIs.face()];
-
-    // Order of weights is the same as that of the vertices of the tet, i.e.
-    // cellCentre, faceBasePt, facePtA, facePtB.
-
-    Type t = this->psi_[tetIs.cell()]*weights[0];
-
-    t += psip_[f[tetIs.faceBasePt()]]*weights[1];
-
-    t += psip_[f[tetIs.facePtA()]]*weights[2];
-
-    t += psip_[f[tetIs.facePtB()]]*weights[3];
-
-    return t;
+    return
+        this->psi_[tetIs.cell()]*coordinates[0]
+      + psip_[triIs[0]]*coordinates[1]
+      + psip_[triIs[1]]*coordinates[2]
+      + psip_[triIs[2]]*coordinates[3];
 }
 
 

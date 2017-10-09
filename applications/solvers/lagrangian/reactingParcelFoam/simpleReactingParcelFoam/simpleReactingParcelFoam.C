@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,9 +24,6 @@ License
 Application
     simpleReactingParcelFoam
 
-Group
-    grpLagrangianSolvers
-
 Description
     Steady state solver for compressible, turbulent flow with reacting,
     multiphase particle clouds and optional sources/constraints.
@@ -38,6 +35,7 @@ Description
 #include "basicReactingMultiphaseCloud.H"
 #include "rhoCombustionModel.H"
 #include "radiationModel.H"
+#include "IOporosityModelList.H"
 #include "fvOptions.H"
 #include "SLGThermo.H"
 #include "simpleControl.H"

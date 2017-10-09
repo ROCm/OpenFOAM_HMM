@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -171,7 +171,11 @@ public:
         label findIndex(const keyType&) const;
 
         //- Find patch index given a name
-        label findPatchID(const word& patchName) const;
+        label findPatchID
+        (
+            const word& patchName,
+            const bool allowNotFound = true
+        ) const;
 
         //- Find patch indices for a given polyPatch type
         template<class Type>
@@ -236,7 +240,8 @@ public:
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,
-            IOstream::compressionType cmp
+            IOstream::compressionType cmp,
+            const bool valid
         ) const;
 
 
