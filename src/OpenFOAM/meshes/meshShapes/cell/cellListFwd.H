@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,46 +21,30 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::edgeList
+Header
+    cellListFwd.H
 
 Description
-    A List of edges.
-
-Typedef
-    Foam::edgeUList
-
-Description
-    A UList of edges.
-
-Typedef
-    Foam::edgeSubList
-
-Description
-    A SubList of edges.
-
-Typedef
-    Foam::edgeListList
-
-Description
-    A List of edgeList.
+    Forwards for various types of cell lists
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeList_H
-#define edgeList_H
+#ifndef cellListFwd_H
+#define cellListFwd_H
 
-#include "edge.H"
+#include "List.H"
 #include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef UList<edge> edgeUList;
-    typedef List<edge> edgeList;
-    typedef SubList<edge> edgeSubList;
-    typedef List<edgeList> edgeListList;
+    class cell;
+
+    typedef UList<cell> cellUList;
+    typedef List<cell> cellList;
+    typedef SubList<cell> cellSubList;
+    typedef List<cellList> cellListList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,19 +25,25 @@ Typedef
     Foam::labelList
 
 Description
-    A List of labels
+    A List of labels.
+
+Typedef
+    Foam::labelSubList
+
+Description
+    A SubList of labels.
 
 Typedef
     Foam::labelListList
 
 Description
-    A List of labelList
+    A List of labelList.
 
 Typedef
     Foam::labelListListList
 
 Description
-    A List of labelListList
+    A List of labelListList.
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,14 +52,16 @@ Description
 
 #include "label.H"
 #include "List.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    // Note: frequently used UList version is located in container itself
+    // Note: frequently used labelUList is defined in UList itself
 
     typedef List<label> labelList;
+    typedef SubList<label> labelSubList;
     typedef List<labelList> labelListList;
     typedef List<labelListList> labelListListList;
 }

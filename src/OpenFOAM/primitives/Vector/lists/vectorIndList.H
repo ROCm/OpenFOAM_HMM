@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,45 +22,33 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::edgeList
+    Foam::vectorIndList
 
 Description
-    A List of edges.
+    An IndirectList of vectors.
 
 Typedef
-    Foam::edgeUList
+    Foam::vectorUIndList
 
 Description
-    A UList of edges.
-
-Typedef
-    Foam::edgeSubList
-
-Description
-    A SubList of edges.
-
-Typedef
-    Foam::edgeListList
-
-Description
-    A List of edgeList.
+    A UIndirectList of vectors.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeList_H
-#define edgeList_H
+#ifndef vectorIndList_H
+#define vectorIndList_H
 
-#include "edge.H"
-#include "SubList.H"
+// Include all normal list typedefs as well
+#include "vectorList.H"
+#include "IndirectList.H"
+#include "UIndirectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef UList<edge> edgeUList;
-    typedef List<edge> edgeList;
-    typedef SubList<edge> edgeSubList;
-    typedef List<edgeList> edgeListList;
+    typedef IndirectList<vector>  vectorIndList;
+    typedef UIndirectList<vector> vectorUIndList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

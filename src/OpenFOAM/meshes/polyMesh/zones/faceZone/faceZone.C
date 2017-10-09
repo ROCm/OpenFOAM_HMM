@@ -43,6 +43,23 @@ namespace Foam
 
 const char* const Foam::faceZone::labelsName = "faceLabels";
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::faceZone::setFlipMap(const bool flipValue)
+{
+    // Match size for flipMap
+    if (flipMap_.size() == this->size())
+    {
+        flipMap_ = flipValue;
+    }
+    else
+    {
+        // Avoid copying old values on resize
+        flipMap_.clear();
+        flipMap_.setSize(this->size(), flipValue);
+    }
+}
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -128,8 +145,8 @@ void Foam::faceZone::calcCellLayers() const
 
         forAll(mf, facei)
         {
-            label ownCelli = own[mf[facei]];
-            label neiCelli =
+            const label ownCelli = own[mf[facei]];
+            const label neiCelli =
             (
                 zoneMesh().mesh().isInternalFace(mf[facei])
               ? nei[mf[facei]]
@@ -386,6 +403,30 @@ void Foam::faceZone::resetAddressing
 }
 
 
+void Foam::faceZone::resetAddressing
+(
+    const labelUList& addr,
+    const bool flipValue
+)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+    setFlipMap(flipValue);
+}
+
+
+void Foam::faceZone::resetAddressing
+(
+    const Xfer<labelList>& addr,
+    const bool flipValue
+)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+    setFlipMap(flipValue);
+}
+
+
 void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
 {
     clearAddressing();
@@ -511,11 +552,11 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
 }
 
 
-void Foam::faceZone::movePoints(const pointField& p)
+void Foam::faceZone::movePoints(const pointField& pts)
 {
     if (patchPtr_)
     {
-        patchPtr_->movePoints(p);
+        patchPtr_->movePoints(pts);
     }
 }
 

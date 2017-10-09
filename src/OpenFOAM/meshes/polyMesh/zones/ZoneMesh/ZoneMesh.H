@@ -176,7 +176,7 @@ public:
         //- Return zone index for the first match, return -1 if not found
         label findIndex(const keyType& key) const;
 
-        //- Find zone index given a name
+        //- Find zone index given a name, return -1 if not found
         label findZoneID(const word& zoneName) const;
 
         //- Mark cells that match the zone specification
@@ -191,12 +191,12 @@ public:
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
 
-        //- Check whether all procs have all zones and in same order. Return
-        //  true if in error.
+        //- Check whether all procs have all zones and in same order.
+        //  \return True if any errors.
         bool checkParallelSync(const bool report = false) const;
 
         //- Correct zone mesh after moving points
-        void movePoints(const pointField& p);
+        void movePoints(const pointField& pts);
 
         //- writeData member function required by regIOobject
         bool writeData(Ostream& os) const;

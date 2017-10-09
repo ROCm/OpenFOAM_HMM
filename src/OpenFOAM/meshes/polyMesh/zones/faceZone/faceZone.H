@@ -55,7 +55,7 @@ class mapPolyMesh;
 // Forward declaration of friend functions and operators
 
 class faceZone;
-Ostream& operator<<(Ostream&, const faceZone&);
+Ostream& operator<<(Ostream& os, const faceZone& zn);
 
 
 /*---------------------------------------------------------------------------*\
@@ -66,46 +66,43 @@ class faceZone
 :
     public zone
 {
-    // Private data
-
-        //- The name associated with the zone-labels dictionary entry
-        static const word labelsName_;
-
-
     // Private Member Functions
 
+        //- Set flip-map to constant value
+        void setFlipMap(const bool flipValue);
+
         //- Disallow default bitwise copy construct
-        faceZone(const faceZone&);
+        faceZone(const faceZone&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const faceZone&);
+        void operator=(const faceZone&) = delete;
 
 
 protected:
 
     // Protected data
 
-        //- Flip map for all faces in the zone.  Set to true if the
-        //  face needs to be flipped to achieve the correct orientation.
+        //- Flip map for all faces in the zone.
+        //  Use true if the face needs flipping for the correct orientation.
         boolList flipMap_;
 
         //- Reference to zone list
         const faceZoneMesh& zoneMesh_;
 
 
-        // Demand-driven private data
+      // Demand-driven data
 
-            //- Primitive patch made out of correctly flipped faces
-            mutable primitiveFacePatch* patchPtr_;
+        //- Primitive patch made out of correctly flipped faces
+        mutable primitiveFacePatch* patchPtr_;
 
-            //- Master cell layer
-            mutable labelList* masterCellsPtr_;
+        //- Master cell layer
+        mutable labelList* masterCellsPtr_;
 
-            //- Slave cell layer
-            mutable labelList* slaveCellsPtr_;
+        //- Slave cell layer
+        mutable labelList* slaveCellsPtr_;
 
-            //- Global edge addressing
-            mutable labelList* mePtr_;
+        //- Global edge addressing
+        mutable labelList* mePtr_;
 
 
     // Protected Member Functions
@@ -168,38 +165,38 @@ public:
             const Xfer<labelList>& addr,
             const Xfer<boolList>& fm,
             const label index,
-            const faceZoneMesh&
+            const faceZoneMesh& zm
         );
 
         //- Construct from dictionary
         faceZone
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const label index,
-            const faceZoneMesh&
+            const faceZoneMesh& zm
         );
 
         //- Construct given the original zone and resetting the
         //  face list and zone mesh information
         faceZone
         (
-            const faceZone&,
+            const faceZone& fz,
             const labelUList& addr,
             const boolList& fm,
             const label index,
-            const faceZoneMesh&
+            const faceZoneMesh& zm
         );
 
-        //- Construct given the original zone, resetting the
-        //  face list and zone mesh information
+        //- Construct given the original zone,
+        //  resetting the face list and zone mesh information
         faceZone
         (
-            const faceZone&,
+            const faceZone& fz,
             const Xfer<labelList>& addr,
             const Xfer<boolList>& fm,
             const label index,
-            const faceZoneMesh&
+            const faceZoneMesh& zm
         );
 
         //- Construct and return a clone, resetting the zone mesh
@@ -235,9 +232,9 @@ public:
         static autoPtr<faceZone> New
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const label index,
-            const faceZoneMesh&
+            const faceZoneMesh& zm
         );
 
 
@@ -246,6 +243,9 @@ public:
 
 
     // Member Functions
+
+        //- Return zoneMesh reference
+        const faceZoneMesh& zoneMesh() const;
 
         //- Return face flip map
         const boolList& flipMap() const
@@ -259,52 +259,71 @@ public:
         //- Return reference to primitive patch
         const primitiveFacePatch& operator()() const;
 
-        //- Return zoneMesh reference
-        const faceZoneMesh& zoneMesh() const;
 
+      // Addressing into mesh
 
-        // Addressing into mesh
+        //- Return labels of master cells (cells next to the master face
+        //  zone in the prescribed direction)
+        const labelList& masterCells() const;
 
-            //- Return labels of master cells (cells next to the master face
-            //  zone in the prescribed direction)
-            const labelList& masterCells() const;
+        //- Return labels of slave cells
+        const labelList& slaveCells() const;
 
-            //- Return labels of slave cells
-            const labelList& slaveCells() const;
-
-            //- Return global edge index for local edges
-            const labelList& meshEdges() const;
+        //- Return global edge index for local edges
+        const labelList& meshEdges() const;
 
 
         //- Clear addressing
         virtual void clearAddressing();
 
-        //- Reset addressing and flip map (clearing demand-driven data)
-        virtual void resetAddressing(const labelUList&, const boolList&);
+        //- Reset addressing and flip map.
+        //  Clears demand-driven data.
+        virtual void resetAddressing
+        (
+            const labelUList& addr,
+            const boolList& flipMap
+        );
+
+        //- Reset addressing - use constant flip map
+        //  Clears demand-driven data.
+        virtual void resetAddressing
+        (
+            const labelUList& addr,
+            const bool flipValue
+        );
+
+        //- Reset addressing - use constant flip map
+        //  Clears demand-driven data.
+        virtual void resetAddressing
+        (
+            const Xfer<labelList>& addr,
+            const bool flipValue
+        );
 
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 
-        //- Check whether all procs have faces synchronised. Return
-        //  true if in error.
+        //- Check whether all procs have faces synchronised.
+        //  \return True if any errors.
         virtual bool checkParallelSync(const bool report = false) const;
 
         //- Correct patch after moving points
-        virtual void movePoints(const pointField&);
+        virtual void movePoints(const pointField& pts);
 
         //- Update for changes in topology
-        virtual void updateMesh(const mapPolyMesh&);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
         //- Write dictionary
-        virtual void writeDict(Ostream&) const;
+        virtual void writeDict(Ostream& os) const;
+
 
     // I-O
 
         //- Ostream Operator
-        friend Ostream& operator<<(Ostream&, const faceZone&);
+        friend Ostream& operator<<(Ostream& os, const faceZone& zn);
 };
 
 

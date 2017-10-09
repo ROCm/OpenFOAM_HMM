@@ -247,17 +247,7 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::whichZone
     const label objectIndex
 ) const
 {
-    const Map<label>& zm = zoneMap();
-    Map<label>::const_iterator zmIter = zm.find(objectIndex);
-
-    if (zmIter == zm.end())
-    {
-        return -1;
-    }
-    else
-    {
-        return zmIter();
-    }
+    return zoneMap().lookup(objectIndex, -1);
 }
 
 
@@ -579,13 +569,13 @@ bool Foam::ZoneMesh<ZoneType, MeshType>::checkParallelSync
 
 
 template<class ZoneType, class MeshType>
-void Foam::ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& p)
+void Foam::ZoneMesh<ZoneType, MeshType>::movePoints(const pointField& pts)
 {
     PtrList<ZoneType>& zones = *this;
 
     forAll(zones, zonei)
     {
-        zones[zonei].movePoints(p);
+        zones[zonei].movePoints(pts);
     }
 }
 

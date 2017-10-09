@@ -49,7 +49,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class zone;
-Ostream& operator<<(Ostream&, const zone&);
+Ostream& operator<<(Ostream& os, const zone& zn);
 
 /*---------------------------------------------------------------------------*\
                            Class zone Declaration
@@ -59,6 +59,11 @@ class zone
 :
     public labelList
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        zone(const zone&) = delete;
+
 
 protected:
 
@@ -71,19 +76,16 @@ protected:
         label index_;
 
 
-        // Demand-driven private data
+      // Demand-driven private data
 
-            //- Map of labels in zone for fast location lookup
-            mutable Map<label>* lookupMapPtr_;
+        //- Map of labels in zone for fast location lookup
+        mutable Map<label>* lookupMapPtr_;
 
 
     // Protected Member Functions
 
         //- Construct the look-up map
         void calcLookupMap() const;
-
-        //- Disallow default bitwise copy construct
-        zone(const zone&);
 
 
 public:
@@ -114,7 +116,7 @@ public:
         zone
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const word& labelsName,
             const label index
         );
@@ -123,7 +125,7 @@ public:
         //  cell list and zone mesh information
         zone
         (
-            const zone&,
+            const zone& zn,
             const labelUList& addr,
             const label index
         );
@@ -132,7 +134,7 @@ public:
         //  cell list and zone mesh information
         zone
         (
-            const zone&,
+            const zone& zn,
             const Xfer<labelList>& addr,
             const label index
         );
@@ -178,20 +180,20 @@ public:
         ) const;
 
         //- Correct patch after moving points
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const pointField& pts)
         {}
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
         //- Write dictionary
-        virtual void writeDict(Ostream&) const = 0;
+        virtual void writeDict(Ostream& os) const = 0;
 
 
     // I-O
 
         //- Ostream Operator
-        friend Ostream& operator<<(Ostream&, const zone&);
+        friend Ostream& operator<<(Ostream& os, const zone& zn);
 };
 
 
