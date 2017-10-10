@@ -275,21 +275,27 @@ void Foam::multiLevelDecomp::decompose
             const label nNext = methods_[nextLevel].nDomains();
             const label nTotal = nCurrDomains * nNext;
 
-            // Retrieve original level0 dictionary and modify number of domains
-            dictionary::const_iterator iter =
-                decompositionDict_.optionalSubDict(typeName + "Coeffs").begin();
-            dictionary myDict = iter().dict();
-            myDict.set("numberOfSubdomains", nTotal);
+            // Get original level0 dictionary and modify numberOfSubdomains
+            dictionary level0Dict;
+            forAllConstIter(dictionary, methodsDict_, iter)
+            {
+                if (iter().isDict())
+                {
+                    level0Dict = iter().dict();
+                    break;
+                }
+            }
+            level0Dict.set("numberOfSubdomains", nTotal);
 
             if (debug && Pstream::master())
             {
-                Pout<< "Reference decomposition with " << myDict << " :"
+                Pout<< "Reference decomposition with " << level0Dict << " :"
                     << endl;
             }
 
             autoPtr<decompositionMethod> method0 = decompositionMethod::New
             (
-                myDict
+                level0Dict
             );
             labelList dist
             (
@@ -364,31 +370,37 @@ void Foam::multiLevelDecomp::decompose
 Foam::multiLevelDecomp::multiLevelDecomp(const dictionary& decompositionDict)
 :
     decompositionMethod(decompositionDict),
-    methodsDict_(decompositionDict_.optionalSubDict(typeName + "Coeffs"))
+    methodsDict_(decompositionDict_.subDict(typeName + "Coeffs"))
 {
     methods_.setSize(methodsDict_.size());
-    label i = 0;
+    label nLevels = 0;
     forAllConstIter(dictionary, methodsDict_, iter)
     {
-        methods_.set(i++, decompositionMethod::New(iter().dict()));
+        // Ignore primitive entries which may be there for additional control
+        if (iter().isDict())
+        {
+            methods_.set(nLevels++, decompositionMethod::New(iter().dict()));
+        }
     }
 
-    label n = 1;
+    methods_.setSize(nLevels);
+
+    label nTot = 1;
     Info<< "decompositionMethod " << type() << " :" << endl;
     forAll(methods_, i)
     {
         Info<< "    level " << i << " decomposing with " << methods_[i].type()
             << " into " << methods_[i].nDomains() << " subdomains." << endl;
 
-        n *= methods_[i].nDomains();
+        nTot *= methods_[i].nDomains();
     }
 
-    if (n != nDomains())
+    if (nTot != nDomains())
     {
         FatalErrorInFunction
             << "Top level decomposition specifies " << nDomains()
             << " domains which is not equal to the product of"
-            << " all sub domains " << n
+            << " all sub domains " << nTot
             << exit(FatalError);
     }
 }
