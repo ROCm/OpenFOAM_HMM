@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -99,7 +99,7 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
         forAll(cCells, i)
         {
             // Get locally-compact cell index of neighbouring cell
-            label nbrCelli = oldToNew[cCells[i]];
+            const label nbrCelli = oldToNew[cCells[i]];
             if (nbrCelli == -1)
             {
                 cutConnections[allDist[cCells[i]]]++;
@@ -109,10 +109,10 @@ void Foam::multiLevelDecomp::subsetGlobalCellCells
                 // Reconvert local cell index into global one
 
                 // Get original neighbour
-                label celli = set[subCelli];
-                label oldNbrCelli = cellCells[celli][i];
+                const label celli = set[subCelli];
+                const label oldNbrCelli = cellCells[celli][i];
                 // Get processor from original neighbour
-                label proci = globalCells.whichProcID(oldNbrCelli);
+                const label proci = globalCells.whichProcID(oldNbrCelli);
                 // Convert into global compact numbering
                 cCells[newI++] = globalSubCells.toGlobal(proci, nbrCelli);
             }
@@ -127,15 +127,16 @@ void Foam::multiLevelDecomp::decompose
     const labelListList& pointPoints,
     const pointField& points,
     const scalarField& pointWeights,
-    const labelList& pointMap,      // map back to original points
-    const label levelI,
+    const labelUList& pointMap,     // map back to original points
+    const label currLevel,
+    const label leafOffset,
 
-    labelField& finalDecomp
+    labelList& finalDecomp
 )
 {
     labelList dist
     (
-        methods_[levelI].decompose
+        methods_[currLevel].decompose
         (
             pointPoints,
             points,
@@ -143,30 +144,62 @@ void Foam::multiLevelDecomp::decompose
         )
     );
 
-    forAll(pointMap, i)
+    // The next recursion level
+    const label nextLevel = currLevel+1;
+
+    // Number of domains at this current level
+    const label nCurrDomains = methods_[currLevel].nDomains();
+
+    // Calculate the domain remapping.
+    // The decompose() method delivers a distribution of [0..nDomains-1]
+    // which we map to the final location according to the decomposition
+    // leaf we are on.
+
+    labelList domainLookup(nCurrDomains);
     {
-        label orig = pointMap[i];
-        finalDecomp[orig] += dist[i];
+        label sizes = 1;  // Cumulative number of domains
+        for (label i = 0; i <= currLevel; ++i)
+        {
+            sizes *= methods_[i].nDomains();
+        }
+
+        // Distribution of domains at this level
+        sizes = this->nDomains() / sizes;
+
+        forAll(domainLookup, i)
+        {
+            domainLookup[i] = i * sizes + leafOffset;
+        }
     }
 
-    if (levelI != methods_.size()-1)
+    if (debug)
+    {
+        Info<< "Distribute at level " << currLevel
+            << " to domains" << nl
+            << flatOutput(domainLookup) << endl;
+    }
+
+    // Extract processor+local index from point-point addressing
+    forAll(pointMap, i)
+    {
+        const label orig = pointMap[i];
+        finalDecomp[orig] = domainLookup[dist[i]];
+    }
+
+    if (nextLevel < methods_.size())
     {
         // Recurse
 
         // Determine points per domain
-        label n = methods_[levelI].nDomains();
-        labelListList domainToPoints(invertOneToMany(n, dist));
-
-        // 'Make space' for new levels of decomposition
-        finalDecomp *= methods_[levelI+1].nDomains();
+        labelListList domainToPoints(invertOneToMany(nCurrDomains, dist));
 
         // Extract processor+local index from point-point addressing
         if (debug && Pstream::master())
         {
-            Pout<< "Decomposition at level " << levelI << " :" << endl;
+            Pout<< "Decomposition at level " << currLevel << " :" << endl;
         }
 
-        for (label domainI = 0; domainI < n; domainI++)
+        for (label domainI = 0; domainI < nCurrDomains; domainI++)
         {
             // Extract elements for current domain
             const labelList domainPoints(findIndices(dist, domainI));
@@ -180,7 +213,7 @@ void Foam::multiLevelDecomp::decompose
             labelList nOutsideConnections;
             subsetGlobalCellCells
             (
-                n,
+                nCurrDomains,
                 domainI,
                 dist,
 
@@ -196,12 +229,12 @@ void Foam::multiLevelDecomp::decompose
             Pstream::listCombineScatter(nOutsideConnections);
             label nPatches = 0;
             label nFaces = 0;
-            forAll(nOutsideConnections, i)
+            for (const label nConnect : nOutsideConnections)
             {
-                if (nOutsideConnections[i] > 0)
+                if (nConnect > 0)
                 {
-                    nPatches++;
-                    nFaces += nOutsideConnections[i];
+                    ++nPatches;
+                    nFaces += nConnect;
                 }
             }
 
@@ -224,7 +257,8 @@ void Foam::multiLevelDecomp::decompose
                 subPoints,
                 subWeights,
                 subPointMap,
-                levelI+1,
+                nextLevel,
+                domainLookup[domainI], // The offset for this level and leaf
 
                 finalDecomp
             );
@@ -238,8 +272,8 @@ void Foam::multiLevelDecomp::decompose
         if (debug)
         {
             // Do straight decompose of two levels
-            label nNext = methods_[levelI+1].nDomains();
-            label nTotal = n*nNext;
+            const label nNext = methods_[nextLevel].nDomains();
+            const label nTotal = nCurrDomains * nNext;
 
             // Retrieve original level0 dictionary and modify number of domains
             dictionary::const_iterator iter =
@@ -267,12 +301,12 @@ void Foam::multiLevelDecomp::decompose
                 )
             );
 
-            for (label blockI = 0; blockI < n; blockI++)
+            for (label blockI = 0; blockI < nCurrDomains; blockI++)
             {
                 // Count the number inbetween blocks of nNext size
 
                 label nPoints = 0;
-                labelList nOutsideConnections(n, 0);
+                labelList nOutsideConnections(nCurrDomains, 0);
                 forAll(pointPoints, pointi)
                 {
                     if ((dist[pointi] / nNext) == blockI)
@@ -283,7 +317,7 @@ void Foam::multiLevelDecomp::decompose
 
                         forAll(pPoints, i)
                         {
-                            label distBlockI = dist[pPoints[i]] / nNext;
+                            const label distBlockI = dist[pPoints[i]] / nNext;
                             if (distBlockI != blockI)
                             {
                                 nOutsideConnections[distBlockI]++;
@@ -301,12 +335,12 @@ void Foam::multiLevelDecomp::decompose
                 Pstream::listCombineScatter(nOutsideConnections);
                 label nPatches = 0;
                 label nFaces = 0;
-                forAll(nOutsideConnections, i)
+                for (const label nConnect : nOutsideConnections)
                 {
-                    if (nOutsideConnections[i] > 0)
+                    if (nConnect > 0)
                     {
-                        nPatches++;
-                        nFaces += nOutsideConnections[i];
+                        ++nPatches;
+                        nFaces += nConnect;
                     }
                 }
 
@@ -385,7 +419,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     CompactListList<label> cellCells;
     calcCellCells(mesh, identity(cc.size()), cc.size(), true, cellCells);
 
-    labelField finalDecomp(cc.size(), 0);
+    labelList finalDecomp(cc.size(), 0);
     labelList cellMap(identity(cc.size()));
 
     decompose
@@ -394,6 +428,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
         cc,
         cWeights,
         cellMap,      // map back to original cells
+        0,
         0,
 
         finalDecomp
@@ -410,7 +445,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
     const scalarField& pointWeights
 )
 {
-    labelField finalDecomp(points.size(), 0);
+    labelList finalDecomp(points.size(), 0);
     labelList pointMap(identity(points.size()));
 
     decompose
@@ -419,6 +454,7 @@ Foam::labelList Foam::multiLevelDecomp::decompose
         points,
         pointWeights,
         pointMap,       // map back to original points
+        0,
         0,
 
         finalDecomp
