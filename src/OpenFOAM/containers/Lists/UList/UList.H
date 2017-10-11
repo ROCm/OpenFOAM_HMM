@@ -48,6 +48,8 @@ SourceFiles
 #include "nullObject.H"
 #include "zero.H"
 #include "stdFoam.H"
+#include "Swap.H"
+
 #include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -181,16 +183,27 @@ public:
 
     // Member Functions
 
-
         // Access
 
-            //- Return the forward circular index, i.e. the next index
+            //- Return the forward circular index, i.e. next index
             //  which returns to the first at the end of the list
             inline label fcIndex(const label i) const;
 
-            //- Return the reverse circular index, i.e. the previous index
+            //- Return forward circular value (ie, next value in the list)
+            inline const T& fcValue(const label i) const;
+
+            //- Return forward circular value (ie, next value in the list)
+            inline T& fcValue(const label i);
+
+            //- Return the reverse circular index, i.e. previous index
             //  which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
+
+            //- Return reverse circular value (ie, previous value in the list)
+            inline const T& rcValue(const label i) const;
+
+            //- Return reverse circular value (ie, previous value in the list)
+            inline T& rcValue(const label i);
 
             //- Return the binary size in number of characters of the UList
             //  if the element is a primitive type
@@ -234,6 +247,41 @@ public:
             inline void checkIndex(const label i) const;
 
 
+      // Search
+
+        //- Find index of the first occurence of the value.
+        //  When start is specified, any occurences before start are ignored.
+        //  Linear search.
+        //  \return -1 if not found.
+        label find(const T& val, const label start=0) const;
+
+        //- Find index of the last occurence of the value.
+        //  When pos is specified, any occurences after pos are ignored.
+        //  Linear search.
+        //  \return -1 if not found.
+        label rfind(const T& val, const label pos=-1) const;
+
+        //- True if the value if found in the list. Linear search.
+        inline bool found(const T& val, const label start=0) const;
+
+
+      // Edit
+
+        //- Move element to the first position.
+        void moveFirst(const label i);
+
+        //- Move element to the last position.
+        void moveLast(const label i);
+
+        //- Swap element with the first element. Fatal on an empty list.
+        void swapFirst(const label i);
+
+        //- Swap element with the last element. Fatal on an empty list.
+        void swapLast(const label i);
+
+
+      // Copy
+
         //- Copy the pointer held by the given UList
         inline void shallowCopy(const UList<T>& a);
 
@@ -264,21 +312,21 @@ public:
         //- Return (start,size) subset from UList with non-const access.
         //  The range is subsetted with the list size itself to ensure that the
         //  result always addresses a valid section of the list.
-        UList<T> operator[](std::initializer_list<label> start_size_range);
+        UList<T> operator[](std::initializer_list<label> start_size);
 
         //- Return (start,size) subset from UList with const access.
         //  The range is subsetted with the list size itself to ensure that the
         //  result always addresses a valid section of the list.
         const UList<T> operator[]
         (
-            std::initializer_list<label> start_size_range
+            std::initializer_list<label> start_size
         ) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
 
         //- Assignment of all entries to the given value
-        void operator=(const T& t);
+        void operator=(const T& val);
 
         //- Assignment of all entries to zero
         void operator=(const zero);
@@ -374,8 +422,8 @@ public:
         //- Return true if the UList is empty (ie, size() is zero)
         inline bool empty() const;
 
-        //- Swap two ULists of the same type in constant time
-        void swap(UList<T>& a);
+        //- Swap content with another UList of the same type in constant time
+        inline void swap(UList<T>& lst);
 
 
     // STL member operators
@@ -429,6 +477,9 @@ public:
         );
 };
 
+
+// Global Functions
+
 template<class T>
 void sort(UList<T>& a);
 
@@ -446,11 +497,15 @@ void shuffle(UList<T>& a);
 
 // Reverse the first n elements of the list
 template<class T>
-inline void reverse(UList<T>& ul, const label n);
+inline void reverse(UList<T>& lst, const label n);
 
 // Reverse all the elements of the list
 template<class T>
-inline void reverse(UList<T>& ul);
+inline void reverse(UList<T>& lst);
+
+// Exchange contents of lists - see UList::swap().
+template<class T>
+inline void Swap(UList<T>& a, UList<T>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -92,13 +92,15 @@ bool Foam::PackedBoolList::bitorPrepare
 template<class LabelListType>
 Foam::label Foam::PackedBoolList::setIndices(const LabelListType& indices)
 {
-    // no better information, just guess something about the size
-    reserve(indices.size());
+    const label len = indices.size();
+
+    // No better information, just guess something from the size
+    reserve(len);
 
     label cnt = 0;
-    forAll(indices, elemI)
+    for (label i = 0; i < len; ++i)
     {
-        if (set(indices[elemI]))
+        if (set(indices[i]))
         {
             ++cnt;
         }
@@ -112,9 +114,10 @@ template<class LabelListType>
 Foam::label Foam::PackedBoolList::unsetIndices(const LabelListType& indices)
 {
     label cnt = 0;
-    forAll(indices, elemI)
+    const label len = indices.size();
+    for (label i = 0; i < len; ++i)
     {
-        if (unset(indices[elemI]))
+        if (unset(indices[i]))
         {
             ++cnt;
         }
@@ -127,29 +130,30 @@ Foam::label Foam::PackedBoolList::unsetIndices(const LabelListType& indices)
 template<class LabelListType>
 Foam::label Foam::PackedBoolList::subsetIndices(const LabelListType& indices)
 {
-    // handle trivial case
-    if (empty() || indices.empty())
+    const label len = indices.size();
+
+    // Handle trivial case
+    if (empty() || !len)
     {
         clear();
         return 0;
     }
 
-    // normal case
-    PackedBoolList anded;
-    anded.reserve(size());
+    PackedBoolList result;
+    result.reserve(size());
 
     label cnt = 0;
-    forAll(indices, elemI)
+    for (label i = 0; i < len; ++i)
     {
-        const label& index = indices[elemI];
-        if (operator[](index))
+        const label index = indices[i];
+        if (get(index))
         {
-            anded.set(index);
+            result.set(index);
             ++cnt;
         }
     }
 
-    transfer(anded);
+    transfer(result);
     return cnt;
 }
 
@@ -176,7 +180,7 @@ void Foam::PackedBoolList::set(const PackedList<1>& lst)
     StorageList& lhs = this->storage();
     const StorageList& rhs = lst.storage();
 
-    for (label i=0; i < len; ++i)
+    for (label i = 0; i < len; ++i)
     {
         lhs[i] |= rhs[i];
     }
@@ -209,7 +213,7 @@ void Foam::PackedBoolList::unset(const PackedList<1>& lst)
     // overlapping storage size
     const label len = min(this->packedLength(), lst.packedLength());
 
-    for (label i=0; i < len; ++i)
+    for (label i = 0; i < len; ++i)
     {
         lhs[i] &= ~rhs[i];
     }
@@ -242,7 +246,7 @@ void Foam::PackedBoolList::subset(const PackedList<1>& lst)
 
     const label len = this->packedLength();
 
-    for (label i=0; i < len; ++i)
+    for (label i = 0; i < len; ++i)
     {
         lhs[i] &= rhs[i];
     }
@@ -288,12 +292,13 @@ Foam::Xfer<Foam::labelList> Foam::PackedBoolList::used() const
 
 void Foam::PackedBoolList::operator=(const UList<bool>& lst)
 {
-    this->setSize(lst.size());
+    const label len = lst.size();
+    this->setSize(len);
 
-    // overwrite with new true/false values
-    forAll(*this, elemI)
+    // Overwrite with new true/false values
+    for (label i = 0; i < len; ++i)
     {
-        set(elemI, lst[elemI]);
+        set(i, lst[i]);
     }
 }
 
@@ -301,15 +306,15 @@ void Foam::PackedBoolList::operator=(const UList<bool>& lst)
 Foam::PackedBoolList&
 Foam::PackedBoolList::operator^=(const PackedList<1>& lst)
 {
-    // extend addressable area if needed, return maximum size possible
+    // Extend addressable area if needed, return maximum size possible
     label len = 0;
     const bool needTrim = bitorPrepare(lst, len);
 
-    // operate directly with the underlying storage
+    // Operate directly with the underlying storage
     StorageList& lhs = this->storage();
     const StorageList& rhs = lst.storage();
 
-    for (label i=0; i < len; ++i)
+    for (label i = 0; i < len; ++i)
     {
         lhs[i] ^= rhs[i];
     }
@@ -334,7 +339,7 @@ Foam::PackedBoolList Foam::operator&
     PackedBoolList result(lst1);
     result &= lst2;
 
-    // trim to bits actually used
+    // Trim to bits actually used
     result.trim();
 
     return result;
@@ -350,7 +355,7 @@ Foam::PackedBoolList Foam::operator^
     PackedBoolList result(lst1);
     result ^= lst2;
 
-    // trim to bits actually used
+    // Trim to bits actually used
     result.trim();
 
     return result;

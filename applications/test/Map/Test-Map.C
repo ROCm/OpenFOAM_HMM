@@ -38,41 +38,75 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Map<bool> banana{{5, true}};
+    Map<bool> map1
+    {
+        {1, true}, {2, false}, {3, true}, {4, false}, {5, true}
+    };
 
     // Taking a const iterator from find does not work!
     // Also, fails later on op==
-    Map<bool>::const_iterator bananaIter = banana.find(5);
+    Map<bool>::const_iterator map1Iter = map1.cfind(5);
 
-    // This works but now I can change the value.
-    //Map<bool>::iterator bananaIter = banana.find(5);
+    // Same, but with non-const access
+    // Map<bool>::iterator map1Iter = map1.find(5);
 
-    if (!bananaIter.found()) // same as  (bananaIter == banana.end())
+    if (!map1Iter.found()) // same as  (map1Iter == map1.end())
     {
         Info<< "not found" << endl;
     }
     else
     {
-        Info<< "5 is " << bananaIter() << endl;
+        Info<< "5 is " << *map1Iter << endl;
     }
 
-    // Same with STL
+    // Repeat with std::map
     Info<< "Same with STL" << endl;
 
-    std::map<label, bool> STLbanana{{5, true}};
-    std::map<label, bool>::const_iterator STLbananaIter = STLbanana.find(5);
+    std::map<label, bool> stdmap1
+    {
+        {1, true}, {2, false}, {3, true}, {4, false}, {5, true}
+    };
 
-    if (STLbananaIter == STLbanana.end())
+    std::map<label, bool>::const_iterator stdmap1Iter = stdmap1.find(5);
+
+    if (stdmap1Iter == stdmap1.cend())
     {
         Info<< "not found" << endl;
     }
     else
     {
-        Info<< "5 is " << STLbananaIter->second << endl;
+        Info<< "5 is " << stdmap1Iter->second << endl;
     }
 
 
-    Info<< "End\n" << endl;
+    Info<<"test move construct" << nl;
+    Map<bool> map2(std::move(map1));
+    Map<bool> map3;
+
+    std::map<label, bool> stdmap2(std::move(stdmap1));
+    std::map<label, bool> stdmap3;
+
+    Info<<"map1: " << map1 << nl
+        <<"map2: " << map2 << nl;
+
+    Info
+        <<"stdmap1: " << stdmap1.size() << nl
+        <<"stdmap2: " << stdmap2.size() << nl;
+
+
+    Info<<"test move assign" << nl;
+    map3 = std::move(map2);
+    stdmap3 = std::move(stdmap2);
+
+    Info<<"map2: " << map2 << nl
+        <<"map3: " << map3 << nl;
+
+    Info
+        <<"stdmap2: " << stdmap2.size() << nl
+        <<"stdmap3: " << stdmap3.size() << nl;
+
+
+    Info<< nl << "End\n" << endl;
 
     return 0;
 }

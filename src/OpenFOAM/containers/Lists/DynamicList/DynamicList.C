@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,23 +24,83 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DynamicList.H"
+#include "labelRange.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class T, int SizeMin>
+Foam::label Foam::DynamicList<T, SizeMin>::removeElements
+(
+    const labelRange& slice
+)
+{
+    if (!slice.size())
+    {
+        // Noop
+        return 0;
+    }
+    else if (slice.after() >= this->size())
+    {
+        // Remove tail
+        this->resize(slice.first());
+    }
+    else
+    {
+        // Copy (swap) down
+        label j = slice.first();
+        const label len = this->size();
+
+        for (label i = slice.after(); i < len; ++i, ++j)
+        {
+            Foam::Swap(this->operator[](i), this->operator[](j));
+        }
+
+        resize(this->size() - slice.size());
+    }
+
+    return slice.size();
+}
+
+
+template<class T, int SizeMin>
+Foam::label Foam::DynamicList<T, SizeMin>::subsetElements
+(
+    const labelRange& slice
+)
+{
+    if (slice.first() > 0)
+    {
+        // Copy (swap) down
+        label j = slice.first();
+        const label len = slice.size();
+
+        for (label i = 0; i < len; ++i, ++j)
+        {
+            Foam::Swap(this->operator[](i), this->operator[](j));
+        }
+    }
+
+    // Don't need min size, since slice size was already checked before
+    resize(slice.size());
+    return this->size();
+}
+
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList(Istream& is)
+template<class T, int SizeMin>
+Foam::DynamicList<T, SizeMin>::DynamicList(Istream& is)
 :
     List<T>(is),
     capacity_(List<T>::size())
 {}
 
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+    const DynamicList<T, SizeMin>& lst
 )
 {
     os << static_cast<const List<T>&>(lst);
@@ -48,11 +108,11 @@ Foam::Ostream& Foam::operator<<
 }
 
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+    DynamicList<T, SizeMin>& lst
 )
 {
     is >> static_cast<List<T>&>(lst);

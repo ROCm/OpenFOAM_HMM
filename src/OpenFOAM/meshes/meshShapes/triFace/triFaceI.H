@@ -147,13 +147,7 @@ inline Foam::pointField Foam::triFace::points(const UList<point>& points) const
 
 inline Foam::face Foam::triFace::triFaceFace() const
 {
-    Foam::face f(3);
-
-    f[0] = operator[](0);
-    f[1] = operator[](1);
-    f[2] = operator[](2);
-
-    return f;
+    return Foam::face(*this);
 }
 
 
@@ -342,14 +336,14 @@ inline Foam::edgeList Foam::triFace::edges() const
 {
     edgeList e(3);
 
-    e[0].start() = operator[](0);
-    e[0].end()   = operator[](1);
+    e[0].first()  = operator[](0);
+    e[0].second() = operator[](1);
 
-    e[1].start() = operator[](1);
-    e[1].end()   = operator[](2);
+    e[1].first()  = operator[](1);
+    e[1].second() = operator[](2);
 
-    e[2].start() = operator[](2);
-    e[2].end()   = operator[](0);
+    e[2].first()  = operator[](2);
+    e[2].second() = operator[](0);
 
     return e;
 }
@@ -369,18 +363,18 @@ inline int Foam::triFace::edgeDirection(const edge& e) const
 {
     if
     (
-        (operator[](0) == e.start() && operator[](1) == e.end())
-     || (operator[](1) == e.start() && operator[](2) == e.end())
-     || (operator[](2) == e.start() && operator[](0) == e.end())
+        (operator[](0) == e.first() && operator[](1) == e.second())
+     || (operator[](1) == e.first() && operator[](2) == e.second())
+     || (operator[](2) == e.first() && operator[](0) == e.second())
     )
     {
         return 1;
     }
     else if
     (
-        (operator[](0) == e.end() && operator[](1) == e.start())
-     || (operator[](1) == e.end() && operator[](2) == e.start())
-     || (operator[](2) == e.end() && operator[](0) == e.start())
+        (operator[](0) == e.second() && operator[](1) == e.first())
+     || (operator[](1) == e.second() && operator[](2) == e.first())
+     || (operator[](2) == e.second() && operator[](0) == e.first())
     )
     {
         return -1;

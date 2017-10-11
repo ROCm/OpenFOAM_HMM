@@ -2,7 +2,7 @@ SUFFIXES += .c
 
 cWARN        = -Wall
 
-cc          = gcc -m64 -march=knl -DvectorMachine -DKNL
+cc          = gcc -m64 -march=knl
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 

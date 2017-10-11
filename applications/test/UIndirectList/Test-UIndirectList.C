@@ -29,75 +29,102 @@ Description
 #include "DynamicList.H"
 #include "IOstreams.H"
 #include "ListOps.H"
-#include "OFstream.H"
+#include "labelIndList.H"
 
 using namespace Foam;
+
+template<class ListType>
+void printInfo(const ListType& lst)
+{
+    Info<< "addr: " << flatOutput(lst.addressing()) << nl
+        << "list: " << flatOutput(lst) << nl
+        << endl;
+}
+
+template<class T, class ListType>
+void testFind(const T& val, const ListType& lst)
+{
+    Info<< nl
+        << "Search for "<< val << " in " << flatOutput(lst) << nl
+        <<" found() = " << lst.found(val)
+        <<" find() = " << lst.find(val)
+        <<" rfind() = " << lst.rfind(val)
+        <<" find(2) = " << lst.find(val, 2)
+        <<" rfind(2) = " << lst.rfind(val, 2)
+        <<" findIndex = " << findIndex(lst, val) << nl
+        << nl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    List<double> completeList(10);
+    List<label> completeList(20);
 
     forAll(completeList, i)
     {
-        completeList[i] = 0.1*i;
+        completeList[i] = 10*i;
     }
 
-    List<label> addresses(5);
-    addresses[0] = 1;
-    addresses[1] = 0;
-    addresses[2] = 7;
-    addresses[3] = 8;
-    addresses[4] = 5;
+    Info<< "raw : " << flatOutput(completeList) << nl << endl;
 
-    UIndirectList<double> idl(completeList, addresses);
+    List<label> addresses{1, 0, 3, 7, 4, 8, 5, 1, 0, 3, 7, 4, 8, 5, };
 
-    Info<< idl << "\n";
+    labelUIndList idl1(completeList, addresses);
 
-    idl[1] = -666;
+    printInfo(idl1);
 
-    Info<< "idl[1] changed: " << idl << endl;
+    for (const label val : { 10, 30, 40, 50, 90, 80, 120 } )
+    {
+        testFind(val, idl1);
+    }
 
-    idl = -999;
+    Info<< flatOutput(idl1) << nl;
 
-    Info<< "idl changed: " << idl << endl;
+    idl1[1] = -666;
 
-    UIndirectList<double> idl2(idl);
+    Info<< "idl1[1] changed: " << flatOutput(idl1) << endl;
 
-    Info<< "idl2: " << idl2 << endl;
+    idl1 = -999;
 
+    Info<< "idl1 changed: " << flatOutput(idl1) << endl;
+
+    labelUIndList idl2(idl1);
+
+    Info<< "idl2: " << flatOutput(idl2) << endl;
 
     {
-        List<double> ident(idl.size());
+        List<label> ident(idl1.size());
 
         forAll(ident, i)
         {
             ident[i] = ident.size() - i;
         }
-        idl = ident;
+        idl1 = ident;
     }
 
-    Info<< "idl assigned from UList: " << idl << endl;
+    Info<< "idl1 assigned from UList: " << flatOutput(idl1) << endl;
 
     // test List operations
 
-    List<double> flatList(UIndirectList<double>(completeList, addresses));
-    Info<< "List constructed from UIndirectList: " << flatList << endl;
+    List<label> flatList(labelUIndList(completeList, addresses));
+    Info<< "List construct from UIndirectList: " << flatOutput(flatList) << nl;
 
-    flatList = UIndirectList<double>(completeList, addresses);
-    Info<< "List assigned from UIndirectList: " << flatList << endl;
+    flatList = labelUIndList(completeList, addresses);
+    Info<< "List assign from UIndirectList: " << flatOutput(flatList) << nl;
 
-    flatList.append(UIndirectList<double>(completeList, addresses));
-    Info<< "List::append(UIndirectList): " << flatList << endl;
+    flatList.append(labelUIndList(completeList, addresses));
+    Info<< "List::append(UIndirectList): " << flatOutput(flatList) << nl;
 
 
-    DynamicList<double> dynList(UIndirectList<double>(completeList, addresses));
-    Info<< "DynamicList constructed from UIndirectList: " << dynList << endl;
+    DynamicList<label> dynList(labelUIndList(completeList, addresses));
+    Info<< "DynamicList construct from UIndirectList: " << flatOutput(dynList)
+        << nl;
 
-    dynList.append(UIndirectList<double>(completeList, addresses));
-    Info<< "DynamicList::append(UIndirectList): " << dynList << endl;
+    dynList.append(labelUIndList(completeList, addresses));
+    Info<< "DynamicList::append(UIndirectList): " << flatOutput(dynList) << nl;
 
     Info<< "\nEnd\n" << endl;
 

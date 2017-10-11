@@ -31,6 +31,7 @@ Description
 
 #include "fvCFD.H"
 #include "Function1.H"
+#include "scalarIndList.H"
 #include "IOdictionary.H"
 #include "linearInterpolationWeights.H"
 #include "splineInterpolationWeights.H"
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
     scalar baseSum = interpolator.weightedSum
     (
         weights,
-        UIndirectList<scalar>(values, indices)
+        scalarUIndList(values, indices)
     );
     Pout<< "baseSum=" << baseSum << nl << nl << endl;
 
@@ -78,7 +79,7 @@ int main(int argc, char *argv[])
 //    scalar partialSum = interpolator.weightedSum
 //    (
 //        weights,
-//        UIndirectList<scalar>(values, indices)
+//        scalarUIndList(values, indices)
 //    );
 //    Pout<< "partialSum=" << partialSum << nl << nl << endl;
 //
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
 //    scalar sum = interpolator.weightedSum
 //    (
 //        weights,
-//        UIndirectList<scalar>(values, indices)
+//        scalarUIndList(values, indices)
 //    );
 //    Pout<< "integrand=" << sum << nl << nl << endl;
 

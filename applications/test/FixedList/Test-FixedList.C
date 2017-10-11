@@ -35,6 +35,7 @@ See also
 #include "argList.H"
 #include "FixedList.H"
 #include "Fstream.H"
+#include "List.H"
 #include "IPstream.H"
 #include "OPstream.H"
 
@@ -47,36 +48,44 @@ int main(int argc, char *argv[])
 {
     argList args(argc, argv);
 
-    FixedList<label, 4> list;
-    list[0] = 1;
-    list[1] = 2;
-    list[2] = 3;
-    list[3] = 4;
-
-    Info<< "list:" << list
-        << " hash:" << FixedList<label, 4>::Hash<>()(list) << endl;
-
-    label a[4] = {0, 1, 2, 3};
-    FixedList<label, 4> list2(a);
-
-    Info<< "list2:" << list2
-        << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
-
-    // Using FixedList for content too
     {
-        List<FixedList<label, 4>> twolists{list, list2};
-        Info<<"List of FixedList: " << flatOutput(twolists) << endl;
-        sort(twolists);
-        // outer-sort only
-        Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
-    }
+        FixedList<label, 4> list1{1, 2, 3, 4};
 
-    Info<< "list: " << list << nl
-        << "list2: " << list2 << endl;
-    list.swap(list2);
-    Info<< "Swapped via the swap() method" << endl;
-    Info<< "list: " << list << nl
-        << "list2: " << list2 << endl;
+        Info<< "list1:" << list1
+            << " hash:" << FixedList<label, 4>::Hash<>()(list1) << endl;
+
+        label a[4] = {0, 1, 2, 3};
+        FixedList<label, 4> list2(a);
+
+        Info<< "list2:" << list2
+            << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
+
+        // Using FixedList for content too
+        {
+            List<FixedList<label, 4>> twolists{list1, list2};
+            Info<<"List of FixedList: " << flatOutput(twolists) << endl;
+            sort(twolists);
+            // outer-sort only
+            Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
+        }
+
+        Info<< "====" << nl
+            << "Test swap" << nl;
+
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << endl;
+        list1.swap(list2);
+        Info<< "The swap() method" << endl;
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << endl;
+
+        Swap(list1, list2);
+        Info<< "The Swap() function" << endl;
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << endl;
+
+        Info<< "====" << nl;
+    }
 
     List<label> list3{0, 1, 2, 3};
     FixedList<label, 4> list4(list3.begin(), list3.end());

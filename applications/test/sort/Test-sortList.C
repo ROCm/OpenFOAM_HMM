@@ -33,108 +33,147 @@ using namespace Foam;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
+
+template<class T>
+void printInfo(const SortableList<T>& list)
+{
+    Info<< "sorted:   " << list << nl
+        << "indices:  " << list.indices() << endl;
+}
+
+
 int main(int argc, char *argv[])
 {
-    labelList orig(8);
-    orig[0] = 7;
-    orig[1] = 9;
-    orig[2] = 1;
-    orig[3] = 2;
-    orig[4] = 4;
-    orig[5] = 7;
-    orig[6] = 4;
-    orig[7] = 0;
+    const labelList orig{7, 9, 1, 2, 4, 7, 4, 0};
 
     labelList order;
 
-    labelList a(orig);
-    sortedOrder(a, order);
+    labelList list1(orig);
+    sortedOrder(list1, order);
 
-    SortableList<label> aReverse(a.size());
-    aReverse = a;
+    SortableList<label> list1r(list1.size());
+    list1r = list1;
 
-    Info<< "unsorted: " << a << endl;
-    sort(a);
-    Info<< "sorted:   " << a << endl;
-    Info<< "indices:  " << order << endl;
-
-    aReverse.reverseSort();
-    Info<< "reverse sorted:   " << aReverse << endl;
-    Info<< "reverse indices:  " << aReverse.indices() << endl;
-
-    SortableList<label> b(orig);
     Info<< "unsorted: " << orig << endl;
-    Info<< "sorted:   " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+    sort(list1);
+    Info<< "sorted:   " << list1 << nl
+        << "indices:  " << order << endl;
 
-    Info<< "shrunk:   " << b.shrink() << endl;
-    Info<< "indices:  " << b.indices() << endl;
+    list1r.reverseSort();
+    Info<< "reverse ..." << nl;
+    printInfo(list1r);
+
+    SortableList<label> list2(orig);
+    Info<< "unsorted: " << orig << nl;
+    printInfo(list2);
+
+    Info<< "shrunk:   " << list2.shrink() << endl;
+    Info<< "indices:  " << list2.indices() << endl;
 
     // repeat by assignment
-    b = orig;
-    Info<< "unsorted: " << b << endl;
-    b.sort();
+    list2 = orig;
+    Info<< "unsorted: " << list2 << endl;
+    list2.sort();
 
-    Info<< "sorted:   " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+    printInfo(list2);
 
     // find unique/duplicate values
-    b = orig;
+    list2 = orig;
 
-    Info<< "unsorted: " << b << endl;
-    uniqueOrder(b, order);
+    Info<< "unsorted: " << list2 << endl;
+    uniqueOrder(list2, order);
     Info<< "unique:  " << order << endl;
-    duplicateOrder(b, order);
+    duplicateOrder(list2, order);
     Info<< "duplicate:" << order << endl;
 
     // sort reverse
-    Info<< "unsorted: " << b << endl;
-    b.reverseSort();
-    Info<< "rsort:    " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+    Info<< "unsorted: " << list2 << endl;
+    list2.reverseSort();
+    Info<< "rsort:    " << list2 << endl;
+    Info<< "indices:  " << list2.indices() << endl;
 
     // transfer assignment
-    a = orig;
-    b.transfer(a);
-    Info<< "unsorted: " << b << endl;
-    b.sort();
+    {
+        list1 = orig;
+        list2.transfer(list1);
+        Info<< "unsorted: " << list2 << endl;
+        list2.sort();
 
-    Info<< "sorted:   " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+        printInfo(list2);
 
-    a.transfer(b);
+        list1.transfer(list2);
 
-    Info<< "plain:    " << a << endl;
-    Info<< "sorted:   " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+        Info<< "plain:    " << list1 << endl;
+        printInfo(list2);
+    }
 
     // sort/duplicate/unique with identical values
-    b.setSize(8);
-    b = 5;
+    list2.setSize(8);
+    list2 = 5;
 
-    Info<< "unsorted: " << b << endl;
+    Info<< "unsorted: " << list2 << endl;
 
-    uniqueOrder(b, order);
+    uniqueOrder(list2, order);
     Info<< "unique:  " << order << endl;
-    duplicateOrder(b, order);
+    duplicateOrder(list2, order);
     Info<< "duplicate:" << order << endl;
-    b.sort();
+    list2.sort();
 
-    Info<< "sorted:   " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+    printInfo(list2);
 
     // with a single value
-    b.setSize(1);
+    list2.setSize(1);
 
-    Info<< "unsorted: " << b << endl;
-    uniqueOrder(b, order);
+    Info<< "unsorted: " << list2 << endl;
+    uniqueOrder(list2, order);
     Info<< "unique:  " << order << endl;
-    duplicateOrder(b, order);
+    duplicateOrder(list2, order);
     Info<< "duplicate:" << order << endl;
-    b.sort();
+    list2.sort();
 
-    Info<< "sorted:   " << b << endl;
-    Info<< "indices:  " << b.indices() << endl;
+    printInfo(list2);
+
+    {
+        labelList tmp(orig);
+
+        Info<< nl << "move construct from List: " << tmp << endl;
+        SortableList<label> list3(std::move(tmp));
+
+        Info<< "input:    " << tmp << endl;
+        printInfo(list3);
+
+        list3.reverseSort();
+
+        Info<< nl << "move construct from SortableList: " << list3 << endl;
+
+        SortableList<label> list4(std::move(list3));
+        Info<< "input:   " << list3 << endl;
+        printInfo(list3);
+        printInfo(list4);
+
+        tmp = orig;
+
+        Info<< nl << "move assign from List: " << tmp << endl;
+        list3 = std::move(tmp);
+
+        Info<< "input:    " << tmp << endl;
+        printInfo(list3);
+
+        Info<< nl << "move assign from SortableList: " << list3 << endl;
+        list4 = std::move(list3);
+
+        Info<< "input:    " << list3 << endl;
+        printInfo(list3);
+        printInfo(list4);
+
+        labelList values;
+        Info<< "move to flat-list: " << list4 << endl;
+
+        values = std::move(list4);
+        Info<< "input:    " << list4 << endl;
+        printInfo(list4);
+        Info<< "flat = " << values << endl;
+    }
 
     Info<< "\nEnd\n" << endl;
 

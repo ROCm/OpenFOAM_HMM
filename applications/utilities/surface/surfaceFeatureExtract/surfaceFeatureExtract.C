@@ -368,7 +368,7 @@ int main(int argc, char *argv[])
             faces.setSize(surf.size());
             forAll(surf, fi)
             {
-                faces[fi] = surf[fi].triFaceFace();
+                faces[fi] = surf[fi];
             }
         }
 

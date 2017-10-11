@@ -773,14 +773,14 @@ int Foam::face::edgeDirection(const edge& e) const
 {
     forAll(*this, i)
     {
-        if (operator[](i) == e.start())
+        if (operator[](i) == e.first())
         {
-            if (operator[](rcIndex(i)) == e.end())
+            if (operator[](rcIndex(i)) == e.second())
             {
                 // Reverse direction
                 return -1;
             }
-            else if (operator[](fcIndex(i)) == e.end())
+            else if (operator[](fcIndex(i)) == e.second())
             {
                 // Forward direction
                 return 1;
@@ -789,14 +789,14 @@ int Foam::face::edgeDirection(const edge& e) const
             // No match
             return 0;
         }
-        else if (operator[](i) == e.end())
+        else if (operator[](i) == e.second())
         {
-            if (operator[](rcIndex(i)) == e.start())
+            if (operator[](rcIndex(i)) == e.first())
             {
                 // Forward direction
                 return 1;
             }
-            else if (operator[](fcIndex(i)) == e.start())
+            else if (operator[](fcIndex(i)) == e.first())
             {
                 // Reverse direction
                 return -1;

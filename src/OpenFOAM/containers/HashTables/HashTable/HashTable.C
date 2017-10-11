@@ -94,6 +94,18 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 
 
 template<class T, class Key, class Hash>
+Foam::HashTable<T, Key, Hash>::HashTable(HashTable<T, Key, Hash>&& ht)
+:
+    HashTableCore(),
+    nElmts_(0),
+    tableSize_(0),
+    table_(nullptr)
+{
+    transfer(ht);
+}
+
+
+template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable
 (
     const Xfer<HashTable<T, Key, Hash>>& ht
@@ -751,6 +763,15 @@ void Foam::HashTable<T, Key, Hash>::clearStorage()
 
 
 template<class T, class Key, class Hash>
+void Foam::HashTable<T, Key, Hash>::swap(HashTable<T, Key, Hash>& ht)
+{
+    Foam::Swap(table_,     ht.table_);
+    Foam::Swap(tableSize_, ht.tableSize_);
+    Foam::Swap(nElmts_,    ht.nElmts_);
+}
+
+
+template<class T, class Key, class Hash>
 void Foam::HashTable<T, Key, Hash>::transfer(HashTable<T, Key, Hash>& ht)
 {
     // As per the Destructor
@@ -905,6 +926,24 @@ void Foam::HashTable<T, Key, Hash>::operator=
     {
         insert(pair.first, pair.second);
     }
+}
+
+
+template<class T, class Key, class Hash>
+void Foam::HashTable<T, Key, Hash>::operator=
+(
+    HashTable<T, Key, Hash>&& rhs
+)
+{
+    // Check for assignment to self
+    if (this == &rhs)
+    {
+        FatalErrorInFunction
+            << "attempted assignment to self"
+            << abort(FatalError);
+    }
+
+    transfer(rhs);
 }
 
 

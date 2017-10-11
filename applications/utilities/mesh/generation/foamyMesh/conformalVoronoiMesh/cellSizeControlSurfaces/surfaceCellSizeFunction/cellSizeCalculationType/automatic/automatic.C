@@ -282,7 +282,7 @@ Foam::tmp<Foam::triSurfacePointScalarField> Foam::automatic::load()
 
         forAll(surface_, fI)
         {
-            faces[fI] = surface_.triSurface::operator[](fI).triFaceFace();
+            faces[fI] = surface_.triSurface::operator[](fI);
         }
 
         vtkSurfaceWriter().write

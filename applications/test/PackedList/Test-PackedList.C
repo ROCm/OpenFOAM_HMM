@@ -41,7 +41,7 @@ using namespace Foam;
 template<unsigned nBits>
 inline void reportInfo()
 {
-    unsigned offset = PackedList<nBits>::packing();
+    const unsigned offset = PackedList<nBits>::packing();
 
     unsigned useSHL = ((1u << (nBits * offset)) - 1);
     unsigned useSHR = (~0u >> (sizeof(unsigned)*CHAR_BIT - nBits * offset));
