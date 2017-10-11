@@ -45,19 +45,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::metisDecomp::decompose
+Foam::label Foam::metisDecomp::decomposeSerial
 (
-    const List<label>& adjncy,
-    const List<label>& xadj,
-    const scalarField& cWeights,
-
-    List<label>& finalDecomp
+    const UList<label>& adjncy,
+    const UList<label>& xadj,
+    const UList<scalar>& cWeights,
+    List<label>& decomp
 )
 {
     // Method of decomposition
     // recursive: multi-level recursive bisection (default)
     // k-way: multi-level k-way
     word method("recursive");
+
+    const dictionary* coeffsDictPtr =
+        decompositionDict_.subDictPtr("metisCoeffs");
 
     label numCells = xadj.size()-1;
 
@@ -77,7 +79,7 @@ Foam::label Foam::metisDecomp::decompose
 
 
     // Check for externally provided cellweights and if so initialise weights
-    scalar minWeights = gMin(cWeights);
+    const scalar minWeights = gMin(cWeights);
     if (cWeights.size() > 0)
     {
         if (minWeights <= 0)
@@ -105,14 +107,13 @@ Foam::label Foam::metisDecomp::decompose
 
 
     // Check for user supplied weights and decomp options
-    if (decompositionDict_.found("metisCoeffs"))
+    if (coeffsDictPtr)
     {
-        const dictionary& metisCoeffs =
-            decompositionDict_.subDict("metisCoeffs");
+        const dictionary& coeffDict = *coeffsDictPtr;
 
         word weightsFile;
 
-        if (metisCoeffs.readIfPresent("method", method))
+        if (coeffDict.readIfPresent("method", method))
         {
             if (method != "recursive" && method != "k-way")
             {
@@ -127,7 +128,7 @@ Foam::label Foam::metisDecomp::decompose
                 << nl << endl;
         }
 
-        if (metisCoeffs.readIfPresent("options", options))
+        if (coeffDict.readIfPresent("options", options))
         {
             if (options.size() != METIS_NOPTIONS)
             {
@@ -142,7 +143,7 @@ Foam::label Foam::metisDecomp::decompose
                 << nl << endl;
         }
 
-        if (metisCoeffs.readIfPresent("processorWeights", processorWeights))
+        if (coeffDict.readIfPresent("processorWeights", processorWeights))
         {
             processorWeights /= sum(processorWeights);
 
@@ -161,7 +162,7 @@ Foam::label Foam::metisDecomp::decompose
     label nProcs = nProcessors_;
 
     // Output: cell -> processor addressing
-    finalDecomp.setSize(numCells);
+    decomp.setSize(numCells);
 
     // Output: number of cut edges
     label edgeCut = 0;
@@ -172,17 +173,17 @@ Foam::label Foam::metisDecomp::decompose
         (
             &numCells,          // num vertices in graph
             &ncon,              // num balancing constraints
-            const_cast<List<label>&>(xadj).begin(),   // indexing into adjncy
-            const_cast<List<label>&>(adjncy).begin(), // neighbour info
-            cellWeights.begin(),// vertexweights
+            const_cast<UList<label>&>(xadj).begin(),   // indexing into adjncy
+            const_cast<UList<label>&>(adjncy).begin(), // neighbour info
+            cellWeights.begin(),// vertex wts
             nullptr,               // vsize: total communication vol
-            faceWeights.begin(),// edgeweights
+            faceWeights.begin(),// edge wts
             &nProcs,            // nParts
             processorWeights.begin(),   // tpwgts
             nullptr,               // ubvec: processor imbalance (default)
             options.begin(),
             &edgeCut,
-            finalDecomp.begin()
+            decomp.begin()
         );
     }
     else
@@ -191,17 +192,17 @@ Foam::label Foam::metisDecomp::decompose
         (
             &numCells,          // num vertices in graph
             &ncon,              // num balancing constraints
-            const_cast<List<label>&>(xadj).begin(),   // indexing into adjncy
-            const_cast<List<label>&>(adjncy).begin(), // neighbour info
-            cellWeights.begin(),// vertexweights
+            const_cast<UList<label>&>(xadj).begin(),   // indexing into adjncy
+            const_cast<UList<label>&>(adjncy).begin(), // neighbour info
+            cellWeights.begin(),// vertex wts
             nullptr,               // vsize: total communication vol
-            faceWeights.begin(),// edgeweights
+            faceWeights.begin(),// edge wts
             &nProcs,            // nParts
             processorWeights.begin(),   // tpwgts
             nullptr,               // ubvec: processor imbalance (default)
             options.begin(),
             &edgeCut,
-            finalDecomp.begin()
+            decomp.begin()
         );
     }
 
@@ -213,116 +214,8 @@ Foam::label Foam::metisDecomp::decompose
 
 Foam::metisDecomp::metisDecomp(const dictionary& decompositionDict)
 :
-    decompositionMethod(decompositionDict)
+    metisLikeDecomp(decompositionDict)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::labelList Foam::metisDecomp::decompose
-(
-    const polyMesh& mesh,
-    const pointField& points,
-    const scalarField& pointWeights
-)
-{
-    if (points.size() != mesh.nCells())
-    {
-        FatalErrorInFunction
-            << "Can use this decomposition method only for the whole mesh"
-            << endl
-            << "and supply one coordinate (cellCentre) for every cell." << endl
-            << "The number of coordinates " << points.size() << endl
-            << "The number of cells in the mesh " << mesh.nCells()
-            << exit(FatalError);
-    }
-
-    CompactListList<label> cellCells;
-    calcCellCells
-    (
-        mesh,
-        identity(mesh.nCells()),
-        mesh.nCells(),
-        false,
-        cellCells
-    );
-
-    // Decompose using default weights
-    labelList decomp;
-    decompose(cellCells.m(), cellCells.offsets(), pointWeights, decomp);
-
-    return decomp;
-}
-
-
-Foam::labelList Foam::metisDecomp::decompose
-(
-    const polyMesh& mesh,
-    const labelList& agglom,
-    const pointField& agglomPoints,
-    const scalarField& agglomWeights
-)
-{
-    if (agglom.size() != mesh.nCells())
-    {
-        FatalErrorInFunction
-            << "Size of cell-to-coarse map " << agglom.size()
-            << " differs from number of cells in mesh " << mesh.nCells()
-            << exit(FatalError);
-    }
-
-    // Make Metis CSR (Compressed Storage Format) storage
-    //   adjncy      : contains neighbours (= edges in graph)
-    //   xadj(celli) : start of information in adjncy for celli
-
-    CompactListList<label> cellCells;
-    calcCellCells(mesh, agglom, agglomPoints.size(), false, cellCells);
-
-    // Decompose using default weights
-    labelList finalDecomp;
-    decompose(cellCells.m(), cellCells.offsets(), agglomWeights, finalDecomp);
-
-
-    // Rework back into decomposition for original mesh
-    labelList fineDistribution(agglom.size());
-
-    forAll(fineDistribution, i)
-    {
-        fineDistribution[i] = finalDecomp[agglom[i]];
-    }
-
-    return fineDistribution;
-}
-
-
-Foam::labelList Foam::metisDecomp::decompose
-(
-    const labelListList& globalCellCells,
-    const pointField& cellCentres,
-    const scalarField& cellWeights
-)
-{
-    if (cellCentres.size() != globalCellCells.size())
-    {
-        FatalErrorInFunction
-            << "Inconsistent number of cells (" << globalCellCells.size()
-            << ") and number of cell centres (" << cellCentres.size()
-            << ")." << exit(FatalError);
-    }
-
-
-    // Make Metis CSR (Compressed Storage Format) storage
-    //   adjncy      : contains neighbours (= edges in graph)
-    //   xadj(celli) : start of information in adjncy for celli
-
-    CompactListList<label> cellCells(globalCellCells);
-
-    // Decompose using default weights
-    labelList decomp;
-    decompose(cellCells.m(), cellCells.offsets(), cellWeights, decomp);
-
-    return decomp;
-}
 
 
 // ************************************************************************* //

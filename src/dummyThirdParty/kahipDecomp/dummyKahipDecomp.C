@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,30 +23,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "metisDecomp.H"
+#include "kahipDecomp.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 
 static const char* notImplementedMessage =
-"You are trying to use metis but do not have the metisDecomp library loaded."
-"\nThis message is from the dummy metisDecomp stub library instead.\n"
+"You are trying to use kahip but do not have the kahipDecomp library loaded."
+"\nThis message is from the dummy kahipDecomp stub library instead.\n"
 "\n"
-"Please install metis and make sure that libmetis.so is in your "
+"Please install kahip and make sure that libkahip.so is in your "
 "LD_LIBRARY_PATH.\n"
-"The metisDecomp library can then be built from "
-"src/parallel/decompose/metisDecomp and dynamically loading or linking"
-" this library will add metis as a decomposition method.\n";
+"The kahipDecomp library can then be built from "
+"src/parallel/decompose/kahipDecomp and dynamically loading or linking"
+" this library will add kahip as a decomposition method.\n";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(metisDecomp, 0);
+    defineTypeNameAndDebug(kahipDecomp, 0);
 
     addToRunTimeSelectionTable
     (
         decompositionMethod,
-        metisDecomp,
+        kahipDecomp,
         dictionary
     );
 }
@@ -54,7 +54,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::metisDecomp::decomposeSerial
+Foam::label Foam::kahipDecomp::decomposeSerial
 (
     const UList<label>& adjncy,
     const UList<label>& xadj,
@@ -71,7 +71,7 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::metisDecomp::metisDecomp
+Foam::kahipDecomp::kahipDecomp
 (
     const dictionary& decompositionDict
 )

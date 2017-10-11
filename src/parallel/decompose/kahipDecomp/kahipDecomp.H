@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,59 +22,60 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::metisDecomp
+    Foam::kahipDecomp
 
 Description
-    Metis domain decomposition
+    Domain decomposition using KaHIP
+    http://algo2.iti.kit.edu/documents/kahip/
 
     When run in parallel will collect the entire graph on to the master,
     decompose and send back.
 
     \verbatim
     numberOfSubdomains   N;
-    method               metis;
+    method               kahip;
 
-    metisCoeffs
+    kahipCoeffs
     {
-        method          recursive;  // k-way
-        options          ( ...);
-        processorWeights (   ... );
+        config          fast;
+        imbalance       0.01;
     }
     \endverbatim
 
     Where the coefficients dictionary is optional, as are all its entries:
     \table
-        Property  | Description                             | Default value
-        method    | recursive / k-way                       | recursive
-        options   | metis options                           |
-        processorWeights | list of weighting per partition  |
+        Property  | Description                                 | Default value
+        config    | fast / eco / strong                         | fast
+        imbalance | imbalance on cells between domains          | 0.01
+        seed      | initial value for random number generator   | 0
     \endtable
 
 SourceFiles
-    metisDecomp.C
+    kahipDecomp.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef metisDecomp_H
-#define metisDecomp_H
+#ifndef kahipDecomp_H
+#define kahipDecomp_H
 
 #include "metisLikeDecomp.H"
+#include "Enum.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class metisDecomp Declaration
+                         Class kahipDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
-class metisDecomp
+class kahipDecomp
 :
     public metisLikeDecomp
 {
 
     // Private Member Functions
 
-        //- Call Metis with options from dictionary.
+        //- Call kahip with options from dictionary.
         virtual label decomposeSerial
         (
             const UList<label>& adjncy,
@@ -84,24 +85,40 @@ class metisDecomp
         );
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const metisDecomp&) = delete;
-        metisDecomp(const metisDecomp&) = delete;
+        void operator=(const kahipDecomp&) = delete;
+        kahipDecomp(const kahipDecomp&) = delete;
 
 
 public:
 
+    //- The predefined KaHIP configuration types
+    enum class configs
+    {
+        FAST = 0, //!< default
+        ECO = 1,
+        STRONG = 2,
+        FASTSOCIAL = 3,
+        ECOSOCIAL = 4,
+        STRONGSOCIAL = 5,
+    };
+
+
+    //- The selection names for predefined KaHIP configurations
+    static const Enum<configs> configNames;
+
+
     //- Runtime type information
-    TypeName("metis");
+    TypeName("kahip");
 
 
     // Constructors
 
         //- Construct given the decomposition dictionary
-        metisDecomp(const dictionary& decompositionDict);
+        kahipDecomp(const dictionary& decompositionDict);
 
 
     //- Destructor
-    virtual ~metisDecomp()
+    virtual ~kahipDecomp()
     {}
 
 
