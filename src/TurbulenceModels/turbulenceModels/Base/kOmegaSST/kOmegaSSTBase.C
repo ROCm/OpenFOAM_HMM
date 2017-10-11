@@ -365,7 +365,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     (
         IOobject
         (
-            IOobject::groupName("k", U.group()),
+            IOobject::groupName("k", alphaRhoPhi.group()),
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::MUST_READ,
@@ -377,7 +377,7 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
     (
         IOobject
         (
-            IOobject::groupName("omega", U.group()),
+            IOobject::groupName("omega", alphaRhoPhi.group()),
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::MUST_READ,
