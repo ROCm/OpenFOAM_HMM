@@ -63,6 +63,14 @@ class streamLineBase
 :
     public fvMeshFunctionObject
 {
+    // Private data
+
+        //- Seed set engine
+        mutable autoPtr<sampledSet> sampledSetPtr_;
+
+        //- Axis of the sampled points to output
+        mutable word sampledSetAxis_;
+
 protected:
 
         //- Input dictionary
@@ -102,35 +110,35 @@ protected:
         wordList vectorNames_;
 
 
-        // Demand driven
+      // Demand driven
 
-            //- Mesh searching enigne
-            autoPtr<meshSearch> meshSearchPtr_;
+        //- File writer for scalar data
+        autoPtr<writer<scalar>> scalarFormatterPtr_;
 
-            //- Seed set engine
-            autoPtr<sampledSet> sampledSetPtr_;
-
-            //- Axis of the sampled points to output
-            word sampledSetAxis_;
-
-            //- File writer for scalar data
-            autoPtr<writer<scalar>> scalarFormatterPtr_;
-
-            //- File writer for vector data
-            autoPtr<writer<vector>> vectorFormatterPtr_;
+        //- File writer for vector data
+        autoPtr<writer<vector>> vectorFormatterPtr_;
 
 
-        // Generated data
+      // Generated data
 
-            //- All tracks. Per track the points it passed through
-            DynamicList<List<point>> allTracks_;
+        //- All tracks. Per track the points it passed through
+        DynamicList<List<point>> allTracks_;
 
-            //- Per scalarField, per track, the sampled values
-            List<DynamicList<scalarList>> allScalars_;
+        //- Per scalarField, per track, the sampled values
+        List<DynamicList<scalarList>> allScalars_;
 
-            //- Per vectorField, per track, the sampled values
-            List<DynamicList<vectorList>> allVectors_;
+        //- Per vectorField, per track, the sampled values
+        List<DynamicList<vectorList>> allVectors_;
 
+
+    // Protected Member Functions
+
+        //- The axis of the sampledSet. Creates sampledSet if required.
+        const word& sampledSetAxis() const;
+
+        //- Demand driven construction of the sampledSet.
+        //  Also updates sampledSetAxis_
+        const sampledSet& sampledSetPoints() const;
 
         //- Construct patch out of all wall patch faces
         autoPtr<indirectPrimitivePatch> wallPatch() const;
