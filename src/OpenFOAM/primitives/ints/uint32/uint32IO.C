@@ -38,13 +38,13 @@ uint32_t Foam::readUint32(const char* buf)
 
     const uint32_t val = uint32_t(parsed);
 
-    if (parsed > UINT32_MAX)
-    {
-        // Range error
-        errno = ERANGE;
-    }
+    const parsing::errorType err =
+    (
+        (parsed > UINT32_MAX)
+      ? parsing::errorType::RANGE
+      : parsing::checkConversion(buf, endptr)
+    );
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
     if (err != parsing::errorType::NONE)
     {
         FatalIOErrorInFunction("unknown")
@@ -64,24 +64,12 @@ bool Foam::readUint32(const char* buf, uint32_t& val)
 
     val = uint32_t(parsed);
 
-    if (parsed > UINT32_MAX)
-    {
-        // Range error
-        errno = ERANGE;
-    }
-
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
-    if (err != parsing::errorType::NONE)
-    {
-        #ifdef FULLDEBUG
-        IOWarningInFunction("unknown")
-            << parsing::errorNames[err] << " '" << buf << "'"
-            << endl;
-        #endif
-        return false;
-    }
-
-    return true;
+    return
+    (
+        (parsed > UINT32_MAX)
+      ? false
+      : (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE)
+    );
 }
 
 

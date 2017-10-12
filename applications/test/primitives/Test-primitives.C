@@ -55,6 +55,7 @@ unsigned testParsing
 )
 {
     unsigned nFail = 0;
+    string errMsg;
 
     // Expect some failures
     const bool prev = FatalIOError.throwExceptions();
@@ -74,6 +75,7 @@ unsigned testParsing
         catch (Foam::error& err)
         {
             parsed = false;
+            errMsg = err.message();
         }
 
         if (parsed)
@@ -93,12 +95,15 @@ unsigned testParsing
             if (expected)
             {
                 ++nFail;
-                Info<< "(fail) unexpected failure " << str << nl;
+                Info<< "(fail) unexpected";
             }
             else
             {
-                Info<< "(pass) expected failure " << str << nl;
+                Info<< "(pass) expected";
             }
+
+            Info<< " failure " << str
+                << "  >> " << errMsg.c_str() << nl;
         }
     }
 
@@ -125,6 +130,7 @@ int main(int argc, char *argv[])
                 { " 1234E junk", false },
                 { " 3.14159 ", true },
                 { " 31.4159E-1 " , true },
+                { " 100E1000 " , false },
             }
         );
     }
@@ -165,6 +171,7 @@ int main(int argc, char *argv[])
             &readInt32,
             {
                 { " 3.14159 ", false },
+                { " 31E1 ", false },
                 { " 31.4159E-1 " , false },
                 { "100" , true },
                 { "	2147483644" , true },
@@ -174,13 +181,16 @@ int main(int argc, char *argv[])
     }
 
     {
-        Info<< nl << "Test readUint32 (max= " << INT32_MAX << "):" << nl;
+        Info<< nl << "Test readUint32 (max= "
+            << unsigned(UINT32_MAX) << "):" << nl;
         nFail += testParsing
         (
             &readUint32,
             {
                 { "	2147483644" , true },
                 { "   2147483700  " , true },
+                { "   4294967295  " , true },
+                { "   4294968000  " , false },
             }
         );
     }

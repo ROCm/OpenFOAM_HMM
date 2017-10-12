@@ -39,13 +39,13 @@ int64_t Foam::readInt64(const char* buf)
 
     const int64_t val = int64_t(parsed);
 
-    if (parsed < INT64_MIN || parsed > INT64_MAX)
-    {
-        // Range error
-        errno = ERANGE;
-    }
+    const parsing::errorType err =
+    (
+        (parsed < INT64_MIN || parsed > INT64_MAX)
+      ? parsing::errorType::RANGE
+      : parsing::checkConversion(buf, endptr)
+    );
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
     if (err != parsing::errorType::NONE)
     {
         FatalIOErrorInFunction("unknown")
@@ -65,24 +65,12 @@ bool Foam::readInt64(const char* buf, int64_t& val)
 
     val = int64_t(parsed);
 
-    if (parsed < INT64_MIN || parsed > INT64_MAX)
-    {
-        // Range error
-        errno = ERANGE;
-    }
-
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
-    if (err != parsing::errorType::NONE)
-    {
-        #ifdef FULLDEBUG
-        IOWarningInFunction("unknown")
-            << parsing::errorNames[err] << " '" << buf << "'"
-            << endl;
-        #endif
-        return false;
-    }
-
-    return true;
+    return
+    (
+        (parsed < INT64_MIN || parsed > INT64_MAX)
+      ? false
+      : (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE)
+    );
 }
 
 

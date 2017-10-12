@@ -30,7 +30,8 @@ License
 const Foam::Enum<Foam::parsing::errorType>
 Foam::parsing::errorNames
 {
-    { errorType::GENERAL,  "General error parsing" },
+    { errorType::GENERAL, "General error parsing" },
+    { errorType::RANGE, "Range error while parsing" },
     { errorType::TRAILING, "Trailing content found parsing" },
 };
 
