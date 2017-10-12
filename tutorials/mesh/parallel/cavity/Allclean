@@ -7,4 +7,4 @@ cleanCase
 # Restore default dictionaries
 cp system/controlDict-startTime system/controlDict
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

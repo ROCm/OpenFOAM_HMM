@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial clean functions
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
 cleanCase
 
@@ -23,4 +21,4 @@ rm -rf constant/heater/polyMesh
 rm -rf constant/leftSolid/polyMesh
 rm -rf constant/rightSolid/polyMesh
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

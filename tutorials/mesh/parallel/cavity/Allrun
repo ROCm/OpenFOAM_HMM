@@ -30,4 +30,4 @@ runParallel -s 5 $decompDict5 icoFoam
 # Reconstruct mesh and results
 runParallel -s reconstruct -np 5 redistributePar -reconstruct
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

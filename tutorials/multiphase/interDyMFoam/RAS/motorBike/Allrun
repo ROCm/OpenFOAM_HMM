@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 ./Allrun.pre
 
@@ -16,4 +14,4 @@ FOAM_SIGFPE=false runParallel -s reconstruct redistributePar -reconstruct
 runParallel -s decompose redistributePar -decompose -latestTime
 runParallel -s restart $(getApplication)
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------
