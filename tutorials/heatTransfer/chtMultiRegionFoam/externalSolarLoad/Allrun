@@ -12,20 +12,21 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Agglomerate patch faces
 for i in air
 do
-    faceAgglomerate -region $i -dict constant/viewFactorsDict > log.faceAgglomerate.$i 2>&1
+    runApplication -s $i \
+        faceAgglomerate -region $i -dict constant/viewFactorsDict
 done
 
 # Generate view factors
 for i in air
 do
-    viewFactorsGen -region $i > log.viewFactorsGen.$i 2>&1
+    runApplication -s $i \
+        viewFactorsGen -region $i
 done
 
 runApplication $(getApplication)
 
-
 echo
-echo "creating files for paraview post-processing"
+echo "Creating files for paraview post-processing"
 echo
 paraFoam -touchAll
 

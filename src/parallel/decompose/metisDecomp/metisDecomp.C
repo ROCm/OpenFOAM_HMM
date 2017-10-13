@@ -77,10 +77,11 @@ Foam::label Foam::metisDecomp::decomposeSerial
     // Face weights (so on the edges of the dual)
     List<label> faceWeights;
 
-
     // Check for externally provided cellweights and if so initialise weights
-    const scalar minWeights = gMin(cWeights);
-    if (cWeights.size() > 0)
+    // Note: min, not gMin since routine runs on master only.
+    const scalar minWeights = min(cWeights);
+
+    if (!cWeights.empty())
     {
         if (minWeights <= 0)
         {

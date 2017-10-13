@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 # Setup case
 ./Allrun.pre
@@ -15,18 +13,18 @@ runApplication decomposePar -allRegions -constant
 # Agglomerate patch faces
 for i in air
 do
-    runParallel -s $i -np 4 \
+    runParallel -s $i \
         faceAgglomerate -region $i -dict constant/viewFactorsDict
 done
 
 # Generate view factors
 for i in air
 do
-     runParallel -s $i -np 4 \
+    runParallel -s $i \
         viewFactorsGen -region $i
 done
 
-# set the initial fields
+# Set the initial fields
 restore0Dir
 
 runParallel $(getApplication)
@@ -35,7 +33,7 @@ runParallel $(getApplication)
 runApplication reconstructPar -allRegions
 
 echo
-echo "creating files for paraview post-processing"
+echo "Creating files for paraview post-processing"
 echo
 paraFoam -touchAll
 

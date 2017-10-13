@@ -18,4 +18,5 @@ EXE_LIBS = \
     -lreconstruct \
     $(LINK_FLAGS) \
     -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lmetisDecomp -lscotchDecomp -lkahipDecomp
+    -L$(FOAM_LIBBIN)/dummy \
+    -lkahipDecomp -lmetisDecomp -lscotchDecomp

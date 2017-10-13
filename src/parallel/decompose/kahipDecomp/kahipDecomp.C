@@ -92,7 +92,9 @@ Foam::label Foam::kahipDecomp::decomposeSerial
     List<int> cellWeights;
 
     // Check for externally provided cellweights and if so initialise weights
-    const scalar minWeights = gMin(cWeights);
+    // Note: min, not gMin since routine runs on master only.
+    const scalar minWeights = min(cWeights);
+
     if (!cWeights.empty())
     {
         if (minWeights <= 0)

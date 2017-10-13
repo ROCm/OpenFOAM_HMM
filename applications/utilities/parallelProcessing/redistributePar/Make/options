@@ -11,7 +11,8 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lgenericPatchFields \
     -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lptscotchDecomp -lscotchDecomp \
+    -L$(FOAM_LIBBIN)/dummy \
+    -lkahipDecomp -lmetisDecomp -lptscotchDecomp -lscotchDecomp \
     -ldecompose \
     -lmeshTools \
     -llagrangian \

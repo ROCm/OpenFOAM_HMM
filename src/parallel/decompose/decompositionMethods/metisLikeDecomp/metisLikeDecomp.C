@@ -181,7 +181,7 @@ Foam::labelList Foam::metisLikeDecomp::decompose
         mesh,
         identity(mesh.nCells()),
         mesh.nCells(),
-        false,
+        true,
         cellCells
     );
 
@@ -214,7 +214,14 @@ Foam::labelList Foam::metisLikeDecomp::decompose
     //   xadj(celli) : start of information in adjncy for celli
 
     CompactListList<label> cellCells;
-    calcCellCells(mesh, agglom, agglomPoints.size(), false, cellCells);
+    calcCellCells
+    (
+        mesh,
+        agglom,
+        agglomPoints.size(),
+        true,
+        cellCells
+    );
 
     // Decompose using default weights
     labelList decomp;

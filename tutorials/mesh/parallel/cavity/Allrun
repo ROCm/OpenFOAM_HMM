@@ -1,13 +1,10 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 runApplication blockMesh
 
-#cp system/decomposeParDict-2 system/decomposeParDict
-#runApplication decomposePar
+decompDict5="-decomposeParDict system/decomposeParDict-5"
 
 # redistributePar to do decomposition
 runParallel -s decompose redistributePar -decompose
@@ -25,15 +22,12 @@ runParallel -s random icoFoam
 cp system/controlDict-latestTime system/controlDict
 
 # Redistribute to 5 processors
-runParallel -s 5 -np 5 redistributePar \
-    -decomposeParDict system/decomposeParDict-5 -cellDist
+runParallel -s 5 $decompDict5 redistributePar -cellDist
 
 # Run a bit more
-runParallel -s 5 -np 5 icoFoam \
-    -decomposeParDict system/decomposeParDict-5
+runParallel -s 5 $decompDict5 icoFoam
 
 # Reconstruct mesh and results
-runParallel -s reconstruct  -np 5 redistributePar -reconstruct
-
+runParallel -s reconstruct -np 5 redistributePar -reconstruct
 
 # -----------------------------------------------------------------------------
