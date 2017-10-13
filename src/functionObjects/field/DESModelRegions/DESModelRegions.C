@@ -172,6 +172,8 @@ bool Foam::functionObjects::DESModelRegions::write()
         << "    writing field " << DESModelRegions.name() << nl
         << endl;
 
+    DESModelRegions.write();
+
     return true;
 }
 

@@ -35,7 +35,31 @@ volVectorField U
 
 #include "compressibleCreatePhi.H"
 
-#include "setAlphaEff.H"
+autoPtr<compressible::turbulenceModel> turbulence;
+
+IOobject turbulencePropertiesHeader
+(
+    "turbulenceProperties",
+    runTime.constant(),
+    mesh,
+    IOobject::MUST_READ_IF_MODIFIED,
+    IOobject::NO_WRITE,
+    false
+);
+
+if (turbulencePropertiesHeader.typeHeaderOk<IOdictionary>(false))
+{
+    Info<< "Creating turbulence model\n" << endl;
+
+    turbulence =
+        compressible::turbulenceModel::New
+        (
+            rho,
+            U,
+            phi,
+            thermo
+        );
+}
 
 #include "createDpdt.H"
 
