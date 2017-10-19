@@ -81,6 +81,7 @@ wmake $targetType sixDoFRigidBodyMotion
 wmake $targetType sixDoFRigidBodyState
 wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
+wmake $targetType semiPermeableBaffle
 
 # Needs access to Turbulence
 
