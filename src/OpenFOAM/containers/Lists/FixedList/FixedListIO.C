@@ -91,10 +91,10 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
             // Write size (so it is valid dictionary entry) and start delimiter
             os << Size << token::BEGIN_BLOCK;
 
-            // Write contents
+            // Contents
             os << L[0];
 
-            // Write end delimiter
+            // End delimiter
             os << token::END_BLOCK;
         }
         else if
@@ -103,31 +103,31 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
          || (Size <= unsigned(shortListLen) && contiguous<T>())
         )
         {
-            // Write start delimiter
+            // Start delimiter
             os << token::BEGIN_LIST;
 
-            // Write contents
+            // Contents
             forAll(L, i)
             {
                 if (i) os << token::SPACE;
                 os << L[i];
             }
 
-            // Write end delimiter
+            // End delimiter
             os << token::END_LIST;
         }
         else
         {
-            // Write start delimiter
+            // Start delimiter
             os << nl << token::BEGIN_LIST << nl;
 
-            // Write contents
+            // Contents
             forAll(L, i)
             {
                 os << L[i] << nl;
             }
 
-            // Write end delimiter
+            // End delimiter
             os << token::END_LIST << nl;
         }
     }

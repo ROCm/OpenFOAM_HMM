@@ -210,7 +210,24 @@ Foam::Ostream& Foam::OSstream::write(const doubleScalar val)
 }
 
 
-Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
+Foam::Ostream& Foam::OSstream::write
+(
+    const char* data,
+    const std::streamsize count
+)
+{
+    beginRaw(count);
+    writeRaw(data, count);
+    endRaw();
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OSstream::beginRaw
+(
+    const std::streamsize count
+)
 {
     if (format() != BINARY)
     {
@@ -220,9 +237,32 @@ Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
     }
 
     os_ << token::BEGIN_LIST;
-    os_.write(buf, count);
-    os_ << token::END_LIST;
 
+    setState(os_.rdstate());
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OSstream::writeRaw
+(
+    const char* data,
+    std::streamsize count
+)
+{
+    // No check for format() == BINARY since this is either done in the
+    // beginRaw() method, or the caller knows what they are doing.
+
+    os_.write(data, count);
+    setState(os_.rdstate());
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OSstream::endRaw()
+{
+    os_ << token::END_LIST;
     setState(os_.rdstate());
 
     return *this;
@@ -231,7 +271,7 @@ Foam::Ostream& Foam::OSstream::write(const char* buf, std::streamsize count)
 
 void Foam::OSstream::indent()
 {
-    for (unsigned short i = 0; i < indentLevel_*indentSize_; i++)
+    for (unsigned short i = 0; i < indentLevel_*indentSize_; ++i)
     {
         os_ << ' ';
     }
