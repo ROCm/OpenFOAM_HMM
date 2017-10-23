@@ -278,7 +278,11 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-void Foam::Swap(const HashSet<Key, Hash>& a, const HashSet<Key, Hash>& b)
+inline void Foam::Swap
+(
+    HashSet<Key, Hash>& a,
+    HashSet<Key, Hash>& b
+)
 {
     a.swap(b);
 }

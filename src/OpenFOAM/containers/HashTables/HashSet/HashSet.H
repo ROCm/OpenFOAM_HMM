@@ -362,8 +362,8 @@ public:
 
 // Global Functions
 
-// Exchange contents of hash tables - see HashTable::swap().
-template<class T, class Key, class Hash>
+// Exchange contents of HashSets - see HashSet::swap().
+template<class Key, class Hash>
 inline void Swap
 (
     HashSet<Key, Hash>& a,
