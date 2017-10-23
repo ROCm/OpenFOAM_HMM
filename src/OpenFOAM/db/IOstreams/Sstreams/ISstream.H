@@ -82,7 +82,7 @@ public:
 
     // Constructors
 
-        //- Construct as wrapper around istream
+        //- Construct as wrapper around std::istream
         inline ISstream
         (
             std::istream& is,
@@ -163,8 +163,8 @@ public:
             //- Read binary block
             virtual Istream& read(char* buf, std::streamsize count);
 
-            //- Rewind and return the stream so that it may be read again
-            virtual Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            virtual void rewind();
 
 
         // Stream state functions

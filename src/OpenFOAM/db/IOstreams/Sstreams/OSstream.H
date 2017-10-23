@@ -69,7 +69,7 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
+        //- Construct as wrapper around std::ostream and set stream status
         OSstream
         (
             std::ostream& os,

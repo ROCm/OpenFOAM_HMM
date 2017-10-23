@@ -167,7 +167,7 @@ const std::istream& Foam::IFstream::stdStream() const
 }
 
 
-Foam::Istream& Foam::IFstream::rewind()
+void Foam::IFstream::rewind()
 {
     lineNumber_ = 1;      // Reset line number
 
@@ -195,8 +195,6 @@ Foam::Istream& Foam::IFstream::rewind()
     {
         ISstream::rewind();
     }
-
-    return *this;
 }
 
 

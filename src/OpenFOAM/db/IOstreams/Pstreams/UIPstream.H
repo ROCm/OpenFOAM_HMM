@@ -171,8 +171,8 @@ public:
             //- Read binary block with 8-byte alignment.
             Istream& read(char* data, const std::streamsize count);
 
-            //- Rewind and return the stream so that it may be read again
-            Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            void rewind();
 
 
         // Edit

@@ -171,6 +171,13 @@ public:
         //- Print description to Ostream
         void print(Ostream& os) const;
 
+        //- Reset the input buffer and rewind the stream
+        void reset(const std::string& s)
+        {
+            this->str(s);
+            this->rewind();
+        }
+
 
     // Member operators
 

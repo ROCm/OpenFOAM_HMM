@@ -131,8 +131,8 @@ public:
             //- Read binary block
             virtual Istream& read(char*, std::streamsize) = 0;
 
-            //- Rewind and return the stream so that it may be read again
-            virtual Istream& rewind() = 0;
+            //- Rewind the stream so that it may be read again
+            virtual void rewind() = 0;
 
 
         // Read List punctuation tokens
