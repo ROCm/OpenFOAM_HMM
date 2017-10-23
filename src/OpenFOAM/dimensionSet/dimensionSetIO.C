@@ -49,7 +49,7 @@ Foam::dimensionSet::tokeniser::tokeniser(Istream& is)
 
 void Foam::dimensionSet::tokeniser::push(const token& t)
 {
-    label end = (start_+size_)%tokens_.size();
+    const label end = (start_+size_)%tokens_.size();
     tokens_[end] = t;
     if (size_ == tokens_.size())
     {
@@ -444,9 +444,9 @@ Foam::Istream& Foam::dimensionSet::read
     {
         // Read first five dimensions
         exponents_[dimensionSet::MASS] = nextToken.number();
-        for (int Dimension=1; Dimension<dimensionSet::CURRENT; Dimension++)
+        for (int d=1; d<dimensionSet::CURRENT; ++d)
         {
-            is >> exponents_[Dimension];
+            is >> exponents_[d];
         }
 
         // Read next token
@@ -681,11 +681,11 @@ Foam::Ostream& Foam::dimensionSet::write
     }
     else
     {
-        for (int d=0; d<dimensionSet::nDimensions-1; d++)
+        for (int d=0; d<dimensionSet::nDimensions; ++d)
         {
-            os << exponents_[d] << token::SPACE;
+            if (d) os << token::SPACE;
+            os << exponents_[d];
         }
-        os << exponents_[dimensionSet::nDimensions-1];
     }
 
     os  << token::END_SQR;
