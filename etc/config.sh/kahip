@@ -42,18 +42,11 @@
 #     An Int64 OpenFOAM version can use it, but the mesh size is limited
 #     accordingly.
 #
-#     If KaHIP was compiled with openmp, you may need additional
-#     compile or link flags in KAHIP_COMP_FLAGS KAHIP_LINK_FLAGS
-#
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
 KAHIP_VERSION=kahip-2.00
 export KAHIP_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$KAHIP_VERSION
-
-# Adjust as required
-# export KAHIP_COMP_FLAGS="-fopenmp"
-export KAHIP_LINK_FLAGS="-lgomp"
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------

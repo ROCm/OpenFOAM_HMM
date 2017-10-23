@@ -1,0 +1,4 @@
+# Flags for compiling/linking openmp
+
+COMP_OPENMP = -DUSE_OMP -qopenmp
+LINK_OPENMP = -liomp5

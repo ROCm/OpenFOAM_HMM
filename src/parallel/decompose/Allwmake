@@ -33,7 +33,6 @@ hasKahip()
     local header label settings
 
     unset KAHIP_ARCH_PATH KAHIP_VERSION
-    unset KAHIP_COMP_FLAGS KAHIP_LINK_FLAGS
     settings=$($WM_PROJECT_DIR/bin/foamEtcFile config.sh/kahip) || {
         echo "$warning (no config.sh/kahip settings)"
         return 1
