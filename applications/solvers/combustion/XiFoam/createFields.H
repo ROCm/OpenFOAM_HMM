@@ -129,3 +129,4 @@ fields.add(thermo.heu());
 #include "createK.H"
 
 #include "createMRF.H"
+#include "createFvOptions.H"

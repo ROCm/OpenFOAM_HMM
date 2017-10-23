@@ -153,3 +153,4 @@ volScalarField Qdot
 #include "createSurfaceFilmModel.H"
 #include "createPyrolysisModel.H"
 #include "createRadiationModel.H"
+#include "createFvOptions.H"

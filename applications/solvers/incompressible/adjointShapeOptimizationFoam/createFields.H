@@ -120,3 +120,5 @@ volScalarField alpha
 );
 zeroCells(alpha, inletCells);
 //zeroCells(alpha, outletCells);
+
+#include "createFvOptions.H"

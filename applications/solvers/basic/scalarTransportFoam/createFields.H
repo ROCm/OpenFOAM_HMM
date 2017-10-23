@@ -55,3 +55,5 @@ dimensionedScalar DT
 );
 
 #include "createPhi.H"
+
+#include "createFvOptions.H"

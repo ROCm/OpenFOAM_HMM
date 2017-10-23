@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
     #include "createControls.H"
     #include "createFields.H"
     #include "createUf.H"
-    #include "createFvOptions.H"
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 

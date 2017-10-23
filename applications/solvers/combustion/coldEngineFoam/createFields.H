@@ -56,3 +56,4 @@ autoPtr<compressible::turbulenceModel> turbulence
 #include "createK.H"
 
 #include "createMRF.H"
+#include "createFvOptions.H"
