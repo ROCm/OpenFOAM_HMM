@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +27,18 @@ Description
 
 #include "IndirectList.H"
 #include "IOstreams.H"
+#include "Fstream.H"
 #include "ListOps.H"
 #include "labelIndList.H"
+#include "argList.H"
 
 using namespace Foam;
 
 template<class ListType>
 void printInfo(const ListType& lst)
 {
-    Info<< "addr: " << flatOutput(lst.addressing()) << nl
+    Info<< "full: " << flatOutput(lst.completeList()) << nl
+        << "addr: " << flatOutput(lst.addressing()) << nl
         << "list: " << flatOutput(lst) << nl
         << endl;
 }
@@ -61,6 +64,15 @@ void testFind(const T& val, const ListType& lst)
 
 int main(int argc, char *argv[])
 {
+    argList::addOption
+    (
+        "binary",
+        "file",
+        "write lists in binary to specified file"
+    );
+
+    argList args(argc, argv);
+
     List<label> completeList(20);
 
     forAll(completeList, i)
@@ -103,6 +115,55 @@ int main(int argc, char *argv[])
     printInfo(idl1);
     printInfo(idl2);
     printInfo(idl3);
+
+    fileName binaryOutput;
+    if (args.optionReadIfPresent("binary", binaryOutput))
+    {
+        Info<<"Writing output to " << binaryOutput << endl;
+
+        OFstream os(binaryOutput, IOstream::BINARY);
+
+        os.writeEntry("idl1", idl1);
+        os.writeEntry("idl2", idl2);
+        os.writeEntry("idl3", idl3);
+    }
+
+    if (Pstream::parRun())
+    {
+        if (Pstream::master())
+        {
+            Pout<< "full: " << flatOutput(idl3.completeList()) << nl
+                << "send: " << flatOutput(idl3) << endl;
+
+            for
+            (
+                int slave = Pstream::firstSlave();
+                slave <= Pstream::lastSlave();
+                ++slave
+            )
+            {
+                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
+                toSlave << idl3;
+            }
+        }
+        else
+        {
+            // From master
+            IPstream fromMaster
+            (
+                Pstream::commsTypes::scheduled,
+                Pstream::masterNo()
+            );
+
+            List<label> recv(fromMaster);
+
+            Pout<<"recv: " << flatOutput(recv) << endl;
+        }
+
+        // MPI barrier
+        bool barrier = true;
+        Pstream::scatter(barrier);
+    }
 
     Info<< "End\n" << endl;
 

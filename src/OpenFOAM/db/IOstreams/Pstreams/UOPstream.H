@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,9 +72,12 @@ class UOPstream
 
     // Private Member Functions
 
-        //- Write a T to the transfer buffer
+        //- Prepare buffer for count bytes of output at specified alignment.
+        inline void prepareBuffer(const size_t count, const size_t align);
+
+        //- Write data to the transfer buffer
         template<class T>
-        inline void writeToBuffer(const T& t);
+        inline void writeToBuffer(const T& val);
 
         //- Write a char to the transfer buffer
         inline void writeToBuffer(const char& c);
@@ -181,6 +184,24 @@ public:
 
             //- Write binary block with 8-byte alignment.
             Ostream& write(const char* data, const std::streamsize count);
+
+            //- Begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            Ostream& beginRaw(const std::streamsize count);
+
+            //- Low-level raw binary output.
+            Ostream& writeRaw
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- End marker for low-level raw binary output.
+            Ostream& endRaw()
+            {
+                return *this;
+            }
 
             //- Add indentation characters
             void indent()

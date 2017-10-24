@@ -154,7 +154,7 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 }
 
 
-Foam::Istream& Foam::ITstream::rewind()
+void Foam::ITstream::rewind()
 {
     tokenIndex_ = 0;
 
@@ -164,8 +164,6 @@ Foam::Istream& Foam::ITstream::rewind()
     }
 
     setGood();
-
-    return *this;
 }
 
 

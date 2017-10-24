@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::dummyISstream
+    Foam::dummyIstream
 
 Description
     Dummy stream for input. Aborts at any attempt to read from it.
@@ -31,10 +31,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dummyISstream_H
-#define dummyISstream_H
+#ifndef dummyIstream_H
+#define dummyIstream_H
 
-#include "StringStream.H"
+#include "Istream.H"
+//#include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,12 +43,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class dummyISstream Declaration
+                        Class dummyIstream Declaration
 \*---------------------------------------------------------------------------*/
 
-class dummyISstream
+class dummyIstream
 :
-    public IStringStream
+    public Istream
 {
 
 public:
@@ -55,14 +56,14 @@ public:
     // Constructors
 
         //- Construct null
-        dummyISstream()
+        dummyIstream()
         :
-            IStringStream(string::null)
+            Istream()
         {}
 
 
     //- Destructor
-    virtual ~dummyISstream()
+    ~dummyIstream()
     {}
 
 
@@ -126,8 +127,8 @@ public:
                 return *this;
             }
 
-            //- Rewind and return the stream so that it may be read again
-            virtual Istream& rewind()
+            //- Rewind the stream so that it may be read again
+            virtual void rewind()
             {
                 NotImplemented;
                 return *this;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,9 +25,11 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "StringStream.H"
+#include "UIBufStream.H"
+#include "UOBufStream.H"
 #include "wordList.H"
 #include "IOstreams.H"
+#include "argList.H"
 
 using namespace Foam;
 
@@ -36,22 +38,46 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    IStringStream testStream(Foam::string("  1002  abcd  defg;"));
+    // Buffer storage
+    DynamicList<char> storage(1000);
 
-    label i(readLabel(testStream));
+    UOBufStream obuf(storage);
+    obuf << 1002 << " " << "abcd" << " " << "def" << " " << 3.14159 << ";\n";
 
-    Info<< "label=" << i << nl;
+    Info<<"formatted: " << obuf.size() << " chars" << endl;
 
-    word w1(testStream);
-    word w2(testStream);
+    // Match size
+    storage.resize(obuf.size());
 
-    Info<< "word=" << w1 << nl;
-    Info<< "word=" << w2 << nl;
+    Info<<"as string: " << string(storage.cdata(), storage.size()) << endl;
 
-    testStream.reset("(hello1)");
+    // Attach input buffer - could also do without previous resize
 
-    wordList wl(testStream);
-    Info<< wl << nl;
+    UIBufStream ibuf(storage, storage.size());
+
+    token t;
+
+    while (ibuf.good())
+    {
+        ibuf >> t;
+        if (t.good())
+        {
+            Info<<"token: " << t << endl;
+        }
+    }
+
+    Info<< nl << "Repeat..." << endl;
+    ibuf.rewind();
+
+    while (ibuf.good())
+    {
+        ibuf >> t;
+        if (t.good())
+        {
+            Info<<"token: " << t << endl;
+        }
+    }
+
 
     Info<< "\nEnd\n" << endl;
 

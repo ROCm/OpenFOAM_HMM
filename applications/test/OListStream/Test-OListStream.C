@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,33 +21,58 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "UPtrList.H"
-#include "Ostream.H"
+#include "OListStream.H"
+#include "wordList.H"
+#include "IOstreams.H"
+#include "argList.H"
 
-// * * * * * * * * * * * * * * * Ostream Operators * * * * * * * * * * * * * //
+using namespace Foam;
 
-template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& L)
+Ostream& toString(Ostream& os, const UList<char>& list)
 {
-    const label sz = L.size();
-
-    // Size and start delimiter
-    os  << nl << indent << sz << nl
-        << indent << token::BEGIN_LIST << incrIndent << nl;
-
-    // Contents
-    for (label i=0; i < sz; ++i)
+    os << '"';
+    for (const char c : list)
     {
-        os << L[i] << nl;
+        os << c;
     }
+    os << '"';
 
-    // End delimiter
-    os << decrIndent << indent << token::END_LIST << nl;
-
-    os.check(FUNCTION_NAME);
     return os;
+}
+
+
+void printInfo(const OListStream& buf)
+{
+    Info<< nl << buf.size() << " chars (" << buf.capacity() << " capacity) ";
+    toString(Info, buf.list()) << endl;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
+
+int main(int argc, char *argv[])
+{
+    // Buffer storage
+    DynamicList<char> storage(8);
+
+    OListStream obuf(std::move(storage));
+    obuf << 1002 << " " << "abcd" << " " << "def" << " " << 3.14159 << ";\n";
+
+    printInfo(obuf);
+
+    obuf.rewind();
+    obuf << 100;
+
+    printInfo(obuf);
+
+    Info<< "\nEnd\n" << endl;
+
+    return 0;
 }
 
 
