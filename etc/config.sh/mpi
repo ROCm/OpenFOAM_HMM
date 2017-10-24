@@ -160,6 +160,28 @@ MPICH-GM)
     _foamAddLib     $GM_LIB_PATH
     ;;
 
+CRAY-MPICH)
+    export FOAM_MPI=cray-mpich
+    export MPI_ARCH_PATH=$MPICH_DIR
+
+    if [ "$FOAM_VERBOSE" -a "$PS1" ]
+    then
+        echo "Using $WM_MPLIB" 1>&2
+        echo "    FOAM_MPI  : $FOAM_MPI" 1>&2
+        echo "    MPICH_DIR : $MPI_ARCH_PATH" 1>&2
+    fi
+
+    [ -d "$MPI_ARCH_PATH" ] || {
+        echo "Warning in $WM_PROJECT_DIR/etc/config.sh/mpi:" 1>&2
+        echo "    Not a valid $WM_MPLIB installation directory." 1>&2
+        echo "    Please set MPICH_DIR properly" 1>&2
+        echo "    Currently using '$MPI_ARCH_PATH'" 1>&2
+    }
+
+    # _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    ;;
+
 HPMPI)
     export FOAM_MPI=hpmpi
     export MPI_HOME=/opt/hpmpi
