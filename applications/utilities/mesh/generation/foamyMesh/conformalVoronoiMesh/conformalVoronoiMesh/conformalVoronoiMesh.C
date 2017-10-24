@@ -660,7 +660,7 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
             if (cc1I != cc2I)
             {
-                if (findIndex(verticesOnFace, cc1I) == -1)
+                if (!verticesOnFace.found(cc1I))
                 {
                     nUniqueVertices++;
                 }

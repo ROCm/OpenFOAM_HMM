@@ -593,7 +593,7 @@ Foam::polyMesh::polyMesh
 
         // Check if there already exists a defaultFaces patch as last patch
         // and reuse it.
-        label patchi = findIndex(boundaryPatchNames, defaultBoundaryPatchName);
+        label patchi = boundaryPatchNames.find(defaultBoundaryPatchName);
 
         if (patchi != -1)
         {
@@ -866,7 +866,7 @@ Foam::polyMesh::polyMesh
 
         // Check if there already exists a defaultFaces patch as last patch
         // and reuse it.
-        label patchi = findIndex(boundaryPatchNames, defaultBoundaryPatchName);
+        label patchi = boundaryPatchNames.find(defaultBoundaryPatchName);
 
         if (patchi != -1)
         {

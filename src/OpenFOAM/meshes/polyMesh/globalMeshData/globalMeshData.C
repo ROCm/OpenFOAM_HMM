@@ -1395,10 +1395,9 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
                 // Add all slaveBFaces. Note that need to check for
                 // uniqueness only in case of cyclics.
 
-                forAll(slaveBFaces, j)
+                for (const label slave : slaveBFaces)
                 {
-                    label slave = slaveBFaces[j];
-                    if (findIndex(SubList<label>(myBFaces, sz), slave) == -1)
+                    if (!SubList<label>(myBFaces, sz).found(slave))
                     {
                         myBFaces[n++] = slave;
                     }
@@ -1434,11 +1433,10 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
                 const labelList& slaveBFaces =
                     globalPointBoundaryFaces[transformedSlaves[i]];
 
-                forAll(slaveBFaces, j)
+                for (const label slave : slaveBFaces)
                 {
-                    label slave = slaveBFaces[j];
                     // Check that same face not already present untransformed
-                    if (findIndex(untrafoFaces, slave)== -1)
+                    if (!untrafoFaces.found(slave))
                     {
                         label proci = globalIndices.whichProcID(slave);
                         label facei = globalIndices.toLocal(proci, slave);
@@ -1624,10 +1622,9 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
                 // Add all slaveBCells. Note that need to check for
                 // uniqueness only in case of cyclics.
 
-                forAll(slaveBCells, j)
+                for (const label slave : slaveBCells)
                 {
-                    label slave = slaveBCells[j];
-                    if (findIndex(SubList<label>(myBCells, sz), slave) == -1)
+                    if (!SubList<label>(myBCells, sz).found(slave))
                     {
                         myBCells[n++] = slave;
                     }
@@ -1663,12 +1660,10 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
                 const labelList& slaveBCells =
                     globalPointBoundaryCells[transformedSlaves[i]];
 
-                forAll(slaveBCells, j)
+                for (const label slave : slaveBCells)
                 {
-                    label slave = slaveBCells[j];
-
                     // Check that same cell not already present untransformed
-                    if (findIndex(untrafoCells, slave)== -1)
+                    if (!untrafoCells.found(slave))
                     {
                         label proci = globalIndices.whichProcID(slave);
                         label celli = globalIndices.toLocal(proci, slave);

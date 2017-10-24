@@ -29,7 +29,7 @@ License
 
 bool Foam::extrudedMesh::sameOrder(const face& f, const edge& e)
 {
-    label i = findIndex(f, e[0]);
+    label i = f.find(e[0]);
 
     label nextI = (i == f.size()-1 ? 0 : i+1);
 

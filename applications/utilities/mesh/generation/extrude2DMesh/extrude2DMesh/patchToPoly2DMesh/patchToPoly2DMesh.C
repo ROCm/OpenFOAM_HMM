@@ -45,7 +45,7 @@ void Foam::patchToPoly2DMesh::flipFaceOrder()
 
         const face& f = localFaces[edgeOwner];
 
-        label fp = findIndex(f, e[0]);
+        label fp = f.find(e[0]);
 
         if (f.nextLabel(fp) != e[1])
         {
@@ -207,7 +207,7 @@ void Foam::patchToPoly2DMesh::addPatchFacesToOwner()
             {
                 const face& f = faces[owner_[bEdgeI]];
 
-                label fp = findIndex(f, e[0]);
+                label fp = f.find(e[0]);
 
                 newOwner[bFacei] = owner_[bEdgeI];
 

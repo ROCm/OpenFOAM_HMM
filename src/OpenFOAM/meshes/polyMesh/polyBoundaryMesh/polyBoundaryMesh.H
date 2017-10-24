@@ -163,12 +163,12 @@ public:
         //- Return patch indices for all matches. Optionally matches patchGroups
         labelList findIndices
         (
-            const keyType&,
+            const keyType& key,
             const bool usePatchGroups = true
         ) const;
 
         //- Return patch index for the first match, return -1 if not found
-        label findIndex(const keyType&) const;
+        label findIndex(const keyType& key) const;
 
         //- Find patch index given a name
         label findPatchID

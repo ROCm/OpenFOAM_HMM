@@ -297,7 +297,7 @@ Foam::label Foam::mapNearestMethod::findMappedSrcCell
         // search target tgtCelli neighbours for match with source cell
         label tgtI = testCells.remove();
 
-        if (findIndex(visitedCells, tgtI) == -1)
+        if (!visitedCells.found(tgtI))
         {
             visitedCells.append(tgtI);
 
@@ -311,7 +311,7 @@ Foam::label Foam::mapNearestMethod::findMappedSrcCell
 
                 forAll(nbrCells, i)
                 {
-                    if (findIndex(visitedCells, nbrCells[i]) == -1)
+                    if (!visitedCells.found(nbrCells[i]))
                     {
                         testCells.append(nbrCells[i]);
                     }

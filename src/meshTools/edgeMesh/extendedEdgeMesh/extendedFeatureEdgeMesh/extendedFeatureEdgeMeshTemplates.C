@@ -379,7 +379,7 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
 
             forAll(ptEdNorms, k)
             {
-                if (findIndex(tmpFtPtNorms, ptEdNorms[k]) == -1)
+                if (!tmpFtPtNorms.found(ptEdNorms[k]))
                 {
                     bool addNormal = true;
 

@@ -1574,7 +1574,7 @@ int main(int argc, char *argv[])
             << " This requires all"
             << " cells to be in one and only one cellZone." << nl << endl;
 
-        label unzonedCelli = findIndex(zoneID, -1);
+        label unzonedCelli = zoneID.find(-1);
         if (unzonedCelli != -1)
         {
             FatalErrorInFunction
@@ -1623,7 +1623,7 @@ int main(int argc, char *argv[])
         labelList newNeiZoneID(mesh.nFaces()-mesh.nInternalFaces());
         getZoneID(mesh, newCellZones, newZoneID, newNeiZoneID);
 
-        label unzonedCelli = findIndex(newZoneID, -1);
+        label unzonedCelli = newZoneID.find(-1);
         if (unzonedCelli != -1)
         {
             FatalErrorInFunction

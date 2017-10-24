@@ -319,10 +319,9 @@ inline void Foam::molecule::constantProperties::setInteracionSiteBools
 
     forAll(siteIds_, i)
     {
-        const word& id(siteIds[i]);
+        const word& id = siteIds[i];
 
-        pairPotentialSites_[i] = (findIndex(pairPotSiteIds, id) > -1);
-
+        pairPotentialSites_[i] = pairPotSiteIds.found(id);
         electrostaticSites_[i] = (mag(siteCharges_[i]) > VSMALL);
     }
 }
@@ -409,7 +408,7 @@ inline bool Foam::molecule::constantProperties::pairPotentialSite
     label sId
 ) const
 {
-    label s = findIndex(siteIds_, sId);
+    label s = siteIds_.find(sId);
 
     if (s == -1)
     {
@@ -434,7 +433,7 @@ inline bool Foam::molecule::constantProperties::electrostaticSite
     label sId
 ) const
 {
-    label s = findIndex(siteIds_, sId);
+    label s = siteIds_.find(sId);
 
     if (s == -1)
     {

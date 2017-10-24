@@ -51,7 +51,7 @@ Foam::wallPolyPatch::wallPolyPatch
     polyPatch(name, size, start, index, bm, patchType)
 {
     //  wall is not constraint type so add wall group explicitly
-    if (findIndex(inGroups(), typeName) == -1)
+    if (!inGroups().found(typeName))
     {
         inGroups().append(typeName);
     }
@@ -70,7 +70,7 @@ Foam::wallPolyPatch::wallPolyPatch
     polyPatch(name, dict, index, bm, patchType)
 {
     //  wall is not constraint type so add wall group explicitly
-    if (findIndex(inGroups(), typeName) == -1)
+    if (!inGroups().found(typeName))
     {
         inGroups().append(typeName);
     }

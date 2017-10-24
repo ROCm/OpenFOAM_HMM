@@ -63,7 +63,7 @@ inline const Foam::labelList& Foam::patchEdgeFaceRegions::regions() const
 template<class TrackingData>
 inline bool Foam::patchEdgeFaceRegions::valid(TrackingData& td) const
 {
-    return regions_.size() && (findIndex(regions_, labelMax) == -1);
+    return regions_.size() && !regions_.found(labelMax);
 }
 
 
@@ -94,7 +94,7 @@ inline bool Foam::patchEdgeFaceRegions::updateEdge
     const face& f = patch.localFaces()[facei];
     const edge& e = patch.edges()[edgeI];
 
-    label index = findIndex(patch.faceEdges()[facei], edgeI);
+    label index = patch.faceEdges()[facei].find(edgeI);
     bool sameOrientation = (f[index] == e.start());
 
     // Get information in edge-order
@@ -114,7 +114,7 @@ inline bool Foam::patchEdgeFaceRegions::updateEdge
             << "problem." << abort(FatalError);
     }
 
-    if ((findIndex(orientedInfo, -1) != -1) || (findIndex(regions_, -1) != -1))
+    if (orientedInfo.found(-1) || regions_.found(-1))
     {
         // Blocked edge/face
         return false;
@@ -161,7 +161,7 @@ inline bool Foam::patchEdgeFaceRegions::updateEdge
             << "problem." << abort(FatalError);
     }
 
-    if ((findIndex(orientedInfo, -1) != -1) || (findIndex(regions_, -1) != -1))
+    if (orientedInfo.found(-1) || regions_.found(-1))
     {
         // Blocked edge/face
         return false;
@@ -199,7 +199,7 @@ inline bool Foam::patchEdgeFaceRegions::updateFace
     const edge& e = patch.edges()[edgeI];
 
     // Find starting point of edge on face.
-    label index0 = findIndex(patch.faceEdges()[facei], edgeI);
+    label index0 = patch.faceEdges()[facei].find(edgeI);
     label index1 = f.fcIndex(index0);
     bool sameOrientation = (f[index0] == e.start());
 
@@ -221,7 +221,7 @@ inline bool Foam::patchEdgeFaceRegions::updateFace
             << "problem." << abort(FatalError);
     }
 
-    if ((findIndex(orientedInfo, -1) != -1) || (findIndex(regions_, -1) != -1))
+    if (orientedInfo.found(-1) || regions_.found(-1))
     {
         // Blocked edge/face
         return false;

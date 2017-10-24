@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
             const wordList& regions = iter();
             forAll(regions, i)
             {
-                if (findIndex(regionNames, regions[i]) == -1)
+                if (!regionNames.found(regions[i]))
                 {
                     regionNames.append(regions[i]);
                 }

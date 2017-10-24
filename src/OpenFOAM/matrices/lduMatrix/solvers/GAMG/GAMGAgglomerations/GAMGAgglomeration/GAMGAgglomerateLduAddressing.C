@@ -704,11 +704,9 @@ void Foam::GAMGAgglomeration::calculateRegionMaster
     // processor
     agglomProcIDs = findIndices(procAgglomMap, myAgglom);
     // Make sure the master is the first element.
-    label index = findIndex
-    (
-        agglomProcIDs,
-        agglomToMaster[myAgglom]
-    );
+    const label index =
+        agglomProcIDs.find(agglomToMaster[myAgglom]);
+
     Swap(agglomProcIDs[0], agglomProcIDs[index]);
 }
 

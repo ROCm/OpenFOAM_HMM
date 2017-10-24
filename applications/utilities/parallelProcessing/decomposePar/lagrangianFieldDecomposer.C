@@ -67,11 +67,8 @@ Foam::lagrangianFieldDecomposer::lagrangianFieldDecomposer
                 const indexedParticle& ppi = *iter();
                 particleIndices_[pi++] = ppi.index();
 
-                label mappedTetFace = findIndex
-                (
-                    decodedProcFaceAddressing,
-                    ppi.tetFace()
-                );
+                const label mappedTetFace =
+                    decodedProcFaceAddressing.find(ppi.tetFace());
 
                 if (mappedTetFace == -1)
                 {

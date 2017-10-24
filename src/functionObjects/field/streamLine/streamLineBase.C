@@ -551,7 +551,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     Info<< "    Employing velocity field " << UName_ << endl;
 
-    if (findIndex(fields_, UName_) == -1)
+    if (!fields_.found(UName_))
     {
         FatalIOErrorInFunction(dict)
             << "Velocity field for tracking " << UName_

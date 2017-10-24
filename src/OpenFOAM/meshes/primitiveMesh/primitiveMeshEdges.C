@@ -404,7 +404,7 @@ void Foam::primitiveMesh::calcEdges(const bool doFaceEdges) const
 
         if (debug)
         {
-            label edgeI = findIndex(oldToNew, -1);
+            label edgeI = oldToNew.find(-1);
 
             if (edgeI != -1)
             {
