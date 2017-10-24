@@ -103,17 +103,17 @@ public:
         inline DynamicField();
 
         //- Construct given size.
-        explicit inline DynamicField(const label);
+        explicit inline DynamicField(const label nElem);
 
         //- Construct from UList. Size set to UList size.
         //  Also constructs from DynamicField with different sizing parameters.
-        explicit inline DynamicField(const UList<T>&);
+        explicit inline DynamicField(const UList<T>& lst);
 
         //- Construct by transferring the parameter contents
-        explicit inline DynamicField(const Xfer<List<T>>&);
+        explicit inline DynamicField(const Xfer<List<T>>& lst);
 
         //- Construct by transferring the parameter contents
-        explicit inline DynamicField(const Xfer<Field<T>>&);
+        explicit inline DynamicField(const Xfer<Field<T>>& lst);
 
         //- Construct by 1 to 1 mapping from the given field
         inline DynamicField
@@ -138,16 +138,16 @@ public:
         );
 
         //- Construct copy
-        inline DynamicField(const DynamicField<T, SizeMin>&);
+        inline DynamicField(const DynamicField<T, SizeMin>& lst);
 
         //- Construct by transferring the Field contents
         inline DynamicField
         (
-            const Xfer<DynamicField<T, SizeMin>>&
+            const Xfer<DynamicField<T, SizeMin>>& lst
         );
 
         //- Construct from Istream. Size set to size of list read.
-        explicit DynamicField(Istream&);
+        explicit DynamicField(Istream& is);
 
         //- Clone
         tmp<DynamicField<T, SizeMin>> clone() const;
@@ -166,31 +166,31 @@ public:
             //  The addressed size will be truncated if needed to fit, but will
             //  remain otherwise untouched.
             //  Use this or reserve() in combination with append().
-            inline void setCapacity(const label);
+            inline void setCapacity(const label nElem);
 
             //- Alter the addressed list size.
             //  New space will be allocated if required.
             //  Use this to resize the list prior to using the operator[] for
             //  setting values (as per List usage).
-            inline void setSize(const label);
+            inline void setSize(const label nElem);
 
             //- Alter the addressed list size and fill new space with a
             //  constant.
-            inline void setSize(const label, const T&);
+            inline void setSize(const label nElem, const T& val);
 
             //- Alter the addressed list size.
             //  New space will be allocated if required.
             //  Use this to resize the list prior to using the operator[] for
             //  setting values (as per List usage).
-            inline void resize(const label);
+            inline void resize(const label nElem);
 
             //- Alter the addressed list size and fill new space with a
             //  constant.
-            inline void resize(const label, const T& val);
+            inline void resize(const label nElem, const T& val);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size, use setCapacity() for that.
-            inline void reserve(const label);
+            inline void reserve(const label nElem);
 
             //- Clear the addressed list, i.e. set the size to zero.
             //  Allocated size does not change
@@ -222,19 +222,19 @@ public:
 
             //- Return non-const access to an element, resizing list if
             //  necessary
-            inline T& operator()(const label);
+            inline T& operator()(const label elemI);
 
             //- Assignment of all addressed entries to the given value
-            inline void operator=(const T&);
+            inline void operator=(const T& val);
 
             //- Assignment to DynamicField
             inline void operator=
             (
-                const DynamicField<T, SizeMin>&
+                const DynamicField<T, SizeMin>& lst
             );
 
             //- Assignment to UList
-            inline void operator=(const UList<T>&);
+            inline void operator=(const UList<T>& lst);
 };
 
 

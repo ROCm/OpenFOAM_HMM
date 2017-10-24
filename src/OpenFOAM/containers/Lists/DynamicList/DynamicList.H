@@ -158,6 +158,10 @@ public:
         //- Move construct.
         inline DynamicList(DynamicList<T, SizeMin>&& lst);
 
+        //- Move construct with different sizing parameters
+        template<int AnySizeMin>
+        inline DynamicList(DynamicList<T, AnySizeMin>&& lst);
+
         //- Move construct from List
         inline DynamicList(List<T>&& lst);
 
@@ -211,6 +215,10 @@ public:
 
             //- Clear the list and delete storage.
             inline void clearStorage();
+
+            //- Expand the addressable size to fit the allocated capacity.
+            //  Returns the previous addressable size.
+            inline label expandStorage();
 
             //- Shrink the allocated space to the number of elements used.
             //  Returns a reference to the DynamicList.

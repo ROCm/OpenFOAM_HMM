@@ -207,6 +207,19 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 
 
 template<class T, int SizeMin>
+template<int AnySizeMin>
+inline Foam::DynamicList<T, SizeMin>::DynamicList
+(
+    DynamicList<T, AnySizeMin>&& lst
+)
+:
+    capacity_(0)
+{
+    transfer(lst);
+}
+
+
+template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
     List<T>&& lst
@@ -361,6 +374,18 @@ inline void Foam::DynamicList<T, SizeMin>::clearStorage()
 
 
 template<class T, int SizeMin>
+inline Foam::label Foam::DynamicList<T, SizeMin>::expandStorage()
+{
+    const label nextFree = List<T>::size();
+
+    // Allow addressing into the entire list
+    List<T>::size(capacity_);
+
+    return nextFree;
+}
+
+
+template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>&
 Foam::DynamicList<T, SizeMin>::shrink()
 {
@@ -386,8 +411,26 @@ inline void Foam::DynamicList<T, SizeMin>::swap
     DynamicList<T, AnySizeMin>& lst
 )
 {
-    Foam::Swap(static_cast<UList<T>&>(*this), static_cast<UList<T>&>(lst));
-    Foam::Swap(capacity_, lst.capacity_);
+    DynamicList<T, SizeMin>& cur = *this;
+
+    // Make addressable size identical to the allocated capacity
+    const label oldSize1 = cur.expandStorage();
+    const label oldSize2 = lst.expandStorage();
+
+    // Swap storage
+    Foam::Swap
+    (
+        static_cast<UList<T>&>(cur),
+        static_cast<UList<T>&>(lst)
+    );
+
+    // Match capacity to the underlying allocated list size
+    cur.setCapacity(cur.size());
+    lst.setCapacity(lst.size());
+
+    // Set addressable size
+    cur.setSize(oldSize2);
+    lst.setSize(oldSize1);
 }
 
 
@@ -409,10 +452,12 @@ Foam::DynamicList<T, SizeMin>::transfer
     DynamicList<T, AnySizeMin>& lst
 )
 {
-    // Take over storage as-is (without shrink), clear addressing for lst.
-    capacity_ = lst.capacity_;
-    lst.capacity_ = 0;
+    // Take over storage as-is (without shrink, without using SizeMin)
+    // clear addressing and storage for old lst.
+    capacity_ = lst.capacity();
+
     List<T>::transfer(static_cast<List<T>&>(lst));
+    lst.clearStorage();  // Ensure capacity=0
 }
 
 
@@ -565,7 +610,7 @@ Foam::DynamicList<T, SizeMin>::append
 )
 {
     append(std::move(static_cast<List<T>&>(lst)));
-    lst.clearStorage();  // Ensure capacity=0 too
+    lst.clearStorage();  // Ensure capacity=0
     return *this;
 }
 
@@ -579,7 +624,7 @@ Foam::DynamicList<T, SizeMin>::append
 )
 {
     append(std::move(static_cast<List<T>&>(lst)));
-    lst.clearStorage();  // Ensure capacity=0 too
+    lst.clearStorage();  // Ensure capacity=0
     return *this;
 }
 

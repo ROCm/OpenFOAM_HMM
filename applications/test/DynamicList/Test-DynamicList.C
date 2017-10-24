@@ -46,6 +46,14 @@ void printInfo
     if (showSize)
     {
         Info<< " size=\"" << lst.size() << "\"";
+        if (lst.cdata())
+        {
+            Info<< " ptr=\"" << long(lst.cdata()) << "\"";
+        }
+        else
+        {
+            Info<< " ptr=\"nullptr\"";
+        }
     }
     Info<< ">" << nl << flatOutput(lst) << nl << "</" << tag << ">" << endl;
 }
@@ -64,6 +72,14 @@ void printInfo
     {
         Info<< " size=\"" << lst.size()
             << "\" capacity=\"" << lst.capacity() << "\"";
+        if (lst.cdata())
+        {
+            Info<< " ptr=\"" << long(lst.cdata()) << "\"";
+        }
+        else
+        {
+            Info<< " ptr=\"nullptr\"";
+        }
     }
     Info<< ">" << nl << flatOutput(lst) << nl << "</" << tag << ">" << endl;
 }
@@ -284,6 +300,19 @@ int main(int argc, char *argv[])
             << flatOutput(input1) << " / "
             << flatOutput(input2) << nl;
 
+        Info<< "test move dissimilar sizing:" << nl;
+        list1 = list2;
+        list1.reserve(100);
+
+        // DynamicList<label,1000> list3; // (std::move(list1));
+        DynamicList<label,1000> list3(std::move(list1));
+        Info<< "orig: " << flatOutput(list1) << nl;
+
+        // list3.swap(list1);
+        // list3 = std::move(list1);
+
+        printInfo("input",  list1, true);
+        printInfo("output", list3, true);
 
         input1 = list2;
 
