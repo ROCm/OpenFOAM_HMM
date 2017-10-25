@@ -33,9 +33,9 @@ Description
         profiling
         {
             active      true;
-            cpuInfo     true;
+            cpuInfo     false;
             memInfo     false;
-            sysInfo     true;
+            sysInfo     false;
         }
     \endcode
     or simply using all defaults:

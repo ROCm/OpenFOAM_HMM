@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,23 +75,52 @@ inline Foam::PackedBoolList::PackedBoolList(const Xfer<PackedList<1>>& lst)
 
 inline Foam::PackedBoolList::PackedBoolList(const UList<bool>& lst)
 :
-    PackedList<1>()
+    PackedList<1>(lst.size())
 {
-    operator=(lst);
+    // Set according to indices that are true
+    const label len = lst.size();
+
+    for (label i = 0; i < len; ++i)
+    {
+        if (lst[i])
+        {
+            this->set(i, 1u);
+        }
+    }
 }
 
 
 inline Foam::PackedBoolList::PackedBoolList(const labelUList& indices)
 :
-    PackedList<1>(indices.size(), 0u)
+    PackedBoolList(indices.size(), indices)
+{}
+
+
+inline Foam::PackedBoolList::PackedBoolList(const UIndirectList<label>& indices)
+:
+    PackedBoolList(indices.size(), indices)
+{}
+
+
+inline Foam::PackedBoolList::PackedBoolList
+(
+    const label size,
+    const labelUList& indices
+)
+:
+    PackedList<1>(size)
 {
     set(indices);
 }
 
 
-inline Foam::PackedBoolList::PackedBoolList(const UIndirectList<label>& indices)
+inline Foam::PackedBoolList::PackedBoolList
+(
+    const label size,
+    const UIndirectList<label>& indices
+)
 :
-    PackedList<1>(indices.size(), 0u)
+    PackedList<1>(size)
 {
     set(indices);
 }

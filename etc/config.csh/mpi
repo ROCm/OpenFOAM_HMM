@@ -141,6 +141,28 @@ case MPICH-GM:
     _foamAddLib     $GM_LIB_PATH
     breaksw
 
+case CRAY-MPICH:
+    if ( ! $?MPICH_DIR ) setenv MPICH_DIR /dev/null
+    setenv FOAM_MPI cray-mpich
+    setenv MPI_ARCH_PATH $MPICH_DIR
+
+    if ($?FOAM_VERBOSE && $?prompt) then
+        echo "Using $WM_MPLIB"
+        echo "    FOAM_MPI  : $FOAM_MPI"
+        echo "    MPICH_DIR : $MPI_ARCH_PATH"
+    endif
+
+    if ( ! -d "$MPI_ARCH_PATH" ) then
+        echo "Warning in $WM_PROJECT_DIR/etc/config.csh/mpi:"
+        echo "    Not a valid $WM_MPLIB installation directory."
+        echo "    Please set MPICH_DIR properly."
+        echo "    Currently using '$MPI_ARCH_PATH'"
+    endif
+
+    # _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    breaksw
+
 case HPMPI:
     setenv FOAM_MPI hpmpi
     setenv MPI_HOME /opt/hpmpi

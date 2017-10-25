@@ -48,8 +48,7 @@ Foam::profilingInformation* Foam::profiling::find
     const label parentId
 )
 {
-    StorageContainer::iterator iter = hash_.find(Key(descr, parentId));
-    return (iter.found() ? iter() : 0);
+    return hash_.lookup(Key(descr, parentId), nullptr);
 }
 
 
@@ -312,6 +311,7 @@ const Foam::Time& Foam::profiling::owner() const
 {
     return owner_;
 }
+
 
 Foam::label Foam::profiling::size() const
 {

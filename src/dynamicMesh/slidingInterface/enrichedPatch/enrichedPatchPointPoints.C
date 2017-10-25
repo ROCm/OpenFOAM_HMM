@@ -46,8 +46,7 @@ void Foam::enrichedPatch::calcPointPoints() const
     // Go through all faces and add the previous and next point as the
     // neighbour for each point. While inserting points, reject the
     // duplicates (as every internal edge will be visited twice).
-    List<DynamicList<label, primitiveMesh::edgesPerPoint_>>
-        pp(meshPoints().size());
+    List<DynamicList<label>> pp(meshPoints().size());
 
     const faceList& lf = localFaces();
 
@@ -59,8 +58,7 @@ void Foam::enrichedPatch::calcPointPoints() const
 
         forAll(curFace, pointi)
         {
-            DynamicList<label, primitiveMesh::edgesPerPoint_>&
-                curPp = pp[curFace[pointi]];
+            DynamicList<label>& curPp = pp[curFace[pointi]];
 
             // Do next label
             label next = curFace.nextLabel(pointi);

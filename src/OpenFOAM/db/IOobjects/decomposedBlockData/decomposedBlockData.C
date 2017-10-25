@@ -30,8 +30,9 @@ License
 #include "Fstream.H"
 #include "StringStream.H"
 #include "dictionary.H"
-#include <sys/time.h>
 #include "objectRegistry.H"
+#include "foamVersion.H"
+#include <sys/time.h>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -204,6 +205,20 @@ void Foam::decomposedBlockData::writeHeader
         << "    version     " << version << ";\n"
         << "    format      " << format << ";\n"
         << "    class       " << type << ";\n";
+
+    // This may be useful to have as well
+    /*
+    if (os.format() == IOstream::BINARY)
+    {
+        os  << "    arch        " << Foam::FOAMbuildArch << ";\n";
+    }
+    */
+
+    if (Pstream::parRun())
+    {
+        os  << "    blocks      " << Pstream::nProcs() << ";\n";
+    }
+
     if (note.size())
     {
         os  << "    note        " << note << ";\n";
@@ -938,7 +953,7 @@ Foam::label Foam::decomposedBlockData::numBlocks(const fileName& fName)
         return nBlocks;
     }
 
-    // Skip header
+    // FoamFile header
     token firstToken(is);
 
     if
@@ -951,8 +966,15 @@ Foam::label Foam::decomposedBlockData::numBlocks(const fileName& fName)
         dictionary headerDict(is);
         is.version(headerDict.lookup("version"));
         is.format(headerDict.lookup("format"));
+
+        // Obtain number of blocks directly
+        if (headerDict.readIfPresent("blocks", nBlocks))
+        {
+            return nBlocks;
+        }
     }
 
+    // Fallback to brute force read of each data block
     List<char> data;
     while (is.good())
     {

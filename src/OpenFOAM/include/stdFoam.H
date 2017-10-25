@@ -25,12 +25,13 @@ Namespace
     stdFoam
 
 Description
-    Includes some global templates and macros used by OpenFOAM.
+    Some global templates and macros used by OpenFOAM and some standard
+    C++ headers.
 
-    Some of the templates are defined here correspond to useful
+    Some of the templates defined here correspond to useful
     std templates that are part of future C++ standards, or that
     are in a state of change. Defining them here provides some additional
-    control over which definition are used within the OpenFOAM code-base.
+    control over which definitions are used within the OpenFOAM code-base.
 
 SeeAlso
     - http://en.cppreference.com/w/cpp/iterator/end
@@ -42,6 +43,7 @@ SeeAlso
 #define StdFoam_H
 
 #include <initializer_list>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,12 +116,12 @@ constexpr auto cend(const C& c) -> decltype(c.end())
 //  }
 //  \endcode
 //  \sa forAllConstIters, forAllIter, forAllConstIters
-#define forAllIters(container,it)                                              \
+#define forAllIters(container,iter)                                            \
     for                                                                        \
     (                                                                          \
-        auto it = stdFoam::begin(container);                                   \
-        it != stdFoam::end(container);                                         \
-        ++it                                                                   \
+        auto iter = stdFoam::begin(container);                                 \
+        iter != stdFoam::end(container);                                       \
+        ++iter                                                                 \
     )
 
 
@@ -132,12 +134,12 @@ constexpr auto cend(const C& c) -> decltype(c.end())
 //  }
 //  \endcode
 //  \sa forAllIters, forAllIter, forAllConstIter
-#define forAllConstIters(container,cit)                                        \
+#define forAllConstIters(container,iter)                                       \
     for                                                                        \
     (                                                                          \
-        auto cit = stdFoam::cbegin(container);                                 \
-        cit != stdFoam::cend(container);                                       \
-        ++cit                                                                  \
+        auto iter = stdFoam::cbegin(container);                                \
+        iter != stdFoam::cend(container);                                      \
+        ++iter                                                                 \
     )
 
 

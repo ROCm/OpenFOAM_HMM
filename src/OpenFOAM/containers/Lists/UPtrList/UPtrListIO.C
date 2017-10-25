@@ -31,18 +31,20 @@ License
 template<class T>
 Foam::Ostream& Foam::operator<<(Ostream& os, const UPtrList<T>& L)
 {
-    // Write size and start delimiter
-    os  << nl << indent << L.size() << nl
-        << indent << token::BEGIN_LIST << incrIndent;
+    const label sz = L.size();
 
-    // Write contents
-    forAll(L, i)
+    // Size and start delimiter
+    os  << nl << indent << sz << nl
+        << indent << token::BEGIN_LIST << incrIndent << nl;
+
+    // Contents
+    for (label i=0; i < sz; ++i)
     {
-        os << nl << L[i];
+        os << L[i] << nl;
     }
 
-    // Write end delimiter
-    os << nl << decrIndent << indent << token::END_LIST << nl;
+    // End delimiter
+    os << decrIndent << indent << token::END_LIST << nl;
 
     os.check(FUNCTION_NAME);
     return os;

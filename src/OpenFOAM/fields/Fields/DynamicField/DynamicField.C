@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,32 +27,32 @@ License
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-Foam::DynamicField<T, SizeInc, SizeMult, SizeDiv>::DynamicField(Istream& is)
+template<class T, int SizeMin>
+Foam::DynamicField<T, SizeMin>::DynamicField(Istream& is)
 :
     Field<T>(is),
     capacity_(Field<T>::size())
 {}
 
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-Foam::tmp<Foam::DynamicField<T, SizeInc, SizeMult, SizeDiv>>
-Foam::DynamicField<T, SizeInc, SizeMult, SizeDiv>::clone() const
+template<class T, int SizeMin>
+Foam::tmp<Foam::DynamicField<T, SizeMin>>
+Foam::DynamicField<T, SizeMin>::clone() const
 {
-    return tmp<DynamicField<T, SizeInc, SizeMult, SizeDiv>>
+    return tmp<DynamicField<T, SizeMin>>
     (
-        new DynamicField<T, SizeInc, SizeMult, SizeDiv>(*this)
+        new DynamicField<T, SizeMin>(*this)
     );
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operator * * * * * * * * * * * * * //
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const DynamicField<T, SizeInc, SizeMult, SizeDiv>& lst
+    const DynamicField<T, SizeMin>& lst
 )
 {
     os << static_cast<const Field<T>&>(lst);
@@ -60,11 +60,11 @@ Foam::Ostream& Foam::operator<<
 }
 
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Foam::Istream& Foam::operator>>
 (
     Istream& is,
-    DynamicField<T, SizeInc, SizeMult, SizeDiv>& lst
+    DynamicField<T, SizeMin>& lst
 )
 {
     is >> static_cast<Field<T>&>(lst);

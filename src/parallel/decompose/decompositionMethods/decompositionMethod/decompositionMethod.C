@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-InClass
-    decompositionMethod
-
 \*---------------------------------------------------------------------------*/
 
 #include "decompositionMethod.H"
@@ -48,6 +45,7 @@ namespace Foam
     defineTypeNameAndDebug(decompositionMethod, 0);
     defineRunTimeSelectionTable(decompositionMethod, dictionary);
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -349,8 +347,8 @@ void Foam::decompositionMethod::calcCellCells
 
     for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
-        label own = agglom[faceOwner[facei]];
-        label nei = agglom[faceNeighbour[facei]];
+        const label own = agglom[faceOwner[facei]];
+        const label nei = agglom[faceNeighbour[facei]];
 
         nFacesPerCell[own]++;
         nFacesPerCell[nei]++;
@@ -367,7 +365,7 @@ void Foam::decompositionMethod::calcCellCells
 
             forAll(pp, i)
             {
-                label own = agglom[faceOwner[facei]];
+                const label own = agglom[faceOwner[facei]];
 
                 label globalNei = globalNeighbour[bFacei];
                 if
@@ -399,8 +397,8 @@ void Foam::decompositionMethod::calcCellCells
     // For internal faces is just offsetted owner and neighbour
     for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
-        label own = agglom[faceOwner[facei]];
-        label nei = agglom[faceNeighbour[facei]];
+        const label own = agglom[faceOwner[facei]];
+        const label nei = agglom[faceNeighbour[facei]];
 
         m[offsets[own] + nFacesPerCell[own]++] = globalAgglom.toGlobal(nei);
         m[offsets[nei] + nFacesPerCell[nei]++] = globalAgglom.toGlobal(own);
@@ -418,9 +416,9 @@ void Foam::decompositionMethod::calcCellCells
 
             forAll(pp, i)
             {
-                label own = agglom[faceOwner[facei]];
+                const label own = agglom[faceOwner[facei]];
 
-                label globalNei = globalNeighbour[bFacei];
+                const label globalNei = globalNeighbour[bFacei];
 
                 if
                 (
@@ -457,7 +455,7 @@ void Foam::decompositionMethod::calcCellCells
         nbrCells.clear();
         nbrCells.insert(globalAgglom.toGlobal(celli));
 
-        label endIndex = cellCells.offsets()[celli+1];
+        const label endIndex = cellCells.offsets()[celli+1];
 
         for (label i = startIndex; i < endIndex; i++)
         {
@@ -555,8 +553,8 @@ void Foam::decompositionMethod::calcCellCells
 
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
-        label own = agglom[faceOwner[faceI]];
-        label nei = agglom[faceNeighbour[faceI]];
+        const label own = agglom[faceOwner[faceI]];
+        const label nei = agglom[faceNeighbour[faceI]];
 
         nFacesPerCell[own]++;
         nFacesPerCell[nei]++;
@@ -573,9 +571,9 @@ void Foam::decompositionMethod::calcCellCells
 
             forAll(pp, i)
             {
-                label own = agglom[faceOwner[faceI]];
+                const label own = agglom[faceOwner[faceI]];
 
-                label globalNei = globalNeighbour[bFaceI];
+                const label globalNei = globalNeighbour[bFaceI];
                 if
                 (
                    !globalAgglom.isLocal(globalNei)
@@ -607,11 +605,11 @@ void Foam::decompositionMethod::calcCellCells
     // For internal faces is just offsetted owner and neighbour
     for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
-        label own = agglom[faceOwner[faceI]];
-        label nei = agglom[faceNeighbour[faceI]];
+        const label own = agglom[faceOwner[faceI]];
+        const label nei = agglom[faceNeighbour[faceI]];
 
-        label ownIndex = offsets[own] + nFacesPerCell[own]++;
-        label neiIndex = offsets[nei] + nFacesPerCell[nei]++;
+        const label ownIndex = offsets[own] + nFacesPerCell[own]++;
+        const label neiIndex = offsets[nei] + nFacesPerCell[nei]++;
 
         m[ownIndex] = globalAgglom.toGlobal(nei);
         w[ownIndex] = mag(mesh.faceAreas()[faceI]);
@@ -631,9 +629,9 @@ void Foam::decompositionMethod::calcCellCells
 
             forAll(pp, i)
             {
-                label own = agglom[faceOwner[faceI]];
+                const label own = agglom[faceOwner[faceI]];
 
-                label globalNei = globalNeighbour[bFaceI];
+                const label globalNei = globalNeighbour[bFaceI];
 
                 if
                 (
@@ -672,7 +670,7 @@ void Foam::decompositionMethod::calcCellCells
         nbrCells.clear();
         nbrCells.insert(globalAgglom.toGlobal(cellI));
 
-        label endIndex = cellCells.offsets()[cellI+1];
+        const label endIndex = cellCells.offsets()[cellI+1];
 
         for (label i = startIndex; i < endIndex; i++)
         {

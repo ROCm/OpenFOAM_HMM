@@ -937,7 +937,7 @@ void Foam::triSurface::triFaceFaces(List<face>& plainFaces) const
 
     forAll(*this, facei)
     {
-        plainFaces[facei] = operator[](facei).triFaceFace();
+        plainFaces[facei] = this->operator[](facei);
     }
 }
 

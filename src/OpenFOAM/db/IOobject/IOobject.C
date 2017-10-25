@@ -374,31 +374,13 @@ const Foam::fileName& Foam::IOobject::caseName() const
 
 Foam::word Foam::IOobject::group() const
 {
-    const auto i = name_.rfind('.');
-
-    if (i == std::string::npos || i == 0)
-    {
-        return word::null;
-    }
-    else
-    {
-        return name_.substr(i+1);
-    }
+    return name_.ext();
 }
 
 
 Foam::word Foam::IOobject::member() const
 {
-    const auto i = name_.rfind('.');
-
-    if (i == std::string::npos || i == 0)
-    {
-        return name_;
-    }
-    else
-    {
-        return name_.substr(0, i);
-    }
+    return name_.lessExt();
 }
 
 

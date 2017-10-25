@@ -1,8 +1,8 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 m4 < system/blockMeshDict.m4 > system/blockMeshDict
 runApplication blockMesh
+
+#------------------------------------------------------------------------------

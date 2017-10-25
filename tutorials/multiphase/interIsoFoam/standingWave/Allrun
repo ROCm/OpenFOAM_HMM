@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 restore0Dir
 
@@ -15,3 +13,5 @@ runApplication -s 2 refineMesh -dict system/refineMeshDict2 -overwrite
 runApplication setAlphaField
 
 runApplication $(getApplication)
+
+#------------------------------------------------------------------------------

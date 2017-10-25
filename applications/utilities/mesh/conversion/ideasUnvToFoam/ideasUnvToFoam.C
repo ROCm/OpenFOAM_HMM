@@ -589,7 +589,8 @@ void readDOFS
     is.getLine(line);
     {
         IStringStream lineStr(line);
-        patchNames.append(lineStr);
+        word pName(lineStr);
+        patchNames.append(pName);
     }
 
     Info<< "For DOF set " << group

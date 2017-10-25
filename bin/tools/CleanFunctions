@@ -31,7 +31,7 @@
 
 cleanTimeDirectories()
 {
-    echo "Cleaning $PWD case"
+    echo "Cleaning case $PWD"
     zeros=""
     while [ ${#zeros} -lt 8 ]
     do
@@ -105,15 +105,13 @@ cleanCase()
     cleanSnappyFiles
     rm -f 0/cellDist > /dev/null 2>&1
 
-    if [ -d constant ]
-    then
-        (cd constant && \
-            rm -rf \
-            cellDecomposition cellToRegion cellLevel* pointLevel* \
-            polyMesh tetDualMesh \
-            > /dev/null 2>&1 \
-        )
-    fi
+    (
+        cd constant 2>/dev/null && \
+        rm -rf \
+          cellDecomposition cellToRegion cellLevel* pointLevel* \
+          polyMesh tetDualMesh \
+          > /dev/null 2>&1 \
+    )
 
     if [ -e system/blockMeshDict.m4 ]
     then
@@ -122,9 +120,17 @@ cleanCase()
 }
 
 
+# Frequently used - cleanCase and rm -rf 0/
+cleanCase0()
+{
+    cleanCase
+    rm -rf 0
+}
+
+
 removeCase()
 {
-    echo "Removing ${1:-unknown} case"
+    echo "Removing case ${1:-unknown}"
     [ "$#" -ge 1 ] && rm -rf "$1"
 }
 
@@ -143,7 +149,7 @@ cleanUcomponents()
 
 cleanApplication()
 {
-    echo "Cleaning $PWD application"
+    echo "Cleaning application $PWD"
     wclean
 }
 

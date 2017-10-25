@@ -1,0 +1,4 @@
+# Flags for compiling/linking openmp
+
+COMP_OPENMP = -DUSE_OMP -fopenmp
+LINK_OPENMP = -lgomp

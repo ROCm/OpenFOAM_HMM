@@ -127,10 +127,16 @@ public:
         //- Construct from an initializer list of Key
         HashSet(std::initializer_list<Key> lst);
 
-        //- Construct as copy
-        HashSet(const HashSet<Key, Hash>& hs)
+        //- Copy construct
+        HashSet(const this_type& hs)
         :
             parent_type(hs)
+        {}
+
+        //- Move construct
+        HashSet(this_type&& hs)
+        :
+            parent_type(std::move(hs))
         {}
 
         //- Construct by transferring the parameter contents
@@ -284,6 +290,20 @@ public:
         //- Return true if the entry exists, same as found().
         inline bool operator[](const Key& key) const;
 
+        using parent_type::operator=;
+
+        //- Copy assignment
+        void operator=(const this_type& rhs)
+        {
+            parent_type::operator=(rhs);
+        }
+
+        //- Move assignment
+        void operator=(this_type&& rhs)
+        {
+            parent_type::operator=(std::move(rhs));
+        }
+
 
       // Comparison
 
@@ -338,6 +358,17 @@ public:
         );
 
 };
+
+
+// Global Functions
+
+// Exchange contents of HashSets - see HashSet::swap().
+template<class Key, class Hash>
+inline void Swap
+(
+    HashSet<Key, Hash>& a,
+    HashSet<Key, Hash>& b
+);
 
 
 // Global Operators

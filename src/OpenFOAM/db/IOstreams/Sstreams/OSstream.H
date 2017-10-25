@@ -69,7 +69,7 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
+        //- Construct as wrapper around std::ostream and set stream status
         OSstream
         (
             std::ostream& os,
@@ -143,7 +143,26 @@ public:
             virtual Ostream& write(const doubleScalar val);
 
             //- Write binary block
-            virtual Ostream& write(const char* buf, std::streamsize count);
+            virtual Ostream& write
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- Begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual Ostream& beginRaw(const std::streamsize count);
+
+            //- Low-level raw binary output.
+            virtual Ostream& writeRaw
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- End marker for low-level raw binary output.
+            virtual Ostream& endRaw();
 
             //- Add indentation characters
             virtual void indent();

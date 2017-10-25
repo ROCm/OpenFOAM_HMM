@@ -1,13 +1,10 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial clean functions
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
 cleanCase
 
 # Restore default dictionaries
-cp system/decomposeParDict-2 system/decomposeParDict
 cp system/controlDict-startTime system/controlDict
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

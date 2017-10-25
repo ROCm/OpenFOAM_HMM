@@ -193,7 +193,7 @@ Foam::vtk::surfaceMeshWriter::surfaceMeshWriter
     os_()
 {
     outputOptions opts(outOpts);
-    opts.legacy(true);  // No append supported
+    opts.append(false);  // No append supported
 
     os_.open((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
     format_ = opts.newFormatter(os_);

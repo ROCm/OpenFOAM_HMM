@@ -798,7 +798,7 @@ Foam::Istream& Foam::ISstream::read(char* buf, std::streamsize count)
 }
 
 
-Foam::Istream& Foam::ISstream::rewind()
+void Foam::ISstream::rewind()
 {
     lineNumber_ = 1;      // Reset line number
 
@@ -807,8 +807,6 @@ Foam::Istream& Foam::ISstream::rewind()
 
     // pubseekpos() rather than seekg() so that it works with gzstream
     stdStream().rdbuf()->pubseekpos(0, std::ios_base::in);
-
-    return *this;
 }
 
 

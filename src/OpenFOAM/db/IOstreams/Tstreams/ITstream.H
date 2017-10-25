@@ -188,8 +188,8 @@ public:
             //- Read binary block
             virtual Istream& read(char*, std::streamsize);
 
-            //- Rewind and return the stream so that it may be read again
-            virtual Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            virtual void rewind();
 
 
         // Edit

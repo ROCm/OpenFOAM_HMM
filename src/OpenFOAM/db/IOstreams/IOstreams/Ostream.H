@@ -97,47 +97,62 @@ public:
         // Write functions
 
             //- Write next token to stream
-            virtual Ostream& write(const token&) = 0;
+            virtual Ostream& write(const token& t) = 0;
 
             //- Write character
-            virtual Ostream& write(const char) = 0;
+            virtual Ostream& write(const char c) = 0;
 
             //- Write character string
-            virtual Ostream& write(const char*) = 0;
+            virtual Ostream& write(const char* str) = 0;
 
             //- Write word
-            virtual Ostream& write(const word&) = 0;
+            virtual Ostream& write(const word& str) = 0;
 
             //- Write keyType
             //  A plain word is written unquoted.
             //  A regular expression is written as a quoted string.
-            virtual Ostream& write(const keyType&);
+            virtual Ostream& write(const keyType& kw);
 
             //- Write string
-            virtual Ostream& write(const string&) = 0;
+            virtual Ostream& write(const string& str) = 0;
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             virtual Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& str,
                 const bool quoted=true
             ) = 0;
 
             //- Write int32_t
-            virtual Ostream& write(const int32_t) = 0;
+            virtual Ostream& write(const int32_t val) = 0;
 
             //- Write int64_t
-            virtual Ostream& write(const int64_t) = 0;
+            virtual Ostream& write(const int64_t val) = 0;
 
             //- Write floatScalar
-            virtual Ostream& write(const floatScalar) = 0;
+            virtual Ostream& write(const floatScalar val) = 0;
 
             //- Write doubleScalar
-            virtual Ostream& write(const doubleScalar) = 0;
+            virtual Ostream& write(const doubleScalar val) = 0;
 
-            //- Write binary block
-            virtual Ostream& write(const char*, std::streamsize) = 0;
+            //- Write binary block.
+            virtual Ostream& write(const char* data, std::streamsize count) = 0;
+
+            //- Emit begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual Ostream& beginRaw(std::streamsize count) = 0;
+
+            //- Low-level raw binary output.
+            virtual Ostream& writeRaw
+            (
+                const char* data,
+                std::streamsize count
+            ) = 0;
+
+            //- Emit end marker for low-level raw binary output.
+            virtual Ostream& endRaw() = 0;
 
             //- Add indentation characters
             virtual void indent() = 0;
@@ -164,11 +179,11 @@ public:
             void decrIndent();
 
             //- Write the keyword followed by an appropriate indentation
-            virtual Ostream& writeKeyword(const keyType&);
+            virtual Ostream& writeKeyword(const keyType& kw);
 
             //- Write begin block group with the given name
             //  Increments indentation, adds newline.
-            virtual Ostream& beginBlock(const keyType&);
+            virtual Ostream& beginBlock(const keyType& keyword);
 
             //- Write begin block group without a name
             //  Increments indentation, adds newline.

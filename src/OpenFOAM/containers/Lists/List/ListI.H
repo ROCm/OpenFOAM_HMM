@@ -89,7 +89,7 @@ inline Foam::List<T>::List
         alloc();
 
         InputIterator iter = begIter;
-        forAll(*this, i)
+        for (label i = 0; i < s; ++i)
         {
             this->operator[](i) = *iter;
             ++iter;
@@ -142,9 +142,9 @@ inline void Foam::List<T>::resize(const label newSize)
 
 
 template<class T>
-inline void Foam::List<T>::resize(const label newSize, const T& a)
+inline void Foam::List<T>::resize(const label newSize, const T& val)
 {
-    this->setSize(newSize, a);
+    this->setSize(newSize, val);
 }
 
 
@@ -182,9 +182,9 @@ inline Foam::Xfer<Foam::List<T>> Foam::List<T>::xfer()
 
 
 template<class T>
-inline void Foam::List<T>::append(const T& t)
+inline void Foam::List<T>::append(const T& val)
 {
-    setSize(size()+1, t);
+    setSize(size()+1, val);
 }
 
 
@@ -223,9 +223,9 @@ inline void Foam::List<T>::append(const UIndirectList<T>& lst)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::List<T>::operator=(const T& t)
+inline void Foam::List<T>::operator=(const T& val)
 {
-    UList<T>::operator=(t);
+    UList<T>::operator=(val);
 }
 
 

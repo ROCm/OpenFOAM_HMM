@@ -95,6 +95,17 @@ inline const Foam::List<Foam::label>& Foam::UIndirectList<T>::addressing() const
 }
 
 
+template<class T>
+inline bool Foam::UIndirectList<T>::found
+(
+    const T& val,
+    const label pos
+) const
+{
+    return this->find(val, pos) != -1;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

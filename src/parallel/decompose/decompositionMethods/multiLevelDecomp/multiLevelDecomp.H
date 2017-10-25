@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -71,21 +71,22 @@ class multiLevelDecomp
             labelList& cutConnections
         ) const;
 
-        //- Decompose level methodI without addressing
+        //- Decompose at 'currLevel' without addressing
         void decompose
         (
             const labelListList& pointPoints,
             const pointField& points,
             const scalarField& pointWeights,
-            const labelList& pointMap,  // map back to original points
-            const label levelI,
+            const labelUList& pointMap,  // map back to original points
+            const label currLevel,
+            const label leafOffset,
 
-            labelField& finalDecomp
+            labelList& finalDecomp
         );
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const multiLevelDecomp&);
-        multiLevelDecomp(const multiLevelDecomp&);
+        void operator=(const multiLevelDecomp&) = delete;
+        multiLevelDecomp(const multiLevelDecomp&) = delete;
 
 
 public:

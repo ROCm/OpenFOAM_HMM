@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 #create meshes
 runApplication -s air    blockMesh -region air
@@ -26,4 +24,4 @@ paraFoam -touch -region air
 
 restore0Dir
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

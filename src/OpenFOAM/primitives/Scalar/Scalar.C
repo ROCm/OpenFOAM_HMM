@@ -102,18 +102,7 @@ bool readScalar(const char* buf, Scalar& val)
 
     val = ScalarConvert(buf, &endptr);
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
-    if (err != parsing::errorType::NONE)
-    {
-        #ifdef FULLDEBUG
-        IOWarningInFunction("unknown")
-            << parsing::errorNames[err] << " '" << buf << "'"
-            << endl;
-        #endif
-        return false;
-    }
-
-    return true;
+    return (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE);
 }
 
 

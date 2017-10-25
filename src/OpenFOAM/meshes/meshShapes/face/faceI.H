@@ -57,6 +57,13 @@ inline Foam::face::face(const labelUList& lst)
 {}
 
 
+template<unsigned Size>
+inline Foam::face::face(const FixedList<label, Size>& lst)
+:
+    labelList(lst)
+{}
+
+
 inline Foam::face::face(std::initializer_list<label> lst)
 :
     labelList(lst)
@@ -66,6 +73,12 @@ inline Foam::face::face(std::initializer_list<label> lst)
 inline Foam::face::face(const Xfer<labelList>& lst)
 :
     labelList(lst)
+{}
+
+
+inline Foam::face::face(labelList&& lst)
+:
+    labelList(std::move(lst))
 {}
 
 
@@ -87,9 +100,10 @@ inline Foam::pointField Foam::face::points
 
     // For each point in list, set it to the point in 'pnts' addressed
     // by 'labs'
-    forAll(p, i)
+    label i = 0;
+    for (const label pointi : *this)
     {
-        p[i] = meshPoints[operator[](i)];
+        p[i++] = meshPoints[pointi];
     }
 
     // Return list
@@ -124,13 +138,13 @@ inline bool Foam::face::found(const label globalIndex) const
 
 inline Foam::label Foam::face::nextLabel(const label i) const
 {
-    return operator[](fcIndex(i));
+    return this->fcValue(i);
 }
 
 
 inline Foam::label Foam::face::prevLabel(const label i) const
 {
-    return operator[](rcIndex(i));
+    return this->rcValue(i);
 }
 
 

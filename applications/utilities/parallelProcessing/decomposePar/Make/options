@@ -11,7 +11,9 @@ EXE_LIBS = \
     -ldynamicMesh \
     -ldecompose \
     -lgenericPatchFields \
-    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lmetisDecomp -lscotchDecomp \
+    -ldecompositionMethods \
+    -L$(FOAM_LIBBIN)/dummy \
+    -lkahipDecomp -lmetisDecomp -lscotchDecomp \
     -llagrangian \
     -ldynamicMesh \
     -lregionModels

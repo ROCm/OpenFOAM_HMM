@@ -329,10 +329,9 @@ Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 }
 
 
-Foam::Istream& Foam::UIPstream::rewind()
+void Foam::UIPstream::rewind()
 {
     externalBufPosition_ = 0;
-    return *this;
 }
 
 

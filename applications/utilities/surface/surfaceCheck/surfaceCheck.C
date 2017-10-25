@@ -150,7 +150,7 @@ void writeZoning
     faceList faces(surf.size());
     forAll(surf, i)
     {
-        faces[i] = surf[i].triFaceFace();
+        faces[i] = surf[i];
     }
 
     vtkSurfaceWriter().write

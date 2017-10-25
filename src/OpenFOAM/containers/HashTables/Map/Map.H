@@ -77,14 +77,20 @@ public:
             parent_type(is)
         {}
 
-        //- Construct as copy
-        Map(const Map<T>& map)
+        //- Copy construct
+        Map(const this_type& map)
         :
             parent_type(map)
         {}
 
+        //- Move construct
+        Map(this_type&& map)
+        :
+            parent_type(std::move(map))
+        {}
+
         //- Construct by transferring the parameter contents
-        Map(const Xfer<Map<T>>& map)
+        Map(const Xfer<this_type>& map)
         :
             parent_type(map)
         {}
@@ -100,6 +106,25 @@ public:
         :
             parent_type(map)
         {}
+
+
+    // Member Operators
+
+        using parent_type::operator=;
+
+        //- Copy assignment
+        void operator=(const this_type& rhs)
+        {
+            parent_type::operator=(rhs);
+        }
+
+        //- Move assignment
+        void operator=(this_type&& rhs)
+        {
+            parent_type::operator=(std::move(rhs));
+        }
+
+
 };
 
 

@@ -53,18 +53,20 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::scotchDecomp::graphPath(const polyMesh& unused)
+{}
+
+
 void Foam::scotchDecomp::check(const int retVal, const char* str)
 {}
 
 
-Foam::label Foam::scotchDecomp::decompose
+Foam::label Foam::scotchDecomp::decomposeSerial
 (
-    const fileName& meshPath,
-    const List<label>& adjncy,
-    const List<label>& xadj,
-    const scalarField& cWeights,
-
-    List<label>& finalDecomp
+    const UList<label>& adjncy,
+    const UList<label>& xadj,
+    const UList<scalar>& cWeights,
+    List<label>& decomp
 )
 {
     FatalErrorInFunction
@@ -81,7 +83,7 @@ Foam::scotchDecomp::scotchDecomp
     const dictionary& decompositionDict
 )
 :
-    decompositionMethod(decompositionDict)
+    metisLikeDecomp(decompositionDict)
 {}
 
 

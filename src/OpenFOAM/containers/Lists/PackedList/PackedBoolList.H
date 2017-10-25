@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -96,7 +96,7 @@ public:
         //- Construct from Istream
         PackedBoolList(Istream& is);
 
-        //- Construct with given size, initializes list to 0
+        //- Construct with given size, initializes list to 0 (false)
         explicit inline PackedBoolList(const label size);
 
         //- Construct with given size and value for all elements
@@ -113,6 +113,20 @@ public:
 
         //- Construct by transferring the parameter contents
         inline PackedBoolList(const Xfer<PackedList<1>>& lst);
+
+        //- Construct with given size and list of labels to set as true.
+        inline PackedBoolList
+        (
+            const label size,
+            const labelUList& indices
+        );
+
+        //- Construct with given size and list of labels to set as true.
+        inline PackedBoolList
+        (
+            const label size,
+            const UIndirectList<label>& indices
+        );
 
         //- Construct from a list of bools
         explicit inline PackedBoolList(const UList<bool>& lst);

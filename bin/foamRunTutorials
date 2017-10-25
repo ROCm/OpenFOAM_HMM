@@ -30,12 +30,10 @@
 #     and all its subdirectories.
 #
 #------------------------------------------------------------------------------
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 # Normally use standard "make"
 make="make"
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 thisScript=$0
 if [ "/${thisScript#/}" != "$thisScript" ]
@@ -43,6 +41,7 @@ then
     thisScript="$PWD/$thisScript"
 fi
 
+unset passArgs runTests
 skipFirst=false
 
 # Parse options
@@ -52,16 +51,15 @@ do
     -t | -test)
         passArgs="-test"
         runTests=true
-        shift
         ;;
     -s | -skipFirst)
         skipFirst=true
-        shift
         ;;
     *)
         break
         ;;
     esac
+    shift
 done
 
 # If an argument is supplied do not execute ./Allrun to avoid recursion

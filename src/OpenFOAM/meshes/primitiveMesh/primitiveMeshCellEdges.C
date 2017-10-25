@@ -60,7 +60,7 @@ void Foam::primitiveMesh::calcCellEdges() const
     else
     {
         // Set up temporary storage
-        List<DynamicList<label, edgesPerCell_>> ce(nCells());
+        List<DynamicList<label>> ce(nCells());
 
 
         // Get reference to faceCells and faceEdges
@@ -71,7 +71,7 @@ void Foam::primitiveMesh::calcCellEdges() const
         // loop through the list again and add edges; checking for duplicates
         forAll(own, facei)
         {
-            DynamicList<label, edgesPerCell_>& curCellEdges = ce[own[facei]];
+            DynamicList<label>& curCellEdges = ce[own[facei]];
 
             const labelList& curEdges = fe[facei];
 
@@ -87,7 +87,7 @@ void Foam::primitiveMesh::calcCellEdges() const
 
         forAll(nei, facei)
         {
-            DynamicList<label, edgesPerCell_>& curCellEdges = ce[nei[facei]];
+            DynamicList<label>& curCellEdges = ce[nei[facei]];
 
             const labelList& curEdges = fe[facei];
 

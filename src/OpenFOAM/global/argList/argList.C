@@ -122,8 +122,7 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
 
     for (const auto& str : slaveProcs)
     {
-        const auto dot = str.rfind('.');
-        const std::string curr(std::move(str.substr(0, dot)));
+        std::string curr(str.substr(0, str.rfind('.')));
 
         if (prev != curr)
         {

@@ -223,6 +223,31 @@ int main(int argc, char *argv[])
         Info << i << endl;
     }
 
+    Info<< nl << "Test swapping, moving etc." << nl;
+    setA.insert({ "some", "more", "entries" });
+
+    Info<< "input" << nl;
+    Info<< "setA: " << setA << nl;
+
+    wordHashSet setA1(std::move(setA));
+
+    Info<< "move construct" << nl;
+    Info<< "setA: " << setA << nl
+        << "setA1: " << setA1 << nl;
+
+
+    wordHashSet setB1;
+    Info<< "move assign" << nl;
+    setB1 = std::move(setA1);
+
+    Info<< "setA1: " << setA1 << nl
+        << "setB1: " << setB1 << nl;
+
+    setB1.swap(setA1);
+
+    Info<< "setA1: " << setA1 << nl
+        << "setB1: " << setB1 << nl;
+
     return 0;
 }
 

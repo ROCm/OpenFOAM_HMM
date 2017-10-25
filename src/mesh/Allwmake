@@ -8,4 +8,4 @@ wmake $targetType snappyHexMesh
 wmake $targetType blockMesh
 wmake $targetType extrudeModel
 
-# ----------------------------------------------------------------- end-of-file
+#------------------------------------------------------------------------------

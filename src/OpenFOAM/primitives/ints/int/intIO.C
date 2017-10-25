@@ -39,13 +39,13 @@ int Foam::readInt(const char* buf)
 
     const int val = int(parsed);
 
-    if (parsed < INT_MIN || parsed > INT_MAX)
-    {
-        // Range error
-        errno = ERANGE;
-    }
+    const parsing::errorType err =
+    (
+        (parsed < INT_MIN || parsed > INT_MAX)
+      ? parsing::errorType::RANGE
+      : parsing::checkConversion(buf, endptr)
+    );
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
     if (err != parsing::errorType::NONE)
     {
         FatalIOErrorInFunction("unknown")
@@ -65,24 +65,12 @@ bool Foam::readInt(const char* buf, int& val)
 
     val = int(parsed);
 
-    if (parsed < INT_MIN || parsed > INT_MAX)
-    {
-        // Range error
-        errno = ERANGE;
-    }
-
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
-    if (err != parsing::errorType::NONE)
-    {
-        #ifdef FULLDEBUG
-        IOWarningInFunction("unknown")
-            << parsing::errorNames[err] << " '" << buf << "'"
-            << endl;
-        #endif
-        return false;
-    }
-
-    return true;
+    return
+    (
+        (parsed < INT_MIN || parsed > INT_MAX)
+      ? false
+      : (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE)
+    );
 }
 
 

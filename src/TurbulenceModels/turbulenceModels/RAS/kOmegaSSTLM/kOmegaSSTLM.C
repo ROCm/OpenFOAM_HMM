@@ -373,7 +373,8 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
         alphaRhoPhi,
         phi,
         transport,
-        propertiesName
+        propertiesName,
+        typeName
     ),
 
     ca1_
@@ -477,7 +478,12 @@ kOmegaSSTLM<BasicTurbulenceModel>::kOmegaSSTLM
         this->mesh_,
         dimensionedScalar("0", dimless, 0)
     )
-{}
+{
+    if (type == typeName)
+    {
+        this->printCoeffs(type);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
