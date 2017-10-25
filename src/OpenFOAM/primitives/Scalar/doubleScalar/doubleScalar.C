@@ -28,6 +28,7 @@ License
 #include "parsing.H"
 #include "IOstreams.H"
 
+#include <cstdlib>
 #include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,7 +41,8 @@ License
 #define ScalarROOTVGREAT doubleScalarROOTVGREAT
 #define ScalarROOTVSMALL doubleScalarROOTVSMALL
 #define ScalarRead readDouble
-#define ScalarConvert ::strtod
+// Convert using larger representation to properly capture underflow
+#define ScalarConvert ::strtold
 
 #include "Scalar.C"
 

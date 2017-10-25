@@ -118,7 +118,8 @@ int main(int argc, char *argv[])
     unsigned nFail = 0;
 
     {
-        Info<< nl << "Test readDouble:" << nl;
+        Info<< nl << "Test readDouble: (small=" << doubleScalarVSMALL
+            << " great=" << doubleScalarVSMALL << "):" << nl;
         nFail += testParsing
         (
             &readDouble,
@@ -131,12 +132,18 @@ int main(int argc, char *argv[])
                 { " 3.14159 ", true },
                 { " 31.4159E-1 " , true },
                 { " 100E1000 " , false },
+                { " 1E-40 " , true },
+                { " 1E-305 " , true },
+                { " 1E-37 " , true },
+                { " 1E-300 " , true },
             }
         );
     }
 
     {
-        Info<< nl << "Test readFloat:" << nl;
+        Info<< nl << "Test readFloat: (small=" << floatScalarVSMALL
+            << " great=" << floatScalarVGREAT << "):" << nl;
+
         nFail += testParsing
         (
             &readFloat,
@@ -145,6 +152,10 @@ int main(int argc, char *argv[])
                 { " 31.4159E-1 " , true },
                 { " 31.4159E200 " , false },
                 { " 31.4159E20 " , true },
+                { " 1E-40 " , true },
+                { " 1E-305 " , true },
+                { " 1E-37 " , true },
+                { " 1E-300 " , true },
             }
         );
     }
@@ -160,12 +171,16 @@ int main(int argc, char *argv[])
                 { " 314.159-2 " , true },
                 { " 31.4159E200 " , true },
                 { " 31.4159E20 " , true },
+                { " 1E-40 " , true },
+                { " 1E-305 " , true },
+                { " 1E-37 " , true },
+                { " 1E-300 " , true },
             }
         );
     }
 
     {
-        Info<< nl << "Test readInt32 (max= " << INT32_MAX << "):" << nl;
+        Info<< nl << "Test readInt32 (max=" << INT32_MAX << "):" << nl;
         nFail += testParsing
         (
             &readInt32,
@@ -181,7 +196,7 @@ int main(int argc, char *argv[])
     }
 
     {
-        Info<< nl << "Test readUint32 (max= "
+        Info<< nl << "Test readUint32 (max="
             << unsigned(UINT32_MAX) << "):" << nl;
         nFail += testParsing
         (

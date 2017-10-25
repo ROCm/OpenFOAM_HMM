@@ -40,7 +40,8 @@ License
 #define ScalarROOTVGREAT floatScalarROOTVGREAT
 #define ScalarROOTVSMALL floatScalarROOTVSMALL
 #define ScalarRead readFloat
-#define ScalarConvert ::strtof
+// Convert using larger representation to properly capture underflow
+#define ScalarConvert ::strtod
 
 #include "Scalar.C"
 
