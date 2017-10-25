@@ -327,6 +327,14 @@ Foam::UList<T>::crend() const
     return &v_[-1];
 }
 
+
+template<class T>
+inline void Foam::UList<T>::size(const label n)
+{
+    size_ = n;
+}
+
+
 template<class T>
 inline Foam::label Foam::UList<T>::size() const
 {

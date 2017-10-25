@@ -311,16 +311,28 @@ inline void Foam::DynamicField<T, SizeMin>::clearStorage()
 
 
 template<class T, int SizeMin>
+inline Foam::label Foam::DynamicField<T, SizeMin>::expandStorage()
+{
+    const label nextFree = Field<T>::size();
+
+    // Allow addressing into the entire list
+    Field<T>::size(capacity_);
+
+    return nextFree;
+}
+
+
+template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>&
 Foam::DynamicField<T, SizeMin>::shrink()
 {
     label nextFree = Field<T>::size();
     if (capacity_ > nextFree)
     {
-        // use the full list when resizing
+        // Use the full list when resizing
         Field<T>::size(capacity_);
 
-        // the new size
+        // The new size
         capacity_ = nextFree;
         Field<T>::setSize(capacity_);
         Field<T>::size(nextFree);
@@ -368,9 +380,9 @@ Foam::DynamicField<T, SizeMin>::append
     label nextFree = List<T>::size();
     setSize(nextFree + lst.size());
 
-    forAll(lst, elemI)
+    forAll(lst, i)
     {
-        this->operator[](nextFree++) = lst[elemI];
+        this->operator[](nextFree++) = lst[i];
     }
     return *this;
 }
@@ -401,15 +413,15 @@ inline T Foam::DynamicField<T, SizeMin>::remove()
 template<class T, int SizeMin>
 inline T& Foam::DynamicField<T, SizeMin>::operator()
 (
-    const label elemI
+    const label i
 )
 {
-    if (elemI >= Field<T>::size())
+    if (i >= Field<T>::size())
     {
-        setSize(elemI + 1);
+        setSize(i + 1);
     }
 
-    return this->operator[](elemI);
+    return this->operator[](i);
 }
 
 

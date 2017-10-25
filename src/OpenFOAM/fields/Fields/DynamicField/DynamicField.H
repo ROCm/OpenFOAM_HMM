@@ -199,6 +199,10 @@ public:
             //- Clear the list and delete storage.
             inline void clearStorage();
 
+            //- Expand the addressable size to fit the allocated capacity.
+            //  Returns the previous addressable size.
+            inline label expandStorage();
+
             //- Shrink the allocated space to the number of elements used.
             //  Returns a reference to the DynamicField.
             inline DynamicField<T, SizeMin>& shrink();
@@ -222,7 +226,7 @@ public:
 
             //- Return non-const access to an element, resizing list if
             //  necessary
-            inline T& operator()(const label elemI);
+            inline T& operator()(const label i);
 
             //- Assignment of all addressed entries to the given value
             inline void operator=(const T& val);

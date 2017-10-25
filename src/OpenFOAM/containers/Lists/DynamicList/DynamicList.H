@@ -117,14 +117,14 @@ public:
         //- Construct null
         inline DynamicList();
 
-        //- Construct given size.
+        //- Construct an empty list with given reserve size.
         explicit inline DynamicList(const label nElem);
 
         //- Construct with given size and value for all elements.
         inline DynamicList(const label nElem, const T& val);
 
         //- Construct with given size initializing all elements to zero
-        inline DynamicList(const label s, const zero);
+        inline DynamicList(const label nElem, const zero);
 
         //- Copy construct.
         inline DynamicList(const DynamicList<T, SizeMin>& lst);
@@ -174,10 +174,14 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            //- Size of the underlying storage.
-            inline label capacity() const;
+        //- Normal lower capacity limit - the SizeMin template parameter
+        inline label min_size() const;
+
+        //- Size of the underlying storage.
+        inline label capacity() const;
+
 
         // Edit
 
@@ -311,7 +315,7 @@ public:
 
             //- Return non-const access to an element, resizing list if
             //  necessary
-            inline T& operator()(const label elemI);
+            inline T& operator()(const label i);
 
             //- Assignment of all addressed entries to the given value
             inline void operator=(const T& val);

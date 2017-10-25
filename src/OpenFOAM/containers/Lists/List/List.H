@@ -111,13 +111,6 @@ class List
         );
 
 
-protected:
-
-    //- Override size to be inconsistent with allocated storage.
-    //  Use with care
-    inline void size(const label n);
-
-
 public:
 
     // Static Member Functions
@@ -210,10 +203,6 @@ public:
 
 
     // Member Functions
-
-        //- Return the number of elements in the UList
-        inline label size() const;
-
 
         // Edit
 

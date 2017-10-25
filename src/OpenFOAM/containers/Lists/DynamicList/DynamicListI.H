@@ -63,17 +63,11 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList()
 
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>::DynamicList
-(
-    const label nElem
-)
+inline Foam::DynamicList<T, SizeMin>::DynamicList(const label nElem)
 :
-    List<T>(nElem),
-    capacity_(nElem)
+    capacity_(0)
 {
-    // We could also enforce sizing granularity
-
-    List<T>::size(0);
+    reserve(nElem);
 }
 
 
@@ -85,7 +79,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(nElem, val),
-    capacity_(nElem)
+    capacity_(List<T>::size())
 {}
 
 
@@ -97,7 +91,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(nElem, Zero),
-    capacity_(nElem)
+    capacity_(List<T>::size())
 {}
 
 
@@ -108,7 +102,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(lst),
-    capacity_(lst.size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -120,7 +114,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(lst),
-    capacity_(lst.size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -131,7 +125,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(lst),
-    capacity_(lst.size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -157,7 +151,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(begIter, endIter),
-    capacity_(this->size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -168,7 +162,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(lst),
-    capacity_(lst.size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -179,7 +173,7 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 )
 :
     List<T>(lst),
-    capacity_(lst.size())
+    capacity_(List<T>::size())
 {}
 
 
@@ -234,8 +228,14 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::label Foam::DynamicList<T, SizeMin>::capacity()
-const
+inline Foam::label Foam::DynamicList<T, SizeMin>::min_size() const
+{
+    return SizeMin;
+}
+
+
+template<class T, int SizeMin>
+inline Foam::label Foam::DynamicList<T, SizeMin>::capacity() const
 {
     return capacity_;
 }
@@ -730,15 +730,15 @@ inline Foam::label Foam::DynamicList<T, SizeMin>::subset
 template<class T, int SizeMin>
 inline T& Foam::DynamicList<T, SizeMin>::operator()
 (
-    const label elemI
+    const label i
 )
 {
-    if (elemI >= List<T>::size())
+    if (i >= List<T>::size())
     {
-        setSize(elemI + 1);
+        setSize(i + 1);
     }
 
-    return this->operator[](elemI);
+    return this->operator[](i);
 }
 
 

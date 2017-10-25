@@ -102,6 +102,10 @@ protected:
 
     // Protected Member Functions
 
+        //- Override size to be inconsistent with allocated storage.
+        //  Use with care
+        inline void size(const label n);
+
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
@@ -465,7 +469,7 @@ public:
         friend Ostream& operator<< <T>
         (
             Ostream& os,
-            const UList<T>& L
+            const UList<T>& lst
         );
 
         //- Read List contents from Istream.
