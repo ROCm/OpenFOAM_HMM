@@ -101,8 +101,11 @@ castellatedMeshControls
 
     // The surface refinement loop might spend lots of iterations refining just
     // a few cells. This setting will cause refinement to stop if
-    // <= minimumRefine cells are selected for refinement. Note: it will
-    // at least do one iteration (unless the number of cells to refine is 0)
+    // <= minRefinementCells cells are selected for refinement. Note: it will
+    // at least do one iteration unless
+    //  a: the number of cells to refine is 0
+    //  b: minRefinementCells = -1. This is a special value indicating
+    //     no refinement.
     minRefinementCells 0;
 
     // Allow a certain level of imbalance during refining
