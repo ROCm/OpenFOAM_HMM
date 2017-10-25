@@ -1,0 +1,487 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+#include "energyTransport.H"
+#include "surfaceFields.H"
+#include "fvmDdt.H"
+#include "fvmDiv.H"
+#include "fvmLaplacian.H"
+#include "fvmSup.H"
+#include "turbulentTransportModel.H"
+#include "turbulentFluidThermoModel.H"
+#include "addToRunTimeSelectionTable.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace functionObjects
+{
+    defineTypeNameAndDebug(energyTransport, 0);
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        energyTransport,
+        dictionary
+    );
+}
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+Foam::volScalarField& Foam::functionObjects::energyTransport::transportedField()
+{
+    if (!foundObject<volScalarField>(fieldName_))
+    {
+        tmp<volScalarField> tfldPtr
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    fieldName_,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh_
+            )
+        );
+        store(fieldName_, tfldPtr);
+    }
+
+    return lookupObjectRef<volScalarField>(fieldName_);
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::energyTransport::kappaEff() const
+{
+    // Incompressible
+    {
+        typedef incompressible::turbulenceModel turbType;
+
+        const turbType* turbPtr = lookupObjectPtr<turbType>
+        (
+            turbulenceModel::propertiesName
+        );
+
+        if (turbPtr)
+        {
+            return tmp<volScalarField>
+            (
+                new volScalarField
+                (
+                    kappa() + Cp()*turbPtr->nut()*rho()/Prt_
+                )
+            );
+        }
+    }
+
+    FatalErrorInFunction
+        << "Turbulence model not found" << exit(FatalError);
+    return tmp<volScalarField>();
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::energyTransport::rho() const
+{
+    tmp<volScalarField> trho
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "trho",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            rho_
+        )
+    );
+
+    if (phases_.size())
+    {
+        trho.ref() = lookupObject<volScalarField>(rhoName_);
+    }
+    return trho;
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::energyTransport::Cp() const
+{
+    if (phases_.size())
+    {
+        tmp<volScalarField> tCp(phases_[0]*Cps_[0]);
+
+        for (label i = 1; i < phases_.size(); i++)
+        {
+            tCp.ref() += phases_[i]*Cps_[i];
+        }
+        return tCp;
+    }
+
+    tmp<volScalarField> tCp
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "tCp",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            Cp_
+        )
+    );
+
+    return tCp;
+}
+
+
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::energyTransport::kappa() const
+{
+    if (phases_.size())
+    {
+        tmp<volScalarField> tkappa(phases_[0]*kappas_[0]);
+
+        for (label i = 1; i < phases_.size(); i++)
+        {
+            tkappa.ref() += phases_[i]*kappas_[i];
+        }
+        return tkappa;
+    }
+
+    tmp<volScalarField> tkappa
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "tkappa",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            kappa_
+        )
+    );
+
+    return tkappa;
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::functionObjects::energyTransport::energyTransport
+(
+    const word& name,
+    const Time& runTime,
+    const dictionary& dict
+)
+:
+    fvMeshFunctionObject(name, runTime, dict),
+    fieldName_(dict.lookupOrDefault<word>("field", "T")),
+    phiName_(dict.lookupOrDefault<word>("phi", "phi")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    nCorr_(0),
+    schemesField_("unknown-schemesField"),
+    fvOptions_(mesh_),
+    multiphaseThermo_(dict.subOrEmptyDict("phaseThermos")),
+    Cp_
+    (
+        dict.lookupOrDefault
+        (
+            "Cp",
+            dimensionedScalar("Cp", dimEnergy/dimMass/dimTemperature, 0)
+        )
+    ),
+    kappa_
+    (
+        dict.lookupOrDefault
+        (
+            "kappa",
+            dimensionedScalar
+            (
+                "kappa",
+                dimEnergy/dimTime/dimLength/dimTemperature,
+                0
+            )
+        )
+    ),
+    rho_
+    (
+        dict.lookupOrDefault("rhoInf", dimensionedScalar("rho", dimDensity, 0))
+    ),
+    Prt_(dict.lookupOrDefault("Prt", dimensionedScalar("Prt", dimless, 1))),
+    rhoCp_
+    (
+        IOobject
+        (
+            "rhoCp",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("rhoCp", dimEnergy/dimTemperature/dimVolume, 0.0)
+    )
+{
+    read(dict);
+
+    // If the flow is multiphase
+    if (!multiphaseThermo_.empty())
+    {
+        Cps_.setSize(multiphaseThermo_.size());
+        kappas_.setSize(Cps_.size());
+        phaseNames_.setSize(Cps_.size());
+
+        label phasei = 0;
+        forAllConstIters(multiphaseThermo_, iter)
+        {
+            const word& key = iter().keyword();
+
+            if (!multiphaseThermo_.isDict(key))
+            {
+                FatalErrorInFunction
+                    << "Found non-dictionary entry " << iter()
+                    << " in top-level dictionary " << multiphaseThermo_
+                    << exit(FatalError);
+            }
+
+            const dictionary& dict = multiphaseThermo_.subDict(key);
+
+            phaseNames_[phasei] = key;
+
+            Cps_.set
+            (
+                phasei,
+                new dimensionedScalar
+                (
+                    "Cp",
+                    dimEnergy/dimMass/dimTemperature,
+                    dict.lookup("Cp")
+                )
+            );
+
+            kappas_.set
+            (
+                phasei,
+                new dimensionedScalar //[J/m/s/K]
+                (
+                    "kappa",
+                    dimEnergy/dimTime/dimLength/dimTemperature,
+                    dict.lookup("kappa")
+                )
+            );
+
+            ++phasei;
+        }
+
+        phases_.setSize(phaseNames_.size());
+        forAll(phaseNames_, i)
+        {
+            phases_.set
+            (
+                i,
+                mesh_.lookupObjectRefPtr<volScalarField>(phaseNames_[i])
+            );
+        }
+
+        rhoCp_ = rho()*Cp();
+        rhoCp_.oldTime();
+    }
+    else
+    {
+        if (Cp_.value() == 0.0 || kappa_.value() == 0.0)
+        {
+            FatalErrorInFunction
+                << " Multiphase thermo dictionary not found and Cp/kappa "
+                << " for single  phase are zero. Please entry either"
+                << exit(FatalError);
+        }
+
+    }
+
+    // Force creation of transported field so any BCs using it can
+    // look it up
+    volScalarField& s = transportedField();
+    s.correctBoundaryConditions();
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::functionObjects::energyTransport::~energyTransport()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObjects::energyTransport::read(const dictionary& dict)
+{
+    fvMeshFunctionObject::read(dict);
+
+    dict.readIfPresent("phi", phiName_);
+    dict.readIfPresent("rho", rhoName_);
+
+    schemesField_ = dict.lookupOrDefault("schemesField", fieldName_);
+
+    dict.readIfPresent("nCorr", nCorr_);
+
+    if (dict.found("fvOptions"))
+    {
+        fvOptions_.reset(dict.subDict("fvOptions"));
+    }
+
+    return true;
+}
+
+
+bool Foam::functionObjects::energyTransport::execute()
+{
+    volScalarField& s = transportedField();
+
+    Log << type() << " execute: " << s.name() << endl;
+
+    const surfaceScalarField& phi =
+        mesh_.lookupObject<surfaceScalarField>(phiName_);
+
+    // Calculate the diffusivity
+    const volScalarField kappaEff("kappaEff", this->kappaEff());
+
+    word divScheme("div(phi," + schemesField_ + ")");
+    word laplacianScheme
+    (
+        "laplacian(kappaEff," + schemesField_ + ")"
+    );
+
+    // Set under-relaxation coeff
+    scalar relaxCoeff = 0.0;
+    if (mesh_.relaxEquation(schemesField_))
+    {
+        relaxCoeff = mesh_.equationRelaxationFactor(schemesField_);
+    }
+
+    if (phi.dimensions() == dimMass/dimTime)
+    {
+        rhoCp_ = rho()*Cp();
+        const surfaceScalarField rhoCpPhi(fvc::interpolate(Cp())*phi);
+
+        for (label i = 0; i <= nCorr_; i++)
+        {
+            fvScalarMatrix sEqn
+            (
+                fvm::ddt(rhoCp_, s)
+              + fvm::div(rhoCpPhi, s, divScheme)
+              - fvm::Sp(fvc::ddt(rhoCp_) + fvc::div(rhoCpPhi), s)
+              - fvm::laplacian(kappaEff, s, laplacianScheme)
+             ==
+                fvOptions_(rhoCp_, s)
+            );
+
+            sEqn.relax(relaxCoeff);
+
+            fvOptions_.constrain(sEqn);
+
+            sEqn.solve(mesh_.solverDict(schemesField_));
+        }
+    }
+    else if (phi.dimensions() == dimVolume/dimTime)
+    {
+        dimensionedScalar rhoCp(rho_*Cp_);
+
+        const surfaceScalarField CpPhi(rhoCp*phi);
+
+        tmp<volScalarField> trhoCp
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "trhoCp",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_,
+                rhoCp
+            )
+        );
+
+        for (label i = 0; i <= nCorr_; i++)
+        {
+            fvScalarMatrix sEqn
+            (
+                fvm::ddt(rhoCp, s)
+              + fvm::div(CpPhi, s, divScheme)
+              - fvm::laplacian(kappaEff, s, laplacianScheme)
+             ==
+                fvOptions_(trhoCp.ref(), s)
+            );
+
+            sEqn.relax(relaxCoeff);
+
+            fvOptions_.constrain(sEqn);
+
+            sEqn.solve(mesh_.solverDict(schemesField_));
+        }
+    }
+    else
+    {
+        FatalErrorInFunction
+            << "Incompatible dimensions for phi: " << phi.dimensions() << nl
+            << "Dimensions should be " << dimMass/dimTime << " or "
+            << dimVolume/dimTime << exit(FatalError);
+    }
+
+    Log << endl;
+
+    return true;
+}
+
+
+bool Foam::functionObjects::energyTransport::write()
+{
+    return true;
+}
+
+
+// ************************************************************************* //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,10 +90,16 @@ class Casson
         dimensionedScalar nuMin_;
         dimensionedScalar nuMax_;
 
+
+
+protected:
+
+    // Protected data
+
         volScalarField nu_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- Calculate and return the laminar viscosity
         tmp<volScalarField> calcNu() const;

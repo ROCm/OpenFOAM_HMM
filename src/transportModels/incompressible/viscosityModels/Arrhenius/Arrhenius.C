@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,40 +23,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CrossPowerLaw.H"
-#include "addToRunTimeSelectionTable.H"
-#include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "Arrhenius.H"
 
-namespace Foam
-{
-namespace viscosityModels
-{
-    defineTypeNameAndDebug(CrossPowerLaw, 0);
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-    addToRunTimeSelectionTable
-    (
-        viscosityModel,
-        CrossPowerLaw,
-        dictionary
-    );
-}
-}
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
+template<class ViscousModel>
 Foam::tmp<Foam::volScalarField>
-Foam::viscosityModels::CrossPowerLaw::calcNu() const
+Foam::viscosityModels::Arrhenius<ViscousModel>::calcNu
+(
+    const volScalarField& field
+) const
 {
-    return (nu0_ - nuInf_)/(scalar(1) + pow(m_*strainRate(), n_)) + nuInf_;
+    return exp(-alpha_*(field - Talpha_));
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::viscosityModels::CrossPowerLaw::CrossPowerLaw
+template<class ViscousModel>
+Foam::viscosityModels::Arrhenius<ViscousModel>::Arrhenius
 (
     const word& name,
     const dictionary& viscosityProperties,
@@ -64,46 +50,41 @@ Foam::viscosityModels::CrossPowerLaw::CrossPowerLaw
     const surfaceScalarField& phi
 )
 :
-    viscosityModel(name, viscosityProperties, U, phi),
-    CrossPowerLawCoeffs_
+    ViscousModel(name, viscosityProperties, U, phi),
+    ArrheniusCoeffs_
     (
         viscosityProperties.optionalSubDict(typeName + "Coeffs")
     ),
-    nu0_("nu0", dimViscosity, CrossPowerLawCoeffs_),
-    nuInf_("nuInf", dimViscosity, CrossPowerLawCoeffs_),
-    m_("m", dimTime, CrossPowerLawCoeffs_),
-    n_("n", dimless, CrossPowerLawCoeffs_),
-    nu_
-    (
-        IOobject
-        (
-            name,
-            U_.time().timeName(),
-            U_.db(),
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        calcNu()
-    )
-{}
+    alpha_("alpha", inv(dimTemperature), ArrheniusCoeffs_),
+    Talpha_("Talpha", dimTemperature, ArrheniusCoeffs_),
+    fieldName_(ArrheniusCoeffs_.lookupOrDefault<word>("field","T")),
+    mesh_(U.mesh())
+{
+    const volScalarField* fieldPtr =
+        mesh_.lookupObjectPtr<volScalarField>(fieldName_);
+
+    if (fieldPtr)
+    {
+        this->nu_ *= calcNu(*fieldPtr);
+    }
+}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::viscosityModels::CrossPowerLaw::read
+template<class ViscousModel>
+bool Foam::viscosityModels::Arrhenius<ViscousModel>::read
 (
     const dictionary& viscosityProperties
 )
 {
     viscosityModel::read(viscosityProperties);
 
-    CrossPowerLawCoeffs_ =
+    ArrheniusCoeffs_ =
         viscosityProperties.optionalSubDict(typeName + "Coeffs");
 
-    CrossPowerLawCoeffs_.lookup("nu0") >> nu0_;
-    CrossPowerLawCoeffs_.lookup("nuInf") >> nuInf_;
-    CrossPowerLawCoeffs_.lookup("m") >> m_;
-    CrossPowerLawCoeffs_.lookup("n") >> n_;
+    ArrheniusCoeffs_.lookup("alpha") >> alpha_;
+    ArrheniusCoeffs_.lookup("Talpha") >> Talpha_;
 
     return true;
 }
