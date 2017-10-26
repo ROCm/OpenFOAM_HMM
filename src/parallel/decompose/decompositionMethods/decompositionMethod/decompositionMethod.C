@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1348,7 +1348,15 @@ Foam::labelList Foam::decompositionMethod::decompose
             {
                 // If no processor specified use the one from the
                 // 0th element
-                proci = finalDecomp[mesh.faceOwner()[set[0]]];
+                if (set.size())
+                {
+                    proci = finalDecomp[mesh.faceOwner()[set[0]]];
+                }
+                else
+                {
+                    // Zero-sized processor (e.g. from redistributePar)
+                    proci = 0;
+                }
             }
 
             forAll(set, fI)
