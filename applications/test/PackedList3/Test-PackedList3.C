@@ -28,11 +28,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "boolList.H"
-#include "HashSet.H"
-#include "StaticHashTable.H"
 #include "cpuTime.H"
-#include <vector>
 #include "PackedBoolList.H"
 
 using namespace Foam;
@@ -44,24 +40,29 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    const label nLoop = 5;
     const label n = 100000000;
-    const label nReport = 1000000;
+    // const label nReport = 1000000;
 
     cpuTime timer;
 
     // test inserts
-    // PackedBoolList
     PackedBoolList packed;
-    for (label i = 0; i < n; i++)
+    for (label iloop = 0; iloop < nLoop; ++iloop)
     {
-        if ((i % nReport) == 0 && i)
+        for (label i = 0; i < n; ++i)
         {
-            Info<< "i:" << i << " in " << timer.cpuTimeIncrement() << " s"
-                <<endl;
+            // if ((i % nReport) == 0 && i)
+            // {
+            //     Info<< "." << flush;
+            // }
+            packed[i] = 1;
+            // Make compiler do something else too
+            packed[i/2] = 0;
         }
-        packed[i] = 1;
     }
-    Info<< "insert test: " << n << " elements in "
+    Info<< nl
+        << "insert test: " << nLoop << "*" << n << " elements in "
         << timer.cpuTimeIncrement() << " s\n\n";
 
     Info << "\nEnd\n" << endl;
