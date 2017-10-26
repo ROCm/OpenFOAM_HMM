@@ -25,16 +25,27 @@ Class
     Foam::OListStream
 
 Description
-    An output stream that writes to a DynamicList.
+    An output stream that writes to a List and manages the List storage.
+    Similar to OStringStream but with a List for its storage instead of
+    as string to allow reuse of List contents without copying.
+
+    The default list size is 512 with a 256 byte block increment.
+    These values can be changed on construction of via the
+    reserve() and setBlockSize() methods.
+
+See Also
+    Foam::IListStream
+    Foam::UOListStream
+    Foam::UIListStream
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef OListStream_H
 #define OListStream_H
 
-#include <sstream>
 #include "DynamicList.H"
 #include "OSstream.H"
+#include "memoryStreamBuffer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,177 +59,187 @@ class OListStreamAllocator;
                     Class OListStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
-//- An stream/stream-buffer allocator for external buffers
+//- An stream/stream-buffer output allocator for lists
 class OListStreamAllocator
 {
-    //- A streambuf adapter to output to a DynamicList
-    class olistbuf
+    //- A streambuf adapter to output to a List
+    class listbuf
     :
-        public std::streambuf
+        public memorybuf::output
     {
         friend OListStreamAllocator;
 
-        //- Underlying list storage
-        DynamicList<char,512> storage_;
-
-
-        //- Adjust buffer pointers to agree with list sizes
-        inline void syncBufferPointers()
+        //- Helper for setting the block size.
+        //  Small list minimum of 64 bytes.
+        static int min_size(int n)
         {
-            setp(storage_.data(), storage_.data() + storage_.capacity());
-            pbump(storage_.size());
+            return max(64, n);
         }
 
-        //- Adjust addressed list size to agree with buffer pointers
-        inline void syncListSize()
-        {
-            storage_.setSize(pptr() - pbase());
-        }
+        //- Block size when resizing the list
+        int block_ = 256;
+
+        //- Underlying list storage.
+        //  Internally manage like a DynamicList, but the addressable size
+        //  is known through the stream pointers.
+        List<char> storage_;
 
 
     protected:
 
-        // Protected members
-
-            //- Set position pointer to relative position
-            virtual std::streampos seekoff
-            (
-                std::streamoff off,
-                std::ios_base::seekdir way,
-                std::ios_base::openmode which = std::ios_base::out
-            )
+        //- Increment capacity directly and
+        //  adjust buffer pointers to agree with list dimensions
+        inline void minCapacity
+        (
+            const std::streamsize n,
+            const std::streamsize cur = 0
+        )
+        {
+            const auto newEnd = n + cur;
+            if (newEnd > storage_.size())
             {
-                const bool testout = which & std::ios_base::out;
+                auto newCapacity =
+                (
+                    (storage_.size() + block_)
+                  - (storage_.size() % block_)
+                );
 
-                if (way == std::ios_base::beg)
+                while (newCapacity < newEnd)
                 {
-                    if (testout)
-                    {
-                        setp(pbase(), epptr());
-                        pbump(off);
-                    }
-
-                    return off;
+                    newCapacity += block_;
                 }
 
-                if (way == std::ios_base::cur)
-                {
-                    if (testout)
-                    {
-                        pbump(off);
-                    }
-                }
-                else if (way == std::ios_base::end)
-                {
-                    if (testout)
-                    {
-                        pbump(off);
-                    }
-                }
+                // Info<<"request:" << newEnd
+                //     << " cur cap:" << storage_.size()
+                //     << " new cap:" << newCapacity
+                //     << " pos:" << cur
+                //     << " incr:" << incr << endl;
 
-                if (testout)
-                {
-                    return pptr() - pbase();
-                }
+                storage_.setSize(newCapacity);
+                sync_pbuffer_to_list();
+                pbump(cur);
+            }
+        }
 
-                return -1;
+        //- Define new increment
+        inline void setBlockSize(const int i)
+        {
+            const auto prev = block_;
+            block_ = min_size(i);
+
+            if (block_ > prev)
+            {
+                minCapacity(0, tellp());
+            }
+        }
+
+        //- Handle overflow
+        virtual int overflow(int c = EOF)
+        {
+            if (c != EOF)
+            {
+                // Need another output block
+                minCapacity(block_, tellp());
+
+                *(pptr()) = c;
+                pbump(1);
+            }
+            return c;
+        }
+
+
+        //- Put sequence of characters
+        virtual std::streamsize xsputn(const char* s, std::streamsize n)
+        {
+            // Enough space so that appends work without problem
+            minCapacity(n, tellp());
+
+            std::streamsize count = 0;
+            while (count < n && pptr() < epptr())
+            {
+                *(pptr()) = *(s + count++);
+                pbump(1);
             }
 
+            return count;
+        }
 
-            //- Set position pointer to absolute position
-            virtual std::streampos seekpos
-            (
-                std::streampos pos,
-                std::ios_base::openmode which = std::ios_base::out
-            )
-            {
-                if (which & std::ios_base::out)
-                {
-                    setp(pbase(), epptr());
-                    pbump(pos);
-
-                    return pptr() - pbase();
-                }
-
-                return -1;
-            }
-
-
-            //- Put sequence of characters
-            virtual std::streamsize xsputn(const char* s, std::streamsize n)
-            {
-                const std::streamsize newlen = n + storage_.size();
-
-                if (newlen > storage_.capacity())
-                {
-                    // Either use reserve(), or setCapacity() directly
-                    // with finer control over growth
-                    storage_.reserve(newlen);
-                    syncBufferPointers();
-                }
-
-                std::streamsize count = 0;
-                while (count < n && pptr() < epptr())
-                {
-                    *(pptr()) = *(s + count++);
-                    pbump(1);
-                }
-
-                // Synchronize list size with output
-                syncListSize();
-
-                return count;
-            }
+        //- Initialize put buffer
+        void init_pbuffer(const std::streamsize n)
+        {
+            set_pbuffer(storage_);
+            minCapacity(n);
+        }
 
 
     public:
 
-        // Constructors
+      // Constructors
 
-            //- Construct with an empty list
-            olistbuf()
-            :
-                storage_(1024)
-            {
-                syncBufferPointers();
-            }
+        //- Construct with an empty list, or specified number of reserved bytes
+        listbuf(size_t nbytes = 512)
+        :
+            storage_()
+        {
+            init_pbuffer(min_size(nbytes));
+        }
+
+        //- Move construct content from an existing List
+        listbuf(List<char>&& buffer)
+        :
+            storage_(std::move(buffer))
+        {
+            init_pbuffer(block_);
+        }
+
+        //- Move construct content from an existing DynamicList
+        template<int AnySize>
+        listbuf(DynamicList<char,AnySize>&& buffer)
+        :
+            storage_(std::move(buffer))
+        {
+            init_pbuffer(block_);
+        }
+
+        //- Transfer (move) construct
+        listbuf(const Xfer<List<char>>& buffer)
+        :
+            storage_(buffer)
+        {
+            init_pbuffer(block_);
+        }
 
 
-            //- Construct with a specified number of reserved bytes
-            olistbuf(size_t nbytes)
-            :
-                storage_()
-            {
-                storage_.reserve(std::max(label(nbytes),1024));
-                syncBufferPointers();
-            }
+      // Member Functions
 
+        //- Return the current list output capacity
+        inline label capacity() const
+        {
+            return storage_.size();
+        }
 
-            //- Move construct from an existing List
-            olistbuf(List<char>&& buffer)
-            :
-                storage_(std::move(buffer))
-            {
-                syncBufferPointers();
-            }
+        //- Sync put buffer pointers to agree with list dimensions
+        inline void sync_pbuffer_to_list()
+        {
+            set_pbuffer(storage_);
+        }
 
+        //- Clear storage
+        inline void clearStorage()
+        {
+            storage_.clear();
+            sync_pbuffer_to_list();
+        }
 
-            //- Move construct from an existing DynamicList
-            template<int AnySize>
-            olistbuf(DynamicList<char,AnySize>&& buffer)
-            :
-                storage_(std::move(buffer))
-            {
-                syncBufferPointers();
-            }
+        //- Shrink to addressed storage
+        inline void shrink()
+        {
+            const auto cur = tellp();
+            storage_.setSize(cur);
+            sync_pbuffer_to_list();
+            pbump(cur);
+        }
     };
-
-
-    // Private data
-
-        //- Reference to the underlying buffer
-        olistbuf buf_;
-
 
 protected:
 
@@ -226,27 +247,21 @@ protected:
 
         typedef std::ostream stream_type;
 
-        //- The output stream
+        //- The stream buffer
+        listbuf buf_;
+
+        //- The stream
         stream_type stream_;
 
 
     // Constructors
 
-        //- Construct with an empty list
-        OListStreamAllocator()
-        :
-            buf_(),
-            stream_(&buf_)
-        {}
-
-
-        //- Construct with a specified number of reserved bytes
-        OListStreamAllocator(size_t nbytes)
+        //- Construct with an empty list or specified number of reserved bytes
+        OListStreamAllocator(size_t nbytes = 512)
         :
             buf_(nbytes),
             stream_(&buf_)
         {}
-
 
         //- Move construct from an existing List
         OListStreamAllocator(List<char>&& buffer)
@@ -254,7 +269,6 @@ protected:
             buf_(std::move(buffer)),
             stream_(&buf_)
         {}
-
 
         //- Move construct from an existing DynamicList
         template<int SizeMin>
@@ -264,71 +278,117 @@ protected:
             stream_(&buf_)
         {}
 
+        //- Transfer (move) construct
+        OListStreamAllocator(const Xfer<List<char>>& buffer)
+        :
+            buf_(buffer),
+            stream_(&buf_)
+        {}
 
-    //- Destructor
-    ~OListStreamAllocator()
-    {}
 
+    // Protected Member Functions
+
+        void printBufInfo(Ostream& os) const
+        {
+            os  << "pos=" << buf_.tellp()
+                << " capacity=" << buf_.capacity()
+                << " block=" << buf_.block_;
+        }
 
 public:
 
     // Member Functions
 
-        //- Content as a list of characters
-        UList<char> list() const
+        //- The current list output capacity
+        inline label capacity() const
+        {
+            return buf_.capacity();
+        }
+
+
+        //- Reserve output space for at least this amount.
+        inline void reserve(const std::streamsize n)
+        {
+            // Also maintain current position when resizing
+            const auto cur = buf_.tellp();
+            if (n > cur)
+            {
+                buf_.minCapacity(n - cur, cur);
+            }
+        }
+
+
+        //- Adjust block size for output
+        inline void setBlockSize(int n)
+        {
+            return buf_.setBlockSize(n);
+        }
+
+
+        //- The current output position in the buffer,
+        //  which is also the addressed list size
+        inline label size() const
+        {
+            return buf_.tellp();
+        }
+
+
+        //- Const access to written contents as a list of characters
+        inline const UList<char> list() const
         {
             return UList<char>
             (
                 const_cast<char*>(buf_.storage_.cdata()),
-                buf_.storage_.size()
+                buf_.tellp()
             );
         }
 
 
-        //- Content as a list of characters
-        UList<char>& list()
+        //- Non-const access to written contents as a list of characters
+        inline UList<char> list()
         {
-            return static_cast<UList<char>&>(buf_.storage_);
-        }
-
-        //- Return the current list capacity
-        inline label capacity() const
-        {
-            return buf_.storage_.capacity();
+            return UList<char>(buf_.storage_.data(), buf_.tellp());
         }
 
 
-        //- Reserve allocation space for at least this size.
-        inline void reserve(const label nElem)
+        //- Transfer contents to the Xfer container as a plain List
+        inline Xfer<List<char>> xfer()
         {
-            buf_.storage_.reserve(nElem);
-            buf_.syncBufferPointers();
-        }
-
-
-        //- Return the current output position in the buffer
-        //  The same as the DynamicList::size()
-        std::streampos size() const
-        {
-            return const_cast<stream_type&>(stream_).tellp();
+            buf_.shrink();  // Shrink to addressed area
+            auto lst = buf_.storage_.xfer();
+            buf_.sync_pbuffer_to_list();
+            return lst;
         }
 
 
         //- Move to buffer start, clear errors
         void rewind()
         {
-            buf_.storage_.clear();
-            buf_.syncBufferPointers();
+            buf_.pubseekpos(0, std::ios_base::out);
             stream_.clear(); // for safety, clear any old errors
         }
+
+        //- Shrink to addressed space, should not affect stream.
+        inline void shrink()
+        {
+            buf_.shrink();
+        }
+
+        //- Clear storage
+        void clearStorage()
+        {
+            buf_.clearStorage();
+            stream_.clear(); // for safety, clear any old errors
+        }
+
 };
 
 
 /*---------------------------------------------------------------------------*\
                          Class OListStream Declaration
-\*----------------------------------------------d-----------------------------*/
+\*---------------------------------------------------------------------------*/
 
-//- An OSstream attached a DynamicList
+//- An OSstream attached to a List
 class OListStream
 :
     public OListStreamAllocator,
@@ -348,7 +408,7 @@ public:
         )
         :
             allocator_type(),
-            OSstream(stream_, "output", format,version)
+            OSstream(stream_, "output", format, version)
         {}
 
 
@@ -391,16 +451,30 @@ public:
             OSstream(stream_, "output", format, version)
         {}
 
-
-    //- Destructor
-    ~OListStream()
-    {}
+        //- Transfer (move) construct
+        OListStream
+        (
+            const Xfer<List<char>>& buffer,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        )
+        :
+            allocator_type(buffer),
+            OSstream(stream_, "output", format, version)
+        {}
 
 
     // Member functions
 
         //- Rewind the stream, clearing any old errors
-        using allocator_type::rewind;
+        virtual void rewind()
+        {
+            allocator_type::rewind();
+            setGood();  // resynchronize with internal state
+        }
+
+        //- Print description to Ostream
+        virtual void print(Ostream& os) const;
 
 };
 

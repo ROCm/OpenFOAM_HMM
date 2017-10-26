@@ -26,6 +26,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "ListStream.H"
+#include "UListStream.H"
 #include "wordList.H"
 #include "IOstreams.H"
 #include "argList.H"
@@ -82,121 +83,63 @@ int main(int argc, char *argv[])
     DynamicList<char> storage(16);
 
     OListStream obuf(std::move(storage));
+    obuf << 1002 << " " << "abcd" << " " << "def" << " " << 3.14159 << ";\n";
 
-    obuf.setBlockSize(100);
-
+    // Move contents to output buffer
     printInfo(obuf);
 
-    // Fill with some content
-    for (label i = 0; i < 50; ++i)
-    {
-        obuf<< 1002 << " " << "abcd" << " "
-            << "def" << " " << 3.14159 << ";\n";
-    }
+    Info<<nl << "as string: ";
+    toString(Info, obuf.list()) << endl;
 
-    printInfo(obuf);
-
-    obuf.rewind();
-    printInfo(obuf);
-
-    for (label i=0; i < 10; ++i)
-    {
-        obuf << "item" << i << "\n";
-    }
-
-    printInfo(obuf);
-
-    obuf.shrink();
-
-    Info<< "after shrink" << nl;
-    printInfo(obuf);
-
-    // Add some more
-    for (label i=10; i < 15; ++i)
-    {
-        obuf << "more" << i << nl;
-    }
-
-    Info<< "appended more" << nl;
-    printInfo(obuf);
-
-    // Overwrite at some position
-    obuf.stdStream().rdbuf()->pubseekpos(0.60 * obuf.size());
-    obuf << "<" << nl << "OVERWRITE" << nl;
-
-    Info<<"after overwrite" << nl;
-    printInfo(obuf);
-
-    Info<< "transfer contents to a List or IListStream" << nl;
+    Info<< "transfer contents to a List" << endl;
 
     IListStream ibuf(obuf.xfer());
 
-    Info<<"original:";
-    printInfo(obuf);
-
-    Info<<"new input:" << nl;
+    Info<< nl;
+    Info<< nl << "input string:";
     printInfo(ibuf);
+
+    Info<< nl << "orig output:";
+    printInfo(obuf);
 
     printTokens(ibuf);
 
-    // Create from other storage types
+    Info<<nl << "after:";
+    printInfo(ibuf);
 
-    Info<< nl;
+    // This should also work
+    ibuf.list() = 'X';
+
+    Info<<nl << "overwritten with const value:";
+    printInfo(ibuf);
+
+    // Can also change content like this:
     {
-        Info<<"create std::move(List)" << endl;
-        List<char> list(16, 'A');
+        const int n = min(26, ibuf.size());
 
-        Info<<"input:";
-        toString(Info, list) << endl;
-
-        OListStream buf1(std::move(list));
-        for (label i = 0; i < 26; ++i)
+        for (int i=0; i<n; ++i)
         {
-            buf1 << char('A' +i);
+            ibuf.list()[i] = 'A' + i;
         }
-        for (label i = 0; i < 26; ++i)
-        {
-            buf1 << char('a' +i);
-        }
-
-        Info<<"orig:";
-        toString(Info, list) << endl;
-
-        printInfo(buf1);
     }
 
-    Info<< nl;
+    Info<<nl << "directly written:";
+    printInfo(ibuf);
 
-    List<char> written;
-    {
-        Info<<"create List.xfer()" << endl;
-        List<char> list(16, 'B');
-
-        Info<<"input:";
-        toString(Info, list) << endl;
-
-        OListStream buf1(list.xfer());
-        for (label i = 0; i < 26; ++i)
-        {
-            buf1 << char('A' + i);
-        }
-        for (label i = 0; i < 26; ++i)
-        {
-            buf1 << char('a' +i);
-        }
-
-        Info<<"orig:";
-        toString(Info, list) << endl;
-
-        printInfo(buf1);
-
-        // Move back to written
-        written = buf1.xfer();
-
-        printInfo(buf1);
-    }
-    Info<<"'captured' content ";
-    toString(Info, written);
+    // But cannot easily swap in/out an entirely new list storage:
+    //
+    // List<char> newvalues(52);
+    // {
+    //     for (int i=0; i<26; ++i)
+    //     {
+    //         newvalues[2*i+0] = char('a' + i);
+    //         newvalues[2*i+1] = char('A' + i);
+    //     }
+    // }
+    // ibuf.swap(newvalues);
+    //
+    // Info<<nl << "after swap:";
+    // printInfo(ibuf);
 
 
     Info<< "\nEnd\n" << endl;

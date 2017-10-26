@@ -175,6 +175,9 @@ $(hashes)/base64Layer.C
 gzstream = $(Streams)/gzstream
 $(gzstream)/gzstream.C
 
+memstream = $(Streams)/memory
+$(memstream)/ListStream.C
+
 Fstreams = $(Streams)/Fstreams
 $(Fstreams)/IFstream.C
 $(Fstreams)/OFstream.C
