@@ -80,10 +80,15 @@ Scalar ScalarRead(const char* buf)
 {
     char* endptr = nullptr;
     errno = 0;
+    const auto parsed = ScalarConvert(buf, &endptr);
 
-    const Scalar val = ScalarConvert(buf, &endptr);
+    const parsing::errorType err =
+    (
+        (parsed < -ScalarVGREAT || parsed > ScalarVGREAT)
+      ? parsing::errorType::RANGE
+      : parsing::checkConversion(buf, endptr)
+    );
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
     if (err != parsing::errorType::NONE)
     {
         FatalIOErrorInFunction("unknown")
@@ -91,7 +96,13 @@ Scalar ScalarRead(const char* buf)
             << exit(FatalIOError);
     }
 
-    return val;
+    // Round underflow to zero
+    return
+    (
+        (parsed > -ScalarVSMALL && parsed < ScalarVSMALL)
+      ? 0
+      : Scalar(parsed)
+    );
 }
 
 
@@ -99,10 +110,22 @@ bool readScalar(const char* buf, Scalar& val)
 {
     char* endptr = nullptr;
     errno = 0;
+    const auto parsed = ScalarConvert(buf, &endptr);
 
-    val = ScalarConvert(buf, &endptr);
+    // Round underflow to zero
+    val =
+    (
+        (parsed > -ScalarVSMALL && parsed < ScalarVSMALL)
+      ? 0
+      : Scalar(parsed)
+    );
 
-    return (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE);
+    return
+    (
+        (parsed < -ScalarVGREAT || parsed > ScalarVGREAT)
+      ? false
+      : (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE)
+    );
 }
 
 
