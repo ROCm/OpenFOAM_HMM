@@ -1362,6 +1362,7 @@ void Foam::snappyRefineDriver::removeInsideCells
     meshRefiner_.splitMesh
     (
         nBufferLayers,                  // nBufferLayers
+        refineParams.nErodeCellZone(),
         globalToMasterPatch_,
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
@@ -1605,6 +1606,7 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
         refineParams.useTopologicalSnapDetection(),
         false,                          // perpendicular edge connected cells
         scalarField(0),                 // per region perpendicular angle
+        refineParams.nErodeCellZone(),
 
         motionDict,
         const_cast<Time&>(mesh.time()),
@@ -1672,6 +1674,7 @@ void Foam::snappyRefineDriver::zonify
         meshRefiner_.zonify
         (
             refineParams.allowFreeStandingZoneFaces(),
+            refineParams.nErodeCellZone(),
             refineParams.locationsInMesh(),
             refineParams.zonesInMesh(),
             zonesToFaceZone
@@ -1731,6 +1734,7 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
         refineParams.useTopologicalSnapDetection(),
         handleSnapProblems,                 // remove perp edge connected cells
         perpAngle,                          // perp angle
+        refineParams.nErodeCellZone(),
 
         motionDict,
         const_cast<Time&>(mesh.time()),

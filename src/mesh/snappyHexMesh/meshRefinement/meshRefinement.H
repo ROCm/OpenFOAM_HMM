@@ -511,6 +511,7 @@ private:
             //- Determine patches for baffles
             void getBafflePatches
             (
+                const label nErodeCellZones,
                 const labelList& globalToMasterPatch,
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
@@ -673,6 +674,17 @@ private:
                 labelList& cellToZone
             ) const;
 
+            //- Opposite of findCellTopo: finds assigned cell connected to
+            //  an unassigned one and puts it in the background zone.
+            void erodeCellZone
+            (
+                const label nErodeCellZones,
+                const label backgroundZoneID,
+                const labelList& unnamedSurfaceRegion,
+                const labelList& namedSurfaceIndex,
+                labelList& cellToZone
+            ) const;
+
             //- Make namedSurfaceIndex consistent with cellToZone
             //  - clear out any blocked faces inbetween same cell zone.
             void makeConsistentFaceIndex
@@ -686,6 +698,7 @@ private:
             void zonify
             (
                 const bool allowFreeStandingZoneFaces,
+                const label nErodeCellZones,
                 const label backgroundZoneID,
                 const pointField& locationsInMesh,
                 const wordList& zonesInMesh,
@@ -1037,6 +1050,7 @@ public:
                 const bool useTopologicalSnapDetection,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
+                const label nErodeCellZones,
                 const dictionary& motionDict,
                 Time& runTime,
                 const labelList& globalToMasterPatch,
@@ -1067,6 +1081,7 @@ public:
             autoPtr<mapPolyMesh> splitMesh
             (
                 const label nBufferLayers,
+                const label nErodeCellZones,
                 const labelList& globalToMasterPatch,
                 const labelList& globalToSlavePatch,
 
@@ -1148,6 +1163,7 @@ public:
             autoPtr<mapPolyMesh> zonify
             (
                 const bool allowFreeStandingZoneFaces,
+                const label nErodeCellZones,
                 const pointField& locationsInMesh,
                 const wordList& regionsInMesh,
                 wordPairHashTable& zonesToFaceZone
