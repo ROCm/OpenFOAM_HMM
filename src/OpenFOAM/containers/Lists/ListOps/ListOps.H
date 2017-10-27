@@ -110,24 +110,44 @@ void inplaceMapKey(const labelUList& oldToNew, Container& lst);
 template<class T>
 void sortedOrder(const UList<T>& lst, labelList& order);
 
-template<class T, class Cmp>
-void sortedOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+//- Sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void sortedOrder
+(
+    const UList<T>& lst,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 //- Generate (sorted) indices corresponding to duplicate list values
 template<class T>
 void duplicateOrder(const UList<T>& lst, labelList& order);
 
-template<class T, class Cmp>
-void duplicateOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+//- Generate (sorted) indices corresponding to duplicate list values
+//  sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void duplicateOrder
+(
+    const UList<T>& lst,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 //- Generate (sorted) indices corresponding to unique list values
 template<class T>
 void uniqueOrder(const UList<T>& lst, labelList& order);
 
-template<class T, class Cmp>
-void uniqueOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+//- Generate (sorted) indices corresponding to unique list values
+//  sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void uniqueOrder
+(
+    const UList<T>& lst,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 //- Inplace sorting and removal of duplicates.
@@ -137,8 +157,12 @@ void inplaceUniqueSort(ListType& lst);
 
 //- Inplace sorting and removal of duplicates.
 //  Do not use FixedList for the input list, since it doesn't resize.
-template<class ListType, class Cmp>
-void inplaceUniqueSort(ListType& lst, const Cmp& cmp);
+template<class ListType, class ListComparePredicate>
+void inplaceUniqueSort
+(
+    ListType& lst,
+    const ListComparePredicate& comp
+);
 
 
 //- Extract elements of List when select is a certain value.

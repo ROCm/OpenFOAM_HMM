@@ -119,8 +119,8 @@ public:
         //- Clear the indices and return a reference to the underlying List
         List<T>& shrink();
 
-        //- (stable) sort the list (if changed after construction time)
-        //  also resizes the indices as required
+        //- (stable) sort the list (if changed after construction time).
+        //  Resizes the indices as required
         void sort();
 
         //- Reverse (stable) sort the list

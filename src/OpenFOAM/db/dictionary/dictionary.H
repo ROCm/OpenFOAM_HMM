@@ -452,6 +452,10 @@ public:
             //- Return the sorted table of contents
             wordList sortedToc() const;
 
+            //- Return table of contents sorted using the specified comparator
+            template<class Compare>
+            wordList sortedToc(const Compare& comp) const;
+
             //- Return the list of available keys or patterns
             List<keyType> keys(bool patterns = false) const;
 

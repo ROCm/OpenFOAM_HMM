@@ -28,6 +28,13 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+template<class Compare>
+Foam::wordList Foam::dictionary::sortedToc(const Compare& comp) const
+{
+    return hashedEntries_.sortedToc(comp);
+}
+
+
 template<class T>
 T Foam::dictionary::lookupType
 (

@@ -293,10 +293,10 @@ void Foam::sort(UList<T>& a)
 }
 
 
-template<class T, class Cmp>
-void Foam::sort(UList<T>& a, const Cmp& cmp)
+template<class T, class Compare>
+void Foam::sort(UList<T>& a, const Compare& comp)
 {
-    std::sort(a.begin(), a.end(), cmp);
+    std::sort(a.begin(), a.end(), comp);
 }
 
 
@@ -307,10 +307,10 @@ void Foam::stableSort(UList<T>& a)
 }
 
 
-template<class T, class Cmp>
-void Foam::stableSort(UList<T>& a, const Cmp& cmp)
+template<class T, class Compare>
+void Foam::stableSort(UList<T>& a, const Compare& comp)
 {
-    std::stable_sort(a.begin(), a.end(), cmp);
+    std::stable_sort(a.begin(), a.end(), comp);
 }
 
 

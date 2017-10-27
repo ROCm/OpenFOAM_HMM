@@ -347,6 +347,10 @@ public:
         //- Return the table of contents as a sorted list
         List<Key> sortedToc() const;
 
+        //- Return table of contents sorted using the specified comparator
+        template<class Compare>
+        List<Key> sortedToc(const Compare& comp) const;
+
         //- Return the sorted table of contents with keys that satisfy
         //  the unary predicate, optionally with inverted logic.
         template<class UnaryPredicate>

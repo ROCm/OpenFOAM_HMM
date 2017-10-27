@@ -41,6 +41,7 @@ SourceFiles
 #include "word.H"
 #include "dictionary.H"
 #include "HashTable.H"
+#include "stringOpsSort.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

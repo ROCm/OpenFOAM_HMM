@@ -139,39 +139,35 @@ public:
 
     // Public classes
 
-        //- Less function class that can be used for sorting
-        class less
+        //- A list compare binary predicate for normal sort
+        struct less
         {
-            const UList<T>& values_;
+            const UList<T>& values;
 
-        public:
-
-            less(const UList<T>& values)
+            less(const UList<T>& list)
             :
-                values_(values)
+                values(list)
             {}
 
-            bool operator()(const label a, const label b)
+            bool operator()(const label a, const label b) const
             {
-                return values_[a] < values_[b];
+                return values[a] < values[b];
             }
         };
 
-        //- Greater function class that can be used for sorting
-        class greater
+        //- A list compare binary predicate for reverse sort
+        struct greater
         {
-            const UList<T>& values_;
+            const UList<T>& values;
 
-        public:
-
-            greater(const UList<T>& values)
+            greater(const UList<T>& list)
             :
-                values_(values)
+                values(list)
             {}
 
-            bool operator()(const label a, const label b)
+            bool operator()(const label a, const label b) const
             {
-                return values_[a] > values_[b];
+                return values[a] > values[b];
             }
         };
 
@@ -487,14 +483,14 @@ public:
 template<class T>
 void sort(UList<T>& a);
 
-template<class T, class Cmp>
-void sort(UList<T>& a, const Cmp& cmp);
+template<class T, class Compare>
+void sort(UList<T>& a, const Compare& comp);
 
 template<class T>
 void stableSort(UList<T>& a);
 
-template<class T, class Cmp>
-void stableSort(UList<T>& a, const Cmp& cmp);
+template<class T, class Compare>
+void stableSort(UList<T>& a, const Compare& comp);
 
 template<class T>
 void shuffle(UList<T>& a);

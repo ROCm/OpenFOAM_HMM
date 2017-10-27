@@ -211,27 +211,30 @@ void Foam::sortedOrder
 }
 
 
-template<class T, class Cmp>
+template<class T, class ListComparePredicate>
 void Foam::sortedOrder
 (
     const UList<T>& lst,
     labelList& order,
-    const Cmp& cmp
+    const ListComparePredicate& comp
 )
 {
+    const label len = lst.size();
+
     // list lengths must be identical
-    if (order.size() != lst.size())
+    if (order.size() != len)
     {
-        // avoid copying any elements, they are overwritten anyhow
+        // Avoid copying any elements, they are overwritten anyhow
         order.clear();
-        order.setSize(lst.size());
+        order.setSize(len);
     }
 
-    forAll(order, elemI)
+    for (label i=0; i<len; ++i)
     {
-        order[elemI] = elemI;
+        order[i] = i; // identity
     }
-    Foam::stableSort(order, cmp);
+
+    Foam::stableSort(order, comp);
 }
 
 
@@ -246,12 +249,12 @@ void Foam::duplicateOrder
 }
 
 
-template<class T, class Cmp>
+template<class T, class ListComparePredicate>
 void Foam::duplicateOrder
 (
     const UList<T>& lst,
     labelList& order,
-    const Cmp& cmp
+    const ListComparePredicate& comp
 )
 {
     if (lst.size() < 2)
@@ -260,7 +263,7 @@ void Foam::duplicateOrder
         return;
     }
 
-    sortedOrder(lst, order, cmp);
+    sortedOrder(lst, order, comp);
 
     const label last = (order.size()-1);
     label n = 0;
@@ -286,15 +289,15 @@ void Foam::uniqueOrder
 }
 
 
-template<class T, class Cmp>
+template<class T, class ListComparePredicate>
 void Foam::uniqueOrder
 (
     const UList<T>& lst,
     labelList& order,
-    const Cmp& cmp
+    const ListComparePredicate& comp
 )
 {
-    sortedOrder(lst, order, cmp);
+    sortedOrder(lst, order, comp);
 
     if (order.size() > 1)
     {
@@ -324,18 +327,24 @@ void Foam::inplaceUniqueSort(ListType& lst)
 }
 
 
-template<class ListType, class Cmp>
-void Foam::inplaceUniqueSort(ListType& lst, const Cmp& cmp)
+template<class ListType, class ListComparePredicate>
+void Foam::inplaceUniqueSort
+(
+    ListType& lst,
+    const ListComparePredicate& comp
+)
 {
     labelList order;
-    uniqueOrder(lst, order, cmp);
+    uniqueOrder(lst, order, comp);
 
-    ListType newLst(order.size());
-    newLst.setSize(order.size()); // Consistent sizing (eg, DynamicList)
+    const label len = order.size();
 
-    forAll(order, elemI)
+    ListType newLst(len);
+    newLst.setSize(len);  // Consistent sizing (eg, DynamicList)
+
+    for (label i=0; i<len; ++i)
     {
-        newLst[elemI] = lst[order[elemI]];
+        newLst[i] = lst[order[i]];
     }
 
     lst.transfer(newLst);

@@ -49,37 +49,40 @@ namespace predicates
                            Class always Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Unary and binary predicates returning true, useful for templating.
-class always
+//- Unary and binary predicates that always return true, useful for templating.
+struct always
 {
-public:
     typedef always value_type;
 
-    //- Construct null
+    //- Null constructible
     inline always()
     {}
 
-    //- Evaluated as a bool - return true
+    //- Evaluated as a bool
+    //  \return true
     inline operator bool() const
     {
         return true;
     }
 
-    //- Unary predicate returning true
+    //- Unary predicate
+    //  \return true
     template<class T>
     inline bool operator()(const T&) const
     {
         return true;
     }
 
-    //- Binary predicate returning true
+    //- Binary predicate
+    //  \return true
     template<class T1, class T2>
     inline bool operator()(const T1&, const T2&) const
     {
         return true;
     }
 
-    //- String match returning true
+    //- String match
+    //  \return true
     inline bool match(const std::string&, bool literal=false) const
     {
         return true;
@@ -91,37 +94,40 @@ public:
                             Class never Declaration
 \*---------------------------------------------------------------------------*/
 
-//- Unary and binary predicates returning false, useful for templating.
-class never
+//- Unary and binary predicates that never return true, useful for templating.
+struct never
 {
-public:
     typedef never value_type;
 
-    //- Construct null
+    //- Null constructible
     inline never()
     {}
 
-    //- Evaluated as a bool - return false
+    //- Evaluated as a bool
+    //  \return false
     inline operator bool() const
     {
         return false;
     }
 
-    //- Unary predicate returning false
+    //- Unary predicate
+    //  \return false
     template<class T>
     inline bool operator()(const T&) const
     {
         return false;
     }
 
-    //- Binary predicate returning false
+    //- Binary predicate
+    //  \return false
     template<class T1, class T2>
     inline bool operator()(const T1&, const T2&) const
     {
         return false;
     }
 
-    //- String match returning false
+    //- String match
+    //  \return false
     inline bool match(const std::string&, bool literal=false) const
     {
         return false;
