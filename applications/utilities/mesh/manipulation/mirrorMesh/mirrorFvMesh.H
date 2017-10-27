@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,12 @@ class mirrorFvMesh
         //- Mirrored mesh
         autoPtr<fvMesh> mirrorMeshPtr_;
 
+        //- Cell map
+        autoPtr<labelList> cellMapPtr_;
+
+        //- Point map
+        autoPtr<labelList> pointMapPtr_;
+
 
     // Private Member Functions
 
@@ -84,7 +90,19 @@ public:
         //- Return reference to mirror mesh
         const fvMesh& mirrorMesh() const
         {
-            return *mirrorMeshPtr_;
+            return mirrorMeshPtr_();
+        }
+
+        //- Mirrorred to original cell
+        const labelList& cellMap() const
+        {
+            return cellMapPtr_();
+        }
+
+        //- Mirrorred to original point
+        const labelList& pointMap() const
+        {
+            return pointMapPtr_();
         }
 };
 
