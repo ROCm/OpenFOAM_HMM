@@ -44,8 +44,6 @@ Note
 SourceFiles
     HashTableI.H
     HashTable.C
-    HashTableCoreI.H
-    HashTableCore.C
     HashTableIO.C
 
 \*---------------------------------------------------------------------------*/
@@ -53,13 +51,10 @@ SourceFiles
 #ifndef HashTable_H
 #define HashTable_H
 
-#include "label.H"
-#include "uLabel.H"
 #include "word.H"
 #include "Xfer.H"
 #include "Hash.H"
-#include "className.H"
-#include "nullObject.H"
+#include "HashTableCore.H"
 
 #include <initializer_list>
 #include <iterator>
@@ -82,80 +77,6 @@ Istream& operator>>(Istream& is, HashTable<T, Key, Hash>& L);
 
 template<class T, class Key, class Hash>
 Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
-
-
-/*---------------------------------------------------------------------------*\
-                        Class HashTableCore Declaration
-\*---------------------------------------------------------------------------*/
-
-//- Bits that are independent of the HashTable template parameters.
-struct HashTableCore
-{
-    //- Maximum allowable internal table size. Approximately labelMax/4
-    static const label maxTableSize;
-
-    //- Return a canonical (power-of-two) of the requested size.
-    static label canonicalSize(const label requested_size);
-
-    //- Construct null
-    HashTableCore()
-    {}
-
-    //- Define template name and debug
-    ClassName("HashTable");
-
-    static_assert
-    (
-        sizeof(NullObject) >= sizeof(void*),
-        "NullObject is too small to reinterpret_cast as HashTable::iterator"
-    );
-
-
-    //- Factory method to create a non-const iterator begin
-    template<class IteratorType, class TableType>
-    inline static IteratorType iterator_begin(TableType& table);
-
-    //- Factory method to create a const iterator begin
-    template<class IteratorType, class TableType>
-    inline static IteratorType iterator_begin(const TableType& table);
-
-    //- Factory method to create a const iterator begin
-    template<class IteratorType, class TableType>
-    inline static IteratorType iterator_cbegin(const TableType& table);
-
-    //- Factory method to create a non-const iterator end
-    //  Simply reinterprets a NullObject as a hash-table iterator.
-    template<class IteratorType>
-    inline static const IteratorType& iterator_end();
-
-    //- Factory method to create a const iterator cend
-    //  Simply reinterprets a NullObject as a hash-table iterator.
-    template<class IteratorType>
-    inline static const IteratorType& iterator_cend();
-
-
-    //- Factory class for creating a begin/end pair for any const iterator.
-    template<class IteratorType, class TableType>
-    class const_iterator_pair
-    {
-        label size_;
-        IteratorType iter_;
-
-    public:
-
-        inline const_iterator_pair(const TableType& tbl);
-
-        inline label size() const;
-        inline bool empty() const;
-
-        inline IteratorType begin() const;
-        inline IteratorType cbegin() const;
-
-        inline const IteratorType& end() const;
-        inline const IteratorType& cend() const;
-    };
-
-};
 
 
 /*---------------------------------------------------------------------------*\
@@ -871,7 +792,6 @@ inline void Swap
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "HashTableCoreI.H"
 #include "HashTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
