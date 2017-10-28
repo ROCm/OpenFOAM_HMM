@@ -9,36 +9,14 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    location    "constant";
+    object      fvOptions;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-dimensions      [1 -1 -2 0 0 0 0];
-
-internalField   uniform 0;
-
-boundaryField
+viscousDissipation
 {
-    rotor
-    {
-        type            zeroGradient;
-    }
-
-    stator
-    {
-        type            zeroGradient;
-    }
-
-    front
-    {
-        type            empty;
-    }
-
-    back
-    {
-        type            empty;
-    }
+    type            viscousDissipation;
+    enabled         true;
 }
-
 // ************************************************************************* //

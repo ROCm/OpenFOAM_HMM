@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,21 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::viscosityModels::BirdCarreau
+    Foam::viscosityModels::Arrhenius
 
 Description
-    An incompressible Bird-Carreau non-Newtonian viscosity model.
-
-    The Bird-Carreau-Yasuda form is also supported if the optional "a"
-    coefficient is specified.  "a" defaults to 2 for the Bird-Carreau model.
+    Arrhenius type of dependency on a given scalar field name. Most likely
+    temperature. The expression is as follow:
+    \verbatim
+        mu = exp(-alpha_*(T - Talpha_))
+    \endverbatim
 
 SourceFiles
-    BirdCarreau.C
+    Arrhenius.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef BirdCarreau_H
-#define BirdCarreau_H
+#ifndef Arrhenius_H
+#define Arrhenius_H
 
 #include "viscosityModel.H"
 #include "dimensionedScalar.H"
@@ -50,46 +51,48 @@ namespace viscosityModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class BirdCarreau Declaration
+                           Class Arrhenius Declaration
 \*---------------------------------------------------------------------------*/
 
-class BirdCarreau
+template<class ViscousModel>
+class Arrhenius
 :
-    public viscosityModel
+    public ViscousModel
 {
     // Private data
 
-        dictionary BirdCarreauCoeffs_;
+        dictionary ArrheniusCoeffs_;
 
-        dimensionedScalar nu0_;
-        dimensionedScalar nuInf_;
-        dimensionedScalar k_;
-        dimensionedScalar n_;
-        dimensionedScalar a_;
+        // Model coefficients
+        dimensionedScalar alpha_;
+        dimensionedScalar Talpha_;
+
+        //- Field used for as temperature
+        word  fieldName_;
+
+        //- Auto pointer for scalar field
+        autoPtr<volScalarField> field_;
+
+        //- Refernce to mesh
+        const fvMesh& mesh_;
 
 
-protected:
-
-    // Protected Data
-
-        volScalarField nu_;
-
-    // Protected Member Functions
+    // Private Member Functions
 
         //- Calculate and return the laminar viscosity
-        tmp<volScalarField> calcNu() const;
+        tmp<volScalarField> calcNu(const volScalarField&) const;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("BirdCarreau");
+//     //- Runtime type information
+     TypeName("Arrhenius");
 
 
     // Constructors
 
         //- Construct from components
-        BirdCarreau
+        Arrhenius
         (
             const word& name,
             const dictionary& viscosityProperties,
@@ -99,28 +102,24 @@ public:
 
 
     //- Destructor
-    virtual ~BirdCarreau()
+    virtual ~Arrhenius()
     {}
 
 
     // Member Functions
 
-        //- Return the laminar viscosity
-        virtual tmp<volScalarField> nu() const
-        {
-            return nu_;
-        }
-
-        //- Return the laminar viscosity for patch
-        virtual tmp<scalarField> nu(const label patchi) const
-        {
-            return nu_.boundaryField()[patchi];
-        }
-
         //- Correct the laminar viscosity
         virtual void correct()
         {
-            nu_ = calcNu();
+            ViscousModel::correct();
+
+            const volScalarField* fieldPtr =
+                mesh_.lookupObjectPtr<volScalarField>(fieldName_);
+
+            if (fieldPtr)
+            {
+                this->nu_ *= calcNu(*fieldPtr);
+            }
         }
 
         //- Read transportProperties dictionary
@@ -132,6 +131,12 @@ public:
 
 } // End namespace viscosityModels
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "Arrhenius.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
