@@ -56,11 +56,6 @@ Changes for OpenFOAM
 // - normally do not want this (Mark Olesen: Oct-2017)
 #undef DIGITS_ALWAYS_FIRST
 
-// [IGNORE_LEADING_ZEROS] : as per original code
-// This results in "file0005.txt" sorting before "file06.txt"
-// -> normally want this (Mark Olesen: Oct-2017)
-#define IGNORE_LEADING_ZEROS
-
 // [MANUAL_NUMCOMPARE] : handwritten code instead of strncmp
 // The orignal code has a mix of strncmp for equality but handwritten code
 // for greater-than/less-than.
@@ -204,23 +199,27 @@ int Foam::stringOps::natstrcmp(const char* s1, const char* s2)
                     {
                         state = NUMERIC;
 
-                        #ifdef IGNORE_LEADING_ZEROS
-                        if (!zeros1)    // Start skip of leading zeros
+                        // State changed from SCAN to NUMERIC, so skip leading
+                        // leading zeros so the numeric comparison is
+                        // untainted by them, but capture the first occurrence
+                        // of leading zeroes for a final tie-break if needed.
+
+                        if (!zeros1)
                         {
+                            // First occurrence of any leading zeroes
                             while (*p1 == '0') { ++p1; ++zeros1; }
                         }
                         else
-                        #endif
                         {
                             while (*p1 == '0') { ++p1; }
                         }
-                        #ifdef IGNORE_LEADING_ZEROS
-                        if (!zeros2)     // Start skip of leading zeros
+
+                        if (!zeros2)
                         {
+                            // First occurrence of any leading zeroes
                             while (*p2 == '0') { ++p2; ++zeros2; }
                         }
                         else
-                        #endif
                         {
                             while (*p2 == '0') { ++p2; }
                         }
