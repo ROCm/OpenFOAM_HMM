@@ -70,7 +70,7 @@ scalar calcVertexNormalWeight
     const pointField& points
 )
 {
-    label index = findIndex(f, pI);
+    label index = f.find(pI);
 
     if (index == -1)
     {
@@ -292,7 +292,7 @@ label detectIntersectionPoints
             if
             (
                 hits[pointI].hit()
-            &&  findIndex(localFaces[hits[pointI].index()], pointI) == -1
+            &&  !localFaces[hits[pointI].index()].found(pointI)
             )
             {
                 scale[pointI] = max(0.0, scale[pointI]-0.2);

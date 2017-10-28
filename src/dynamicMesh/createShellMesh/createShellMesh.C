@@ -226,8 +226,8 @@ void Foam::createShellMesh::calcPointRegions
             label facei = patch.edgeFaces()[edgeI][0];
             const face& f = patch.localFaces()[facei];
 
-            label fp0 = findIndex(f, e[0]);
-            label fp1 = findIndex(f, e[1]);
+            label fp0 = f.find(e[0]);
+            label fp1 = f.find(e[1]);
             allEdgeData[edgeI] = labelPair
             (
                 pointGlobalRegions[facei][fp0],
@@ -283,7 +283,7 @@ void Foam::createShellMesh::calcPointRegions
                 const face& f = patch.localFaces()[facei];
 
                 // Combine edgeData with face data
-                label fp0 = findIndex(f, e[0]);
+                label fp0 = f.find(e[0]);
                 if (pointGlobalRegions[facei][fp0] > edgeData[0])
                 {
                     pointGlobalRegions[facei][fp0] = edgeData[0];
@@ -294,7 +294,7 @@ void Foam::createShellMesh::calcPointRegions
                     }
                 }
 
-                label fp1 = findIndex(f, e[1]);
+                label fp1 = f.find(e[1]);
                 if (pointGlobalRegions[facei][fp1] > edgeData[1])
                 {
                     pointGlobalRegions[facei][fp1] = edgeData[1];
@@ -334,9 +334,9 @@ void Foam::createShellMesh::calcPointRegions
                 if (!nonManifoldEdge[edgeI])
                 {
                     const edge& e = patch.edges()[edgeI];
-                    label fp0 = findIndex(f, e[0]);
+                    label fp0 = f.find(e[0]);
                     label region0 = pointGlobalRegions[facei][fp0];
-                    label fp1 = findIndex(f, e[1]);
+                    label fp1 = f.find(e[1]);
                     label region1 = pointGlobalRegions[facei][fp1];
 
                     if
@@ -696,7 +696,7 @@ void Foam::createShellMesh::setRefinement
         const face& f = patch_.localFaces()[eFaces[0]];
         const edge& e = patch_.edges()[edgeI];
 
-        label fp0 = findIndex(f, e[0]);
+        label fp0 = f.find(e[0]);
         label fp1 = f.fcIndex(fp0);
 
         if (f[fp1] != e[1])
@@ -815,7 +815,7 @@ void Foam::createShellMesh::setRefinement
                 const face& f = patch_.localFaces()[minFacei];
 
                 const edge& e = patch_.edges()[edgeI];
-                label fp0 = findIndex(f, e[0]);
+                label fp0 = f.find(e[0]);
                 label fp1 = f.fcIndex(fp0);
 
                 if (f[fp1] != e[1])

@@ -246,6 +246,7 @@ labelList identity(const label len);
 
 //- Find first occurence of given element and return index,
 //  return -1 if not found. Linear search.
+//  \deprecated prefer UList find/found methods (deprecated Oct 2017)
 template<class ListType>
 label findIndex
 (

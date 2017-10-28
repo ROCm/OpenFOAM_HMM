@@ -129,14 +129,14 @@ void Foam::wallBoundedParticle::crossEdgeConnectedFace
             {
                 // Edge is in the forward circulation of this face, so
                 // work with the start point of the edge
-                eIndex = findIndex(otherFace, e.start());
+                eIndex = otherFace.find(e.start());
             }
             else
             {
                 // edDir == -1, so the edge is in the reverse
                 // circulation of this face, so work with the end
                 // point of the edge
-                eIndex = findIndex(otherFace, e.end());
+                eIndex = otherFace.find(e.end());
             }
 
             label tetBasePtI = mesh().tetBasePtIs()[facei];
@@ -194,7 +194,7 @@ void Foam::wallBoundedParticle::crossEdgeConnectedFace(const edge& meshEdge)
 
     // And adapt meshEdgeStart_.
     const Foam::face& f = mesh().faces()[tetFace()];
-    label fp = findIndex(f, meshEdge[0]);
+    label fp = f.find(meshEdge[0]);
 
     if (f.nextLabel(fp) == meshEdge[1])
     {
@@ -371,8 +371,8 @@ bool Foam::wallBoundedParticle::isTriAlongTrack
     if
     (
         currentE[0] == currentE[1]
-     || findIndex(triVerts, currentE[0]) == -1
-     || findIndex(triVerts, currentE[1]) == -1
+     || !triVerts.found(currentE[0])
+     || !triVerts.found(currentE[1])
     )
     {
         FatalErrorInFunction

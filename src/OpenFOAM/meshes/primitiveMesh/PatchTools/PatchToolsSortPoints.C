@@ -128,7 +128,7 @@ Foam::PatchTools::sortedPointEdges
         {
             forAll(pEdges, eI)
             {
-                if (findIndex(newEdgeList, pEdges[eI]) == -1)
+                if (!newEdgeList.found(pEdges[eI]))
                 {
                     WarningInFunction
                         << "Cannot find all original edges in the new list"

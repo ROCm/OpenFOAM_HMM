@@ -168,14 +168,12 @@ void Foam::meshToMeshMethod::appendNbrCells
     const labelList& nbrCells = mesh.cellCells()[celli];
 
     // filter out cells already visited from cell neighbours
-    forAll(nbrCells, i)
+    for (const label nbrCelli : nbrCells)
     {
-        label nbrCelli = nbrCells[i];
-
         if
         (
-            (findIndex(visitedCells, nbrCelli) == -1)
-         && (findIndex(nbrCellIDs, nbrCelli) == -1)
+            !visitedCells.found(nbrCelli)
+         && !nbrCellIDs.found(nbrCelli)
         )
         {
             nbrCellIDs.append(nbrCelli);

@@ -53,7 +53,7 @@ Foam::mappedPolyPatch::mappedPolyPatch
     mappedPatchBase(static_cast<const polyPatch&>(*this))
 {
     //  mapped is not constraint type so add mapped group explicitly
-    if (findIndex(inGroups(), typeName) == -1)
+    if (!inGroups().found(typeName))
     {
         inGroups().append(typeName);
     }
@@ -123,7 +123,7 @@ Foam::mappedPolyPatch::mappedPolyPatch
     mappedPatchBase(*this, dict)
 {
     //  mapped is not constraint type so add mapped group explicitly
-    if (findIndex(inGroups(), typeName) == -1)
+    if (!inGroups().found(typeName))
     {
         inGroups().append(typeName);
     }

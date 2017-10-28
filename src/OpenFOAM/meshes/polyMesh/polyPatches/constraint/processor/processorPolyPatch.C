@@ -362,7 +362,7 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
             const face& f = localFaces()[facei];
 
-            pointIndex[patchPointi] = findIndex(f, patchPointi);
+            pointIndex[patchPointi] = f.find(patchPointi);
         }
 
         // Express all edges as patch face and index in face.
@@ -377,7 +377,7 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
             const labelList& fEdges = faceEdges()[facei];
 
-            edgeIndex[patchEdgeI] = findIndex(fEdges, patchEdgeI);
+            edgeIndex[patchEdgeI] = fEdges.find(patchEdgeI);
         }
 
         UOPstream toNeighbProc(neighbProcNo(), pBufs);

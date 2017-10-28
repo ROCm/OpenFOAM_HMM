@@ -363,7 +363,7 @@ bool Foam::geomCellLooper::cut
                     // endpoint so only insert if unique.
                     label cut = vertToEVert(cutVertI);
 
-                    if (findIndex(localLoop, cut) == -1)
+                    if (!localLoop.found(cut))
                     {
                         localLoop.append(vertToEVert(cutVertI));
                         localLoopWeights.append(-GREAT);

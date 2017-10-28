@@ -137,12 +137,12 @@ bool Foam::cellFeatures::isCellFeatureEdge
 
     const face& f0 = mesh_.faces()[face0];
 
-    label face0Start = findIndex(f0, e.start());
+    label face0Start = f0.find(e.start());
     label face0End   = f0.fcIndex(face0Start);
 
     const face& f1 = mesh_.faces()[face1];
 
-    label face1Start = findIndex(f1, e.start());
+    label face1Start = f1.find(e.start());
     label face1End   = f1.fcIndex(face1Start);
 
     if

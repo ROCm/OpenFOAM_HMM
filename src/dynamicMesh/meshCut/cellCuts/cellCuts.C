@@ -189,12 +189,12 @@ void Foam::cellCuts::syncProc()
                             if (isEdge(cuts[i]))
                             {
                                 label edgei = getEdge(cuts[i]);
-                                label index = findIndex(fEdges, edgei);
+                                label index = fEdges.find(edgei);
                                 relCuts[bFacei][i] = -index-1;
                             }
                             else
                             {
-                                label index = findIndex(f, getVertex(cuts[i]));
+                                label index = f.find(getVertex(cuts[i]));
                                 relCuts[bFacei][i] = index+1;
                             }
                         }
@@ -390,13 +390,9 @@ Foam::label Foam::cellCuts::edgeEdgeToFace
 
         const labelList& fEdges = mesh().faceEdges()[facei];
 
-        if
-        (
-            findIndex(fEdges, edgeA) != -1
-         && findIndex(fEdges, edgeB) != -1
-        )
+        if (fEdges.found(edgeA) && fEdges.found(edgeB))
         {
-           return facei;
+            return facei;
         }
     }
 
@@ -432,13 +428,9 @@ Foam::label Foam::cellCuts::edgeVertexToFace
 
         const labelList& fEdges = mesh().faceEdges()[facei];
 
-        if
-        (
-            findIndex(fEdges, edgeI) != -1
-         && findIndex(f, vertI) != -1
-        )
+        if (fEdges.found(edgeI) && f.found(vertI))
         {
-           return facei;
+            return facei;
         }
     }
 
@@ -469,13 +461,9 @@ Foam::label Foam::cellCuts::vertexVertexToFace
 
         const face& f = mesh().faces()[facei];
 
-        if
-        (
-            findIndex(f, vertA) != -1
-         && findIndex(f, vertB) != -1
-        )
+        if (f.found(vertA) && f.found(vertB))
         {
-           return facei;
+            return facei;
         }
     }
 
@@ -677,7 +665,7 @@ Foam::label Foam::cellCuts::loopFace
 
             if (isEdge(cut))
             {
-                if (findIndex(fEdges, getEdge(cut)) == -1)
+                if (!fEdges.found(getEdge(cut)))
                 {
                     // Edge not on face. Skip face.
                     allOnFace = false;
@@ -686,7 +674,7 @@ Foam::label Foam::cellCuts::loopFace
             }
             else
             {
-                if (findIndex(f, getVertex(cut)) == -1)
+                if (!f.found(getVertex(cut)))
                 {
                     // Vertex not on face. Skip face.
                     allOnFace = false;
@@ -1333,8 +1321,8 @@ Foam::labelList Foam::cellCuts::nonAnchorPoints
 
         if
         (
-            findIndex(anchorPoints, pointi) == -1
-         && findIndex(loop, vertToEVert(pointi)) == -1
+            !anchorPoints.found(pointi)
+         && !loop.found(vertToEVert(pointi))
         )
         {
             newElems[newElemI++] = pointi;
@@ -1826,7 +1814,7 @@ Foam::label Foam::cellCuts::countFaceCuts
         if
         (
             pointIsCut_[vertI]
-         || (findIndex(loop, vertToEVert(vertI)) != -1)
+         || loop.found(vertToEVert(vertI))
         )
         {
             nCuts++;
@@ -1844,7 +1832,7 @@ Foam::label Foam::cellCuts::countFaceCuts
         if
         (
             edgeIsCut_[edgeI]
-         || (findIndex(loop, edgeToEVert(edgeI)) != -1)
+         || loop.found(edgeToEVert(edgeI))
         )
         {
             nCuts++;
@@ -2764,7 +2752,7 @@ void Foam::cellCuts::check() const
             if
             (
                 !isEdge(cut)
-             && findIndex(anchors, getVertex(cut)) != -1
+             && anchors.found(getVertex(cut))
             )
             {
                 FatalErrorInFunction

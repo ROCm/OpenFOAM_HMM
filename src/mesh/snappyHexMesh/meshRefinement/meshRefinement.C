@@ -2037,7 +2037,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     const dictionary& patchInfo
 )
 {
-    label meshedi = findIndex(meshedPatches_, name);
+    label meshedi = meshedPatches_.find(name);
 
     if (meshedi != -1)
     {
@@ -2341,7 +2341,7 @@ void Foam::meshRefinement::findRegions
         {
             // Do a quick check for locationsOutsideMesh overlapping with
             // inside ones.
-            label index = findIndex(insideRegions, regioni);
+            label index = insideRegions.find(regioni);
             if (index != -1)
             {
                 FatalErrorInFunction

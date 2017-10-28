@@ -748,7 +748,7 @@ void Foam::isoSurface::calcSnappedPoint
             FixedList<scalar, 4> s;
             FixedList<point, 4> pt;
 
-            label fp = findIndex(f, pointi);
+            label fp = f.find(pointi);
             s[0] = isoFraction(pVals[pointi], cVals[own]);
             pt[0] = (1.0-s[0])*pts[pointi] + s[0]*cc[own];
 

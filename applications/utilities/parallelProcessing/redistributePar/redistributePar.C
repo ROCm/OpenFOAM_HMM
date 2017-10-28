@@ -857,7 +857,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         // processors
         autoPtr<fvMeshSubset> subsetterPtr;
 
-        const bool allHaveMesh = (findIndex(haveMesh, false) == -1);
+        const bool allHaveMesh = !haveMesh.found(false);
         if (!allHaveMesh)
         {
             // Find last non-processor patch.

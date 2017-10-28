@@ -112,7 +112,7 @@ bool Foam::fv::option::isActive()
 
 Foam::label Foam::fv::option::applyToField(const word& fieldName) const
 {
-    return findIndex(fieldNames_, fieldName);
+    return fieldNames_.find(fieldName);
 }
 
 

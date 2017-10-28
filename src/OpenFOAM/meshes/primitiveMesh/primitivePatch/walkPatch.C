@@ -149,7 +149,7 @@ void Foam::walkPatch::faceToFace
 
             const face& f = pp_.localFaces()[facei];
 
-            label fp = findIndex(f, enterVertI);
+            label fp = f.find(enterVertI);
 
             indexInFace_.append(fp);
 

@@ -45,7 +45,7 @@ void Foam::tetherPotentialList::readTetherPotentialDict
     {
         word tetherPotentialName = tetherSiteIdList[t];
 
-        label tetherId = findIndex(siteIdList, tetherPotentialName);
+        label tetherId = siteIdList.find(tetherPotentialName);
 
         if (tetherId == -1)
         {

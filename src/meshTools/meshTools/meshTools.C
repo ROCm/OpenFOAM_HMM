@@ -319,7 +319,7 @@ bool Foam::meshTools::edgeOnCell
     const label edgeI
 )
 {
-    return findIndex(mesh.edgeCells(edgeI), celli) != -1;
+    return mesh.edgeCells(edgeI).found(celli);
 }
 
 
@@ -330,7 +330,7 @@ bool Foam::meshTools::edgeOnFace
     const label edgeI
 )
 {
-    return findIndex(mesh.faceEdges(facei), edgeI) != -1;
+    return mesh.faceEdges(facei).found(edgeI);
 }
 
 

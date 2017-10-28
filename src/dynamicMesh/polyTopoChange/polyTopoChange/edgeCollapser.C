@@ -1138,9 +1138,9 @@ void Foam::edgeCollapser::filterFace
         // Do we have a local point for this index?
         if (collapseStrings.found(collapseIndex))
         {
-            label localPointi = collapseStrings[collapseIndex][0];
+            const label localPointi = collapseStrings[collapseIndex][0];
 
-            if (findIndex(SubList<label>(f, newFp), localPointi) == -1)
+            if (!SubList<label>(f, newFp).found(localPointi))
             {
                 f[newFp++] = localPointi;
             }
@@ -1176,7 +1176,7 @@ void Foam::edgeCollapser::filterFace
         label pointi = f[fp];
 
         // Search for previous occurrence.
-        label index = findIndex(SubList<label>(f, fp), pointi);
+        const label index = SubList<label>(f, fp).find(pointi);
 
         if (index == fp1)
         {

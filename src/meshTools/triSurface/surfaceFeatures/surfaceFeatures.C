@@ -392,7 +392,7 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
 
     label nVisited = 0;
 
-    if (findIndex(featurePoints_, startPointi) >= 0)
+    if (featurePoints_.found(startPointi))
     {
         // Do not walk across feature points
 
@@ -623,7 +623,7 @@ Foam::surfaceFeatures::surfaceFeatures::checkFlatRegionEdge
 
             regionAndNormal1[i] = myRegionAndNormal;
 
-            label index = findIndex(regionAndNormal, -myRegionAndNormal);
+            label index = regionAndNormal.find(-myRegionAndNormal);
             if (index == -1)
             {
                 // Not found.

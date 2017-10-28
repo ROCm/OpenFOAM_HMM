@@ -212,7 +212,7 @@ bool Foam::intersectedSurface::sameEdgeOrder
 {
     forAll(fA, fpA)
     {
-        label fpB = findIndex(fB, fA[fpA]);
+        label fpB = fB.find(fA[fpA]);
 
         if (fpB != -1)
         {

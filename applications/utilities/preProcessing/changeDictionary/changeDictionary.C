@@ -206,7 +206,7 @@ labelList findMatches
             const wordList& keys = shortcuts[name];
             forAll(keys, j)
             {
-                label index = findIndex(thisKeys, keys[j]);
+                label index = thisKeys.find(keys[j]);
                 if (index != -1)
                 {
                     matches.append(index);

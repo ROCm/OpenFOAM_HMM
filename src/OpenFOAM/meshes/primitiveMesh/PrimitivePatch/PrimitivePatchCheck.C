@@ -50,7 +50,7 @@ visitPointRegion
     boolList& pFacesHad
 ) const
 {
-    label index = findIndex(pFaces, startFacei);
+    label index = pFaces.find(startFacei);
 
     if (!pFacesHad[index])
     {
@@ -267,7 +267,7 @@ checkPointManifold
         // After this all faces using pointi should have been visited and
         // marked off in pFacesHad.
 
-        label unset = findIndex(pFacesHad, false);
+        label unset = pFacesHad.find(false);
 
         if (unset != -1)
         {

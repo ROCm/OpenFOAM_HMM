@@ -1147,7 +1147,7 @@ Foam::label Foam::distributedTriSurfaceMesh::findTriangle
         if (f.region() == otherF.region())
         {
             // Find index of otherF[0]
-            label fp0 = findIndex(f, otherF[0]);
+            label fp0 = f.find(otherF[0]);
             // Check rest of triangle in same order
             label fp1 = f.fcIndex(fp0);
             label fp2 = f.fcIndex(fp1);

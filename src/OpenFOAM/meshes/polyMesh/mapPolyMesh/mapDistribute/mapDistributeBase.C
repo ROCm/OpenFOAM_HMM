@@ -89,7 +89,7 @@ Foam::List<Foam::labelPair> Foam::mapDistributeBase::schedule
 
             forAll(nbrData, i)
             {
-                if (findIndex(allComms, nbrData[i]) == -1)
+                if (!allComms.found(nbrData[i]))
                 {
                     label sz = allComms.size();
                     allComms.setSize(sz+1);

@@ -858,7 +858,7 @@ void Foam::ListUniqueEqOp<T>::operator()(List<T>& x, const List<T>& y) const
         {
             forAll(y, i)
             {
-                if (findIndex(x, y[i]) == -1)
+                if (!x.found(y[i]))
                 {
                     x.append(y[i]);
                 }

@@ -404,7 +404,7 @@ void Foam::polyTopoChange::checkFace
         }
     }
 
-    if (f.size() < 3 || findIndex(f, -1) != -1)
+    if (f.size() < 3 || f.found(-1))
     {
         FatalErrorInFunction
             << "Illegal vertices in face"

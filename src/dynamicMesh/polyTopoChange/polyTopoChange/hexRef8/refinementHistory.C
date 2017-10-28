@@ -313,7 +313,7 @@ void Foam::refinementHistory::freeSplitCell(const label index)
         {
             FixedList<label, 8>& subCells = subCellsPtr();
 
-            label myPos = findIndex(subCells, index);
+            label myPos = subCells.find(index);
 
             if (myPos == -1)
             {

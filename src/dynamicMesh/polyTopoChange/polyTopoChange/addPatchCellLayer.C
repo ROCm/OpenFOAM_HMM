@@ -540,7 +540,7 @@ void Foam::addPatchCellLayer::findZoneFace
 
         if
         (
-            (findIndex(excludeFaces, faceI) == -1)
+            !excludeFaces.found(faceI)
          && (
                 (mesh.isInternalFace(faceI) && useInternalFaces)
              || (!mesh.isInternalFace(faceI) && useBoundaryFaces)
@@ -749,7 +749,7 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
 
             if (otherProci != -1)
             {
-                if (findIndex(gd[Pstream::myProcNo()], otherProci) != -1)
+                if (gd[Pstream::myProcNo()].found(otherProci))
                 {
                     // There is already a processorPolyPatch to otherProci.
                     // Use it. Note that we can only index procPatchMap

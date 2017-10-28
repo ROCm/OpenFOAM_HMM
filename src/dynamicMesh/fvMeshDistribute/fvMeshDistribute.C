@@ -656,7 +656,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 
     if (debug)
     {
-        label index = findIndex(map().reverseFaceMap(), -1);
+        label index = map().reverseFaceMap().find(-1);
 
         if (index != -1)
         {

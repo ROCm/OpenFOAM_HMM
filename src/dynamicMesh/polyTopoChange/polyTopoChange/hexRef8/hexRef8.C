@@ -544,7 +544,7 @@ Foam::label Foam::hexRef8::getAnchorCell
 {
     if (cellAnchorPoints[celli].size())
     {
-        label index = findIndex(cellAnchorPoints[celli], pointi);
+        label index = cellAnchorPoints[celli].find(pointi);
 
         if (index != -1)
         {
@@ -559,7 +559,7 @@ Foam::label Foam::hexRef8::getAnchorCell
 
         forAll(f, fp)
         {
-            label index = findIndex(cellAnchorPoints[celli], f[fp]);
+            label index = cellAnchorPoints[celli].find(f[fp]);
 
             if (index != -1)
             {
@@ -1849,7 +1849,7 @@ bool Foam::hexRef8::matchHexShape
                         if (iter != pointFaces.end())
                         {
                             labelList& pFaces = iter();
-                            if (findIndex(pFaces, facei) == -1)
+                            if (!pFaces.found(facei))
                             {
                                 pFaces.append(facei);
                             }
@@ -4376,12 +4376,12 @@ void Foam::hexRef8::updateMesh
             cellLevel_[newCelli] = fnd();
         }
 
-        //if (findIndex(cellLevel_, -1) != -1)
+        //if (cellLevel_.found(-1))
         //{
         //    WarningInFunction
         //        << "Problem : "
         //        << "cellLevel_ contains illegal value -1 after mapping
-        //        << " at cell " << findIndex(cellLevel_, -1) << endl
+        //        << " at cell " << cellLevel_.find(-1) << endl
         //        << "This means that another program has inflated cells"
         //        << " (created cells out-of-nothing) and hence we don't know"
         //        << " their cell level. Continuing with illegal value."
@@ -4450,12 +4450,12 @@ void Foam::hexRef8::updateMesh
             pointLevel_[newPointi] = fnd();
         }
 
-        //if (findIndex(pointLevel_, -1) != -1)
+        //if (pointLevel_.found(-1))
         //{
         //    WarningInFunction
         //        << "Problem : "
         //        << "pointLevel_ contains illegal value -1 after mapping"
-        //        << " at point" << findIndex(pointLevel_, -1) << endl
+        //        << " at point" << pointLevel_.find(-1) << endl
         //        << "This means that another program has inflated points"
         //        << " (created points out-of-nothing) and hence we don't know"
         //        << " their point level. Continuing with illegal value."
@@ -4516,7 +4516,7 @@ void Foam::hexRef8::subset
 
         cellLevel_.transfer(newCellLevel);
 
-        if (findIndex(cellLevel_, -1) != -1)
+        if (cellLevel_.found(-1))
         {
             FatalErrorInFunction
                 << "Problem : "
@@ -4537,7 +4537,7 @@ void Foam::hexRef8::subset
 
         pointLevel_.transfer(newPointLevel);
 
-        if (findIndex(pointLevel_, -1) != -1)
+        if (pointLevel_.found(-1))
         {
             FatalErrorInFunction
                 << "Problem : "

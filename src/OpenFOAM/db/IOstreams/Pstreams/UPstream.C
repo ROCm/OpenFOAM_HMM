@@ -219,12 +219,12 @@ Foam::label Foam::UPstream::procNo(const label myComm, const int baseProcID)
 
     if (parentComm == -1)
     {
-        return findIndex(parentRanks, baseProcID);
+        return parentRanks.find(baseProcID);
     }
     else
     {
-        label parentRank = procNo(parentComm, baseProcID);
-        return findIndex(parentRanks, parentRank);
+        const label parentRank = procNo(parentComm, baseProcID);
+        return parentRanks.find(parentRank);
     }
 }
 
