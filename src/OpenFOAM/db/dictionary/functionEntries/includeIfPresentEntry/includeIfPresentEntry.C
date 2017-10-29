@@ -64,7 +64,9 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    const fileName fName(resolveFile(is, parentDict));
+    const fileName rawName(is);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
+
     autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
     ISstream& ifs = ifsPtr();
 
@@ -100,7 +102,9 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    const fileName fName(resolveFile(is, parentDict));
+    const fileName rawName(is);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
+
     autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
     ISstream& ifs = ifsPtr();
 

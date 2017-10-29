@@ -68,9 +68,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Read the include fileName from Istream, expand and return
-        static fileName resolveFile(Istream& is, const dictionary& dict);
-
         //- Expand include fileName and return
         static fileName resolveFile
         (
@@ -78,6 +75,7 @@ protected:
             const fileName& f,
             const dictionary& dict
         );
+
 
 public:
 

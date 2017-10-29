@@ -79,9 +79,16 @@ class includeEtcEntry
 :
     public functionEntry
 {
-    //- Expand include fileName and return
-    static fileName resolveFile(const fileName& f, const dictionary& dict);
+protected:
 
+    // Protected Member Functions
+
+        //- Expand include fileName and search etc directories for the file
+        static fileName resolveEtcFile
+        (
+            const fileName& f,
+            const dictionary& dict
+        );
 
 public:
 
