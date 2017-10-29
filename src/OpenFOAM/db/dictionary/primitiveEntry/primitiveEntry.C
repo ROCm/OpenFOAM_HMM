@@ -49,7 +49,7 @@ bool Foam::primitiveEntry::expandVariable
     {
         // Recursive substitution mode.
         // Content between {} is replaced with expansion.
-        string expanded = varName.substr(1, varName.size()-2);
+        string expanded(varName.substr(1, varName.size()-2));
 
         // Substitute dictionary and environment variables.
         // Do not allow empty substitutions.
@@ -57,46 +57,45 @@ bool Foam::primitiveEntry::expandVariable
 
         return expandVariable(expanded, dict);
     }
+
+    // Lookup variable name in the given dictionary WITHOUT pattern matching.
+    // Having a pattern match means that in this example:
+    // {
+    //     internalField XXX;
+    //     boundaryField { ".*" {YYY;} movingWall {value $internalField;}
+    // }
+    // The $internalField would be matched by the ".*" !!!
+
+    // Recursive, non-patterns
+    const entry* eptr = dict.lookupScopedEntryPtr(varName, true, false);
+    if (!eptr)
+    {
+        // Not found - revert to environment variable
+        const string str(getEnv(varName));
+
+        if (str.empty())
+        {
+            FatalIOErrorInFunction
+            (
+                dict
+            )   << "Illegal dictionary entry or environment variable name "
+                << varName << endl << "Valid dictionary entries are "
+                << dict.toc() << exit(FatalIOError);
+
+            return false;
+        }
+
+        append(tokenList(IStringStream('(' + str + ')')()));
+    }
+    else if (eptr->isDict())
+    {
+        // Found dictionary entry
+        append(eptr->dict().tokens());
+    }
     else
     {
-        // lookup the variable name in the given dictionary....
-        // Note: allow wildcards to match? For now disabled since following
-        // would expand internalField to wildcard match and not expected
-        // internalField:
-        //      internalField XXX;
-        //      boundaryField { ".*" {YYY;} movingWall {value $internalField;}
-        const entry* ePtr = dict.lookupScopedEntryPtr(varName, true, false);
-
-        // ...if defined append its tokens into this
-        if (ePtr)
-        {
-            if (ePtr->isDict())
-            {
-                append(ePtr->dict().tokens());
-            }
-            else
-            {
-                append(ePtr->stream());
-            }
-        }
-        else
-        {
-            // Not in the dictionary - try an environment variable
-            const string envStr = getEnv(varName);
-
-            if (envStr.empty())
-            {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "Illegal dictionary entry or environment variable name "
-                    << varName << endl << "Valid dictionary entries are "
-                    << dict.toc() << exit(FatalIOError);
-
-                return false;
-            }
-            append(tokenList(IStringStream('(' + envStr + ')')()));
-        }
+        // Found primitive entry
+        append(eptr->stream());
     }
 
     return true;

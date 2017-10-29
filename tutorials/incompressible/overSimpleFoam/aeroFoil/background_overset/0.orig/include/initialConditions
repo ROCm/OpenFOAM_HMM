@@ -11,6 +11,5 @@ pressure             0;
 turbulentKE          0.375;
 turbulentOmega       3.6;
 turbulentEpsilon     0.12;
-#inputMode           merge
 
 // ************************************************************************* //

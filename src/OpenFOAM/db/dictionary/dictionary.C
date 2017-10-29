@@ -45,157 +45,6 @@ bool Foam::dictionary::writeOptionalEntries
 );
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-namespace Foam
-{
-    // file-scope
-    //- Walk lists of patterns and regexps for an exact match
-    //  or regular expression match
-    template<class WcIterator, class ReIterator>
-    static bool findInPatterns
-    (
-        const bool patternMatch,
-        const word& keyword,
-        WcIterator& wcIter,
-        ReIterator& reIter
-    )
-    {
-        while (wcIter.found())
-        {
-            if
-            (
-                patternMatch
-              ? reIter()->match(keyword)
-              : wcIter()->keyword() == keyword
-            )
-            {
-                return true;
-            }
-
-            ++reIter;
-            ++wcIter;
-        }
-
-        return false;
-    }
-}
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-const Foam::entry* Foam::dictionary::lookupScopedSubEntryPtr
-(
-    const word& keyword,
-    bool recursive,
-    bool patternMatch
-) const
-{
-    string::size_type dotPos = keyword.find('.');
-
-    if (dotPos == string::npos)
-    {
-        // Non-scoped lookup
-        return lookupEntryPtr(keyword, recursive, patternMatch);
-    }
-    else if (dotPos == 0)
-    {
-        // Starting with a '.' -> go up for every further '.' found
-        ++dotPos;
-
-        const dictionary* dictPtr = this;
-        for
-        (
-            string::const_iterator it = keyword.begin()+1;
-            it != keyword.end() && *it == '.';
-            ++dotPos, ++it
-        )
-        {
-            // Go to parent
-            if (&dictPtr->parent_ != &dictionary::null)
-            {
-                dictPtr = &dictPtr->parent_;
-            }
-            else
-            {
-                FatalIOErrorInFunction
-                (
-                    *this
-                )   << "No parent of current dictionary when searching for "
-                    << keyword.substr(1)
-                    << exit(FatalIOError);
-
-                return nullptr;
-            }
-        }
-
-        return dictPtr->lookupScopedSubEntryPtr
-        (
-            keyword.substr(dotPos),
-            false,
-            patternMatch
-        );
-    }
-    else
-    {
-        // The first word
-        const entry* entPtr = lookupScopedSubEntryPtr
-        (
-            keyword.substr(0, dotPos),
-            false,
-            patternMatch
-        );
-
-        if (!entPtr)
-        {
-            // Fall back to finding key with '.' so e.g. if keyword is
-            // a.b.c.d it would try
-            // a.b, a.b.c, a.b.c.d
-
-            while (true)
-            {
-                dotPos = keyword.find('.', dotPos+1);
-
-                entPtr = lookupEntryPtr
-                (
-                    keyword.substr(0, dotPos),
-                    false,
-                    patternMatch
-                );
-
-                if (dotPos == string::npos)
-                {
-                    // Parsed the whole word. Return entry or null.
-                    return entPtr;
-                }
-
-                if (entPtr && entPtr->isDict())
-                {
-                    return entPtr->dict().lookupScopedSubEntryPtr
-                    (
-                        keyword.substr(dotPos),
-                        false,
-                        patternMatch
-                    );
-                }
-            }
-        }
-
-        if (entPtr->isDict())
-        {
-            return entPtr->dict().lookupScopedSubEntryPtr
-            (
-                keyword.substr(dotPos),
-                false,
-                patternMatch
-            );
-        }
-    }
-
-    return nullptr;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dictionary::dictionary()
@@ -322,10 +171,8 @@ const Foam::dictionary& Foam::dictionary::topDict() const
     {
         return p.topDict();
     }
-    else
-    {
-        return *this;
-    }
+
+    return *this;
 }
 
 
@@ -335,10 +182,8 @@ Foam::label Foam::dictionary::startLineNumber() const
     {
         return first()->startLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -348,10 +193,8 @@ Foam::label Foam::dictionary::endLineNumber() const
     {
         return last()->endLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -395,29 +238,7 @@ bool Foam::dictionary::found
     bool patternMatch
 ) const
 {
-    if (hashedEntries_.found(keyword))
-    {
-        return true;
-    }
-
-    if (patternMatch && patterns_.size())
-    {
-        pattern_const_iterator wcLink = patterns_.begin();
-        regexp_const_iterator  reLink = regexps_.begin();
-
-        // Find in patterns using regular expressions only
-        if (findInPatterns(patternMatch, keyword, wcLink, reLink))
-        {
-            return true;
-        }
-    }
-
-    if (recursive && &parent_ != &dictionary::null)
-    {
-        return parent_.found(keyword, recursive, patternMatch);
-    }
-
-    return false;
+    return csearch(keyword, recursive, patternMatch).found();
 }
 
 
@@ -428,31 +249,7 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
     bool patternMatch
 ) const
 {
-    auto iter = hashedEntries_.cfind(keyword);
-
-    if (iter.found())
-    {
-        return iter();
-    }
-
-    if (patternMatch && patterns_.size())
-    {
-        pattern_const_iterator wcLink = patterns_.begin();
-        regexp_const_iterator  reLink = regexps_.begin();
-
-        // Find in patterns using regular expressions only
-        if (findInPatterns(patternMatch, keyword, wcLink, reLink))
-        {
-            return wcLink();
-        }
-    }
-
-    if (recursive && &parent_ != &dictionary::null)
-    {
-        return parent_.lookupEntryPtr(keyword, recursive, patternMatch);
-    }
-
-    return nullptr;
+    return csearch(keyword, recursive, patternMatch).ptr();
 }
 
 
@@ -463,36 +260,7 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
     bool patternMatch
 )
 {
-    auto iter = hashedEntries_.find(keyword);
-
-    if (iter.found())
-    {
-        return iter();
-    }
-
-    if (patternMatch && patterns_.size())
-    {
-        pattern_iterator wcLink = patterns_.begin();
-        regexp_iterator  reLink = regexps_.begin();
-
-        // Find in patterns using regular expressions only
-        if (findInPatterns(patternMatch, keyword, wcLink, reLink))
-        {
-            return wcLink();
-        }
-    }
-
-    if (recursive && &parent_ != &dictionary::null)
-    {
-        return const_cast<dictionary&>(parent_).lookupEntryPtr
-        (
-            keyword,
-            recursive,
-            patternMatch
-        );
-    }
-
-    return nullptr;
+    return search(keyword, recursive, patternMatch).ptr();
 }
 
 
@@ -503,9 +271,9 @@ const Foam::entry& Foam::dictionary::lookupEntry
     bool patternMatch
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, recursive, patternMatch);
+    auto finder = csearch(keyword, recursive, patternMatch);
 
-    if (entryPtr == nullptr)
+    if (!finder.found())
     {
         FatalIOErrorInFunction
         (
@@ -515,7 +283,7 @@ const Foam::entry& Foam::dictionary::lookupEntry
             << exit(FatalIOError);
     }
 
-    return *entryPtr;
+    return finder.ref();
 }
 
 
@@ -537,29 +305,37 @@ const Foam::entry* Foam::dictionary::lookupScopedEntryPtr
     bool patternMatch
 ) const
 {
-    if ((keyword[0] == ':' || keyword[0] == '^'))
-    {
-        // Go up to top level
-        const dictionary* dictPtr = this;
-        while (&dictPtr->parent_ != &dictionary::null)
-        {
-            dictPtr = &dictPtr->parent_;
-        }
+    return csearchScoped(keyword, recursive, patternMatch).ptr();
+}
 
-        return dictPtr->lookupScopedSubEntryPtr
-        (
-            keyword.substr(1),
-            false,
-            patternMatch
-        );
+
+bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
+{
+    if (keyword.size() < 2)
+    {
+        return false;
     }
 
-    return lookupScopedSubEntryPtr
-    (
-        keyword,
-        recursive,
-        patternMatch
-    );
+    // Drop leading '$' to get the var-name, already validated as word.
+    const word varName(keyword.substr(1), false);
+
+    // Lookup the variable name in the given dictionary
+    const_searcher finder = csearch(varName, true, true);
+
+    // If defined insert its entries into this dictionary
+    if (finder.found())
+    {
+        const dictionary& addDict = finder.dict();
+
+        forAllConstIters(addDict, iter)
+        {
+            add(iter(), mergeEntry);
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -569,16 +345,21 @@ bool Foam::dictionary::substituteScopedKeyword
     bool mergeEntry
 )
 {
-    // Drop first character of keyword to get the var-name, already validated.
+    if (keyword.size() < 2)
+    {
+        return false;
+    }
+
+    // Drop leading '$' to get the var-name, already validated as word.
     const word varName(keyword.substr(1), false);
 
     // Lookup the variable name in the given dictionary
-    const entry* ePtr = lookupScopedEntryPtr(varName, true, true);
+    const_searcher finder = csearchScoped(varName, true, true);
 
     // If defined insert its entries into this dictionary
-    if (ePtr != nullptr)
+    if (finder.found())
     {
-        const dictionary& addDict = ePtr->dict();
+        const dictionary& addDict = finder.dict();
 
         forAllConstIter(parent_type, addDict, iter)
         {
@@ -595,54 +376,30 @@ bool Foam::dictionary::substituteScopedKeyword
 bool Foam::dictionary::isDict(const word& keyword) const
 {
     // Find non-recursive with patterns
-    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
-
-    if (entryPtr)
-    {
-        return entryPtr->isDict();
-    }
-    else
-    {
-        return false;
-    }
+    return csearch(keyword, false, true).isDict();
 }
 
 
 const Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
-
-    if (entryPtr)
-    {
-        return &entryPtr->dict();
-    }
-    else
-    {
-        return nullptr;
-    }
+    // Find non-recursive with patterns
+    return csearch(keyword, false, true).dictPtr();
 }
 
 
 Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword)
 {
-    entry* entryPtr = lookupEntryPtr(keyword, false, true);
-
-    if (entryPtr)
-    {
-        return &entryPtr->dict();
-    }
-    else
-    {
-        return nullptr;
-    }
+    // Find non-recursive with patterns
+    return search(keyword, false, true).dictPtr();
 }
 
 
 const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
+    // Find non-recursive with patterns
+    auto finder = csearch(keyword, false, true);
 
-    if (entryPtr == nullptr)
+    if (!finder.found())
     {
         FatalIOErrorInFunction
         (
@@ -651,15 +408,17 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
             << name()
             << exit(FatalIOError);
     }
-    return entryPtr->dict();
+
+    return finder.dict();
 }
 
 
 Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 {
-    entry* entryPtr = lookupEntryPtr(keyword, false, true);
+    // Find non-recursive with patterns
+    auto finder = search(keyword, false, true);
 
-    if (entryPtr == nullptr)
+    if (!finder.found())
     {
         FatalIOErrorInFunction
         (
@@ -668,7 +427,8 @@ Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
             << name()
             << exit(FatalIOError);
     }
-    return entryPtr->dict();
+
+    return finder.dict();
 }
 
 
@@ -678,29 +438,35 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
     const bool mustRead
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
+    // Find non-recursive with patterns
+    auto finder = csearch(keyword, false, true);
 
-    if (entryPtr == nullptr)
+    if (finder.isDict())
     {
-        if (mustRead)
-        {
-            FatalIOErrorInFunction
-            (
-                *this
-            )   << "keyword " << keyword << " is undefined in dictionary "
-                << name()
-                << exit(FatalIOError);
-            return entryPtr->dict();
-        }
-        else
-        {
-            return dictionary(*this, dictionary(name() + '.' + keyword));
-        }
+        // Found and a sub-dictionary
+        return finder.dict();
     }
-    else
+
+    if (mustRead)
     {
-        return entryPtr->dict();
+        FatalIOErrorInFunction
+        (
+            *this
+        )   << "keyword " << keyword
+            << " is not a sub-dictionary in dictionary "
+            << name()
+            << exit(FatalIOError);
     }
+
+    if (finder.found())
+    {
+        IOWarningInFunction((*this))
+            << "keyword " << keyword
+            << " found but not a sub-dictionary in dictionary "
+            << name() << endl;
+    }
+
+    return dictionary(*this, dictionary(name() + '.' + keyword));
 }
 
 
@@ -709,16 +475,23 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
     const word& keyword
 ) const
 {
-    const entry* entryPtr = lookupEntryPtr(keyword, false, true);
+    auto finder = csearch(keyword, false, true);
 
-    if (entryPtr)
+    if (finder.isDict())
     {
-        return entryPtr->dict();
+        // Found and a sub-dictionary
+        return finder.dict();
     }
-    else
+
+    if (finder.found())
     {
-        return *this;
+        IOWarningInFunction((*this))
+            << "keyword " << keyword
+            << " found but not a sub-dictionary in dictionary "
+            << name() << endl;
     }
+
+    return *this;
 }
 
 
@@ -726,10 +499,10 @@ Foam::wordList Foam::dictionary::toc() const
 {
     wordList keys(size());
 
-    label nKeys = 0;
-    forAllConstIter(parent_type, *this, iter)
+    label n = 0;
+    forAllConstIters(*this, iter)
     {
-        keys[nKeys++] = iter().keyword();
+        keys[n++] = iter().keyword();
     }
 
     return keys;
@@ -746,15 +519,15 @@ Foam::List<Foam::keyType> Foam::dictionary::keys(bool patterns) const
 {
     List<keyType> keys(size());
 
-    label nKeys = 0;
-    forAllConstIter(parent_type, *this, iter)
+    label n = 0;
+    forAllConstIters(*this, iter)
     {
         if (iter().keyword().isPattern() ? patterns : !patterns)
         {
-            keys[nKeys++] = iter().keyword();
+            keys[n++] = iter().keyword();
         }
     }
-    keys.setSize(nKeys);
+    keys.setSize(n);
 
     return keys;
 }
@@ -796,16 +569,15 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
             return true;
         }
-        else
-        {
-            IOWarningInFunction((*this))
-                << "problem replacing entry "<< entryPtr->keyword()
-                << " in dictionary " << name() << endl;
 
-            parent_type::remove(entryPtr);
-            delete entryPtr;
-            return false;
-        }
+
+        IOWarningInFunction((*this))
+            << "problem replacing entry "<< entryPtr->keyword()
+            << " in dictionary " << name() << endl;
+
+        parent_type::remove(entryPtr);
+        delete entryPtr;
+        return false;
     }
 
 
@@ -825,16 +597,15 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 
         return true;
     }
-    else
-    {
-        IOWarningInFunction((*this))
-            << "attempt to add entry "<< entryPtr->keyword()
-            << " which already exists in dictionary " << name()
-            << endl;
 
-        delete entryPtr;
-        return false;
-    }
+
+    IOWarningInFunction((*this))
+        << "attempt to add entry "<< entryPtr->keyword()
+        << " which already exists in dictionary " << name()
+        << endl;
+
+    delete entryPtr;
+    return false;
 }
 
 
@@ -844,55 +615,55 @@ void Foam::dictionary::add(const entry& e, bool mergeEntry)
 }
 
 
-void Foam::dictionary::add(const keyType& k, const word& w, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const word& v, bool overwrite)
 {
-    add(new primitiveEntry(k, token(w)), overwrite);
+    add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
 void Foam::dictionary::add
 (
     const keyType& k,
-    const Foam::string& s,
+    const Foam::string& v,
     bool overwrite
 )
 {
-    add(new primitiveEntry(k, token(s)), overwrite);
+    add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
-void Foam::dictionary::add(const keyType& k, const label l, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const label v, bool overwrite)
 {
-    add(new primitiveEntry(k, token(l)), overwrite);
+    add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
-void Foam::dictionary::add(const keyType& k, const scalar s, bool overwrite)
+void Foam::dictionary::add(const keyType& k, const scalar v, bool overwrite)
 {
-    add(new primitiveEntry(k, token(s)), overwrite);
+    add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
 void Foam::dictionary::add
 (
     const keyType& k,
-    const dictionary& d,
+    const dictionary& v,
     bool mergeEntry
 )
 {
-    add(new dictionaryEntry(k, *this, d), mergeEntry);
+    add(new dictionaryEntry(k, *this, v), mergeEntry);
 }
 
 
 void Foam::dictionary::set(entry* entryPtr)
 {
     // Find non-recursive with patterns
-    entry* existingPtr = lookupEntryPtr(entryPtr->keyword(), false, true);
+    auto finder = search(entryPtr->keyword(), false, true);
 
     // Clear dictionary so merge acts like overwrite
-    if (existingPtr && existingPtr->isDict())
+    if (finder.isDict())
     {
-        existingPtr->dict().clear();
+        finder.dict().clear();
     }
     add(entryPtr, true);
 }
@@ -904,134 +675,14 @@ void Foam::dictionary::set(const entry& e)
 }
 
 
-void Foam::dictionary::set(const keyType& k, const dictionary& d)
+void Foam::dictionary::set(const keyType& k, const dictionary& v)
 {
-    set(new dictionaryEntry(k, *this, d));
-}
-
-
-bool Foam::dictionary::remove(const word& keyword)
-{
-    auto iter = hashedEntries_.find(keyword);
-
-    if (iter.found())
-    {
-        // Delete from patterns
-        pattern_iterator wcLink = patterns_.begin();
-        regexp_iterator  reLink = regexps_.begin();
-
-        // Find in pattern using exact match only
-        if (findInPatterns(false, keyword, wcLink, reLink))
-        {
-            patterns_.remove(wcLink);
-            regexps_.remove(reLink);
-        }
-
-        parent_type::remove(iter());
-        delete iter();
-        hashedEntries_.erase(iter);
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-
-bool Foam::dictionary::changeKeyword
-(
-    const keyType& oldKeyword,
-    const keyType& newKeyword,
-    bool forceOverwrite
-)
-{
-    // No change
-    if (oldKeyword == newKeyword)
-    {
-        return false;
-    }
-
-    // Check that oldKeyword exists and can be changed
-    auto iter = hashedEntries_.find(oldKeyword);
-
-    if (!iter.found())
-    {
-        return false;
-    }
-
-    if (iter()->keyword().isPattern())
-    {
-        FatalIOErrorInFunction
-        (
-            *this
-        )   << "Old keyword "<< oldKeyword
-            << " is a pattern."
-            << "Pattern replacement not yet implemented."
-            << exit(FatalIOError);
-    }
-
-
-    auto iter2 = hashedEntries_.find(newKeyword);
-
-    // newKeyword already exists
-    if (iter2.found())
-    {
-        if (forceOverwrite)
-        {
-            if (iter2()->keyword().isPattern())
-            {
-                // Delete from patterns
-                pattern_iterator wcLink = patterns_.begin();
-                regexp_iterator  reLink = regexps_.begin();
-
-                // Find in patterns using exact match only
-                if (findInPatterns(false, iter2()->keyword(), wcLink, reLink))
-                {
-                    patterns_.remove(wcLink);
-                    regexps_.remove(reLink);
-                }
-            }
-
-            parent_type::replace(iter2(), iter());
-            delete iter2();
-            hashedEntries_.erase(iter2);
-        }
-        else
-        {
-            IOWarningInFunction
-            (
-                *this
-            )   << "cannot rename keyword "<< oldKeyword
-                << " to existing keyword " << newKeyword
-                << " in dictionary " << name() << endl;
-            return false;
-        }
-    }
-
-    // Change name and HashTable, but leave DL-List untouched
-    iter()->keyword() = newKeyword;
-    iter()->name() = name() + '.' + newKeyword;
-    hashedEntries_.erase(oldKeyword);
-    hashedEntries_.insert(newKeyword, iter());
-
-    if (newKeyword.isPattern())
-    {
-        patterns_.insert(iter());
-        regexps_.insert
-        (
-            autoPtr<regExp>(new regExp(newKeyword))
-        );
-    }
-
-    return true;
+    set(new dictionaryEntry(k, *this, v));
 }
 
 
 bool Foam::dictionary::merge(const dictionary& dict)
 {
-    // Check for assignment to self
     if (this == &dict)
     {
         FatalIOErrorInFunction(*this)
@@ -1041,7 +692,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
 
     bool changed = false;
 
-    forAllConstIter(parent_type, dict, iter)
+    forAllConstIters(dict, iter)
     {
         auto fnd = hashedEntries_.find(iter().keyword());
 
@@ -1112,7 +763,6 @@ Foam::ITstream& Foam::dictionary::operator[](const word& keyword) const
 
 void Foam::dictionary::operator=(const dictionary& rhs)
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
@@ -1126,7 +776,7 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     // Create clones of the entries in the given dictionary
     // resetting the parentDict to this dictionary
 
-    forAllConstIter(parent_type, rhs, iter)
+    forAllConstIters(rhs, iter)
     {
         add(iter().clone(*this).ptr());
     }
@@ -1135,15 +785,15 @@ void Foam::dictionary::operator=(const dictionary& rhs)
 
 void Foam::dictionary::operator+=(const dictionary& rhs)
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted addition assignment to self for dictionary " << name()
+            << "attempted addition assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
-    forAllConstIter(parent_type, rhs, iter)
+    forAllConstIters(rhs, iter)
     {
         add(iter().clone(*this).ptr());
     }
@@ -1152,15 +802,15 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
 
 void Foam::dictionary::operator|=(const dictionary& rhs)
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary " << name()
+            << "attempted assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
-    forAllConstIter(parent_type, rhs, iter)
+    forAllConstIters(rhs, iter)
     {
         if (!found(iter().keyword()))
         {
@@ -1172,15 +822,15 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
 
 void Foam::dictionary::operator<<=(const dictionary& rhs)
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
         FatalIOErrorInFunction(*this)
-            << "attempted assignment to self for dictionary " << name()
+            << "attempted assignment to self for dictionary "
+            << name()
             << abort(FatalIOError);
     }
 
-    forAllConstIter(parent_type, rhs, iter)
+    forAllConstIters(rhs, iter)
     {
         set(iter().clone(*this).ptr());
     }

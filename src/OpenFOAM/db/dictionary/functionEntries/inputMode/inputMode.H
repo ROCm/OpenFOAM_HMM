@@ -84,6 +84,86 @@ public:
 };
 
 
+/*---------------------------------------------------------------------------*\
+                      Class inputModeDefault Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Temporarily change inputMode to %protect for the following entry
+class inputModeDefault
+:
+    public functionEntry
+{
+public:
+
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+};
+
+
+/*---------------------------------------------------------------------------*\
+                       Class inputModeMerge Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Temporarily change inputMode to %merge for the following entry
+class inputModeMerge
+:
+    public functionEntry
+{
+public:
+
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+};
+
+
+/*---------------------------------------------------------------------------*\
+                     Class inputModeOverwrite Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Temporarily change inputMode to %overwrite for the following entry
+class inputModeOverwrite
+:
+    public functionEntry
+{
+public:
+
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+};
+
+
+/*---------------------------------------------------------------------------*\
+                        Class inputModeWarn Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Temporarily change inputMode to %warn for the following entry
+class inputModeWarn
+:
+    public functionEntry
+{
+public:
+
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+};
+
+
+/*---------------------------------------------------------------------------*\
+                       Class inputModeError Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Temporarily change inputMode to %error for the following entry
+class inputModeError
+:
+    public functionEntry
+{
+public:
+
+    //- Execute in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace functionEntries

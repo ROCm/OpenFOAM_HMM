@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,6 +28,12 @@ License
 #include "token.H"
 #include <cctype>
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// Truncate error message for readability
+static const unsigned errLen = 80;
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 char Foam::ISstream::nextValid()
@@ -43,7 +49,7 @@ char Foam::ISstream::nextValid()
         // Return if stream is bad - ie, previous get() failed
         if (bad() || isspace(c))
         {
-            break;
+            return 0;
         }
 
         // Is this the start of a C/C++ comment?
@@ -51,7 +57,7 @@ char Foam::ISstream::nextValid()
         {
             if (!get(c))
             {
-                // cannot get another character - return this one
+                // Cannot get another character - return this one
                 return '/';
             }
 
@@ -63,10 +69,10 @@ char Foam::ISstream::nextValid()
             }
             else if (c == '*')
             {
-                // within a C-style comment
+                // Within a C-style comment
                 while (true)
                 {
-                    // search for end of C-style comment - '*/'
+                    // Search for end of C-style comment - '*/'
                     if (get(c) && c == '*')
                     {
                         if (get(c))
@@ -99,7 +105,7 @@ char Foam::ISstream::nextValid()
         }
         else
         {
-            // a valid character - return it
+            // A valid character - return it
             return c;
         }
     }
@@ -124,14 +130,14 @@ void Foam::ISstream::readWordToken(token& t)
     }
     else
     {
-        t = wPtr;
+        t = wPtr; // Token takes ownership
     }
 }
 
 
 Foam::Istream& Foam::ISstream::read(token& t)
 {
-    static const int maxLen = 128;
+    static const unsigned maxLen = 128;  // When parsing labels or scalars
     static char buf[maxLen];
 
     // Return the put back token if it exists
@@ -151,7 +157,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Set the line number of this token to the current stream line number
     t.lineNumber() = lineNumber();
 
-    // return on error
+    // Return on error
     if (!c)
     {
         t.setBad();
@@ -182,7 +188,6 @@ Foam::Istream& Foam::ISstream::read(token& t)
             return *this;
         }
 
-
         // String: enclosed by double quotes.
         case token::BEGIN_STRING :
         {
@@ -196,24 +201,24 @@ Foam::Istream& Foam::ISstream::read(token& t)
             }
             else
             {
-                t = sPtr;
+                t = sPtr; // Token takes ownership
             }
 
             return *this;
         }
+
         // Possible verbatim string or dictionary functionEntry
         case token::HASH :
         {
             char nextC;
             if (read(nextC).bad())
             {
-                // Return hash as word
+                // Return lone '#' as word
                 t = token(word(c));
-                return *this;
             }
             else if (nextC == token::BEGIN_BLOCK)
             {
-                // Verbatim string
+                // Verbatim string: #{ ... #}
                 string* sPtr = new string;
 
                 if (readVerbatim(*sPtr).bad())
@@ -223,36 +228,34 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
                 else
                 {
-                    t = sPtr;
+                    t = sPtr; // Token takes ownership
                     t.type() = token::tokenType::VERBATIMSTRING;
                 }
-
-                return *this;
             }
             else
             {
-                // Word beginning with #
+                // Word beginning with '#'. Eg, "#include"
                 putback(nextC);
                 putback(c);
 
                 readWordToken(t);
-
-                return *this;
             }
+
+            return *this;
         }
 
+        // Dictionary variable (as rvalue)
         case '$':
         {
-            // Look ahead
             char nextC;
             if (read(nextC).bad())
             {
-                // Return $ as word
+                // Return lone '$' as word
                 t = token(word(c));
-                return *this;
             }
             else if (nextC == token::BEGIN_BLOCK)
             {
+                // Put back so that "${" is included in the variable
                 putback(nextC);
                 putback(c);
 
@@ -265,18 +268,20 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
                 else
                 {
-                    t = sPtr;
+                    t = sPtr; // Token takes ownership
                     t.type() = token::tokenType::VARIABLE;
                 }
-                return *this;
             }
             else
             {
+                // Word/variable beginning with '$', but without "{}"
+
                 putback(nextC);
                 putback(c);
                 readWordToken(t);
-                return *this;
             }
+
+            return *this;
         }
 
         // Number: integer or floating point
@@ -292,7 +297,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
         {
             bool asLabel = (c != '.');
 
-            int nChar = 0;
+            unsigned nChar = 0;
             buf[nChar++] = c;
 
             // get everything that could resemble a number and let
@@ -343,43 +348,26 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
                 if (nChar == 1 && buf[0] == '-')
                 {
-                    // a single '-' is punctuation
+                    // A single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
                 else
                 {
-                    if (asLabel)
+                    label labelVal;
+                    scalar scalarVal;
+
+                    if (asLabel && Foam::read(buf, labelVal))
                     {
-                        label labelVal = 0;
-                        if (Foam::read(buf, labelVal))
-                        {
-                            t = labelVal;
-                        }
-                        else
-                        {
-                            // Maybe too big? Try as scalar
-                            scalar scalarVal;
-                            if (readScalar(buf, scalarVal))
-                            {
-                                t = scalarVal;
-                            }
-                            else
-                            {
-                                t.setBad();
-                            }
-                        }
+                        t = labelVal;
+                    }
+                    else if (readScalar(buf, scalarVal))
+                    {
+                        // A scalar or too big to fit as a label
+                        t = scalarVal;
                     }
                     else
                     {
-                        scalar scalarVal;
-                        if (readScalar(buf, scalarVal))
-                        {
-                            t = scalarVal;
-                        }
-                        else
-                        {
-                            t.setBad();
-                        }
+                        t.setBad();
                     }
                 }
             }
@@ -409,28 +397,28 @@ Foam::Istream& Foam::ISstream::read(char& c)
 
 Foam::Istream& Foam::ISstream::read(word& str)
 {
-    static const int maxLen = 1024;
-    static const int errLen = 80; // truncate error message for readability
+    static const unsigned maxLen = 1024;
     static char buf[maxLen];
 
-    int nChar = 0;
-    int listDepth = 0;
+    unsigned nChar = 0;
+    unsigned depth = 0;  // Track depth of "()" nesting
     char c;
 
     while (get(c) && word::valid(c))
     {
         if (c == token::BEGIN_LIST)
         {
-            listDepth++;
+            ++depth;
         }
         else if (c == token::END_LIST)
         {
-            if (listDepth)
+            if (depth)
             {
-                listDepth--;
+                --depth;
             }
             else
             {
+                // Had ')' without a previous '(' ... stop
                 break;
             }
         }
@@ -449,10 +437,13 @@ Foam::Istream& Foam::ISstream::read(word& str)
         }
     }
 
-    // we could probably skip this check
+    // Terminate string with nul char
+    buf[nChar] = '\0';
+
+    // We could probably skip this check
     if (bad())
     {
-        buf[errLen] = buf[nChar] = '\0';
+        buf[errLen] = '\0';
 
         FatalIOErrorInFunction(*this)
             << "problem while reading word '" << buf << "...' after "
@@ -468,9 +459,14 @@ Foam::Istream& Foam::ISstream::read(word& str)
             << "invalid first character found : " << c
             << exit(FatalIOError);
     }
+    else if (depth)
+    {
+        IOWarningInFunction(*this)
+            << "Missing " << depth << " closing ')' while parsing" << nl << nl
+            << buf << nl << endl;
+    }
 
-    // done reading
-    buf[nChar] = '\0';
+    // Finalize
     str = buf;
     putback(c);
 
@@ -480,8 +476,7 @@ Foam::Istream& Foam::ISstream::read(word& str)
 
 Foam::Istream& Foam::ISstream::read(string& str)
 {
-    static const int maxLen = 1024;
-    static const int errLen = 80; // truncate error message for readability
+    static const unsigned maxLen = 1024;
     static char buf[maxLen];
 
     char c;
@@ -505,7 +500,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
         return *this;
     }
 
-    int nChar = 0;
+    unsigned nChar = 0;
     bool escaped = false;
 
     while (get(c))
@@ -515,11 +510,11 @@ Foam::Istream& Foam::ISstream::read(string& str)
             if (escaped)
             {
                 escaped = false;
-                nChar--;    // overwrite backslash
+                --nChar;    // Overwrite backslash
             }
             else
             {
-                // done reading
+                // Done reading
                 buf[nChar] = '\0';
                 str = buf;
                 return *this;
@@ -530,7 +525,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
             if (escaped)
             {
                 escaped = false;
-                nChar--;    // overwrite backslash
+                --nChar;    // Overwrite backslash
             }
             else
             {
@@ -581,12 +576,11 @@ Foam::Istream& Foam::ISstream::read(string& str)
 
 Foam::Istream& Foam::ISstream::readVariable(string& str)
 {
-    static const int maxLen = 1024;
-    static const int errLen = 80; // truncate error message for readability
+    static const unsigned maxLen = 1024;
     static char buf[maxLen];
 
-    int nChar = 0;
-    int blockCount = 0;
+    unsigned nChar = 0;
+    unsigned depth = 0;  // Track depth of "{}" nesting
     char c;
 
     if (!get(c) || c != '$')
@@ -601,8 +595,8 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
     // Read next character to see if '{'
     if (get(c) && c == token::BEGIN_BLOCK)
     {
-        // Read, counting brackets
         buf[nChar++] = c;
+        ++depth;  // Starts with '{'
 
         // Also allow '/' between ${...} blocks for slash-scoping of entries
         while
@@ -615,6 +609,23 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
             )
         )
         {
+            if (c == token::BEGIN_BLOCK)
+            {
+                ++depth;
+            }
+            else if (c == token::END_BLOCK)
+            {
+                if (depth)
+                {
+                    --depth;
+                }
+                else
+                {
+                    // Had '}' without a previous '{' ... stop
+                    break;
+                }
+            }
+
             buf[nChar++] = c;
             if (nChar == maxLen)
             {
@@ -626,22 +637,6 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
                     << exit(FatalIOError);
 
                 return *this;
-            }
-
-            if (c == token::BEGIN_BLOCK)
-            {
-                blockCount++;
-            }
-            else if (c == token::END_BLOCK)
-            {
-                if (blockCount)
-                {
-                    blockCount--;
-                }
-                else
-                {
-                    break;
-                }
             }
         }
     }
@@ -666,10 +661,13 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
         }
     }
 
+    // Terminate string with nul char
+    buf[nChar] = '\0';
+
     // we could probably skip this check
     if (bad())
     {
-        buf[errLen] = buf[nChar] = '\0';
+        buf[errLen] = '\0';
 
         FatalIOErrorInFunction(*this)
             << "problem while reading string '" << buf << "...' after "
@@ -685,16 +683,16 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
             << "invalid first character found : " << c
             << exit(FatalIOError);
     }
-
-    // done reading
-    buf[nChar] = '\0';
-    str = buf;
-
-    // Note: check if we exited due to '}' or just !word::valid.
-    if (c != token::END_BLOCK)
+    else if (depth)
     {
-        putback(c);
+        IOWarningInFunction(*this)
+            << "Missing " << depth << " closing '}' while parsing" << nl << nl
+            << buf << nl << endl;
     }
+
+    // Finalize
+    str = buf;
+    putback(c);
 
     return *this;
 }
@@ -702,13 +700,11 @@ Foam::Istream& Foam::ISstream::readVariable(string& str)
 
 Foam::Istream& Foam::ISstream::readVerbatim(string& str)
 {
-    static const int maxLen = 8000;
-    static const int errLen = 80; // truncate error message for readability
+    static const unsigned maxLen = 8000;
     static char buf[maxLen];
 
+    unsigned nChar = 0;
     char c;
-
-    int nChar = 0;
 
     while (get(c))
     {
@@ -718,6 +714,7 @@ Foam::Istream& Foam::ISstream::readVerbatim(string& str)
             get(nextC);
             if (nextC == token::END_BLOCK)
             {
+                // The closing "#}" found
                 buf[nChar] = '\0';
                 str = buf;
                 return *this;
