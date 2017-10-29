@@ -383,11 +383,94 @@ public:
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator end() const;
 
+    // Reverse iterators
 
-    // STL reverse_iterator
+        //- Generic const/non-const reverse iterator
+        template<bool Const>
+        class reverse_iterator_base
+        {
+        public:
+            //- The const/non-const type for entries
+            typedef typename std::conditional
+                <Const, const T, T>::type value_type;
 
-        //- Reverse iterator for reverse traversal of UList
-        typedef T* reverse_iterator;
+            //- A pointer to a const/non-const entry
+            typedef value_type* pointer;
+
+            //- A reference to a const/non-const entry
+            typedef value_type& reference;
+
+
+        private:
+
+            //- The element pointer
+            pointer ptr_;
+
+
+        public:
+
+            //- Construct null or from list element pointer
+            inline reverse_iterator_base(pointer ptr = nullptr)
+            :
+                ptr_(ptr)
+            {}
+
+
+            //- Copy construct
+            inline reverse_iterator_base(const reverse_iterator_base& iter)
+            :
+                ptr_(iter.ptr_)
+            {}
+
+
+            //- Reverse increment
+            inline void operator++()
+            {
+                --ptr_;
+            }
+
+            //- Reverse increment
+            inline reverse_iterator_base operator++(int)
+            {
+                reverse_iterator_base old(*this);
+                --ptr_;
+                return old;
+            }
+
+            //- Reverse increase
+            inline void operator+=(int n)
+            {
+                ptr_ -= n;
+            }
+
+            //- Dereference iterator
+            reference operator*() const
+            {
+                return *ptr_;
+            }
+
+            //- Dereference iterator
+            pointer operator->() const
+            {
+                return ptr_;
+            }
+
+            //- Equality
+            bool operator==(const reverse_iterator_base& iter) const
+            {
+                return ptr_ == iter.ptr_;
+            }
+
+            //- inequality
+            bool operator!=(const reverse_iterator_base& iter) const
+            {
+                return ptr_ != iter.ptr_;
+            }
+        };
+
+
+        //- STL reverse_iterator
+        typedef reverse_iterator_base<false> reverse_iterator;
 
         //- Return reverse_iterator to begin reverse traversing the UList
         inline reverse_iterator rbegin();
@@ -396,10 +479,8 @@ public:
         inline reverse_iterator rend();
 
 
-    // STL const_reverse_iterator
-
-        //- Reverse iterator for reverse traversal of constant UList
-        typedef const T* const_reverse_iterator;
+        //- STL const reverse iterator
+        typedef reverse_iterator_base<true> const_reverse_iterator;
 
         //- Return const_reverse_iterator to begin reverse traversing the UList
         inline const_reverse_iterator crbegin() const;

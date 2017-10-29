@@ -207,13 +207,13 @@ constexpr auto crend(const C& c) -> decltype(c.rend())
 //      statements;
 //  }
 //  \endcode
-//  \sa forAllReverseConstIters
+//  \sa forAllConstReverseIters
 #define forAllReverseIters(container,iter)                                     \
     for                                                                        \
     (                                                                          \
         auto iter = stdFoam::rbegin(container);                                \
         iter != stdFoam::rend(container);                                      \
-        --iter                                                                 \
+        ++iter                                                                 \
     )
 
 
@@ -226,12 +226,12 @@ constexpr auto crend(const C& c) -> decltype(c.rend())
 //  }
 //  \endcode
 //  \sa forAllReverseIters
-#define forAllReverseConstIters(container,iter)                                \
+#define forAllConstReverseIters(container,iter)                                \
     for                                                                        \
     (                                                                          \
         auto iter = stdFoam::crbegin(container);                               \
         iter != stdFoam::crend(container);                                     \
-        --iter                                                                 \
+        ++iter                                                                 \
     )
 
 
