@@ -55,7 +55,7 @@ Foam::dictionary::dictionary(Istream& is)
 }
 
 
-Foam::dictionary::dictionary(Istream& is, const bool keepHeader)
+Foam::dictionary::dictionary(Istream& is, bool keepHeader)
 :
     dictionaryName(is.name()),
     parent_(dictionary::null)
@@ -77,8 +77,14 @@ Foam::autoPtr<Foam::dictionary> Foam::dictionary::New(Istream& is)
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::dictionary::read(Istream& is, const bool keepHeader)
+bool Foam::dictionary::read(Istream& is, bool keepHeader)
 {
+    // Normally remove FoamFile header when read, but avoid this if it already
+    // existed prior to the current read.
+    // We would otherwise lose it with every top-level '#include ...'
+
+    keepHeader = keepHeader || hashedEntries_.found("FoamFile");
+
     // Check for empty dictionary
     if (is.eof())
     {
@@ -103,7 +109,6 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
     while (!is.eof() && entry::New(*this, is))
     {}
 
-    // Normally remove the FoamFile header entry if it exists
     if (!keepHeader)
     {
         remove("FoamFile");

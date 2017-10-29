@@ -414,7 +414,7 @@ public:
 
         //- Construct top-level dictionary from Istream,
         //  reading entries until EOF, optionally keeping the header
-        dictionary(Istream& is, const bool keepHeader);
+        dictionary(Istream& is, bool keepHeader);
 
         //- Construct as copy given the parent dictionary
         dictionary(const dictionary& parentDict, const dictionary& dict);
@@ -765,7 +765,7 @@ public:
         bool read(Istream& is);
 
         //- Read dictionary from Istream, optionally keeping the header
-        bool read(Istream& is, const bool keepHeader);
+        bool read(Istream& is, bool keepHeader);
 
 
       // Write

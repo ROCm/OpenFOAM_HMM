@@ -62,10 +62,8 @@ bool Foam::entry::getKeyword(keyType& keyword, token& keyToken, Istream& is)
         keyword = keyToken.stringToken();
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -84,20 +82,17 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
     {
         return false;
     }
-    else
-    {
-        // Otherwise the token is invalid
-        cerr<< "--> FOAM Warning :" << nl
-            << "    From function "
-            << FUNCTION_NAME << nl
-            << "    in file " << __FILE__
-            << " at line " << __LINE__ << nl
-            << "    Reading " << is.name().c_str() << nl
-            << "    found " << keyToken << nl
-            << "    expected either " << token::END_BLOCK << " or EOF"
-            << std::endl;
-        return false;
-    }
+
+    // Otherwise the token is invalid
+    std::cerr
+        << "--> FOAM Warning :" << nl
+        << "    From function " << FUNCTION_NAME << nl
+        << "    in file " << __FILE__ << " at line " << __LINE__ << nl
+        << "    Reading " << is.name().c_str() << nl
+        << "    found " << keyToken << nl
+        << "    expected either " << token::END_BLOCK << " or EOF"
+        << std::endl;
+    return false;
 }
 
 
@@ -154,22 +149,20 @@ bool Foam::entry::New
                 false
             );
         }
-        else
-        {
-            // Otherwise the token is invalid
-            cerr<< "--> FOAM Warning :" << nl
-                << "    From function "
-                << FUNCTION_NAME << nl
-                << "    in file " << __FILE__
-                << " at line " << __LINE__ << nl
-                << "    Reading " << is.name().c_str() << nl
-                << "    found " << keyToken << nl
-                << "    expected either " << token::END_BLOCK << " or EOF"
-                << std::endl;
-            return false;
-        }
+
+        // Otherwise the token is invalid
+        std::cerr
+            << "--> FOAM Warning :" << nl
+            << "    From function " << FUNCTION_NAME << nl
+            << "    in file " << __FILE__ << " at line " << __LINE__ << nl
+            << "    Reading " << is.name().c_str() << nl
+            << "    found " << keyToken << nl
+            << "    expected either " << token::END_BLOCK << " or EOF"
+            << std::endl;
+        return false;
     }
-    else if (keyword[0] == '#')
+
+    if (keyword[0] == '#')
     {
         // Function entry
 
@@ -186,17 +179,11 @@ bool Foam::entry::New
                 false
             );
         }
-        else
-        {
-            const word functionName(keyword.substr(1), false);
-            return functionEntry::execute(functionName, parentDict, is);
-        }
+
+        const word functionName(keyword.substr(1), false);
+        return functionEntry::execute(functionName, parentDict, is);
     }
-    else if
-    (
-        !disableFunctionEntries
-     && keyword[0] == '$'
-    )
+    else if (!disableFunctionEntries && keyword[0] == '$')
     {
         // Substitution entry
 
@@ -237,14 +224,12 @@ bool Foam::entry::New
                     false
                 );
             }
-            else
-            {
-                FatalIOErrorInFunction(is)
-                    << "Attempt to use undefined variable " << varName
-                    << " as keyword"
-                    << exit(FatalIOError);
-                return false;
-            }
+
+            FatalIOErrorInFunction(is)
+                << "Attempt to use undefined variable " << varName
+                << " as keyword"
+                << exit(FatalIOError);
+            return false;
         }
         else
         {
@@ -276,9 +261,6 @@ bool Foam::entry::New
             return false;
         }
 
-        // How to manage duplicate entries
-        bool mergeEntry = false;
-
         const bool scoped =
         (
             !disableFunctionEntries
@@ -293,27 +275,19 @@ bool Foam::entry::New
           : parentDict.search(keyword, false, false)
         );
 
+        // How to manage duplicate entries
+        bool mergeEntry = false;
+
         if (finder.found())
         {
             // Use keyword from the found entry (ie, eliminate scoping chars)
             const keyType key = finder.ref().keyword();
 
-            if (mode == inputMode::MERGE)
+            if (mode == inputMode::PROTECT || keyword == "FoamFile")
             {
-                mergeEntry = true;
-            }
-            else if (mode == inputMode::OVERWRITE)
-            {
-                // Clear existing dictionary so merge acts like overwrite
-                if (finder.isDict())
-                {
-                    finder.dict().clear();
-                }
-                mergeEntry = true;
-            }
-            else if (mode == inputMode::PROTECT)
-            {
-                // Read and discard the entry.
+                // Read and discard if existing element should be protected,
+                // or would potentially alter the "FoamFile" header.
+
                 // Disable function/variable expansion to avoid side-effects
                 const int oldFlag = entry::disableFunctionEntries;
                 entry::disableFunctionEntries = 1;
@@ -330,13 +304,28 @@ bool Foam::entry::New
                 entry::disableFunctionEntries = oldFlag;
                 return true;
             }
-            else if (mode == inputMode::ERROR)
+
+            if (mode == inputMode::ERROR)
             {
                 FatalIOErrorInFunction(is)
                     << "duplicate entry: " << key
                     << exit(FatalIOError);
 
                 return false;
+            }
+
+            if (mode == inputMode::MERGE)
+            {
+                mergeEntry = true;
+            }
+            else if (mode == inputMode::OVERWRITE)
+            {
+                // Clear existing dictionary so merge acts like overwrite
+                if (finder.isDict())
+                {
+                    finder.dict().clear();
+                }
+                mergeEntry = true;
             }
 
             // Merge/overwrite data entry
