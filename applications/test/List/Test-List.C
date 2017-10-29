@@ -105,6 +105,22 @@ int main(int argc, char *argv[])
     };
     Info<< "list2: " << list2 << endl;
 
+    Info<< "forAllConstIters(list2): ";
+    forAllConstIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllReverseConstIters(list2): ";
+    forAllReverseConstIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllIters(list2, iter) { *iter *= 2; Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllReverseConstIters(list2): ";
+    forAllReverseIters(list2, iter) { *iter *= 0.5; Info<< " " << *iter; }
+    Info<< endl;
+
     list1.append(list2);
     Info<< "list1.append(list2): " << list1 << endl;
 
