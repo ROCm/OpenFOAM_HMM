@@ -110,13 +110,13 @@ public:
         {}
 
         //- Construct given initial T
-        LList(T a)
+        explicit LList(T a)
         :
             LListBase(new link(a))
         {}
 
         //- Construct from Istream
-        LList(Istream&);
+        explicit LList(Istream&);
 
         //- Construct as copy
         LList(const LList<LListBase, T>&);
