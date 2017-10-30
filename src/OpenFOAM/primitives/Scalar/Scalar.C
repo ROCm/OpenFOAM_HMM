@@ -115,7 +115,7 @@ bool readScalar(const char* buf, Scalar& val)
     // Round underflow to zero
     val =
     (
-        (parsed > -ScalarVSMALL && parsed < ScalarVSMALL)
+        (parsed >= -ScalarVSMALL && parsed <= ScalarVSMALL)
       ? 0
       : Scalar(parsed)
     );
