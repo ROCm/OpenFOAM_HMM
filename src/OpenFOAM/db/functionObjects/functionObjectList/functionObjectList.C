@@ -788,8 +788,9 @@ bool Foam::functionObjectList::read()
                 }
                 catch (Foam::error& err)
                 {
-                    WarningInFunction
-                        << "Caught FatalError " << err << nl << endl;
+                    // Bit of trickery to get the original message
+                    err.write(Warning, false);
+                    InfoInFunction << nl << endl;
                 }
 
                 // Restore previous exception throwing state
