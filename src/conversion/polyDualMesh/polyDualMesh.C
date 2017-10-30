@@ -165,7 +165,7 @@ void Foam::polyDualMesh::getPointEdges
         if (e[0] == pointi)
         {
             // One of the edges using pointi. Check which one.
-            label index = findIndex(f, pointi);
+            label index = f.find(pointi);
 
             if (f.nextLabel(index) == e[1])
             {
@@ -184,7 +184,7 @@ void Foam::polyDualMesh::getPointEdges
         else if (e[1] == pointi)
         {
             // One of the edges using pointi. Check which one.
-            label index = findIndex(f, pointi);
+            label index = f.find(pointi);
 
             if (f.nextLabel(index) == e[0])
             {
@@ -929,7 +929,7 @@ void Foam::polyDualMesh::calcDual
         label startFacei = -1;
         label endFacei = -1;
 
-        label index = findIndex(f0, neighbour);
+        label index = f0.find(neighbour);
 
         if (f0.nextLabel(index) == owner)
         {
@@ -1062,7 +1062,7 @@ void Foam::polyDualMesh::calcDual
             // the face uses the owner, neighbour
             const face& f0 = mesh.faces()[face0];
 
-            label index = findIndex(f0, neighbour);
+            label index = f0.find(neighbour);
 
             bool f0OrderOk = (f0.nextLabel(index) == owner);
 

@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "includeEntry.H"
-#include "IFstream.H"
 #include "addToMemberFunctionSelectionTable.H"
 #include "stringOps.H"
-#include "Time.H"
+#include "IFstream.H"
 #include "IOstreams.H"
+#include "Time.H"
 #include "fileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -64,33 +64,13 @@ namespace functionEntries
 
 Foam::fileName Foam::functionEntries::includeEntry::resolveFile
 (
-    Istream& is,
-    const dictionary& dict
-)
-{
-    fileName fName(is);
-    // Substitute dictionary and environment variables.
-    // Allow empty substitutions.
-    stringOps::inplaceExpand(fName, dict, true, true);
-
-    if (fName.empty() || fName.isAbsolute())
-    {
-        return fName;
-    }
-
-    // Relative name
-    return fileName(is.name()).path()/fName;
-}
-
-
-Foam::fileName Foam::functionEntries::includeEntry::resolveFile
-(
     const fileName& dir,
     const fileName& f,
     const dictionary& dict
 )
 {
     fileName fName(f);
+
     // Substitute dictionary and environment variables.
     // Allow empty substitutions.
     stringOps::inplaceExpand(fName, dict, true, true);
@@ -114,7 +94,8 @@ bool Foam::functionEntries::includeEntry::execute
 )
 {
     const fileName rawName(is);
-    const fileName fName = resolveFile(is.name().path(), rawName, parentDict);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
+
     autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
     ISstream& ifs = ifsPtr();
 
@@ -133,27 +114,22 @@ bool Foam::functionEntries::includeEntry::execute
             (
                 dynamic_cast<const regIOobject&>(top)
             );
-            //Info<< rio.name() << " : adding dependency on included file "
-            //    << fName << endl;
-
             rio.addWatch(fName);
         }
 
         parentDict.read(ifs);
         return true;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open include file "
-            << (ifs.name().size() ? ifs.name() : rawName)
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "Cannot open include file "
+        << (ifs.name().size() ? ifs.name() : rawName)
+        << " while reading dictionary " << parentDict.name()
+        << exit(FatalIOError);
+
+    return false;
 }
 
 
@@ -165,7 +141,8 @@ bool Foam::functionEntries::includeEntry::execute
 )
 {
     const fileName rawName(is);
-    const fileName fName = resolveFile(is.name().path(), rawName, parentDict);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
+
     autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
     ISstream& ifs = ifsPtr();
 
@@ -184,27 +161,23 @@ bool Foam::functionEntries::includeEntry::execute
             (
                 dynamic_cast<const regIOobject&>(top)
             );
-            //Info<< rio.name() << " : adding dependency on included file "
-            //    << fName << endl;
-
             rio.addWatch(fName);
         }
 
         entry.read(parentDict, ifs);
         return true;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open include file "
-            << (ifs.name().size() ? ifs.name() : rawName)
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "Cannot open include file "
+        << (ifs.name().size() ? ifs.name() : rawName)
+        << " while reading dictionary " << parentDict.name()
+        << exit(FatalIOError);
+
+    return false;
 }
+
 
 // ************************************************************************* //

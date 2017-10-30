@@ -179,7 +179,7 @@ void Foam::CFCFaceToCellStencil::calcCellStencil
                         label nbrGlobalI = globalNumbering().toGlobal(nbrFacei);
 
                         // Check if already there. Note:should use hashset?
-                        if (findIndex(allGlobalFaces, nbrGlobalI) == -1)
+                        if (!allGlobalFaces.found(nbrGlobalI))
                         {
                             allGlobalFaces.append(nbrGlobalI);
                         }
@@ -196,7 +196,7 @@ void Foam::CFCFaceToCellStencil::calcCellStencil
                     label nbrGlobalI = nbrGlobalFaces[j];
 
                     // Check if already there. Note:should use hashset?
-                    if (findIndex(allGlobalFaces, nbrGlobalI) == -1)
+                    if (!allGlobalFaces.found(nbrGlobalI))
                     {
                         allGlobalFaces.append(nbrGlobalI);
                     }

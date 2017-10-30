@@ -79,11 +79,6 @@ protected:
         {}
 
 
-    //- Destructor
-    ~StringStreamAllocator()
-    {}
-
-
 public:
 
     // Public Member Functions
@@ -112,6 +107,8 @@ class IStringStream
     public StringStreamAllocator<std::istringstream>,
     public ISstream
 {
+    typedef StringStreamAllocator<std::istringstream> allocator_type;
+
 public:
 
     // Constructors
@@ -125,7 +122,7 @@ public:
             const Foam::string& name="input"
         )
         :
-            StringStreamAllocator<std::istringstream>(buffer),
+            allocator_type(buffer),
             ISstream(stream_, name, format, version)
         {}
 
@@ -139,7 +136,7 @@ public:
             const Foam::string& name="input"
         )
         :
-            StringStreamAllocator<std::istringstream>(buffer),
+            allocator_type(buffer),
             ISstream(stream_, name, format, version)
         {}
 
@@ -147,27 +144,22 @@ public:
         //- Construct as copy of content
         IStringStream(const IStringStream& str)
         :
-            StringStreamAllocator<std::istringstream>(str.str()),
+            allocator_type(str.str()),
             ISstream(stream_, str.name(), str.format(), str.version())
         {}
 
 
-    //- Destructor
-    ~IStringStream()
-    {}
-
-
     // Member Functions
 
-        //- Print description to Ostream
-        void print(Ostream& os) const;
-
         //- Reset the input buffer and rewind the stream
-        void reset(const std::string& s)
+        virtual void reset(const std::string& s)
         {
             this->str(s);
             this->rewind();
         }
+
+        //- Print description to Ostream
+        virtual void print(Ostream& os) const;
 
 
     // Member operators
@@ -192,6 +184,8 @@ class OStringStream
     public StringStreamAllocator<std::ostringstream>,
     public OSstream
 {
+    typedef StringStreamAllocator<std::ostringstream> allocator_type;
+
 public:
 
     // Constructors
@@ -203,7 +197,7 @@ public:
             versionNumber version=currentVersion
         )
         :
-            StringStreamAllocator<std::ostringstream>(),
+            allocator_type(),
             OSstream(stream_, "output", format, version)
         {}
 
@@ -211,14 +205,9 @@ public:
         //- Construct as copy of content
         OStringStream(const OStringStream& str)
         :
-            StringStreamAllocator<std::ostringstream>(str.str()),
+            allocator_type(str.str()),
             OSstream(stream_, str.name(), str.format(), str.version())
         {}
-
-
-    //- Destructor
-    ~OStringStream()
-    {}
 
 
     // Member Functions
@@ -231,14 +220,14 @@ public:
         }
 
         //- Rewind the output stream
-        void rewind()
+        virtual void rewind()
         {
             // pubseekpos() instead of seekp() for symmetry with other classes
             stream_.rdbuf()->pubseekpos(0, std::ios_base::out);
         }
 
         //- Print description to Ostream
-        void print(Ostream& os) const;
+        virtual void print(Ostream& os) const;
 
 };
 

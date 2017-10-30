@@ -102,6 +102,10 @@ protected:
 
     // Protected Member Functions
 
+        //- Override size to be inconsistent with allocated storage.
+        //  Use with care
+        inline void size(const label n);
+
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
@@ -135,39 +139,35 @@ public:
 
     // Public classes
 
-        //- Less function class that can be used for sorting
-        class less
+        //- A list compare binary predicate for normal sort
+        struct less
         {
-            const UList<T>& values_;
+            const UList<T>& values;
 
-        public:
-
-            less(const UList<T>& values)
+            less(const UList<T>& list)
             :
-                values_(values)
+                values(list)
             {}
 
-            bool operator()(const label a, const label b)
+            bool operator()(const label a, const label b) const
             {
-                return values_[a] < values_[b];
+                return values[a] < values[b];
             }
         };
 
-        //- Greater function class that can be used for sorting
-        class greater
+        //- A list compare binary predicate for reverse sort
+        struct greater
         {
-            const UList<T>& values_;
+            const UList<T>& values;
 
-        public:
-
-            greater(const UList<T>& values)
+            greater(const UList<T>& list)
             :
-                values_(values)
+                values(list)
             {}
 
-            bool operator()(const label a, const label b)
+            bool operator()(const label a, const label b) const
             {
-                return values_[a] > values_[b];
+                return values[a] > values[b];
             }
         };
 
@@ -252,16 +252,19 @@ public:
         //- Find index of the first occurence of the value.
         //  When start is specified, any occurences before start are ignored.
         //  Linear search.
-        //  \return -1 if not found.
+        //  \return position in list or -1 if not found.
         label find(const T& val, const label start=0) const;
 
         //- Find index of the last occurence of the value.
         //  When pos is specified, any occurences after pos are ignored.
         //  Linear search.
-        //  \return -1 if not found.
+        //  \return position in list or -1 if not found.
         label rfind(const T& val, const label pos=-1) const;
 
-        //- True if the value if found in the list. Linear search.
+        //- True if the value if found in the list.
+        //  When start is specified, any occurences before start are ignored.
+        //  Linear search.
+        //  \return true if found.
         inline bool found(const T& val, const label start=0) const;
 
 
@@ -380,11 +383,94 @@ public:
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator end() const;
 
+    // Reverse iterators
 
-    // STL reverse_iterator
+        //- Generic const/non-const reverse iterator
+        template<bool Const>
+        class reverse_iterator_base
+        {
+        public:
+            //- The const/non-const type for entries
+            typedef typename std::conditional
+                <Const, const T, T>::type value_type;
 
-        //- Reverse iterator for reverse traversal of UList
-        typedef T* reverse_iterator;
+            //- A pointer to a const/non-const entry
+            typedef value_type* pointer;
+
+            //- A reference to a const/non-const entry
+            typedef value_type& reference;
+
+
+        private:
+
+            //- The element pointer
+            pointer ptr_;
+
+
+        public:
+
+            //- Construct null or from list element pointer
+            inline reverse_iterator_base(pointer ptr = nullptr)
+            :
+                ptr_(ptr)
+            {}
+
+
+            //- Copy construct
+            inline reverse_iterator_base(const reverse_iterator_base& iter)
+            :
+                ptr_(iter.ptr_)
+            {}
+
+
+            //- Reverse increment
+            inline void operator++()
+            {
+                --ptr_;
+            }
+
+            //- Reverse increment
+            inline reverse_iterator_base operator++(int)
+            {
+                reverse_iterator_base old(*this);
+                --ptr_;
+                return old;
+            }
+
+            //- Reverse increase
+            inline void operator+=(int n)
+            {
+                ptr_ -= n;
+            }
+
+            //- Dereference iterator
+            reference operator*() const
+            {
+                return *ptr_;
+            }
+
+            //- Dereference iterator
+            pointer operator->() const
+            {
+                return ptr_;
+            }
+
+            //- Equality
+            bool operator==(const reverse_iterator_base& iter) const
+            {
+                return ptr_ == iter.ptr_;
+            }
+
+            //- inequality
+            bool operator!=(const reverse_iterator_base& iter) const
+            {
+                return ptr_ != iter.ptr_;
+            }
+        };
+
+
+        //- STL reverse_iterator
+        typedef reverse_iterator_base<false> reverse_iterator;
 
         //- Return reverse_iterator to begin reverse traversing the UList
         inline reverse_iterator rbegin();
@@ -393,10 +479,8 @@ public:
         inline reverse_iterator rend();
 
 
-    // STL const_reverse_iterator
-
-        //- Reverse iterator for reverse traversal of constant UList
-        typedef const T* const_reverse_iterator;
+        //- STL const reverse iterator
+        typedef reverse_iterator_base<true> const_reverse_iterator;
 
         //- Return const_reverse_iterator to begin reverse traversing the UList
         inline const_reverse_iterator crbegin() const;
@@ -465,7 +549,7 @@ public:
         friend Ostream& operator<< <T>
         (
             Ostream& os,
-            const UList<T>& L
+            const UList<T>& lst
         );
 
         //- Read List contents from Istream.
@@ -483,14 +567,14 @@ public:
 template<class T>
 void sort(UList<T>& a);
 
-template<class T, class Cmp>
-void sort(UList<T>& a, const Cmp& cmp);
+template<class T, class Compare>
+void sort(UList<T>& a, const Compare& comp);
 
 template<class T>
 void stableSort(UList<T>& a);
 
-template<class T, class Cmp>
-void stableSort(UList<T>& a, const Cmp& cmp);
+template<class T, class Compare>
+void stableSort(UList<T>& a, const Compare& comp);
 
 template<class T>
 void shuffle(UList<T>& a);

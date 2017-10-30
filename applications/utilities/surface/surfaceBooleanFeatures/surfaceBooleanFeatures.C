@@ -416,7 +416,7 @@ void visitPointRegion
 
 
 
-        label index = findIndex(s.pointFaces()[pointI], nextFaceI);
+        label index = s.pointFaces()[pointI].find(nextFaceI);
 
         if (pFacesZone[index] == -1)
         {

@@ -343,13 +343,6 @@ Foam::StaticHashTable<T, Key, Hash>::begin()
         }
     }
 
-    #ifdef FULLDEBUG
-    if (debug)
-    {
-        Info<< "StaticHashTable is empty\n";
-    }
-    #endif
-
     return StaticHashTable<T, Key, Hash>::endIter_;
 }
 
@@ -374,13 +367,6 @@ Foam::StaticHashTable<T, Key, Hash>::cbegin() const
             return const_iterator(*this, hashIdx, 0);
         }
     }
-
-    #ifdef FULLDEBUG
-    if (debug)
-    {
-        Info<< "StaticHashTable is empty\n";
-    }
-    #endif
 
     return StaticHashTable<T, Key, Hash>::endConstIter_;
 }

@@ -49,7 +49,7 @@ bool Foam::meshCutter::uses(const labelList& elems1, const labelList& elems2)
 {
     forAll(elems1, elemI)
     {
-        if (findIndex(elems2, elems1[elemI]) != -1)
+        if (elems2.found(elems1[elemI]))
         {
             return true;
         }
@@ -64,7 +64,7 @@ bool Foam::meshCutter::isIn
     const labelList& cuts
 )
 {
-    label index = findIndex(cuts, twoCuts[0]);
+    label index = cuts.find(twoCuts[0]);
 
     if (index == -1)
     {
@@ -380,7 +380,7 @@ void Foam::meshCutter::splitFace
 ) const
 {
     // Check if we find any new vertex which is part of the splitEdge.
-    label startFp = findIndex(f, v0);
+    label startFp = f.find(v0);
 
     if (startFp == -1)
     {
@@ -390,7 +390,7 @@ void Foam::meshCutter::splitFace
             << abort(FatalError);
     }
 
-    label endFp = findIndex(f, v1);
+    label endFp = f.find(v1);
 
     if (endFp == -1)
     {

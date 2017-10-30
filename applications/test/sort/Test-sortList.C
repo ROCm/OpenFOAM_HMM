@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,8 @@ Description
 
 #include "SortableList.H"
 #include "ListOps.H"
+#include "HashSet.H"
+#include "stringOps.H"
 
 using namespace Foam;
 
@@ -174,6 +176,142 @@ int main(int argc, char *argv[])
         printInfo(list4);
         Info<< "flat = " << values << endl;
     }
+
+    // Sort strings
+    {
+        HashSet<string> hashed
+        {
+            "2.txt",
+            "05.txt",
+            "15.txt",
+            "other.bak04",
+            "other.bak1",
+            "file1.txt",
+            "file10.txt",
+            "file2.txt",
+            "file100.txt",
+            "file.txt",
+            "file011.txt",
+            "file15.txt",
+            "file0009.txt",
+            "abcd.txt",
+
+         // Some regular processor directories
+            "processor0",
+            "processor1",
+            "processor9",
+            "processor10",
+            "processor11",
+            "processor20",
+            "processor21",
+            "processor35",
+            "processors",
+
+         // Aggregate processor directories
+            "processor0-31",
+            "processor32-63",
+            "processor64-95",
+            "processor96-127",
+            "processor128-159",
+            "processor160-191",
+            "processor192-223",
+            "processor224-255",
+        };
+
+        Info<< nl << "Test string sorting" << nl << endl;
+
+        // Using hash toc
+        if (true)
+        {
+            Info<< "Unsorted" << hashed.toc() << endl;
+            Info<< "sortedToc" << hashed.sortedToc() << endl;
+            Info<< "natural"
+                << hashed.sortedToc(stringOps::natural_sort()) << endl;
+
+            Info<< "reverse natural"
+                << hashed.sortedToc(stringOps::natural_sort::reverse())
+                << endl;
+        }
+
+        // Normal list
+        if (true)
+        {
+            labelList order;
+
+            List<string> strings(hashed.toc());
+            Info<< nl << "stringList:" << strings << endl;
+
+            sort(strings);
+            Info<< "normal sort:" << strings << endl;
+
+            shuffle(strings);
+            sort(strings, stringOps::natural_sort());
+            Info<< "natural sort:" << strings << endl;
+
+            shuffle(strings);
+            sort(strings, stringOps::natural_sort::reverse());
+            Info<< "reverse natural:" << strings << endl;
+
+            strings = hashed.toc();
+
+            Info<< nl << "test sorted order" << endl;
+            Info<< nl << "list:" << strings << endl;
+
+            sortedOrder(strings, order);
+            Info<< "sortedOrder:" << flatOutput(order) << endl;
+
+            shuffle(strings);
+            sort(strings, stringOps::natural_sort());
+            Info<< "reverse natural:" << strings << endl;
+
+            shuffle(strings);
+            sort(strings, stringOps::natural_sort::reverse());
+            Info<< "reverse natural:" << strings << endl;
+
+            sortedOrder
+            (
+                strings,
+                order,
+                stringOps::natural_sort::less<string>(strings)
+            );
+            Info<< "natural sortedOrder: " << flatOutput(order) << endl;
+        }
+
+        // SortableList
+        if (false)
+        {
+            SortableList<string> sortable;
+            Info<< nl << "Testing sortable list";
+
+            // Assign to ensure list is initially unsorted
+            sortable = hashed.toc();
+            Info<< nl << "input:" << sortable << endl;
+
+            sortable.sort();
+            Info<< nl << "normal:" << sortable << endl;
+
+            // This is still a bother (looks fairly ugly)
+            // so not implemented for now
+
+            ///  // Assign to ensure list is initially unsorted
+            ///  sortable = hashed.toc();
+            ///  sortable.sort
+            ///  (
+            ///      stringOps::natural_sort::less<string>(sortable)
+            ///  );
+            ///  Info<< nl << "natural:" << sortable << endl;
+
+            ///  // Assign to ensure list is initially unsorted
+            ///  sortable = hashed.toc();
+            ///  sortable.sort
+            ///  (
+            ///      stringOps::natural_sort::greater<string>(sortable)
+            ///  );
+            ///  Info<< nl << "natural:" << sortable << endl;
+        }
+
+    }
+
 
     Info<< "\nEnd\n" << endl;
 

@@ -101,7 +101,7 @@ void Foam::triSurfaceTools::greenRefine
 
     // Find index of edge in face.
 
-    label fp0 = findIndex(f, e[0]);
+    label fp0 = f.find(e[0]);
     label fp1 = f.fcIndex(fp0);
     label fp2 = f.fcIndex(fp1);
 
@@ -881,7 +881,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
     {
         // Excluded point. Test only opposite edge.
 
-        label fp0 = findIndex(s.localFaces()[triI], excludePointi);
+        label fp0 = s.localFaces()[triI].find(excludePointi);
 
         if (fp0 == -1)
         {
@@ -1062,7 +1062,7 @@ void Foam::triSurfaceTools::snapToEnd
             // endpoint on edge; current on triangle
             const labelList& fEdges = s.faceEdges()[current.index()];
 
-            if (findIndex(fEdges, end.index()) != -1)
+            if (fEdges.found(end.index()))
             {
                 //if (debug)
                 //{
@@ -1111,7 +1111,7 @@ void Foam::triSurfaceTools::snapToEnd
             // endpoint on point; current on triangle
             const triSurface::FaceType& f = s.localFaces()[current.index()];
 
-            if (findIndex(f, end.index()) != -1)
+            if (f.found(end.index()))
             {
                 //if (debug)
                 //{
@@ -1415,7 +1415,7 @@ void Foam::triSurfaceTools::otherEdges
 {
     const labelList& eFaces = surf.faceEdges()[facei];
 
-    label i0 = findIndex(eFaces, edgeI);
+    label i0 = eFaces.find(edgeI);
 
     if (i0 == -1)
     {

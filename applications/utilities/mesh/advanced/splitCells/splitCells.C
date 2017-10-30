@@ -225,8 +225,8 @@ bool splitHex
 
         const face& f = faces[facei];
 
-        label fp0 = findIndex(f, e[0]);
-        label fp1 = findIndex(f, e[1]);
+        label fp0 = f.find(e[0]);
+        label fp1 = f.find(e[1]);
 
         if (fp0 == -1)
         {

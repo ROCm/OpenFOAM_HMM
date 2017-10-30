@@ -47,6 +47,7 @@ See also
 #include "SubList.H"
 
 #include <list>
+#include <numeric>
 
 using namespace Foam;
 
@@ -79,6 +80,33 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
+    {
+        List<label> ident(15);
+        std::iota(ident.begin(), ident.end(), 0);
+
+        Info<<"Ident:";
+        forAllConstIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"reverse:";
+        forAllReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"const reverse:";
+        forAllConstReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+    }
+
+
     if (false)
     {
         labelList intlist(IStringStream("(0 1 2)")());
@@ -104,6 +132,22 @@ int main(int argc, char *argv[])
         vector(6, 7, 8),
     };
     Info<< "list2: " << list2 << endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllConstIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstReverseIters(list2): ";
+    forAllConstReverseIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllIters(list2, iter) { *iter *= 2; Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllReverseIters(list2): ";
+    forAllReverseIters(list2, iter) { *iter *= 0.5; Info<< " " << *iter; }
+    Info<< endl;
 
     list1.append(list2);
     Info<< "list1.append(list2): " << list1 << endl;

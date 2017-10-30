@@ -112,8 +112,6 @@ public:
 
     // Member Functions
 
-      // Access
-
         //- This hides both signatures of std::basic_ios::rdbuf()
         sha1buf* rdbuf()
         {
@@ -153,11 +151,6 @@ protected:
         :
             stream_()
         {}
-
-
-    //- Destructor
-    ~OSHA1streamAllocator()
-    {}
 
 
 public:
@@ -221,11 +214,6 @@ public:
             allocator_type(),
             OSstream(stream_, "sha1", format, version)
         {}
-
-
-    //- Destructor
-    ~OSHA1stream()
-    {}
 
 
     // Member functions

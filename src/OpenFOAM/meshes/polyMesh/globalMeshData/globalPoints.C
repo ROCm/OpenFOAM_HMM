@@ -138,20 +138,18 @@ void Foam::globalPoints::addToSend
     // information is the patch faces using the point and the relative position
     // of the point in the face)
 
-    label meshPointi = pp.meshPoints()[patchPointi];
+    const label meshPointi = pp.meshPoints()[patchPointi];
 
     // Add all faces using the point so we are sure we find it on the
     // other side.
     const labelList& pFaces = pp.pointFaces()[patchPointi];
 
-    forAll(pFaces, i)
+    for (const label patchFacei : pFaces)
     {
-        label patchFacei = pFaces[i];
-
         const face& f = pp[patchFacei];
 
         patchFaces.append(patchFacei);
-        indexInFace.append(findIndex(f, meshPointi));
+        indexInFace.append(f.find(meshPointi));
 
         // Add patch transformation
         allInfo.append(addSendTransform(pp.index(), knownInfo));

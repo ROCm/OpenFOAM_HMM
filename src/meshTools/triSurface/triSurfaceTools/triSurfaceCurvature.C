@@ -45,7 +45,7 @@ Foam::scalar Foam::triSurfaceTools::vertexNormalWeight
     const UList<point>& points
 )
 {
-    label index = findIndex(f, pI);
+    label index = f.find(pI);
 
     if (index == -1)
     {

@@ -109,6 +109,35 @@ static inline bool isBackupName(const Foam::fileName& name)
     );
 }
 
+
+// Like fileName "/" global operator, but retain any invalid characters
+static inline Foam::fileName fileNameConcat
+(
+    const std::string& a,
+    const std::string& b
+)
+{
+    if (a.size())
+    {
+        if (b.size())
+        {
+            // Two non-empty strings: can concatenate
+            return Foam::fileName((a + '/' + b), false);
+        }
+
+        return Foam::fileName(a, false);
+    }
+
+    // Or, if the first string is empty
+
+    if (b.size())
+    {
+        return Foam::fileName(b, false);
+    }
+
+    // Both strings are empty
+    return Foam::fileName();
+}
 //! \endcond
 
 
@@ -148,12 +177,10 @@ Foam::string Foam::getEnv(const std::string& envName)
     {
         return string(env);
     }
-    else
-    {
-        // Return null-constructed string rather than string::null
-        // to avoid cyclic dependencies in the construction of globals
-        return string();
-    }
+
+    // Return null-constructed string rather than string::null
+    // to avoid cyclic dependencies in the construction of globals
+    return string();
 }
 
 
@@ -220,10 +247,8 @@ Foam::string Foam::userName()
     {
         return pw->pw_name;
     }
-    else
-    {
-        return string();
-    }
+
+    return string();
 }
 
 
@@ -246,10 +271,8 @@ Foam::fileName Foam::home()
     {
         return pw->pw_dir;
     }
-    else
-    {
-        return fileName();
-    }
+
+    return fileName();
 }
 
 
@@ -266,10 +289,8 @@ Foam::fileName Foam::home(const std::string& userName)
     {
         return pw->pw_dir;
     }
-    else
-    {
-        return fileName();
-    }
+
+    return fileName();
 }
 
 
@@ -708,13 +729,14 @@ Foam::fileNameList Foam::readDir
     const bool followLink
 )
 {
-    // Initial filename list size
-    // also used as increment if initial size found to be insufficient
+    // Initial filename list size and the increment when resizing the list
     static const int maxNnames = 100;
 
     // Basic sanity: cannot strip '.gz' from directory names
     const bool stripgz = filtergz && (type != fileName::DIRECTORY);
     const word extgz("gz");
+
+    fileNameList dirEntries;
 
     // Open directory and set the structure pointer
     // Do not attempt to open an empty directory name
@@ -731,12 +753,12 @@ Foam::fileNameList Foam::readDir
                 << "cannot open directory " << directory << endl;
         }
 
-        return fileNameList();
+        return dirEntries;
     }
 
     if (POSIX::debug)
     {
-        //InfoInFunction
+        // InfoInFunction
         Pout<< FUNCTION_NAME << " : reading directory " << directory << endl;
         if ((POSIX::debug & 2) && !Pstream::master())
         {
@@ -744,22 +766,31 @@ Foam::fileNameList Foam::readDir
         }
     }
 
-    label nEntries = 0;
-    fileNameList dirEntries(maxNnames);
+    label nFailed = 0;     // Entries with invalid characters
+    label nEntries = 0;    // Number of selected entries
+    dirEntries.setSize(maxNnames);
 
     // Read and parse all the entries in the directory
     for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
     {
-        const fileName name(list->d_name);
+        const std::string item(list->d_name);
 
         // Ignore files/directories beginning with "."
         // These are the ".", ".." directories and any hidden files/dirs
-        if (name.empty() || name[0] == '.')
+        if (item.empty() || item[0] == '.')
         {
             continue;
         }
 
-        if
+        // Validate filename without spaces, quotes, etc in the name.
+        // No duplicate slashes to strip - dirent will not have them anyhow.
+
+        const fileName name(fileName::validate(item));
+        if (name != item)
+        {
+            ++nFailed;
+        }
+        else if
         (
             (type == fileName::DIRECTORY)
          || (type == fileName::FILE && !isBackupName(name))
@@ -783,10 +814,18 @@ Foam::fileNameList Foam::readDir
             }
         }
     }
-
-    // Reset the length of the entries list
-    dirEntries.setSize(nEntries);
     ::closedir(source);
+
+    // Finalize the length of the entries list
+    dirEntries.setSize(nEntries);
+
+    if (nFailed && POSIX::debug)
+    {
+        std::cerr
+            << "Foam::readDir() : reading directory " << directory << nl
+            << nFailed << " entries with invalid characters in their name"
+            << std::endl;
+    }
 
     return dirEntries;
 }
@@ -911,22 +950,22 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
         }
 
         // Copy files
-        fileNameList contents = readDir(src, fileName::FILE, false, followLink);
-        forAll(contents, i)
+        fileNameList files = readDir(src, fileName::FILE, false, followLink);
+        for (const fileName& item : files)
         {
             if (POSIX::debug)
             {
                 InfoInFunction
-                    << "Copying : " << src/contents[i]
-                    << " to " << destFile/contents[i] << endl;
+                    << "Copying : " << src/item
+                    << " to " << destFile/item << endl;
             }
 
             // File to file.
-            cp(src/contents[i], destFile/contents[i], followLink);
+            cp(src/item, destFile/item, followLink);
         }
 
         // Copy sub directories.
-        fileNameList subdirs = readDir
+        fileNameList dirs = readDir
         (
             src,
             fileName::DIRECTORY,
@@ -934,17 +973,17 @@ bool Foam::cp(const fileName& src, const fileName& dest, const bool followLink)
             followLink
         );
 
-        forAll(subdirs, i)
+        for (const fileName& item : dirs)
         {
             if (POSIX::debug)
             {
                 InfoInFunction
-                    << "Copying : " << src/subdirs[i]
+                    << "Copying : " << src/item
                     << " to " << destFile << endl;
             }
 
             // Dir to Dir.
-            cp(src/subdirs[i], destFile, followLink);
+            cp(src/item, destFile, followLink);
         }
     }
     else
@@ -1002,12 +1041,10 @@ bool Foam::ln(const fileName& src, const fileName& dst)
     {
         return true;
     }
-    else
-    {
-        WarningInFunction
-            << "symlink from " << src << " to " << dst << " failed." << endl;
-        return false;
-    }
+
+    WarningInFunction
+        << "symlink from " << src << " to " << dst << " failed." << endl;
+    return false;
 }
 
 
@@ -1157,14 +1194,20 @@ bool Foam::rmDir(const fileName& directory, const bool silent)
     label nErrors = 0;
     for (struct dirent *list; (list = ::readdir(source)) != nullptr; /*nil*/)
     {
-        const fileName name(list->d_name);
-        if (name.empty() || name == "." || name == "..")
+        const std::string item(list->d_name);
+
+        // Ignore "." and ".." directories
+        if (item.empty() || item == "." || item == "..")
         {
-            // Ignore "." and ".." directories
             continue;
         }
 
-        const fileName path = directory/name;
+        // Allow invalid characters (spaces, quotes, etc),
+        // otherwise we cannot subdirs with these types of names.
+        // -> const fileName path = directory/name; <-
+
+        const fileName path(fileNameConcat(directory, item));
+
         if (path.type(false) == fileName::DIRECTORY)
         {
             if (!rmDir(path, true))  // Only report errors at the top-level
@@ -1548,10 +1591,8 @@ bool Foam::dlSymFound(void* handle, const std::string& symbol)
         // symbol can be found if there was no error
         return !::dlerror();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -1680,7 +1721,7 @@ Foam::label Foam::allocateThread()
         }
     }
 
-    label index = threads_.size();
+    const label index = threads_.size();
     if (POSIX::debug)
     {
         Pout<< "allocateThread : new index:" << index << endl;
@@ -1750,7 +1791,7 @@ Foam::label Foam::allocateMutex()
         }
     }
 
-    label index = mutexes_.size();
+    const label index = mutexes_.size();
 
     if (POSIX::debug)
     {

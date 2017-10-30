@@ -286,46 +286,54 @@ Foam::UList<T>::cend() const
 }
 
 template<class T>
-inline typename Foam::UList<T>::iterator
+inline typename Foam::UList<T>::reverse_iterator
 Foam::UList<T>::rbegin()
 {
-    return &v_[size_-1];
+    return reverse_iterator(&v_[size_-1]);
 }
 
 template<class T>
-inline typename Foam::UList<T>::const_iterator
+inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::rbegin() const
 {
-    return &v_[size_-1];
+    return const_reverse_iterator(&v_[size_-1]);
 }
 
 template<class T>
-inline typename Foam::UList<T>::const_iterator
+inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::crbegin() const
 {
-    return &v_[size_-1];
+    return const_reverse_iterator(&v_[size_-1]);
 }
 
 template<class T>
-inline typename Foam::UList<T>::iterator
+inline typename Foam::UList<T>::reverse_iterator
 Foam::UList<T>::rend()
 {
-    return &v_[-1];
+    return reverse_iterator(&v_[-1]);
 }
 
 template<class T>
-inline typename Foam::UList<T>::const_iterator
+inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::rend() const
 {
-    return &v_[-1];
+    return const_reverse_iterator(&v_[-1]);
 }
 
 template<class T>
-inline typename Foam::UList<T>::const_iterator
+inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::crend() const
 {
-    return &v_[-1];
+    return const_reverse_iterator(&v_[-1]);
 }
+
+
+template<class T>
+inline void Foam::UList<T>::size(const label n)
+{
+    size_ = n;
+}
+
 
 template<class T>
 inline Foam::label Foam::UList<T>::size() const

@@ -136,7 +136,7 @@ label findFace(const primitivePatch& pp, const labelList& meshF)
 
         forAll(f, fp)
         {
-            if (findIndex(meshF, f[fp]) != -1)
+            if (meshF.found(f[fp]))
             {
                 nMatched++;
             }
@@ -168,7 +168,7 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
 
         forAll(f, fp)
         {
-            if (findIndex(meshF, f[fp]) != -1)
+            if (meshF.found(f[fp]))
             {
                 nMatched++;
             }

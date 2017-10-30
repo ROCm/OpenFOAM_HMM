@@ -407,17 +407,8 @@ void Foam::topoCellLooper::walkSplitHex
 
         if
         (
-            (vertI != -1)
-         && (
-                (startLoop =
-                    findIndex
-                    (
-                        loop,
-                        vertToEVert(vertI)
-                    )
-                )
-            != -1
-            )
+            vertI != -1
+         && (startLoop = loop.find(vertToEVert(vertI))) != -1
         )
         {
             // Breaking walk since vertI already cut
@@ -430,17 +421,8 @@ void Foam::topoCellLooper::walkSplitHex
         }
         if
         (
-            (edgeI != -1)
-         && (
-                (startLoop =
-                    findIndex
-                    (
-                        loop,
-                        edgeToEVert(edgeI)
-                    )
-                )
-             != -1
-            )
+            edgeI != -1
+         && (startLoop = loop.find(edgeToEVert(edgeI))) != -1
         )
         {
             // Breaking walk since edgeI already cut

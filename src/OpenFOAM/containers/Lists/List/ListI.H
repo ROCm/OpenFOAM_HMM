@@ -151,26 +151,14 @@ inline void Foam::List<T>::resize(const label newSize, const T& val)
 template<class T>
 inline T& Foam::List<T>::newElmt(const label i)
 {
-    if (i >= this->size())
+    const label n = this->size();
+
+    if (i >= n)
     {
-        setSize(2*this->size());
+        setSize(2*n);
     }
 
     return UList<T>::operator[](i);
-}
-
-
-template<class T>
-inline void Foam::List<T>::size(const label n)
-{
-    UList<T>::size_ = n;
-}
-
-
-template<class T>
-inline Foam::label Foam::List<T>::size() const
-{
-    return UList<T>::size_;
 }
 
 
@@ -184,7 +172,7 @@ inline Foam::Xfer<Foam::List<T>> Foam::List<T>::xfer()
 template<class T>
 inline void Foam::List<T>::append(const T& val)
 {
-    setSize(size()+1, val);
+    setSize(this->size()+1, val);
 }
 
 
@@ -200,9 +188,9 @@ inline void Foam::List<T>::append(const UList<T>& lst)
     label nextFree = this->size();
     setSize(nextFree + lst.size());
 
-    forAll(lst, elemI)
+    forAll(lst, i)
     {
-        this->operator[](nextFree++) = lst[elemI];
+        this->operator[](nextFree++) = lst[i];
     }
 }
 
@@ -213,9 +201,9 @@ inline void Foam::List<T>::append(const UIndirectList<T>& lst)
     label nextFree = this->size();
     setSize(nextFree + lst.size());
 
-    forAll(lst, elemI)
+    forAll(lst, i)
     {
-        this->operator[](nextFree++) = lst[elemI];
+        this->operator[](nextFree++) = lst[i];
     }
 }
 

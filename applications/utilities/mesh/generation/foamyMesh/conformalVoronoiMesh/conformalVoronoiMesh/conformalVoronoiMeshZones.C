@@ -471,7 +471,7 @@ void Foam::conformalVoronoiMesh::calcFaceZones
         // a faceZone
         if (surfHit.size() == 1 && surfHit[0].hit())
         {
-            if (findIndex(unclosedSurfaces, hitSurface[0]) != -1)
+            if (unclosedSurfaces.found(hitSurface[0]))
             {
                 vectorField norm;
                 geometryToConformTo().getNormal

@@ -457,7 +457,7 @@ void Foam::radiation::solarLoad::calculateQdiff
                 label faceI = fineFaces[j];
                 label globalFaceI = faceI + pp.start();
 
-                if (findIndex(hitFacesId, globalFaceI) != -1)
+                if (hitFacesId.found(globalFaceI))
                 {
                     fullArea += sf[faceI];
                 }

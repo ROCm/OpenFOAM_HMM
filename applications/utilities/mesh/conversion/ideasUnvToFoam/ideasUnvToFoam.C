@@ -806,7 +806,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        if (findIndex(foamVerts, -1) != -1)
+        if (foamVerts.found(-1))
         {
             FatalErrorInFunction
                 << "Cell " << celli
@@ -825,7 +825,7 @@ int main(int argc, char *argv[])
     {
         labelList foamVerts(renumber(unvToFoam, boundaryFaces[bFacei]));
 
-        if (findIndex(foamVerts, -1) != -1)
+        if (foamVerts.found(-1))
         {
             FatalErrorInFunction
                 << "Boundary face " << bFacei

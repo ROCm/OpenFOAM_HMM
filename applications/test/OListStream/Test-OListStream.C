@@ -25,7 +25,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "OListStream.H"
+#include "ListStream.H"
 #include "wordList.H"
 #include "IOstreams.H"
 #include "argList.H"
@@ -45,10 +45,31 @@ Ostream& toString(Ostream& os, const UList<char>& list)
 }
 
 
-void printInfo(const OListStream& buf)
+template<class BufType>
+void printInfo(const BufType& buf)
 {
-    Info<< nl << buf.size() << " chars (" << buf.capacity() << " capacity) ";
-    toString(Info, buf.list()) << endl;
+    Info<< nl << "=========================" << endl;
+    buf.print(Info);
+    toString(Info, buf.list());
+    Info<< nl << "=========================" << endl;
+}
+
+
+void printTokens(Istream& is)
+{
+    label count = 0;
+    token t;
+    while (is.good())
+    {
+        is >> t;
+        if (t.good())
+        {
+            ++count;
+            Info<<"token: " << t << endl;
+        }
+    }
+
+    Info<< count << " tokens" << endl;
 }
 
 
@@ -58,17 +79,125 @@ void printInfo(const OListStream& buf)
 int main(int argc, char *argv[])
 {
     // Buffer storage
-    DynamicList<char> storage(8);
+    DynamicList<char> storage(16);
 
     OListStream obuf(std::move(storage));
-    obuf << 1002 << " " << "abcd" << " " << "def" << " " << 3.14159 << ";\n";
+
+    obuf.setBlockSize(100);
+
+    printInfo(obuf);
+
+    // Fill with some content
+    for (label i = 0; i < 50; ++i)
+    {
+        obuf<< 1002 << " " << "abcd" << " "
+            << "def" << " " << 3.14159 << ";\n";
+    }
 
     printInfo(obuf);
 
     obuf.rewind();
-    obuf << 100;
+    printInfo(obuf);
+
+    for (label i=0; i < 10; ++i)
+    {
+        obuf << "item" << i << "\n";
+    }
 
     printInfo(obuf);
+
+    obuf.shrink();
+
+    Info<< "after shrink" << nl;
+    printInfo(obuf);
+
+    // Add some more
+    for (label i=10; i < 15; ++i)
+    {
+        obuf << "more" << i << nl;
+    }
+
+    Info<< "appended more" << nl;
+    printInfo(obuf);
+
+    // Overwrite at some position
+    obuf.stdStream().rdbuf()->pubseekpos(0.60 * obuf.size());
+    obuf << "<" << nl << "OVERWRITE" << nl;
+
+    Info<<"after overwrite" << nl;
+    printInfo(obuf);
+
+    Info<< "transfer contents to a List or IListStream" << nl;
+
+    IListStream ibuf(obuf.xfer());
+
+    Info<<"original:";
+    printInfo(obuf);
+
+    Info<<"new input:" << nl;
+    printInfo(ibuf);
+
+    printTokens(ibuf);
+
+    // Create from other storage types
+
+    Info<< nl;
+    {
+        Info<<"create std::move(List)" << endl;
+        List<char> list(16, 'A');
+
+        Info<<"input:";
+        toString(Info, list) << endl;
+
+        OListStream buf1(std::move(list));
+        for (label i = 0; i < 26; ++i)
+        {
+            buf1 << char('A' +i);
+        }
+        for (label i = 0; i < 26; ++i)
+        {
+            buf1 << char('a' +i);
+        }
+
+        Info<<"orig:";
+        toString(Info, list) << endl;
+
+        printInfo(buf1);
+    }
+
+    Info<< nl;
+
+    List<char> written;
+    {
+        Info<<"create List.xfer()" << endl;
+        List<char> list(16, 'B');
+
+        Info<<"input:";
+        toString(Info, list) << endl;
+
+        OListStream buf1(list.xfer());
+        for (label i = 0; i < 26; ++i)
+        {
+            buf1 << char('A' + i);
+        }
+        for (label i = 0; i < 26; ++i)
+        {
+            buf1 << char('a' +i);
+        }
+
+        Info<<"orig:";
+        toString(Info, list) << endl;
+
+        printInfo(buf1);
+
+        // Move back to written
+        written = buf1.xfer();
+
+        printInfo(buf1);
+    }
+    Info<<"'captured' content ";
+    toString(Info, written);
+
 
     Info<< "\nEnd\n" << endl;
 

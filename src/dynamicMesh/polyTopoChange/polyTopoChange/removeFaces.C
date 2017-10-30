@@ -283,12 +283,12 @@ void Foam::removeFaces::mergeFaces
 
         const face& f = fp.localFaces()[facei];
 
-        label index1 = findIndex(f, edgeLoop[1]);
+        label index1 = f.find(edgeLoop[1]);
 
         if (index1 != -1)
         {
             // Check whether consecutive to edgeLoop[0]
-            label index0 = findIndex(f, edgeLoop[0]);
+            label index0 = f.find(edgeLoop[0]);
 
             if (index0 != -1)
             {

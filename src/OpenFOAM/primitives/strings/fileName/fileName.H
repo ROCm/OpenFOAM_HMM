@@ -135,6 +135,20 @@ public:
         //- Is this character valid for a fileName?
         inline static bool valid(char c);
 
+        //- Construct validated fileName (no invalid characters).
+        //  Optionally perform some additional cleanup such as removing
+        //  duplicate or trailing slashes.
+        static fileName validate
+        (
+            const std::string& s,
+            const bool doClean=false
+        );
+
+        //- This is a specialized (possibly slower) version of compare()
+        //  that ignores duplicate or trailing slashes.
+        static bool equals(const std::string& s1, const std::string& s2);
+
+
         //- Cleanup filename
         //
         // Removes trailing \c /

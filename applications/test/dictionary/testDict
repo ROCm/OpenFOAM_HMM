@@ -13,18 +13,19 @@ FoamFile
     object      testDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#inputMode  merge
+
 #includeIfPresent "someUnknownFile"
 #includeIfPresent "$FOAM_CASE/someUnknownFile"
 #includeIfPresent "$FOAM_CASE/someUnknownFile-$FOAM_CASENAME"
 
 internalField   uniform 1;
 
-// use 'protect' to supply defaults
-#inputMode  protect
-internalField   uniform 10;
-dimensions      [ 0 2 -2 0 0 0 0 ];
-#inputMode  merge
+// supply defaults
+#default internalField  uniform 10;
+#default dimensions     [ 1 2 -2 0 0 0 0 ];
+#overwrite dimensions   [ 0 2 -2 0 0 0 0 ];
+// #warn       dimensions      [ 0 2 -2 0 0 0 0 ];
+// #error      dimensions      [ 0 2 -2 0 0 0 0 ];
 
 active
 {
@@ -86,12 +87,12 @@ boundaryField
     #remove inactive
 
     inlet_7  { ${${varType}}}   // Test indirection/recursive expansion
-    #inputMode overwrite
     inlet_8  { $active }
+
+    #overwrite inlet_8  { type none; }
 }
 
-// NB: the inputMode has a global scope
-#inputMode merge
+
 #include "testDict2"
 
 foo

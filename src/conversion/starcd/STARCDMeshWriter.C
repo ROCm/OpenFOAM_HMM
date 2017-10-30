@@ -380,7 +380,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
             label cellId = owner[facei];
             const labelList& cFaces  = cells[cellId];
             const cellShape& shape = shapes[cellId];
-            label cellFaceId = findIndex(cFaces, facei);
+            label cellFaceId = cFaces.find(facei);
 
             //      Info<< "cell " << cellId + 1 << " face " << facei
             //          << " == " << faces[facei]

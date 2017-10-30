@@ -148,7 +148,7 @@ Foam::labelList Foam::cellLooper::getVertEdgesNonFace
 
         if
         (
-            (findIndex(exclEdges, edgeI) == -1)
+            !exclEdges.found(edgeI)
          && meshTools::edgeOnCell(mesh(), celli, edgeI)
         )
         {

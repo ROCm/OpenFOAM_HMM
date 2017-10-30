@@ -671,7 +671,7 @@ Foam::labelList Foam::meshRefinement::getZones
         surfaceZonesInfo::faceZoneType fzType;
         bool hasInfo = getFaceZoneInfo(fZone.name(), mpI, spI, fzType);
 
-        if (hasInfo && findIndex(fzTypes, fzType) != -1)
+        if (hasInfo && fzTypes.found(fzType))
         {
             zoneIDs.append(zoneI);
         }
@@ -1549,7 +1549,7 @@ void Foam::meshRefinement::findCellZoneGeometric
             }
 
             // Make sure the cellZone originated from a closed surface
-            label geomSurfI = findIndex(surfaceToCellZone, minZone);
+            label geomSurfI = surfaceToCellZone.find(minZone);
 
             if (geomSurfI != -1)
             {
@@ -1593,7 +1593,7 @@ void Foam::meshRefinement::findCellZoneGeometric
                     }
 
                     // Make sure the cellZone originated from a closed surface
-                    label geomSurfI = findIndex(surfaceToCellZone, minZone);
+                    label geomSurfI = surfaceToCellZone.find(minZone);
 
                     if (geomSurfI != -1)
                     {

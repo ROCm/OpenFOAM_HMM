@@ -2119,8 +2119,8 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
 
                         patchIndex = max
                         (
-                            findIndex(procNeighbours, vA->procIndex()),
-                            findIndex(procNeighbours, vB->procIndex())
+                            procNeighbours.find(vA->procIndex()),
+                            procNeighbours.find(vB->procIndex())
                         );
 
                         // The lower processor index is the owner of the

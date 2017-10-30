@@ -21,67 +21,51 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "UIBufStream.H"
-#include "UOBufStream.H"
-#include "wordList.H"
-#include "IOstreams.H"
-#include "argList.H"
+#include "UListStream.H"
+#include "ListStream.H"
+#include "OCountStream.H"
 
-using namespace Foam;
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
-
-int main(int argc, char *argv[])
+void Foam::IListStream::print(Ostream& os) const
 {
-    // Buffer storage
-    DynamicList<char> storage(1000);
-
-    UOBufStream obuf(storage);
-    obuf << 1002 << " " << "abcd" << " " << "def" << " " << 3.14159 << ";\n";
-
-    Info<<"formatted: " << obuf.size() << " chars" << endl;
-
-    // Match size
-    storage.resize(obuf.size());
-
-    Info<<"as string: " << string(storage.cdata(), storage.size()) << endl;
-
-    // Attach input buffer - could also do without previous resize
-
-    UIBufStream ibuf(storage, storage.size());
-
-    token t;
-
-    while (ibuf.good())
-    {
-        ibuf >> t;
-        if (t.good())
-        {
-            Info<<"token: " << t << endl;
-        }
-    }
-
-    Info<< nl << "Repeat..." << endl;
-    ibuf.rewind();
-
-    while (ibuf.good())
-    {
-        ibuf >> t;
-        if (t.good())
-        {
-            Info<<"token: " << t << endl;
-        }
-    }
+    os  << "IListStream: ";
+    printBufInfo(os);
+    os  << Foam::endl;
+}
 
 
-    Info<< "\nEnd\n" << endl;
+void Foam::UIListStream::print(Ostream& os) const
+{
+    os  << "UIListStream: ";
+    printBufInfo(os);
+    os  << Foam::endl;
+}
 
-    return 0;
+
+void Foam::OListStream::print(Ostream& os) const
+{
+    os  << "OListStream: ";
+    printBufInfo(os);
+    os  << Foam::endl;
+}
+
+
+void Foam::UOListStream::print(Ostream& os) const
+{
+    os  << "UOListStream: ";
+    printBufInfo(os);
+    os  << Foam::endl;
+}
+
+
+void Foam::OCountStream::print(Ostream& os) const
+{
+    os  << "OCountStream: ";
+    printBufInfo(os);
+    os  << Foam::endl;
 }
 
 

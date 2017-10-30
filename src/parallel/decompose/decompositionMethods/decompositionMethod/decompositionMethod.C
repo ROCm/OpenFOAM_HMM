@@ -96,11 +96,10 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("preserveBaffles")
-     && findIndex
+     && !constraintTypes_.found
         (
-            constraintTypes_,
             decompositionConstraints::preserveBafflesConstraint::typeName
-        ) == -1
+        )
     )
     {
         constraints_.append
@@ -112,11 +111,10 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("preservePatches")
-     && findIndex
+     && !constraintTypes_.found
         (
-            constraintTypes_,
             decompositionConstraints::preservePatchesConstraint::typeName
-        ) == -1
+        )
     )
     {
         const wordReList pNames(decompositionDict_.lookup("preservePatches"));
@@ -130,11 +128,10 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("preserveFaceZones")
-     && findIndex
+     && !constraintTypes_.found
         (
-            constraintTypes_,
             decompositionConstraints::preserveFaceZonesConstraint::typeName
-        ) == -1
+        )
     )
     {
         const wordReList zNames(decompositionDict_.lookup("preserveFaceZones"));
@@ -148,11 +145,10 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("singleProcessorFaceSets")
-     && findIndex
+     && !constraintTypes_.found
         (
-            constraintTypes_,
             decompositionConstraints::preserveFaceZonesConstraint::typeName
-        ) == -1
+        )
     )
     {
         const List<Tuple2<word, label>> zNameAndProcs

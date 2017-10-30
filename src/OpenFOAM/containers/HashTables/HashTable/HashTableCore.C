@@ -23,7 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "HashTable.H"
+#include "HashTableCore.H"
 #include "uLabel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

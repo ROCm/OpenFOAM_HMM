@@ -240,11 +240,11 @@ std::streamsize Foam::UList<T>::byteSize() const
 template<class T>
 Foam::label Foam::UList<T>::find(const T& val, const label start) const
 {
-    if (start >= 0)
+    const label len = this->size();
+
+    if (start >= 0 && len)
     {
         List_CONST_ACCESS(T, (*this), vp);
-
-        const label len = this->size();
 
         for (label i = start; i < len; ++i)
         {
@@ -264,17 +264,10 @@ Foam::label Foam::UList<T>::rfind(const T& val, const label pos) const
 {
     List_CONST_ACCESS(T, (*this), vp);
 
-    for
-    (
-        label i =
-        (
-            pos < 0
-          ? (this->size()-1)
-          : min(pos, this->size()-1)
-        );
-        i >= 0;
-        --i
-    )
+    const label len1 = (this->size()-1);
+
+    // pos == -1 has same meaning as std::string::npos - search from end
+    for (label i = ((pos >= 0 && pos < len1) ? pos : len1); i >= 0; --i)
     {
         if (vp[i] == val)
         {
@@ -293,10 +286,10 @@ void Foam::sort(UList<T>& a)
 }
 
 
-template<class T, class Cmp>
-void Foam::sort(UList<T>& a, const Cmp& cmp)
+template<class T, class Compare>
+void Foam::sort(UList<T>& a, const Compare& comp)
 {
-    std::sort(a.begin(), a.end(), cmp);
+    std::sort(a.begin(), a.end(), comp);
 }
 
 
@@ -307,10 +300,10 @@ void Foam::stableSort(UList<T>& a)
 }
 
 
-template<class T, class Cmp>
-void Foam::stableSort(UList<T>& a, const Cmp& cmp)
+template<class T, class Compare>
+void Foam::stableSort(UList<T>& a, const Compare& comp)
 {
-    std::stable_sort(a.begin(), a.end(), cmp);
+    std::stable_sort(a.begin(), a.end(), comp);
 }
 
 

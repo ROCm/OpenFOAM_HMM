@@ -38,6 +38,7 @@ See also
 #include "List.H"
 #include "IPstream.H"
 #include "OPstream.H"
+#include <numeric>
 
 using namespace Foam;
 
@@ -47,6 +48,63 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList args(argc, argv);
+
+    if (false)
+    {
+        FixedList<string, 1> ident;
+
+        auto iter = ident.begin();
+
+        Info << iter->size() << endl;
+
+        auto riter = ident.rbegin();
+        Info << riter->size() << endl;
+
+        auto iter2 = ident.rbegin();
+
+        iter2 = iter;
+    }
+
+    {
+        FixedList<label, 15> ident;
+        std::iota(ident.begin(), ident.end(), 0);
+
+        // auto iter = ident.begin();
+        //
+        // iter += 5;
+        // Info << *iter << "< " << endl;
+        // iter -= 2;
+        // Info << *iter << "< " << endl;
+
+        // Don't yet bother with making reverse iterators random access
+        // auto riter = ident.crbegin();
+
+        // riter += 5;
+        // Info << *riter << "< " << endl;
+        // riter += 2;
+        // Info << *riter << "< " << endl;
+
+        Info<<"Ident:";
+        forAllConstIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"reverse:";
+        forAllReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"const reverse:";
+        forAllConstReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+    }
 
     {
         FixedList<label, 4> list1{1, 2, 3, 4};

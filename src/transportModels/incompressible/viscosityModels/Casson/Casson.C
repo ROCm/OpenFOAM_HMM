@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ namespace viscosityModels
 }
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::Casson::calcNu() const

@@ -473,7 +473,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 label elemi = elems[i];
                 label coarseElemi = tgtCompactMap[elemi];
 
-                label index = findIndex(newElems, coarseElemi);
+                label index = newElems.find(coarseElemi);
                 if (index == -1)
                 {
                     newElems.append(coarseElemi);
@@ -519,7 +519,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 label elemi = elems[i];
                 label coarseElemi = targetRestrictAddressing[elemi];
 
-                label index = findIndex(newElems, coarseElemi);
+                label index = newElems.find(coarseElemi);
                 if (index == -1)
                 {
                     newElems.append(coarseElemi);

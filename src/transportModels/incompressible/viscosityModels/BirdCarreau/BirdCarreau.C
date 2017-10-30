@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ namespace viscosityModels
 }
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
 Foam::viscosityModels::BirdCarreau::calcNu() const
@@ -52,7 +52,7 @@ Foam::viscosityModels::BirdCarreau::calcNu() const
     return
         nuInf_
       + (nu0_ - nuInf_)
-       *pow(scalar(1) + pow(k_*strainRate(), a_), (n_ - 1.0)/a_);
+      * pow(scalar(1) + pow(k_*strainRate(), a_), (n_ - 1.0)/a_);
 }
 
 

@@ -657,8 +657,8 @@ void Foam::boundaryCutter::setRefinement
         // Split face from one side of diagonal to other.
         const labelPair& diag = iter();
 
-        label fp0 = findIndex(newFace, f[diag[0]]);
-        label fp1 = findIndex(newFace, f[diag[1]]);
+        label fp0 = newFace.find(f[diag[0]]);
+        label fp1 = newFace.find(f[diag[1]]);
 
         if (fp0 == -1 || fp1 == -1 || fp0 == fp1)
         {

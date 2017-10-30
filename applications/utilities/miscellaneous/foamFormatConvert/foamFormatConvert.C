@@ -179,7 +179,7 @@ class uniqueEqOp
         }
         forAll(y, i)
         {
-            if (!y[i].empty() && findIndex(x, y[i]) == -1)
+            if (!y[i].empty() && !x.found(y[i]))
             {
                 newX[n++] = y[i];
             }

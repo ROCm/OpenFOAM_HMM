@@ -52,50 +52,51 @@ class countstreambuf
     // Private data
 
         //- The number of bytes
-        std::streamsize n_;
+        std::streamsize size_;
 
 protected:
-    // Protected members
 
-        //- Put sequence of characters
-        virtual std::streamsize xsputn(const char* s, std::streamsize num)
+    //- Simply handle output counting via overflow
+    virtual int overflow(int c = EOF)
+    {
+        if (c != EOF)
         {
-            n_ += num;
-            return num;
+            ++size_;
         }
+        return c;
+    }
 
-
-        //- Set position pointer to absolute position
-        //  For the counter, any positioning is ignored and it always acts like
-        //  seekpos(0), which resets the count.
-        virtual std::streampos seekpos
-        (
-            std::streampos sp,
-            std::ios_base::openmode which = std::ios_base::in|std::ios_base::out
-        )
-        {
-            n_ = 0;
-            return 0;
-        }
+    //- Set position pointer to absolute position
+    //  For the counter, any positioning is ignored and it always acts like
+    //  seekpos(0), which resets the count.
+    virtual std::streampos seekpos
+    (
+        std::streampos,
+        std::ios_base::openmode which = std::ios_base::in|std::ios_base::out
+    )
+    {
+        size_ = 0;
+        return 0;
+    }
 
 
 public:
 
     // Constructors
 
-        //- Construct null
-        countstreambuf()
+        //- Construct null, or with precount size
+        countstreambuf(std::streamsize precount=0)
         :
-            n_(0)
+            size_(precount)
         {}
 
 
     // Access
 
-        //- Get number of bytes counted
+        //- Number of bytes counted
         std::streamsize size() const
         {
-            return n_;
+            return size_;
         }
 };
 
@@ -155,23 +156,72 @@ public:
 
 
 /*---------------------------------------------------------------------------*\
+                    Class OCountStreamAllocator Declaration
+\*---------------------------------------------------------------------------*/
+
+//- An stream/stream-buffer allocator for counting
+class OCountStreamAllocator
+{
+protected:
+
+    // Protected data
+
+        typedef std::ostream stream_type;
+
+        //- The stream buffer
+        countstreambuf buf_;
+
+        //- The output stream
+        stream_type stream_;
+
+
+    // Constructors
+
+        //- Construct null, or with precount size
+        OCountStreamAllocator(std::streamsize precount=0)
+        :
+            buf_(precount),
+            stream_(&buf_)
+        {}
+
+
+    // Protected Member Functions
+
+        void printBufInfo(Ostream& os) const
+        {
+            os << "count=" << buf_.size();
+        }
+
+public:
+
+    // Member Functions
+
+        //- The number of bytes counted
+        std::streamsize size() const
+        {
+            return buf_.size();
+        }
+
+        //- Rewind the stream, reset the count
+        void rewind()
+        {
+            buf_.pubseekpos(0);
+            stream_.clear(); // for safety, clear any old errors
+        }
+};
+
+
+/*---------------------------------------------------------------------------*\
                         Class OCountStream Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An output stream for calculating byte counts
 class OCountStream
 :
-    private ocountstream,
+    public OCountStreamAllocator,
     public OSstream
 {
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        OCountStream(const OCountStream&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const OCountStream&) = delete;
+    typedef OCountStreamAllocator allocator_type;
 
 public:
 
@@ -184,38 +234,29 @@ public:
             versionNumber version=currentVersion
         )
         :
-            ocountstream(),
-            OSstream
-            (
-                static_cast<ocountstream&>(*this),
-                "output",
-                format,
-                version
-        )
+            allocator_type(),
+            OSstream(stream_, "output", format, version)
         {}
 
-
-    //- Destructor
-    ~OCountStream()
-    {}
+        //- Copy construct
+        OCountStream(const OCountStream& os)
+        :
+            allocator_type(os.size()),
+            OSstream(stream_, os.name(), os.format(), os.version())
+        {}
 
 
     // Member functions
 
-      // Access
-
-        //- Return the number of bytes counted
-        using ocountstream::size;
-
-
-      // Edit
-
         //- Rewind the stream, reset the count, clearing any old errors
-        void rewind()
+        virtual void rewind()
         {
-            ocountstream::rewind();
+            allocator_type::rewind();
             setGood();  // resynchronize with internal state
         }
+
+        //- Print description to Ostream
+        virtual void print(Ostream& os) const;
 
 };
 

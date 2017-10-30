@@ -105,7 +105,7 @@ void Foam::parLagrangianRedistributor::findClouds
             // One of the objects is coordinates/positions so must be valid
             // cloud
 
-            label cloudI = findIndex(cloudNames, localCloudDirs[i]);
+            label cloudI = cloudNames.find(localCloudDirs[i]);
 
             objectNames[cloudI].setSize(sprayObjs.size());
             label objectI = 0;

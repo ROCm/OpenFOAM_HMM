@@ -133,7 +133,7 @@ Foam::List<T>& Foam::SortableList<T>::shrink()
 template<class T>
 void Foam::SortableList<T>::sort()
 {
-    sortedOrder(*this, indices_);
+    Foam::sortedOrder(*this, indices_);
 
     List<T> lst(*this, indices_); // Copy with indices for mapping
     List<T>::transfer(lst);
@@ -143,7 +143,7 @@ void Foam::SortableList<T>::sort()
 template<class T>
 void Foam::SortableList<T>::reverseSort()
 {
-    sortedOrder(*this, indices_, typename UList<T>::greater(*this));
+    Foam::sortedOrder(*this, indices_, typename UList<T>::greater(*this));
 
     List<T> lst(*this, indices_); // Copy with indices for mapping
     List<T>::transfer(lst);
@@ -156,6 +156,7 @@ void Foam::SortableList<T>::swap(SortableList<T>& lst)
     List<T>::swap(lst);
     indices_.swap(lst.indices_);
 }
+
 
 template<class T>
 Foam::Xfer<Foam::List<T>> Foam::SortableList<T>::xfer()

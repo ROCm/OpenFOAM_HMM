@@ -99,7 +99,7 @@ Foam::polyPatch::polyPatch
     (
         patchType != word::null
      && constraintType(patchType)
-     && findIndex(inGroups(), patchType) == -1
+     && !inGroups().found(patchType)
     )
     {
         inGroups().append(patchType);
@@ -160,7 +160,7 @@ Foam::polyPatch::polyPatch
     (
         patchType != word::null
      && constraintType(patchType)
-     && findIndex(inGroups(), patchType) == -1
+     && !inGroups().found(patchType)
     )
     {
         inGroups().append(patchType);

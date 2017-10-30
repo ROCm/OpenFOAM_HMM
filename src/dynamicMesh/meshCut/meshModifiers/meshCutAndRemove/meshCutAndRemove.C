@@ -54,7 +54,7 @@ Foam::label Foam::meshCutAndRemove::firstCommon
 {
     forAll(elems1, elemI)
     {
-        label index1 = findIndex(elems2, elems1[elemI]);
+        label index1 = elems2.find(elems1[elemI]);
 
         if (index1 != -1)
         {
@@ -72,7 +72,7 @@ bool Foam::meshCutAndRemove::isIn
     const labelList& cuts
 )
 {
-    label index = findIndex(cuts, twoCuts[0]);
+    label index = cuts.find(twoCuts[0]);
 
     if (index == -1)
     {
@@ -434,7 +434,7 @@ void Foam::meshCutAndRemove::splitFace
 ) const
 {
     // Check if we find any new vertex which is part of the splitEdge.
-    label startFp = findIndex(f, v0);
+    label startFp = f.find(v0);
 
     if (startFp == -1)
     {
@@ -444,7 +444,7 @@ void Foam::meshCutAndRemove::splitFace
             << abort(FatalError);
     }
 
-    label endFp = findIndex(f, v1);
+    label endFp = f.find(v1);
 
     if (endFp == -1)
     {

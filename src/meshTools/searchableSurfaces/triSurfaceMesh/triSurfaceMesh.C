@@ -175,7 +175,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         forAll(pFaces, i)
         {
             const triSurface::FaceType& f = triSurface::operator[](pFaces[i]);
-            label fp = findIndex(f, pointi);
+            label fp = f.find(pointi);
 
             // Something weird: if I expand the code of addFaceToEdge in both
             // below instances it gives a segmentation violation on some

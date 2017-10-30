@@ -1120,7 +1120,7 @@ void Foam::ccm::reader::juggleSolids()
 
 
     // The corresponding Foam patch
-    const label patchIndex  = findIndex(origBndId_, defaultBoundaryRegion);
+    const label patchIndex  = origBndId_.find(defaultBoundaryRegion);
     const label nPatchFaces = patchSizes_[patchIndex];
 
     labelList patchStarts(patchStartList(nInternalFaces_));
@@ -1828,8 +1828,8 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
         labelPair patchPair
         (
-            findIndex(origBndId_, ifentry.bnd0),
-            findIndex(origBndId_, ifentry.bnd1)
+            origBndId_.find(ifentry.bnd0),
+            origBndId_.find(ifentry.bnd1)
         );
 
         if
