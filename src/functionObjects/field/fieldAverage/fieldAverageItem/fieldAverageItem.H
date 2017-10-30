@@ -36,6 +36,8 @@ Description
         window          200;  // optional averaging window
         windowName      w1;   // optional window name (default = "")
         windowType      approximate; // window type
+
+        allowRestart    yes;  // optional, used for windowType 'exact'
     }
     \endverbatim
 
@@ -166,6 +168,9 @@ private:
         //- List of window field names (windowType = EXACT)
         FIFOStack<word> windowFieldNames_;
 
+        //- Switch to write all necessary files for clean restart
+        bool allowRestart_;
+
 
 public:
 
@@ -237,6 +242,9 @@ public:
             //- Return the list of window field names (windowType = EXACT)
             inline const FIFOStack<word>& windowFieldNames() const;
 
+            //- Return the allow restart flag
+            inline bool allowRestart() const;
+
             //- Return the current time interval
             inline scalar dt(const scalar deltaT) const;
 
@@ -249,14 +257,20 @@ public:
             //- Return true if time is inside window (including boundaries)
             inline bool inWindow(const scalar t) const;
 
+            //- Return true if we wish to store window fields
+            inline bool storeWindowFields() const;
+
+            //- Return true if we wish to write window fields
+            inline bool writeWindowFields() const;
+
             //- Add field to window
             void addToWindow(const word& fieldName, const scalar deltaT);
 
             //- Evolve and update
             void evolve(const objectRegistry& obr);
 
-            //- Restart
-            void restart(const scalar time0, const bool override);
+            //- Clear out all mean fields and (optionally) supporting data
+            void clear(const objectRegistry& obr, const bool fullClean);
 
             //- Read state and re-initialise values
             bool readState(const dictionary& dict);
@@ -298,7 +312,8 @@ public:
              && a.totalTime_ == b.totalTime_
              && a.window_ == b.window_
              && a.windowName_ == b.windowName_
-             && a.windowType_ == b.windowType_;
+             && a.windowType_ == b.windowType_
+             && a.allowRestart_ == b.allowRestart_;
         }
 
         friend bool operator!=

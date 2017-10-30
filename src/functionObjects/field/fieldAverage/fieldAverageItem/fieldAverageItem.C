@@ -68,9 +68,9 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem()
 :
     active_(false),
     fieldName_("unknown"),
-    mean_(0),
+    mean_(false),
     meanFieldName_("unknown"),
-    prime2Mean_(0),
+    prime2Mean_(false),
     prime2MeanFieldName_("unknown"),
     base_(baseType::ITER),
     totalIter_(0),
@@ -80,7 +80,8 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem()
     windowType_(windowType::NONE),
 
     windowTimes_(),
-    windowFieldNames_()
+    windowFieldNames_(),
+    allowRestart_(true)
 {}
 
 
@@ -103,7 +104,8 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem
     windowType_(faItem.windowType_),
 
     windowTimes_(faItem.windowTimes_),
-    windowFieldNames_(faItem.windowFieldNames_)
+    windowFieldNames_(faItem.windowFieldNames_),
+    allowRestart_(faItem.allowRestart_)
 {}
 
 
@@ -154,16 +156,34 @@ void Foam::functionObjects::fieldAverageItem::evolve(const objectRegistry& obr)
 }
 
 
-void Foam::functionObjects::fieldAverageItem::restart
+void Foam::functionObjects::fieldAverageItem::clear
 (
-    const scalar time0,
-    const bool override
+    const objectRegistry& obr,
+    bool fullClean
 )
 {
-    if (totalTime_ < 0 || override)
+    if (mean_ && obr.found(meanFieldName_))
+    {
+        obr.checkOut(*obr[meanFieldName_]);
+    }
+
+    if (prime2Mean_ && obr.found(prime2MeanFieldName_))
+    {
+        obr.checkOut(*obr[prime2MeanFieldName_]);
+    }
+
+    for (const word& fieldName : windowFieldNames_)
+    {
+        if (obr.found(fieldName))
+        {
+            obr.checkOut(*obr[fieldName]);
+        }
+    }
+
+    if (totalTime_ < 0 || fullClean)
     {
         totalIter_ = 0;
-        totalTime_ = time0;
+        totalTime_ = 0;
         windowTimes_.clear();
         windowFieldNames_.clear();
     }
@@ -231,6 +251,7 @@ void Foam::functionObjects::fieldAverageItem::operator=
     windowType_ = rhs.windowType_;
     windowTimes_ = rhs.windowTimes_;
     windowFieldNames_ = rhs.windowFieldNames_;
+    allowRestart_ = rhs.allowRestart_;
 }
 
 

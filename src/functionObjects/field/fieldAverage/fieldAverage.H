@@ -197,10 +197,6 @@ protected:
 
         // Initialisation routines
 
-            //- Checkout fields (causes deletion) from the database
-            //  and reset lists
-            void resetFields();
-
             //- Reset lists (clear existing values) and initialize averaging.
             //  Check requested field averages are valid, populate field lists
             void initialize();

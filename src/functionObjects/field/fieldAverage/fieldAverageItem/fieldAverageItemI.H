@@ -124,6 +124,12 @@ Foam::functionObjects::fieldAverageItem::windowFieldNames() const
 }
 
 
+bool Foam::functionObjects::fieldAverageItem::allowRestart() const
+{
+    return allowRestart_;
+}
+
+
 Foam::scalar Foam::functionObjects::fieldAverageItem::dt
 (
     const scalar deltaT
@@ -206,6 +212,18 @@ bool Foam::functionObjects::fieldAverageItem::inWindow(const scalar t) const
     }
 
     return false;
+}
+
+
+bool Foam::functionObjects::fieldAverageItem::storeWindowFields() const
+{
+    return windowType_ == windowType::EXACT;
+}
+
+
+bool Foam::functionObjects::fieldAverageItem::writeWindowFields() const
+{
+    return (allowRestart_ && window_ > 0);
 }
 
 

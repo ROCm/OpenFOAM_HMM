@@ -42,37 +42,13 @@ namespace functionObjects
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void Foam::functionObjects::fieldAverage::resetFields()
-{
-    for (const fieldAverageItem& item : faItems_)
-    {
-        if (item.mean())
-        {
-            if (obr().found(item.meanFieldName()))
-            {
-                obr().checkOut(*obr()[item.meanFieldName()]);
-            }
-        }
-
-        if (item.prime2Mean())
-        {
-            if (obr().found(item.prime2MeanFieldName()))
-            {
-                obr().checkOut(*obr()[item.prime2MeanFieldName()]);
-            }
-        }
-    }
-}
-
-
 void Foam::functionObjects::fieldAverage::initialize()
 {
     for (fieldAverageItem& item : faItems_)
     {
-        item.restart(0, false);
+        // Note: not clearing data needed for restart
+        item.clear(obr(), false);
     }
-
-    resetFields();
 
     Log << type() << " " << name() << ":" << nl;
 
@@ -130,7 +106,7 @@ void Foam::functionObjects::fieldAverage::restart()
 
     for (fieldAverageItem& item : faItems_)
     {
-        item.restart(0, true);
+        item.clear(obr(), true);
     }
 
     initialize();
@@ -251,12 +227,23 @@ void Foam::functionObjects::fieldAverage::readAveragingProperties()
                 getDict(fieldName, fieldDict);
                 item.readState(fieldDict);
 
-                scalar userTotalTime =
-                    obr().time().timeToUserTime(item.totalTime());
+                if (item.allowRestart())
+                {
+                    scalar userTotalTime =
+                        obr().time().timeToUserTime(item.totalTime());
 
-                Info<< "        " << fieldName
-                    << " iters = " << item.totalIter()
-                    << " time = " << userTotalTime << nl;
+                    Info<< "        " << fieldName
+                        << ": iters = " << item.totalIter()
+                        << " time = " << userTotalTime << nl;
+                }
+                else
+                {
+                    item.clear(obr(), true);
+
+                    Info<< "        " << fieldName
+                        << ": starting averaging at time "
+                        << obr().time().timeOutputValue() << endl;
+                }
             }
             else
             {

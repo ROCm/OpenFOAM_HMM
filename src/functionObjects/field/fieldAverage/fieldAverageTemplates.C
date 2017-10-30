@@ -141,10 +141,17 @@ void Foam::functionObjects::fieldAverage::restoreWindowFieldsType
             IOobject::NO_WRITE
         );
 
-        if (io.typeHeaderOk<dictionary>(false))
+        if (io.typeHeaderOk<Type>(true))
         {
             DebugInfo << "Read and store: " << name << endl;
             obr().store(new Type(io, fieldPtr->mesh()));
+        }
+        else
+        {
+            WarningInFunction
+                << "Unable to read window " << Type::typeName << " " << name
+                << ".  Averaging restart behaviour may be compromised"
+                << endl;
         }
     }
 }
@@ -262,7 +269,6 @@ void Foam::functionObjects::fieldAverage::storeWindowFieldType
 )
 {
     const word& fieldName = item.fieldName();
-
     if (!foundObject<Type>(fieldName))
     {
         return;
@@ -306,7 +312,7 @@ void Foam::functionObjects::fieldAverage::storeWindowFields()
 
     for (fieldAverageItem& item : faItems_)
     {
-        if (item.window() > 0)
+        if (item.storeWindowFields())
         {
             storeWindowFieldType<VolFieldType>(item);
             storeWindowFieldType<SurfaceFieldType>(item);
@@ -432,6 +438,7 @@ void Foam::functionObjects::fieldAverage::writeFields() const
             writeFieldType<SurfaceFieldType>(fieldName);
             writeFieldType<SurfFieldType>(fieldName);
         }
+
         if (item.prime2Mean())
         {
             const word& fieldName = item.prime2MeanFieldName();
@@ -439,7 +446,8 @@ void Foam::functionObjects::fieldAverage::writeFields() const
             writeFieldType<SurfaceFieldType>(fieldName);
             writeFieldType<SurfFieldType>(fieldName);
         }
-        if (item.window() > 0)
+
+        if (item.writeWindowFields())
         {
             FIFOStack<word> fieldNames = item.windowFieldNames();
             forAllConstIters(fieldNames, fieldNameIter)
