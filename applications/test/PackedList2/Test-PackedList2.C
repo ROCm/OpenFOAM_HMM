@@ -31,14 +31,12 @@ Description
 #include "boolList.H"
 #include "PackedBoolList.H"
 #include "HashSet.H"
-#include "StaticHashTable.H"
 #include "cpuTime.H"
 #include <vector>
 #include <unordered_set>
 
 using namespace Foam;
 
-#undef TEST_STATIC_HASH
 #undef TEST_STD_BOOLLIST
 #undef TEST_STD_UNORDERED_SET
 
@@ -84,20 +82,6 @@ int main(int argc, char *argv[])
     Info<< "populated labelHashSet in "
         << timer.cpuTimeIncrement() << " s\n\n";
 
-
-    #ifdef TEST_STATIC_HASH
-    // fullStaticHash is really slow
-    // give it lots of slots to help
-    StaticHashTable<nil, label, Hash<label>> emptyStaticHash;
-    StaticHashTable<nil, label, Hash<label>> fullStaticHash(100000);
-    for (label i = 0; i < n; i++)
-    {
-        fullStaticHash.insert(i, nil());
-    }
-    Info<< "populated StaticHashTable in "
-        << timer.cpuTimeIncrement() << " s\n\n";
-    #endif
-
     #ifdef TEST_STD_UNORDERED_SET
     std::unordered_set<label, Foam::Hash<label>> emptyStdHash;
     std::unordered_set<label, Foam::Hash<label>> fullStdHash;
@@ -112,10 +96,6 @@ int main(int argc, char *argv[])
 
     emptyHash.printInfo(Info);
     fullHash.printInfo(Info);
-    #ifdef TEST_STATIC_HASH
-    emptyStaticHash.printInfo(Info);
-    fullStaticHash.printInfo(Info);
-    #endif
     #ifdef TEST_STD_UNORDERED_SET
     printInfo(emptyStdHash);
     printInfo(fullStdHash);
@@ -303,37 +283,6 @@ int main(int argc, char *argv[])
         << "Reading full labelHashSet:" << timer.cpuTimeIncrement()
         << " s" << nl
         << "  sum " << sum << nl;
-
-
-    #ifdef TEST_STATIC_HASH
-    // Read empty StaticHashTable
-    sum = 0;
-    for (label iter = 0; iter < nIters; ++iter)
-    {
-        forAll(unpacked, i)
-        {
-            sum += emptyStaticHash.found(i);
-        }
-    }
-    std::cout
-        << "Reading empty StaticHash:" << timer.cpuTimeIncrement()
-        << " s" << nl
-        << "  sum " << sum << nl;
-
-    // Read full StaticHashTable
-    sum = 0;
-    for (label iter = 0; iter < nIters; ++iter)
-    {
-        forAll(unpacked, i)
-        {
-            sum += fullStaticHash.found(i);
-        }
-    }
-    std::cout
-        << "Reading full StaticHash:" << timer.cpuTimeIncrement()
-        << " s" << nl
-        << "  sum " << sum << nl;
-    #endif
 
 
     #ifdef TEST_STD_UNORDERED_SET
