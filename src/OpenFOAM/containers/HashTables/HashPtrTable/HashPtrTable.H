@@ -91,8 +91,11 @@ public:
 
     // Constructors
 
+        //- Construct null with default table size
+        HashPtrTable();
+
         //- Construct given initial table size
-        HashPtrTable(const label size = 128);
+        explicit HashPtrTable(const label size);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
@@ -102,7 +105,7 @@ public:
         HashPtrTable(Istream& is);
 
         //- Construct from dictionary with default dictionary constructor class
-        HashPtrTable(const dictionary& dict);
+        explicit HashPtrTable(const dictionary& dict);
 
         //- Construct as copy
         HashPtrTable(const this_type& ht);
@@ -127,7 +130,7 @@ public:
         //- Erase an entry specified by the given key
         bool erase(const Key& key);
 
-        //- Clear all entries from table
+        //- Clear all entries from table and deleting any allocated pointers
         void clear();
 
         //- Write

@@ -36,6 +36,8 @@ defineTypeNameAndDebug(HashTableCore, 0);
 // Approximately labelMax/4
 const Foam::label Foam::HashTableCore::maxTableSize(1L << (sizeof(label)*8-3));
 
+Foam::zero::null Foam::HashTableCore::zeroNullElement;
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -50,7 +52,7 @@ Foam::label Foam::HashTableCore::canonicalSize(const label requested_size)
         return maxTableSize;
     }
 
-    // Enforce power of two - makes for a very fast modulus.
+    // Enforce power of two for fast modulus in hash index calculations.
     // Use unsigned for these calculations.
     //
     // - The lower limit (8) is somewhat arbitrary, but if the hash table
@@ -65,7 +67,8 @@ Foam::label Foam::HashTableCore::canonicalSize(const label requested_size)
     {
         return powerOfTwo;
     }
-    else if (size & (size-1))  // <- Modulus of i^2
+
+    if (size & (size-1))  // <- Modulus of i^2
     {
         // Determine power-of-two. Brute-force is fast enough.
         while (powerOfTwo < size)
@@ -75,10 +78,8 @@ Foam::label Foam::HashTableCore::canonicalSize(const label requested_size)
 
         return powerOfTwo;
     }
-    else
-    {
-        return size;
-    }
+
+    return size;
 }
 
 

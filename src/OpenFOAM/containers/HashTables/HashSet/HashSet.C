@@ -79,7 +79,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::assignMultiple
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
 :
-    HashTable<nil, Key, Hash>(2*lst.size())
+    parent_type(2*lst.size())
 {
     for (const auto& k : lst)
     {
@@ -92,7 +92,7 @@ template<class Key, class Hash>
 template<unsigned Size>
 Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
 :
-    HashTable<nil, Key, Hash>(2*lst.size())
+    parent_type(2*lst.size())
 {
     for (const auto& k : lst)
     {
@@ -104,7 +104,7 @@ Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> lst)
 :
-    HashTable<nil, Key, Hash>(2*lst.size())
+    parent_type(2*lst.size())
 {
     for (const auto& k : lst)
     {
@@ -120,7 +120,7 @@ Foam::HashSet<Key, Hash>::HashSet
     const HashTable<AnyType, Key, AnyHash>& tbl
 )
 :
-    HashTable<nil, Key, Hash>(tbl.capacity())
+    parent_type(tbl.capacity())
 {
     using other_iter =
         typename HashTable<AnyType, Key, AnyHash>::const_iterator;
@@ -349,7 +349,7 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::begin() const
 {
-    return HashTableCore::iterator_begin<const_iterator>
+    return HashTableCore::iterator_cbegin<const_iterator>
     (
         static_cast<const parent_type&>(*this)
     );
@@ -360,7 +360,7 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::cbegin() const
 {
-    return HashTableCore::iterator_begin<const_iterator>
+    return HashTableCore::iterator_cbegin<const_iterator>
     (
         static_cast<const parent_type&>(*this)
     );
@@ -379,7 +379,7 @@ template<class Key, class Hash>
 inline const typename Foam::HashSet<Key, Hash>::const_iterator&
 Foam::HashSet<Key, Hash>::end() const
 {
-    return HashTableCore::iterator_end<const_iterator>();
+    return HashTableCore::iterator_cend<const_iterator>();
 }
 
 

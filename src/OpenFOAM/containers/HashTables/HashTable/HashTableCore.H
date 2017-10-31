@@ -40,6 +40,7 @@ SourceFiles
 #include "uLabel.H"
 #include "className.H"
 #include "nullObject.H"
+#include "zero.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -79,18 +80,14 @@ struct HashTableCore
 
     //- Factory method to create a const iterator begin
     template<class IteratorType, class TableType>
-    inline static IteratorType iterator_begin(const TableType& table);
-
-    //- Factory method to create a const iterator begin
-    template<class IteratorType, class TableType>
     inline static IteratorType iterator_cbegin(const TableType& table);
 
-    //- Factory method to create a non-const iterator end
+    //- Factory method to return an iterator end
     //  Simply reinterprets a NullObject as a hash-table iterator.
     template<class IteratorType>
     inline static const IteratorType& iterator_end();
 
-    //- Factory method to create a const iterator cend
+    //- Factory method to return an iterator cend
     //  Simply reinterprets a NullObject as a hash-table iterator.
     template<class IteratorType>
     inline static const IteratorType& iterator_cend();
@@ -116,6 +113,13 @@ struct HashTableCore
         inline const IteratorType& end() const;
         inline const IteratorType& cend() const;
     };
+
+
+protected:
+
+    //- A static zero::null for dereferencing as a dummy HashSet element
+    static zero::null zeroNullElement;
+
 };
 
 
