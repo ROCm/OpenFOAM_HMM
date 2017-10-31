@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "hashedWordList.H"
+#include "nil.H"
 #include "HashSet.H"
 #include "Map.H"
 #include "labelPairHashes.H"
@@ -68,6 +69,8 @@ int main(int argc, char *argv[])
     tableB.insert("value6", nil());
 
     Info<< "tableA keys: "; tableA.writeKeys(Info) << endl;
+
+    Info<< "tableB content: " << tableB << endl;
 
     auto keyIterPair = tableA.keys();
     for (const auto& i : keyIterPair)
