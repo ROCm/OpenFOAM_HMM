@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,13 +105,6 @@ private:
             FixedList<triPoints, 10>& tris
         ) const;
 
-        //- Decompose face into triangle fan
-        inline void triangleFan
-        (
-            const face& f,
-            DynamicList<face>& faces
-        ) const;
-
         //- Return point of intersection between plane and triangle edge
         inline point planeIntersection
         (
@@ -161,6 +154,15 @@ public:
 
         //- Fraction of local length scale to use as intersection tolerance
         inline static scalar& tolerance();
+
+        //- Triangulate a face using the given triangulation mode
+        static void triangulate
+        (
+            const face& f,
+            const pointField& points,
+            const triangulationMode& triMode,
+            faceList& faceTris
+        );
 
         //- Return area of intersection of faceA with faceB
         scalar calc
