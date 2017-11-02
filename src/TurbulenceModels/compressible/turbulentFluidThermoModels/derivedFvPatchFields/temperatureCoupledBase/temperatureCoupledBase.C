@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,7 +71,45 @@ Foam::temperatureCoupledBase::temperatureCoupledBase
     method_(KMethodTypeNames_.lookup("kappaMethod", dict)),
     kappaName_(dict.lookupOrDefault<word>("kappa", "none")),
     alphaAniName_(dict.lookupOrDefault<word>("alphaAni","none"))
-{}
+{
+    switch (method_)
+    {
+        case mtDirectionalSolidThermo:
+        {
+            if (!dict.found("alphaAni"))
+            {
+                FatalIOErrorInFunction(dict)
+                    << "Did not find entry 'alphaAni'"
+                       " required for 'kappaMethod' "
+                    << KMethodTypeNames_[method_]
+                    << exit(FatalIOError);
+            }
+
+            break;
+        }
+
+        case mtLookup:
+        {
+            if (!dict.found("kappa"))
+            {
+                FatalIOErrorInFunction(dict)
+                    << "Did not find entry 'kappa'"
+                       " required for 'kappaMethod' "
+                    <<  KMethodTypeNames_[method_] << nl
+                    << "    Please set 'kappa' to the name of a volScalarField"
+                       " or volSymmTensorField"
+                    << exit(FatalIOError);
+            }
+
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
+}
 
 
 Foam::temperatureCoupledBase::temperatureCoupledBase
@@ -132,7 +170,8 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
             else
             {
                 FatalErrorInFunction
-                    << "Kappa defined to employ " << KMethodTypeNames_[method_]
+                    << "kappaMethod defined to employ "
+                    << KMethodTypeNames_[method_]
                     << " method, but thermo package not available"
                     << exit(FatalError);
             }
@@ -196,10 +235,8 @@ Foam::tmp<Foam::scalarField> Foam::temperatureCoupledBase::kappa
                     << "Did not find field " << kappaName_
                     << " on mesh " << mesh.name() << " patch " << patch_.name()
                     << nl
-                    << "Please set 'kappaMethod' to one of "
-                    << flatOutput(KMethodTypeNames_.sortedToc()) << nl
-                    << "and 'kappa' to the name of the volScalar"
-                    << " or volSymmTensor field (if kappaMethod=lookup)"
+                    << "    Please set 'kappa' to the name of a volScalarField"
+                    << " or volSymmTensorField."
                     << exit(FatalError);
             }
 
