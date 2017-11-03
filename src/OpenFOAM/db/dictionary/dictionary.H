@@ -222,13 +222,6 @@ public:
             pointer eptr_;
 
 
-            //- Construct null
-            Searcher()
-            :
-                dict_(nullptr),
-                eptr_(nullptr)
-            {}
-
             //- Construct for the given dictionary context
             Searcher(dict_pointer dict)
             :
@@ -244,6 +237,14 @@ public:
 
 
         public:
+
+            //- Construct null
+            Searcher()
+            :
+                dict_(nullptr),
+                eptr_(nullptr)
+            {}
+
 
             //- Entry was found.
             inline bool found() const

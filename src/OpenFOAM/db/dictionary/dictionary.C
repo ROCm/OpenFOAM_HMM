@@ -271,7 +271,7 @@ const Foam::entry& Foam::dictionary::lookupEntry
     bool patternMatch
 ) const
 {
-    auto finder = csearch(keyword, recursive, patternMatch);
+    const const_searcher finder(csearch(keyword, recursive, patternMatch));
 
     if (!finder.found())
     {
@@ -320,7 +320,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
     const word varName(keyword.substr(1), false);
 
     // Lookup the variable name in the given dictionary
-    const_searcher finder = csearch(varName, true, true);
+    const const_searcher finder(csearch(varName, true, true));
 
     // If defined insert its entries into this dictionary
     if (finder.found())
@@ -354,7 +354,7 @@ bool Foam::dictionary::substituteScopedKeyword
     const word varName(keyword.substr(1), false);
 
     // Lookup the variable name in the given dictionary
-    const_searcher finder = csearchScoped(varName, true, true);
+    const const_searcher finder(csearchScoped(varName, true, true));
 
     // If defined insert its entries into this dictionary
     if (finder.found())
@@ -397,7 +397,7 @@ Foam::dictionary* Foam::dictionary::subDictPtr(const word& keyword)
 const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 {
     // Find non-recursive with patterns
-    auto finder = csearch(keyword, false, true);
+    const const_searcher finder(csearch(keyword, false, true));
 
     if (!finder.found())
     {
@@ -416,7 +416,7 @@ const Foam::dictionary& Foam::dictionary::subDict(const word& keyword) const
 Foam::dictionary& Foam::dictionary::subDict(const word& keyword)
 {
     // Find non-recursive with patterns
-    auto finder = search(keyword, false, true);
+    searcher finder = search(keyword, false, true);
 
     if (!finder.found())
     {
@@ -439,7 +439,7 @@ Foam::dictionary Foam::dictionary::subOrEmptyDict
 ) const
 {
     // Find non-recursive with patterns
-    auto finder = csearch(keyword, false, true);
+    const const_searcher finder(csearch(keyword, false, true));
 
     if (finder.isDict())
     {
@@ -475,7 +475,7 @@ const Foam::dictionary& Foam::dictionary::optionalSubDict
     const word& keyword
 ) const
 {
-    auto finder = csearch(keyword, false, true);
+    const const_searcher finder(csearch(keyword, false, true));
 
     if (finder.isDict())
     {
@@ -535,6 +535,11 @@ Foam::List<Foam::keyType> Foam::dictionary::keys(bool patterns) const
 
 bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 {
+    if (!entryPtr)
+    {
+        return false;
+    }
+
     auto iter = hashedEntries_.find(entryPtr->keyword());
 
     if (mergeEntry && iter.found())
@@ -543,8 +548,8 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
         if (iter()->isDict() && entryPtr->isDict())
         {
             iter()->dict().merge(entryPtr->dict());
-            delete entryPtr;
 
+            delete entryPtr;
             return true;
         }
 
@@ -576,6 +581,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             << " in dictionary " << name() << endl;
 
         parent_type::remove(entryPtr);
+
         delete entryPtr;
         return false;
     }
@@ -657,8 +663,13 @@ void Foam::dictionary::add
 
 void Foam::dictionary::set(entry* entryPtr)
 {
+    if (!entryPtr)
+    {
+        return;
+    }
+
     // Find non-recursive with patterns
-    auto finder = search(entryPtr->keyword(), false, true);
+    searcher finder(search(entryPtr->keyword(), false, true));
 
     // Clear dictionary so merge acts like overwrite
     if (finder.isDict())
