@@ -68,12 +68,12 @@ class Arrhenius
         dimensionedScalar Talpha_;
 
         //- Field used for as temperature
-        word  fieldName_;
+        word fieldName_;
 
         //- Auto pointer for scalar field
         autoPtr<volScalarField> field_;
 
-        //- Refernce to mesh
+        //- Reference to mesh
         const fvMesh& mesh_;
 
 
@@ -85,8 +85,8 @@ class Arrhenius
 
 public:
 
-//     //- Runtime type information
-     TypeName("Arrhenius");
+    //- Runtime type information
+    TypeName("Arrhenius");
 
 
     // Constructors

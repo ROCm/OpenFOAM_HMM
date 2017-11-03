@@ -45,14 +45,14 @@ License
                 dictionary,                                                  \
                 ArrheniusType##visType                                       \
             );                                                               \
-                                                                             \
-            defineTemplateTypeNameAndDebugWithName                           \
-            (                                                                \
-                ArrheniusType##visType,                                      \
-                #ArrheniusType"<"#visType">",                                \
-                0                                                            \
-            );                                                               \
         }                                                                    \
+                                                                             \
+        defineTemplateTypeNameAndDebugWithName                               \
+        (                                                                    \
+            viscosityModels::ArrheniusType##visType,                         \
+            #ArrheniusType"<"#visType">",                                    \
+            0                                                                \
+        );                                                                   \
     }
 
 
