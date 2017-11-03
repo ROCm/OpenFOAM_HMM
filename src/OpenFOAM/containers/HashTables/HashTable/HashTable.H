@@ -25,14 +25,15 @@ Class
     Foam::HashTable
 
 Description
-    An STL-conforming hash table.
+    A HashTable similar to \c std::unordered_map.
+    The entries are considered \a unordered since their placement
+    depends on the method used to generate the hash key index, the
+    table capacity, insertion order etc. When the key order is
+    important, use the sortedToc() method to obtain a list of sorted
+    keys and use that for further access.
 
-Note
-    Hashing index collisions are handled via chaining using a singly-linked
-    list with the colliding entry being added to the head of the linked
-    list. Thus copying the hash table (or indeed even resizing it) will
-    often result in a different hash order. Use a sorted table-of-contents
-    when the hash order is important.
+    Internally the table uses closed addressing into a flat storage space
+    with collisions handled by linked-list chaining.
 
     The end iterator of all hash-tables has a nullptr to the hash entry.
     Thus avoid separate allocation for each table and use a single one with
@@ -41,10 +42,38 @@ Note
     a nullptr as its first data member.
     The nullObject is such an item (with a nullptr data member).
 
+Note
+    For historical reasons, dereferencing the table iterator
+    (eg, \a *iter) returns a reference to the stored object value
+    value rather than the stored key/object value like std::unordered_map
+    does.
+
+    The HashTable iterator:
+    \code
+        forAllConstIters(table, iter)
+        {
+            Info<< "val:" << *iter << nl
+                << "key:" << iter.key() << nl;
+                << "val:" << iter.object() << nl;
+        }
+    \endcode
+    whereas for the \c std::unordered_map iterator:
+    \code
+        forAllConstIters(stdmap, iter)
+        {
+            Info<< "key/val:" << *iter << nl
+                << "key:" << iter->first << nl
+                << "val:" << iter->second << nl;
+        }
+    \endcode
+    This difference is most evident when using range-for syntax.
+
 SourceFiles
     HashTableI.H
+    HashTableIterI.H
     HashTable.C
     HashTableIO.C
+    HashTableIter.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,6 +81,7 @@ SourceFiles
 #define HashTable_H
 
 #include "word.H"
+#include "zero.H"
 #include "Xfer.H"
 #include "Hash.H"
 #include "HashTableCore.H"
@@ -80,7 +110,7 @@ Ostream& operator<<(Ostream& os, const HashTable<T, Key, Hash>& tbl);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class HashTable Declaration
+                          Class HashTable Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class Key=word, class Hash=string::hash>
@@ -88,6 +118,140 @@ class HashTable
 :
     public HashTableCore
 {
+    // Private types for table entries
+
+        //- Structure with a (K,V) tuple and a linked-list for collisions
+        //  Could store key/object as std::pair, but no particular advantage
+        //  unless the iterator dereference type changes.
+        struct pair_entry
+        {
+            //- Type of key
+            typedef Key key_type;
+
+            //- Object content type
+            typedef T mapped_type;
+
+            //- The lookup key
+            key_type key_;
+
+            //- The data object
+            mapped_type obj_;
+
+            //- Addressing (next in collision list)
+            pair_entry* next_;
+
+            //- Construct from key, object, next pointer
+            pair_entry(const Key& key, const T& obj, pair_entry* next)
+            :
+                key_(key),
+                obj_(obj),
+                next_(next)
+            {}
+
+            //- The key
+            const key_type& key() const
+            {
+                return key_;
+            }
+
+            //- The mapped object
+            const mapped_type& mapped() const
+            {
+                return obj_;
+            }
+            mapped_type& mapped()
+            {
+                return obj_;
+            }
+
+        private:
+            //- Disallow default bitwise copy construct / assignment
+            pair_entry(const pair_entry&) = delete;
+            void operator=(const pair_entry&) = delete;
+        };
+
+
+        //- Structure with a single (K) value and a linked-list for collisions
+        struct unary_entry
+        {
+            //- Type of key
+            typedef Key key_type;
+
+            //- Object content type
+            typedef zero::null mapped_type;
+
+            //- Content storage type to the entry
+            typedef key_type value_type;
+
+            //- The lookup key == content
+            key_type key_;
+
+            //- Addressing (next in collision list)
+            unary_entry* next_;
+
+            //- Construct from key, (ununsed) object, next pointer
+            unary_entry(const Key& key, const T&, unary_entry* next)
+            :
+                key_(key),
+                next_(next)
+            {}
+
+            //- The key
+            const key_type& key() const
+            {
+                return key_;
+            }
+
+            //- Dummy mapped object
+            const mapped_type& mapped() const
+            {
+                return zeroNullElement;
+            }
+            mapped_type& mapped()
+            {
+                return zeroNullElement;
+            }
+
+
+        private:
+            //- Disallow default bitwise copy construct / assignment
+            unary_entry(const unary_entry&) = delete;
+            void operator=(const unary_entry&) = delete;
+        };
+
+
+        //- Hashed node with a linked-list for collisions
+        typedef typename std::conditional
+        <
+            std::is_same<zero::null, typename std::remove_cv<T>::type>::value,
+            unary_entry,
+            pair_entry
+        >::type node_type;
+
+
+    // Private Data
+
+        //- The number of nodes currently stored in table
+        label size_;
+
+        //- Number of nodes allocated in table
+        label capacity_;
+
+        //- The table of primary nodes
+        node_type** table_;
+
+
+    // Private Member Functions
+
+        //- Return the hash index of the Key within the current table size.
+        //  No checks for zero-sized tables.
+        inline label hashKeyIndex(const Key& key) const;
+
+        //- Assign a new hash-entry to a possibly already existing key.
+        //  \return True if the new entry was set.
+        bool set(const Key& key, const T& obj, const bool overwrite);
+
+
 public:
 
     //- The template instance used for this HashTable
@@ -96,18 +260,25 @@ public:
 
     // STL type definitions
 
-        //- Type of keys that the HashTable uses.
+        //- The second template parameter, type of keys used.
         typedef Key key_type;
 
-        //- Type of values that the HashTable contains.
+        //- The first template parameter, type of objects contained.
+        typedef T mapped_type;
+
+        //- Same as mapped_type for OpenFOAM HashTables
+        //  Note that this is different than the std::map definition.
         typedef T value_type;
 
+        //- The third template parameter, the hash index method.
+        typedef Hash hasher;
+
         //- The type used for storing into value_type objects.
-        //  This type is usually value_type&.
+        //  This type is usually 'value_type*'.
         typedef T* pointer;
 
         //- The type used for storing into value_type objects.
-        //  This type is usually value_type&.
+        //  This type is usually 'value_type&'.
         typedef T& reference;
 
         //- The type used for reading from constant value_type objects.
@@ -129,65 +300,14 @@ public:
         //- Forward iterator with const access
         class const_iterator;
 
-
-private:
-
-    // Private data type for table entries
-
-        //- Structure to hold a hashed entry, with a linked-list for collisions
-        struct hashedEntry
-        {
-            //- The lookup key
-            Key key_;
-
-            //- The data object
-            T obj_;
-
-            //- Pointer to next hashedEntry in sub-list
-            hashedEntry* next_;
-
-            //- Construct from key, object, next pointer
-            inline hashedEntry(const Key& key, const T& obj, hashedEntry* next);
-
-        private:
-            //- Disallow default bitwise copy construct
-            hashedEntry(const hashedEntry&) = delete;
-
-            //- Disallow default bitwise assignment
-            void operator=(const hashedEntry&) = delete;
-        };
-
-
-    // Private data: size of table, the table and current number of elements
-
-        //- The current number of elements in table
-        label nElmts_;
-
-        //- Number of primary entries allocated in table
-        label tableSize_;
-
-        //- The table of primary entries
-        hashedEntry** table_;
-
-
-    // Private Member Functions
-
-        //- Return the hash index of the Key within the current table size.
-        //  No checks for zero-sized tables.
-        inline label hashKeyIndex(const Key& key) const;
-
-        //- Assign a new hash-entry to a possibly already existing key.
-        //  \return True if the new entry was set.
-        bool set(const Key& key, const T& obj, const bool protect);
-
-
 protected:
 
         //- Internally used base for iterator and const_iterator
-        class iterator_base;
+        template<bool Const> class Iterator;
 
-        //- Friendship with the iterator_base is required.
-        friend class iterator_base;
+        //- Friendship with the base iterator is required.
+        friend class Iterator<true>;
+        friend class Iterator<false>;
 
 
     // Protected Member Functions
@@ -205,20 +325,23 @@ public:
 
     // Constructors
 
-        //- Construct given initial table size
-        HashTable(const label size = 128);
+        //- Construct null with default (128) table size
+        HashTable();
 
-        //- Construct from Istream
+        //- Construct given initial table size
+        explicit HashTable(const label size);
+
+        //- Construct from Istream with default table size
         HashTable(Istream& is, const label size = 128);
 
         //- Construct as copy
-        HashTable(const HashTable<T, Key, Hash>& ht);
+        HashTable(const this_type& ht);
 
         //- Move construct
-        HashTable(HashTable<T, Key, Hash>&& ht);
+        HashTable(this_type&& ht);
 
         //- Construct by transferring the parameter contents
-        HashTable(const Xfer<HashTable<T, Key, Hash>>& ht);
+        HashTable(const Xfer<this_type>& ht);
 
         //- Construct from an initializer list
         HashTable(std::initializer_list<std::pair<Key, T>> lst);
@@ -242,19 +365,19 @@ public:
         inline bool empty() const;
 
         //- Return true if hashed entry is found in table
-        bool found(const Key& key) const;
+        inline bool found(const Key& key) const;
 
         //- Find and return an iterator set at the hashed entry
         //  If not found iterator = end()
-        iterator find(const Key& key);
+        inline iterator find(const Key& key);
 
         //- Find and return an const_iterator set at the hashed entry
         //  If not found iterator = end()
-        const_iterator find(const Key& key) const;
+        inline const_iterator find(const Key& key) const;
 
         //- Find and return an const_iterator set at the hashed entry
         //  If not found iterator = end()
-        const_iterator cfind(const Key& key) const;
+        inline const_iterator cfind(const Key& key) const;
 
         //- Return hashed entry if it exists, or return the given default
         inline const T& lookup(const Key& key, const T& deflt) const;
@@ -512,149 +635,157 @@ protected:
         //  and prevent most external usage.
         //  iterator and const_iterator have the same size, allowing
         //  us to reinterpret_cast between them (if desired)
-        class iterator_base
+
+        template<bool Const>
+        class Iterator
         {
         public:
-            // Public typedefs
-            using table_type = this_type;
-            using key_type   = this_type::key_type;
+          // Typedefs
             using iterator_category = std::forward_iterator_tag;
-            using difference_type  = this_type::difference_type;
+            using difference_type = this_type::difference_type;
 
-        private:
-            using entry_type = hashedEntry;
+            //- The HashTable container type
+            using table_type = typename std::conditional
+            <
+                Const,
+                const this_type,
+                this_type
+            >::type;
 
-          // Private Data
+            //- The node-type being addressed
+            using node_type = typename std::conditional
+            <
+                Const,
+                const this_type::node_type,
+                this_type::node_type
+            >::type;
 
-            //- Currently selected entry.
-            //  MUST be the first member for easy comparison between iterators
-            //  and for reinterpret_cast from nullObject
-            entry_type* entryPtr_;
+            //- The key type
+            using key_type = this_type::key_type;
 
-            //- Pointer to the hash-table for which this is an iterator
-            //  This allows use of the default bitwise copy/assignment
-            table_type* hashTable_;
+            //- The object type being addressed
+            using mapped_type = typename std::conditional
+            <
+                Const,
+                const this_type::mapped_type,
+                this_type::mapped_type
+            >::type;
 
-            //- Current hash index within the hash-table data.
-            //  A signed value, since erase() uses a negative value to signal
-            //  the erasure state.
-            label hashIndex_;
+
+          // Member Functions
+
+            //- True if iterator points to an entry
+            //  This can be used directly instead of comparing to end()
+            inline bool found() const;
+
+            //- The key associated with the iterator
+            inline const Key& key() const;
+
+          // Member Operators
+
+            //- Compare hash-entry element pointers.
+            //  Independent of const/non-const access
+            inline bool operator==(const Iterator<true>& iter) const;
+            inline bool operator!=(const Iterator<true>& iter) const;
+
+            inline bool operator==(const Iterator<false>& iter) const;
+            inline bool operator!=(const Iterator<false>& iter) const;
+
 
         protected:
+            friend class HashTable;  // For begin/find constructors
+
+          // Protected Data
+
+            //- The selected entry.
+            //  MUST be the first member for easy comparison between iterators
+            //  and for reinterpret_cast from nullObject
+            node_type* entry_;
+
+            //- The hash-table container being iterated on.
+            //  Using a pointer allows default bitwise copy/assignment
+            table_type* container_;
+
+            //- Index within the hash-table data.
+            //  A signed value, since iterator_erase() needs a negative value
+            //  to mark the position.
+            label index_;
+
+
+          // Protected Constructors
+
+            //- Construct null (end iterator)
+            inline Iterator();
+
+            //- Construct from begin of hash-table
+            inline Iterator(bool, table_type* tbl);
+
+            //- Construct by finding key in hash table
+            inline Iterator(table_type* tbl, const Key& key);
+
 
           // Protected Member Functions
 
             //- Increment to the next position
             inline void increment();
 
-            //- The referenced object/value element
-            inline T& element() const;
+            //- The object associated with the iterator
+            inline mapped_type& object() const
+            {
+                return entry_->mapped();
+            }
 
-            //- Erase the entry at the current position
-            bool erase();
-
-
-        public:
-
-          // Constructors
-
-            //- Construct null (end iterator)
-            inline iterator_base();
-
-            //- Construct from begin of hash-table
-            inline explicit iterator_base(const table_type* hashTbl);
-
-            //- Construct from hash table, element and hash index
-            inline iterator_base
-            (
-                const table_type* hashTbl,
-                const entry_type* elmt,
-                const label hashIndex
-            );
-
-          // Member functions/operators
-
-            //- True if iterator points to an entry
-            //  This can be used directly instead of comparing to end()
-            inline bool found() const;
-
-            //- Return the Key corresponding to the iterator
-            inline const Key& key() const;
-
-            //- Compare hash-entry element pointers
-            inline bool operator==(const iterator_base& iter) const;
-            inline bool operator!=(const iterator_base& iter) const;
+            //- Permit an explicit cast to the other (const/non-const) searcher
+            inline explicit operator const Iterator<!Const>&() const
+            {
+                return *reinterpret_cast<const Iterator<!Const>*>(this);
+            }
         };
 
+
+        //- Low-level entry erasure using iterator internals.
+        //  This invalidates the iterator until the next ++ operation.
+        //  \return True if the corresponding entry existed and was removed
+        bool iterator_erase(node_type*& entry, label& index);
 
 public:
-
-        //- An iterator wrapper for returning a reference to the key
-        template<class WrappedIterator>
-        class key_iterator_base
-        :
-            public WrappedIterator
-        {
-        public:
-            using value_type = this_type::key_type;
-            using pointer    = const Key*;
-            using reference  = const Key&;
-
-            //- Implicit conversion
-            inline key_iterator_base(const WrappedIterator& iter);
-
-            //- Return the key
-            inline reference operator*() const;
-            inline reference operator()() const;
-
-            inline key_iterator_base& operator++();
-            inline key_iterator_base operator++(int);
-        };
-
-
-    // STL iterator
 
         //- Forward iterator with non-const access
         class iterator
         :
-            public iterator_base
+            public Iterator<false>
         {
-            friend class HashTable;  // Uses iterator::erase() method
-            using entry_type = hashedEntry;
-
         public:
+          // Typedefs
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type   = this_type::difference_type;
 
-          // Public typedefs
-            using table_type = this_type;
-            using value_type = this_type::value_type;
-            using pointer    = this_type::pointer;
-            using reference  = this_type::reference;
+            using key_type    = this_type::key_type;
+            using mapped_type = this_type::mapped_type;
+            using value_type  = this_type::value_type;
+            using pointer     = this_type::pointer;
+            using reference   = this_type::reference;
 
           // Constructors
 
             //- Construct null (end iterator)
-            inline iterator();
+            inline iterator() {}
 
-            //- Construct from begin of hash-table
-            inline explicit iterator(table_type* hashTbl);
+            //- Copy construct from similar access type
+            inline explicit iterator(const Iterator<false>& iter)
+            :
+                Iterator<false>(iter)
+            {}
 
-            //- Construct from hash table, element and hash index
-            //  Used by the hash-table find() method.
-            inline iterator
-            (
-                table_type* hashTbl,
-                entry_type* elmt,
-                const label hashIndex
-            );
 
           // Member functions/operators
 
-            //- Return non-const access to referenced object
-            inline reference object() const;
+            //- Non-const access to referenced object
+            using Iterator<false>::object;
 
-            //- Return non-const access to referenced object
-            inline reference operator*() const;
-            inline reference operator()() const;
+            //- Non-const access to referenced object
+            inline reference operator*() const  { return this->object(); }
+            inline reference operator()() const { return this->object(); }
 
             inline iterator& operator++();
             inline iterator operator++(int);
@@ -666,53 +797,110 @@ public:
         //- Forward iterator with const access
         class const_iterator
         :
-            public iterator_base
+            public Iterator<true>
         {
-            using entry_type = const hashedEntry;
-
         public:
+          // Typedefs
+            using iterator_category = std::forward_iterator_tag;
+            using difference_type   = this_type::difference_type;
 
-          // Public typedefs
-            using table_type = const this_type;
-            using value_type = const this_type::value_type;
-            using pointer    = this_type::const_pointer;
-            using reference  = this_type::const_reference;
+            using key_type    = this_type::key_type;
+            using mapped_type = const this_type::mapped_type;
+            using value_type  = const this_type::value_type;
+            using pointer     = this_type::const_pointer;
+            using reference   = this_type::const_reference;
 
           // Constructors
 
             //- Construct null (end iterator)
-            inline const_iterator();
+            inline const_iterator() {}
 
-            //- Construct from begin of hash-table
-            inline explicit const_iterator(table_type* hashTbl);
+            //- Copy construct from similar access type
+            inline explicit const_iterator(const Iterator<true>& iter)
+            :
+                Iterator<true>(iter)
+            {}
 
-            //- Construct from hash table, element and hash index.
-            //  Used by the hash-table find() method.
-            inline const_iterator
-            (
-                table_type* hashTbl,
-                entry_type* elmt,
-                const label hashIndex
-            );
+            //- Copy construct from dissimilar access type
+            inline explicit const_iterator(const Iterator<false>& iter)
+            :
+                Iterator<true>
+                (
+                    static_cast<const Iterator<true>&>(iter)
+                )
+            {}
 
-            //- Copy construct from iterator
-            inline const_iterator(const iterator& iter);
+            //- Implicit conversion from dissimilar access type
+            inline const_iterator(const iterator& iter)
+            :
+                const_iterator(reinterpret_cast<const const_iterator&>(iter))
+            {}
+
 
           // Member functions/operators
 
-            //- Return const access to referenced object
-            inline reference object() const;
+            //- Const access to referenced object
+            using Iterator<true>::object;
 
-            //- Return const access to referenced object
-            inline reference operator*() const;
-            inline reference operator()() const;
+            //- Const access to referenced object
+            inline reference operator*() const  { return this->object(); }
+            inline reference operator()() const { return this->object(); }
 
             inline const_iterator& operator++();
             inline const_iterator operator++(int);
+
+          // Assignment
+
+            const_iterator& operator=(const const_iterator&) = default;
+
+            // Allow assign from iterator to const_iterator
+            const_iterator& operator=(const iterator& iter)
+            {
+                return this->operator=
+                (
+                    reinterpret_cast<const const_iterator&>(iter)
+                );
+            }
         };
 
 
     //- Iterating over keys only
+
+        //- An iterator wrapper for returning a reference to the key
+        template<class Iter>
+        class key_iterator_base
+        :
+            public Iter
+        {
+        public:
+            using value_type = this_type::key_type;
+            using pointer    = const Key*;
+            using reference  = const Key&;
+
+            //- Implicit conversion
+            inline key_iterator_base(const Iter& iter)
+            :
+                Iter(iter)
+            {}
+
+            //- Return the key
+            inline reference operator*() const  { return this->key(); }
+            inline reference operator()() const { return this->key(); }
+
+            inline key_iterator_base& operator++()
+            {
+                this->increment();
+                return *this;
+            }
+
+            inline key_iterator_base operator++(int)
+            {
+                key_iterator_base iter(*this);
+                this->increment();
+                return iter;
+            }
+        };
+
 
         //- Forward iterator returning the key
         using key_iterator = key_iterator_base<iterator>;
@@ -793,6 +981,7 @@ inline void Swap
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "HashTableI.H"
+#include "HashTableIterI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

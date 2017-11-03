@@ -27,6 +27,11 @@ Class
 Description
     A HashTable to objects of type \<T\> with a label key.
 
+Note
+    The Map contents are unordered.
+    When the key order is important, use the sortedToc() method to obtain
+    a list of sorted keys and use that for further access.
+
 See also
     PtrMap
 
@@ -65,13 +70,19 @@ public:
 
     // Constructors
 
-        //- Construct given initial size
-        Map(const label size = 128)
+        //- Construct null with default table size
+        Map()
+        :
+            parent_type()
+        {}
+
+        //- Construct with given table size
+        explicit Map(const label size)
         :
             parent_type(size)
         {}
 
-        //- Construct from Istream
+        //- Construct from Istream with default table size
         Map(Istream& is)
         :
             parent_type(is)
@@ -96,7 +107,7 @@ public:
         {}
 
         //- Construct by transferring the parameter contents
-        Map(const Xfer<HashTable<T, label, Hash<label>>>& map)
+        Map(const Xfer<parent_type>& map)
         :
             parent_type(map)
         {}

@@ -82,7 +82,10 @@ case ThirdParty:
         set clang_version=llvm-3.9.1
         breaksw
     case Clang40:
-        set clang_version=llvm-4.0.0
+        set clang_version=llvm-4.0.1
+        breaksw
+    case Clang50:
+        set clang_version=llvm-5.0.0
         breaksw
     default:
         /bin/cat << UNKNOWN_COMPILER

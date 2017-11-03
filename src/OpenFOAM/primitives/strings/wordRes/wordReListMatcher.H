@@ -39,12 +39,10 @@ Description
 
 namespace Foam
 {
-
      typedef wordRes wordReListMatcher;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 #endif
 

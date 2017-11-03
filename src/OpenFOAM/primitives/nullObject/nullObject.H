@@ -22,12 +22,13 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::nullObject
+    Foam::NullObject
 
 Description
     Singleton null-object class and instance.
-    It occupies enough space to reinterpret its content as a class with
-    a null pointer for its content.
+    Its contents occupy just enough space to also be reinterpreted
+    as another class with a null pointer or zero long for its first
+    member.
 
 SourceFiles
     nullObjectI.H
@@ -43,8 +44,14 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class Istream;
+class Ostream;
+
+class NullObject;
+
 /*---------------------------------------------------------------------------*\
-                         Class nullObject Declaration
+                         Class NullObject Declaration
 \*---------------------------------------------------------------------------*/
 
 class NullObject
@@ -55,12 +62,12 @@ class NullObject
     {
         void* ptr;
         unsigned long val;
-    } null;
+    } content;
 
-    //- Private constructor
+    //- Private constructor for singleton only
     NullObject()
     :
-        null{nullptr}
+        content{nullptr}
     {}
 
     //- Disallow default bitwise copy construct
@@ -70,21 +77,42 @@ class NullObject
     void operator=(const NullObject&) = delete;
 
 public:
-    //- The unique null object
-    static const NullObject nullObject;
 
-    //- A nullptr pointer content
-    inline const void* pointer() const
-    {
-        return null.ptr;
-    }
+    // Static Data
 
-    //- A zero value content
-    inline unsigned long value() const
-    {
-        return null.val;
-    }
+        //- A unique null object
+        static const NullObject nullObject;
+
+
+    // Member Functions
+
+        //- A nullptr pointer content
+        inline const void* pointer() const
+        {
+            return content.ptr;
+        }
+
+        //- Zero valued integer content
+        inline unsigned long value() const
+        {
+            return content.val;
+        }
 };
+
+
+// IOstream Operators
+
+//- Read from Istream consumes no content.
+inline Istream& operator>>(Istream& is, NullObject&)
+{
+    return is;
+}
+
+//- Write to Ostream emits no content.
+inline Ostream& operator<<(Ostream& os, const NullObject&)
+{
+    return os;
+}
 
 
 //- Pointer to the unique nullObject
