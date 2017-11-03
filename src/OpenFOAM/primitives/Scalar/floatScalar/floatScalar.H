@@ -51,13 +51,13 @@ typedef float floatScalar;
 // Largest and smallest scalar values allowed in certain parts of the code.
 // (6 is the number of significant figures in an
 //  IEEE single precision number.  See limits.h or float.h)
-static const floatScalar floatScalarGREAT = 1.0e+6;
-static const floatScalar floatScalarVGREAT = 1.0e+37;
-static const floatScalar floatScalarROOTVGREAT = 1.0e+18;
-static const floatScalar floatScalarSMALL = 1.0e-6;
-static const floatScalar floatScalarROOTSMALL = 1.0e-3;
-static const floatScalar floatScalarVSMALL = 1.0e-37;
-static const floatScalar floatScalarROOTVSMALL = 1.0e-18;
+constexpr floatScalar floatScalarGREAT = 1.0e+6;
+constexpr floatScalar floatScalarVGREAT = 1.0e+37;
+constexpr floatScalar floatScalarROOTVGREAT = 1.0e+18;
+constexpr floatScalar floatScalarSMALL = 1.0e-6;
+constexpr floatScalar floatScalarROOTSMALL = 1.0e-3;
+constexpr floatScalar floatScalarVSMALL = 1.0e-37;
+constexpr floatScalar floatScalarROOTVSMALL = 1.0e-18;
 
 
 #define Scalar floatScalar

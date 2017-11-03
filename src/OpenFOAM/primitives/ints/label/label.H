@@ -58,8 +58,8 @@ namespace Foam
 
 typedef INT_SIZE(int, _t) label;
 
-static const label labelMin = INT_SIZE(INT, _MIN);
-static const label labelMax = INT_SIZE(INT, _MAX);
+constexpr label labelMin = INT_SIZE(INT, _MIN);
+constexpr label labelMax = INT_SIZE(INT, _MAX);
 
 //- Read label from stream.
 //  Uses readInt32 or readInt64 according to WM_LABEL_SIZE

@@ -329,8 +329,8 @@ inline Ostream& endEntry(Ostream& os)
 
 
 // Useful aliases for tab and newline characters
-static const char tab = '\t';
-static const char nl = '\n';
+constexpr char tab = '\t';
+constexpr char nl = '\n';
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
