@@ -75,6 +75,8 @@ template<class T> class IndirectList;
 template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
+typedef List<char> charList;
+
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
 \*---------------------------------------------------------------------------*/
