@@ -27,9 +27,6 @@ License
 #include "primitiveMesh.H"
 #include "DynamicList.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::enrichedPatch::calcPointPoints() const
@@ -52,16 +49,14 @@ void Foam::enrichedPatch::calcPointPoints() const
 
     bool found = false;
 
-    forAll(lf, facei)
+    for (const face& curFace : lf)
     {
-        const face& curFace = lf[facei];
-
         forAll(curFace, pointi)
         {
             DynamicList<label>& curPp = pp[curFace[pointi]];
 
             // Do next label
-            label next = curFace.nextLabel(pointi);
+            const label next = curFace.nextLabel(pointi);
 
             found = false;
 
@@ -80,7 +75,7 @@ void Foam::enrichedPatch::calcPointPoints() const
             }
 
             // Do previous label
-            label prev = curFace.prevLabel(pointi);
+            const label prev = curFace.prevLabel(pointi);
             found = false;
 
             forAll(curPp, i)

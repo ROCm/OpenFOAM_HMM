@@ -229,35 +229,23 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     if (curPointZoneNames.size())
     {
         pointZoneNames_.setCapacity(2*curPointZoneNames.size());
-    }
-
-    forAll(curPointZoneNames, zoneI)
-    {
-        pointZoneNames_.append(curPointZoneNames[zoneI]);
+        pointZoneNames_.append(curPointZoneNames);
     }
 
     // Face zones
     wordList curFaceZoneNames = faceZones().names();
-
     if (curFaceZoneNames.size())
     {
         faceZoneNames_.setCapacity(2*curFaceZoneNames.size());
-    }
-    forAll(curFaceZoneNames, zoneI)
-    {
-        faceZoneNames_.append(curFaceZoneNames[zoneI]);
+        faceZoneNames_.append(curFaceZoneNames);
     }
 
     // Cell zones
     wordList curCellZoneNames = cellZones().names();
-
     if (curCellZoneNames.size())
     {
         cellZoneNames_.setCapacity(2*curCellZoneNames.size());
-    }
-    forAll(curCellZoneNames, zoneI)
-    {
-        cellZoneNames_.append(curCellZoneNames[zoneI]);
+        cellZoneNames_.append(curCellZoneNames);
     }
 }
 

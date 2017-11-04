@@ -587,6 +587,7 @@ Foam::dictionary* Foam::dictionary::makeScopedDictPtr(const fileName& dictPath)
                 }
                 else
                 {
+                    // Note: a failed add() deletes the eptr passed
                     return nullptr;
                 }
             }

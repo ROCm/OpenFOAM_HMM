@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ Application
 
 Group
     grpMeshManipulationUtilities
-
 
 Description
     'Stitches' a mesh.
@@ -332,7 +331,8 @@ int main(int argc, char *argv[])
         isf[i] = masterPatch.start() + i;
     }
 
-    polyTopoChanger stitcher(mesh);
+    polyTopoChanger stitcher(mesh, IOobject::NO_READ);
+    stitcher.clear();
     stitcher.setSize(1);
 
     mesh.pointZones().clearAddressing();
@@ -414,7 +414,6 @@ int main(int argc, char *argv[])
         );
     }
 
-
     // Search for list of objects for this time
     IOobjectList objects(mesh, runTime.timeName());
 
@@ -435,7 +434,7 @@ int main(int argc, char *argv[])
     PtrList<volTensorField> volTensorFields;
     ReadFields(mesh, objects, volTensorFields);
 
-    //- Uncomment if you want to interpolate surface fields (usually bad idea)
+    //- Uncomment if you want to interpolate surface fields (usually a bad idea)
     //Info<< "Reading all current surfaceFields" << endl;
     //PtrList<surfaceScalarField> surfaceScalarFields;
     //ReadFields(mesh, objects, surfaceScalarFields);
@@ -469,7 +468,7 @@ int main(int argc, char *argv[])
     // Bypass runTime write (since only writes at writeTime)
     if
     (
-       !runTime.objectRegistry::writeObject
+        !runTime.objectRegistry::writeObject
         (
             runTime.writeFormat(),
             IOstream::currentVersion,

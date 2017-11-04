@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,7 +47,7 @@ void Foam::enrichedPatch::calcMeshPoints() const
             << abort(FatalError);
     }
 
-    meshPointsPtr_ = new labelList(pointMap().toc());
+    meshPointsPtr_ = new labelList(std::move(pointMap().toc()));
     labelList& mp = *meshPointsPtr_;
 
     sort(mp);
@@ -88,7 +88,7 @@ void Foam::enrichedPatch::calcLocalFaces() const
 
         forAll(f, pointi)
         {
-            curlf[pointi] = mpLookup.find(f[pointi])();
+            curlf[pointi] = mpLookup.cfind(f[pointi])();
         }
     }
 }
@@ -110,7 +110,7 @@ void Foam::enrichedPatch::calcLocalPoints() const
 
     forAll(lp, i)
     {
-        lp[i] = pointMap().find(mp[i])();
+        lp[i] = pointMap().cfind(mp[i])();
     }
 }
 
@@ -131,14 +131,13 @@ void Foam::enrichedPatch::clearOut()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::enrichedPatch::enrichedPatch
 (
     const primitiveFacePatch& masterPatch,
     const primitiveFacePatch& slavePatch,
-    const labelList& slavePointPointHits,
-    const labelList& slavePointEdgeHits,
-    const List<objectHit>& slavePointFaceHits
+    const labelUList& slavePointPointHits,
+    const labelUList& slavePointEdgeHits,
+    const UList<objectHit>& slavePointFaceHits
 )
 :
     masterPatch_(masterPatch),
@@ -252,36 +251,20 @@ void Foam::enrichedPatch::writeOBJ(const fileName& fName) const
 {
     OFstream str(fName);
 
-    const pointField& lp = localPoints();
-
-    forAll(lp, pointi)
-    {
-        meshTools::writeOBJ(str, lp[pointi]);
-    }
+    meshTools::writeOBJ(str, localPoints());
 
     const faceList& faces = localFaces();
 
-    forAll(faces, facei)
+    for (const face& f : faces)
     {
-        const face& f = faces[facei];
-
         str << 'f';
-        forAll(f, fp)
+        for (const label fp : f)
         {
-            str << ' ' << f[fp]+1;
+            str << ' ' << fp+1;
         }
         str << nl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

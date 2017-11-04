@@ -369,9 +369,6 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    Foam::word meshRegionName = polyMesh::defaultRegion;
-    args.optionReadIfPresent("region", meshRegionName);
-
     #include "createNamedMesh.H"
 
     const word setName = args[1];

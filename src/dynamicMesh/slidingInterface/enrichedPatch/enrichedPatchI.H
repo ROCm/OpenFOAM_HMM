@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,75 +23,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polyTopoChange.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-void Foam::polyTopoChange::reorder
-(
-    const labelUList& oldToNew,
-    DynamicList<T>& lst
-)
+inline const Foam::Map<Foam::point>& Foam::enrichedPatch::pointMap() const
 {
-    // Create copy
-    DynamicList<T> oldLst(lst);
-
-    forAll(oldToNew, i)
+    if (!pointMapComplete_)
     {
-        const label newIdx = oldToNew[i];
-
-        if (newIdx >= 0)
-        {
-            lst[newIdx] = oldLst[i];
-        }
+        completePointMap();
     }
+
+    return pointMap_;
 }
 
 
-template<class T>
-void Foam::polyTopoChange::reorder
-(
-    const labelUList& oldToNew,
-    List<DynamicList<T>>& lst
-)
+inline Foam::Map<Foam::point>& Foam::enrichedPatch::pointMap()
 {
-    // Create copy
-    List<DynamicList<T>> oldLst(lst);
-
-    forAll(oldToNew, i)
+    if (!pointMapComplete_)
     {
-        const label newIdx = oldToNew[i];
-
-        if (newIdx >= 0)
-        {
-            lst[newIdx].transfer(oldLst[i]);
-        }
+        completePointMap();
     }
+
+    return pointMap_;
 }
 
 
-template<class T>
-void Foam::polyTopoChange::renumberKey
-(
-    const labelUList& oldToNew,
-    Map<T>& map
-)
+inline const Foam::Map<Foam::label>& Foam::enrichedPatch::pointMergeMap() const
 {
-    Map<T> newMap(map.capacity());
-
-    forAllConstIters(map, iter)
-    {
-        const label newKey = oldToNew[iter.key()];
-
-        if (newKey >= 0)
-        {
-            newMap.insert(newKey, iter.object());
-        }
-    }
-
-    map.transfer(newMap);
+    return pointMergeMap_;
 }
+
+
+inline Foam::Map<Foam::label>& Foam::enrichedPatch::pointMergeMap()
+{
+    return pointMergeMap_;
+}
+
 
 
 // ************************************************************************* //

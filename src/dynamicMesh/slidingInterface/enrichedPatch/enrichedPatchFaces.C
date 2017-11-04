@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,10 +26,10 @@ License
 #include "enrichedPatch.H"
 #include "DynamicList.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::label Foam::enrichedPatch::enrichedFaceRatio_ = 3;
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -79,10 +79,11 @@ void Foam::enrichedPatch::calcEnrichedFaces
 
     forAll(slavePatch_, facei)
     {
-        const face oldFace = slavePatch_[facei];
-        const face oldLocalFace = slaveLocalFaces[facei];
-//         Info<< "old slave face " << facei << ": " << oldFace << endl;
+        const face& oldFace = slavePatch_[facei];
+        const face& oldLocalFace = slaveLocalFaces[facei];
         const labelList& curEdges = slaveFaceEdges[facei];
+
+        // Info<< "old slave face[" << facei << "] " << oldFace << endl;
 
         DynamicList<label> newFace(oldFace.size()*enrichedFaceRatio_);
 
@@ -90,57 +91,45 @@ void Foam::enrichedPatch::calcEnrichedFaces
         // so both can be done is the same loop
         forAll(oldFace, i)
         {
-            // Add the point
-            Map<label>::const_iterator mpIter =
-                pmm.find(oldFace[i]);
+            // Add the point.
+            // Using the mapped point id if possible
 
-            if (mpIter == pmm.end())
-            {
-                // Point not mapped
-                newFace.append(oldFace[i]);
+            const label mappedPointi = pmm.lookup(oldFace[i], oldFace[i]);
 
-                // Add the projected point into the patch support
-                pointMap().insert
-                (
-                    oldFace[i],    // Global label of point
-                    projectedSlavePoints[oldLocalFace[i]] // Projected position
-                );
-            }
-            else
-            {
-                // Point mapped
-                newFace.append(mpIter());
+            newFace.append(mappedPointi);
 
-                // Add the projected point into the patch support
-                pointMap().insert
-                (
-                    mpIter(),    // Merged global label of point
-                    projectedSlavePoints[oldLocalFace[i]] // Projected position
-                );
-            }
+            // Add the projected point into the patch support
+            pointMap().insert
+            (
+                mappedPointi,   // Global label of point
+                projectedSlavePoints[oldLocalFace[i]] // Projected position
+            );
 
             // Grab the edge points
 
-            const labelList& slavePointsOnEdge =
+            const labelList& pointsOnEdge =
                 pointsIntoSlaveEdges[curEdges[i]];
 
-            // Info<< "slavePointsOnEdge for "
-            //     << curEdges[i] << ": " << slavePointsOnEdge
+            // Info<< "slave pointsOnEdge for "
+            //     << curEdges[i] << ": " << pointsOnEdge
             //     << endl;
 
             // If there are no points on the edge, skip everything
             // If there is only one point, no need for sorting
-            if (slavePointsOnEdge.size())
+            if (pointsOnEdge.size())
             {
                 // Sort edge points in order
-                scalarField edgePointWeights(slavePointsOnEdge.size());
-                const point& startPoint = projectedSlavePoints[oldLocalFace[i]];
+                scalarField weightOnEdge(pointsOnEdge.size());
 
-                vector e =
-                    projectedSlavePoints[oldLocalFace.nextLabel(i)]
-                  - startPoint;
+                const point& startPoint =
+                    projectedSlavePoints[oldLocalFace[i]];
 
-                scalar magSqrE = magSqr(e);
+                const point& endPoint =
+                    projectedSlavePoints[oldLocalFace.nextLabel(i)];
+
+                vector e = (endPoint - startPoint);
+
+                const scalar magSqrE = magSqr(e);
 
                 if (magSqrE > SMALL)
                 {
@@ -154,27 +143,34 @@ void Foam::enrichedPatch::calcEnrichedFaces
                         << abort(FatalError);
                 }
 
-                pointField slavePosOnEdge(slavePointsOnEdge.size());
+                pointField positionOnEdge(pointsOnEdge.size());
 
-                forAll(slavePointsOnEdge, edgePointi)
+                forAll(pointsOnEdge, edgePointi)
                 {
-                    slavePosOnEdge[edgePointi] =
-                        pointMap().find(slavePointsOnEdge[edgePointi])();
+                    positionOnEdge[edgePointi] =
+                        pointMap()[pointsOnEdge[edgePointi]];
 
-                    edgePointWeights[edgePointi] =
-                        (e & (slavePosOnEdge[edgePointi] - startPoint));
+                    weightOnEdge[edgePointi] =
+                    (
+                        e
+                      &
+                        (
+                            positionOnEdge[edgePointi]
+                          - startPoint
+                        )
+                    );
                 }
 
                 if (debug)
                 {
                     // Check weights: all new points should be on the edge
-                    if (min(edgePointWeights) < 0 || max(edgePointWeights) > 1)
+                    if (min(weightOnEdge) < 0 || max(weightOnEdge) > 1)
                     {
                         FatalErrorInFunction
                             << " not on the edge for edge " << curEdges[i]
                             << " of face " << facei << " in slave patch." << nl
-                            << "Min weight: " << min(edgePointWeights)
-                            << " Max weight: " << max(edgePointWeights)
+                            << "Min weight: " << min(weightOnEdge)
+                            << " Max weight: " << max(weightOnEdge)
                             << abort(FatalError);
                     }
                 }
@@ -182,42 +178,46 @@ void Foam::enrichedPatch::calcEnrichedFaces
                 // Go through the points and collect them based on
                 // weights from lower to higher.  This gives the
                 // correct order of points along the edge.
-                forAll(edgePointWeights, passI)
+                forAll(weightOnEdge, passI)
                 {
                     // Max weight can only be one, so the sorting is
                     // done by elimination.
                     label nextPoint = -1;
                     scalar dist = 2;
 
-                    forAll(edgePointWeights, wI)
+                    forAll(weightOnEdge, wI)
                     {
-                        if (edgePointWeights[wI] < dist)
+                        if (weightOnEdge[wI] < dist)
                         {
-                            dist = edgePointWeights[wI];
+                            dist = weightOnEdge[wI];
                             nextPoint = wI;
                         }
                     }
 
                     // Insert the next point and reset its weight to exclude it
                     // from future picks
-                    newFace.append(slavePointsOnEdge[nextPoint]);
-                    edgePointWeights[nextPoint] = GREAT;
+                    newFace.append(pointsOnEdge[nextPoint]);
+                    weightOnEdge[nextPoint] = GREAT;
 
                     // Add the point into patch support
                     pointMap().insert
                     (
-                        slavePointsOnEdge[nextPoint],
-                        slavePosOnEdge[nextPoint]
+                        pointsOnEdge[nextPoint],
+                        positionOnEdge[nextPoint]
                     );
                 }
             }
         }
-        // Info<< "New slave face " << facei << ": " << newFace << endl;
+
+        // Info<< "New slave face[" << facei << "] "
+        //     << flatOutput(newFace) << " was " << flatOutput(oldFace)
+        //     << endl;
 
         // Add the new face to the list
         enrichedFaces[nEnrichedFaces].transfer(newFace);
         nEnrichedFaces++;
     }
+
 
     // Add master faces into the enriched faces list
 
@@ -225,8 +225,9 @@ void Foam::enrichedPatch::calcEnrichedFaces
     {
         const face& oldFace = masterPatch_[facei];
         const face& oldLocalFace = masterLocalFaces[facei];
-//         Info<< "old master face: " << oldFace << endl;
         const labelList& curEdges = masterFaceEdges[facei];
+
+        // Info<< "old master face[" << facei << "] " << oldFace << endl;
 
         DynamicList<label> newFace(oldFace.size()*enrichedFaceRatio_);
 
@@ -234,49 +235,41 @@ void Foam::enrichedPatch::calcEnrichedFaces
         // so both can be done is the same loop
         forAll(oldFace, i)
         {
-            // Add the point
-            Map<label>::const_iterator mpIter =
-                pmm.find(oldFace[i]);
+            // Add the point.
+            // Using the mapped point id if possible
 
-            if (mpIter == pmm.end())
-            {
-                // Point not mapped
-                newFace.append(oldFace[i]);
+            const label mappedPointi = pmm.lookup(oldFace[i], oldFace[i]);
 
-                // Add the point into patch support
-                pointMap().insert
-                (
-                    oldFace[i],
-                    masterLocalPoints[oldLocalFace[i]]
-                );
-            }
-            else
-            {
-                // Point mapped
-                newFace.append(mpIter());
+            newFace.append(mappedPointi);
 
-                // Add the point into support
-                pointMap().insert(mpIter(), masterLocalPoints[oldLocalFace[i]]);
-            }
+            // Add the point into patch support
+            pointMap().insert
+            (
+                mappedPointi,   // Global label of point
+                masterLocalPoints[oldLocalFace[i]]
+            );
 
             // Grab the edge points
 
-            const labelList& masterPointsOnEdge =
+            const labelList& pointsOnEdge =
                 pointsIntoMasterEdges[curEdges[i]];
 
             // If there are no points on the edge, skip everything
             // If there is only one point, no need for sorting
-            if (masterPointsOnEdge.size())
+            if (pointsOnEdge.size())
             {
                 // Sort edge points in order
-                scalarField edgePointWeights(masterPointsOnEdge.size());
-                const point& startPoint = masterLocalPoints[oldLocalFace[i]];
+                scalarField weightOnEdge(pointsOnEdge.size());
 
-                vector e =
-                    masterLocalPoints[oldLocalFace.nextLabel(i)]
-                  - startPoint;
+                const point& startPoint =
+                    masterLocalPoints[oldLocalFace[i]];
 
-                scalar magSqrE = magSqr(e);
+                const point& endPoint =
+                    masterLocalPoints[oldLocalFace.nextLabel(i)];
+
+                vector e = (endPoint - startPoint);
+
+                const scalar magSqrE = magSqr(e);
 
                 if (magSqrE > SMALL)
                 {
@@ -290,27 +283,33 @@ void Foam::enrichedPatch::calcEnrichedFaces
                         << abort(FatalError);
                 }
 
-                pointField masterPosOnEdge(masterPointsOnEdge.size());
+                pointField positionOnEdge(pointsOnEdge.size());
 
-                forAll(masterPointsOnEdge, edgePointi)
+                forAll(pointsOnEdge, edgePointi)
                 {
-                    masterPosOnEdge[edgePointi] =
-                        pointMap().find(masterPointsOnEdge[edgePointi])();
+                    positionOnEdge[edgePointi] =
+                        pointMap()[pointsOnEdge[edgePointi]];
 
-                    edgePointWeights[edgePointi] =
-                        (e & (masterPosOnEdge[edgePointi] - startPoint));
+                    weightOnEdge[edgePointi] =
+                    (
+                        e
+                      &
+                        (
+                            positionOnEdge[edgePointi] - startPoint
+                        )
+                    );
                 }
 
                 if (debug)
                 {
                     // Check weights: all new points should be on the edge
-                    if (min(edgePointWeights) < 0 || max(edgePointWeights) > 1)
+                    if (min(weightOnEdge) < 0 || max(weightOnEdge) > 1)
                     {
                         FatalErrorInFunction
                             << " not on the edge for edge " << curEdges[i]
                             << " of face " << facei << " in master patch." << nl
-                            << "Min weight: " << min(edgePointWeights)
-                            << " Max weight: " << max(edgePointWeights)
+                            << "Min weight: " << min(weightOnEdge)
+                            << " Max weight: " << max(weightOnEdge)
                             << abort(FatalError);
                     }
                 }
@@ -318,37 +317,40 @@ void Foam::enrichedPatch::calcEnrichedFaces
                 // Go through the points and collect them based on
                 // weights from lower to higher.  This gives the
                 // correct order of points along the edge.
-                forAll(edgePointWeights, passI)
+                forAll(weightOnEdge, passI)
                 {
                     // Max weight can only be one, so the sorting is
                     // done by elimination.
                     label nextPoint = -1;
                     scalar dist = 2;
 
-                    forAll(edgePointWeights, wI)
+                    forAll(weightOnEdge, wI)
                     {
-                        if (edgePointWeights[wI] < dist)
+                        if (weightOnEdge[wI] < dist)
                         {
-                            dist = edgePointWeights[wI];
+                            dist = weightOnEdge[wI];
                             nextPoint = wI;
                         }
                     }
 
                     // Insert the next point and reset its weight to exclude it
                     // from future picks
-                    newFace.append(masterPointsOnEdge[nextPoint]);
-                    edgePointWeights[nextPoint] = GREAT;
+                    newFace.append(pointsOnEdge[nextPoint]);
+                    weightOnEdge[nextPoint] = GREAT;
 
                     // Add the point into patch support
                     pointMap().insert
                     (
-                        masterPointsOnEdge[nextPoint],
-                        masterPosOnEdge[nextPoint]
+                        pointsOnEdge[nextPoint],
+                        positionOnEdge[nextPoint]
                     );
                 }
             }
         }
-        // Info<< "New master face: " << newFace << endl;
+
+        // Info<< "New master face[" << facei << "] "
+        //     << flatOutput(newFace) << " was " << flatOutput(oldFace)
+        //     << endl;
 
         // Add the new face to the list
         enrichedFaces[nEnrichedFaces].transfer(newFace);
