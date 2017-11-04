@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Map Declaration
+                             Class Map Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -70,19 +70,19 @@ public:
 
     // Constructors
 
-        //- Construct null with default table size
+        //- Construct null with default table capacity
         Map()
         :
             parent_type()
         {}
 
-        //- Construct with given table size
+        //- Construct with given initial table capacity
         explicit Map(const label size)
         :
             parent_type(size)
         {}
 
-        //- Construct from Istream with default table size
+        //- Construct from Istream with default table capacity
         Map(Istream& is)
         :
             parent_type(is)

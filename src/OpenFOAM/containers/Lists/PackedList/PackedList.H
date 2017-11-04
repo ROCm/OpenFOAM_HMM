@@ -268,13 +268,14 @@ public:
         //  Never auto-vivify entries.
         inline unsigned int get(const label i) const;
 
-        //- Set value at index I. Return true if value changed.
+        //- Set value at index I, default value set is the max_value.
         //  Does auto-vivify for non-existent, non-zero entries.
-        //  Default value set is the max_value.
+        //  \return true if value changed.
         inline bool set(const label i, const unsigned int val = ~0u);
 
-        //- Unset the entry at index I. Return true if value changed.
+        //- Unset the entry at index I.
         //  Never auto-vivify entries.
+        //  \return true if value changed.
         inline bool unset(const label i);
 
         //- Return the underlying packed storage
@@ -287,8 +288,7 @@ public:
         //- The list length when packed
         inline label packedLength() const;
 
-        //- Return the binary size in number of characters
-        //  used in the underlying storage
+        //- The number of bytes used in the underlying storage
         inline std::streamsize byteSize() const;
 
         //- Count number of bits set, O(log(n))
@@ -366,7 +366,8 @@ public:
         Istream& read(Istream& is);
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         //  A special indexed output (ASCII only) is triggered by specifying
         //  a negative value for shortListLen.
         //

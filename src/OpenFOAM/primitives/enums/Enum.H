@@ -105,7 +105,7 @@ public:
         explicit Enum(std::initializer_list<std::pair<EnumType, word>> lst);
 
         //- Construct from a list of names with values incremented from the
-        //  specified start value.
+        //- specified start value.
         Enum(const EnumType start, std::initializer_list<word> lst);
 
 
@@ -141,7 +141,7 @@ public:
       // Lookup
 
         //- Lookup the key in the dictionary and return the corresponding
-        //  enumeration element based on its name.
+        //- enumeration element based on its name.
         //  Fatal if anything is incorrect.
         EnumType lookup
         (
@@ -150,7 +150,7 @@ public:
         ) const;
 
         //- Find the key in the dictionary and return the corresponding
-        //  enumeration element based on its name.
+        //- enumeration element based on its name.
         //  Return the default value if the key was not found in the dictionary.
         //  Fatal if the enumerated name was incorrect.
         EnumType lookupOrDefault
@@ -162,7 +162,7 @@ public:
 
 
         //- Find the key in the dictionary and return the corresponding
-        //  enumeration element based on its name.
+        //- enumeration element based on its name.
         //  Return the default value if the key was not found in the dictionary
         //  or if the enumerated name was incorrect (emit warning)
         EnumType lookupOrFailsafe

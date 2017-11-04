@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
@@ -29,40 +29,67 @@
 #
 #     Assumes comment strings are formatted as follows
 #         //- General description
-#         //  more information
+#         //  Detailed information
 #         //  and even more information
+#     or
+#         //- General description
+#         //- that spans several
+#         //- lines
+#         //  Detailed information
+#         //  and even more information
+#
 #     This should be re-formatted as the following
-#         //! general description
-#         /*!
-#         more information
+#         /*! \brief General description
+#          that spans several
+#          lines
+#         */
+#         /*! Detailed information
 #         and even more information
 #         */
+#
 #     The intermediate "/*! ... */" block is left-justified to handle
 #     possible verbatim text
+#
 #------------------------------------------------------------------------------
 
+# States: 0=normal, 1=brief, 2=details
 BEGIN {
     state = 0
 }
 
 /^ *\/\/-/ {
-    state = 1
-    sub(/\/\/-/, "//!")
+    if (state == 0)
+    {
+        # Changed from normal to brief (start of comment block)
+        printf "/*! \\brief"
+        state = 1
+    }
+
+    if (state == 1)
+    {
+        # Within brief: strip leading
+        if (!sub(/^ *\/\/-  /, ""))
+        {
+            sub(/^ *\/\/-/, "")
+        }
+    }
+
     print
     next
 }
 
 /^ *\/\// {
-    # Start comment block
     if (state == 1)
     {
+        # Change from brief to details
+        printf "*/\n"
         printf "/*! "
         state = 2
     }
 
-    # Inside comment block
     if (state == 2)
     {
+        # Within details: strip leading
         if (!sub(/^ *\/\/  /, ""))
         {
             sub(/^ *\/\//, "")
@@ -74,10 +101,10 @@ BEGIN {
 }
 
 {
-    # End comment block
-    if (state == 2)
+    # End comment filtering
+    if (state)
     {
-        printf "*/ "
+        printf "*/\n"
     }
     state = 0
     print

@@ -26,6 +26,7 @@ Class
 
 Description
     A HashTable similar to \c std::unordered_map.
+
     The entries are considered \a unordered since their placement
     depends on the method used to generate the hash key index, the
     table capacity, insertion order etc. When the key order is
@@ -305,8 +306,10 @@ protected:
         //- Internally used base for iterator and const_iterator
         template<bool Const> class Iterator;
 
-        //- Friendship with the base iterator is required.
+        //- An iterator with const access to HashTable internals.
         friend class Iterator<true>;
+
+        //- An iterator with non-const access to HashTable internals.
         friend class Iterator<false>;
 
 
@@ -325,13 +328,13 @@ public:
 
     // Constructors
 
-        //- Construct null with default (128) table size
+        //- Construct null with default (128) table capacity
         HashTable();
 
-        //- Construct given initial table size
+        //- Construct given initial table capacity
         explicit HashTable(const label size);
 
-        //- Construct from Istream with default table size
+        //- Construct from Istream with default table capacity
         HashTable(Istream& is, const label size = 128);
 
         //- Construct as copy
@@ -385,18 +388,22 @@ public:
 
       // Table of contents
 
-        //- Return the table of contents
+        //- The table of contents (the keys) in unsorted order.
         List<Key> toc() const;
 
-        //- Return the table of contents as a sorted list
+        //- The table of contents (the keys) in sorted order
         List<Key> sortedToc() const;
 
-        //- Return table of contents sorted using the specified comparator
+        //- The table of contents (the keys) sorted according to the
+        //- specified comparator
         template<class Compare>
         List<Key> sortedToc(const Compare& comp) const;
 
-        //- Return the sorted table of contents with keys that satisfy
-        //  the unary predicate, optionally with inverted logic.
+        //- The table of contents (the keys) selected according to the
+        //- unary predicate applied to the \b keys.
+        //  \param invert changes the logic to select when the predicate
+        //      is false
+        //  \return sorted list of selected keys
         template<class UnaryPredicate>
         List<Key> tocKeys
         (
@@ -404,8 +411,11 @@ public:
             const bool invert = false
         ) const;
 
-        //- Return the sorted table of contents with values that satisfy
-        // the unary predicate, optionally with inverted logic.
+        //- The table of contents (the keys) selected according to the
+        //- unary predicate applied to the \b values.
+        //  \param invert changes the logic to select when the predicate
+        //      is false
+        //  \return sorted list of selected keys
         template<class UnaryPredicate>
         List<Key> tocValues
         (
@@ -413,8 +423,11 @@ public:
             const bool invert = false
         ) const;
 
-        //- Return the sorted table of contents with keys/values that satisfy
-        //  the binary predicate, optionally with inverted logic.
+        //- The table of contents (the keys) selected according to the
+        //- binary predicate applied to the \b keys and \b values.
+        //  \param invert changes the logic to select when the predicate
+        //      is false
+        //  \return sorted list of selected keys
         template<class BinaryPredicate>
         List<Key> tocEntries
         (
@@ -425,8 +438,9 @@ public:
 
       // Counting
 
-        //- Count the number of keys that satisfy the unary predicate,
-        //  optionally with inverted logic.
+        //- Count the number of keys that satisfy the unary predicate
+        //  \param invert changes the logic to select when the predicate
+        //      is false
         template<class UnaryPredicate>
         label countKeys
         (
@@ -434,8 +448,9 @@ public:
             const bool invert = false
         ) const;
 
-        //- Count the number of values that satisfy the unary predicate,
-        //  optionally with inverted logic.
+        //- Count the number of values that satisfy the unary predicate
+        //  \param invert changes the logic to select when the predicate
+        //      is false
         template<class UnaryPredicate>
         label countValues
         (
@@ -443,8 +458,9 @@ public:
             const bool invert = false
         ) const;
 
-        //- Count the number of entries that satisfy the binary predicate,
-        //  optionally with inverted logic.
+        //- Count the number of entries that satisfy the binary predicate.
+        //  \param invert changes the logic to select when the predicate
+        //      is false
         template<class BinaryPredicate>
         label countEntries
         (
@@ -455,7 +471,7 @@ public:
 
       // Edit
 
-        //- Insert a new entry
+        //- Insert a new entry, not overwriting existing entries.
         //  \return True if the entry inserted, which means that it did
         //  not previously exist in the table.
         inline bool insert(const Key& key, const T& obj);
@@ -618,11 +634,11 @@ public:
         //- Move assign
         void operator=(HashTable<T, Key, Hash>&& rhs);
 
-        //- Equality. Hash tables are equal if the keys and values are equal.
-        //  Independent of table storage size and table order.
+        //- Equality. Tables are equal if all keys and values are equal,
+        //- independent of order or underlying storage size.
         bool operator==(const HashTable<T, Key, Hash>& rhs) const;
 
-        //- The opposite of the equality operation. Takes linear time.
+        //- The opposite of the equality operation.
         bool operator!=(const HashTable<T, Key, Hash>& rhs) const;
 
 
@@ -918,7 +934,7 @@ public:
 
     // Iterator access
 
-        //- Iterator set to the beginning of the HashTable
+        //- iterator set to the beginning of the HashTable
         inline iterator begin();
 
         //- const_iterator set to the beginning of the HashTable
@@ -943,7 +959,8 @@ public:
         Ostream& printInfo(Ostream& os) const;
 
         //- Write the unordered keys as a list, with line-breaks if list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeKeys(Ostream& os, const label shortListLen=0) const;
 
 

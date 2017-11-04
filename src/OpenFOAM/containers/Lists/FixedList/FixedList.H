@@ -129,7 +129,7 @@ public:
         //- Construct from value
         explicit inline FixedList(const T& val);
 
-        //- Construct from C-array
+        //- Copy construct from C-array
         explicit inline FixedList(const T lst[Size]);
 
         //- Copy constructor
@@ -164,7 +164,7 @@ public:
         // Access
 
             //- Return the forward circular index, i.e. next index
-            //  which returns to the first at the end of the list
+            //- which returns to the first at the end of the list
             inline label fcIndex(const label i) const;
 
             //- Return forward circular value (ie, next value in the list)
@@ -174,7 +174,7 @@ public:
             inline T& fcValue(const label i);
 
             //- Return the reverse circular index, i.e. previous index
-            //  which returns to the last at the beginning of the list
+            //- which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
 
             //- Return reverse circular value (ie, previous value in the list)
@@ -184,13 +184,13 @@ public:
             inline T& rcValue(const label i);
 
 
-            //- Return a const pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a const pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline const T* cdata() const;
 
-            //- Return a pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline T* data();
 
@@ -246,10 +246,10 @@ public:
         //- Move element to the last position.
         void moveLast(const label i);
 
-        //- Swap element with the first element. Fatal on an empty list.
+        //- Swap element with the first element.
         void swapFirst(const label i);
 
-        //- Swap element with the last element. Fatal on an empty list.
+        //- Swap element with the last element.
         void swapLast(const label i);
 
         //- Copy (not transfer) the argument contents
@@ -292,16 +292,14 @@ public:
         //- Type of values the FixedList contains
         typedef T value_type;
 
-        //- Type that can be used for storing into
-        //  FixedList::value_type objects
+        //- The type used for storing into value_type objects
         typedef T& reference;
 
-        //- Type that can be used for storing into
-        //  constant FixedList::value_type objects
+        //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
-        //  FixedList iterator objects
+        //- FixedList iterator objects
         typedef label difference_type;
 
         //- The type that can represent the size of a FixedList
@@ -486,7 +484,8 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 

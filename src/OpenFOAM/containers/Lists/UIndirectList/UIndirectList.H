@@ -147,19 +147,17 @@ public:
 
     // STL type definitions
 
-        //- Type of values the UList contains.
+        //- Type of values the list contains.
         typedef T value_type;
 
-        //- Type that can be used for storing into
-        //  UList::value_type objects.
+        //- The type used for storing into UList::value_type objects.
         typedef T& reference;
 
-        //- Type that can be used for storing into
-        //  constant UList::value_type objects
+        //- The type used for reading from constant UList::value_type objects
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
-        //  UList iterator objects.
+        //- UList iterator objects.
         typedef label difference_type;
 
         //- The type that can represent the size of a UList.
@@ -169,8 +167,8 @@ public:
     // Writing
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
-        //  Binary output is currently still a bit of an annoyance.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 

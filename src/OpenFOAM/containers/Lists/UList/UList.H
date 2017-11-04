@@ -110,11 +110,11 @@ protected:
         void writeEntry(Ostream& os) const;
 
         //- Return a validated (start,size) subset range, which means that it
-        //  always addresses a valid section of the list.
+        //- always addresses a valid section of the list.
         labelRange validateRange(const labelRange& range) const;
 
         //- Return a validated (start,size) subset range, which means that it
-        //  always addresses a valid section of the list.
+        //- always addresses a valid section of the list.
         labelRange validateRange
         (
             std::initializer_list<label> start_size_pair
@@ -186,7 +186,7 @@ public:
         // Access
 
             //- Return the forward circular index, i.e. next index
-            //  which returns to the first at the end of the list
+            //- which returns to the first at the end of the list
             inline label fcIndex(const label i) const;
 
             //- Return forward circular value (ie, next value in the list)
@@ -196,7 +196,7 @@ public:
             inline T& fcValue(const label i);
 
             //- Return the reverse circular index, i.e. previous index
-            //  which returns to the last at the beginning of the list
+            //- which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
 
             //- Return reverse circular value (ie, previous value in the list)
@@ -206,19 +206,19 @@ public:
             inline T& rcValue(const label i);
 
             //- Return the binary size in number of characters of the UList
-            //  if the element is a primitive type
+            //- if the element is a primitive type
             //  i.e. contiguous<T>() == true.
             //  Note that is of type streamsize since used in stream ops
             std::streamsize byteSize() const;
 
 
-            //- Return a const pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a const pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline const T* cdata() const;
 
-            //- Return a pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline T* data();
 
@@ -347,7 +347,7 @@ public:
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
-        //  UList iterator objects
+        //- UList iterator objects
         typedef label difference_type;
 
         //- The type that can represent the size of a UList
@@ -539,7 +539,8 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 

@@ -62,13 +62,13 @@ public:
 
     // Constructors
 
-        //- Construct null with default table size
+        //- Construct null with default table capacity
         PtrMap()
         :
             parent_type()
         {}
 
-        //- Construct given initial map size
+        //- Construct with given initial table capacity
         explicit PtrMap(const label size)
         :
             parent_type(size)

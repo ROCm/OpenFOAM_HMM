@@ -126,7 +126,10 @@ class argList
         //  so destructor is done last.
         ParRunControl parRunControl_;
 
+        //- The arguments after removing known options
         stringList args_;
+
+        //- The extracted options
         HashTable<string> options_;
 
         word executable_;
@@ -202,7 +205,7 @@ public:
     // Constructors
 
         //- Construct from argc and argv
-        //  checking the arguments and options as requested
+        //- checking the arguments and options as requested.
         argList
         (
             int& argc,
@@ -344,14 +347,14 @@ public:
 
         // Edit
 
-            //- Add to a bool option to validOptions with usage information
+            //- Add a bool option to validOptions with usage information
             static void addBoolOption
             (
                 const word& opt,
                 const string& usage = ""
             );
 
-            //- Add to an option to validOptions with usage information
+            //- Add an option to validOptions with usage information
             //  An option with an empty param is a bool option
             static void addOption
             (

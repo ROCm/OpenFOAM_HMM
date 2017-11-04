@@ -91,10 +91,10 @@ public:
 
     // Constructors
 
-        //- Construct null with default table size
+        //- Construct null with default table capacity
         HashPtrTable();
 
-        //- Construct given initial table size
+        //- Construct given initial table capacity
         explicit HashPtrTable(const label size);
 
         //- Construct from Istream using given Istream constructor class
@@ -123,7 +123,7 @@ public:
         //  Includes a safeguard against the end-iterator.
         T* remove(iterator& iter);
 
-        //- Erase an entry specified by given iterator
+        //- Erase an entry specified by given iterator.
         //  Includes a safeguard against the end-iterator.
         bool erase(iterator& iter);
 

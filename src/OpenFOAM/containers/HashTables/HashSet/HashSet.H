@@ -27,6 +27,7 @@ Class
 Description
     A HashTable with keys but without contents that is similar to
     \c std::unordered_set.
+
     The entries are considered \a unordered since their placement
     depends on the method used to generate the hash key index, the
     table capacity, insertion order etc. When the key order is
@@ -121,19 +122,19 @@ public:
 
     // Constructors
 
-        //- Construct null with default (128) table size
+        //- Construct null with default (128) table capacity
         HashSet()
         :
             parent_type()
         {}
 
-        //- Construct given initial size
+        //- Construct given initial table capacity
         explicit HashSet(const label size)
         :
             parent_type(size)
         {}
 
-        //- Construct from Istream with default table size
+        //- Construct from Istream with default table capacity
         HashSet(Istream& is)
         :
             parent_type(is)
@@ -183,7 +184,7 @@ public:
 
       // Edit
 
-        //- Insert a new entry
+        //- Insert a new entry, not overwriting existing entries.
         //  \return True if the entry inserted, which means that it did
         //  not previously exist in the set.
         bool insert(const Key& key)
@@ -297,7 +298,8 @@ public:
     // Writing
 
         //- Write the unordered keys as a list, with line-breaks if list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const
         {
             return this->writeKeys(os, shortListLen);
@@ -329,8 +331,8 @@ public:
 
       // Comparison
 
-        //- Equality. Two hashset are equal when they have the same keys.
-        //  Independent of table size or order.
+        //- Sets are equal if all keys are equal,
+        //- independent of order or underlying storage size.
         bool operator==(const this_type& rhs) const;
 
         //- The opposite of the equality operation.
