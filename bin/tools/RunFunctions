@@ -340,8 +340,8 @@ cloneParallelCase()
 #
 restore0Dir()
 {
-    if [ "$1" = "-processor" ]
-    then
+    case "$1" in
+    -processor | -processors)
         echo "Restore 0/ from 0.orig/ for processor directories"
         [ -d 0.orig ] || echo "    Warning: no 0.orig/ found"
 
@@ -349,7 +349,24 @@ restore0Dir()
         \ls -d processor* | xargs -I {} \rm -rf ./{}/0
         \ls -d processor* | xargs -I {} \cp -r 0.orig ./{}/0 > /dev/null 2>&1
 
-    else
+        # Remove '#include' directives from field dictionaries
+        # for collated format
+        if [ "$1" = "-processors" ]
+        then
+        (
+            echo "Filter #include directives in processors/0:"
+            cd processors/0 2>/dev/null || exit 0
+            for file in $(grep -l "#include" * 2> /dev/null)
+            do
+                foamDictionary "$file" > "$file.$$." && mv "$file.$$." "$file"
+                echo "    $file"
+            done | tr -d '\n'
+            echo
+        )
+        fi
+        ;;
+
+    *)
         echo "Restore 0/ from 0.orig/"
         if [ -d 0.orig ]
         then
@@ -358,7 +375,8 @@ restore0Dir()
         else
             echo "    Warning: no 0.orig/ found"
         fi
-    fi
+        ;;
+    esac
 }
 
 
