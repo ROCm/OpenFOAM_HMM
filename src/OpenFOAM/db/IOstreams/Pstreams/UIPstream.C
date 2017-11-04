@@ -42,12 +42,12 @@ inline void Foam::UIPstream::checkEof()
 
 
 template<class T>
-inline void Foam::UIPstream::readFromBuffer(T& t)
+inline void Foam::UIPstream::readFromBuffer(T& val)
 {
     const size_t align = sizeof(T);
     externalBufPosition_ = align + ((externalBufPosition_ - 1) & ~(align - 1));
 
-    t = reinterpret_cast<T&>(externalBuf_[externalBufPosition_]);
+    val = reinterpret_cast<T&>(externalBuf_[externalBufPosition_]);
     externalBufPosition_ += sizeof(T);
     checkEof();
 }
@@ -67,10 +67,14 @@ inline void Foam::UIPstream::readFromBuffer
           + ((externalBufPosition_ - 1) & ~(align - 1));
     }
 
-    const char* bufPtr = &externalBuf_[externalBufPosition_];
-    char* dataPtr = reinterpret_cast<char*>(data);
-    size_t i = count;
-    while (i--) *dataPtr++ = *bufPtr++;
+    const char* const __restrict__ buf = &externalBuf_[externalBufPosition_];
+    char* const __restrict__ output = reinterpret_cast<char*>(data);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        output[i] = buf[i];
+    }
+
     externalBufPosition_ += count;
     checkEof();
 }
@@ -78,14 +82,15 @@ inline void Foam::UIPstream::readFromBuffer
 
 inline Foam::Istream& Foam::UIPstream::readStringFromBuffer(std::string& str)
 {
+    // Use std::string::assign() to copy content, including '\0'.
+    // Stripping (when desired) is the responsibility of the sending side.
+
     size_t len;
     readFromBuffer(len);
-    // Uses the underlying std::string::operator=()
-    // - no stripInvalid invoked (the sending side should have done that)
-    // - relies on trailing '\0' char (so cannot send anything with an embedded
-    //   nul char)
-    str = &externalBuf_[externalBufPosition_];
-    externalBufPosition_ += len + 1;
+
+    str.assign(&externalBuf_[externalBufPosition_], len);
+
+    externalBufPosition_ += len;
     checkEof();
 
     return *this;
@@ -276,7 +281,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
 Foam::Istream& Foam::UIPstream::read(char& c)
 {
     c = externalBuf_[externalBufPosition_];
-    externalBufPosition_++;
+    ++externalBufPosition_;
     checkEof();
     return *this;
 }

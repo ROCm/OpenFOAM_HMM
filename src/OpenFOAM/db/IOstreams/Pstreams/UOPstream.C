@@ -109,7 +109,7 @@ inline void Foam::UOPstream::writeStringToBuffer(const std::string& str)
 {
     const size_t len = str.size();
     writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeToBuffer(str.data(), len, 1);
 }
 
 
