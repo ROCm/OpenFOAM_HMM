@@ -129,17 +129,17 @@ protected:
 public:
 
     // Forward declarations
-    class input;
-    class output;
+    class in;
+    class out;
 };
 
 
 /*---------------------------------------------------------------------------*\
-                      Class memorybuf::input Declaration
+                        Class memorybuf::in Declaration
 \*---------------------------------------------------------------------------*/
 
-//- An output streambuf for memory access
-class memorybuf::input
+//- An input streambuf for memory access
+class memorybuf::in
 :
     public memorybuf
 {
@@ -175,11 +175,11 @@ protected:
 
 
 /*---------------------------------------------------------------------------*\
-                      Class memorybuf::output Declaration
+                       Class memorybuf::out Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An output streambuf for memory access
-class memorybuf::output
+class memorybuf::out
 :
     public memorybuf
 {

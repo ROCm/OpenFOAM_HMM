@@ -82,7 +82,7 @@ class UIListStreamAllocator
     //- A streambuf class for input from UList or equivalent
     class ulistbuf
     :
-        public memorybuf::input
+        public memorybuf::in
     {
         friend UIListStreamAllocator;
 

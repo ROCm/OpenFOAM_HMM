@@ -100,7 +100,7 @@ class UOListAllocator
     //- A streambuf adapter for output to UList or equivalent
     class ulistbuf
     :
-        public memorybuf::output
+        public memorybuf::out
     {
         friend UOListAllocator;
 

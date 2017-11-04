@@ -65,7 +65,7 @@ class OListStreamAllocator
     //- A streambuf adapter to output to a List
     class listbuf
     :
-        public memorybuf::output
+        public memorybuf::out
     {
         friend OListStreamAllocator;
 
