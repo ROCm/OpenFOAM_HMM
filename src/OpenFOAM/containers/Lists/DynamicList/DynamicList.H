@@ -249,6 +249,9 @@ public:
             //- Append an element to the end of this list.
             inline DynamicList<T, SizeMin>& append(const T& val);
 
+            //- Move append an element
+            inline DynamicList<T, SizeMin>& append(T&& val);
+
             //- Append another list to the end of this list.
             inline DynamicList<T, SizeMin>& append(const UList<T>& lst);
 

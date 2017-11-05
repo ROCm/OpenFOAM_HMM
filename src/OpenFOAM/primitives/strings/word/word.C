@@ -25,6 +25,7 @@ License
 
 #include "word.H"
 #include "debug.H"
+#include <cctype>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -77,10 +78,8 @@ Foam::word Foam::word::lessExt() const
     {
         return *this;
     }
-    else
-    {
-        return substr(0, i);
-    }
+
+    return substr(0, i);
 }
 
 
@@ -106,6 +105,30 @@ bool Foam::word::hasExt(const word& ending) const
 bool Foam::word::hasExt(const wordRe& ending) const
 {
     return string::hasExt(ending);
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+Foam::word Foam::operator&(const word& a, const word& b)
+{
+    if (a.size())
+    {
+        if (b.size())
+        {
+            // Two non-empty words: can concatenate and perform camel case
+            word camelCase(a + b);
+            camelCase[a.size()] = char(toupper(b[0]));
+
+            return camelCase;
+        }
+
+        return a;
+    }
+
+    // Or, if the first string is empty (or both are empty)
+
+    return b;
 }
 
 

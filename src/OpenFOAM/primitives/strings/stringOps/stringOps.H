@@ -54,6 +54,14 @@ namespace Foam
 
 namespace stringOps
 {
+    //- Count the number of occurences of the specified character
+    std::string::size_type count(const std::string& str, const char c);
+
+    //- Count the number of occurences of the specified character
+    //  Correctly handles nullptr.
+    std::string::size_type count(const char* str, const char c);
+
+
     //- Expand occurences of variables according to the mapping
     //  Expansion includes:
     //  -# variables

@@ -492,7 +492,22 @@ Foam::DynamicList<T, SizeMin>::append
     const label idx = List<T>::size();
     setSize(idx + 1);
 
-    this->operator[](idx) = val;
+    this->operator[](idx) = val;  // copy element
+    return *this;
+}
+
+
+template<class T, int SizeMin>
+inline Foam::DynamicList<T, SizeMin>&
+Foam::DynamicList<T, SizeMin>::append
+(
+    T&& val
+)
+{
+    const label idx = List<T>::size();
+    setSize(idx + 1);
+
+    this->operator[](idx) = std::move(val);  // move assign element
     return *this;
 }
 
@@ -510,12 +525,13 @@ Foam::DynamicList<T, SizeMin>::append
             << "Attempted appending to self" << abort(FatalError);
     }
 
-    label nextFree = List<T>::size();
-    setSize(nextFree + lst.size());
+    label idx = List<T>::size();
+
+    setSize(idx + lst.size());
 
     for (const T& val : lst)
     {
-        this->operator[](nextFree++) = val;
+        this->operator[](idx++) = val;  // copy element
     }
     return *this;
 }
@@ -529,12 +545,12 @@ Foam::DynamicList<T, SizeMin>::append
     const FixedList<T, FixedSize>& lst
 )
 {
-    label nextFree = List<T>::size();
-    setSize(nextFree + lst.size());
+    label idx = List<T>::size();
+    setSize(idx + lst.size());
 
     for (const T& val : lst)
     {
-        this->operator[](nextFree++) = val;
+        this->operator[](idx++) = val;  // copy element
     }
     return *this;
 }
@@ -547,12 +563,13 @@ Foam::DynamicList<T, SizeMin>::append
     std::initializer_list<T> lst
 )
 {
-    label nextFree = List<T>::size();
-    setSize(nextFree + lst.size());
+    label idx = List<T>::size();
+
+    setSize(idx + lst.size());
 
     for (const T& val : lst)
     {
-        this->operator[](nextFree++) = val;
+        this->operator[](idx++) = val;  // copy element
     }
     return *this;
 }
@@ -565,12 +582,14 @@ Foam::DynamicList<T, SizeMin>::append
     const UIndirectList<T>& lst
 )
 {
-    label nextFree = List<T>::size();
-    setSize(nextFree + lst.size());
+    label idx = List<T>::size();
+    const label n = lst.size();
 
-    forAll(lst, elemI)
+    setSize(idx + n);
+
+    for (label i=0; i<n; ++i)
     {
-        this->operator[](nextFree++) = lst[elemI];
+        this->operator[](idx++) = lst[i];  // copy element
     }
     return *this;
 }
@@ -589,12 +608,13 @@ Foam::DynamicList<T, SizeMin>::append
             << "Attempted appending to self" << abort(FatalError);
     }
 
-    label nextFree = List<T>::size();
-    setSize(nextFree + lst.size());
+    label idx = List<T>::size();
+
+    setSize(idx + lst.size());
 
     for (T& val : lst)
     {
-        Foam::Swap(this->operator[](nextFree++), val);
+        Foam::Swap(this->operator[](idx++), val);  // moved content
     }
 
     lst.clear();
@@ -779,11 +799,13 @@ inline void Foam::DynamicList<T, SizeMin>::operator=
     const FixedList<T, FixedSize>& lst
 )
 {
-    setSize(lst.size());
+    const label n = lst.size();
 
-    forAll(lst, i)
+    setSize(n);
+
+    for (label i=0; i<n; ++i)
     {
-        this->operator[](i) = lst[i];
+        this->operator[](i) = lst[i];  // copy element
     }
 }
 

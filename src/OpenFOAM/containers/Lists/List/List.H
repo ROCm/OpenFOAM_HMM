@@ -226,7 +226,10 @@ public:
             //- Append an element at the end of the list
             inline void append(const T& val);
 
-            //- Append a List at the end of this list
+            //- Move append an element at the end of the list
+            inline void append(T&& val);
+
+            //- Append a List to the end of this list
             inline void append(const UList<T>& lst);
 
             //- Append a UIndirectList at the end of this list

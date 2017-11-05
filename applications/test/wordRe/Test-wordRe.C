@@ -56,6 +56,56 @@ int main(int argc, char *argv[])
         {"file[a-b]", wordRe::REGEX},
     };
 
+    if (true)
+    {
+        Info<<"keyType: " << keyre << endl;
+
+        keyType key2(std::move(keyre));
+
+        Info<<"move construct: <" << keyre << "> <" << key2 << ">" << endl;
+
+        keyre = std::move(key2);
+
+        Info<<"move assign: <" << keyre << "> <" << key2 << ">" << endl;
+
+        keyType key3;
+
+        keyre.swap(key3);
+
+        Info<<"swap: <" << keyre << "> <" << key3 << ">" << endl;
+
+        keyre = std::move(key3);
+        Info<<"move assign: <" << keyre << "> <" << key3 << ">" << endl;
+
+        return 0;
+    }
+
+    if (false)
+    {
+        wordRe keyre("y.*", wordRe::REGEX);
+
+        Info<<"wordRe: " << keyre << endl;
+
+        wordRe key2(std::move(keyre));
+
+        Info<<"keyTypes: " << keyre << " " << key2 << endl;
+
+        keyre = std::move(key2);
+
+        Info<<"keyTypes: " << keyre << " " << key2 << endl;
+
+        wordRe key3;
+
+        keyre.swap(key3);
+
+        Info<<"keyTypes: <" << keyre << "> <" << key3 << ">" << endl;
+
+        keyre = std::move(key3);
+        Info<<"keyTypes: <" << keyre << "> <" << key3 << ">" << endl;
+
+        return 0;
+    }
+
     wordRes wrelist(wordrelist);
 
     Info<< "re-list:" << wrelist() << endl;
@@ -76,7 +126,7 @@ int main(int argc, char *argv[])
 
     wre = "this .* file";
 
-    Info<<"substring: " << wre(4) << endl;
+    Info<<"substring: " << wre.substr(4) << endl;
 
     wre.info(Info) << endl;
     wre = s1;

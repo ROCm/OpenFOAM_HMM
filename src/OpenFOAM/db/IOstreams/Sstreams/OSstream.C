@@ -24,8 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "OSstream.H"
 #include "token.H"
+#include "OSstream.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +53,7 @@ Foam::Ostream& Foam::OSstream::write(const char c)
     os_ << c;
     if (c == token::NL)
     {
-        lineNumber_++;
+        ++lineNumber_;
     }
     setState(os_.rdstate());
     return *this;
@@ -61,7 +62,7 @@ Foam::Ostream& Foam::OSstream::write(const char c)
 
 Foam::Ostream& Foam::OSstream::write(const char* str)
 {
-    lineNumber_ += string(str).count(token::NL);
+    lineNumber_ += stringOps::count(str, token::NL);
     os_ << str;
     setState(os_.rdstate());
     return *this;
@@ -169,7 +170,7 @@ Foam::Ostream& Foam::OSstream::writeQuoted
     else
     {
         // output unquoted string, only advance line number on newline
-        lineNumber_ += string(str).count(token::NL);
+        lineNumber_ += stringOps::count(str, token::NL);
         os_ << str;
     }
 

@@ -154,6 +154,9 @@ public:
         //- Construct as copy of word, use specified compile option
         inline wordRe(const word& str, const compOption);
 
+        //- Move construct
+        inline wordRe(wordRe&& str);
+
         //- Construct from Istream
         //  Words are treated as literals, strings with an auto-test
         wordRe(Istream& is);
@@ -191,6 +194,9 @@ public:
         //- Clear string and regular expression
         inline void clear();
 
+        //- Swap contents
+        inline void swap(wordRe& str);
+
 
      // Matching/Searching
 
@@ -210,17 +216,11 @@ public:
 
     // Member operators
 
-        //- Avoid masking the normal operator()
-        using word::operator();
-
         //- Perform smart match on text, as per match()
         inline bool operator()(const std::string& text) const;
 
 
-      // Assignment
-
-        //- Copy wordRe and its type (literal or regex)
-        //  Always case sensitive
+        //- Copy assignment, retaining type (literal or regex)
         inline void operator=(const wordRe& str);
 
         //- Copy word, never a regular expression
@@ -241,6 +241,9 @@ public:
         //- Copy string, auto-test for regular expression
         //  Always case sensitive
         inline void operator=(const char* str);
+
+        //- Move assignment.
+        inline void operator=(wordRe&& str);
 
 
     // IOstream operators
