@@ -765,30 +765,22 @@ void Foam::slidingInterface::write(Ostream& os) const
 
 void Foam::slidingInterface::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type() << token::END_STATEMENT << nl
-        << "    masterFaceZoneName " << masterFaceZoneID_.name()
-        << token::END_STATEMENT << nl
-        << "    slaveFaceZoneName " << slaveFaceZoneID_.name()
-        << token::END_STATEMENT << nl
-        << "    cutPointZoneName " << cutPointZoneID_.name()
-        << token::END_STATEMENT << nl
-        << "    cutFaceZoneName " << cutFaceZoneID_.name()
-        << token::END_STATEMENT << nl
-        << "    masterPatchName " << masterPatchID_.name()
-        << token::END_STATEMENT << nl
-        << "    slavePatchName " << slavePatchID_.name()
-        << token::END_STATEMENT << nl
-        << "    typeOfMatch " << typeOfMatchNames_[matchType_]
-        << token::END_STATEMENT << nl
-        << "    coupleDecouple " << coupleDecouple_
-        << token::END_STATEMENT << nl
-        << "    projection " << intersection::algorithmNames_[projectionAlgo_]
-        << token::END_STATEMENT << nl
-        << "    attached " << attached_
-        << token::END_STATEMENT << nl
-        << "    active " << active()
-        << token::END_STATEMENT << nl;
+    os  << nl;
+
+    os.beginBlock(name());
+
+    os.writeEntry("type", type());
+    os.writeEntry("masterFaceZoneName", masterFaceZoneID_.name());
+    os.writeEntry("slaveFaceZoneName", slaveFaceZoneID_.name());
+    os.writeEntry("cutPointZoneName", cutPointZoneID_.name());
+    os.writeEntry("cutFaceZoneName", cutFaceZoneID_.name());
+    os.writeEntry("masterPatchName", masterPatchID_.name());
+    os.writeEntry("slavePatchName", slavePatchID_.name());
+    os.writeEntry("typeOfMatch", typeOfMatchNames_[matchType_]);
+    os.writeEntry("coupleDecouple", coupleDecouple_);
+    os.writeEntry("projection", intersection::algorithmNames_[projectionAlgo_]);
+    os.writeEntry("attached", attached_);
+    os.writeEntry("active", active());
 
     if (attached_)
     {
@@ -797,10 +789,8 @@ void Foam::slidingInterface::writeDict(Ostream& os) const
         masterStickOutFacesPtr_->writeEntry("masterStickOutFaces", os);
         slaveStickOutFacesPtr_->writeEntry("slaveStickOutFaces", os);
 
-         os << "    retiredPointMap " << retiredPointMap()
-            << token::END_STATEMENT << nl
-            << "    cutPointEdgePairMap " << cutPointEdgePairMap()
-            << token::END_STATEMENT << nl;
+        os.writeEntry("retiredPointMap", retiredPointMap());
+        os.writeEntry("cutPointEdgePairMap", cutPointEdgePairMap());
     }
 
     WRITE_NON_DEFAULT(pointMergeTol)
@@ -812,7 +802,7 @@ void Foam::slidingInterface::writeDict(Ostream& os) const
     WRITE_NON_DEFAULT(edgeCoPlanarTol)
     WRITE_NON_DEFAULT(edgeEndCutoffTol)
 
-    os  << token::END_BLOCK << endl;
+    os.endBlock();
 }
 
 

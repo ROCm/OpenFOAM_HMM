@@ -1112,10 +1112,8 @@ bool Foam::processorPolyPatch::order
 void Foam::processorPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
-    os.writeKeyword("myProcNo") << myProcNo_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("neighbProcNo") << neighbProcNo_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("myProcNo", myProcNo_);
+    os.writeEntry("neighbProcNo", neighbProcNo_);
 }
 
 

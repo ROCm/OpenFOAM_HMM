@@ -112,9 +112,9 @@ Foam::autoPtr<Foam::RBD::joint> Foam::RBD::joint::iNew::operator()
 
 inline Foam::Ostream& Foam::RBD::operator<<(Ostream& os, const joint& j)
 {
-    os  << indent << token::BEGIN_BLOCK << incrIndent << endl;
+    os.beginBlock();
     j.write(os);
-    os  << decrIndent << indent << token::END_BLOCK;
+    os.endBlock();
 
     return os;
 }

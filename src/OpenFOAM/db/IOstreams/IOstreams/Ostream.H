@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -209,6 +209,26 @@ public:
             {
                 writeKeyword(key) << value;
                 return endEntry();
+            }
+
+            //- Write a keyword/value entry only when the two values differ.
+            //  \param key the name of the entry
+            //  \param value1 the reference value
+            //  \param value2 the value to write if it differs from value1
+            template<class T>
+            Ostream& writeEntryIfDifferent
+            (
+                const word& key,
+                const T& value1,
+                const T& value2
+            )
+            {
+                if (value1 != value2)
+                {
+                    writeEntry(key, value2);
+                }
+
+                return *this;
             }
 
 

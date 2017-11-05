@@ -97,10 +97,8 @@ bool Foam::UniformDimensionedField<Type>::writeData(Ostream& os) const
 {
     scalar multiplier;
     os.writeKeyword("dimensions");
-    this->dimensions().write(os, multiplier) << token::END_STATEMENT
-        << nl;
-    os.writeKeyword("value") << this->value()/multiplier << token::END_STATEMENT
-        << nl << nl;
+    this->dimensions().write(os, multiplier) << token::END_STATEMENT << nl;
+    os.writeEntry("value", this->value()/multiplier) << nl;
 
     return os.good();
 }

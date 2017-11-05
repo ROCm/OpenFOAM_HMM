@@ -158,8 +158,8 @@ void Foam::fixedProfileFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     profile_->writeData(os);
-    os.writeKeyword("direction") << dir_ << token::END_STATEMENT << nl;
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
+    os.writeEntry("direction", dir_);
+    os.writeEntry("origin", origin_);
     this->writeEntry("value", os);
 }
 

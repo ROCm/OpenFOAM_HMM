@@ -102,7 +102,7 @@ inline void Foam::thirdBodyEfficiencies::write(Ostream& os) const
         coeffs[i].second() = operator[](i);
     }
 
-    os.writeKeyword("coeffs") << coeffs << token::END_STATEMENT << nl;
+    os.writeEntry("coeffs", coeffs);
 }
 
 

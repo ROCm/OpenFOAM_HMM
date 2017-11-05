@@ -67,11 +67,11 @@ inline Foam::scalar Foam::SRIFallOffFunction::operator()
 
 inline void Foam::SRIFallOffFunction::write(Ostream& os) const
 {
-    os.writeKeyword("a") << a_ << token::END_STATEMENT << nl;
-    os.writeKeyword("b") << b_ << token::END_STATEMENT << nl;
-    os.writeKeyword("c") << c_ << token::END_STATEMENT << nl;
-    os.writeKeyword("d") << d_ << token::END_STATEMENT << nl;
-    os.writeKeyword("e") << e_ << token::END_STATEMENT << nl;
+    os.writeEntry("a", a_);
+    os.writeEntry("b", b_);
+    os.writeEntry("c", c_);
+    os.writeEntry("d", d_);
+    os.writeEntry("e", e_);
 }
 
 

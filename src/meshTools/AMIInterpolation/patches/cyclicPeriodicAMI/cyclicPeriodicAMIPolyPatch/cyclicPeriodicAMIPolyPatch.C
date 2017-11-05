@@ -709,25 +709,10 @@ void Foam::cyclicPeriodicAMIPolyPatch::write(Ostream& os) const
 {
     cyclicAMIPolyPatch::write(os);
 
-    os.writeKeyword("periodicPatch") << periodicPatchName_
-        << token::END_STATEMENT << nl;
-
-    if (nTransforms_ != 0)
-    {
-        os.writeKeyword("nTransforms") << nTransforms_ <<
-            token::END_STATEMENT << nl;
-    }
-
-    if (nSectors_ != 0)
-    {
-        os.writeKeyword("nSectors") << nSectors_ <<
-            token::END_STATEMENT << nl;
-    }
-
-    if (maxIter_ != 36)
-    {
-        os.writeKeyword("maxIter") << maxIter_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntry("periodicPatch", periodicPatchName_);
+    os.writeEntryIfDifferent<label>("nTransforms", 0, nTransforms_);
+    os.writeEntryIfDifferent<label>("nSectors", 0, nSectors_);
+    os.writeEntryIfDifferent<label>("maxIter", 36, maxIter_);
 }
 
 

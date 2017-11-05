@@ -90,9 +90,9 @@ void Foam::wallBoilingModels::departureDiameterModels::
 TolubinskiKostanchuk::write(Ostream& os) const
 {
     departureDiameterModel::write(os);
-    os.writeKeyword("dRef") << dRef_ << token::END_STATEMENT << nl;
-    os.writeKeyword("dMax") << dMax_ << token::END_STATEMENT << nl;
-    os.writeKeyword("dMin") << dMin_ << token::END_STATEMENT << nl;
+    os.writeEntry("dRef", dRef_);
+    os.writeEntry("dMax", dMax_);
+    os.writeEntry("dMin", dMin_);
 }
 
 

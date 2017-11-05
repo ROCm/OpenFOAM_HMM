@@ -100,8 +100,7 @@ template<class Type>
 void Foam::fixedNormalSlipPointPatchField<Type>::write(Ostream& os) const
 {
     slipPointPatchField<Type>::write(os);
-    os.writeKeyword("n")
-        << n_ << token::END_STATEMENT << nl;
+    os.writeEntry("n", n_);
 }
 
 

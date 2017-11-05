@@ -294,12 +294,9 @@ void nutURoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
-    os.writeKeyword("roughnessHeight")
-        << roughnessHeight_ << token::END_STATEMENT << nl;
-    os.writeKeyword("roughnessConstant")
-        << roughnessConstant_ << token::END_STATEMENT << nl;
-    os.writeKeyword("roughnessFactor")
-        << roughnessFactor_ << token::END_STATEMENT << nl;
+    os.writeEntry("roughnessHeight", roughnessHeight_);
+    os.writeEntry("roughnessConstant", roughnessConstant_);
+    os.writeEntry("roughnessFactor", roughnessFactor_);
     writeEntry("value", os);
 }
 

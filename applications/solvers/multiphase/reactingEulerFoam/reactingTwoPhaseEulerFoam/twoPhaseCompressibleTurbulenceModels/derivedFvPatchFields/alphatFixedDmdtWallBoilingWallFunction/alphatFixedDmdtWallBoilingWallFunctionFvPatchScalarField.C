@@ -138,9 +138,9 @@ void alphatFixedDmdtWallBoilingWallFunctionFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("relax") << relax_ << token::END_STATEMENT << nl;
-    os.writeKeyword("fixedDmdt") << fixedDmdt_ << token::END_STATEMENT << nl;
-    os.writeKeyword("L") << L_ << token::END_STATEMENT << nl;
+    os.writeEntry("relax", relax_);
+    os.writeEntry("fixedDmdt", fixedDmdt_);
+    os.writeEntry("L", L_);
     dmdt_.writeEntry("dmdt", os);
     writeEntry("value", os);
 }

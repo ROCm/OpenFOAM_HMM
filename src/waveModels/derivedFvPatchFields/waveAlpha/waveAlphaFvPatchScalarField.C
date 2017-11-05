@@ -120,8 +120,7 @@ void Foam::waveAlphaFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
 
-    os.writeKeyword("waveDictName") << waveDictName_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("waveDictName", waveDictName_);
 
     writeEntry("value", os);
 }

@@ -44,12 +44,9 @@ void Foam::RBD::rigidBodyMotion::write(Ostream& os) const
 {
     rigidBodyModel::write(os);
 
-    os.writeKeyword("accelerationRelaxation")
-        << aRelax_ << token::END_STATEMENT << nl;
-    os.writeKeyword("accelerationDamping")
-        << aDamp_ << token::END_STATEMENT << nl;
-    os.writeKeyword("report")
-        << report_ << token::END_STATEMENT << nl;
+    os.writeEntry("accelerationRelaxation", aRelax_);
+    os.writeEntry("accelerationDamping", aDamp_);
+    os.writeEntry("report", report_);
 }
 
 

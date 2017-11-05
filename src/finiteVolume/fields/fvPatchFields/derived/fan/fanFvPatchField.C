@@ -132,12 +132,9 @@ template<class Type>
 void Foam::fanFvPatchField<Type>::write(Ostream& os) const
 {
     uniformJumpFvPatchField<Type>::write(os);
-    this->template writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    this->template writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    this->template writeEntryIfDifferent<bool>
-    (
-        os, "uniformJump", false, uniformJump_
-    );
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<bool>("uniformJump", false, uniformJump_);
 }
 
 

@@ -129,7 +129,7 @@ void alphatWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
+    os.writeEntry("Prt", Prt_);
     writeEntry("value", os);
 }
 

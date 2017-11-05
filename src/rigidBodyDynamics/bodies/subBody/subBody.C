@@ -29,11 +29,8 @@ License
 
 void Foam::RBD::subBody::write(Ostream& os) const
 {
-    os.writeKeyword("master")
-        << masterName_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("transform")
-        << masterXT_ << token::END_STATEMENT << nl;
+    os.writeEntry("master", masterName_);
+    os.writeEntry("transform", masterXT_);
 }
 
 

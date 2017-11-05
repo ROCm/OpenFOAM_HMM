@@ -228,8 +228,8 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::write(Ostream& os) const
     flowRate_->writeData(os);
     if (!volumetric_)
     {
-        writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-        writeEntryIfDifferent<scalar>(os, "rhoOutlet", -VGREAT, rhoOutlet_);
+        os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+        os.writeEntryIfDifferent<scalar>("rhoOutlet", -VGREAT, rhoOutlet_);
     }
     writeEntry("value", os);
 }

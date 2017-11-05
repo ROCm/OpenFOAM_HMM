@@ -41,18 +41,12 @@ void Foam::sixDoFRigidBodyMotionState::write(dictionary& dict) const
 
 void Foam::sixDoFRigidBodyMotionState::write(Ostream& os) const
 {
-    os.writeKeyword("centreOfRotation")
-        << centreOfRotation_ << token::END_STATEMENT << nl;
-    os.writeKeyword("orientation")
-        << Q_ << token::END_STATEMENT << nl;
-    os.writeKeyword("velocity")
-        << v_ << token::END_STATEMENT << nl;
-    os.writeKeyword("acceleration")
-        << a_ << token::END_STATEMENT << nl;
-    os.writeKeyword("angularMomentum")
-        << pi_ << token::END_STATEMENT << nl;
-    os.writeKeyword("torque")
-        << tau_ << token::END_STATEMENT << nl;
+    os.writeEntry("centreOfRotation", centreOfRotation_);
+    os.writeEntry("orientation", Q_);
+    os.writeEntry("velocity", v_);
+    os.writeEntry("acceleration", a_);
+    os.writeEntry("angularMomentum", pi_);
+    os.writeEntry("torque", tau_);
 }
 
 

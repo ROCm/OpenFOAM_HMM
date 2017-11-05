@@ -59,11 +59,11 @@ void omegaWallFunctionFvPatchScalarField::checkType()
 
 void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
-    os.writeKeyword("beta1") << beta1_ << token::END_STATEMENT << nl;
-    os.writeKeyword("blended") << blended_ << token::END_STATEMENT << nl;
+    os.writeEntry("Cmu", Cmu_);
+    os.writeEntry("kappa", kappa_);
+    os.writeEntry("E", E_);
+    os.writeEntry("beta1", beta1_);
+    os.writeEntry("blended", blended_);
 }
 
 

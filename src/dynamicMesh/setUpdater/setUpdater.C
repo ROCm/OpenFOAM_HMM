@@ -45,14 +45,8 @@ namespace Foam
     );
 }
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from dictionary
 Foam::setUpdater::setUpdater
 (
     const word& name,
@@ -111,22 +105,13 @@ void Foam::setUpdater::write(Ostream& os) const
 
 void Foam::setUpdater::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type()
-        << token::END_STATEMENT << nl
-        << "    active " << active()
-        << token::END_STATEMENT << nl
-        << token::END_BLOCK << endl;
+    os  << nl;
+
+    os.beginBlock(name());
+    os.writeEntry("type", type());
+    os.writeEntry("active", active());
+    os.endBlock();
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

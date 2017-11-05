@@ -74,10 +74,7 @@ Foam::tableReader<Type>::~tableReader()
 template<class Type>
 void Foam::tableReader<Type>::write(Ostream& os) const
 {
-    if (this->type() != "openFoam")
-    {
-        os.writeEntry("readerType", this->type());
-    }
+    os.writeEntryIfDifferent<word>("readerType", "openFoam", this->type());
 }
 
 

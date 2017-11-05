@@ -592,8 +592,7 @@ void Foam::cyclicACMIPolyPatch::write(Ostream& os) const
 {
     cyclicAMIPolyPatch::write(os);
 
-    os.writeKeyword("nonOverlapPatch") << nonOverlapPatchName_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("nonOverlapPatch", nonOverlapPatchName_);
 }
 
 

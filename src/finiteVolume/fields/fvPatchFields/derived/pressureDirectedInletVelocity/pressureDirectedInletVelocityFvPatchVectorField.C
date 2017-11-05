@@ -178,8 +178,8 @@ void Foam::pressureDirectedInletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     inletDir_.writeEntry("inletDirection", os);
     writeEntry("value", os);
 }

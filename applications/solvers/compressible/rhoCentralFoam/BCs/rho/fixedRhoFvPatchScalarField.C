@@ -117,8 +117,8 @@ void Foam::fixedRhoFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
 
-    writeEntryIfDifferent<word>(os, "p", "p", this->pName_);
-    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
+    os.writeEntryIfDifferent<word>("p", "p", pName_);
+    os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
     writeEntry("value", os);
 }
 

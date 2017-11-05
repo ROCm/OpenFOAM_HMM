@@ -146,10 +146,10 @@ void Foam::prghTotalHydrostaticPressureFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "ph_rgh", "ph_rgh", ph_rghName_);
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("ph_rgh", "ph_rgh", ph_rghName_);
     writeEntry("value", os);
 }
 

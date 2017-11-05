@@ -292,18 +292,12 @@ void Foam::activeBaffleVelocityFvPatchVectorField::updateCoeffs()
 void Foam::activeBaffleVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
-    os.writeKeyword("cyclicPatch")
-        << cyclicPatchName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("orientation")
-        << orientation_ << token::END_STATEMENT << nl;
-    os.writeKeyword("openingTime")
-        << openingTime_ << token::END_STATEMENT << nl;
-    os.writeKeyword("maxOpenFractionDelta")
-        << maxOpenFractionDelta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("openFraction")
-        << openFraction_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
+    os.writeEntryIfDifferent<word>("p", "p", pName_);
+    os.writeEntry("cyclicPatch", cyclicPatchName_);
+    os.writeEntry("orientation", orientation_);
+    os.writeEntry("openingTime", openingTime_);
+    os.writeEntry("maxOpenFractionDelta", maxOpenFractionDelta_);
+    os.writeEntry("openFraction", openFraction_);
     writeEntry("value", os);
 }
 

@@ -297,25 +297,23 @@ void Foam::coordinateSystem::writeDict(Ostream& os, bool subDict) const
 {
     if (subDict)
     {
-        os  << indent << name_ << nl
-            << indent << token::BEGIN_BLOCK << incrIndent << nl;
+        os.beginBlock(name_);
     }
 
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
 
-
-    // The note entry is optional
     if (note_.size())
     {
-        os.writeKeyword("note") << note_ << token::END_STATEMENT << nl;
+        // note is optional
+        os.writeEntry("note", note_);
     }
 
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
+    os.writeEntry("origin", origin_);
     R_->write(os);
 
     if (subDict)
     {
-        os  << decrIndent << indent << token::END_BLOCK << endl;
+        os.endBlock();
     }
 }
 

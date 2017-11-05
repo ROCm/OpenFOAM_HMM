@@ -470,10 +470,12 @@ void Foam::surfaceDisplacementPointPatchVectorField::write(Ostream& os) const
     os.writeEntry("projectDirection", projectDir_);
     os.writeEntry("wedgePlane", wedgePlane_);
 
-    if (frozenPointsZone_ != word::null)
-    {
-        os.writeEntry("frozenPointsZone", frozenPointsZone_);
-    }
+    os.writeEntryIfDifferent<word>
+    (
+        "frozenPointsZone",
+        word::null,
+        frozenPointsZone_
+    );
 }
 
 

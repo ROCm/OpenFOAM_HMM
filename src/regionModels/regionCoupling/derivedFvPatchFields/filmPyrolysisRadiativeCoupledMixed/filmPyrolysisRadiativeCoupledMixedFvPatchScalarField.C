@@ -384,28 +384,23 @@ void filmPyrolysisRadiativeCoupledMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_
     );
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "pyrolysisRegion",
         "pyrolysisProperties",
         pyrolysisRegionName_
     );
-    os.writeKeyword("Tnbr")<< TnbrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("qr")<< qrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("convectiveScaling") << convectiveScaling_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("filmDeltaDry") << filmDeltaDry_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("filmDeltaWet") << filmDeltaWet_
-        << token::END_STATEMENT << endl;
+    os.writeEntry("Tnbr", TnbrName_);
+    os.writeEntry("qr", qrName_);
+    os.writeEntry("convectiveScaling", convectiveScaling_);
+    os.writeEntry("filmDeltaDry", filmDeltaDry_);
+    os.writeEntry("filmDeltaWet", filmDeltaWet_);
     temperatureCoupledBase::write(os);
 }
 

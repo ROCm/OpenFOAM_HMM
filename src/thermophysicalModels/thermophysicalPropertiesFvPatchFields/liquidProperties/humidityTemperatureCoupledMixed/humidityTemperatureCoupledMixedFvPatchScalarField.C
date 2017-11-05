@@ -727,19 +727,19 @@ void Foam::humidityTemperatureCoupledMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "mu", "thermo:mu", muName_);
-    writeEntryIfDifferent<word>(os, "Tnbr", "T", TnbrName_);
-    writeEntryIfDifferent<word>(os, "qrNbr", "none", qrNbrName_);
-    writeEntryIfDifferent<word>(os, "qr", "none", qrName_);
+    os.writeEntryIfDifferent<word>("p", "p", pName_);
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("mu", "thermo:mu", muName_);
+    os.writeEntryIfDifferent<word>("Tnbr", "T", TnbrName_);
+    os.writeEntryIfDifferent<word>("qrNbr", "none", qrNbrName_);
+    os.writeEntryIfDifferent<word>("qr", "none", qrName_);
 
     if (fluid_)
     {
         os.writeEntry("mode", massModeTypeNames_[mode_]);
 
-        writeEntryIfDifferent<word>(os, "specie", "none", specieName_);
+        os.writeEntryIfDifferent<word>("specie", "none", specieName_);
 
         os.writeEntry("carrierMolWeight", Mcomp_);
 

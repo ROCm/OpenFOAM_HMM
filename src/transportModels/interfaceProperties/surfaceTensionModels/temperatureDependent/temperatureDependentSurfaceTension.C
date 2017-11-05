@@ -128,10 +128,8 @@ bool Foam::surfaceTensionModels::temperatureDependent::writeData
         os  << sigma_() << token::END_STATEMENT << nl;
         return os.good();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

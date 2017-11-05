@@ -128,7 +128,7 @@ void Foam::rotatingPressureInletOutletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName() << token::END_STATEMENT << nl;
+    os.writeEntry("phi", phiName());
     omega_->writeData(os);
     writeEntry("value", os);
 }

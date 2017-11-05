@@ -343,8 +343,7 @@ template<class Type>
 void Foam::codedMixedFvPatchField<Type>::write(Ostream& os) const
 {
     mixedFvPatchField<Type>::write(os);
-    os.writeKeyword("name") << name_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("name", name_);
 
     codedBase::writeCodeDict(os, dict_);
 }
