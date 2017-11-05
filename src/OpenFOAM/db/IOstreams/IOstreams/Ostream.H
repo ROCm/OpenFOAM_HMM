@@ -97,7 +97,7 @@ public:
         // Write functions
 
             //- Write next token to stream
-            virtual Ostream& write(const token& t) = 0;
+            virtual Ostream& write(const token& tok) = 0;
 
             //- Write character
             virtual Ostream& write(const char c) = 0;

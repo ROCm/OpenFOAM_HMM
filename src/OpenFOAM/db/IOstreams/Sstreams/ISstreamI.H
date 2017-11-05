@@ -59,7 +59,7 @@ inline Foam::ISstream& Foam::ISstream::get(char& c)
 
     if (good() && c == '\n')
     {
-        lineNumber_++;
+        ++lineNumber_;
     }
 
     return *this;
@@ -76,7 +76,7 @@ inline Foam::ISstream& Foam::ISstream::getLine(string& str)
 {
     std::getline(is_, str);
     setState(is_.rdstate());
-    lineNumber_++;
+    ++lineNumber_;
 
     return *this;
 }
@@ -86,7 +86,7 @@ inline Foam::ISstream& Foam::ISstream::putback(const char c)
 {
     if (c == '\n')
     {
-        lineNumber_--;
+        --lineNumber_;
     }
 
     if (!is_.putback(c))

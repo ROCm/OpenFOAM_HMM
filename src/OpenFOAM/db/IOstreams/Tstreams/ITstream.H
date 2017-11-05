@@ -208,7 +208,7 @@ public:
         // Read functions
 
             //- Return next token from stream
-            virtual Istream& read(token& t);
+            virtual Istream& read(token& tok);
 
             //- Read a character
             virtual Istream& read(char&);

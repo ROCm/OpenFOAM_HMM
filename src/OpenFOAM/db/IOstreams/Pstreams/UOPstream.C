@@ -185,18 +185,18 @@ Foam::UOPstream::~UOPstream()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::UOPstream::write(const token& t)
+Foam::Ostream& Foam::UOPstream::write(const token& tok)
 {
     // Raw token output only supported for verbatim strings for now
-    if (t.type() == token::tokenType::VERBATIMSTRING)
+    if (tok.type() == token::tokenType::VERBATIMSTRING)
     {
         writeToBuffer(char(token::tokenType::VERBATIMSTRING));
-        write(t.stringToken());
+        write(tok.stringToken());
     }
-    else if (t.type() == token::tokenType::VARIABLE)
+    else if (tok.type() == token::tokenType::VARIABLE)
     {
         writeToBuffer(char(token::tokenType::VARIABLE));
-        write(t.stringToken());
+        write(tok.stringToken());
     }
     else
     {

@@ -65,19 +65,19 @@ void Foam::prefixOSstream::print(Ostream& os) const
 }
 
 
-Foam::Ostream& Foam::prefixOSstream::write(const token& t)
+Foam::Ostream& Foam::prefixOSstream::write(const token& tok)
 {
-    if (t.type() == token::tokenType::VERBATIMSTRING)
+    if (tok.type() == token::tokenType::VERBATIMSTRING)
     {
         write(char(token::HASH));
         write(char(token::BEGIN_BLOCK));
-        writeQuoted(t.stringToken(), false);
+        writeQuoted(tok.stringToken(), false);
         write(char(token::HASH));
         write(char(token::END_BLOCK));
     }
-    else if (t.type() == token::tokenType::VARIABLE)
+    else if (tok.type() == token::tokenType::VARIABLE)
     {
-        writeQuoted(t.stringToken(), false);
+        writeQuoted(tok.stringToken(), false);
     }
     return *this;
 }

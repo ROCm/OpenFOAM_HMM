@@ -56,7 +56,8 @@ bool Foam::entry::getKeyword(keyType& keyword, token& keyToken, Istream& is)
         keyword = keyToken.wordToken();
         return true;
     }
-    else if (keyToken.isString())
+
+    if (keyToken.isString())
     {
         // Enable wildcards
         keyword = keyToken.stringToken();
@@ -136,7 +137,8 @@ bool Foam::entry::New
         {
             return false;
         }
-        else if
+
+        if
         (
             keyToken.isLabel()
          || (keyToken.isPunctuation() && keyToken.pToken() == token::BEGIN_LIST)
@@ -162,9 +164,10 @@ bool Foam::entry::New
         return false;
     }
 
+
     if (keyword[0] == '#')
     {
-        // Function entry
+        // Function entry - #function
 
         if (disableFunctionEntries)
         {
@@ -183,9 +186,11 @@ bool Foam::entry::New
         const word functionName(keyword.substr(1), false);
         return functionEntry::execute(functionName, parentDict, is);
     }
-    else if (!disableFunctionEntries && keyword[0] == '$')
+
+
+    if (!disableFunctionEntries && keyword[0] == '$')
     {
-        // Substitution entry
+        // Substitution entry - $variable
 
         token nextToken(is);
         is.putBack(nextToken);
@@ -245,10 +250,10 @@ bool Foam::entry::New
 
         return true;
     }
-    else
-    {
-        // Normal or scoped entry
 
+
+    // Normal or scoped entry
+    {
         token nextToken(is);
         is.putBack(nextToken);
 
@@ -399,11 +404,9 @@ bool Foam::entry::New
                     );
                 }
             }
-            else
-            {
-                // Some error finding/creating intermediate dictionaries
-                return false;
-            }
+
+            // Some error finding/creating intermediate dictionaries
+            return false;
         }
         else
         {

@@ -164,7 +164,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Analyse input starting with this character.
     switch (c)
     {
-        // Check for punctuation first
+        // Check for punctuation first - same as token::isSeparator
 
         case token::END_STATEMENT :
         case token::BEGIN_LIST :
@@ -288,7 +288,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            bool asLabel = (c != '.');
+            label labelVal = (c != '.'); // used as bool here
 
             unsigned nChar = 0;
             buf[nChar++] = c;
@@ -308,9 +308,9 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 )
             )
             {
-                if (asLabel)
+                if (labelVal)
                 {
-                    asLabel = isdigit(c);
+                    labelVal = isdigit(c);
                 }
 
                 buf[nChar++] = c;
@@ -344,16 +344,15 @@ Foam::Istream& Foam::ISstream::read(token& t)
                     // A single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
+                else if (labelVal && Foam::read(buf, labelVal))
+                {
+                    t = labelVal;
+                }
                 else
                 {
-                    label labelVal;
                     scalar scalarVal;
 
-                    if (asLabel && Foam::read(buf, labelVal))
-                    {
-                        t = labelVal;
-                    }
-                    else if (readScalar(buf, scalarVal))
+                    if (readScalar(buf, scalarVal))
                     {
                         // A scalar or too big to fit as a label
                         t = scalarVal;

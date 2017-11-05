@@ -147,7 +147,7 @@ public:
             );
 
             //- Write next token to stream
-            Ostream& write(const token& t);
+            Ostream& write(const token& tok);
 
             //- Write single character. Whitespace is suppressed.
             Ostream& write(const char c);

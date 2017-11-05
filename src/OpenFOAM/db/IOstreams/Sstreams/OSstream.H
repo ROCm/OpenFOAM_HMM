@@ -105,7 +105,7 @@ public:
         // Write functions
 
             //- Write next token to stream
-            virtual Ostream& write(const token& t);
+            virtual Ostream& write(const token& tok);
 
             //- Write character
             virtual Ostream& write(const char c);
@@ -116,7 +116,7 @@ public:
             //- Write word
             virtual Ostream& write(const word& str);
 
-            //- Write string
+            //- Write string (quoted)
             //  In the rare case that the string contains a final trailing
             //  backslash, it will be dropped to the appearance of an escaped
             //  double-quote.

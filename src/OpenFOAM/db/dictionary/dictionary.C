@@ -217,14 +217,16 @@ Foam::tokenList Foam::dictionary::tokens() const
     // Serialize dictionary into a string
     OStringStream os;
     write(os, false);
+
     IStringStream is(os.str());
 
-    // Parse string as tokens
     DynamicList<token> tokens;
-    token t;
-    while (is.read(t))
+
+    // Parse string as tokens
+    token tok;
+    while (is.read(tok))
     {
-        tokens.append(t);
+        tokens.append(std::move(tok));
     }
 
     return tokenList(tokens.xfer());

@@ -134,19 +134,19 @@ void Foam::ITstream::print(Ostream& os) const
 }
 
 
-Foam::Istream& Foam::ITstream::read(token& t)
+Foam::Istream& Foam::ITstream::read(token& tok)
 {
     // Return the put back token if it exists
-    if (Istream::getBack(t))
+    if (Istream::getBack(tok))
     {
-        lineNumber_ = t.lineNumber();
+        lineNumber_ = tok.lineNumber();
         return *this;
     }
 
     if (tokenIndex_ < size())
     {
-        t = operator[](tokenIndex_++);
-        lineNumber_ = t.lineNumber();
+        tok = operator[](tokenIndex_++);
+        lineNumber_ = tok.lineNumber();
 
         if (tokenIndex_ == size())
         {
@@ -170,15 +170,15 @@ Foam::Istream& Foam::ITstream::read(token& t)
             setEof();
         }
 
-        t = token::undefinedToken;
+        tok = token::undefinedToken;
 
         if (size())
         {
-            t.lineNumber() = tokenList::last().lineNumber();
+            tok.lineNumber() = tokenList::last().lineNumber();
         }
         else
         {
-            t.lineNumber() = lineNumber();
+            tok.lineNumber() = lineNumber();
         }
     }
 
@@ -238,6 +238,7 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 void Foam::ITstream::rewind()
 {
     tokenIndex_ = 0;
+    lineNumber_ = 0;
 
     if (size())
     {

@@ -30,11 +30,23 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::primitiveEntry::append(const UList<token>& varTokens)
+void Foam::primitiveEntry::appendTokenList(const UList<token>& varTokens)
 {
     for (const token& tok : varTokens)
     {
-        newElmt(tokenIndex()++) = tok;
+        newElmt(tokenIndex()++) = tok;  // append copy
+    }
+}
+
+
+void Foam::primitiveEntry::appendTokensFromString(const string& input)
+{
+    IStringStream is(input);
+
+    token tok;
+    while (!is.read(tok).bad() && tok.good())
+    {
+        newElmt(tokenIndex()++) = std::move(tok);
     }
 }
 
@@ -85,17 +97,18 @@ bool Foam::primitiveEntry::expandVariable
             return false;
         }
 
-        append(tokenList(IStringStream('(' + str + ')')()));
+        // Split input string into a stream of tokens and append to list
+        appendTokensFromString(str);
     }
     else if (eptr->isDict())
     {
         // Found dictionary entry
-        append(eptr->dict().tokens());
+        appendTokenList(eptr->dict().tokens());
     }
     else
     {
         // Found primitive entry
-        append(eptr->stream());
+        appendTokenList(eptr->stream());
     }
 
     return true;
@@ -113,10 +126,10 @@ Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& is)
 }
 
 
-Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& t)
+Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& tok)
 :
     entry(key),
-    ITstream(key, tokenList(1, t))
+    ITstream(key, tokenList(1, tok))
 {}
 
 
@@ -148,14 +161,12 @@ Foam::label Foam::primitiveEntry::startLineNumber() const
 {
     const tokenList& tokens = *this;
 
-    if (tokens.empty())
+    if (tokens.size())
     {
-        return -1;
+        tokens.first().lineNumber();
     }
-    else
-    {
-        return tokens.first().lineNumber();
-    }
+
+    return -1;
 }
 
 
@@ -163,14 +174,12 @@ Foam::label Foam::primitiveEntry::endLineNumber() const
 {
     const tokenList& tokens = *this;
 
-    if (tokens.empty())
-    {
-        return -1;
-    }
-    else
+    if (tokens.size())
     {
         return tokens.last().lineNumber();
     }
+
+    return -1;
 }
 
 
