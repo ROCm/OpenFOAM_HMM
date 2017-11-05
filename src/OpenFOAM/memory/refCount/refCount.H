@@ -36,8 +36,6 @@ See also
 #ifndef refCount_H
 #define refCount_H
 
-#include "bool.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -50,20 +48,10 @@ namespace Foam
 class refCount
 {
     // Private data
-
-        int count_;
-
-
-    // Private Member Functions
-
-        //- Dissallow copy
-        refCount(const refCount&);
-
-        //- Dissallow bitwise assignment
-        void operator=(const refCount&);
+    int count_;
 
 
-protected:
+public:
 
     // Constructors
 
@@ -73,8 +61,6 @@ protected:
             count_(0)
         {}
 
-
-public:
 
     // Member Functions
 
@@ -87,7 +73,7 @@ public:
         //- Return true if the reference count is zero
         bool unique() const
         {
-            return count_ == 0;
+            return !count_;
         }
 
 
@@ -96,25 +82,25 @@ public:
         //- Increment the reference count
         void operator++()
         {
-            count_++;
+            ++count_;
         }
 
         //- Increment the reference count
         void operator++(int)
         {
-            count_++;
+            ++count_;
         }
 
         //- Decrement the reference count
         void operator--()
         {
-            count_--;
+            --count_;
         }
 
         //- Decrement the reference count
         void operator--(int)
         {
-            count_--;
+            --count_;
         }
 };
 

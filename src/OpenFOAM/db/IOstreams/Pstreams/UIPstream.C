@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -164,22 +164,20 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         // Word
         case token::tokenType::WORD :
         {
-            word* pval = new word;
-            if (read(*pval))
+            word val;
+            if (read(val))
             {
-                if (token::compound::isCompound(*pval))
+                if (token::compound::isCompound(val))
                 {
-                    t = token::compound::New(*pval, *this).ptr();
-                    delete pval;
+                    t = token::compound::New(val, *this).ptr();
                 }
                 else
                 {
-                    t = pval;
+                    t = std::move(val);
                 }
             }
             else
             {
-                delete pval;
                 t.setBad();
             }
             return *this;
@@ -190,26 +188,25 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         {
             // Recurse to read actual string
             read(t);
-            t.type() = token::tokenType::VERBATIMSTRING;
+            t.setType(token::tokenType::VERBATIMSTRING);
             return *this;
         }
         case token::tokenType::VARIABLE :
         {
             // Recurse to read actual string
             read(t);
-            t.type() = token::tokenType::VARIABLE;
+            t.setType(token::tokenType::VARIABLE);
             return *this;
         }
         case token::tokenType::STRING :
         {
-            string* pval = new string;
-            if (read(*pval))
+            string val;
+            if (read(val))
             {
-                t = pval;
+                t = std::move(val);
             }
             else
             {
-                delete pval;
                 t.setBad();
             }
             return *this;

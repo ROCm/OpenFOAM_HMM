@@ -116,21 +116,18 @@ char Foam::ISstream::nextValid()
 
 void Foam::ISstream::readWordToken(token& t)
 {
-    word* wPtr = new word;
-
-    if (read(*wPtr).bad())
+    word val;
+    if (read(val).bad())
     {
-        delete wPtr;
         t.setBad();
     }
-    else if (token::compound::isCompound(*wPtr))
+    else if (token::compound::isCompound(val))
     {
-        t = token::compound::New(*wPtr, *this).ptr();
-        delete wPtr;
+        t = token::compound::New(val, *this).ptr();
     }
     else
     {
-        t = wPtr; // Token takes ownership
+        t = std::move(val); // Move contents to token
     }
 }
 
@@ -192,16 +189,15 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case token::BEGIN_STRING :
         {
             putback(c);
-            string* sPtr = new string;
 
-            if (read(*sPtr).bad())
+            string val;
+            if (read(val).bad())
             {
-                delete sPtr;
                 t.setBad();
             }
             else
             {
-                t = sPtr; // Token takes ownership
+                t = std::move(val); // Move contents to token
             }
 
             return *this;
@@ -219,17 +215,16 @@ Foam::Istream& Foam::ISstream::read(token& t)
             else if (nextC == token::BEGIN_BLOCK)
             {
                 // Verbatim string: #{ ... #}
-                string* sPtr = new string;
 
-                if (readVerbatim(*sPtr).bad())
+                string val;
+                if (readVerbatim(val).bad())
                 {
-                    delete sPtr;
                     t.setBad();
                 }
                 else
                 {
-                    t = sPtr; // Token takes ownership
-                    t.type() = token::tokenType::VERBATIMSTRING;
+                    t = std::move(val); // Move contents to token
+                    t.setType(token::tokenType::VERBATIMSTRING);
                 }
             }
             else
@@ -259,17 +254,15 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 putback(nextC);
                 putback(c);
 
-                string* sPtr = new string;
-
-                if (readVariable(*sPtr).bad())
+                string val;
+                if (readVariable(val).bad())
                 {
-                    delete sPtr;
                     t.setBad();
                 }
                 else
                 {
-                    t = sPtr; // Token takes ownership
-                    t.type() = token::tokenType::VARIABLE;
+                    t = std::move(val); // Move contents to token
+                    t.setType(token::tokenType::VARIABLE);
                 }
             }
             else
