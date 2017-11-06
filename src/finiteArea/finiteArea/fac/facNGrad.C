@@ -62,9 +62,9 @@ ngrad
     typedef typename outerProduct<vector,Type>::type GradType;
 
     tmp<GeometricField<GradType, faPatchField, areaMesh>> tgGrad =
-        fac::edgeIntegrate(ssf.mesh().Sf() * ssf);
+        fac::edgeIntegrate(ssf.mesh().Sf()*ssf);
 
-    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad();
+    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad.ref();
 
     gGrad = n*(n & gGrad);
     gGrad.correctBoundaryConditions();
@@ -119,9 +119,9 @@ ngrad
         (
             vf.mesh(),
             vf.mesh().schemesDict().gradScheme(name)
-        )().grad(vf);
+        ).ref().grad(vf);
 
-    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad();
+    GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad.ref();
 
     gGrad = n*(n & gGrad);
     gGrad.correctBoundaryConditions();

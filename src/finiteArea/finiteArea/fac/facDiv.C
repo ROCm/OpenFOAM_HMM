@@ -108,14 +108,14 @@ div
         fa::divScheme<Type>::New
         (
             vf.mesh(), vf.mesh().schemesDict().divScheme(name)
-        )().facDiv(vf)
+        ).ref().facDiv(vf)
     );
     GeometricField
     <
         typename innerProduct<vector, Type>::type,
         faPatchField,
         areaMesh
-    >& Div = tDiv();
+    >& Div = tDiv.ref();
 
     Div.primitiveFieldRef() =
         transform(tensor::I - sqr(n), Div.internalField());
@@ -208,9 +208,9 @@ div
             vf.mesh(),
             flux,
             vf.mesh().schemesDict().divScheme(name)
-        )().facDiv(flux, vf)
+        ).ref().facDiv(flux, vf)
     );
-    GeometricField<Type, faPatchField, areaMesh>& Div = tDiv();
+    GeometricField<Type, faPatchField, areaMesh>& Div = tDiv.ref();
 
     Div.internalField() = transform(tensor::I - sqr(n), Div.internalField());
     Div.correctBoundaryConditions();

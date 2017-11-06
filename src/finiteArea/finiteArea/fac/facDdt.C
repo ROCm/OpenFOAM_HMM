@@ -53,7 +53,7 @@ ddt
     (
         mesh,
         mesh.schemesDict().ddtScheme("ddt(" + dt.name() + ')')
-    )().facDdt(dt);
+    ).ref().facDdt(dt);
 }
 
 
@@ -68,7 +68,7 @@ ddt
     (
         vf.mesh(),
         vf.mesh().schemesDict().ddtScheme("ddt(" + vf.name() + ')')
-    )().facDdt(vf);
+    ).ref().facDdt(vf);
 }
 
 
@@ -87,7 +87,7 @@ ddt
         (
             "ddt(" + rho.name() + ',' + vf.name() + ')'
         )
-    )().facDdt(rho, vf);
+    ).ref().facDdt(rho, vf);
 }
 
 
@@ -106,7 +106,7 @@ ddt
         (
             "ddt(" + rho.name() + ',' + vf.name() + ')'
         )
-    )().facDdt(rho, vf);
+    ).ref().facDdt(rho, vf);
 }
 
 

@@ -56,8 +56,9 @@ ndiv
         vf.mesh(),
         flux,
         vf.mesh().schemesDict().divScheme(name)
-    )().famDiv(flux, vf);//TODO calculate normal
+    ).ref().famDiv(flux, vf);//TODO calculate normal
 }
+
 
 template<class Type>
 tmp<faMatrix<Type>>
@@ -85,6 +86,7 @@ ndiv
 {
     return fam::ndiv(flux, vf, "div("+flux.name()+','+vf.name()+')');
 }
+
 
 template<class Type>
 tmp<faMatrix<Type>>

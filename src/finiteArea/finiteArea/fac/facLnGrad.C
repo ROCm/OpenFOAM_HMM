@@ -53,7 +53,7 @@ lnGrad
     (
         vf.mesh(),
         vf.mesh().schemesDict().lnGradScheme(name)
-    )().lnGrad(vf);
+    ).ref().lnGrad(vf);
 }
 
 

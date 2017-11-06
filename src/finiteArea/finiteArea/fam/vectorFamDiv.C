@@ -56,7 +56,7 @@ div
         vf.mesh(),
         flux,
         vf.mesh().schemesDict().divScheme(name)
-    )().famDiv(flux, vf);
+    ).ref().famDiv(flux, vf);
 }
 
 

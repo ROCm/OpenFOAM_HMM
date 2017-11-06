@@ -46,7 +46,7 @@ Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
             pTraits<Type>::zero
         )
     );
-    Field<Type>& result = tresult();
+    Field<Type>& result = tresult.ref();
 
     // Get reference to volume mesh
     const polyMesh& pMesh = mesh_();

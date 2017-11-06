@@ -53,8 +53,10 @@ ndiv
 {
     const areaVectorField& n = ssf.mesh().faceAreaNormals();
 
-    tmp<GeometricField<Type, faPatchField, areaMesh>> v =
+    tmp<GeometricField<Type, faPatchField, areaMesh>> tv =
         fac::edgeIntegrate(ssf);
+
+    GeometricField<Type, faPatchField, areaMesh>& v = tv.ref();
 
     v.internalField() = n*(n & v.internalField());
     v.correctBoundaryConditions();
@@ -97,9 +99,9 @@ ndiv
         fa::divScheme<Type>::New
             (
                 vf.mesh(), vf.mesh().schemesDict().divScheme(name)
-            )().facDiv(vf)
+            ).ref().facDiv(vf)
     );
-    GeometricField<Type, faPatchField, areaMesh>& Div = tDiv();
+    GeometricField<Type, faPatchField, areaMesh>& Div = tDiv.ref();
 
     Div.internalField() = n*(n & Div.internalField());
     Div.correctBoundaryConditions();
@@ -191,10 +193,10 @@ ndiv
             vf.mesh(),
             flux,
             vf.mesh().schemesDict().divScheme(name)
-        )().facDiv(flux, vf)
+        ).ref().facDiv(flux, vf)
     );
 
-    GeometricField<Type, faPatchField, areaMesh>& Div = tDiv();
+    GeometricField<Type, faPatchField, areaMesh>& Div = tDiv.ref();
 
     Div.internalField() = n*(n &Div.internalField());
     Div.correctBoundaryConditions();
