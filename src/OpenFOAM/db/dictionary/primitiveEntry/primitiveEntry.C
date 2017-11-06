@@ -30,24 +30,23 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::primitiveEntry::appendTokenList(const UList<token>& varTokens)
+void Foam::primitiveEntry::appendTokenList(const UList<token>& toks)
 {
-    for (const token& tok : varTokens)
+    for (const token& tok : toks)
     {
-        newElmt(tokenIndex()++) = tok;  // append copy
+        newElmt(tokenIndex()++) = tok;  // copy append
     }
 }
 
 
-void Foam::primitiveEntry::appendTokensFromString(const string& input)
+void Foam::primitiveEntry::appendTokenList(List<token>&& toks)
 {
-    IStringStream is(input);
-
-    token tok;
-    while (!is.read(tok).bad() && tok.good())
+    for (token& tok : toks)
     {
-        newElmt(tokenIndex()++) = std::move(tok);
+        newElmt(tokenIndex()++) = std::move(tok);  // move append
     }
+
+    toks.clear();
 }
 
 
@@ -97,13 +96,16 @@ bool Foam::primitiveEntry::expandVariable
             return false;
         }
 
-        // Split input string into a stream of tokens and append to list
-        appendTokensFromString(str);
+        // String parsed as a list of tokens
+        ITstream its("env", str);
+        appendTokenList(std::move(static_cast<tokenList&>(its)));
     }
     else if (eptr->isDict())
     {
         // Found dictionary entry
-        appendTokenList(eptr->dict().tokens());
+
+        tokenList toks(eptr->dict().tokens().xfer());
+        appendTokenList(std::move(toks));
     }
     else
     {

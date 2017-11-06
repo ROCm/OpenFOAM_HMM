@@ -28,7 +28,6 @@ License
 #include "dictionaryEntry.H"
 #include "regExp.H"
 #include "OSHA1stream.H"
-#include "DynamicList.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -214,22 +213,20 @@ Foam::SHA1Digest Foam::dictionary::digest() const
 
 Foam::tokenList Foam::dictionary::tokens() const
 {
-    // Serialize dictionary into a string
+    // Serialize dictionary entries into a string
     OStringStream os;
-    write(os, false);
 
-    IStringStream is(os.str());
-
-    DynamicList<token> tokens;
-
-    // Parse string as tokens
-    token tok;
-    while (is.read(tok))
+    // Process entries
+    forAllConstIter(parent_type, *this, iter)
     {
-        tokens.append(std::move(tok));
+        os << *iter;
     }
 
-    return tokenList(tokens.xfer());
+    // String re-parsed as a list of tokens
+    return static_cast<tokenList>
+    (
+        ITstream("tokens", os.str(), os.format(), os.version())
+    );
 }
 
 

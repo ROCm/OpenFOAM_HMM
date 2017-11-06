@@ -73,14 +73,13 @@ class primitiveEntry
             Istream& is
         );
 
-        //- Append the given tokens at the current tokenIndex
+        //- Copy append the given tokens at the current tokenIndex
         //  No filtering on the tokens.
-        void appendTokenList(const UList<token>& varTokens);
+        void appendTokenList(const UList<token>& toks);
 
-        //- Split input string into a stream of tokens and append at the
-        //- current tokenIndex.
+        //- Move append the given tokens at the current tokenIndex
         //  No filtering on the tokens.
-        void appendTokensFromString(const string& input);
+        void appendTokenList(List<token>&& toks);
 
 
         //- Expand the given variable.
