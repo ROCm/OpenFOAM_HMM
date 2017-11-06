@@ -831,11 +831,18 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
 
         // Statistics
+        Info<< nl << "Processor " << proci;
 
-        Info<< endl
-            << "Processor " << proci << nl
-            << "    Number of cells = " << procMesh.nCells()
-            << endl;
+        if (procMesh.nCells())
+        {
+            Info<< nl << "    ";
+        }
+        else
+        {
+            Info<< ": ";
+        }
+
+        Info<< "Number of cells = " << procMesh.nCells() << nl;
 
         maxProcCells = max(maxProcCells, procMesh.nCells());
 
@@ -865,9 +872,12 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             }
         }
 
-        Info<< "    Number of processor patches = " << nProcPatches << nl
-            << "    Number of processor faces = " << nProcFaces << nl
-            << "    Number of boundary faces = " << nBoundaryFaces << endl;
+        if (procMesh.nCells() && (nBoundaryFaces || nProcFaces))
+        {
+            Info<< "    Number of processor patches = " << nProcPatches << nl
+                << "    Number of processor faces = " << nProcFaces << nl
+                << "    Number of boundary faces = " << nBoundaryFaces << nl;
+        }
 
         totProcFaces += nProcFaces;
         totProcPatches += nProcPatches;
