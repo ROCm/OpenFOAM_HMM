@@ -34,28 +34,33 @@ Foam::fileFormats::NASCore::NASCore()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::fileFormats::NASCore::parseNASCoord
-(
-    const string& s
-)
+Foam::scalar Foam::fileFormats::NASCore::parseNASCoord(const string& s)
 {
-    size_t expSign = s.find_last_of("+-");
+    scalar value = 0;
 
-    if (expSign != string::npos && expSign > 0 && !isspace(s[expSign-1]))
+    const size_t expSign = s.find_last_of("+-");
+
+    if (expSign != std::string::npos && expSign > 0 && !isspace(s[expSign-1]))
     {
-        scalar mantissa = readScalar(IStringStream(s.substr(0, expSign))());
-        scalar exponent = readScalar(IStringStream(s.substr(expSign+1))());
+        scalar exponent = 0;
+
+        // Parse as per strtod/strtof - allowing trailing space or [Ee]
+        readScalar(s.substr(0, expSign).c_str(), value);  // mantissa
+        readScalar(s.substr(expSign+1).c_str(),  exponent);
 
         if (s[expSign] == '-')
         {
             exponent = -exponent;
         }
-        return mantissa * pow(10, exponent);
+
+        value *= ::pow(10, exponent);
     }
     else
     {
-        return readScalar(IStringStream(s)());
+        readScalar(s.c_str(), value);
     }
+
+    return value;
 }
 
 

@@ -15,11 +15,15 @@
             )
           : -dpdt
         )
-      - fvm::laplacian(alphaEff, he)
      ==
         radiation->Sh(thermo, he)
       + fvOptions(rho, he)
     );
+
+    if (turbulence.valid())
+    {
+        EEqn -= fvm::laplacian(turbulence->alphaEff(), he);
+    }
 
     EEqn.relax();
 

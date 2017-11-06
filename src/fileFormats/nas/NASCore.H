@@ -55,8 +55,8 @@ public:
 
     // Public Member Functions
 
-        //- Do weird things to extract number
-        static scalar parseNASCoord(const string&);
+        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
+        static scalar parseNASCoord(const string& s);
 
 
     // Constructors
