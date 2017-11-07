@@ -280,7 +280,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
     const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
 )
 {
-    return tmp<fluxFieldType>
+    tmp<fluxFieldType> tCorr
     (
         new fluxFieldType
         (
@@ -299,6 +299,10 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
             )
         )
     );
+
+    tCorr.ref().setOriented();
+
+    return tCorr;
 }
 
 
@@ -310,7 +314,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
     const fluxFieldType& phi
 )
 {
-    return tmp<fluxFieldType>
+    tmp<fluxFieldType> tCorr
     (
         new fluxFieldType
         (
@@ -329,6 +333,10 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             )
         )
     );
+
+    tCorr.ref().setOriented();
+
+    return tCorr;
 }
 
 
@@ -341,7 +349,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
     const GeometricField<Type, fvsPatchField, surfaceMesh>& Uf
 )
 {
-    return tmp<fluxFieldType>
+    tmp<fluxFieldType> tCorr
     (
         new fluxFieldType
         (
@@ -362,6 +370,10 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
             )
         )
     );
+
+    tCorr.ref().setOriented();
+
+    return tCorr;
 }
 
 
@@ -374,7 +386,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
     const fluxFieldType& phi
 )
 {
-    return tmp<fluxFieldType>
+    tmp<fluxFieldType> tCorr
     (
         new fluxFieldType
         (
@@ -395,6 +407,10 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             )
         )
     );
+
+    tCorr.ref().setOriented();
+
+    return tCorr;
 }
 
 
