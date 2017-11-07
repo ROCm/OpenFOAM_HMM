@@ -199,7 +199,6 @@ void Foam::particle::writePosition(Ostream& os) const
         p.position = position();
         p.celli = celli_;
 
-        vector pos(position());
         os.write(reinterpret_cast<const char*>(&p.position), s);
     }
 
