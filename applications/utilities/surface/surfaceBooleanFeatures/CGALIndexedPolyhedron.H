@@ -33,8 +33,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IndexedPolyhedron_H
-#define IndexedPolyhedron_H
+#ifndef CGALIndexedPolyhedron_H
+#define CGALIndexedPolyhedron_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

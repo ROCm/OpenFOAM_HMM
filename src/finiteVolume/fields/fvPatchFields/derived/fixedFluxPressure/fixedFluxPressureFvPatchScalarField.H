@@ -48,8 +48,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedFluxPressureFvPatchScalarFields_H
-#define fixedFluxPressureFvPatchScalarFields_H
+#ifndef fixedFluxPressureFvPatchScalarField_H
+#define fixedFluxPressureFvPatchScalarField_H
 
 #include "fvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"

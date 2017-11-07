@@ -38,8 +38,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef meshtoMesh_H
-#define meshtoMesh_H
+#ifndef meshToMesh0_H
+#define meshToMesh0_H
 
 #include "fvMesh.H"
 #include "HashTable.H"

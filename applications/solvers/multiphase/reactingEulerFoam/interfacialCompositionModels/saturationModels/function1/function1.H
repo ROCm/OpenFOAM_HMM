@@ -72,8 +72,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef function1_saturationModel_H
-#define function1_saturationModel_H
+#ifndef saturationModels_function1_H
+#define saturationModels_function1_H
 
 #include "saturationModel.H"
 #include "Function1.H"

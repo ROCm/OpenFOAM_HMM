@@ -59,8 +59,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MarshakRadiationMixedFvPatchField_H
-#define MarshakRadiationMixedFvPatchField_H
+#ifndef radiation_MarshakRadiationFvPatchScalarField_H
+#define radiation_MarshakRadiationFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 

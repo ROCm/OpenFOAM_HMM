@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef smoluchowskiJumpTFvPatchScalarFields_H
-#define smoluchowskiJumpTFvPatchScalarFields_H
+#ifndef smoluchowskiJumpTFvPatchScalarField_H
+#define smoluchowskiJumpTFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 
@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                 Class smoluchowskiJumpTFvPatch Declaration
+            Class smoluchowskiJumpTFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
 class smoluchowskiJumpTFvPatchScalarField
@@ -73,6 +73,7 @@ class smoluchowskiJumpTFvPatchScalarField
 
         //- Heat capacity ratio (default 1.4)
         scalar gamma_;
+
 
 public:
 

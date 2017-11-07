@@ -60,8 +60,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef freestreamPressureFvPatchScalarFields_H
-#define freestreamPressureFvPatchScalarFields_H
+#ifndef freestreamPressureFvPatchScalarField_H
+#define freestreamPressureFvPatchScalarField_H
 
 #include "fvPatchFields.H"
 #include "zeroGradientFvPatchFields.H"
