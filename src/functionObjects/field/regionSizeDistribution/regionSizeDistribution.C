@@ -860,7 +860,7 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             forAll(selected, i)
             {
                 const word& fldName = scalarNames[selected[i]];
-            Log << "    Scalar field " << fldName << endl;
+                Log << "    Scalar field " << fldName << endl;
 
                 const scalarField& fld = obr_.lookupObject
                 <
