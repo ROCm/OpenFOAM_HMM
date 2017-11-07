@@ -208,11 +208,16 @@ Foam::basicThermo::basicThermo
             phasePropertyName("thermo:alpha"),
             mesh.time().timeName(),
             mesh,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionSet(1, -1, -1, 0, 0)
+        dimensionedScalar
+        (
+            "zero",
+            dimensionSet(1, -1, -1, 0, 0),
+            Zero
+        )
     ),
 
     dpdt_(lookupOrDefault<Switch>("dpdt", true))
@@ -263,11 +268,16 @@ Foam::basicThermo::basicThermo
             phasePropertyName("thermo:alpha"),
             mesh.time().timeName(),
             mesh,
-            IOobject::NO_READ,
+            IOobject::READ_IF_PRESENT,
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionSet(1, -1, -1, 0, 0)
+        dimensionedScalar
+        (
+            "zero",
+            dimensionSet(1, -1, -1, 0, 0),
+            Zero
+        )
     )
 {}
 
