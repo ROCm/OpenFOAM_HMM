@@ -37,8 +37,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mappedWallFvPatch_H
-#define mappedWallFvPatch_H
+#ifndef mappedVariableThicknessWallFvPatch_H
+#define mappedVariableThicknessWallFvPatch_H
 
 #include "wallFvPatch.H"
 #include "mappedVariableThicknessWallPolyPatch.H"

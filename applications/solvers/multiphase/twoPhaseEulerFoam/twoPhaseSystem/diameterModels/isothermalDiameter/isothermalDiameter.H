@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isothermal_H
-#define isothermal_H
+#ifndef diameterModels_isothermal_H
+#define diameterModels_isothermal_H
 
 #include "diameterModel.H"
 

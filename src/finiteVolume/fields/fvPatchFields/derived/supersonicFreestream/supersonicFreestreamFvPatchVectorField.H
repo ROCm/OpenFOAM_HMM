@@ -69,8 +69,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef supersonicFreestreamFvPatchVectorFields_H
-#define supersonicFreestreamFvPatchVectorFields_H
+#ifndef supersonicFreestreamFvPatchVectorField_H
+#define supersonicFreestreamFvPatchVectorField_H
 
 #include "fvPatchFields.H"
 #include "mixedFvPatchFields.H"

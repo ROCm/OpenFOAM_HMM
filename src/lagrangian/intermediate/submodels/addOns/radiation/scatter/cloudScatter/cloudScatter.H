@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationCloudScatter_H
-#define radiationCloudScatter_H
+#ifndef radiation_cloudScatter_H
+#define radiation_cloudScatter_H
 
 #include "scatterModel.H"
 

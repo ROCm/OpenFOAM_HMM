@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationNoAbsorptionEmission_H
-#define radiationNoAbsorptionEmission_H
+#ifndef radiation_noAbsorptionEmission_H
+#define radiation_noAbsorptionEmission_H
 
 #include "absorptionEmissionModel.H"
 

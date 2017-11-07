@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeThermoParcelTurbulenceForces_h
-#define makeThermoParcelTurbulenceForces_h
+#ifndef makeThermoParcelTurbulenceForces_H
+#define makeThermoParcelTurbulenceForces_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
