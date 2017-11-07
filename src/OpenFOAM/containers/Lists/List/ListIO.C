@@ -92,7 +92,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                 }
                 else
                 {
-                    // uniform content (delimiter == token::BEGIN_BLOCK)
+                    // Uniform content (delimiter == token::BEGIN_BLOCK)
 
                     T element;
                     is >> element;
@@ -141,7 +141,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         // Putback the opening bracket
         is.putBack(firstToken);
 
-        // Now read as a singly-linked list
+        // Read as a singly-linked list
         SLList<T> sll(is);
 
         // Convert the singly-linked list to this list
@@ -176,8 +176,11 @@ Foam::List<T> Foam::readList(Istream& is)
                 << exit(FatalIOError);
         }
 
-        // Read via a singly-linked list
-        L = SLList<T>(is);
+        // Read as singly-linked list
+        SLList<T> sll(is);
+
+        // Convert the singly-linked list to this list
+        L = sll;
     }
     else
     {

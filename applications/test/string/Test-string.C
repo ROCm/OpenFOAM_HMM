@@ -69,6 +69,65 @@ int main(int argc, char *argv[])
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
     Info<<"trim: " << stringOps::trim(test) << endl;
 
+    if (false)
+    {
+        Info<<"test move construct - string size:" << test.size() << nl;
+        string test2(std::move(test));
+
+        Info<<"input size:" << test.size() << nl;
+        Info<<"moved size:" << test2.size() << nl;
+
+        Info<<"test move assign - string sizes:"
+            << test.size() << "/" << test2.size() << nl;
+
+        test = std::move(test2);
+
+        Info<<"input size:" << test.size() << nl;
+        Info<<"moved size:" << test2.size() << nl;
+    }
+
+    if (false)
+    {
+        std::string str("some text");
+
+        Info<<"test move construct to string:" << str.size() << nl;
+
+        Foam::string test2(std::move(str));
+
+        Info<<"input/moved sizes:" << str.size() << "/" << test2.size() << nl;
+
+        str = std::move(test2);
+
+        Info<<"test move assign - sizes:"
+            << str.size() << "/" << test2.size() << nl;
+    }
+
+    if (false)
+    {
+        Foam::string str("thisIsAWord");
+
+        Info<<"test move construct to word:" << str.size() << nl;
+
+        word test2(std::move(str));
+
+        Info<<"input/moved sizes:" << str.size() << "/" << test2.size() << nl;
+
+        str = std::move(test2);
+
+        Info<<"test move assign - sizes:"
+            << str.size() << "/" << test2.size() << nl;
+
+        // move back
+        test2.swap(str);
+
+        Info<<"test move assign - sizes:"
+            << str.size() << "/" << test2.size() << nl;
+
+        string str2(std::move(test2));
+        Info<<"input/moved sizes:" << test2.size() << "/" << str2.size() << nl;
+
+    }
+
     {
         fileName test1("libFooBar.so");
 

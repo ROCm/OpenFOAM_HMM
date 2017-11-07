@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration
+class ISstream;
+
+
 /*---------------------------------------------------------------------------*\
                            Class ITstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -59,6 +63,12 @@ class ITstream
 
         //- Index of token currently being read
         label tokenIndex_;
+
+
+    // Private Member Functions
+
+        //- Convert input sequence into tokens and append to the token list
+        void toTokenList(ISstream& input);
 
 
 public:
@@ -101,6 +111,39 @@ public:
             setOpened();
             setGood();
         }
+
+
+        //- Construct token list by parsing the input character sequence
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const UList<char>& input,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        );
+
+
+        //- Construct token list by parsing the input string
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const std::string& input,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        );
+
+
+        //- Construct token list by parsing the input character sequence
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const char* input,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        );
 
 
         //- Construct as copy
@@ -165,7 +208,7 @@ public:
         // Read functions
 
             //- Return next token from stream
-            virtual Istream& read(token& t);
+            virtual Istream& read(token& tok);
 
             //- Read a character
             virtual Istream& read(char&);

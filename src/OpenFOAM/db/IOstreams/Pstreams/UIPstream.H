@@ -80,7 +80,7 @@ class UIPstream
 
         //- Read a T from the transfer buffer
         template<class T>
-        inline void readFromBuffer(T& t);
+        inline void readFromBuffer(T& val);
 
         //- Read count bytes of data from the transfer buffer
         //  using align byte alignment

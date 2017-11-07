@@ -359,10 +359,8 @@ std::string Foam::fileName::path(const std::string& str)
     {
         return str.substr(0, i);
     }
-    else
-    {
-        return "/";
-    }
+
+    return "/";
 }
 
 

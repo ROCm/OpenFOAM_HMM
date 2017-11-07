@@ -116,21 +116,18 @@ char Foam::ISstream::nextValid()
 
 void Foam::ISstream::readWordToken(token& t)
 {
-    word* wPtr = new word;
-
-    if (read(*wPtr).bad())
+    word val;
+    if (read(val).bad())
     {
-        delete wPtr;
         t.setBad();
     }
-    else if (token::compound::isCompound(*wPtr))
+    else if (token::compound::isCompound(val))
     {
-        t = token::compound::New(*wPtr, *this).ptr();
-        delete wPtr;
+        t = token::compound::New(val, *this).ptr();
     }
     else
     {
-        t = wPtr; // Token takes ownership
+        t = std::move(val); // Move contents to token
     }
 }
 
@@ -167,7 +164,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Analyse input starting with this character.
     switch (c)
     {
-        // Check for punctuation first
+        // Check for punctuation first - same as token::isSeparator
 
         case token::END_STATEMENT :
         case token::BEGIN_LIST :
@@ -192,16 +189,15 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case token::BEGIN_STRING :
         {
             putback(c);
-            string* sPtr = new string;
 
-            if (read(*sPtr).bad())
+            string val;
+            if (read(val).bad())
             {
-                delete sPtr;
                 t.setBad();
             }
             else
             {
-                t = sPtr; // Token takes ownership
+                t = std::move(val); // Move contents to token
             }
 
             return *this;
@@ -219,17 +215,16 @@ Foam::Istream& Foam::ISstream::read(token& t)
             else if (nextC == token::BEGIN_BLOCK)
             {
                 // Verbatim string: #{ ... #}
-                string* sPtr = new string;
 
-                if (readVerbatim(*sPtr).bad())
+                string val;
+                if (readVerbatim(val).bad())
                 {
-                    delete sPtr;
                     t.setBad();
                 }
                 else
                 {
-                    t = sPtr; // Token takes ownership
-                    t.type() = token::tokenType::VERBATIMSTRING;
+                    t = std::move(val); // Move contents to token
+                    t.setType(token::tokenType::VERBATIMSTRING);
                 }
             }
             else
@@ -259,17 +254,15 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 putback(nextC);
                 putback(c);
 
-                string* sPtr = new string;
-
-                if (readVariable(*sPtr).bad())
+                string val;
+                if (readVariable(val).bad())
                 {
-                    delete sPtr;
                     t.setBad();
                 }
                 else
                 {
-                    t = sPtr; // Token takes ownership
-                    t.type() = token::tokenType::VARIABLE;
+                    t = std::move(val); // Move contents to token
+                    t.setType(token::tokenType::VARIABLE);
                 }
             }
             else
@@ -295,7 +288,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            bool asLabel = (c != '.');
+            label labelVal = (c != '.'); // used as bool here
 
             unsigned nChar = 0;
             buf[nChar++] = c;
@@ -315,9 +308,9 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 )
             )
             {
-                if (asLabel)
+                if (labelVal)
                 {
-                    asLabel = isdigit(c);
+                    labelVal = isdigit(c);
                 }
 
                 buf[nChar++] = c;
@@ -351,16 +344,15 @@ Foam::Istream& Foam::ISstream::read(token& t)
                     // A single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
+                else if (labelVal && Foam::read(buf, labelVal))
+                {
+                    t = labelVal;
+                }
                 else
                 {
-                    label labelVal;
                     scalar scalarVal;
 
-                    if (asLabel && Foam::read(buf, labelVal))
-                    {
-                        t = labelVal;
-                    }
-                    else if (readScalar(buf, scalarVal))
+                    if (readScalar(buf, scalarVal))
                     {
                         // A scalar or too big to fit as a label
                         t = scalarVal;

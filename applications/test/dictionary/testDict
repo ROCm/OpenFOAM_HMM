@@ -95,6 +95,14 @@ boundaryField
 
 #include "testDict2"
 
+verbatim #{
+
+    This is a somewhat larger chunk of verbatim text that we would much
+    prefer to move as a token rather than copying its entire content each
+    time we do parsing or need to resize the token list.
+
+#};
+
 foo
 {
     $active

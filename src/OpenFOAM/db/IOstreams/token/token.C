@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,13 +29,13 @@ License
 
 namespace Foam
 {
-    const char* const token::typeName = "token";
-    token token::undefinedToken;
-
     typedef token::compound tokenCompound;
     defineTypeNameAndDebug(tokenCompound, 0);
     defineRunTimeSelectionTable(tokenCompound, Istream);
 }
+
+const char* const Foam::token::typeName = "token";
+const Foam::token Foam::token::undefinedToken;
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -94,7 +94,7 @@ Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
 {
     if (type_ == tokenType::COMPOUND)
     {
-        if (compoundTokenPtr_->empty())
+        if (data_.compoundPtr->empty())
         {
             FatalIOErrorInFunction(is)
                 << "compound has already been transfered from token\n    "
@@ -102,16 +102,14 @@ Foam::token::compound& Foam::token::transferCompoundToken(const Istream& is)
         }
         else
         {
-            compoundTokenPtr_->empty() = true;
+            data_.compoundPtr->empty() = true;
         }
 
-        return *compoundTokenPtr_;
+        return *data_.compoundPtr;
     }
-    else
-    {
-        parseError("compound");
-        return *compoundTokenPtr_;
-    }
+
+    parseError("compound");
+    return *data_.compoundPtr;
 }
 
 

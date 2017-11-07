@@ -99,6 +99,12 @@ inline Foam::string::string(const size_type len, const char c)
 {}
 
 
+inline Foam::string::string(std::string&& str)
+:
+    std::string(std::move(str))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class String>

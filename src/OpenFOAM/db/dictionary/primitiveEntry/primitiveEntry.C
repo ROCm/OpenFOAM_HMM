@@ -30,12 +30,23 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::primitiveEntry::append(const UList<token>& varTokens)
+void Foam::primitiveEntry::appendTokenList(const UList<token>& toks)
 {
-    for (const token& tok : varTokens)
+    for (const token& tok : toks)
     {
-        newElmt(tokenIndex()++) = tok;
+        newElmt(tokenIndex()++) = tok;  // copy append
     }
+}
+
+
+void Foam::primitiveEntry::appendTokenList(List<token>&& toks)
+{
+    for (token& tok : toks)
+    {
+        newElmt(tokenIndex()++) = std::move(tok);  // move append
+    }
+
+    toks.clear();
 }
 
 
@@ -85,17 +96,21 @@ bool Foam::primitiveEntry::expandVariable
             return false;
         }
 
-        append(tokenList(IStringStream('(' + str + ')')()));
+        // String parsed as a list of tokens
+        ITstream its("env", str);
+        appendTokenList(std::move(static_cast<tokenList&>(its)));
     }
     else if (eptr->isDict())
     {
         // Found dictionary entry
-        append(eptr->dict().tokens());
+
+        tokenList toks(eptr->dict().tokens().xfer());
+        appendTokenList(std::move(toks));
     }
     else
     {
         // Found primitive entry
-        append(eptr->stream());
+        appendTokenList(eptr->stream());
     }
 
     return true;
@@ -113,10 +128,10 @@ Foam::primitiveEntry::primitiveEntry(const keyType& key, const ITstream& is)
 }
 
 
-Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& t)
+Foam::primitiveEntry::primitiveEntry(const keyType& key, const token& tok)
 :
     entry(key),
-    ITstream(key, tokenList(1, t))
+    ITstream(key, tokenList(1, tok))
 {}
 
 
@@ -148,14 +163,12 @@ Foam::label Foam::primitiveEntry::startLineNumber() const
 {
     const tokenList& tokens = *this;
 
-    if (tokens.empty())
+    if (tokens.size())
     {
-        return -1;
+        tokens.first().lineNumber();
     }
-    else
-    {
-        return tokens.first().lineNumber();
-    }
+
+    return -1;
 }
 
 
@@ -163,14 +176,12 @@ Foam::label Foam::primitiveEntry::endLineNumber() const
 {
     const tokenList& tokens = *this;
 
-    if (tokens.empty())
-    {
-        return -1;
-    }
-    else
+    if (tokens.size())
     {
         return tokens.last().lineNumber();
     }
+
+    return -1;
 }
 
 

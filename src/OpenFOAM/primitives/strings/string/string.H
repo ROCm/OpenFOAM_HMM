@@ -153,13 +153,18 @@ public:
         //- Construct from copies of a single character
         inline string(const size_type len, const char c);
 
+        //- Move construct from std::string
+        inline string(std::string&& str);
+
         //- Construct from Istream
         string(Istream& is);
 
 
     // Member Functions
 
-        //- Count and return the number of a given character in the string
+        //- Count the number of occurences of the specified character
+        //- in the string
+        //  Partially deprecated (NOV-2017) in favour of stringOps::count
         size_type count(const char c) const;
 
         //- Does the string contain valid characters only?
@@ -194,7 +199,7 @@ public:
         using std::string::replace;
 
         //- Replace first occurence of sub-string oldStr with newStr,
-        //  beginning at start
+        //- beginning at start
         string& replace
         (
             const string& oldStr,
@@ -203,7 +208,7 @@ public:
         );
 
         //- Replace all occurences of sub-string oldStr with newStr,
-        //  beginning at start. This is a no-op if oldStr is empty.
+        //- beginning at start. This is a no-op if oldStr is empty.
         string& replaceAll
         (
             const string& oldStr,

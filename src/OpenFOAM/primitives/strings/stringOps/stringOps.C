@@ -132,6 +132,47 @@ static inline int findParameterAlternative
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+std::string::size_type Foam::stringOps::count
+(
+    const std::string& str,
+    const char c
+)
+{
+    std::string::size_type n = 0;
+
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    {
+        if (*iter == c)
+        {
+            ++n;
+        }
+    }
+
+    return n;
+}
+
+
+std::string::size_type Foam::stringOps::count(const char* str, const char c)
+{
+    if (!str)
+    {
+        return 0;
+    }
+
+    std::string::size_type n = 0;
+
+    for (const char *iter = str; *iter; ++iter)
+    {
+        if (*iter == c)
+        {
+            ++n;
+        }
+    }
+
+    return n;
+}
+
+
 Foam::string Foam::stringOps::expand
 (
     const string& original,

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,6 +22,8 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
+
+#include <algorithm>
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -75,13 +77,40 @@ inline Foam::keyType::keyType(const char* s)
 {}
 
 
-inline Foam::keyType::keyType
-(
-    const std::string& s,
-    const bool isPattern
-)
+inline Foam::keyType::keyType(const std::string& s, const bool isPattern)
 :
     word(s, false),
+    isPattern_(isPattern)
+{}
+
+
+
+inline Foam::keyType::keyType(keyType&& s)
+:
+    word(std::move(static_cast<word&>(s)), false),
+    isPattern_(s.isPattern())
+{
+    s.isPattern_ = false;
+}
+
+
+inline Foam::keyType::keyType(word&& s)
+:
+    word(std::move(s), false),
+    isPattern_(false)
+{}
+
+
+inline Foam::keyType::keyType(string&& s)
+:
+    word(std::move(s), false),
+    isPattern_(true)
+{}
+
+
+inline Foam::keyType::keyType(std::string&& s, const bool isPattern)
+:
+    word(std::move(s), false),
     isPattern_(isPattern)
 {}
 
@@ -91,6 +120,13 @@ inline Foam::keyType::keyType
 inline bool Foam::keyType::isPattern() const
 {
     return isPattern_;
+}
+
+
+inline void Foam::keyType::swap(keyType& s)
+{
+    word::swap(static_cast<word&>(s));
+    std::swap(isPattern_, s.isPattern_);
 }
 
 
@@ -104,29 +140,36 @@ inline bool Foam::keyType::operator()(const std::string& text) const
 
 inline void Foam::keyType::operator=(const keyType& s)
 {
-    string::operator=(s); // Bypass checking
+    string::operator=(s); // Bypass char checking
     isPattern_ = s.isPattern_;
 }
 
 
 inline void Foam::keyType::operator=(const word& s)
 {
-    string::operator=(s); // Bypass checking
+    string::operator=(s); // Bypass char checking
     isPattern_ = false;
 }
 
 
 inline void Foam::keyType::operator=(const string& s)
 {
-    string::operator=(s); // Bypass checking
+    string::operator=(s); // Bypass char checking
     isPattern_ = true;
 }
 
 
 inline void Foam::keyType::operator=(const char* s)
 {
-    string::operator=(s); // Bypass checking
+    string::operator=(s); // Bypass char checking
     isPattern_ = false;
+}
+
+
+inline void Foam::keyType::operator=(keyType&& s)
+{
+    clear();
+    swap(s);
 }
 
 

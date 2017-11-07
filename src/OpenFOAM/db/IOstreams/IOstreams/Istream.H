@@ -96,16 +96,16 @@ public:
 
             //- Put back token
             //  Only a single put back is permitted
-            void putBack(const token&);
+            void putBack(const token& tok);
 
             //- Get the put back token if there is one and return true.
             //  Return false if no put back token is available.
-            bool getBack(token&);
+            bool getBack(token& tok);
 
             //- Peek at the put back token without removing it.
             //  Returns false if no put back token is available and set the
             //  token to undefined.
-            bool peekBack(token&);
+            bool peekBack(token& tok);
 
             //- Return next token from stream
             virtual Istream& read(token&) = 0;
@@ -116,7 +116,7 @@ public:
             //- Read a word
             virtual Istream& read(word&) = 0;
 
-            // Read a string (including enclosing double-quotes)
+            //- Read a string (including enclosing double-quotes)
             virtual Istream& read(string&) = 0;
 
             //- Read a label

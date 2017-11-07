@@ -58,10 +58,8 @@ Foam::label Foam::dictionaryEntry::startLineNumber() const
     {
         return first()->startLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -71,10 +69,8 @@ Foam::label Foam::dictionaryEntry::endLineNumber() const
     {
         return last()->endLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
