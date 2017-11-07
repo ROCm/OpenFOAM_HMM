@@ -34,7 +34,7 @@ surfaceNoiseCoeffs
 
 
     // Input file
-    file        "postProcessing/cuttingPlane/yNormal_0.0/yNormal_0.0.case";
+    file        "postProcessing/cuttingPlane/zNormal/zNormal.case";
 
     // Surface reader
     reader      ensight;
@@ -48,7 +48,7 @@ surfaceNoiseCoeffs
         ensight
         {
             collateTimes    1;
-	        format          binary;
+            format          binary;
         }
     }
 
