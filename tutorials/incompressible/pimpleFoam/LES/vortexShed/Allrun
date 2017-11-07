@@ -13,4 +13,9 @@ runApplication decomposePar
 
 runParallel $(getApplication)
 
+# Run noise tool for both point and surface
+
+runParallel -s point noise -dict system/noiseDict-point
+
+runParallel -s surface noise -dict system/noiseDict-surface
 #------------------------------------------------------------------------------
