@@ -203,6 +203,7 @@ dictionary = db/dictionary
 $(dictionary)/dictionary.C
 $(dictionary)/dictionaryIO.C
 $(dictionary)/dictionarySearch.C
+$(dictionary)/dictionaryCompat.C
 
 entry = $(dictionary)/entry
 $(entry)/entry.C

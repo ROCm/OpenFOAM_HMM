@@ -630,10 +630,11 @@ bool Foam::fileOperations::masterUncollatedFileOperation::rm
 
 bool Foam::fileOperations::masterUncollatedFileOperation::rmDir
 (
-    const fileName& dir
+    const fileName& dir,
+    const bool silent
 ) const
 {
-    return masterOp<bool, rmDirOp>(dir, rmDirOp());
+    return masterOp<bool, rmDirOp>(dir, rmDirOp(silent));
 }
 
 

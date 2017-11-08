@@ -684,32 +684,42 @@ public:
         //- Add a new entry.
         //  \param mergeEntry dictionaries are interwoven and primitive
         //         entries are overwritten
-        bool add(entry* entryPtr, bool mergeEntry=false);
+        //  \return pointer to inserted entry, or place of merging
+        //   or nullptr on failure
+        entry* add(entry* entryPtr, bool mergeEntry=false);
 
         //- Add an entry.
         //  \param mergeEntry dictionaries are interwoven and primitive
         //         entries are overwritten
-        void add(const entry& e, bool mergeEntry=false);
+        //  \return pointer to inserted entry, or place of merging
+        //   or nullptr on failure
+        entry* add(const entry& e, bool mergeEntry=false);
 
         //- Add a word entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const word& v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const word& v, bool overwrite=false);
 
         //- Add a string entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const string& v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const string& v, bool overwrite=false);
 
         //- Add a label entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const label v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const label v, bool overwrite=false);
 
         //- Add a scalar entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const scalar v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const scalar v, bool overwrite=false);
 
         //- Add a dictionary entry.
         //  \param mergeEntry merge into an existing sub-dictionary
-        void add
+        //  \return pointer to inserted entry, or place of merging
+        //   or nullptr on failure
+        entry* add
         (
             const keyType& k,
             const dictionary& d,
@@ -718,21 +728,29 @@ public:
 
         //- Add a T entry
         //  \param overwrite force overwrite of existing entry
+        //  \return pointer to inserted entry or nullptr on failure
         template<class T>
-        void add(const keyType& k, const T& v, bool overwrite=false);
+        entry* add(const keyType& k, const T& v, bool overwrite=false);
 
         //- Assign a new entry, overwriting any existing entry.
-        void set(entry* entryPtr);
+        //
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* set(entry* entryPtr);
 
         //- Assign a new entry, overwriting any existing entry.
-        void set(const entry& e);
+        //
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* set(const entry& e);
 
         //- Assign a dictionary entry, overwriting any existing entry.
-        void set(const keyType& k, const dictionary& v);
+        //
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* set(const keyType& k, const dictionary& v);
 
         //- Assign a T entry, overwriting any existing entry.
+        //  \return pointer to inserted entry or nullptr on failure
         template<class T>
-        void set(const keyType& k, const T& v);
+        entry* set(const keyType& k, const T& v);
 
         //- Remove an entry specified by keyword
         bool remove(const word& keyword);
@@ -888,6 +906,127 @@ public:
         //- Locate existing or create sub-dictionary using slash-scoping
         //  \return nullptr if the dictionary path could not be created
         dictionary* makeScopedDictPtr(const fileName& dictPath);
+
+
+    // Compatibility helpers
+
+        //- Search dictionary for given keyword and any compatibility names
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //      Old version 1600=OpenFOAM-v3.0, 240=OpenFOAM-2.4.x,
+        //      170=OpenFOAM-1.7.x,...
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const_searcher csearchCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Search dictionary for given keyword and any compatibility names
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        bool foundCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Find and return an entry pointer if present, or return a nullptr,
+        //- using any compatibility names it needed.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const entry* lookupEntryPtrCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive,
+            bool patternMatch
+        ) const;
+
+        //- Find and return an entry if present otherwise error,
+        //- using any compatibility names it needed.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const entry& lookupEntryCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive,
+            bool patternMatch
+        ) const;
+
+        //- Find and return an entry data stream,
+        //- using any compatibility names it needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        ITstream& lookupCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Find and return a T, or return the given default value
+        //- using any compatibility names it needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        template<class T>
+        T lookupOrDefaultCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            const T& deflt,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Find an entry if present, and assign to T val
+        //- using any compatibility names it needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param val the value to read
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        //
+        //  \return true if the entry was found.
+        template<class T>
+        bool readIfPresentCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            T& val,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
 
 
     // Member Operators

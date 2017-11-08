@@ -404,7 +404,11 @@ int main(int argc, char *argv[])
                 Info<< "Removing " << nProcs
                     << " existing processor directories" << endl;
 
-                fileHandler().rmDir(runTime.path()/word("processors"));
+                fileHandler().rmDir
+                (
+                    runTime.path()/word("processors"),
+                    true  // silent (may not have been collated)
+                );
 
                 // remove existing processor dirs
                 // reverse order to avoid gaps if someone interrupts the process

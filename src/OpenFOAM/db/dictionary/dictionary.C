@@ -532,11 +532,11 @@ Foam::List<Foam::keyType> Foam::dictionary::keys(bool patterns) const
 }
 
 
-bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
+Foam::entry* Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
 {
     if (!entryPtr)
     {
-        return false;
+        return nullptr;
     }
 
     auto iter = hashedEntries_.find(entryPtr->keyword());
@@ -549,7 +549,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             iter()->dict().merge(entryPtr->dict());
 
             delete entryPtr;
-            return true;
+            return iter();   // pointer to existing dictionary
         }
 
 
@@ -571,7 +571,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
                 );
             }
 
-            return true;
+            return entryPtr;  // now an entry in the dictionary
         }
 
 
@@ -582,7 +582,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
         parent_type::remove(entryPtr);
 
         delete entryPtr;
-        return false;
+        return nullptr;
     }
 
 
@@ -600,71 +600,86 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             );
         }
 
-        return true;
+        return entryPtr;  // now an entry in the dictionary
     }
 
 
     IOWarningInFunction((*this))
-        << "attempt to add entry "<< entryPtr->keyword()
+        << "attempt to add entry " << entryPtr->keyword()
         << " which already exists in dictionary " << name()
         << endl;
 
     delete entryPtr;
-    return false;
+    return nullptr;
 }
 
 
-void Foam::dictionary::add(const entry& e, bool mergeEntry)
+Foam::entry* Foam::dictionary::add(const entry& e, bool mergeEntry)
 {
-    add(e.clone(*this).ptr(), mergeEntry);
+    return add(e.clone(*this).ptr(), mergeEntry);
 }
 
 
-void Foam::dictionary::add(const keyType& k, const word& v, bool overwrite)
+Foam::entry* Foam::dictionary::add
+(
+    const keyType& k,
+    const word& v,
+    bool overwrite
+)
 {
-    add(new primitiveEntry(k, token(v)), overwrite);
+    return add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
-void Foam::dictionary::add
+Foam::entry* Foam::dictionary::add
 (
     const keyType& k,
     const Foam::string& v,
     bool overwrite
 )
 {
-    add(new primitiveEntry(k, token(v)), overwrite);
+    return add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
-void Foam::dictionary::add(const keyType& k, const label v, bool overwrite)
+Foam::entry* Foam::dictionary::add
+(
+    const keyType& k,
+    const label v,
+    bool overwrite
+)
 {
-    add(new primitiveEntry(k, token(v)), overwrite);
+    return add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
-void Foam::dictionary::add(const keyType& k, const scalar v, bool overwrite)
+Foam::entry* Foam::dictionary::add
+(
+    const keyType& k,
+    const scalar v,
+    bool overwrite
+)
 {
-    add(new primitiveEntry(k, token(v)), overwrite);
+    return add(new primitiveEntry(k, token(v)), overwrite);
 }
 
 
-void Foam::dictionary::add
+Foam::entry* Foam::dictionary::add
 (
     const keyType& k,
     const dictionary& v,
     bool mergeEntry
 )
 {
-    add(new dictionaryEntry(k, *this, v), mergeEntry);
+    return add(new dictionaryEntry(k, *this, v), mergeEntry);
 }
 
 
-void Foam::dictionary::set(entry* entryPtr)
+Foam::entry* Foam::dictionary::set(entry* entryPtr)
 {
     if (!entryPtr)
     {
-        return;
+        return nullptr;
     }
 
     // Find non-recursive with patterns
@@ -675,19 +690,20 @@ void Foam::dictionary::set(entry* entryPtr)
     {
         finder.dict().clear();
     }
-    add(entryPtr, true);
+
+    return add(entryPtr, true);
 }
 
 
-void Foam::dictionary::set(const entry& e)
+Foam::entry* Foam::dictionary::set(const entry& e)
 {
-    set(e.clone(*this).ptr());
+    return set(e.clone(*this).ptr());
 }
 
 
-void Foam::dictionary::set(const keyType& k, const dictionary& v)
+Foam::entry* Foam::dictionary::set(const keyType& k, const dictionary& v)
 {
-    set(new dictionaryEntry(k, *this, v));
+    return set(new dictionaryEntry(k, *this, v));
 }
 
 

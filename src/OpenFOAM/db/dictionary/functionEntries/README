@@ -14,7 +14,7 @@
   #includeIfPresent | dict/primitive    | string
   #includeFunc      | dict              | word
                     |                   |
-  #calcEntry        | dict/primitive    | string
+  #calc             | dict/primitive    | string
   #codeStream       | dict/primitive    | dictionary
 
 

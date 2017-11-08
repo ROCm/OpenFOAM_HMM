@@ -192,7 +192,11 @@ public:
             virtual bool rm(const fileName&) const;
 
             //- Remove a dirctory and its contents
-            virtual bool rmDir(const fileName&) const;
+            virtual bool rmDir
+            (
+                const fileName& dir,
+                const bool silent = false
+            ) const;
 
 //            //- Open a shared library. Return handle to library. Print error
 //            //  message if library cannot be loaded (check = true)
