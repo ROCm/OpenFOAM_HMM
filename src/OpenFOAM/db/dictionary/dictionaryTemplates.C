@@ -146,16 +146,16 @@ bool Foam::dictionary::readIfPresent
 
 
 template<class T>
-void Foam::dictionary::add(const keyType& k, const T& v, bool overwrite)
+Foam::entry* Foam::dictionary::add(const keyType& k, const T& v, bool overwrite)
 {
-    add(new primitiveEntry(k, v), overwrite);
+    return add(new primitiveEntry(k, v), overwrite);
 }
 
 
 template<class T>
-void Foam::dictionary::set(const keyType& k, const T& v)
+Foam::entry* Foam::dictionary::set(const keyType& k, const T& v)
 {
-    set(new primitiveEntry(k, v));
+    return set(new primitiveEntry(k, v));
 }
 
 

@@ -684,32 +684,42 @@ public:
         //- Add a new entry.
         //  \param mergeEntry dictionaries are interwoven and primitive
         //         entries are overwritten
-        bool add(entry* entryPtr, bool mergeEntry=false);
+        //  \return pointer to inserted entry, or place of merging
+        //   or nullptr on failure
+        entry* add(entry* entryPtr, bool mergeEntry=false);
 
         //- Add an entry.
         //  \param mergeEntry dictionaries are interwoven and primitive
         //         entries are overwritten
-        void add(const entry& e, bool mergeEntry=false);
+        //  \return pointer to inserted entry, or place of merging
+        //   or nullptr on failure
+        entry* add(const entry& e, bool mergeEntry=false);
 
         //- Add a word entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const word& v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const word& v, bool overwrite=false);
 
         //- Add a string entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const string& v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const string& v, bool overwrite=false);
 
         //- Add a label entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const label v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const label v, bool overwrite=false);
 
         //- Add a scalar entry.
         //  \param overwrite force overwrite of an existing entry.
-        void add(const keyType& k, const scalar v, bool overwrite=false);
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* add(const keyType& k, const scalar v, bool overwrite=false);
 
         //- Add a dictionary entry.
         //  \param mergeEntry merge into an existing sub-dictionary
-        void add
+        //  \return pointer to inserted entry, or place of merging
+        //   or nullptr on failure
+        entry* add
         (
             const keyType& k,
             const dictionary& d,
@@ -718,21 +728,29 @@ public:
 
         //- Add a T entry
         //  \param overwrite force overwrite of existing entry
+        //  \return pointer to inserted entry or nullptr on failure
         template<class T>
-        void add(const keyType& k, const T& v, bool overwrite=false);
+        entry* add(const keyType& k, const T& v, bool overwrite=false);
 
         //- Assign a new entry, overwriting any existing entry.
-        void set(entry* entryPtr);
+        //
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* set(entry* entryPtr);
 
         //- Assign a new entry, overwriting any existing entry.
-        void set(const entry& e);
+        //
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* set(const entry& e);
 
         //- Assign a dictionary entry, overwriting any existing entry.
-        void set(const keyType& k, const dictionary& v);
+        //
+        //  \return pointer to inserted entry or nullptr on failure
+        entry* set(const keyType& k, const dictionary& v);
 
         //- Assign a T entry, overwriting any existing entry.
+        //  \return pointer to inserted entry or nullptr on failure
         template<class T>
-        void set(const keyType& k, const T& v);
+        entry* set(const keyType& k, const T& v);
 
         //- Remove an entry specified by keyword
         bool remove(const word& keyword);
