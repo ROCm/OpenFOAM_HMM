@@ -47,7 +47,7 @@ void Foam::enrichedPatch::calcMeshPoints() const
             << abort(FatalError);
     }
 
-    meshPointsPtr_ = new labelList(std::move(pointMap().toc()));
+    meshPointsPtr_ = new labelList(pointMap().toc());
     labelList& mp = *meshPointsPtr_;
 
     sort(mp);

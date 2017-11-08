@@ -468,7 +468,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                     completed = addedFaces.found(endFace);
 
                     // Add all face neighbours of face in the map
-                    const labelList cf(std::move(addedFaces.toc()));
+                    const labelList cf(addedFaces.toc());
                     addedFaces.clear();
 
                     for (const label cfi : cf)
@@ -518,7 +518,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                     completed = addedFaces.found(startFace);
 
                     // Add all face neighbours of face in the map
-                    const labelList cf(std::move(addedFaces.toc()));
+                    const labelList cf(addedFaces.toc());
                     addedFaces.clear();
 
                     for (const label cfi : cf)
@@ -580,7 +580,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                 );
             }
 
-            const labelList curMasterEdges(std::move(curMasterEdgesMap.toc()));
+            const labelList curMasterEdges(curMasterEdgesMap.toc());
             curMasterEdgesMap.clear();
 
             // For all master edges to intersect, skip the ones

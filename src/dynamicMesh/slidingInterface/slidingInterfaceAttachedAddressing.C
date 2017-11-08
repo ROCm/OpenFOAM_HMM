@@ -174,12 +174,11 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         if (debug)
         {
             masterStickOutFacesPtr_ =
-                new labelList(std::move(stickOutFaceMap.sortedToc()));
+                new labelList(stickOutFaceMap.sortedToc());
         }
         else
         {
-            masterStickOutFacesPtr_ =
-                new labelList(std::move(stickOutFaceMap.toc()));
+            masterStickOutFacesPtr_ = new labelList(stickOutFaceMap.toc());
         }
 
         // Slave side
@@ -210,12 +209,11 @@ void Foam::slidingInterface::calcAttachedAddressing() const
         if (debug)
         {
             slaveStickOutFacesPtr_ =
-                new labelList(std::move(stickOutFaceMap.sortedToc()));
+                new labelList(stickOutFaceMap.sortedToc());
         }
         else
         {
-            slaveStickOutFacesPtr_ =
-                new labelList(std::move(stickOutFaceMap.toc()));
+            slaveStickOutFacesPtr_ = new labelList(stickOutFaceMap.toc());
         }
 
         stickOutFaceMap.clear();
