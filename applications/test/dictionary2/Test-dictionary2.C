@@ -112,7 +112,8 @@ int main(int argc, char *argv[])
 
     // overwrite existing
     {
-        entry* e = dict1.set(word("dict2"), 1000); // overwrite
+        dict1.set("entry3", 1000); // overwrite
+        entry* e = dict1.set(word("dict3"), 1000); // overwrite
         entryInfo(e);
     }
 
@@ -124,9 +125,85 @@ int main(int argc, char *argv[])
         entry* e = dict1.add(word("dict4"), tmpdict, true);  // merge
         entryInfo(e);
 
-        if (e)
-            Info<< nl << "=> " << *e << nl;
+        if (e) Info<< nl << "=> " << *e << nl;
+
+        tmpdict.clear();
+        tmpdict.add(word("other"), 2.718281);
+
+        dict1.add(word("dict1"), tmpdict, true);  // merge
     }
+
+    Info<< nl << "dictionary" << nl << nl;
+    dict1.write(Info, false);
+
+
+    {
+        dict1.foundCompat
+        (
+            "newEntry", {{"entry1", 1612}, {"entry15", 1606}}
+        );
+        dict1.foundCompat
+        (
+            "newEntry", {{"entry15", 1612}, {"entry2", 1606}}
+        );
+        dict1.foundCompat
+        (
+            "newEntry", {{"entry3", 240}, {"entry2", 1606}}
+        );
+
+        // And some success
+        dict1.foundCompat
+        (
+            "entry4", {{"none", 240}, {"entry2", 1606}}
+        );
+    }
+
+    {
+        label lval = readLabel
+        (
+            dict1.lookupCompat
+            (
+                "entry400", {{"none", 240}, {"entry3", 1606}}
+            )
+        );
+        Info<< "int value: " << lval << nl;
+    }
+
+
+    // Could have different dictionary names and different entries names etc.
+    // Quite ugly!
+    {
+        scalar sval = readScalar
+        (
+            dict1.csearchCompat
+            (
+                "newdictName", {{"dict4", 1706}, {"dict1", 1606}}
+            )
+            .dict()
+            .lookupCompat
+            (
+                "newval", {{"something", 1606}, {"other", 1612}}
+            )
+        );
+
+        Info<< "scalar value: " << sval << nl;
+
+        sval = readScalar
+        (
+            dict1.csearchCompat
+            (
+                "newdictName", {{"dict1", 1606}, {"dict4", 1706}}
+            )
+            .dict()
+            .lookupCompat
+            (
+                "newval", {{"something", 1606}, {"other", 1612}}
+            )
+        );
+
+        Info<< "scalar value = " << sval << nl;
+    }
+
 
     Info<< nl << "dictionary" << nl << nl;
     dict1.write(Info, false);

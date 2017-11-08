@@ -36,6 +36,20 @@ Foam::wordList Foam::dictionary::sortedToc(const Compare& comp) const
 
 
 template<class T>
+Foam::entry* Foam::dictionary::add(const keyType& k, const T& v, bool overwrite)
+{
+    return add(new primitiveEntry(k, v), overwrite);
+}
+
+
+template<class T>
+Foam::entry* Foam::dictionary::set(const keyType& k, const T& v)
+{
+    return set(new primitiveEntry(k, v));
+}
+
+
+template<class T>
 T Foam::dictionary::lookupType
 (
     const word& keyword,
@@ -43,7 +57,7 @@ T Foam::dictionary::lookupType
     bool patternMatch
 ) const
 {
-    auto finder = csearch(keyword, recursive, patternMatch);
+    const const_searcher finder(csearch(keyword, recursive, patternMatch));
 
     if (!finder.found())
     {
@@ -68,7 +82,7 @@ T Foam::dictionary::lookupOrDefault
     bool patternMatch
 ) const
 {
-    auto finder = csearch(keyword, recursive, patternMatch);
+    const const_searcher finder(csearch(keyword, recursive, patternMatch));
 
     if (finder.found())
     {
@@ -96,7 +110,7 @@ T Foam::dictionary::lookupOrAddDefault
     bool patternMatch
 )
 {
-    auto finder = csearch(keyword, recursive, patternMatch);
+    const const_searcher finder(csearch(keyword, recursive, patternMatch));
 
     if (finder.found())
     {
@@ -125,7 +139,7 @@ bool Foam::dictionary::readIfPresent
     bool patternMatch
 ) const
 {
-    auto finder = csearch(keyword, recursive, patternMatch);
+    const const_searcher finder(csearch(keyword, recursive, patternMatch));
 
     if (finder.found())
     {
@@ -146,16 +160,63 @@ bool Foam::dictionary::readIfPresent
 
 
 template<class T>
-Foam::entry* Foam::dictionary::add(const keyType& k, const T& v, bool overwrite)
+T Foam::dictionary::lookupOrDefaultCompat
+(
+    const word& keyword,
+    std::initializer_list<std::pair<const char*,int>> compat,
+    const T& deflt,
+    bool recursive,
+    bool patternMatch
+) const
 {
-    return add(new primitiveEntry(k, v), overwrite);
+    const const_searcher
+        finder(csearchCompat(keyword, compat, recursive, patternMatch));
+
+    if (finder.found())
+    {
+        return pTraits<T>(finder.ptr()->stream());
+    }
+
+    if (writeOptionalEntries)
+    {
+        IOInfoInFunction(*this)
+            << "Optional entry '" << keyword << "' is not present,"
+            << " returning the default value '" << deflt << "'"
+            << endl;
+    }
+
+    return deflt;
 }
 
 
 template<class T>
-Foam::entry* Foam::dictionary::set(const keyType& k, const T& v)
+bool Foam::dictionary::readIfPresentCompat
+(
+    const word& keyword,
+    std::initializer_list<std::pair<const char*,int>> compat,
+    T& val,
+    bool recursive,
+    bool patternMatch
+) const
 {
-    return set(new primitiveEntry(k, v));
+    const const_searcher
+        finder(csearchCompat(keyword, compat, recursive, patternMatch));
+
+    if (finder.found())
+    {
+        finder.ptr()->stream() >> val;
+        return true;
+    }
+
+    if (writeOptionalEntries)
+    {
+        IOInfoInFunction(*this)
+            << "Optional entry '" << keyword << "' is not present,"
+            << " the default value '" << val << "' will be used."
+            << endl;
+    }
+
+    return false;
 }
 
 

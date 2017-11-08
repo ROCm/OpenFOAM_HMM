@@ -908,6 +908,127 @@ public:
         dictionary* makeScopedDictPtr(const fileName& dictPath);
 
 
+    // Compatibility helpers
+
+        //- Search dictionary for given keyword and any compatibility names
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //      Old version 1600=OpenFOAM-v3.0, 240=OpenFOAM-2.4.x,
+        //      170=OpenFOAM-1.7.x,...
+        //
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const_searcher csearchCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Search dictionary for given keyword and any compatibility names
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        bool foundCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Find and return an entry pointer if present, or return a nullptr,
+        //- using any compatibility names it needed.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const entry* lookupEntryPtrCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive,
+            bool patternMatch
+        ) const;
+
+        //- Find and return an entry if present otherwise error,
+        //- using any compatibility names it needed.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        const entry& lookupEntryCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive,
+            bool patternMatch
+        ) const;
+
+        //- Find and return an entry data stream,
+        //- using any compatibility names it needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        ITstream& lookupCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Find and return a T, or return the given default value
+        //- using any compatibility names it needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        template<class T>
+        T lookupOrDefaultCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            const T& deflt,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+        //- Find an entry if present, and assign to T val
+        //- using any compatibility names it needed.
+        //  Default search: non-recursive with patterns.
+        //
+        //  \param compat list of old compatibility keywords and the last
+        //      OpenFOAM version for which they were used.
+        //  \param val the value to read
+        //  \param recursive search parent dictionaries
+        //  \param patternMatch use regular expressions
+        //
+        //  \return true if the entry was found.
+        template<class T>
+        bool readIfPresentCompat
+        (
+            const word& keyword,
+            std::initializer_list<std::pair<const char*,int>> compat,
+            T& val,
+            bool recursive = false,
+            bool patternMatch = true
+        ) const;
+
+
     // Member Operators
 
         //- Find and return an entry data stream (identical to #lookup method).
