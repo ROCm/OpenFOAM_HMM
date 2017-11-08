@@ -247,7 +247,12 @@ public:
             virtual bool rm(const fileName&) const = 0;
 
             //- Remove a dirctory and its contents
-            virtual bool rmDir(const fileName&) const = 0;
+            //  \param silent do not report missing directory
+            virtual bool rmDir
+            (
+                const fileName& dir,
+                const bool silent = false
+            ) const = 0;
 
 //            //- Open a shared library. Return handle to library. Print error
 //            //  message if library cannot be loaded (check = true)
