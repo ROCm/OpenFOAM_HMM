@@ -60,7 +60,7 @@ inline bool Foam::HashTable<T, Key, Hash>::empty() const
 
 
 template<class T, class Key, class Hash>
-bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
+inline bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
 {
     if (size_)
     {

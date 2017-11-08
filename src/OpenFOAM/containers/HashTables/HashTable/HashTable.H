@@ -737,7 +737,7 @@ protected:
             inline Iterator(bool, table_type* tbl);
 
             //- Construct by finding key in hash table
-            inline Iterator(table_type* tbl, const Key& key);
+            Iterator(table_type* tbl, const Key& key);
 
 
           // Protected Member Functions
