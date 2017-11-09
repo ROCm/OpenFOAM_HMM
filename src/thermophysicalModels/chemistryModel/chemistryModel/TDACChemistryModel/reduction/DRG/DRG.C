@@ -41,7 +41,7 @@ Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::DRG
     dictionary initSet = this->coeffsDict_.subDict("initialSet");
     for (label i=0; i<chemistry.nSpecie(); i++)
     {
-        if (initSet.found(chemistry.Y()[i].name()))
+        if (initSet.found(chemistry.Y()[i].member()))
         {
             searchInitSet_[j++] = i;
         }
@@ -255,12 +255,7 @@ void Foam::chemistryReductionMethods::DRG<CompType, ThermoType>::reduceMechanism
 
                 if (rAB > 1)
                 {
-                    Info<< "Badly Conditioned rAB : " << rAB
-                    << " for species : "
-                    << this->chemistry_.Y()[u].name() << ","
-                    << this->chemistry_.Y()[otherSpec].name()
-                    << endl;
-                    rAB = 1.0;
+                    rAB = 1;
                 }
 
                 // Include B only if rAB is above the tolerance and if the

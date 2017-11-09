@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,7 +89,7 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
 
     for (label i = 0; i < chemistry.nSpecie(); i++)
     {
-        if (initSet.found(chemistry.Y()[i].name()))
+        if (initSet.found(chemistry.Y()[i].member()))
         {
             searchInitSet_[j++] = i;
         }
@@ -140,23 +140,23 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
                     << endl;
             }
         }
-        if (this->chemistry_.Y()[i].name() == CO2Name_)
+        if (this->chemistry_.Y()[i].member() == CO2Name_)
         {
             CO2Id_ = i;
         }
-        else if (this->chemistry_.Y()[i].name() == COName_)
+        else if (this->chemistry_.Y()[i].member() == COName_)
         {
             COId_ = i;
         }
-        else if (this->chemistry_.Y()[i].name() == HO2Name_)
+        else if (this->chemistry_.Y()[i].member() == HO2Name_)
         {
             HO2Id_ = i;
         }
-        else if (this->chemistry_.Y()[i].name() == H2OName_)
+        else if (this->chemistry_.Y()[i].member() == H2OName_)
         {
             H2OId_ = i;
         }
-        else if (this->chemistry_.Y()[i].name() == NOName_)
+        else if (this->chemistry_.Y()[i].member() == NOName_)
         {
             NOId_ = i;
         }
@@ -206,7 +206,7 @@ Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::DAC
             fuelSpeciesProp_[i] = readScalar(fuelDict.lookup(fuelSpecies_[i]));
             for (label j=0; j<this->nSpecie_; j++)
             {
-                if (this->chemistry_.Y()[j].name() == fuelSpecies_[i])
+                if (this->chemistry_.Y()[j].member() == fuelSpecies_[i])
                 {
                     fuelSpeciesID_[i] = j;
                     break;
@@ -472,8 +472,8 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             // Complete combustion products are not considered
             if
             (
-                this->chemistry_.Y()[i].name() == "CO2"
-             || this->chemistry_.Y()[i].name() == "H2O"
+                this->chemistry_.Y()[i].member() == "CO2"
+             || this->chemistry_.Y()[i].member() == "H2O"
             )
             {
                 continue;
@@ -482,7 +482,7 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
             Na[0] += sC_[i]*c[i];
             Na[1] += sH_[i]*c[i];
             Na[2] += sO_[i]*c[i];
-            if (sC_[i]>nbCLarge_ || this->chemistry_.Y()[i].name() == "O2")
+            if (sC_[i]>nbCLarge_ || this->chemistry_.Y()[i].member() == "O2")
             {
                 Nal[0] += sC_[i]*c[i];
                 Nal[1] += sH_[i]*c[i];
@@ -619,21 +619,15 @@ void Foam::chemistryReductionMethods::DAC<CompType, ThermoType>::reduceMechanism
     {
         label u = Q.pop();
         scalar Den = max(PA[u], CA[u]);
-        if (Den != 0.0)
+        if (Den != 0)
         {
             for (label v=0; v<NbrABInit[u]; ++v)
             {
                 label otherSpec = rABOtherSpec(u, v);
                 scalar rAB = mag(rABNum(u, v))/Den;
-
                 if (rAB > 1)
                 {
-                    Info<< "Badly Conditioned rAB : " << rAB
-                    << " for species : "
-                    << this->chemistry_.Y()[u].name() << ","
-                    << this->chemistry_.Y()[otherSpec].name()
-                    << endl;
-                    rAB = 1.0;
+                    rAB = 1;
                 }
 
                 // The direct link is weaker than the user-defined tolerance
