@@ -217,7 +217,7 @@ private:
             //- Name of the radiative heat flux field
             const word qrName_;
 
-            //- Name of the species on which the mass transfered (default H2O)
+            //- Name of the species on which the mass transferred (default H2O)
             const word specieName_;
 
 
