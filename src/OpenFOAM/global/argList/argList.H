@@ -341,7 +341,6 @@ public:
             inline const string& operator[](const label index) const;
 
             //- Return the argument string associated with the named option
-            //  \sa option()
             inline const string& operator[](const word& opt) const;
 
 

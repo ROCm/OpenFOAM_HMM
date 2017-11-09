@@ -1599,7 +1599,7 @@ int main(int argc, char *argv[])
     }
     else if (useCellZonesFile)
     {
-        const word zoneFile = args.option("cellZonesFileOnly");
+        const word zoneFile(args["cellZonesFileOnly"]);
         Info<< "Reading split from cellZones file " << zoneFile << endl
             << "This requires all"
             << " cells to be in one and only one cellZone." << nl << endl;

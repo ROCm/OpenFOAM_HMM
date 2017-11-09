@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("featureFile"))
     {
-        const fileName featureFileName(args.option("featureFile"));
+        const fileName featureFileName(args["featureFile"]);
         Info<< "Reading features from " << featureFileName << " ..." << endl;
 
         edgeMesh feMesh(featureFileName);
