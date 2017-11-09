@@ -96,15 +96,18 @@ bool Foam::primitiveEntry::expandVariable
             return false;
         }
 
-        // String parsed as a list of tokens
-        ITstream its("env", str);
-        appendTokenList(std::move(static_cast<tokenList&>(its)));
+        // Parse string into a series of tokens
+
+        tokenList toks(ITstream::parse(str, IOstream::ASCII));
+
+        appendTokenList(std::move(toks));
     }
     else if (eptr->isDict())
     {
         // Found dictionary entry
 
         tokenList toks(eptr->dict().tokens().xfer());
+
         appendTokenList(std::move(toks));
     }
     else

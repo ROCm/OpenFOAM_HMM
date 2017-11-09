@@ -25,7 +25,7 @@ Class
     Foam::ITstream
 
 Description
-    Input token stream.
+    An input stream of tokens.
 
 SourceFiles
     ITstream.C
@@ -45,7 +45,6 @@ namespace Foam
 
 // Forward declaration
 class ISstream;
-
 
 /*---------------------------------------------------------------------------*\
                            Class ITstream Declaration
@@ -67,8 +66,9 @@ class ITstream
 
     // Private Member Functions
 
-        //- Convert input sequence into tokens and append to the token list
-        void toTokenList(ISstream& input);
+        //- Convert input sequence into a list of tokens.
+        //  \return the number of tokens in the resulting list.
+        static label parseStream(ISstream& input, tokenList& tokens);
 
 
 public:
@@ -162,6 +162,33 @@ public:
         //- Destructor
         virtual ~ITstream()
         {}
+
+
+    // Static Functions
+
+        //- Create token list by parsing the input character sequence until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const UList<char>& input,
+            streamFormat format=ASCII
+        );
+
+        //- Create token list by parsing the input string until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const std::string& input,
+            streamFormat format=ASCII
+        );
+
+        //- Create token list by parsing the input character sequence until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const char* input,
+            streamFormat format=ASCII
+        );
 
 
     // Member functions

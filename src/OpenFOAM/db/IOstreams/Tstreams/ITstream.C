@@ -27,23 +27,72 @@ License
 #include "ITstream.H"
 #include "UIListStream.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void Foam::ITstream::toTokenList(ISstream& is)
+Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
 {
-    tokenIndex_ = 0;
+    label nTok = 0;
+
+    tokens.clear();
+    tokens.setSize(64, token::undefinedToken);
 
     token tok;
-
     while (!is.read(tok).bad() && tok.good())
     {
-        newElmt(tokenIndex()++) = std::move(tok);
+        tokens.newElmt(nTok++) = std::move(tok);
     }
 
-    tokenList::setSize(tokenIndex());
+    tokens.setSize(nTok);
 
-    setOpened();
-    ITstream::rewind();
+    return nTok;
+}
+
+
+Foam::tokenList Foam::ITstream::parse
+(
+    const UList<char>& input,
+    streamFormat format
+)
+{
+    UIListStream is(input, format, IOstream::currentVersion);
+
+    tokenList tokens;
+    parseStream(is, tokens);
+    return tokens;
+}
+
+
+Foam::tokenList Foam::ITstream::parse
+(
+    const std::string& input,
+    streamFormat format
+)
+{
+    UIListStream is
+    (
+        input.data(),
+        input.size(),
+        format,
+        IOstream::currentVersion
+    );
+
+    tokenList tokens;
+    parseStream(is, tokens);
+    return tokens;
+}
+
+
+Foam::tokenList Foam::ITstream::parse
+(
+    const char* input,
+    streamFormat format
+)
+{
+    UIListStream is(input, strlen(input), format, IOstream::currentVersion);
+
+    tokenList tokens;
+    parseStream(is, tokens);
+    return tokens;
 }
 
 
@@ -58,13 +107,14 @@ Foam::ITstream::ITstream
 )
 :
     Istream(format, version),
-    tokenList(16, token::undefinedToken),
+    tokenList(),
     name_(name),
     tokenIndex_(0)
 {
     UIListStream is(input, format, version);
 
-    toTokenList(is);
+    parseStream(is, static_cast<tokenList&>(*this));
+    ITstream::rewind();
 }
 
 
@@ -77,13 +127,14 @@ Foam::ITstream::ITstream
 )
 :
     Istream(format, version),
-    tokenList(16, token::undefinedToken),
+    tokenList(),
     name_(name),
     tokenIndex_(0)
 {
     UIListStream is(input.data(), input.size(), format, version);
 
-    toTokenList(is);
+    parseStream(is, static_cast<tokenList&>(*this));
+    ITstream::rewind();
 }
 
 
@@ -96,14 +147,14 @@ Foam::ITstream::ITstream
 )
 :
     Istream(format, version),
-    tokenList(16, token::undefinedToken),
+    tokenList(),
     name_(name),
     tokenIndex_(0)
 {
-    const size_t len = strlen(input);
-    UIListStream is(input, len, format, version);
+    UIListStream is(input, strlen(input), format, version);
 
-    toTokenList(is);
+    parseStream(is, static_cast<tokenList&>(*this));
+    ITstream::rewind();
 }
 
 
@@ -245,6 +296,7 @@ void Foam::ITstream::rewind()
         lineNumber_ = tokenList::first().lineNumber();
     }
 
+    setOpened();
     setGood();
 }
 

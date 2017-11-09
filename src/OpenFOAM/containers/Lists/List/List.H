@@ -236,23 +236,23 @@ public:
             inline void append(const UIndirectList<T>& lst);
 
             //- Transfer the contents of the argument List into this list
-            //  and annul the argument list
+            //- and annul the argument list
             void transfer(List<T>& lst);
 
             //- Transfer the contents of the argument List into this list
-            //  and annul the argument list
+            //- and annul the argument list
             template<int SizeMin>
             void transfer(DynamicList<T, SizeMin>& lst);
 
             //- Transfer the contents of the argument List into this list
-            //  and annul the argument list
+            //- and annul the argument list
             void transfer(SortableList<T>& lst);
 
             //- Transfer contents to the Xfer container
             inline Xfer<List<T>> xfer();
 
-            //- Return subscript-checked element of UList.
-            //  Resize list if required.
+            //- Return subscript-checked element of UList and resizing the list
+            //- if required.
             inline T& newElmt(const label i);
 
 
@@ -301,7 +301,10 @@ public:
 
         //- Read List from Istream, discarding contents of existing List
         friend Istream& operator>> <T>
-        (Istream& is, List<T>& L);
+        (
+            Istream& is,
+            List<T>& L
+        );
 };
 
 

@@ -223,10 +223,7 @@ Foam::tokenList Foam::dictionary::tokens() const
     }
 
     // String re-parsed as a list of tokens
-    return static_cast<tokenList>
-    (
-        ITstream("tokens", os.str(), os.format(), os.version())
-    );
+    return ITstream::parse(os.str());
 }
 
 
