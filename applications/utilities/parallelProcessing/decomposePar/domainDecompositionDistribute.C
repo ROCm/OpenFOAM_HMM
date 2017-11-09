@@ -46,11 +46,11 @@ void Foam::domainDecomposition::distributeCells()
         decompDictFile_
     );
 
+    word weightName;
     scalarField cellWeights;
-    if (method.found("weightField"))
-    {
-        word weightName = method.lookup("weightField");
 
+    if (method.readIfPresent("weightField", weightName))
+    {
         volScalarField weights
         (
             IOobject

@@ -49,10 +49,8 @@ void Foam::domainDecomposition::mark
     labelList& elementToZone
 )
 {
-    forAll(zoneElems, i)
+    for (const label pointi : zoneElems)
     {
-        label pointi = zoneElems[i];
-
         if (elementToZone[pointi] == -1)
         {
             // First occurrence
@@ -69,7 +67,6 @@ void Foam::domainDecomposition::mark
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 Foam::domainDecomposition::domainDecomposition
 (
     const IOobject& io,
@@ -98,13 +95,13 @@ Foam::domainDecomposition::domainDecomposition
     decompDictFile_(decompDictFile),
     nProcs_
     (
-        readInt
+        decompositionMethod::nDomains
         (
             decompositionModel::New
             (
                 *this,
                 decompDictFile
-            ).lookup("numberOfSubdomains")
+            )
         )
     ),
     distributed_(false),

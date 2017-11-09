@@ -330,7 +330,6 @@ int main(int argc, char *argv[])
     }
 
 
-
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
@@ -338,13 +337,12 @@ int main(int argc, char *argv[])
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
 
-
         // Determine the existing processor count directly
         label nProcs = fileHandler().nProcs(runTime.path(), regionDir);
 
-        // Get requested numberOfSubdomains. Note: have no mesh yet so
-        // cannot use decompositionModel::New
-        const label nDomains = readLabel
+        // Get requested numberOfSubdomains directly from the dictionary.
+        // Note: have no mesh yet so cannot use decompositionModel::New
+        const label nDomains = decompositionMethod::nDomains
         (
             IOdictionary
             (
@@ -362,7 +360,7 @@ int main(int argc, char *argv[])
                     ),
                     decompDictFile
                 )
-            ).lookup("numberOfSubdomains")
+            )
         );
 
         if (decomposeFieldsOnly)

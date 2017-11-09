@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,13 @@ Class
     Foam::manualDecomp
 
 Description
-    Decomposition given a cell-to-processor association in a file
+    Decompose based on cell-to-processor association in a file
+
+    Method coefficients:
+    \table
+        Property  | Description                           | Required | Default
+        dataFile  | filename of cell decomposition data   | yes      |
+    \endtable
 
 SourceFiles
     manualDecomp.C
@@ -50,14 +56,14 @@ class manualDecomp
 {
     // Private data
 
-        fileName decompDataFile_;
+        fileName dataFile_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const manualDecomp&);
-        manualDecomp(const manualDecomp&);
+        void operator=(const manualDecomp&) = delete;
+        manualDecomp(const manualDecomp&) = delete;
 
 
 public:
@@ -69,7 +75,15 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        manualDecomp(const dictionary& decompositionDict);
+        manualDecomp(const dictionary& decompDict);
+
+        //- Construct given the decomposition dictionary and region name
+        manualDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
+
 
     //- Destructor
     virtual ~manualDecomp()

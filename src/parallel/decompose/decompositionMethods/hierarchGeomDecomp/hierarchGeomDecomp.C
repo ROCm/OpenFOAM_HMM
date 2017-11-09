@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,44 +40,51 @@ namespace Foam
         hierarchGeomDecomp,
         dictionary
     );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        hierarchGeomDecomp,
+        dictionaryRegion
+    );
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::hierarchGeomDecomp::setDecompOrder()
 {
-    const word order(geomDecomDict_.lookup("order"));
+    word order;
 
-    if (order.size() != 3)
+    if (coeffsDict_.readIfPresent("order", order))
     {
-        FatalIOErrorInFunction
-        (
-            decompositionDict_
-        )   << "number of characters in order (" << order << ") != 3"
-            << exit(FatalIOError);
-    }
-
-    for (label i = 0; i < 3; ++i)
-    {
-        if (order[i] == 'x')
-        {
-            decompOrder_[i] = 0;
-        }
-        else if (order[i] == 'y')
-        {
-            decompOrder_[i] = 1;
-        }
-        else if (order[i] == 'z')
-        {
-            decompOrder_[i] = 2;
-        }
-        else
+        if (order.size() != 3)
         {
             FatalIOErrorInFunction
             (
                 decompositionDict_
-            )   << "Illegal decomposition order " << order << endl
-                << "It should only contain x, y or z" << exit(FatalError);
+            )   << "number of characters in order (" << order << ") != 3"
+                << exit(FatalIOError);
+        }
+
+        for (int i = 0; i < 3; ++i)
+        {
+            // Change [x-z] -> [0-2]
+
+            switch (order[i])
+            {
+                case 'x': decompOrder_[i] = 0; break;
+                case 'y': decompOrder_[i] = 1; break;
+                case 'z': decompOrder_[i] = 2; break;
+
+                default:
+                    FatalIOErrorInFunction
+                    (
+                        decompositionDict_
+                    )   << "Illegal decomposition order " << order << nl
+                        << "It should only contain x, y or z"
+                        << exit(FatalError);
+                    break;
+            }
         }
     }
 }
@@ -704,7 +711,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     label allSize = points.size();
     reduce(allSize, sumOp<label>());
 
-    const label sizeTol = max(1, label(1e-3*allSize/nProcessors_));
+    const label sizeTol = max(1, label(1e-3*allSize/nDomains_));
 
     // Sort recursive
     sortComponent
@@ -745,7 +752,7 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     label allSize = points.size();
     reduce(allSize, sumOp<label>());
 
-    const label sizeTol = max(1, label(1e-3*allSize/nProcessors_));
+    const label sizeTol = max(1, label(1e-3*allSize/nDomains_));
 
     // Sort recursive
     sortComponent
@@ -767,11 +774,24 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
 
 Foam::hierarchGeomDecomp::hierarchGeomDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    geomDecomp(decompositionDict, typeName),
-    decompOrder_()
+    geomDecomp(typeName, decompDict),
+    decompOrder_({0,1,2})
+{
+    setDecompOrder();
+}
+
+
+Foam::hierarchGeomDecomp::hierarchGeomDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    geomDecomp(typeName, decompDict, regionName),
+    decompOrder_({0,1,2})
 {
     setDecompOrder();
 }

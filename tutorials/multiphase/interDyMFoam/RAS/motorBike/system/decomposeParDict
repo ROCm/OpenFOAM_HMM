@@ -20,7 +20,6 @@ numberOfSubdomains 5;
 method          hierarchical;
 // method          ptscotch;
 
-
 // Optional decomposition constraints
 constraints
 {
@@ -33,22 +32,12 @@ constraints
 }
 
 
-simpleCoeffs
+coeffs
 {
-    n               (4 1 1);
-    delta           0.001;
-}
-
-hierarchicalCoeffs
-{
-    n               (5 1 1);
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "cellDecomposition";
+    n           (5 1 1);
+    //delta       0.001; // default=0.001
+    //order       xyz;   // default=xzy
+    dataFile    "cellDecomposition";
 }
 
 

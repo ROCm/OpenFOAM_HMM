@@ -10,11 +10,8 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    note        "mesh decomposition control dictionary";
-    location    "system";
     object      decomposeParDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 numberOfSubdomains  4;
@@ -23,38 +20,29 @@ numberOfSubdomains  4;
 // preserveFaceZones (heater solid1 solid3);
 
 method          scotch;
+
 // method          hierarchical;
 // method          simple;
 // method          manual;
 
-simpleCoeffs
+regions
 {
-    n           (2 2 1);
-    delta       0.001;
+    heater
+    {
+        numberOfSubdomains  1;
+        method          none;
+
+        coeffs
+        {
+            n       (1 1 1);
+            delta   0.001;
+        }
+    }
 }
 
-hierarchicalCoeffs
+coeffs
 {
-    n           (2 2 1);
-    delta       0.001;
-    order       xyz;
+    n       (2 2 1);
 }
-
-
-manualCoeffs
-{
-    dataFile    "decompositionData";
-}
-
-
-//// Is the case distributed
-//distributed     yes;
-//// Per slave (so nProcs-1 entries) the directory above the case.
-//roots
-//(
-//    "/tmp"
-//    "/tmp"
-//);
-
 
 // ************************************************************************* //

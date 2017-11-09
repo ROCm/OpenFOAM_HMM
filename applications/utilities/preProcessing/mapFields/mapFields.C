@@ -58,7 +58,7 @@ int readNumProcs
         dictFile = dictFile / dictName;
     }
 
-    return readInt
+    return decompositionMethod::nDomains
     (
         IOdictionary
         (
@@ -75,7 +75,7 @@ int readNumProcs
                 ),
                 dictFile
             )
-        ).lookup("numberOfSubdomains")
+        )
     );
 }
 

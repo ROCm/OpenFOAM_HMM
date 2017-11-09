@@ -38,7 +38,20 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(kahipDecomp, 0);
-    addToRunTimeSelectionTable(decompositionMethod, kahipDecomp, dictionary);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        kahipDecomp,
+        dictionary
+    );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        kahipDecomp,
+        dictionaryRegion
+    );
 }
 
 
@@ -72,9 +85,6 @@ Foam::label Foam::kahipDecomp::decomposeSerial
     double imbalance = 0.01;
     int seed = 0;
     bool verbose = false;
-
-    const dictionary* coeffsDictPtr =
-        decompositionDict_.subDictPtr("kahipCoeffs");
 
     #if WM_LABEL_SIZE == 64
     if (xadj.size()-1 > INT_MAX)
@@ -120,109 +130,91 @@ Foam::label Foam::kahipDecomp::decomposeSerial
         }
     }
 
+    kahipConfig =
+        configNames.lookupOrDefault("config", coeffsDict_, kahipConfig);
+
+    coeffsDict_.readIfPresent("imbalance", imbalance);
+    coeffsDict_.readIfPresent("verbose", verbose);
+
+    Info<< "kahipDecomp :"
+        << " config=" << configNames[kahipConfig]
+        << " imbalance=" << imbalance;
+
+    if (coeffsDict_.readIfPresent("seed", seed))
+    {
+        Info<< " seed=" << seed;
+    }
+
     // Additional sizing parameters (testing only)
     std::map<std::string, std::vector<int>> sizingParams;
 
-    // Check for user supplied weights and decomp options
-    if (coeffsDictPtr)
+    List<int> labels;
+    if
+    (
+        coeffsDict_.readIfPresent("hierarchy", labels)
+     && !labels.empty()
+    )
     {
-        const dictionary& coeffDict = *coeffsDictPtr;
+        std::vector<int> vec;
+        vec.reserve(labels.size()+1);
 
-        //- Find the key in the dictionary and return the corresponding
-        //  enumeration element based on its name.
-        //  Return the default value if the key was not found in the dictionary.
-        //  Fatal if the enumerated name was incorrect.
+        // Verify sizing
 
-        kahipConfig =
-            configNames.lookupOrDefault("config", coeffDict, kahipConfig);
-
-        coeffDict.readIfPresent("imbalance", imbalance);
-        coeffDict.readIfPresent("verbose", verbose);
-
-        Info<< "kahipDecomp :"
-            << " config=" << configNames[kahipConfig]
-            << " imbalance=" << imbalance;
-
-        List<int> labels;
-        if
-        (
-            coeffDict.readIfPresent("hierarchy", labels)
-         && !labels.empty()
-        )
+        int n = 1;
+        for (auto val : labels)
         {
-            std::vector<int> vec;
-            vec.reserve(labels.size()+1);
+            n *= val;
+            vec.push_back(val);
+        }
 
-            // Verify sizing
+        if (n != nDomains_)
+        {
+            // Size mismatch. Try to correct.
 
-            int n = 1;
-            for (auto val : labels)
+            if (nDomains_ % n)
             {
-                n *= val;
-                vec.push_back(val);
+                WarningInFunction
+                    << "Mismatch in number of processors and "
+                    << "hierarchy specified" << flatOutput(labels) << endl;
+
+                vec.clear();
             }
-
-            if (n != nProcessors_)
+            else
             {
-                // Size mismatch. Try to correct.
-
-                if (nProcessors_ % n)
-                {
-                    WarningInFunction
-                        << "Mismatch in number of processors and "
-                        << "hierarchy specified" << flatOutput(labels) << endl;
-
-                    vec.clear();
-                }
-                else
-                {
-                    // Evenly divisible, add extra hierarchy level
-                    vec.push_back(nProcessors_ / n);
-                }
-            }
-
-            if (!vec.empty())
-            {
-                sizingParams["hierarchy"] = std::move(vec);
-
-                Info<< " hierarchy=" << flatOutput(labels);
+                // Evenly divisible, add extra hierarchy level
+                vec.push_back(nDomains_ / n);
             }
         }
 
-        if
-        (
-            coeffDict.readIfPresent("distance", labels)
-         && !labels.empty()
-        )
+        if (!vec.empty())
         {
-            std::vector<int> vec(labels.size());
-
-            forAll(labels, i)
-            {
-                vec[i] = labels[i];
-            }
-
-            sizingParams["distance"] = std::move(vec);
-
-            Info<< " distance=" << flatOutput(labels);
+            sizingParams["hierarchy"] = std::move(vec);
+            Info<< " hierarchy=" << flatOutput(labels);
         }
-
-        if (coeffDict.readIfPresent("seed", seed))
-        {
-            Info<< " seed=" << seed;
-        }
-
-        Info<< endl;
     }
-    else
+
+    if
+    (
+        coeffsDict_.readIfPresent("distance", labels)
+     && !labels.empty()
+    )
     {
-        Info<< "kahipDecomp :"
-            << " config=" << configNames[kahipConfig]
-            << " imbalance=" << imbalance << endl;
+        std::vector<int> vec(labels.size());
+
+        forAll(labels, i)
+        {
+            vec[i] = labels[i];
+        }
+
+        sizingParams["distance"] = std::move(vec);
+        Info<< " distance=" << flatOutput(labels);
     }
+
+    Info<< endl;
+
 
     // Number of partitions
-    int nParts = nProcessors_;
+    int nParts = nDomains_;
 
     // Output: number of cut edges
     int edgeCut = 0;
@@ -322,9 +314,19 @@ Foam::label Foam::kahipDecomp::decomposeSerial
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::kahipDecomp::kahipDecomp(const dictionary& decompositionDict)
+Foam::kahipDecomp::kahipDecomp(const dictionary& decompDict)
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp(typeName, decompDict, selectionType::NULL_DICT)
+{}
+
+
+Foam::kahipDecomp::kahipDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp(typeName, decompDict, regionName, selectionType::NULL_DICT)
 {}
 
 

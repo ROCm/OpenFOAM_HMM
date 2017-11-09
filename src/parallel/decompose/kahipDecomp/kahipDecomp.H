@@ -31,6 +31,8 @@ Description
     When run in parallel will collect the entire graph on to the master,
     decompose and send back.
 
+    Coefficients dictionary: \a kahipCoeffs, \a coeffs.
+
     \verbatim
     numberOfSubdomains   N;
     method               kahip;
@@ -42,12 +44,12 @@ Description
     }
     \endverbatim
 
-    Where the coefficients dictionary is optional, as are all its entries:
+    Method coefficients:
     \table
-        Property  | Description                                 | Default value
-        config    | fast / eco / strong                         | fast
-        imbalance | imbalance on cells between domains          | 0.01
-        seed      | initial value for random number generator   | 0
+        Property  | Description                          | Required | Default
+        config    | fast / eco / strong                  | no       | fast
+        imbalance | imbalance on cells between domains   | no       | 0.01
+        seed      | initial value for random number generator | no  | 0
     \endtable
 
 SourceFiles
@@ -114,7 +116,14 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        kahipDecomp(const dictionary& decompositionDict);
+        kahipDecomp(const dictionary& decompDict);
+
+        //- Construct given the decomposition dictionary and region name
+        kahipDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor
