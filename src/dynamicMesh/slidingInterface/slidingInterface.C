@@ -52,7 +52,7 @@ const Foam::Enum
 <
     Foam::slidingInterface::typeOfMatch
 >
-Foam::slidingInterface::typeOfMatchNames_
+Foam::slidingInterface::typeOfMatchNames
 {
     { typeOfMatch::INTEGRAL, "integral" },
     { typeOfMatch::PARTIAL, "partial" },
@@ -112,8 +112,6 @@ void Foam::slidingInterface::clearOut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-// Construct from components
 Foam::slidingInterface::slidingInterface
 (
     const word& name,
@@ -204,7 +202,6 @@ Foam::slidingInterface::slidingInterface
 }
 
 
-// Construct from components
 Foam::slidingInterface::slidingInterface
 (
     const word& name,
@@ -244,7 +241,7 @@ Foam::slidingInterface::slidingInterface
         dict.lookup("slavePatchName"),
         mme.mesh().boundaryMesh()
     ),
-    matchType_(typeOfMatchNames_.lookup("typeOfMatch", dict)),
+    matchType_(typeOfMatchNames.lookup("typeOfMatch", dict)),
     coupleDecouple_(dict.lookup("coupleDecouple")),
     attached_(dict.lookup("attached")),
     projectionAlgo_
@@ -749,7 +746,7 @@ void Foam::slidingInterface::write(Ostream& os) const
         << cutFaceZoneID_.name() << nl
         << masterPatchID_.name() << nl
         << slavePatchID_.name() << nl
-        << typeOfMatchNames_[matchType_] << nl
+        << typeOfMatchNames[matchType_] << nl
         << coupleDecouple_ << nl
         << attached_ << endl;
 }
@@ -776,7 +773,7 @@ void Foam::slidingInterface::writeDict(Ostream& os) const
     os.writeEntry("cutFaceZoneName", cutFaceZoneID_.name());
     os.writeEntry("masterPatchName", masterPatchID_.name());
     os.writeEntry("slavePatchName", slavePatchID_.name());
-    os.writeEntry("typeOfMatch", typeOfMatchNames_[matchType_]);
+    os.writeEntry("typeOfMatch", typeOfMatchNames[matchType_]);
     os.writeEntry("coupleDecouple", coupleDecouple_);
     os.writeEntry("projection", intersection::algorithmNames_[projectionAlgo_]);
     os.writeEntry("attached", attached_);
