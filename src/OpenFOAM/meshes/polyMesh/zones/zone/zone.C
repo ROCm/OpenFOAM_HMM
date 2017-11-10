@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,15 @@ void Foam::zone::calcLookupMap() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::zone::zone(const word& name, const label index)
+:
+    labelList(),
+    name_(name),
+    index_(index),
+    lookupMapPtr_(nullptr)
+{}
+
+
 Foam::zone::zone
 (
     const word& name,
@@ -90,6 +99,20 @@ Foam::zone::zone
 )
 :
     labelList(addr),
+    name_(name),
+    index_(index),
+    lookupMapPtr_(nullptr)
+{}
+
+
+Foam::zone::zone
+(
+    const word& name,
+    labelList&& addr,
+    const label index
+)
+:
+    labelList(std::move(addr)),
     name_(name),
     index_(index),
     lookupMapPtr_(nullptr)
@@ -127,13 +150,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const zone& zn,
+    const zone& origZone,
     const labelUList& addr,
     const label index
 )
 :
     labelList(addr),
-    name_(zn.name()),
+    name_(origZone.name()),
     index_(index),
     lookupMapPtr_(nullptr)
 {}
@@ -141,13 +164,27 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const zone& zn,
+    const zone& origZone,
+    labelList&& addr,
+    const label index
+)
+:
+    labelList(std::move(addr)),
+    name_(origZone.name()),
+    index_(index),
+    lookupMapPtr_(nullptr)
+{}
+
+
+Foam::zone::zone
+(
+    const zone& origZone,
     const Xfer<labelList>& addr,
     const label index
 )
 :
     labelList(addr),
-    name_(zn.name()),
+    name_(origZone.name()),
     index_(index),
     lookupMapPtr_(nullptr)
 {}
@@ -184,9 +221,8 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
     // To check for duplicate entries
     labelHashSet elems(size());
 
-    forAll(addr, i)
+    for (const label idx : addr)
     {
-        const label idx = addr[i];
         if (idx < 0 || idx >= maxSize)
         {
             hasError = true;

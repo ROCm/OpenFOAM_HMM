@@ -1282,7 +1282,7 @@ int main(int argc, char *argv[])
                 (
                     faceZones.toc()[cnt],
                     indizes,
-                    boolList(indizes.size(),false),
+                    false, // none are flipped
                     cnt,
                     mesh.faceZones()
                 );

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -109,6 +109,9 @@ public:
 
     // Constructors
 
+        //- Construct an empty zone
+        cellZone(const word& name, const label index, const cellZoneMesh& zm);
+
         //- Construct from components
         cellZone
         (
@@ -118,7 +121,16 @@ public:
             const cellZoneMesh& zm
         );
 
-        //- Construct from components, transferring contents
+        //- Construct from components, transferring addressing
+        cellZone
+        (
+            const word& name,
+            labelList&& addr,
+            const label index,
+            const cellZoneMesh& zm
+        );
+
+        //- Construct from components, transferring addressing
         cellZone
         (
             const word& name,
@@ -136,25 +148,36 @@ public:
             const cellZoneMesh& zm
         );
 
-        //- Construct given the original zone,
-        //  resetting the cell list and zone mesh information
+        //- Construct given the original zone (name is used),
+        //- and resetting the cell list and zone mesh information
         cellZone
         (
-            const cellZone& cz,
+            const cellZone& origZone,
             const labelUList& addr,
             const label index,
             const cellZoneMesh& zm
         );
 
-        //- Construct given the original zone,
-        //  resetting the cell list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, resetting the cell addressing.
         cellZone
         (
-            const cellZone& cz,
+            const cellZone& origZone,
+            labelList&& addr,
+            const label index,
+            const cellZoneMesh& zm
+        );
+
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, (move) resetting the cell addressing.
+        cellZone
+        (
+            const cellZone& origZone,
             const Xfer<labelList>& addr,
             const label index,
             const cellZoneMesh& zm
         );
+
 
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<cellZone> clone(const cellZoneMesh& zm) const
@@ -165,8 +188,8 @@ public:
             );
         }
 
-        //- Construct and return a clone, resetting the cell list
-        //  and zone mesh
+        //- Construct and return a clone,
+        //- resetting the cell list and zone mesh
         virtual autoPtr<cellZone> clone
         (
             const labelUList& addr,
@@ -184,7 +207,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new cell zone
-        //  created on freestore from dictionary
+        //- created on freestore from dictionary
         static autoPtr<cellZone> New
         (
             const word& name,
@@ -228,7 +251,7 @@ public:
         //- Assign addressing, clearing demand-driven data
         void operator=(const labelUList& addr);
 
-        //- Assign addressing, clearing demand-driven data
+        //- Move assign addressing, clearing demand-driven data
         void operator=(const Xfer<labelList>& addr);
 
 

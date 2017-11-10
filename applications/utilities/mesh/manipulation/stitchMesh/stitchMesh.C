@@ -72,108 +72,7 @@ Description
 #include "IOobjectList.H"
 #include "ReadFields.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-label addPointZone(polyMesh& mesh, const word& name)
-{
-    pointZoneMesh& zones = mesh.pointZones();
-    label zoneID = zones.findZoneID(name);
-
-    if (zoneID != -1)
-    {
-        Info<< "Reusing existing pointZone " << zones[zoneID].name()
-            << " at index " << zoneID << endl;
-
-        return zoneID;
-    }
-
-    zoneID = zones.size();
-    Info<< "Adding pointZone " << name << " at index " << zoneID << endl;
-
-    zones.setSize(zoneID+1);
-    zones.set
-    (
-        zoneID,
-        new pointZone
-        (
-            name,
-            labelList(0),
-            zoneID,
-            zones
-        )
-    );
-
-    return zoneID;
-}
-
-
-label addFaceZone(polyMesh& mesh, const word& name)
-{
-    faceZoneMesh& zones = mesh.faceZones();
-    label zoneID = zones.findZoneID(name);
-
-    if (zoneID != -1)
-    {
-        Info<< "Reusing existing faceZone " << zones[zoneID].name()
-            << " at index " << zoneID << endl;
-
-        return zoneID;
-    }
-
-    zoneID = zones.size();
-    Info<< "Adding faceZone " << name << " at index " << zoneID << endl;
-
-    zones.setSize(zoneID+1);
-    zones.set
-    (
-        zoneID,
-        new faceZone
-        (
-            name,
-            labelList(0),
-            boolList(),
-            zoneID,
-            zones
-        )
-    );
-
-    return zoneID;
-}
-
-
-label addCellZone(polyMesh& mesh, const word& name)
-{
-    cellZoneMesh& zones = mesh.cellZones();
-    label zoneID = zones.findZoneID(name);
-
-    if (zoneID != -1)
-    {
-        Info<< "Reusing existing cellZone " << zones[zoneID].name()
-            << " at index " << zoneID << endl;
-
-        return zoneID;
-    }
-
-    zoneID = zones.size();
-    Info<< "Adding cellZone " << name << " at index " << zoneID << endl;
-
-    zones.setSize(zoneID+1);
-    zones.set
-    (
-        zoneID,
-        new cellZone
-        (
-            name,
-            labelList(0),
-            zoneID,
-            zones
-        )
-    );
-
-    return zoneID;
-}
-
 
 // Checks whether patch present
 void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
@@ -196,7 +95,6 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
             << exit(FatalError);
     }
 }
-
 
 
 int main(int argc, char *argv[])
@@ -341,10 +239,12 @@ int main(int argc, char *argv[])
 
     if (perfectCover)
     {
-        // Add empty zone for resulting internal faces
-        const label cutZoneID = addFaceZone(mesh, cutZoneName);
-
-        mesh.faceZones()[cutZoneID].resetAddressing(isf.xfer(), false);
+        // Starts as master zone, but receives the resulting internal faces
+        mesh.faceZones()
+        (
+            cutZoneName,
+            true // verbose
+        ).resetAddressing(isf.xfer(), false);
 
         // Add the perfect interface mesh modifier
         stitcher.set
@@ -363,12 +263,19 @@ int main(int argc, char *argv[])
     }
     else
     {
-        label pointZoneID = addPointZone(mesh, mergePatchName + "CutPointZone");
-        mesh.pointZones()[pointZoneID] = labelList(0);
+        // An empty point zone
+        mesh.pointZones()
+        (
+            mergePatchName + "CutPointZone",
+            true // verbose
+        ) = labelList();
 
-        label masterZoneID = addFaceZone(mesh, mergePatchName + "MasterZone");
-
-        mesh.faceZones()[masterZoneID].resetAddressing(isf.xfer(), false);
+        // The master zone
+        mesh.faceZones()
+        (
+            mergePatchName + "MasterZone",
+            true // verbose
+        ).resetAddressing(isf.xfer(), false);
 
         // Slave patch
         const polyPatch& slavePatch = mesh.boundaryMesh()[slavePatchName];
@@ -380,12 +287,18 @@ int main(int argc, char *argv[])
             osf[i] = slavePatch.start() + i;
         }
 
-        label slaveZoneID = addFaceZone(mesh, mergePatchName + "SlaveZone");
-        mesh.faceZones()[slaveZoneID].resetAddressing(osf.xfer(), false);
+        mesh.faceZones()
+        (
+            mergePatchName + "SlaveZone",
+            true // verbose
+        ).resetAddressing(osf.xfer(), false);
 
-        // Add empty zone for cut faces
-        const label cutZoneID = addFaceZone(mesh, cutZoneName);
-        mesh.faceZones()[cutZoneID].resetAddressing(labelList(0), false);
+        // An empty zone for cut faces
+        mesh.faceZones()
+        (
+            cutZoneName,
+            true // verbose
+        ).resetAddressing(labelList(), false);
 
 
         // Add the sliding interface mesh modifier

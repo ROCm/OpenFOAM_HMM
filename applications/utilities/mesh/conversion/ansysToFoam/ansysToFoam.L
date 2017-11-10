@@ -642,7 +642,7 @@ int main(int argc, char *argv[])
                     (
                         patchNames[patchi],
                         bFaceLabels,
-                        boolList(bFaceLabels.size(), false),
+                        false, // none are flipped
                         fz.size(),
                         pShapeMesh.faceZones()
                     )

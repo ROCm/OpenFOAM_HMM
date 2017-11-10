@@ -63,7 +63,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
             (
                 iter.key(),
                 iter(),
-                boolList(iter().size(), false),
+                false, // none are flipped
                 nZone,
                 mesh.faceZones()
             )

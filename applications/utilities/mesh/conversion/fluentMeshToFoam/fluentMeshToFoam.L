@@ -1077,7 +1077,6 @@ int main(int argc, char *argv[])
         // Create new faces
         forAll(faces, facei)
         {
-
             if (faces[facei].size() != 2)
             {
                 FatalErrorInFunction
@@ -1660,7 +1659,7 @@ int main(int argc, char *argv[])
             (
                 name,
                 zoneFaces,
-                boolList(zoneFaces.size(), false),
+                false, // none are flipped
                 cnt,
                 pShapeMesh.faceZones()
             );

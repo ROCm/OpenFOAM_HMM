@@ -2546,7 +2546,7 @@ void Foam::ccm::reader::addFaceZones
             (
                 iter.key(),
                 iter(),
-                boolList(iter().size(), false),
+                false, // none are flipped
                 nZone,
                 mesh.faceZones()
             )

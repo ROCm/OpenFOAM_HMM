@@ -1156,7 +1156,6 @@ int main(int argc, char *argv[])
             new cellZone
             (
                 name,
-                labelList(0),
                 cellZonei,
                 mesh.cellZones()
             )
@@ -1186,8 +1185,6 @@ int main(int argc, char *argv[])
             new faceZone
             (
                 name,
-                labelList(0),
-                boolList(0),
                 faceZonei,
                 mesh.faceZones()
             )

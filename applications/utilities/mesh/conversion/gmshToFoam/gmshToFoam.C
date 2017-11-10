@@ -1102,7 +1102,7 @@ int main(int argc, char *argv[])
                 (
                     zoneName,
                     zoneFaces[zoneI],
-                    boolList(zoneFaces[zoneI].size(), true),
+                    true, // all are flipped
                     nValidFaceZones,
                     mesh.faceZones()
                 );

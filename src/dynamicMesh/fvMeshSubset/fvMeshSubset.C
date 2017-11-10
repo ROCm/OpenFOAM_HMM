@@ -56,10 +56,8 @@ bool Foam::fvMeshSubset::checkCellSubset() const
 
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -69,10 +67,10 @@ void Foam::fvMeshSubset::markPoints
     Map<label>& pointMap
 )
 {
-    forAll(curPoints, pointi)
+    for (const label pointi : curPoints)
     {
         // Note: insert will only insert if not yet there.
-        pointMap.insert(curPoints[pointi], 0);
+        pointMap.insert(pointi, 0);
     }
 }
 
@@ -83,9 +81,9 @@ void Foam::fvMeshSubset::markPoints
     labelList& pointMap
 )
 {
-    forAll(curPoints, pointi)
+    for (const label pointi : curPoints)
     {
-        pointMap[curPoints[pointi]] = 0;
+        pointMap[pointi] = 0;
     }
 }
 

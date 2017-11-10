@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,10 @@ Class
     Foam::zone
 
 Description
-    Base class for zones
+    Base class for mesh zones.
+
+    A zone is a list of labels (eg, cells, faces, points) with
+    a name and associated with an index within another list.
 
 SourceFiles
     zone.C
@@ -96,7 +99,10 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct an empty zone
+        zone(const word& name, const label index);
+
+        //- Copy construct from components
         zone
         (
             const word& name,
@@ -104,7 +110,15 @@ public:
             const label index
         );
 
-        //- Construct from components, transferring contents
+        //- Move construct from components
+        zone
+        (
+            const word& name,
+            labelList&& addr,
+            const label index
+        );
+
+        //- Move construct from components
         zone
         (
             const word& name,
@@ -121,17 +135,26 @@ public:
             const label index
         );
 
-        //- Construct given the original zone and resetting the
-        //  cell list and zone mesh information
+        //- Construct given the name of the original zone (name is used)
+        //- and resetting addressing and index.
         zone
         (
-            const zone& zn,
+            const zone& origZone,
             const labelUList& addr,
             const label index
         );
 
-        //- Construct given the original zone, resetting the
-        //  cell list and zone mesh information
+        //- Construct given the name of the original zone (name is used)
+        //- and (move) resetting addressing and index.
+        zone
+        (
+            const zone& origZone,
+            labelList&& addr,
+            const label index
+        );
+
+        //- Construct given the name of the original zone (name is used)
+        //- and (move) resetting addressing and index.
         zone
         (
             const zone& zn,

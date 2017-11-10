@@ -16,10 +16,10 @@
                   + name(pairI)
                 );
 
+                // An empty zone for cut points
                 pz[pairI] = new pointZone
                 (
                     mergeName + "CutPointZone",
-                    labelList(0),
                     0,
                     mesh.pointZones()
                 );
@@ -40,7 +40,7 @@
                 (
                     mergeName + "MasterZone",
                     isf,
-                    boolList(masterPatch.size(), false),
+                    false, // none are flipped
                     0,
                     mesh.faceZones()
                 );
@@ -61,17 +61,15 @@
                 (
                     mergeName + "SlaveZone",
                     osf,
-                    boolList(slavePatch.size(), false),
+                    false, // none are flipped
                     1,
                     mesh.faceZones()
                 );
 
-                // Add empty zone for cut faces
+                // An empty zone for cut faces
                 fz[3*pairI + 2] = new faceZone
                 (
                     mergeName + "CutFaceZone",
-                    labelList(0),
-                    boolList(0, false),
                     2,
                     mesh.faceZones()
                 );
