@@ -29,70 +29,71 @@
 #
 #     Assumes comment strings are formatted as follows
 #         //- General description
-#         //  Detailed information
-#         //  and even more information
-#     or
-#         //- General description
-#         //- that spans several
-#         //- lines
-#         //  Detailed information
-#         //  and even more information
-#
+#         //- with a continuation of general description
+#         //  Detailed description
+#         //  with more particulars
 #     This should be re-formatted as the following
-#         /*! \brief General description
-#          that spans several
-#          lines
-#         */
-#         /*! Detailed information
-#         and even more information
-#         */
-#
-#     The intermediate "/*! ... */" block is left-justified to handle
-#     possible verbatim text
-#
+#         /*!
+#          * \brief General description
+#          * with a continuation of general description
+#          *
+#          * Detailed description
+#          * with more particulars
+#          */
 #------------------------------------------------------------------------------
 
-# States: 0=normal, 1=brief, 2=details
+# state:  0=normal, 1=brief, 2=details
+# indent: whitespace content prior to the opening "//-"
 BEGIN {
     state = 0
+    indent = ""
 }
 
-/^ *\/\/-/ {
+/^\s*\/\/-/ {
     if (state == 0)
     {
         # Changed from normal to brief (start of comment block)
-        printf "/*! \\brief"
+        ## indent = substr($0, 1, index($0, "/")-1)
+        indent = $0
+        sub(/\S.*/, "", indent)
+        printf indent "/*!\n"
+        printf indent " * \\brief "
+        sub(/^\s*\/\/-\s*/, "")
         state = 1
     }
-
-    if (state == 1)
+    else
     {
-        # Within brief: strip leading
-        if (!sub(/^ *\/\/-  /, ""))
-        {
-            sub(/^ *\/\/-/, "")
-        }
+        # Within brief: replace leading space with proper indent amount
+        printf indent
+        sub(/^\s*\/\/-\s*/, " * ")
     }
 
     print
     next
 }
 
-/^ *\/\// {
+
+/^\s*\/\// {
     if (state == 1)
     {
-        # Change from brief to details
-        printf "*/\n"
-        printf "/*! "
+        # Change from brief to details. Extra line to start new paragraph.
+        printf indent " *\n"
         state = 2
     }
 
     if (state == 2)
     {
-        # Within details: strip leading
-        if (!sub(/^ *\/\/  /, ""))
+        # Within details
+        printf indent
+
+        # '//' with 4 spaces or more - assume indent is intentional
+        if (match($0, /^\s*\/\/(    )+/))
         {
-            sub(/^ *\/\//, "")
+            sub(/^\s*\/\/\s/, " *")
+        }
+        else
+        {
+            sub(/^\s*\/\/\s*/, " * ")
         }
     }
 
@@ -100,13 +101,14 @@ BEGIN {
     next
 }
 
+
 {
     # End comment filtering
     if (state)
     {
-        printf "*/\n"
+        printf indent " */\n"
+        state = 0
     }
-    state = 0
     print
     next
 }
