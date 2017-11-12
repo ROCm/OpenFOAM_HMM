@@ -127,7 +127,7 @@ public:
         // Inquiry
 
             //- Return flags of output stream
-            ios_base::fmtflags flags() const
+            virtual ios_base::fmtflags flags() const
             {
                 return ios_base::fmtflags(0);
             }
@@ -146,25 +146,26 @@ public:
                 const label communicator = 0
             );
 
-            //- Write next token to stream
-            Ostream& write(const token& tok);
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok);
 
             //- Write single character. Whitespace is suppressed.
-            Ostream& write(const char c);
+            virtual Ostream& write(const char c);
 
             //- Write the word-characters of a character string.
             //  Sends as a single char, or as word.
-            Ostream& write(const char* str);
+            virtual Ostream& write(const char* str);
 
             //- Write word
-            Ostream& write(const word& str);
+            virtual Ostream& write(const word& str);
 
             //- Write string
-            Ostream& write(const string& str);
+            virtual Ostream& write(const string& str);
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
-            Ostream& writeQuoted
+            virtual Ostream& writeQuoted
             (
                 const std::string& str,
                 const bool quoted=true
@@ -174,70 +175,74 @@ public:
             virtual Ostream& write(const int32_t val);
 
             //- Write int64_t as a label
-            Ostream& write(const int64_t val);
+            virtual Ostream& write(const int64_t val);
 
             //- Write floatScalar
-            Ostream& write(const floatScalar val);
+            virtual Ostream& write(const floatScalar val);
 
             //- Write doubleScalar
-            Ostream& write(const doubleScalar val);
+            virtual Ostream& write(const doubleScalar val);
 
             //- Write binary block with 8-byte alignment.
-            Ostream& write(const char* data, const std::streamsize count);
+            virtual Ostream& write
+            (
+                const char* data,
+                const std::streamsize count
+            );
 
             //- Begin marker for low-level raw binary output.
             //  The count should indicate the number of bytes for subsequent
             //  writeRaw calls.
-            Ostream& beginRaw(const std::streamsize count);
+            virtual Ostream& beginRaw(const std::streamsize count);
 
             //- Low-level raw binary output.
-            Ostream& writeRaw
+            virtual Ostream& writeRaw
             (
                 const char* data,
                 const std::streamsize count
             );
 
             //- End marker for low-level raw binary output.
-            Ostream& endRaw()
+            virtual Ostream& endRaw()
             {
                 return *this;
             }
 
             //- Add indentation characters
-            void indent()
+            virtual void indent()
             {}
 
 
         // Stream state functions
 
             //- Flush stream
-            void flush()
+            virtual void flush()
             {}
 
             //- Add newline and flush stream
-            void endl()
+            virtual void endl()
             {}
 
             //- Get width of output field
-            int width() const
+            virtual int width() const
             {
                 return 0;
             }
 
             //- Set width of output field (and return old width)
-            int width(const int)
+            virtual int width(const int)
             {
                  return 0;
             }
 
             //- Get precision of output field
-            int precision() const
+            virtual int precision() const
             {
                  return 0;
             }
 
             //- Set precision of output field (and return old precision)
-            int precision(const int)
+            virtual int precision(const int)
             {
                  return 0;
             }

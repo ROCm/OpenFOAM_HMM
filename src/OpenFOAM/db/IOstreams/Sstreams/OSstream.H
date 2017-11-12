@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,8 +104,9 @@ public:
 
         // Write functions
 
-            //- Write next token to stream
-            virtual Ostream& write(const token& tok);
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok);
 
             //- Write character
             virtual Ostream& write(const char c);

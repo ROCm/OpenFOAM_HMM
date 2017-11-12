@@ -200,25 +200,16 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
     bool addSpace = false;  // Separate from previous tokens with a space
     for (const token& tok : *this)
     {
-        if (tok.type() == token::tokenType::VERBATIMSTRING)
+        if (addSpace) os << token::SPACE;
+
+        // Try to output token directly, with special handling in Ostreams.
+
+        if (!os.write(tok))
         {
-            // Bypass token output operator to avoid losing verbatimness.
-            // Handled in the Ostreams themselves
-
-            if (addSpace) os << token::SPACE;
-
-            os.write(tok);
-
-            addSpace = true;  // Separate from following tokens
+            os  << tok;   // Revert to normal '<<' output operator
         }
-        else
-        {
-            if (addSpace) os << token::SPACE;
 
-            os  << tok;
-
-            addSpace = true;  // Separate from following tokens
-        }
+        addSpace = true;  // Separate from following tokens
     }
 
     if (!contentsOnly)

@@ -96,8 +96,9 @@ public:
 
         // Write functions
 
-            //- Write next token to stream
-            virtual Ostream& write(const token& tok) = 0;
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok) = 0;
 
             //- Write character
             virtual Ostream& write(const char c) = 0;
