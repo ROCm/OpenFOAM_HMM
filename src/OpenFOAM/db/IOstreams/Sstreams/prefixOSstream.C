@@ -71,6 +71,12 @@ bool Foam::prefixOSstream::write(const token& tok)
 
     switch (tok.type())
     {
+        case token::tokenType::FLAG :
+        {
+            // silently consume the flag
+            return true;
+        }
+
         case token::tokenType::VERBATIMSTRING :
         {
             write(char(token::HASH));

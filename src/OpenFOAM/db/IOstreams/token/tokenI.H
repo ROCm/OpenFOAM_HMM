@@ -25,6 +25,48 @@ License
 
 #include <algorithm>
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+inline Foam::token Foam::token::flag(int bitmask)
+{
+    token tok;
+    tok.type_ = tokenType::FLAG;
+    tok.data_.flagVal = bitmask;
+
+    return tok;
+}
+
+
+inline bool Foam::token::isseparator(int c)
+{
+    switch (c)
+    {
+        case token::END_STATEMENT :
+        case token::BEGIN_LIST :
+        case token::END_LIST :
+        case token::BEGIN_SQR :
+        case token::END_SQR :
+        case token::BEGIN_BLOCK :
+        case token::END_BLOCK :
+        case token::COLON :
+        case token::COMMA :
+        case token::ASSIGN :
+        case token::ADD :
+        // Excluded token::SUBTRACT since it could start a number
+        case token::MULTIPLY :
+        case token::DIVIDE :
+        {
+            return true;
+        }
+
+        default:
+            break;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::token::setUndefined()
@@ -322,6 +364,24 @@ inline bool Foam::token::error() const
 }
 
 
+inline bool Foam::token::isFlag() const
+{
+    return (type_ == tokenType::FLAG);
+}
+
+
+inline int Foam::token::flagToken() const
+{
+    if (type_ == tokenType::FLAG)
+    {
+        return data_.flagVal;
+    }
+
+    parseError("flag bitmask");
+    return NO_FLAG;
+}
+
+
 inline bool Foam::token::isPunctuation() const
 {
     return (type_ == tokenType::PUNCTUATION);
@@ -336,37 +396,7 @@ inline Foam::token::punctuationToken Foam::token::pToken() const
     }
 
     parseError("punctuation character");
-    return NULL_TOKEN;
-}
-
-
-inline bool Foam::token::isseparator(int c)
-{
-    switch (c)
-    {
-        case token::END_STATEMENT :
-        case token::BEGIN_LIST :
-        case token::END_LIST :
-        case token::BEGIN_SQR :
-        case token::END_SQR :
-        case token::BEGIN_BLOCK :
-        case token::END_BLOCK :
-        case token::COLON :
-        case token::COMMA :
-        case token::ASSIGN :
-        case token::ADD :
-        // Excluded token::SUBTRACT since it could start a number
-        case token::MULTIPLY :
-        case token::DIVIDE :
-        {
-            return true;
-        }
-
-        default:
-            break;
-    }
-
-    return false;
+    return punctuationToken::NULL_TOKEN;
 }
 
 
@@ -711,6 +741,9 @@ inline bool Foam::token::operator==(const token& tok) const
     {
         case tokenType::UNDEFINED:
             return true;
+
+        case tokenType::FLAG:
+            return data_.flagVal == tok.data_.flagVal;
 
         case tokenType::PUNCTUATION:
             return data_.punctuationVal == tok.data_.punctuationVal;

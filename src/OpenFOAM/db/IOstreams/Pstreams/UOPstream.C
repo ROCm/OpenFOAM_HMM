@@ -191,6 +191,13 @@ bool Foam::UOPstream::write(const token& tok)
 
     switch (tok.type())
     {
+        case token::tokenType::FLAG :
+        {
+            // silently consume the flag
+
+            return true;
+        }
+
         case token::tokenType::VERBATIMSTRING :
         {
             writeToBuffer(char(token::tokenType::VERBATIMSTRING));

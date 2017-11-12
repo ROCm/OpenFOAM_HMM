@@ -43,6 +43,10 @@ static OS& printTokenInfo(OS& os, const token& tok)
             os  << "undefined token";
         break;
 
+        case token::tokenType::FLAG:
+            os  << "flag '" << int(tok.flagToken()) << '\'';
+        break;
+
         case token::tokenType::PUNCTUATION:
             os  << "punctuation '" << tok.pToken() << '\'';
         break;
@@ -117,6 +121,7 @@ Foam::word Foam::token::name() const
     switch (type_)
     {
         case token::tokenType::UNDEFINED: return "undefined";
+        case token::tokenType::FLAG: return "flag";
         case token::tokenType::PUNCTUATION: return "punctuation";
         case token::tokenType::LABEL: return "label";
         case token::tokenType::FLOAT_SCALAR: return "float";
@@ -153,6 +158,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
             os << "UNDEFINED";
             WarningInFunction
                 << "Undefined token" << endl;
+        break;
+
+        case token::tokenType::FLAG:
+            // Swallow the flag
         break;
 
         case token::tokenType::PUNCTUATION:

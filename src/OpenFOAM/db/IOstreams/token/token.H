@@ -79,6 +79,7 @@ public:
         UNDEFINED,        //!< An undefined token-type
 
         // Fundamental types
+        FLAG,             //!< stream flag (1-byte bitmask)
         PUNCTUATION,      //!< single character punctuation
         LABEL,            //!< label (integer) type
         FLOAT_SCALAR,     //!< float (single-precision) type
@@ -94,6 +95,15 @@ public:
         COMPOUND,         //!< Compound type such as List\<label\> etc.
 
         ERROR             //!< A token error encountered
+    };
+
+
+    //- Stream or output control flags (1-byte width)
+    enum flagType
+    {
+        NO_FLAG = 0,   //!< No flags
+        ASCII   = 1,   //!< ASCII-mode stream
+        BINARY  = 2,   //!< BINARY-mode stream
     };
 
 
@@ -137,16 +147,6 @@ public:
 
             bool empty_;
 
-
-        // Private Member Functions
-
-            //- Disallow default bitwise copy construct
-            compound(const compound&) = delete;
-
-            //- Disallow default bitwise assignment
-            void operator=(const compound&) = delete;
-
-
     public:
 
         //- Runtime type information
@@ -170,6 +170,9 @@ public:
             :
                 empty_(false)
             {}
+
+            //- No default copy construct
+            compound(const compound&) = delete;
 
 
         // Selectors
@@ -202,9 +205,13 @@ public:
             virtual void write(Ostream& os) const = 0;
 
 
-        // IOstream Operators
+        // Operators
 
-            friend Ostream& operator<<(Ostream&, const compound&);
+            //- No default assign operator
+            compound& operator=(const compound&) = delete;
+
+            //- Output operator
+            friend Ostream& operator<<(Ostream& os, const compound& ct);
     };
 
 
@@ -250,6 +257,7 @@ private:
         int64_t int64Val;
         int32_t int32Val;
 
+        int flagVal;   // bitmask - stored as int, not enum
         punctuationToken punctuationVal;
         label labelVal;
         floatScalar floatVal;
@@ -350,7 +358,12 @@ public:
     inline ~token();
 
 
-    // Static member functions
+    // Static Member Functions
+
+        //- Create a token with stream flags, no sanity check
+        //
+        //  \param bitmask the flags to set
+        inline static token flag(int bitmask);
 
         //- True if the character is a punctuation separator (eg, in ISstream).
         //  Since it could also start a number, SUBTRACT is not included as
@@ -395,6 +408,9 @@ public:
         //- True if token is ERROR
         inline bool error() const;
 
+        //- True if token is FLAG
+        inline bool isFlag() const;
+
         //- True if token is PUNCTUATION
         inline bool isPunctuation() const;
 
@@ -430,6 +446,10 @@ public:
 
 
     // Access
+
+        //- Return flag bitmask
+        //  Report FatalIOError and return NO_FLAG if token is not FLAG
+        inline int flagToken() const;
 
         //- Return punctuation character.
         //  Report FatalIOError and return \b \\0 if token is not PUNCTUATION
