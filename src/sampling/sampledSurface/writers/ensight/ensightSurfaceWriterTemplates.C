@@ -99,9 +99,13 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
         << "model:  1   " << osGeom.name().name() << nl
         << nl
         << "VARIABLE" << nl
-        << ensightPTraits<Type>::typeName << " per "
-        << word(isNodeValues ? "node:" : "element:")
-        << setw(3) << 1
+        << ensightPTraits<Type>::typeName
+        <<
+        (
+            isNodeValues
+          ? " per node:    1  "  // time-set 1
+          : " per element: 1  "  // time-set 1
+        )
         << setw(15) << varName
         << "   " << surfName.c_str() << ".********." << varName << nl
         << nl
