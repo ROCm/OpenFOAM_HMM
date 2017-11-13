@@ -29,6 +29,24 @@ License
 #include "token.H"
 #include <cctype>
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+// Adjust stream format based on the flagMask
+inline static void processFlags(Istream& is, int flagMask)
+{
+    if ((flagMask & token::ASCII))
+    {
+        is.format(IOstream::ASCII);
+    }
+    else if ((flagMask & token::BINARY))
+    {
+        is.format(IOstream::BINARY);
+    }
+}
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -121,19 +139,48 @@ Foam::UIPstream::~UIPstream()
 Foam::Istream& Foam::UIPstream::read(token& t)
 {
     // Return the put back token if it exists
+    // - with additional handling for special stream flags
     if (Istream::getBack(t))
     {
-        return *this;
+        if (t.isFlag())
+        {
+            processFlags(*this, t.flagToken());
+        }
+        else
+        {
+            return *this;
+        }
     }
+
+    // Read character, return on error
+    // - with additional handling for special stream flags
 
     char c;
-
-    // Return on error
-    if (!read(c))
+    do
     {
-        t.setBad();
-        return *this;
+        if (!read(c))
+        {
+            t.setBad();   // Error
+            return *this;
+        }
+
+        if (c == token::FLAG)
+        {
+            char flagVal;
+
+            if (read(flagVal))
+            {
+                processFlags(*this, flagVal);
+            }
+            else
+            {
+                t.setBad();   // Error
+                return *this;
+            }
+        }
     }
+    while (c == token::FLAG);
+
 
     // Set the line number of this token to the current stream line number
     t.lineNumber() = lineNumber();
