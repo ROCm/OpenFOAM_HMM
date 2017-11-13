@@ -70,7 +70,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeUncollated
     }
 
     // const scalar timeValue = Foam::name(this->mesh().time().timeValue());
-    const scalar timeValue = readScalar(IStringStream(timeDir)());
+    const scalar timeValue = readScalar(timeDir);
 
     OFstream osCase(baseDir/surfName + ".case");
     ensightGeoFile osGeom
@@ -179,7 +179,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
 
     // surfName already validated
     const fileName meshFile(baseDir/surfName + ".000000.mesh");
-    const scalar timeValue = readScalar(IStringStream(timeDir)());
+    const scalar timeValue = readScalar(timeDir);
     label timeIndex = 0;
 
     // Do case file
@@ -194,7 +194,7 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
             if (is.good() && dict.read(is))
             {
                 dict.lookup("times") >> times;
-                const scalar timeValue = readScalar(IStringStream(timeDir)());
+                const scalar timeValue = readScalar(timeDir);
                 label index = findLower(times, timeValue);
                 timeIndex = index+1;
             }
