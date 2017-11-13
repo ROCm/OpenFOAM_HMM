@@ -26,7 +26,7 @@ License
 #include "boundaryRegion.H"
 #include "IOMap.H"
 #include "OFstream.H"
-#include "stringListOps.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -109,7 +109,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names
             "boundaryRegion_" + Foam::name(iter.key())
         );
 
-        if (findStrings(patterns, lookupName))
+        if (stringOps::match(patterns, lookupName))
         {
             lookup.insert(iter.key(), lookupName);
         }
