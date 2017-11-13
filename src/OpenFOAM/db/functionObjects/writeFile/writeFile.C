@@ -150,7 +150,8 @@ Foam::functionObjects::writeFile::writeFile
     fileName_("undefined"),
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
-    writeToFile_(true)
+    writeToFile_(true),
+    writtenHeader_(false)
 {}
 
 
@@ -167,7 +168,8 @@ Foam::functionObjects::writeFile::writeFile
     fileName_(fileName),
     filePtr_(),
     writePrecision_(IOstream::defaultPrecision()),
-    writeToFile_(true)
+    writeToFile_(true),
+    writtenHeader_(false)
 {
     read(dict);
 
@@ -234,8 +236,13 @@ void Foam::functionObjects::writeFile::writeCommented
     const string& str
 ) const
 {
-    os  << setw(1) << "#" << setw(1) << ' '
-        << setf(ios_base::left) << setw(charWidth() - 2) << str.c_str();
+    os  << setw(1) << "#";
+
+    if (str.size())
+    {
+        os  << setw(1) << ' '
+            << setf(ios_base::left) << setw(charWidth() - 2) << str.c_str();
+    }
 }
 
 
@@ -255,8 +262,8 @@ void Foam::functionObjects::writeFile::writeHeader
     const string& str
 ) const
 {
-    os  << setw(1) << "#" << setw(1) << ' '
-        << setf(ios_base::left) << setw(charWidth() - 2) << str.c_str() << nl;
+    writeCommented(os, str);
+    os  << nl;
 }
 
 
@@ -264,6 +271,12 @@ void Foam::functionObjects::writeFile::writeTime(Ostream& os) const
 {
     const scalar timeNow = fileObr_.time().timeOutputValue();
     os  << setw(charWidth()) << Time::timeName(timeNow);
+}
+
+
+void Foam::functionObjects::writeFile::writeBreak(Ostream& os) const
+{
+    writeHeader(os, "===");
 }
 
 

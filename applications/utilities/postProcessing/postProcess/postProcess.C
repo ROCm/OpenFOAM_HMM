@@ -39,6 +39,7 @@ Description
 #include "surfaceFields.H"
 #include "pointFields.H"
 #include "uniformDimensionedFields.H"
+#include "fileFieldSelection.H"
 
 using namespace Foam;
 
@@ -153,14 +154,14 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
 
     // Initialize the set of selected fields from the command-line options
-    HashSet<word> selectedFields;
+    functionObjects::fileFieldSelection fields(mesh);
     if (args.optionFound("fields"))
     {
-        args.optionLookup("fields")() >> selectedFields;
+        args.optionLookup("fields")() >> fields;
     }
     if (args.optionFound("field"))
     {
-        selectedFields.insert(args.optionLookup("field")());
+        fields.insert(args.optionLookup("field")());
     }
 
     // Externally stored dictionary for functionObjectList
@@ -170,7 +171,13 @@ int main(int argc, char *argv[])
     // Construct functionObjectList
     autoPtr<functionObjectList> functionsPtr
     (
-        functionObjectList::New(args, runTime, functionsDict, selectedFields)
+        functionObjectList::New
+        (
+            args,
+            runTime,
+            functionsDict,
+            fields.selection()
+        )
     );
 
     forAll(timeDirs, timei)
@@ -178,6 +185,8 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[timei], timei);
 
         Info<< "Time = " << runTime.timeName() << endl;
+
+        fields.updateSelection();
 
         if (mesh.readUpdate() != polyMesh::UNCHANGED)
         {
@@ -187,7 +196,7 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 functionsDict,
-                selectedFields
+                fields.selection()
             );
         }
 
@@ -200,7 +209,7 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 mesh,
-                selectedFields,
+                fields.selection(),
                 functionsPtr(),
                 timei == timeDirs.size()-1
             );
