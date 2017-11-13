@@ -459,7 +459,9 @@ snapControls
         //- When splitting the minimum area ratio of faces. If face split
         //  causes ratio of area less than this do not split. Default is 0.3
         //minAreaRatio 0.3;
-
+        //- Attract points only to the surface they originate from. Default
+        //  false. This can improve snapping of intersecting surfaces.
+        //  strictRegionSnap true;
 }
 
 // Settings for the layer addition.
