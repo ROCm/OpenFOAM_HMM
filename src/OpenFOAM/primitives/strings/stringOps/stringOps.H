@@ -42,6 +42,7 @@ SourceFiles
 #include "dictionary.H"
 #include "HashTable.H"
 #include "stringOpsSort.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,6 +61,13 @@ namespace stringOps
     //- Count the number of occurences of the specified character
     //  Correctly handles nullptr.
     std::string::size_type count(const char* str, const char c);
+
+    //- Return true if text matches one of the regular expressions.
+    //  Simply forwards a wordReList to a wordRes for the matching.
+    inline bool match(const wordReList& patterns, const std::string& text)
+    {
+        return wordRes(patterns).match(text);
+    }
 
 
     //- Expand occurences of variables according to the mapping
