@@ -579,9 +579,8 @@ bool Foam::functionObjectList::execute()
             }
         }
     }
-
     // Force writing of state dictionary after function object execution
-    if (time_.outputTime())
+    if (time_.writeTime())
     {
         label oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;

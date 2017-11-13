@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,7 @@ const Foam::word Foam::functionObjects::fieldAverageItem::EXT_MEAN
     "Mean"
 );
 
+
 const Foam::word Foam::functionObjects::fieldAverageItem::EXT_PRIME2MEAN
 (
     "Prime2Mean"
@@ -49,19 +50,38 @@ Foam::functionObjects::fieldAverageItem::baseTypeNames_
 };
 
 
+const Foam::Enum
+<
+    Foam::functionObjects::fieldAverageItem::windowType
+>
+Foam::functionObjects::fieldAverageItem::windowTypeNames_
+{
+    { windowType::NONE, "none" },
+    { windowType::APPROXIMATE, "approximate" },
+    { windowType::EXACT, "exact" },
+};
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::fieldAverageItem::fieldAverageItem()
 :
     active_(false),
     fieldName_("unknown"),
-    mean_(0),
+    mean_(false),
     meanFieldName_("unknown"),
-    prime2Mean_(0),
+    prime2Mean_(false),
     prime2MeanFieldName_("unknown"),
-    base_(ITER),
-    window_(-1.0),
-    windowName_("")
+    base_(baseType::ITER),
+    totalIter_(0),
+    totalTime_(-1),
+    window_(-1),
+    windowName_(""),
+    windowType_(windowType::NONE),
+
+    windowTimes_(),
+    windowFieldNames_(),
+    allowRestart_(true)
 {}
 
 
@@ -77,8 +97,15 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem
     prime2Mean_(faItem.prime2Mean_),
     prime2MeanFieldName_(faItem.prime2MeanFieldName_),
     base_(faItem.base_),
+    totalIter_(faItem.totalIter_),
+    totalTime_(faItem.totalTime_),
     window_(faItem.window_),
-    windowName_(faItem.windowName_)
+    windowName_(faItem.windowName_),
+    windowType_(faItem.windowType_),
+
+    windowTimes_(faItem.windowTimes_),
+    windowFieldNames_(faItem.windowFieldNames_),
+    allowRestart_(faItem.allowRestart_)
 {}
 
 
@@ -86,6 +113,112 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem
 
 Foam::functionObjects::fieldAverageItem::~fieldAverageItem()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::functionObjects::fieldAverageItem::addToWindow
+(
+    const word& fieldName,
+    const scalar deltaT
+)
+{
+    windowTimes_.push(deltaT);
+    windowFieldNames_.push(fieldName);
+}
+
+
+void Foam::functionObjects::fieldAverageItem::evolve(const objectRegistry& obr)
+{
+    totalIter_++;
+    totalTime_ += obr.time().deltaTValue();
+    forAllIters(windowTimes_, timeIter)
+    {
+        timeIter() += obr.time().deltaTValue();
+    }
+
+    // Remove any fields that have passed out of the window
+    bool removeItem = true;
+
+    while (removeItem && windowTimes_.size())
+    {
+        removeItem = !(inWindow(windowTimes_.first()));
+
+        if (removeItem)
+        {
+            windowTimes_.pop();
+            const word fieldName = windowFieldNames_.pop();
+
+            //Info<< "evolve: removing field: " << fieldName << endl;
+            obr.checkOut(*obr[fieldName]);
+        }
+    }
+}
+
+
+void Foam::functionObjects::fieldAverageItem::clear
+(
+    const objectRegistry& obr,
+    bool fullClean
+)
+{
+    if (mean_ && obr.found(meanFieldName_))
+    {
+        obr.checkOut(*obr[meanFieldName_]);
+    }
+
+    if (prime2Mean_ && obr.found(prime2MeanFieldName_))
+    {
+        obr.checkOut(*obr[prime2MeanFieldName_]);
+    }
+
+    for (const word& fieldName : windowFieldNames_)
+    {
+        if (obr.found(fieldName))
+        {
+            obr.checkOut(*obr[fieldName]);
+        }
+    }
+
+    if (totalTime_ < 0 || fullClean)
+    {
+        totalIter_ = 0;
+        totalTime_ = 0;
+        windowTimes_.clear();
+        windowFieldNames_.clear();
+    }
+}
+
+
+bool Foam::functionObjects::fieldAverageItem::readState(const dictionary& dict)
+{
+    dict.lookup("totalIter") >> totalIter_;
+    dict.lookup("totalTime") >> totalTime_;
+
+    if (window_ > 0)
+    {
+        dict.lookup("windowTimes") >> windowTimes_;
+        dict.lookup("windowFieldNames") >> windowFieldNames_;
+    }
+
+    return true;
+}
+
+
+void Foam::functionObjects::fieldAverageItem::writeState
+(
+    dictionary& dict
+) const
+{
+    dict.add("totalIter", totalIter_);
+    dict.add("totalTime", totalTime_);
+
+    if (window_ > 0)
+    {
+        dict.add("windowTimes", windowTimes_);
+        dict.add("windowFieldNames", windowFieldNames_);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -111,8 +244,14 @@ void Foam::functionObjects::fieldAverageItem::operator=
     prime2Mean_ = rhs.prime2Mean_;
     prime2MeanFieldName_ = rhs.prime2MeanFieldName_;
     base_ = rhs.base_;
+    totalIter_ = rhs.totalIter_;
+    totalTime_ = rhs.totalTime_;
     window_ = rhs.window_;
     windowName_ = rhs.windowName_;
+    windowType_ = rhs.windowType_;
+    windowTimes_ = rhs.windowTimes_;
+    windowFieldNames_ = rhs.windowFieldNames_;
+    allowRestart_ = rhs.allowRestart_;
 }
 
 
