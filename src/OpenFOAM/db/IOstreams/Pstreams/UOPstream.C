@@ -193,7 +193,8 @@ bool Foam::UOPstream::write(const token& tok)
     {
         case token::tokenType::FLAG :
         {
-            // silently consume the flag
+            writeToBuffer(char(token::tokenType::FLAG));
+            writeToBuffer(char(tok.flagToken()));
 
             return true;
         }
