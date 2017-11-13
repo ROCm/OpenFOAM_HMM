@@ -169,6 +169,9 @@ public:
             //- Return true if the UPtrList is empty (ie, size() is zero)
             inline bool empty() const;
 
+            //- Swap content with another UPtrList
+            inline void swap(UPtrList<T>& lst);
+
             //- Return reference to the first element of the list
             inline T& first();
 
