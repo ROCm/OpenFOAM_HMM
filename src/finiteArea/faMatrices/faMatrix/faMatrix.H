@@ -207,6 +207,9 @@ public:
             Istream&
         );
 
+        //- Clone
+        tmp<faMatrix<Type>> clone() const;
+
 
     //- Destructor
     virtual ~faMatrix();

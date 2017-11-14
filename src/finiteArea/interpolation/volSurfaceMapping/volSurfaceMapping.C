@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<template<class> class PatchField, class Type>
+template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::volSurfaceMapping::mapToSurface
 (
     const typename GeometricField<Type, fvPatchField, volMesh>::Boundary& df

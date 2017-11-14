@@ -551,7 +551,7 @@ void faMeshDecomposition::decomposeMesh()
 
             const label patchStart = patches[patchI].start();
 
-//             if (typeid(patches[patchI]) != typeid(cyclicFaPatch))
+//             if (!isA<cyclicFaPatch>(patches[patchI]))
             if (true)
             {
                 // Normal patch. Add edges to processor where the face

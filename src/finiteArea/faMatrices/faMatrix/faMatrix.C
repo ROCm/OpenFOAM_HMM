@@ -302,6 +302,19 @@ Foam::faMatrix<Type>::faMatrix
 
 
 template<class Type>
+Foam::tmp<Foam::faMatrix<Type>> Foam::faMatrix<Type>::clone() const
+{
+    return tmp<faMatrix<Type>>
+    (
+        new faMatrix<Type>(*this)
+    );
+}
+
+
+// * * * * * * * * * * * * * * * Destructor * * * * * * * * * * * * * * * * * //
+
+
+template<class Type>
 Foam::faMatrix<Type>::~faMatrix()
 {
     DebugInFunction

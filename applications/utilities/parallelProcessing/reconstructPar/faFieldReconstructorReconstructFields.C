@@ -253,7 +253,7 @@ Foam::faFieldReconstructor::reconstructFaAreaField
         // add empty patches
         if
         (
-            typeid(mesh_.boundary()[patchI]) == typeid(emptyFaPatch)
+            isA<emptyFaPatch>(mesh_.boundary()[patchI])
          && !patchFields(patchI)
         )
         {
@@ -533,7 +533,7 @@ Foam::faFieldReconstructor::reconstructFaEdgeField
         // add empty patches
         if
         (
-            typeid(mesh_.boundary()[patchI]) == typeid(emptyFaPatch)
+            isA<emptyFaPatch>(mesh_.boundary()[patchI])
          && !patchFields(patchI)
         )
         {

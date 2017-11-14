@@ -90,7 +90,7 @@ public:
     // Member Functions
 
         //- Map droplet cloud sources to surface
-        template<template<class> class PatchField, class Type>
+        template<class Type>
         tmp<Field<Type>> mapToSurface
         (
             const typename

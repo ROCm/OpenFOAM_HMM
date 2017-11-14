@@ -80,7 +80,10 @@ Foam::solverPerformance Foam::faMatrix<Foam::scalar>::solve
         solverControls
     )->solve(psi.ref(), totalSource);
 
-    solverPerf.print(Info);
+    if (solverPerformance::debug)
+    {
+        solverPerf.print(Info);
+    }
 
     diag() = saveDiag;
 
