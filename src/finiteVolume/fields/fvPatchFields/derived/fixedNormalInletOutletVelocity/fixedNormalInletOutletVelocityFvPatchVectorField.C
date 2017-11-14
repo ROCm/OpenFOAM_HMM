@@ -181,13 +181,13 @@ void Foam::fixedNormalInletOutletVelocityFvPatchVectorField::write
 const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    os.writeKeyword("fixTangentialInflow")
-        << fixTangentialInflow_ << token::END_STATEMENT << nl;
-    os.writeKeyword("normalVelocity")
-        << nl << indent << token::BEGIN_BLOCK << nl << incrIndent;
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntry("fixTangentialInflow", fixTangentialInflow_);
+
+    os.beginBlock("normalVelocity");
     normalVelocity_->write(os);
-    os << decrIndent << indent << token::END_BLOCK << endl;
+    os.endBlock();
+
     writeEntry("value", os);
 }
 

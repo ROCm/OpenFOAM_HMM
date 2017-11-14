@@ -270,8 +270,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
         // Make sure to construct the patchfield with up-to-date value
 
         OStringStream os;
-        os.writeKeyword("type") << name_ << token::END_STATEMENT
-            << nl;
+        os.writeEntry("type", name_);
         static_cast<const Field<Type>&>(*this).writeEntry("value", os);
         IStringStream is(os.str());
         dictionary dict(is);
@@ -333,8 +332,7 @@ template<class Type>
 void Foam::codedFixedValuePointPatchField<Type>::write(Ostream& os) const
 {
     fixedValuePointPatchField<Type>::write(os);
-    os.writeKeyword("name") << name_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("name", name_);
 
     codedBase::writeCodeDict(os, dict_);
 }

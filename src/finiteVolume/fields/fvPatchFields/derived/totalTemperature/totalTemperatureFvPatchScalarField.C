@@ -177,10 +177,10 @@ void Foam::totalTemperatureFvPatchScalarField::updateCoeffs()
 void Foam::totalTemperatureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
+    os.writeEntry("gamma", gamma_);
     T0_.writeEntry("T0", os);
     writeEntry("value", os);
 }

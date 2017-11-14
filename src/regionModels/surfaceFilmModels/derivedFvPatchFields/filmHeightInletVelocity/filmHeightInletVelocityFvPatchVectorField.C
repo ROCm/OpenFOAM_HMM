@@ -132,9 +132,9 @@ void Foam::filmHeightInletVelocityFvPatchVectorField::updateCoeffs()
 void Foam::filmHeightInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "deltaf", "deltaf", deltafName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("deltaf", "deltaf", deltafName_);
     writeEntry("value", os);
 }
 

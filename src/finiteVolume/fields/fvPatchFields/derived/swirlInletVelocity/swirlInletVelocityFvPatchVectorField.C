@@ -145,8 +145,8 @@ void Foam::swirlInletVelocityFvPatchVectorField::updateCoeffs()
 void Foam::swirlInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
-    os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
+    os.writeEntry("origin", origin_);
+    os.writeEntry("axis", axis_);
     axialVelocity_->writeData(os);
     radialVelocity_->writeData(os);
     tangentialVelocity_->writeData(os);

@@ -260,8 +260,7 @@ void turbulentTemperatureCoupledBaffleMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    os.writeKeyword("Tnbr")<< TnbrName_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("Tnbr", TnbrName_);
     thicknessLayers_.writeEntry("thicknessLayers", os);
     kappaLayers_.writeEntry("kappaLayers", os);
 

@@ -133,7 +133,7 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField::write
 {
     fvPatchField<vector>::write(os);
     flowRate_->writeData(os);
-    os.writeKeyword("alpha") << alphaName_ << token::END_STATEMENT << nl;
+    os.writeEntry("alpha", alphaName_);
     writeEntry("value", os);
 }
 

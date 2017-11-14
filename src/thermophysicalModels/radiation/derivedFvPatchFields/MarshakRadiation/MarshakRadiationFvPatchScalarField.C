@@ -187,7 +187,7 @@ void Foam::radiation::MarshakRadiationFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "T", "T", TName_);
+    os.writeEntryIfDifferent<word>("T", "T", TName_);
 }
 
 

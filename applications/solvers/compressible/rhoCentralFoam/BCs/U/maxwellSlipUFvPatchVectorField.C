@@ -200,18 +200,16 @@ void Foam::maxwellSlipUFvPatchVectorField::updateCoeffs()
 void Foam::maxwellSlipUFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "T", "T", TName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
-    writeEntryIfDifferent<word>(os, "mu", "thermo:mu", muName_);
-    writeEntryIfDifferent<word>(os, "tauMC", "tauMC", tauMCName_);
+    os.writeEntryIfDifferent<word>("T", "T", TName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
+    os.writeEntryIfDifferent<word>("mu", "thermo:mu", muName_);
+    os.writeEntryIfDifferent<word>("tauMC", "tauMC", tauMCName_);
 
-    os.writeKeyword("accommodationCoeff")
-        << accommodationCoeff_ << token::END_STATEMENT << nl;
+    os.writeEntry("accommodationCoeff", accommodationCoeff_);
     Uwall_.writeEntry("Uwall", os);
-    os.writeKeyword("thermalCreep")
-        << thermalCreep_ << token::END_STATEMENT << nl;
-    os.writeKeyword("curvature") << curvature_ << token::END_STATEMENT << nl;
+    os.writeEntry("thermalCreep", thermalCreep_);
+    os.writeEntry("curvature", curvature_);
 
     refValue().writeEntry("refValue", os);
     valueFraction().writeEntry("valueFraction", os);

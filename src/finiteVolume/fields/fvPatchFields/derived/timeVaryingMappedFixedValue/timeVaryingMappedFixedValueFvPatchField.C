@@ -568,23 +568,20 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::write
 {
     fvPatchField<Type>::write(os);
 
-    this->writeEntryIfDifferent(os, "setAverage", Switch(false), setAverage_);
+    os.writeEntryIfDifferent("setAverage", Switch(false), setAverage_);
+    os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
 
-    this->writeEntryIfDifferent(os, "perturb", scalar(1e-5), perturb_);
-
-    this->writeEntryIfDifferent
+    os.writeEntryIfDifferent
     (
-        os,
         "fieldTable",
         this->internalField().name(),
         fieldTableName_
     );
 
-    this->writeEntryIfDifferent
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "mapMethod",
-        word("planarInterpolation"),
+        "planarInterpolation",
         mapMethod_
     );
 

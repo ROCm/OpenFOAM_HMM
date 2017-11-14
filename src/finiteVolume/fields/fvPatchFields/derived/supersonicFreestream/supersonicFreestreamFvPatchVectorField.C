@@ -297,13 +297,13 @@ void Foam::supersonicFreestreamFvPatchVectorField::updateCoeffs()
 void Foam::supersonicFreestreamFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "T", "T", TName_);
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
-    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
-    os.writeKeyword("UInf") << UInf_ << token::END_STATEMENT << nl;
-    os.writeKeyword("pInf") << pInf_ << token::END_STATEMENT << nl;
-    os.writeKeyword("TInf") << TInf_ << token::END_STATEMENT << nl;
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("T", "T", TName_);
+    os.writeEntryIfDifferent<word>("p", "p", pName_);
+    os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
+    os.writeEntry("UInf", UInf_);
+    os.writeEntry("pInf", pInf_);
+    os.writeEntry("TInf", TInf_);
+    os.writeEntry("gamma", gamma_);
     writeEntry("value", os);
 }
 

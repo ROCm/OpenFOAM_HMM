@@ -145,12 +145,9 @@ void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularSpring::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("referenceOrientation")
-        << refQ_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("stiffness") << stiffness_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("damping") << damping_ << token::END_STATEMENT << nl;
+    os.writeEntry("referenceOrientation", refQ_);
+    os.writeEntry("stiffness", stiffness_);
+    os.writeEntry("damping", damping_);
 }
 
 

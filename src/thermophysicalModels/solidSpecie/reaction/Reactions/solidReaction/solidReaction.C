@@ -112,8 +112,7 @@ template<class ReactionThermo>
 void Foam::solidReaction<ReactionThermo>::write(Ostream& os) const
 {
     OStringStream reaction;
-    os.writeKeyword("reaction") << solidReactionStr(reaction)
-        << token::END_STATEMENT << nl;
+    os.writeEntry("reaction", solidReactionStr(reaction));
 }
 
 

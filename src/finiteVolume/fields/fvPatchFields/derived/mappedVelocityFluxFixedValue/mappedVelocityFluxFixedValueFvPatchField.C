@@ -233,7 +233,7 @@ void Foam::mappedVelocityFluxFixedValueFvPatchField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->writeEntry("value", os);
 }
 

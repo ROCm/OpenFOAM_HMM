@@ -121,12 +121,9 @@ void Foam::waveDisplacementPointPatchVectorField::updateCoeffs()
 void Foam::waveDisplacementPointPatchVectorField::write(Ostream& os) const
 {
     pointPatchField<vector>::write(os);
-    os.writeKeyword("amplitude")
-        << amplitude_ << token::END_STATEMENT << nl;
-    os.writeKeyword("omega")
-        << omega_ << token::END_STATEMENT << nl;
-    os.writeKeyword("waveNumber")
-        << waveNumber_ << token::END_STATEMENT << nl;
+    os.writeEntry("amplitude", amplitude_);
+    os.writeEntry("omega", omega_);
+    os.writeEntry("waveNumber", waveNumber_);
     writeEntry("value", os);
 }
 

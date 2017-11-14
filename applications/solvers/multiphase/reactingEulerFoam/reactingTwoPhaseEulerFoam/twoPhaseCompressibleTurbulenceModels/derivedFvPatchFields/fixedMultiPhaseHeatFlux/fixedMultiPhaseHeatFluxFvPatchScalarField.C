@@ -183,7 +183,7 @@ void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::updateCoeffs()
 void Foam::fixedMultiPhaseHeatFluxFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("relax") << relax_ << token::END_STATEMENT << nl;
+    os.writeEntry("relax", relax_);
     q_.writeEntry("q", os);
     writeEntry("value", os);
 }

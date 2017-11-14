@@ -248,8 +248,8 @@ void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::write
 ) const
 {
     mixedFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "T", "T", TName_);
-    os.writeKeyword("solarLoad") << solarLoad_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("T", "T", TName_);
+    os.writeEntry("solarLoad", solarLoad_);
 }
 
 

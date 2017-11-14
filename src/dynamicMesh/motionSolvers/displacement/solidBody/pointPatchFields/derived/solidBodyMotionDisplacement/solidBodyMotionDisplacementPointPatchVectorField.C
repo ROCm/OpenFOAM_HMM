@@ -174,8 +174,8 @@ write(Ostream& os) const
     // Note: write value
     fixedValuePointPatchVectorField::write(os);
 
-    os.writeKeyword(solidBodyMotionFunction::typeName) << SBMFPtr_->type()
-        << token::END_STATEMENT << nl;
+    os.writeEntry(solidBodyMotionFunction::typeName, SBMFPtr_->type());
+
     os  << indent << word(SBMFPtr_->type() + "Coeffs");
     SBMFPtr_->writeData(os);
 }

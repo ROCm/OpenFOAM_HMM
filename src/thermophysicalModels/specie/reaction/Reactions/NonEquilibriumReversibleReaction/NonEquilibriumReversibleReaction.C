@@ -196,19 +196,13 @@ void Foam::NonEquilibriumReversibleReaction
 {
     ReactionType<ReactionThermo>::write(os);
 
-    os  << indent << "forward" << nl;
-    os  << indent << token::BEGIN_BLOCK << nl;
-    os  << incrIndent;
+    os.beginBlock("forward");
     fk_.write(os);
-    os  << decrIndent;
-    os  << indent << token::END_BLOCK << nl;
+    os.endBlock();
 
-    os  << indent << "reverse" << nl;
-    os  << indent << token::BEGIN_BLOCK << nl;
-    os  << incrIndent;
+    os.beginBlock("reverse");
     rk_.write(os);
-    os  << decrIndent;
-    os  << indent << token::END_BLOCK << nl;
+    os.endBlock();
 }
 
 

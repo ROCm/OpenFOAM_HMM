@@ -191,9 +191,8 @@ void Foam::inclinedFilmNusseltInletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_

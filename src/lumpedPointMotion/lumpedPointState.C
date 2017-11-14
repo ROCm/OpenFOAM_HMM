@@ -254,7 +254,7 @@ void Foam::lumpedPointState::writeDict(Ostream& os) const
     os.writeEntry("angles", angles_);
     if (degrees_)
     {
-        os.writeKeyword("degrees") << "true;" << nl;
+        os.writeEntry("degrees", word("true"));
     }
 }
 

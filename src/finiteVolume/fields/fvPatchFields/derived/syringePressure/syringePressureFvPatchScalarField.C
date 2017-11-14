@@ -233,17 +233,17 @@ void Foam::syringePressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
 
-    os.writeKeyword("Ap") << Ap_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Sp") << Sp_ << token::END_STATEMENT << nl;
-    os.writeKeyword("VsI") << VsI_ << token::END_STATEMENT << nl;
-    os.writeKeyword("tas") << tas_ << token::END_STATEMENT << nl;
-    os.writeKeyword("tae") << tae_ << token::END_STATEMENT << nl;
-    os.writeKeyword("tds") << tds_ << token::END_STATEMENT << nl;
-    os.writeKeyword("tde") << tde_ << token::END_STATEMENT << nl;
-    os.writeKeyword("psI") << psI_ << token::END_STATEMENT << nl;
-    os.writeKeyword("psi") << psi_ << token::END_STATEMENT << nl;
-    os.writeKeyword("ams") << ams_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    os.writeEntry("Ap", Ap_);
+    os.writeEntry("Sp", Sp_);
+    os.writeEntry("VsI", VsI_);
+    os.writeEntry("tas", tas_);
+    os.writeEntry("tae", tae_);
+    os.writeEntry("tds", tds_);
+    os.writeEntry("tde", tde_);
+    os.writeEntry("psI", psI_);
+    os.writeEntry("psi", psi_);
+    os.writeEntry("ams", ams_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
 
     writeEntry("value", os);
 }

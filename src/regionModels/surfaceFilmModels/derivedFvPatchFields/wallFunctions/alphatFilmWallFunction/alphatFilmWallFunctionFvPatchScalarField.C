@@ -237,18 +237,17 @@ void alphatFilmWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_
     );
-    os.writeKeyword("B") << B_ << token::END_STATEMENT << nl;
-    os.writeKeyword("yPlusCrit") << yPlusCrit_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
+    os.writeEntry("B", B_);
+    os.writeEntry("yPlusCrit", yPlusCrit_);
+    os.writeEntry("Cmu", Cmu_);
+    os.writeEntry("kappa", kappa_);
+    os.writeEntry("Prt", Prt_);
     writeEntry("value", os);
 }
 

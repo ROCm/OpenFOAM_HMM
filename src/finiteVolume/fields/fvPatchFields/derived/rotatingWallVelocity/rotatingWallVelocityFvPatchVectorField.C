@@ -145,8 +145,8 @@ void Foam::rotatingWallVelocityFvPatchVectorField::updateCoeffs()
 void Foam::rotatingWallVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
-    os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
+    os.writeEntry("origin", origin_);
+    os.writeEntry("axis", axis_);
     omega_->writeData(os);
     writeEntry("value", os);
 }

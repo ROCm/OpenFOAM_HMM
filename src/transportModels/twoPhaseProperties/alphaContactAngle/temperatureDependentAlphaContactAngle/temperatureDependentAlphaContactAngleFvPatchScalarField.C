@@ -121,7 +121,7 @@ void Foam::temperatureDependentAlphaContactAngleFvPatchScalarField::write
 ) const
 {
     alphaContactAngleFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "T", "T", TName_);
+    os.writeEntryIfDifferent<word>("T", "T", TName_);
     theta0_->writeData(os);
     writeEntry("value", os);
 }

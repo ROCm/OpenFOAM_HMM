@@ -374,10 +374,10 @@ void Foam::polyPatch::clearAddressing()
 
 void Foam::polyPatch::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
     patchIdentifier::write(os);
-    os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
-    os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
+    os.writeEntry("nFaces", size());
+    os.writeEntry("startFace", start());
 }
 
 
