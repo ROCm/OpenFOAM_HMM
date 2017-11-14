@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,11 +35,6 @@ SourceFiles
 #ifndef solidThermo_H
 #define solidThermo_H
 
-#include "volFields.H"
-#include "runTimeSelectionTables.H"
-#include "fvMesh.H"
-#include "IOdictionary.H"
-#include "autoPtr.H"
 #include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
