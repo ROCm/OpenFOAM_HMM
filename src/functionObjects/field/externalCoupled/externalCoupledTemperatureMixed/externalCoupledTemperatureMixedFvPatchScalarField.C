@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -196,7 +196,7 @@ void Foam::externalCoupledTemperatureMixedFvPatchScalarField::writeData
     const scalarField Tc(patchInternalField());
 
     // Heat transfer coefficient [W/m2/K]
-    const scalarField htc(qDot/(Tp - Tc + ROOTVSMALL));
+    const scalarField htc(qDot/(Tp - Tc + 1e-3));
 
     const Field<scalar>& magSf(this->patch().magSf());
 
