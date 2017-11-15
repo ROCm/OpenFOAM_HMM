@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,10 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     uniformJumpFvPatchField<Type>(p, iF),
     phiName_("phi"),
     rhoName_("rho"),
-    uniformJump_(false)
+    uniformJump_(false),
+    nonDimensional_(false),
+    rpm_(0.0),
+    dm_(0.0)
 {}
 
 
@@ -64,8 +67,17 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     uniformJumpFvPatchField<Type>(p, iF, dict),
     phiName_(dict.lookupOrDefault<word>("phi", "phi")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false))
-{}
+    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false)),
+    nonDimensional_(dict.lookupOrDefault<Switch>("nonDimensional", false)),
+    rpm_(dict.lookupOrDefault<scalar>("rpm", 0.0)),
+    dm_(dict.lookupOrDefault<scalar>("dm", 0.0))
+{
+    if (nonDimensional_)
+    {
+        dict.lookup("rpm") >> rpm_;
+        dict.lookup("dm") >> dm_;
+    }
+}
 
 
 template<class Type>
@@ -80,7 +92,10 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     uniformJumpFvPatchField<Type>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    uniformJump_(ptf.uniformJump_)
+    uniformJump_(ptf.uniformJump_),
+    nonDimensional_(ptf.nonDimensional_),
+    rpm_(ptf.rpm_),
+    dm_(ptf.dm_)
 {}
 
 
@@ -93,7 +108,10 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     uniformJumpFvPatchField<Type>(ptf),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    uniformJump_(ptf.uniformJump_)
+    uniformJump_(ptf.uniformJump_),
+    nonDimensional_(ptf.nonDimensional_),
+    rpm_(ptf.rpm_),
+    dm_(ptf.dm_)
 {}
 
 
@@ -107,7 +125,10 @@ Foam::fanFvPatchField<Type>::fanFvPatchField
     uniformJumpFvPatchField<Type>(ptf, iF),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    uniformJump_(ptf.uniformJump_)
+    uniformJump_(ptf.uniformJump_),
+    nonDimensional_(ptf.nonDimensional_),
+    rpm_(ptf.rpm_),
+    dm_(ptf.dm_)
 {}
 
 
@@ -138,6 +159,12 @@ void Foam::fanFvPatchField<Type>::write(Ostream& os) const
     (
         os, "uniformJump", false, uniformJump_
     );
+    this->template writeEntryIfDifferent<bool>
+    (
+        os, "nonDimensional", false, nonDimensional_
+    );
+    this->template writeEntryIfDifferent<scalar>(os, "rpm", 0, rpm_);
+    this->template writeEntryIfDifferent<scalar>(os, "dm", 0, dm_);
 }
 
 
