@@ -68,9 +68,11 @@ namespace Foam
         return Hash<face>::operator()(t, 0);
     }
 }
+
 const string SEPARATOR("    -1");
 
-bool isSeparator(const string& line)
+
+bool isSeparator(const std::string& line)
 {
     return line.substr(0, 6) == SEPARATOR;
 }
@@ -100,7 +102,7 @@ label readTag(IFstream& is)
 
     } while (tag == SEPARATOR);
 
-    return readLabel(IStringStream(tag)());
+    return readLabel(tag);
 }
 
 
@@ -144,14 +146,14 @@ void skipSection(IFstream& is)
 }
 
 
-scalar readUnvScalar(const string& unvString)
+scalar readUnvScalar(const std::string& unvString)
 {
     string s(unvString);
 
     s.replaceAll("d", "E");
     s.replaceAll("D", "E");
 
-    return readScalar(IStringStream(s)());
+    return readScalar(s);
 }
 
 
@@ -170,13 +172,13 @@ void readUnits
     string line;
     is.getLine(line);
 
-    label l = readLabel(IStringStream(line.substr(0, 10))());
+    label l = readLabel(line.substr(0, 10));
     Info<< "l:" << l << endl;
 
     string units(line.substr(10, 20));
     Info<< "units:" << units << endl;
 
-    label unitType = readLabel(IStringStream(line.substr(30, 10))());
+    label unitType = readLabel(line.substr(30, 10));
     Info<< "unitType:" << unitType << endl;
 
     // Read lengthscales
@@ -215,7 +217,7 @@ void readPoints
         string line;
         is.getLine(line);
 
-        label pointi = readLabel(IStringStream(line.substr(0, 10))());
+        label pointi = readLabel(line.substr(0, 10));
 
         if (pointi == -1)
         {
@@ -589,7 +591,8 @@ void readDOFS
     is.getLine(line);
     {
         IStringStream lineStr(line);
-        patchNames.append(lineStr);
+        word pName(lineStr);
+        patchNames.append(pName);
     }
 
     Info<< "For DOF set " << group
@@ -805,7 +808,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        if (findIndex(foamVerts, -1) != -1)
+        if (foamVerts.found(-1))
         {
             FatalErrorInFunction
                 << "Cell " << celli
@@ -824,7 +827,7 @@ int main(int argc, char *argv[])
     {
         labelList foamVerts(renumber(unvToFoam, boundaryFaces[bFacei]));
 
-        if (findIndex(foamVerts, -1) != -1)
+        if (foamVerts.found(-1))
         {
             FatalErrorInFunction
                 << "Boundary face " << bFacei

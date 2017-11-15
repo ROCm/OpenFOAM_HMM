@@ -146,7 +146,7 @@ class addPatchCellLayer
                 {
                     forAll(y, yi)
                     {
-                        if (findIndex(x, y[yi]) == -1)
+                        if (!x.found(y[yi]))
                         {
                             label sz = x.size();
                             x.setSize(sz+1);

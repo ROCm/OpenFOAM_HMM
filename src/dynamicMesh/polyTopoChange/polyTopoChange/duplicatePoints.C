@@ -135,7 +135,7 @@ void Foam::duplicatePoints::setRefinement
                 const labelList& dupPoints = duplicates_[iter()];
 
                 // Look up index of my region in the regions for this point
-                label index = findIndex(regions, fRegion[fp]);
+                label index = regions.find(fRegion[fp]);
                 // Get the corresponding added point
                 newFace[fp] = dupPoints[index];
             }

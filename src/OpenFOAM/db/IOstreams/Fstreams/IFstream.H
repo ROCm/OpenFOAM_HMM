@@ -130,7 +130,7 @@ public:
         virtual const std::istream& stdStream() const;
 
         //- Rewind the stream so that it may be read again
-        virtual Istream& rewind();
+        virtual void rewind();
 
 
       // Print

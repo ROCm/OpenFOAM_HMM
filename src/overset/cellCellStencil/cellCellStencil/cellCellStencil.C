@@ -256,7 +256,7 @@ void Foam::cellCellStencil::globalCellCells
             }
 
             SubList<label> current(stencil, compacti);
-            if (findIndex(current, nbrCelli) == -1)
+            if (!current.found(nbrCelli))
             {
                 stencil[compacti] = nbrCelli;
                 stencilPoints[compacti++] = nbrCc;

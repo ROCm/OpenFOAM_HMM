@@ -195,6 +195,9 @@ public:
         //  Prints stack before exiting.
         void abort();
 
+        //- Print error message
+        void write(Ostream& os, const bool includeTitle = true) const;
+
 
     // Ostream operator
 

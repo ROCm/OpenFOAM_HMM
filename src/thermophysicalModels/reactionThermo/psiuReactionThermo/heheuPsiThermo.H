@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef heheuReactionThermo_H
-#define heheuReactionThermo_H
+#ifndef heheuPsiThermo_H
+#define heheuPsiThermo_H
 
 #include "heThermo.H"
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     Info<< "Test expressions:" << rawList << endl;
     IOobject::writeDivider(Info) << endl;
 
-    List<string> groups;
+    List<std::string> groups;
 
     // Report matches:
     forAll(rawList, elemI)
@@ -74,7 +74,23 @@ int main(int argc, char *argv[])
                 Info<< "false";
             }
         }
+
         Info<< endl;
+
+        if (false)
+        {
+            regExp re2(std::move(re));
+            Info<<"move construct: " << re.exists() << "/" << re2.exists()
+                << endl;
+
+            re = std::move(re2);
+            Info<<"move assign: " << re.exists() << "/" << re2.exists()
+                << endl;
+
+            re.swap(re2);
+            Info<<"swap: " << re.exists() << "/" << re2.exists()
+                << endl;
+        }
     }
 
     Info<< nl << "test regExp(const char*) ..." << endl;

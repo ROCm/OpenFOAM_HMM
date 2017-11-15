@@ -314,11 +314,10 @@ tmp<Field<Type>> mappedPatchFieldBase<Type>::mappedField() const
 template<class Type>
 void mappedPatchFieldBase<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("field") << fieldName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("setAverage") << setAverage_ << token::END_STATEMENT << nl;
-    os.writeKeyword("average") << average_ << token::END_STATEMENT << nl;
-    os.writeKeyword("interpolationScheme") << interpolationScheme_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("field", fieldName_);
+    os.writeEntry("setAverage", setAverage_);
+    os.writeEntry("average", average_);
+    os.writeEntry("interpolationScheme", interpolationScheme_);
 }
 
 

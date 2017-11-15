@@ -31,8 +31,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef none_H
-#define none_H
+#ifndef chemistryReductionMethods_none_H
+#define chemistryReductionMethods_none_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

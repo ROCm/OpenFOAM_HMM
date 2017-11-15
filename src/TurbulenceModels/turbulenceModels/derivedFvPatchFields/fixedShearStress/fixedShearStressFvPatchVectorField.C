@@ -126,7 +126,7 @@ void Foam::fixedShearStressFvPatchVectorField::updateCoeffs()
 void Foam::fixedShearStressFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("tau") << tau0_ << token::END_STATEMENT << nl;
+    os.writeEntry("tau", tau0_);
     writeEntry("value", os);
 }
 

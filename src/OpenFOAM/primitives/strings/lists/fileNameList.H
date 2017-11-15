@@ -33,6 +33,12 @@ Typedef
 Description
     A List of fileNames.
 
+Typedef
+    Foam::fileNameSubList
+
+Description
+    A SubList of fileNames.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef fileNameList_H
@@ -40,14 +46,15 @@ Description
 
 #include "fileName.H"
 #include "List.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef UList<fileName> fileNameUList;
-
     typedef List<fileName> fileNameList;
+    typedef SubList<fileName> fileNameSubList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

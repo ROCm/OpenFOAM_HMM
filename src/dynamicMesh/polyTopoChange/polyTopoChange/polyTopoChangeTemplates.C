@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,20 +30,20 @@ License
 template<class T>
 void Foam::polyTopoChange::reorder
 (
-    const labelList& oldToNew,
+    const labelUList& oldToNew,
     DynamicList<T>& lst
 )
 {
     // Create copy
     DynamicList<T> oldLst(lst);
 
-    forAll(oldToNew, elemI)
+    forAll(oldToNew, i)
     {
-        label newElemI = oldToNew[elemI];
+        const label newIdx = oldToNew[i];
 
-        if (newElemI != -1)
+        if (newIdx >= 0)
         {
-            lst[newElemI] = oldLst[elemI];
+            lst[newIdx] = oldLst[i];
         }
     }
 }
@@ -52,20 +52,20 @@ void Foam::polyTopoChange::reorder
 template<class T>
 void Foam::polyTopoChange::reorder
 (
-    const labelList& oldToNew,
+    const labelUList& oldToNew,
     List<DynamicList<T>>& lst
 )
 {
     // Create copy
     List<DynamicList<T>> oldLst(lst);
 
-    forAll(oldToNew, elemI)
+    forAll(oldToNew, i)
     {
-        label newElemI = oldToNew[elemI];
+        const label newIdx = oldToNew[i];
 
-        if (newElemI != -1)
+        if (newIdx >= 0)
         {
-            lst[newElemI].transfer(oldLst[elemI]);
+            lst[newIdx].transfer(oldLst[i]);
         }
     }
 }
@@ -74,23 +74,23 @@ void Foam::polyTopoChange::reorder
 template<class T>
 void Foam::polyTopoChange::renumberKey
 (
-    const labelList& oldToNew,
-    Map<T>& elems
+    const labelUList& oldToNew,
+    Map<T>& map
 )
 {
-    Map<T> newElems(elems.size());
+    Map<T> newMap(map.capacity());
 
-    forAllConstIter(typename Map<T>, elems, iter)
+    forAllConstIters(map, iter)
     {
-        label newElem = oldToNew[iter.key()];
+        const label newKey = oldToNew[iter.key()];
 
-        if (newElem >= 0)
+        if (newKey >= 0)
         {
-            newElems.insert(newElem, iter());
+            newMap.insert(newKey, iter.object());
         }
     }
 
-    elems.transfer(newElems);
+    map.transfer(newMap);
 }
 
 

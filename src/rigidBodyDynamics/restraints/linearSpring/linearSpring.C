@@ -134,20 +134,11 @@ void Foam::RBD::restraints::linearSpring::write
 {
     restraint::write(os);
 
-    os.writeKeyword("anchor")
-        << anchor_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("refAttachmentPt")
-        << refAttachmentPt_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("stiffness")
-        << stiffness_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("damping")
-        << damping_ << token::END_STATEMENT << nl;
-
-    os.writeKeyword("restLength")
-        << restLength_ << token::END_STATEMENT << nl;
+    os.writeEntry("anchor", anchor_);
+    os.writeEntry("refAttachmentPt", refAttachmentPt_);
+    os.writeEntry("stiffness", stiffness_);
+    os.writeEntry("damping", damping_);
+    os.writeEntry("restLength", restLength_);
 }
 
 

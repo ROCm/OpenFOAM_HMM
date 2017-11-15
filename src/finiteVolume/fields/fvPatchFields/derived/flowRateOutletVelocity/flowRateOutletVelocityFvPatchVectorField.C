@@ -160,7 +160,7 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::updateValues
     Up -= nUp*n;
 
     // Remove any reverse flow
-    nUp = max(nUp, 0.0);
+    nUp = max(nUp, scalar(0.0));
 
     const scalar flowRate = flowRate_->value(t);
     const scalar estimatedFlowRate = gSum(rho*(this->patch().magSf()*nUp));
@@ -228,8 +228,8 @@ void Foam::flowRateOutletVelocityFvPatchVectorField::write(Ostream& os) const
     flowRate_->writeData(os);
     if (!volumetric_)
     {
-        writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-        writeEntryIfDifferent<scalar>(os, "rhoOutlet", -VGREAT, rhoOutlet_);
+        os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+        os.writeEntryIfDifferent<scalar>("rhoOutlet", -VGREAT, rhoOutlet_);
     }
     writeEntry("value", os);
 }

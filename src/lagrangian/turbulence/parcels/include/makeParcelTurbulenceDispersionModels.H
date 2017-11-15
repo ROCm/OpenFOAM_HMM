@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelTurbulenceDispersionModels_h
-#define makeParcelTurbulenceDispersionModels_h
+#ifndef makeParcelTurbulenceDispersionModels_H
+#define makeParcelTurbulenceDispersionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 inline Foam::IndirectListAddressing::IndirectListAddressing
 (
     const labelUList& addr

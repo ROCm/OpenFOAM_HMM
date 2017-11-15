@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,8 +39,127 @@ Description
 #include "POSIX.H"
 #include "Switch.H"
 #include "etcFiles.H"
+#include "Pair.H"
+#include "Tuple2.H"
+#include <fstream>
 
 using namespace Foam;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+unsigned testStrip
+(
+    const bool doClean,
+    std::initializer_list
+    <
+        Tuple2<bool, std::string>
+    > tests
+)
+{
+    Info<< nl << "Checking with clean=" << Switch(doClean) << nl << endl;
+
+    unsigned nFail = 0;
+
+    for (const Tuple2<bool, std::string>& test : tests)
+    {
+        const bool expected = test.first();
+        const std::string& input = test.second();
+
+        fileName output(fileName::validate(input, doClean));
+
+        // Check for real failure (invalid chars) vs.
+        // spurious failure (removed double slashes with 'doClean').
+
+        const bool same =
+        (
+            doClean
+          ? fileName::equals(input, output)
+          : (input == output)
+        );
+
+        if (same)
+        {
+            if (expected)
+            {
+                Info<< "(pass) validated " << input << " = " << output << nl;
+            }
+            else
+            {
+                ++nFail;
+                Info<< "(fail) unexpected success for " << input << nl;
+            }
+        }
+        else
+        {
+            if (expected)
+            {
+                ++nFail;
+                Info<< "(fail) unexpected";
+            }
+            else
+            {
+                Info<< "(pass) expected";
+            }
+
+            Info<< " failure for " << input << nl;
+        }
+    }
+
+    return nFail;
+}
+
+
+unsigned testEquals
+(
+    std::initializer_list
+    <
+        Tuple2<bool, Pair<std::string>>
+    > tests
+)
+{
+    Info<< nl << "Checking fileName::equals()" << nl << endl;
+
+    unsigned nFail = 0;
+
+    for (const Tuple2<bool, Pair<std::string>>& test : tests)
+    {
+        const bool expected = test.first();
+        const std::string& s1 = test.second().first();
+        const std::string& s2 = test.second().second();
+
+        const bool same = fileName::equals(s1, s2);
+
+        if (same)
+        {
+            if (expected)
+            {
+                Info<< "(pass) success";
+            }
+            else
+            {
+                ++nFail;
+                Info<< "(fail) unexpected success";
+            }
+        }
+        else
+        {
+            if (expected)
+            {
+                ++nFail;
+                Info<< "(fail) unexpected failure";
+            }
+            else
+            {
+                Info<< "(pass) expected failure";
+            }
+
+        }
+
+        Info<< " for " << s1 << " == " << s2 << nl;
+    }
+    return nFail;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -48,6 +167,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::addBoolOption("validate", "test fileName::validate");
     argList::addBoolOption("ext", "test handing of file extensions");
     argList::addBoolOption("construct", "test constructors");
     argList::addBoolOption("default", "reinstate default tests");
@@ -235,6 +355,69 @@ int main(int argc, char *argv[])
         Info<< nl;
     }
 
+
+    if (args.optionFound("validate"))
+    {
+        unsigned nFail = 0;
+        Info<< nl << "Test fileName::validate" << nl;
+
+        // Without clean
+        nFail += testEquals
+        (
+            {
+                { true,  { "abc", "abc/" } },
+                { true,  { "///abc/", "//abc///" } },
+                { false, { " ab //c/", "ab/c" } },
+            }
+        );
+
+        Info<< nl << "Test fileName::validate" << nl;
+
+        // Without clean
+        nFail += testStrip
+        (
+            false,
+            {
+                { true,  "abc/" },
+                { true,  "/", },
+                { true,  "//", },
+                { true,  "/abc/def", },
+                { true,  "/abc/def/", },
+                { false, "/abc  def" },
+                { true,  "/abc////def///", },
+                { false,  "/abc//// def///" },
+            }
+        );
+
+        // With clean
+        nFail += testStrip
+        (
+            true,
+            {
+                { true,  "abc/" },
+                { true,  "/" },
+                { true,  "//" },
+                { true,  "/abc/def" },
+                { true,  "/abc/def/" },
+                { false, "/abc  def" },
+                { true,  "/abc////def///" },
+                { false, "/abc//// def///" },
+            }
+        );
+
+        Info<< nl;
+        if (nFail)
+        {
+            Info<< "failed " << nFail;
+        }
+        else
+        {
+            Info<< "passed all";
+        }
+        Info<< " fileName::validate tests" << nl;
+    }
+
+
     if (!defaultTests)
     {
         return 0;
@@ -312,10 +495,32 @@ int main(int argc, char *argv[])
         Foam::rm(lnB);
         Foam::rmDir(dirB);
 
+        Info<< nl << "=========================" << nl
+            << "Test some copying and deletion" << endl;
+
 
         Info<< "Creating directory " << dirA << endl;
         Foam::mkDir(dirA);
 
+        Info<< "Populating with various files" << endl;
+        for
+        (
+            const std::string name
+          : { "file-1", "file-2", "bad name one", "bad name 2" }
+        )
+        {
+            // Full path, but without any stripping
+            const fileName file
+            (
+                (static_cast<const std::string&>(dirA) + "/" + name),
+                false
+            );
+
+            Info<<"    create: " << file << endl;
+
+            std::ofstream os(file);
+            os << "file=<" << file << ">" << nl;
+        }
 
         const int oldPosix = POSIX::debug;
         POSIX::debug = 1;
@@ -362,7 +567,7 @@ int main(int argc, char *argv[])
                     << " but is " << lnB.type(true) << exit(FatalError);
             }
 
-            // Delete
+            // Delete (link)
             Foam::rm(lnB);
         }
 
@@ -379,12 +584,13 @@ int main(int argc, char *argv[])
                     << " but is " << lnB.type(false) << exit(FatalError);
             }
 
-            // Delete
-            Foam::rm(lnB);
+            // Delete (directory, not link)
+            Foam::rmDir(lnB);
         }
 
         POSIX::debug = oldPosix;
 
+        // Verify that rmDir works with bad names too
         Foam::rmDir(dirA);
         Foam::rm(lnA);
     }

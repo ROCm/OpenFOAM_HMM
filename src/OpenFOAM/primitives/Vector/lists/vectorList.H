@@ -33,6 +33,18 @@ Typedef
 Description
     A List of vectors.
 
+Typedef
+    Foam::vectorSubList
+
+Description
+    A SubList of vectors.
+
+Typedef
+    Foam::vectorListList
+
+Description
+    A List of vectorList.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef vectorList_H
@@ -40,14 +52,16 @@ Description
 
 #include "vector.H"
 #include "List.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef UList<vector> vectorUList;
-
     typedef List<vector> vectorList;
+    typedef SubList<vector> vectorSubList;
+    typedef List<vectorList> vectorListList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

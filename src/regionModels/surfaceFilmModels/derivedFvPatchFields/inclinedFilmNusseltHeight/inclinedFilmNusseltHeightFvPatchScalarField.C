@@ -192,9 +192,8 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_

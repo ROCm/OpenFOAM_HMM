@@ -35,7 +35,7 @@ Usage
     Options are:
 
     -translate vector
-        Translates the points by the given vector,
+        Translates the points by the given vector before rotations
 
     -rotate (vector vector)
         Rotates the points from the first vector to the second,
@@ -145,45 +145,44 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Transform (translate/rotate/scale) mesh points.\n"
-        "Note: roll=rotation about x, pitch=rotation about y, "
-        "yaw=rotation about z"
+        "Transform (translate / rotate / scale) mesh points.\n"
+        "Note: roll=rotate about x, pitch=rotate about y, yaw=rotate about z"
     );
     argList::addOption
     (
         "translate",
         "vector",
-        "translate by the specified <vector> - eg, '(1 0 0)'"
+        "Translate by specified <vector> - eg, '(1 0 0)' before rotations"
     );
     argList::addOption
     (
         "rotate",
         "(vectorA vectorB)",
-        "transform in terms of a rotation between <vectorA> and <vectorB> "
+        "Transform as a rotation between <vectorA> and <vectorB> "
         "- eg, '( (1 0 0) (0 0 1) )'"
     );
     argList::addOption
     (
         "rollPitchYaw",
         "vector",
-        "rotate by '(roll pitch yaw)' in degrees"
+        "Rotate by '(roll pitch yaw)' in degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "rotate by '(yaw pitch roll)' in degrees"
+        "Rotate by '(yaw pitch roll)' in degrees"
     );
     argList::addBoolOption
     (
         "rotateFields",
-        "read and transform vector and tensor fields too"
+        "Read and transform vector and tensor fields too"
     );
     argList::addOption
     (
         "scale",
         "scalar | vector",
-        "scale by the specified amount - eg, for a uniform [mm] to [m] scaling "
+        "Scale by the specified amount - eg, for a uniform [mm] to [m] scaling "
         "use either (0.001 0.001 0.001)' or simply '0.001'"
     );
 

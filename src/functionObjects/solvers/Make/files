@@ -1,3 +1,4 @@
 scalarTransport/scalarTransport.C
+energyTransport/energyTransport.C
 
 LIB = $(FOAM_LIBBIN)/libsolverFunctionObjects

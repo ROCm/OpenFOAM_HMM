@@ -154,18 +154,12 @@ tmp<scalarField> atmBoundaryLayer::epsilon(const vectorField& p) const
 void atmBoundaryLayer::write(Ostream& os) const
 {
     z0_.writeEntry("z0", os) ;
-    os.writeKeyword("flowDir")
-        << flowDir_ << token::END_STATEMENT << nl;
-    os.writeKeyword("zDir")
-        << zDir_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa")
-        << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Cmu")
-        << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Uref")
-        << Uref_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Zref")
-        << Zref_ << token::END_STATEMENT << nl;
+    os.writeEntry("flowDir", flowDir_);
+    os.writeEntry("zDir", zDir_);
+    os.writeEntry("kappa", kappa_);
+    os.writeEntry("Cmu", Cmu_);
+    os.writeEntry("Uref", Uref_);
+    os.writeEntry("Zref", Zref_);
     zGround_.writeEntry("zGround", os) ;
 }
 

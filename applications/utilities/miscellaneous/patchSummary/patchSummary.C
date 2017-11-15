@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
                 collectFieldList(psytf, patchi, fieldToType);
                 collectFieldList(ptf, patchi, fieldToType);
 
-                label groupI = findIndex(fieldToTypes, fieldToType);
+                label groupI = fieldToTypes.find(fieldToType);
                 if (groupI == -1)
                 {
                     DynamicList<label> group(1);

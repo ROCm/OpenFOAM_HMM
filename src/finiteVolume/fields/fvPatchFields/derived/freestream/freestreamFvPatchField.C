@@ -108,11 +108,7 @@ template<class Type>
 void Foam::freestreamFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    if (this->phiName_ != "phi")
-    {
-        os.writeKeyword("phi")
-            << this->phiName_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
     freestreamValue().writeEntry("freestreamValue", os);
     this->writeEntry("value", os);
 }

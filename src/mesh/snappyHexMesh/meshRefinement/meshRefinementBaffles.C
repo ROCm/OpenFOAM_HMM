@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -279,6 +279,7 @@ void Foam::meshRefinement::getIntersections
 
 void Foam::meshRefinement::getBafflePatches
 (
+    const label nErodeCellZones,
     const labelList& globalToMasterPatch,
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
@@ -309,6 +310,7 @@ void Foam::meshRefinement::getBafflePatches
         zonify
         (
             true,               // allowFreeStandingZoneFaces
+            nErodeCellZones,
             -2,                 // zone to put unreached cells into
             locationsInMesh,
             zonesInMesh,
@@ -331,16 +333,13 @@ void Foam::meshRefinement::getBafflePatches
     labelList neiCellZone;
     syncTools::swapBoundaryCellList(mesh_, cellToZone, neiCellZone);
 
-    const labelList testFaces(intersectedFaces());
-
     ownPatch.setSize(mesh_.nFaces());
     ownPatch = -1;
     neiPatch.setSize(mesh_.nFaces());
     neiPatch = -1;
-    forAll(testFaces, i)
-    {
-        label faceI = testFaces[i];
 
+    forAll(ownPatch, faceI)
+    {
         if (unnamedRegion1[faceI] != -1 || unnamedRegion2[faceI] != -1)
         {
             label ownMasterPatch = -1;
@@ -672,7 +671,7 @@ Foam::labelList Foam::meshRefinement::getZones
         surfaceZonesInfo::faceZoneType fzType;
         bool hasInfo = getFaceZoneInfo(fZone.name(), mpI, spI, fzType);
 
-        if (hasInfo && findIndex(fzTypes, fzType) != -1)
+        if (hasInfo && fzTypes.found(fzType))
         {
             zoneIDs.append(zoneI);
         }
@@ -1550,7 +1549,7 @@ void Foam::meshRefinement::findCellZoneGeometric
             }
 
             // Make sure the cellZone originated from a closed surface
-            label geomSurfI = findIndex(surfaceToCellZone, minZone);
+            label geomSurfI = surfaceToCellZone.find(minZone);
 
             if (geomSurfI != -1)
             {
@@ -1594,7 +1593,7 @@ void Foam::meshRefinement::findCellZoneGeometric
                     }
 
                     // Make sure the cellZone originated from a closed surface
-                    label geomSurfI = findIndex(surfaceToCellZone, minZone);
+                    label geomSurfI = surfaceToCellZone.find(minZone);
 
                     if (geomSurfI != -1)
                     {
@@ -2060,6 +2059,111 @@ void Foam::meshRefinement::findCellZoneTopo
 }
 
 
+void Foam::meshRefinement::erodeCellZone
+(
+    const label nErodeCellZones,
+    const label backgroundZoneID,
+    const labelList& unnamedSurfaceRegion,
+    const labelList& namedSurfaceIndex,
+    labelList& cellToZone
+) const
+{
+    // This routine fixes small problems with left over unassigned regions
+    // (after all off the unreachable bits of the mesh have been removed).
+    // The problem is that the cell zone information might be inconsistent
+    // with the face zone information. So what we do here is to erode
+    // any cell zones until we hit a named face.
+    // - backgroundZoneID = -2 : do not change so remove cells
+    // - backgroundZoneID = -1 : put into background
+    // Note that is the opposite of findCellZoneTopo which moves unassigned
+    // regions into a neighbouring region(=cellZone) unless there is an
+    // intersected faces inbetween the two.
+
+    for (label iter = 0; iter < nErodeCellZones; iter++)
+    {
+        label nChanged = 0;
+
+        labelList erodedCellToZone(cellToZone);
+
+        // Do internal faces
+        for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
+        {
+            if
+            (
+                unnamedSurfaceRegion[facei] == -1
+             && namedSurfaceIndex[facei] == -1
+            )
+            {
+                label own = mesh_.faceOwner()[facei];
+                label nei = mesh_.faceNeighbour()[facei];
+                if (cellToZone[own] == -2 && cellToZone[nei] >= -1)
+                {
+                    erodedCellToZone[nei] = backgroundZoneID;
+                    nChanged++;
+                }
+                else if (cellToZone[nei] == -2 && cellToZone[own] >= -1)
+                {
+                    erodedCellToZone[own] = backgroundZoneID;
+                    nChanged++;
+                }
+            }
+        }
+
+        // Do boundary faces
+
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+        // Get coupled neighbour cellRegion
+        labelList neiCellZone;
+        syncTools::swapBoundaryCellList(mesh_, cellToZone, neiCellZone);
+
+        // Calculate region to zone from cellRegions on either side of coupled
+        // face.
+        forAll(patches, patchi)
+        {
+            const polyPatch& pp = patches[patchi];
+
+            if (pp.coupled())
+            {
+                forAll(pp, i)
+                {
+                    label facei = pp.start()+i;
+                    if
+                    (
+                        unnamedSurfaceRegion[facei] == -1
+                     && namedSurfaceIndex[facei] == -1
+                    )
+                    {
+                        label own = mesh_.faceOwner()[facei];
+                        label bFacei = facei-mesh_.nInternalFaces();
+                        if (neiCellZone[bFacei] == -2 && cellToZone[own] >= -1)
+                        {
+                            erodedCellToZone[own] = backgroundZoneID;
+                            nChanged++;
+                        }
+                    }
+                }
+            }
+        }
+
+        cellToZone.transfer(erodedCellToZone);
+
+        reduce(nChanged, sumOp<label>());
+        if (debug)
+        {
+            Pout<< "erodeCellZone : eroded " << nChanged
+                << " cells (moved from cellZone to background zone "
+                << backgroundZoneID << endl;
+        }
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+    }
+}
+
+
 void Foam::meshRefinement::makeConsistentFaceIndex
 (
     const labelList& surfaceMap,
@@ -2281,6 +2385,7 @@ void Foam::meshRefinement::getIntersections
 void Foam::meshRefinement::zonify
 (
     const bool allowFreeStandingZoneFaces,
+    const label nErodeCellZones,
     const label backgroundZoneID,
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
@@ -2496,18 +2601,39 @@ void Foam::meshRefinement::zonify
 
     if (namedSurfaces.size())
     {
-        Info<< "Walking from known cellZones; crossing a faceZone "
-            << "face changes cellZone" << nl << endl;
+        if (nErodeCellZones <= 0)
+        {
+            Info<< "Walking from known cellZones; crossing a faceZone "
+                << "face changes cellZone" << nl << endl;
 
-        findCellZoneTopo
-        (
-            backgroundZoneID,
-            pointField(0),
-            unnamedRegion1,      // Intersections with unnamed surfaces
-            namedSurfaceIndex,   // Intersections with named surfaces
-            surfaceToCellZone,
-            cellToZone
-        );
+            // Put unassigned regions into any connected cellZone
+            findCellZoneTopo
+            (
+                backgroundZoneID,
+                pointField(0),
+                unnamedRegion1,      // Intersections with unnamed surfaces
+                namedSurfaceIndex,   // Intersections with named surfaces
+                surfaceToCellZone,
+                cellToZone
+            );
+        }
+        else
+        {
+            Info<< "Eroding cellZone cells to make these consistent with"
+                << " faceZone faces" << nl << endl;
+
+            // Erode cell zone cells (connected to an unassigned cell)
+            // and put them into backgroundZone
+            erodeCellZone
+            (
+                nErodeCellZones,
+                backgroundZoneID,
+                unnamedRegion1,
+                namedSurfaceIndex,
+                cellToZone
+            );
+        }
+
 
         // Make sure namedSurfaceIndex is unset inbetween same cell zones.
         if (!allowFreeStandingZoneFaces)
@@ -3424,6 +3550,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     const bool useTopologicalSnapDetection,
     const bool removeEdgeConnectedCells,
     const scalarField& perpendicularAngle,
+    const label nErodeCellZones,
     const dictionary& motionDict,
     Time& runTime,
     const labelList& globalToMasterPatch,
@@ -3452,6 +3579,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
     labelList ownPatch, neiPatch;
     getBafflePatches
     (
+        nErodeCellZones,
         globalToMasterPatch,
 
         locationsInMesh,
@@ -3522,6 +3650,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
             labelList ownPatch, neiPatch;
             getBafflePatches
             (
+                nErodeCellZones,
                 globalToMasterPatch,
 
                 locationsInMesh,
@@ -3689,6 +3818,7 @@ void Foam::meshRefinement::mergeFreeStandingBaffles
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
+    const label nErodeCellZones,
     const labelList& globalToMasterPatch,
     const labelList& globalToSlavePatch,
 
@@ -3709,6 +3839,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
     labelList ownPatch, neiPatch;
     getBafflePatches
     (
+        nErodeCellZones,
         globalToMasterPatch,
 
         locationsInMesh,
@@ -4202,6 +4333,7 @@ Foam::meshRefinement::dupNonManifoldBoundaryPoints()
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 (
     const bool allowFreeStandingZoneFaces,
+    const label nErodeCellZones,
     const pointField& locationsInMesh,
     const wordList& zonesInMesh,
     wordPairHashTable& zonesToFaceZone
@@ -4278,6 +4410,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         zonify
         (
             allowFreeStandingZoneFaces,
+            nErodeCellZones,// Use erosion (>0) or regionSplit to clean up
             -1,             // Set all cells with cellToZone -2 to -1
             locationsInMesh,
             zonesInMesh,

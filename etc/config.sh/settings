@@ -216,12 +216,17 @@ _foamAddLib  $FOAM_USER_LIBBIN:$FOAM_SITE_LIBBIN:$FOAM_LIBBIN
 # Adjust for non-gcc compilers
 case "$WM_COMPILER" in
 Clang*)
-    # Using clang - not gcc
+    # Using clang compiler suite
     export WM_CC='clang'
     export WM_CXX='clang++'
     ;;
+Cray*)
+    # Using cray system compilers
+    export WM_CC='cc'
+    export WM_CXX='CC'
+    ;;
 Icc*)
-    # Using icc - not gcc
+    # Using intel compilers
     export WM_CC='icc'
     export WM_CXX='icpc'
     ;;

@@ -62,14 +62,9 @@ Foam::RBD::sphere::~sphere()
 
 void Foam::RBD::sphere::write(Ostream& os) const
 {
-    os.writeKeyword("type")
-        << type() << token::END_STATEMENT << nl;
-
-    os.writeKeyword("mass")
-        << m() << token::END_STATEMENT << nl;
-
-    os.writeKeyword("radius")
-        << r() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
+    os.writeEntry("mass", m());
+    os.writeEntry("radius", r());
 }
 
 

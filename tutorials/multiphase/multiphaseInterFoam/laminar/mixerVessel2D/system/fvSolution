@@ -48,7 +48,7 @@ solvers
         relTol          0;
     }
 
-    U
+    "(U|T)"
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
@@ -71,7 +71,7 @@ relaxationFactors
 {
     equations
     {
-        "U.*"           1;
+        ".*"           1;
     }
 }
 

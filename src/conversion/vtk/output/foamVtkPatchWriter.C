@@ -245,7 +245,7 @@ Foam::vtk::patchWriter::patchWriter
     nFaces_(0)
 {
     outputOptions opts(outOpts);
-    opts.append(false);  // No append
+    opts.append(false);  // No append supported
 
     os_.open((baseName + (legacy_ ? ".vtk" : ".vtp")).c_str());
     format_ = opts.newFormatter(os_);

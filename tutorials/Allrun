@@ -63,6 +63,9 @@ do
     -collect)
         optCollectOnly=true
         ;;
+    -test)   # Known options that should be passed through
+        break
+        ;;
     -*)
         usage "unknown option: $1"
         ;;
@@ -124,7 +127,7 @@ logReport()
 if [ -z "$optCollectOnly" ]
 then
     # Recursively run all tutorials
-    foamRunTutorials -test -skipFirst
+    foamRunTutorials -skipFirst $*
 fi
 
 

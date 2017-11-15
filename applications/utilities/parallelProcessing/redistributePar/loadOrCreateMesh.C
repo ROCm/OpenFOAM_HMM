@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,10 @@ License
 #include "Time.H"
 //#include "IOPtrList.H"
 #include "polyBoundaryMeshEntries.H"
+#include "IOobjectList.H"
+#include "pointSet.H"
+#include "faceSet.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -372,6 +376,41 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             );
         }
         mesh.addZones(pz, fz, cz);
+    }
+
+
+    // Determine sets
+    // ~~~~~~~~~~~~~~
+
+    wordList pointSetNames;
+    wordList faceSetNames;
+    wordList cellSetNames;
+    if (Pstream::master())
+    {
+        // Read sets
+        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+        pointSetNames = objects.sortedNames(pointSet::typeName);
+        faceSetNames = objects.sortedNames(faceSet::typeName);
+        cellSetNames = objects.sortedNames(cellSet::typeName);
+    }
+    Pstream::scatter(pointSetNames);
+    Pstream::scatter(faceSetNames);
+    Pstream::scatter(cellSetNames);
+
+    if (!haveMesh)
+    {
+        forAll(pointSetNames, i)
+        {
+            pointSet(mesh, pointSetNames[i], 0).write();
+        }
+        forAll(faceSetNames, i)
+        {
+            faceSet(mesh, faceSetNames[i], 0).write();
+        }
+        forAll(cellSetNames, i)
+        {
+            cellSet(mesh, cellSetNames[i], 0).write();
+        }
     }
 
 

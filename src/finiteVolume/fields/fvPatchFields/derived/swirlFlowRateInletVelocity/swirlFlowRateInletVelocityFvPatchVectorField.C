@@ -199,10 +199,10 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchField<vector>::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
-    os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntry("origin", origin_);
+    os.writeEntry("axis", axis_);
     flowRate_->writeData(os);
     rpm_->writeData(os);
     writeEntry("value", os);

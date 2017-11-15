@@ -27,8 +27,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidRegionDiff_H
-#define solidRegionDiff_H
+#ifndef solidRegionDiffNo_H
+#define solidRegionDiffNo_H
 
 #include "fvMesh.H"
 

@@ -101,17 +101,7 @@ bool Foam::string::hasExt(const wordRe& ending) const
 
 Foam::string::size_type Foam::string::count(const char c) const
 {
-    size_type nChar = 0;
-
-    for (auto iter = cbegin(); iter != cend(); ++iter)
-    {
-        if (*iter == c)
-        {
-            ++nChar;
-        }
-    }
-
-    return nChar;
+    return stringOps::count(*this, c);
 }
 
 

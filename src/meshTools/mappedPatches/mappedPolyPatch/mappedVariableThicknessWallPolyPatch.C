@@ -167,7 +167,7 @@ Foam::mappedVariableThicknessWallPolyPatch::
 void Foam::mappedVariableThicknessWallPolyPatch::
 write(Foam::Ostream& os) const
 {
-    os.writeKeyword("thickness") << thickness_ << token::END_STATEMENT << nl;
+    os.writeEntry("thickness", thickness_);
 }
 
 

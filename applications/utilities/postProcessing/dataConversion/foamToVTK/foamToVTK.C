@@ -154,7 +154,7 @@ Note
 #include "faceZoneMesh.H"
 #include "Cloud.H"
 #include "passiveParticle.H"
-#include "stringListOps.H"
+#include "stringOps.H"
 
 #include "meshSubsetHelper.H"
 #include "readFields.H"
@@ -1172,7 +1172,7 @@ int main(int argc, char *argv[])
             {
                 const polyPatch& pp = patches[patchi];
 
-                if (findStrings(excludePatches, pp.name()))
+                if (stringOps::match(excludePatches, pp.name()))
                 {
                     // Skip excluded patch
                     continue;

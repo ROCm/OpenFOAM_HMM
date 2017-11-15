@@ -52,7 +52,7 @@ void Foam::functionObjects::streamLine::track()
         initialParticles
     );
 
-    const sampledSet& seedPoints = sampledSetPtr_();
+    const sampledSet& seedPoints = sampledSetPoints();
 
     forAll(seedPoints, i)
     {

@@ -57,15 +57,29 @@ inline Foam::line<Point, PointRef>::line(Istream& is)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Point, class PointRef>
-inline PointRef Foam::line<Point, PointRef>::start() const
+inline PointRef Foam::line<Point, PointRef>::first() const
 {
     return a_;
+}
+
+
+template<class Point, class PointRef>
+inline PointRef Foam::line<Point, PointRef>::second() const
+{
+    return b_;
+}
+
+
+template<class Point, class PointRef>
+inline PointRef Foam::line<Point, PointRef>::start() const
+{
+    return first();
 }
 
 template<class Point, class PointRef>
 inline PointRef Foam::line<Point, PointRef>::end() const
 {
-    return b_;
+    return second();
 }
 
 
@@ -110,21 +124,21 @@ Foam::PointHit<Point> Foam::line<Point, PointRef>::nearestDist
 
     Point w(p - a_);
 
-    scalar c1 = v & w;
+    const scalar c1 = v & w;
 
     if (c1 <= 0)
     {
         return PointHit<Point>(false, a_, Foam::mag(p - a_), true);
     }
 
-    scalar c2 = v & v;
+    const scalar c2 = v & v;
 
     if (c2 <= c1)
     {
         return PointHit<Point>(false, b_, Foam::mag(p - b_), true);
     }
 
-    scalar b = c1/c2;
+    const scalar b = c1/c2;
 
     Point pb(a_ + b*v);
 

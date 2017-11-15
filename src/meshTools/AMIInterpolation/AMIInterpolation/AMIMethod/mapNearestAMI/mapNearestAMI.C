@@ -137,7 +137,7 @@ Foam::label Foam::mapNearestAMI<SourcePatch, TargetPatch>::findMappedSrcFace
         // search target tgtFacei neighbours for match with source face
         label tgtI = testFaces.remove();
 
-        if (findIndex(visitedFaces, tgtI) == -1)
+        if (!visitedFaces.found(tgtI))
         {
             visitedFaces.append(tgtI);
 
@@ -151,7 +151,7 @@ Foam::label Foam::mapNearestAMI<SourcePatch, TargetPatch>::findMappedSrcFace
 
                 forAll(nbrFaces, i)
                 {
-                    if (findIndex(visitedFaces, nbrFaces[i]) == -1)
+                    if (!visitedFaces.found(nbrFaces[i]))
                     {
                         testFaces.append(nbrFaces[i]);
                     }

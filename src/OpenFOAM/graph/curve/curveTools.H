@@ -15,10 +15,6 @@ namespace Foam
 #define curveSmall 1.0e-8
 #define curveGreat 1.0e8
 
-typedef List<char> charList;
-typedef List<charList> charListList;
-
-
 scalar distance(const vector&, const vector&);
 
 

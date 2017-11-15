@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef porousBafflePressureFvPatchFieldsFwd_H
-#define porousBafflePressureFvPatchFieldsFwd_H
+#ifndef porousBafflePressureFvPatchFieldFwd_H
+#define porousBafflePressureFvPatchFieldFwd_H
 
 #include "fieldTypes.H"
 

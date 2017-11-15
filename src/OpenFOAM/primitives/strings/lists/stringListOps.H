@@ -44,18 +44,13 @@ SourceFiles
 
 namespace Foam
 {
-  // Single-string matches:
-
-    //- Return true if text matches one of the regular expressions
-    //  The primary purpose of this function is to automatically convert
-    //  a wordReList to a wordRes for matching.
+    //- Single-string match for one of the regular expressions
+    //  \deprecated use stringOps::match instead (deprecated NOV-2017)
     inline bool findStrings(const wordRes& matcher, const std::string& text)
     {
         return matcher(text);
     }
 
-
-  // Multi-string matches:
 
     //- Extract list indices
     //  The unary match predicate has the following signature:

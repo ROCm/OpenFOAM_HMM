@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,31 +33,22 @@ Foam::functionObjects::fieldAverageItem::fieldAverageItem(Istream& is)
 :
     active_(false),
     fieldName_("unknown"),
-    mean_(0),
+    mean_(false),
     meanFieldName_("unknown"),
-    prime2Mean_(0),
+    prime2Mean_(false),
     prime2MeanFieldName_("unknown"),
-    base_(ITER),
-    window_(-1.0)
+    base_(baseType::ITER),
+    totalIter_(0),
+    totalTime_(-1),
+    window_(-1.0),
+    windowName_(""),
+    windowType_(windowType::NONE),
+
+    windowTimes_(),
+    windowFieldNames_(),
+    allowRestart_(true)
 {
-    is.check(FUNCTION_NAME);
-
-    const dictionaryEntry entry(dictionary::null, is);
-
-    fieldName_ = entry.keyword();
-    mean_ = readBool(entry.lookup("mean"));
-    prime2Mean_ = readBool(entry.lookup("prime2Mean"));
-    base_ = baseTypeNames_.lookup("base", entry);
-    window_ = entry.lookupOrDefault<scalar>("window", -1.0);
-    windowName_ = entry.lookupOrDefault<word>("windowName", "");
-
-    meanFieldName_ = fieldName_ + EXT_MEAN;
-    prime2MeanFieldName_ = fieldName_ + EXT_PRIME2MEAN;
-    if ((window_ > 0) && (windowName_ != ""))
-    {
-        meanFieldName_ = meanFieldName_ + "_" + windowName_;
-        prime2MeanFieldName_ = prime2MeanFieldName_ + "_" + windowName_;
-    }
+    is >> *this;
 }
 
 
@@ -79,13 +70,61 @@ Foam::Istream& Foam::functionObjects::operator>>
     faItem.prime2Mean_ = readBool(entry.lookup("prime2Mean"));
     faItem.base_ = faItem.baseTypeNames_.lookup("base", entry);
     faItem.window_ = entry.lookupOrDefault<scalar>("window", -1.0);
-    faItem.windowName_ = entry.lookupOrDefault<word>("windowName", "");
+
+    if (faItem.window_ > 0)
+    {
+        faItem.windowType_ =
+            faItem.windowTypeNames_.lookup("windowType", entry);
+
+        if (faItem.windowType_ != fieldAverageItem::windowType::NONE)
+        {
+            if
+            (
+                faItem.base_ == fieldAverageItem::baseType::ITER
+             && label(faItem.window_) < 1
+            )
+            {
+                FatalIOErrorInFunction(entry)
+                    << "Window must be 1 or more for base type "
+                    << faItem.baseTypeNames_[fieldAverageItem::baseType::ITER]
+                    << exit(FatalIOError);
+            }
+
+            faItem.windowName_ = entry.lookupOrDefault<word>("windowName", "");
+
+            if (faItem.windowType_ == fieldAverageItem::windowType::EXACT)
+            {
+                faItem.allowRestart_ = readBool(entry.lookup("allowRestart"));
+
+                if (!faItem.allowRestart_)
+                {
+                    WarningInFunction
+                        << faItem.windowTypeNames_[faItem.windowType_]
+                        << " windowing for field " << faItem.fieldName_
+                        << " will not write intermediate files and restart will"
+                        << " not be possible.  To enable, please set"
+                        << " 'allowRestart' to 'yes'"
+                        << endl;
+                }
+            }
+        }
+        else
+        {
+            // Deactivate windowing
+            faItem.window_ = -1;
+        }
+    }
+    else
+    {
+        // Deactivate windowing
+        faItem.window_ = -1;
+    }
 
     faItem.meanFieldName_ = faItem.fieldName_ + fieldAverageItem::EXT_MEAN;
     faItem.prime2MeanFieldName_ =
         faItem.fieldName_ + fieldAverageItem::EXT_PRIME2MEAN;
 
-    if ((faItem.window_ > 0) && (faItem.windowName_ != ""))
+    if ((faItem.window_ > 0) && (!faItem.windowName_.empty()))
     {
         faItem.meanFieldName_ =
             faItem.meanFieldName_ + "_" + faItem.windowName_;
@@ -93,6 +132,7 @@ Foam::Istream& Foam::functionObjects::operator>>
         faItem.prime2MeanFieldName_ =
             faItem.prime2MeanFieldName_ + "_" + faItem.windowName_;
     }
+
     return is;
 }
 
@@ -105,28 +145,34 @@ Foam::Ostream& Foam::functionObjects::operator<<
 {
     os.check(FUNCTION_NAME);
 
-    os  << faItem.fieldName_ << nl << token::BEGIN_BLOCK << nl;
-    os.writeKeyword("mean") << faItem.mean_ << token::END_STATEMENT << nl;
-    os.writeKeyword("prime2Mean") << faItem.prime2Mean_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("base") << faItem.baseTypeNames_[faItem.base_]
-        << token::END_STATEMENT << nl;
+    os.beginBlock(faItem.fieldName_);
+
+    os.writeEntry("mean", faItem.mean_);
+    os.writeEntry("prime2Mean", faItem.prime2Mean_);
+    os.writeEntry("base", faItem.baseTypeNames_[faItem.base_]);
 
     if (faItem.window_ > 0)
     {
-        os.writeKeyword("window") << faItem.window_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("window", faItem.window_);
 
-        if (faItem.windowName_ != "")
+        if (!faItem.windowName_.empty())
         {
-            os.writeKeyword("windowName") << faItem.windowName_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("windowName", faItem.windowName_);
         }
+
+        os.writeEntry
+        (
+            "windowType",
+            faItem.windowTypeNames_[faItem.windowType_]
+        );
+
+        os.writeEntry("allowRestart", faItem.allowRestart_);
     }
 
-    os  << token::END_BLOCK << nl;
+    os.endBlock() << flush;
 
     os.check(FUNCTION_NAME);
+
     return os;
 }
 

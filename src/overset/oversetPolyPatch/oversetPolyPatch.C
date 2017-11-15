@@ -54,7 +54,7 @@ Foam::oversetPolyPatch::oversetPolyPatch
     masterPatchID_(-1)
 {
     //  'overset' is not constraint type so add to group explicitly
-    if (findIndex(inGroups(), typeName) == -1)
+    if (!inGroups().found(typeName))
     {
         inGroups().append(typeName);
     }
@@ -74,7 +74,7 @@ Foam::oversetPolyPatch::oversetPolyPatch
     masterPatchID_(-1)
 {
     //  'overset' is not constraint type so add to group explicitly
-    if (findIndex(inGroups(), typeName) == -1)
+    if (!inGroups().found(typeName))
     {
         inGroups().append(typeName);
     }

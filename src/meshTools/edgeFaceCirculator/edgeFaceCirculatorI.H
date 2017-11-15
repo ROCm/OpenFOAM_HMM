@@ -143,7 +143,7 @@ Foam::label Foam::edgeFaceCirculator::getMinIndex
     const label v1
 )
 {
-    label fp = findIndex(f, v0);
+    label fp = f.find(v0);
 
     if (fp != -1)
     {

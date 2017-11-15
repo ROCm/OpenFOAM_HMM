@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -113,6 +113,9 @@ public:
         //- Construct from string, optionally ignore case
         inline regExp(const std::string& pattern, bool ignoreCase);
 
+        //- Move construct
+        inline regExp(regExp&& rgx);
+
 
     //- Destructor
     inline ~regExp();
@@ -146,6 +149,9 @@ public:
         //  \return True if expression had existed prior to the clear.
         bool clear();
 
+        //- Swap contents
+        inline void swap(regExp& rgx);
+
 
       // Matching/Searching
 
@@ -177,6 +183,10 @@ public:
         //- Assign and compile pattern from string
         //  Always case sensitive
         inline void operator=(const std::string& pattern);
+
+        //- Move assignment
+        inline void operator=(regExp&& rgx);
+
 };
 
 

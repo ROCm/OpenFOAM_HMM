@@ -48,8 +48,9 @@ Note
         list[1] = list[5] = list[6];  // propagates value
     \endcode
 
-    Using get() or the '[]' operator are similarly fast. Looping and reading
-    via an iterator is approx. 15% slower, but can be more flexible.
+    Reading via the get() or the '[]' operator are identical.
+    Looping and reading via an iterator is approx. 15% slower,
+    but can be more flexible.
 
     Using the set() operator (and the '[]' operator) are marginally slower
     (approx. 5%) than using an iterator, but the set() method has the
@@ -157,7 +158,7 @@ protected:
     // Protected Member Functions
 
         //- Calculate the list length when packed
-        inline static label packedLength(const label);
+        inline static label packedLength(const label nElem);
 
         //- Read a list entry (allows for specialization)
         inline static unsigned int readValue(Istream& is);
@@ -200,14 +201,14 @@ public:
 
         //- The max. number of bits that can be templated.
         //  Might someday be useful for a template assert.
-        inline static unsigned int max_bits();
+        inline static constexpr unsigned int max_bits();
 
         //- The max. value for an entry, which simultaneously the bit-mask
         //  eg, ((1 << 2) - 1) yields 0b0011
-        inline static unsigned int max_value();
+        inline static constexpr unsigned int max_value();
 
         //- The number of entries per packed storage element
-        inline static unsigned int packing();
+        inline static constexpr unsigned int packing();
 
         //- Masking for all bits below the offset
         inline static unsigned int maskLower(unsigned offset);
@@ -267,13 +268,14 @@ public:
         //  Never auto-vivify entries.
         inline unsigned int get(const label i) const;
 
-        //- Set value at index I. Return true if value changed.
+        //- Set value at index I, default value set is the max_value.
         //  Does auto-vivify for non-existent, non-zero entries.
-        //  Default value set is the max_value.
+        //  \return true if value changed.
         inline bool set(const label i, const unsigned int val = ~0u);
 
-        //- Unset the entry at index I. Return true if value changed.
+        //- Unset the entry at index I.
         //  Never auto-vivify entries.
+        //  \return true if value changed.
         inline bool unset(const label i);
 
         //- Return the underlying packed storage
@@ -286,8 +288,7 @@ public:
         //- The list length when packed
         inline label packedLength() const;
 
-        //- Return the binary size in number of characters
-        //  used in the underlying storage
+        //- The number of bytes used in the underlying storage
         inline std::streamsize byteSize() const;
 
         //- Count number of bits set, O(log(n))
@@ -365,7 +366,8 @@ public:
         Istream& read(Istream& is);
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         //  A special indexed output (ASCII only) is triggered by specifying
         //  a negative value for shortListLen.
         //
@@ -393,11 +395,11 @@ public:
         //- Remove and return the last element
         inline unsigned int remove();
 
-        //- Get value at index I
+        //- Identical to get() - get value at index.
         //  Never auto-vivify entries.
         inline unsigned int operator[](const label i) const;
 
-        //- Set value at index I.
+        //- Non-const access to value at index.
         //  Returns iterator to perform the actual operation.
         //  Does not auto-vivify entries, but will when assigned to.
         inline iteratorBase operator[](const label i);
@@ -496,11 +498,11 @@ public:
 
             //- Disallow copy constructor from const_iterator
             //  This would violate const-ness!
-            iterator(const const_iterator& iter);
+            iterator(const const_iterator& iter) = delete;
 
             //- Disallow assignment from const_iterator
             //  This would violate const-ness!
-            void operator=(const const_iterator& iter);
+            void operator=(const const_iterator& iter) = delete;
 
 
         public:

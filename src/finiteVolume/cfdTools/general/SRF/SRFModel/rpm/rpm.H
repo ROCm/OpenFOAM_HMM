@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SRFModelRpm_H
-#define SRFModelRpm_H
+#ifndef SRF_rpm_H
+#define SRF_rpm_H
 
 #include "SRFModel.H"
 

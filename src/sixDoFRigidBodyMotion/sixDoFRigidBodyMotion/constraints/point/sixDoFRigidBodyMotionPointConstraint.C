@@ -116,8 +116,7 @@ void Foam::sixDoFRigidBodyMotionConstraints::point::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("centreOfRotation")
-        << centreOfRotation_ << token::END_STATEMENT << nl;
+    os.writeEntry("centreOfRotation", centreOfRotation_);
 }
 
 // ************************************************************************* //

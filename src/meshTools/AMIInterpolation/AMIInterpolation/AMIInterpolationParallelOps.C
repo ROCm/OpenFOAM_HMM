@@ -67,7 +67,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
         }
         else if (nHaveFaces == 1)
         {
-            proci = findIndex(facesPresentOnProc, 1);
+            proci = facesPresentOnProc.find(1);
             if (debug)
             {
                 InfoInFunction

@@ -79,69 +79,85 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            //- Return the number of elements in the list
-            inline label size() const;
+        //- Return the number of elements in the list
+        inline label size() const;
 
-            //- Return true if the list is empty (ie, size() is zero).
-            inline bool empty() const;
+        //- Return true if the list is empty (ie, size() is zero).
+        inline bool empty() const;
 
-            //- Return the first element of the list.
-            inline T& first();
+        //- Return the first element of the list.
+        inline T& first();
 
-            //- Return first element of the list.
-            inline const T& first() const;
+        //- Return first element of the list.
+        inline const T& first() const;
 
-            //- Return the last element of the list.
-            inline T& last();
+        //- Return the last element of the list.
+        inline T& last();
 
-            //- Return the last element of the list.
-            inline const T& last() const;
+        //- Return the last element of the list.
+        inline const T& last() const;
 
-            //- Return the complete list
-            inline const UList<T>& completeList() const;
+        //- Return the complete list
+        inline const UList<T>& completeList() const;
 
-            //- Return the list addressing
-            inline const List<label>& addressing() const;
+        //- Return the list addressing
+        inline const List<label>& addressing() const;
 
 
-        // Member Operators
+      // Search
 
-            //- Return the addressed elements as a List
-            inline List<T> operator()() const;
+        //- Find index of the first occurence of the value.
+        //  When start is specified, any occurences before start are ignored.
+        //  Linear search.
+        //  \return -1 if not found.
+        label find(const T& val, const label start=0) const;
 
-            //- Return non-const access to an element
-            inline T& operator[](const label i);
+        //- Find index of the last occurence of the value.
+        //  When pos is specified, any occurences after pos are ignored.
+        //  Linear search.
+        //  \return -1 if not found.
+        label rfind(const T& val, const label pos=-1) const;
 
-            //- Return const access to an element
-            inline const T& operator[](const label i) const;
+        //- True if the value if found in the list. Linear search.
+        inline bool found(const T& val, const label start=0) const;
 
-            //- Assignment to UList of addressed elements
-            inline void operator=(const UList<T>& ae);
 
-            //- Assignment to UIndirectList of addressed elements
-            inline void operator=(const UIndirectList<T>& ae);
+    // Member Operators
 
-            //- Assignment of all entries to the given value
-            inline void operator=(const T& t);
+        //- Return the addressed elements as a List
+        inline List<T> operator()() const;
+
+        //- Return non-const access to an element
+        inline T& operator[](const label i);
+
+        //- Return const access to an element
+        inline const T& operator[](const label i) const;
+
+        //- Assignment to UList of addressed elements
+        inline void operator=(const UList<T>& ae);
+
+        //- Assignment to UIndirectList of addressed elements
+        inline void operator=(const UIndirectList<T>& ae);
+
+        //- Assignment of all entries to the given value
+        inline void operator=(const T& t);
 
 
     // STL type definitions
 
-        //- Type of values the UList contains.
+        //- Type of values the list contains.
         typedef T value_type;
 
-        //- Type that can be used for storing into
-        //  UList::value_type objects.
+        //- The type used for storing into UList::value_type objects.
         typedef T& reference;
 
-        //- Type that can be used for storing into
-        //  constant UList::value_type objects
+        //- The type used for reading from constant UList::value_type objects
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
-        //  UList iterator objects.
+        //- UList iterator objects.
         typedef label difference_type;
 
         //- The type that can represent the size of a UList.
@@ -151,8 +167,8 @@ public:
     // Writing
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
-        //  Binary output is currently still a bit of an annoyance.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 
@@ -162,7 +178,7 @@ public:
         friend Ostream& operator<< <T>
         (
             Ostream& os,
-            const UIndirectList<T>& L
+            const UIndirectList<T>& lst
         );
 };
 
@@ -176,6 +192,7 @@ public:
 #include "UIndirectListI.H"
 
 #ifdef NoRepository
+    #include "UIndirectList.C"
     #include "UIndirectListIO.C"
 #endif
 

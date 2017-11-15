@@ -102,6 +102,52 @@ Foam::argList::initValidTables::initValidTables()
 
 Foam::argList::initValidTables dummyInitValidTables;
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Counted per machine name
+// Does not include any sorting since we wish to know the ordering according to
+// mpi rank.
+//
+// Always include the master too.
+// This provides a better overview of the subscription
+static void printHostsSubscription(const UList<string>& slaveProcs)
+{
+    Info<< "Hosts  :" << nl << "(" << nl;
+
+    std::string prev = hostName();
+    int count = 1;
+
+    for (const auto& str : slaveProcs)
+    {
+        std::string curr(str.substr(0, str.rfind('.')));
+
+        if (prev != curr)
+        {
+            if (count)
+            {
+                // Finish previous
+                Info<<"    (" << prev.c_str() << " " << count << ")" << nl;
+                count = 0;
+            }
+
+            prev = std::move(curr);
+        }
+        ++count;
+    }
+
+    if (count)
+    {
+        // Finished last one
+        Info<<"    (" << prev.c_str() << " " << count << ")" << nl;
+    }
+
+    Info<< ")" << nl;
+}
+
+}
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -931,6 +977,7 @@ void Foam::argList::parse
     }
 
     stringList slaveProcs;
+    const int writeHostsSwitch = debug::infoSwitch("writeHosts", 1);
 
     // Collect slave machine/pid, and check that the build is identical
     if (parRunControl_.parRun())
@@ -981,8 +1028,9 @@ void Foam::argList::parse
     // Keep or discard slave and root information for reporting:
     if (Pstream::master() && parRunControl_.parRun())
     {
-        if (!debug::infoSwitch("writeSlaves", 1))
+        if (!writeHostsSwitch)
         {
+            // Clear here to ensures it doesn't show in the jobInfo
             slaveProcs.clear();
         }
         if (!debug::infoSwitch("writeRoots", 1))
@@ -1000,7 +1048,16 @@ void Foam::argList::parse
         {
             if (slaveProcs.size())
             {
-                Info<< "Slaves : " << slaveProcs << nl;
+                if (writeHostsSwitch == 1)
+                {
+                    // Compact output (see etc/controlDict)
+                    printHostsSubscription(slaveProcs);
+                }
+                else
+                {
+                    // Full output of "slave.pid"
+                    Info<< "Slaves : " << slaveProcs << nl;
+                }
             }
             if (roots.size())
             {

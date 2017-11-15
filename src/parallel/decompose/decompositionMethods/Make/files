@@ -4,6 +4,7 @@ simpleGeomDecomp/simpleGeomDecomp.C
 hierarchGeomDecomp/hierarchGeomDecomp.C
 manualDecomp/manualDecomp.C
 multiLevelDecomp/multiLevelDecomp.C
+metisLikeDecomp/metisLikeDecomp.C
 structuredDecomp/structuredDecomp.C
 noDecomp/noDecomp.C
 

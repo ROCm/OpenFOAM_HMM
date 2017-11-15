@@ -1703,7 +1703,7 @@ Foam::labelPair Foam::snappySnapDriver::findDiagonalAttraction
         //forAll(cPoints, i)
         //{
         //    label pointi = cPoints[i];
-        //    if (findIndex(meshF, pointi) == -1)
+        //    if (!meshF.found(pointi))
         //    {
         //        cc += mesh.points()[pointi];
         //    }

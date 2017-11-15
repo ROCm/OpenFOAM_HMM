@@ -40,7 +40,7 @@ void Foam::vtk::writePointSet
 )
 {
     outputOptions opts(outOpts);
-    opts.legacy(true);  // Legacy only, no append
+    opts.legacy(true);  // Legacy only, no xml, no append
 
     const bool legacy_(opts.legacy());
 

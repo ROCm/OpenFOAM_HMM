@@ -567,7 +567,7 @@ const Foam::word& Foam::genericPointPatchField<Type>::actualType() const
 template<class Type>
 void Foam::genericPointPatchField<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("type") << actualTypeName_ << token::END_STATEMENT << nl;
+    os.writeEntry("type", actualTypeName_);
 
     forAllConstIter(dictionary, dict_, iter)
     {

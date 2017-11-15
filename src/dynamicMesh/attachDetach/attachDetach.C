@@ -463,22 +463,18 @@ void Foam::attachDetach::write(Ostream& os) const
 
 void Foam::attachDetach::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
-        << "    type " << type()
-        << token::END_STATEMENT << nl
-        << "    faceZoneName " << faceZoneID_.name()
-        << token::END_STATEMENT << nl
-        << "    masterPatchName " << masterPatchID_.name()
-        << token::END_STATEMENT << nl
-        << "    slavePatchName " << slavePatchID_.name()
-        << token::END_STATEMENT << nl
-        << "    triggerTimes " << triggerTimes_
-        << token::END_STATEMENT << nl
-        << "    manualTrigger " << manualTrigger()
-        << token::END_STATEMENT << nl
-        << "    active " << active()
-        << token::END_STATEMENT << nl
-        << token::END_BLOCK << endl;
+    os  << nl;
+    os.beginBlock(name());
+
+    os.writeEntry("type", type());
+    os.writeEntry("faceZoneName", faceZoneID_.name());
+    os.writeEntry("masterPatchName", masterPatchID_.name());
+    os.writeEntry("slavePatchName", slavePatchID_.name());
+    os.writeEntry("triggerTimes", triggerTimes_);
+    os.writeEntry("manualTrigger", manualTrigger());
+    os.writeEntry("active", active());
+
+    os.endBlock();
 }
 
 

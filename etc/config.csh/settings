@@ -214,12 +214,17 @@ if (! $?WM_COMPILER_TYPE ) setenv WM_COMPILER_TYPE system
 # Adjustments for non-gcc compilers
 switch ("$WM_COMPILER")
 case Clang*:
-    # Using clang - not gcc
+    # Using clang compiler suite
     setenv WM_CC 'clang'
     setenv WM_CXX 'clang++'
     breaksw
+case Cray*:
+    # Using cray system compilers
+    setenv WM_CC 'cc'
+    setenv WM_CXX 'CC'
+    breaksw
 case Icc*:
-    # Using icc - not gcc
+    # Using intel compilers
     setenv WM_CC 'icc'
     setenv WM_CXX 'icpc'
     breaksw

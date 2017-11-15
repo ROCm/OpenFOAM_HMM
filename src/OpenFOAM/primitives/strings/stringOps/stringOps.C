@@ -29,11 +29,71 @@ License
 #include "etcFiles.H"
 #include "StringStream.H"
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+namespace Foam
+{
+// Standard handling of "~/", "./" etc.
+static void standardExpansions(Foam::string& s)
+{
+    if (s.empty())
+    {
+        return;
+    }
+
+    if (s[0] == '.')
+    {
+        // Expand a lone '.' and an initial './' into cwd
+        if (s.size() == 1)
+        {
+            s = cwd();
+        }
+        else if (s[1] == '/')
+        {
+            s.std::string::replace(0, 1, cwd());
+        }
+    }
+    else if (s[0] == '~')
+    {
+        // Expand initial ~
+        //   ~/        => home directory
+        //   ~OpenFOAM => site/user OpenFOAM configuration directory
+        //   ~user     => home directory for specified user
+
+        string user;
+        fileName file;
+
+        const auto slash = s.find('/');
+        if (slash == std::string::npos)
+        {
+            user = s.substr(1);
+        }
+        else
+        {
+            user = s.substr(1, slash - 1);
+            file = s.substr(slash + 1);
+        }
+
+        // NB: be a bit lazy and expand ~unknownUser as an
+        // empty string rather than leaving it untouched.
+        // otherwise add extra test
+
+        if (user == "OpenFOAM")
+        {
+            s = findEtcFile(file);
+        }
+        else
+        {
+            s = home(user)/file;
+        }
+    }
+}
+}
+
 
 //! \cond fileScope
 //  Find the type/position of the ":-" or ":+" alternative values
+//  Returns 0, '-', '+' corresponding to not-found or ':-' or ':+'
 static inline int findParameterAlternative
 (
     const std::string& s,
@@ -68,6 +128,49 @@ static inline int findParameterAlternative
     return 0;
 }
 //! \endcond
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+std::string::size_type Foam::stringOps::count
+(
+    const std::string& str,
+    const char c
+)
+{
+    std::string::size_type n = 0;
+
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    {
+        if (*iter == c)
+        {
+            ++n;
+        }
+    }
+
+    return n;
+}
+
+
+std::string::size_type Foam::stringOps::count(const char* str, const char c)
+{
+    if (!str)
+    {
+        return 0;
+    }
+
+    std::string::size_type n = 0;
+
+    for (const char *iter = str; *iter; ++iter)
+    {
+        if (*iter == c)
+        {
+            ++n;
+        }
+    }
+
+    return n;
+}
 
 
 Foam::string Foam::stringOps::expand
@@ -257,13 +360,14 @@ Foam::string Foam::stringOps::getVariable
 {
     string value;
 
-    const entry* ePtr = dict.lookupScopedEntryPtr
+    const entry* eptr = dict.lookupScopedEntryPtr
     (
         name,
         true,
         false
     );
-    if (ePtr)
+
+    if (eptr)
     {
         OStringStream buf;
         // Force floating point numbers to be printed with at least
@@ -271,11 +375,8 @@ Foam::string Foam::stringOps::getVariable
         buf << fixed;
         buf.precision(IOstream::defaultPrecision());
 
-        // fail for non-primitiveEntry
-        dynamicCast<const primitiveEntry>
-        (
-            *ePtr
-        ).write(buf, true);
+        // Fails for non-primitiveEntry
+        dynamicCast<const primitiveEntry>(*eptr).write(buf, true);
 
         value = buf.str();
     }
@@ -308,8 +409,11 @@ Foam::string Foam::stringOps::getVariable
                 }
             }
         }
+    }
 
-        if (!allowEmpty && value.empty())
+    if (!allowEmpty && value.empty())
+    {
+        if (allowEnvVars)
         {
             FatalIOErrorInFunction
             (
@@ -317,15 +421,14 @@ Foam::string Foam::stringOps::getVariable
             )   << "Cannot find dictionary or environment variable "
                 << name << exit(FatalIOError);
         }
-    }
-
-    if (!allowEmpty && value.empty())
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Cannot find dictionary variable "
-            << name << exit(FatalIOError);
+        else
+        {
+            FatalIOErrorInFunction
+            (
+                dict
+            )   << "Cannot find dictionary variable "
+                << name << exit(FatalIOError);
+        }
     }
 
     return value;
@@ -360,8 +463,9 @@ Foam::string Foam::stringOps::expand
         {
             newString.append(string(s[index]));
         }
-        index++;
+        ++index;
     }
+
     return newString;
 }
 
@@ -390,7 +494,7 @@ Foam::string& Foam::stringOps::inplaceExpand
             if (s[begVar+1] == '{')
             {
                 // Recursive variable expansion mode
-                label stringStart = begVar;
+                auto stringStart = begVar;
                 begVar += 2;
                 string varValue
                 (
@@ -471,53 +575,8 @@ Foam::string& Foam::stringOps::inplaceExpand
         }
     }
 
-    if (!s.empty())
-    {
-        if (s[0] == '~')
-        {
-            // Expand initial ~
-            //   ~/        => home directory
-            //   ~OpenFOAM => site/user OpenFOAM configuration directory
-            //   ~user     => home directory for specified user
-
-            string user;
-            fileName file;
-
-            if ((begVar = s.find('/')) != string::npos)
-            {
-                user = s.substr(1, begVar - 1);
-                file = s.substr(begVar + 1);
-            }
-            else
-            {
-                user = s.substr(1);
-            }
-
-            // NB: be a bit lazy and expand ~unknownUser as an
-            // empty string rather than leaving it untouched.
-            // otherwise add extra test
-            if (user == "OpenFOAM")
-            {
-                s = findEtcFile(file);
-            }
-            else
-            {
-                s = home(user)/file;
-            }
-        }
-        else if (s[0] == '.')
-        {
-            // Expand a lone '.' and an initial './' into cwd
-            if (s.size() == 1)
-            {
-                s = cwd();
-            }
-            else if (s[1] == '/')
-            {
-                s.std::string::replace(0, 1, cwd());
-            }
-        }
-    }
+    // Standard handling of "~/", "./" etc.
+    standardExpansions(s);
 
     return s;
 }
@@ -596,32 +655,33 @@ Foam::string& Foam::stringOps::inplaceExpand
                 );
 
 
-                // lookup in the dictionary
-                const entry* ePtr = dict.lookupScopedEntryPtr
+                // Lookup in the dictionary without wildcards.
+                // See note in primitiveEntry
+                const entry* eptr = dict.lookupScopedEntryPtr
                 (
                     varName,
                     true,
-                    false   // wildcards disabled. See primitiveEntry
+                    false
                 );
 
                 // if defined - copy its entries
-                if (ePtr)
+                if (eptr)
                 {
                     OStringStream buf;
                     // Force floating point numbers to be printed with at least
                     // some decimal digits.
                     buf << fixed;
                     buf.precision(IOstream::defaultPrecision());
-                    if (ePtr->isDict())
+                    if (eptr->isDict())
                     {
-                        ePtr->dict().write(buf, false);
+                        eptr->dict().write(buf, false);
                     }
                     else
                     {
-                        // fail for other types
+                        // Fail for non-primitiveEntry
                         dynamicCast<const primitiveEntry>
                         (
-                            *ePtr
+                            *eptr
                         ).write(buf, true);
                     }
 
@@ -816,53 +876,8 @@ Foam::string& Foam::stringOps::inplaceExpand
         }
     }
 
-    if (!s.empty())
-    {
-        if (s[0] == '~')
-        {
-            // Expand initial ~
-            //   ~/        => home directory
-            //   ~OpenFOAM => site/user OpenFOAM configuration directory
-            //   ~user     => home directory for specified user
-
-            string user;
-            fileName file;
-
-            if ((begVar = s.find('/')) != string::npos)
-            {
-                user = s.substr(1, begVar - 1);
-                file = s.substr(begVar + 1);
-            }
-            else
-            {
-                user = s.substr(1);
-            }
-
-            // NB: be a bit lazy and expand ~unknownUser as an
-            // empty string rather than leaving it untouched.
-            // otherwise add extra test
-            if (user == "OpenFOAM")
-            {
-                s = findEtcFile(file);
-            }
-            else
-            {
-                s = home(user)/file;
-            }
-        }
-        else if (s[0] == '.')
-        {
-            // Expand a lone '.' and an initial './' into cwd
-            if (s.size() == 1)
-            {
-                s = cwd();
-            }
-            else if (s[1] == '/')
-            {
-                s.std::string::replace(0, 1, cwd());
-            }
-        }
-    }
+    // Standard handling of "~/", "./" etc.
+    standardExpansions(s);
 
     return s;
 }
@@ -886,11 +901,9 @@ bool Foam::stringOps::inplaceReplaceVar(string& s, const word& varName)
     {
         return false;
     }
-    else
-    {
-        s.replace(i, content.size(), string("${" + varName + "}"));
-        return true;
-    }
+
+    s.replace(i, content.size(), string("${" + varName + "}"));
+    return true;
 }
 
 

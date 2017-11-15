@@ -301,7 +301,7 @@ void Foam::searchableRotatedBox::findLineAll
     info.setSize(start.size());
 
     // Work array
-    DynamicList<pointIndexHit, 1, 1> hits;
+    DynamicList<pointIndexHit> hits;
 
     // Tolerances:
     // To find all intersections we add a small vector to the last intersection

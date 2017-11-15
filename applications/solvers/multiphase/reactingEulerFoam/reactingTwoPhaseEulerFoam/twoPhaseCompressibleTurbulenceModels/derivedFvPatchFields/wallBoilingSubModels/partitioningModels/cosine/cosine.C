@@ -97,10 +97,8 @@ void Foam::wallBoilingModels::partitioningModels::
 cosine::write(Ostream& os) const
 {
     partitioningModel::write(os);
-    os.writeKeyword("alphaLiquid1") << alphaLiquid1_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("alphaLiquid0") << alphaLiquid0_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("alphaLiquid1", alphaLiquid1_);
+    os.writeEntry("alphaLiquid0", alphaLiquid0_);
 }
 
 

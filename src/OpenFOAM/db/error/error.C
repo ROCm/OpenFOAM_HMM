@@ -250,21 +250,30 @@ void Foam::error::abort()
 }
 
 
+void Foam::error::write(Ostream& os, const bool includeTitle) const
+{
+    os  << nl;
+    if (includeTitle)
+    {
+        os  << title().c_str() << endl;
+    }
+    os  << message().c_str();
+
+    if (error::level >= 2 && sourceFileLineNumber())
+    {
+        os  << nl << nl
+            << "    From function " << functionName().c_str() << endl
+            << "    in file " << sourceFileName().c_str()
+            << " at line " << sourceFileLineNumber() << '.';
+    }
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const error& err)
 {
-    os  << nl
-        << err.title().c_str() << endl
-        << err.message().c_str();
-
-    if (error::level >= 2 && err.sourceFileLineNumber())
-    {
-        os  << nl << nl
-            << "    From function " << err.functionName().c_str() << endl
-            << "    in file " << err.sourceFileName().c_str()
-            << " at line " << err.sourceFileLineNumber() << '.';
-    }
+    err.write(os);
 
     return os;
 }

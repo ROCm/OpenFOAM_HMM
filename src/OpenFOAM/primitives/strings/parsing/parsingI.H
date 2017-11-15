@@ -32,7 +32,7 @@ inline Foam::parsing::errorType Foam::parsing::checkConversion
     if (errno || endptr == buf)
     {
         // Some type of error OR no conversion
-        return errorType::GENERAL;
+        return (errno == ERANGE ? errorType::RANGE : errorType::GENERAL);
     }
 
     // Trailing spaces are permitted

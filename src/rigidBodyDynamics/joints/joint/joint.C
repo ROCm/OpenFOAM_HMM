@@ -79,7 +79,7 @@ Foam::RBD::joint::~joint()
 
 void Foam::RBD::joint::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
 }
 
 

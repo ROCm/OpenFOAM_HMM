@@ -125,8 +125,7 @@ alphaContactAngleFvPatchScalarField::alphaContactAngleFvPatchScalarField
 void alphaContactAngleFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("thetaProperties")
-        << thetaProps_ << token::END_STATEMENT << nl;
+    os.writeEntry("thetaProperties", thetaProps_);
     writeEntry("value", os);
 }
 

@@ -33,6 +33,7 @@ Description
 #include "IFstream.H"
 #include "StringStream.H"
 #include "cpuTime.H"
+#include "DynamicList.H"
 
 using namespace Foam;
 
@@ -69,6 +70,8 @@ int main(int argc, char *argv[])
 
             IStringStream is(rawArg);
 
+            DynamicList<token> tokens;
+
             while (is.good())
             {
                 token tok(is);
@@ -83,12 +86,23 @@ int main(int argc, char *argv[])
                         << "  lookahead: '" << char(lookahead) << "'"
                         << endl;
                 }
+
+                if (tok.good())
+                {
+                    tokens.append(std::move(tok));
+                    if (verbose)
+                    {
+                        Info<< "after append: " << tok.info() << endl;
+                    }
+                }
             }
 
             if (verbose)
             {
                 Info<< nl;
                 IOobject::writeDivider(Info);
+
+                Info<< "tokenList:" << tokens << endl;
             }
         }
     }

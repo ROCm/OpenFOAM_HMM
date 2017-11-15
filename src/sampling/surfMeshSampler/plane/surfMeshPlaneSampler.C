@@ -73,7 +73,7 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
     triangulate_(triangulate),
     needsUpdate_(true)
 {
-    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) < 0)
+    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) == -1)
     {
         Info<< "cellZone " << zoneKey_
             << " not found - using entire mesh" << endl;
@@ -109,7 +109,7 @@ Foam::surfMeshPlaneSampler::surfMeshPlaneSampler
 
     dict.readIfPresent("zone", zoneKey_);
 
-    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) < 0)
+    if (debug && zoneKey_.size() && mesh.cellZones().findIndex(zoneKey_) == -1)
     {
         Info<< "cellZone " << zoneKey_
             << " not found - using entire mesh" << endl;

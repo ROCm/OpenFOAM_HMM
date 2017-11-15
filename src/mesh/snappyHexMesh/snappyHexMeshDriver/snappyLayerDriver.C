@@ -344,7 +344,7 @@ bool Foam::snappyLayerDriver::checkCommonOrder
     forAll(curFace, fp)
     {
         // Get the index in the neighbouring face shared with curFace
-        const label nb = findIndex(nbFace, curFace[fp]);
+        const label nb = nbFace.find(curFace[fp]);
 
         if (nb != -1)
         {
@@ -1936,7 +1936,7 @@ void Foam::snappyLayerDriver::getVertexString
 ) const
 {
     const labelList& fEdges = pp.faceEdges()[facei];
-    label fp = findIndex(fEdges, edgei);
+    label fp = fEdges.find(edgei);
 
     if (fp == -1)
     {

@@ -40,8 +40,8 @@ void Foam::enrichedPatch::completePointMap() const
 
     const Map<label>& pmm = pointMergeMap();
 
-    // Get the mesh points for both patches.  If the point has not been
-    // merged away, add it to the map
+    // Get the mesh points for both patches.
+    // If the point has not been merged away, add it to the map
 
     // Do master patch
     const labelList& masterMeshPoints = masterPatch_.meshPoints();
@@ -74,31 +74,6 @@ void Foam::enrichedPatch::completePointMap() const
             );
         }
     }
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-Foam::Map<Foam::point>& Foam::enrichedPatch::pointMap()
-{
-    if (!pointMapComplete_)
-    {
-        completePointMap();
-    }
-
-    return pointMap_;
-}
-
-
-const Foam::Map<Foam::point>& Foam::enrichedPatch::pointMap() const
-{
-    if (!pointMapComplete_)
-    {
-        completePointMap();
-    }
-
-    return pointMap_;
 }
 
 

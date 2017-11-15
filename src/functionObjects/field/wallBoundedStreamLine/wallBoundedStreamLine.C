@@ -131,12 +131,11 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
         // Get the seed points
         // ~~~~~~~~~~~~~~~~~~~
 
-        const sampledSet& seedPoints = sampledSetPtr_();
-
+        const sampledSet& seedPoints = sampledSetPoints();
 
         forAll(seedPoints, i)
         {
-            label celli = seedPoints.cells()[i];
+            const label celli = seedPoints.cells()[i];
 
             if (celli != -1)
             {

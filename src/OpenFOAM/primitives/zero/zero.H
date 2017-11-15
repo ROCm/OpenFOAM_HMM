@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,6 +43,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class Istream;
+class Ostream;
+
+class zero;
+
 /*---------------------------------------------------------------------------*\
                            Class zero Declaration
 \*---------------------------------------------------------------------------*/
@@ -50,13 +56,20 @@ namespace Foam
 class zero
 {
 public:
-
     typedef zero value_type;
+
+    // Forward declaration
+    class null;
+
 
     // Constructors
 
-        //- Construct null
+        //- Null constructible
         zero()
+        {}
+
+        //- Construct null from Istream. Consumes no content.
+        explicit zero(Istream&)
         {}
 
 
@@ -85,7 +98,45 @@ public:
         {
             return 0;
         }
+
 };
+
+
+/*---------------------------------------------------------------------------*\
+                         Class zero::null Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A zero class with a null output adapter.
+class zero::null
+:
+    public zero
+{
+public:
+    typedef null value_type;
+
+    //- Null constructible
+    null()
+    {}
+
+    //- Construct null from Istream without consuming any content.
+    explicit null(Istream&)
+    {}
+};
+
+
+// IOstream Operators
+
+//- Read from Istream consumes no content.
+inline Istream& operator>>(Istream& is, zero&)
+{
+    return is;
+}
+
+//- Write to Ostream emits no content.
+inline Ostream& operator<<(Ostream& os, const zero::null&)
+{
+    return os;
+}
 
 
 // Global zero

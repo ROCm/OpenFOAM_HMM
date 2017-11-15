@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ Application
 
 Group
     grpMeshManipulationUtilities
-
 
 Description
     'Stitches' a mesh.
@@ -76,100 +75,102 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-label addPointZone(const polyMesh& mesh, const word& name)
+label addPointZone(polyMesh& mesh, const word& name)
 {
-    label zoneID = mesh.pointZones().findZoneID(name);
+    pointZoneMesh& zones = mesh.pointZones();
+    label zoneID = zones.findZoneID(name);
 
     if (zoneID != -1)
     {
-        Info<< "Reusing existing pointZone "
-            << mesh.pointZones()[zoneID].name()
+        Info<< "Reusing existing pointZone " << zones[zoneID].name()
             << " at index " << zoneID << endl;
-    }
-    else
-    {
-        pointZoneMesh& pointZones = const_cast<polyMesh&>(mesh).pointZones();
-        zoneID = pointZones.size();
-        Info<< "Adding pointZone " << name << " at index " << zoneID << endl;
 
-        pointZones.setSize(zoneID+1);
-        pointZones.set
-        (
-            zoneID,
-            new pointZone
-            (
-                name,
-                labelList(0),
-                zoneID,
-                pointZones
-            )
-        );
+        return zoneID;
     }
+
+    zoneID = zones.size();
+    Info<< "Adding pointZone " << name << " at index " << zoneID << endl;
+
+    zones.setSize(zoneID+1);
+    zones.set
+    (
+        zoneID,
+        new pointZone
+        (
+            name,
+            labelList(0),
+            zoneID,
+            zones
+        )
+    );
+
     return zoneID;
 }
 
 
-label addFaceZone(const polyMesh& mesh, const word& name)
+label addFaceZone(polyMesh& mesh, const word& name)
 {
-    label zoneID = mesh.faceZones().findZoneID(name);
+    faceZoneMesh& zones = mesh.faceZones();
+    label zoneID = zones.findZoneID(name);
 
     if (zoneID != -1)
     {
-        Info<< "Reusing existing faceZone " << mesh.faceZones()[zoneID].name()
+        Info<< "Reusing existing faceZone " << zones[zoneID].name()
             << " at index " << zoneID << endl;
-    }
-    else
-    {
-        faceZoneMesh& faceZones = const_cast<polyMesh&>(mesh).faceZones();
-        zoneID = faceZones.size();
-        Info<< "Adding faceZone " << name << " at index " << zoneID << endl;
 
-        faceZones.setSize(zoneID+1);
-        faceZones.set
-        (
-            zoneID,
-            new faceZone
-            (
-                name,
-                labelList(0),
-                boolList(),
-                zoneID,
-                faceZones
-            )
-        );
+        return zoneID;
     }
+
+    zoneID = zones.size();
+    Info<< "Adding faceZone " << name << " at index " << zoneID << endl;
+
+    zones.setSize(zoneID+1);
+    zones.set
+    (
+        zoneID,
+        new faceZone
+        (
+            name,
+            labelList(0),
+            boolList(),
+            zoneID,
+            zones
+        )
+    );
+
     return zoneID;
 }
 
 
-label addCellZone(const polyMesh& mesh, const word& name)
+label addCellZone(polyMesh& mesh, const word& name)
 {
-    label zoneID = mesh.cellZones().findZoneID(name);
+    cellZoneMesh& zones = mesh.cellZones();
+    label zoneID = zones.findZoneID(name);
 
     if (zoneID != -1)
     {
-        Info<< "Reusing existing cellZone " << mesh.cellZones()[zoneID].name()
+        Info<< "Reusing existing cellZone " << zones[zoneID].name()
             << " at index " << zoneID << endl;
-    }
-    else
-    {
-        cellZoneMesh& cellZones = const_cast<polyMesh&>(mesh).cellZones();
-        zoneID = cellZones.size();
-        Info<< "Adding cellZone " << name << " at index " << zoneID << endl;
 
-        cellZones.setSize(zoneID+1);
-        cellZones.set
-        (
-            zoneID,
-            new cellZone
-            (
-                name,
-                labelList(0),
-                zoneID,
-                cellZones
-            )
-        );
+        return zoneID;
     }
+
+    zoneID = zones.size();
+    Info<< "Adding cellZone " << name << " at index " << zoneID << endl;
+
+    zones.setSize(zoneID+1);
+    zones.set
+    (
+        zoneID,
+        new cellZone
+        (
+            name,
+            labelList(0),
+            zoneID,
+            zones
+        )
+    );
+
     return zoneID;
 }
 
@@ -330,7 +331,8 @@ int main(int argc, char *argv[])
         isf[i] = masterPatch.start() + i;
     }
 
-    polyTopoChanger stitcher(mesh);
+    polyTopoChanger stitcher(mesh, IOobject::NO_READ);
+    stitcher.clear();
     stitcher.setSize(1);
 
     mesh.pointZones().clearAddressing();
@@ -340,13 +342,9 @@ int main(int argc, char *argv[])
     if (perfectCover)
     {
         // Add empty zone for resulting internal faces
-        label cutZoneID = addFaceZone(mesh, cutZoneName);
+        const label cutZoneID = addFaceZone(mesh, cutZoneName);
 
-        mesh.faceZones()[cutZoneID].resetAddressing
-        (
-            isf,
-            boolList(masterPatch.size(), false)
-        );
+        mesh.faceZones()[cutZoneID].resetAddressing(isf.xfer(), false);
 
         // Add the perfect interface mesh modifier
         stitcher.set
@@ -370,11 +368,7 @@ int main(int argc, char *argv[])
 
         label masterZoneID = addFaceZone(mesh, mergePatchName + "MasterZone");
 
-        mesh.faceZones()[masterZoneID].resetAddressing
-        (
-            isf,
-            boolList(masterPatch.size(), false)
-        );
+        mesh.faceZones()[masterZoneID].resetAddressing(isf.xfer(), false);
 
         // Slave patch
         const polyPatch& slavePatch = mesh.boundaryMesh()[slavePatchName];
@@ -387,19 +381,11 @@ int main(int argc, char *argv[])
         }
 
         label slaveZoneID = addFaceZone(mesh, mergePatchName + "SlaveZone");
-        mesh.faceZones()[slaveZoneID].resetAddressing
-        (
-            osf,
-            boolList(slavePatch.size(), false)
-        );
+        mesh.faceZones()[slaveZoneID].resetAddressing(osf.xfer(), false);
 
         // Add empty zone for cut faces
-        label cutZoneID = addFaceZone(mesh, cutZoneName);
-        mesh.faceZones()[cutZoneID].resetAddressing
-        (
-            labelList(0),
-            boolList(0, false)
-        );
+        const label cutZoneID = addFaceZone(mesh, cutZoneName);
+        mesh.faceZones()[cutZoneID].resetAddressing(labelList(0), false);
 
 
         // Add the sliding interface mesh modifier
@@ -428,7 +414,6 @@ int main(int argc, char *argv[])
         );
     }
 
-
     // Search for list of objects for this time
     IOobjectList objects(mesh, runTime.timeName());
 
@@ -449,7 +434,7 @@ int main(int argc, char *argv[])
     PtrList<volTensorField> volTensorFields;
     ReadFields(mesh, objects, volTensorFields);
 
-    //- Uncomment if you want to interpolate surface fields (usually bad idea)
+    //- Uncomment if you want to interpolate surface fields (usually a bad idea)
     //Info<< "Reading all current surfaceFields" << endl;
     //PtrList<surfaceScalarField> surfaceScalarFields;
     //ReadFields(mesh, objects, surfaceScalarFields);
@@ -483,7 +468,7 @@ int main(int argc, char *argv[])
     // Bypass runTime write (since only writes at writeTime)
     if
     (
-       !runTime.objectRegistry::writeObject
+        !runTime.objectRegistry::writeObject
         (
             runTime.writeFormat(),
             IOstream::currentVersion,

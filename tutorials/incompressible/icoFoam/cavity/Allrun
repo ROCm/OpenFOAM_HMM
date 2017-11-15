@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 cavityCases="cavity cavityFine cavityGrade cavityHighRe cavityClipped"
 
@@ -55,20 +53,21 @@ setCavityHighRe()
 }
 
 
+unset previousCase
 for caseName in $cavityCases
 do
-    if [ "$caseName" = cavityFine ]
-    then
+    case "$caseName" in
+    cavityFine)
         cloneCase cavity $caseName
         setCavityFine
-    fi
+        ;;
 
-    if [ "$caseName" = cavityHighRe ]
-    then
+    cavityHighRe)
         cloneCase cavity $caseName
         setCavityHighRe
         copySolutionDirs $caseName cavity
-    fi
+        ;;
+    esac
 
     ( cd $caseName && runApplication blockMesh )
 

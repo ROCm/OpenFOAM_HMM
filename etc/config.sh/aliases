@@ -72,10 +72,10 @@ alias run='cd $FOAM_RUN'
 unset -f wmRefresh 2>/dev/null
 wmRefresh()
 {
-    wmProjectDir=$WM_PROJECT_DIR
-    foamSettings=$FOAM_SETTINGS
+    local projectDir=$WM_PROJECT_DIR
+    local foamSettings=$FOAM_SETTINGS
     wmUnset
-    . $wmProjectDir/etc/bashrc $foamSettings
+    . $projectDir/etc/bashrc $foamSettings
 }
 
 
@@ -84,12 +84,25 @@ wmRefresh()
 unset -f foamVersion 2>/dev/null
 foamVersion()
 {
-    if [ "$1" ]; then
+    if [ "$#" -gt 0 ]
+    then
+        local ver=$1
+        shift
+        # The variable foamInstDir had meaning for older OpenFOAM versions
         foamInstDir=$FOAM_INST_DIR
-        wmUnset
-        . $foamInstDir/OpenFOAM-$1/etc/bashrc
-        foam
-        echo "Changed to OpenFOAM-$1" 1>&2
+        if [ -f "$foamInstDir/OpenFOAM-$ver/etc/bashrc" ]
+        then
+            wmUnset
+            . $foamInstDir/OpenFOAM-$ver/etc/bashrc
+            unset foamInstDir
+            foam
+            echo "Changed to OpenFOAM-$WM_PROJECT_VERSION" 1>&2
+        else
+            unset foamInstDir
+            echo "No OpenFOAM-$ver available" 1>&2
+            echo "Using OpenFOAM-$WM_PROJECT_VERSION" 1>&2
+            return 1
+        fi
     else
         echo "OpenFOAM-$WM_PROJECT_VERSION" 1>&2
     fi

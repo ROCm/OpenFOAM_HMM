@@ -176,7 +176,7 @@ void Foam::Cloud<ParticleType>::move
         pIter().stepFraction() = 0;
     }
 
-    // List of lists of particles to be transfered for all of the
+    // List of lists of particles to be transferred for all of the
     // neighbour processors
     List<IDLList<ParticleType>> particleTransferLists
     (
@@ -292,19 +292,19 @@ void Foam::Cloud<ParticleType>::move
         pBufs.finishedSends(allNTrans);
 
 
-        bool transfered = false;
+        bool transferred = false;
 
         for (const label n : allNTrans)
         {
             if (n)
             {
-                transfered = true;
+                transferred = true;
                 break;
             }
         }
-        reduce(transfered, orOp<bool>());
+        reduce(transferred, orOp<bool>());
 
-        if (!transfered)
+        if (!transferred)
         {
             break;
         }

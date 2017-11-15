@@ -127,13 +127,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const zone& z,
+    const zone& zn,
     const labelUList& addr,
     const label index
 )
 :
     labelList(addr),
-    name_(z.name()),
+    name_(zn.name()),
     index_(index),
     lookupMapPtr_(nullptr)
 {}
@@ -141,13 +141,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const zone& z,
+    const zone& zn,
     const Xfer<labelList>& addr,
     const label index
 )
 :
     labelList(addr),
-    name_(z.name()),
+    name_(zn.name()),
     index_(index),
     lookupMapPtr_(nullptr)
 {}
@@ -165,18 +165,7 @@ Foam::zone::~zone()
 
 Foam::label Foam::zone::localID(const label globalCellID) const
 {
-    const Map<label>& lm = lookupMap();
-
-    Map<label>::const_iterator lmIter = lm.find(globalCellID);
-
-    if (lmIter == lm.end())
-    {
-        return -1;
-    }
-    else
-    {
-        return lmIter();
-    }
+    return lookupMap().lookup(globalCellID, -1);
 }
 
 
@@ -197,7 +186,8 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
 
     forAll(addr, i)
     {
-        if (addr[i] < 0 || addr[i] >= maxSize)
+        const label idx = addr[i];
+        if (idx < 0 || idx >= maxSize)
         {
             hasError = true;
 
@@ -205,7 +195,7 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
             {
                 SeriousErrorInFunction
                     << "Zone " << name_
-                    << " contains invalid index label " << addr[i] << nl
+                    << " contains invalid index label " << idx << nl
                     << "Valid index labels are 0.."
                     << maxSize-1 << endl;
             }
@@ -215,13 +205,13 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
                 break;
             }
         }
-        else if (!elems.insert(addr[i]))
+        else if (!elems.insert(idx))
         {
             if (report)
             {
                 WarningInFunction
                     << "Zone " << name_
-                    << " contains duplicate index label " << addr[i] << endl;
+                    << " contains duplicate index label " << idx << endl;
             }
         }
     }
@@ -239,9 +229,9 @@ void Foam::zone::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const zone& z)
+Foam::Ostream& Foam::operator<<(Ostream& os, const zone& zn)
 {
-    z.write(os);
+    zn.write(os);
     os.check(FUNCTION_NAME);
     return os;
 }

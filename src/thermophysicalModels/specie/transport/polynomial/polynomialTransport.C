@@ -57,25 +57,27 @@ Foam::polynomialTransport<Thermo, PolySize>::polynomialTransport
 template<class Thermo, int PolySize>
 void Foam::polynomialTransport<Thermo, PolySize>::write(Ostream& os) const
 {
-    os  << this->name() << endl;
-    os  << token::BEGIN_BLOCK << incrIndent << nl;
+    os.beginBlock(this->name());
 
     Thermo::write(os);
 
-    dictionary dict("transport");
-    dict.add
-    (
-        word("muCoeffs<" + Foam::name(PolySize) + '>'),
-        muCoeffs_
-    );
-    dict.add
-    (
-        word("kappaCoeffs<" + Foam::name(PolySize) + '>'),
-        kappaCoeffs_
-    );
-    os  << indent << dict.dictName() << dict;
+    // Entries in dictionary format
+    {
+        os.beginBlock("transport");
+        os.writeEntry
+        (
+            word("muCoeffs<" + Foam::name(PolySize) + '>'),
+            muCoeffs_
+        );
+        os.writeEntry
+        (
+            word("kappaCoeffs<" + Foam::name(PolySize) + '>'),
+            kappaCoeffs_
+        );
+        os.endBlock();
+    }
 
-    os  << decrIndent << token::END_BLOCK << nl;
+    os.endBlock();
 }
 
 

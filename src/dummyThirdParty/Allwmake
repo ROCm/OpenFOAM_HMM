@@ -7,6 +7,7 @@ cd ${0%/*} || exit 1    # Run from this directory
 wmake $targetType scotchDecomp
 wmake $targetType ptscotchDecomp
 wmake $targetType metisDecomp
+wmake $targetType kahipDecomp
 wmake $targetType MGridGen
 
 #------------------------------------------------------------------------------

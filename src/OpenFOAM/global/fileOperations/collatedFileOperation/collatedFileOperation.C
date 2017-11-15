@@ -200,7 +200,7 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
                 << "         may \"hang\".  If thread support cannot be "
                    "enabled, deactivate threading" << nl
                 << "         by setting maxThreadFileBufferSize to 0 in "
-                   "$FOAM_ETC/controlDict"
+                   "the OpenFOAM etc/controlDict"
                 << endl;
         }
 

@@ -58,7 +58,7 @@ void surfaceNoise::initialise(const fileName& fName)
 
         // Find the index of the pressure data
         const List<word> fieldNames(readerPtr_->fieldNames(0));
-        pIndex_ = findIndex(fieldNames, pName_);
+        pIndex_ = fieldNames.find(pName_);
         if (pIndex_ == -1)
         {
             FatalErrorInFunction

@@ -106,6 +106,9 @@ class refinementParameters
 
         Switch interfaceRefine_;
 
+        label nErodeCellZone_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -210,6 +213,11 @@ public:
             bool interfaceRefine() const
             {
                 return interfaceRefine_;
+            }
+
+            label nErodeCellZone() const
+            {
+                return nErodeCellZone_;
             }
 
 

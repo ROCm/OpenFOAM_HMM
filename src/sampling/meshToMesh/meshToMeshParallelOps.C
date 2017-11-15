@@ -70,7 +70,7 @@ Foam::label Foam::meshToMesh::calcDistribution
         }
         else if (nHaveCells == 1)
         {
-            proci = findIndex(cellsPresentOnProc, 1);
+            proci = cellsPresentOnProc.find(1);
             if (debug)
             {
                 InfoInFunction

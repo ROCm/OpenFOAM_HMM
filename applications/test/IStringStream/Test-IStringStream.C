@@ -36,20 +36,22 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    IStringStream testStream(Foam::string("1002 sfsd sdfsd"));
+    IStringStream testStream(Foam::string("  1002  abcd  defg;"));
 
     label i(readLabel(testStream));
 
-    Info<< i << endl;
+    Info<< "label=" << i << nl;
 
-    word bla(testStream);
-    word bla2(testStream);
+    word w1(testStream);
+    word w2(testStream);
 
-    Info<< bla << tab << bla2 << endl;
+    Info<< "word=" << w1 << nl;
+    Info<< "word=" << w2 << nl;
 
-    wordList wl(IStringStream("(hello1")());
+    testStream.reset("(hello1)");
 
-    Info<< wl << endl;
+    wordList wl(testStream);
+    Info<< wl << nl;
 
     Info<< "\nEnd\n" << endl;
 

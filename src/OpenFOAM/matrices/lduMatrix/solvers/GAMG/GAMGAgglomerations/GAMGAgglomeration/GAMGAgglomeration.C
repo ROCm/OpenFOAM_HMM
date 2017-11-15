@@ -634,7 +634,7 @@ bool Foam::GAMGAgglomeration::checkRestriction
     {
         labelList& masters = coarseToMasters[restrict[celli]];
 
-        if (findIndex(masters, master[celli]) == -1)
+        if (!masters.found(master[celli]))
         {
             masters.append(master[celli]);
             nNewCoarse++;
@@ -672,7 +672,7 @@ bool Foam::GAMGAgglomeration::checkRestriction
         {
             label coarseI = restrict[celli];
 
-            label index = findIndex(coarseToMasters[coarseI], master[celli]);
+            label index = coarseToMasters[coarseI].find(master[celli]);
             newRestrict[celli] = coarseToNewCoarse[coarseI][index];
         }
 

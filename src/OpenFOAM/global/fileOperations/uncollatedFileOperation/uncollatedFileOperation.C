@@ -292,10 +292,11 @@ bool Foam::fileOperations::uncollatedFileOperation::rm
 
 bool Foam::fileOperations::uncollatedFileOperation::rmDir
 (
-    const fileName& dir
+    const fileName& dir,
+    const bool silent
 ) const
 {
-    return Foam::rmDir(dir);
+    return Foam::rmDir(dir, silent);
 }
 
 
@@ -600,7 +601,7 @@ bool Foam::fileOperations::uncollatedFileOperation::read
     if (masterOnly && Pstream::parRun())
     {
         // Master reads headerclassname from file. Make sure this gets
-        // transfered as well as contents.
+        // transferred as well as contents.
         Pstream::scatter(io.headerClassName());
         Pstream::scatter(io.note());
 

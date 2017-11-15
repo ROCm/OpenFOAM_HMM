@@ -300,32 +300,22 @@ void Foam::plenumPressureFvPatchScalarField::updateCoeffs()
 void Foam::plenumPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("gamma") << gamma_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("R") << R_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("supplyMassFlowRate") << supplyMassFlowRate_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("supplyTotalTemperature") << supplyTotalTemperature_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("plenumVolume") << plenumVolume_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("plenumDensity") << plenumDensity_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("plenumTemperature") << plenumTemperature_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("gamma", gamma_);
+    os.writeEntry("R", R_);
+    os.writeEntry("supplyMassFlowRate", supplyMassFlowRate_);
+    os.writeEntry("supplyTotalTemperature", supplyTotalTemperature_);
+    os.writeEntry("plenumVolume", plenumVolume_);
+    os.writeEntry("plenumDensity", plenumDensity_);
+    os.writeEntry("plenumTemperature", plenumTemperature_);
     if (hasRho_)
     {
-        os.writeKeyword("rho") << rho_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("rho", rho_);
     }
-    os.writeKeyword("inletAreaRatio") << inletAreaRatio_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("inletDischargeCoefficient") << inletDischargeCoefficient_
-        << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<scalar>(os, "timeScale", 0.0, timeScale_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    os.writeEntry("inletAreaRatio", inletAreaRatio_);
+    os.writeEntry("inletDischargeCoefficient", inletDischargeCoefficient_);
+    os.writeEntryIfDifferent<scalar>("timeScale", 0.0, timeScale_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
     writeEntry("value", os);
 }
 

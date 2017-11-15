@@ -205,7 +205,7 @@ void Foam::triSurfaceRegionSearch::findNearest
 
         forAll(octrees, treeI)
         {
-            if (findIndex(regionIndices, treeI) == -1)
+            if (!regionIndices.found(treeI))
             {
                 continue;
             }

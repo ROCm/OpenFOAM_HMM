@@ -35,8 +35,7 @@ static const char* notImplementedMessage =
 "LD_LIBRARY_PATH.\n"
 "The metisDecomp library can then be built from "
 "src/parallel/decompose/metisDecomp and dynamically loading or linking"
-" this library will add metis as a decomposition method.\n"
-"Please be aware that there are license restrictions on using Metis.";
+" this library will add metis as a decomposition method.\n";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,12 +54,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::label Foam::metisDecomp::decompose
+Foam::label Foam::metisDecomp::decomposeSerial
 (
-    const List<label>& adjncy,
-    const List<label>& xadj,
-    const scalarField& cellWeights,
-    List<label>& finalDecomp
+    const UList<label>& adjncy,
+    const UList<label>& xadj,
+    const UList<scalar>& cellWeights,
+    List<label>& decomp
 )
 {
     FatalErrorInFunction
@@ -77,53 +76,8 @@ Foam::metisDecomp::metisDecomp
     const dictionary& decompositionDict
 )
 :
-    decompositionMethod(decompositionDict)
+    metisLikeDecomp(decompositionDict)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::labelList Foam::metisDecomp::decompose
-(
-    const polyMesh& mesh,
-    const pointField& points,
-    const scalarField& pointWeights
-)
-{
-    FatalErrorInFunction
-        << notImplementedMessage << exit(FatalError);
-
-    return labelList();
-}
-
-
-Foam::labelList Foam::metisDecomp::decompose
-(
-    const polyMesh& mesh,
-    const labelList& agglom,
-    const pointField& agglomPoints,
-    const scalarField& agglomWeights
-)
-{
-    FatalErrorInFunction
-        << notImplementedMessage << exit(FatalError);
-
-    return labelList();
-}
-
-
-Foam::labelList Foam::metisDecomp::decompose
-(
-    const labelListList& globalCellCells,
-    const pointField& cellCentres,
-    const scalarField& cellWeights
-)
-{
-    FatalErrorInFunction
-        << notImplementedMessage << exit(FatalError);
-
-    return labelList();
-}
 
 
 // ************************************************************************* //

@@ -144,7 +144,7 @@ public:
 };
 
 
-//- Return reverse of a tuple2
+//- Return reverse of a Tuple2
 template<class Type1, class Type2>
 inline Tuple2<Type2, Type1> reverse(const Tuple2<Type1, Type2>& t)
 {

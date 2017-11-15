@@ -365,20 +365,17 @@ void Foam::pressurePIDControlInletVelocityFvPatchVectorField::write
 {
     fvPatchField<vector>::write(os);
 
-    os.writeKeyword("deltaP") << deltaP_ << token::END_STATEMENT << nl;
-    os.writeKeyword("upstream") << upstreamName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("downstream")
-        << downstreamName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("shapeFactor") << shapeFactor_
-        << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
-    writeEntryIfDifferent<word>(os, "rho", "none", rhoName_);
-    os.writeKeyword("P") << P_ << token::END_STATEMENT << nl;
-    os.writeKeyword("I") << I_ << token::END_STATEMENT << nl;
-    os.writeKeyword("D") << D_ << token::END_STATEMENT << nl;
-    os.writeKeyword("error") << error_ << token::END_STATEMENT << nl;
-    os.writeKeyword("errorIntegral")
-        << errorIntegral_ << token::END_STATEMENT << nl;
+    os.writeEntry("deltaP", deltaP_);
+    os.writeEntry("upstream", upstreamName_);
+    os.writeEntry("downstream", downstreamName_);
+    os.writeEntry("shapeFactor", shapeFactor_);
+    os.writeEntryIfDifferent<word>("p", "p", pName_);
+    os.writeEntryIfDifferent<word>("rho", "none", rhoName_);
+    os.writeEntry("P", P_);
+    os.writeEntry("I", I_);
+    os.writeEntry("D", D_);
+    os.writeEntry("error", error_);
+    os.writeEntry("errorIntegral", errorIntegral_);
 
     writeEntry("value", os);
 }

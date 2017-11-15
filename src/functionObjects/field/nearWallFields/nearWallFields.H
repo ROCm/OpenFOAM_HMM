@@ -107,7 +107,7 @@ protected:
 
         // Read from dictionary
 
-            //- Fields to process
+            //- Fields to process (input-name output-name)
             List<Tuple2<word, word>> fieldSet_;
 
             //- Switch to send output to Info as well as to file

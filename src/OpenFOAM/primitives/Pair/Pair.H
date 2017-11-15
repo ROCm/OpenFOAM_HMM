@@ -28,6 +28,9 @@ Description
     An ordered pair of two objects of type \<T\> with first() and second()
     elements.
 
+SourceFiles
+    PairI.H
+
 See also
     Foam::Tuple2 for storing two objects of dissimilar types.
 
@@ -48,10 +51,10 @@ namespace Foam
                             Class Pair Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
+template<class T>
 class Pair
 :
-    public FixedList<Type, 2>
+    public FixedList<T, 2>
 {
 
 public:
@@ -59,131 +62,96 @@ public:
     // Constructors
 
         //- Null constructor
-        inline Pair()
-        {}
+        inline Pair();
 
         //- Construct from components
-        inline Pair(const Type& f, const Type& s)
-        {
-            first() = f;
-            second() = s;
-        }
+        inline Pair(const T& f, const T& s);
 
         //- Construct from FixedList
-        inline Pair(const FixedList<Type, 2>& lst)
-        :
-            FixedList<Type, 2>(lst)
-        {}
+        inline Pair(const FixedList<T, 2>& lst);
+
+        //- Construct, optionally sorted with first less-than second
+        inline Pair(const T& f, const T& s, const bool doSort);
+
+        //- Construct, optionally sorted with first less-than second
+        inline Pair(const FixedList<T, 2>& lst, const bool doSort);
 
         //- Construct from Istream
-        inline Pair(Istream& is)
-        :
-            FixedList<Type, 2>(is)
-        {}
+        inline Pair(Istream& is);
 
 
     // Member Functions
 
-        //- Return first
-        inline const Type& first() const
-        {
-            return this->operator[](0);
-        }
+      // Access
 
-        //- Return first
-        inline Type& first()
-        {
-            return this->operator[](0);
-        }
+        //- Return first element
+        using FixedList<T, 2>::first;
 
-        //- Return second
-        inline const Type& second() const
-        {
-            return this->operator[](1);
-        }
+        //- Return last element
+        using FixedList<T, 2>::last;
 
-        //- Return second
-        inline Type& second()
-        {
-            return this->operator[](1);
-        }
+        //- Return second element, which is also the last element
+        inline const T& second() const;
 
-        //- Return other
-        inline const Type& other(const Type& a) const
-        {
-            if (first() == second())
-            {
-                FatalErrorInFunction
-                    << "Call to other only valid for Pair with differing"
-                    << " elements:" << *this << abort(FatalError);
-            }
-            else if (first() == a)
-            {
-                return second();
-            }
-            else
-            {
-                if (second() != a)
-                {
-                    FatalErrorInFunction
-                        << "Pair " << *this
-                        << " does not contain " << a << abort(FatalError);
-                }
-                return first();
-            }
-        }
+        //- Return second element, which is also the last element
+        inline T& second();
+
+        //- Return other element
+        inline const T& other(const T& a) const;
+
+
+     // Queries
+
+        //- True if first() is less-than second()
+        inline bool sorted() const;
+
+
+     // Editing
+
+        //- Flip the Pair in-place.
+        inline void flip();
+
+        //- Sort so that first() is less-than second()
+        inline void sort();
 
 
      // Comparison
 
         //- Compare Pairs
-        //  Returns:
+        //  \return
         //  -  0: different
         //  - +1: identical values and order used
         //  - -1: identical values, but in reversed order
-        static inline int compare(const Pair<Type>& a, const Pair<Type>& b)
-        {
-            if (a[0] == b[0] && a[1] == b[1])
-            {
-                return 1;
-            }
-            else if (a[0] == b[1] && a[1] == b[0])
-            {
-                return -1;
-            }
-            else
-            {
-                return 0;
-            }
-        }
+        static inline int compare(const Pair<T>& a, const Pair<T>& b);
 };
 
 
 // * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
-template<class Type>
-Pair<Type> reverse(const Pair<Type>& p)
+//- Return reverse of a Pair
+template<class T>
+Pair<T> reverse(const Pair<T>& p)
 {
-    return Pair<Type>(p.second(), p.first());
+    return Pair<T>(p.second(), p.first());
 }
 
 
-template<class Type>
-bool operator==(const Pair<Type>& a, const Pair<Type>& b)
+template<class T>
+bool operator==(const Pair<T>& a, const Pair<T>& b)
 {
     return (a.first() == b.first() && a.second() == b.second());
 }
 
 
-template<class Type>
-bool operator!=(const Pair<Type>& a, const Pair<Type>& b)
+template<class T>
+bool operator!=(const Pair<T>& a, const Pair<T>& b)
 {
     return !(a == b);
 }
 
 
-template<class Type>
-bool operator<(const Pair<Type>& a, const Pair<Type>& b)
+template<class T>
+bool operator<(const Pair<T>& a, const Pair<T>& b)
 {
     return
     (
@@ -197,22 +165,22 @@ bool operator<(const Pair<Type>& a, const Pair<Type>& b)
 }
 
 
-template<class Type>
-bool operator<=(const Pair<Type>& a, const Pair<Type>& b)
+template<class T>
+bool operator<=(const Pair<T>& a, const Pair<T>& b)
 {
     return !(b < a);
 }
 
 
-template<class Type>
-bool operator>(const Pair<Type>& a, const Pair<Type>& b)
+template<class T>
+bool operator>(const Pair<T>& a, const Pair<T>& b)
 {
     return (b < a);
 }
 
 
-template<class Type>
-bool operator>=(const Pair<Type>& a, const Pair<Type>& b)
+template<class T>
+bool operator>=(const Pair<T>& a, const Pair<T>& b)
 {
     return !(a < b);
 }
@@ -221,6 +189,10 @@ bool operator>=(const Pair<Type>& a, const Pair<Type>& b)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "PairI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

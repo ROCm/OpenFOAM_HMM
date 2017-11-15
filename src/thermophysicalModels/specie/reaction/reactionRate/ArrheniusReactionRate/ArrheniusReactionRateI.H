@@ -77,9 +77,9 @@ inline Foam::scalar Foam::ArrheniusReactionRate::operator()
 
 inline void Foam::ArrheniusReactionRate::write(Ostream& os) const
 {
-    os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
-    os.writeKeyword("beta") << beta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
+    os.writeEntry("A", A_);
+    os.writeEntry("beta", beta_);
+    os.writeEntry("Ta", Ta_);
 }
 
 

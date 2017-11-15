@@ -21,10 +21,11 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Typedef
-    Foam::faceListFwd
+Header
+    faceListFwd.H
 
 Description
+    Forwards for various types of face lists
 
 \*---------------------------------------------------------------------------*/
 
@@ -39,6 +40,7 @@ Description
 namespace Foam
 {
     class face;
+
     typedef UList<face> faceUList;
     typedef List<face> faceList;
     typedef SubList<face> faceSubList;

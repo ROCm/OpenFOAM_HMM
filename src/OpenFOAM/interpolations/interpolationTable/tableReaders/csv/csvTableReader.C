@@ -173,10 +173,8 @@ void Foam::csvTableReader<Type>::write(Ostream& os) const
 {
     tableReader<Type>::write(os);
 
-    os.writeKeyword("hasHeaderLine")
-        << headerLine_ << token::END_STATEMENT << nl;
-    os.writeKeyword("timeColumn")
-        << timeColumn_ << token::END_STATEMENT << nl;
+    os.writeEntry("hasHeaderLine", headerLine_);
+    os.writeEntry("timeColumn", timeColumn_);
 
     // Force writing labelList in ascii
     os.writeKeyword("valueColumns");
@@ -186,10 +184,13 @@ void Foam::csvTableReader<Type>::write(Ostream& os) const
         os  << componentColumns_;
         os.format(IOstream::BINARY);
     }
+    else
+    {
+        os << componentColumns_;
+    }
     os  << token::END_STATEMENT << nl;
 
-    os.writeKeyword("separator")
-        << string(separator_) << token::END_STATEMENT << nl;
+    os.writeEntry("separator", string(separator_));
 }
 
 

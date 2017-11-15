@@ -68,7 +68,7 @@ void Foam::functionObjects::fieldValues::fieldValueDelta::writeFileHeader
     DynamicList<word> commonFields(fields1.size());
     forAll(fields1, fieldi)
     {
-        label index = findIndex(fields2, fields1[fieldi]);
+        label index = fields2.find(fields1[fieldi]);
         if (index != -1)
         {
             commonFields.append(fields1[fieldi]);

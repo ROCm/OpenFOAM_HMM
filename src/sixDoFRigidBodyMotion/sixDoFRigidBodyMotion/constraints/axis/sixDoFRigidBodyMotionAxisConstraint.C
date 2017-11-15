@@ -116,8 +116,7 @@ void Foam::sixDoFRigidBodyMotionConstraints::axis::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("axis")
-        << axis_ << token::END_STATEMENT << nl;
+    os.writeEntry("axis", axis_);
 }
 
 // ************************************************************************* //

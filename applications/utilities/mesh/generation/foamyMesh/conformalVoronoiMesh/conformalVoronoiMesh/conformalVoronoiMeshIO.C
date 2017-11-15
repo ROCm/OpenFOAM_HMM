@@ -306,7 +306,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //            )()
 //        );
 //
-//        label pointi = findIndex(pointDualAddressing, -1);
+//        label pointi = pointDualAddressing.find(-1);
 //        if (pointi != -1)
 //        {
 //            WarningInFunction

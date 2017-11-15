@@ -129,7 +129,7 @@ Foam::searchableSurfaces::searchableSurfaces(const label size)
 //                    // Get the dictionary for region iter.key()
 //                    const dictionary& regionDict = regionsDict.subDict(key);
 //
-//                    label index = findIndex(localNames, key);
+//                    label index = localNames.find(key);
 //
 //                    if (index == -1)
 //                    {
@@ -251,7 +251,7 @@ Foam::searchableSurfaces::searchableSurfaces
                     // Get the dictionary for region iter.keyword()
                     const dictionary& regionDict = regionsDict.subDict(key);
 
-                    label index = findIndex(localNames, key);
+                    label index = localNames.find(key);
 
                     if (index == -1)
                     {
@@ -285,7 +285,7 @@ Foam::label Foam::searchableSurfaces::findSurfaceID
     const word& wantedName
 ) const
 {
-    return findIndex(names_, wantedName);
+    return names_.find(wantedName);
 }
 
 
@@ -295,9 +295,9 @@ Foam::label Foam::searchableSurfaces::findSurfaceRegionID
     const word& regionName
 ) const
 {
-    label surfaceIndex = findSurfaceID(surfaceName);
+    const label surfaceIndex = findSurfaceID(surfaceName);
 
-    return findIndex(this->operator[](surfaceIndex).regions(), regionName);
+    return this->operator[](surfaceIndex).regions().find(regionName);
 }
 
 

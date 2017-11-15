@@ -571,21 +571,20 @@ void Foam::MRFZone::correctBoundaryVelocity(volVectorField& U) const
 void Foam::MRFZone::writeData(Ostream& os) const
 {
     os  << nl;
-    os.write(name_) << nl;
-    os  << token::BEGIN_BLOCK << incrIndent << nl;
-    os.writeKeyword("active") << active_ << token::END_STATEMENT << nl;
-    os.writeKeyword("cellZone") << cellZoneName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
-    os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
+    os.beginBlock(name_);
+
+    os.writeEntry("active", active_);
+    os.writeEntry("cellZone", cellZoneName_);
+    os.writeEntry("origin", origin_);
+    os.writeEntry("axis", axis_);
     omega_->writeData(os);
 
     if (excludedPatchNames_.size())
     {
-        os.writeKeyword("nonRotatingPatches") << excludedPatchNames_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("nonRotatingPatches", excludedPatchNames_);
     }
 
-    os  << decrIndent << token::END_BLOCK << nl;
+    os.endBlock();
 }
 
 

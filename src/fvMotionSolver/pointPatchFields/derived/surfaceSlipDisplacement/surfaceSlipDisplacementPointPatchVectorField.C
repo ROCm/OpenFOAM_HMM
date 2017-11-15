@@ -431,10 +431,13 @@ void Foam::surfaceSlipDisplacementPointPatchVectorField::write
     os.writeEntry("projectMode", projectModeNames_[projectMode_]);
     os.writeEntry("projectDirection", projectDir_);
     os.writeEntry("wedgePlane", wedgePlane_);
-    if (frozenPointsZone_ != word::null)
-    {
-        os.writeEntry("frozenPointsZone", frozenPointsZone_);
-    }
+
+    os.writeEntryIfDifferent<word>
+    (
+        "frozenPointsZone",
+        word::null,
+        frozenPointsZone_
+    );
 }
 
 

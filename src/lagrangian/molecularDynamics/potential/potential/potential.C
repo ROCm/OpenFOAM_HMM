@@ -51,7 +51,7 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
         {
             const word& siteId = siteIdNames[sI];
 
-            if (findIndex(siteIdList, siteId) == -1)
+            if (!siteIdList.found(siteId))
             {
                 siteIdList.append(siteId);
             }
@@ -63,14 +63,14 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
         {
             const word& siteId = pairPotSiteIds[sI];
 
-            if (findIndex(siteIdNames, siteId) == -1)
+            if (!siteIdNames.found(siteId))
             {
                 FatalErrorInFunction
                     << siteId << " in pairPotentialSiteIds is not in siteIds: "
                     << siteIdNames << nl << abort(FatalError);
             }
 
-            if (findIndex(pairPotentialSiteIdList, siteId) == -1)
+            if (!pairPotentialSiteIdList.found(siteId))
             {
                 pairPotentialSiteIdList.append(siteId);
             }
@@ -83,7 +83,7 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
     {
         const word& siteId = siteIdList[aSIN];
 
-        if (findIndex(pairPotentialSiteIdList, siteId) == -1)
+        if (!pairPotentialSiteIdList.found(siteId))
         {
             pairPotentialSiteIdList.append(siteId);
         }
@@ -169,7 +169,7 @@ void Foam::potential::potential::readPotentialDict()
 
         forAll(removalOrder_, rO)
         {
-            removalOrder_[rO] = findIndex(idList_, remOrd[rO]);
+            removalOrder_[rO] = idList_.find(remOrd[rO]);
 
             if (removalOrder_[rO] == -1)
             {
@@ -288,7 +288,7 @@ void Foam::potential::potential::readMdInitialiseDict
                     << abort(FatalError);
             }
 
-            if (findIndex(idList,id) == -1)
+            if (!idList.found(id))
             {
                 idList.append(id);
             }
@@ -319,7 +319,7 @@ void Foam::potential::potential::readMdInitialiseDict
                     moleculePropertiesDict.subDict(id).lookup("siteIds")
                 );
 
-                if (findIndex(siteIds, tetherSiteId) != -1)
+                if (siteIds.found(tetherSiteId))
                 {
                     idFound = true;
                 }

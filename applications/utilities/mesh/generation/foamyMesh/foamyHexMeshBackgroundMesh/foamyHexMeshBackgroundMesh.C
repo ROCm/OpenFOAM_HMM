@@ -721,7 +721,7 @@ int main(int argc, char *argv[])
         isoFaces.setSize(iso.size());
         forAll(isoFaces, i)
         {
-            isoFaces[i] = iso[i].triFaceFace();
+            isoFaces[i] = iso[i];
         }
         isoPoints = iso.points();
     }

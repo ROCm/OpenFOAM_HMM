@@ -120,6 +120,24 @@ void testMapDistribute()
 }
 
 
+// Print to Perr
+template<class T>
+Ostream& perrInfo(const T& data)
+{
+    Perr<< data;
+    return Perr;
+}
+
+
+// Print to Perr
+template<>
+Ostream& perrInfo(const string& data)
+{
+    Perr<< data << " (size: " << data.size() << ")";
+    return Perr;
+}
+
+
 template<class T>
 void testTransfer(const T& input)
 {
@@ -127,7 +145,8 @@ void testTransfer(const T& input)
 
     if (Pstream::master())
     {
-        Perr<<"test transfer (" << (typeid(T).name()) << "): " << data << nl << endl;
+        Perr<<"test transfer (" << (typeid(T).name()) << "): ";
+        perrInfo(data) << nl << endl;
     }
 
     if (Pstream::myProcNo() != Pstream::masterNo())
@@ -141,7 +160,7 @@ void testTransfer(const T& input)
         Perr<< "slave receiving from master " << Pstream::masterNo() << endl;
         IPstream fromMaster(Pstream::commsTypes::blocking, Pstream::masterNo());
         fromMaster >> data;
-        Perr<< data << endl;
+        perrInfo(data) << endl;
     }
     else
     {
@@ -155,7 +174,7 @@ void testTransfer(const T& input)
             Perr<< "master receiving from slave " << slave << endl;
             IPstream fromSlave(Pstream::commsTypes::blocking, slave);
             fromSlave >> data;
-            Perr<< data << endl;
+            perrInfo(data) << endl;
         }
 
         for
@@ -258,6 +277,15 @@ int main(int argc, char *argv[])
     testTransfer(scalar(3.14159));
     testTransfer(string("test   string"));
     testTransfer(string("  x "));
+
+    {
+        // Slightly roundabout way to construct with a nul in string
+        string str1("embedded. nul character in string");
+        str1[8] = '\0';
+
+        Info<< "len: " << str1.size() << endl;
+        testTransfer(str1);
+    }
     testTransfer(word("3.141 59"));  // bad word, but transfer doesn't care
 
     testTokenized(label(1234));

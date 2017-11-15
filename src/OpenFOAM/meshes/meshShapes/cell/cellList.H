@@ -25,7 +25,25 @@ Typedef
     Foam::cellList
 
 Description
-    list of cells
+    A List of cells.
+
+Typedef
+    Foam::cellUList
+
+Description
+    A UList of cells.
+
+Typedef
+    Foam::cellSubList
+
+Description
+    A SubList of cells.
+
+Typedef
+    Foam::cellListList
+
+Description
+    A List of cellList.
 
 \*---------------------------------------------------------------------------*/
 
@@ -34,15 +52,8 @@ Description
 
 #include "cell.H"
 #include "List.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    typedef List<cell> cellList;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "SubList.H"
+#include "cellListFwd.H"
 
 #endif
 

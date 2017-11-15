@@ -149,9 +149,9 @@ void Foam::turbulentIntensityKineticEnergyInletFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("intensity") << intensity_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", this->phiName_);
+    os.writeEntry("intensity", intensity_);
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
     writeEntry("value", os);
 }
 

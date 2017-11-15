@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef blackModyEmission_H
-#define blackModyEmission_H
+#ifndef radiation_blackBodyEmission_H
+#define radiation_blackBodyEmission_H
 
 #include "volFields.H"
 #include "dimensionedScalar.H"

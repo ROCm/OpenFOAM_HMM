@@ -63,7 +63,7 @@ void greenRefine
 
     // Find index of edge in face.
 
-    label fp0 = findIndex(f, e[0]);
+    label fp0 = f.find(e[0]);
     label fp1 = f.fcIndex(fp0);
     label fp2 = f.fcIndex(fp1);
 
@@ -235,16 +235,11 @@ public:
     {
         const treeDataEdge& shape = tree_.shapes();
 
-        forAll(indices, i)
+        for (const label index : indices)
         {
-            const label index = indices[i];
             const label edgeIndex = shape.edgeLabels()[index];
 
-            if
-            (
-                !shapeMask_.empty()
-             && findIndex(shapeMask_, edgeIndex) != -1
-            )
+            if (shapeMask_.found(edgeIndex))
             {
                 continue;
             }
@@ -256,7 +251,7 @@ public:
             // Only register hit if closest point is not an edge point
             if (nearHit.hit())
             {
-                scalar distSqr = sqr(nearHit.distance());
+                const scalar distSqr = sqr(nearHit.distance());
 
                 if (distSqr < nearestDistSqr)
                 {

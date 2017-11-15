@@ -190,13 +190,12 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
 void Foam::porousBafflePressureFvPatchField::write(Ostream& os) const
 {
     fixedJumpFvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     D_->writeData(os);
     I_->writeData(os);
-    os.writeKeyword("length") << length_ << token::END_STATEMENT << nl;
-    os.writeKeyword("uniformJump") << uniformJump_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("length", length_);
+    os.writeEntry("uniformJump", uniformJump_);
 }
 
 

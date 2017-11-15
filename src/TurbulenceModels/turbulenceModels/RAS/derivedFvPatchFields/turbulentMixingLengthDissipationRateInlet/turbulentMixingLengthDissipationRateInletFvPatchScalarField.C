@@ -159,10 +159,9 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("mixingLength")
-        << mixingLength_ << token::END_STATEMENT << nl;
-    os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
+    os.writeEntry("mixingLength", mixingLength_);
+    os.writeEntry("phi", this->phiName_);
+    os.writeEntry("k", kName_);
     writeEntry("value", os);
 }
 

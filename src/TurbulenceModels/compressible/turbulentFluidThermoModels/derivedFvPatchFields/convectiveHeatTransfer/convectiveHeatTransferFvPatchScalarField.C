@@ -161,7 +161,7 @@ void convectiveHeatTransferFvPatchScalarField::updateCoeffs()
 void convectiveHeatTransferFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("L") << L_ << token::END_STATEMENT << nl;
+    os.writeEntry("L", L_);
     writeEntry("value", os);
 }
 

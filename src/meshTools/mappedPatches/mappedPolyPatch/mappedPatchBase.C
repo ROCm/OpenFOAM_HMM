@@ -1432,8 +1432,7 @@ void Foam::mappedPatchBase::write(Ostream& os) const
 
             if (!surfDict_.empty())
             {
-                os.writeKeyword(surfDict_.dictName());
-                os  << surfDict_;
+                surfDict_.writeEntry(surfDict_.dictName(), os);
             }
         }
     }

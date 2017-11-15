@@ -42,6 +42,7 @@ namespace Foam
 
 const char * const Foam::cellZone::labelsName = "cellLabels";
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellZone::cellZone

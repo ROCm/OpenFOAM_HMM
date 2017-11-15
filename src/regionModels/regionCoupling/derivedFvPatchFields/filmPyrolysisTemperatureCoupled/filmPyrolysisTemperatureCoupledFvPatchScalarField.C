@@ -186,22 +186,20 @@ void Foam::filmPyrolysisTemperatureCoupledFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_
     );
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "pyrolysisRegion",
         "pyrolysisProperties",
         pyrolysisRegionName_
     );
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     writeEntry("value", os);
 }
 

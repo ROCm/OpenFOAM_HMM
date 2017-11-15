@@ -109,8 +109,7 @@ void Foam::RBD::restraints::linearDamper::write
 {
     restraint::write(os);
 
-    os.writeKeyword("coeff")
-        << coeff_ << token::END_STATEMENT << nl;
+    os.writeEntry("coeff", coeff_);
 }
 
 

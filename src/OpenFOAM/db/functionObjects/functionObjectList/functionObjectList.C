@@ -579,9 +579,8 @@ bool Foam::functionObjectList::execute()
             }
         }
     }
-
     // Force writing of state dictionary after function object execution
-    if (time_.outputTime())
+    if (time_.writeTime())
     {
         label oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;
@@ -788,8 +787,9 @@ bool Foam::functionObjectList::read()
                 }
                 catch (Foam::error& err)
                 {
-                    WarningInFunction
-                        << "Caught FatalError " << err << nl << endl;
+                    // Bit of trickery to get the original message
+                    err.write(Warning, false);
+                    InfoInFunction << nl << endl;
                 }
 
                 // Restore previous exception throwing state

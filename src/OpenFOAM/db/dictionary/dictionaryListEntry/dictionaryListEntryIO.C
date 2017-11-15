@@ -47,6 +47,16 @@ static Foam::label realSize(const Foam::dictionary& dict)
 Foam::dictionaryListEntry::dictionaryListEntry
 (
     const dictionary& parentDict,
+    const dictionaryListEntry& dictEnt
+)
+:
+    dictionaryEntry(parentDict, dictEnt)
+{}
+
+
+Foam::dictionaryListEntry::dictionaryListEntry
+(
+    const dictionary& parentDict,
     Istream& is
 )
 :

@@ -28,11 +28,11 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<int SizeMin>
 Foam::label Foam::face::triangles
 (
     const UList<point>& points,
-    DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
+    DynamicList<face, SizeMin>& triFaces
 ) const
 {
     label triI = triFaces.size();

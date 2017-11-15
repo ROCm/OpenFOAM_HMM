@@ -98,8 +98,7 @@ void Foam::RBD::joints::Pa::jcalc
 void Foam::RBD::joints::Pa::write(Ostream& os) const
 {
     joint::write(os);
-    os.writeKeyword("axis")
-        << S_[0].l() << token::END_STATEMENT << nl;
+    os.writeEntry("axis", S_[0].l());
 }
 
 

@@ -30,7 +30,7 @@ Description
 
 #include "SLList.H"
 #include "Ostream.H"
-#include "stringListOps.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,21 +109,21 @@ public:
         {
             List<word> matched(SLList<T>::size());
 
-            label matchI = 0;
+            label matchi = 0;
             forAllConstIters(*this, iter)
             {
                 const word& name = iter().name();
 
                 if
                 (
-                    findStrings(whiteLst, name)
-                 && !findStrings(blackLst, name)
+                    stringOps::match(whiteLst, name)
+                 && !stringOps::match(blackLst, name)
                 )
                 {
-                    matched[matchI++] = name;
+                    matched[matchi++] = name;
                 }
             }
-            matched.setSize(matchI);
+            matched.setSize(matchi);
 
             return matched;
         }

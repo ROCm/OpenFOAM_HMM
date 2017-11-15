@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     while (true)
     {
         // Find first unset face.
-        label unsetFacei = findIndex(patchIDs, -1);
+        label unsetFacei = patchIDs.find(-1);
 
         if (unsetFacei == -1)
         {

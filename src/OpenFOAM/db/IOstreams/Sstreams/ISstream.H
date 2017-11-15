@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,9 +69,12 @@ class ISstream
 
 
         //- Read a verbatim string (excluding block delimiters).
+        //  The leading "#{" has been removed prior to calling,
+        //  continues until the closing "#}" has been found.
         Istream& readVerbatim(string& str);
 
-        //- Read a variable name (includes '{')
+        //- Read a variable name starting with '$'.
+        //  Handles both "$var" and "${var}" forms.
         Istream& readVariable(string& str);
 
         //- Disallow default bitwise assignment
@@ -82,7 +85,7 @@ public:
 
     // Constructors
 
-        //- Construct as wrapper around istream
+        //- Construct as wrapper around std::istream
         inline ISstream
         (
             std::istream& is,
@@ -163,8 +166,8 @@ public:
             //- Read binary block
             virtual Istream& read(char* buf, std::streamsize count);
 
-            //- Rewind and return the stream so that it may be read again
-            virtual Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            virtual void rewind();
 
 
         // Stream state functions

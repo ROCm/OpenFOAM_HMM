@@ -133,11 +133,8 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                             procAgglomMap[cluster[i]] = coarseI;
                         }
 
-                        label masterIndex = findIndex
-                        (
-                            cluster,
-                            coarseToMaster[coarseI]
-                        );
+                        const label masterIndex =
+                            cluster.find(coarseToMaster[coarseI]);
 
                         if (masterIndex == -1)
                         {
@@ -150,7 +147,7 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
                                 << exit(FatalError);
                         }
 
-                        if (findIndex(cluster, myProcID) != -1)
+                        if (cluster.found(myProcID))
                         {
                             // This is my cluster. Make sure master index is
                             // first
@@ -161,12 +158,12 @@ bool Foam::manualGAMGProcAgglomeration::agglomerate()
 
 
                     // Check that we've done all processors
-                    if (findIndex(procAgglomMap, -1) != -1)
+                    if (procAgglomMap.found(-1))
                     {
                         FatalErrorInFunction
                             << "At level " << fineLevelIndex
                             << " processor "
-                            << findIndex(procAgglomMap, -1)
+                            << procAgglomMap.find(-1)
                             << " is not in any cluster"
                             << exit(FatalError);
                     }

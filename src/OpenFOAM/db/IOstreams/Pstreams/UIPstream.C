@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,24 @@ License
 #include "token.H"
 #include <cctype>
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+// Adjust stream format based on the flagMask
+inline static void processFlags(Istream& is, int flagMask)
+{
+    if ((flagMask & token::ASCII))
+    {
+        is.format(IOstream::ASCII);
+    }
+    else if ((flagMask & token::BINARY))
+    {
+        is.format(IOstream::BINARY);
+    }
+}
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -42,12 +60,12 @@ inline void Foam::UIPstream::checkEof()
 
 
 template<class T>
-inline void Foam::UIPstream::readFromBuffer(T& t)
+inline void Foam::UIPstream::readFromBuffer(T& val)
 {
     const size_t align = sizeof(T);
     externalBufPosition_ = align + ((externalBufPosition_ - 1) & ~(align - 1));
 
-    t = reinterpret_cast<T&>(externalBuf_[externalBufPosition_]);
+    val = reinterpret_cast<T&>(externalBuf_[externalBufPosition_]);
     externalBufPosition_ += sizeof(T);
     checkEof();
 }
@@ -67,10 +85,14 @@ inline void Foam::UIPstream::readFromBuffer
           + ((externalBufPosition_ - 1) & ~(align - 1));
     }
 
-    const char* bufPtr = &externalBuf_[externalBufPosition_];
-    char* dataPtr = reinterpret_cast<char*>(data);
-    size_t i = count;
-    while (i--) *dataPtr++ = *bufPtr++;
+    const char* const __restrict__ buf = &externalBuf_[externalBufPosition_];
+    char* const __restrict__ output = reinterpret_cast<char*>(data);
+
+    for (size_t i = 0; i < count; ++i)
+    {
+        output[i] = buf[i];
+    }
+
     externalBufPosition_ += count;
     checkEof();
 }
@@ -78,14 +100,15 @@ inline void Foam::UIPstream::readFromBuffer
 
 inline Foam::Istream& Foam::UIPstream::readStringFromBuffer(std::string& str)
 {
+    // Use std::string::assign() to copy content, including '\0'.
+    // Stripping (when desired) is the responsibility of the sending side.
+
     size_t len;
     readFromBuffer(len);
-    // Uses the underlying std::string::operator=()
-    // - no stripInvalid invoked (the sending side should have done that)
-    // - relies on trailing '\0' char (so cannot send anything with an embedded
-    //   nul char)
-    str = &externalBuf_[externalBufPosition_];
-    externalBufPosition_ += len + 1;
+
+    str.assign(&externalBuf_[externalBufPosition_], len);
+
+    externalBufPosition_ += len;
     checkEof();
 
     return *this;
@@ -116,19 +139,48 @@ Foam::UIPstream::~UIPstream()
 Foam::Istream& Foam::UIPstream::read(token& t)
 {
     // Return the put back token if it exists
+    // - with additional handling for special stream flags
     if (Istream::getBack(t))
     {
-        return *this;
+        if (t.isFlag())
+        {
+            processFlags(*this, t.flagToken());
+        }
+        else
+        {
+            return *this;
+        }
     }
+
+    // Read character, return on error
+    // - with additional handling for special stream flags
 
     char c;
-
-    // Return on error
-    if (!read(c))
+    do
     {
-        t.setBad();
-        return *this;
+        if (!read(c))
+        {
+            t.setBad();   // Error
+            return *this;
+        }
+
+        if (c == token::FLAG)
+        {
+            char flagVal;
+
+            if (read(flagVal))
+            {
+                processFlags(*this, flagVal);
+            }
+            else
+            {
+                t.setBad();   // Error
+                return *this;
+            }
+        }
     }
+    while (c == token::FLAG);
+
 
     // Set the line number of this token to the current stream line number
     t.lineNumber() = lineNumber();
@@ -159,22 +211,20 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         // Word
         case token::tokenType::WORD :
         {
-            word* pval = new word;
-            if (read(*pval))
+            word val;
+            if (read(val))
             {
-                if (token::compound::isCompound(*pval))
+                if (token::compound::isCompound(val))
                 {
-                    t = token::compound::New(*pval, *this).ptr();
-                    delete pval;
+                    t = token::compound::New(val, *this).ptr();
                 }
                 else
                 {
-                    t = pval;
+                    t = std::move(val);
                 }
             }
             else
             {
-                delete pval;
                 t.setBad();
             }
             return *this;
@@ -185,26 +235,25 @@ Foam::Istream& Foam::UIPstream::read(token& t)
         {
             // Recurse to read actual string
             read(t);
-            t.type() = token::tokenType::VERBATIMSTRING;
+            t.setType(token::tokenType::VERBATIMSTRING);
             return *this;
         }
         case token::tokenType::VARIABLE :
         {
             // Recurse to read actual string
             read(t);
-            t.type() = token::tokenType::VARIABLE;
+            t.setType(token::tokenType::VARIABLE);
             return *this;
         }
         case token::tokenType::STRING :
         {
-            string* pval = new string;
-            if (read(*pval))
+            string val;
+            if (read(val))
             {
-                t = pval;
+                t = std::move(val);
             }
             else
             {
-                delete pval;
                 t.setBad();
             }
             return *this;
@@ -276,7 +325,7 @@ Foam::Istream& Foam::UIPstream::read(token& t)
 Foam::Istream& Foam::UIPstream::read(char& c)
 {
     c = externalBuf_[externalBufPosition_];
-    externalBufPosition_++;
+    ++externalBufPosition_;
     checkEof();
     return *this;
 }
@@ -329,10 +378,9 @@ Foam::Istream& Foam::UIPstream::read(char* data, std::streamsize count)
 }
 
 
-Foam::Istream& Foam::UIPstream::rewind()
+void Foam::UIPstream::rewind()
 {
     externalBufPosition_ = 0;
-    return *this;
 }
 
 

@@ -27,7 +27,7 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::Istream::putBack(const token& t)
+void Foam::Istream::putBack(const token& tok)
 {
     if (bad())
     {
@@ -43,13 +43,13 @@ void Foam::Istream::putBack(const token& t)
     }
     else
     {
-        putBackToken_ = t;
+        putBackToken_ = tok;
         putBack_ = true;
     }
 }
 
 
-bool Foam::Istream::getBack(token& t)
+bool Foam::Istream::getBack(token& tok)
 {
     if (bad())
     {
@@ -59,7 +59,7 @@ bool Foam::Istream::getBack(token& t)
     }
     else if (putBack_)
     {
-        t = putBackToken_;
+        tok = putBackToken_;
         putBack_ = false;
         return true;
     }
@@ -68,15 +68,15 @@ bool Foam::Istream::getBack(token& t)
 }
 
 
-bool Foam::Istream::peekBack(token& t)
+bool Foam::Istream::peekBack(token& tok)
 {
     if (putBack_)
     {
-        t = putBackToken_;
+        tok = putBackToken_;
     }
     else
     {
-        t = token::undefinedToken;
+        tok = token::undefinedToken;
     }
 
     return putBack_;
