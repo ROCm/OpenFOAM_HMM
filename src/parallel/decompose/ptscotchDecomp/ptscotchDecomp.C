@@ -770,9 +770,9 @@ Foam::label Foam::ptscotchDecomp::decompose
     feenableexcept(oldExcepts);
     #endif
 
+    // See above note to have size 1. Undo.
+    finalDecomp.setSize(xadjSize-1);
 
-
-    //finalDecomp.setSize(xadjSize-1);
     //check
     //(
     //    SCOTCH_dgraphPart
