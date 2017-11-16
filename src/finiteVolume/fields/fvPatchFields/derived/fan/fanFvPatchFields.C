@@ -55,7 +55,7 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
                 Un =
                     120.0*Un/pow3(constant::mathematical::pi)
                   * patch().magSf()
-                  / pow3(dm_);
+                  / pow3(dm_)/rpm_;
             }
         }
 
@@ -69,7 +69,7 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
             scalarField deltap = this->jumpTable_->value(Un);
             // Convert adimensional deltap from curve into deltaP
             scalarField pdFan =
-                deltap*pow4(constant::mathematical::pi)*rpm_*sqr(dm_)/1800;
+                deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800;
             this->jump_ = max(pdFan, scalar(0));
         }
         else
