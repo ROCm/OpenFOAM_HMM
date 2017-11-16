@@ -44,7 +44,6 @@ SourceFiles
 #define fft_H
 
 #include "complexFields.H"
-#include "UList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,6 +62,19 @@ public:
     };
 
 
+    //- Transform real-value data
+    //  - uses the fftw real to half-complex method
+    //  - result size is field.size()/2 + 1
+    static tmp<complexField> realTransform1D(const scalarField& field);
+
+
+    //- Transform real-value data
+    //  - uses the fftw real to half-complex method
+    //  - result size is field.size()/2 + 1
+    static tmp<complexField> realTransform1D(const tmp<scalarField>& field);
+
+
+    //- Transform compex-value data
     static void transform
     (
         complexField& field,

@@ -26,7 +26,6 @@ License
 #include "noiseFFT.H"
 #include "IFstream.H"
 #include "DynamicList.H"
-#include "SubField.H"
 #include "mathematicalConstants.H"
 #include "HashSet.H"
 #include "fft.H"
@@ -240,33 +239,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
     const tmp<scalarField>& tpn
 ) const
 {
-    // Calculate the 2-sided fft
-    // Note: result not scaled
-    tmp<scalarField> tPn2
-    (
-        mag
-        (
-            fft::reverseTransform
-            (
-                ReComplexField(tpn),
-                List<int>(1, tpn().size())
-            )
-        )
-    );
-
-    tpn.clear();
-
-    // Only storing the positive half
-    // Note: storing (N/2) values, DC component at position (0)
-    tmp<scalarField> tPn
-    (
-        new scalarField
-        (
-            scalarField::subField(tPn2(), tPn2().size()/2 + 1)
-        )
-    );
-
-    return tPn;
+    return mag(fft::realTransform1D(tpn));
 }
 
 
