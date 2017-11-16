@@ -628,6 +628,9 @@ void thermoSingleLayer::evolveRegion()
         InfoInFunction << endl;
     }
 
+    // Solve continuity for deltaRho_
+    solveContinuity();
+
     // Update sub-models to provide updated source contributions
     updateSubmodels();
 
