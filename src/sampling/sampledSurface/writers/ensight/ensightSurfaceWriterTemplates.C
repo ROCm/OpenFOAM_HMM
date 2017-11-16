@@ -284,9 +284,13 @@ Foam::fileName Foam::ensightSurfaceWriter::writeCollated
                 );
 
                 osCase
-                    << fieldType << " per "
-                    << word(isNodeValues ? "node:" : "element:")
-                    << setw(3)  << 1
+                    << fieldType
+                    <<
+                    (
+                        isNodeValues
+                      ? " per node:    1  "  // time-set 1
+                      : " per element: 1  "  // time-set 1
+                    )
                     << setw(15) << varName
                     << "   data/******/" << varName
                     << nl;
