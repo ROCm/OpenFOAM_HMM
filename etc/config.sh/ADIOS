@@ -5,21 +5,9 @@
 #   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-# License
+# This file is part of OpenFOAM, licensed under the GNU General Public License
+# <http://www.gnu.org/licenses/>.
 #     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/ADIOS
@@ -48,7 +36,7 @@
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-adios_version=ADIOS-1.11.1
+adios_version=ADIOS-1.12.0
 export ADIOS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
 
 # END OF (NORMAL) USER EDITABLE PART
