@@ -69,6 +69,7 @@ public:
         nonBlocking
     };
 
+    //- Names of the communication types
     static const Enum<commsTypes> commsTypeNames;
 
     // Public classes
@@ -87,8 +88,8 @@ public:
                 //- procIDs of all processors below (so not just directly below)
                 labelList allBelow_;
 
-                //- procIDs of all processors not below. (inverse set of
-                //  allBelow_ and minus myProcNo)
+                //- procIDs of all processors not below.
+                //  (inverse set of allBelow_ and minus myProcNo)
                 labelList allNotBelow_;
 
 
@@ -102,10 +103,10 @@ public:
                 //- Construct from components
                 commsStruct
                 (
-                    const label,
-                    const labelList&,
-                    const labelList&,
-                    const labelList&
+                    const label above,
+                    const labelList& below,
+                    const labelList& allBelow,
+                    const labelList& allNotBelow
                 );
 
                 //- Construct from components; construct allNotBelow_
@@ -113,9 +114,9 @@ public:
                 (
                     const label nProcs,
                     const label myProcID,
-                    const label,
-                    const labelList&,
-                    const labelList&
+                    const label above,
+                    const labelList& below,
+                    const labelList& allBelow
                 );
 
 
@@ -255,12 +256,12 @@ public:
     // Static data
 
         //- Should compact transfer be used in which floats replace doubles
-        //  reducing the bandwidth requirement at the expense of some loss
-        //  in accuracy
+        //- reducing the bandwidth requirement at the expense of some loss
+        //- in accuracy
         static bool floatTransfer;
 
         //- Number of processors at which the sum algorithm changes from linear
-        //  to tree
+        //- to tree
         static int nProcsSimpleSum;
 
         //- Default commsType
@@ -344,15 +345,15 @@ public:
         };
 
         //- Return physical processor number (i.e. processor number in
-        //  worldComm) given communicator and procssor
+        //- worldComm) given communicator and procssor
         static int baseProcNo(const label myComm, const int procID);
 
         //- Return processor number in communicator (given physical processor
-        //  number) (= reverse of baseProcNo)
+        //- number) (= reverse of baseProcNo)
         static label procNo(const label comm, const int baseProcID);
 
         //- Return processor number in communicator (given processor number
-        //  and communicator)
+        //- and communicator)
         static label procNo
         (
             const label myComm,
@@ -361,12 +362,22 @@ public:
         );
 
         //- Add the valid option this type of communications library
-        //  adds/requires on the command line
+        //- adds/requires on the command line
         static void addValidParOptions(HashTable<string>& validParOptions);
 
         //- Initialisation function called from main
-        //  Spawns slave processes and initialises inter-communication
+        //  Spawns slave processes and initialises inter-communication.
+        //  \note warns if MPI has already been initialized.
+        //      Fatal if MPI has already been finalized.
         static bool init(int& argc, char**& argv);
+
+        //- Special purpose initialisation function.
+        //  Performs a basic MPI_Init without any other setup.
+        //  Only used for applications that need MPI communication when
+        //  OpenFOAM is running in a non-parallel mode.
+        //  \note Behaves as a no-op if MPI has already been initialized.
+        //      Fatal if MPI has already been finalized.
+        static bool initNull();
 
         // Non-blocking comms
 
@@ -401,7 +412,7 @@ public:
         }
 
         //- Set data for parallel running. Special case nProcs=0 to switch off
-        //  parallel running
+        //- parallel running
         static void setParRun(const label nProcs);
 
         //- Number of processes in parallel run

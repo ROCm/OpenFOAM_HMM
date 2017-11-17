@@ -66,8 +66,67 @@ void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
 }
 
 
+bool Foam::UPstream::initNull()
+{
+    int flag = 0;
+
+    MPI_Finalized(&flag);
+    if (flag)
+    {
+        // Already finalized - this is an error
+        FatalErrorInFunction
+            << "MPI was already finalized - cannot perform MPI_Init" << endl
+            << Foam::abort(FatalError);
+
+        return false;
+    }
+
+    MPI_Initialized(&flag);
+    if (flag)
+    {
+        // Already initialized - nothing to do
+        return true;
+    }
+
+    MPI_Init_thread
+    (
+        nullptr,    // argc
+        nullptr,    // argv
+        MPI_THREAD_SINGLE,
+        &flag       // provided_thread_support
+    );
+
+    return true;
+}
+
+
 bool Foam::UPstream::init(int& argc, char**& argv)
 {
+    int flag = 0;
+
+    MPI_Finalized(&flag);
+    if (flag)
+    {
+        // Already finalized - this is an error
+        FatalErrorInFunction
+            << "MPI was already finalized - cannot perform MPI_Init" << endl
+            << Foam::abort(FatalError);
+
+        return false;
+    }
+
+    MPI_Initialized(&flag);
+    if (flag)
+    {
+        // Already initialized - issue warning and skip the rest
+        WarningInFunction
+            << "MPI was already initialized - cannot perform MPI_Init" << nl
+            << "This could indicate an application programming error!" << endl;
+
+        return true;
+    }
+
+
     //MPI_Init(&argc, &argv);
     int provided_thread_support;
     MPI_Init_thread
@@ -92,8 +151,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     if (numprocs <= 1)
     {
         FatalErrorInFunction
-            << "bool IPstream::init(int& argc, char**& argv) : "
-               "attempt to run parallel on 1 processor"
+            << "attempt to run parallel on 1 processor"
             << Foam::abort(FatalError);
     }
 
@@ -146,6 +204,26 @@ void Foam::UPstream::exit(int errnum)
     if (debug)
     {
         Pout<< "UPstream::exit." << endl;
+    }
+
+    int flag = 0;
+
+    MPI_Initialized(&flag);
+    if (!flag)
+    {
+        // Not initialized - just exit
+        ::exit(errnum);
+        return;
+    }
+
+    MPI_Finalized(&flag);
+    if (flag)
+    {
+        // Already finalized
+        FatalErrorInFunction
+            << "MPI was already finalized" << endl
+            << Foam::abort(FatalError);
+        return;
     }
 
     #ifndef SGIMPI

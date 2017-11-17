@@ -122,8 +122,8 @@ class argList
         //- Track enabled/disabled checking of processor directories state
         static bool checkProcessorDirectories_;
 
-        //- Switch on/off parallel mode. Has to be first to be constructed
-        //  so destructor is done last.
+        //- Switch on/off parallel mode.
+        //  Must be first to be constructed so destructor is done last.
         ParRunControl parRunControl_;
 
         //- The arguments after removing known options
