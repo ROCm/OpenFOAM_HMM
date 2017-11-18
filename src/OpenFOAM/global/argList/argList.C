@@ -45,6 +45,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+bool Foam::argList::argsMandatory_ = true;
 bool Foam::argList::bannerEnabled_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
@@ -206,6 +207,12 @@ void Foam::argList::removeOption(const word& opt)
 {
     validOptions.erase(opt);
     optionUsage.erase(opt);
+}
+
+
+void Foam::argList::nonMandatoryArgs()
+{
+    argsMandatory_ = false;
 }
 
 
@@ -1267,7 +1274,7 @@ void Foam::argList::printNotes() const
     if (!notes.empty())
     {
         Info<< nl;
-        forAllConstIter(SLList<string>, notes, iter)
+        forAllConstIters(notes, iter)
         {
             Info<< iter().c_str() << nl;
         }
@@ -1279,9 +1286,26 @@ void Foam::argList::printUsage() const
 {
     Info<< "\nUsage: " << executable_ << " [OPTIONS]";
 
-    forAllConstIter(SLList<string>, validArgs, iter)
+    if (validArgs.size())
     {
-        Info<< " <" << iter().c_str() << '>';
+        Info<< ' ';
+
+        if (!argsMandatory_)
+        {
+            Info<< '[';
+        }
+
+        label i = 0;
+        forAllConstIters(validArgs, iter)
+        {
+            if (i++) Info<< ' ';
+            Info<< '<' << iter().c_str() << '>';
+        }
+
+        if (!argsMandatory_)
+        {
+            Info<< ']';
+        }
     }
 
     Info<< "\noptions:\n";
@@ -1411,7 +1435,7 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
         if (checkOpts)
         {
-            forAllConstIter(HashTable<string>, options_, iter)
+            forAllConstIters(options_, iter)
             {
                 const word& optionName = iter.key();
                 if

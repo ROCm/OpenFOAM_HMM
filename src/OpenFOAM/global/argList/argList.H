@@ -116,6 +116,9 @@ class argList
 {
     // Private data
 
+        //- Track enabled/disabled mandatory arguments
+        static bool argsMandatory_;
+
         //- Track enabled/disabled banner state
         static bool bannerEnabled_;
 
@@ -375,6 +378,9 @@ public:
 
             //- Remove option from validOptions and from optionUsage
             static void removeOption(const word& opt);
+
+            //- Flag command arguments as being non-mandatory
+            static void nonMandatoryArgs();
 
             //- Disable emitting the banner information
             static void noBanner();
