@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     pimpleDyMFoam;
+application     pimpleFoam;
 
 startFrom       startTime;
 
@@ -23,19 +23,19 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         5;
+endTime         0.003;
 
-deltaT          1e-5;
+deltaT          5e-06;
 
-writeControl    adjustableRunTime;
+writeControl    timeStep;
 
-writeInterval   1e-2;
+writeInterval   40;
 
 purgeWrite      0;
 
-writeFormat     ascii;
+writeFormat     binary;
 
-writePrecision  10;
+writePrecision  6;
 
 writeCompression off;
 
@@ -45,20 +45,13 @@ timePrecision   6;
 
 runTimeModifiable true;
 
-adjustTimeStep  yes;
+adjustTimeStep  no;
 
-maxCo           0.9;
+maxCo           0.2;
 
 functions
 {
-    sixDoFRigidBodyState
-    {
-        type           sixDoFRigidBodyState;
-        libs           ("libsixDoFRigidBodyState.so");
-        angleFormat    degrees;
-    }
-
-    #include "ensightWrite"
+    #include "cuttingPlane"
 }
 
 // ************************************************************************* //

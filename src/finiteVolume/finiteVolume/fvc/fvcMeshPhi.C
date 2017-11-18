@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,6 +215,43 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvc::absolute
     else
     {
         return tmp<surfaceScalarField>(tphi, true);
+    }
+}
+
+
+void Foam::fvc::correctUf
+(
+    autoPtr<surfaceVectorField>& Uf,
+    const volVectorField& U,
+    const surfaceScalarField& phi
+)
+{
+    const fvMesh& mesh = U.mesh();
+
+    if (mesh.changing())
+    {
+        Uf() = fvc::interpolate(U);
+        surfaceVectorField n(mesh.Sf()/mesh.magSf());
+        Uf() += n*(phi/mesh.magSf() - (n & Uf()));
+    }
+}
+
+
+void Foam::fvc::correctRhoUf
+(
+    autoPtr<surfaceVectorField>& rhoUf,
+    const volScalarField& rho,
+    const volVectorField& U,
+    const surfaceScalarField& phi
+)
+{
+    const fvMesh& mesh = U.mesh();
+
+    if (mesh.changing())
+    {
+        rhoUf() = fvc::interpolate(rho*U);
+        surfaceVectorField n(mesh.Sf()/mesh.magSf());
+        rhoUf() += n*(fvc::absolute(phi, rho, U)/mesh.magSf() - (n & rhoUf()));
     }
 }
 

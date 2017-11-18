@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     pimpleDyMFoam;
+application     pimpleFoam;
 
 startFrom       startTime;
 
@@ -23,13 +23,16 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         0.003;
+endTime         0.1;
 
-deltaT          5e-06;
+deltaT          1e-5;
+writeControl    adjustableRunTime;
+writeInterval   0.001;
 
-writeControl    timeStep;
-
-writeInterval   40;
+////- For testing with moveDynamicMesh
+//deltaT          0.01;
+//writeControl    timeStep;
+//writeInterval   1;
 
 purgeWrite      0;
 
@@ -45,13 +48,15 @@ timePrecision   6;
 
 runTimeModifiable true;
 
-adjustTimeStep  no;
+adjustTimeStep  yes;
 
-maxCo           0.2;
+maxCo           2;
 
 functions
 {
-    #include "cuttingPlane"
+    #includeFunc Q
+    #include "surfaces"
+    #include "forces"
 }
 
 // ************************************************************************* //

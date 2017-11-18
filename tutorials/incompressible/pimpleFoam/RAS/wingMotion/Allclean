@@ -6,6 +6,6 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 ( cd wingMotion2D_simpleFoam && cleanCase0 )
 
-( cd wingMotion2D_pimpleDyMFoam && cleanCase0 )
+( cd wingMotion2D_pimpleFoam && cleanCase0 )
 
 #------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -146,6 +146,21 @@ namespace fvc
         const tmp<surfaceScalarField>& tphi,
         const volScalarField& rho,
         const volVectorField& U
+    );
+
+    void correctUf
+    (
+        autoPtr<surfaceVectorField>& Uf,
+        const volVectorField& U,
+        const surfaceScalarField& phi
+    );
+
+    void correctRhoUf
+    (
+        autoPtr<surfaceVectorField>& rhoUf,
+        const volScalarField& rho,
+        const volVectorField& U,
+        const surfaceScalarField& phi
     );
 }
 
