@@ -39,7 +39,6 @@ Description
 #include "cellShapeControl.H"
 #include "backgroundMeshDecomposition.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "DynamicField.H"
 #include "isoSurfaceCell.H"
 #include "vtkSurfaceWriter.H"
@@ -252,7 +251,7 @@ autoPtr<polyMesh> generateHexMesh
     }
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
     cellShapeList cellShapes(nCells[0]*nCells[1]*nCells[2]);
 
     labelList hexPoints(8);

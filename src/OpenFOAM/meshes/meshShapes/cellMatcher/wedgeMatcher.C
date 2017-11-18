@@ -27,13 +27,6 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::wedgeMatcher::vertPerCell = 7;
-const Foam::label Foam::wedgeMatcher::facePerCell = 6;
-const Foam::label Foam::wedgeMatcher::maxVertPerFace = 4;
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::wedgeMatcher::wedgeMatcher()
@@ -43,7 +36,7 @@ Foam::wedgeMatcher::wedgeMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "wedge"
+        "wedge" // same as cellModel::modelNames[cellModel::WEDGE]
     )
 {}
 
@@ -339,31 +332,25 @@ bool Foam::wedgeMatcher::faceSizeMatch
     label nTris = 0;
     label nQuads = 0;
 
-    forAll(myFaces, myFacei)
+    for (const label facei : myFaces)
     {
-        label size = faces[myFaces[myFacei]].size();
+        const label size = faces[facei].size();
 
         if (size == 3)
         {
-            nTris++;
+            ++nTris;
         }
         else if (size == 4)
         {
-            nQuads++;
+            ++nQuads;
         }
         else
         {
             return false;
         }
     }
-    if ((nTris == 2) && (nQuads == 4))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+
+    return (nTris == 2 && nQuads == 4);
 }
 
 
@@ -417,10 +404,8 @@ bool Foam::wedgeMatcher::matches
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

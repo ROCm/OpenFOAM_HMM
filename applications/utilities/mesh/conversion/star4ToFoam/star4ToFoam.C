@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a Star-CD (v4) pro-STAR mesh into OpenFOAM format.
+    Converts a STARCD/PROSTAR (v4) mesh into OpenFOAM format.
 
 Usage
     \b star4ToFoam [OPTION] prostarMesh
@@ -66,11 +66,11 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert pro-STAR (v4) mesh to OpenFOAM"
+        "convert STARCD/PROSTAR (v4) mesh to OpenFOAM"
     );
 
     argList::noParallel();
-    argList::validArgs.append("pro-STAR prefix");
+    argList::validArgs.append("PROSTAR prefix");
     argList::addBoolOption
     (
         "ascii",

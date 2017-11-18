@@ -203,7 +203,7 @@ public:
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        inline label insert(const UList<label>& lst);
+        inline label insert(const labelUList& lst);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
@@ -225,7 +225,7 @@ public:
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline label erase(const UList<label>& lst);
+        inline label erase(const labelUList& lst);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.

@@ -13,8 +13,7 @@ points[5] = vector(1, 0, 1);
 points[6] = vector(1, 1, 1);
 points[7] = vector(0, 1, 1);
 
-const cellModel& hexa = *(cellModeller::lookup("hex"));
-faceList faces = hexa.modelFaces();
+faceList faces = cellModel::ref(cellModel::HEX).modelFaces();
 
 fvMesh mesh
 (
@@ -25,7 +24,7 @@ fvMesh mesh
         runTime,
         IOobject::READ_IF_PRESENT
     ),
-    xferMove<Field<vector>>(points),
+    xferMove<pointField>(points),
     faces.xfer(),
     owner.xfer(),
     neighbour.xfer()

@@ -45,13 +45,6 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
-class cell;
-bool operator==(const cell& a, const cell& b);
-inline bool operator!=(const cell& a, const cell& b);
-
-
 /*---------------------------------------------------------------------------*\
                            Class cell Declaration
 \*---------------------------------------------------------------------------*/
@@ -73,7 +66,7 @@ public:
         //- Construct null
         inline cell();
 
-        //- Construct given size
+        //- Construct given size, with invalid point labels (-1)
         explicit inline cell(const label sz);
 
         //- Construct from list of labels
@@ -132,13 +125,17 @@ public:
 
         //- Returns cell volume
         scalar mag(const UList<point>& p, const faceUList& f) const;
-
-
-    // Friend Operators
-
-        friend bool operator==(const cell& a, const cell& b);
-        friend bool operator!=(const cell& a, const cell& b);
 };
+
+
+// Global Operators
+
+//- Test if both cells are the same size and contain the same points
+//  The internal point ordering is ignored
+bool operator==(const cell& a, const cell& b);
+
+//- Test if the cells differ (different size or different points)
+inline bool operator!=(const cell& a, const cell& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

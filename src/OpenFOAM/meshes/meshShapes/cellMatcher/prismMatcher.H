@@ -25,10 +25,10 @@ Class
     Foam::prismMatcher
 
 Description
-    A cellMatcher for prism cells
+    A cellMatcher for prism cells (cellModel::PRISM)
 
 See also
-    cellMatcher
+    cellMatcher, cellModel
 
 SourceFiles
     prismMatcher.C
@@ -53,21 +53,21 @@ class prismMatcher
 :
     public cellMatcher
 {
-    // Static data members
+    // Static Data Members
 
-        //- Constants for this shape
-        static const label vertPerCell;
-        static const label facePerCell;
-        static const label maxVertPerFace;
+        // Constants for this shape
+        static constexpr label vertPerCell = 6;
+        static constexpr label facePerCell = 5;
+        static constexpr label maxVertPerFace = 4;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        prismMatcher(const prismMatcher&);
+        prismMatcher(const prismMatcher&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const prismMatcher&);
+        prismMatcher& operator=(const prismMatcher&) = delete;
 
 
 public:

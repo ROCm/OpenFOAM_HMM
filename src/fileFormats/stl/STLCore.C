@@ -81,7 +81,7 @@ bool Foam::fileFormats::STLCore::isBinaryName
 // this seems to work better than the old token-based method
 // - using wordToken can cause an abort if non-word (binary) content
 //   is detected ... this is not exactly what we want.
-// - some programs (eg, pro-STAR) have 'solid' as the first word in
+// - some programs (eg, PROSTAR) have 'solid' as the first word in
 //   the binary header. This is just wrong and not our fault.
 int Foam::fileFormats::STLCore::detectBinaryHeader
 (

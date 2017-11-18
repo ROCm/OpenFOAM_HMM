@@ -27,7 +27,6 @@ License
 #include "foamVtkCore.H"
 #include "polyMesh.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 
 // Only used in this file
 #include "foamVtuSizingTemplates.C"
@@ -74,12 +73,12 @@ void Foam::vtk::vtuSizing::reset
     const bool decompose
 )
 {
-    const cellModel& tet      = *(cellModeller::lookup("tet"));
-    const cellModel& pyr      = *(cellModeller::lookup("pyr"));
-    const cellModel& prism    = *(cellModeller::lookup("prism"));
-    const cellModel& wedge    = *(cellModeller::lookup("wedge"));
-    const cellModel& tetWedge = *(cellModeller::lookup("tetWedge"));
-    const cellModel& hex      = *(cellModeller::lookup("hex"));
+    const cellModel& tet      = cellModel::ref(cellModel::TET);
+    const cellModel& pyr      = cellModel::ref(cellModel::PYR);
+    const cellModel& prism    = cellModel::ref(cellModel::PRISM);
+    const cellModel& wedge    = cellModel::ref(cellModel::WEDGE);
+    const cellModel& tetWedge = cellModel::ref(cellModel::TETWEDGE);
+    const cellModel& hex      = cellModel::ref(cellModel::HEX);
 
     const cellShapeList& shapes = mesh.cellShapes();
 

@@ -70,7 +70,7 @@ Note
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 using namespace Foam;
 
@@ -276,8 +276,7 @@ int main(int argc, char *argv[])
     }
 
 
-
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList tetPoints(4);
 

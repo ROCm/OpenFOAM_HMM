@@ -79,7 +79,6 @@ SourceFiles
 
 #include "labelList.H"
 #include "faceList.H"
-#include "boolList.H"
 #include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -90,8 +89,8 @@ namespace Foam
 // Forward declaration of classes
 class primitiveMesh;
 class cell;
-class cellShape;
 class cellModel;
+class cellShape;
 
 /*---------------------------------------------------------------------------*\
                          Class cellMatcher Declaration
@@ -178,15 +177,15 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        cellMatcher(const cellMatcher&);
-        void operator=(const cellMatcher&);
+        cellMatcher(const cellMatcher&) = delete;
+        cellMatcher& operator=(const cellMatcher&) = delete;
 
 
 public:
 
     // Constructors
 
-        //- Construct given mesh and shape factors
+        //- Construct for shape factors
         cellMatcher
         (
             const label vertPerCell,

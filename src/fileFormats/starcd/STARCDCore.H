@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STARCDCore
 
 Description
-    Core routines used when reading/writing pro-STAR vrt/cel/bnd files.
+    Core routines used when reading/writing PROSTAR vrt/cel/bnd files.
 
 SourceFiles
     STARCDCore.C
@@ -121,11 +121,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Face addressing from pro-STAR faces to OpenFOAM faces.
+        //- Face addressing from PROSTAR faces to OpenFOAM faces.
         //  For hex, prism, tet, pyr primitive shapes.
         static const Map<FixedList<int, 6>> starToFoamFaceAddr;
 
-        //- Face addressing from OpenFOAM faces to pro-STAR faces.
+        //- Face addressing from OpenFOAM faces to PROSTAR faces.
         //  For hex, prism, tet, pyr primitive shapes.
         static const Map<FixedList<int, 6>> foamToStarFaceAddr;
 

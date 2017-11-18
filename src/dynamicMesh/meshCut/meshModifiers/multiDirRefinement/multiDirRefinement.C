@@ -33,7 +33,7 @@ License
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -186,7 +186,7 @@ void Foam::multiDirRefinement::addCells
 
 Foam::labelList Foam::multiDirRefinement::splitOffHex(const primitiveMesh& mesh)
 {
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     const cellShapeList& cellShapes = mesh.cellShapes();
 

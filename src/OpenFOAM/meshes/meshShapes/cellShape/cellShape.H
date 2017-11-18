@@ -87,16 +87,16 @@ public:
         //- Construct from components
         inline cellShape
         (
-            const cellModel&,
-            const labelList&,
+            const cellModel& model,
+            const labelUList& labels,
             const bool doCollapse = false
         );
 
         //- Construct from components
         inline cellShape
         (
-            const word& model,
-            const labelList&,
+            const word& modelName,
+            const labelUList& labels,
             const bool doCollapse = false
         );
 

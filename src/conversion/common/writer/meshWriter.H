@@ -107,14 +107,6 @@ protected:
         //- cellTable IDs for each cell
         labelList cellTableId_;
 
-        //- Pointers to cell shape models
-        static const cellModel* unknownModel;
-        static const cellModel* tetModel;
-        static const cellModel* pyrModel;
-        static const cellModel* prismModel;
-        static const cellModel* hexModel;
-
-
 public:
 
     // Static data members
