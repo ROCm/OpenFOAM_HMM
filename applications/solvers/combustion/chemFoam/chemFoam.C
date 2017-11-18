@@ -42,7 +42,7 @@ Description
 #include "OFstream.H"
 #include "thermoPhysicsTypes.H"
 #include "basicMultiComponentMixture.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

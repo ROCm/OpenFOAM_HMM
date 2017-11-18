@@ -53,7 +53,6 @@ Description
 #include "faceSet.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
-#include "cellModeller.H"
 #include "uindirectPrimitivePatch.H"
 #include "surfZoneIdentifierList.H"
 #include "UnsortedMeshedSurface.H"

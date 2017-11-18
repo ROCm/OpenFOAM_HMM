@@ -149,11 +149,11 @@ inline Point Foam::triangle<Point, PointRef>::circumCentre() const
 template<class Point, class PointRef>
 inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
 {
-    scalar d1 =  (c_ - a_) & (b_ - a_);
-    scalar d2 = -(c_ - b_) & (b_ - a_);
-    scalar d3 =  (c_ - a_) & (c_ - b_);
+    const scalar d1 =  (c_ - a_) & (b_ - a_);
+    const scalar d2 = -(c_ - b_) & (b_ - a_);
+    const scalar d3 =  (c_ - a_) & (c_ - b_);
 
-    scalar denom = d2*d3 + d3*d1 + d1*d2;
+    const scalar denom = d2*d3 + d3*d1 + d1*d2;
 
     if (Foam::mag(denom) < VSMALL)
     {
@@ -161,12 +161,9 @@ inline Foam::scalar Foam::triangle<Point, PointRef>::circumRadius() const
 
         return GREAT;
     }
-    else
-    {
-        scalar a = (d1 + d2)*(d2 + d3)*(d3 + d1) / denom;
 
-        return 0.5*Foam::sqrt(min(GREAT, max(0, a)));
-    }
+    const scalar a = (d1 + d2)*(d2 + d3)*(d3 + d1) / denom;
+    return 0.5*Foam::sqrt(min(GREAT, max(0, a)));
 }
 
 

@@ -27,13 +27,6 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::hexMatcher::vertPerCell = 8;
-const Foam::label Foam::hexMatcher::facePerCell = 6;
-const Foam::label Foam::hexMatcher::maxVertPerFace = 4;
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::hexMatcher::hexMatcher()
@@ -43,7 +36,7 @@ Foam::hexMatcher::hexMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "hex"
+        "hex" // same as cellModel::modelNames[cellModel::HEX]
     )
 {}
 
@@ -261,9 +254,9 @@ bool Foam::hexMatcher::faceSizeMatch
         return false;
     }
 
-    forAll(myFaces, myFacei)
+    for (const label facei : myFaces)
     {
-        label size = faces[myFaces[myFacei]].size();
+        const label size = faces[facei].size();
 
         if (size != 4)
         {
@@ -325,10 +318,8 @@ bool Foam::hexMatcher::matches
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

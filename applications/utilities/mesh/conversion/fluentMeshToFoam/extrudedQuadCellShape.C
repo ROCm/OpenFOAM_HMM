@@ -51,7 +51,7 @@ cellShape extrudedQuadCellShape
 
     if (!hexModelPtr_)
     {
-        hexModelPtr_ = cellModeller::lookup("hex");
+        hexModelPtr_ = cellModel::ptr(cellModel::HEX);
     }
 
     const cellModel& hex = *hexModelPtr_;

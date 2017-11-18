@@ -26,6 +26,7 @@ Class
 
 Description
     Collection of all hex degenerate matchers (hex, wedge, prism etc.)
+
     Has static member function to match a shape.
 
 See also
@@ -52,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class degenerateMatcher Declaration
+                      Class degenerateMatcher Declaration
 \*---------------------------------------------------------------------------*/
 
 class degenerateMatcher

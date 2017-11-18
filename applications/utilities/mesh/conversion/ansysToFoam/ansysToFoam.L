@@ -56,7 +56,6 @@ using namespace Foam;
 #include "emptyPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "SLList.H"
 #include "SLPtrList.H"
 
@@ -363,10 +362,10 @@ int main(int argc, char *argv[])
     }
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList labelsHex(8);
     labelList labelsPrism(6);

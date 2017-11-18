@@ -61,6 +61,8 @@ inline Foam::label Foam::cell::nFaces() const
 }
 
 
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
+
 inline bool Foam::operator!=(const cell& a, const cell& b)
 {
     return !(a == b);

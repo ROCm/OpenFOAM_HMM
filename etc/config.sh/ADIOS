@@ -5,9 +5,9 @@
 #   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-# This file is part of OpenFOAM, licensed under the GNU General Public License
-# <http://www.gnu.org/licenses/>.
-#     This file is part of OpenFOAM.
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/ADIOS

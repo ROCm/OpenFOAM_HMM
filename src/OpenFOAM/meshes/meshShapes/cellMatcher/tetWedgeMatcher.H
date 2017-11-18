@@ -25,10 +25,10 @@ Class
     Foam::tetWedgeMatcher
 
 Description
-    A cellMatcher for tetWedge cells
+    A cellMatcher for tetWedge cells (cellModel::TETWEDGE).
 
 See also
-    cellMatcher
+    cellMatcher, cellModel
 
 SourceFiles
     tetWedgeMatcher.C
@@ -46,28 +46,28 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class tetWedgeMatcher Declaration
+                       Class tetWedgeMatcher Declaration
 \*---------------------------------------------------------------------------*/
 
 class tetWedgeMatcher
 :
     public cellMatcher
 {
-    // Static data members
+    // Static Data Members
 
-        //- Constants for this shape
-        static const label vertPerCell;
-        static const label facePerCell;
-        static const label maxVertPerFace;
+        // Constants for this shape
+        static constexpr label vertPerCell = 5;
+        static constexpr label facePerCell = 4;
+        static constexpr label maxVertPerFace = 4;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        tetWedgeMatcher(const tetWedgeMatcher&);
+        tetWedgeMatcher(const tetWedgeMatcher&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const tetWedgeMatcher&);
+        tetWedgeMatcher& operator=(const tetWedgeMatcher&) = delete;
 
 
 public:

@@ -34,7 +34,7 @@ using std::ios;
 #include "wallFvPatch.H"
 #include "symmetryPlaneFvPatch.H"
 #include "symmetryFvPatch.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -218,10 +218,10 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         << "(12 (1 1 "
         << nCells() << " 1 0)(" << std::endl;
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     const cellShapeList& cells = cellShapes();
 

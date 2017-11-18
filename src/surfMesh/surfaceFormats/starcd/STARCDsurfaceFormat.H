@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STARCDsurfaceFormat
 
 Description
-    Read/write the surface shells from pro-STAR vrt/cel files.
+    Read/write the surface shells from PROSTAR vrt/cel files.
 
 Note
     Uses the extension \a .inp (input) to denote the format.

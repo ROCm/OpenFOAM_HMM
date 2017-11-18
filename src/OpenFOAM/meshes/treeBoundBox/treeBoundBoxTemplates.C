@@ -26,9 +26,7 @@ License
 #include "treeBoundBox.H"
 #include "FixedList.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 template<unsigned Size>
 Foam::treeBoundBox::treeBoundBox

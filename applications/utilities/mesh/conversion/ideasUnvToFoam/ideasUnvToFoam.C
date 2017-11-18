@@ -42,7 +42,7 @@ Description
 #include "polyMesh.H"
 #include "Time.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "DynamicList.H"
@@ -291,9 +291,9 @@ void readCells
     labelList unvToFoam(invert(maxUnvPoint+1, unvPointID));
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelHashSet skippedElements;
 

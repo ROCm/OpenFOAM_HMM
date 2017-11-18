@@ -52,10 +52,8 @@ inline int Foam::triFace::compare(const triFace& a, const triFace& b)
         // same face, but reversed orientation
         return -1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 
@@ -379,10 +377,8 @@ inline int Foam::triFace::edgeDirection(const edge& e) const
     {
         return -1;
     }
-    else
-    {
-        return 0;
-    }
+
+    return 0;
 }
 
 

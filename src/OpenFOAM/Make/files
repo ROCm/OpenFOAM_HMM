@@ -442,11 +442,9 @@ $(cell)/cellIOList.C
 tetCell = $(meshShapes)/tetCell
 $(tetCell)/tetCell.C
 
-cellModeller = $(meshShapes)/cellModeller
-$(cellModeller)/cellModeller.C
-
 cellModel = $(meshShapes)/cellModel
 $(cellModel)/cellModel.C
+$(cellModel)/cellModels.C
 $(cellModel)/cellModelIO.C
 
 cellShape = $(meshShapes)/cellShape

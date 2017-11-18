@@ -52,7 +52,7 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "repatchPolyTopoChanger.H"
 #include "cellSet.H"
 #include "faceSet.H"
@@ -435,10 +435,10 @@ void readCells
 
     Info<< "Starting to read cells at line " << inFile.lineNumber() << endl;
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     face triPoints(3);
     face quadPoints(4);

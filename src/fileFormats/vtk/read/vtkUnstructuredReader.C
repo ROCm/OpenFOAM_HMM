@@ -27,7 +27,7 @@ License
 #include "labelIOField.H"
 #include "scalarIOField.H"
 #include "stringIOList.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "vectorIOField.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
@@ -104,10 +104,10 @@ void Foam::vtkUnstructuredReader::extractCells
     const labelList& cellVertData
 )
 {
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList tetPoints(4);
     labelList pyrPoints(5);

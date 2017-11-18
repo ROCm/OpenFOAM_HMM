@@ -26,7 +26,7 @@ License
 #include "hexCellLooper.H"
 #include "cellFeatures.H"
 #include "polyMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "plane.H"
 #include "ListOps.H"
 #include "meshTools.H"
@@ -153,7 +153,7 @@ void Foam::hexCellLooper::makeFace
 Foam::hexCellLooper::hexCellLooper(const polyMesh& mesh)
 :
     geomCellLooper(mesh),
-    hex_(*(cellModeller::lookup("hex")))
+    hex_(cellModel::ref(cellModel::HEX))
 {}
 
 

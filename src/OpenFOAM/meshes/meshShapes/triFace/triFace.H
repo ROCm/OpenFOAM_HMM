@@ -86,10 +86,10 @@ public:
             const label c
         );
 
-        //- Copy construct from a list of 3 labels.
+        //- Copy construct from a list of three point labels.
         explicit inline triFace(const labelUList& lst);
 
-        //- Construct from an initializer list of 3 labels
+        //- Construct from an initializer list of three point labels
         explicit inline triFace(std::initializer_list<label> lst);
 
         //- Construct from Istream

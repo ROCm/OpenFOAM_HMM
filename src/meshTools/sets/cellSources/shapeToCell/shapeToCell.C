@@ -76,7 +76,7 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
     }
     else
     {
-        const cellModel& wantedModel = *(cellModeller::lookup(type_));
+        const cellModel& wantedModel = cellModel::ref(type_);
 
         const cellShapeList& cellShapes = mesh_.cellShapes();
 
@@ -93,7 +93,6 @@ void Foam::shapeToCell::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::shapeToCell::shapeToCell
 (
     const polyMesh& mesh,
@@ -103,7 +102,7 @@ Foam::shapeToCell::shapeToCell
     topoSetSource(mesh),
     type_(type)
 {
-    if (!cellModeller::lookup(type_) && (type_ != "splitHex"))
+    if (!cellModel::ptr(type_) && type_ != "splitHex")
     {
         FatalErrorInFunction
             << "Illegal cell type " << type_ << exit(FatalError);
@@ -111,7 +110,6 @@ Foam::shapeToCell::shapeToCell
 }
 
 
-// Construct from dictionary
 Foam::shapeToCell::shapeToCell
 (
     const polyMesh& mesh,
@@ -121,7 +119,7 @@ Foam::shapeToCell::shapeToCell
     topoSetSource(mesh),
     type_(dict.lookup("type"))
 {
-    if (!cellModeller::lookup(type_) && (type_ != "splitHex"))
+    if (!cellModel::ptr(type_) && type_ != "splitHex")
     {
         FatalErrorInFunction
             << "Illegal cell type " << type_ << exit(FatalError);
@@ -129,7 +127,6 @@ Foam::shapeToCell::shapeToCell
 }
 
 
-// Construct from Istream
 Foam::shapeToCell::shapeToCell
 (
     const polyMesh& mesh,
@@ -139,12 +136,13 @@ Foam::shapeToCell::shapeToCell
     topoSetSource(mesh),
     type_(checkIs(is))
 {
-    if (!cellModeller::lookup(type_) && (type_ != "splitHex"))
+    if (!cellModel::ptr(type_) && type_ != "splitHex")
     {
         FatalErrorInFunction
             << "Illegal cell type " << type_ << exit(FatalError);
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 

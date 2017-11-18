@@ -26,7 +26,7 @@ License
 #include "ensightCells.H"
 #include "error.H"
 #include "polyMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -162,10 +162,10 @@ void Foam::ensightCells::classify
 )
 {
     // References to cell shape models
-    const cellModel& tet   = *(cellModeller::lookup("tet"));
-    const cellModel& pyr   = *(cellModeller::lookup("pyr"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& hex   = *(cellModeller::lookup("hex"));
+    const cellModel& tet   = cellModel::ref(cellModel::TET);
+    const cellModel& pyr   = cellModel::ref(cellModel::PYR);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& hex   = cellModel::ref(cellModel::HEX);
 
     const cellShapeList& shapes = mesh.cellShapes();
 

@@ -28,7 +28,7 @@ License
 #include "emptyPolyPatch.H"
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "ListOps.H"
 #include "IFstream.H"
 #include "IOMap.H"
@@ -317,7 +317,10 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
 
 
     // avoid undefined shapes for polyhedra
-    cellShape genericShape(*unknownModel, labelList(0));
+    cellShape genericShape
+    (
+        cellModel::ref(cellModel::UNKNOWN), labelList()
+    );
 
     // Pass 2:
     // construct cellFaces_ and possibly cellShapes_
@@ -372,23 +375,23 @@ void Foam::fileFormats::STARCDMeshReader::readCells(const fileName& inputName)
                 continue;
             }
 
-            // determine the foam cell shape
+            // determine the OpenFOAM cell shape
             const cellModel* curModelPtr = nullptr;
 
             // fluid/solid cells
             switch (shapeId)
             {
                 case STARCDCore::starcdHex:
-                    curModelPtr = hexModel;
+                    curModelPtr = cellModel::ptr(cellModel::HEX);
                     break;
                 case STARCDCore::starcdPrism:
-                    curModelPtr = prismModel;
+                    curModelPtr = cellModel::ptr(cellModel::PRISM);
                     break;
                 case STARCDCore::starcdTet:
-                    curModelPtr = tetModel;
+                    curModelPtr = cellModel::ptr(cellModel::TET);
                     break;
                 case STARCDCore::starcdPyr:
-                    curModelPtr = pyrModel;
+                    curModelPtr = cellModel::ptr(cellModel::PYR);
                     break;
             }
 
@@ -612,12 +615,12 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
     // Mapping between OpenFOAM and PROSTAR primitives
     // - needed for face mapping
     //
-    const Map<label> prostarShapeLookup =
+    const Map<label> shapeLookup =
     {
-        { hexModel->index(),   STARCDCore::starcdHex },
-        { prismModel->index(), STARCDCore::starcdPrism },
-        { tetModel->index(),   STARCDCore::starcdTet },
-        { pyrModel->index(),   STARCDCore::starcdPyr }
+        { cellModel::ref(cellModel::HEX).index(), STARCDCore::starcdHex },
+        { cellModel::ref(cellModel::PRISM).index(), STARCDCore::starcdPrism },
+        { cellModel::ref(cellModel::TET).index(), STARCDCore::starcdTet },
+        { cellModel::ref(cellModel::PYR).index(), STARCDCore::starcdPyr },
     };
 
     // Pass 1:
@@ -861,9 +864,9 @@ void Foam::fileFormats::STARCDMeshReader::readBoundary
                 if (cellId < cellShapes_.size())
                 {
                     label mapIndex = cellShapes_[cellId].model().index();
-                    if (prostarShapeLookup.found(mapIndex))
+                    if (shapeLookup.found(mapIndex))
                     {
-                        mapIndex = prostarShapeLookup[mapIndex];
+                        mapIndex = shapeLookup[mapIndex];
                         cellFaceId =
                             STARCDCore::starToFoamFaceAddr
                             [mapIndex][cellFaceId];
