@@ -31,23 +31,20 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(pointZoneSet, 0);
 
 addToRunTimeSelectionTable(topoSet, pointZoneSet, word);
 addToRunTimeSelectionTable(topoSet, pointZoneSet, size);
 addToRunTimeSelectionTable(topoSet, pointZoneSet, set);
-
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void pointZoneSet::updateSet()
+void Foam::pointZoneSet::updateSet()
 {
     labelList order;
     sortedOrder(addressing_, order);
@@ -62,9 +59,9 @@ void pointZoneSet::updateSet()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pointZoneSet::pointZoneSet
+Foam::pointZoneSet::pointZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -96,7 +93,7 @@ pointZoneSet::pointZoneSet
 }
 
 
-pointZoneSet::pointZoneSet
+Foam::pointZoneSet::pointZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -112,7 +109,7 @@ pointZoneSet::pointZoneSet
 }
 
 
-pointZoneSet::pointZoneSet
+Foam::pointZoneSet::pointZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -130,13 +127,13 @@ pointZoneSet::pointZoneSet
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-pointZoneSet::~pointZoneSet()
+Foam::pointZoneSet::~pointZoneSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void pointZoneSet::invert(const label maxLen)
+void Foam::pointZoneSet::invert(const label maxLen)
 {
     // Count
     label n = 0;
@@ -165,7 +162,7 @@ void pointZoneSet::invert(const label maxLen)
 }
 
 
-void pointZoneSet::subset(const topoSet& set)
+void Foam::pointZoneSet::subset(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 
@@ -186,7 +183,7 @@ void pointZoneSet::subset(const topoSet& set)
 }
 
 
-void pointZoneSet::addSet(const topoSet& set)
+void Foam::pointZoneSet::addSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_);
 
@@ -207,7 +204,7 @@ void pointZoneSet::addSet(const topoSet& set)
 }
 
 
-void pointZoneSet::deleteSet(const topoSet& set)
+void Foam::pointZoneSet::deleteSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 
@@ -229,7 +226,7 @@ void pointZoneSet::deleteSet(const topoSet& set)
 }
 
 
-void pointZoneSet::sync(const polyMesh& mesh)
+void Foam::pointZoneSet::sync(const polyMesh& mesh)
 {
     pointSet::sync(mesh);
 
@@ -239,13 +236,13 @@ void pointZoneSet::sync(const polyMesh& mesh)
 }
 
 
-label pointZoneSet::maxSize(const polyMesh& mesh) const
+Foam::label Foam::pointZoneSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nPoints();
 }
 
 
-bool pointZoneSet::writeObject
+bool Foam::pointZoneSet::writeObject
 (
     IOstream::streamFormat s,
     IOstream::versionNumber v,
@@ -290,7 +287,7 @@ bool pointZoneSet::writeObject
 }
 
 
-void pointZoneSet::updateMesh(const mapPolyMesh& morphMap)
+void Foam::pointZoneSet::updateMesh(const mapPolyMesh& morphMap)
 {
     // pointZone
     labelList newAddressing(addressing_.size());
@@ -314,7 +311,7 @@ void pointZoneSet::updateMesh(const mapPolyMesh& morphMap)
 }
 
 
-void pointZoneSet::writeDebug
+void Foam::pointZoneSet::writeDebug
 (
     Ostream& os,
     const primitiveMesh& mesh,
@@ -324,9 +321,5 @@ void pointZoneSet::writeDebug
     pointSet::writeDebug(os, mesh, maxLen);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -38,12 +38,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void makeGraph
+void Foam::makeGraph
 (
     const scalarField& x,
     const volScalarField& vsf,
@@ -54,7 +49,7 @@ void makeGraph
 }
 
 
-void makeGraph
+void Foam::makeGraph
 (
     const scalarField& x,
     const volScalarField& vsf,
@@ -76,7 +71,7 @@ void makeGraph
 }
 
 
-void makeGraph
+void Foam::makeGraph
 (
     const scalarField& x,
     const scalarField& sf,
@@ -95,9 +90,5 @@ void makeGraph
     ).write(path/name, graphFormat);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
