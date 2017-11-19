@@ -171,13 +171,13 @@ void Foam::vtk::vtuCells::reset
 }
 
 
-void Foam::vtk::vtuCells::renumberCells(const UList<label>& mapping)
+void Foam::vtk::vtuCells::renumberCells(const labelUList& mapping)
 {
     maps_.renumberCells(mapping);
 }
 
 
-void Foam::vtk::vtuCells::renumberPoints(const UList<label>& mapping)
+void Foam::vtk::vtuCells::renumberPoints(const labelUList& mapping)
 {
     maps_.renumberPoints(mapping);
 }

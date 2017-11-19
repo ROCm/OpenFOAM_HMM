@@ -81,8 +81,8 @@ class ptscotchDecomp
         //- Decompose. Handles size 0 arrays
         label decompose
         (
-            const UList<label>& adjncy,
-            const UList<label>& xadj,
+            const labelUList& adjncy,
+            const labelUList& xadj,
             const UList<scalar>& cWeights,
             List<label>& finalDecomp
         ) const;

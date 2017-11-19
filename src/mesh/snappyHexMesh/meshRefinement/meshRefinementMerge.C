@@ -826,7 +826,7 @@ namespace Foam
 // Pick up faces of cells of faces in set.
 Foam::labelList Foam::meshRefinement::growFaceCellFace
 (
-    const UList<label>& set
+    const labelUList& set
 ) const
 {
     boolList selected(mesh_.nFaces(), false);

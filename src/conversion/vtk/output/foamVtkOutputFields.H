@@ -63,7 +63,7 @@ namespace vtk
     (
         vtk::formatter& fmt,
         const DimensionedField<Type, volMesh>& fld,
-        const UList<label>& cellMap
+        const labelUList& cellMap
     );
 
     //- Write internalField for mesh
@@ -82,7 +82,7 @@ namespace vtk
     (
         vtk::formatter& fmt,
         const GeometricField<Type, fvPatchField, volMesh>& fld,
-        const UList<label>& cellMap
+        const labelUList& cellMap
     );
 
 

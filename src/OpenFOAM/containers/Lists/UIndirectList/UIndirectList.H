@@ -52,6 +52,10 @@ namespace Foam
 template<class T> class UIndirectList;
 template<class T> Ostream& operator<<(Ostream&, const UIndirectList<T>&);
 
+// Commonly required list types
+typedef UIndirectList<bool> boolUIndList;
+typedef UIndirectList<label> labelUIndList;
+
 /*---------------------------------------------------------------------------*\
                         Class UIndirectList Declaration
 \*---------------------------------------------------------------------------*/

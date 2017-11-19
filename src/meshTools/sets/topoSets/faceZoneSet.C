@@ -49,8 +49,8 @@ void Foam::faceZoneSet::updateSet()
 {
     labelList order;
     sortedOrder(addressing_, order);
-    addressing_ = UIndirectList<label>(addressing_, order)();
-    flipMap_ = UIndirectList<bool>(flipMap_, order)();
+    addressing_ = labelUIndList(addressing_, order)();
+    flipMap_ = boolUIndList(flipMap_, order)();
 
     faceSet::clearStorage();
     faceSet::resize(2*addressing_.size());

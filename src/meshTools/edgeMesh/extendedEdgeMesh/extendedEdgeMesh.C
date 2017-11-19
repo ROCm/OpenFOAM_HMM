@@ -1693,7 +1693,7 @@ void Foam::extendedEdgeMesh::autoMap
         const labelList& eNormals = edgeNormals()[edgeI];
         labelList& subNormals = subEdgeNormals[subEdgeI];
 
-        subNormals = UIndirectList<label>(reverseNormalMap, eNormals);
+        subNormals = labelUIndList(reverseNormalMap, eNormals);
     }
 
     labelListList subPointNormals(pointMap.size());
@@ -1703,7 +1703,7 @@ void Foam::extendedEdgeMesh::autoMap
         const labelList& pNormals = featurePointNormals()[pointI];
         labelList& subNormals = subPointNormals[subPointI];
 
-        subNormals = UIndirectList<label>(reverseNormalMap, pNormals);
+        subNormals = labelUIndList(reverseNormalMap, pNormals);
     }
 
     // Use compaction map to compact normal data
@@ -1793,8 +1793,8 @@ void Foam::extendedEdgeMesh::trim
     select(surf, volType, subPointMap, subEdgeMap);
 
     // Update overall point maps
-    pointMap = UIndirectList<label>(allPointMap, subPointMap);
-    edgeMap = UIndirectList<label>(allEdgeMap, subEdgeMap);
+    pointMap = labelUIndList(allPointMap, subPointMap);
+    edgeMap = labelUIndList(allEdgeMap, subEdgeMap);
 
     // Extract current point and edge status
     List<edgeStatus> edgeStat(edges().size());
@@ -1836,8 +1836,8 @@ void Foam::extendedEdgeMesh::trim
     );
 
     // Update the overall pointMap, edgeMap
-    pointMap = UIndirectList<label>(pointMap, sortedToOriginalPoint)();
-    edgeMap = UIndirectList<label>(edgeMap, sortedToOriginalEdge)();
+    pointMap = labelUIndList(pointMap, sortedToOriginalPoint)();
+    edgeMap = labelUIndList(edgeMap, sortedToOriginalEdge)();
 }
 
 
@@ -1992,7 +1992,7 @@ bool Foam::extendedEdgeMesh::mergePointsAndSort
         sortedToOriginalPoint,
         edgeMap             // point merging above did not affect edge order
     );
-    pointMap = UIndirectList<label>(pointMap, sortedToOriginalPoint)();
+    pointMap = labelUIndList(pointMap, sortedToOriginalPoint)();
 
     return nNewPoints != nOldPoints;
 }

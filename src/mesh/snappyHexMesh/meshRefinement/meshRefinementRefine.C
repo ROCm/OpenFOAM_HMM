@@ -1219,7 +1219,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
             sortedOrder(pNormals, visitOrder, normalLess(pNormals));
 
             pNormals = List<point>(pNormals, visitOrder);
-            pLevel = UIndirectList<label>(pLevel, visitOrder);
+            pLevel = labelUIndList(pLevel, visitOrder);
         }
 
         // Clear out unnecessary data

@@ -299,7 +299,7 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                IOobject::AUTO_WRITE,
 //                false
 //            ),
-//            UIndirectList<label>
+//            labelUIndList
 //            (
 //                vertexToDualAddressing,
 //                pointToDelaunayVertex

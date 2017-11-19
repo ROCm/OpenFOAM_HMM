@@ -245,7 +245,7 @@ public:
         explicit inline PackedList(const labelUList& lst);
 
         //- Construct from an indirect list of labels
-        explicit inline PackedList(const UIndirectList<label>& lst);
+        explicit inline PackedList(const labelUIndList& lst);
 
         //- Clone
         inline autoPtr<PackedList<nBits>> clone() const;
@@ -414,7 +414,7 @@ public:
         void operator=(const labelUList& lst);
 
         //- Assignment operator.
-        void operator=(const UIndirectList<label>& lst);
+        void operator=(const labelUIndList& lst);
 
 
     // Iterators and helpers

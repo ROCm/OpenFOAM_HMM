@@ -1384,14 +1384,14 @@ void Foam::fvMeshSubset::setLargeCellSubset
 
 void Foam::fvMeshSubset::setLargeCellSubset
 (
-    const UList<label>& globalCellMap,
+    const labelUList& globalCellMap,
     const label patchID,
     const bool syncPar
 )
 {
     labelList region(baseMesh().nCells(), 0);
 
-    for (auto cellId : globalCellMap)
+    for (const label cellId : globalCellMap)
     {
         region[cellId] = 1;
     }
@@ -1408,9 +1408,9 @@ void Foam::fvMeshSubset::setLargeCellSubset
 {
     labelList region(baseMesh().nCells(), 0);
 
-    forAllConstIter(labelHashSet, globalCellMap, iter)
+    for (const label cellId : globalCellMap)
     {
-        region[iter.key()] = 1;
+        region[cellId] = 1;
     }
     setLargeCellSubset(region, 1, patchID, syncPar);
 }

@@ -105,7 +105,7 @@ void Foam::triSurface::calcEdgeOwner() const
                     << "Edge " << edgeI << " vertices:" << e
                     << " is used by faces " << myFaces
                     << " vertices:"
-                    << UIndirectList<labelledTri>(localFaces(), myFaces)()
+                    << UIndirectList<labelledTri>(localFaces(), myFaces)
                     << " none of which use the edge vertices in the same order"
                     << nl << "I give up" << abort(FatalError);
             }

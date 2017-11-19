@@ -288,7 +288,7 @@ public:
         (
             const polyMesh& mesh,
             UList<uint8_t>& cellTypes,
-            UList<label>& connectivity,
+            labelUList& connectivity,
             foamVtkMeshMaps& maps
         ) const;
 
@@ -297,10 +297,10 @@ public:
         (
             const polyMesh& mesh,
             UList<uint8_t>& cellTypes,
-            UList<label>& connectivity,
-            UList<label>& offsets,
-            UList<label>& faces,
-            UList<label>& facesOffsets,
+            labelUList& connectivity,
+            labelUList& offsets,
+            labelUList& faces,
+            labelUList& facesOffsets,
             foamVtkMeshMaps& maps
         ) const;
 
@@ -349,8 +349,8 @@ public:
             UList<int>& offsets,
             UList<int>& faces,
             UList<int>& facesOffsets,
-            UList<label>& cellMap,
-            UList<label>& addPointsIds
+            labelUList& cellMap,
+            labelUList& addPointsIds
         ) const;
 
         //- Populate lists for Internal VTK format
@@ -362,8 +362,8 @@ public:
             UList<long>& offsets,
             UList<long>& faces,
             UList<long>& facesOffsets,
-            UList<label>& cellMap,
-            UList<label>& addPointsIds
+            labelUList& cellMap,
+            labelUList& addPointsIds
         ) const;
 
         //- Populate lists for Internal VTK format
@@ -375,8 +375,8 @@ public:
             UList<long long>& offsets,
             UList<long long>& faces,
             UList<long long>& facesOffsets,
-            UList<label>& cellMap,
-            UList<label>& addPointsIds
+            labelUList& cellMap,
+            labelUList& addPointsIds
         ) const;
 
 

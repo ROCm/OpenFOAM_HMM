@@ -56,8 +56,8 @@ namespace Foam
 
 Foam::label Foam::kahipDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cellWeights,
     List<label>& decomp
 )

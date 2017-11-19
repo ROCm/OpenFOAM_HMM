@@ -4347,7 +4347,7 @@ void Foam::snappyLayerDriver::addLayers
                 {
                     labelList meshPoints
                     (
-                        UIndirectList<label>(candidates, oldPoints)
+                        labelUIndList(candidates, oldPoints)
                     );
                     label masteri = min(meshPoints);
                     forAll(meshPoints, i)

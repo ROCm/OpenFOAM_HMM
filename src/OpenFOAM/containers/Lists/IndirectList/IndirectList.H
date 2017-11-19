@@ -81,12 +81,8 @@ protected:
 
     // Member Functions
 
-      // Access
-
         //- Return the list addressing
         inline const List<label>& addressing() const;
-
-      // Edit
 
         //- Reset addressing
         inline void resetAddressing(const labelUList& addr);
@@ -141,13 +137,8 @@ public:
 
     // Member Functions
 
-      // Access
-
         //- Return the list addressing
         using UIndirectList<T>::addressing;
-
-
-      // Edit
 
         //- Reset addressing
         using IndirectListAddressing::resetAddressing;

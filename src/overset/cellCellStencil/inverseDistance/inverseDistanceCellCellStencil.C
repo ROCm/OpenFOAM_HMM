@@ -1087,7 +1087,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
         DebugInfo<< FUNCTION_NAME << " : Gathered region type" << endl;
 
         // Communicate region status through interpolative cells
-        labelList cellRegionType(UIndirectList<label>(regionType, cellRegion));
+        labelList cellRegionType(labelUIndList(regionType, cellRegion));
         map.distribute(cellRegionType);
 
         DebugInfo<< FUNCTION_NAME << " : Interpolated region type" << endl;

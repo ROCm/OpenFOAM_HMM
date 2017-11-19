@@ -679,7 +679,7 @@ void Foam::snappySnapDriver::calcNearestFacePointProperties
         pNormals = List<point>(pNormals, visitOrder);
         pDisp = List<point>(pDisp, visitOrder);
         pFc = List<point>(pFc, visitOrder);
-        pFid = UIndirectList<label>(pFid, visitOrder)();
+        pFid = labelUIndList(pFid, visitOrder)();
     }
 }
 

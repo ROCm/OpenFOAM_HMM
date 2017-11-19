@@ -105,7 +105,7 @@ Foam::label Foam::regionSide::otherEdge
         << "Cannot find other edge on face " << facei << " that uses point "
         << pointi << " but not point " << freePointi << endl
         << "Edges on face:" << fEdges
-        << " verts:" << UIndirectList<edge>(mesh.edges(), fEdges)()
+        << " verts:" << UIndirectList<edge>(mesh.edges(), fEdges)
         << " Vertices on face:"
         << mesh.faces()[facei]
         << " Vertices on original edge:" << e << abort(FatalError);

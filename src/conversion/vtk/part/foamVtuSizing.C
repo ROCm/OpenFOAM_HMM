@@ -272,7 +272,7 @@ void Foam::vtk::vtuSizing::populateLegacy
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
-    UList<label>& vertLabels,
+    labelUList& vertLabels,
     foamVtkMeshMaps& maps
 ) const
 {
@@ -301,10 +301,10 @@ void Foam::vtk::vtuSizing::populateXml
 (
     const polyMesh& mesh,
     UList<uint8_t>& cellTypes,
-    UList<label>& connectivity,
-    UList<label>& offsets,
-    UList<label>& faces,
-    UList<label>& facesOffsets,
+    labelUList& connectivity,
+    labelUList& offsets,
+    labelUList& faces,
+    labelUList& facesOffsets,
     foamVtkMeshMaps& maps
 ) const
 {
@@ -421,8 +421,8 @@ void Foam::vtk::vtuSizing::populateInternal
     UList<int>& offsets,
     UList<int>& faces,
     UList<int>& facesOffsets,
-    UList<label>& cellMap,
-    UList<label>& addPointsIds
+    labelUList& cellMap,
+    labelUList& addPointsIds
 ) const
 {
     populateArrays
@@ -449,8 +449,8 @@ void Foam::vtk::vtuSizing::populateInternal
     UList<long>& offsets,
     UList<long>& faces,
     UList<long>& facesOffsets,
-    UList<label>& cellMap,
-    UList<label>& addPointsIds
+    labelUList& cellMap,
+    labelUList& addPointsIds
 ) const
 {
     populateArrays
@@ -477,8 +477,8 @@ void Foam::vtk::vtuSizing::populateInternal
     UList<long long>& offsets,
     UList<long long>& faces,
     UList<long long>& facesOffsets,
-    UList<label>& cellMap,
-    UList<label>& addPointsIds
+    labelUList& cellMap,
+    labelUList& addPointsIds
 ) const
 {
     populateArrays

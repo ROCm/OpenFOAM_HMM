@@ -497,8 +497,8 @@ autoPtr<mapPolyMesh> reorderMesh
             sortedOrder(newAddressing, newToOld);
             fZone.resetAddressing
             (
-                UIndirectList<label>(newAddressing, newToOld)(),
-                UIndirectList<bool>(newFlipMap, newToOld)()
+                labelUIndList(newAddressing, newToOld)(),
+                boolUIndList(newFlipMap, newToOld)()
             );
         }
     }
@@ -508,7 +508,7 @@ autoPtr<mapPolyMesh> reorderMesh
         cellZones.clearAddressing();
         forAll(cellZones, zoneI)
         {
-            cellZones[zoneI] = UIndirectList<label>
+            cellZones[zoneI] = labelUIndList
             (
                 reverseCellOrder,
                 cellZones[zoneI]
@@ -1074,7 +1074,7 @@ int main(int argc, char *argv[])
         );
 
         // Combine point reordering into map.
-        const_cast<labelList&>(map().pointMap()) = UIndirectList<label>
+        const_cast<labelList&>(map().pointMap()) = labelUIndList
         (
             map().pointMap(),
             pointOrderMap().pointMap()
@@ -1101,7 +1101,7 @@ int main(int argc, char *argv[])
 
             cellProcAddressing = labelList
             (
-                UIndirectList<label>(cellProcAddressing, map().cellMap())
+                labelUIndList(cellProcAddressing, map().cellMap())
             );
         }
         else
@@ -1125,7 +1125,7 @@ int main(int argc, char *argv[])
 
             faceProcAddressing = labelList
             (
-                UIndirectList<label>(faceProcAddressing, map().faceMap())
+                labelUIndList(faceProcAddressing, map().faceMap())
             );
 
             // Detect any flips.
@@ -1165,7 +1165,7 @@ int main(int argc, char *argv[])
 
             pointProcAddressing = labelList
             (
-                UIndirectList<label>(pointProcAddressing, map().pointMap())
+                labelUIndList(pointProcAddressing, map().pointMap())
             );
         }
         else

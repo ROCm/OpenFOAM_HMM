@@ -204,11 +204,11 @@ void Foam::sampledPatch::remapFaces(const labelUList& faceMap)
         MeshStorage::remapFaces(faceMap);
         patchFaceLabels_ = labelList
         (
-            UIndirectList<label>(patchFaceLabels_, faceMap)
+            labelUIndList(patchFaceLabels_, faceMap)
         );
         patchIndex_ = labelList
         (
-            UIndirectList<label>(patchIndex_, faceMap)
+            labelUIndList(patchIndex_, faceMap)
         );
 
         // Redo patchStart.

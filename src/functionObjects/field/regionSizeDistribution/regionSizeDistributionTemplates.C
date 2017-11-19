@@ -63,7 +63,7 @@ Foam::Map<Type> Foam::functionObjects::regionSizeDistribution::regionSum
 template<class Type>
 Foam::List<Type> Foam::functionObjects::regionSizeDistribution::extractData
 (
-    const UList<label>& keys,
+    const labelUList& keys,
     const Map<Type>& regionData
 ) const
 {

@@ -51,7 +51,6 @@ SourceFiles
 namespace Foam
 {
 
-
 class mapPolyMesh;
 class polyMesh;
 class primitiveMesh;
@@ -239,7 +238,7 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const UList<label>&,
+            const labelUList& set,
             writeOption w=NO_WRITE
         );
 

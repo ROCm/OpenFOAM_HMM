@@ -31,8 +31,8 @@ License
 
 Foam::label Foam::metisLikeDecomp::decomposeGeneral
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
 )

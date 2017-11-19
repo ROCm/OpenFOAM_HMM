@@ -114,7 +114,7 @@ namespace vtk
     (
         vtk::formatter& fmt,
         const UList<Type>& lst,
-        const UList<label>& addressing
+        const labelUList& addressing
     );
 
 
