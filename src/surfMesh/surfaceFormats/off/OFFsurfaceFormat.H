@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,7 @@ Class
     Foam::fileFormats::OFFsurfaceFormat
 
 Description
-    Provide a means of reading/writing Geomview OFF polyList format.
-
+    Read/write Geomview OFF polyList format.
 
 See also
     The <a href="http://www.geoview.org">Geoview</a>
@@ -57,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class OFFsurfaceFormat Declaration
+                Class fileFormats::OFFsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -79,42 +78,37 @@ public:
     // Constructors
 
         //- Construct from file name
-        OFFsurfaceFormat(const fileName&);
-
-
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<MeshedSurface<Face>> New(const fileName& name)
-        {
-            return autoPtr<MeshedSurface<Face>>
-            (
-                new OFFsurfaceFormat(name)
-            );
-        }
+        OFFsurfaceFormat(const fileName& filename);
 
 
     //- Destructor
-    virtual ~OFFsurfaceFormat()
-    {}
+    virtual ~OFFsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& filename);
 
         //- Write object
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 };
 

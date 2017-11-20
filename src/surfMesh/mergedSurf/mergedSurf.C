@@ -50,12 +50,6 @@ Foam::mergedSurf::mergedSurf
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::mergedSurf::~mergedSurf()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::mergedSurf::use()

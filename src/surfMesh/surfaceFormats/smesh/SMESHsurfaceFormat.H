@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::SMESHsurfaceFormat
 
 Description
-    Provide a means of writing tetgen SMESH format.
+    Write tetgen SMESH format.
 
     Tetgen http://tetgen.berlios.de
 
@@ -53,7 +53,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class SMESHsurfaceFormat Declaration
+               Class fileFormats::SMESHsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -75,27 +75,34 @@ public:
     // Constructors
 
         //- Construct null
-        SMESHsurfaceFormat();
+        SMESHsurfaceFormat() = default;
 
 
     //- Destructor
-    virtual ~SMESHsurfaceFormat()
-    {}
+    virtual ~SMESHsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Write object
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 };
 

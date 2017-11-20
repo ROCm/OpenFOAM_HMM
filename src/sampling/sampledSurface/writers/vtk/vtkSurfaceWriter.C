@@ -55,9 +55,8 @@ void Foam::vtkSurfaceWriter::writeGeometry
 
     // Write vertex coords
     os  << "POINTS " << points.size() << " double" << nl;
-    forAll(points, pointi)
+    for (const point& pt : points)
     {
-        const point& pt = points[pointi];
         os  << float(pt.x()) << ' '
             << float(pt.y()) << ' '
             << float(pt.z()) << nl;
@@ -67,22 +66,20 @@ void Foam::vtkSurfaceWriter::writeGeometry
 
     // Write faces
     label nNodes = 0;
-    forAll(faces, facei)
+    for (const face& f : faces)
     {
-        nNodes += faces[facei].size();
+        nNodes += f.size();
     }
 
     os  << "POLYGONS " << faces.size() << ' '
         << faces.size() + nNodes << nl;
 
-    forAll(faces, facei)
+    for (const face& f : faces)
     {
-        const face& f = faces[facei];
-
         os  << f.size();
-        forAll(f, fp)
+        for (const label verti : f)
         {
-            os  << ' ' << f[fp];
+            os  << ' ' << verti;
         }
         os  << nl;
     }
@@ -130,9 +127,8 @@ namespace Foam
     {
         os  << "3 " << values.size() << " float" << nl;
 
-        forAll(values, elemI)
+        for (const vector& v : values)
         {
-            const vector& v = values[elemI];
             os  << float(v[0]) << ' '
                 << float(v[1]) << ' '
                 << float(v[2]) << nl;
@@ -149,9 +145,8 @@ namespace Foam
     {
         os  << "1 " << values.size() << " float" << nl;
 
-        forAll(values, elemI)
+        for (const sphericalTensor& v : values)
         {
-            const sphericalTensor& v = values[elemI];
             os  << float(v[0]) << nl;
         }
     }
@@ -166,9 +161,8 @@ namespace Foam
     {
         os  << "6 " << values.size() << " float" << nl;
 
-        forAll(values, elemI)
+        for (const symmTensor& v : values)
         {
-            const symmTensor& v = values[elemI];
             os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
                 << ' '
                 << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
@@ -187,9 +181,8 @@ namespace Foam
     {
         os  << "9 " << values.size() << " float" << nl;
 
-        forAll(values, elemI)
+        for (const tensor& v : values)
         {
-            const tensor& v = values[elemI];
             os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
                 << ' '
                 << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
@@ -211,23 +204,17 @@ Foam::vtkSurfaceWriter::vtkSurfaceWriter()
 {}
 
 
-Foam::vtkSurfaceWriter::vtkSurfaceWriter(const dictionary& dict)
+Foam::vtkSurfaceWriter::vtkSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
     writePrecision_
     (
-        dict.lookupOrDefault
+        options.lookupOrDefault
         (
             "writePrecision",
             IOstream::defaultPrecision()
         )
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtkSurfaceWriter::~vtkSurfaceWriter()
 {}
 
 
@@ -260,7 +247,7 @@ Foam::fileName Foam::vtkSurfaceWriter::write
 }
 
 
-// create write methods
+// Create write methods
 defineSurfaceWriterWriteFields(Foam::vtkSurfaceWriter);
 
 

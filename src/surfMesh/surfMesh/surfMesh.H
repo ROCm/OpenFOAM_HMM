@@ -69,7 +69,7 @@ public:
 
         //- Enumeration defining the state of the mesh after a read update.
         //  Used for post-processing applications, where the mesh
-        //  needs to update based on the files written in time directores
+        //  needs to update based on the files written in time directories
         enum readUpdateState
         {
             UNCHANGED,
@@ -157,7 +157,7 @@ public:
         //- Construct from IOobject, with alternative surface name
         explicit surfMesh
         (
-            const IOobject&,
+            const IOobject& io,
             const word& surfName = word::null
         );
 
@@ -165,16 +165,16 @@ public:
         //  surfZones are added using addZones() member function
         surfMesh
         (
-            const IOobject&,
-            const Xfer<pointField>&,
-            const Xfer<faceList>&,
+            const IOobject& io,
+            const Xfer<pointField>& pointLst,
+            const Xfer<faceList>& faceLst,
             const word& surfName = word::null
         );
 
         //- Construct copy/move from MeshedSurface
         surfMesh
         (
-            const IOobject&,
+            const IOobject& io,
             const Xfer<MeshedSurface<face>>& surf,
             const word& surfName = word::null
         );
@@ -192,7 +192,7 @@ public:
             fileName meshDir() const;
 
             //- Return the current instance directory for points
-            //  Used in the consruction of geometric mesh data dependent
+            //  Used in the construction of geometric mesh data dependent
             //  on points
             const fileName& pointsInstance() const;
 
@@ -262,7 +262,7 @@ public:
             //- Add surface zones
             void addZones
             (
-                const List<surfZone>&,
+                const surfZoneList& srfZones,
                 const bool validate = true
             );
 
@@ -294,7 +294,7 @@ public:
 
 
             //- Transfer the contents of the argument and annul the argument
-            void transfer(MeshedSurface<face>&);
+            void transfer(MeshedSurface<face>& surf);
 
 
       // Writing
@@ -311,11 +311,23 @@ public:
             const bool valid
         ) const;
 
-        //- Write to file
-        static void write(const fileName&, const surfMesh&);
 
-        //- Write to file
-        void write(const fileName&);
+        //- Write to file, choosing writer based on its extension.
+        //  Uses MeshedSurfaceProxy for writing.
+        void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const;
+
+        //- Write to file, choosing writer given extension.
+        //  Uses MeshedSurfaceProxy for writing.
+        void write
+        (
+            const fileName& name,
+            const word& ext,
+            const dictionary& options = dictionary::null
+        ) const;
 
 
       // Storage management

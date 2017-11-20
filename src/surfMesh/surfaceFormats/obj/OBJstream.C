@@ -72,12 +72,6 @@ Foam::OBJstream::OBJstream
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::OBJstream::~OBJstream()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::OBJstream::write(const char c)

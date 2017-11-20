@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats"
+        "convert between surface formats, using MeshSurface library components"
     );
 
     argList::noParallel();
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    // check that reading/writing is supported
+    // Check that reading/writing is supported
     if
     (
         !MeshedSurface<face>::canRead(importName, true)

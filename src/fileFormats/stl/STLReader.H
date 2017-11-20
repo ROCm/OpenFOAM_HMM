@@ -85,7 +85,7 @@ class STLReader
         bool readBINARY(const fileName& filename);
 
         //- Read ASCII or BINARY
-        bool readFile(const fileName& filename, const STLFormat& format);
+        bool readFile(const fileName& filename, const STLFormat format);
 
 
         //- Disallow default bitwise copy construct
@@ -105,7 +105,7 @@ public:
 
         //- Read from file, filling in the information.
         //  Manually selected choice of ASCII/BINARY/UNKNOWN(detect) formats.
-        STLReader(const fileName& filename, const STLFormat& format);
+        STLReader(const fileName& filename, const STLFormat format);
 
 
     //- Destructor

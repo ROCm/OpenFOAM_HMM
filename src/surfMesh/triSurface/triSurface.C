@@ -25,14 +25,10 @@ License
 
 #include "triSurface.H"
 #include "demandDrivenData.H"
-#include "Fstream.H"
 #include "Time.H"
-#include "boundBox.H"
-#include "SortableList.H"
-#include "PackedBoolList.H"
 #include "surfZoneList.H"
-#include "surfaceFormatsCore.H"
-#include "MeshedSurfaceProxy.H"
+#include "MeshedSurface.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -42,72 +38,7 @@ namespace Foam
 }
 
 
-// Note that these lists are a stop-gap measure until the read/write handling
-// gets properly updated
-const Foam::wordHashSet Foam::triSurface::readTypes_
-{
-    "ftr", "stl", "stlb", "gts", "obj", "off", "tri", "ac", "nas", "vtk"
-};
-
-
-const Foam::wordHashSet Foam::triSurface::writeTypes_
-{
-    "ftr", "stl", "stlb", "gts", "obj", "off", "tri", "ac", "smesh", "vtk",
-    // via proxy:
-    "inp", "vtp"
-};
-
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-bool Foam::triSurface::canReadType(const word& ext, const bool verbose)
-{
-    return fileFormats::surfaceFormatsCore::checkSupport
-    (
-        readTypes(),
-        ext,
-        verbose,
-        "reading"
-   );
-}
-
-
-bool Foam::triSurface::canWriteType(const word& ext, const bool verbose)
-{
-    return fileFormats::surfaceFormatsCore::checkSupport
-    (
-        writeTypes(),
-        ext,
-        verbose,
-        "writing"
-    );
-}
-
-
-bool Foam::triSurface::canRead(const fileName& name, const bool verbose)
-{
-    word ext = name.ext();
-    if (ext == "gz")
-    {
-        ext = name.lessExt().ext();
-    }
-    return canReadType(ext, verbose);
-}
-
-
-const Foam::wordHashSet& Foam::triSurface::readTypes()
-{
-    return readTypes_;
-}
-
-
-const Foam::wordHashSet& Foam::triSurface::writeTypes()
-{
-    return writeTypes_;
-}
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
 {
@@ -217,50 +148,17 @@ Foam::List<Foam::labelledTri> Foam::triSurface::convertToTri
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::triSurface::printTriangle
-(
-    Ostream& os,
-    const string& pre,
-    const labelledTri& f,
-    const pointField& points
-)
-{
-    os
-        << pre.c_str() << "vertex numbers:"
-        << f[0] << ' ' << f[1] << ' ' << f[2] << endl
-        << pre.c_str() << "vertex coords :"
-        << points[f[0]] << ' ' << points[f[1]] << ' ' << points[f[2]]
-        << pre.c_str() << "region        :" << f.region() << endl
-        << endl;
-}
-
-
-Foam::string Foam::triSurface::getLineNoComment(IFstream& is)
-{
-    string line;
-    do
-    {
-        is.getLine(line);
-    }
-    while ((line.empty() || line[0] == '#') && is.good());
-
-    return line;
-}
-
-
 // Remove non-triangles, double triangles.
 void Foam::triSurface::checkTriangles(const bool verbose)
 {
     // Simple check on indices ok.
     const label maxPointi = points().size() - 1;
 
-    forAll(*this, facei)
+    for (const triSurface::FaceType& f : *this)
     {
-        const triSurface::FaceType& f = (*this)[facei];
-
-        forAll(f, fp)
+        for (const label verti : f)
         {
-            if (f[fp] < 0 || f[fp] > maxPointi)
+            if (verti < 0 || verti > maxPointi)
             {
                 FatalErrorInFunction
                     << "triangle " << f
@@ -306,14 +204,12 @@ void Foam::triSurface::checkTriangles(const bool verbose)
             // Check if faceNeighbours use same points as this face.
             // Note: discards normal information - sides of baffle are merged.
 
-            forAll(fEdges, fp)
+            for (const label edgei : fEdges)
             {
-                const labelList& eFaces = edgeFaces()[fEdges[fp]];
+                const labelList& eFaces = edgeFaces()[edgei];
 
-                forAll(eFaces, i)
+                for (const label neighbour : eFaces)
                 {
-                    label neighbour = eFaces[i];
-
                     if (neighbour > facei)
                     {
                         // lower numbered faces already checked
@@ -383,190 +279,24 @@ void Foam::triSurface::checkEdges(const bool verbose)
 {
     const labelListList& eFaces = edgeFaces();
 
-    forAll(eFaces, edgeI)
+    forAll(eFaces, edgei)
     {
-        const labelList& myFaces = eFaces[edgeI];
+        const labelList& myFaces = eFaces[edgei];
 
         if (myFaces.empty())
         {
             FatalErrorInFunction
-                << "Edge " << edgeI << " with vertices " << edges()[edgeI]
+                << "Edge " << edgei << " with vertices " << edges()[edgei]
                 << " has no edgeFaces"
                 << exit(FatalError);
         }
         else if (myFaces.size() > 2 && verbose)
         {
             WarningInFunction
-                << "Edge " << edgeI << " with vertices " << edges()[edgeI]
+                << "Edge " << edgei << " with vertices " << edges()[edgei]
                 << " has more than 2 faces connected to it : " << myFaces
                 << endl;
         }
-    }
-}
-
-
-// Read triangles, points from Istream
-bool Foam::triSurface::read(Istream& is)
-{
-    is  >> patches_ >> storedPoints() >> storedFaces();
-
-    return true;
-}
-
-
-// Read from file in given format
-bool Foam::triSurface::read
-(
-    const fileName& name,
-    const word& ext,
-    const bool check
-)
-{
-    if (check && !exists(name))
-    {
-        FatalErrorInFunction
-            << "Cannnot read " << name << exit(FatalError);
-    }
-
-    if (ext == "gz")
-    {
-        fileName unzipName = name.lessExt();
-
-        // Do not check for existence. Let IFstream do the unzipping.
-        return read(unzipName, unzipName.ext(), false);
-    }
-    else if (ext == "ftr")
-    {
-        return read(IFstream(name)());
-    }
-    else if (ext == "stl")
-    {
-        return readSTL(name);
-    }
-    else if (ext == "stlb")
-    {
-        return readSTL(name, true);
-    }
-    else if (ext == "gts")
-    {
-        return readGTS(name);
-    }
-    else if (ext == "obj")
-    {
-        return readOBJ(name);
-    }
-    else if (ext == "off")
-    {
-        return readOFF(name);
-    }
-    else if (ext == "tri")
-    {
-        return readTRI(name);
-    }
-    else if (ext == "ac")
-    {
-        return readAC(name);
-    }
-    else if (ext == "nas")
-    {
-        return readNAS(name);
-    }
-    else if (ext == "vtk")
-    {
-        return readVTK(name);
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "unknown file extension " << ext
-            << " for reading file " << name
-            << ". Supported extensions:" << nl
-            << "    " << flatOutput(readTypes_.sortedToc()) << nl
-            << exit(FatalError);
-
-        return false;
-    }
-}
-
-
-// Write to file in given format
-void Foam::triSurface::write
-(
-    const fileName& name,
-    const word& ext,
-    const bool sort
-) const
-{
-    if (ext == "ftr")
-    {
-        return write(OFstream(name)());
-    }
-    else if (ext == "stl")
-    {
-        return writeSTLASCII(sort, OFstream(name)());
-    }
-    else if (ext == "stlb")
-    {
-        std::ofstream outFile(name, std::ios::binary);
-
-        writeSTLBINARY(outFile);
-    }
-    else if (ext == "gts")
-    {
-        return writeGTS(sort, OFstream(name)());
-    }
-    else if (ext == "obj")
-    {
-        writeOBJ(sort, OFstream(name)());
-    }
-    else if (ext == "off")
-    {
-        writeOFF(sort, OFstream(name)());
-    }
-    else if (ext == "vtk")
-    {
-        std::ofstream outFile(name, std::ios::binary);
-        writeVTK(sort, outFile);
-    }
-    else if
-    (
-        ext == "inp"  // STARCD
-     || ext == "vtp"  // VTK
-    )
-    {
-        labelList faceMap;
-        List<surfZone> zoneLst = this->sortedZones(faceMap);
-
-        MeshedSurfaceProxy<labelledTri> proxy
-        (
-            this->points(),
-            this->surfFaces(),
-            zoneLst,
-            faceMap
-        );
-
-        proxy.write(name, ext);
-    }
-    else if (ext == "tri")
-    {
-        writeTRI(sort, OFstream(name)());
-    }
-    else if (ext == "ac")
-    {
-        writeAC(OFstream(name)());
-    }
-    else if (ext == "smesh")
-    {
-        writeSMESH(sort, OFstream(name)());
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "unknown file extension " << ext
-            << " for writing file " << name
-            << ". Supported extensions:" << nl
-            << "    " << flatOutput(writeTypes_.sortedToc()) << nl
-            << exit(FatalError);
     }
 }
 
@@ -576,16 +306,16 @@ void Foam::triSurface::write
 Foam::surfacePatchList
 Foam::triSurface::calcPatches(labelList& faceMap) const
 {
-    // Sort according to region numbers of labelledTri
-    SortableList<label> sortedRegion(size());
+    // Determine the sorted order:
+    // use sortedOrder directly (the intermediate list is discared anyhow)
 
-    forAll(sortedRegion, facei)
+    List<label> regions(size());
+    forAll(regions, facei)
     {
-        sortedRegion[facei] = operator[](facei).region();
+        regions[facei] = operator[](facei).region();
     }
-    sortedRegion.sort();
-
-    faceMap = sortedRegion.indices();
+    sortedOrder(regions, faceMap);
+    regions.clear();
 
     // Extend regions
     label maxRegion = patches_.size()-1;    // for non-compacted regions
@@ -685,6 +415,24 @@ Foam::triSurface::triSurface()
 {}
 
 
+Foam::triSurface::triSurface(const triSurface& surf)
+:
+    ParentType(surf, surf.points()),
+    patches_(surf.patches()),
+    sortedEdgeFacesPtr_(nullptr),
+    edgeOwnerPtr_(nullptr)
+{}
+
+
+Foam::triSurface::triSurface(triSurface&& surf)
+:
+    triSurface()
+{
+    FaceListType::operator=(std::move(static_cast<FaceListType&>(surf)));
+    storedPoints() = std::move(surf.storedPoints());
+    patches_ = std::move(surf.patches());
+}
+
 
 Foam::triSurface::triSurface
 (
@@ -776,47 +524,6 @@ Foam::triSurface::triSurface(const fileName& name, const scalar scaleFactor)
 }
 
 
-Foam::triSurface::triSurface(Istream& is)
-:
-    ParentType(List<Face>(), pointField()),
-    patches_(),
-    sortedEdgeFacesPtr_(nullptr),
-    edgeOwnerPtr_(nullptr)
-{
-    read(is);
-
-    setDefaultPatches();
-}
-
-
-Foam::triSurface::triSurface(const Time& d)
-:
-    ParentType(List<Face>(), pointField()),
-    patches_(),
-    sortedEdgeFacesPtr_(nullptr),
-    edgeOwnerPtr_(nullptr)
-{
-    fileName foamFile(d.caseName() + ".ftr");
-
-    fileName foamPath(d.path()/triSurfInstance(d)/typeName/foamFile);
-
-    IFstream foamStream(foamPath);
-
-    read(foamStream);
-
-    setDefaultPatches();
-}
-
-
-Foam::triSurface::triSurface(const triSurface& ts)
-:
-    ParentType(ts, ts.points()),
-    patches_(ts.patches()),
-    sortedEdgeFacesPtr_(nullptr),
-    edgeOwnerPtr_(nullptr)
-{}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::triSurface::~triSurface()
@@ -844,9 +551,19 @@ void Foam::triSurface::clearPatchMeshAddr()
 void Foam::triSurface::clearOut()
 {
     ParentType::clearOut();
-
     clearTopology();
     clearPatchMeshAddr();
+}
+
+
+void Foam::triSurface::swap(triSurface& surf)
+{
+    clearOut();
+    surf.clearOut();
+
+    FaceListType::swap(static_cast<FaceListType&>(surf));
+    storedPoints().swap(surf.storedPoints());
+    patches_.swap(surf.patches());
 }
 
 
@@ -980,24 +697,18 @@ void Foam::triSurface::markZone
         // Pick up neighbours of changedFaces
         DynamicList<label> newChangedFaces(2*changedFaces.size());
 
-        forAll(changedFaces, i)
+        for (const label facei : changedFaces)
         {
-            label facei = changedFaces[i];
-
             const labelList& fEdges = faceEdges()[facei];
 
-            forAll(fEdges, i)
+            for (const label edgei : fEdges)
             {
-                label edgeI = fEdges[i];
-
-                if (!borderEdge[edgeI])
+                if (!borderEdge[edgei])
                 {
-                    const labelList& eFaces = edgeFaces()[edgeI];
+                    const labelList& eFaces = edgeFaces()[edgei];
 
-                    forAll(eFaces, j)
+                    for (const label nbrFacei : eFaces)
                     {
-                        label nbrFacei = eFaces[j];
-
                         if (faceZone[nbrFacei] == -1)
                         {
                             faceZone[nbrFacei] = currentZone;
@@ -1102,13 +813,12 @@ void Foam::triSurface::subsetMeshMap
             // Renumber labels for face
             const triSurface::FaceType& f = locFaces[oldFacei];
 
-            forAll(f, fp)
+            for (const label verti : f)
             {
-                label labI = f[fp];
-                if (!pointHad[labI])
+                if (!pointHad[verti])
                 {
-                    pointHad[labI] = true;
-                    pointMap[pointi++] = labI;
+                    pointHad[verti] = true;
+                    pointMap[pointi++] = verti;
                 }
             }
         }
@@ -1162,99 +872,55 @@ Foam::triSurface Foam::triSurface::subsetMesh
 }
 
 
-void Foam::triSurface::write
+void Foam::triSurface::reset
 (
-    const fileName& name,
-    const bool sortByRegion
-) const
+    const Xfer<List<labelledTri>>& triangles,
+    const geometricSurfacePatchList& patches,
+    const Xfer<List<point>>& points
+)
 {
-    write(name, name.ext(), sortByRegion);
+    clearOut();
+
+    this->storedFaces().transfer(triangles());
+    this->storedPoints().transfer(points());
+
+    patches_ = patches;
 }
 
 
-void Foam::triSurface::write(Ostream& os) const
+void Foam::triSurface::reset(MeshedSurface<labelledTri>& input)
 {
-    os  << patches() << endl;
+    const auto& zones = input.surfZones();
 
-    //Note: Write with global point numbering
-    os  << points() << nl
-        << static_cast<const List<labelledTri>&>(*this) << endl;
-
-    // Check state of Ostream
-    os.check(FUNCTION_NAME);
-}
-
-
-void Foam::triSurface::write(const Time& d) const
-{
-    fileName foamFile(d.caseName() + ".ftr");
-
-    fileName foamPath(d.path()/triSurfInstance(d)/typeName/foamFile);
-
-    OFstream foamStream(foamPath);
-
-    write(foamStream);
-}
-
-
-void Foam::triSurface::writeStats(Ostream& os) const
-{
-    // Unfortunately nPoints constructs meshPoints() so do compact version
-    // ourselves.
-    PackedBoolList pointIsUsed(points().size());
-
-    label nPoints = 0;
-    boundBox bb(boundBox::invertedBox);
-    labelHashSet regionsUsed;
-
-    for (const triSurface::FaceType& f : *this)
+    geometricSurfacePatchList patches(zones.size());
+    forAll(zones, zonei)
     {
-        regionsUsed.insert(f.region());
-
-        forAll(f, fp)
-        {
-            const label pointi = f[fp];
-            if (pointIsUsed.set(pointi, 1))
-            {
-                bb.add(points()[pointi]);
-                ++nPoints;
-            }
-        }
+        patches[zonei] = geometricSurfacePatch(zones[zonei]);
     }
 
-    os  << "Triangles    : " << size()
-        << " in " << regionsUsed.size() <<  " region(s)" << nl
-        << "Vertices     : " << nPoints << nl
-        << "Bounding Box : " << bb << endl;
+    this->reset(input.xferFaces(), patches, input.xferPoints());
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::triSurface::operator=(const triSurface& ts)
+void Foam::triSurface::operator=(const triSurface& surf)
 {
-    List<labelledTri>::operator=(ts);
     clearOut();
-    storedPoints() = ts.points();
-    patches_ = ts.patches();
+
+    FaceListType::operator=(static_cast<const FaceListType&>(surf));
+    storedPoints() = surf.points();
+    patches_ = surf.patches();
 }
 
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, triSurface& sm)
+void Foam::triSurface::operator=(triSurface&& surf)
 {
-    sm.clearOut();
-    sm.read(is);
-    sm.setDefaultPatches();
-    return is;
-}
+    clearOut();
 
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const triSurface& sm)
-{
-    sm.write(os);
-    return os;
+    FaceListType::operator=(std::move(static_cast<FaceListType&>(surf)));
+    storedPoints() = std::move(surf.storedPoints());
+    patches_ = std::move(surf.patches());
 }
 
 

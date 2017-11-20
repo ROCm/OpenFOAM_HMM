@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "ListOps.H"
 #include "clock.H"
 #include "PackedBoolList.H"
+#include "DynamicList.H"
 #include "StringStream.H"
 #include "OSspecific.H"
 
@@ -83,12 +84,6 @@ Foam::fileFormats::STARCDCore::starToFoamFaceAddr =
     { starcdTet,   { 3, -1, 2, -1, 1, 0 } },
     { starcdPyr,   { 0, -1, 4, 2, 1, 3 } }
 };
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STARCDCore::STARCDCore()
-{}
 
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
@@ -173,8 +168,8 @@ void Foam::fileFormats::STARCDCore::removeFiles(const fileName& base)
 Foam::label Foam::fileFormats::STARCDCore::readPoints
 (
     IFstream& is,
-    pointField& points,
-    labelList& ids
+    List<point>& points,
+    List<label>& ids
 )
 {
     label maxId = 0;
@@ -219,7 +214,7 @@ Foam::label Foam::fileFormats::STARCDCore::readPoints
 void Foam::fileFormats::STARCDCore::writePoints
 (
     Ostream& os,
-    const pointField& points,
+    const UList<point>& points,
     const scalar scaleFactor
 )
 {

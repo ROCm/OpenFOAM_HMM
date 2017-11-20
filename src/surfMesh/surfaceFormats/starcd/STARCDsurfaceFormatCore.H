@@ -48,7 +48,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
+            Class fileFormats::STARCDsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class STARCDsurfaceFormatCore
@@ -57,16 +57,16 @@ class STARCDsurfaceFormatCore
 {
 protected:
 
-    // Protected Member Functions
+    // Protected Static Member Functions
 
-    static Map<word> readInpCellTable(IFstream&);
+    static Map<word> readInpCellTable(ISstream& is);
 
     static void writeCase
     (
-        Ostream&,
-        const pointField&,
+        Ostream& os,
+        const UList<point>& pts,
         const label nFaces,
-        const UList<surfZone>&
+        const UList<surfZone>& zoneLst
     );
 };
 

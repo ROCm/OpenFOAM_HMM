@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,8 +35,9 @@ SourceFiles
 #ifndef VTKsurfaceFormatCore_H
 #define VTKsurfaceFormatCore_H
 
-#include "MeshedSurface.H"
 #include "foamVtkFormatter.H"
+#include "point.H"
+#include "surfZone.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,20 +47,20 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class VTKsurfaceFormatCore Declaration
+              Class fileFormats::VTKsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class VTKsurfaceFormatCore
 {
 protected:
 
-    // Protected Member Functions
+    // Protected Static Member Functions
 
         //- Write header information with points
         static void writeHeader
         (
             vtk::formatter& format,
-            const pointField& pts
+            const UList<point>& pts
         );
 
         //- Write regions (zones) information as CellData

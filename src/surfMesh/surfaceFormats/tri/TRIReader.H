@@ -22,21 +22,27 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::fileFormats::TRIsurfaceFormatCore
+    Foam::fileFormats::TRIReader
 
 Description
-    Internal class used by the TRIsurfaceFormat
+    TRI (triangle) file reader.
+
+    For TRI format (eg, AC3D).
+    Each input line has 9 floats (3 points, each 3 floats) followed by hex
+    colour. The colour is used to build regions numbered from 0 upwards.
+
+    Reading and stitching similar to the STLReader.
 
 SourceFiles
-    TRIsurfaceFormatCore.C
+    TRIReader.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef TRIsurfaceFormatCore_H
-#define TRIsurfaceFormatCore_H
+#ifndef TRIReader_H
+#define TRIReader_H
 
-#include "surfaceFormatsCore.H"
 #include "STLpoint.H"
+#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,12 +52,10 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class TRIsurfaceFormatCore Declaration
+                   Class fileFormats::TRIReader Declaration
 \*---------------------------------------------------------------------------*/
 
-class TRIsurfaceFormatCore
-:
-    public surfaceFormatsCore
+class TRIReader
 {
     // Private Data
 
@@ -63,19 +67,22 @@ class TRIsurfaceFormatCore
         //- The zones associated with the faces
         List<label> zoneIds_;
 
+        //- The zone names, in the order of their first appearance
+        List<word> names_;
+
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
 
 
     // Private Member Functions
 
+        bool readFile(const fileName& filename);
+
         //- Disallow default bitwise copy construct
-        TRIsurfaceFormatCore(const TRIsurfaceFormatCore&) = delete;
+        TRIReader(const TRIReader&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const TRIsurfaceFormatCore&) = delete;
-
-        bool read(const fileName&);
+        TRIReader& operator=(const TRIReader&) = delete;
 
 
 public:
@@ -83,11 +90,11 @@ public:
     // Constructors
 
         //- Read from file, filling in the information
-        TRIsurfaceFormatCore(const fileName& filename);
+        TRIReader(const fileName& filename);
 
 
     //- Destructor
-    ~TRIsurfaceFormatCore();
+    ~TRIReader() = default;
 
 
     // Member Functions
@@ -121,6 +128,12 @@ public:
         inline List<label>& zoneIds()
         {
             return zoneIds_;
+        }
+
+        //- The list of solid names in the order of their first appearance
+        inline List<word>& names()
+        {
+            return names_;
         }
 
         //- The list of zone sizes in the order of their first appearance

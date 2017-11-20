@@ -65,19 +65,18 @@ void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
     }
     else
     {
-        label nTri = 0;
-        label nQuad = 0;
-        forAll(*this, i)
+        label nTri = 0, nQuad = 0;
+        for (const Face& f : *this)
         {
-            const label n = this->operator[](i).size();
+            const label n = f.size();
 
             if (n == 3)
             {
-                nTri++;
+                ++nTri;
             }
             else if (n == 4)
             {
-                nQuad++;
+                ++nQuad;
             }
         }
 

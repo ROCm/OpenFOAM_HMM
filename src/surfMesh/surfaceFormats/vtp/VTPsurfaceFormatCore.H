@@ -35,8 +35,9 @@ SourceFiles
 #ifndef VTPsurfaceFormatCore_H
 #define VTPsurfaceFormatCore_H
 
-#include "MeshedSurface.H"
 #include "foamVtkFormatter.H"
+#include "point.H"
+#include "surfZone.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,26 +47,25 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class VTPsurfaceFormatCore Declaration
+              Class fileFormats::VTPsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class VTPsurfaceFormatCore
 {
 protected:
 
-    // Protected Member Functions
+    // Protected Static Member Functions
 
-        //- Write file header information with points
+        //- Write header information with points
         static void writeHeader
         (
             vtk::formatter& format,
-            const pointField& pts,
+            const UList<point>& pts,
             const label nFaces
         );
 
-        //- Write file footer
+        //- Write footer
         static void writeFooter(vtk::formatter& format);
-
 
         //- Write regions (zones) information as CellData
         static void writeCellData

@@ -69,11 +69,12 @@ protected:
 
     // Protected Member Functions
 
-        //- Detect 'stlb' extension as binary
+        //- Detect 'stlb' extension as binary when format = UNKNOWN.
+        //  Otherwise test if format == BINARY.
         static bool isBinaryName
         (
             const fileName& filename,
-            const STLFormat& format
+            const STLFormat format
         );
 
 
@@ -98,7 +99,7 @@ protected:
     // Constructors
 
         //- Construct null
-        STLCore();
+        STLCore() = default;
 
 };
 

@@ -62,29 +62,32 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 
     is.getLine(line);
 
-    string version = line.substr(4);
-
-    if (version != "b")
+    // Verify version
     {
-        WarningInFunction
-            << "When reading AC3D file " << filename
-            << " read header " << line << " with version "
-            << version << endl
-            << "Only tested reading with version 'b'."
-            << " This might give problems" << endl;
+        const string version = line.substr(4);
+
+        if (version != "b")
+        {
+            WarningInFunction
+                << "When reading AC3D file " << filename
+                << " read header " << line << " with version "
+                << version << endl
+                << "Only tested reading with version 'b'."
+                << " This might give problems" << endl;
+        }
     }
 
 
-    if (!cueTo(is, "OBJECT", args) || (args != "world"))
+    if (!cueTo(is, "OBJECT", args) || args != "world")
     {
         FatalErrorInFunction
             << "Cannot find \"OBJECT world\" in file " << filename
             << exit(FatalError);
     }
 
-    // # of kids is the # of zones
+    // Number of kids is the number of zones
     args = cueToOrDie(is, "kids");
-    label nZones = parse<int>(args);
+    const label nZones = parse<int>(args);
 
     // Start of vertices for object/zones
     label vertexOffset = 0;
@@ -170,11 +173,11 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
             }
             else if (cmd == "numsurf")
             {
-                label nFaces = parse<int>(args);
+                const label nFaces = parse<int>(args);
 
                 for (label facei = 0; facei < nFaces; ++facei)
                 {
-                    static string errorMsg =
+                    const string errorMsg =
                         string(" while reading face ")
                             + Foam::name(facei) + " on zone "
                             + Foam::name(zoneI)
@@ -184,13 +187,13 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                     cueToOrDie(is, "mat", errorMsg);
                     args = cueToOrDie(is, "refs", errorMsg);
 
-                    label nVert = parse<int>(args);
+                    const label nVert = parse<int>(args);
 
                     List<label> verts(nVert);
                     forAll(verts, vertI)
                     {
                         is.getLine(line);
-                        verts[vertI] = parse<int>(line) + vertexOffset;
+                        verts[vertI] = vertexOffset + parse<int>(line);
                     }
 
                     const labelUList& f = static_cast<const labelUList&>(verts);
@@ -221,7 +224,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
             else if (cmd == "kids")
             {
                 // 'kids' denotes the end of the current zone.
-                label nKids = parse<int>(args);
+                const label nKids = parse<int>(args);
 
                 if (nKids != 0)
                 {
@@ -275,26 +278,22 @@ static void writeZone
 
     os << "numvert " << patch.nPoints() << nl;
 
-    forAll(patch.localPoints(), pti)
+    for (const point& pt : patch.localPoints())
     {
-        const point& pt = patch.localPoints()[pti];
-
         os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 
     os << "numsurf " << patch.size() << nl;
 
-    forAll(patch.localFaces(), facei)
+    for (const Face& f : patch.localFaces())
     {
-        const Face& f = patch.localFaces()[facei];
-
         os  << "SURF 0x20" << nl          // polygon
             << "mat " << zoneI << nl
             << "refs " << f.size() << nl;
 
-        forAll(f, fp)
+        for (const label verti : f)
         {
-            os << f[fp] << " 0 0" << nl;
+            os << verti << " 0 0" << nl;
         }
     }
 
@@ -306,13 +305,14 @@ template<class Face>
 void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
+    const UList<Face>& faceLst = surf.surfFaces();
 
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().size()
       ? surf.surfZones()
@@ -342,10 +342,9 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
         return;
     }
 
-    forAll(zones, zoneI)
+    label zoneIndex = 0;
+    for (const surfZone& zone : zones)
     {
-        const surfZone& zone = zones[zoneI];
-
         if (useFaceMap)
         {
             SubList<label> zoneMap(surf.faceMap(), zone.size(), zone.start());
@@ -355,7 +354,7 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
                 pointLst
             );
 
-            writeZone(os, patch, zone.name(), zoneI);
+            writeZone(os, patch, zone.name(), zoneIndex);
         }
         else
         {
@@ -365,8 +364,10 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
                 pointLst
             );
 
-            writeZone(os, patch, zone.name(), zoneI);
+            writeZone(os, patch, zone.name(), zoneIndex);
         }
+
+        ++zoneIndex;
     }
 }
 
@@ -375,7 +376,8 @@ template<class Face>
 void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
+    const UnsortedMeshedSurface<Face>& surf,
+    const dictionary&
 )
 {
     OFstream os(filename);
@@ -404,10 +406,10 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
     }
 
     writeHeader(os, zoneLst);
-    forAll(zoneLst, zoneI)
-    {
-        const surfZone& zone = zoneLst[zoneI];
 
+    label zoneIndex = 0;
+    for (const surfZone& zone : zoneLst)
+    {
         SubList<label> zoneMap(faceMap, zone.size(), zone.start());
         PrimitivePatch<Face, UIndirectList, const pointField&> patch
         (
@@ -415,7 +417,9 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
             surf.points()
         );
 
-        writeZone(os, patch, zone.name(), zoneI);
+        writeZone(os, patch, zone.name(), zoneIndex);
+
+        ++zoneIndex;
     }
 }
 

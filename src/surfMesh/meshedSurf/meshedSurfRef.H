@@ -33,7 +33,6 @@ Description
 #define meshedSurfRef_H
 
 #include "meshedSurf.H"
-#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,8 +62,6 @@ class meshedSurfRef
 
 public:
 
-    // Public Member Functions
-
     // Constructors
 
         //- Construct from components
@@ -82,8 +79,7 @@ public:
 
 
     //- Destructor
-    virtual ~meshedSurfRef()
-    {}
+    virtual ~meshedSurfRef() = default;
 
 
     // Access Member Functions

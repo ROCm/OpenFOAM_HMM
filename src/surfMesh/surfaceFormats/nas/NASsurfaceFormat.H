@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ Description
 
     - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
       to obtain zone names.
-    - Handles Nastran short and long formats, but not free format.
+    - Handles Nastran short, long formats and comma-separated free format.
     - Properly handles the Nastran compact floating point notation: \n
     \verbatim
         GRID          28        10.20269-.030265-2.358-8
@@ -56,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class NASsurfaceFormat Declaration
+                Class fileFormats::NASsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -66,6 +66,15 @@ class NASsurfaceFormat
     public NASCore
 {
     // Private Member Functions
+
+        //- Output CTRIA3 or CQUAD4
+        inline static label writeShell
+        (
+            Ostream& os,
+            const Face& f,
+            const label groupId,
+            label elementId
+        );
 
         //- Disallow default bitwise copy construct
         NASsurfaceFormat(const NASsurfaceFormat<Face>&) = delete;
@@ -79,30 +88,38 @@ public:
     // Constructors
 
         //- Construct from file name
-        NASsurfaceFormat(const fileName&);
-
-
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<MeshedSurface<Face>> New(const fileName& name)
-        {
-            return autoPtr<MeshedSurface<Face>>
-            (
-                new NASsurfaceFormat<Face>(name)
-            );
-        }
+        NASsurfaceFormat(const fileName& filename);
 
 
     //- Destructor
-    virtual ~NASsurfaceFormat()
-    {}
+    virtual ~NASsurfaceFormat() = default;
+
+
+    // Static Member Functions
+
+        //- Write surface mesh components by proxy
+        static void write
+        (
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
+        );
 
 
     // Member Functions
 
         //- Read from a file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& filename);
+
+        //- Write object file
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
+        }
 };
 
 
