@@ -5,12 +5,7 @@
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void writeCellGraph
+void Foam::writeCellGraph
 (
     const volScalarField& vsf,
     const word& graphFormat
@@ -29,9 +24,5 @@ void writeCellGraph
     ).write(path/vsf.name(), graphFormat);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

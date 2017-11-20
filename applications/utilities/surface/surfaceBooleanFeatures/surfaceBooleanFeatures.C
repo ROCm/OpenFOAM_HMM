@@ -588,7 +588,7 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
 
         //s.transfer(dupSurf);
         s = dupSurf;
-        pointMap = UIndirectList<label>(pointMap, dupPointMap)();
+        pointMap = labelUIndList(pointMap, dupPointMap)();
     }
 
     return nNonManifold;

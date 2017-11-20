@@ -207,7 +207,7 @@ void Foam::multiLevelDecomp::decompose
             // Subset point-wise data.
             pointField subPoints(points, domainPoints);
             scalarField subWeights(pointWeights, domainPoints);
-            labelList subPointMap(UIndirectList<label>(pointMap, domainPoints));
+            labelList subPointMap(labelUIndList(pointMap, domainPoints));
             // Subset point-point addressing (adapt global numbering)
             labelListList subPointPoints;
             labelList nOutsideConnections;

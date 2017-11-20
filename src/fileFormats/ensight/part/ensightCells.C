@@ -230,7 +230,7 @@ void Foam::ensightCells::classify
         }
 
         // eg, the processor local cellId
-        UList<label> slice = address_[slices_[what]];
+        labelUList slice = address_[slices_[what]];
 
         slice[sizes_[what]] = id;
         sizes_[what]++;

@@ -50,7 +50,7 @@ void Foam::vtk::writeField
 (
     vtk::formatter& fmt,
     const DimensionedField<Type, volMesh>& fld,
-    const UList<label>& cellMap
+    const labelUList& cellMap
 )
 {
     const uint64_t payLoad =
@@ -89,7 +89,7 @@ void Foam::vtk::writeField
 (
     vtk::formatter& fmt,
     const GeometricField<Type, fvPatchField, volMesh>& fld,
-    const UList<label>& cellMap
+    const labelUList& cellMap
 )
 {
     const uint64_t payLoad =

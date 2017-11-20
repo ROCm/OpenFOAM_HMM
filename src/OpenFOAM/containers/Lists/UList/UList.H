@@ -67,6 +67,7 @@ template<class T> class UList;
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 template<class T> Istream& operator>>(Istream&, UList<T>&);
 
+// Commonly required list types
 typedef UList<char> charUList;
 typedef UList<label> labelUList;
 

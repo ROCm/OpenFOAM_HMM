@@ -47,8 +47,8 @@ Description
 
 namespace Foam
 {
+    // NB: labelUIndList is defined in UIndirectList itself
     typedef IndirectList<label>  labelIndList;
-    typedef UIndirectList<label> labelUIndList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

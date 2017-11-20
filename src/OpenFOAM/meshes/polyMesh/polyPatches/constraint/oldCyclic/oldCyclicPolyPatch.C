@@ -497,7 +497,7 @@ bool Foam::oldCyclicPolyPatch::matchAnchors
                     << "Patch:" << name() << " : "
                     << "Cannot find point on face " << f
                     << " with vertices:"
-                    << UIndirectList<point>(pp.points(), f)()
+                    << UIndirectList<point>(pp.points(), f)
                     << " that matches point " << wantedAnchor
                     << " when matching the halves of cyclic patch " << name()
                     << endl

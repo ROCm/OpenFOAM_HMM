@@ -253,8 +253,8 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 ////- Does prevention of 0 cell domains and calls ptscotch.
 //Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
 //(
-//    const UList<label>& initadjncy,
-//    const UList<label>& initxadj,
+//    const labelUList& initadjncy,
+//    const labelUList& initxadj,
 //    const UList<scalar>& initcWeights,
 //    List<label>& finalDecomp
 //) const
@@ -441,8 +441,8 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& finalDecomp
 ) const

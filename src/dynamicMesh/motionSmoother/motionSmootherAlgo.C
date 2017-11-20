@@ -92,12 +92,12 @@ void Foam::motionSmootherAlgo::checkFld(const pointScalarField& fld)
 
 Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 (
-    const UList<label>& faceLabels
+    const labelUList& faceLabels
 ) const
 {
     labelHashSet usedPoints(mesh_.nPoints()/100);
 
-    for (auto faceId : faceLabels)
+    for (const label faceId : faceLabels)
     {
         usedPoints.insert(mesh_.faces()[faceId]);
     }
@@ -113,9 +113,9 @@ Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 {
     labelHashSet usedPoints(mesh_.nPoints()/100);
 
-    forAllConstIter(labelHashSet, faceLabels, iter)
+    for (const label faceId : faceLabels)
     {
-        usedPoints.insert(mesh_.faces()[iter.key()]);
+        usedPoints.insert(mesh_.faces()[faceId]);
     }
 
     return usedPoints;

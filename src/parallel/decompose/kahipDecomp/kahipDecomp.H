@@ -78,8 +78,8 @@ class kahipDecomp
         //- Call kahip with options from dictionary.
         virtual label decomposeSerial
         (
-            const UList<label>& adjncy,
-            const UList<label>& xadj,
+            const labelUList& adjncy,
+            const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
         );

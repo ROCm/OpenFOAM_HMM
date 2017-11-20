@@ -453,7 +453,7 @@ int main(int argc, char *argv[])
             region,
             1,
             exposedFaces,
-            UIndirectList<label>(nearestExposedPatch, exposedFaces)(),
+            labelUIndList(nearestExposedPatch, exposedFaces)(),
             true
         );
     }

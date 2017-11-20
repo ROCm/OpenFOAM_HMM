@@ -71,7 +71,7 @@ void Foam::meshDualiser::checkPolyTopoChange(const polyTopoChange& meshMod)
                 FatalErrorInFunction
                     << "duplicate verts:" << newToOld[newI]
                     << " coords:"
-                    << UIndirectList<point>(points, newToOld[newI])()
+                    << UIndirectList<point>(points, newToOld[newI])
                     << abort(FatalError);
             }
         }
@@ -275,7 +275,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //n /= mag(n);
         //Pout<< "Generated internal dualFace:" << dualFacei
         //    << " verts:" << newFace
-        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
+        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
         //    << " n:" << n
         //    << " between dualowner:" << dualCell0
         //    << " dualneigbour:" << dualCell1
@@ -302,7 +302,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //n /= mag(n);
         //Pout<< "Generated internal dualFace:" << dualFacei
         //    << " verts:" << newFace
-        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
+        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
         //    << " n:" << n
         //    << " between dualowner:" << dualCell1
         //    << " dualneigbour:" << dualCell0
@@ -359,7 +359,7 @@ Foam::label Foam::meshDualiser::addBoundaryFace
     //n /= mag(n);
     //Pout<< "Generated boundary dualFace:" << dualFacei
     //    << " verts:" << newFace
-    //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
+    //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
     //    << " n:" << n
     //    << " on dualowner:" << dualCelli
     //    << endl;
@@ -554,7 +554,7 @@ void Foam::meshDualiser::createFaceFromInternalFace
 
     //Pout<< "createFaceFromInternalFace : At face:" << facei
     //    << " verts:" << f
-    //    << " points:" << UIndirectList<point>(mesh_.points(), f)()
+    //    << " points:" << UIndirectList<point>(mesh_.points(), f)
     //    << " started walking at edge:" << fEdges[fp]
     //    << " verts:" << mesh_.edges()[fEdges[fp]]
     //    << endl;
@@ -603,7 +603,7 @@ void Foam::meshDualiser::createFaceFromInternalFace
             {
                 FatalErrorInFunction
                     << "face:" << facei << " verts:" << f
-                    << " points:" << UIndirectList<point>(mesh_.points(), f)()
+                    << " points:" << UIndirectList<point>(mesh_.points(), f)
                     << " no feature edge between " << f[fp]
                     << " and " << f[nextFp] << " although have different"
                     << " dual cells." << endl

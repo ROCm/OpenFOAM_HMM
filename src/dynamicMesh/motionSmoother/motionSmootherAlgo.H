@@ -209,7 +209,7 @@ class motionSmootherAlgo
         static void checkFld(const pointScalarField&);
 
         //- Get points used by given faces
-        labelHashSet getPoints(const UList<label>& faceLabels) const;
+        labelHashSet getPoints(const labelUList& faceLabels) const;
 
         //- Get points used by given faces
         labelHashSet getPoints(const labelHashSet& faceLabels) const;

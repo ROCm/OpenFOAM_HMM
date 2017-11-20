@@ -443,7 +443,6 @@ int main(int argc, char *argv[])
         }
 
 
-
         indirectPrimitivePatch extrudePatch
         (
             IndirectList<face>

@@ -47,8 +47,8 @@ namespace Foam
 
 Foam::label Foam::metisDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
 )
@@ -174,8 +174,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,          // num vertices in graph
             &ncon,              // num balancing constraints
-            const_cast<UList<label>&>(xadj).begin(),   // indexing into adjncy
-            const_cast<UList<label>&>(adjncy).begin(), // neighbour info
+            const_cast<labelUList&>(xadj).begin(),   // indexing into adjncy
+            const_cast<labelUList&>(adjncy).begin(), // neighbour info
             cellWeights.begin(),// vertex wts
             nullptr,               // vsize: total communication vol
             faceWeights.begin(),// edge wts
@@ -193,8 +193,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,          // num vertices in graph
             &ncon,              // num balancing constraints
-            const_cast<UList<label>&>(xadj).begin(),   // indexing into adjncy
-            const_cast<UList<label>&>(adjncy).begin(), // neighbour info
+            const_cast<labelUList&>(xadj).begin(),   // indexing into adjncy
+            const_cast<labelUList&>(adjncy).begin(), // neighbour info
             cellWeights.begin(),// vertex wts
             nullptr,               // vsize: total communication vol
             faceWeights.begin(),// edge wts

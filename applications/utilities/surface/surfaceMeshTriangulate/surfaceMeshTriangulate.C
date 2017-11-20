@@ -219,11 +219,11 @@ int main(int argc, char *argv[])
 
             }
             Info<< "Additionally triangulating faceZones "
-                << UIndirectList<word>
-                  (
-                      allZoneNames,
-                      includeFaceZones.sortedToc()
-                  )
+                <<  UIndirectList<word>
+                    (
+                        allZoneNames,
+                        includeFaceZones.sortedToc()
+                    )
                 << endl;
         }
 

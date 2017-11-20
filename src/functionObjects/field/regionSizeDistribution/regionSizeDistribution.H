@@ -229,8 +229,7 @@ class regionSizeDistribution
 
         //- Get data in order
         template<class Type>
-        List<Type> extractData(const UList<label>& keys, const Map<Type>&)
-        const;
+        List<Type> extractData(const labelUList& keys, const Map<Type>&) const;
 
         void writeGraph
         (

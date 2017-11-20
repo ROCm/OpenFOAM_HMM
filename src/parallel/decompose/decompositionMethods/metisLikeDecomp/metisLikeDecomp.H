@@ -65,8 +65,8 @@ protected:
         //- Serial and/or collect/distribute for parallel operation
         virtual label decomposeGeneral
         (
-            const UList<label>& adjncy,
-            const UList<label>& xadj,
+            const labelUList& adjncy,
+            const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
         );
@@ -74,8 +74,8 @@ protected:
         //- Decomposition with metis-like parameters
         virtual label decomposeSerial
         (
-            const UList<label>& adjncy,
-            const UList<label>& xadj,
+            const labelUList& adjncy,
+            const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
         ) = 0;

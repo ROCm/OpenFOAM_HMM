@@ -270,7 +270,7 @@ class addPatchCellLayer
             const polyMesh& mesh,
             const indirectPrimitivePatch& pp,
             const label ppEdgeI,
-            const UIndirectList<label>& excludeFaces,
+            const labelUIndList& excludeFaces,
             const labelList& meshFaces,
 
             label& inflateFaceI,

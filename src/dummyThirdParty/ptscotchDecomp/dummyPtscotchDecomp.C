@@ -64,8 +64,8 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const UList<label>& initxadj,
-    const UList<label>& initadjncy,
+    const labelUList& initxadj,
+    const labelUList& initadjncy,
     const UList<scalar>& initcWeights,
     List<label>& finalDecomp
 ) const

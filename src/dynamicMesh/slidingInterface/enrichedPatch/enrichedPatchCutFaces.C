@@ -215,7 +215,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                 const labelList& nextPoints = pp[curPointLabel];
 
                 // Pout<< "nextPoints: "
-                //     << UIndirectList<label>(mp, nextPoints)
+                //     << labelUIndList(mp, nextPoints)
                 //     << endl;
 
                 // Get the vector along the edge and the right vector

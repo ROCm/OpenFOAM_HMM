@@ -73,7 +73,7 @@ void Foam::vtk::writeList
 (
     vtk::formatter& fmt,
     const UList<Type>& lst,
-    const UList<label>& addressing
+    const labelUList& addressing
 )
 {
     forAll(addressing, i)

@@ -418,7 +418,7 @@ bool Foam::faceTriangulation::split
     {
         WarningInFunction
             << "Illegal face:" << f
-            << " with points " << UIndirectList<point>(points, f)()
+            << " with points " << UIndirectList<point>(points, f)
             << endl;
 
         return false;
@@ -494,7 +494,7 @@ bool Foam::faceTriangulation::split
 
                 WarningInFunction
                     << "Cannot find valid diagonal on face " << f
-                    << " with points " << UIndirectList<point>(points, f)()
+                    << " with points " << UIndirectList<point>(points, f)
                     << nl
                     << "Returning naive triangulation starting from "
                     << f[maxIndex] << " which might not be correct for a"
@@ -521,7 +521,7 @@ bool Foam::faceTriangulation::split
             {
                 WarningInFunction
                     << "Cannot find valid diagonal on face " << f
-                    << " with points " << UIndirectList<point>(points, f)()
+                    << " with points " << UIndirectList<point>(points, f)
                     << nl
                     << "Returning empty triFaceList" << endl;
 
@@ -553,7 +553,7 @@ bool Foam::faceTriangulation::split
         {
             FatalErrorInFunction
                 << "Illegal split of face:" << f
-                << " with points " << UIndirectList<point>(points, f)()
+                << " with points " << UIndirectList<point>(points, f)
                 << " at indices " << index1 << " and " << index2
                 << abort(FatalError);
         }
