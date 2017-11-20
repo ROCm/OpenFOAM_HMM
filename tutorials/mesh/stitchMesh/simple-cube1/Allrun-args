@@ -4,10 +4,11 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 runApplication ./Allmesh
 
-# Use stitchMesh with dictionary
-
-# runApplication stitchMesh -intermediate
-runApplication stitchMesh -overwrite
+# Use stitchMesh with command arguments (no dictionary)
+for dir in x y z
+do
+    runApplication -s dir-$dir stitchMesh -partial outer$dir inner$dir
+done
 
 runApplication checkMesh
 

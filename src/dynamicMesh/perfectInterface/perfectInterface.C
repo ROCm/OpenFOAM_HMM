@@ -79,7 +79,6 @@ Foam::pointField Foam::perfectInterface::calcFaceCentres
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::perfectInterface::perfectInterface
 (
     const word& name,
@@ -97,7 +96,6 @@ Foam::perfectInterface::perfectInterface
 {}
 
 
-// Construct from dictionary
 Foam::perfectInterface::perfectInterface
 (
     const word& name,
