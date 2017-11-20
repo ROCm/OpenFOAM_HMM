@@ -6,20 +6,8 @@
 #    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.csh/compiler
@@ -32,7 +20,7 @@
 
 switch ("$WM_COMPILER_TYPE")
 case ThirdParty:
-    # Default versions of GMP, MPFR and MPC, override as necessary
+    # Default versions of GMP, MPFR, MPC - override as necessary
     set gmp_version=gmp-system
     set mpfr_version=mpfr-system
     set mpc_version=mpc-system
@@ -56,6 +44,9 @@ case ThirdParty:
         breaksw
     case Gcc54:
         set gcc_version=gcc-5.4.0
+        breaksw
+    case Gcc55:
+        set gcc_version=gcc-5.5.0
         breaksw
     case Gcc61:
         set gcc_version=gcc-6.1.0
