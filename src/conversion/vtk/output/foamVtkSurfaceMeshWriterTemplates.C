@@ -74,8 +74,7 @@ void Foam::vtk::surfaceMeshWriter::write
     }
     else
     {
-        format().openDataArray<float, nCmpt>(field.name())
-            .closeTag();
+        format().openDataArray<float, nCmpt>(field.name()).closeTag();
     }
 
     format().writeSize(payLoad);
@@ -93,9 +92,55 @@ void Foam::vtk::surfaceMeshWriter::write
 template<class Type>
 void Foam::vtk::surfaceMeshWriter::write
 (
+    const GeometricField<Type, faPatchField, areaMesh>& field
+)
+{
+    const int nCmpt(pTraits<Type>::nComponents);
+    const uint64_t payLoad(pp_.size() * nCmpt * sizeof(float));
+
+    if (legacy_)
+    {
+        legacy::floatField(os(), field.name(), nCmpt, pp_.size());
+    }
+    else
+    {
+        format().openDataArray<float, nCmpt>(field.name()).closeTag();
+    }
+
+    format().writeSize(payLoad);
+    vtk::writeList(format(), field.primitiveField());
+
+    format().flush();
+
+    if (!legacy_)
+    {
+        format().endDataArray();
+    }
+}
+
+
+template<class Type>
+void Foam::vtk::surfaceMeshWriter::write
+(
     const UPtrList
     <
         const GeometricField<Type, fvsPatchField, surfaceMesh>
+    >& sflds
+)
+{
+    for (const auto& field : sflds)
+    {
+        write(field);
+    }
+}
+
+
+template<class Type>
+void Foam::vtk::surfaceMeshWriter::write
+(
+    const UPtrList
+    <
+        const GeometricField<Type, faPatchField, areaMesh>
     >& sflds
 )
 {
