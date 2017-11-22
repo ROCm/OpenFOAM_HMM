@@ -46,6 +46,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class CStringList;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return the PID of this process
@@ -206,14 +210,32 @@ bool ping(const std::string& host, const label timeOut=10);
 //  Uses vfork/execl internally.
 //  Where possible, use the list version instead.
 //
-//  Treats an empty command as a successful no-op.
-int system(const std::string& command);
+//  \param background return immediately to parent process instead of waiting
+//      for the child. Can be used (with moderation) to create background
+//      processes.
+//
+//  \note treats an empty command as a successful no-op.
+int system(const std::string& command, const bool background=false);
 
 //- Execute the specified command with arguments.
 //  Uses vfork/execvp internally
 //
-//  Treats an empty command as a successful no-op.
-int system(const UList<string>& command);
+//  \param background return immediately to parent process instead of waiting
+//      for the child. Can be used (with moderation) to create background
+//      processes.
+//
+//  \note treats an empty command as a successful no-op.
+int system(const UList<string>& command, const bool background=false);
+
+//- Execute the specified command with arguments.
+//  Uses vfork/execvp internally
+//
+//  \param background return immediately to parent process instead of waiting
+//      for the child. Can be used (with moderation) to create background
+//      processes.
+//
+//  \note treats an empty command as a successful no-op.
+int system(const CStringList& command, const bool background=false);
 
 //- Open a shared library and return handle to library.
 //  Print error message if library cannot be loaded (suppress with check=true)
