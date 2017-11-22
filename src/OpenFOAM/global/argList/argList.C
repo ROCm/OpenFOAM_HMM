@@ -54,6 +54,7 @@ Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
+Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
 Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
@@ -97,7 +98,13 @@ Foam::argList::initValidTables::initValidTables()
         "fileHandler",
         "handler",
         "override the fileHandler"
-     );
+    );
+
+    // Some standard option aliases (with or without version warnings)
+//     argList::addOptionCompat
+//     (
+//         "noFunctionObjects", {"no-function-objects", 0 }
+//     );
 
     Pstream::addValidParOptions(validParOptions);
 }
@@ -152,6 +159,7 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
 
 }
 
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 void Foam::argList::addArgument(const string& argumentName)
@@ -182,6 +190,20 @@ void Foam::argList::addOption
     {
         optionUsage.set(opt, usage);
     }
+}
+
+
+void Foam::argList::addOptionCompat
+(
+    const word& optionName,
+    std::pair<const char*,int> compat
+)
+{
+    validOptionsCompat.insert
+    (
+        compat.first,
+        std::pair<word,int>(optionName, compat.second)
+    );
 }
 
 
@@ -388,57 +410,106 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::word Foam::argList::optionCompat(const word& optionName)
+{
+    if (!validOptionsCompat.empty())
+    {
+        auto canonical = validOptionsCompat.cfind(optionName.substr(1));
+
+        if (canonical.found())
+        {
+            const auto& iter = *canonical;
+
+            if (iter.second)
+            {
+                // Emit warning, but only if version (non-zero) was provided
+                std::cerr
+                    << "--> FOAM IOWarning :" << nl
+                    << "    Found [v" << iter.second << "] '"
+                    << optionName << "' instead of '-"
+                    << iter.first << "' option"
+                    << nl
+                    << std::endl;
+
+                error::warnAboutAge("option", iter.second);
+            }
+
+            return "-" + iter.first;
+        }
+    }
+
+    // Nothing found - pass through the original input
+    return optionName;
+}
+
+
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
     int nArgs = 1;
-    unsigned listDepth = 0;
-    string tmpString;
+    unsigned depth = 0;
+    string group;  // For grouping ( ... ) arguments
 
     // Note: we rewrite directly into args_
     // and use a second pass to sort out args/options
 
     args_[0] = fileName(argv[0]);
-    for (int argI = 1; argI < argc; ++argI)
+    for (int argi = 1; argi < argc; ++argi)
     {
-        if (strcmp(argv[argI], "(") == 0)
+        if (strcmp(argv[argi], "(") == 0)
         {
-            ++listDepth;
-            tmpString += "(";
+            ++depth;
+            group += '(';
         }
-        else if (strcmp(argv[argI], ")") == 0)
+        else if (strcmp(argv[argi], ")") == 0)
         {
-            if (listDepth)
+            if (depth)
             {
-                --listDepth;
-                tmpString += ")";
-                if (!listDepth)
+                --depth;
+                group += ')';
+                if (!depth)
                 {
-                    args_[nArgs++] = tmpString;
-                    tmpString.clear();
+                    args_[nArgs++] = group;
+                    group.clear();
                 }
             }
             else
             {
-                args_[nArgs++] = argv[argI];
+                args_[nArgs++] = argv[argi];
             }
         }
-        else if (listDepth)
+        else if (depth)
         {
             // Quote each string element
-            tmpString += "\"";
-            tmpString += argv[argI];
-            tmpString += "\"";
+            group += '"';
+            group += argv[argi];
+            group += '"';
+        }
+        else if (argv[argi][0] == '-')
+        {
+            // Appears to be an option
+            const char *optionName = &argv[argi][1];
+
+            if (validOptions.found(optionName))
+            {
+                // Known option name
+                args_[nArgs++] = argv[argi];
+            }
+            else
+            {
+                // Try alias for the option name
+                args_[nArgs++] = optionCompat(argv[argi]);
+            }
         }
         else
         {
-            args_[nArgs++] = argv[argI];
+            args_[nArgs++] = argv[argi];
         }
     }
 
-    if (tmpString.size())
+    if (group.size())
     {
         // Group(s) not closed, but flush anything still pending
-        args_[nArgs++] = tmpString;
+        args_[nArgs++] = group;
     }
 
     args_.setSize(nArgs);
@@ -530,11 +601,11 @@ Foam::argList::argList
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar which might filter argv
-    for (int argI = 1; argI < argc; ++argI)
+    for (int argi = 1; argi < argc; ++argi)
     {
-        if (argv[argI][0] == '-')
+        if (argv[argi][0] == '-')
         {
-            const char *optionName = &argv[argI][1];
+            const char *optionName = &argv[argi][1];
 
             if (validParOptions.found(optionName))
             {
@@ -551,14 +622,14 @@ Foam::argList::argList
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
     HashTable<string>::const_iterator optIter;
-    for (int argI = 1; argI < args_.size(); ++argI)
+    for (int argi = 1; argi < args_.size(); ++argi)
     {
         argListStr_ += ' ';
-        argListStr_ += args_[argI];
+        argListStr_ += args_[argi];
 
-        if (args_[argI][0] == '-')
+        if (args_[argi][0] == '-')
         {
-            const char *optionName = &args_[argI][1];
+            const char *optionName = &args_[argi][1];
 
             if (!*optionName)
             {
@@ -580,8 +651,8 @@ Foam::argList::argList
                 // If the option is known to require an argument,
                 // get it or emit a FatalError.
 
-                ++argI;
-                if (argI >= args_.size())
+                ++argi;
+                if (argi >= args_.size())
                 {
                     FatalError
                         <<"Option '-" << optionName
@@ -591,9 +662,9 @@ Foam::argList::argList
                 }
 
                 argListStr_ += ' ';
-                argListStr_ += args_[argI];
+                argListStr_ += args_[argi];
                 // Handle duplicates by taking the last -option specified
-                options_.set(optionName, args_[argI]);
+                options_.set(optionName, args_[argi]);
             }
             else
             {
@@ -605,9 +676,9 @@ Foam::argList::argList
         }
         else
         {
-            if (nArgs != argI)
+            if (nArgs != argi)
             {
-                args_[nArgs] = args_[argI];
+                args_[nArgs] = args_[argi];
             }
             ++nArgs;
         }

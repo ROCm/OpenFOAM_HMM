@@ -103,6 +103,7 @@ SourceFiles
 #include "parRun.H"
 #include "StringStream.H"
 #include "OSspecific.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,6 +147,9 @@ class argList
 
     // Private Member Functions
 
+        //- Helper for resolving aliases for -options within validOptionsCompat
+        static word optionCompat(const word& optionName);
+
         //- Helper function for printUsage
         static void printOptionUsage
         (
@@ -180,6 +184,10 @@ public:
 
         //- A list of valid parallel options
         static HashTable<string> validParOptions;
+
+        //- A list of aliases for options.
+        //  Stored as (alias = canonical, version)
+        static HashTable<std::pair<word,int>> validOptionsCompat;
 
         //- Short usage information for validOptions
         static HashTable<string> optionUsage;
@@ -367,6 +375,19 @@ public:
                 const word& opt,
                 const string& param = "",
                 const string& usage = ""
+            );
+
+            //- Add an alias for the optionName.
+            //
+            //  \param optionName the currently used option name
+            //      OpenFOAM version for which they were used.
+            //  \param compat alias name and the last OpenFOAM version
+            //      (YYMM) for when the alias was not needed.
+            //      Setting a version of 0 suppresses warnings about the alias.
+            static void addOptionCompat
+            (
+                const word& optionName,
+                std::pair<const char*, int> compat
             );
 
             //- Add option usage information to optionUsage
