@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,26 +23,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "SubStrings.H"
 
-template<class StringType>
-Foam::CStringList::CStringList
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class ListType>
+int Foam::CStringList::resetContent
 (
-    const UList<StringType>& input
-)
-:
-    CStringList()
-{
-    reset(input);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class StringType>
-void Foam::CStringList::reset
-(
-    const UList<StringType>& input
+    const ListType& input
 )
 {
     clear();
@@ -52,35 +40,34 @@ void Foam::CStringList::reset
         // Special handling of an empty list
         argv_ = new char*[1];
         argv_[0] = nullptr;     // Final nullptr terminator
-        return;
+        return 0;
     }
 
     // Count overall required string length, including each trailing nul char
     for (const auto& str : input)
     {
-        len_ += str.size() + 1;
+        len_ += str.length() + 1;
     }
     --len_; // No final nul in overall count
 
     argv_ = new char*[input.size()+1];  // Extra +1 for terminating nullptr
     data_ = new char[len_+1];           // Extra +1 for terminating nul char
 
-    // Copy contents
-    char* ptr = data_;
+    argv_[0] = data_;   // Starts here
+
     for (const auto& str : input)
     {
-        argv_[argc_++] = ptr;   // The start of this string
-
-        for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
-        {
-            *(ptr++) = *iter;
-        }
-        *(ptr++) = '\0';
+        char *next = stringCopy(argv_[argc_], str);
+        argv_[++argc_] = next;   // The start of next string
     }
 
     argv_[argc_] = nullptr;     // Final nullptr terminator
+
+    return argc_;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class StringType>
 Foam::List<StringType>

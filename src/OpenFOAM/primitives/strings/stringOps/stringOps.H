@@ -122,9 +122,9 @@ namespace stringOps
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
-    string& inplaceExpand
+    void inplaceExpand
     (
-        string& s,
+        std::string& s,
         const HashTable<string, word, string::hash>& mapping,
         const char sigil = '$'
     );
@@ -168,7 +168,7 @@ namespace stringOps
     string expand
     (
         const string& s,
-        string::size_type& index,
+        std::string::size_type& index,
         const dictionary& dict,
         const bool allowEnvVars,
         const bool allowEmpty
@@ -186,9 +186,9 @@ namespace stringOps
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
-    string& inplaceExpand
+    void inplaceExpand
     (
-        string& s,
+        std::string& s,
         const dictionary& dict,
         const bool allowEnvVars,
         const bool allowEmpty,
@@ -205,9 +205,9 @@ namespace stringOps
     //
     //  \note the leading sigil can be changed to avoid conflicts with other
     //  string expansions
-    string& inplaceExpand
+    void inplaceExpand
     (
-        string& s,
+        std::string& s,
         const dictionary& dict,
         const char sigil = '$'
     );
@@ -276,9 +276,9 @@ namespace stringOps
     //
     //  \sa
     //  Foam::findEtcFile
-    string& inplaceExpand
+    void inplaceExpand
     (
-        string& s,
+        std::string& s,
         const bool allowEmpty = false
     );
 
@@ -286,26 +286,39 @@ namespace stringOps
     //- Replace environment variable contents with its name.
     //  This is essentially the inverse operation for inplaceExpand.
     //  Return true if a replacement was successful.
-    bool inplaceReplaceVar(string& s, const word& varName);
+    bool inplaceReplaceVar(std::string& s, const word& varName);
 
 
     //- Return string trimmed of leading whitespace
     string trimLeft(const string& s);
 
     //- Trim leading whitespace inplace
-    string& inplaceTrimLeft(string& s);
+    void inplaceTrimLeft(std::string& s);
 
     //- Return string trimmed of trailing whitespace
     string trimRight(const string& s);
 
     //- Trim trailing whitespace inplace
-    string& inplaceTrimRight(string& s);
+    void inplaceTrimRight(std::string& s);
 
     //- Return string trimmed of leading and trailing whitespace
     string trim(const string& original);
 
     //- Trim leading and trailing whitespace inplace
-    string& inplaceTrim(string& s);
+    void inplaceTrim(std::string& s);
+
+
+    //- Return string transformed with std::tolower on each character
+    string lower(const string& original);
+
+    //- Inplace transform string with std::tolower on each character
+    void inplaceLower(std::string& s);
+
+    //- Return string transformed with std::toupper on each character
+    string upper(const string& original);
+
+    //- Inplace transform string with std::toupper on each character
+    void inplaceUpper(std::string& s);
 
 
     //- Using printf-formatter for a word representation of the primitive.
