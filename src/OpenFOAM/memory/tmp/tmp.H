@@ -140,12 +140,6 @@ public:
 
     // Member operators
 
-        #ifdef NON_CONST_TMP
-        //- Deprecated non-const dereference operator.
-        //  Use ref() where non-const access is required
-        inline T& operator()();
-        #endif
-
         //- Const dereference operator
         inline const T& operator()() const;
 

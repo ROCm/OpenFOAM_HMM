@@ -247,27 +247,6 @@ inline void Foam::tmp<T>::clear() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-#ifdef NON_CONST_TMP
-template<class T>
-inline T& Foam::tmp<T>::operator()()
-{
-    if (isTmp())
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-
-    // Const-ness is automatically cast-away which is why this operator is
-    // deprecated.  Use ref() where non-const access is required.
-    return *ptr_;
-}
-#endif
-
-
 template<class T>
 inline const T& Foam::tmp<T>::operator()() const
 {
