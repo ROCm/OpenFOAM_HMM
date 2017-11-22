@@ -38,6 +38,8 @@ License
 #include "sigQuit.H"
 #include "sigSegv.H"
 #include "foamVersion.H"
+#include "stringOps.H"
+#include "CStringList.H"
 #include "uncollatedFileOperation.H"
 #include "masterUncollatedFileOperation.H"
 
@@ -657,14 +659,14 @@ void Foam::argList::parse
         }
 
         // Only display one or the other
-        if (options_.found("srcDoc"))
-        {
-            displayDoc(true);
-            quickExit = true;
-        }
-        else if (options_.found("doc"))
+        if (options_.found("doc"))
         {
             displayDoc(false);
+            quickExit = true;
+        }
+        else if (options_.found("srcDoc"))
+        {
+            displayDoc(true);
             quickExit = true;
         }
 
@@ -1362,59 +1364,72 @@ void Foam::argList::displayDoc(bool source) const
 {
     const dictionary& docDict = debug::controlDict().subDict("Documentation");
     List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
-    List<fileName> docExts(docDict.lookup("doxySourceFileExts"));
+    fileName docExt(docDict.lookup("doxySourceFileExt"));
 
-    // For source code: change foo_8C.html to foo_8C_source.html
+    // For source code: change xxx_8C.html to xxx_8C_source.html
     if (source)
     {
-        for (fileName& ext : docExts)
-        {
-            ext.replace(".", "_source.");
-        }
+        docExt.replace(".", "_source.");
     }
 
-    fileName docFile;
-    bool found = false;
+    fileName url;
 
     for (const fileName& dir : docDirs)
     {
-        for (const fileName& ext : docExts)
+        // http protocols are last in the list
+        if (dir.startsWith("http:") || dir.startsWith("https:"))
         {
-            docFile = dir/executable_ + ext;
-            docFile.expand();
-
-            if (isFile(docFile))
-            {
-                found = true;
-                break;
-            }
+            url = dir/executable_ + docExt;
+            break;
         }
-        if (found)
+
+        fileName docFile = stringOps::expand(dir/executable_ + docExt);
+
+        if
+        (
+            docFile.startsWith("file://")
+          ? isFile(docFile.substr(7))   // check part after "file://"
+          : isFile(docFile)
+        )
         {
+            url = std::move(docFile);
             break;
         }
     }
 
-    if (found)
-    {
-        string docBrowser = getEnv("FOAM_DOC_BROWSER");
-        if (docBrowser.empty())
-        {
-            docDict.lookup("docBrowser") >> docBrowser;
-        }
-        // Can use FOAM_DOC_BROWSER='application file://%f' if required
-        docBrowser.replaceAll("%f", docFile);
-
-        Info<< "Show documentation: " << docBrowser.c_str() << endl;
-
-        Foam::system(docBrowser);
-    }
-    else
+    if (url.empty())
     {
         Info<< nl
             << "No documentation found for " << executable_
             << ", but you can use -help to display the usage\n" << endl;
+
+        return;
     }
+
+    string docBrowser = getEnv("FOAM_DOC_BROWSER");
+    if (docBrowser.empty())
+    {
+        docDict.lookup("docBrowser") >> docBrowser;
+    }
+
+    // Can use FOAM_DOC_BROWSER='application file://%f' if required
+    if (docBrowser.find("%f") != std::string::npos)
+    {
+        docBrowser.replace("%f", url);
+    }
+    else
+    {
+        docBrowser += " " + url;
+    }
+
+    // Split on whitespace to use safer version of Foam::system()
+
+    CStringList command(stringOps::splitSpace(docBrowser));
+
+    Info<<"OpenFOAM-" << Foam::FOAMversion << " documentation:" << nl
+        << "    " << command << nl << endl;
+
+    Foam::system(command, true);
 }
 
 

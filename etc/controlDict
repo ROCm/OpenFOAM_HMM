@@ -18,17 +18,15 @@ FoamFile
 
 Documentation
 {
-    docBrowser      "firefox %f";
+    docBrowser          "firefox -new-tab %f";
+    doxySourceFileExt   "_8C.html";
+
+    // Places to search for documentation, http is last in the list
     doxyDocDirs
     (
         "$WM_PROJECT_USER_DIR/html"
-        "~OpenFOAM/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
-    );
-    doxySourceFileExts
-    (
-        "App_8C.html"
-        "_8C.html"
+        "https://www.openfoam.com/documentation/cpp-guide/html"
     );
 }
 
