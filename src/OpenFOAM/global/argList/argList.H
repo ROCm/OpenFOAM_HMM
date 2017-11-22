@@ -79,7 +79,8 @@ Note
       in the <tt>~OpenFOAM/controlDict</tt> file.
       The \%f token is used as a placeholder for the file name.
     - The valid (mandatory) arguments can be adjusted
-      by directly manipulating the argList::validArgs static member.
+      via the addArgument static method instead of directly
+      manipulating the argList::validArgs static member.
     - The valid options can be adjusted
       via the addOption/removeOption static methods instead of directly
       manipulating the argList::validOptions static member.
@@ -348,6 +349,9 @@ public:
 
 
         // Edit
+
+            //- Append a (mandatory) argument to validArgs
+            static void addArgument(const string& argumentName);
 
             //- Add a bool option to validOptions with usage information
             static void addBoolOption

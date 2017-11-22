@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
         "map volume fields from one mesh to another"
     );
 
-    argList::validArgs.append("sourceCase");
+    argList::addArgument("sourceCase");
 
     argList::addOption
     (

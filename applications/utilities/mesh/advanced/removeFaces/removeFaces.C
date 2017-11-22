@@ -54,7 +54,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
-    argList::validArgs.append("faceSet");
+    argList::addArgument("faceSet");
 
     #include "setRootCase.H"
     #include "createTime.H"

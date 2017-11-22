@@ -42,7 +42,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("dict .. dictN");
+    argList::addArgument("dict .. dictN");
     argList args(argc, argv, false, true);
 
     Info<< nl

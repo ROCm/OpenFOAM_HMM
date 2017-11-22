@@ -50,8 +50,8 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
-    argList::validArgs.append("faceZone");
-    argList::validArgs.append("outsidePoint");
+    argList::addArgument("faceZone");
+    argList::addArgument("outsidePoint");
 
     #include "setRootCase.H"
     #include "createTime.H"

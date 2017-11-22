@@ -154,6 +154,12 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+void Foam::argList::addArgument(const string& argumentName)
+{
+    validArgs.append(argumentName);
+}
+
+
 void Foam::argList::addBoolOption
 (
     const word& opt,
@@ -368,15 +374,15 @@ void Foam::argList::printOptionUsage
 
 bool Foam::argList::postProcess(int argc, char *argv[])
 {
-    bool postProcessOption = false;
-
-    for (int i=1; i<argc; i++)
+    for (int i=1; i<argc; ++i)
     {
-        postProcessOption = argv[i] == '-' + postProcessOptionName;
-        if (postProcessOption) break;
+        if (argv[i] == '-' + postProcessOptionName)
+        {
+            return true;
+        }
     }
 
-    return postProcessOption;
+    return false;
 }
 
 
@@ -1256,14 +1262,12 @@ bool Foam::argList::unsetOption(const word& opt)
         // Remove the option, return true if state changed
         return options_.erase(opt);
     }
-    else
-    {
-        FatalError
-            <<"used argList::unsetOption on an invalid option: '"
-            << opt << "'" << nl << "allowed are the following:"
-            << validOptions << endl;
-        FatalError.exit();
-    }
+
+    FatalError
+        <<"used argList::unsetOption on an invalid option: '"
+        << opt << "'" << nl << "allowed are the following:"
+        << validOptions << endl;
+    FatalError.exit();
 
     return false;
 }
@@ -1486,6 +1490,7 @@ bool Foam::argList::checkRootCase() const
 
         return false;
     }
+
     fileName pathDir(fileHandler().filePath(path()));
 
     if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())

@@ -625,7 +625,7 @@ mtype                 {space}"MTYPE:"{space}
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("GAMBIT file");
+    argList::addArgument("GAMBIT file");
     argList::addOption
     (
         "scale",

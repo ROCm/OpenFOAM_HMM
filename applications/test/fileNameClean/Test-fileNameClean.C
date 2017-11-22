@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-    argList::validArgs.insert("fileName .. fileNameN");
+    argList::addArgument("fileName .. fileNameN");
     argList::addOption("istream", "file", "test Istream values");
 
     argList args(argc, argv, false, true);

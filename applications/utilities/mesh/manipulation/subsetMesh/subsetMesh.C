@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::validArgs.append("cellSet");
+    argList::addArgument("cellSet");
     argList::addOption
     (
         "patch",

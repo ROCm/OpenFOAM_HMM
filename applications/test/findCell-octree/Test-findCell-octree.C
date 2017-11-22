@@ -37,7 +37,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("point (x y z)");
+    argList::addArgument("point (x y z)");
 
     #include "setRootCase.H"
     #include "createTime.H"

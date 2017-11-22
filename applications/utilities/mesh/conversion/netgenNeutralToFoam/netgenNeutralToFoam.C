@@ -92,7 +92,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("Neutral file");
+    argList::addArgument("Neutral file");
 
     #include "setRootCase.H"
     #include "createTime.H"

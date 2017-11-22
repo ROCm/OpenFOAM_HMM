@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
-    argList::validArgs.append("output file");
+    argList::addArgument("output file");
     #include "addRegionOption.H"
     argList::addBoolOption
     (

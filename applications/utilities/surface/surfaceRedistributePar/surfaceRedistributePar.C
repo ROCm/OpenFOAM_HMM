@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
         "directory"
     );
 
-    argList::validArgs.append("triSurfaceMesh");
-    argList::validArgs.append("distributionType");
+    argList::addArgument("triSurfaceMesh");
+    argList::addArgument("distributionType");
     argList::addBoolOption
     (
         "keepNonMapped",

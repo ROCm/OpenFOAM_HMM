@@ -771,7 +771,7 @@ endOfSection               {space}")"{space}
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("Fluent mesh file");
+    argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",

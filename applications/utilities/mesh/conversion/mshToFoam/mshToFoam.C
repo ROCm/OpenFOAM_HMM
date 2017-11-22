@@ -60,7 +60,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".msh file");
+    argList::addArgument(".msh file");
     argList::addBoolOption
     (
         "hex",

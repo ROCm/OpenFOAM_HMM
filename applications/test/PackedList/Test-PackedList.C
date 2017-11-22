@@ -82,7 +82,7 @@ inline void reportInfo()
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("file .. fileN");
+    argList::addArgument("file .. fileN");
 
     argList::addBoolOption("mask", "report information about the bit masks");
     argList::addBoolOption("count", "test the count() method");

@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
 
-    argList::validArgs.append("masterCase");
+    argList::addArgument("masterCase");
     argList::addOption
     (
         "masterRegion",
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
         "specify alternative mesh region for the master mesh"
     );
 
-    argList::validArgs.append("addCase");
+    argList::addArgument("addCase");
     argList::addOption
     (
         "addRegion",

@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
     (
         "Re-sample surfaces used in foamyHexMesh operation"
     );
-    argList::validArgs.append("(nx ny nz)");
-    argList::validArgs.append("outputName");
+    argList::addArgument("(nx ny nz)");
+    argList::addArgument("outputName");
 
     #include "setRootCase.H"
     #include "createTime.H"

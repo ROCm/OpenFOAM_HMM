@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
         "boundary edges to match other surface boundary edges"
     );
     argList::noParallel();
-    argList::validArgs.append("hookTolerance");
+    argList::addArgument("hookTolerance");
 
     #include "addDictOption.H"
 

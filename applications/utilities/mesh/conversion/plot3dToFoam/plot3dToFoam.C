@@ -59,7 +59,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("PLOT3D geom file");
+    argList::addArgument("PLOT3D geom file");
     argList::addOption
     (
         "scale",

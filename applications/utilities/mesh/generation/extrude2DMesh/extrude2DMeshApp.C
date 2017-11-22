@@ -110,7 +110,7 @@ static const Enum<ExtrudeMode> ExtrudeModeNames
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("surfaceFormat");
+    argList::addArgument("surfaceFormat");
 
     #include "addOverwriteOption.H"
 

@@ -101,7 +101,7 @@ label findFace(const primitiveMesh& mesh, const face& f)
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("file prefix");
+    argList::addArgument("file prefix");
     argList::addBoolOption
     (
         "noFaceFile",

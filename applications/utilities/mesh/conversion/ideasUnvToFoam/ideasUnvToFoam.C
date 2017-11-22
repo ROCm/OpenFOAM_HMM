@@ -662,7 +662,7 @@ label findPatch(const List<labelHashSet>& dofGroups, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".unv file");
+    argList::addArgument(".unv file");
     argList::addBoolOption
     (
         "dump",

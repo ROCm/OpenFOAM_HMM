@@ -867,7 +867,7 @@ label findFace(const primitiveMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("Fluent mesh file");
+    argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",

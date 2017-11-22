@@ -62,8 +62,8 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
-    argList::validArgs.append("patches");
-    argList::validArgs.append("edgeFraction");
+    argList::addArgument("patches");
+    argList::addArgument("edgeFraction");
 
     argList::addOption
     (

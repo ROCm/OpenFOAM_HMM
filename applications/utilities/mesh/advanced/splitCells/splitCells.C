@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
     );
     #include "addOverwriteOption.H"
     argList::noParallel();
-    argList::validArgs.append("edgeAngle [0..360]");
+    argList::addArgument("edgeAngle [0..360]");
 
     argList::addOption
     (

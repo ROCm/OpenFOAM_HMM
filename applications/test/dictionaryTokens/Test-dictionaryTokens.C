@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption("info", "report token info");
     argList::addBoolOption("value", "report token value");
 
-    argList::validArgs.insert("dict .. dictN");
+    argList::addArgument("dict .. dictN");
     argList args(argc, argv, false, true);
 
     const bool optInfo  = args.optionFound("info");

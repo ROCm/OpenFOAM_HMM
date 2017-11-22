@@ -297,7 +297,7 @@ label findFace(const polyMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("ANSYS input file");
+    argList::addArgument("ANSYS input file");
     argList::addOption
     (
         "scale",

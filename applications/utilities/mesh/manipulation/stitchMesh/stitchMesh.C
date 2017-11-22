@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
     );
 
     // The arguments are non-mandatory when using dictionary mode
-    argList::validArgs.append("masterPatch");
-    argList::validArgs.append("slavePatch");
+    argList::addArgument("masterPatch");
+    argList::addArgument("slavePatch");
 
     #include "setRootCaseNonMandatoryArgs.H"
 

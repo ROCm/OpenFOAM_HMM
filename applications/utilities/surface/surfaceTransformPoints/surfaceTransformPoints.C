@@ -65,8 +65,8 @@ int main(int argc, char *argv[])
         "Note: roll=rotate about x, pitch=rotate about y, yaw=rotate about z"
     );
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
     argList::addOption
     (
         "translate",

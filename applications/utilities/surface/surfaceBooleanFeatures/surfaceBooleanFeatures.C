@@ -1513,9 +1513,9 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("action");
-    argList::validArgs.append("surfaceFile1");
-    argList::validArgs.append("surfaceFile2");
+    argList::addArgument("action");
+    argList::addArgument("surfaceFile1");
+    argList::addArgument("surfaceFile2");
 
     argList::addOption
     (

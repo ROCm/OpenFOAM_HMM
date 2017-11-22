@@ -49,7 +49,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("CFX geom file");
+    argList::addArgument("CFX geom file");
     argList::addOption
     (
         "scale",

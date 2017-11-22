@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("outputFile");
+    argList::addArgument("inputFile");
+    argList::addArgument("outputFile");
 
     argList::addBoolOption
     (

@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("PROSTAR prefix");
+    argList::addArgument("PROSTAR prefix");
     argList::addBoolOption
     (
         "ascii",

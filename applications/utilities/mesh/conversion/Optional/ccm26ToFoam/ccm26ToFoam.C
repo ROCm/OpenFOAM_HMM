@@ -621,7 +621,7 @@ int main(int argc, char *argv[])
         " - does not handle mesh regions (porosity, solids, ...)\n"
     );
     argList::noParallel();
-    argList::validArgs.append("ccmFile");
+    argList::addArgument("ccmFile");
 
     #include "setRootCase.H"
     #include "createTime.H"

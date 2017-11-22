@@ -44,7 +44,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("scaling factor");
+    argList::addArgument("scaling factor");
 
     #include "setRootCase.H"
 
