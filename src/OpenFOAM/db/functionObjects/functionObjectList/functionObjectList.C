@@ -770,7 +770,7 @@ bool Foam::functionObjectList::read()
                     );
                     if (functionObjects::timeControl::entriesPresent(dict))
                     {
-                        foPtr.set
+                        foPtr.reset
                         (
                             new functionObjects::timeControl(key, time_, dict)
                         );

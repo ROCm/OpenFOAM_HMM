@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
 
         {
-            meshFilterPtr.set
+            meshFilterPtr.reset
             (
                 new polyMeshFilter(mesh, pointPriority, collapseDict)
             );

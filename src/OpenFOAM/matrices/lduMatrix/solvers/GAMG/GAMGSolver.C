@@ -253,7 +253,7 @@ Foam::GAMGSolver::GAMGSolver
 
             if (matrixLevels_.set(coarsestLevel))
             {
-                coarsestLUMatrixPtr_.set
+                coarsestLUMatrixPtr_.reset
                 (
                     new LUscalarMatrix
                     (

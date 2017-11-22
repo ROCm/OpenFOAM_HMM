@@ -92,7 +92,7 @@ Foam::velocityDisplacementMotionSolver::velocityDisplacementMotionSolver
 
     pointDisplacement.primitiveFieldRef() = mesh.points() - points0;
 
-    displacementMotionSolverPtr_.set
+    displacementMotionSolverPtr_.reset
     (
         dynamic_cast<displacementMotionSolver*>
         (

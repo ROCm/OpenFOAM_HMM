@@ -76,7 +76,7 @@ Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
 {
     if (modelTable.found(pair_))
     {
-        model_.set
+        model_.reset
         (
             modelType::New
             (
@@ -88,7 +88,7 @@ Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
 
     if (modelTable.found(pair1In2_))
     {
-        model1In2_.set
+        model1In2_.reset
         (
             modelType::New
             (
@@ -100,7 +100,7 @@ Foam::BlendedInterfacialModel<modelType>::BlendedInterfacialModel
 
     if (modelTable.found(pair2In1_))
     {
-        model2In1_.set
+        model2In1_.reset
         (
             modelType::New
             (

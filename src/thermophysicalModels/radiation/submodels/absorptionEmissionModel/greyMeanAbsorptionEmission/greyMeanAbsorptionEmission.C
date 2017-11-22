@@ -94,7 +94,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
         const word name = coeffsDict_.lookup("lookUpTableFileName");
         if (name != "none")
         {
-            lookUpTablePtr_.set
+            lookUpTablePtr_.reset
             (
                 new interpolationLookUpTable<scalar>
                 (

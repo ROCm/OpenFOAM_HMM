@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
         if (dictPath.size())
         {
-            csDictIoPtr.set
+            csDictIoPtr.reset
             (
                 new IOobject
                 (
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            csDictIoPtr.set
+            csDictIoPtr.reset
             (
                 new IOobject
                 (

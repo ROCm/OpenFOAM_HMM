@@ -275,7 +275,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
         IStringStream is(os.str());
         dictionary dict(is);
 
-        redirectPatchFieldPtr_.set
+        redirectPatchFieldPtr_.reset
         (
             pointPatchField<Type>::New
             (

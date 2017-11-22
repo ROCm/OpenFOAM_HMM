@@ -1019,7 +1019,7 @@ void Foam::Time::setDeltaT(const scalar deltaT, const bool adjust)
 Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
 {
     subCycling_ = true;
-    prevTimeState_.set(new TimeState(*this));
+    prevTimeState_.reset(new TimeState(*this));
 
     setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
     deltaT_ /= nSubCycles;

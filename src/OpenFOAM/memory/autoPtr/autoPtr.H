@@ -36,8 +36,6 @@ SourceFiles
 #ifndef autoPtr_H
 #define autoPtr_H
 
-#include <cstddef>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -63,11 +61,14 @@ public:
 
     // Constructors
 
+        //- Construct null with nullptr
+        inline explicit autoPtr();
+
         //- Store object pointer
-        inline explicit autoPtr(T* p = nullptr);
+        inline explicit autoPtr(T* p);
 
         //- Construct as copy by transferring pointer to this autoPtr and
-        //  setting the arguments pointer to nullptr
+        //- setting the arguments pointer to nullptr
         inline autoPtr(const autoPtr<T>& ap);
 
         //- Construct either by transferring pointer or cloning.
@@ -92,7 +93,7 @@ public:
 
         // Edit
 
-            //- Return object pointer for reuse
+            //- Release ownership of the object pointer and return the pointer
             inline T* ptr();
 
             //- Set pointer to that given.
@@ -100,11 +101,11 @@ public:
             inline void set(T* p);
 
             //- If object pointer already set, delete object and set to given
-            //  pointer
+            //- pointer
             inline void reset(T* p = nullptr);
 
-            //- Delete object (if the pointer is valid) and set pointer to
-            //  nullptr
+            //- Delete object (if the pointer is valid)
+            //- and set pointer to nullptr
             inline void clear();
 
 
@@ -127,19 +128,24 @@ public:
 
         // Member operators
 
-            //- Return reference to the object data
+            //- Return reference to the object data.
+            //  Fatal if no pointer is allocated.
             inline T& operator()();
 
             //- Return const reference to the object data
+            //  Fatal if no pointer is allocated.
             inline const T& operator()() const;
 
             //- Const cast to the underlying type reference
+            //  Fatal if no pointer is allocated.
             inline operator const T&() const;
 
-            //- Return object pointer
+            //- Dereferences (non-const) pointer to the managed object
+            //  Fatal if no pointer is allocated.
             inline T* operator->();
 
-            //- Return const object pointer
+            //- Dereferences (const) pointer to the managed object
+            //  Fatal if no pointer is allocated.
             inline const T* operator->() const;
 
             //- Take over the object pointer from parameter

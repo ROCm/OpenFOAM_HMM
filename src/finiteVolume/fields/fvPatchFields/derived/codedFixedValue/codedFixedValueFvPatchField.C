@@ -273,7 +273,7 @@ Foam::codedFixedValueFvPatchField<Type>::redirectPatchField() const
         IStringStream is(os.str());
         dictionary dict(is);
 
-        redirectPatchFieldPtr_.set
+        redirectPatchFieldPtr_.reset
         (
             fvPatchField<Type>::New
             (

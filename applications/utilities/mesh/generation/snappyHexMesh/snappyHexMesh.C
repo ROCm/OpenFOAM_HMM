@@ -314,7 +314,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         }
     }
 
-    surfacePtr.set
+    surfacePtr.reset
     (
         new refinementSurfaces
         (
@@ -731,7 +731,7 @@ int main(int argc, char *argv[])
                 << runTime.timeName() << nl << endl;
         }
 
-        meshPtr.set
+        meshPtr.reset
         (
             new fvMesh
             (
@@ -982,7 +982,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        surfacesPtr.set
+        surfacesPtr.reset
         (
             new refinementSurfaces
             (
