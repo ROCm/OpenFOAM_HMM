@@ -729,14 +729,13 @@ void Foam::argList::parse
     // 2. environment var FOAM_FILEHANDLER
     // 3. etc/controlDict optimisationSwitches 'fileHandler'
     // 4. system/controlDict 'fileHandler' (not handled here; done in TimeIO.C)
+    // 5. '-fileHandler' commmand-line option
 
     {
-        word handlerType(getEnv("FOAM_FILEHANDLER"));
-        HashTable<string>::const_iterator iter = options_.find("fileHandler");
-        if (iter != options_.end())
-        {
-            handlerType = iter();
-        }
+        word handlerType
+        (
+            options_.lookup("fileHandler", getEnv("FOAM_FILEHANDLER"))
+        );
 
         if (handlerType.empty())
         {
