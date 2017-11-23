@@ -20,9 +20,10 @@ surfaceScalarField phiHbyA
 (
     "phiHbyA",
     fvc::interpolate(rho)*fvc::flux(HbyA)
-  + rhorAUf*fvc::ddtCorr(rho, U, phi)
+  + rhorAUf*fvc::ddtCorr(rho, U, phi, rhoUf)
 );
 
+fvc::makeRelative(phiHbyA, rho, U);
 MRF.makeRelative(fvc::interpolate(rho), phiHbyA);
 
 // Update the pressure BCs to ensure flux consistency
@@ -103,7 +104,15 @@ if (pressureControl.limit(p))
 thermo.correctRho(psi*p - psip0, rhoMin, rhoMax) ;
 rho = thermo.rho();
 
+// Correct rhoUf if the mesh is moving
+fvc::correctRhoUf(rhoUf, rho, U, phi);
+
 if (thermo.dpdt())
 {
     dpdt = fvc::ddt(p);
+
+    if (mesh.moving())
+    {
+        dpdt -= fvc::div(fvc::meshPhi(rho, U), p);
+    }
 }
