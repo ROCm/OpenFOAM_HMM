@@ -335,26 +335,29 @@ namespace stringOps
 
 
     //- Split string into sub-strings at the delimiter character.
-    //  Empty sub-strings are suppressed.
+    //  Empty sub-strings are normally suppressed.
+    //  Behaviour is ill-defined if delim is a NUL character.
     template<class StringType>
     Foam::SubStrings<StringType> split
     (
         const StringType& str,
-        const char delim
+        const char delim,
+        const bool keepEmpty = false
     );
 
     //- Split string into sub-strings using delimiter string.
-    //  Empty sub-strings are suppressed.
+    //  Empty sub-strings are normally suppressed.
     template<class StringType>
     Foam::SubStrings<StringType> split
     (
         const StringType& str,
-        const std::string& delim
+        const std::string& delim,
+        const bool keepEmpty = false
     );
 
-
     //- Split string into sub-strings using any characters in delimiter.
-    //  Empty sub-strings are suppressed.
+    //  Empty sub-strings are normally suppressed.
+    //  Behaviour is ill-defined if delim is an empty string.
     template<class StringType>
     Foam::SubStrings<StringType> splitAny
     (
@@ -362,6 +365,14 @@ namespace stringOps
         const std::string& delim
     );
 
+    //- Split string into sub-strings using a fixed field width
+    //  Behaviour is ill-defined if width is zero.
+    template<class StringType>
+    Foam::SubStrings<StringType> splitFixed
+    (
+        const StringType& str,
+        const std::string::size_type width
+    );
 
     //- Split string into sub-strings at whitespace (TAB, NL, VT, FF, CR, SPC)
     //  Empty sub-strings are suppressed.

@@ -62,6 +62,18 @@ int main(int argc, char *argv[])
     dict.add("FOAM_RUN", subDict);
 
 
+    // Test Foam::name with formatting string
+    {
+        word formatted = Foam::name("formatted=<%X>", 0xdeadbeef);
+        Info<<"formatted: " << formatted << nl;
+    }
+
+    Info<<"formatted: "
+        << Foam::name("formatted not checked for validity=<%X>", 0xdeadbeef)
+        << nl
+        << endl
+
+
     Info<< "string:" << test << nl << "hash:"
         << unsigned(string::hash()(test)) << endl;
 
