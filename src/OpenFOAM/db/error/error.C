@@ -31,6 +31,44 @@ License
 #include "Pstream.H"
 #include "OSspecific.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::error::warnAboutAge
+(
+    const char* what,
+    const int oldVersion
+)
+{
+    if (oldVersion < 1000)
+    {
+        // Emit warning
+        std::cerr
+            << "    This " << what << " is considered to be VERY old!\n"
+            << std::endl;
+    }
+    else if (OPENFOAM_PLUS > oldVersion)
+    {
+        const int months =
+        (
+            // YYMM -> months
+            (12 * (OPENFOAM_PLUS/100) + (OPENFOAM_PLUS % 100))
+          - (12 * (oldVersion/100) + (oldVersion % 100))
+        );
+
+        std::cerr
+            << "    This " << what << " is deemed to be " << months
+            << " months old.\n"
+            << std::endl;
+    }
+///// Uncertain if this is desirable
+///    else if (OPENFOAM_PLUS < oldVersion)
+///    {
+///        std::cerr
+///            << "    This " << what << " appears to be a future option\n"
+///            << std::endl;
+///    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

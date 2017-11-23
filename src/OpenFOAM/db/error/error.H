@@ -100,6 +100,15 @@ public:
     virtual ~error() throw();
 
 
+    // Static Member Functions
+
+        //- Emit warning on stderr about something being old.
+        //  \param what description for the warning
+        //  \param oldVersion is a YYMM version value for determining the
+        //      age in months.
+        static void warnAboutAge(const char* what, const int oldVersion);
+
+
     // Member functions
 
         string message() const;
