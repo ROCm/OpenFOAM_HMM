@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,40 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "psiChemistryCombustion.H"
+#include "ChemistryCombustion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::combustionModels::psiChemistryCombustion::psiChemistryCombustion
+template<class ReactionThermo>
+Foam::ChemistryCombustion<ReactionThermo>::ChemistryCombustion
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& combustionProperties,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
 )
 :
-    psiCombustionModel(modelType, mesh, combustionProperties, phaseName),
-    chemistryPtr_(psiChemistryModel::New(mesh, phaseName))
+    CombustionModel<ReactionThermo>
+    (
+        modelType,
+        thermo,
+        turb,
+        combustionProperties
+    ),
+    chemistryPtr_(BasicChemistryModel<ReactionThermo>::New(thermo))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::combustionModels::psiChemistryCombustion::~psiChemistryCombustion()
+template<class ReactionThermo>
+Foam::ChemistryCombustion<ReactionThermo>::
+~ChemistryCombustion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::psiReactionThermo&
-Foam::combustionModels::psiChemistryCombustion::thermo()
+template<class ReactionThermo>
+ReactionThermo&
+Foam::ChemistryCombustion<ReactionThermo>::thermo()
 {
     return chemistryPtr_->thermo();
 }
 
 
-const Foam::psiReactionThermo&
-Foam::combustionModels::psiChemistryCombustion::thermo() const
+template<class ReactionThermo>
+const ReactionThermo&
+Foam::ChemistryCombustion<ReactionThermo>::thermo() const
 {
     return chemistryPtr_->thermo();
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,8 @@ SourceFiles
 #ifndef zoneCombustion_H
 #define zoneCombustion_H
 
+#include "CombustionModel.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -49,15 +51,15 @@ namespace combustionModels
                             Class zoneCombustion Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
+template<class ReactionThermo>
 class zoneCombustion
 :
-    public Type
+    public CombustionModel<ReactionThermo>
 {
     // Private data
 
         //- The combustion model to be zone-filtered
-        autoPtr<Type> combustionModelPtr_;
+        autoPtr<CombustionModel<ReactionThermo>> combustionModelPtr_;
 
         //- List of zone names in which the reactions are active
         wordList zoneNames_;
@@ -90,9 +92,9 @@ public:
         zoneCombustion
         (
             const word& modelType,
-            const fvMesh& mesh,
-            const word& combustionProperties,
-            const word& phaseName
+            ReactionThermo& thermo,
+            const compressibleTurbulenceModel& turb,
+            const word& combustionProperties
         );
 
 
@@ -103,10 +105,10 @@ public:
     // Member Functions
 
         //- Return access to the thermo package
-        virtual typename Type::ReactionThermo& thermo();
+        virtual ReactionThermo& thermo();
 
         //- Return const access to the thermo package
-        virtual const typename Type::ReactionThermo& thermo() const;
+        virtual const ReactionThermo& thermo() const;
 
         //- Correct combustion rate
         virtual void correct();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,51 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "psiCombustionModel.H"
-
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
-
-namespace Foam
-{
-namespace combustionModels
-{
-    defineTypeNameAndDebug(psiCombustionModel, 0);
-    defineRunTimeSelectionTable(psiCombustionModel, dictionary);
-}
-}
+#include "ThermoCombustion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::combustionModels::psiCombustionModel::psiCombustionModel
+template<class ReactionThermo>
+Foam::ThermoCombustion<ReactionThermo>::ThermoCombustion
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& combustionProperties,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb
 )
 :
-    combustionModel(modelType, mesh, combustionProperties, phaseName)
+    CombustionModel<ReactionThermo>
+    (
+        modelType,
+        thermo,
+        turb,
+        combustionModel::combustionPropertiesName
+    ),
+    thermo_(thermo)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::combustionModels::psiCombustionModel::~psiCombustionModel()
+template<class ReactionThermo>
+Foam::ThermoCombustion<ReactionThermo>::~ThermoCombustion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::combustionModels::psiCombustionModel::read()
+template<class ReactionThermo>
+ReactionThermo&
+Foam::ThermoCombustion<ReactionThermo>::thermo()
 {
-    if (combustionModel::read())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return thermo_;
+}
+
+
+template<class ReactionThermo>
+const ReactionThermo&
+Foam::ThermoCombustion<ReactionThermo>::thermo() const
+{
+    return thermo_;
 }
 
 

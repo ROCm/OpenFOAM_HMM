@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,47 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rhoChemistryModel.H"
-#include "fvMesh.H"
+#include "BasicChemistryModel.H"
 
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
+template<class ReactionThermo>
+inline ReactionThermo& Foam::BasicChemistryModel<ReactionThermo>::thermo()
 {
-    defineTypeNameAndDebug(rhoChemistryModel, 0);
-    defineRunTimeSelectionTable(rhoChemistryModel, fvMesh);
+    return thermo_;
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::rhoChemistryModel::rhoChemistryModel
-(
-    const fvMesh& mesh,
-    const word& phaseName
-)
-:
-    basicChemistryModel(mesh, phaseName),
-    thermo_(rhoReactionThermo::New(mesh, phaseName))
-{}
-
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
-(
-    const fvMesh& mesh,
-    const word& phaseName
-)
+template<class ReactionThermo>
+inline const ReactionThermo&
+Foam::BasicChemistryModel<ReactionThermo>::thermo() const
 {
-    return basicChemistryModel::New<rhoChemistryModel>(mesh, phaseName);
+    return thermo_;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::rhoChemistryModel::~rhoChemistryModel()
-{}
 
 
 // ************************************************************************* //

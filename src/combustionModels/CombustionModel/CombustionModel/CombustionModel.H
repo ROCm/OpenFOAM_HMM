@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,119 +22,100 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rhoCombustionModel
+    Foam::CombustionModel
 
 Description
-    Combustion models for rho-based thermodynamics
+    Combustion models for templated thermodynamics
 
 SourceFiles
-    rhoCombustionModelI.H
-    rhoCombustionModel.C
-    rhoCombustionModelNew.C
+    CombustionModelI.H
+    CombustionModel.C
+    CombustionModelNew.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rhoCombustionModel_H
-#define rhoCombustionModel_H
+#ifndef CombustionModel_H
+#define CombustionModel_H
 
 #include "combustionModel.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-#include "rhoReactionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace combustionModels
-{
 
 /*---------------------------------------------------------------------------*\
-                     class rhoCombustionModel Declaration
+                     class CombustionModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class rhoCombustionModel
+template<class ReactionThermo>
+class CombustionModel
 :
     public combustionModel
 {
-
-    // Private Member Functions
-
-        //- Construct as copy (not implemented)
-        rhoCombustionModel(const rhoCombustionModel&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const rhoCombustionModel&);
-
-
 public:
 
-    typedef rhoReactionThermo ReactionThermo;
+    //- Thermo type
+    typedef ReactionThermo reactionThermo;
 
 
     //- Runtime type information
-    TypeName("rhoCombustionModel");
+    TypeName("CombustionModel");
 
 
     //- Declare run-time constructor selection tables
     declareRunTimeSelectionTable
     (
         autoPtr,
-        rhoCombustionModel,
+        CombustionModel,
         dictionary,
         (
             const word& modelType,
-            const fvMesh& mesh,
-            const word& combustionProperties,
-            const word& phaseName
+            ReactionThermo& thermo,
+            const compressibleTurbulenceModel& turb,
+            const word& combustionProperties
         ),
-        (modelType, mesh, combustionProperties, phaseName)
+        (modelType, thermo, turb, combustionProperties)
     );
 
 
     // Constructors
 
-
         //- Construct from components
-        rhoCombustionModel
+        CombustionModel
         (
             const word& modelType,
-            const fvMesh& mesh,
-            const word& combustionProperties,
-            const word& phaseName
+            ReactionThermo& thermo,
+            const compressibleTurbulenceModel& turb,
+            const word& combustionProperties
         );
 
 
-
-    //- Selector
-    static autoPtr<rhoCombustionModel> New
-    (
-        const fvMesh& mesh,
-        const word& combustionProperties=combustionPropertiesName,
-        const word& phaseName=word::null
-    );
+        //- Selector
+        static autoPtr<CombustionModel> New
+        (
+            ReactionThermo& thermo,
+            const compressibleTurbulenceModel& turb,
+            const word& combustionProperties=combustionPropertiesName
+        );
 
 
     //- Destructor
-    virtual ~rhoCombustionModel();
+    virtual ~CombustionModel();
 
 
     // Member Functions
 
-        // Access functions
-
-            //- Access combustion dict
-             inline const dictionary& coeff() const;
-
-
         //- Return access to the thermo package
-        virtual rhoReactionThermo& thermo() = 0;
+        virtual ReactionThermo& thermo() = 0;
 
         //- Return const access to the thermo package
-        virtual const rhoReactionThermo& thermo() const = 0;
+        virtual const ReactionThermo& thermo() const = 0;
 
 
-     // IO
+    // IO
 
         //- Update properties from given dictionary
         virtual bool read();
@@ -143,8 +124,13 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace combustionModels
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "CombustionModel.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

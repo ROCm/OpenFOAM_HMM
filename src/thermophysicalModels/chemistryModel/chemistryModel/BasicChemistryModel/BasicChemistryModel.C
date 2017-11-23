@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,18 +23,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "BasicChemistryModel.H"
 
-inline Foam::psiReactionThermo& Foam::psiChemistryModel::thermo()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::BasicChemistryModel<ReactionThermo>::BasicChemistryModel
+(
+    ReactionThermo& thermo
+)
+:
+    basicChemistryModel(thermo),
+    thermo_(thermo)
+{}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::autoPtr<Foam::BasicChemistryModel<ReactionThermo>>
+Foam::BasicChemistryModel<ReactionThermo>::New(ReactionThermo& thermo)
 {
-    return *thermo_;
+    return basicChemistryModel::New<BasicChemistryModel<ReactionThermo>>
+    (
+        thermo
+    );
 }
 
 
-inline const Foam::psiReactionThermo& Foam::psiChemistryModel::thermo() const
-{
-    return *thermo_;
-}
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::BasicChemistryModel<ReactionThermo>::~BasicChemistryModel()
+{}
 
 
 // ************************************************************************* //

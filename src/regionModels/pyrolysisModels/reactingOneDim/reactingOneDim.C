@@ -152,7 +152,7 @@ void reactingOneDim::updatePhiGas()
     forAll(gasTable, gasI)
     {
         tmp<volScalarField> tHsiGas =
-            solidChemistry_->gasHs(solidThermo_.p(), solidThermo_.T(), gasI);
+            solidChemistry_->gasHs(solidThermo_->p(), solidThermo_->T(), gasI);
 
         const volScalarField& HsiGas = tHsiGas();
 
@@ -300,7 +300,7 @@ void reactingOneDim::solveEnergy()
         InfoInFunction << endl;
     }
 
-    tmp<volScalarField> alpha(solidThermo_.alpha());
+    tmp<volScalarField> alpha(solidThermo_->alpha());
 
     fvScalarMatrix hEqn
     (
@@ -382,9 +382,9 @@ reactingOneDim::reactingOneDim
 )
 :
     pyrolysisModel(modelType, mesh, regionType),
-    solidChemistry_(basicSolidChemistryModel::New(regionMesh())),
-    solidThermo_(solidChemistry_->solidThermo()),
-    radiation_(radiation::radiationModel::New(solidThermo_.T())),
+    solidThermo_(solidReactionThermo::New(regionMesh())),
+    solidChemistry_(basicSolidChemistryModel::New(solidThermo_())),
+    radiation_(radiation::radiationModel::New(solidThermo_->T())),
     rho_
     (
         IOobject
@@ -395,10 +395,10 @@ reactingOneDim::reactingOneDim
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        solidThermo_.rho()
+        solidThermo_->rho()
     ),
-    Ys_(solidThermo_.composition().Y()),
-    h_(solidThermo_.he()),
+    Ys_(solidThermo_->composition().Y()),
+    h_(solidThermo_->he()),
     nNonOrthCorr_(-1),
     maxDiff_(10),
     minimumDelta_(1e-4),
@@ -482,9 +482,9 @@ reactingOneDim::reactingOneDim
 )
 :
     pyrolysisModel(modelType, mesh, dict, regionType),
-    solidChemistry_(basicSolidChemistryModel::New(regionMesh())),
-    solidThermo_(solidChemistry_->solidThermo()),
-    radiation_(radiation::radiationModel::New(solidThermo_.T())),
+    solidThermo_(solidReactionThermo::New(regionMesh())),
+    solidChemistry_(basicSolidChemistryModel::New(solidThermo_())),
+    radiation_(radiation::radiationModel::New(solidThermo_->T())),
     rho_
     (
         IOobject
@@ -495,10 +495,10 @@ reactingOneDim::reactingOneDim
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        solidThermo_.rho()
+        solidThermo_->rho()
     ),
-    Ys_(solidThermo_.composition().Y()),
-    h_(solidThermo_.he()),
+    Ys_(solidThermo_->composition().Y()),
+    h_(solidThermo_->he()),
     nNonOrthCorr_(-1),
     maxDiff_(10),
     minimumDelta_(1e-4),
@@ -641,13 +641,13 @@ const volScalarField& reactingOneDim::rho() const
 
 const volScalarField& reactingOneDim::T() const
 {
-    return solidThermo_.T();
+    return solidThermo_->T();
 }
 
 
 const tmp<volScalarField> reactingOneDim::Cp() const
 {
-    return solidThermo_.Cp();
+    return solidThermo_->Cp();
 }
 
 
@@ -659,7 +659,7 @@ tmp<volScalarField> reactingOneDim::kappaRad() const
 
 tmp<volScalarField> reactingOneDim::kappa() const
 {
-    return solidThermo_.kappa();
+    return solidThermo_->kappa();
 }
 
 
@@ -703,12 +703,12 @@ void reactingOneDim::evolveRegion()
 
     calculateMassTransfer();
 
-    solidThermo_.correct();
+    solidThermo_->correct();
 
     Info<< "pyrolysis min/max(T) = "
-        << gMin(solidThermo_.T().primitiveField())
+        << gMin(solidThermo_->T().primitiveField())
         << ", "
-        << gMax(solidThermo_.T().primitiveField())
+        << gMax(solidThermo_->T().primitiveField())
         << endl;
 }
 

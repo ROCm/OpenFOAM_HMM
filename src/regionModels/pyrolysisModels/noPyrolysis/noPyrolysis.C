@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,9 +47,14 @@ addToRunTimeSelectionTable(pyrolysisModel, noPyrolysis, dictionary);
 
 void noPyrolysis::constructThermoChemistry()
 {
+    solidThermo_.reset
+    (
+        solidReactionThermo::New(regionMesh()).ptr()
+    );
+
     solidChemistry_.reset
     (
-        basicSolidChemistryModel::New(regionMesh()).ptr()
+        basicSolidChemistryModel::New(solidThermo_()).ptr()
     );
 
     radiation_.reset(radiation::radiationModel::New
@@ -97,6 +102,7 @@ noPyrolysis::noPyrolysis
 )
 :
     pyrolysisModel(mesh, regionType),
+    solidThermo_(nullptr),
     solidChemistry_(nullptr),
     radiation_(nullptr)
 {
@@ -116,6 +122,7 @@ noPyrolysis::noPyrolysis
 )
 :
     pyrolysisModel(mesh, regionType),
+    solidThermo_(nullptr),
     solidChemistry_(nullptr),
     radiation_(nullptr)
 {

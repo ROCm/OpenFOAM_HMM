@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,6 @@ SourceFiles
 #ifndef chemistrySolver_H
 #define chemistrySolver_H
 
-#include "chemistryModel.H"
 #include "IOdictionary.H"
 #include "scalarField.H"
 
@@ -58,8 +57,8 @@ public:
 
     // Constructors
 
-        //- Construct from components and phase name
-        chemistrySolver(const fvMesh& mesh, const word& phaseName);
+        //- Construct from thermo
+        chemistrySolver(typename ChemistryModel::reactionThermo& thermo);
 
 
     //- Destructor

@@ -15,10 +15,10 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-combustionModel  infinitelyFastChemistry<psiThermoCombustion,gasHThermoPhysics>;
+combustionModel  infinitelyFastChemistry;
 
-//combustionModel  FSD<psiThermoCombustion,gasHThermoPhysics>;
-//combustionModel  diffusionMulticomponent<psiChemistryCombustion,gasHThermoPhysics>;
+//combustionModel  FSD;
+//combustionModel  diffusionMulticomponent;
 //NOTE: To use diffusionMulticomponent combustion model you need to rename files:
 // reactions.twoSteps -> reactions
 // thermophysicalProperties.twoSteps -> thermophysicalProperties

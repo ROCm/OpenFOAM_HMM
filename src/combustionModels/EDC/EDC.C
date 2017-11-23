@@ -27,16 +27,16 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::combustionModels::EDC<Type>::EDC
+template<class ReactionThermo>
+Foam::combustionModels::EDC<ReactionThermo>::EDC
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& combustionProperties,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
 )
 :
-    laminar<Type>(modelType, mesh, combustionProperties, phaseName),
+    laminar<ReactionThermo>(modelType, thermo, turb, combustionProperties),
     version_
     (
         EDCversionNames.lookupOrDefault
@@ -56,13 +56,13 @@ Foam::combustionModels::EDC<Type>::EDC
     (
         IOobject
         (
-            IOobject::groupName(typeName + ":kappa", phaseName),
-            mesh.time().timeName(),
-            mesh,
+            this->thermo().phasePropertyName(typeName + ":kappa"),
+            this->mesh().time().timeName(),
+            this->mesh(),
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh,
+        this->mesh(),
         dimensionedScalar(dimless, Zero)
     )
 {}
@@ -70,15 +70,15 @@ Foam::combustionModels::EDC<Type>::EDC
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::combustionModels::EDC<Type>::~EDC()
+template<class ReactionThermo>
+Foam::combustionModels::EDC<ReactionThermo>::~EDC()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::combustionModels::EDC<Type>::correct()
+template<class ReactionThermo>
+void Foam::combustionModels::EDC<ReactionThermo>::correct()
 {
     if (this->active())
     {
@@ -172,17 +172,17 @@ void Foam::combustionModels::EDC<Type>::correct()
 }
 
 
-template<class Type>
+template<class ReactionThermo>
 Foam::tmp<Foam::fvScalarMatrix>
-Foam::combustionModels::EDC<Type>::R(volScalarField& Y) const
+Foam::combustionModels::EDC<ReactionThermo>::R(volScalarField& Y) const
 {
-    return kappa_*laminar<Type>::R(Y);
+    return kappa_*laminar<ReactionThermo>::R(Y);
 }
 
 
-template<class Type>
+template<class ReactionThermo>
 Foam::tmp<Foam::volScalarField>
-Foam::combustionModels::EDC<Type>::Qdot() const
+Foam::combustionModels::EDC<ReactionThermo>::Qdot() const
 {
     tmp<volScalarField> tQdot
     (
@@ -190,7 +190,7 @@ Foam::combustionModels::EDC<Type>::Qdot() const
         (
             IOobject
             (
-                IOobject::groupName(typeName + ":Qdot", this->phaseName_),
+                this->thermo().phasePropertyName(typeName + ":Qdot"),
                 this->mesh().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -211,10 +211,10 @@ Foam::combustionModels::EDC<Type>::Qdot() const
 }
 
 
-template<class Type>
-bool Foam::combustionModels::EDC<Type>::read()
+template<class ReactionThermo>
+bool Foam::combustionModels::EDC<ReactionThermo>::read()
 {
-    if (Type::read())
+    if (laminar<ReactionThermo>::read())
     {
         version_ =
         (

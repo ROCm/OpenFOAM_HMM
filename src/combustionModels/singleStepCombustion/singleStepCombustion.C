@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,22 +33,22 @@ namespace combustionModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
-singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
+template<class ReactionThermo, class ThermoType>
+singleStepCombustion<ReactionThermo, ThermoType>::singleStepCombustion
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& combustionProperties,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
 )
 :
-    CombThermoType(modelType, mesh, phaseName),
+    ThermoCombustion<ReactionThermo>(modelType, thermo, turb),
     singleMixturePtr_(nullptr),
     wFuel_
     (
         IOobject
         (
-            IOobject::groupName("wFuel", phaseName),
+            this->thermo().phasePropertyName("wFuel"),
             this->mesh().time().timeName(),
             this->mesh(),
             IOobject::NO_READ,
@@ -89,21 +89,21 @@ singleStepCombustion<CombThermoType, ThermoType>::singleStepCombustion
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
-singleStepCombustion<CombThermoType, ThermoType>::~singleStepCombustion()
+template<class ReactionThermo, class ThermoType>
+singleStepCombustion<ReactionThermo, ThermoType>::~singleStepCombustion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-template<class CombThermoType, class ThermoType>
-tmp<fvScalarMatrix> singleStepCombustion<CombThermoType, ThermoType>::R
+template<class ReactionThermo, class ThermoType>
+tmp<fvScalarMatrix> singleStepCombustion<ReactionThermo, ThermoType>::R
 (
     volScalarField& Y
 ) const
 {
     const label specieI =
-        this->thermoPtr_->composition().species()[Y.member()];
+        this->thermo().composition().species()[Y.member()];
 
     volScalarField wSpecie
     (
@@ -125,22 +125,22 @@ tmp<fvScalarMatrix> singleStepCombustion<CombThermoType, ThermoType>::R
 }
 
 
-template<class CombThermoType, class ThermoType>
+template<class ReactionThermo, class ThermoType>
 tmp<volScalarField>
-singleStepCombustion<CombThermoType, ThermoType>::Qdot() const
+singleStepCombustion<ReactionThermo, ThermoType>::Qdot() const
 {
     const label fuelI = singleMixturePtr_->fuelIndex();
     volScalarField& YFuel =
-        const_cast<volScalarField&>(this->thermoPtr_->composition().Y(fuelI));
+        const_cast<volScalarField&>(this->thermo().composition().Y(fuelI));
 
     return -singleMixturePtr_->qFuel()*(R(YFuel) & YFuel);
 }
 
 
-template<class CombThermoType, class ThermoType>
-bool singleStepCombustion<CombThermoType, ThermoType>::read()
+template<class ReactionThermo, class ThermoType>
+bool singleStepCombustion<ReactionThermo, ThermoType>::read()
 {
-    if (CombThermoType::read())
+    if (ThermoCombustion<ReactionThermo>::read())
     {
         return true;
     }

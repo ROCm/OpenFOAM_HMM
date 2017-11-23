@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,43 +26,42 @@ License
 #include "makeCombustionTypes.H"
 
 #include "thermoPhysicsTypes.H"
-#include "psiThermoCombustion.H"
-#include "rhoThermoCombustion.H"
+#include "psiReactionThermo.H"
+#include "rhoReactionThermo.H"
 #include "diffusion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 // Combustion models based on sensibleEnthalpy
 makeCombustionTypesThermo
 (
     diffusion,
-    psiThermoCombustion,
-    gasHThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    gasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusion,
-    psiThermoCombustion,
-    constGasHThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    constGasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusion,
-    rhoThermoCombustion,
-    gasHThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    gasHThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusion,
-    rhoThermoCombustion,
-    constGasHThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    constGasHThermoPhysics
 );
 
 
@@ -71,34 +70,31 @@ makeCombustionTypesThermo
 makeCombustionTypesThermo
 (
     diffusion,
-    psiThermoCombustion,
-    gasEThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    gasEThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusion,
-    psiThermoCombustion,
-    constGasEThermoPhysics,
-    psiCombustionModel
+    psiReactionThermo,
+    constGasEThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusion,
-    rhoThermoCombustion,
-    gasEThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    gasEThermoPhysics
 );
 
 makeCombustionTypesThermo
 (
     diffusion,
-    rhoThermoCombustion,
-    constGasEThermoPhysics,
-    rhoCombustionModel
+    rhoReactionThermo,
+    constGasEThermoPhysics
 );
 
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

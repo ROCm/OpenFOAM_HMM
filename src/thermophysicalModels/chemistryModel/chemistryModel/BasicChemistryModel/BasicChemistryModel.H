@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,86 +22,108 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::rhoThermoCombustion
+    Foam::BasicChemistryModel
 
 Description
-    Density-based thermo model wrapper for combustion models
+    Basic chemistry model templated on thermodynamics
 
 SourceFiles
-    rhoThermoCombustion.C
+    BasicChemistryModelI.H
+    BasicChemistryModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rhoThermoCombustion_H
-#define rhoThermoCombustion_H
+#ifndef BasicChemistryModel_H
+#define BasicChemistryModel_H
 
+#include "basicChemistryModel.H"
 #include "autoPtr.H"
-#include "rhoCombustionModel.H"
-#include "rhoChemistryModel.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace combustionModels
-{
+
+// Forward declaration of classes
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                    class rhoThermoCombustion Declaration
+                     class BasicChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class rhoThermoCombustion
+template<class ReactionThermo>
+class BasicChemistryModel
 :
-    public rhoCombustionModel
+    public basicChemistryModel
 {
-    // Private Member Functions
-
-        //- Construct as copy (not implemented)
-        rhoThermoCombustion(const rhoThermoCombustion&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const rhoThermoCombustion&);
-
-
 protected:
 
     // Protected data
 
-        //- Pointer to thermo model
-        autoPtr<rhoReactionThermo> thermoPtr_;
+        //- Thermo
+        ReactionThermo& thermo_;
 
 
 public:
 
+    //- Runtime type information
+    TypeName("BasicChemistryModel");
+
+
+    //- Thermo type
+    typedef ReactionThermo reactionThermo;
+
+
+    //- Declare run-time constructor selection tables
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        BasicChemistryModel,
+        thermo,
+        (ReactionThermo& thermo),
+        (thermo)
+    );
+
+
     // Constructors
 
-        //- Construct from components
-        rhoThermoCombustion
-        (
-            const word& modelType,
-            const fvMesh& mesh,
-            const word& phaseName
-        );
+        //- Construct from thermo
+        BasicChemistryModel(ReactionThermo& thermo);
+
+
+    //- Selector
+    static autoPtr<BasicChemistryModel<ReactionThermo>> New
+    (
+        ReactionThermo& thermo
+    );
 
 
     //- Destructor
-    virtual ~rhoThermoCombustion();
+    virtual ~BasicChemistryModel();
 
 
     // Member Functions
 
         //- Return access to the thermo package
-        virtual rhoReactionThermo& thermo();
+        inline ReactionThermo& thermo();
 
         //- Return const access to the thermo package
-        virtual const rhoReactionThermo& thermo() const;
+        inline const ReactionThermo& thermo() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace combustionModels
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "BasicChemistryModel.C"
+#endif
+
+#include "BasicChemistryModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

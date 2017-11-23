@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,41 +23,64 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "psiThermoCombustion.H"
+#include "CombustionModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::combustionModels::psiThermoCombustion::psiThermoCombustion
+template<class ReactionThermo>
+Foam::CombustionModel<ReactionThermo>::CombustionModel
 (
     const word& modelType,
-    const fvMesh& mesh,
-    const word& phaseName
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
 )
 :
-    psiCombustionModel(modelType, mesh, combustionPropertiesName, phaseName),
-    thermoPtr_(psiReactionThermo::New(mesh, phaseName))
+    combustionModel(modelType, thermo, turb, combustionProperties)
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+template<class ReactionThermo>
+Foam::autoPtr<Foam::CombustionModel<ReactionThermo>>
+Foam::CombustionModel<ReactionThermo>::New
+(
+    ReactionThermo& thermo,
+    const compressibleTurbulenceModel& turb,
+    const word& combustionProperties
+)
+{
+    return
+        combustionModel::New<CombustionModel<ReactionThermo>>
+        (
+            thermo,
+            turb,
+            combustionProperties
+        );
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::combustionModels::psiThermoCombustion::~psiThermoCombustion()
+template<class ReactionThermo>
+Foam::CombustionModel<ReactionThermo>::~CombustionModel()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::psiReactionThermo&
-Foam::combustionModels::psiThermoCombustion::thermo()
+template<class ReactionThermo>
+bool Foam::CombustionModel<ReactionThermo>::read()
 {
-    return *thermoPtr_;
-}
-
-
-const Foam::psiReactionThermo&
-Foam::combustionModels::psiThermoCombustion::thermo() const
-{
-    return *thermoPtr_;
+    if (combustionModel::read())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 
