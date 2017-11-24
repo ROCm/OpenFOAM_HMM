@@ -81,11 +81,6 @@ Foam::argList::initValidTables::initValidTables()
         "decomposeParDict", "file",
         "read decomposePar dictionary from specified location"
     );
-    validParOptions.set
-    (
-        "decomposeParDict",
-        "file"
-    );
 
     argList::addBoolOption
     (
