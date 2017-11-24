@@ -182,7 +182,7 @@ unset adjusted optMpi
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help | --help)
+    -h | -help* | --help*)
         usage
         ;;
     '')

@@ -445,7 +445,7 @@ public:
             void printNotes() const;
 
             //- Print usage
-            void printUsage() const;
+            void printUsage(bool full=true) const;
 
             //- Display documentation in browser
             //  Optionally display the application source code

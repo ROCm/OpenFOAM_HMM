@@ -85,20 +85,20 @@ Foam::argList::initValidTables::initValidTables()
     argList::addBoolOption
     (
         "noFunctionObjects",
-        "do not execute functionObjects"
+        "do not execute function objects"
     );
 
     argList::addOption
     (
         "fileHandler",
         "handler",
-        "override the fileHandler"
+        "override the file handler type"
     );
 
     // Some standard option aliases (with or without version warnings)
 //     argList::addOptionCompat
 //     (
-//         "noFunctionObjects", {"no-function-objects", 0 }
+//         "noFunctionObjects", {"no-function-objects", 0}
 //     );
 
     Pstream::addValidParOptions(validParOptions);
@@ -152,7 +152,21 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
     Info<< ")" << nl;
 }
 
+
+// Print information about version, build, arch
+static void printBuildInfo(const bool full=true)
+{
+    Info<<"Using: OpenFOAM-" << Foam::FOAMversion
+        << " (see www.OpenFOAM.com)" << nl
+        << "Build: " << Foam::FOAMbuild << nl;
+
+    if (full)
+    {
+        Info << "Arch:  " << Foam::FOAMbuildArch << nl;
+    }
 }
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -415,9 +429,20 @@ Foam::word Foam::argList::optionCompat(const word& optionName)
         {
             const auto& iter = *canonical;
 
-            if (iter.second)
+            // Emit warning if there is versioning (non-zero) and it is not
+            // tagged as future change (ie, ThisVersion > version).
+
+            if
+            (
+                iter.second
+             &&
+                (
+                    (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
+                  ? (OPENFOAM_PLUS > iter.second)
+                  : true
+                )
+            )
             {
-                // Emit warning, but only if version (non-zero) was provided
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
                     << "    Found [v" << iter.second << "] '"
@@ -614,6 +639,9 @@ Foam::argList::argList
     regroupArgv(argc, argv);
     argListStr_ += args_[0];
 
+    // Set executable name immediately - useful when emitting errors.
+    executable_ = fileName(args_[0]).name();
+
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
     HashTable<string>::const_iterator optIter;
@@ -649,11 +677,15 @@ Foam::argList::argList
                 ++argi;
                 if (argi >= args_.size())
                 {
-                    FatalError
-                        <<"Option '-" << optionName
-                        << "' requires an argument" << endl;
-                    printUsage();
-                    FatalError.exit();
+                    printBuildInfo(false);
+
+                    Info<<nl
+                        <<"Error: option '-" << optionName
+                        << "' requires an argument" << nl << nl
+                        << "See '" << executable_ << " -help' for usage"
+                        << nl << nl;
+
+                    Pstream::exit(1); // works for serial and parallel
                 }
 
                 argListStr_ += ' ';
@@ -680,9 +712,6 @@ Foam::argList::argList
     }
 
     args_.setSize(nArgs);
-
-    // Set executable name
-    executable_ = fileName(args_[0]).name();
 
     parse(checkArgs, checkOpts, initialise);
 }
@@ -718,15 +747,21 @@ void Foam::argList::parse
 )
 {
     // Help/documentation options:
-    //   -help    print the usage
-    //   -doc     display application documentation in browser
-    //   -srcDoc  display source code in browser
+    //   -help        print the usage
+    //   -help-full   print the full usage
+    //   -doc         display application documentation in browser
+    //   -doc-source  display source code in browser
     {
         bool quickExit = false;
 
-        if (options_.found("help"))
+        if (options_.found("help-full"))
         {
-            printUsage();
+            printUsage(true);
+            quickExit = true;
+        }
+        else if (options_.found("help"))
+        {
+            printUsage(false);
             quickExit = true;
         }
 
@@ -736,7 +771,11 @@ void Foam::argList::parse
             displayDoc(false);
             quickExit = true;
         }
-        else if (options_.found("srcDoc"))
+        else if
+        (
+            options_.found("doc-source")
+         || options_.found("srcDoc")  // Compat 1706
+        )
         {
             displayDoc(true);
             quickExit = true;
@@ -748,12 +787,14 @@ void Foam::argList::parse
         }
     }
 
-    // Print the usage message and exit if the number of arguments is incorrect
+    // Print the collected error messages and exit if check fails
     if (!check(checkArgs, checkOpts))
     {
-        FatalError.exit();
-    }
+        printBuildInfo(false);
+        FatalError.write(Info, false);
 
+        Pstream::exit(1); // works for serial and parallel
+    }
 
     if (initialise)
     {
@@ -1297,7 +1338,7 @@ void Foam::argList::printNotes() const
 }
 
 
-void Foam::argList::printUsage() const
+void Foam::argList::printUsage(bool full) const
 {
     Info<< "\nUsage: " << executable_ << " [OPTIONS]";
 
@@ -1328,6 +1369,19 @@ void Foam::argList::printUsage() const
     const wordList opts = validOptions.sortedToc();
     for (const word& optionName : opts)
     {
+        if (!full)
+        {
+            // Adhoc filtering of some options to suppress
+            if
+            (
+                optionName.startsWith("list")
+             && optionName != "list"
+            )
+            {
+                continue;
+            }
+        }
+
         Info<< "  -" << optionName;
         label len = optionName.size() + 3;  // Length includes leading '  -'
 
@@ -1352,24 +1406,23 @@ void Foam::argList::printUsage() const
         }
     }
 
-    // Place srcDoc/doc/help options at the end
-    Info<< "  -srcDoc";
-    printOptionUsage(9, "display source code in browser" );
-
+    // Place documentation/help options at the end
     Info<< "  -doc";
     printOptionUsage(6, "display application documentation in browser");
 
+    Info<< "  -doc-source";
+    printOptionUsage(13, "display source code in browser" );
+
     Info<< "  -help";
-    printOptionUsage(7, "print the usage");
+    printOptionUsage(7, "print usage information and exit");
+    Info<< "  -help-full";
+    printOptionUsage(12, "print full usage information and exit");
 
     printNotes();
 
-    Info<< nl
-        <<"Using: OpenFOAM-" << Foam::FOAMversion
-        << " (see www.OpenFOAM.com)" << nl
-        << "Build: " << Foam::FOAMbuild << nl
-        << "Arch:  " << Foam::FOAMbuildArch << nl
-        << endl;
+    Info<< nl;
+    printBuildInfo();
+    Info<< endl;
 }
 
 
@@ -1456,8 +1509,8 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
         if (checkArgs && nargs != validArgs.size())
         {
             FatalError
-                << "Wrong number of arguments, expected " << validArgs.size()
-                << " found " << nargs << endl;
+                << "Expected " << validArgs.size()
+                << " arguments but found " << nargs << endl;
             ok = false;
         }
 
@@ -1481,7 +1534,10 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
         if (!ok)
         {
-            printUsage();
+            FatalError
+                << nl
+                << "See '" << executable_ << " -help' for usage"
+                << nl << nl;
         }
     }
 

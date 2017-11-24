@@ -93,7 +93,7 @@ USAGE
 # Find -help anywhere
 for i
 do
-    case "$i" in (-h | -help) usage ;; esac
+    case "$i" in (-h | -help*) usage ;; esac
 done
 
 #------------------------------------------------------------------------------

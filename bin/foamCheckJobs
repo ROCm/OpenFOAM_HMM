@@ -180,12 +180,10 @@ releaseLock () {
 #
 #-------------------------------------------------------------------------------
 
+case "$1" in (-h | -help*) usage ;; esac
+
 if [ $# -eq 1 ]
 then
-    if [ "$1" = "-h" -o "$1" = "-help" ]
-    then
-        usage
-    fi
     STATEFILE="$1"
 elif [ $# -eq 0 ]
 then

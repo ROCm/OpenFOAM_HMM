@@ -109,7 +109,7 @@ unset optList optQuiet localDB
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
+    -h | -help*)
         printHelp
         exit 0
         ;;
