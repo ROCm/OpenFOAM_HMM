@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "ITstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -81,12 +82,6 @@ inline Foam::stringList& Foam::argList::args()
 }
 
 
-inline const Foam::string& Foam::argList::arg(const label index) const
-{
-    return args_[index];
-}
-
-
 inline Foam::label Foam::argList::size() const
 {
     return args_.size();
@@ -105,21 +100,18 @@ inline Foam::HashTable<Foam::string>& Foam::argList::options()
 }
 
 
-inline const Foam::string& Foam::argList::option(const word& opt) const
+inline bool Foam::argList::optionFound(const word& optionName) const
 {
-    return options_[opt];
+    return options_.found(optionName);
 }
 
 
-inline bool Foam::argList::optionFound(const word& opt) const
+inline Foam::IStringStream Foam::argList::optionLookup
+(
+    const word& optionName
+) const
 {
-    return options_.found(opt);
-}
-
-
-inline Foam::IStringStream Foam::argList::optionLookup(const word& opt) const
-{
-    return IStringStream(options_[opt]);
+    return IStringStream(options_[optionName]);
 }
 
 
@@ -133,37 +125,37 @@ namespace Foam
 
     template<>
     inline Foam::string
-    argList::argRead<Foam::string>(const label index) const
+    argList::argRead<Foam::string>(const label argIndex) const
     {
-        return args_[index];
+        return args_[argIndex];
     }
 
     template<>
     inline Foam::word
-    argList::argRead<Foam::word>(const label index) const
+    argList::argRead<Foam::word>(const label argIndex) const
     {
-        return args_[index];
+        return args_[argIndex];
     }
 
     template<>
     inline Foam::fileName
-    argList::argRead<Foam::fileName>(const label index) const
+    argList::argRead<Foam::fileName>(const label argIndex) const
     {
-        return args_[index];
+        return args_[argIndex];
     }
 
     template<>
     inline Foam::label
-    argList::argRead<Foam::label>(const label index) const
+    argList::argRead<Foam::label>(const label argIndex) const
     {
-        return Foam::readLabel(args_[index]);
+        return Foam::readLabel(args_[argIndex]);
     }
 
     template<>
     inline Foam::scalar
-    argList::argRead<Foam::scalar>(const label index) const
+    argList::argRead<Foam::scalar>(const label argIndex) const
     {
-        return Foam::readScalar(args_[index]);
+        return Foam::readScalar(args_[argIndex]);
     }
 
     //
@@ -172,37 +164,37 @@ namespace Foam
 
     template<>
     inline Foam::string
-    argList::optionRead<Foam::string>(const word& opt) const
+    argList::optionRead<Foam::string>(const word& optionName) const
     {
-        return options_[opt];
+        return options_[optionName];
     }
 
     template<>
     inline Foam::word
-    argList::optionRead<Foam::word>(const word& opt) const
+    argList::optionRead<Foam::word>(const word& optionName) const
     {
-        return options_[opt];
+        return options_[optionName];
     }
 
     template<>
     inline Foam::fileName
-    argList::optionRead<Foam::fileName>(const word& opt) const
+    argList::optionRead<Foam::fileName>(const word& optionName) const
     {
-        return options_[opt];
+        return options_[optionName];
     }
 
     template<>
     inline Foam::label
-    argList::optionRead<Foam::label>(const word& opt) const
+    argList::optionRead<Foam::label>(const word& optionName) const
     {
-        return Foam::readLabel(options_[opt]);
+        return Foam::readLabel(options_[optionName]);
     }
 
     template<>
     inline Foam::scalar
-    argList::optionRead<Foam::scalar>(const word& opt) const
+    argList::optionRead<Foam::scalar>(const word& optionName) const
     {
-        return Foam::readScalar(options_[opt]);
+        return Foam::readScalar(options_[optionName]);
     }
 
 }
@@ -211,21 +203,21 @@ namespace Foam
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline T Foam::argList::argRead(const label index) const
+inline T Foam::argList::argRead(const label argIndex) const
 {
     T val;
 
-    IStringStream(args_[index])() >> val;
+    IStringStream(args_[argIndex])() >> val;
     return val;
 }
 
 
 template<class T>
-inline T Foam::argList::optionRead(const word& opt) const
+inline T Foam::argList::optionRead(const word& optionName) const
 {
     T val;
 
-    optionLookup(opt)() >> val;
+    IStringStream(options_[optionName])() >> val;
     return val;
 }
 
@@ -233,71 +225,97 @@ inline T Foam::argList::optionRead(const word& opt) const
 template<class T>
 inline bool Foam::argList::optionReadIfPresent
 (
-    const word& opt,
+    const word& optionName,
     T& val
 ) const
 {
-    if (optionFound(opt))
+    if (optionFound(optionName))
     {
-        val = optionRead<T>(opt);
+        val = optionRead<T>(optionName);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
 template<class T>
 inline bool Foam::argList::optionReadIfPresent
 (
-    const word& opt,
+    const word& optionName,
     T& val,
     const T& deflt
 ) const
 {
-    if (optionReadIfPresent<T>(opt, val))
+    if (optionReadIfPresent<T>(optionName, val))
     {
         return true;
     }
-    else
-    {
-        val = deflt;
-        return false;
-    }
+
+    val = deflt;
+    return false;
 }
 
 
 template<class T>
 inline T Foam::argList::optionLookupOrDefault
 (
-    const word& opt,
+    const word& optionName,
     const T& deflt
 ) const
 {
-    if (optionFound(opt))
+    if (optionFound(optionName))
     {
-        return optionRead<T>(opt);
+        return optionRead<T>(optionName);
+    }
+
+    return deflt;
+}
+
+
+template<class T>
+inline Foam::List<T> Foam::argList::optionReadList
+(
+    const word& optionName
+) const
+{
+    List<T> list;
+
+    ITstream its(optionName, options_[optionName]);
+
+    if (its.size() == 1)
+    {
+        // Single token - treated like list with one entry
+        list.setSize(1);
+
+        its >> list[0];
     }
     else
     {
-        return deflt;
+        its >> list;
     }
+
+    return list;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline const Foam::string& Foam::argList::operator[](const label index) const
+inline const Foam::string& Foam::argList::operator[]
+(
+    const label argIndex
+) const
 {
-    return args_[index];
+    return args_[argIndex];
 }
 
 
-inline const Foam::string& Foam::argList::operator[](const word& opt) const
+inline const Foam::string& Foam::argList::operator[]
+(
+    const word& optionName
+) const
 {
-    return options_[opt];
+    return options_[optionName];
 }
 
 
