@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
     argList::noBanner();
     argList::noParallel();
     argList::noJobInfo();
+    argList::noFunctionObjects();
     argList::addBoolOption
     (
         "processor",
@@ -75,18 +76,16 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    label nProcs = 0;
+    // Get times list from the master processor and subset based on
+    // command-line options
 
-    // Create the processor databases
-    PtrList<Time> databases(1);
+    label nProcs = 0;
+    instantList timeDirs;
 
     if (args.optionFound("processor"))
     {
-        // Determine the processor count directly
-        while (isDir(args.path()/(word("processor") + name(nProcs))))
-        {
-            ++nProcs;
-        }
+        // Determine the processor count
+        nProcs = fileHandler().nProcs(args.path());
 
         if (!nProcs)
         {
@@ -95,77 +94,83 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
 
-        // Create the processor databases
-        databases.setSize(nProcs);
-
-        forAll(databases, proci)
-        {
-            databases.set
+        timeDirs = timeSelector::select
+        (
+            Time
             (
-                proci,
-                new Time
-                (
-                    Time::controlDictName,
-                    args.rootPath(),
-                    args.caseName()/fileName(word("processor") + name(proci))
-                )
-            );
-        }
+                Time::controlDictName,
+                args.rootPath(),
+                args.caseName()/"processor0"
+            ).times(),
+            args
+        );
     }
     else
     {
-        databases.set
+        timeDirs = timeSelector::select
         (
-            0,
-            new Time
+            Time
             (
                 Time::controlDictName,
                 args.rootPath(),
                 args.caseName()
-            )
+            ).times(),
+            args
         );
     }
 
-    // Use the times list from the master processor
-    // and select a subset based on the command-line options
-    instantList timeDirs = timeSelector::select
-    (
-        databases[0].times(),
-        args
-    );
 
     if (args.optionFound("rm"))
     {
-        if (args.optionFound("processor"))
+        if (nProcs)
         {
-            for (label proci=0; proci<nProcs; proci++)
+            // Info<< "Remove " << timeDirs.size()
+            //     << " processor time directories" << nl;
+
+            forAllReverse(timeDirs, timei)
             {
-                fileName procPath
+                fileName path
                 (
-                    args.path()/(word("processor") + name(proci))
+                    args.path()
+                  / "processors"
+                  / timeDirs[timei].name()
                 );
 
-                forAll(timeDirs, timeI)
+                rmDir(path, true);
+
+                for (label proci=0; proci<nProcs; ++proci)
                 {
-                    rmDir(procPath/timeDirs[timeI].name());
+                    path =
+                    (
+                        args.path()
+                      / (word("processor") + name(proci))
+                      / timeDirs[timei].name()
+                    );
+
+                    rmDir(path, true);
                 }
             }
         }
         else
         {
-            forAll(timeDirs, timeI)
+            // Info<< "Remove " << timeDirs.size()
+            //     << " time directories" << nl;
+
+            forAllReverse(timeDirs, timei)
             {
-                rmDir(args.path()/timeDirs[timeI].name());
+                rmDir(args.path()/timeDirs[timei].name(), true);
             }
         }
     }
     else
     {
-        forAll(timeDirs, timeI)
+        forAll(timeDirs, timei)
         {
-            Info<< timeDirs[timeI].name() << endl;
+            Info<< timeDirs[timei].name() << nl;
         }
+        Info<< flush;
     }
+
 
     return 0;
 }
