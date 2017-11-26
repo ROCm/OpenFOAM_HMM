@@ -67,15 +67,22 @@ class functionEntry
 {
     // Private Member Functions
 
-        //- Read line as string token
-        static token readLine(const word& key, Istream& is);
-
         //- Disallow default bitwise copy construct
         functionEntry(const functionEntry&) = delete;
 
         //- Disallow default bitwise assignment
         void operator=(const functionEntry&) = delete;
 
+
+protected:
+
+        //- Read line and return as a string token
+        static token readLine(const word& key, Istream& is);
+
+        //- Read a List of strings values, treating a single entry like a
+        //- list of size 1.
+        template<class StringType>
+        static List<StringType> readStringList(Istream& is);
 
 public:
 
@@ -139,6 +146,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "functionEntryTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

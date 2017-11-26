@@ -54,7 +54,7 @@ bool Foam::functionEntries::removeEntry::execute
     Istream& is
 )
 {
-    const List<keyType> patterns = readList<keyType>(is);
+    const List<keyType> patterns = functionEntry::readStringList<keyType>(is);
 
     for (const keyType& key : patterns)
     {

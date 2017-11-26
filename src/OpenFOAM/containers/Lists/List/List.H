@@ -308,17 +308,6 @@ public:
 };
 
 
-//- Read a bracket-delimited list, or handle a single value as list of size 1
-//  For example,
-//  \code
-//      wList = readList<word>(IStringStream("(patch1 patch2 patch3)")());
-//      wList = readList<word>(IStringStream("patch0")());
-//  \endcode
-//  Mostly useful for handling command-line arguments
-template<class T>
-List<T> readList(Istream& is);
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

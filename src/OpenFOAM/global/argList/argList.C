@@ -916,8 +916,19 @@ void Foam::argList::parse
             {
                 distributed_ = true;
                 source = "-roots";
-                IStringStream is(options_["roots"]);
-                roots = readList<fileName>(is);
+                ITstream is("roots", options_["roots"]);
+
+                if (is.size() == 1)
+                {
+                    // Single token - treated like list with one entry
+                    roots.setSize(1);
+
+                    is >> roots[0];
+                }
+                else
+                {
+                    is >> roots;
+                }
 
                 if (roots.size() != 1)
                 {

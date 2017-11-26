@@ -7,7 +7,7 @@
   #warn             | dict              | entry introducer
   #error            | dict              | entry introducer
                     |                   |
-  #remove           | dict              | readList<keyType>
+  #remove           | dict              | keyType or List<keyType>
                     |                   |
   #include          | dict/primitive    | string
   #includeEtc       | dict/primitive    | string
@@ -24,7 +24,7 @@ Pending future extensions
 |-------------------|-------------------|-------------------|-----------------
   #define           | dict              | entry introducer
   #local            | dict              | entry introducer
-  #undef            | dict              | readList<word>
+  #undef            | dict              | keyType or List<keyType>
 
 
-2017-11-05
+2017-11-26

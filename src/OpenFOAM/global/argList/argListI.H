@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "ITstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -106,12 +105,12 @@ inline bool Foam::argList::optionFound(const word& optionName) const
 }
 
 
-inline Foam::IStringStream Foam::argList::optionLookup
+inline Foam::ITstream Foam::argList::optionLookup
 (
     const word& optionName
 ) const
 {
-    return IStringStream(options_[optionName]);
+    return ITstream(optionName, options_[optionName]);
 }
 
 
@@ -205,9 +204,12 @@ namespace Foam
 template<class T>
 inline T Foam::argList::argRead(const label argIndex) const
 {
-    T val;
+    ITstream is(Foam::name(argIndex), args_[argIndex]);
 
-    IStringStream(args_[argIndex])() >> val;
+    T val;
+    is >> val;
+
+    // Could also check is.nRemainingTokens() to detect trailing rubbish
     return val;
 }
 
@@ -215,9 +217,12 @@ inline T Foam::argList::argRead(const label argIndex) const
 template<class T>
 inline T Foam::argList::optionRead(const word& optionName) const
 {
-    T val;
+    ITstream is(optionName, options_[optionName]);
 
-    IStringStream(options_[optionName])() >> val;
+    T val;
+    is >> val;
+
+    // Could also check is.nRemainingTokens() to detect trailing rubbish
     return val;
 }
 
@@ -281,18 +286,18 @@ inline Foam::List<T> Foam::argList::optionReadList
 {
     List<T> list;
 
-    ITstream its(optionName, options_[optionName]);
+    ITstream is(optionName, options_[optionName]);
 
-    if (its.size() == 1)
+    if (is.size() == 1)
     {
         // Single token - treated like list with one entry
         list.setSize(1);
 
-        its >> list[0];
+        is >> list[0];
     }
     else
     {
-        its >> list;
+        is >> list;
     }
 
     return list;
