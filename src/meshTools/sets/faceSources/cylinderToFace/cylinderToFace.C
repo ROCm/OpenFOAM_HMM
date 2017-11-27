@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,52 +23,50 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "faceToPoint.H"
+#include "cylinderToFace.H"
 #include "polyMesh.H"
-#include "faceSet.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(faceToPoint, 0);
-    addToRunTimeSelectionTable(topoSetSource, faceToPoint, word);
-    addToRunTimeSelectionTable(topoSetSource, faceToPoint, istream);
+    defineTypeNameAndDebug(cylinderToFace, 0);
+    addToRunTimeSelectionTable(topoSetSource, cylinderToFace, word);
+    addToRunTimeSelectionTable(topoSetSource, cylinderToFace, istream);
 }
 
-Foam::topoSetSource::addToUsageTable Foam::faceToPoint::usage_
-(
-    faceToPoint::typeName,
-    "\n    Usage: faceToPoint <faceSet> all\n\n"
-    "    Select all points of faces in the faceSet\n\n"
-);
 
-const Foam::Enum
-<
-    Foam::faceToPoint::faceAction
->
-Foam::faceToPoint::faceActionNames_
-{
-    { faceAction::ALL, "all" },
-};
+Foam::topoSetSource::addToUsageTable Foam::cylinderToFace::usage_
+(
+    cylinderToFace::typeName,
+    "\n    Usage: cylinderToFace (p1X p1Y p1Z) (p2X p2Y p2Z) radius\n\n"
+    "    Select all faces with face centre within bounding cylinder\n\n"
+);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::faceToPoint::combine(topoSet& set, const bool add) const
+void Foam::cylinderToFace::combine(topoSet& set, const bool add) const
 {
-    // Load the set
-    faceSet loadedSet(mesh_, setName_);
+    const vector axis = p2_ - p1_;
+    const scalar rad2 = sqr(radius_);
+    const scalar magAxis2 = magSqr(axis);
 
-    // Add all points from faces in loadedSet
-    forAllConstIter(faceSet, loadedSet, iter)
+    const pointField& ctrs = mesh_.faceCentres();
+
+    forAll(ctrs, facei)
     {
-        const face& f = mesh_.faces()[iter.key()];
+        vector d = ctrs[facei] - p1_;
+        scalar magD = d & axis;
 
-        forAll(f, fp)
+        if ((magD > 0) && (magD < magAxis2))
         {
-            addOrDelete(set, f[fp], add);
+            scalar d2 = (d & d) - sqr(magD)/magAxis2;
+            if (d2 < rad2)
+            {
+                addOrDelete(set, facei, add);
+            }
         }
     }
 }
@@ -76,52 +74,56 @@ void Foam::faceToPoint::combine(topoSet& set, const bool add) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::faceToPoint::faceToPoint
+Foam::cylinderToFace::cylinderToFace
 (
     const polyMesh& mesh,
-    const word& setName,
-    const faceAction option
+    const vector& p1,
+    const vector& p2,
+    const scalar radius
 )
 :
     topoSetSource(mesh),
-    setName_(setName),
-    option_(option)
+    p1_(p1),
+    p2_(p2),
+    radius_(radius)
 {}
 
 
-Foam::faceToPoint::faceToPoint
+Foam::cylinderToFace::cylinderToFace
 (
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
     topoSetSource(mesh),
-    setName_(dict.lookup("set")),
-    option_(faceActionNames_.lookup("option", dict))
+    p1_(dict.lookup("p1")),
+    p2_(dict.lookup("p2")),
+    radius_(readScalar(dict.lookup("radius")))
 {}
 
 
-Foam::faceToPoint::faceToPoint
+Foam::cylinderToFace::cylinderToFace
 (
     const polyMesh& mesh,
     Istream& is
 )
 :
     topoSetSource(mesh),
-    setName_(checkIs(is)),
-    option_(faceActionNames_.read(checkIs(is)))
+    p1_(checkIs(is)),
+    p2_(checkIs(is)),
+    radius_(readScalar(checkIs(is)))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::faceToPoint::~faceToPoint()
+Foam::cylinderToFace::~cylinderToFace()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::faceToPoint::applyToSet
+void Foam::cylinderToFace::applyToSet
 (
     const topoSetSource::setAction action,
     topoSet& set
@@ -129,15 +131,15 @@ void Foam::faceToPoint::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding points from face in faceSet " << setName_
-            << " ..." << endl;
+        Info<< "    Adding faces with centre within cylinder, with p1 = "
+            << p1_ << ", p2 = " << p2_ << " and radius = " << radius_ << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing points from face in faceSet " << setName_
-            << " ..." << endl;
+        Info<< "    Removing faces with centre within cylinder, with p1 = "
+            << p1_ << ", p2 = " << p2_ << " and radius = " << radius_ << endl;
 
         combine(set, false);
     }
