@@ -38,9 +38,9 @@ inline void Foam::PtrList<T>::resize(const label newSize)
 template<class T>
 inline void Foam::PtrList<T>::append(T* ptr)
 {
-    label sz = this->size();
-    this->setSize(sz+1);
-    this->ptrs_[sz] = ptr;
+    const label idx = this->size();
+    this->setSize(idx + 1);
+    this->ptrs_[idx] = ptr;
 }
 
 

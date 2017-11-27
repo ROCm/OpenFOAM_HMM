@@ -32,6 +32,8 @@ Description
 #include "scalar.H"
 #include "IOstreams.H"
 #include "PtrList.H"
+#include "DLPtrList.H"
+#include "SLPtrList.H"
 #include "plane.H"
 #include "DynamicList.H"
 
@@ -79,6 +81,36 @@ int main(int argc, char *argv[])
     PtrList<Scalar> list1(10);
     PtrList<Scalar> list2(15);
     PtrList<Scalar> listApp;
+
+    {
+        DLPtrList<Scalar> llist1;
+        llist1.insert(new Scalar(100));
+        llist1.insert(new Scalar(200));
+        llist1.insert(new Scalar(300));
+
+        DLPtrList<Scalar>::const_iterator citer = llist1.begin();
+
+        Info<< *citer << endl;
+        Info<< typeid(*citer).name() << endl;
+
+        ++citer;
+        ++citer;
+
+        --citer;
+
+        Info<< typeid(llist1.begin()).name() << endl;
+
+        forAllIters(llist1, it)
+        {
+            Info<< typeid(*it).name() << endl;
+            Info<< "reversed: " << *it << endl;
+        }
+        for (const auto& it : llist1)
+        {
+            Info<< typeid(it).name() << endl;
+            Info<< "for-: " << it << endl;
+        }
+    }
 
     forAll(list1, i)
     {

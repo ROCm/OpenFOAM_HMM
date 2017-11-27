@@ -36,9 +36,9 @@ Foam::PtrList<T>::PtrList()
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(const label s)
+Foam::PtrList<T>::PtrList(const label len)
 :
-    UPtrList<T>(s)
+    UPtrList<T>(len)
 {}
 
 
@@ -99,12 +99,12 @@ Foam::PtrList<T>::PtrList(const SLPtrList<T>& sll)
         label i = 0;
         for
         (
-            typename SLPtrList<T>::const_iterator iter = sll.begin();
-            iter != sll.end();
+            typename SLPtrList<T>::const_iterator iter = sll.cbegin();
+            iter != sll.cend();
             ++iter
         )
         {
-            this->ptrs_[i++] = (iter()).clone().ptr();
+            this->ptrs_[i++] = (*iter).clone().ptr();
         }
     }
 }
@@ -209,7 +209,7 @@ void Foam::PtrList<T>::reorder(const labelUList& oldToNew)
 
     forAll(*this, i)
     {
-        label newI = oldToNew[i];
+        const label newI = oldToNew[i];
 
         if (newI < 0 || newI >= this->size())
         {

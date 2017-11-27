@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,13 @@ Class
 Description
     Base for doubly-linked lists.
 
+    The iterators associated with the list only have a core functionality
+    for navigation, with additional functionality to be added by inheriting
+    classes. The node iterators always have a node-pointer as the
+    first member data, which allows reinterpret_cast from anything else with
+    a nullptr as its first data member.
+    The nullObject is such an item (with a nullptr data member).
+
 SourceFiles
     DLListBaseI.H
     DLListBase.C
@@ -36,9 +43,9 @@ SourceFiles
 #ifndef DLListBase_H
 #define DLListBase_H
 
-#include "bool.H"
 #include "label.H"
 #include "uLabel.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,35 +58,40 @@ namespace Foam
 
 class DLListBase
 {
-
 public:
 
-    //- Link structure
+    //- The structure for a doubly-linked storage node
     struct link
     {
+        //- Pointer to prev entry in list
+        link* prev_ = nullptr;
+
         //- Pointer to next entry in list
-        link *prev_, *next_;
+        link* next_ = nullptr;
 
         //- Null construct
-        inline link();
+        link() = default;
 
-        //- Check if the link is registered with the DLListBase
+        //- Check if the node is registered with the list
         inline bool registered() const;
 
-        //- Deregister the link after removal
+        //- Deregister the node after removal
         inline void deregister();
     };
 
 
 private:
 
-    // Private data
+    // Private Member Data
 
-       //- first_ points to first element and last_ points to last element.
-       link *first_, *last_;
+       //- Pointer to first element
+       link *first_ = nullptr;
 
-       //- Number of elements in in list
-       label nElmts_;
+       //- Pointer to last element
+       link *last_ = nullptr;
+
+       //- Number of elements in the list
+       label size_ = 0;
 
 
     // Private Member Functions
@@ -91,9 +103,34 @@ private:
         void operator=(const DLListBase&) = delete;
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Factory method to return an iterator end
+        //  Simply reinterprets a NullObject as a DLListBase iterator.
+        template<class IteratorType>
+        inline static const IteratorType& iterator_end();
+
+        //- Factory method to return an iterator reverse end
+        //  Simply reinterprets a NullObject as a DLListBase iterator.
+        template<class IteratorType>
+        inline static const IteratorType& iterator_rend();
+
+        //- Return iterator to first item or end-iterator if list is empty
+        //  Removes constness which the caller promises to manage.
+        template<class IteratorType>
+        inline IteratorType iterator_first() const;
+
+        //- Return iterator to last item or end-iterator if list is empty
+        //  Removes constness which the caller promises to manage.
+        template<class IteratorType>
+        inline IteratorType iterator_last() const;
+
+
 public:
 
-    // Forward declaration of STL iterators
+    // Forward declaration of iterators
 
         class iterator;
         friend class iterator;
@@ -101,213 +138,185 @@ public:
         class const_iterator;
         friend class const_iterator;
 
-        class const_reverse_iterator;
-        friend class const_reverse_iterator;
-
 
     // Constructors
 
         //- Null construct
-        inline DLListBase();
-
-        //- Construct given initial entry
-        inline DLListBase(link*);
+        DLListBase() = default;
 
 
     //- Destructor
-    ~DLListBase();
+    ~DLListBase() = default;
 
 
     // Member Functions
 
-        // Access
+        //- Return number of elements in list
+        inline label size() const;
 
-            //- Return number of elements in list
-            inline label size() const;
+        //- Return true if the list is empty
+        inline bool empty() const;
 
-            //- Return true if the list is empty
-            inline bool empty() const;
+        //- Return first entry
+        inline link* first();
 
-            //- Return first entry
-            inline link* first();
+        //- Return const access to first entry
+        inline const link* first() const;
 
-            //- Return const access to first entry
-            inline const link* first() const;
+        //- Return last entry
+        inline link* last();
 
-            //- Return last entry
-            inline link* last();
-
-            //- Return const access to last entry
-            inline const link* last() const;
+        //- Return const access to last entry
+        inline const link* last() const;
 
 
-        // Edit
+        //- Add at head of list
+        void insert(link* item);
 
-            //- Add at head of list
-            void insert(link*);
+        //- Add at tail of list
+        void append(link* item);
 
-            //- Add at tail of list
-            void append(link*);
+        //- Swap this element with the one above unless it is at the top
+        bool swapUp(link* item);
 
-            //- Swap this element with the one above unless it is at the top
-            bool swapUp(link*);
+        //- Swap this element with the one below unless it is at the bottom
+        bool swapDown(link* item);
 
-            //- Swap this element with the one below unless it is at the bottom
-            bool swapDown(link*);
+        //- Remove and return head
+        link* removeHead();
 
-            //- Remove and return head
-            link* removeHead();
+        //- Remove and return element
+        link* remove(link* item);
 
-            //- Remove and return element
-            link* remove(link*);
+        // Remove and return element specified by iterator
+        inline link* remove(iterator& iter);
 
-            // Remove and return element specified by iterator
-            inline link* remove(iterator&);
+        //- Replace oldLink with newLink and return element
+        link* replace(link* oldLink, link* newLink);
 
-            //- Replace oldLink with newLink and return element
-            link* replace(link* oldLink, link* newLink);
+        //- Replace oldIter with newItem and return element
+        inline link* replace(iterator& oldIter, link* newitem);
 
-            //- Replace oldIter with newLink and return element
-            inline link* replace(iterator& oldIter, link* newLink);
+        //- Clear the list
+        inline void clear();
 
-            //- Clear the list
-            inline void clear();
+        //- Swap the contents of the list
+        inline void swap(DLListBase& lst);
 
-            //- Transfer the contents of the argument into this List
-            //  and annul the argument list.
-            inline void transfer(DLListBase&);
+        //- Transfer the contents of the argument into this list
+        //- and annul the argument list.
+        inline void transfer(DLListBase& lst);
 
-    // STL iterator
 
-        //- An STL-conforming iterator
+    // iterator
+
+        //- A primitive non-const node iterator.
+        //  Needs to be extended by inheriting classes.
         class iterator
         {
             friend class DLListBase;
             friend class const_iterator;
 
-            //- Reference to the list this is an iterator for
-            DLListBase& curList_;
+            //- The selected node.
+            //  MUST be the first member for easy comparison between iterators
+            //  and for reinterpret_cast from nullObject
+            link* node_;
 
-            //- Current element
-            link* curElmt_;
+            //- The list being iterated on
+            DLListBase* list_;
 
-            //- Copy of the link
-            link curLink_;
-
-            //- Construct for a given SLListBase with nullptr element and link.
-            //  Only used to create endIter
-            inline iterator(DLListBase&);
+            //- Copy of the node prev/next pointers (to use after removal)
+            link copy_;
 
         public:
 
-            //- Construct for a given DLListBase and link
-            inline iterator(DLListBase&, link*);
+            //- Construct for a node on a list
+            inline iterator(DLListBase* list, link* item);
 
-            //- Currently pointing at a valid entry
+            //- The storage node
+            inline link* get_node() const;
+
+            //- Pointing at a valid storage node
             inline bool found() const;
+
+            //- Move backward through list
+            inline void prev();
+
+            //- Move forward through list
+            inline void next();
 
             inline void operator=(const iterator& iter);
 
-            inline bool operator==(const iterator& iter) const;
-            inline bool operator!=(const iterator& iter) const;
-
-            inline link& operator*() const;
-
-            inline iterator& operator++();
-            inline iterator operator++(int);
+            inline bool operator==(const iterator&) const;
+            inline bool operator!=(const iterator&) const;
         };
 
-        inline iterator begin();
-        inline const iterator& end();
 
+    // const_iterator
 
-    // STL const_iterator
-
-        //- An STL-conforming const_iterator
+        //- A primitive const node iterator (bidirectional).
+        //  Must normally be extended by inheriting classes.
+        //  Since this iterator works bidirectionally, it can be used as the
+        //  basis for a derived const_reverse_iterator
         class const_iterator
         {
-            //- Reference to the list this is an iterator for
-            const DLListBase& curList_;
+            //- The selected node.
+            //  MUST be the first member for easy comparison between iterators
+            //  and for reinterpret_cast from nullObject
+            const link* node_;
 
-            //- Current element
-            const link* curElmt_;
+            //- The list being iterated on (as pointer for bitwise copy)
+            const DLListBase* list_;
 
         public:
 
-            //- Construct for a given DLListBase and link
-            inline const_iterator(const DLListBase&, const link*);
+            //- Construct for a node on a list
+            inline const_iterator(const DLListBase* list, const link* item);
 
-            //- Construct from a non-const iterator
+            //- Copy construct from a non-const iterator
             inline const_iterator(const DLListBase::iterator& iter);
 
-            //- Currently pointing at a valid entry
+            //- Copy construct
+            const_iterator(const const_iterator&) = default;
+
+            //- The storage node
+            inline const link* get_node() const;
+
+            //- Pointing at a valid storage node
             inline bool found() const;
 
-            inline void operator=(const const_iterator& iter);
+            //- Move backward through list
+            inline void prev();
 
-            inline bool operator==(const const_iterator& iter) const;
-            inline bool operator!=(const const_iterator& iter) const;
+            //- Move forward through list
+            inline void next();
 
-            inline const link& operator*() const;
+            const_iterator& operator=(const const_iterator&) = default;
 
-            inline const_iterator& operator++();
-            inline const_iterator operator++(int);
+            inline bool operator==(const const_iterator&) const;
+            inline bool operator!=(const const_iterator&) const;
         };
 
+
+        //- Iterator to first item in list with non-const access
+        inline iterator begin();
+
+        //- Iterator to first item in list with const access
         inline const_iterator cbegin() const;
+
+        //- Iterator to last item in list with const access
+        //  Note that this is not a const_reverse_iterator, this is the
+        //  responsibilty of any derived classes.
+        inline const_iterator crbegin() const;
+
+        //- End of list for iterators
+        inline const iterator& end();
+
+        //- End of list for iterators
         inline const const_iterator& cend() const;
 
-        inline const_iterator begin() const;
-        inline const const_iterator& end() const;
-
-
-    // STL const_reverse_iterator
-
-        //- An STL-conforming const_reverse_iterator
-        class const_reverse_iterator
-        {
-            //- Reference to the list this is an reverse_iterator for
-            const DLListBase& curList_;
-
-            //- Current element
-            const link* curElmt_;
-
-        public:
-
-            //- Construct for a given DLListBase and link
-            inline const_reverse_iterator(const DLListBase& lst, const link*);
-
-            //- Currently pointing at a valid entry
-            inline bool found() const;
-
-            inline void operator=(const const_reverse_iterator& iter);
-
-            inline bool operator==(const const_reverse_iterator& iter) const;
-            inline bool operator!=(const const_reverse_iterator& iter) const;
-
-            inline const link& operator*() const;
-
-            inline const_reverse_iterator& operator++();
-            inline const_reverse_iterator operator++(int);
-        };
-
-        inline const_reverse_iterator crbegin() const;
-        inline const const_reverse_iterator& crend() const;
-
-        inline const_reverse_iterator rbegin() const;
-        inline const const_reverse_iterator& rend() const;
-
-
-private:
-
-        //- Iterator returned by end()
-        static iterator endIter_;
-
-        //- const_iterator returned by end()
-        static const_iterator endConstIter_;
-
-        //- const_reverse_iterator returned by end()
-        static const_reverse_iterator endConstRevIter_;
+        //- End of list for reverse iterators
+        inline const const_iterator& crend() const;
 };
 
 

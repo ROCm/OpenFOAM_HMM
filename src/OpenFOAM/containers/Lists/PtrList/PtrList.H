@@ -42,27 +42,20 @@ SourceFiles
 #define PtrList_H
 
 #include "UPtrList.H"
+#include "SLPtrListFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 
 template<class T> class autoPtr;
 template<class T> class tmp;
-
-class SLListBase;
-template<class LListBase, class T> class LPtrList;
-template<class T>
-using SLPtrList = LPtrList<SLListBase, T>;
-
-// Forward declaration of friend functions and operators
 template<class T> class PtrList;
 
-template<class T>
-Istream& operator>>(Istream&, PtrList<T>&);
+template<class T> Istream& operator>>(Istream& is, PtrList<T>& lst);
 
 
 /*---------------------------------------------------------------------------*\
@@ -81,7 +74,7 @@ protected:
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream&, const INew& inewt);
+        void read(Istream& is, const INew& inew);
 
 
 public:
@@ -92,30 +85,30 @@ public:
         PtrList();
 
         //- Construct with size specified
-        explicit PtrList(const label);
+        explicit PtrList(const label len);
 
-        //- Copy constructor
-        PtrList(const PtrList<T>&);
+        //- Copy constructor, using 'clone()' method on each element
+        PtrList(const PtrList<T>& a);
 
         //- Copy constructor with additional argument for clone
         template<class CloneArg>
-        PtrList(const PtrList<T>&, const CloneArg&);
+        PtrList(const PtrList<T>& a, const CloneArg& cloneArg);
 
         //- Construct by transferring the parameter contents
-        PtrList(const Xfer<PtrList<T>>&);
+        PtrList(const Xfer<PtrList<T>>& lst);
 
         //- Construct as copy or re-use as specified
-        PtrList(PtrList<T>&, bool reuse);
+        PtrList(PtrList<T>& a, bool reuse);
 
         //- Construct as copy of SLPtrList<T>
-        explicit PtrList(const SLPtrList<T>&);
+        explicit PtrList(const SLPtrList<T>& sll);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        PtrList(Istream&, const INew&);
+        PtrList(Istream& is, const INew& inew);
 
         //- Construct from Istream using default Istream constructor class
-        PtrList(Istream&);
+        PtrList(Istream& is);
 
 
     //- Destructor

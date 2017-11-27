@@ -63,9 +63,9 @@ Foam::labelRange Foam::UList<T>::validateRange
     auto iter = start_size.begin();
 
     const label beg = *(iter++);
-    const label sz  = *iter;
+    const label len = *iter;
 
-    return this->validateRange(labelRange(beg, sz));
+    return this->validateRange(labelRange(beg, len));
 }
 
 

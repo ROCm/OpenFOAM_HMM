@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,21 +21,31 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Alias
+InClass
     Foam::SLList
 
 Description
-    Non-intrusive singly-linked list.
+    Forward declarations for SLList
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SLList_H
-#define SLList_H
+#ifndef SLListFwd_H
+#define SLListFwd_H
 
-#include "SLListBase.H"
-#include "LList.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "SLListFwd.H"
+namespace Foam
+{
+    // Forward declarations
+    class SLListBase;
+    template<class LListBase, class T> class LList;
+
+    // Alias
+    template<class T>
+    using SLList = LList<SLListBase, T>;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

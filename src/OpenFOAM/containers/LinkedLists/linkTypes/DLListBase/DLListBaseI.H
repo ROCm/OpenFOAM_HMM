@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,39 +24,74 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
+#include "nullObject.H"
 
-// * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-inline Foam::DLListBase::link::link()
-:
-    prev_(nullptr),
-    next_(nullptr)
-{}
-
-
-inline Foam::DLListBase::DLListBase()
-:
-    first_(nullptr),
-    last_(nullptr),
-    nElmts_(0)
-{}
-
-
-inline Foam::DLListBase::DLListBase(link* a)
-:
-    first_(a),
-    last_(a),
-    nElmts_(1)
+template<class IteratorType>
+inline const IteratorType& Foam::DLListBase::iterator_end()
 {
-    a->prev_ = a;
-    a->next_ = a;
+    return *reinterpret_cast<const IteratorType*>(nullObjectPtr);
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+template<class IteratorType>
+inline const IteratorType& Foam::DLListBase::iterator_rend()
+{
+    return *reinterpret_cast<const IteratorType*>(nullObjectPtr);
+}
 
-inline Foam::DLListBase::~DLListBase()
-{}
+
+template<class IteratorType>
+inline IteratorType Foam::DLListBase::iterator_first() const
+{
+    DLListBase* list = const_cast<DLListBase*>(this);
+
+    if (size())
+    {
+        return IteratorType(list, const_cast<DLListBase::link*>(first_));
+    }
+
+    // Return an end iterator
+    return IteratorType(list, nullptr);
+}
+
+
+template<class IteratorType>
+inline IteratorType Foam::DLListBase::iterator_last() const
+{
+    DLListBase* list = const_cast<DLListBase*>(this);
+
+    if (size())
+    {
+        return IteratorType(list, const_cast<DLListBase::link*>(last_));
+    }
+
+    // Return an end iterator
+    return IteratorType(list, nullptr);
+}
+
+
+// * * * * * * * * * * * * * * * Iterator ends * * * * * * * * * * * * * * * //
+
+inline const Foam::DLListBase::iterator& Foam::DLListBase::end()
+{
+    return iterator_end<DLListBase::iterator>();
+}
+
+
+inline const Foam::DLListBase::const_iterator&
+Foam::DLListBase::cend() const
+{
+    return iterator_end<DLListBase::const_iterator>();
+}
+
+
+inline const Foam::DLListBase::const_iterator&
+Foam::DLListBase::crend() const
+{
+    return iterator_rend<DLListBase::const_iterator>();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -69,27 +104,26 @@ inline bool Foam::DLListBase::link::registered() const
 
 inline void Foam::DLListBase::link::deregister()
 {
-    prev_ = nullptr;
-    next_ = nullptr;
+    prev_ = next_ = nullptr;
 }
 
 
 inline Foam::label Foam::DLListBase::size() const
 {
-    return nElmts_;
+    return size_;
 }
 
 
 inline bool Foam::DLListBase::empty() const
 {
-    return !nElmts_;
+    return !size_;
 }
 
 
 inline Foam::DLListBase::link*
 Foam::DLListBase::first()
 {
-    if (!nElmts_)
+    if (!size_)
     {
         FatalErrorInFunction
             << "list is empty"
@@ -102,7 +136,7 @@ Foam::DLListBase::first()
 inline const Foam::DLListBase::link*
 Foam::DLListBase::first() const
 {
-    if (!nElmts_)
+    if (!size_)
     {
         FatalErrorInFunction
             << "list is empty"
@@ -115,7 +149,7 @@ Foam::DLListBase::first() const
 inline Foam::DLListBase::link*
 Foam::DLListBase::last()
 {
-    if (!nElmts_)
+    if (!size_)
     {
         FatalErrorInFunction
             << "list is empty"
@@ -128,7 +162,7 @@ Foam::DLListBase::last()
 inline const Foam::DLListBase::link*
 Foam::DLListBase::last() const
 {
-    if (!nElmts_)
+    if (!size_)
     {
         FatalErrorInFunction
             << "list is empty"
@@ -142,15 +176,23 @@ inline void Foam::DLListBase::clear()
 {
     first_ = nullptr;
     last_  = nullptr;
-    nElmts_ = 0;
+    size_  = 0;
+}
+
+
+inline void Foam::DLListBase::swap(DLListBase& lst)
+{
+    std::swap(first_, lst.first_);
+    std::swap(last_, lst.last_);
+    std::swap(size_, lst.size_);
 }
 
 
 inline void Foam::DLListBase::transfer(DLListBase& lst)
 {
-    first_  = lst.first_;
-    last_   = lst.last_;
-    nElmts_ = lst.nElmts_;
+    first_ = lst.first_;
+    last_  = lst.last_;
+    size_  = lst.size_;
 
     lst.clear();
 }
@@ -159,10 +201,10 @@ inline void Foam::DLListBase::transfer(DLListBase& lst)
 inline Foam::DLListBase::link*
 Foam::DLListBase::remove
 (
-    DLListBase::iterator& it
+    DLListBase::iterator& iter
 )
 {
-    return remove(it.curElmt_);
+    return remove(iter.node_);
 }
 
 
@@ -170,88 +212,100 @@ inline Foam::DLListBase::link*
 Foam::DLListBase::replace
 (
     DLListBase::iterator& oldIter,
-    DLListBase::link* newLink
+    DLListBase::link* newItem
 )
 {
-    return replace(oldIter.curElmt_, newLink);
+    return replace(oldIter.node_, newItem);
 }
 
 
 // * * * * * * * * * * * * * * * STL iterator  * * * * * * * * * * * * * * * //
 
-inline Foam::DLListBase::iterator::iterator(DLListBase& s, link* elmt)
+inline Foam::DLListBase::iterator::iterator
+(
+    DLListBase* list,
+    DLListBase::link* item
+)
 :
-    curList_(s),
-    curElmt_(elmt),
-    curLink_(*curElmt_)
-{}
+    node_(item),
+    list_(list),
+    copy_()
+{
+    if (node_ != nullptr)
+    {
+        copy_ = *node_;
+    }
+}
 
 
-inline Foam::DLListBase::iterator::iterator(DLListBase& s)
-:
-    curList_(s),
-    curElmt_(nullptr),
-    curLink_()
-{}
+inline Foam::DLListBase::link*
+Foam::DLListBase::iterator::get_node() const
+{
+    return node_;
+}
 
 
 inline bool Foam::DLListBase::iterator::found() const
 {
-    return (curElmt_ != nullptr);
+    return (node_ != nullptr);
+}
+
+
+inline void Foam::DLListBase::iterator::prev()
+{
+    if (list_)
+    {
+        // Check if the node_ is the first element (points to itself)
+        // or if the list is empty because last element was removed
+        if (node_ == copy_.prev_ || list_->first_ == nullptr)
+        {
+            node_ = nullptr;
+        }
+        else
+        {
+            node_ = copy_.prev_;
+            copy_ = *node_;
+        }
+    }
+}
+
+
+inline void Foam::DLListBase::iterator::next()
+{
+    if (list_)
+    {
+        // Check if the node_ is the last element (points to itself)
+        // or if the list is empty because last element was removed
+        if (node_ == copy_.next_ || list_->last_ == nullptr)
+        {
+            node_ = nullptr;
+        }
+        else
+        {
+            node_ = copy_.next_;
+            copy_ = *node_;
+        }
+    }
 }
 
 
 inline void Foam::DLListBase::iterator::operator=(const iterator& iter)
 {
-    curElmt_ = iter.curElmt_;
-    curLink_ = iter.curLink_;
+    node_ = iter.node_;
+    list_ = iter.list_;
+    copy_ = iter.copy_;
 }
 
 
 inline bool Foam::DLListBase::iterator::operator==(const iterator& iter) const
 {
-    return curElmt_ == iter.curElmt_;
+    return node_ == iter.node_;
 }
 
 
 inline bool Foam::DLListBase::iterator::operator!=(const iterator& iter) const
 {
-    return curElmt_ != iter.curElmt_;
-}
-
-
-inline Foam::DLListBase::link&
-Foam::DLListBase::iterator::operator*() const
-{
-    return *curElmt_;
-}
-
-
-inline Foam::DLListBase::iterator&
-Foam::DLListBase::iterator::operator++()
-{
-    // Check if the curElmt_ is the last element (if it points to itself)
-    // or if the list is empty because the last element may have been removed
-    if (curLink_.next_ == curElmt_ || curList_.last_ == nullptr)
-    {
-        curElmt_ = nullptr;
-    }
-    else
-    {
-        curElmt_ = curLink_.next_;
-        curLink_ = *curElmt_;
-    }
-
-    return *this;
-}
-
-
-inline Foam::DLListBase::iterator
-Foam::DLListBase::iterator::operator++(int)
-{
-    iterator tmp = *this;
-    ++*this;
-    return tmp;
+    return node_ != iter.node_;
 }
 
 
@@ -260,18 +314,10 @@ Foam::DLListBase::begin()
 {
     if (size())
     {
-        return iterator(*this, first());
+        return iterator_first<iterator>();
     }
-    else
-    {
-        return endIter_;
-    }
-}
 
-
-inline const Foam::DLListBase::iterator& Foam::DLListBase::end()
-{
-    return endIter_;
+    return end();
 }
 
 
@@ -279,12 +325,12 @@ inline const Foam::DLListBase::iterator& Foam::DLListBase::end()
 
 inline Foam::DLListBase::const_iterator::const_iterator
 (
-    const DLListBase& s,
-    const link* elmt
+    const DLListBase* list,
+    const DLListBase::link* item
 )
 :
-    curList_(s),
-    curElmt_(elmt)
+    node_(item),
+    list_(list)
 {}
 
 
@@ -293,23 +339,53 @@ inline Foam::DLListBase::const_iterator::const_iterator
     const DLListBase::iterator& iter
 )
 :
-    curList_(iter.curList_),
-    curElmt_(iter.curElmt_)
+    node_(iter.node_),
+    list_(iter.list_)
 {}
+
+
+inline const Foam::DLListBase::link*
+Foam::DLListBase::const_iterator::get_node() const
+{
+    return node_;
+}
 
 
 inline bool Foam::DLListBase::const_iterator::found() const
 {
-    return (curElmt_ != nullptr);
+    return (node_ != nullptr);
 }
 
 
-inline void Foam::DLListBase::const_iterator::operator=
-(
-    const const_iterator& iter
-)
+inline void Foam::DLListBase::const_iterator::prev()
 {
-    curElmt_ = iter.curElmt_;
+    if (list_ && node_)
+    {
+        if (node_ == list_->first_)
+        {
+            node_ = nullptr;
+        }
+        else
+        {
+            node_ = node_->prev_;
+        }
+    }
+}
+
+
+inline void Foam::DLListBase::const_iterator::next()
+{
+    if (list_ && node_)
+    {
+        if (node_ == list_->last_)
+        {
+            node_ = nullptr;
+        }
+        else
+        {
+            node_ = node_->next_;
+        }
+    }
 }
 
 
@@ -318,7 +394,7 @@ inline bool Foam::DLListBase::const_iterator::operator==
     const const_iterator& iter
 ) const
 {
-    return curElmt_ == iter.curElmt_;
+    return node_ == iter.node_;
 }
 
 
@@ -327,39 +403,7 @@ inline bool Foam::DLListBase::const_iterator::operator!=
     const const_iterator& iter
 ) const
 {
-    return curElmt_ != iter.curElmt_;
-}
-
-
-inline const Foam::DLListBase::link&
-Foam::DLListBase::const_iterator::operator*() const
-{
-    return *curElmt_;
-}
-
-
-inline Foam::DLListBase::const_iterator&
-Foam::DLListBase::const_iterator::operator++()
-{
-    if (curElmt_ == curList_.last_)
-    {
-        curElmt_ = nullptr;
-    }
-    else
-    {
-        curElmt_ = curElmt_->next_;
-    }
-
-    return *this;
-}
-
-
-inline Foam::DLListBase::const_iterator
-Foam::DLListBase::const_iterator::operator++(int)
-{
-    const_iterator tmp = *this;
-    ++*this;
-    return tmp;
+    return node_ != iter.node_;
 }
 
 
@@ -368,146 +412,22 @@ Foam::DLListBase::cbegin() const
 {
     if (size())
     {
-        return const_iterator(*this, first());
+        return iterator_first<const_iterator>();
     }
-    else
-    {
-        return endConstIter_;
-    }
-}
 
-
-inline const Foam::DLListBase::const_iterator&
-Foam::DLListBase::cend() const
-{
-    return endConstIter_;
+    return cend();
 }
 
 
 inline Foam::DLListBase::const_iterator
-Foam::DLListBase::begin() const
-{
-    return this->cbegin();
-}
-
-
-inline const Foam::DLListBase::const_iterator&
-Foam::DLListBase::end() const
-{
-    return endConstIter_;
-}
-
-
-// * * * * * * * * * * STL const_reverse_iterator  * * * * * * * * * * * * * //
-
-inline Foam::DLListBase::const_reverse_iterator::const_reverse_iterator
-(
-    const DLListBase& lst,
-    const link* elmt
-)
-:
-    curList_(lst),
-    curElmt_(elmt)
-{}
-
-
-inline bool Foam::DLListBase::const_reverse_iterator::found() const
-{
-    return (curElmt_ != nullptr);
-}
-
-
-inline void Foam::DLListBase::const_reverse_iterator::operator=
-(
-    const const_reverse_iterator& iter
-)
-{
-    curElmt_ = iter.curElmt_;
-}
-
-
-inline bool Foam::DLListBase::const_reverse_iterator::operator==
-(
-    const const_reverse_iterator& iter
-) const
-{
-    return curElmt_ == iter.curElmt_;
-}
-
-
-inline bool Foam::DLListBase::const_reverse_iterator::operator!=
-(
-    const const_reverse_iterator& iter
-) const
-{
-    return curElmt_ != iter.curElmt_;
-}
-
-
-inline const Foam::DLListBase::link&
-Foam::DLListBase::const_reverse_iterator::operator*() const
-{
-    return *curElmt_;
-}
-
-
-inline Foam::DLListBase::const_reverse_iterator&
-Foam::DLListBase::const_reverse_iterator::operator++()
-{
-    if (curElmt_ == curList_.first_)
-    {
-        curElmt_ = nullptr;
-    }
-    else
-    {
-        curElmt_ = curElmt_->prev_;
-    }
-
-    return *this;
-}
-
-
-inline Foam::DLListBase::const_reverse_iterator
-Foam::DLListBase::const_reverse_iterator::operator++(int)
-{
-    const_reverse_iterator tmp = *this;
-    ++*this;
-    return tmp;
-}
-
-
-inline Foam::DLListBase::const_reverse_iterator
 Foam::DLListBase::crbegin() const
 {
     if (size())
     {
-        return const_reverse_iterator(*this, this->last());
+        return iterator_last<const_iterator>();
     }
-    else
-    {
-        return endConstRevIter_;
-    }
-}
 
-
-inline const Foam::DLListBase::const_reverse_iterator&
-Foam::DLListBase::crend() const
-{
-    return endConstRevIter_;
-}
-
-
-inline Foam::DLListBase::const_reverse_iterator
-Foam::DLListBase::rbegin() const
-{
-    return this->crbegin();
-}
-
-
-inline const Foam::DLListBase::const_reverse_iterator&
-Foam::DLListBase::rend() const
-{
-    return endConstRevIter_;
+    return crend();
 }
 
 

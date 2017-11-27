@@ -43,6 +43,7 @@ SourceFiles
 #include "Hash.H"
 #include "autoPtr.H"
 #include "Swap.H"
+#include "SLListFwd.H"
 
 #include <type_traits>
 #include <initializer_list>
@@ -52,7 +53,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class T, unsigned Size> class FixedList;
 
@@ -64,10 +65,6 @@ Ostream& operator<<(Ostream&, const FixedList<T, Size>&);
 
 template<class T> class UList;
 
-class SLListBase;
-template<class LListBase, class T> class LList;
-template<class T>
-using SLList = LList<SLListBase, T>;
 
 /*---------------------------------------------------------------------------*\
                            Class FixedList Declaration
@@ -491,14 +488,14 @@ public:
         friend Istream& operator>> <T, Size>
         (
             Istream& is,
-            FixedList<T, Size>& L
+            FixedList<T, Size>& lst
         );
 
         //- Write List to Ostream, as per writeList() with shortListLen=10
         friend Ostream& operator<< <T, Size>
         (
             Ostream& os,
-            const FixedList<T, Size>& L
+            const FixedList<T, Size>& lst
         );
 };
 
