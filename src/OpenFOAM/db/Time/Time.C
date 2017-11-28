@@ -1201,7 +1201,7 @@ Foam::Time& Foam::Time::operator++()
             // reinterpretation of the word
             if
             (
-                readScalar(dimensionedScalar::name().c_str(), timeNameValue)
+                readScalar(dimensionedScalar::name(), timeNameValue)
              && (mag(timeNameValue - oldTimeValue - userDeltaT) > timeTol)
             )
             {
@@ -1209,7 +1209,7 @@ Foam::Time& Foam::Time::operator++()
                 while
                 (
                     precision_ < maxPrecision_
-                 && readScalar(dimensionedScalar::name().c_str(), timeNameValue)
+                 && readScalar(dimensionedScalar::name(), timeNameValue)
                  && (mag(timeNameValue - oldTimeValue - userDeltaT) > timeTol)
                 )
                 {
@@ -1242,7 +1242,7 @@ Foam::Time& Foam::Time::operator++()
                     scalar oldTimeNameValue = -VGREAT;
                     if
                     (
-                        readScalar(oldTimeName.c_str(), oldTimeNameValue)
+                        readScalar(oldTimeName, oldTimeNameValue)
                      && (
                             sign(timeNameValue - oldTimeNameValue)
                          != sign(deltaT_)
