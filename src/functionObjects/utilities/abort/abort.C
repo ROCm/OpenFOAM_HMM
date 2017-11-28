@@ -49,18 +49,6 @@ namespace functionObjects
 }
 
 
-const Foam::Enum
-<
-    Foam::Time::stopAtControls
->
-Foam::functionObjects::abort::actionNames_
-{
-    { Time::stopAtControls::saNoWriteNow, "noWriteNow" },
-    { Time::stopAtControls::saWriteNow, "writeNow" },
-    { Time::stopAtControls::saNextWrite, "nextWrite" },
-};
-
-
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 // file-scope
@@ -126,12 +114,6 @@ Foam::functionObjects::abort::abort
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::abort::~abort()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::abort::read(const dictionary& dict)
@@ -145,7 +127,7 @@ bool Foam::functionObjects::abort::read(const dictionary& dict)
 
     const auto oldAction = action_;
 
-    action_ = actionNames_.lookupOrDefault
+    action_ = Time::stopAtControlNames.lookupOrDefault
     (
         "action",
         dict,

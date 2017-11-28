@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,24 +22,23 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::data
+    Foam::subLoopTime
 
 Description
-    Database for solution data, solver performance and other reduced data.
-
-    fvMesh is derived from data so that all fields have access to the data from
-    the mesh reference they hold.
+    A class for managing sub-loops referencing Time.
 
 SourceFiles
-    data.C
+    subLoopTime.C
+
+SeeAlso
+    subCycleTime
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef data_H
-#define data_H
+#ifndef subLoopTime_H
+#define subLoopTime_H
 
-#include "IOdictionary.H"
-#include "solverPerformance.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,72 +46,89 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                            Class data Declaration
+                         Class subLoopTime Declaration
 \*---------------------------------------------------------------------------*/
 
-class data
-:
-    public IOdictionary
+class subLoopTime
 {
-    // Private data
-
-        //- Previously used time-index, used for reset between iterations
-        mutable label prevTimeIndex_;
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        data(const data&) = delete;
+        subLoopTime(const subLoopTime&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const data&) = delete;
+        void operator=(const subLoopTime&) = delete;
+
+
+protected:
+
+    // Protected data
+
+        Time& time_;
+
+        //- The current sub-cycle index
+        label index_;
+
+        //- The total number of cycles in the sub-cycle
+        label total_;
 
 
 public:
 
-    //- Debug switch
-    static int debug;
-
-
     // Constructors
 
-        //- Construct for objectRegistry
-        data(const objectRegistry& obr);
+        //- Construct from time with fixed number of cycles
+        //  \param runTime  the top-level time
+        //  \param nCycles  the number of times to loop
+        subLoopTime(Time& runTime, const label nCycles);
+
+
+    //- Destructor
+    ~subLoopTime();
 
 
     // Member Functions
 
-        //- Return the dictionary of solver performance data which
-        //- includes initial and final residuals for convergence checking
-        const dictionary& solverPerformanceDict() const;
+        //- The current cycle index
+        inline label index() const
+        {
+            return index_;
+        }
 
-        //- Add/set the solverPerformance entry for the named field
-        template<class Type>
-        void setSolverPerformance
-        (
-            const word& name,
-            const SolverPerformance<Type>& sp
-        ) const;
+        //- The total number of cycles
+        inline label nCycles() const
+        {
+            return total_;
+        }
 
-        //- Add/set the solverPerformance entry, using its fieldName
-        template<class Type>
-        void setSolverPerformance
-        (
-            const SolverPerformance<Type>& sp
-        ) const;
+        //- Return true if looping is active
+        bool status() const;
+
+        //- Force terminate the loop
+        void stop();
+
+        //- True if looping is active, increments the index.
+        //  Example usage,
+        //  \code
+        //      while (control.loop())
+        //      {
+        //          solve;
+        //      }
+        //  \endcode
+        bool loop();
+
+
+    // Member Operators
+
+        //- Prefix increment
+        subLoopTime& operator++();
+
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "dataTemplates.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

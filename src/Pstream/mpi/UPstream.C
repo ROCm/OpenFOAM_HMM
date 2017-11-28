@@ -176,7 +176,7 @@ bool Foam::UPstream::init(int& argc, char**& argv)
         int bufSize = 0;
 
         const std::string str = Foam::getEnv("MPI_BUFFER_SIZE");
-        if (str.empty() || !Foam::read(str.c_str(), bufSize) || bufSize <= 0)
+        if (str.empty() || !Foam::read(str, bufSize) || bufSize <= 0)
         {
             bufSize = mpiBufferSize;
         }

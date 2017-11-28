@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,83 +23,62 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "subCycleTime.H"
+#include "subLoopTime.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::subCycleTime::subCycleTime(Time& runTime, const label nCycles)
+Foam::subLoopTime::subLoopTime(Time& runTime, const label nCycles)
 :
     time_(runTime),
     index_(0),
     total_(nCycles)
-{
-    // Could avoid 0 or 1 nCycles here on construction
-    time_.subCycle(nCycles);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::subCycleTime::~subCycleTime()
+Foam::subLoopTime::~subLoopTime()
 {
-    endSubCycle();
+    stop();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::subCycleTime::status() const
+bool Foam::subLoopTime::status() const
 {
-    return (index_ <= total_);
+    return (index_ < total_);
 }
 
 
-bool Foam::subCycleTime::end() const
+void Foam::subLoopTime::stop()
 {
-    return (index_ > total_);  // or !(status())
-}
-
-
-void Foam::subCycleTime::endSubCycle()
-{
-    time_.endSubCycle();
-
     // If called manually, ensure status() will return false
-
     index_ = total_ + 1;
 }
 
 
-bool Foam::subCycleTime::loop()
+bool Foam::subLoopTime::loop()
 {
-    const bool active = status();
+    const bool active = (index_ < total_);   // as per status()
 
     if (active)
     {
         operator++();
+    }
+    else if (index_)
+    {
+        // Not active, the loop condition has now exiting on the last subloop
     }
 
     return active;
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-Foam::subCycleTime& Foam::subCycleTime::operator++()
+Foam::subLoopTime& Foam::subLoopTime::operator++()
 {
-    ++time_;
     ++index_;
-
-    // Register index change with Time, in case someone wants this information
-    time_.subCycleIndex(index_);
-
     return *this;
-}
-
-
-Foam::subCycleTime& Foam::subCycleTime::operator++(int)
-{
-    return operator++();
 }
 
 

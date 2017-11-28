@@ -44,12 +44,14 @@ const Foam::Enum
 <
     Foam::Time::stopAtControls
 >
-Foam::Time::stopAtControlNames_
+Foam::Time::stopAtControlNames
 {
     { stopAtControls::saEndTime, "endTime" },
     { stopAtControls::saNoWriteNow, "noWriteNow" },
     { stopAtControls::saWriteNow, "writeNow" },
     { stopAtControls::saNextWrite, "nextWrite" },
+    // NOTE: stopAtControls::saUnknown is left untabulated here so that it can
+    // be used as fallback value to flag unknown settings
 };
 
 
@@ -57,7 +59,7 @@ const Foam::Enum
 <
     Foam::Time::writeControls
 >
-Foam::Time::writeControlNames_
+Foam::Time::writeControlNames
 {
     { writeControls::wcTimeStep, "timeStep" },
     { writeControls::wcRunTime, "runTime" },
@@ -433,8 +435,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
     sigWriteNow_(true, *this),
     sigStopAtWriteNow_(true, *this),
 
@@ -502,8 +504,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
     sigWriteNow_(true, *this),
     sigStopAtWriteNow_(true, *this),
 
@@ -581,8 +583,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
     sigWriteNow_(true, *this),
     sigStopAtWriteNow_(true, *this),
 
@@ -651,9 +653,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
-
     writeFormat_(IOstream::ASCII),
     writeVersion_(IOstream::currentVersion),
     writeCompression_(IOstream::UNCOMPRESSED),
@@ -825,6 +826,12 @@ Foam::dimensionedScalar Foam::Time::endTime() const
 }
 
 
+Foam::Time::stopAtControls Foam::Time::stopAt() const
+{
+    return stopAt_;
+}
+
+
 bool Foam::Time::run() const
 {
     deleteDemandDrivenData(loopProfiling_);
@@ -913,20 +920,23 @@ bool Foam::Time::end() const
 }
 
 
-bool Foam::Time::stopAt(const stopAtControls sa) const
+bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
 {
-    const bool changed = (stopAt_ != sa);
-    stopAt_ = sa;
+    if (stopCtrl == stopAtControls::saUnknown)
+    {
+        return false;
+    }
 
-    // adjust endTime
-    if (sa == saEndTime)
+    const bool changed = (stopAt_ != stopCtrl);
+    stopAt_ = stopCtrl;
+    endTime_ = GREAT;
+
+    // Adjust endTime
+    if (stopCtrl == stopAtControls::saEndTime)
     {
         controlDict_.lookup("endTime") >> endTime_;
     }
-    else
-    {
-        endTime_ = GREAT;
-    }
+
     return changed;
 }
 
@@ -1018,15 +1028,29 @@ void Foam::Time::setDeltaT(const scalar deltaT, const bool adjust)
 
 Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
 {
-    subCycling_ = true;
-    prevTimeState_.reset(new TimeState(*this));
+    prevTimeState_.set(new TimeState(*this));  // Fatal if already set
 
     setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
     deltaT_ /= nSubCycles;
     deltaT0_ /= nSubCycles;
     deltaTSave_ = deltaT0_;
 
+    subCycling_ = nSubCycles;
+
     return prevTimeState();
+}
+
+
+void Foam::Time::subCycleIndex(const label index)
+{
+    // Only permit adjustment if sub-cycling was already active
+    // and if the index is valid (positive, non-zero).
+    // This avoids potential mixups for deleting.
+
+    if (subCycling_ && index > 0)
+    {
+        subCycling_ = index;
+    }
 }
 
 
@@ -1034,10 +1058,11 @@ void Foam::Time::endSubCycle()
 {
     if (subCycling_)
     {
-        subCycling_ = false;
         TimeState::operator=(prevTimeState());
         prevTimeState_.clear();
     }
+
+    subCycling_ = 0;
 }
 
 
@@ -1113,7 +1138,7 @@ Foam::Time& Foam::Time::operator++()
             case wcRunTime:
             case wcAdjustableRunTime:
             {
-                label writeIndex = label
+                const label writeIndex = label
                 (
                     ((value() - startTime_) + 0.5*deltaT_)
                   / writeInterval_
@@ -1129,7 +1154,7 @@ Foam::Time& Foam::Time::operator++()
 
             case wcCpuTime:
             {
-                label writeIndex = label
+                const label writeIndex = label
                 (
                     returnReduce(elapsedCpuTime(), maxOp<double>())
                   / writeInterval_
@@ -1144,7 +1169,7 @@ Foam::Time& Foam::Time::operator++()
 
             case wcClockTime:
             {
-                label writeIndex = label
+                const label writeIndex = label
                 (
                     returnReduce(label(elapsedClockTime()), maxOp<label>())
                   / writeInterval_
@@ -1201,7 +1226,7 @@ Foam::Time& Foam::Time::operator++()
             // reinterpretation of the word
             if
             (
-                readScalar(dimensionedScalar::name().c_str(), timeNameValue)
+                readScalar(dimensionedScalar::name(), timeNameValue)
              && (mag(timeNameValue - oldTimeValue - userDeltaT) > timeTol)
             )
             {
@@ -1209,7 +1234,7 @@ Foam::Time& Foam::Time::operator++()
                 while
                 (
                     precision_ < maxPrecision_
-                 && readScalar(dimensionedScalar::name().c_str(), timeNameValue)
+                 && readScalar(dimensionedScalar::name(), timeNameValue)
                  && (mag(timeNameValue - oldTimeValue - userDeltaT) > timeTol)
                 )
                 {
@@ -1242,7 +1267,7 @@ Foam::Time& Foam::Time::operator++()
                     scalar oldTimeNameValue = -VGREAT;
                     if
                     (
-                        readScalar(oldTimeName.c_str(), oldTimeNameValue)
+                        readScalar(oldTimeName, oldTimeNameValue)
                      && (
                             sign(timeNameValue - oldTimeNameValue)
                          != sign(deltaT_)

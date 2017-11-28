@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
                 if
                 (
                     matchName != "perfect"
-                 && !slidingInterface::typeOfMatchNames.hasEnum(matchName)
+                 && !slidingInterface::typeOfMatchNames.found(matchName)
                 )
                 {
                     Info<< "Error: unknown match type - " << matchName

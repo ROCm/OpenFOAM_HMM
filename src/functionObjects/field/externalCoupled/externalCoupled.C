@@ -460,6 +460,42 @@ void Foam::functionObjects::externalCoupled::initCoupling()
 }
 
 
+void Foam::functionObjects::externalCoupled::performCoupling()
+{
+    // Ensure coupling has been initialised
+    initCoupling();
+
+    // Write data for external source
+    writeDataMaster();
+
+    // Signal external source to execute (by removing lock file)
+    // - Wait for slave to provide data
+    useSlave();
+
+    // Wait for response - and catch any abort information sent from slave
+    const auto action = waitForSlave();
+
+    // Remove old data files from OpenFOAM
+    removeDataMaster();
+
+    // Read data passed back from external source
+    readDataMaster();
+
+    // Signal external source to wait (by creating the lock file)
+    useMaster();
+
+    // Process any abort information sent from slave
+    if
+    (
+        action != time_.stopAt()
+     && action != Time::stopAtControls::saUnknown
+    )
+    {
+        time_.stopAt(action);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::externalCoupled::externalCoupled
@@ -483,46 +519,16 @@ Foam::functionObjects::externalCoupled::externalCoupled
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::externalCoupled::~externalCoupled()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::externalCoupled::execute()
 {
     if (!initialisedCoupling_ || time_.timeIndex() % calcFrequency_ == 0)
     {
-        // Initialise the coupling
-        initCoupling();
-
-        // Write data for external source
-        writeDataMaster();
-
-        // Signal external source to execute (by removing lock file)
-        // - Wait for slave to provide data
-        useSlave();
-
-        // Wait for response
-        waitForSlave();
-
-        // Remove old data files from OpenFOAM
-        removeDataMaster();
-
-        // Read data passed back from external source
-        readDataMaster();
-
-        // Signal external source to wait (by creating the lock file)
-        useMaster();
-
-        return true;
+        performCoupling();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

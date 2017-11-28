@@ -87,10 +87,8 @@ const Foam::word& Foam::Enum<EnumType>::getName(const EnumType e) const
     {
         return word::null;
     }
-    else
-    {
-        return names_[idx];
-    }
+
+    return names_[idx];
 }
 
 
@@ -233,16 +231,14 @@ EnumType Foam::Enum<EnumType>::lookupOrFailsafe
         const word enumName(dict.lookup(key));
         const label idx = getIndex(enumName);
 
-        if (idx < 0)
-        {
-            IOWarningInFunction(dict)
-                << "bad " << key <<" specifier " << enumName
-                << " using " << getName(deflt) << endl;
-        }
-        else
+        if (idx >= 0)
         {
             return EnumType(values_[idx]);
         }
+
+        IOWarningInFunction(dict)
+            << "bad " << key <<" specifier " << enumName
+            << " using " << getName(deflt) << endl;
     }
 
     return deflt;
