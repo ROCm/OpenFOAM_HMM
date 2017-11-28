@@ -1577,7 +1577,7 @@ int main(int argc, char *argv[])
         { booleanSurface::DIFFERENCE, "difference" }
     };
 
-    if (!validActions.hasEnum(action))
+    if (!validActions.found(action))
     {
         FatalErrorInFunction
             << "Unsupported action " << action << endl

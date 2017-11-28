@@ -117,7 +117,7 @@ bool Foam::functionEntries::inputMode::execute
     const word modeName(is);
 
     // Behaviour like Enum lookupOrFailsafe()
-    if (selectableNames.hasEnum(modeName))
+    if (selectableNames.found(modeName))
     {
         entry::globalInputMode = selectableNames[modeName];
     }
