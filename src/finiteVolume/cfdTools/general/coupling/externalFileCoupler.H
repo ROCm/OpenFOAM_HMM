@@ -60,20 +60,25 @@ Description
     A typical coupling loop would look like this (on the master-side):
     \verbatim
         initialize - master takes control
-        write data for slave
-        use slave, wait for slave
-        cleanup old data from master
-        read data from slave
-        use master
+        writeDataMaster() - write data for slave
+        useSlave()
+        waitForSlave()
+        removeDataMaster() - cleanup old data from master [optional?]
+        readDataMaster() - read data from slave
+        useMaster()
     \endverbatim
 
     On the slave-side:
     \verbatim
-        wait for master
-        read data from master
-        write data for master
-        use master
+        waitForMaster()
+        readDataSlave()  - read data from master
+        writeDataSlave() - write data for master
+        useMaster()
     \endverbatim
+
+    Note that since the waitForSlave() method not only waits for the lock file
+    to be reinstated but also does a simple check of its contents, it can
+    also serve to communicate some control from the slave to the master.
 
 SourceFiles
     externalFileCoupler.C
@@ -86,6 +91,7 @@ SourceFiles
 
 #include "fileName.H"
 #include "dictionary.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -177,7 +183,7 @@ public:
 
     // Member Functions
 
-      // Initialization
+    // Initialization
 
         //- True if state has been initialized
         inline bool initialized() const;
@@ -186,7 +192,7 @@ public:
         inline bool slaveFirst() const;
 
 
-      // File locations
+    // File locations
 
         //- Return the file path to the base communications directory
         inline const fileName& commDirectory() const;
@@ -198,36 +204,57 @@ public:
         inline fileName lockFile() const;
 
 
-      // Settings
+    // Settings
 
         //- Read communication settings from dictionary
         bool readDict(const dictionary& dict);
 
 
-      // Handshaking
+    // Handshaking
 
         //- Create lock file to indicate that OpenFOAM is in charge
-        //  Optionally wait for master to complete as well.
-        void useMaster(const bool wait=false) const;
+        //  \param wait - wait for master to complete.
+        //
+        //  \return Time::stopAtControls::saUnknown if not waiting, otherwise
+        //      as per the waitForMaster() description.
+        enum Time::stopAtControls useMaster(const bool wait=false) const;
 
         //- Remove lock file to indicate that the external program is in charge
-        //  Optionally wait for slave to complete as well.
-        void useSlave(const bool wait=false) const;
+        //  \param wait - wait for slave to complete.
+        //
+        //  \return Time::stopAtControls::saUnknown if not waiting, otherwise
+        //      as per the waitForSlave() description.
+        enum Time::stopAtControls useSlave(const bool wait=false) const;
 
 
         //- Wait for master to complete.
         //  This is when the lock file disappears, or exists but has
-        //  "status=done" content.
-        //  \return False if lock file contains "status=done"
-        bool waitForMaster() const;
+        //  \c status=done content.
+        //
+        //  \return Time::stopAtControls::saUnknown or if lock file
+        //      contained \c status=done it returns
+        //      Time::stopAtControls::saEndTime
+        enum Time::stopAtControls waitForMaster() const;
 
         //- Wait for slave to complete.
         //  This is when the lock file appears.
-        //  \return False if lock file contains "status=done"
-        bool waitForSlave() const;
+        //
+        //  When the lock file appears, it is checked for the following
+        //  content which corresponds to particular return values:
+        //  - \c status=done
+        //  \return Foam::Time::saEndTime
+        //  - \c action=writeNow
+        //  \return Foam::Time::saWriteNow
+        //  - \c action=nextWrite
+        //  \return Foam::Time::saNextWrite
+        //  - \c action=noNextWrite
+        //  \return Foam::Time::saNoNextWrite
+        // - Anything else (empty file, no action= or status=, etc)
+        //  \return Foam::Time::saUnknown
+        enum Time::stopAtControls waitForSlave() const;
 
 
-      // File creation, removal
+    // File creation, removal
 
         //- Read data files on master (OpenFOAM).
         //  These data files are normally created by the slave.
@@ -251,12 +278,12 @@ public:
         //- Remove data files written by slave (external program)
         virtual void removeDataSlave() const;
 
-        //- Generate status=done in lock (only when run-state = master)
+
+        //- Generate \c status=done in lock (only when run-state = master)
         void shutdown() const;
 
         //- Remove files written by OpenFOAM
         void removeDirectory() const;
-
 
 };
 

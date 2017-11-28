@@ -282,6 +282,9 @@ private:
 
         static void checkOrder(const wordList& regionNames);
 
+        //- Perform the coupling with necessary initialization etc.
+        void performCoupling();
+
         //- Disallow default bitwise copy constructor
         externalCoupled(const externalCoupled&) = delete;
 
@@ -313,7 +316,7 @@ public:
 
 
     //- Destructor
-    virtual ~externalCoupled();
+    virtual ~externalCoupled() = default;
 
 
     // Member Functions

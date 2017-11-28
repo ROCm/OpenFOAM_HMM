@@ -40,17 +40,51 @@ namespace Foam
 Foam::word Foam::externalFileCoupler::lockName = "OpenFOAM";
 
 
-// file-scope
-// check file (must exist) for "status=done" content
-static bool checkIsDone(const std::string& lck)
+namespace Foam
 {
-    std::string content;
-    std::ifstream is(lck);
-    is >> content;
 
-    return (content.find("done") != std::string::npos);
+// file-scope
+// Read file contents and return a stop control as follows:
+// - contains "done" (should actually be status=done, but we are generous) :
+//   The master (OpenFOAM) has signalled that it is done. Report as <endTime>
+//
+// - action=writeNow, action=nextWrite action=noWriteNow :
+//   The slave has signalled that it is done and wants the master to exit with
+//   the specified type of action. Report as corresponding <action>.
+//
+// Anything else (empty file, no action=, etc) is reported as <unknown>.
+//
+static enum Time::stopAtControls getStopAction(const std::string& filename)
+{
+    // Slurp entire input file (must exist) as a single string
+    std::string fileContent;
+
+    std::ifstream is(filename);
+    std::getline(is, fileContent, '\0');
+
+    if (fileContent.find("done") != std::string::npos)
+    {
+        return Time::stopAtControls::saEndTime;
+    }
+
+    const auto equals = fileContent.find('=');
+
+    if (equals != std::string::npos)
+    {
+        const word actionName(word::validate(fileContent.substr(equals+1)));
+
+        return
+            Time::stopAtControlNames
+            (
+                actionName,
+                Time::stopAtControls::saUnknown
+            );
+    }
+
+    return Time::stopAtControls::saUnknown;
 }
 
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -141,7 +175,8 @@ bool Foam::externalFileCoupler::readDict(const dictionary& dict)
 }
 
 
-void Foam::externalFileCoupler::useMaster(const bool wait) const
+enum Foam::Time::stopAtControls
+Foam::externalFileCoupler::useMaster(const bool wait) const
 {
     const bool wasInit = initialized();
     runState_ = MASTER;
@@ -163,18 +198,20 @@ void Foam::externalFileCoupler::useMaster(const bool wait) const
 
             std::ofstream os(lck);
             os << "status=openfoam\n";
-            os.flush();
         }
     }
 
     if (wait)
     {
-        waitForMaster();
+        return waitForMaster();
     }
+
+    return Time::stopAtControls::saUnknown;
 }
 
 
-void Foam::externalFileCoupler::useSlave(const bool wait) const
+enum Foam::Time::stopAtControls
+Foam::externalFileCoupler::useSlave(const bool wait) const
 {
     const bool wasInit = initialized();
     runState_ = SLAVE;
@@ -194,19 +231,23 @@ void Foam::externalFileCoupler::useSlave(const bool wait) const
 
     if (wait)
     {
-        waitForSlave();
+        return waitForSlave();
     }
+
+    return Time::stopAtControls::saUnknown;
 }
 
 
-bool Foam::externalFileCoupler::waitForMaster() const
+enum Foam::Time::stopAtControls
+Foam::externalFileCoupler::waitForMaster() const
 {
     if (!initialized())
     {
         useMaster(); // was not initialized
     }
 
-    bool isDone = false;
+    auto action = Time::stopAtControls::saUnknown;
+
     if (Pstream::master())
     {
         const fileName lck(lockFile());
@@ -221,9 +262,11 @@ bool Foam::externalFileCoupler::waitForMaster() const
             if (prevTime < modTime)
             {
                 prevTime = modTime;
-                isDone = checkIsDone(lck);
-                if (isDone)
+
+                if (Time::stopAtControls::saEndTime == getStopAction(lck))
                 {
+                    // Found 'done' - slave should not wait for master
+                    action = Time::stopAtControls::saEndTime;
                     break;
                 }
             }
@@ -231,21 +274,24 @@ bool Foam::externalFileCoupler::waitForMaster() const
         }
     }
 
-    // MPI barrier
-    Pstream::scatter(isDone);
+    label intAction(action);
 
-    return !isDone;
+    Pstream::scatter(intAction); // Also acts as MPI barrier
+
+    return Time::stopAtControls(intAction);
 }
 
 
-bool Foam::externalFileCoupler::waitForSlave() const
+enum Foam::Time::stopAtControls
+Foam::externalFileCoupler::waitForSlave() const
 {
     if (!initialized())
     {
         useSlave(); // was not initialized
     }
 
-    bool isDone = false;
+    auto action = Time::stopAtControls::saUnknown;
+
     if (Pstream::master())
     {
         const fileName lck(lockFile());
@@ -267,16 +313,16 @@ bool Foam::externalFileCoupler::waitForSlave() const
             Log << type() << ": wait time = " << totalTime << endl;
         }
 
-        // But check for status=done content in the file
-        isDone = checkIsDone(lck);
+        action = getStopAction(lck);
 
         Log << type() << ": found lock file " << lck << endl;
     }
 
-    // MPI barrier
-    Pstream::scatter(isDone);
+    label intAction(action);
 
-    return !isDone;
+    Pstream::scatter(intAction); // Also acts as MPI barrier
+
+    return Time::stopAtControls(intAction);
 }
 
 
@@ -308,12 +354,10 @@ void Foam::externalFileCoupler::shutdown() const
 {
     if (Pstream::master() && runState_ == MASTER && Foam::isDir(commsDir_))
     {
-        const fileName lck(lockFile());
-
         Log << type() << ": lock file status=done" << endl;
-        std::ofstream os(lck);
+
+        std::ofstream os(lockFile());
         os  << "status=done\n";
-        os.flush();
     }
 
     runState_ = DONE;   // Avoid re-triggering in destructor
