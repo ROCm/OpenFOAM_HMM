@@ -284,6 +284,7 @@ $(Time)/Time.C
 $(Time)/TimeIO.C
 $(Time)/findTimes.C
 $(Time)/subCycleTime.C
+$(Time)/subLoopTime.C
 $(Time)/findInstance.C
 $(Time)/timeSelector.C
 
