@@ -32,6 +32,7 @@ License
 //#include "IFstream.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
+#include "wordRes.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
 #include "IOdictionary.H"
@@ -579,6 +580,7 @@ bool Foam::functionObjectList::execute()
             }
         }
     }
+
     // Force writing of state dictionary after function object execution
     if (time_.writeTime())
     {
@@ -594,6 +596,49 @@ bool Foam::functionObjectList::execute()
         );
 
         IOstream::precision_ = oldPrecision;
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute(const label subIndex)
+{
+    bool ok = execution_;
+
+    if (ok)
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            ok = funcObj.execute(subIndex) && ok;
+        }
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute
+(
+    const wordRes& functionNames,
+    const label subIndex
+)
+{
+    bool ok = execution_;
+
+    if (ok && functionNames.size())
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            if (functionNames.match(funcObj.name()))
+            {
+                ok = funcObj.execute(subIndex) && ok;
+            }
+        }
     }
 
     return ok;
