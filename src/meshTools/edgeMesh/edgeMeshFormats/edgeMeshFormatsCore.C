@@ -38,15 +38,16 @@ Foam::word Foam::fileFormats::edgeMeshFormatsCore::nativeExt("eMesh");
 
 Foam::string Foam::fileFormats::edgeMeshFormatsCore::getLineNoComment
 (
-    IFstream& is
+    ISstream& is,
+    const char comment
 )
 {
-    string line;
+    Foam::string line;
     do
     {
         is.getLine(line);
     }
-    while ((line.empty() || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == comment) && is.good());
 
     return line;
 }
@@ -181,18 +182,6 @@ bool Foam::fileFormats::edgeMeshFormatsCore::checkSupport
 
     return false;
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::edgeMeshFormatsCore::edgeMeshFormatsCore()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::edgeMeshFormatsCore::~edgeMeshFormatsCore()
-{}
 
 
 // ************************************************************************* //

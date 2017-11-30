@@ -23,41 +23,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "TRIsurfaceFormat.H"
+#include "TRIReader.H"
+#include "surfaceFormatsCore.H"
 #include "IFstream.H"
 #include "IOmanip.H"
 #include "StringStream.H"
 #include "mergePoints.H"
 #include "Map.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
+static Foam::string getLineNoComment
 (
-    const fileName& filename
+    Foam::ISstream& is,
+    const char comment='#'
 )
-:
-    sorted_(true),
-    points_(0),
-    zoneIds_(0),
-    sizes_(0)
 {
-    read(filename);
+    Foam::string line;
+    do
+    {
+        is.getLine(line);
+    }
+    while ((line.empty() || line[0] == comment) && is.good());
+
+    return line;
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::fileFormats::TRIsurfaceFormatCore::~TRIsurfaceFormatCore()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::fileFormats::TRIsurfaceFormatCore::read
-(
-    const fileName& filename
-)
+bool Foam::fileFormats::TRIReader::readFile(const fileName& filename)
 {
     this->clear();
     sorted_ = true;
@@ -74,6 +69,7 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     // the rest of the reader resembles the STL binary reader
     DynamicList<STLpoint> dynPoints;
     DynamicList<label> dynZones;
+    DynamicList<word>  dynNames;
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
 
@@ -84,13 +80,14 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
 
     while (is.good())
     {
-        string line = this->getLineNoComment(is);
+        string line = getLineNoComment(is);
 
-        // Handle continuations?
-        // if (line.removeEnd("\\"))
-        // {
-        //     line += this->getLineNoComment(is);
-        // }
+        if (line.empty())
+        {
+            break;
+        }
+
+        // Do not handle continuations
 
         IStringStream lineStream(line);
 
@@ -133,21 +130,23 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
         const word rawName(lineStream);
         const word name("zone" + rawName.substr(1));
 
-        HashTable<label>::const_iterator fnd = lookup.cfind(name);
-        if (fnd.found())
+        const auto iter = lookup.cfind(name);
+        if (iter.found())
         {
-            if (zoneI != fnd())
+            if (zoneI != iter.object())
             {
-                // group appeared out of order
-                sorted_ = false;
+                sorted_ = false; // Group appeared out of order
+                zoneI = iter.object();
             }
-            zoneI = fnd();
         }
         else
         {
             zoneI = dynSizes.size();
-            lookup.insert(name, zoneI);
-            dynSizes.append(0);
+            if (lookup.insert(name, zoneI))
+            {
+                dynNames.append(name);
+                dynSizes.append(0);
+            }
         }
 
         dynZones.append(zoneI);
@@ -156,44 +155,68 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
 
     // skip empty groups
     label nZone = 0;
-    forAll(dynSizes, zoneI)
+    forAll(dynSizes, zonei)
     {
-        if (dynSizes[zoneI])
+        if (dynSizes[zonei])
         {
-            if (nZone != zoneI)
+            if (nZone != zonei)
             {
-                dynSizes[nZone] = dynSizes[zoneI];
+                dynNames[nZone] = dynNames[zonei];
+                dynSizes[nZone] = dynSizes[zonei];
             }
-            nZone++;
+            ++nZone;
         }
     }
+
     // truncate addressed size
+    dynNames.setCapacity(nZone);
     dynSizes.setCapacity(nZone);
 
     // transfer to normal lists
     points_.transfer(dynPoints);
     zoneIds_.transfer(dynZones);
+    names_.transfer(dynNames);
     sizes_.transfer(dynSizes);
 
     return true;
 }
 
 
-void Foam::fileFormats::TRIsurfaceFormatCore::clear()
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::fileFormats::TRIReader::TRIReader
+(
+    const fileName& filename
+)
+:
+    sorted_(true),
+    points_(),
+    zoneIds_(),
+    names_(),
+    sizes_()
+{
+    readFile(filename);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::fileFormats::TRIReader::clear()
 {
     sorted_ = true;
     points_.clear();
     zoneIds_.clear();
+    names_.clear();
     sizes_.clear();
 }
 
 
-Foam::label Foam::fileFormats::TRIsurfaceFormatCore::mergePointsMap
+Foam::label Foam::fileFormats::TRIReader::mergePointsMap
 (
     labelList& pointMap
 ) const
 {
-    // Use merge tolerance as per STL ascii
+    // Use merge tolerance as per STL ASCII
     return mergePointsMap
     (
         100 * doubleScalarSMALL,
@@ -202,7 +225,7 @@ Foam::label Foam::fileFormats::TRIsurfaceFormatCore::mergePointsMap
 }
 
 
-Foam::label Foam::fileFormats::TRIsurfaceFormatCore::mergePointsMap
+Foam::label Foam::fileFormats::TRIReader::mergePointsMap
 (
     const scalar mergeTol,
     labelList& pointMap

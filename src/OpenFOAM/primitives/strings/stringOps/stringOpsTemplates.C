@@ -183,7 +183,8 @@ template<class StringType>
 Foam::SubStrings<StringType> Foam::stringOps::splitFixed
 (
     const StringType& str,
-    const std::string::size_type width
+    const std::string::size_type width,
+    const std::string::size_type start
 )
 {
     Foam::SubStrings<StringType> lst;
@@ -195,7 +196,7 @@ Foam::SubStrings<StringType> Foam::stringOps::splitFixed
     const auto len = str.size();
     lst.reserve(1 + (len / width));
 
-    for (std::string::size_type pos = 0; pos < len; pos += width)
+    for (std::string::size_type pos = start; pos < len; pos += width)
     {
         const auto end = (pos + width);
 

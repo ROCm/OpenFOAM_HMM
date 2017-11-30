@@ -83,8 +83,7 @@ public:
 
 
     //- Destructor
-    virtual ~ModifiableMeshedSurface()
-    {}
+    virtual ~ModifiableMeshedSurface() = default;
 
 
     // Member Functions

@@ -48,7 +48,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class X3DsurfaceFormat Declaration
+                Class fileFormats::X3DsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -70,28 +70,34 @@ public:
     // Constructors
 
         //- Construct null
-        X3DsurfaceFormat();
+        X3DsurfaceFormat() = default;
 
 
     //- Destructor
-    virtual ~X3DsurfaceFormat()
-    {}
+    virtual ~X3DsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
 
+    // Member Functions
+
         //- Write object
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 
 };

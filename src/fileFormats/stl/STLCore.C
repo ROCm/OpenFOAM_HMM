@@ -59,21 +59,20 @@ static bool startsWithSolid(const char header[STLHeaderSize])
 //! \endcond
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STLCore::STLCore()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::fileFormats::STLCore::isBinaryName
 (
     const fileName& filename,
-    const STLFormat& format
+    const STLFormat format
 )
 {
-    return (format == UNKNOWN ? (filename.ext() == "stlb") : format == BINARY);
+    return
+    (
+        format == STLFormat::UNKNOWN
+      ? (filename.ext() == "stlb")
+      : format == STLFormat::BINARY
+    );
 }
 
 

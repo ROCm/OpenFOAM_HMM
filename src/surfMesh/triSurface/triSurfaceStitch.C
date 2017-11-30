@@ -79,8 +79,8 @@ bool Foam::triSurface::stitchTriangles
             {
                 Pout<< "stitchTriangles : "
                     << "Removing triangle " << i
-                    << " with non-unique vertices." << endl
-                    << "    vertices   :" << newTri << endl
+                    << " with non-unique vertices." << nl
+                    << "    vertices   :" << newTri << nl
                     << "    coordinates:" << newTri.points(ps)
                     << endl;
             }
@@ -105,16 +105,13 @@ bool Foam::triSurface::stitchTriangles
 
             label nPoints = 0;
 
-            forAll(*this, i)
+            for (const labelledTri& f : *this)
             {
-                const triSurface::FaceType& f = operator[](i);
-
-                forAll(f, fp)
+                for (const label pointi : f)
                 {
-                    label pointi = f[fp];
                     if (pointIsUsed.set(pointi, 1))
                     {
-                        nPoints++;
+                        ++nPoints;
                     }
                 }
             }
@@ -135,15 +132,14 @@ bool Foam::triSurface::stitchTriangles
                 ps.setSize(newPointi);
 
                 newTriangleI = 0;
-                forAll(*this, i)
+                for (const labelledTri& f : *this)
                 {
-                    const labelledTri& tri = operator[](i);
                     operator[](newTriangleI++) = labelledTri
                     (
-                        pointMap[tri[0]],
-                        pointMap[tri[1]],
-                        pointMap[tri[2]],
-                        tri.region()
+                        pointMap[f[0]],
+                        pointMap[f[1]],
+                        pointMap[f[2]],
+                        f.region()
                     );
                 }
             }

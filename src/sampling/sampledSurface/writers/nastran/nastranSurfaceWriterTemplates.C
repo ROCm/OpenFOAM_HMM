@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,17 +38,19 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeValue
 {
     switch (writeFormat_)
     {
-        case wfShort:
+        case fieldFormat::SHORT :
         {
             os  << setw(8) << value;
             break;
         }
-        case wfLong:
+
+        case fieldFormat::LONG :
         {
             os  << setw(16) << value;
             break;
         }
-        case wfFree:
+
+        case fieldFormat::FREE :
         {
             os  << value;
             break;
@@ -63,7 +65,7 @@ template<class Type>
 Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
 (
     Ostream& os,
-    const dataFormat& format,
+    const loadFormat format,
     const Type& value,
     const label EID
 ) const
@@ -87,16 +89,16 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
     Type scaledValue = scale_*value;
 
     // Write keyword
-    writeKeyword(os, dataFormatNames_[format])  << separator_;
+    writeKeyword(os, loadFormatNames_[format])  << separator_;
 
     // Write load set ID
-    os.setf(ios_base::right);
+    os.setf(std::ios_base::right);
 
     writeValue(os, SID) << separator_;
 
     switch (format)
     {
-        case dfPLOAD2:
+        case loadFormat::PLOAD2 :
         {
             if (pTraits<Type>::nComponents == 1)
             {
@@ -105,7 +107,7 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
             else
             {
                 WarningInFunction
-                    << dataFormatNames_[format] << " requires scalar values "
+                    << loadFormatNames_[format] << " requires scalar values "
                     << "and cannot be used for higher rank values"
                     << endl;
 
@@ -116,27 +118,20 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFaceValue
             break;
         }
 
-        case dfPLOAD4:
+        case loadFormat::PLOAD4 :
         {
             writeValue(os, EID);
 
-            for (direction dirI = 0; dirI < pTraits<Type>::nComponents; ++dirI)
+            for (direction d = 0; d < pTraits<Type>::nComponents; ++d)
             {
                 os  << separator_;
-                writeValue(os, component(scaledValue, dirI));
+                writeValue(os, component(scaledValue, d));
             }
             break;
         }
-
-        default:
-        {
-            FatalErrorInFunction
-                << "Unhandled enumeration " << dataFormatNames_[format]
-                << exit(FatalError);
-        }
     }
 
-    os.unsetf(ios_base::right);
+    os.unsetf(std::ios_base::right);
 
     os << nl;
 
@@ -167,7 +162,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
         return fileName::null;
     }
 
-    const dataFormat& format(fieldMap_[fieldName]);
+    const loadFormat& format(fieldMap_[fieldName]);
 
     if (!isDir(outputDir/fieldName))
     {
@@ -178,7 +173,7 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
     const scalar timeValue = 0.0;
 
     OFstream os(outputDir/fieldName/surfaceName + ".nas");
-    formatOS(os);
+    fileFormats::NASCore::setPrecision(os, writeFormat_);
 
     if (verbose)
     {
@@ -199,21 +194,19 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
         << "$ Field data" << nl
         << "$" << nl;
 
+    label elemId = 0;
+
     if (isNodeValues)
     {
-        label elemId = 0;
-
-        forAll(decomposedFaces, i)
+        for (const DynamicList<face>& dFaces : decomposedFaces)
         {
-            const DynamicList<face>& dFaces = decomposedFaces[i];
-            forAll(dFaces, facei)
+            for (const face& f : dFaces)
             {
                 Type v = Zero;
-                const face& f = dFaces[facei];
 
-                forAll(f, fptI)
+                for (const label verti : f)
                 {
-                    v += values[f[fptI]];
+                    v += values[verti];
                 }
                 v /= f.size();
 
@@ -223,11 +216,8 @@ Foam::fileName Foam::nastranSurfaceWriter::writeTemplate
     }
     else
     {
-        label elemId = 0;
-
-        forAll(decomposedFaces, i)
+        for (const DynamicList<face>& dFaces : decomposedFaces)
         {
-            const DynamicList<face>& dFaces = decomposedFaces[i];
             forAll(dFaces, facei)
             {
                 writeFaceValue(os, format, values[facei], ++elemId);

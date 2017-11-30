@@ -288,6 +288,10 @@ public:
 
     // Member Functions
 
+        //- Suppress direct swapping, since storage containers may be const
+        void swap(PrimitivePatch&) = delete;
+
+
     // Access
 
         //- Return reference to global points
@@ -320,9 +324,9 @@ public:
             label nInternalEdges() const;
 
             //- Is internal edge?
-            bool isInternalEdge(const label edgeI) const
+            bool isInternalEdge(const label edgei) const
             {
-                return edgeI < nInternalEdges();
+                return edgei < nInternalEdges();
             }
 
             //- Return list of boundary points,

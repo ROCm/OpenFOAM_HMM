@@ -29,7 +29,6 @@ Description
 
 #include "triSurface.H"
 #include "HashTable.H"
-#include "SortableList.H"
 #include "transform.H"
 #include "PatchTools.H"
 

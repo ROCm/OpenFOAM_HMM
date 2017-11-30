@@ -57,7 +57,7 @@ class surfaceRegistry
         surfaceRegistry(const surfaceRegistry&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const surfaceRegistry&) = delete;
+        surfaceRegistry& operator=(const surfaceRegistry&) = delete;
 
 
 public:
@@ -77,13 +77,14 @@ public:
         //- Construct for the given objectRegistry and named surface
         surfaceRegistry
         (
-            const objectRegistry&,
+            const objectRegistry& obr,
             const word& surfName = word::null
         );
 
 
     //- Destructor
-    virtual ~surfaceRegistry();
+    virtual ~surfaceRegistry() = default;
+
 };
 
 

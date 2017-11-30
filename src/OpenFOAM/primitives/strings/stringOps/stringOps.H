@@ -365,13 +365,18 @@ namespace stringOps
         const std::string& delim
     );
 
-    //- Split string into sub-strings using a fixed field width
+    //- Split string into sub-strings using a fixed field width.
     //  Behaviour is ill-defined if width is zero.
+    //  \param str the string to be split
+    //  \param width the fixed field width for each sub-string
+    //  \param start the optional offset of where to start the splitting.
+    //      Any text prior to start is ignored in the operation.
     template<class StringType>
     Foam::SubStrings<StringType> splitFixed
     (
         const StringType& str,
-        const std::string::size_type width
+        const std::string::size_type width,
+        const std::string::size_type start = 0
     );
 
     //- Split string into sub-strings at whitespace (TAB, NL, VT, FF, CR, SPC)

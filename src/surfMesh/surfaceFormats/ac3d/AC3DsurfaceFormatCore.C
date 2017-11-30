@@ -28,6 +28,22 @@ License
 #include "IFstream.H"
 #include "StringStream.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// Define 8 standard colours as r,g,b components
+static float colourMap[] =
+{
+    1, 1, 1,
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1,
+    1, 1, 0,
+    0, 1, 1,
+    1, 0, 1,
+    0.5, 0.5, 1
+};
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 bool Foam::fileFormats::AC3DsurfaceFormatCore::readCmd
@@ -42,9 +58,9 @@ bool Foam::fileFormats::AC3DsurfaceFormatCore::readCmd
         string line;
         is.getLine(line);
 
-        string::size_type space = line.find(' ');
+        const auto space = line.find(' ');
 
-        if (space != string::npos)
+        if (space && space != string::npos)
         {
             cmd  = line.substr(0, space);
             args = line.substr(space+1);
@@ -52,12 +68,11 @@ bool Foam::fileFormats::AC3DsurfaceFormatCore::readCmd
             return true;
         }
     }
+
     return false;
 }
 
 
-// Read up to line starting with cmd. Sets args to rest of line.
-// Returns true if found, false if stream is not good anymore.
 bool Foam::fileFormats::AC3DsurfaceFormatCore::cueTo
 (
     IFstream& is,
@@ -70,23 +85,20 @@ bool Foam::fileFormats::AC3DsurfaceFormatCore::cueTo
         string line;
         is.getLine(line);
 
-        string::size_type space = line.find(' ');
+        const auto space = line.find(' ');
 
-        if (space != string::npos)
+        if (space && space != string::npos && cmd == line.substr(0, space))
         {
-            if (line.substr(0, space) == cmd)
-            {
-                args = line.substr(space+1);
+            args = line.substr(space+1);
 
-                return true;
-            }
+            return true;
         }
     }
+
     return false;
 }
 
 
-// Similar to cueTo(), but throws error if cmd not found
 Foam::string Foam::fileFormats::AC3DsurfaceFormatCore::cueToOrDie
 (
     IFstream& is,
@@ -110,35 +122,22 @@ Foam::string Foam::fileFormats::AC3DsurfaceFormatCore::cueToOrDie
 void Foam::fileFormats::AC3DsurfaceFormatCore::writeHeader
 (
     Ostream& os,
-    const UList<surfZone>& zoneLst
+    const UList<surfZone>& zones
 )
 {
     // Write with zones as separate objects under "world" object.
     // Header is taken over from sample file.
     // Defines separate materials for all zones. Recycle colours.
 
-    // Define 8 standard colours as r,g,b components
-    static scalar colourMap[] =
-    {
-        1, 1, 1,
-        1, 0, 0,
-        0, 1, 0,
-        0, 0, 1,
-        1, 1, 0,
-        0, 1, 1,
-        1, 0, 1,
-        0.5, 0.5, 1
-    };
-
     // Write header. Define materials.
     os  << "AC3Db" << nl;
 
-    forAll(zoneLst, zoneI)
+    forAll(zones, zonei)
     {
-        label colourI = zoneI % 8;
-        label colourCompI = 3 * colourI;
+        const label colourI = zonei % 8;
+        const label colourCompI = 3 * colourI;
 
-        os  << "MATERIAL \"" << zoneLst[zoneI].name() << "Mat\" rgb "
+        os  << "MATERIAL \"" << zones[zonei].name() << "Mat\" rgb "
             << colourMap[colourCompI] << ' ' << colourMap[colourCompI+1]
             << ' ' << colourMap[colourCompI+2]
             << "  amb 0.2 0.2 0.2  emis 0 0 0  spec 0.5 0.5 0.5  shi 10"
@@ -147,7 +146,7 @@ void Foam::fileFormats::AC3DsurfaceFormatCore::writeHeader
     }
 
     os  << "OBJECT world" << nl
-        << "kids " << zoneLst.size() << endl;
+        << "kids " << zones.size() << endl;
 }
 
 

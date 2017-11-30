@@ -34,19 +34,21 @@ License
 
 Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 Foam::string Foam::fileFormats::surfaceFormatsCore::getLineNoComment
 (
-    IFstream& is
+    ISstream& is,
+    const char comment
 )
 {
-    string line;
+    Foam::string line;
     do
     {
         is.getLine(line);
     }
-    while ((line.empty() || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == comment) && is.good());
 
     return line;
 }
@@ -168,23 +170,12 @@ bool Foam::fileFormats::surfaceFormatsCore::checkSupport
     {
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl
-            << "Valid types: " << flatOutput(available.sortedToc()) << endl;
+            << "Valid types: " << flatOutput(available.sortedToc()) << nl
+            << endl;
     }
 
     return false;
 }
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::surfaceFormatsCore::surfaceFormatsCore()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::surfaceFormatsCore::~surfaceFormatsCore()
-{}
 
 
 // ************************************************************************* //

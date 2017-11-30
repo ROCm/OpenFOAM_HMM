@@ -25,7 +25,8 @@ Class
     Foam::fileFormats::VTKsurfaceFormat
 
 Description
-    Provide a means of reading/writing VTK legacy format.
+    Read/write VTK legacy format (ASCII) for surfaces.
+
     The output is never sorted by zone.
 
 SourceFiles
@@ -49,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class VTKsurfaceFormat Declaration
+                Class fileFormats::VTKsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -83,48 +84,42 @@ public:
         VTKsurfaceFormat(const fileName& filename);
 
 
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<MeshedSurface<Face>> New(const fileName& name)
-        {
-            return autoPtr<MeshedSurface<Face>>
-            (
-                new VTKsurfaceFormat<Face>(name)
-            );
-        }
-
-
     //- Destructor
-    virtual ~VTKsurfaceFormat()
-    {}
+    virtual ~VTKsurfaceFormat() = default;
 
 
-    // Member Functions
-
-      // Write
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
-            const MeshedSurfaceProxy<Face>& surf
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
         static void write
         (
             const fileName& fileName,
-            const UnsortedMeshedSurface<Face>& surf
+            const UnsortedMeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
+
+
+    // Member Functions
 
         //- Read from file
         virtual bool read(const fileName& filename);
 
         //- Write object file
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 };
 

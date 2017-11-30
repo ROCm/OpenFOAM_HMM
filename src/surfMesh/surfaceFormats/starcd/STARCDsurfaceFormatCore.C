@@ -37,7 +37,7 @@ License
 Foam::Map<Foam::word>
 Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
 (
-    IFstream& is
+    ISstream& is
 )
 {
     Map<word> lookup;
@@ -80,7 +80,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
 void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
 (
     Ostream& os,
-    const pointField& pointLst,
+    const UList<point>& pts,
     const label nFaces,
     const UList<surfZone>& zoneLst
 )
@@ -88,7 +88,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     const word caseName = os.name().nameLessExt();
 
     os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
-        << "! " << pointLst.size() << " points, " << nFaces << " faces" << nl
+        << "! " << pts.size() << " points, " << nFaces << " faces" << nl
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;
 

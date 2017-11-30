@@ -24,19 +24,26 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "triSurface.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void triSurface::writeOFF(const bool writeSorted, Ostream& os) const
+void Foam::triSurface::writeGTS
+(
+    const fileName& filename,
+    const bool sort
+) const
 {
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorInFunction
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
     // Write header
-    os  << "OFF" << endl
-        << "# Geomview OFF file" << endl
+    os  << "# GTS file" << endl
         << "# Regions:" << endl;
 
     labelList faceMap;
@@ -46,71 +53,68 @@ void triSurface::writeOFF(const bool writeSorted, Ostream& os) const
     forAll(patches, patchi)
     {
         os  << "#     " << patchi << "    "
-            << patches[patchi].name() << endl;
+            << patches[patchi].name() << nl;
     }
-    os  << nl << endl;
+    os  << "#" << nl;
 
-    const pointField& ps = points();
+    const pointField& pts = points();
 
-    os  << "# nPoints  nTriangles  nEdges" << endl
-        << ps.size()
-        << ' ' << size()
-        << ' ' << nEdges()
-        << nl << endl;
+    os  << "# nPoints  nEdges  nTriangles" << nl
+        << pts.size() << ' ' << nEdges() << ' ' << size() << nl;
 
     // Write vertex coords
-    forAll(ps, pointi)
+    for (const point& pt : pts)
     {
-        os  << ps[pointi].x() << ' '
-            << ps[pointi].y() << ' '
-            << ps[pointi].z() << " #" << pointi << endl;
+        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 
-    os  << endl;
+    // Write edges.
+    // Note: edges are in local point labels so convert
+    const edgeList& es = edges();
+    const labelList& meshPts = meshPoints();
 
-    if (writeSorted)
+    for (const edge& e : es)
+    {
+        os  << meshPts[e.start()] + 1 << ' '
+            << meshPts[e.end()] + 1 << nl;
+    }
+
+    // Write faces in terms of edges.
+    const labelListList& faceEs = faceEdges();
+
+    if (sort)
     {
         label faceIndex = 0;
-
-        forAll(patches, patchi)
+        for (const surfacePatch& p : patches)
         {
-            // Print all faces belonging to this patch
+            const label nLocalFaces = p.size();
 
-            for
-            (
-                label patchFacei = 0;
-                patchFacei < patches[patchi].size();
-                patchFacei++
-            )
+            for (label i = 0; i<nLocalFaces; ++i)
             {
                 const label facei = faceMap[faceIndex++];
 
-                os  << "3 "
-                    << operator[](facei)[0] << ' '
-                    << operator[](facei)[1] << ' '
-                    << operator[](facei)[2] << ' '
-                    << operator[](facei).region()
-                    << endl;
+                const labelList& fEdges = faceEdges()[facei];
+
+                os  << fEdges[0] + 1 << ' '
+                    << fEdges[1] + 1 << ' '
+                    << fEdges[2] + 1 << ' '
+                    << (*this)[facei].region() << nl;
             }
         }
     }
     else
     {
-        forAll(*this, facei)
+        forAll(faceEs, facei)
         {
-            os  << "3 "
-                << operator[](facei)[0] << ' '
-                << operator[](facei)[1] << ' '
-                << operator[](facei)[2] << ' '
-                << operator[](facei).region()
-                << endl;
+            const labelList& fEdges = faceEdges()[facei];
+
+            os  << fEdges[0] + 1 << ' '
+                << fEdges[1] + 1 << ' '
+                << fEdges[2] + 1 << ' '
+                << (*this)[facei].region() << nl;
         }
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

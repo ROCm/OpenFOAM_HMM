@@ -47,16 +47,16 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     // primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
     label count = 0;
-    forAll(f, fp)
+    for (const label verti : f)
     {
         if ((count % 8) == 0)
         {
             os  << nl << "  " << cellId;
         }
-        os  << ' ' << f[fp] + 1;
-        count++;
+        os  << ' ' << verti + 1;
+        ++count;
     }
-    os  << endl;
+    os  << nl;
 }
 
 
@@ -160,8 +160,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
         if (typeId == starcdShellType)
         {
             // Convert groupID into zoneID
-            Map<label>::const_iterator fnd = lookup.find(cellTableId);
-            if (fnd != lookup.end())
+            const auto fnd = lookup.cfind(cellTableId);
+            if (fnd.found())
             {
                 if (zoneI != fnd())
                 {
@@ -175,19 +175,18 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                 zoneI = dynSizes.size();
                 lookup.insert(cellTableId, zoneI);
 
-                Map<word>::const_iterator tableNameIter =
-                    cellTableLookup.find(cellTableId);
+                const auto tableNameIter = cellTableLookup.cfind(cellTableId);
 
-                if (tableNameIter == cellTableLookup.end())
+                if (tableNameIter.found())
+                {
+                    dynNames.append(tableNameIter());
+                }
+                else
                 {
                     dynNames.append
                     (
                         word("cellTable_") + ::Foam::name(cellTableId)
                     );
-                }
-                else
-                {
-                    dynNames.append(tableNameIter());
                 }
 
                 dynSizes.append(0);
@@ -203,10 +202,10 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                 label nTri = 0;
                 f.triangles(this->points(), nTri, trias);
 
-                forAll(trias, facei)
+                for (const face& tri : trias)
                 {
                     // a triangular 'face', convert to 'triFace' etc
-                    dynFaces.append(Face(trias[facei]));
+                    dynFaces.append(Face(tri));
                     dynZones.append(zoneI);
                     dynSizes[zoneI]++;
                 }
@@ -234,14 +233,15 @@ template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&  faceLst  = surf.surfFaces();
+    const UList<label>& faceMap  = surf.faceMap();
 
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst)
@@ -249,7 +249,6 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
-
 
     fileName baseName = filename.lessExt();
 
@@ -265,10 +264,11 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     forAll(zones, zoneI)
     {
         const surfZone& zone = zones[zoneI];
+        const label nLocalFaces = zone.size();
 
         if (useFaceMap)
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
                 writeShell(os, f, faceIndex, zoneI + 1);
@@ -276,7 +276,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         }
         else
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
                 writeShell(os, f, faceIndex, zoneI + 1);
@@ -284,7 +284,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         }
     }
 
-    // write simple .inp file
+    // Write simple .inp file
     writeCase
     (
         OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),
