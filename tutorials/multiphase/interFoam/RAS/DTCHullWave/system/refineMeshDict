@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  plus                                  |
-|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -11,46 +11,33 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "system";
-    object      controlDict;
+    object      refineMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     interFoam;
+set             c0;
 
-startFrom       startTime;
+coordinateSystem global;
 
-startTime       0;
+globalCoeffs
+{
+    tan1            (1 0 0);
+    tan2            (0 1 0);
+}
 
-stopAt          endTime;
+patchLocalCoeffs
+{
+    patch           outside;
+    tan1            (1 0 0);
+}
 
-endTime         5.0;
+directions      ( tan1 tan2 );
 
-deltaT          1e-4;
+useHexTopology  no;
 
-writeControl    adjustableRunTime;
+geometricCut    yes;
 
-writeInterval   0.05;
+writeMesh       no;
 
-purgeWrite      0;
-
-writeFormat     binary;
-
-writePrecision  6;
-
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   10;
-
-runTimeModifiable yes;
-
-adjustTimeStep  yes;
-
-maxCo           1.5;
-
-maxAlphaCo      1;
-
-maxDeltaT       1;
 
 // ************************************************************************* //
