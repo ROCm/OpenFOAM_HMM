@@ -31,28 +31,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-if (mesh.changing())
-{
-    if (!Uf.valid())
-    {
-        Info<< "Constructing face velocity Uf" << endl;
-
-        Uf.reset
-        (
-            new surfaceVectorField
-            (
-                IOobject
-                (
-                    "Uf",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::AUTO_WRITE
-                ),
-                fvc::interpolate(U)
-            )
-        );
-    }
-}
+#error Remove updateUf.H
 
 // ************************************************************************* //

@@ -1,8 +1,9 @@
+#include "createControl.H"
 #include "createTimeControls.H"
 
 bool correctPhi
 (
-    pimple.dict().lookupOrDefault("correctPhi", true)
+    pimple.dict().lookupOrDefault("correctPhi", mesh.dynamic())
 );
 
 bool checkMeshCourantNo

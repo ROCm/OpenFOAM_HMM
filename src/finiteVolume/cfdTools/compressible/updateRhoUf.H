@@ -31,28 +31,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-if (mesh.changing())
-{
-    if (!rhoUf.valid())
-    {
-        Info<< "Constructing face momentum rhoUf" << endl;
-
-        rhoUf.reset
-        (
-            new surfaceVectorField
-            (
-                IOobject
-                (
-                    "rhoUf",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::AUTO_WRITE
-                ),
-                fvc::interpolate(rho*U)
-            )
-        );
-    }
-}
+#error Remove rhoUpdateUf.H
 
 // ************************************************************************* //
