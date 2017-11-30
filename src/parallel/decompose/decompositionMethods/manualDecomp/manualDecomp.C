@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -20,9 +20,6 @@ License
 
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
-
-Description
-    Decomposition given a cell-to-processor association in a file
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,21 +40,33 @@ namespace Foam
         manualDecomp,
         dictionary
     );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        manualDecomp,
+        dictionaryRegion
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::manualDecomp::manualDecomp(const dictionary& decompositionDict)
+Foam::manualDecomp::manualDecomp(const dictionary& decompDict)
 :
-    decompositionMethod(decompositionDict),
-    decompDataFile_
-    (
-        decompositionDict.optionalSubDict
-        (
-            word(decompositionDict.lookup("method")) + "Coeffs"
-        ).lookup("dataFile")
-    )
+    decompositionMethod(decompDict),
+    dataFile_(findCoeffsDict(typeName + "Coeffs").lookup("dataFile"))
+{}
+
+
+Foam::manualDecomp::manualDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName),
+    dataFile_(findCoeffsDict(typeName + "Coeffs").lookup("dataFile"))
 {}
 
 
@@ -74,7 +83,7 @@ Foam::labelList Foam::manualDecomp::decompose
     (
         IOobject
         (
-            decompDataFile_,
+            dataFile_,
             mesh.facesInstance(),
             mesh,
             IOobject::MUST_READ,
@@ -93,18 +102,18 @@ Foam::labelList Foam::manualDecomp::decompose
             << finalDecomp.size() << " Number of points: "
             << points.size()
             << ".\n" << "Manual decomposition data read from file "
-            << decompDataFile_ << "." << endl
+            << dataFile_ << "." << endl
             << exit(FatalError);
     }
 
-    if (min(finalDecomp) < 0 || max(finalDecomp) > nProcessors_ - 1)
+    if (min(finalDecomp) < 0 || max(finalDecomp) > nDomains_ - 1)
     {
         FatalErrorInFunction
             << "According to the decomposition, cells assigned to "
             << "impossible processor numbers.  Min processor = "
             << min(finalDecomp) << " Max processor = " << max(finalDecomp)
             << ".\n" << "Manual decomposition data read from file "
-            << decompDataFile_ << "." << endl
+            << dataFile_ << "." << endl
             << exit(FatalError);
     }
 

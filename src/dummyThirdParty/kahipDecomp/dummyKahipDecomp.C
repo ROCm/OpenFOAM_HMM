@@ -73,10 +73,20 @@ Foam::label Foam::kahipDecomp::decomposeSerial
 
 Foam::kahipDecomp::kahipDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp("kahip", decompDict)
+{}
+
+
+Foam::kahipDecomp::kahipDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp("kahip", decompDict, regionName)
 {}
 
 

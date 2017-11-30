@@ -30,24 +30,26 @@ Description
     When run in parallel will collect the entire graph on to the master,
     decompose and send back.
 
+    Coefficients dictionary: \a metisCoeffs, \a coeffs.
+
     \verbatim
     numberOfSubdomains   N;
     method               metis;
 
     metisCoeffs
     {
-        method          recursive;  // k-way
+        method           recursive;  // k-way
         options          ( ...);
-        processorWeights (   ... );
+        processorWeights ( ... );
     }
     \endverbatim
 
-    Where the coefficients dictionary is optional, as are all its entries:
+    Method coefficients:
     \table
-        Property  | Description                             | Default value
-        method    | recursive / k-way                       | recursive
-        options   | metis options                           |
-        processorWeights | list of weighting per partition  |
+        Property  | Description                 | Required | Default
+        method    | recursive / k-way           | no | recursive
+        options   | metis options               | no
+        processorWeights | list of weighting per partition  | no
     \endtable
 
 SourceFiles
@@ -97,7 +99,14 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        metisDecomp(const dictionary& decompositionDict);
+        metisDecomp(const dictionary& decompDict);
+
+        //- Construct given the decomposition dictionary and region name
+        metisDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor

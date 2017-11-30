@@ -41,10 +41,208 @@ namespace Foam
         multiLevelDecomp,
         dictionary
     );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        multiLevelDecomp,
+        dictionaryRegion
+    );
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::multiLevelDecomp::createMethodsDict()
+{
+    methodsDict_.clear();
+
+    word defaultMethod;
+    labelList domains;
+
+    label nTotal = 0;
+    label nLevels = 0;
+
+    // Found (non-recursive, no patterns) "method" and "domains" ?
+    // Allow as quick short-cut entry
+    if
+    (
+        // non-recursive, no patterns
+        coeffsDict_.readIfPresent("method", defaultMethod, false, false)
+        // non-recursive, no patterns
+     && coeffsDict_.readIfPresent("domains", domains, false, false)
+    )
+    {
+        // Short-cut version specified by method, domains only
+
+        nTotal = (domains.empty() ? 0 : 1);
+
+        for (const label n : domains)
+        {
+            nTotal *= n;
+            ++nLevels;
+        }
+
+        if (nTotal == 1)
+        {
+            // Emit Warning
+            nTotal = nDomains();
+            nLevels = 1;
+
+            domains.setSize(1);
+            domains[0] = nTotal;
+        }
+        else if (nTotal > 0 && nTotal < nDomains() && !(nDomains() % nTotal))
+        {
+            // nTotal < nDomains, but with an integral factor,
+            // which we insert as level 0
+            ++nLevels;
+
+            labelList old(std::move(domains));
+
+            domains.setSize(old.size()+1);
+
+            domains[0] = nDomains() / nTotal;
+            forAll(old, i)
+            {
+                domains[i+1] = old[i];
+            }
+            nTotal *= domains[0];
+
+            Info<<"    inferred level0 with " << domains[0]
+                << " domains" << nl << nl;
+        }
+
+        if (!nLevels || nTotal != nDomains())
+        {
+            FatalErrorInFunction
+                << "Top level decomposition specifies " << nDomains()
+                << " domains which is not equal to the product of"
+                << " all sub domains " << nTotal
+                << exit(FatalError);
+        }
+
+        // Create editable methods dictionaries
+        nLevels = 0;
+
+        // Common coeffs dictionary
+        const dictionary& subMethodCoeffsDict
+        (
+            findCoeffsDict
+            (
+                coeffsDict_,
+                defaultMethod + "Coeffs",
+                selectionType::NULL_DICT
+            )
+        );
+
+        for (const label n : domains)
+        {
+            const word levelName("level" + Foam::name(nLevels++));
+
+            entry* dictptr = methodsDict_.set(levelName, dictionary());
+
+            dictionary& dict = dictptr->dict();
+            dict.add("method", defaultMethod);
+            dict.add("numberOfSubdomains", n);
+
+            // Inject coeffs dictionary too
+            if (subMethodCoeffsDict.size())
+            {
+                dict.add(subMethodCoeffsDict.dictName(), subMethodCoeffsDict);
+            }
+        }
+    }
+    else
+    {
+        // Specified by full dictionaries
+
+        // Create editable methods dictionaries
+        // - Only consider sub-dictionaries with a "numberOfSubdomains" entry
+        //   This automatically filters out any coeffs dictionaries
+
+        forAllConstIters(coeffsDict_, iter)
+        {
+            word methodName;
+
+            if
+            (
+                iter().isDict()
+                // non-recursive, no patterns
+             && iter().dict().found("numberOfSubdomains", false, false)
+            )
+            {
+                // No method specified? can use a default method?
+
+                const bool addDefaultMethod
+                (
+                    !(iter().dict().found("method", false, false))
+                 && !defaultMethod.empty()
+                );
+
+                entry* e = methodsDict_.add(iter());
+
+                if (addDefaultMethod && e && e->isDict())
+                {
+                    e->dict().add("method", defaultMethod);
+                }
+            }
+        }
+    }
+}
+
+
+void Foam::multiLevelDecomp::setMethods()
+{
+    // Assuming methodsDict_ has be properly created, convert the method
+    // dictionaries to actual methods
+
+    label nLevels = 0;
+
+    methods_.clear();
+    methods_.setSize(methodsDict_.size());
+    forAllConstIters(methodsDict_, iter)
+    {
+        // Dictionary entries only
+        // - these method dictioaries are non-regional
+        if (iter().isDict())
+        {
+            methods_.set
+            (
+                nLevels++,
+                // non-verbose would be nicer
+                decompositionMethod::New(iter().dict())
+            );
+        }
+    }
+
+    methods_.setSize(nLevels);
+
+    // Verify that nTotal is correct based on what each method delivers
+
+    Info<< nl
+        << "Decompose " << type() << " [" << nDomains() << "] in "
+        << nLevels << " levels:" << endl;
+
+    label nTotal = 1;
+    forAll(methods_, i)
+    {
+        Info<< "    level " << i << " : " << methods_[i].type()
+            << " [" << methods_[i].nDomains() << "]" << endl;
+
+        nTotal *= methods_[i].nDomains();
+    }
+
+    if (nTotal != nDomains())
+    {
+        FatalErrorInFunction
+            << "Top level decomposition specifies " << nDomains()
+            << " domains which is not equal to the product of"
+            << " all sub domains " << nTotal
+            << exit(FatalError);
+    }
+}
+
 
 // Given a subset of cells determine the new global indices. The problem
 // is in the cells from neighbouring processors which need to be renumbered.
@@ -277,7 +475,7 @@ void Foam::multiLevelDecomp::decompose
 
             // Get original level0 dictionary and modify numberOfSubdomains
             dictionary level0Dict;
-            forAllConstIter(dictionary, methodsDict_, iter)
+            forAllConstIters(methodsDict_, iter)
             {
                 if (iter().isDict())
                 {
@@ -367,42 +565,45 @@ void Foam::multiLevelDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::multiLevelDecomp::multiLevelDecomp(const dictionary& decompositionDict)
+Foam::multiLevelDecomp::multiLevelDecomp(const dictionary& decompDict)
 :
-    decompositionMethod(decompositionDict),
-    methodsDict_(decompositionDict_.subDict(typeName + "Coeffs"))
+    decompositionMethod(decompDict),
+    coeffsDict_
+    (
+        findCoeffsDict
+        (
+            typeName + "Coeffs",
+            (selectionType::EXACT | selectionType::MANDATORY)
+        )
+    ),
+    methodsDict_(),
+    methods_()
 {
-    methods_.setSize(methodsDict_.size());
-    label nLevels = 0;
-    forAllConstIter(dictionary, methodsDict_, iter)
-    {
-        // Ignore primitive entries which may be there for additional control
-        if (iter().isDict())
-        {
-            methods_.set(nLevels++, decompositionMethod::New(iter().dict()));
-        }
-    }
+    createMethodsDict();
+    setMethods();
+}
 
-    methods_.setSize(nLevels);
 
-    label nTot = 1;
-    Info<< "decompositionMethod " << type() << " :" << endl;
-    forAll(methods_, i)
-    {
-        Info<< "    level " << i << " decomposing with " << methods_[i].type()
-            << " into " << methods_[i].nDomains() << " subdomains." << endl;
-
-        nTot *= methods_[i].nDomains();
-    }
-
-    if (nTot != nDomains())
-    {
-        FatalErrorInFunction
-            << "Top level decomposition specifies " << nDomains()
-            << " domains which is not equal to the product of"
-            << " all sub domains " << nTot
-            << exit(FatalError);
-    }
+Foam::multiLevelDecomp::multiLevelDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_
+    (
+        findCoeffsDict
+        (
+            typeName + "Coeffs",
+            (selectionType::EXACT | selectionType::MANDATORY)
+        )
+    ),
+    methodsDict_(),
+    methods_()
+{
+    createMethodsDict();
+    setMethods();
 }
 
 
@@ -417,6 +618,7 @@ bool Foam::multiLevelDecomp::parallelAware() const
             return false;
         }
     }
+
     return true;
 }
 

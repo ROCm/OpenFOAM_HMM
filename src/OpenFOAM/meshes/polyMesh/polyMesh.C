@@ -325,15 +325,21 @@ Foam::polyMesh::polyMesh(const IOobject& io)
     boundary_.calcGeometry();
 
     // Warn if global empty mesh
-    if (returnReduce(nPoints(), sumOp<label>()) == 0)
+    if (returnReduce(boundary_.empty(), orOp<bool>()))
     {
         WarningInFunction
-            << "no points in mesh" << endl;
-    }
-    if (returnReduce(nCells(), sumOp<label>()) == 0)
-    {
-        WarningInFunction
-            << "no cells in mesh" << endl;
+            << "mesh missing boundary on one or more domains" << endl;
+
+        if (returnReduce(nPoints(), sumOp<label>()) == 0)
+        {
+            WarningInFunction
+                << "no points in mesh" << endl;
+        }
+        if (returnReduce(nCells(), sumOp<label>()) == 0)
+        {
+            WarningInFunction
+                << "no cells in mesh" << endl;
+        }
     }
 
     // Initialise demand-driven data

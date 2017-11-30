@@ -31,13 +31,4 @@ hierarchicalCoeffs
     order           xyz;
 }
 
-manualCoeffs
-{
-    dataFile        "";
-}
-
-distributed     no;
-
-roots           ( );
-
 // ************************************************************************* //

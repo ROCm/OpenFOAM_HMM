@@ -15,10 +15,174 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains  2;
+//- The total number of domains (mandatory)
+numberOfSubdomains  256;
+
+//- The decomposition method (mandatory)
+method          scotch;
+// method          hierarchical;
+// method          simple;
+// method          metis;
+// method          manual;
+// method          multiLevel;
+// method          structured;  // does 2D decomposition of structured mesh
 
 
-// Optional decomposition constraints
+//- Optional region-wise decomposition.
+//  Can specify a different method.
+//  The number of subdomains can be less than the top-level numberOfSubdomains.
+regions
+{
+    water
+    {
+        numberOfSubdomains 128;
+        method  metis;
+    }
+
+    ".*solid"
+    {
+        numberOfSubdomains 4;
+        method  metis;
+    }
+
+    heater
+    {
+        numberOfSubdomains 1;
+        method  none;
+    }
+}
+
+
+// Coefficients for the decomposition method are either as a
+// general "coeffs" dictionary or method-specific "<method>Coeffs".
+// For multiLevel, using multiLevelCoeffs only.
+
+
+multiLevelCoeffs
+{
+    // multiLevel decomposition methods to apply in turn.
+    // This is like hierarchical but fully general
+    // - every method can be used at every level.
+
+    // Only sub-dictionaries containing the keyword "method" are used.
+    //
+
+    level0
+    {
+        numberOfSubdomains  16;
+        method scotch;
+    }
+    level1
+    {
+        numberOfSubdomains  2;
+        method scotch;
+        coeffs
+        {
+            n       (2 1 1);
+            delta   0.001;
+        }
+    }
+    level2
+    {
+        numberOfSubdomains  8;
+        // method simple;
+        method scotch;
+    }
+}
+
+
+multiLevelCoeffs
+{
+    // Compact multiLevel specification, activated by the presence of the
+    // keywords "method" and "domains"
+
+    method  scotch;
+    domains (16 2 8);
+
+    //// Or with implicit '16' for the first level with numberOfSubdomains=256
+    //domains (2 8);
+}
+
+
+
+// Other example coefficents
+
+simpleCoeffs
+{
+    n           (2 1 1);
+    // delta       0.001;  //< default value = 0.001
+}
+
+hierarchicalCoeffs
+{
+    n           (1 2 1);
+    // delta       0.001;  //< default value = 0.001
+    // order       xyz;    //< default order = xyz
+}
+
+metisCoeffs
+{
+ /*
+    processorWeights
+    (
+        1
+        1
+        1
+        1
+    );
+  */
+}
+
+scotchCoeffs
+{
+    //processorWeights
+    //(
+    //    1
+    //    1
+    //    1
+    //    1
+    //);
+    //writeGraph  true;
+    //strategy "b";
+}
+
+manualCoeffs
+{
+    dataFile    "decompositionData";
+}
+
+structuredCoeffs
+{
+    // Patches to do 2D decomposition on. Structured mesh only; cells have
+    // to be in 'columns' on top of patches.
+    patches     (movingWall);
+
+    // Method to use on the 2D subset
+    method      scotch;
+}
+
+
+//- Use the volScalarField named here as a weight for each cell in the
+//  decomposition.  For example, use a particle population field to decompose
+//  for a balanced number of particles in a lagrangian simulation.
+// weightField dsmcRhoNMean;
+
+
+//// Is the case distributed? Note: command-line argument -roots takes
+//// precedence
+//distributed     yes;
+//
+//// Per slave (so nProcs-1 entries) the directory above the case.
+//roots
+//(
+//    "/tmp"
+//    "/tmp"
+//);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Decomposition constraints
+
 //constraints
 //{
 //    preserveBaffles
@@ -87,108 +251,5 @@ numberOfSubdomains  2;
 //  same points.
 //preserveBaffles true;
 
-
-
-//- Use the volScalarField named here as a weight for each cell in the
-//  decomposition.  For example, use a particle population field to decompose
-//  for a balanced number of particles in a lagrangian simulation.
-// weightField dsmcRhoNMean;
-
-method          scotch;
-//method          hierarchical;
-// method          simple;
-// method          metis;
-// method          manual;
-// method          multiLevel;
-// method          structured;  // does 2D decomposition of structured mesh
-
-multiLevelCoeffs
-{
-    // Decomposition methods to apply in turn. This is like hierarchical but
-    // fully general - every method can be used at every level.
-
-    level0
-    {
-        numberOfSubdomains  64;
-        //method simple;
-        //simpleCoeffs
-        //{
-        //    n           (2 1 1);
-        //    delta       0.001;
-        //}
-        method scotch;
-    }
-    level1
-    {
-        numberOfSubdomains  4;
-        method scotch;
-    }
-}
-
-// Desired output
-
-simpleCoeffs
-{
-    n           (2 1 1);
-    delta       0.001;
-}
-
-hierarchicalCoeffs
-{
-    n           (1 2 1);
-    delta       0.001;
-    order       xyz;
-}
-
-metisCoeffs
-{
- /*
-    processorWeights
-    (
-        1
-        1
-        1
-        1
-    );
-  */
-}
-
-scotchCoeffs
-{
-    //processorWeights
-    //(
-    //    1
-    //    1
-    //    1
-    //    1
-    //);
-    //writeGraph  true;
-    //strategy "b";
-}
-
-manualCoeffs
-{
-    dataFile    "decompositionData";
-}
-
-structuredCoeffs
-{
-    // Patches to do 2D decomposition on. Structured mesh only; cells have
-    // to be in 'columns' on top of patches.
-    patches     (movingWall);
-
-    // Method to use on the 2D subset
-    method      scotch;
-}
-
-//// Is the case distributed? Note: command-line argument -roots takes
-//// precedence
-//distributed     yes;
-//// Per slave (so nProcs-1 entries) the directory above the case.
-//roots
-//(
-//    "/tmp"
-//    "/tmp"
-//);
 
 // ************************************************************************* //

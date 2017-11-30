@@ -98,10 +98,22 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 Foam::ptscotchDecomp::ptscotchDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict),
+    coeffsDict_(dictionary::null)
+{}
+
+
+Foam::ptscotchDecomp::ptscotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_(dictionary::null)
 {}
 
 

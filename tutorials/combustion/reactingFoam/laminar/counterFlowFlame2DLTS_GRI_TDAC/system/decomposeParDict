@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    note        "mesh decomposition control dictionary";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -19,11 +18,11 @@ numberOfSubdomains  4;
 
 method          hierarchical;
 
-hierarchicalCoeffs
+coeffs
 {
     n           (2 2 1);
-    delta       0.001;
-    order       xyz;
+    //delta       0.001; // default=0.001
+    //order       xyz;   // default=xzy
 }
 
 // ************************************************************************* //

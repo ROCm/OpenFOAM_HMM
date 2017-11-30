@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,9 @@ Class
     Foam::noDecomp
 
 Description
-    Dummy decomposition method
+    A dummy decomposition method, selected as \c none.
+
+    Method coefficients: \a none
 
 SourceFiles
     noDecomp.C
@@ -52,8 +54,8 @@ class noDecomp
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const noDecomp&);
-        noDecomp(const noDecomp&);
+        void operator=(const noDecomp&) = delete;
+        noDecomp(const noDecomp&) = delete;
 
 
 public:
@@ -65,7 +67,15 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        noDecomp(const dictionary& decompositionDict);
+        noDecomp(const dictionary& decompDict);
+
+        //- Construct given the decomposition dictionary and region name
+        noDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
+
 
     //- Destructor
     virtual ~noDecomp()
@@ -74,15 +84,15 @@ public:
 
     // Member Functions
 
-        //- Manual decompose does not care about proc boundaries - is all
-        //  up to the user.
+        //- Manual decompose does not care about proc boundaries - it is all
+        //- up to the user.
         virtual bool parallelAware() const
         {
             return true;
         }
 
-        //- Return for every coordinate the wanted processor number. Use the
-        //  mesh connectivity (if needed)
+        //- Return for every coordinate the wanted processor number.
+        //  Use the mesh connectivity (if needed)
         virtual labelList decompose
         (
             const polyMesh& mesh,
@@ -93,8 +103,8 @@ public:
             return labelList(cc.size(), Pstream::myProcNo());
         }
 
-        //- Return for every coordinate the wanted processor number. Explicitly
-        //  provided connectivity - does not use mesh_.
+        //- Return for every coordinate the wanted processor number.
+        //  Explicitly provided connectivity - does not use mesh_.
         //  The connectivity is equal to mesh.cellCells() except for
         //  - in parallel the cell numbers are global cell numbers (starting
         //    from 0 at processor0 and then incrementing all through the

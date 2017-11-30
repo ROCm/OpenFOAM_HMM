@@ -10,13 +10,11 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 numberOfSubdomains 6;
-
 
 method          structured;
 
@@ -33,21 +31,12 @@ structuredCoeffs
     }
 }
 
-
-hierarchicalCoeffs
+coeffs
 {
-    n               (1 2 2);
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "cellDecomposition";
-}
-
-metisCoeffs
-{
+    n           (1 2 3);
+    //delta       0.001; // default=0.001
+    //order       xyz;   // default=xzy
+    dataFile    "cellDecomposition";
 }
 
 // ************************************************************************* //

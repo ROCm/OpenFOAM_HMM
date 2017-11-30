@@ -26,7 +26,10 @@ Class
 
 Description
     PTScotch domain decomposition.
+
     For the main details about how to define the strategies, see scotchDecomp.
+
+    Coefficients dictionary: \a scotchCoeffs, \a coeffs.
 
     Nonetheless, when decomposing in parallel, using <tt>writeGraph=true</tt>
     will write out \c .dgr files for debugging. For example, use these files
@@ -57,7 +60,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ptscotchDecomp Declaration
+                       Class ptscotchDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
 class ptscotchDecomp
@@ -65,6 +68,9 @@ class ptscotchDecomp
     public decompositionMethod
 {
     // Private data
+
+        //- Original coefficients for this method
+        dictionary coeffsDict_;
 
         //- Output path and name for optional grf file.
         fileName graphPath_;
@@ -111,8 +117,12 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary and mesh
-        ptscotchDecomp(const dictionary& decompositionDict);
+        //- Construct given the decomposition dictionary
+        ptscotchDecomp(const dictionary& decompDict);
+
+
+        //- Construct given the decomposition dictionary and region name
+        ptscotchDecomp(const dictionary& decompDict, const word& regionName);
 
 
     //- Destructor

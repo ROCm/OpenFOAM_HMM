@@ -26,9 +26,12 @@ Class
 
 Description
     Scotch domain decomposition.
+
     When run in parallel will collect the whole graph on to the master,
     decompose and send back. Use ptscotchDecomp for proper distributed
     decomposition.
+
+    Coefficients dictionary: \a scotchCoeffs, \a coeffs.
 
     Quoting from the Scotch forum, on the 2008-08-22 10:09, Francois
     PELLEGRINI posted the following details:
@@ -262,8 +265,15 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary and mesh
-        scotchDecomp(const dictionary& decompositionDict);
+        //- Construct given the decomposition dictionary
+        scotchDecomp(const dictionary& decompDict);
+
+        //- Construct given the decomposition dictionary and region name
+        scotchDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor

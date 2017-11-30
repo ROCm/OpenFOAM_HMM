@@ -80,10 +80,20 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 
 Foam::scotchDecomp::scotchDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp("scotch", decompDict)
+{}
+
+
+Foam::scotchDecomp::scotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp("scotch", decompDict, regionName)
 {}
 
 
