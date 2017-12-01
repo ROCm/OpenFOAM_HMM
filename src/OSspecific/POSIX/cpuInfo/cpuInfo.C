@@ -113,10 +113,8 @@ void Foam::cpuInfo::parse()
     std::string line, key, val;
 
     std::ifstream is("/proc/cpuinfo");
-    while (is.good())
+    while (is.good() && std::getline(is, line))
     {
-        std::getline(is, line);
-
         if (!split(line, key, val))
         {
             continue;
@@ -154,12 +152,6 @@ Foam::cpuInfo::cpuInfo()
 {
     parse();
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cpuInfo::~cpuInfo()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

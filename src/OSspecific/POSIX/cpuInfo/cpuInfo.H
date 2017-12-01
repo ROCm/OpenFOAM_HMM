@@ -88,9 +88,8 @@ public:
         //- Construct and populate with information
         cpuInfo();
 
-
     //- Destructor
-    ~cpuInfo();
+    ~cpuInfo() = default;
 
 
     // Member Functions
