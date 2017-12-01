@@ -35,6 +35,10 @@ License
 #include "janafThermo.H"
 #include "sensibleEnthalpy.H"
 #include "thermo.H"
+#include "rhoConst.H"
+#include "perfectFluid.H"
+#include "adiabaticPerfectFluid.H"
+#include "Boussinesq.H"
 
 #include "constTransport.H"
 #include "sutherlandTransport.H"
@@ -45,6 +49,7 @@ License
 #include "multiComponentMixture.H"
 #include "reactingMixture.H"
 #include "singleStepReactingMixture.H"
+#include "singleComponentMixture.H"
 
 #include "thermoPhysicsTypes.H"
 
@@ -55,7 +60,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -68,7 +73,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -81,7 +86,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -94,7 +99,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -107,7 +112,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -120,7 +125,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -134,7 +139,7 @@ makeReactionThermo
 );
 
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -147,7 +152,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -160,7 +165,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -173,7 +178,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -186,7 +191,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -199,7 +204,7 @@ makeReactionThermo
     specie
 );
 
-makeReactionThermo
+makeReactionThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -212,10 +217,11 @@ makeReactionThermo
     specie
 );
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Multi-component thermo for internal energy
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -224,7 +230,7 @@ makeReactionMixtureThermo
     constGasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -233,7 +239,7 @@ makeReactionMixtureThermo
     gasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -242,7 +248,7 @@ makeReactionMixtureThermo
     constIncompressibleGasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -251,7 +257,7 @@ makeReactionMixtureThermo
     incompressibleGasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -260,7 +266,7 @@ makeReactionMixtureThermo
     icoPoly8EThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -269,9 +275,37 @@ makeReactionMixtureThermo
     icoPoly8TranspJanafEThermoPhysics
 );
 
-// Multi-component reaction thermo
+makeReactionMixtureThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constFluidEThermoPhysics
+);
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constAdiabaticFluidEThermoPhysics
+);
+
+makeReactionMixtureThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constEThermoPhysics
+);
+
+
+// Reaction thermo for internal energy
+
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -280,7 +314,7 @@ makeReactionMixtureThermo
     constGasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -289,7 +323,7 @@ makeReactionMixtureThermo
     gasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -298,7 +332,7 @@ makeReactionMixtureThermo
     constIncompressibleGasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -307,7 +341,7 @@ makeReactionMixtureThermo
     incompressibleGasEThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -316,7 +350,10 @@ makeReactionMixtureThermo
     icoPoly8EThermoPhysics
 );
 
-makeReactionMixtureThermo
+
+// Single-step reaction thermo for internal energy
+
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -326,9 +363,101 @@ makeReactionMixtureThermo
 );
 
 
-// Multi-component thermo for sensible enthalpy
+// Single-component thermo for internal energy
 
 makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constGasEThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    gasEThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constIncompressibleGasEThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    incompressibleGasEThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    icoPoly8EThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constFluidEThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constAdiabaticFluidEThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constEThermoPhysics
+);
+
+makeReactionThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constTransport,
+    sensibleInternalEnergy,
+    hConstThermo,
+    Boussinesq,
+    specie
+);
+
+makeReactionThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    sutherlandTransport,
+    sensibleInternalEnergy,
+    janafThermo,
+    Boussinesq,
+    specie
+);
+
+
+
+// Multi-component thermo for sensible enthalpy
+
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -337,7 +466,7 @@ makeReactionMixtureThermo
     constGasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -346,7 +475,7 @@ makeReactionMixtureThermo
     gasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -355,7 +484,7 @@ makeReactionMixtureThermo
     constIncompressibleGasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -364,7 +493,7 @@ makeReactionMixtureThermo
     incompressibleGasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -373,7 +502,7 @@ makeReactionMixtureThermo
     icoPoly8HThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -382,9 +511,36 @@ makeReactionMixtureThermo
     icoPoly8TranspJanafHThermoPhysics
 );
 
-// Multi-component reaction thermo
+makeReactionMixtureThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constFluidHThermoPhysics
+);
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constAdiabaticFluidHThermoPhysics
+);
+
+makeReactionMixtureThermos
+(
+    rhoThermo,
+    rhoReactionThermo,
+    heRhoThermo,
+    multiComponentMixture,
+    constHThermoPhysics
+);
+
+// Reaction thermo for sensible enthalpy
+
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -393,7 +549,7 @@ makeReactionMixtureThermo
     constGasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -402,7 +558,7 @@ makeReactionMixtureThermo
     gasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -411,7 +567,7 @@ makeReactionMixtureThermo
     constIncompressibleGasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -420,7 +576,7 @@ makeReactionMixtureThermo
     incompressibleGasHThermoPhysics
 );
 
-makeReactionMixtureThermo
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -429,7 +585,10 @@ makeReactionMixtureThermo
     icoPoly8HThermoPhysics
 );
 
-makeReactionMixtureThermo
+
+// Single-step reaction thermo for sensible enthalpy
+
+makeReactionMixtureThermos
 (
     rhoThermo,
     rhoReactionThermo,
@@ -438,6 +597,96 @@ makeReactionMixtureThermo
     gasHThermoPhysics
 );
 
+
+// Single-component thermo for sensible enthalpy
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constGasHThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    gasHThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constIncompressibleGasHThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    incompressibleGasHThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    icoPoly8HThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constFluidHThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constAdiabaticFluidHThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constHThermoPhysics
+);
+
+makeReactionThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    constTransport,
+    sensibleEnthalpy,
+    hConstThermo,
+    Boussinesq,
+    specie
+);
+
+makeReactionThermo
+(
+    rhoReactionThermo,
+    heRhoThermo,
+    singleComponentMixture,
+    sutherlandTransport,
+    sensibleEnthalpy,
+    janafThermo,
+    Boussinesq,
+    specie
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,24 +22,20 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::multiComponentMixture
-
-Group
-    grpReactionThermophysicalMixtures
+    Foam::singleComponentMixture
 
 Description
-    Foam::multiComponentMixture
+    Single component mixture
 
 SourceFiles
-    multiComponentMixture.C
+    singleComponentMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef multiComponentMixture_H
-#define multiComponentMixture_H
+#ifndef singleComponentMixture_H
+#define singleComponentMixture_H
 
 #include "basicSpecieMixture.H"
-#include "HashPtrTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,38 +43,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class multiComponentMixture Declaration
+                         Class singleComponentMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ThermoType>
-class multiComponentMixture
+class singleComponentMixture
 :
     public basicSpecieMixture
 {
     // Private data
 
-        //- Species data
-        PtrList<ThermoType> speciesData_;
-
-        //- Temporary storage for the cell/face mixture thermo data
-        mutable ThermoType mixture_;
-
-        //- Temporary storage for the volume weighted
-        //  cell/face mixture thermo data
-        mutable ThermoType mixtureVol_;
-
-
-    // Private Member Functions
-
-        //- Construct the species data from the given dictionary and return the
-        //  data for the first specie to initialise the mixture thermo data
-        const ThermoType& constructSpeciesData(const dictionary& thermoDict);
-
-        //- Correct the mass fractions to sum to 1
-        void correctMassFractions();
-
-        //- Construct as copy (not implemented)
-        multiComponentMixture(const multiComponentMixture<ThermoType>&);
+        //- Thermo model
+        ThermoType thermo_;
 
 
 public:
@@ -89,61 +65,61 @@ public:
 
     // Constructors
 
-        //- Construct from dictionary, specie names, thermo database,
-        //  mesh and phase name
-        multiComponentMixture
-        (
-            const dictionary&,
-            const wordList& specieNames,
-            const HashPtrTable<ThermoType>& thermoData,
-            const fvMesh&,
-            const word&
-        );
-
         //- Construct from dictionary, mesh and phase name
-        multiComponentMixture(const dictionary&, const fvMesh&, const word&);
+        singleComponentMixture(const dictionary&, const fvMesh&, const word&);
 
 
     //- Destructor
-    virtual ~multiComponentMixture()
-    {}
+    virtual ~singleComponentMixture();
 
 
-    // Member functions
+    // Member Functions
 
         //- Return the instantiated type name
+        //  Note: This defines the same name as pureMixture so that
+        //  non-reacting and reacting solvers are compatable
         static word typeName()
         {
-            return "multiComponentMixture<" + ThermoType::typeName() + '>';
+            return "pureMixture<" + ThermoType::typeName() + '>';
         }
 
-        const ThermoType& cellMixture(const label celli) const;
+        //- Get the mixture for the given cell
+        const ThermoType& cellMixture(const label celli) const
+        {
+            return thermo_;
+        }
 
+        //- Get the mixture for the given patch face
         const ThermoType& patchFaceMixture
         (
             const label patchi,
             const label facei
-        ) const;
+        ) const
+        {
+            return thermo_;
+        }
 
+        //- Get the volumetric mixture for the given cell
         const ThermoType& cellVolMixture
         (
             const scalar p,
             const scalar T,
             const label celli
-        ) const;
+        )
+        {
+            return thermo_;
+        }
 
+        //- Get the volumetric mixture for the given patch face
         const ThermoType& patchFaceVolMixture
         (
             const scalar p,
             const scalar T,
             const label patchi,
             const label facei
-        ) const;
-
-        //- Return the raw specie thermodynamic data
-        const PtrList<ThermoType>& speciesData() const
+        ) const
         {
-            return speciesData_;
+            return thermo_;
         }
 
         //- Read dictionary
@@ -152,7 +128,15 @@ public:
         //- Return thermo based on index
         inline const ThermoType& getLocalThermo(const label speciei) const
         {
-            return speciesData_[speciei];
+            #ifdef FULLDEBUG
+            if (speciei != 0)
+            {
+                FatalErrorInFunction
+                    << "Specie index must be zero for a single component "
+                    << "mixture" << exit(FatalError);
+            }
+            #endif
+            return thermo_;
         }
 };
 
@@ -164,7 +148,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "multiComponentMixture.C"
+    #include "singleComponentMixture.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
