@@ -42,7 +42,7 @@ Description
 #include "chemistrySolver.H"
 #include "OFstream.H"
 #include "thermoPhysicsTypes.H"
-#include "basicMultiComponentMixture.H"
+#include "basicSpecieMixture.H"
 #include "cellModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
