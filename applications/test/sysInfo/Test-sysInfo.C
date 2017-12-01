@@ -30,6 +30,7 @@ Description
 #include "profilingSysInfo.H"
 #include "IOstreams.H"
 #include "endian.H"
+#include "cpuInfo.H"
 
 using namespace Foam;
 
@@ -38,7 +39,9 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    profiling::sysInfo().write(Info);
+    profilingSysInfo().write(Info);
+
+    cpuInfo().write(Info);
 
 #ifdef WM_BIG_ENDIAN
     Info

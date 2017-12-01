@@ -40,6 +40,7 @@ int Foam::profiling::allowed
 
 Foam::profiling* Foam::profiling::pool_(nullptr);
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::profilingInformation* Foam::profiling::find
@@ -98,10 +99,8 @@ bool Foam::profiling::print(Ostream& os)
     {
         return pool_->writeData(os);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -109,12 +108,10 @@ bool Foam::profiling::writeNow()
 {
     if (active())
     {
-        return pool_->write();
+        return pool_->regIOobject::write();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -189,7 +186,7 @@ Foam::profilingInformation* Foam::profiling::New
     clockTime& timer
 )
 {
-    profilingInformation *info = 0;
+    profilingInformation *info = nullptr;
 
     if (active())
     {
@@ -246,7 +243,7 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    regIOobject(io),
+    IOdictionary(io),
     owner_(owner),
     clockTime_(),
     hash_(),
@@ -265,7 +262,7 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    regIOobject(io),
+    IOdictionary(io),
     owner_(owner),
     clockTime_(),
     hash_(),

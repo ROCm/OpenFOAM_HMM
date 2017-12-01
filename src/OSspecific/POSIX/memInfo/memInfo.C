@@ -36,87 +36,122 @@ Foam::memInfo::memInfo()
 :
     peak_(0),
     size_(0),
-    rss_(0)
+    rss_(0),
+    free_(0)
 {
     update();
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::memInfo::~memInfo()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-//
-// Parse the following type of content.
-//
-// ===========================
-// VmPeak:    15920 kB
-// VmSize:    15916 kB
-// VmLck:         0 kB
-// VmPin:         0 kB
-// VmHWM:      6972 kB
-// VmRSS:      6972 kB
-// VmLib:      2208 kB
-// VmPTE:        52 kB
-// VmPMD:        12 kB
-// VmSwap:        0 kB
-
-const Foam::memInfo& Foam::memInfo::update()
-{
-    // Clear (invalidate) values first
-    peak_ = size_ = rss_ = 0;
-    std::string line;
-
-    unsigned nKeys = 0;
-
-    std::ifstream is("/proc/" + std::to_string(Foam::pid()) + "/status");
-    while (is.good() && nKeys < 3)  // Stop after getting the known keys
-    {
-        std::getline(is, line);
-
-        const auto keyLen = line.find(':');
-        if (keyLen == std::string::npos)
-        {
-            continue;
-        }
-
-        // Value is after the ':', but skip any leading whitespace since
-        // strtoi will do it anyhow
-        const auto begVal = line.find_first_not_of("\t :", keyLen);
-        if (begVal == std::string::npos)
-        {
-            continue;
-        }
-
-        const std::string key = line.substr(0, keyLen);
-
-        if (key == "VmPeak")
-        {
-            peak_ = std::stoi(line.substr(begVal));
-            ++nKeys;
-        }
-        else if (key == "VmSize")
-        {
-            size_ = std::stoi(line.substr(begVal));
-            ++nKeys;
-        }
-        else if (key == "VmRSS")
-        {
-            rss_ = std::stoi(line.substr(begVal));
-            ++nKeys;
-        }
-    }
-
-    return *this;
-}
-
 
 bool Foam::memInfo::valid() const
 {
     return peak_ > 0;
+}
+
+
+void Foam::memInfo::clear()
+{
+    peak_ = size_ = rss_ = 0;
+    free_ = 0;
+}
+
+
+const Foam::memInfo& Foam::memInfo::update()
+{
+    clear();
+    std::string line;
+
+    // "/proc/PID/status"
+    // ===========================
+    // VmPeak:    15920 kB
+    // VmSize:    15916 kB
+    // VmLck:         0 kB
+    // VmPin:         0 kB
+    // VmHWM:      6972 kB
+    // VmRSS:      6972 kB
+    // ...
+    // Stop parsing when known keys have been extracted
+    {
+        std::ifstream is("/proc/" + std::to_string(Foam::pid()) + "/status");
+
+        for
+        (
+            unsigned nkeys = 3;
+            nkeys && is.good() && std::getline(is, line);
+            /*nil*/
+        )
+        {
+            const auto delim = line.find(':');
+            if (delim == std::string::npos)
+            {
+                continue;
+            }
+
+            const std::string key(line.substr(0, delim));
+
+            // std::stoi() skips whitespace before using as many digits as
+            // possible. So just need to skip over the ':' and let stoi do
+            // the rest
+
+            if (key == "VmPeak")
+            {
+                peak_ = std::stoi(line.substr(delim+1));
+                --nkeys;
+            }
+            else if (key == "VmSize")
+            {
+                size_ = std::stoi(line.substr(delim+1));
+                --nkeys;
+            }
+            else if (key == "VmRSS")
+            {
+                rss_ = std::stoi(line.substr(delim+1));
+                --nkeys;
+            }
+        }
+    }
+
+    // "/proc/meminfo"
+    // ===========================
+    // MemTotal:       65879268 kB
+    // MemFree:        51544256 kB
+    // MemAvailable:   58999636 kB
+    // Buffers:            2116 kB
+    // ...
+    // Stop parsing when known keys have been extracted
+    {
+        std::ifstream is("/proc/meminfo");
+
+        for
+        (
+            unsigned nkeys = 1;
+            nkeys && is.good() && std::getline(is, line);
+            /*nil*/
+        )
+        {
+            const auto delim = line.find(':');
+            if (delim == std::string::npos)
+            {
+                continue;
+            }
+
+            const std::string key = line.substr(0, delim);
+
+            // std::stoi() skips whitespace before using as many digits as
+            // possible. So just need to skip over the ':' and let stoi do
+            // the rest
+
+            if (key == "MemFree")
+            {
+                free_ = std::stoi(line.substr(delim+1));
+                --nkeys;
+            }
+        }
+    }
+
+    return *this;
 }
 
 
@@ -125,6 +160,7 @@ void Foam::memInfo::write(Ostream& os) const
     os.writeEntry("size", size_);
     os.writeEntry("peak", peak_);
     os.writeEntry("rss", rss_);
+    os.writeEntry("free", free_);
 }
 
 
@@ -133,7 +169,7 @@ void Foam::memInfo::write(Ostream& os) const
 Foam::Istream& Foam::operator>>(Istream& is, memInfo& m)
 {
     is.readBegin("memInfo");
-    is  >> m.peak_ >> m.size_ >> m.rss_;
+    is  >> m.peak_ >> m.size_ >> m.rss_ >> m.free_;
     is.readEnd("memInfo");
 
     is.check(FUNCTION_NAME);
@@ -146,7 +182,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const memInfo& m)
     os  << token::BEGIN_LIST
         << m.peak_ << token::SPACE
         << m.size_ << token::SPACE
-        << m.rss_
+        << m.rss_  << token::SPACE
+        << m.free_
         << token::END_LIST;
 
     os.check(FUNCTION_NAME);
