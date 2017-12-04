@@ -616,6 +616,12 @@ addLayersControls
         // Default is false.
         //detectExtrusionIsland true;
 
+        // Optional: do not extrude around sharp edges if both faces are not
+        // fully extruded i.e. if one of the faces on either side would
+        // become a wedge.
+        // Default is 0.5*featureAngle. Set to -180 always attempt extrusion
+        //layerTerminationAngle 25;
+
         // Optional: at non-patched sides allow mesh to slip if extrusion
         // direction makes angle larger than slipFeatureAngle. Default is
         // 0.5*featureAngle.
