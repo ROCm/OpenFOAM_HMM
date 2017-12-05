@@ -19,8 +19,8 @@ List<bool> frozenFlowFluid(fluidRegions.size(), false);
 PtrList<IOMRFZoneList> MRFfluid(fluidRegions.size());
 PtrList<fv::options> fluidFvOptions(fluidRegions.size());
 
-List<label> refCellFluid(fluidRegions.size());
-List<scalar> refValueFluid(fluidRegions.size());
+List<label> pRefCellFluid(fluidRegions.size());
+List<scalar> pRefValueFluid(fluidRegions.size());
 
 // Populate fluid field pointer lists
 forAll(fluidRegions, i)
@@ -252,8 +252,8 @@ forAll(fluidRegions, i)
 
     turbulence[i].validate();
 
-    refCellFluid[i] = 0;
-    refValueFluid[i] = 0.0;
+    pRefCellFluid[i] = 0;
+    pRefValueFluid[i] = 0.0;
 
     if (p_rghFluid[i].needReference())
     {
@@ -262,8 +262,8 @@ forAll(fluidRegions, i)
             thermoFluid[i].p(),
             p_rghFluid[i],
             pimpleDict,
-            refCellFluid[i],
-            refValueFluid[i]
+            pRefCellFluid[i],
+            pRefValueFluid[i]
         );
     }
 
