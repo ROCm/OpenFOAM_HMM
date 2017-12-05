@@ -425,6 +425,7 @@ $(coupling)/externalFileCoupler.C
 
 solutionControl = $(general)/solutionControl
 $(solutionControl)/solutionControl/solutionControl.C
+$(solutionControl)/loopControl/loopControl.C
 $(solutionControl)/simpleControl/simpleControl.C
 $(solutionControl)/pimpleControl/pimpleControl.C
 $(solutionControl)/pisoControl/pisoControl.C
