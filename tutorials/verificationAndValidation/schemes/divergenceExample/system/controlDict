@@ -51,7 +51,7 @@ functions
     {
         type        sets;
         functionObjectLibs ("libsampling.so");
-        outputControl onEnd;
+        writeControl onEnd;
         setFormat   raw;
         sets
         (
@@ -65,7 +65,7 @@ functions
                 end         (1 0 0.00501);
                 nPoints     200;
             }
-        );        
+        );
         interpolationScheme cellPoint;
         fields          (T);
     }

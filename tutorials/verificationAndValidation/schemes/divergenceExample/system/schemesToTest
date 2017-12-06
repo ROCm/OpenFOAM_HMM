@@ -2,7 +2,7 @@ limitedLinear 0.2
 limitedLinear 1.0
 linear
 linearUpwind grad(U)
-LUST
+LUST grad(U)
 midPoint
 Minmod
 MUSCL
