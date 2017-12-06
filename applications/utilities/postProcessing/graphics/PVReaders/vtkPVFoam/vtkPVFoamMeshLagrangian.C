@@ -50,7 +50,7 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
     if (debug)
     {
         Info<< "<beg> lagrangianVTKMesh - timePath "
-            << mesh.time().timePath()/cloud::prefix/cloudName << endl;
+            << mesh.time().timePath()/cloud::prefix/cloudName << nl;
         printMemory();
     }
 
@@ -71,7 +71,7 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 
         if (debug)
         {
-            Info<< "cloud with " << parcels.size() << " parcels" << endl;
+            Info<< "cloud with " << parcels.size() << " parcels" << nl;
         }
 
         auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
@@ -91,7 +91,7 @@ vtkSmartPointer<vtkPolyData> Foam::vtkPVFoam::lagrangianVTKMesh
 
     if (debug)
     {
-        Info<< "<end> lagrangianVTKMesh" << endl;
+        Info<< "<end> lagrangianVTKMesh" << nl;
         printMemory();
     }
 

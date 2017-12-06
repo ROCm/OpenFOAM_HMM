@@ -26,6 +26,7 @@ License
 #include "vtkPVFoam.H"
 
 // OpenFOAM includes
+#include "areaFaMesh.H"
 #include "Cloud.H"
 #include "IOobjectList.H"
 #include "vtkPVFoamReader.h"
@@ -42,7 +43,7 @@ License
 
 void Foam::vtkPVFoam::convertVolFields()
 {
-    const fvMesh& mesh = *meshPtr_;
+    const fvMesh& mesh = *volMeshPtr_;
 
     const bool interpFields = reader_->GetInterpolateVolFields();
     hashedWordList selectedFields = getSelected
@@ -67,11 +68,11 @@ void Foam::vtkPVFoam::convertVolFields()
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         forAllConstIters(objects, iter)
         {
             Info<< "  " << iter()->name()
-                << " == " << iter()->objectPath() << endl;
+                << " == " << iter()->objectPath() << nl;
         }
         printMemory();
     }
@@ -110,7 +111,7 @@ void Foam::vtkPVFoam::convertVolFields()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -118,7 +119,7 @@ void Foam::vtkPVFoam::convertVolFields()
 
 void Foam::vtkPVFoam::convertPointFields()
 {
-    const fvMesh& mesh = *meshPtr_;
+    const fvMesh& mesh = *volMeshPtr_;
 
     hashedWordList selectedFields = getSelected
     (
@@ -129,7 +130,7 @@ void Foam::vtkPVFoam::convertPointFields()
     {
         if (debug)
         {
-            Info<< "no point fields selected" << endl;
+            Info<< "no point fields selected" << nl;
         }
         return;
     }
@@ -146,11 +147,11 @@ void Foam::vtkPVFoam::convertPointFields()
 
     if (debug)
     {
-        Info<< "<beg> convert volume -> point fields" << endl;
+        Info<< "<beg> convert volume -> point fields" << nl;
         forAllConstIters(objects, iter)
         {
             Info<< "  " << iter()->name()
-                << " == " << iter()->objectPath() << endl;
+                << " == " << iter()->objectPath() << nl;
         }
         printMemory();
     }
@@ -166,7 +167,61 @@ void Foam::vtkPVFoam::convertPointFields()
 
     if (debug)
     {
-        Info<< "<end> convert volume -> point fields" << endl;
+        Info<< "<end> convert volume -> point fields" << nl;
+        printMemory();
+    }
+}
+
+
+void Foam::vtkPVFoam::convertAreaFields()
+{
+    if (!areaMeshPtr_)
+    {
+        return;
+    }
+
+    const faMesh& mesh = *areaMeshPtr_;
+
+    vtkDataArraySelection* select = reader_->GetVolFieldSelection();
+
+    hashedWordList selectedFields = getSelected(select);
+
+    if (selectedFields.empty())
+    {
+        return;
+    }
+
+    // Get objects (fields) for this time - only keep selected fields
+    // the region name is already in the mesh db
+    IOobjectList objects(mesh.mesh(), dbPtr_().timeName());
+
+    objects.filterKeys(selectedFields);
+
+    if (objects.empty())
+    {
+        return;
+    }
+
+    if (debug)
+    {
+        Info<< "<beg> " << FUNCTION_NAME << nl;
+        forAllConstIters(objects, iter)
+        {
+            Info<< "  " << iter()->name()
+                << " == " << iter()->objectPath() << nl;
+        }
+        printMemory();
+    }
+
+    convertAreaFields<scalar>(mesh, objects);
+    convertAreaFields<vector>(mesh, objects);
+    convertAreaFields<sphericalTensor>(mesh, objects);
+    convertAreaFields<symmTensor>(mesh, objects);
+    convertAreaFields<tensor>(mesh, objects);
+
+    if (debug)
+    {
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -174,8 +229,10 @@ void Foam::vtkPVFoam::convertPointFields()
 
 void Foam::vtkPVFoam::convertLagrangianFields()
 {
-    const arrayRange& range = rangeLagrangian_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangeClouds_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
 
     hashedWordList selectedFields = getSelected
     (
@@ -189,17 +246,12 @@ void Foam::vtkPVFoam::convertLagrangianFields()
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
-
         const auto& longName = selectedPartIds_[partId];
         const word cloudName = getFoamName(longName);
 
@@ -229,11 +281,11 @@ void Foam::vtkPVFoam::convertLagrangianFields()
 
         if (debug)
         {
-            Info<< "converting OpenFOAM lagrangian fields" << endl;
+            Info<< "converting OpenFOAM lagrangian fields" << nl;
             forAllConstIters(objects, iter)
             {
                 Info<< "  " << iter()->name()
-                    << " == " << iter()->objectPath() << endl;
+                    << " == " << iter()->objectPath() << nl;
             }
         }
 
@@ -247,7 +299,7 @@ void Foam::vtkPVFoam::convertLagrangianFields()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }

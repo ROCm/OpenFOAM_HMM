@@ -309,16 +309,16 @@ int vtkPVFoamReader::RequestData
     // Get the requested time step.
     // We only support requests for a single time step
 
-    int nRequestTime = 0;
-    double requestTime[nInfo];
+    std::vector<double> requestTime;
+    requestTime.reserve(nInfo);
 
     // taking port0 as the lead for other outputs would be nice, but fails when
     // a filter is added - we need to check everything
     // but since PREVIOUS_UPDATE_TIME_STEPS() is protected, relay the logic
     // to the vtkPVFoam::setTime() method
-    for (int infoI = 0; infoI < nInfo; ++infoI)
+    for (int infoi = 0; infoi < nInfo; ++infoi)
     {
-        vtkInformation *outInfo = outputVector->GetInformationObject(infoI);
+        vtkInformation *outInfo = outputVector->GetInformationObject(infoi);
 
         const int nsteps =
             outInfo->Length(vtkStreamingDemandDrivenPipeline::TIME_STEPS());
@@ -329,7 +329,7 @@ int vtkPVFoamReader::RequestData
          && nsteps > 0
         )
         {
-            requestTime[nRequestTime] =
+            const double timeValue =
             (
                 1 == nsteps
                 // Only one time-step available, UPDATE_TIME_STEP is unreliable
@@ -337,16 +337,13 @@ int vtkPVFoamReader::RequestData
               : outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP())
             );
 
-            // outInfo->Set(vtkDataObject::DATA_TIME_STEP(), requestTime[nRequestTime]);
-            // this->SetTimeValue(requestedTimeValue);
-            ++nRequestTime;
+            // outInfo->Set(vtkDataObject::DATA_TIME_STEP(), timeValue);
+            // this->SetTimeValue(timeValue);
+            requestTime.push_back(timeValue);
         }
     }
 
-    if (nRequestTime)
-    {
-        backend_->setTime(nRequestTime, requestTime);
-    }
+    backend_->setTime(requestTime);
 
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
     (
