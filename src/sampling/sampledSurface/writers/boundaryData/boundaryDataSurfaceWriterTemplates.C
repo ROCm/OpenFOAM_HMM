@@ -75,7 +75,7 @@ Foam::fileName Foam::boundaryDataSurfaceWriter::writeTemplate
             IOobject::NO_WRITE,
             false
         ),
-        0
+        label(0)
     );
 
     if (isNodeValues)
