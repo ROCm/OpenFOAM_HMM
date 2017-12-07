@@ -66,10 +66,14 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 
         if (nonDimensional_)
         {
-            scalarField deltap = this->jumpTable_->value(Un);
+            scalarField deltap(this->jumpTable_->value(Un));
+
             // Convert adimensional deltap from curve into deltaP
-            scalarField pdFan =
-                deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800;
+            scalarField pdFan
+            (
+                deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800.0
+            );
+
             this->jump_ = max(pdFan, scalar(0));
         }
         else
