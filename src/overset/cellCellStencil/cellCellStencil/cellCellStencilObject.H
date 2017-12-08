@@ -154,6 +154,17 @@ public:
         {
             return stencilPtr_().cellInterpolationWeight();
         }
+
+        //- Calculate weights for a single acceptor
+        virtual void stencilWeights
+        (
+            const point& sample,
+            const pointList& donorCcs,
+            scalarList& weights
+        ) const
+        {
+            stencilPtr_().stencilWeights(sample, donorCcs, weights);
+        }
 };
 
 

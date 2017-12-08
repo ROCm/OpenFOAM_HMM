@@ -92,7 +92,7 @@ bool Foam::oversetAdjustPhi
                 else
                 {
                     adjustableMassOut[zonei] += flux;
-                 }
+                }
             }
         }
     }

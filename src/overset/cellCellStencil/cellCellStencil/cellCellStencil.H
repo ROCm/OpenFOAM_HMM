@@ -168,12 +168,27 @@ public:
         //  calculated, 1 = use interpolated)
         virtual const scalarList& cellInterpolationWeight() const = 0;
 
+        //- Calculate weights for a single acceptor
+        virtual void stencilWeights
+        (
+            const point& sample,
+            const pointList& donorCcs,
+            scalarList& weights
+        ) const = 0;
+
         //- Helper: is stencil fully local
         bool localStencil(const labelUList&) const;
 
         //- Helper: get reference to registered zoneID. Loads volScalarField
         //  if not registered.
-        const labelIOList& zoneID() const;
+        static const labelIOList& zoneID(const fvMesh&);
+
+        //- Helper: get reference to registered zoneID. Loads volScalarField
+        //  if not registered.
+        const labelIOList& zoneID() const
+        {
+            return zoneID(mesh_);
+        }
 
         //- Helper: create cell-cell addressing in global numbering
         static void globalCellCells
