@@ -54,14 +54,14 @@ Description
 
 bool haveAllTimes
 (
-    const HashSet<word>& masterTimeDirSet,
+    const wordHashSet& masterTimeDirSet,
     const instantList& timeDirs
 )
 {
     // Loop over all times
-    forAll(timeDirs, timei)
+    for (const instant& t : timeDirs)
     {
-        if (!masterTimeDirSet.found(timeDirs[timei].name()))
+        if (!masterTimeDirSet.found(t.name()))
         {
             return false;
         }
@@ -126,11 +126,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
-    {
-        args.optionLookup("fields")() >> selectedFields;
-    }
+    wordHashSet selectedFields;
+    args.optionReadIfPresent("fields", selectedFields);
 
     const bool noFields = args.optionFound("noFields");
 
@@ -158,8 +155,8 @@ int main(int argc, char *argv[])
     }
 
 
-    HashSet<word> selectedLagrangianFields;
-    if (args.optionFound("lagrangianFields"))
+    wordHashSet selectedLagrangianFields;
+    if (args.optionReadIfPresent("lagrangianFields", selectedLagrangianFields))
     {
         if (noLagrangian)
         {
@@ -168,49 +165,41 @@ int main(int argc, char *argv[])
                 << "options together."
                 << exit(FatalError);
         }
-
-        args.optionLookup("lagrangianFields")() >> selectedLagrangianFields;
     }
 
 
     const bool newTimes   = args.optionFound("newTimes");
     const bool allRegions = args.optionFound("allRegions");
 
-
     wordList regionNames;
     wordList regionDirs;
     if (allRegions)
     {
-        Info<< "Reconstructing for all regions in regionProperties" << nl
-            << endl;
+        Info<< "Reconstructing all regions in regionProperties" << nl << endl;
         regionProperties rp(runTime);
-        forAllConstIter(HashTable<wordList>, rp, iter)
+
+        wordHashSet names;
+        forAllConstIters(rp, iter)
         {
-            const wordList& regions = iter();
-            forAll(regions, i)
-            {
-                if (!regionNames.found(regions[i]))
-                {
-                    regionNames.append(regions[i]);
-                }
-            }
+            names.insert(iter.object());
         }
+
+        regionNames = names.sortedToc();
         regionDirs = regionNames;
     }
     else
     {
-        word regionName;
-        if (args.optionReadIfPresent("region", regionName))
+        regionNames = {fvMesh::defaultRegion};
+        if (args.optionReadIfPresent("region", regionNames[0]))
         {
-            regionNames = wordList(1, regionName);
             regionDirs = regionNames;
         }
         else
         {
-            regionNames = wordList(1, fvMesh::defaultRegion);
-            regionDirs = wordList(1, word::null);
+            regionDirs = {word::null};
         }
     }
+
 
     // Determine the processor count
     label nProcs = fileHandler().nProcs(args.path(), regionDirs[0]);
@@ -267,10 +256,10 @@ int main(int argc, char *argv[])
     {
         masterTimeDirs = runTime.times();
     }
-    HashSet<word> masterTimeDirSet(2*masterTimeDirs.size());
-    forAll(masterTimeDirs, i)
+    wordHashSet masterTimeDirSet(2*masterTimeDirs.size());
+    for (const instant& t : masterTimeDirs)
     {
-        masterTimeDirSet.insert(masterTimeDirs[i].name());
+        masterTimeDirSet.insert(t.name());
     }
 
 
@@ -567,21 +556,18 @@ int main(int argc, char *argv[])
                         );
                     }
 
-                    forAll(cloudDirs, i)
+                    for (const fileName& cloudDir : cloudDirs)
                     {
                         // Check if we already have cloud objects for this
                         // cloudname
-                        HashTable<IOobjectList>::const_iterator iter =
-                            cloudObjects.find(cloudDirs[i]);
-
-                        if (iter == cloudObjects.end())
+                        if (!cloudObjects.found(cloudDir))
                         {
                             // Do local scan for valid cloud objects
                             IOobjectList sprayObjs
                             (
                                 procMeshes.meshes()[proci],
                                 databases[proci].timeName(),
-                                cloud::prefix/cloudDirs[i]
+                                cloud::prefix/cloudDir
                             );
 
                             IOobject* positionsPtr =
@@ -591,7 +577,7 @@ int main(int argc, char *argv[])
 
                             if (coordsPtr || positionsPtr)
                             {
-                                cloudObjects.insert(cloudDirs[i], sprayObjs);
+                                cloudObjects.insert(cloudDir, sprayObjs);
                             }
                         }
                     }
@@ -606,7 +592,7 @@ int main(int argc, char *argv[])
                         const word cloudName = word::validate(iter.key());
 
                         // Objects (on arbitrary processor)
-                        const IOobjectList& sprayObjs = iter();
+                        const IOobjectList& sprayObjs = iter.object();
 
                         Info<< "Reconstructing lagrangian fields for cloud "
                             << cloudName << nl << endl;
