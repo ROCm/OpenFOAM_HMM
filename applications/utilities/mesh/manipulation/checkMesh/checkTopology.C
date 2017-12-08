@@ -690,7 +690,7 @@ Foam::label Foam::checkTopology
                 Info<< "    "
                     << setw(20) << cZone.name()
                     << setw(9) << returnReduce(cZone.size(), sumOp<label>())
-                    << setw(9) 
+                    << setw(9)
                     << returnReduce(isZonePoint.count(), sumOp<label>())
                     << setw(3) << bb << endl;
             }
