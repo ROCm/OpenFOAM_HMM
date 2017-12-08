@@ -30,12 +30,11 @@ regions
     heater
     {
         numberOfSubdomains  1;
-        method          none;
+        method          simple; // none;
 
         coeffs
         {
             n       (1 1 1);
-            delta   0.001;
         }
     }
 }

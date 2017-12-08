@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,15 +275,15 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    bool region                  = args.optionFound("region");
-    bool allRegions              = args.optionFound("allRegions");
-    bool writeCellDist           = args.optionFound("cellDist");
-    bool copyZero                = args.optionFound("copyZero");
-    bool copyUniform             = args.optionFound("copyUniform");
-    bool decomposeFieldsOnly     = args.optionFound("fields");
-    bool decomposeSets           = !args.optionFound("noSets");
-    bool forceOverwrite          = args.optionFound("force");
-    bool ifRequiredDecomposition = args.optionFound("ifRequired");
+    const bool optRegion        = args.optionFound("region");
+    const bool allRegions       = args.optionFound("allRegions");
+    const bool writeCellDist    = args.optionFound("cellDist");
+    const bool copyZero         = args.optionFound("copyZero");
+    const bool copyUniform      = args.optionFound("copyUniform");
+    const bool decomposeSets    = !args.optionFound("noSets");
+    bool decomposeFieldsOnly    = args.optionFound("fields");
+    bool forceOverwrite         = args.optionFound("force");
+    const bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
     // Set time from database
     #include "createTime.H"
@@ -296,44 +296,30 @@ int main(int argc, char *argv[])
     args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
     wordList regionNames;
-    wordList regionDirs;
     if (allRegions)
     {
         Info<< "Decomposing all regions in regionProperties" << nl << endl;
         regionProperties rp(runTime);
-        forAllConstIter(HashTable<wordList>, rp, iter)
+
+        wordHashSet names;
+        forAllConstIters(rp, iter)
         {
-            const wordList& regions = iter();
-            forAll(regions, i)
-            {
-                if (!regionNames.found(regions[i]))
-                {
-                    regionNames.append(regions[i]);
-                }
-            }
+            names.insert(iter.object());
         }
-        regionDirs = regionNames;
+
+        regionNames = names.sortedToc();
     }
     else
     {
-        word regionName;
-        if (args.optionReadIfPresent("region", regionName))
-        {
-            regionNames = wordList(1, regionName);
-            regionDirs = regionNames;
-        }
-        else
-        {
-            regionNames = wordList(1, fvMesh::defaultRegion);
-            regionDirs = wordList(1, word::null);
-        }
+        regionNames = {fvMesh::defaultRegion};
+        args.optionReadIfPresent("region", regionNames[0]);
     }
-
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir = regionDirs[regioni];
+        const word& regionDir =
+            regionName == fvMesh::defaultRegion ? word::null : regionName;
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
 
@@ -391,7 +377,7 @@ int main(int argc, char *argv[])
                 Info<< "Using existing processor directories" << nl;
             }
 
-            if (region || allRegions)
+            if (allRegions || optRegion)
             {
                 procDirsProblem = false;
                 forceOverwrite = false;
@@ -527,7 +513,7 @@ int main(int argc, char *argv[])
         {
             // Copy the 0 directory into each of the processor directories
             fileName prevTimePath;
-            for (label proci = 0; proci < mesh.nProcs(); proci++)
+            for (label proci = 0; proci < mesh.nProcs(); ++proci)
             {
                 Time processorDb
                 (
@@ -736,13 +722,13 @@ int main(int argc, char *argv[])
 
                 label cloudI = 0;
 
-                forAll(cloudDirs, i)
+                for (const fileName& cloudDir : cloudDirs)
                 {
                     IOobjectList sprayObjs
                     (
                         mesh,
                         runTime.timeName(),
-                        cloud::prefix/cloudDirs[i],
+                        cloud::prefix/cloudDir,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
                         false
@@ -759,7 +745,7 @@ int main(int argc, char *argv[])
                         // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
                         Info<< "Identified lagrangian data set: "
-                            << cloudDirs[i] << endl;
+                            << cloudDir << endl;
 
                         lagrangianPositions.set
                         (
@@ -767,7 +753,7 @@ int main(int argc, char *argv[])
                             new Cloud<indexedParticle>
                             (
                                 mesh,
-                                cloudDirs[i],
+                                cloudDir,
                                 false
                             )
                         );
@@ -944,7 +930,7 @@ int main(int argc, char *argv[])
                 Info<< endl;
 
                 // split the fields over processors
-                for (label proci = 0; proci < mesh.nProcs(); proci++)
+                for (label proci = 0; proci < mesh.nProcs(); ++proci)
                 {
                     Info<< "Processor " << proci << ": field transfer" << endl;
 
@@ -1234,8 +1220,8 @@ int main(int argc, char *argv[])
                     // directory
                     decomposeUniform(copyUniform, mesh, processorDb, regionDir);
 
-                    // For the first region of a multi-region case additionally
-                    // decompose the "uniform" directory in the time directory
+                    // For a multi-region case, also decompose the "uniform"
+                    // directory in the time directory
                     if (regionNames.size() > 1 && regioni == 0)
                     {
                         decomposeUniform(copyUniform, mesh, processorDb);
