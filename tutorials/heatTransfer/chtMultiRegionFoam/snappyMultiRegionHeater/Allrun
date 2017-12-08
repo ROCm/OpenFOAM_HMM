@@ -11,15 +11,15 @@ runApplication snappyHexMesh -overwrite
 runApplication splitMeshRegions -cellZones -overwrite
 
 # remove fluid fields from solid regions (important for post-processing)
-for i in heater leftSolid rightSolid
+for i in $(foamListRegions solid)
 do
    rm -f 0*/$i/{nut,alphat,epsilon,k,U,p_rgh}
 done
 
 
-for i in bottomAir topAir heater leftSolid rightSolid
+for i in $(foamListRegions)
 do
-   runApplication -s $i  changeDictionary -region $i
+   runApplication -s $i changeDictionary -region $i
 done
 
 
