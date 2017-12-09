@@ -34,7 +34,10 @@ Description
     The momentum and other fluid properties are of the "mixture" and a single
     momentum equation is solved.
 
-    Turbulence modelling is generic, i.e.  laminar, RAS or LES may be selected.
+    Either mixture or two-phase transport modelling may be selected.  In the
+    mixture approach a single laminar, RAS or LES model is selected to model the
+    momentum stress.  In the Euler-Euler two-phase approach separate laminar,
+    RAS or LES selected models are selected for each of the phases.
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,10 +47,7 @@ Description
 #include "localEulerDdtScheme.H"
 #include "CrankNicolsonDdtScheme.H"
 #include "subCycle.H"
-#include "rhoThermo.H"
-#include "twoPhaseMixture.H"
-#include "twoPhaseMixtureThermo.H"
-#include "turbulentFluidThermoModel.H"
+#include "compressibleInterPhaseTransportModel.H"
 #include "pimpleControl.H"
 #include "fvOptions.H"
 #include "fvcSmooth.H"
@@ -64,14 +64,11 @@ int main(int argc, char *argv[])
     #include "createControl.H"
     #include "createTimeControls.H"
     #include "createFields.H"
-    #include "createAlphaFluxes.H"
 
     volScalarField& p = mixture.p();
     volScalarField& T = mixture.T();
     const volScalarField& psi1 = mixture.thermo1().psi();
     const volScalarField& psi2 = mixture.thermo2().psi();
-
-    turbulence->validate();
 
     if (!LTS)
     {
@@ -109,6 +106,8 @@ int main(int argc, char *argv[])
             #include "alphaControls.H"
             #include "compressibleAlphaEqnSubCycle.H"
 
+            turbulence.correctPhasePhi();
+
             #include "UEqn.H"
             volScalarField divU(fvc::div(fvc::absolute(phi, U)));
             #include "TEqn.H"
@@ -121,7 +120,7 @@ int main(int argc, char *argv[])
 
             if (pimple.turbCorr())
             {
-                turbulence->correct();
+                turbulence.correct();
             }
         }
 
