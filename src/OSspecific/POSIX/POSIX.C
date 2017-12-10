@@ -1689,7 +1689,7 @@ Foam::label Foam::allocateThread()
         {
             if (POSIX::debug)
             {
-                Pout<< "allocateThread : reusing index:" << i << endl;
+                Pout<< FUNCTION_NAME << " : reusing index:" << i << endl;
             }
             // Reuse entry
             threads_[i].reset(new pthread_t());
@@ -1700,7 +1700,7 @@ Foam::label Foam::allocateThread()
     const label index = threads_.size();
     if (POSIX::debug)
     {
-        Pout<< "allocateThread : new index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : new index:" << index << endl;
     }
     threads_.append(autoPtr<pthread_t>(new pthread_t()));
 
@@ -1717,7 +1717,7 @@ void Foam::createThread
 {
     if (POSIX::debug)
     {
-        Pout<< "createThread : index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : index:" << index << endl;
     }
     if (pthread_create(&threads_[index](), nullptr, start_routine, arg))
     {
@@ -1731,11 +1731,11 @@ void Foam::joinThread(const label index)
 {
     if (POSIX::debug)
     {
-        Pout<< "freeThread : join:" << index << endl;
+        Pout<< FUNCTION_NAME << " : index:" << index << endl;
     }
     if (pthread_join(threads_[index](), nullptr))
     {
-        FatalErrorInFunction << "Failed freeing thread " << index
+        FatalErrorInFunction << "Failed joining thread " << index
             << exit(FatalError);
     }
 }
@@ -1745,7 +1745,7 @@ void Foam::freeThread(const label index)
 {
     if (POSIX::debug)
     {
-        Pout<< "freeThread : index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : index:" << index << endl;
     }
     threads_[index].clear();
 }
@@ -1759,7 +1759,7 @@ Foam::label Foam::allocateMutex()
         {
             if (POSIX::debug)
             {
-                Pout<< "allocateMutex : reusing index:" << i << endl;
+                Pout<< FUNCTION_NAME << " : reusing index:" << i << endl;
             }
             // Reuse entry
             mutexes_[i].reset(new pthread_mutex_t());
@@ -1771,7 +1771,7 @@ Foam::label Foam::allocateMutex()
 
     if (POSIX::debug)
     {
-        Pout<< "allocateMutex : new index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : new index:" << index << endl;
     }
     mutexes_.append(autoPtr<pthread_mutex_t>(new pthread_mutex_t()));
     return index;
@@ -1782,7 +1782,7 @@ void Foam::lockMutex(const label index)
 {
     if (POSIX::debug)
     {
-        Pout<< "lockMutex : index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : index:" << index << endl;
     }
     if (pthread_mutex_lock(&mutexes_[index]()))
     {
@@ -1796,7 +1796,7 @@ void Foam::unlockMutex(const label index)
 {
     if (POSIX::debug)
     {
-        Pout<< "unlockMutex : index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : index:" << index << endl;
     }
     if (pthread_mutex_unlock(&mutexes_[index]()))
     {
@@ -1810,7 +1810,7 @@ void Foam::freeMutex(const label index)
 {
     if (POSIX::debug)
     {
-        Pout<< "freeMutex : index:" << index << endl;
+        Pout<< FUNCTION_NAME << " : index:" << index << endl;
     }
     mutexes_[index].clear();
 }
