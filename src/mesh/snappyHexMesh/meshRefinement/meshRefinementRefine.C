@@ -41,6 +41,11 @@ License
 #include "cellSet.H"
 #include "treeDataCell.H"
 
+#include "cellCuts.H"
+#include "refineCell.H"
+#include "hexCellLooper.H"
+#include "meshCutter.H"
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -2642,6 +2647,65 @@ Foam::meshRefinement::balanceAndRefine
     printMeshInfo(debug, "After refinement " + msg);
 
     return distMap;
+}
+
+
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::directionalRefine
+(
+    const string& msg,
+    const direction cmpt,
+    const labelList& cellsToRefine
+)
+{
+    // Set splitting direction
+    vector refDir(Zero);
+    refDir[cmpt] = 1;
+    List<refineCell> refCells(cellsToRefine.size());
+    forAll(cellsToRefine, i)
+    {
+        refCells[i] = refineCell(cellsToRefine[i], refDir);
+    }
+
+    // How to walk circumference of cells
+    hexCellLooper cellWalker(mesh_);
+
+    // Analyse cuts
+    cellCuts cuts(mesh_, cellWalker, refCells);
+
+    // Cell cutter
+    Foam::meshCutter meshRefiner(mesh_);
+
+    polyTopoChange meshMod(mesh_);
+
+    // Insert mesh refinement into polyTopoChange.
+    meshRefiner.setRefinement(cuts, meshMod);
+
+    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh_, false);
+
+    // Update fields
+    mesh_.updateMesh(morphMap);
+
+    // Move mesh (since morphing does not do this)
+    if (morphMap().hasMotionPoints())
+    {
+        mesh_.movePoints(morphMap().preMotionPoints());
+    }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    // Reset the instance for if in overwrite mode
+    mesh_.setInstance(timeName());
+
+    // Update stored refinement pattern
+    meshRefiner.updateMesh(morphMap);
+
+    // Update intersection info
+    updateMesh(morphMap, getChangedFaces(morphMap, cellsToRefine));
+
+    return morphMap;
 }
 
 
