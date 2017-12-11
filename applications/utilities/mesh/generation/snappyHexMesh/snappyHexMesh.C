@@ -1083,7 +1083,29 @@ int main(int argc, char *argv[])
 
     if (!limitDict.empty())
     {
-        Info<< "Read refinement shells in = "
+        Info<< "Read limit shells in = "
+            << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+    }
+
+
+    // Optionally read directional refinement shells
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    const dictionary dirRefDict
+    (
+        refineDict.subOrEmptyDict("directionalRefinementRegions")
+    );
+
+    if (!dirRefDict.empty())
+    {
+        Info<< "Reading directional refinement shells." << endl;
+    }
+
+    shellSurfaces dirShells(allGeometry, dirRefDict);
+
+    if (!dirRefDict.empty())
+    {
+        Info<< "Read directional refinement shells in = "
             << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
     }
 
@@ -1120,6 +1142,7 @@ int main(int argc, char *argv[])
         surfaces,           // for surface intersection refinement
         features,           // for feature edges/point based refinement
         shells,             // for volume (inside/outside) refinement
+        dirShells,          // vol volume directional refinement
         limitShells         // limit of volume refinement
     );
     Info<< "Calculated surface intersections in = "

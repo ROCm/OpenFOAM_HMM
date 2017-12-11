@@ -40,6 +40,7 @@ License
 #include "IOmanip.H"
 #include "labelVector.H"
 #include "profiling.H"
+#include "searchableSurfaces.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -1571,6 +1572,400 @@ Foam::label Foam::snappyRefineDriver::shellRefine
 
     return iter;
 }
+//XXXXXXXXXX
+Foam::List<Foam::direction> Foam::snappyRefineDriver::faceDirection() const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    List<direction> faceDir(mesh.nFaces());
+
+    vectorField nf(mesh.faceAreas());
+    nf /= mag(nf);
+
+    forAll(nf, facei)
+    {
+        const vector& n = nf[facei];
+        if (mag(n[0]) > 0.5)
+        {
+            faceDir[facei] = 0;
+        }
+        else if (mag(n[1]) > 0.5)
+        {
+            faceDir[facei] = 1;
+        }
+        else if (mag(n[2]) > 0.5)
+        {
+            faceDir[facei] = 2;
+        }
+    }
+
+    return faceDir;
+}
+Foam::label Foam::snappyRefineDriver::faceConsistentRefinement
+(
+    const PackedBoolList& isDirFace,
+    const List<labelVector>& dirCellLevel,
+    const direction dir,
+    const bool maxSet,
+    PackedBoolList& refineCell
+) const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    label nChanged = 0;
+
+    // Internal faces.
+    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    {
+        if (isDirFace[facei])
+        {
+            label own = mesh.faceOwner()[facei];
+            label ownLevel = dirCellLevel[own][dir] + refineCell.get(own);
+
+            label nei = mesh.faceNeighbour()[facei];
+            label neiLevel = dirCellLevel[nei][dir] + refineCell.get(nei);
+
+            if (ownLevel > (neiLevel+1))
+            {
+                if (maxSet)
+                {
+                    refineCell.set(nei);
+                }
+                else
+                {
+                    refineCell.unset(own);
+                }
+                nChanged++;
+            }
+            else if (neiLevel > (ownLevel+1))
+            {
+                if (maxSet)
+                {
+                    refineCell.set(own);
+                }
+                else
+                {
+                    refineCell.unset(nei);
+                }
+                nChanged++;
+            }
+        }
+    }
+
+
+    // Coupled faces. Swap owner level to get neighbouring cell level.
+    // (only boundary faces of neiLevel used)
+    labelList neiLevel(mesh.nFaces()-mesh.nInternalFaces());
+
+    forAll(neiLevel, i)
+    {
+        label own = mesh.faceOwner()[i+mesh.nInternalFaces()];
+
+        neiLevel[i] = dirCellLevel[own][dir] + refineCell.get(own);
+    }
+
+    // Swap to neighbour
+    syncTools::swapBoundaryFaceList(mesh, neiLevel);
+
+    // Now we have neighbour value see which cells need refinement
+    forAll(neiLevel, i)
+    {
+        label facei = i+mesh.nInternalFaces();
+        if (isDirFace[facei])
+        {
+            label own = mesh.faceOwner()[facei];
+            label ownLevel = dirCellLevel[own][dir] + refineCell.get(own);
+
+            if (ownLevel > (neiLevel[i]+1))
+            {
+                if (!maxSet)
+                {
+                    refineCell.unset(own);
+                    nChanged++;
+                }
+            }
+            else if (neiLevel[i] > (ownLevel+1))
+            {
+                if (maxSet)
+                {
+                    refineCell.set(own);
+                    nChanged++;
+                }
+            }
+        }
+    }
+
+    return nChanged;
+}
+Foam::labelList Foam::snappyRefineDriver::consistentDirectionalRefinement
+(
+    const direction dir,
+    const List<labelVector>& dirCellLevel,
+    const labelUList& candidateCells,
+    const bool maxSet
+) const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    const List<direction> faceDir(faceDirection());
+
+    PackedBoolList isDirFace(mesh.nFaces());
+    forAll(faceDir, facei)
+    {
+        if (faceDir[facei] == dir)
+        {
+            isDirFace[facei] = true;
+        }
+    }
+
+    // Loop, modifying cellsToRefine, until no more changes to due to 2:1
+    // conflicts.
+    // maxSet = false : unselect cells to refine
+    // maxSet = true  : select cells to refine
+
+    // Go to straight boolList.
+    PackedBoolList isRefineCell(mesh.nCells());
+    isRefineCell.set(candidateCells);
+
+    while (true)
+    {
+        label nChanged = faceConsistentRefinement
+        (
+            isDirFace,
+            dirCellLevel,
+            dir,
+            maxSet,
+            isRefineCell
+        );
+
+        reduce(nChanged, sumOp<label>());
+
+        if (debug)
+        {
+            Pout<< "snappyRefineDriver::consistentDirectionalRefinement"
+                << " : Changed " << nChanged
+                << " refinement levels due to 2:1 conflicts."
+                << endl;
+        }
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+    }
+
+    return isRefineCell.used();
+}
+
+
+Foam::label Foam::snappyRefineDriver::directionalShellRefine
+(
+    const refinementParameters& refineParams,
+    const label maxIter
+)
+{
+    addProfiling(shell, "snappyHexMesh::refine::directionalShell");
+    const fvMesh& mesh = meshRefiner_.mesh();
+    const shellSurfaces& shells = meshRefiner_.dirShells();
+
+    labelList& cellLevel =
+        const_cast<labelIOList&>(meshRefiner_.meshCutter().cellLevel());
+
+
+    // Determine the minimum and maximum cell levels that are candidates for
+    // directional refinement
+    label overallMinLevel = labelMax;
+    label overallMaxLevel = labelMin;
+    {
+        const LevelAndDirListList& dirLevels = shells.dirLevels();
+        forAll(dirLevels, shelli)
+        {
+            const LevelAndDirList& dirLevel = dirLevels[shelli];
+            forAll(dirLevel, i)
+            {
+                overallMinLevel = min(dirLevel[i].first(), overallMinLevel);
+                overallMaxLevel = max(dirLevel[i].first(), overallMaxLevel);
+            }
+        }
+    }
+
+    if (overallMinLevel > overallMaxLevel)
+    {
+        return 0;
+    }
+
+    // Maintain directional refinement levels
+    List<labelVector> dirCellLevel(cellLevel.size());
+    forAll(cellLevel, celli)
+    {
+        label l = cellLevel[celli];
+        dirCellLevel[celli] = labelVector(l, l, l);
+    }
+
+    label iter;
+    for (iter = 0; iter < maxIter; iter++)
+    {
+        Info<< nl
+            << "Directional shell refinement iteration " << iter << nl
+            << "--------------------------------------" << nl
+            << endl;
+
+        label nAllRefine = 0;
+
+        for (direction dir = 0; dir < vector::nComponents; dir++)
+        {
+            // Select the cells that need to be refined in certain direction:
+            // 
+            // - cell inside/outside shell
+            // - original cellLevel (using mapping) mentioned in levelIncrement
+            // - dirCellLevel not yet up to cellLevel+levelIncrement
+
+            labelList candidateCells;
+            {
+                // Extract component of directional level
+                labelList currentLevel(dirCellLevel.size());
+                forAll(dirCellLevel, celli)
+                {
+                    currentLevel[celli] = dirCellLevel[celli][dir];
+                }
+
+                // Find cells inside the shells
+                labelList insideShell;
+                shells.findDirectionalLevel
+                (
+                    mesh.cellCentres(),
+                    cellLevel,
+                    currentLevel,  // directional level
+                    dir,
+                    insideShell
+                );
+
+                // Extract
+                label n = 0;
+                forAll(insideShell, celli)
+                {
+                    if (insideShell[celli] >= 0)
+                    {
+                        n++;
+                    }
+                }
+                candidateCells.setSize(n);
+                n = 0;
+                forAll(insideShell, celli)
+                {
+                    if (insideShell[celli] >= 0)
+                    {
+                        candidateCells[n++] = celli;
+                    }
+                }
+            }
+
+            // Extend to keep 2:1 ratio
+            labelList cellsToRefine
+            (
+                consistentDirectionalRefinement
+                (
+                    dir,
+                    dirCellLevel,
+                    candidateCells,
+                    true
+                )
+            );
+
+            Info<< "Determined cells to refine in = "
+                << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+            label nCellsToRefine = cellsToRefine.size();
+            reduce(nCellsToRefine, sumOp<label>());
+
+            Info<< "Selected for direction " << vector::componentNames[dir]
+                << " refinement : " << nCellsToRefine
+                << " cells (out of " << mesh.globalData().nTotalCells()
+                << ')' << endl;
+
+            nAllRefine += nCellsToRefine;
+
+            // Stop when no cells to refine or have done minimum necessary
+            // iterations and not enough cells to refine.
+            if (nCellsToRefine == 0)
+            {
+                Info<< "Not refining direction " << dir
+                    << " since too few cells selected."
+                    << nl << endl;
+                break;
+            }
+
+
+            if (debug)
+            {
+                const_cast<Time&>(mesh.time())++;
+            }
+
+            PackedBoolList isRefineCell(mesh.nCells());
+            isRefineCell.set(cellsToRefine);
+
+            autoPtr<mapPolyMesh> map
+            (
+                meshRefiner_.directionalRefine
+                (
+                    "directional refinement iteration " + name(iter),
+                    dir,
+                    cellsToRefine
+                )
+            );
+
+            meshRefinement::updateList
+            (
+                map().cellMap(),
+                labelVector(0, 0, 0),
+                dirCellLevel
+            );
+
+            forAll(map().cellMap(), celli)
+            {
+                if (isRefineCell[map().cellMap()[celli]])
+                {
+                    dirCellLevel[celli][dir]++;
+                }
+            }
+        }
+
+
+        if (nAllRefine == 0)
+        {
+            Info<< "Stopping refining since no cells selected."
+                << nl << endl;
+            break;
+        }
+
+        meshRefiner_.printMeshInfo
+        (
+            debug,
+            "After directional refinement iteration " + name(iter)
+        );
+
+        if (debug&meshRefinement::MESH)
+        {
+            Pout<< "Writing directional refinement iteration " + name(iter)
+                << " mesh to time " << meshRefiner_.timeName() << endl;
+            meshRefiner_.write
+            (
+                meshRefinement::debugType(debug),
+                meshRefinement::writeType
+                (
+                    meshRefinement::writeLevel()
+                  | meshRefinement::WRITEMESH
+                ),
+                mesh.time().path()/meshRefiner_.timeName()
+            );
+        }
+    }
+
+    // Adjust cellLevel from dirLevel?
+    // Is cellLevel the max of dirLevel? Or the min?
+
+    return iter;
+}
 
 
 void Foam::snappyRefineDriver::baffleAndSplitMesh
@@ -2064,6 +2459,15 @@ void Foam::snappyRefineDriver::doRefine
         refineParams,
         10      // maxIter
     );
+
+    // Directional refinement
+//XXXXX
+    directionalShellRefine
+    (
+        refineParams,
+        100    // maxIter
+    );
+//XXXXX
 
     // Introduce baffles at surface intersections. Remove sections unreachable
     // from keepPoint.

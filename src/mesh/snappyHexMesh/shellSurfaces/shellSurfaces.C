@@ -584,6 +584,7 @@ Foam::shellSurfaces::shellSurfaces
     modes_.setSize(shellI);
     distances_.setSize(shellI);
     levels_.setSize(shellI);
+    dirLevels_.setSize(shellI);
 
     extendedGapLevel_.setSize(shellI);
     extendedGapMode_.setSize(shellI);
@@ -613,6 +614,31 @@ Foam::shellSurfaces::shellSurfaces
 
             // Read pairs of distance+level
             setAndCheckLevels(shellI, dict.lookup("levels"));
+
+
+            // Directional refinement
+            // ~~~~~~~~~~~~~~~~~~~~~~
+
+            if (dict.readIfPresent("levelIncrement", dirLevels_[shellI]))
+            {
+                if (modes_[shellI] == INSIDE)
+                {
+                    Info<< "Additional directional refinement level"
+                        << " for all cells inside " << geomName << endl;
+                }
+                else if (modes_[shellI] == OUTSIDE)
+                {
+                    Info<< "Additional directional refinement level"
+                        << " for all cells outside " << geomName << endl;
+                }
+                else
+                {
+                    FatalIOErrorInFunction(shellsDict)
+                        << "Unsupported mode "
+                        << refineModeNames_[modes_[shellI]]
+                        << exit(FatalIOError);
+                }
+            }
 
 
 
@@ -820,6 +846,76 @@ void Foam::shellSurfaces::findLevel
     forAll(shells_, shelli)
     {
         findLevel(pt, shelli, minLevel, shell);
+    }
+}
+
+
+void Foam::shellSurfaces::findDirectionalLevel
+(
+    const pointField& pt,
+    const labelList& ptLevel,
+    const labelList& dirLevel,  // directional level
+    const direction dir,
+    labelList& shell
+) const
+{
+    shell.setSize(pt.size());
+    shell = -1;
+
+    List<volumeType> volType;
+
+    // Current back to original
+    DynamicList<label> candidateMap(pt.size());
+
+    forAll(shells_, shelli)
+    {
+        if (modes_[shelli] == INSIDE || modes_[shelli] == OUTSIDE)
+        {
+            const LevelAndDirList& shellLevels = dirLevels_[shelli];
+
+            // Collect the cells that are of the right original level
+            candidateMap.clear();
+            forAll(ptLevel, celli)
+            {
+                label level = ptLevel[celli];
+                forAll(shellLevels, leveli)
+                {
+                    label selectLevel = shellLevels[leveli].first();
+                    label addLevel = shellLevels[leveli].second()[dir];
+
+                    if
+                    (
+                        level == selectLevel
+                     && dirLevel[celli] < level+addLevel
+                    )
+                    {
+                        candidateMap.append(celli);
+                        break;
+                    }
+                }
+            }
+
+            pointField candidatePt(pt, candidateMap);
+            allGeometry_[shells_[shelli]].getVolumeType(candidatePt, volType);
+
+            forAll(candidateMap, i)
+            {
+                if
+                (
+                    (
+                        modes_[shelli] == INSIDE
+                     && volType[i] == volumeType::INSIDE
+                    )
+                 || (
+                        modes_[shelli] == OUTSIDE
+                     && volType[i] == volumeType::OUTSIDE
+                    )
+                )
+                {
+                    shell[candidateMap[i]] = shelli;
+                }
+            }
+        }
     }
 }
 

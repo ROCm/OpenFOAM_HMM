@@ -39,11 +39,16 @@ SourceFiles
 #include "searchableSurface.H"
 #include "Enum.H"
 #include "Tuple2.H"
+#include "labelVector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+typedef Tuple2<label,labelVector> LevelAndDir;
+typedef List<LevelAndDir> LevelAndDirList;
+typedef List<LevelAndDirList> LevelAndDirListList;
 
 class searchableSurfaces;
 
@@ -84,6 +89,9 @@ private:
 
         //- Per shell per distance the refinement level
         labelListList levels_;
+
+        //- Per shell, per refinement level additional directional refinement
+        LevelAndDirListList dirLevels_;
 
 
         // Gap level refinement
@@ -171,6 +179,13 @@ public:
                 return shells_;
             }
 
+            //- Raw access to directional refinement
+            //  Per shell a list of (level + additional level)
+            const LevelAndDirListList& dirLevels() const
+            {
+                return dirLevels_;
+            }
+
 
         // Query
 
@@ -213,6 +228,16 @@ public:
             (
                 const pointField& pt,
                 const labelList& ptLevel,
+                labelList& shell
+            ) const;
+
+            //- Find any shell (or -1) with higher wanted directional level
+            void findDirectionalLevel
+            (
+                const pointField& pt,
+                const labelList& ptLevel,   // omnidirectional level
+                const labelList& dirLevel,  // directional level
+                const direction dir,
                 labelList& shell
             ) const;
 };
