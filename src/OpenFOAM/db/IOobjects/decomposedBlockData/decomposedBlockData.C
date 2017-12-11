@@ -366,7 +366,7 @@ bool Foam::decomposedBlockData::readBlocks
             (
                 label proci = 1;
                 proci < UPstream::nProcs(comm);
-                proci++
+                ++proci
             )
             {
                 List<char> elems(is);
@@ -423,7 +423,7 @@ bool Foam::decomposedBlockData::readBlocks
             (
                 label proci = 1;
                 proci < UPstream::nProcs(comm);
-                proci++
+                ++proci
             )
             {
                 List<char> elems(is);
@@ -506,7 +506,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             (
                 label proci = 1;
                 proci < UPstream::nProcs(comm);
-                proci++
+                ++proci
             )
             {
                 is >> data;
@@ -589,7 +589,7 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             (
                 label proci = 1;
                 proci < UPstream::nProcs(comm);
-                proci++
+                ++proci
             )
             {
                 List<char> elems(is);
@@ -661,8 +661,8 @@ void Foam::decomposedBlockData::gather
 
     char* data0Ptr = reinterpret_cast<char*>(datas.begin());
 
-    labelList recvOffsets;
-    labelList recvSizes;
+    List<int> recvOffsets;
+    List<int> recvSizes;
     if (UPstream::master())
     {
         recvOffsets.setSize(nProcs);
@@ -716,7 +716,7 @@ void Foam::decomposedBlockData::gatherSlaveData
             sliceSizes[proci] = int(recvSizes[proci]);
             sliceOffsets[proci] = totalSize;
             totalSize += sliceSizes[proci];
-            proci++;
+            ++proci;
         }
         sliceOffsets[proci] = totalSize;
         recvData.setSize(totalSize);
@@ -798,7 +798,7 @@ bool Foam::decomposedBlockData::writeBlocks
 
             label slaveOffset = 0;
 
-            for (label proci = 1; proci < nProcs; proci++)
+            for (label proci = 1; proci < nProcs; ++proci)
             {
                 os << nl << nl << "// Processor" << proci << nl;
                 start[proci] = os.stdStream().tellp();
@@ -827,7 +827,7 @@ bool Foam::decomposedBlockData::writeBlocks
             }
             // Write slaves
             List<char> elems;
-            for (label proci = 1; proci < nProcs; proci++)
+            for (label proci = 1; proci < nProcs; ++proci)
             {
                 elems.setSize(recvSizes[proci]);
                 IPstream::read
@@ -899,7 +899,7 @@ bool Foam::decomposedBlockData::writeBlocks
                 )
                 {
                     totalSize += recvSizes[proci];
-                    proci++;
+                    ++proci;
                 }
 
                 masterData[1] = proci-masterData[0];
@@ -948,7 +948,7 @@ bool Foam::decomposedBlockData::writeBlocks
                 (
                     label proci = startAndSize[0];
                     proci < startAndSize[0]+startAndSize[1];
-                    proci++
+                    ++proci
                 )
                 {
                     os << nl << nl << "// Processor" << proci << nl;

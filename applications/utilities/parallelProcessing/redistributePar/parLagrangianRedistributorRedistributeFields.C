@@ -105,7 +105,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                0
+                label(0)
             );
 
             map.distribute(field);
@@ -179,7 +179,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
             Info<< "        " <<  objectNames[i] << endl;
 
             // Read if present
-            CompactIOField<Field<Type>, Type > field
+            CompactIOField<Field<Type>, Type> field
             (
                 IOobject
                 (
@@ -191,7 +191,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                0
+                label(0)
             );
 
             // Distribute
@@ -259,7 +259,7 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
                     IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 ),
-                0
+                label(0)
             );
 
             fieldPtr->store();
@@ -277,7 +277,7 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
 {
     HashTable<Container*> fields
     (
-        cloud.lookupClass<Container >()
+        cloud.lookupClass<Container>()
     );
 
     if (fields.size())
