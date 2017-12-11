@@ -81,13 +81,13 @@ OptimisationSwitches
 
     //- collated: thread buffer size for queued file writes.
     //  If set to 0 or not sufficient for the file size threading is not used.
-    //  Default: 2e9
-    maxThreadFileBufferSize 2e9;
+    //  Default: 1e9
+    maxThreadFileBufferSize 0;
 
     //- masterUncollated: non-blocking buffer size.
     //  If the file exceeds this buffer size scheduled transfer is used.
-    //  Default: 2e9
-    maxMasterFileBufferSize 2e9;
+    //  Default: 1e9
+    maxMasterFileBufferSize 1e9;
 
     commsType       nonBlocking; //scheduled; //blocking;
     floatTransfer   0;

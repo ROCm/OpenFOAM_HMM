@@ -30,6 +30,7 @@ License
 #include "SubList.H"
 #include "allReduce.H"
 #include "int.H"
+#include "collatedFileOperation.H"
 
 #include <mpi.h>
 
@@ -128,12 +129,17 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
 
     //MPI_Init(&argc, &argv);
+    int wanted_thread_support = MPI_THREAD_SINGLE;
+    if (fileOperations::collatedFileOperation::maxThreadFileBufferSize > 0)
+    {
+        wanted_thread_support = MPI_THREAD_MULTIPLE;
+    }
     int provided_thread_support;
     MPI_Init_thread
     (
         &argc,
         &argv,
-        MPI_THREAD_MULTIPLE,
+        wanted_thread_support,
         &provided_thread_support
     );
 
