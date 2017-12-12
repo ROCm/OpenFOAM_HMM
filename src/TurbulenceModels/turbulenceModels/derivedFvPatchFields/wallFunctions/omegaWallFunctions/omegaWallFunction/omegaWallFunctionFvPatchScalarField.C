@@ -238,6 +238,8 @@ void omegaWallFunctionFvPatchScalarField::calculate
     {
         const label celli = patch.faceCells()[facei];
 
+        const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
+
         const scalar w = cornerWeights[facei];
 
         const scalar omegaVis = 6*nuw[facei]/(beta1_*sqr(y[facei]));
@@ -250,22 +252,36 @@ void omegaWallFunctionFvPatchScalarField::calculate
         // For backward-compatibility the blending method is provided as an
         // option
 
+        // Generation contribution is included using the blended option, or
+        // when using the switching option if operating in the laminar
+        // sub-layer
+        bool includeG = true;
         if (blended_)
         {
             omega0[celli] += w*sqrt(sqr(omegaVis) + sqr(omegaLog));
         }
-
-        if (!blended_)
+        else
         {
-            omega0[celli] += w*omegaLog;
+            if (yPlus > yPlusLam_)
+            {
+                omega0[celli] += w*omegaLog;
+            }
+            else
+            {
+                omega0[celli] += w*omegaVis;
+                includeG = false;
+            }
         }
 
-        G0[celli] +=
-            w
-            *(nutw[facei] + nuw[facei])
-            *magGradUw[facei]
-            *Cmu25*sqrt(k[celli])
-            /(kappa_*y[facei]);
+        if (includeG)
+        {
+            G0[celli] +=
+                w
+               *(nutw[facei] + nuw[facei])
+               *magGradUw[facei]
+               *Cmu25*sqrt(k[celli])
+               /(kappa_*y[facei]);
+        }
     }
 }
 
@@ -283,7 +299,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kappa_(0.41),
     E_(9.8),
     beta1_(0.075),
-    blended_(false),
+    blended_(true),
     yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     omega_(),
@@ -332,7 +348,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     beta1_(dict.lookupOrDefault<scalar>("beta1", 0.075)),
-    blended_(dict.lookupOrDefault<Switch>("blended", false)),
+    blended_(dict.lookupOrDefault<Switch>("blended", true)),
     yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     omega_(),
@@ -455,11 +471,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 
     typedef DimensionedField<scalar, volMesh> FieldType;
 
-    FieldType& G =
-        const_cast<FieldType&>
-        (
-            db().lookupObject<FieldType>(turbModel.GName())
-        );
+    FieldType& G = db().lookupObjectRef<FieldType>(turbModel.GName());
 
     FieldType& omega = const_cast<FieldType&>(internalField());
 
@@ -507,11 +519,7 @@ void omegaWallFunctionFvPatchScalarField::updateWeightedCoeffs
 
     typedef DimensionedField<scalar, volMesh> FieldType;
 
-    FieldType& G =
-        const_cast<FieldType&>
-        (
-            db().lookupObject<FieldType>(turbModel.GName())
-        );
+    FieldType& G = db().lookupObjectRef<FieldType>(turbModel.GName());
 
     FieldType& omega = const_cast<FieldType&>(internalField());
 
@@ -567,8 +575,7 @@ void omegaWallFunctionFvPatchScalarField::manipulateMatrix
     DynamicList<scalar> constraintomega(weights.size());
     const labelUList& faceCells = patch().faceCells();
 
-    const DimensionedField<scalar, volMesh>& omega
-        = internalField();
+    const DimensionedField<scalar, volMesh>& omega = internalField();
 
     label nConstrainedCells = 0;
 
@@ -578,7 +585,7 @@ void omegaWallFunctionFvPatchScalarField::manipulateMatrix
         // only set the values if the weights are > tolerance
         if (weights[facei] > tolerance_)
         {
-            nConstrainedCells++;
+            ++nConstrainedCells;
 
             label celli = faceCells[facei];
 
