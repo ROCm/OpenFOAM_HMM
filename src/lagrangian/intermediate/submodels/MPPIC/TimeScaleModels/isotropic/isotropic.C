@@ -84,7 +84,7 @@ Foam::TimeScaleModels::isotropic::oneByTau
     static const scalar a =
         8.0*sqrt(2.0)/(5.0*constant::mathematical::pi)
        *0.25*(3.0 - e_)*(1.0 + e_);
-    
+
     return a*f*alphaPacked_/max(alphaPacked_ - alpha, SMALL);
 }
 

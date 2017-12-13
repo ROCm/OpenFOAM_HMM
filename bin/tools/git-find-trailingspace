@@ -1,16 +1,13 @@
-#!/bin/bash
+#!/bin/sh
 #------------------------------------------------------------------------------
 # Script
-#     find-trailingspace
+#     git-find-trailingspace
 #
 # Description
-#     Search for files with trailing whitesapce
+#     Use git grep to search for files with trailing whitespace
 #
 #------------------------------------------------------------------------------
-cd $WM_PROJECT_DIR || exit 1
 
-tab=$'\t'
-
-git grep -c -E "[ $tab]+"'$' -- $@
+git grep -c -P '\s+$' -- $@
 
 #------------------------------------------------------------------------------

@@ -227,12 +227,6 @@ Foam::fileOperations::collatedFileOperation::collatedFileOperation
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileOperations::collatedFileOperation::~collatedFileOperation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::fileOperations::collatedFileOperation::objectPath

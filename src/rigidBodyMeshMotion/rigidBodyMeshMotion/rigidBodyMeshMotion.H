@@ -25,7 +25,7 @@ Class
     Foam::rigidBodyMeshMotion
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Rigid-body mesh motion solver for fvMesh.

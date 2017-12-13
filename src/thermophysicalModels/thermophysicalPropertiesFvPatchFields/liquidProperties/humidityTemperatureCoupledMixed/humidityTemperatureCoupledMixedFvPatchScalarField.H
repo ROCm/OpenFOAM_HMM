@@ -81,7 +81,7 @@ Description
     - A scalar transport equation for the carrier specie is required, e.g.
       supplied via a function object or in the main solver. This specie
       transports the vapour phase in the main ragion.
-    - The boundary condition of this specie on the coupled wall must be 
+    - The boundary condition of this specie on the coupled wall must be
       fixedGradient in order to allow condensation or evaporation of the
       vapour in or out of this wall
 
