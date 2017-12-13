@@ -1206,7 +1206,6 @@ Foam::meshRefinement::meshRefinement
     const refinementSurfaces& surfaces,
     const refinementFeatures& features,
     const shellSurfaces& shells,
-    const shellSurfaces& dirShells,
     const shellSurfaces& limitShells
 )
 :
@@ -1217,7 +1216,6 @@ Foam::meshRefinement::meshRefinement
     surfaces_(surfaces),
     features_(features),
     shells_(shells),
-    dirShells_(dirShells),
     limitShells_(limitShells),
     meshCutter_
     (
