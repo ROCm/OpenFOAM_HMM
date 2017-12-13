@@ -46,10 +46,6 @@ SourceFiles
 namespace Foam
 {
 
-typedef Tuple2<label,labelVector> LevelAndDir;
-typedef List<LevelAndDir> LevelAndDirList;
-typedef List<LevelAndDirList> LevelAndDirListList;
-
 class searchableSurfaces;
 
 /*---------------------------------------------------------------------------*\
@@ -90,8 +86,8 @@ private:
         //- Per shell per distance the refinement level
         labelListList levels_;
 
-        //- Per shell, per refinement level additional directional refinement
-        LevelAndDirListList dirLevels_;
+        //- Per shell any additional directional refinement
+        List<Tuple2<labelPair,labelVector>> dirLevels_;
 
 
         // Gap level refinement
@@ -179,14 +175,6 @@ public:
                 return shells_;
             }
 
-            //- Raw access to directional refinement
-            //  Per shell a list of (level + additional level)
-            const LevelAndDirListList& dirLevels() const
-            {
-                return dirLevels_;
-            }
-
-
         // Query
 
             //- Highest shell level
@@ -194,6 +182,9 @@ public:
 
             //- Highest shell gap level
             labelList maxGapLevel() const;
+
+            //- Min and max cell level for directional refinement
+            labelPairList directionalSelectLevel() const;
 
             //- Find shell level higher than ptLevel
             void findHigherLevel

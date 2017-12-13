@@ -161,9 +161,6 @@ private:
         //- All shell-refinement interaction
         const shellSurfaces& shells_;
 
-        //- All directional shell-refinement interaction
-        const shellSurfaces& dirShells_;
-
         //- All limit-refinement interaction
         const shellSurfaces& limitShells_;
 
@@ -798,7 +795,6 @@ public:
             const refinementSurfaces&,
             const refinementFeatures&,
             const shellSurfaces&,   // omnidirectional refinement
-            const shellSurfaces&,   // directional refinement
             const shellSurfaces&    // limit refinement
         );
 
@@ -850,12 +846,6 @@ public:
             const shellSurfaces& shells() const
             {
                 return shells_;
-            }
-
-            //- Reference to directional shell-refinement shells
-            const shellSurfaces& dirShells() const
-            {
-                return dirShells_;
             }
 
             //- Reference to meshcutting engine

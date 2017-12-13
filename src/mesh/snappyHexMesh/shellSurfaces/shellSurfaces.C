@@ -619,8 +619,29 @@ Foam::shellSurfaces::shellSurfaces
             // Directional refinement
             // ~~~~~~~~~~~~~~~~~~~~~~
 
-            if (dict.readIfPresent("levelIncrement", dirLevels_[shellI]))
+            dirLevels_[shellI] = Tuple2<labelPair,labelVector>
+            (
+                labelPair(labelMax, labelMin),
+                labelVector::zero
+            );
+            const entry* levelPtr = dict.lookupEntryPtr
+            (
+                "levelIncrement",
+                false,
+                true
+            );
+            if (levelPtr)
             {
+                // Do reading ourselves since using labelPair would require
+                // additional bracket pair
+                Istream& is = levelPtr->stream();
+
+                is.readBegin("levelIncrement");
+                is  >> dirLevels_[shellI].first().first()
+                    >> dirLevels_[shellI].first().second()
+                    >> dirLevels_[shellI].second();
+                is.readEnd("levelIncrement");
+
                 if (modes_[shellI] == INSIDE)
                 {
                     Info<< "Additional directional refinement level"
@@ -771,6 +792,17 @@ Foam::labelList Foam::shellSurfaces::maxGapLevel() const
 }
 
 
+Foam::labelPairList Foam::shellSurfaces::directionalSelectLevel() const
+{
+    labelPairList levels(dirLevels_.size());
+    forAll(dirLevels_, shelli)
+    {
+        levels[shelli] = dirLevels_[shelli].first();
+    }
+    return levels;
+}
+
+
 void Foam::shellSurfaces::findHigherLevel
 (
     const pointField& pt,
@@ -871,33 +903,31 @@ void Foam::shellSurfaces::findDirectionalLevel
     {
         if (modes_[shelli] == INSIDE || modes_[shelli] == OUTSIDE)
         {
-            const LevelAndDirList& shellLevels = dirLevels_[shelli];
+            const labelPair& selectLevels = dirLevels_[shelli].first();
+            const label addLevel = dirLevels_[shelli].second()[dir];
 
             // Collect the cells that are of the right original level
             candidateMap.clear();
             forAll(ptLevel, celli)
             {
                 label level = ptLevel[celli];
-                forAll(shellLevels, leveli)
-                {
-                    label selectLevel = shellLevels[leveli].first();
-                    label addLevel = shellLevels[leveli].second()[dir];
 
-                    if
-                    (
-                        level == selectLevel
-                     && dirLevel[celli] < level+addLevel
-                    )
-                    {
-                        candidateMap.append(celli);
-                        break;
-                    }
+                if
+                (
+                    level >= selectLevels.first()
+                 && level <= selectLevels.second()
+                 && dirLevel[celli] < level+addLevel
+                )
+                {
+                    candidateMap.append(celli);
                 }
             }
 
+            // Do geometric test
             pointField candidatePt(pt, candidateMap);
             allGeometry_[shells_[shelli]].getVolumeType(candidatePt, volType);
 
+            // Extract selected cells
             forAll(candidateMap, i)
             {
                 if
