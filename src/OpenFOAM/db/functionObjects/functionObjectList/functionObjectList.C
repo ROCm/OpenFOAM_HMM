@@ -176,7 +176,7 @@ bool Foam::functionObjectList::readFunctionObject
 (
     const string& funcNameArgs,
     dictionary& functionsDict,
-    HashSet<word>& requiredFields,
+    HashSet<wordRe>& requiredFields,
     const word& region
 )
 {
@@ -190,7 +190,7 @@ bool Foam::functionObjectList::readFunctionObject
     word funcName(funcNameArgs);
 
     int argLevel = 0;
-    wordList args;
+    wordReList args;
 
     List<Tuple2<word, string>> namedArgs;
     bool namedArg = false;
@@ -237,9 +237,12 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        word::validate
+                        wordRe
                         (
-                            funcNameArgs.substr(start, i - start)
+                            word::validate
+                            (
+                                funcNameArgs.substr(start, i - start)
+                            )
                         )
                     );
                 }
@@ -310,11 +313,11 @@ bool Foam::functionObjectList::readFunctionObject
     }
     else if (funcDict.found("field"))
     {
-        requiredFields.insert(word(funcDict.lookup("field")));
+        requiredFields.insert(wordRe(funcDict.lookup("field")));
     }
     else if (funcDict.found("fields"))
     {
-        requiredFields.insert(wordList(funcDict.lookup("fields")));
+        requiredFields.insert(wordReList(funcDict.lookup("fields")));
     }
 
     // Insert named arguments
@@ -384,7 +387,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     const argList& args,
     const Time& runTime,
     dictionary& controlDict,
-    HashSet<word>& requiredFields
+    HashSet<wordRe>& requiredFields
 )
 {
     autoPtr<functionObjectList> functionsPtr;

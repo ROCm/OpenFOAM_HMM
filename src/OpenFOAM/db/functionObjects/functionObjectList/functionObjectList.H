@@ -155,7 +155,7 @@ public:
             const argList& args,
             const Time& runTime,
             dictionary& controlDict,
-            HashSet<word>& requiredFields
+            HashSet<wordRe>& requiredFields
         );
 
 
@@ -236,7 +236,7 @@ public:
         (
             const string& funcNameArgs0,
             dictionary& functionsDict,
-            HashSet<word>& requiredFields,
+            HashSet<wordRe>& requiredFields,
             const word& region = word::null
         );
 
