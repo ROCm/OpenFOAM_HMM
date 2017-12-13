@@ -253,6 +253,7 @@ void Foam::rigidBodyMeshMotion::solve()
         {
             model_.solve
             (
+                t.value(),
                 t.deltaTValue(),
                 scalarField(model_.nDoF(), Zero),
                 Field<spatialVector>(model_.nBodies(), Zero)
@@ -282,6 +283,7 @@ void Foam::rigidBodyMeshMotion::solve()
 
         model_.solve
         (
+            t.value(),
             t.deltaTValue(),
             scalarField(model_.nDoF(), Zero),
             fx

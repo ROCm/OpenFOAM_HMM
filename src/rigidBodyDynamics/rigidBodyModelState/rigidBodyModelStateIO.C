@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,6 +33,7 @@ void Foam::RBD::rigidBodyModelState::write(dictionary& dict) const
     dict.add("q", q_);
     dict.add("qDot", qDot_);
     dict.add("qDdot", qDdot_);
+    dict.add("t", t_);
     dict.add("deltaT", deltaT_);
 }
 
@@ -42,6 +43,7 @@ void Foam::RBD::rigidBodyModelState::write(Ostream& os) const
     os.writeEntry("q", q_);
     os.writeEntry("qDot", qDot_);
     os.writeEntry("qDdot", qDdot_);
+    os.writeEntry("t", t_);
     os.writeEntry("deltaT", deltaT_);
 }
 
@@ -57,6 +59,7 @@ Foam::Istream& Foam::RBD::operator>>
     is  >> state.q_
         >> state.qDot_
         >> state.qDdot_
+        >> state.t_
         >> state.deltaT_;
 
     is.check(FUNCTION_NAME);
@@ -73,6 +76,7 @@ Foam::Ostream& Foam::RBD::operator<<
     os  << state.q_
         << token::SPACE << state.qDot_
         << token::SPACE << state.qDdot_
+        << token::SPACE << state.t_
         << token::SPACE << state.deltaT_;
 
     os.check(FUNCTION_NAME);
