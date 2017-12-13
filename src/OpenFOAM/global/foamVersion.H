@@ -27,7 +27,6 @@ Namespace
 Description
     Namespace for OpenFOAM
 
-
 Global
     Foam::FOAMversion
 
@@ -67,6 +66,9 @@ namespace Foam
     extern const char* const FOAMversion;
     extern const char* const FOAMbuild;
     extern const std::string FOAMbuildArch;
+
+    //- Additional OpenFOAM modules
+    namespace Module {}
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
