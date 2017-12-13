@@ -206,6 +206,9 @@ public:
             //  forces execution (used in post-processing mode)
             virtual bool execute();
 
+            //- Execute using the specified subIndex.
+            virtual bool execute(const label subIndex);
+
             //- Called at each ++ or += of the time-loop.
             //  postProcess overrides the usual writeControl behaviour and
             //  forces writing (used in post-processing mode)

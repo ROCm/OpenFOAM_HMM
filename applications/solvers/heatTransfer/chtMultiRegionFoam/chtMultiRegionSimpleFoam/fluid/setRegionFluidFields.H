@@ -12,6 +12,14 @@
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
 
+    volScalarField& p_rgh = p_rghFluid[i];
+
+    const dimensionedVector& g = gFluid[i];
+    const volScalarField& gh = ghFluid[i];
+    const surfaceScalarField& ghf = ghfFluid[i];
+
+    radiation::radiationModel& rad = radiation[i];
+
     IOMRFZoneList& MRF = MRFfluid[i];
     fv::options& fvOptions = fluidFvOptions[i];
 
@@ -22,14 +30,7 @@
         initialMassFluid[i]
     );
 
-    radiation::radiationModel& rad = radiation[i];
+    bool frozenFlow = frozenFlowFluid[i];
 
     const label pRefCell = pRefCellFluid[i];
     const scalar pRefValue = pRefValueFluid[i];
-    const bool frozenFlow = frozenFlowFluid[i];
-
-    volScalarField& p_rgh = p_rghFluid[i];
-
-    const dimensionedVector& g = gFluid[i];
-    const volScalarField& gh = ghFluid[i];
-    const surfaceScalarField& ghf = ghfFluid[i];

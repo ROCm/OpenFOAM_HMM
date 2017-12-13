@@ -9,22 +9,37 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volScalarField;
-    object      p_rgh;
+    class       dictionary;
+    object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 1e5;
-
-boundaryField
+SIMPLE
 {
-    ".*"
+    energyCoupling
     {
-        type            calculated;
-        value           uniform 1e5;
+        iterations      50;
+
+        interval        0;
+
+        // Convergence criteria to stop looping
+        convergence
+        {
+            h           1e-3;
+        }
+
+        // Names of function objects to fire with execute(int) when looping
+        onLoop          ( );
+
+        // Names of function objects to fire with execute(int) when converged
+        onConverged     ( externalCoupled );
+
+        // Names of function objects to fire with execute(int) when loop ends
+        // without convergence
+        onEnd           ( );
     }
 }
+
 
 // ************************************************************************* //

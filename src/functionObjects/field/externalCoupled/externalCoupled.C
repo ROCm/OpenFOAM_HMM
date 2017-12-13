@@ -127,7 +127,7 @@ void Foam::functionObjects::externalCoupled::readColumns
             List<scalarField> values(nColumns);
 
             // Number of rows to read for processor proci
-            label procNRows = globalFaces.localSize(proci);
+            const label procNRows = globalFaces.localSize(proci);
 
             forAll(values, columni)
             {
@@ -195,7 +195,7 @@ void Foam::functionObjects::externalCoupled::readLines
         for (label proci = 0; proci < Pstream::nProcs(); ++proci)
         {
             // Number of rows to read for processor proci
-            label procNRows = globalFaces.localSize(proci);
+            const label procNRows = globalFaces.localSize(proci);
 
             UOPstream toProc(proci, pBufs);
 
@@ -369,19 +369,17 @@ Foam::word Foam::functionObjects::externalCoupled::compositeName
             return regionNames[0];
         }
     }
-    else
+
+    // Enforce lexical ordering
+    checkOrder(regionNames);
+
+    word composite(regionNames[0]);
+    for (label i = 1; i < regionNames.size(); ++i)
     {
-        // Enforce lexical ordering
-        checkOrder(regionNames);
-
-        word composite(regionNames[0]);
-        for (label i = 1; i < regionNames.size(); i++)
-        {
-            composite += "_" + regionNames[i];
-        }
-
-        return composite;
+        composite += "_" + regionNames[i];
     }
+
+    return composite;
 }
 
 
@@ -418,8 +416,7 @@ void Foam::functionObjects::externalCoupled::initCoupling()
         UPtrList<const fvMesh> meshes(regionNames.size());
         forAll(regionNames, regi)
         {
-            const word& regionName = regionNames[regi];
-            meshes.set(regi, &time_.lookupObject<fvMesh>(regionName));
+            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
@@ -484,6 +481,9 @@ void Foam::functionObjects::externalCoupled::performCoupling()
     // Signal external source to wait (by creating the lock file)
     useMaster();
 
+    // Update information about last triggering
+    lastTrigger_ = time_.timeIndex();
+
     // Process any abort information sent from slave
     if
     (
@@ -491,6 +491,9 @@ void Foam::functionObjects::externalCoupled::performCoupling()
      && action != Time::stopAtControls::saUnknown
     )
     {
+        Info<< type() << ": slave requested action "
+            << Time::stopAtControlNames[action] << endl;
+
         time_.stopAt(action);
     }
 }
@@ -508,6 +511,8 @@ Foam::functionObjects::externalCoupled::externalCoupled
     functionObject(name),
     externalFileCoupler(),
     time_(runTime),
+    calcFrequency_(-1),
+    lastTrigger_(-1),
     initialisedCoupling_(false)
 {
     read(dict);
@@ -523,12 +528,25 @@ Foam::functionObjects::externalCoupled::externalCoupled
 
 bool Foam::functionObjects::externalCoupled::execute()
 {
-    if (!initialisedCoupling_ || time_.timeIndex() % calcFrequency_ == 0)
+    // Not initialized or overdue
+    if
+    (
+        !initialisedCoupling_
+     || (time_.timeIndex() >= lastTrigger_ + calcFrequency_)
+    )
     {
         performCoupling();
     }
 
     return false;
+}
+
+
+bool Foam::functionObjects::externalCoupled::execute(const label subIndex)
+{
+    performCoupling();
+
+    return true;
 }
 
 
@@ -551,6 +569,8 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     externalFileCoupler::readDict(dict);
 
     calcFrequency_ = dict.lookupOrDefault("calcFrequency", 1);
+
+    // Leave trigger intact
 
     // Get names of all fvMeshes (and derived types)
     wordList allRegionNames(time_.lookupClass<fvMesh>().sortedToc());
@@ -613,21 +633,21 @@ bool Foam::functionObjects::externalCoupled::read(const dictionary& dict)
     Info<< type() << ": Communicating with regions:" << endl;
     for (const word& compName : regionGroupNames_)
     {
-        Info<< "Region: " << compName << endl << incrIndent;
+        Info<< "Region: " << compName << nl << incrIndent;
         const labelList& groups = regionToGroups_[compName];
         for (const label groupi : groups)
         {
             const wordRe& groupName = groupNames_[groupi];
 
             Info<< indent << "patchGroup: " << groupName << "\t"
-                << endl
+                << nl
                 << incrIndent
                 << indent << "Reading fields: "
                 << groupReadFields_[groupi]
-                << endl
+                << nl
                 << indent << "Writing fields: "
                 << groupWriteFields_[groupi]
-                << endl
+                << nl
                 << decrIndent;
         }
         Info<< decrIndent;
@@ -671,10 +691,9 @@ void Foam::functionObjects::externalCoupled::readDataMaster()
 
         // Get the meshes for the region-group
         UPtrList<const fvMesh> meshes(regionNames.size());
-        forAll(regionNames, j)
+        forAll(regionNames, regi)
         {
-            const word& regionName = regionNames[j];
-            meshes.set(j, &time_.lookupObject<fvMesh>(regionName));
+            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
@@ -716,10 +735,9 @@ void Foam::functionObjects::externalCoupled::writeDataMaster() const
 
         // Get the meshes for the region-group
         UPtrList<const fvMesh> meshes(regionNames.size());
-        forAll(regionNames, j)
+        forAll(regionNames, regi)
         {
-            const word& regionName = regionNames[j];
-            meshes.set(j, &time_.lookupObject<fvMesh>(regionName));
+            meshes.set(regi, time_.lookupObjectPtr<fvMesh>(regionNames[regi]));
         }
 
         const labelList& groups = regionToGroups_[compName];
