@@ -1881,12 +1881,7 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
 
             // Stop when no cells to refine or have done minimum necessary
             // iterations and not enough cells to refine.
-            if (nCellsToRefine == 0)
-            {
-                //Info<< "Not refining direction " << dir
-                //    << " since too few cells selected." << nl << endl;
-            }
-            else
+            if (nCellsToRefine > 0)
             {
                 if (debug)
                 {
