@@ -1766,7 +1766,7 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
 {
     addProfiling(shell, "snappyHexMesh::refine::directionalShell");
     const fvMesh& mesh = meshRefiner_.mesh();
-    const shellSurfaces& shells = meshRefiner_.dirShells();
+    const shellSurfaces& shells = meshRefiner_.shells();
 
     labelList& cellLevel =
         const_cast<labelIOList&>(meshRefiner_.meshCutter().cellLevel());
@@ -1774,19 +1774,13 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
 
     // Determine the minimum and maximum cell levels that are candidates for
     // directional refinement
+    const labelPairList dirSelect(shells.directionalSelectLevel());
     label overallMinLevel = labelMax;
     label overallMaxLevel = labelMin;
+    forAll(dirSelect, shelli)
     {
-        const LevelAndDirListList& dirLevels = shells.dirLevels();
-        forAll(dirLevels, shelli)
-        {
-            const LevelAndDirList& dirLevel = dirLevels[shelli];
-            forAll(dirLevel, i)
-            {
-                overallMinLevel = min(dirLevel[i].first(), overallMinLevel);
-                overallMaxLevel = max(dirLevel[i].first(), overallMaxLevel);
-            }
-        }
+        overallMinLevel = min(dirSelect[shelli].first(), overallMinLevel);
+        overallMaxLevel = max(dirSelect[shelli].second(), overallMaxLevel);
     }
 
     if (overallMinLevel > overallMaxLevel)
@@ -1889,43 +1883,45 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
             // iterations and not enough cells to refine.
             if (nCellsToRefine == 0)
             {
-                Info<< "Not refining direction " << dir
-                    << " since too few cells selected."
-                    << nl << endl;
-                break;
+                //Info<< "Not refining direction " << dir
+                //    << " since too few cells selected." << nl << endl;
             }
-
-
-            if (debug)
+            else
             {
-                const_cast<Time&>(mesh.time())++;
-            }
-
-            PackedBoolList isRefineCell(mesh.nCells());
-            isRefineCell.set(cellsToRefine);
-
-            autoPtr<mapPolyMesh> map
-            (
-                meshRefiner_.directionalRefine
-                (
-                    "directional refinement iteration " + name(iter),
-                    dir,
-                    cellsToRefine
-                )
-            );
-
-            meshRefinement::updateList
-            (
-                map().cellMap(),
-                labelVector(0, 0, 0),
-                dirCellLevel
-            );
-
-            forAll(map().cellMap(), celli)
-            {
-                if (isRefineCell[map().cellMap()[celli]])
+                if (debug)
                 {
-                    dirCellLevel[celli][dir]++;
+                    const_cast<Time&>(mesh.time())++;
+                }
+
+                PackedBoolList isRefineCell(mesh.nCells());
+                isRefineCell.set(cellsToRefine);
+
+                autoPtr<mapPolyMesh> map
+                (
+                    meshRefiner_.directionalRefine
+                    (
+                        "directional refinement iteration " + name(iter),
+                        dir,
+                        cellsToRefine
+                    )
+                );
+
+                Info<< "Refined mesh in = "
+                    << mesh.time().cpuTimeIncrement() << " s" << endl;
+
+                meshRefinement::updateList
+                (
+                    map().cellMap(),
+                    labelVector(0, 0, 0),
+                    dirCellLevel
+                );
+
+                forAll(map().cellMap(), celli)
+                {
+                    if (isRefineCell[map().cellMap()[celli]])
+                    {
+                        dirCellLevel[celli][dir]++;
+                    }
                 }
             }
         }
@@ -1946,8 +1942,8 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
 
         if (debug&meshRefinement::MESH)
         {
-            Pout<< "Writing directional refinement iteration " + name(iter)
-                << " mesh to time " << meshRefiner_.timeName() << endl;
+            Pout<< "Writing directional refinement iteration "
+                << iter << " mesh to time " << meshRefiner_.timeName() << endl;
             meshRefiner_.write
             (
                 meshRefinement::debugType(debug),
@@ -1961,8 +1957,16 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
         }
     }
 
-    // Adjust cellLevel from dirLevel?
-    // Is cellLevel the max of dirLevel? Or the min?
+    // Adjust cellLevel from dirLevel? As max? Or the min?
+    // For now: use max. The idea is that if there is a wall
+    // any directional refinement is likely to be aligned with
+    // the wall (wall layers) so any snapping/layering would probably
+    // want to use this highest refinement level.
+
+    forAll(cellLevel, celli)
+    {
+        cellLevel[celli] = cmptMax(dirCellLevel[celli]);
+    }
 
     return iter;
 }
