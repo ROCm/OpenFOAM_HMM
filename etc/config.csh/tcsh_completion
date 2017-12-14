@@ -5,8 +5,9 @@
 #   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-# This file is part of OpenFOAM, licensed under the GNU General Public License
-# <http://www.gnu.org/licenses/>.
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.csh/tcsh_completion
