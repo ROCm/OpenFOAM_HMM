@@ -39,13 +39,6 @@ alias wmSchedOff='unset WM_SCHEDULER'
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias foam='cd $WM_PROJECT_DIR'
 
-if [ -n "$WM_PROJECT_SITE" ]
-then
-    alias foamSite='cd $WM_PROJECT_SITE'
-else
-    alias foamSite='cd $WM_PROJECT_INST_DIR/site'
-fi
-
 alias src='cd $FOAM_SRC'
 alias lib='cd $FOAM_LIBBIN'
 alias app='cd $FOAM_APP'

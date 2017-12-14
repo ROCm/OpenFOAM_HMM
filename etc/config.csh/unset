@@ -170,7 +170,6 @@ unalias wmSchedOn
 unalias wmSchedOff
 
 unalias foam
-unalias foamSite
 
 unalias src
 unalias lib

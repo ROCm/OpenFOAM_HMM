@@ -156,7 +156,6 @@ unalias wmSchedOn   2>/dev/null
 unalias wmSchedOff  2>/dev/null
 
 unalias foam        2>/dev/null
-unalias foamSite    2>/dev/null
 
 unalias src         2>/dev/null
 unalias lib         2>/dev/null
