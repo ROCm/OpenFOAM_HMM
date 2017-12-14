@@ -77,6 +77,7 @@ protected:
         static void markBoundaries
         (
             const fvMesh& mesh,
+            const vector& smallVec,
 
             const boundBox& bb,
             const labelVector& nDivs,

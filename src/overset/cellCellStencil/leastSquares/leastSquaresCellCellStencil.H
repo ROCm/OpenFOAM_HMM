@@ -22,103 +22,82 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::oversetGAMGInterfaceField
+    Foam::cellCellStencils::leastSquares
 
 Description
-    GAMG agglomerated processor interface field.
+    Least-squares-weighted interpolation stencil.
+
+    Base machinery is similar to inverse distance interpolation stencil
+    but weights minimize error in LSQ sense recovering exact solution
+    for linear solution problems. Gradient and values are found
+    simultaneously.
 
 SourceFiles
-    processorGAMGInterfaceField.C
+    leastSquaresCellCellStencil.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oversetGAMGInterfaceField_H
-#define oversetGAMGInterfaceField_H
+#ifndef cellCellStencils_leastSquares_H
+#define cellCellStencils_leastSquares_H
 
-#include "GAMGInterfaceField.H"
-#include "oversetGAMGInterface.H"
-#include "processorLduInterfaceField.H"
+#include "inverseDistanceCellCellStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+namespace cellCellStencils
+{
+
 /*---------------------------------------------------------------------------*\
-                  Class oversetGAMGInterfaceField Declaration
+                        Class leastSquares Declaration
 \*---------------------------------------------------------------------------*/
 
-class oversetGAMGInterfaceField
+class leastSquares
 :
-    public GAMGInterfaceField
+    public inverseDistance
 {
-protected:
-
-    // Protected data
-
-        //- Local reference cast into the interface
-        const oversetGAMGInterface& oversetInterface_;
-
-
-private:
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        oversetGAMGInterfaceField(const oversetGAMGInterfaceField&);
+        leastSquares(const leastSquares&);
 
         //- Disallow default bitwise assignment
-        void operator=(const oversetGAMGInterfaceField&);
+        void operator=(const leastSquares&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("overset");
+    TypeName("leastSquares");
 
 
     // Constructors
 
-        //- Construct from GAMG interface and fine level interface field
-        oversetGAMGInterfaceField
-        (
-            const GAMGInterface& GAMGCp,
-            const lduInterfaceField& fineInterface
-        );
+        //- Construct from fvMesh
+        leastSquares(const fvMesh&, const dictionary&, const bool);
 
 
     //- Destructor
-    virtual ~oversetGAMGInterfaceField();
+    virtual ~leastSquares();
 
 
     // Member Functions
 
-        // Access
-
-            //- Return size
-            label size() const
-            {
-                return oversetInterface_.size();
-            }
-
-
-        // Interface matrix update
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                scalarField& result,
-                const bool add,
-                const scalarField& psiInternal,
-                const scalarField& coeffs,
-                const direction cmpt,
-                const Pstream::commsTypes commsType
-            ) const;
+        //- Calculate lsq weights for single acceptor
+        virtual void stencilWeights
+        (
+            const point& sample,
+            const pointList& donorCcs,
+            scalarList& weights
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace cellCellStencils
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

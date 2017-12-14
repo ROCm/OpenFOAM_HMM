@@ -1100,4 +1100,39 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
 }
 
 
+void Foam::cellCellStencils::cellVolumeWeight::stencilWeights
+(
+    const point& sample,
+    const pointList& donorCcs,
+    scalarList& weights
+) const
+{
+    // Inverse-distance weighting
+
+    weights.setSize(donorCcs.size());
+    scalar sum = 0.0;
+    forAll(donorCcs, i)
+    {
+        scalar d = mag(sample-donorCcs[i]);
+
+        if (d > ROOTVSMALL)
+        {
+            weights[i] = 1.0/d;
+            sum += weights[i];
+        }
+        else
+        {
+            // Short circuit
+            weights = 0.0;
+            weights[i] = 1.0;
+            return;
+        }
+    }
+    forAll(weights, i)
+    {
+        weights[i] /= sum;
+    }
+}
+
+
 // ************************************************************************* //

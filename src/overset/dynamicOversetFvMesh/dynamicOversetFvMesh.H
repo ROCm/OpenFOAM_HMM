@@ -38,6 +38,8 @@ SourceFiles
 #include "dynamicMotionSolverFvMesh.H"
 #include "labelIOList.H"
 #include "fvMeshPrimitiveLduAddressing.H"
+#include "lduInterfaceFieldPtrsList.H"
+#include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,6 +102,14 @@ protected:
         template<class GeoField>
         void interpolate(GeoField& psi) const;
 
+        //- Freeze values at holes
+        template<class Type>
+        void freezeHoles(fvMatrix<Type>&) const;
+
+        //- Get scalar interfaces of certain type
+        template<class GeoField, class PatchType>
+        lduInterfaceFieldPtrsList scalarInterfaces(const GeoField& psi) const;
+
         //- Add interpolation to matrix (coefficients)
         template<class Type>
         void addInterpolation(fvMatrix<Type>&) const;
@@ -111,25 +121,6 @@ protected:
         //- Debug: correct coupled bc
         template<class GeoField>
         static void correctCoupledBoundaryConditions(GeoField& fld);
-
-        //- Use extended addressing
-        void active(const bool f) const
-        {
-            active_ = f;
-
-            if (active_)
-            {
-                DebugInfo<< "Switching to extended addressing with nFaces:"
-                    << primitiveLduAddr().lowerAddr().size()
-                    << endl;
-            }
-            else
-            {
-                DebugInfo<< "Switching to base addressing with nFaces:"
-                    << fvMesh::lduAddr().lowerAddr().size()
-                    << endl;
-            }
-        }
 
 
 private:
@@ -164,18 +155,43 @@ public:
 
         // Extended addressing
 
-            //- Use extended addressing
-            bool active() const
-            {
-                return active_;
-            }
-
             //- Return extended ldu addressing
             const fvMeshPrimitiveLduAddressing& primitiveLduAddr() const;
 
             //- Return ldu addressing. If active: is (extended)
             //  primitiveLduAddr
             virtual const lduAddressing& lduAddr() const;
+
+            //- Return old to new face addressing
+            const labelList& reverseFaceMap() const
+            {
+                return reverseFaceMap_;
+            }
+
+            //- Return true if using extended addressing
+            bool active() const
+            {
+                return active_;
+            }
+
+            //- Enable/disable extended addressing
+            void active(const bool f) const
+            {
+                active_ = f;
+
+                if (active_)
+                {
+                    DebugInfo<< "Switching to extended addressing with nFaces:"
+                        << primitiveLduAddr().lowerAddr().size()
+                        << endl;
+                }
+                else
+                {
+                    DebugInfo<< "Switching to base addressing with nFaces:"
+                        << fvMesh::lduAddr().lowerAddr().size()
+                        << endl;
+                }
+            }
 
 
         // Overset

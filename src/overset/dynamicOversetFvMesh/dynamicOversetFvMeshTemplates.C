@@ -26,6 +26,7 @@ License
 #include "volFields.H"
 #include "fvMatrix.H"
 #include "cellCellStencilObject.H"
+#include "oversetFvPatchField.H"
 
 // * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
 
@@ -77,41 +78,34 @@ void Foam::dynamicOversetFvMesh::interpolate(GeoField& psi) const
 }
 
 
-//template<class T>
-//void Foam::dynamicOversetFvMesh::setReference(fvMatrix<T>& m) const
-//{
-//    const mapDistribute& map = cellInterpolationMap();
-//    const List<scalarList>& wghts = cellInterpolationWeights();
-//    const labelListList& stencil = cellStencil();
-//    const labelList& cellIDs = interpolationCells();
-//    const scalarList& factor = cellInterpolationWeight();
-//
-//    Field<T> work(m.psi());
-//    map.mapDistributeBase::distribute(work, UPstream::msgType()+1);
-//
-//    forAll(cellIDs, i)
-//    {
-//        label celli = cellIDs[i];
-//
-//        const scalarList& w = wghts[celli];
-//        const labelList& nbrs = stencil[celli];
-//        const scalar f = factor[celli];
-//
-//        //Pout<< "Interpolating " << celli << " from values:" << endl;
-//        T s(pTraits<T>::zero);
-//        forAll(nbrs, nbrI)
-//        {
-//            //Pout<< "    " << work[nbrs[nbrI]]
-//            //    << " from slot " << nbrs[nbrI] << endl;
-//            s += w[nbrI]*work[nbrs[nbrI]];
-//        }
-//        //Pout<< "Interpolated value:" << s << endl;
-//        const T oldPsi = m.psi()[celli];
-//        m.setReference(celli, (1.0-f)*oldPsi + f*s, true);
-//        Pout<< "psi was:" << oldPsi << " now forcing to:"
-//            << (1.0-f)*oldPsi + f*s << endl;
-//    }
-//}
+template<class GeoField, class PatchType>
+Foam::lduInterfaceFieldPtrsList
+Foam::dynamicOversetFvMesh::scalarInterfaces(const GeoField& psi) const
+{
+    const typename GeoField::Boundary& bpsi = psi.boundaryField();
+
+    lduInterfaceFieldPtrsList interfaces(bpsi.size());
+
+    forAll(interfaces, patchi)
+    {
+        if
+        (
+            isA<lduInterfaceField>(bpsi[patchi])
+         && isA<PatchType>(bpsi[patchi])
+        )
+        {
+            interfaces.set
+            (
+                patchi,
+                &refCast<const lduInterfaceField>
+                (
+                    bpsi[patchi]
+                )
+            );
+        }
+    }
+    return interfaces;
+}
 
 
 template<class Type>
@@ -185,6 +179,7 @@ void Foam::dynamicOversetFvMesh::addInterpolation(fvMatrix<Type>& m) const
         }
     }
 
+
     forAll(m.internalCoeffs(), patchI)
     {
         const labelUList& fc = addr.patchAddr(patchI);
@@ -205,6 +200,76 @@ void Foam::dynamicOversetFvMesh::addInterpolation(fvMatrix<Type>& m) const
                     intCoeffs[i] = pTraits<Type>::zero;
                     bouCoeffs[i] = pTraits<Type>::zero;
                 }
+            }
+        }
+    }
+
+    // NOTE: For a non-scalar matrix, in the function fvMatrix::solveSegregated
+    // it uses updateInterfaceMatrix to correct for remote source contributions.
+    // This unfortunately also triggers the overset interpolation which then
+    // produces a non-zero source for interpolated cells.
+    // The procedure below calculates this contribution 'correctionSource'
+    // and substracts it from the source later in order to compensate.
+    Field<Type> correctionSource(diag.size(), pTraits<Type>::zero);
+
+    if (pTraits<Type>::nComponents > 1)
+    {
+        typedef GeometricField<Type, fvPatchField, volMesh> GeoField;
+
+        typename pTraits<Type>::labelType validComponents
+        (
+            this->template validComponents<Type>()
+        );
+
+        // Get all the overset lduInterfaces
+        lduInterfaceFieldPtrsList interfaces
+        (
+            scalarInterfaces<GeoField, oversetFvPatchField<Type>>
+            (
+                m.psi()
+            )
+        );
+
+        const Field<Type>& psiInt = m.psi().primitiveField();
+
+        for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+        {
+            if (component(validComponents, cmpt) != -1)
+            {
+                const scalarField psiCmpt(psiInt.component(cmpt));
+                scalarField corrSourceCmpt(correctionSource.component(cmpt));
+
+                forAll(interfaces, patchi)
+                {
+                    if (interfaces.set(patchi))
+                    {
+                        interfaces[patchi].initInterfaceMatrixUpdate
+                        (
+                            corrSourceCmpt,
+                            true,
+                            psiCmpt,
+                            m.boundaryCoeffs()[patchi].component(cmpt),
+                            cmpt,
+                            Pstream::defaultCommsType
+                        );
+                    }
+                }
+                forAll(interfaces, patchi)
+                {
+                    if (interfaces.set(patchi))
+                    {
+                        interfaces[patchi].updateInterfaceMatrix
+                        (
+                            corrSourceCmpt,
+                            true,
+                            psiCmpt,
+                            m.boundaryCoeffs()[patchi].component(cmpt),
+                            cmpt,
+                            Pstream::defaultCommsType
+                        );
+                    }
+                }
+                correctionSource.replace(cmpt, corrSourceCmpt);
             }
         }
     }
@@ -271,12 +336,14 @@ void Foam::dynamicOversetFvMesh::addInterpolation(fvMatrix<Type>& m) const
         {
             // Create interpolation stencil. Leave any non-local contributions
             //  to be done by oversetFvPatchField updateMatrixInterface
+            // 'correctionSource' is only applied for vector and higher
+            // fvMatrix; it is zero for scalar matrices (see above).
 
             diag[celli] *= (1.0-f);
             diag[celli] += normalisation*f;
 
             source[celli] *= (1.0-f);
-            source[celli] += normalisation*f*pTraits<Type>::zero; // dummy
+            source[celli] -= correctionSource[celli];
 
             //Pout<< "Interpolating " << celli << " with factor:" << f
             //    << " new diag:" << diag[celli]
@@ -328,6 +395,39 @@ Foam::SolverPerformance<Type> Foam::dynamicOversetFvMesh::solve
     const dictionary& dict
 ) const
 {
+    // Check we're running with bcs that can handle implicit matrix manipulation
+    const typename GeometricField<Type, fvPatchField, volMesh>::Boundary bpsi =
+        m.psi().boundaryField();
+
+    bool hasOverset = false;
+    forAll(bpsi, patchi)
+    {
+        if (isA<oversetFvPatchField<Type>>(bpsi[patchi]))
+        {
+            hasOverset = true;
+            break;
+        }
+    }
+
+    if (!hasOverset)
+    {
+        if (debug)
+        {
+            Pout<< "dynamicOversetFvMesh::solve() :"
+                << " bypassing matrix adjustment for field " << m.psi().name()
+                << endl;
+        }
+        return dynamicMotionSolverFvMesh::solve(m, dict);
+    }
+
+    if (debug)
+    {
+        Pout<< "dynamicOversetFvMesh::solve() :"
+            << " adjusting matrix for interpolation for field "
+            << m.psi().name() << endl;
+    }
+
+
     // Switch to extended addressing (requires mesh::update() having been
     // called)
     active(true);
@@ -346,8 +446,7 @@ Foam::SolverPerformance<Type> Foam::dynamicOversetFvMesh::solve
     // Use lower level solver
     SolverPerformance<Type> s(dynamicMotionSolverFvMesh::solve(m, dict));
 
-    // Reset matrix (shuffle faces into original order)
-    //resetMatrix(m);
+    // Restore matrix
     m.upper().transfer(oldUpper);
     m.lower().transfer(oldLower);
     m.internalCoeffs().transfer(oldInt);

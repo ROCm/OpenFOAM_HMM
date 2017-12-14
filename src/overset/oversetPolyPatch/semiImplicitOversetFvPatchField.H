@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,25 +22,28 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::oversetFvPatchField
+    Foam::semiImplicitOversetFvPatchField
 
 Group
     grpCoupledBoundaryConditions
 
 Description
-    Boundary condition for use on overset patches. To be run in combination
-    with special dynamicFvMesh type that inserts local contributions into
-    the matrix. This boundary condition adds the remote contributions.
+    Boundary condition for use on overset patches. Implements update of
+    interpolated cells inside the linear solvers.
+
+SeeAlso
 
 SourceFiles
-    oversetFvPatchField.C
+    semiImplicitOversetFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oversetFvPatchField_H
-#define oversetFvPatchField_H
+#ifndef semiImplicitOversetFvPatchField_H
+#define semiImplicitOversetFvPatchField_H
 
-#include "semiImplicitOversetFvPatchField.H"
+#include "oversetFvPatch.H"
+#include "zeroGradientFvPatchField.H"
+#include "LduInterfaceField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,83 +51,111 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class oversetFvPatchField Declaration
+                 Class semiImplicitOversetFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class oversetFvPatchField
+class semiImplicitOversetFvPatchField
 :
-    public semiImplicitOversetFvPatchField<Type>
+    public LduInterfaceField<Type>,
+    public zeroGradientFvPatchField<Type>
 {
+protected:
+
+    // Protected data
+
+        //- Local reference cast into the overset patch
+        const oversetFvPatch& oversetPatch_;
+
+        //- Master patch ID
+        mutable label masterPatchID_;
+
+
 public:
 
     //- Runtime type information
-    TypeName(oversetFvPatch::typeName_());
+    TypeName("semiImplicitOverset");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        oversetFvPatchField
+        semiImplicitOversetFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        oversetFvPatchField
+        semiImplicitOversetFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given oversetFvPatchField onto a new patch
-        oversetFvPatchField
+        //- Construct by mapping given semiImplicitOversetFvPatchField onto a
+        //  new patch
+        semiImplicitOversetFvPatchField
         (
-            const oversetFvPatchField<Type>&,
+            const semiImplicitOversetFvPatchField<Type>&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        oversetFvPatchField(const oversetFvPatchField<Type>&);
+        semiImplicitOversetFvPatchField
+        (
+            const semiImplicitOversetFvPatchField<Type>&
+        );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type>> clone() const
+        virtual tmp<fvPatchField<Type> > clone() const
         {
-            return tmp<fvPatchField<Type>>
+            return tmp<fvPatchField<Type> >
             (
-                new oversetFvPatchField<Type>(*this)
+                new semiImplicitOversetFvPatchField<Type>(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        oversetFvPatchField
+        semiImplicitOversetFvPatchField
         (
-            const oversetFvPatchField<Type>&,
+            const semiImplicitOversetFvPatchField<Type>&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type>> clone
+        virtual tmp<fvPatchField<Type> > clone
         (
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type>>
+            return tmp<fvPatchField<Type> >
             (
-                new oversetFvPatchField<Type>(*this, iF)
+                new semiImplicitOversetFvPatchField<Type>(*this, iF)
             );
         }
 
 
     // Member functions
 
+        // Access
+
+            //- Return local reference cast into the cyclic AMI patch
+            const oversetFvPatch& oversetPatch() const
+            {
+                return oversetPatch_;
+            }
+
+
         // Evaluation functions
 
-            //- Initialise the evaluation of the patch field
+            //- Evaluate the patch field
+            virtual void evaluate(const Pstream::commsTypes commsType);
+
+             //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
 
             //- Update result field based on interface functionality
@@ -137,6 +168,25 @@ public:
                 const direction cmpt,
                 const Pstream::commsTypes commsType
             ) const;
+
+            //- Update result field based on interface functionality
+            virtual void updateInterfaceMatrix
+            (
+                Field<Type>&,
+                const bool add,
+                const Field<Type>&,
+                const scalarField&,
+                const Pstream::commsTypes commsType
+            ) const
+            {
+                NotImplemented;
+            }
+
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 
@@ -147,7 +197,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "oversetFvPatchField.C"
+#   include "semiImplicitOversetFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

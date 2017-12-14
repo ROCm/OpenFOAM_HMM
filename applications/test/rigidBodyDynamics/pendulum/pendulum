@@ -32,6 +32,7 @@ bodies
         type            sphere;
         mass            1;
         radius          0.05;
+        centreOfMass    (0 10 0);
         transform       (1 0 0 0 1 0 0 0 1) (0 -1 0);
         mergeWith       hinge;
     }
