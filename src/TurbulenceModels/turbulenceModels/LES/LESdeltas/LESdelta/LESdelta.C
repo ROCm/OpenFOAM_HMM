@@ -66,12 +66,13 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
 (
     const word& name,
     const turbulenceModel& turbulence,
-    const dictionary& dict
+    const dictionary& dict,
+    const word& lookupName
 )
 {
-    const word deltaType(dict.lookup("delta"));
+    const word deltaType(dict.lookup(lookupName));
 
-    Info<< "Selecting LES delta type " << deltaType << endl;
+    Info<< "Selecting LES " << lookupName << " type " << deltaType << endl;
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(deltaType);
 
@@ -94,12 +95,13 @@ Foam::autoPtr<Foam::LESdelta> Foam::LESdelta::New
     const word& name,
     const turbulenceModel& turbulence,
     const dictionary& dict,
-    const dictionaryConstructorTable& additionalConstructors
+    const dictionaryConstructorTable& additionalConstructors,
+    const word& lookupName
 )
 {
-    const word deltaType(dict.lookup("delta"));
+    const word deltaType(dict.lookup(lookupName));
 
-    Info<< "Selecting LES delta type " << deltaType << endl;
+    Info<< "Selecting LES " << lookupName << " type " << deltaType << endl;
 
     // First any additional ones
     {
