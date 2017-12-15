@@ -13,7 +13,7 @@
 #     etc/config.sh/mpi
 #
 # Description
-#     Setup file for communications library (MPI) for OpenFOAM
+#     Setup for MPI communications library for OpenFOAM
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #     For USERMPI, the user is responsible for supplying an appropriate

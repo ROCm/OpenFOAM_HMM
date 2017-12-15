@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -20,9 +20,8 @@
 #     actually exist at the time of sourcing.
 #
 # Note
-#     When building OpenFOAM, any changes made here MUST be made in the
-#     equivalent config.sh version too, since that is the one which will
-#     be used during the build process.
+#     Changes made here MUST be made in the equivalent config.sh version too,
+#     since that is the one used in the build process.
 #
 # It is recommended to use VTK sources from ParaView (5.0.1 or later)
 #

@@ -13,15 +13,15 @@
 #     etc/config.sh/ccmio
 #
 # Description
-#     Setup file for libccmio include/libraries.
+#     Setup for LIBCCMIO include/libraries.
 #     Sourced during wmake process only.
 #
 #     Static libraries (recommended) are found under CCMIO_ARCH_PATH/lib.
 #     Dynamic libraries are found under FOAM_EXT_LIBBIN path.
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process
+#     No csh version. This file is only used by wmake.
+#
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

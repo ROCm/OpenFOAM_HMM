@@ -13,30 +13,26 @@
 #     etc/config.sh/ADIOS
 #
 # Description
-#     Setup file for ADIOS include/libraries.
+#     Setup for ADIOS include/libraries (usually ThirdParty installation).
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
-#     If using system-wide installations, use the following settings:
+#     To disable its use:               adios_version=adios-none
+#     For system-wide installations:    adios_version=adios-system
 #
-#         adios_version=adios-system
-#
-#     If the system adios is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         adios_version=adios-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify adios-system
-#         - provide full paths for ADIOS_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use adios-system
+#       2. and provide full path for ADIOS_ARCH_PATH
 #
 # Note
 #     Since ADIOS is a static library build, the libraries are renamed
 #     for the appropriate MPI. Eg, libadios_openmpi-system
 #
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-adios_version=ADIOS-1.12.0
+adios_version=ADIOS-1.13.0
 export ADIOS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
 
 # END OF (NORMAL) USER EDITABLE PART

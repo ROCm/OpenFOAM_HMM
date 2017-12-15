@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -13,32 +13,21 @@
 #     etc/config.sh/scotch
 #
 # Description
-#     Setup file for scotch include/libraries.
+#     Setup for SCOTCH include/libraries (usually ThirdParty installation).
 #     Sourced during wmake process only.
 #
-#     Normally used to specify the scotch version and location for a
-#     ThirdParty installation.
+#     To disable its use:               SCOTCH_VERSION=scotch-none
+#     For system-wide installations:    SCOTCH_VERSION=scotch-system
 #
-#     If using system-wide installations, use the following setting:
-#
-#         SCOTCH_VERSION=scotch-system
-#
-#     If the system scotch is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         SCOTCH_VERSION=scotch-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify scotch-system
-#         - provide full path for SCOTCH_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use scotch-system
+#       2. and provide full path for SCOTCH_ARCH_PATH
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process.
+#     No csh version. This file is only used by wmake.
 #
-#     Scotch can also be entirely disabled, by either renaming this file or
-#     by creating an empty one with the same name at a user or site location.
-#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

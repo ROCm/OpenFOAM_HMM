@@ -10,10 +10,10 @@
 #     <http://www.gnu.org/licenses/>.
 #
 # File
-#     config.csh/ensight
+#     etc/config.csh/ensight
 #
 # Description
-#     Setup file for Ensight
+#     Setup for ENSIGHT
 #     Sourced from OpenFOAM-*/etc/cshrc
 #
 #------------------------------------------------------------------------------

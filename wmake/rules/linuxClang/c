@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cWARN        = -Wall
+cWARN       = -Wall
 
 cc          = clang -m32
 

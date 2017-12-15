@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -109,7 +109,6 @@ unsetenv OPAL_PREFIX
 unsetenv ENSIGHT9_READER
 unsetenv ParaView_DIR
 unsetenv ParaView_INCLUDE_DIR
-unsetenv ParaView_MAJOR
 unsetenv ParaView_VERSION
 unsetenv PV_PLUGIN_PATH
 unsetenv VTK_DIR
@@ -118,6 +117,8 @@ unsetenv VTK_DIR
 # unset other ThirdParty environment variables
 
 unsetenv ADIOS_ARCH_PATH
+unsetenv ADIOS1_ARCH_PATH
+unsetenv ADIOS2_ARCH_PATH
 unsetenv BOOST_ARCH_PATH
 unsetenv CCMIO_ARCH_PATH
 unsetenv CGAL_ARCH_PATH
@@ -141,14 +142,12 @@ if ( $?foamClean ) then
     if ($?LD_LIBRARY_PATH) then
         set cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"`
         if ( $status == 0 ) setenv LD_LIBRARY_PATH $cleaned
-
         if ( ${%LD_LIBRARY_PATH} == 0 ) unsetenv LD_LIBRARY_PATH
     endif
 
     if ($?MANPATH) then
         set cleaned=`$foamClean "$MANPATH" "$foamOldDirs"`
         if ( $status == 0 ) setenv MANPATH $cleaned
-
         if ( ${%MANPATH} == 0 ) unsetenv MANPATH
     endif
 
