@@ -13,8 +13,7 @@
 #     etc/config.csh/settings
 #
 # Description
-#     Setup file for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
+#     Settings for OpenFOAM, sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
 #------------------------------------------------------------------------------
 

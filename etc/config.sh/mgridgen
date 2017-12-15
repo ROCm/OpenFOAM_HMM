@@ -13,32 +13,24 @@
 #     etc/config.sh/mgridgen
 #
 # Description
-#     Setup file for MGridGen include/libraries.
+#     Setup for MGRIDGEN include/libraries (usually ThirdParty installation).
 #     Sourced during wmake process only.
 #
 #     Normally used to specify the MGridGen version and location for a
 #     ThirdParty installation.
 #
-#     If using system-wide installations, use the following setting:
+#     To disable its use:               MGRIDGEN_VERSION=mgridgen-none
+#     For system-wide installations:    MGRIDGEN_VERSION=mgridgen-system
 #
-#         MGRIDGEN_VERSION=mgridgen-system
-#
-#     If the system mgridgen is unusable and you don't have or want
-#     a ThirdParty installation:
-#
-#         MGRIDGEN_VERSION=mgridgen-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify mgridgen-system
-#         - provide full path for MGRIDGEN_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use mgridgen-system
+#       2. and provide full path for MGRIDGEN_ARCH_PATH
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process.
+#     No csh version. This file is only used by wmake.
 #
-#     MGridGen can be entirely disabled, by either renaming this file or
-#     by creating an empty one with the same name at a user or site location.
-#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

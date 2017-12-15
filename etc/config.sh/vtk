@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -21,8 +21,8 @@
 #
 # Note
 #     When _foamAddLib is unset
-#         - the vtk_version, mesa_version variables are retained.
-#           (for future integration into ThirdParty build)
+#       - vtk_version, mesa_version variables are retained.
+#         (for future integration into ThirdParty build)
 #
 # It is recommended to use VTK sources from ParaView (5.0.1 or later)
 #

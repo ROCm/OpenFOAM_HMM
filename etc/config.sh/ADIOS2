@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -10,52 +10,39 @@
 #     <http://www.gnu.org/licenses/>.
 #
 # File
-#     etc/config.sh/ADIOS
+#     etc/config.sh/ADIOS2
 #
 # Description
-#     Setup for ADIOS include/libraries (usually ThirdParty installation).
+#     Setup for ADIOS2 include/libraries (usually ThirdParty installation).
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
-#     To disable its use:               adios_version=adios-none
-#     For system-wide installations:    adios_version=adios-system
-#
-#     For central installations not located under ThirdParty:
-#       1. use adios-system
-#       2. and provide full path for ADIOS_ARCH_PATH
-#
-# Note
-#     Since ADIOS is a static library build, the libraries are renamed
-#     for the appropriate MPI. Eg, libadios_openmpi-system
-#
-#     Can also disable by renaming/removing this file or by creating an empty
-#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-adios_version=ADIOS-1.13.0
-export ADIOS_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
+adios2_version=ADIOS2-git
+export ADIOS2_ARCH_PATH=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios2_version
 
 # END OF (NORMAL) USER EDITABLE PART
 #------------------------------------------------------------------------------
 if [ "$FOAM_VERBOSE" -a "$PS1" ]
 then
-    echo "Using adios ($adios_version)  ->  $ADIOS_ARCH_PATH" 1>&2
+    echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH" 1>&2
 fi
 
 if command -v _foamAddPath >/dev/null 2>&1  # normal sourcing
 then
-    # If ADIOS_ARCH_PATH does not end with '-system' or '-none',
+    # If *_ARCH_PATH does not end with '-system' or '-none',
     # it is located within ThirdParty, or a central installation
     # outside of ThirdParty and should be added to the path.
 
-    ending="${ADIOS_ARCH_PATH##*-}"
+    ending="${ADIOS2_ARCH_PATH##*-}"
     if [ "$ending" != none -a "$ending" != system ]
     then
         # PATH was already cleaned by etc/bashrc caller
-        _foamAddPath $ADIOS_ARCH_PATH/bin
+        _foamAddPath $ADIOS2_ARCH_PATH/bin
     fi
 
-    unset adios_version ending
+    unset adios2_version ending
 
 fi
 

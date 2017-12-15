@@ -13,26 +13,25 @@
 #     etc/config.sh/gperftools
 #
 # Description
-#     Setup file for gperftools binaries and libraries.
+#     Setup file for GPERFTOOLS binaries/libraries.
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
-#     If using system-wide installations, use the following settings:
+#     To disable its use:               gperftools_version=gperftools-none
+#     For system-wide installations:    gperftools_version=gperftools-system
 #
-#         gperftools_version=gperftools-system
-#
-#     If the system gperftools is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         gperftools_version=gperftools-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify gperftools-system
-#         - provide full paths for GPERFTOOLS_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use gperftools-system
+#       2. and provide full path for GPERFTOOLS_ARCH_PATH
 #
 # Note
 #     When _foamAddLib is unset (eg, called from makeGperftools):
-#         - gperftools_version variable are retained.
-#         - the LD_LIBRARY_PATH and PATH are not adjusted.
+#       - gperftools_version variable are retained.
+#       - the LD_LIBRARY_PATH and PATH are not adjusted.
+#
+#     No csh version, This file is only used by wmake.
+#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

@@ -105,7 +105,6 @@ fi
 unset ENSIGHT9_READER
 unset ParaView_DIR
 unset ParaView_INCLUDE_DIR
-unset ParaView_MAJOR
 unset ParaView_VERSION
 unset PV_PLUGIN_PATH
 unset VTK_DIR
@@ -114,6 +113,8 @@ unset VTK_DIR
 # unset other ThirdParty environment variables
 
 unset ADIOS_ARCH_PATH
+unset ADIOS1_ARCH_PATH
+unset ADIOS2_ARCH_PATH
 unset BOOST_ARCH_PATH
 unset CCMIO_ARCH_PATH
 unset CGAL_ARCH_PATH

@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -13,32 +13,21 @@
 #     etc/config.sh/metis
 #
 # Description
-#     Setup file for metis include/libraries.
+#     Setup for METIS include/libraries (usually ThirdParty installation).
 #     Sourced during wmake process only.
 #
-#     Normally used to specify the metis version and location for a
-#     ThirdParty installation.
+#     To disable its use:               METIS_VERSION=metis-none
+#     For system-wide installations:    METIS_VERSION=metis-system
 #
-#     If using system-wide installations, use the following setting:
-#
-#         METIS_VERSION=metis-system
-#
-#     If the system metis is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         METIS_VERSION=metis-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify metis-system
-#         - provide full path for METIS_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use metis-system
+#       2. and provide full path for METIS_ARCH_PATH
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process.
+#     No csh version. This file is only used by wmake.
 #
-#     Metis can also be entirely disabled, by either renaming this file or
-#     by creating an empty one with the same name at a user or site location.
-#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

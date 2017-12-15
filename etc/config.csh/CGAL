@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -16,26 +16,24 @@
 #     Setup file for CGAL (& boost) include/libraries.
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
-#     If using system-wide installations, use the following settings:
-#
-#         boost_version=boost-system
-#         cgal_version=cgal-system
-#
-#     If the system boost/cgal is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
+#     To disable its use:
 #         boost_version=boost-none
 #         cgal_version=cgal-none
 #
-#     If using a central installation, but not located under ThirdParty:
-#         - specify boost-system / cgal-system
-#         - provide full paths for BOOST_ARCH_PATH / CGAL_ARCH_PATH
+#     For system-wide installations:
+#         boost_version=boost-system
+#         cgal_version=cgal-system
+#
+#     For central installations not located under ThirdParty:
+#       1. use boost-system / cgal-system
+#       2. and provide full paths for BOOST_ARCH_PATH / CGAL_ARCH_PATH
 #
 # Note
-#     When building OpenFOAM, any changes made here MUST be made in the
-#     equivalent config.sh version too, since that is the one which will
-#     be used during the build process.
+#     Changes made here MUST be made in the equivalent config.sh version too,
+#     since that is the one used in the build process.
 #
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
