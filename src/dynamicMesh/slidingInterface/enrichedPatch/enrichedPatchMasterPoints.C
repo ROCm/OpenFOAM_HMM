@@ -28,11 +28,6 @@ License
 #include "demandDrivenData.H"
 #include "DynamicList.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::enrichedPatch::nFaceHits_ = 4;
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::enrichedPatch::calcMasterPointFaces() const
@@ -63,11 +58,8 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
 
         for (const label pointi : curFace)
         {
-            DynamicList<label>& dynLst = mpf(pointi); // Get or create
-
-            dynLst.reserve(primitiveMesh::facesPerPoint_); // Min size for list
-
-            dynLst.append(facei);
+            // Existing or auto-vivify DynamicList
+            mpf(pointi).append(facei);
         }
     }
 
@@ -86,11 +78,8 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
             // Index of projected point corresponding to this slave point
             const label mergedPointi = pointMergeMap()[slaveMeshPoints[pointi]];
 
-            DynamicList<label>& dynLst = mpf(mergedPointi); // Get or create
-
-            dynLst.reserve(primitiveMesh::facesPerPoint_); // Min size for list
-
-            dynLst.append(slavePointFaceHits_[pointi].hitObject());
+            // Existing or auto-vivify DynamicList
+            mpf(mergedPointi).append(slavePointFaceHits_[pointi].hitObject());
         }
     }
 
