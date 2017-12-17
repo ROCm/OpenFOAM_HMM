@@ -14,7 +14,7 @@
 #     foamConfigurePaths
 #
 # Description
-#     Adjust hardcoded versions and installation paths (for bash, POSIX shell).
+#     Adjust hardcoded installation versions and paths in bashrc and config.sh/
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -30,8 +30,8 @@ usage: ${0##*/}
   -SP | -float32          specify 'WM_PRECISION_OPTION'
   -DP | -float64          specify 'WM_PRECISION_OPTION'
   -int32 | -int64         specify 'WM_LABEL_SIZE'
-  -system NAME            specify 'system' compiler to be used
-  -third  NAME            specify 'ThirdParty' compiler to be used
+  -system NAME            specify 'system' compiler to use (eg, Gcc, Icc,...)
+  -third  NAME            specify 'ThirdParty' compiler to use (eg, Clang40,...)
   -boost VER              specify 'boost_version'
   -boost-path DIR         specify 'BOOST_ARCH_PATH'
   -cgal ver               specify 'cgal_version'
@@ -40,16 +40,18 @@ usage: ${0##*/}
   -cmake VER              specify 'cmake_version'
   -fftw VER               specify 'fffw_version'
   -fftw-path DIR          specify 'FFTW_ARCH_PATH'
+  -kahip VER              specify 'KAHIP_VERSION'
+  -kahip-path DIR         specify 'KAHIP_ARCH_PATH'
   -metis ver              specify 'METIS_VERSION'
   -metis-path DIR         specify 'METIS_ARCH_PATH'
   -paraview VER           specify 'ParaView_VERSION' (eg, 5.4.1)
   -paraview-path DIR      specify 'ParaView_DIR' (eg, /opt/ParaView-5.4.1)
-  -mpi NAME               specify type for 'WM_MPLIB' (eg, FJMPI, INTELMPI, etc)
+  -mpi NAME               specify 'WM_MPLIB' type (eg, FJMPI, INTELMPI, etc)
   -openmpi VER            specify ThirdParty openmpi version for 'FOAM_MPI'
   -openmpi-system         activate system openmpi
   -openmpi-third          activate ThirdParty openmpi (using default version)
   -scotch VER             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
-  -scotch-path dir        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
+  -scotch-path DIR        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
   -vtk  VER               specify 'vtk_version' (eg, VTK-7.1.0)
   -mesa VER               specify 'mesa_version' (eg, mesa-13.0.1)
   -sigfpe | -no-sigfpe    [defunct - now under etc/controlDict]
