@@ -34,43 +34,19 @@ InClass
 template<template<class> class patchType, class meshType>
 void Foam::vtkPVFoam::updateInfoFields
 (
-    vtkDataArraySelection* select
+    vtkDataArraySelection* select,
+    const IOobjectList& objects
 )
 {
     if (debug)
     {
         Info<< "<beg> updateInfoFields <"
             << meshType::Mesh::typeName
-            << "> [meshPtr=" << (meshPtr_ ? "set" : "null") << "]"
-            << endl;
+            << "> [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]"
+            << nl;
     }
 
-    HashSet<string> enabled;
-    if (!select->GetNumberOfArrays() && !meshPtr_)
-    {
-        // Enable 'p' and 'U' only on the first call
-        enabled = { "p", "U" };
-    }
-    else
-    {
-        // Preserve the enabled selections
-        enabled = getSelectedArraySet(select);
-    }
-
-    select->RemoveAllArrays();
-
-    // use the db directly since this might be called without a mesh,
-    // but the region must get added back in
-    word regionPrefix;
-    if (meshRegion_ != polyMesh::defaultRegion)
-    {
-        regionPrefix = meshRegion_;
-    }
-
-    // Search for list of objects for this time and mesh region
-    IOobjectList objects(dbPtr_(), dbPtr_().timeName(), regionPrefix);
-
-    // Add volume fields to GUI
+    // Add geometric fields (volume/area) to GUI
     addToSelection<GeometricField<scalar, patchType, meshType>>
     (
         select,
@@ -91,14 +67,13 @@ void Foam::vtkPVFoam::updateInfoFields
         select,
         objects
     );
-
     addToSelection<GeometricField<tensor, patchType, meshType>>
     (
         select,
         objects
     );
 
-    // Add dimensioned fields to GUI
+    // Add dimensioned fields (volume/area) to GUI
     addToSelection<DimensionedField<scalar, meshType>>
     (
         select,
@@ -125,15 +100,12 @@ void Foam::vtkPVFoam::updateInfoFields
         objects
     );
 
-
-    // Restore the enabled selections
-    setSelectedArrayEntries(select, enabled);
-
     if (debug)
     {
-        Info<< "<end> updateInfoFields" << endl;
+        Info<< "<end> updateInfoFields" << nl;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -99,6 +99,7 @@ namespace Foam
 // OpenFOAM class forward declarations
 class argList;
 class Time;
+class faMesh;
 class fvMesh;
 class IOobjectList;
 class polyPatch;
@@ -127,9 +128,8 @@ class vtkPVFoam
         //  with the output fields.
         //  The original copy is reused for different timestep
         template<class DataType>
-        class foamVtkCaching
+        struct foamVtkCaching
         {
-        public:
             typedef DataType dataType;
 
             //- The geometry, without any cell/point data
@@ -208,7 +208,7 @@ class vtkPVFoam
 
 
         //- Bookkeeping for vtkPolyData
-        class foamVtpData
+        struct foamVtpData
         :
             public foamVtkCaching<vtkPolyData>,
             public foamVtkMeshMaps
@@ -216,7 +216,7 @@ class vtkPVFoam
 
 
         //- Bookkeeping for vtkUnstructuredGrid
-        class foamVtuData
+        struct foamVtuData
         :
             public foamVtkCaching<vtkUnstructuredGrid>,
             public foamVtkMeshMaps
@@ -231,8 +231,11 @@ class vtkPVFoam
         //- OpenFOAM time control
         autoPtr<Time> dbPtr_;
 
-        //- OpenFOAM mesh
-        fvMesh* meshPtr_;
+        //- OpenFOAM finite volume mesh
+        fvMesh* volMeshPtr_;
+
+        //- OpenFOAM finite area mesh
+        faMesh* areaMeshPtr_;
 
         //- The mesh region
         word meshRegion_;
@@ -262,8 +265,9 @@ class vtkPVFoam
         //  used to index into selectedPartIds and thus indirectly into
         //  cachedVtp, cachedVtu
         arrayRange rangeVolume_;
+        arrayRange rangeArea_;
         arrayRange rangePatches_;
-        arrayRange rangeLagrangian_;
+        arrayRange rangeClouds_;
         arrayRange rangeCellZones_;
         arrayRange rangeFaceZones_;
         arrayRange rangePointZones_;
@@ -294,6 +298,9 @@ class vtkPVFoam
 
         //- Internal mesh info
         void updateInfoInternalMesh(vtkDataArraySelection* select);
+
+        //- Finite area mesh info
+        void updateInfoAreaMesh(vtkDataArraySelection* select);
 
         //- Lagrangian info
         void updateInfoLagrangian(vtkDataArraySelection* select);
@@ -326,8 +333,15 @@ class vtkPVFoam
         template<template<class> class patchType, class meshType>
         void updateInfoFields
         (
-            vtkDataArraySelection* select
+            vtkDataArraySelection* select,
+            const IOobjectList& objects
         );
+
+        //- Volume/Area field info
+        void updateInfoContinuumFields(vtkDataArraySelection* select);
+
+        //- Point field info
+        void updateInfoPointFields(vtkDataArraySelection* select);
 
         //- Lagrangian field info
         void updateInfoLagrangianFields(vtkDataArraySelection* select);
@@ -335,8 +349,11 @@ class vtkPVFoam
 
       // Mesh conversion functions
 
-        //- Convert InternalMesh
+        //- Convert internalMesh
         void convertMeshVolume();
+
+        //- Convert areaMesh
+        void convertMeshArea();
 
         //- Convert Lagrangian points
         void convertMeshLagrangian();
@@ -490,8 +507,11 @@ class vtkPVFoam
         ) const;
 
 
-        //- Convert volume fields
+        //- Convert finite volume fields
         void convertVolFields();
+
+        //- Convert finite area fields
+        void convertAreaFields();
 
         //- Convert point fields
         void convertPointFields();
@@ -525,6 +545,14 @@ class vtkPVFoam
         (
             const fvMesh& mesh,
             const PtrList<patchInterpolator>& patchInterpList,
+            const IOobjectList& objects
+        );
+
+        //- Area fields - all types
+        template<class Type>
+        void convertAreaFields
+        (
+            const faMesh& mesh,
             const IOobjectList& objects
         );
 
@@ -631,7 +659,7 @@ public:
         //- Set the runTime to the first plausible request time,
         //  returns the timeIndex
         //  sets to "constant" on error
-        int setTime(int count, const double requestTimes[]);
+        int setTime(const std::vector<double>& requestTimes);
 
 
         //- The current time index

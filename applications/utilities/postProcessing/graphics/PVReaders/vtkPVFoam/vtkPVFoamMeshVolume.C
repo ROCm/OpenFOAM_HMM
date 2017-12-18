@@ -115,7 +115,7 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
 {
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
@@ -209,7 +209,7 @@ vtkSmartPointer<vtkUnstructuredGrid> Foam::vtkPVFoam::volumeVTKMesh
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 

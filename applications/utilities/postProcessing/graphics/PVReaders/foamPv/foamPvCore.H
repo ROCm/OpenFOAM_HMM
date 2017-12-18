@@ -119,11 +119,49 @@ public:
             setStart(startAt);
         }
 
-
         //- Increment the size
         void operator+=(label n)
         {
             setSize(size() + n);
+        }
+
+        //- True if the labelRange intersects any key in the Map
+        template<class T>
+        bool intersects(const Map<T>& map) const
+        {
+            for (const label idx : *this)
+            {
+                if (map.found(idx))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        //- The intersection ids with keys in the Map
+        template<class T>
+        List<label> intersection(const Map<T>& map) const
+        {
+            List<label> indices(Foam::min(map.size(), this->size()));
+
+            if (indices.size())
+            {
+                label n = 0;
+
+                for (const label idx : *this)
+                {
+                    if (map.found(idx))
+                    {
+                        indices[n++] = idx;
+                    }
+                }
+
+                indices.setSize(n);
+            }
+
+            return indices;
         }
 
     }; // End class arrayRange
@@ -139,6 +177,7 @@ private:
         //- Disallow default bitwise assignment
         void operator=(const foamPvCore&) = delete;
 
+
 public:
 
     //- Static data members
@@ -146,8 +185,15 @@ public:
 
 
     //- Construct null
-    foamPvCore()
-    {}
+    foamPvCore() = default;
+
+
+    //- Print information about vtkDataArraySelection
+    static Ostream& printDataArraySelection
+    (
+        Ostream& os,
+        vtkDataArraySelection* select
+    );
 
 
     //- Convenience method for the VTK multiblock API
