@@ -37,7 +37,6 @@ Description
 #include "polyMesh.H"
 #include "Fstream.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "preservePatchTypes.H"
 #include "emptyPolyPatch.H"
 #include "wallPolyPatch.H"

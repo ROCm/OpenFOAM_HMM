@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ Class
 
 Description
     A subset of mesh points.
+
     The labels of points in the zone can be obtained from the addressing()
     list.
 
@@ -109,11 +110,23 @@ public:
 
     // Constructors
 
+        //- Construct an empty zone
+        pointZone(const word& name, const label index, const pointZoneMesh& zm);
+
         //- Construct from components
         pointZone
         (
             const word& name,
             const labelUList& addr,
+            const label index,
+            const pointZoneMesh& zm
+        );
+
+        //- Construct from components, transferring addressing
+        pointZone
+        (
+            const word& name,
+            labelList&& addr,
             const label index,
             const pointZoneMesh& zm
         );
@@ -136,25 +149,36 @@ public:
             const pointZoneMesh& zm
         );
 
-        //- Construct given the original zone and resetting the
-        //  point list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, resetting the point addressing.
         pointZone
         (
-            const pointZone& pz,
+            const pointZone& origZone,
             const labelUList& addr,
             const label index,
             const pointZoneMesh& zm
         );
 
-        //- Construct given the original zone,
-        //  resetting the point list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, (move) resetting the point addressing.
         pointZone
         (
-            const pointZone& pz,
+            const pointZone& origZone,
+            labelList&& addr,
+            const label index,
+            const pointZoneMesh& zm
+        );
+
+        //- Construct with a new index and zone mesh information from
+        //- an original zone, (move) resetting the point list.
+        pointZone
+        (
+            const pointZone& origZone,
             const Xfer<labelList>& addr,
             const label index,
             const pointZoneMesh& zm
         );
+
 
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<pointZone> clone(const pointZoneMesh& zm) const

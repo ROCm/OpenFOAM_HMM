@@ -45,6 +45,7 @@ namespace Foam
     );
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::setUpdater::setUpdater

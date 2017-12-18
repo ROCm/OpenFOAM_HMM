@@ -101,12 +101,6 @@ public:
             return selection_;
         }
 
-        //- Return the current field selection
-        wordHashSet& selection()
-        {
-            return selection_;
-        }
-
         //- Read the fieldSelection data from dictionary
         virtual bool read(const dictionary& dict);
 

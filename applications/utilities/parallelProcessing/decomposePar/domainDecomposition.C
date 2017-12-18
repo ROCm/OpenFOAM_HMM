@@ -49,10 +49,8 @@ void Foam::domainDecomposition::mark
     labelList& elementToZone
 )
 {
-    forAll(zoneElems, i)
+    for (const label pointi : zoneElems)
     {
-        label pointi = zoneElems[i];
-
         if (elementToZone[pointi] == -1)
         {
             // First occurrence
@@ -69,7 +67,6 @@ void Foam::domainDecomposition::mark
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
 Foam::domainDecomposition::domainDecomposition
 (
     const IOobject& io,
@@ -98,13 +95,13 @@ Foam::domainDecomposition::domainDecomposition
     decompDictFile_(decompDictFile),
     nProcs_
     (
-        readInt
+        decompositionMethod::nDomains
         (
             decompositionModel::New
             (
                 *this,
                 decompDictFile
-            ).lookup("numberOfSubdomains")
+            )
         )
     ),
     distributed_(false),
@@ -831,11 +828,18 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
 
 
         // Statistics
+        Info<< nl << "Processor " << proci;
 
-        Info<< endl
-            << "Processor " << proci << nl
-            << "    Number of cells = " << procMesh.nCells()
-            << endl;
+        if (procMesh.nCells())
+        {
+            Info<< nl << "    ";
+        }
+        else
+        {
+            Info<< ": ";
+        }
+
+        Info<< "Number of cells = " << procMesh.nCells() << nl;
 
         maxProcCells = max(maxProcCells, procMesh.nCells());
 
@@ -865,9 +869,12 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
             }
         }
 
-        Info<< "    Number of processor patches = " << nProcPatches << nl
-            << "    Number of processor faces = " << nProcFaces << nl
-            << "    Number of boundary faces = " << nBoundaryFaces << endl;
+        if (procMesh.nCells() && (nBoundaryFaces || nProcFaces))
+        {
+            Info<< "    Number of processor patches = " << nProcPatches << nl
+                << "    Number of processor faces = " << nProcFaces << nl
+                << "    Number of boundary faces = " << nBoundaryFaces << nl;
+        }
 
         totProcFaces += nProcFaces;
         totProcPatches += nProcPatches;

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("firePolyMesh");
+    argList::addArgument("firePolyMesh");
     argList::addBoolOption
     (
         "ascii",

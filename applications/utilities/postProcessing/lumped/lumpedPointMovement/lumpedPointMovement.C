@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         "slave",
         "invoke as a slave responder for testing"
     );
-    argList::validArgs.insert("responseFile");
+    argList::addArgument("responseFile");
 
     #include "setRootCase.H"
 

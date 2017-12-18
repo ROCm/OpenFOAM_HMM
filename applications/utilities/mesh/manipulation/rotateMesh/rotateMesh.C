@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
 
-    argList::validArgs.append("n1");
-    argList::validArgs.append("n2");
+    argList::addArgument("n1");
+    argList::addArgument("n2");
 
     #include "setRootCase.H"
     #include "createTime.H"

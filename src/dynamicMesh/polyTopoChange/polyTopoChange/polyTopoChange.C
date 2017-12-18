@@ -3422,7 +3422,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
             pZonePtrs[i] = new pointZone
             (
                 oldPointZones[i].name(),
-                labelList(0),
                 i,
                 newMesh.pointZones()
             );
@@ -3437,8 +3436,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
             fZonePtrs[i] = new faceZone
             (
                 oldFaceZones[i].name(),
-                labelList(0),
-                boolList(0),
                 i,
                 newMesh.faceZones()
             );
@@ -3453,7 +3450,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
             cZonePtrs[i] = new cellZone
             (
                 oldCellZones[i].name(),
-                labelList(0),
                 i,
                 newMesh.cellZones()
             );

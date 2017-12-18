@@ -46,7 +46,7 @@ inline Ostream& printPoint(Ostream& os, const point& p)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("file .. fileN");
+    argList::addArgument("file .. fileN");
     argList::addBoolOption("B", "B-Spline implementation");
     argList::addBoolOption("CMR", "catmull-rom spline (default)");
     argList::addOption

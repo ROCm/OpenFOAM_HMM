@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         "list",
         "List directories or files to be checked"
     );
-    argList::validArgs.insert("file...");
+    argList::addArgument("file...");
 
     argList::addNote
     (

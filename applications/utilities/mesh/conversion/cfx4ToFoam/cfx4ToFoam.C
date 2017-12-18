@@ -41,7 +41,6 @@ Description
 #include "symmetryPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 
 using namespace Foam;
 
@@ -50,7 +49,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("CFX geom file");
+    argList::addArgument("CFX geom file");
     argList::addOption
     (
         "scale",
@@ -545,7 +544,7 @@ int main(int argc, char *argv[])
 
     cellShapeList cellShapes(nMeshCells);
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     label nCreatedCells = 0;
 

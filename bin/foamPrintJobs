@@ -105,14 +105,11 @@ leftStr() {
 #
 #-------------------------------------------------------------------------------
 
+case "$1" in (-h | -help*) usage ;; esac
+
 if [ $# -eq 1 ]
 then
-    if [ "$1" = "-h" -o "$1" = "-help" ]
-    then
-        usage
-    else
-        STATEFILE="$1"
-    fi
+    STATEFILE="$1"
 elif [ $# -eq 0 ]
 then
     STATEFILE=${STATEFILE:-$DEFSTATEFILE}

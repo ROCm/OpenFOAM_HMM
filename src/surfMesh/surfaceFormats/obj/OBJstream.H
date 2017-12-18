@@ -87,10 +87,10 @@ public:
 
 
     //- Destructor
-    ~OBJstream();
+    ~OBJstream() = default;
 
 
-    // Member functions
+    // Member Functions
 
         // Access
 

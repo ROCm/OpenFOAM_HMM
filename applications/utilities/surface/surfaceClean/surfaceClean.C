@@ -53,10 +53,10 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("min length");
-    argList::validArgs.append("min quality");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("min length");
+    argList::addArgument("min quality");
+    argList::addArgument("output surfaceFile");
     argList::addBoolOption
     (
         "noClean",

@@ -89,7 +89,7 @@ tmp<volScalarField> kOmegaSSTDDES<BasicTurbulenceModel>::dTilda
 
     return max
     (
-        lRAS 
+        lRAS
       - fd(magGradU)
        *max
         (

@@ -49,10 +49,7 @@ USAGE
 }
 
 # Simple help
-if [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    usage
-fi
+case "$1" in (-h | -help*) usage ;; esac
 
 #------------------------------------------------------------------------------
 # Default is the current directory

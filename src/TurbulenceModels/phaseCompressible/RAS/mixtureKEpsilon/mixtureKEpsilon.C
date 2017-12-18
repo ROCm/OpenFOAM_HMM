@@ -236,7 +236,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::initMixtureFields()
         this->runTime_.timeName(this->runTime_.startTime().value())
     );
 
-    Ct2_.set
+    Ct2_.reset
     (
         new volScalarField
         (
@@ -252,7 +252,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::initMixtureFields()
         )
     );
 
-    rhom_.set
+    rhom_.reset
     (
         new volScalarField
         (
@@ -268,7 +268,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::initMixtureFields()
         )
     );
 
-    km_.set
+    km_.reset
     (
         new volScalarField
         (
@@ -286,7 +286,7 @@ void mixtureKEpsilon<BasicTurbulenceModel>::initMixtureFields()
     );
     correctInletOutlet(km_(), kl);
 
-    epsilonm_.set
+    epsilonm_.reset
     (
         new volScalarField
         (
@@ -323,10 +323,8 @@ bool mixtureKEpsilon<BasicTurbulenceModel>::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

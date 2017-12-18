@@ -1,0 +1,15 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+runApplication ./Allmesh
+
+# Use stitchMesh with command arguments (no dictionary)
+for dir in x y z
+do
+    runApplication -s dir-$dir stitchMesh -partial outer$dir inner$dir
+done
+
+runApplication checkMesh
+
+# -----------------------------------------------------------------------------

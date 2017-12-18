@@ -46,8 +46,6 @@
 #     This script must exist in one of these locations:
 #     - $WM_PROJECT_INST_DIR/OpenFOAM-<VERSION>/bin
 #     - $WM_PROJECT_INST_DIR/openfoam-<VERSION>/bin
-#     - $WM_PROJECT_INST_DIR/OpenFOAM+<VERSION>/bin
-#     - $WM_PROJECT_INST_DIR/openfoam+<VERSION>/bin
 #     - $WM_PROJECT_INST_DIR/openfoam<VERSION>/bin  (debian version)
 #
 #-------------------------------------------------------------------------------
@@ -146,13 +144,6 @@ guessVersion()
         version="${version%%*-}" # Extra safety, eg openfoam-version-packager
         ;;
 
-    (OpenFOAM+* | openfoam+*)
-        # Alternative naming: OpenFOAM+<VERSION> or openfoam+<VERSION>
-        dirBase="${projectDirName%%+*}+"
-        version="${projectDirName#*+}"
-        version="${version%%*-}" # Extra safety, eg openfoam-version-packager
-        ;;
-
     (openfoam[0-9]*)
         # Debian naming: openfoam<VERSION>
         dirBase="openfoam"
@@ -205,7 +196,7 @@ unset optAll optList optShell optVersion
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     -a | -all)

@@ -75,7 +75,7 @@ while [ "$#" -gt 0 ]
 do
     # echo "$1" 1>&2
     case "$1" in
-    -help)
+    -help*)
         usage
         ;;
 

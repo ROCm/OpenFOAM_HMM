@@ -57,7 +57,7 @@ bool notEqual(const scalar s1, const scalar s2, const scalar tol)
 int main(int argc, char *argv[])
 {
     #include "addTimeOptions.H"
-    argList::validArgs.append("inflate (true|false)");
+    argList::addArgument("inflate (true|false)");
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

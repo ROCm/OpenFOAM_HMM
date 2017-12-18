@@ -5,8 +5,9 @@
 #   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-# This file is part of OpenFOAM, licensed under the GNU General Public License
-# <http://www.gnu.org/licenses/>.
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/bash_completion
@@ -92,9 +93,9 @@ foamAddCompletion()
 # - arg2 = current word
 # - arg3 = previous word
 #
-# The respective options are generated on-the-fly from the application's -help
-# output and cached to the _of_complete_cache_ global associative array with
-# entries formatted as "argOpts.. | boolOpts ..".
+# The respective options are generated on-the-fly from the application's
+# -help-full output and cached to the _of_complete_cache_ global associative
+# array with entries formatted as "argOpts.. | boolOpts ..".
 # The '|' character separates options with and without arguments.
 #
 unset -f _of_complete_ 2>/dev/null
@@ -106,7 +107,7 @@ _of_complete_()
     local choices
 
     case ${prev} in
-    -help|-doc|-srcDoc)
+    -help|-help-full|-doc|-doc-source)
         # These options are usage - we can stop now.
         COMPREPLY=()
         return 0
@@ -130,10 +131,10 @@ _of_complete_()
         # All options
         choices="${_of_complete_cache_[$appName]}"
 
-        # Not in cache, obtain by parsing application -help
+        # Not in cache, obtain by parsing application -help-full
         if [ -z "$choices" ]
         then
-            local helpText=$($appName -help 2>/dev/null | sed -ne '/^  *-/p')
+            local helpText=$($appName -help-full 2>/dev/null | sed -ne '/^  *-/p')
 
             if [ -n "$helpText" ]
             then

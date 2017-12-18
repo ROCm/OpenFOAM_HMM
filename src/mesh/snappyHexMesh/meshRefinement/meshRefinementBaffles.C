@@ -693,10 +693,9 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::subsetBaffles
     // Mark zone per face
     labelList faceToZone(mesh.nFaces(), -1);
 
-    forAll(zoneIDs, i)
+    for (const label zoneID : zoneIDs)
     {
-        label zoneID = zoneIDs[i];
-        UIndirectList<label>(faceToZone, faceZones[zoneID]) = zoneID;
+        labelUIndList(faceToZone, faceZones[zoneID]) = zoneID;
     }
 
 

@@ -44,49 +44,97 @@ namespace Foam
 {
     defineTypeNameAndDebug(decompositionMethod, 0);
     defineRunTimeSelectionTable(decompositionMethod, dictionary);
+    defineRunTimeSelectionTable(decompositionMethod, dictionaryRegion);
+
+    // Fallback name when searching for optional coefficients directories
+    static const word defaultName("coeffs");
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::decompositionMethod::decompositionMethod
-(
-    const dictionary& decompositionDict
-)
-:
-    decompositionDict_(decompositionDict),
-    nProcessors_
-    (
-        readLabel(decompositionDict.lookup("numberOfSubdomains"))
-    )
+Foam::label Foam::decompositionMethod::nDomains(const dictionary& decompDict)
 {
-    // Read any constraints
-    wordList constraintTypes_;
-    if (decompositionDict_.found("constraints"))
+    return readLabel(decompDict.lookup("numberOfSubdomains"));
+}
+
+
+Foam::label Foam::decompositionMethod::nDomains
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+{
+    const label nDomainsGlobal = nDomains(decompDict);
+
+    const dictionary& regionDict(optionalRegionDict(decompDict, regionName));
+
+    label nDomainsRegion;
+    if (regionDict.readIfPresent("numberOfSubdomains", nDomainsRegion))
     {
-        //PtrList<dictionary> constraintsList
-        //(
-        //    decompositionDict_.lookup("constraints")
-        //);
-        //forAll(constraintsList, i)
-        //{
-        //    const dictionary& dict = constraintsList[i];
-        const dictionary& constraintsList = decompositionDict_.subDict
-        (
-            "constraints"
-        );
-        forAllConstIter(dictionary, constraintsList, iter)
+        if (nDomainsRegion >= 1 && nDomainsRegion <= nDomainsGlobal)
+        {
+            return nDomainsRegion;
+        }
+
+        WarningInFunction
+            << "ignoring out of range numberOfSubdomains "
+            << nDomainsRegion << " for region " << regionName
+            << nl << nl
+            << endl;
+    }
+
+    return nDomainsGlobal;
+}
+
+
+const Foam::dictionary& Foam::decompositionMethod::optionalRegionDict
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+{
+    auto finder = decompDict.csearch("regions");
+
+    if (!regionName.empty() && finder.isDict())
+    {
+        finder = finder.dict().csearch(regionName);
+
+        if (finder.isDict())
+        {
+            return finder.dict();
+        }
+    }
+
+    return dictionary::null;
+}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::decompositionMethod::readConstraints()
+{
+    constraints_.clear();
+
+    // Read any constraints
+    wordList constraintTypes;
+
+    const dictionary* dictptr = decompositionDict_.subDictPtr("constraints");
+
+    if (dictptr)
+    {
+        forAllConstIters(*dictptr, iter)
         {
             const dictionary& dict = iter().dict();
 
-            constraintTypes_.append(dict.lookup("type"));
+            constraintTypes.append(dict.lookup("type"));
 
             constraints_.append
             (
                 decompositionConstraint::New
                 (
                     dict,
-                    constraintTypes_.last()
+                    constraintTypes.last()
                 )
             );
         }
@@ -96,7 +144,7 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("preserveBaffles")
-     && !constraintTypes_.found
+     && !constraintTypes.found
         (
             decompositionConstraints::preserveBafflesConstraint::typeName
         )
@@ -111,7 +159,7 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("preservePatches")
-     && !constraintTypes_.found
+     && !constraintTypes.found
         (
             decompositionConstraints::preservePatchesConstraint::typeName
         )
@@ -128,7 +176,7 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("preserveFaceZones")
-     && !constraintTypes_.found
+     && !constraintTypes.found
         (
             decompositionConstraints::preserveFaceZonesConstraint::typeName
         )
@@ -145,7 +193,7 @@ Foam::decompositionMethod::decompositionMethod
     if
     (
         decompositionDict_.found("singleProcessorFaceSets")
-     && !constraintTypes_.found
+     && !constraintTypes.found
         (
             decompositionConstraints::preserveFaceZonesConstraint::typeName
         )
@@ -166,17 +214,144 @@ Foam::decompositionMethod::decompositionMethod
     }
 }
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
+(
+    const dictionary& dict,
+    const word& coeffsName,
+    int select
+)
+{
+    dictionary::const_searcher fnd;
+
+    if
+    (
+        (fnd = dict.csearch(coeffsName)).isDict()
+     ||
+        (
+            !(select & selectionType::EXACT)
+         && (fnd = dict.csearch(defaultName)).isDict()
+        )
+    )
+    {
+        return fnd.dict();
+    }
+
+    // Not found
+    if (select & selectionType::MANDATORY)
+    {
+        FatalIOError
+            << "'" << coeffsName << "' dictionary not found in dictionary "
+            << dict.name() << endl
+            << abort(FatalIOError);
+    }
+
+    if (select & selectionType::NULL_DICT)
+    {
+        return dictionary::null;
+    }
+
+    return dict;
+}
+
+
+const Foam::dictionary& Foam::decompositionMethod::findCoeffsDict
+(
+    const word& coeffsName,
+    int select
+) const
+{
+    dictionary::const_searcher fnd;
+
+    if
+    (
+        !decompositionRegionDict_.empty()
+    &&
+        (
+            (fnd = decompositionRegionDict_.csearch(coeffsName)).isDict()
+         ||
+            (
+                !(select & selectionType::EXACT)
+             && (fnd = decompositionRegionDict_.csearch(defaultName)).isDict()
+            )
+        )
+    )
+    {
+        return fnd.dict();
+    }
+
+    if
+    (
+        (fnd = decompositionDict_.csearch(coeffsName)).isDict()
+     ||
+        (
+            !(select & selectionType::EXACT)
+         && (fnd = decompositionDict_.csearch(defaultName)).isDict()
+        )
+    )
+    {
+        return fnd.dict();
+    }
+
+    // Not found
+    if (select & selectionType::MANDATORY)
+    {
+        FatalIOError
+            << "'" << coeffsName << "' dictionary not found in dictionary "
+            << decompositionDict_.name() << endl
+            << abort(FatalIOError);
+    }
+
+    if (select & selectionType::NULL_DICT)
+    {
+        return dictionary::null;
+    }
+
+    return decompositionDict_;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::decompositionMethod::decompositionMethod
+(
+    const dictionary& decompDict
+)
+:
+    decompositionDict_(decompDict),
+    decompositionRegionDict_(dictionary::null),
+    nDomains_(nDomains(decompDict))
+{
+    readConstraints();
+}
+
+
+Foam::decompositionMethod::decompositionMethod
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionDict_(decompDict),
+    decompositionRegionDict_
+    (
+        optionalRegionDict(decompositionDict_, regionName)
+    ),
+    nDomains_(nDomains(decompDict, regionName))
+{
+    readConstraints();
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 {
-    const word methodType(decompositionDict.lookup("method"));
-
-    Info<< "Selecting decompositionMethod " << methodType << endl;
+    const word methodType(decompDict.lookup("method"));
 
     auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
@@ -190,7 +365,58 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
             << exit(FatalError);
     }
 
-    return autoPtr<decompositionMethod>(cstrIter()(decompositionDict));
+    // verbose
+    {
+        Info<< "Selecting decompositionMethod " << methodType
+            << " [" << (nDomains(decompDict)) << "]" << endl;
+    }
+
+    return autoPtr<decompositionMethod>(cstrIter()(decompDict));
+}
+
+
+Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
+(
+    const dictionary& decompDict,
+    const word& regionName
+
+)
+{
+    const dictionary& regionDict(optionalRegionDict(decompDict, regionName));
+
+    if (regionDict.empty())
+    {
+        // No region-specific information - just forward to normal routine
+        return decompositionMethod::New(decompDict);
+    }
+
+    word methodType(decompDict.lookup("method"));
+    regionDict.readIfPresent("method", methodType);
+
+    auto cstrIter = dictionaryRegionConstructorTablePtr_->cfind(methodType);
+
+    if (!cstrIter.found())
+    {
+        WarningInFunction
+            << nl
+            << "Unknown region decompositionMethod "
+            << methodType << nl << nl
+            << "Valid decompositionMethods : " << endl
+            << dictionaryRegionConstructorTablePtr_->sortedToc() << nl
+            << "Reverting to non-region version" << nl
+            << endl;
+
+        return decompositionMethod::New(decompDict);
+    }
+
+    // verbose
+    {
+        Info<< "Selecting decompositionMethod " << methodType
+            << " [" << (nDomains(decompDict, regionName)) << "] (region "
+            << regionName << ")" << endl;
+    }
+
+    return autoPtr<decompositionMethod>(cstrIter()(decompDict, regionName));
 }
 
 
@@ -341,7 +567,7 @@ void Foam::decompositionMethod::calcCellCells
     // Number of faces per coarse cell
     labelList nFacesPerCell(nLocalCoarse, 0);
 
-    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
         const label own = agglom[faceOwner[facei]];
         const label nei = agglom[faceNeighbour[facei]];
@@ -391,7 +617,7 @@ void Foam::decompositionMethod::calcCellCells
     const labelList& offsets = cellCells.offsets();
 
     // For internal faces is just offsetted owner and neighbour
-    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
         const label own = agglom[faceOwner[facei]];
         const label nei = agglom[faceNeighbour[facei]];
@@ -453,7 +679,7 @@ void Foam::decompositionMethod::calcCellCells
 
         const label endIndex = cellCells.offsets()[celli+1];
 
-        for (label i = startIndex; i < endIndex; i++)
+        for (label i = startIndex; i < endIndex; ++i)
         {
             if (nbrCells.insert(cellCells.m()[i]))
             {
@@ -547,10 +773,10 @@ void Foam::decompositionMethod::calcCellCells
     // Number of faces per coarse cell
     labelList nFacesPerCell(nLocalCoarse, 0);
 
-    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
-        const label own = agglom[faceOwner[faceI]];
-        const label nei = agglom[faceNeighbour[faceI]];
+        const label own = agglom[faceOwner[facei]];
+        const label nei = agglom[faceNeighbour[facei]];
 
         nFacesPerCell[own]++;
         nFacesPerCell[nei]++;
@@ -599,18 +825,18 @@ void Foam::decompositionMethod::calcCellCells
     const labelList& offsets = cellCells.offsets();
 
     // For internal faces is just offsetted owner and neighbour
-    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
     {
-        const label own = agglom[faceOwner[faceI]];
-        const label nei = agglom[faceNeighbour[faceI]];
+        const label own = agglom[faceOwner[facei]];
+        const label nei = agglom[faceNeighbour[facei]];
 
         const label ownIndex = offsets[own] + nFacesPerCell[own]++;
         const label neiIndex = offsets[nei] + nFacesPerCell[nei]++;
 
         m[ownIndex] = globalAgglom.toGlobal(nei);
-        w[ownIndex] = mag(mesh.faceAreas()[faceI]);
+        w[ownIndex] = mag(mesh.faceAreas()[facei]);
         m[neiIndex] = globalAgglom.toGlobal(own);
-        w[ownIndex] = mag(mesh.faceAreas()[faceI]);
+        w[ownIndex] = mag(mesh.faceAreas()[facei]);
     }
 
     // For boundary faces is offsetted coupled neighbour
@@ -661,14 +887,14 @@ void Foam::decompositionMethod::calcCellCells
 
     label startIndex = cellCells.offsets()[0];
 
-    forAll(cellCells, cellI)
+    forAll(cellCells, celli)
     {
         nbrCells.clear();
-        nbrCells.insert(globalAgglom.toGlobal(cellI));
+        nbrCells.insert(globalAgglom.toGlobal(celli));
 
-        const label endIndex = cellCells.offsets()[cellI+1];
+        const label endIndex = cellCells.offsets()[celli+1];
 
-        for (label i = startIndex; i < endIndex; i++)
+        for (label i = startIndex; i < endIndex; ++i)
         {
             if (nbrCells.insert(cellCells.m()[i]))
             {
@@ -678,8 +904,8 @@ void Foam::decompositionMethod::calcCellCells
             }
         }
         startIndex = endIndex;
-        cellCells.offsets()[cellI+1] = newIndex;
-        cellCellWeights.offsets()[cellI+1] = newIndex;
+        cellCells.offsets()[celli+1] = newIndex;
+        cellCellWeights.offsets()[celli+1] = newIndex;
     }
 
     cellCells.m().setSize(newIndex);
@@ -753,7 +979,7 @@ void Foam::decompositionMethod::calcCellCells
 //    labelList nFacesPerCell(nLocalCoarse, 0);
 //
 //    // 1. Internal faces
-//    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+//    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
 //    {
 //        if (!blockedFace[facei])
 //        {
@@ -880,7 +1106,7 @@ void Foam::decompositionMethod::calcCellCells
 //    const labelList& offsets = cellCells.offsets();
 //
 //    // 1. For internal faces is just offsetted owner and neighbour
-//    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+//    for (label facei = 0; facei < mesh.nInternalFaces(); ++facei)
 //    {
 //        if (!blockedFace[facei])
 //        {
@@ -1032,7 +1258,7 @@ void Foam::decompositionMethod::calcCellCells
 //
 //        label endIndex = cellCells.offsets()[celli+1];
 //
-//        for (label i = startIndex; i < endIndex; i++)
+//        for (label i = startIndex; i < endIndex; ++i)
 //        {
 //            if (nbrCells.insert(cellCells.m()[i]))
 //            {
@@ -1180,11 +1406,11 @@ Foam::labelList Foam::decompositionMethod::decompose
 
         forAll(localRegion, celli)
         {
-            label regionI = localRegion[celli];
+            const label regioni = localRegion[celli];
 
-            if (regionCentres[regionI] == point::max)
+            if (regionCentres[regioni] == point::max)
             {
-                regionCentres[regionI] = mesh.cellCentres()[celli];
+                regionCentres[regioni] = mesh.cellCentres()[celli];
             }
         }
 
@@ -1197,18 +1423,18 @@ Foam::labelList Foam::decompositionMethod::decompose
         {
             forAll(localRegion, celli)
             {
-                label regionI = localRegion[celli];
+                const label regioni = localRegion[celli];
 
-                regionWeights[regionI] += cellWeights[celli];
+                regionWeights[regioni] += cellWeights[celli];
             }
         }
         else
         {
             forAll(localRegion, celli)
             {
-                label regionI = localRegion[celli];
+                const label regioni = localRegion[celli];
 
-                regionWeights[regionI] += 1.0;
+                regionWeights[regioni] += 1.0;
             }
         }
 
@@ -1224,11 +1450,11 @@ Foam::labelList Foam::decompositionMethod::decompose
 
         // Implement the explicitConnections since above decompose
         // does not know about them
-        forAll(explicitConnections, i)
+        forAll(explicitConnections, connectioni)
         {
-            const labelPair& baffle = explicitConnections[i];
-            label f0 = baffle.first();
-            label f1 = baffle.second();
+            const labelPair& baffle = explicitConnections[connectioni];
+            const label f0 = baffle.first();
+            const label f1 = baffle.second();
 
             if (!blockedFace[f0] && !blockedFace[f1])
             {
@@ -1292,7 +1518,7 @@ Foam::labelList Foam::decompositionMethod::decompose
             {
                 if (!blockedFace[facei])
                 {
-                    label own = mesh.faceOwner()[facei];
+                    const label own = mesh.faceOwner()[facei];
                     seedFaces[nUnblocked] = facei;
                     seedData[nUnblocked] = minData(finalDecomp[own]);
                     nUnblocked++;
@@ -1361,10 +1587,8 @@ Foam::labelList Foam::decompositionMethod::decompose
                 forAll(f, fp)
                 {
                     const labelList& pFaces = mesh.pointFaces()[f[fp]];
-                    forAll(pFaces, i)
+                    for (const label facei : pFaces)
                     {
-                        label facei = pFaces[i];
-
                         finalDecomp[mesh.faceOwner()[facei]] = proci;
                         if (mesh.isInternalFace(facei))
                         {
@@ -1433,9 +1657,9 @@ void Foam::decompositionMethod::setConstraints
     specifiedProcessorFaces.clear();
     explicitConnections.clear();
 
-    forAll(constraints_, constraintI)
+    forAll(constraints_, constrainti)
     {
-        constraints_[constraintI].add
+        constraints_[constrainti].add
         (
             mesh,
             blockedFace,
@@ -1457,9 +1681,9 @@ void Foam::decompositionMethod::applyConstraints
     labelList& decomposition
 )
 {
-    forAll(constraints_, constraintI)
+    forAll(constraints_, constrainti)
     {
-        constraints_[constraintI].apply
+        constraints_[constrainti].apply
         (
             mesh,
             blockedFace,

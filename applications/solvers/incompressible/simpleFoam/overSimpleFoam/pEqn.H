@@ -5,7 +5,7 @@
     surfaceScalarField rAUf("rAUf", faceMask*fvc::interpolate(rAU));
 
     volVectorField HbyA("HbyA", U);
-    HbyA = constrainHbyA(rAU*UEqn.H(), U, p);
+    HbyA = constrainHbyA(cellMask*rAU*UEqn.H(), U, p);
 
     //mesh.interpolate(HbyA);
     if (massFluxInterpolation)

@@ -25,7 +25,8 @@ Class
     Foam::fileFormats::VTPsurfaceFormat
 
 Description
-    Provide a means of writing VTP (xml) format.
+    Write surfaces in VTP (xml) format.
+
     The output is never sorted by zone.
 
 SourceFiles
@@ -49,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class VTPsurfaceFormat Declaration
+                Class fileFormats::VTPsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -80,36 +81,42 @@ public:
     // Constructors
 
         //- Construct null
-        VTPsurfaceFormat();
+        VTPsurfaceFormat() = default;
 
 
     //- Destructor
-    virtual ~VTPsurfaceFormat()
-    {}
+    virtual ~VTPsurfaceFormat() = default;
 
 
-    // Member Functions
-
-      // Write
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
             const fileName& filename,
-            const MeshedSurfaceProxy<Face>& surf
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
         static void write
         (
             const fileName& filename,
-            const UnsortedMeshedSurface<Face>& surf
+            const UnsortedMeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Write object file
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 };
 

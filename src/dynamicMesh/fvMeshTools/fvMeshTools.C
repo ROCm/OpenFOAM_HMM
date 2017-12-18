@@ -642,7 +642,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             pz[i] = new pointZone
             (
                 pointZoneNames[i],
-                labelList(0),
                 i,
                 mesh.pointZones()
             );
@@ -653,8 +652,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             fz[i] = new faceZone
             (
                 faceZoneNames[i],
-                labelList(0),
-                boolList(0),
                 i,
                 mesh.faceZones()
             );
@@ -665,7 +662,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
             cz[i] = new cellZone
             (
                 cellZoneNames[i],
-                labelList(0),
                 i,
                 mesh.cellZones()
             );

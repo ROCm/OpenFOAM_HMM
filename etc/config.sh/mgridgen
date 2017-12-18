@@ -6,51 +6,31 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/mgridgen
 #
 # Description
-#     Setup file for MGridGen include/libraries.
+#     Setup for MGRIDGEN include/libraries (usually ThirdParty installation).
 #     Sourced during wmake process only.
 #
 #     Normally used to specify the MGridGen version and location for a
 #     ThirdParty installation.
 #
-#     If using system-wide installations, use the following setting:
+#     To disable its use:               MGRIDGEN_VERSION=mgridgen-none
+#     For system-wide installations:    MGRIDGEN_VERSION=mgridgen-system
 #
-#         MGRIDGEN_VERSION=mgridgen-system
-#
-#     If the system mgridgen is unusable and you don't have or want
-#     a ThirdParty installation:
-#
-#         MGRIDGEN_VERSION=mgridgen-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify mgridgen-system
-#         - provide full path for MGRIDGEN_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use mgridgen-system
+#       2. and provide full path for MGRIDGEN_ARCH_PATH
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process.
+#     No csh version. This file is only used by wmake.
 #
-#     MGridGen can be entirely disabled, by either renaming this file or
-#     by creating an empty one with the same name at a user or site location.
-#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

@@ -38,6 +38,8 @@ License
 #include "sigQuit.H"
 #include "sigSegv.H"
 #include "foamVersion.H"
+#include "stringOps.H"
+#include "CStringList.H"
 #include "uncollatedFileOperation.H"
 #include "masterUncollatedFileOperation.H"
 
@@ -45,12 +47,14 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+bool Foam::argList::argsMandatory_ = true;
 bool Foam::argList::bannerEnabled_ = true;
 bool Foam::argList::checkProcessorDirectories_ = true;
 Foam::SLList<Foam::string>    Foam::argList::validArgs;
 Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
+Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
 Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
@@ -77,24 +81,25 @@ Foam::argList::initValidTables::initValidTables()
         "decomposeParDict", "file",
         "read decomposePar dictionary from specified location"
     );
-    validParOptions.set
-    (
-        "decomposeParDict",
-        "file"
-    );
 
     argList::addBoolOption
     (
         "noFunctionObjects",
-        "do not execute functionObjects"
+        "do not execute function objects"
     );
 
     argList::addOption
     (
         "fileHandler",
         "handler",
-        "override the fileHandler"
-     );
+        "override the file handler type"
+    );
+
+    // Some standard option aliases (with or without version warnings)
+//     argList::addOptionCompat
+//     (
+//         "noFunctionObjects", {"no-function-objects", 0}
+//     );
 
     Pstream::addValidParOptions(validParOptions);
 }
@@ -147,48 +152,83 @@ static void printHostsSubscription(const UList<string>& slaveProcs)
     Info<< ")" << nl;
 }
 
+
+// Print information about version, build, arch
+static void printBuildInfo(const bool full=true)
+{
+    Info<<"Using: OpenFOAM-" << Foam::FOAMversion
+        << " (see www.OpenFOAM.com)" << nl
+        << "Build: " << Foam::FOAMbuild << nl;
+
+    if (full)
+    {
+        Info << "Arch:  " << Foam::FOAMbuildArch << nl;
+    }
 }
+
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
+void Foam::argList::addArgument(const string& argumentName)
+{
+    validArgs.append(argumentName);
+}
+
+
 void Foam::argList::addBoolOption
 (
-    const word& opt,
+    const word& optionName,
     const string& usage
 )
 {
-    addOption(opt, "", usage);
+    addOption(optionName, "", usage);
 }
 
 
 void Foam::argList::addOption
 (
-    const word& opt,
+    const word& optionName,
     const string& param,
     const string& usage
 )
 {
-    validOptions.set(opt, param);
+    validOptions.set(optionName, param);
     if (!usage.empty())
     {
-        optionUsage.set(opt, usage);
+        optionUsage.set(optionName, usage);
     }
+}
+
+
+void Foam::argList::addOptionCompat
+(
+    const word& optionName,
+    std::pair<const char*,int> compat
+)
+{
+    validOptionsCompat.insert
+    (
+        compat.first,
+        std::pair<word,int>(optionName, compat.second)
+    );
 }
 
 
 void Foam::argList::addUsage
 (
-    const word& opt,
+    const word& optionName,
     const string& usage
 )
 {
     if (usage.empty())
     {
-        optionUsage.erase(opt);
+        optionUsage.erase(optionName);
     }
     else
     {
-        optionUsage.set(opt, usage);
+        optionUsage.set(optionName, usage);
     }
 }
 
@@ -202,10 +242,16 @@ void Foam::argList::addNote(const string& note)
 }
 
 
-void Foam::argList::removeOption(const word& opt)
+void Foam::argList::removeOption(const word& optionName)
 {
-    validOptions.erase(opt);
-    optionUsage.erase(opt);
+    validOptions.erase(optionName);
+    optionUsage.erase(optionName);
+}
+
+
+void Foam::argList::nonMandatoryArgs()
+{
+    argsMandatory_ = false;
 }
 
 
@@ -359,71 +405,131 @@ void Foam::argList::printOptionUsage
 
 bool Foam::argList::postProcess(int argc, char *argv[])
 {
-    bool postProcessOption = false;
-
-    for (int i=1; i<argc; i++)
+    for (int i=1; i<argc; ++i)
     {
-        postProcessOption = argv[i] == '-' + postProcessOptionName;
-        if (postProcessOption) break;
+        if (argv[i] == '-' + postProcessOptionName)
+        {
+            return true;
+        }
     }
 
-    return postProcessOption;
+    return false;
 }
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+Foam::word Foam::argList::optionCompat(const word& optionName)
+{
+    if (!validOptionsCompat.empty())
+    {
+        auto canonical = validOptionsCompat.cfind(optionName.substr(1));
+
+        if (canonical.found())
+        {
+            const auto& iter = *canonical;
+
+            // Emit warning if there is versioning (non-zero) and it is not
+            // tagged as future change (ie, ThisVersion > version).
+
+            if
+            (
+                iter.second
+             &&
+                (
+                    (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
+                  ? (OPENFOAM_PLUS > iter.second)
+                  : true
+                )
+            )
+            {
+                std::cerr
+                    << "--> FOAM IOWarning :" << nl
+                    << "    Found [v" << iter.second << "] '"
+                    << optionName << "' instead of '-"
+                    << iter.first << "' option"
+                    << nl
+                    << std::endl;
+
+                error::warnAboutAge("option", iter.second);
+            }
+
+            return "-" + iter.first;
+        }
+    }
+
+    // Nothing found - pass through the original input
+    return optionName;
+}
+
+
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
     int nArgs = 1;
-    unsigned listDepth = 0;
-    string tmpString;
+    unsigned depth = 0;
+    string group;  // For grouping ( ... ) arguments
 
     // Note: we rewrite directly into args_
     // and use a second pass to sort out args/options
 
     args_[0] = fileName(argv[0]);
-    for (int argI = 1; argI < argc; ++argI)
+    for (int argi = 1; argi < argc; ++argi)
     {
-        if (strcmp(argv[argI], "(") == 0)
+        if (strcmp(argv[argi], "(") == 0)
         {
-            ++listDepth;
-            tmpString += "(";
+            ++depth;
+            group += '(';
         }
-        else if (strcmp(argv[argI], ")") == 0)
+        else if (strcmp(argv[argi], ")") == 0)
         {
-            if (listDepth)
+            if (depth)
             {
-                --listDepth;
-                tmpString += ")";
-                if (!listDepth)
+                --depth;
+                group += ')';
+                if (!depth)
                 {
-                    args_[nArgs++] = tmpString;
-                    tmpString.clear();
+                    args_[nArgs++] = group;
+                    group.clear();
                 }
             }
             else
             {
-                args_[nArgs++] = argv[argI];
+                args_[nArgs++] = argv[argi];
             }
         }
-        else if (listDepth)
+        else if (depth)
         {
             // Quote each string element
-            tmpString += "\"";
-            tmpString += argv[argI];
-            tmpString += "\"";
+            group += '"';
+            group += argv[argi];
+            group += '"';
+        }
+        else if (argv[argi][0] == '-')
+        {
+            // Appears to be an option
+            const char *optionName = &argv[argi][1];
+
+            if (validOptions.found(optionName))
+            {
+                // Known option name
+                args_[nArgs++] = argv[argi];
+            }
+            else
+            {
+                // Try alias for the option name
+                args_[nArgs++] = optionCompat(argv[argi]);
+            }
         }
         else
         {
-            args_[nArgs++] = argv[argI];
+            args_[nArgs++] = argv[argi];
         }
     }
 
-    if (tmpString.size())
+    if (group.size())
     {
         // Group(s) not closed, but flush anything still pending
-        args_[nArgs++] = tmpString;
+        args_[nArgs++] = group;
     }
 
     args_.setSize(nArgs);
@@ -515,11 +621,11 @@ Foam::argList::argList
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar which might filter argv
-    for (int argI = 1; argI < argc; ++argI)
+    for (int argi = 1; argi < argc; ++argi)
     {
-        if (argv[argI][0] == '-')
+        if (argv[argi][0] == '-')
         {
-            const char *optionName = &argv[argI][1];
+            const char *optionName = &argv[argi][1];
 
             if (validParOptions.found(optionName))
             {
@@ -533,17 +639,20 @@ Foam::argList::argList
     regroupArgv(argc, argv);
     argListStr_ += args_[0];
 
+    // Set executable name immediately - useful when emitting errors.
+    executable_ = fileName(args_[0]).name();
+
     // Check arguments and options, argv[0] was already handled
     int nArgs = 1;
     HashTable<string>::const_iterator optIter;
-    for (int argI = 1; argI < args_.size(); ++argI)
+    for (int argi = 1; argi < args_.size(); ++argi)
     {
         argListStr_ += ' ';
-        argListStr_ += args_[argI];
+        argListStr_ += args_[argi];
 
-        if (args_[argI][0] == '-')
+        if (args_[argi][0] == '-')
         {
-            const char *optionName = &args_[argI][1];
+            const char *optionName = &args_[argi][1];
 
             if (!*optionName)
             {
@@ -565,20 +674,24 @@ Foam::argList::argList
                 // If the option is known to require an argument,
                 // get it or emit a FatalError.
 
-                ++argI;
-                if (argI >= args_.size())
+                ++argi;
+                if (argi >= args_.size())
                 {
-                    FatalError
-                        <<"Option '-" << optionName
-                        << "' requires an argument" << endl;
-                    printUsage();
-                    FatalError.exit();
+                    printBuildInfo(false);
+
+                    Info<<nl
+                        <<"Error: option '-" << optionName
+                        << "' requires an argument" << nl << nl
+                        << "See '" << executable_ << " -help' for usage"
+                        << nl << nl;
+
+                    Pstream::exit(1); // works for serial and parallel
                 }
 
                 argListStr_ += ' ';
-                argListStr_ += args_[argI];
+                argListStr_ += args_[argi];
                 // Handle duplicates by taking the last -option specified
-                options_.set(optionName, args_[argI]);
+                options_.set(optionName, args_[argi]);
             }
             else
             {
@@ -590,18 +703,15 @@ Foam::argList::argList
         }
         else
         {
-            if (nArgs != argI)
+            if (nArgs != argi)
             {
-                args_[nArgs] = args_[argI];
+                args_[nArgs] = args_[argi];
             }
             ++nArgs;
         }
     }
 
     args_.setSize(nArgs);
-
-    // Set executable name
-    executable_ = fileName(args_[0]).name();
 
     parse(checkArgs, checkOpts, initialise);
 }
@@ -637,27 +747,37 @@ void Foam::argList::parse
 )
 {
     // Help/documentation options:
-    //   -help    print the usage
-    //   -doc     display application documentation in browser
-    //   -srcDoc  display source code in browser
+    //   -help        print the usage
+    //   -help-full   print the full usage
+    //   -doc         display application documentation in browser
+    //   -doc-source  display source code in browser
     {
         bool quickExit = false;
 
-        if (options_.found("help"))
+        if (options_.found("help-full"))
         {
-            printUsage();
+            printUsage(true);
+            quickExit = true;
+        }
+        else if (options_.found("help"))
+        {
+            printUsage(false);
             quickExit = true;
         }
 
         // Only display one or the other
-        if (options_.found("srcDoc"))
-        {
-            displayDoc(true);
-            quickExit = true;
-        }
-        else if (options_.found("doc"))
+        if (options_.found("doc"))
         {
             displayDoc(false);
+            quickExit = true;
+        }
+        else if
+        (
+            options_.found("doc-source")
+         || options_.found("srcDoc")  // Compat 1706
+        )
+        {
+            displayDoc(true);
             quickExit = true;
         }
 
@@ -667,12 +787,14 @@ void Foam::argList::parse
         }
     }
 
-    // Print the usage message and exit if the number of arguments is incorrect
+    // Print the collected error messages and exit if check fails
     if (!check(checkArgs, checkOpts))
     {
-        FatalError.exit();
-    }
+        printBuildInfo(false);
+        FatalError.write(Info, false);
 
+        Pstream::exit(1); // works for serial and parallel
+    }
 
     if (initialise)
     {
@@ -720,14 +842,13 @@ void Foam::argList::parse
     // 2. environment var FOAM_FILEHANDLER
     // 3. etc/controlDict optimisationSwitches 'fileHandler'
     // 4. system/controlDict 'fileHandler' (not handled here; done in TimeIO.C)
+    // 5. '-fileHandler' commmand-line option
 
     {
-        word handlerType(getEnv("FOAM_FILEHANDLER"));
-        HashTable<string>::const_iterator iter = options_.find("fileHandler");
-        if (iter != options_.end())
-        {
-            handlerType = iter();
-        }
+        word handlerType
+        (
+            options_.lookup("fileHandler", getEnv("FOAM_FILEHANDLER"))
+        );
 
         if (handlerType.empty())
         {
@@ -795,8 +916,19 @@ void Foam::argList::parse
             {
                 distributed_ = true;
                 source = "-roots";
-                IStringStream is(options_["roots"]);
-                roots = readList<fileName>(is);
+                ITstream is("roots", options_["roots"]);
+
+                if (is.size() == 1)
+                {
+                    // Single token - treated like list with one entry
+                    roots.setSize(1);
+
+                    is >> roots[0];
+                }
+                else
+                {
+                    is >> roots;
+                }
 
                 if (roots.size() != 1)
                 {
@@ -1151,113 +1283,55 @@ Foam::argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::argList::setOption(const word& opt, const string& param)
+bool Foam::argList::setOption(const word& optionName, const string& param)
 {
-    bool changed = false;
-
-    // Only allow valid options
-    if (validOptions.found(opt))
+    // Some options are always protected
+    if
+    (
+        optionName == "case"
+     || optionName == "parallel"
+     || optionName == "roots"
+    )
     {
-        // Some options are to be protected
-        if
-        (
-            opt == "case"
-         || opt == "parallel"
-         || opt == "roots"
-        )
-        {
-            FatalError
-                <<"used argList::setOption on a protected option: '"
-                << opt << "'" << endl;
-            FatalError.exit();
-        }
-
-        if (validOptions[opt].empty())
-        {
-            // Bool option
-            if (!param.empty())
-            {
-                // Disallow change of type
-                FatalError
-                    <<"used argList::setOption to change bool to non-bool: '"
-                    << opt << "'" << endl;
-                FatalError.exit();
-            }
-            else
-            {
-                // Did not previously exist
-                changed = !options_.found(opt);
-            }
-        }
-        else
-        {
-            // Non-bool option
-            if (param.empty())
-            {
-                // Disallow change of type
-                FatalError
-                    <<"used argList::setOption to change non-bool to bool: '"
-                    << opt << "'" << endl;
-                FatalError.exit();
-            }
-            else
-            {
-                // Existing value needs changing, or did not previously exist
-                changed = options_.found(opt) ? options_[opt] != param : true;
-            }
-        }
-    }
-    else
-    {
-        FatalError
-            <<"used argList::setOption on an invalid option: '"
-            << opt << "'" << nl << "allowed are the following:"
-            << validOptions << endl;
-        FatalError.exit();
+        FatalErrorInFunction
+            <<"Option: '" << optionName << "' is protected" << nl
+            << exit(FatalError);
+        return false;
     }
 
-    // Set/change the option as required
-    if (changed)
+    if
+    (
+        options_.found(optionName)
+      ? (options_[optionName] != param)
+      : true
+    )
     {
-        options_.set(opt, param);
-    }
-
-    return changed;
-}
-
-
-bool Foam::argList::unsetOption(const word& opt)
-{
-    // Only allow valid options
-    if (validOptions.found(opt))
-    {
-        // Some options are to be protected
-        if
-        (
-            opt == "case"
-         || opt == "parallel"
-         || opt == "roots"
-        )
-        {
-            FatalError
-                <<"used argList::unsetOption on a protected option: '"
-                << opt << "'" << endl;
-            FatalError.exit();
-        }
-
-        // Remove the option, return true if state changed
-        return options_.erase(opt);
-    }
-    else
-    {
-        FatalError
-            <<"used argList::unsetOption on an invalid option: '"
-            << opt << "'" << nl << "allowed are the following:"
-            << validOptions << endl;
-        FatalError.exit();
+        options_.set(optionName, param);
+        return true;
     }
 
     return false;
+}
+
+
+bool Foam::argList::unsetOption(const word& optionName)
+{
+    // Some options are always protected
+    if
+    (
+        optionName == "case"
+     || optionName == "parallel"
+     || optionName == "roots"
+    )
+    {
+        FatalErrorInFunction
+            <<"Option: '" << optionName << "' is protected" << nl
+            << exit(FatalError);
+        return false;
+    }
+
+    // Remove the option, return true if state changed
+    return options_.erase(optionName);
 }
 
 
@@ -1267,7 +1341,7 @@ void Foam::argList::printNotes() const
     if (!notes.empty())
     {
         Info<< nl;
-        forAllConstIter(SLList<string>, notes, iter)
+        forAllConstIters(notes, iter)
         {
             Info<< iter().c_str() << nl;
         }
@@ -1275,13 +1349,30 @@ void Foam::argList::printNotes() const
 }
 
 
-void Foam::argList::printUsage() const
+void Foam::argList::printUsage(bool full) const
 {
     Info<< "\nUsage: " << executable_ << " [OPTIONS]";
 
-    forAllConstIter(SLList<string>, validArgs, iter)
+    if (validArgs.size())
     {
-        Info<< " <" << iter().c_str() << '>';
+        Info<< ' ';
+
+        if (!argsMandatory_)
+        {
+            Info<< '[';
+        }
+
+        label i = 0;
+        forAllConstIters(validArgs, iter)
+        {
+            if (i++) Info<< ' ';
+            Info<< '<' << iter().c_str() << '>';
+        }
+
+        if (!argsMandatory_)
+        {
+            Info<< ']';
+        }
     }
 
     Info<< "\noptions:\n";
@@ -1289,6 +1380,19 @@ void Foam::argList::printUsage() const
     const wordList opts = validOptions.sortedToc();
     for (const word& optionName : opts)
     {
+        if (!full)
+        {
+            // Adhoc filtering of some options to suppress
+            if
+            (
+                optionName.startsWith("list")
+             && optionName != "list"
+            )
+            {
+                continue;
+            }
+        }
+
         Info<< "  -" << optionName;
         label len = optionName.size() + 3;  // Length includes leading '  -'
 
@@ -1313,24 +1417,23 @@ void Foam::argList::printUsage() const
         }
     }
 
-    // Place srcDoc/doc/help options at the end
-    Info<< "  -srcDoc";
-    printOptionUsage(9, "display source code in browser" );
-
+    // Place documentation/help options at the end
     Info<< "  -doc";
     printOptionUsage(6, "display application documentation in browser");
 
+    Info<< "  -doc-source";
+    printOptionUsage(13, "display source code in browser" );
+
     Info<< "  -help";
-    printOptionUsage(7, "print the usage");
+    printOptionUsage(7, "print usage information and exit");
+    Info<< "  -help-full";
+    printOptionUsage(12, "print full usage information and exit");
 
     printNotes();
 
-    Info<< nl
-        <<"Using: OpenFOAM-" << Foam::FOAMversion
-        << " (see www.OpenFOAM.com)" << nl
-        << "Build: " << Foam::FOAMbuild << nl
-        << "Arch:  " << Foam::FOAMbuildArch << nl
-        << endl;
+    Info<< nl;
+    printBuildInfo();
+    Info<< endl;
 }
 
 
@@ -1338,59 +1441,72 @@ void Foam::argList::displayDoc(bool source) const
 {
     const dictionary& docDict = debug::controlDict().subDict("Documentation");
     List<fileName> docDirs(docDict.lookup("doxyDocDirs"));
-    List<fileName> docExts(docDict.lookup("doxySourceFileExts"));
+    fileName docExt(docDict.lookup("doxySourceFileExt"));
 
-    // For source code: change foo_8C.html to foo_8C_source.html
+    // For source code: change xxx_8C.html to xxx_8C_source.html
     if (source)
     {
-        for (fileName& ext : docExts)
-        {
-            ext.replace(".", "_source.");
-        }
+        docExt.replace(".", "_source.");
     }
 
-    fileName docFile;
-    bool found = false;
+    fileName url;
 
     for (const fileName& dir : docDirs)
     {
-        for (const fileName& ext : docExts)
+        // http protocols are last in the list
+        if (dir.startsWith("http:") || dir.startsWith("https:"))
         {
-            docFile = dir/executable_ + ext;
-            docFile.expand();
-
-            if (isFile(docFile))
-            {
-                found = true;
-                break;
-            }
+            url = dir/executable_ + docExt;
+            break;
         }
-        if (found)
+
+        fileName docFile = stringOps::expand(dir/executable_ + docExt);
+
+        if
+        (
+            docFile.startsWith("file://")
+          ? isFile(docFile.substr(7))   // check part after "file://"
+          : isFile(docFile)
+        )
         {
+            url = std::move(docFile);
             break;
         }
     }
 
-    if (found)
-    {
-        string docBrowser = getEnv("FOAM_DOC_BROWSER");
-        if (docBrowser.empty())
-        {
-            docDict.lookup("docBrowser") >> docBrowser;
-        }
-        // Can use FOAM_DOC_BROWSER='application file://%f' if required
-        docBrowser.replaceAll("%f", docFile);
-
-        Info<< "Show documentation: " << docBrowser.c_str() << endl;
-
-        Foam::system(docBrowser);
-    }
-    else
+    if (url.empty())
     {
         Info<< nl
             << "No documentation found for " << executable_
             << ", but you can use -help to display the usage\n" << endl;
+
+        return;
     }
+
+    string docBrowser = getEnv("FOAM_DOC_BROWSER");
+    if (docBrowser.empty())
+    {
+        docDict.lookup("docBrowser") >> docBrowser;
+    }
+
+    // Can use FOAM_DOC_BROWSER='application file://%f' if required
+    if (docBrowser.find("%f") != std::string::npos)
+    {
+        docBrowser.replace("%f", url);
+    }
+    else
+    {
+        docBrowser += " " + url;
+    }
+
+    // Split on whitespace to use safer version of Foam::system()
+
+    CStringList command(stringOps::splitSpace(docBrowser));
+
+    Info<<"OpenFOAM-" << Foam::FOAMversion << " documentation:" << nl
+        << "    " << command << nl << endl;
+
+    Foam::system(command, true);
 }
 
 
@@ -1404,14 +1520,14 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
         if (checkArgs && nargs != validArgs.size())
         {
             FatalError
-                << "Wrong number of arguments, expected " << validArgs.size()
-                << " found " << nargs << endl;
+                << "Expected " << validArgs.size()
+                << " arguments but found " << nargs << endl;
             ok = false;
         }
 
         if (checkOpts)
         {
-            forAllConstIter(HashTable<string>, options_, iter)
+            forAllConstIters(options_, iter)
             {
                 const word& optionName = iter.key();
                 if
@@ -1429,7 +1545,10 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
         if (!ok)
         {
-            printUsage();
+            FatalError
+                << nl
+                << "See '" << executable_ << " -help' for usage"
+                << nl << nl;
         }
     }
 
@@ -1448,6 +1567,7 @@ bool Foam::argList::checkRootCase() const
 
         return false;
     }
+
     fileName pathDir(fileHandler().filePath(path()));
 
     if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())

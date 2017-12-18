@@ -69,7 +69,7 @@ word name(const char* fmt, const int32_t val);
 
 //- Return a word representation of an int32, using printf-style formatter.
 //  The representation is not checked for valid word characters.
-word name(const std::string&, const int32_t val);
+word name(const std::string& fmt, const int32_t val);
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //

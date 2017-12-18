@@ -328,7 +328,7 @@ Foam::lduPrimitiveMesh::lduPrimitiveMesh
                 << " agglomerates to " << procAgglomMap[procIDs[i]]
                 << " whereas other processors " << procIDs
                 << " agglomerate to "
-                << UIndirectList<label>(procAgglomMap, procIDs)
+                << labelUIndList(procAgglomMap, procIDs)
                 << exit(FatalError);
         }
     }

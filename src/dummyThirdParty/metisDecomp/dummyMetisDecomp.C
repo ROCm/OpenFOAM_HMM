@@ -56,8 +56,8 @@ namespace Foam
 
 Foam::label Foam::metisDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cellWeights,
     List<label>& decomp
 )
@@ -73,10 +73,20 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
 Foam::metisDecomp::metisDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp("metis", decompDict)
+{}
+
+
+Foam::metisDecomp::metisDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp("metis", decompDict, regionName)
 {}
 
 

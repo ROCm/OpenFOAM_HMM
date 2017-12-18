@@ -6,6 +6,7 @@ cellCellStencil/inverseDistance/waveMethod.C
 cellCellStencil/inverseDistance/meshToMeshData.C
 cellCellStencil/trackingInverseDistance/voxelMeshSearch.C
 cellCellStencil/trackingInverseDistance/trackingInverseDistanceCellCellStencil.C
+cellCellStencil/leastSquares/leastSquaresCellCellStencil.C
 
 dynamicOversetFvMesh/dynamicOversetFvMesh.C
 
@@ -20,6 +21,9 @@ oversetPolyPatch/oversetGAMGInterface.C
 oversetPolyPatch/oversetGAMGInterfaceField.C
 oversetPolyPatch/oversetPointPatch.C
 oversetPolyPatch/oversetPointPatchFields.C
+
+oversetPolyPatch/semiImplicitOversetFvPatchFields.C
+oversetPolyPatch/semiImplicitOversetGAMGInterfaceField.C
 
 oversetAdjustPhi/oversetAdjustPhi.C
 

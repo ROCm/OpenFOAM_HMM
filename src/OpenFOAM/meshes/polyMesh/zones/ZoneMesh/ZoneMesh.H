@@ -145,7 +145,7 @@ public:
         const Map<label>& zoneMap() const;
 
         //- Given a global object index, return the zone it is in.
-        // If object does not belong to any zones, return -1
+        //  If object does not belong to any zones, return -1
         label whichZone(const label objectIndex) const;
 
         //- Return a list of zone types
@@ -179,7 +179,7 @@ public:
         //- Find zone index given a name, return -1 if not found
         label findZoneID(const word& zoneName) const;
 
-        //- Mark cells that match the zone specification
+        //- Mark items (cells, faces, points) that match the zone specification
         PackedBoolList findMatching(const keyType& key) const;
 
         //- Clear addressing
@@ -203,14 +203,34 @@ public:
 
     // Member Operators
 
-        //- Return const and non-const reference to ZoneType by index.
+        //- Return const and non-const reference to zone by index.
         using PtrList<ZoneType>::operator[];
 
-        //- Return const reference to ZoneType by name.
+        //- Return const reference to zone by name.
+        //  Fatal if the zone does not exist.
         const ZoneType& operator[](const word& zoneName) const;
 
-        //- Return reference to ZoneType by name.
+        //- Return reference to an existing zone by name
+        //  Fatal if the zone does not exist.
         ZoneType& operator[](const word& zoneName);
+
+        //- Find an existing zone by name or create a new empty one
+        //- if required.
+        //
+        //  To determine if the zone already existed or was newly created,
+        //  it will be necessary to add additional logic in the caller.
+        //  For example,
+        //  \code
+        //      const label nOrig = zones.size();
+        //
+        //      ZoneType& zn = zones("zoneName");
+        //
+        //      if (nOrig == zones.size()) { existing... } else { new... }
+        //  \endcode
+        //  \param verbose report if an existing zone was selected or
+        //      a new zone was created.
+        //  \return non-const reference to the existing or new zone
+        ZoneType& operator()(const word& zoneName, const bool verbose=false);
 
 
     // Ostream operator

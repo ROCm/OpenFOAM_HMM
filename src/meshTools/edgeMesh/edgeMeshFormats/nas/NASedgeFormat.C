@@ -30,10 +30,7 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileFormats::NASedgeFormat::NASedgeFormat
-(
-    const fileName& filename
-)
+Foam::fileFormats::NASedgeFormat::NASedgeFormat(const fileName& filename)
 {
     read(filename);
 }
@@ -62,13 +59,13 @@ bool Foam::fileFormats::NASedgeFormat::read
 
     while (is.good())
     {
+        string::size_type linei = 0;  // parsing position within current line
         string line;
         is.getLine(line);
 
-        // Skip empty or comment
         if (line.empty() || line[0] == '$')
         {
-            continue;
+            continue; // Skip empty or comment
         }
 
         // Check if character 72 is continuation
@@ -94,39 +91,38 @@ bool Foam::fileFormats::NASedgeFormat::read
         }
 
 
-        // Read first word
-        IStringStream lineStream(line);
-        word cmd;
-        lineStream >> cmd;
+        // First word (column 0-8)
+        const word cmd(word::validate(nextNasField(line, linei, 8)));
 
         if (cmd == "CBEAM" || cmd == "CROD")
         {
-            edge e;
+            // discard elementId (8-16)
+            (void) nextNasField(line, linei, 8); // 8-16
+            // discard groupId (16-24)
+            (void) nextNasField(line, linei, 8); // 16-24
 
-            // label groupId = readLabel(line.substr(16,8));
-            e[0] = readLabel(line.substr(24,8));
-            e[1] = readLabel(line.substr(32,8));
+            label a = readLabel(nextNasField(line, linei, 8)); // 24-32
+            label b = readLabel(nextNasField(line, linei, 8)); // 32-40
 
-            // discard groupID
-            dynEdges.append(e);
+            dynEdges.append(edge(a,b));
         }
         else if (cmd == "PLOTEL")
         {
-            edge e;
+            // discard elementId (8-16)
+            (void) nextNasField(line, linei, 8); // 8-16
 
-            // label groupId = readLabel(line.substr(16,8));
-            e[0] = readLabel(line.substr(16,8));
-            e[1] = readLabel(line.substr(24,8));
+            label a = readLabel(nextNasField(line, linei, 8)); // 16-24
+            label b = readLabel(nextNasField(line, linei, 8)); // 24-32
 
-            // discard groupID
-            dynEdges.append(e);
+            dynEdges.append(edge(a,b));
         }
         else if (cmd == "GRID")
         {
-            label index = readLabel(line.substr(8,8));
-            scalar x = readNasScalar(line.substr(24, 8));
-            scalar y = readNasScalar(line.substr(32, 8));
-            scalar z = readNasScalar(line.substr(40, 8));
+            label index = readLabel(nextNasField(line, linei, 8)); // 8-16
+            (void) nextNasField(line, linei, 8); // 16-24
+            scalar x = readNasScalar(nextNasField(line, linei, 8)); // 24-32
+            scalar y = readNasScalar(nextNasField(line, linei, 8)); // 32-40
+            scalar z = readNasScalar(nextNasField(line, linei, 8)); // 40-48
 
             pointId.append(index);
             dynPoints.append(point(x, y, z));
@@ -139,10 +135,12 @@ bool Foam::fileFormats::NASedgeFormat::read
             // GRID*      126   0 -5.55999875E+02 -5.68730474E+02
             // *         2.14897901E+02
 
-            label index = readLabel(line.substr(8,16));
-            scalar x = readNasScalar(line.substr(40, 16));
-            scalar y = readNasScalar(line.substr(56, 16));
+            label index = readLabel(nextNasField(line, linei, 16)); // 8-24
+            (void) nextNasField(line, linei, 16); // 24-40
+            scalar x = readNasScalar(nextNasField(line, linei, 16)); // 40-56
+            scalar y = readNasScalar(nextNasField(line, linei, 16)); // 56-72
 
+            linei = 0; // restart at index 0
             is.getLine(line);
             if (line[0] != '*')
             {
@@ -153,7 +151,8 @@ bool Foam::fileFormats::NASedgeFormat::read
                     << "File:" << is.name() << " line:" << is.lineNumber()
                     << exit(FatalError);
             }
-            scalar z = readNasScalar(line.substr(8, 16));
+            (void) nextNasField(line, linei, 8); // 0-8
+            scalar z = readNasScalar(nextNasField(line, linei, 16)); // 8-16
 
             pointId.append(index);
             dynPoints.append(point(x, y, z));
@@ -179,9 +178,8 @@ bool Foam::fileFormats::NASedgeFormat::read
 
     // Pass1: relabel edges
     // ~~~~~~~~~~~~~~~~~~~~
-    forAll(dynEdges, i)
+    for (edge& e : dynEdges)
     {
-        edge& e = dynEdges[i];
         e[0] = mapPointId[e[0]];
         e[1] = mapPointId[e[1]];
 
@@ -191,7 +189,7 @@ bool Foam::fileFormats::NASedgeFormat::read
     pointId.clearStorage();
     mapPointId.clear();
 
-    // not all the points were used, cull them accordingly
+    // Not all the points were used, cull them accordingly
     if (unsigned(points().size()) != usedPoints.count())
     {
         label nUsed = 0;
@@ -215,11 +213,9 @@ bool Foam::fileFormats::NASedgeFormat::read
 
         pts.setSize(nUsed);
 
-        // renumber edge vertices
-        forAll(dynEdges, edgeI)
+        // Renumber edge vertices
+        for (edge& e : dynEdges)
         {
-            edge& e = dynEdges[edgeI];
-
             e[0] = mapPointId[e[0]];
             e[1] = mapPointId[e[1]];
         }

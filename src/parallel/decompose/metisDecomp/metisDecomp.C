@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,7 +39,20 @@ extern "C"
 namespace Foam
 {
     defineTypeNameAndDebug(metisDecomp, 0);
-    addToRunTimeSelectionTable(decompositionMethod, metisDecomp, dictionary);
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        metisDecomp,
+        dictionary
+    );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        metisDecomp,
+        dictionaryRegion
+    );
 }
 
 
@@ -47,8 +60,8 @@ namespace Foam
 
 Foam::label Foam::metisDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
 )
@@ -148,19 +161,19 @@ Foam::label Foam::metisDecomp::decomposeSerial
         {
             processorWeights /= sum(processorWeights);
 
-            if (processorWeights.size() != nProcessors_)
+            if (processorWeights.size() != nDomains_)
             {
                 FatalErrorInFunction
                     << "Number of processor weights "
                     << processorWeights.size()
-                    << " does not equal number of domains " << nProcessors_
+                    << " does not equal number of domains " << nDomains_
                     << exit(FatalError);
             }
         }
     }
 
     label ncon = 1;
-    label nProcs = nProcessors_;
+    label nProcs = nDomains_;
 
     // Output: cell -> processor addressing
     decomp.setSize(numCells);
@@ -174,8 +187,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,          // num vertices in graph
             &ncon,              // num balancing constraints
-            const_cast<UList<label>&>(xadj).begin(),   // indexing into adjncy
-            const_cast<UList<label>&>(adjncy).begin(), // neighbour info
+            const_cast<labelUList&>(xadj).begin(),   // indexing into adjncy
+            const_cast<labelUList&>(adjncy).begin(), // neighbour info
             cellWeights.begin(),// vertex wts
             nullptr,               // vsize: total communication vol
             faceWeights.begin(),// edge wts
@@ -193,8 +206,8 @@ Foam::label Foam::metisDecomp::decomposeSerial
         (
             &numCells,          // num vertices in graph
             &ncon,              // num balancing constraints
-            const_cast<UList<label>&>(xadj).begin(),   // indexing into adjncy
-            const_cast<UList<label>&>(adjncy).begin(), // neighbour info
+            const_cast<labelUList&>(xadj).begin(),   // indexing into adjncy
+            const_cast<labelUList&>(adjncy).begin(), // neighbour info
             cellWeights.begin(),// vertex wts
             nullptr,               // vsize: total communication vol
             faceWeights.begin(),// edge wts
@@ -213,9 +226,19 @@ Foam::label Foam::metisDecomp::decomposeSerial
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::metisDecomp::metisDecomp(const dictionary& decompositionDict)
+Foam::metisDecomp::metisDecomp(const dictionary& decompDict)
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp(typeName, decompDict, selectionType::NULL_DICT)
+{}
+
+
+Foam::metisDecomp::metisDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp(typeName, decompDict, regionName, selectionType::NULL_DICT)
 {}
 
 

@@ -28,18 +28,23 @@ Group
     grpGenericBoundaryConditions grpCoupledBoundaryConditions
 
 Description
-    This boundary condition extends the mixed boundary condition with
-    serialisation through
+    Extends the mixed boundary condition with serialisation functions.
+
+    The serialisation functions:
+
     - writeHeader
     - writeData
     - readData
-    functions. It is used for coupling to external applications in combination
+
+    It is used for coupling to external applications in combination
     with the externalCoupled functionObject. The default output is one
     line per face, with columns
-    <value> <snGrad> <refValue> <refGrad> <valueFraction>
+    \verbatim
+        <value> <snGrad> <refValue> <refGrad> <valueFraction>
+    \endverbatim
 
-Notes
-    readData,writeData are not callbacks for regIOobject (since fvPatchField
+Note
+    readData, writeData are not callbacks for regIOobject (since fvPatchField
     not derived from it). They do however do exactly the same - streaming of
     data.
 

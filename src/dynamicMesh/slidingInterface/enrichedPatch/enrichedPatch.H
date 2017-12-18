@@ -176,9 +176,6 @@ class enrichedPatch
         //- Estimated ratio of original-to-enriched face size
         static const label enrichedFaceRatio_;
 
-        //- Estimated number of master face hits by slave points
-        static const label nFaceHits_;
-
         //- Size of face on which the check is forced
         static const label maxFaceSizeDebug_;
 

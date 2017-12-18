@@ -115,7 +115,7 @@ Foam::hexRef8Data::hexRef8Data
             new labelIOList
             (
                 rio,
-                UIndirectList<label>(data.cellLevelPtr_(), cellMap)()
+                labelUIndList(data.cellLevelPtr_(), cellMap)()
             )
         );
     }
@@ -129,7 +129,7 @@ Foam::hexRef8Data::hexRef8Data
             new labelIOList
             (
                 rio,
-                UIndirectList<label>(data.pointLevelPtr_(), pointMap)()
+                labelUIndList(data.pointLevelPtr_(), pointMap)()
             )
         );
     }
@@ -176,7 +176,7 @@ Foam::hexRef8Data::hexRef8Data
         forAll(procDatas, procI)
         {
             const labelList& procCellLevel = procDatas[procI].cellLevelPtr_();
-            UIndirectList<label>(cellLevel, cellMaps[procI]) = procCellLevel;
+            labelUIndList(cellLevel, cellMaps[procI]) = procCellLevel;
         }
     }
 
@@ -194,7 +194,7 @@ Foam::hexRef8Data::hexRef8Data
         forAll(procDatas, procI)
         {
             const labelList& procPointLevel = procDatas[procI].pointLevelPtr_();
-            UIndirectList<label>(pointLevel, pointMaps[procI]) = procPointLevel;
+            labelUIndList(pointLevel, pointMaps[procI]) = procPointLevel;
         }
     }
 

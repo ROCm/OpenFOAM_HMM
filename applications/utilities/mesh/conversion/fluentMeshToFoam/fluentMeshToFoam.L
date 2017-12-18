@@ -103,7 +103,7 @@ wordList patchNameIDs(maxZoneID);
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -867,7 +867,7 @@ label findFace(const primitiveMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("Fluent mesh file");
+    argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",
@@ -1077,7 +1077,6 @@ int main(int argc, char *argv[])
         // Create new faces
         forAll(faces, facei)
         {
-
             if (faces[facei].size() != 2)
             {
                 FatalErrorInFunction
@@ -1660,7 +1659,7 @@ int main(int argc, char *argv[])
             (
                 name,
                 zoneFaces,
-                boolList(zoneFaces.size(), false),
+                false, // none are flipped
                 cnt,
                 pShapeMesh.faceZones()
             );

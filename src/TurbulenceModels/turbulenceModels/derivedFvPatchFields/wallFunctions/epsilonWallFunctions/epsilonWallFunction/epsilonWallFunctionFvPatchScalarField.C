@@ -229,21 +229,35 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
+    typedef DimensionedField<scalar, volMesh> FieldType;
+    const FieldType& G = db().lookupObject<FieldType>(turbModel.GName());
+
     // Set epsilon and G
     forAll(nutw, facei)
     {
         const label celli = patch.faceCells()[facei];
 
+        const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
+
         const scalar w = cornerWeights[facei];
 
-        epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
+        if (yPlus > yPlusLam_)
+        {
+            epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
 
-        G0[celli] +=
-            w
-            *(nutw[facei] + nuw[facei])
-            *magGradUw[facei]
-            *Cmu25*sqrt(k[celli])
-            /(kappa_*y[facei]);
+            G0[celli] +=
+                w
+               *(nutw[facei] + nuw[facei])
+               *magGradUw[facei]
+               *Cmu25*sqrt(k[celli])
+               /(kappa_*y[facei]);
+        }
+        else
+        {
+            epsilon0[celli] += w*2.0*k[celli]*nuw[facei]/sqr(y[facei]);
+
+            G0[celli] += w*G[celli];
+        }
     }
 }
 

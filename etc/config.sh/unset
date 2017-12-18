@@ -6,20 +6,8 @@
 #    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/unset
@@ -117,7 +105,6 @@ fi
 unset ENSIGHT9_READER
 unset ParaView_DIR
 unset ParaView_INCLUDE_DIR
-unset ParaView_MAJOR
 unset ParaView_VERSION
 unset PV_PLUGIN_PATH
 unset VTK_DIR
@@ -126,6 +113,8 @@ unset VTK_DIR
 # unset other ThirdParty environment variables
 
 unset ADIOS_ARCH_PATH
+unset ADIOS1_ARCH_PATH
+unset ADIOS2_ARCH_PATH
 unset BOOST_ARCH_PATH
 unset CCMIO_ARCH_PATH
 unset CGAL_ARCH_PATH
@@ -168,7 +157,6 @@ unalias wmSchedOn   2>/dev/null
 unalias wmSchedOff  2>/dev/null
 
 unalias foam        2>/dev/null
-unalias foamSite    2>/dev/null
 
 unalias src         2>/dev/null
 unalias lib         2>/dev/null

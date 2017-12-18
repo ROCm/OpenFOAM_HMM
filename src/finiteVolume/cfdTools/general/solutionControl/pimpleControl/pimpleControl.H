@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,10 +57,10 @@ class pimpleControl
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        pimpleControl(const pimpleControl&);
+        pimpleControl(const pimpleControl&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const pimpleControl&);
+        void operator=(const pimpleControl&) = delete;
 
 
 protected:
@@ -116,7 +116,7 @@ public:
 
 
     //- Destructor
-    virtual ~pimpleControl();
+    virtual ~pimpleControl() = default;
 
 
     // Member Functions
@@ -151,7 +151,7 @@ public:
             //- Return true for first PIMPLE (outer) iteration
             inline bool firstIter() const;
 
-            //- Return true fore final PIMPLE (outer) iteration
+            //- Return true for final PIMPLE (outer) iteration
             inline bool finalIter() const;
 
             //- Return true for final inner iteration

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,6 +105,11 @@ Usage
 #include "lagrangianFieldDecomposer.H"
 #include "decompositionModel.H"
 #include "collatedFileOperation.H"
+
+#include "faCFD.H"
+#include "emptyFaPatch.H"
+#include "faMeshDecomposition.H"
+#include "faFieldDecomposer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -275,15 +280,15 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    bool region                  = args.optionFound("region");
-    bool allRegions              = args.optionFound("allRegions");
-    bool writeCellDist           = args.optionFound("cellDist");
-    bool copyZero                = args.optionFound("copyZero");
-    bool copyUniform             = args.optionFound("copyUniform");
-    bool decomposeFieldsOnly     = args.optionFound("fields");
-    bool decomposeSets           = !args.optionFound("noSets");
-    bool forceOverwrite          = args.optionFound("force");
-    bool ifRequiredDecomposition = args.optionFound("ifRequired");
+    const bool optRegion        = args.optionFound("region");
+    const bool allRegions       = args.optionFound("allRegions");
+    const bool writeCellDist    = args.optionFound("cellDist");
+    const bool copyZero         = args.optionFound("copyZero");
+    const bool copyUniform      = args.optionFound("copyUniform");
+    const bool decomposeSets    = !args.optionFound("noSets");
+    bool decomposeFieldsOnly    = args.optionFound("fields");
+    bool forceOverwrite         = args.optionFound("force");
+    const bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
     // Set time from database
     #include "createTime.H"
@@ -296,55 +301,39 @@ int main(int argc, char *argv[])
     args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
     wordList regionNames;
-    wordList regionDirs;
     if (allRegions)
     {
         Info<< "Decomposing all regions in regionProperties" << nl << endl;
         regionProperties rp(runTime);
-        forAllConstIter(HashTable<wordList>, rp, iter)
+
+        wordHashSet names;
+        forAllConstIters(rp, iter)
         {
-            const wordList& regions = iter();
-            forAll(regions, i)
-            {
-                if (!regionNames.found(regions[i]))
-                {
-                    regionNames.append(regions[i]);
-                }
-            }
+            names.insert(iter.object());
         }
-        regionDirs = regionNames;
+
+        regionNames = names.sortedToc();
     }
     else
     {
-        word regionName;
-        if (args.optionReadIfPresent("region", regionName))
-        {
-            regionNames = wordList(1, regionName);
-            regionDirs = regionNames;
-        }
-        else
-        {
-            regionNames = wordList(1, fvMesh::defaultRegion);
-            regionDirs = wordList(1, word::null);
-        }
+        regionNames = {fvMesh::defaultRegion};
+        args.optionReadIfPresent("region", regionNames[0]);
     }
-
-
 
     forAll(regionNames, regioni)
     {
         const word& regionName = regionNames[regioni];
-        const word& regionDir = regionDirs[regioni];
+        const word& regionDir =
+            regionName == fvMesh::defaultRegion ? word::null : regionName;
 
         Info<< "\n\nDecomposing mesh " << regionName << nl << endl;
-
 
         // Determine the existing processor count directly
         label nProcs = fileHandler().nProcs(runTime.path(), regionDir);
 
-        // Get requested numberOfSubdomains. Note: have no mesh yet so
-        // cannot use decompositionModel::New
-        const label nDomains = readLabel
+        // Get requested numberOfSubdomains directly from the dictionary.
+        // Note: have no mesh yet so cannot use decompositionModel::New
+        const label nDomains = decompositionMethod::nDomains
         (
             IOdictionary
             (
@@ -362,7 +351,7 @@ int main(int argc, char *argv[])
                     ),
                     decompDictFile
                 )
-            ).lookup("numberOfSubdomains")
+            )
         );
 
         if (decomposeFieldsOnly)
@@ -393,7 +382,7 @@ int main(int argc, char *argv[])
                 Info<< "Using existing processor directories" << nl;
             }
 
-            if (region || allRegions)
+            if (allRegions || optRegion)
             {
                 procDirsProblem = false;
                 forceOverwrite = false;
@@ -529,7 +518,7 @@ int main(int argc, char *argv[])
         {
             // Copy the 0 directory into each of the processor directories
             fileName prevTimePath;
-            for (label proci = 0; proci < mesh.nProcs(); proci++)
+            for (label proci = 0; proci < mesh.nProcs(); ++proci)
             {
                 Time processorDb
                 (
@@ -738,13 +727,13 @@ int main(int argc, char *argv[])
 
                 label cloudI = 0;
 
-                forAll(cloudDirs, i)
+                for (const fileName& cloudDir : cloudDirs)
                 {
                     IOobjectList sprayObjs
                     (
                         mesh,
                         runTime.timeName(),
-                        cloud::prefix/cloudDirs[i],
+                        cloud::prefix/cloudDir,
                         IOobject::MUST_READ,
                         IOobject::NO_WRITE,
                         false
@@ -761,7 +750,7 @@ int main(int argc, char *argv[])
                         // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
                         Info<< "Identified lagrangian data set: "
-                            << cloudDirs[i] << endl;
+                            << cloudDir << endl;
 
                         lagrangianPositions.set
                         (
@@ -769,7 +758,7 @@ int main(int argc, char *argv[])
                             new Cloud<indexedParticle>
                             (
                                 mesh,
-                                cloudDirs[i],
+                                cloudDir,
                                 false
                             )
                         );
@@ -946,7 +935,7 @@ int main(int argc, char *argv[])
                 Info<< endl;
 
                 // split the fields over processors
-                for (label proci = 0; proci < mesh.nProcs(); proci++)
+                for (label proci = 0; proci < mesh.nProcs(); ++proci)
                 {
                     Info<< "Processor " << proci << ": field transfer" << endl;
 
@@ -1236,8 +1225,8 @@ int main(int argc, char *argv[])
                     // directory
                     decomposeUniform(copyUniform, mesh, processorDb, regionDir);
 
-                    // For the first region of a multi-region case additionally
-                    // decompose the "uniform" directory in the time directory
+                    // For a multi-region case, also decompose the "uniform"
+                    // directory in the time directory
                     if (regionNames.size() > 1 && regioni == 0)
                     {
                         decomposeUniform(copyUniform, mesh, processorDb);
@@ -1253,6 +1242,178 @@ int main(int argc, char *argv[])
                         faceProcAddressingList.set(proci, nullptr);
                         procMeshList.set(proci, nullptr);
                         processorDbList.set(proci, nullptr);
+                    }
+                }
+
+                // Finite area mesh and field decomposition
+
+                IOobject faMeshBoundaryIOobj
+                (
+                    "faBoundary",
+                    mesh.time().findInstance
+                    (
+                        mesh.dbDir()/polyMesh::meshSubDir,
+                        "boundary"
+                    ),
+                    faMesh::meshSubDir,
+                    mesh,
+                    IOobject::READ_IF_PRESENT,
+                    IOobject::NO_WRITE
+                );
+
+
+                if (faMeshBoundaryIOobj.typeHeaderOk<faBoundaryMesh>(true))
+                {
+                    Info << "\nFinite area mesh decomposition" << endl;
+
+                    faMeshDecomposition aMesh(mesh);
+
+                    aMesh.decomposeMesh();
+
+                    aMesh.writeDecomposition();
+
+
+                    // Construct the area fields
+                    // ~~~~~~~~~~~~~~~~~~~~~~~~
+                    PtrList<areaScalarField> areaScalarFields;
+                    readFields(aMesh, objects, areaScalarFields);
+
+                    PtrList<areaVectorField> areaVectorFields;
+                    readFields(aMesh, objects, areaVectorFields);
+
+                    PtrList<areaSphericalTensorField> areaSphericalTensorFields;
+                    readFields(aMesh, objects, areaSphericalTensorFields);
+
+                    PtrList<areaSymmTensorField> areaSymmTensorFields;
+                    readFields(aMesh, objects, areaSymmTensorFields);
+
+                    PtrList<areaTensorField> areaTensorFields;
+                    readFields(aMesh, objects, areaTensorFields);
+
+
+                    // Construct the edge fields
+                    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                    PtrList<edgeScalarField> edgeScalarFields;
+                    readFields(aMesh, objects, edgeScalarFields);
+
+                    Info << endl;
+
+                    // Split the fields over processors
+                    for (label procI = 0; procI < mesh.nProcs(); procI++)
+                    {
+                        Info<< "Processor " << procI
+                            << ": finite area field transfer" << endl;
+
+                        // open the database
+                        Time processorDb
+                        (
+                            Time::controlDictName,
+                            args.rootPath(),
+                            args.caseName()/
+                            fileName(word("processor") + name(procI))
+                        );
+
+                        processorDb.setTime(runTime);
+
+                        // Read the mesh
+                        fvMesh procFvMesh
+                        (
+                            IOobject
+                            (
+                                regionName,
+                                processorDb.timeName(),
+                                processorDb
+                            )
+                        );
+
+                        faMesh procMesh(procFvMesh);
+
+                        // // Does not work.  HJ, 15/Aug/2017
+                        // const labelIOList& faceProcAddressing =
+                        //     procAddressing
+                        //     (
+                        //         procMeshList,
+                        //         procI,
+                        //         "faceProcAddressing",
+                        //         faceProcAddressingList
+                        //     );
+
+                        // const labelIOList& boundaryProcAddressing =
+                        //     procAddressing
+                        //     (
+                        //         procMeshList,
+                        //         procI,
+                        //         "boundaryProcAddressing",
+                        //         boundaryProcAddressingList
+                        //     );
+
+                        labelIOList faceProcAddressing
+                        (
+                            IOobject
+                            (
+                                "faceProcAddressing",
+                                "constant",
+                                procMesh.meshSubDir,
+                                procFvMesh,
+                                IOobject::MUST_READ,
+                                IOobject::NO_WRITE
+                            )
+                        );
+
+                        labelIOList boundaryProcAddressing
+                        (
+                            IOobject
+                            (
+                                "boundaryProcAddressing",
+                                "constant",
+                                procMesh.meshSubDir,
+                                procFvMesh,
+                                IOobject::MUST_READ,
+                                IOobject::NO_WRITE
+                            )
+                        );
+
+                        // FA fields
+                        if
+                        (
+                            areaScalarFields.size()
+                         || areaVectorFields.size()
+                         || areaSphericalTensorFields.size()
+                         || areaSymmTensorFields.size()
+                         || areaTensorFields.size()
+                         || edgeScalarFields.size()
+                        )
+                        {
+                            labelIOList edgeProcAddressing
+                            (
+                                IOobject
+                                (
+                                    "edgeProcAddressing",
+                                    "constant",
+                                    procMesh.meshSubDir,
+                                    procFvMesh,
+                                    IOobject::MUST_READ,
+                                    IOobject::NO_WRITE
+                                )
+                            );
+
+                            faFieldDecomposer fieldDecomposer
+                            (
+                                aMesh,
+                                procMesh,
+                                edgeProcAddressing,
+                                faceProcAddressing,
+                                boundaryProcAddressing
+                            );
+
+                            fieldDecomposer.decomposeFields(areaScalarFields);
+                            fieldDecomposer.decomposeFields(areaVectorFields);
+                            fieldDecomposer.decomposeFields(areaSphericalTensorFields);
+                            fieldDecomposer.decomposeFields(areaSymmTensorFields);
+                            fieldDecomposer.decomposeFields(areaTensorFields);
+
+                            fieldDecomposer.decomposeFields(edgeScalarFields);
+                        }
                     }
                 }
             }

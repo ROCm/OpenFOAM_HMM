@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline char* Foam::CStringList::stringCopy(char *dest, const std::string& str)
+{
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    {
+        *dest = *iter;
+        ++dest;
+    }
+    *(dest++) = '\0';
+
+    return dest;
+}
+
+
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
 inline int Foam::CStringList::count(const char * const argv[])
 {
-    int nElem = 0;
+    int n = 0;
     if (argv)
     {
-        while (argv[nElem])
+        while (argv[n])
         {
-            ++nElem;
+            ++n;
         }
     }
-
-    return nElem;
+    return n;
 }
 
 
@@ -49,6 +63,24 @@ inline Foam::CStringList::CStringList()
     argv_(nullptr),
     data_(nullptr)
 {}
+
+
+template<class StringType>
+inline Foam::CStringList::CStringList(const UList<StringType>& input)
+:
+    CStringList()
+{
+    reset(input);
+}
+
+
+template<class StringType>
+inline Foam::CStringList::CStringList(const SubStrings<StringType>& input)
+:
+    CStringList()
+{
+    reset(input);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -97,9 +129,37 @@ inline char** Foam::CStringList::strings() const
 }
 
 
+inline char** Foam::CStringList::strings(int start) const
+{
+    return &(argv_[start]);
+}
+
+
 inline const char* Foam::CStringList::data() const
 {
     return data_;
+}
+
+
+template<class StringType>
+inline int Foam::CStringList::reset(const UList<StringType>& input)
+{
+    return resetContent(input);
+}
+
+
+template<class StringType>
+inline int Foam::CStringList::reset(const SubStrings<StringType>& input)
+{
+    return resetContent(input);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+inline const char* Foam::CStringList::operator[](int i) const
+{
+    return argv_[i];
 }
 
 

@@ -59,7 +59,7 @@ Foam::word Foam::ensightCase::options::padded(const label i) const
     // As per Foam::name, but with fixed length
     char buf[32];
 
-    ::snprintf(buf, 32, printf_.c_str(), i);
+    ::snprintf(buf, 32, printf_.c_str(), static_cast<int>(i));
     buf[31] = 0;
 
     // no stripping required

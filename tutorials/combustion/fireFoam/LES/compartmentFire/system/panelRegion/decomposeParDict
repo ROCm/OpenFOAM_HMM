@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -26,27 +25,9 @@ structuredCoeffs
 
     simpleCoeffs
     {
-         n               ( 5 1 4 );
-         delta           0.001;
+         n           (5 1 4);
+         delta       0.001;
     }
 }
-
-
-hierarchicalCoeffs
-{
-    n               ( 1 2 2 );
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "cellDecomposition";
-}
-
-metisCoeffs
-{
-}
-
 
 // ************************************************************************* //

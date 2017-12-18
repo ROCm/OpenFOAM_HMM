@@ -148,11 +148,7 @@ Foam::label Foam::solutionControl::applyToField
 {
     forAll(residualControl_, i)
     {
-        if (useRegEx && residualControl_[i].name.match(fieldName))
-        {
-            return i;
-        }
-        else if (residualControl_[i].name == fieldName)
+        if (residualControl_[i].name.match(fieldName, !useRegEx))
         {
             return i;
         }
@@ -173,42 +169,68 @@ void Foam::solutionControl::storePrevIterFields() const
 }
 
 
-template<class Type>
-void Foam::solutionControl::maxTypeResidual
+Foam::Pair<Foam::scalar> Foam::solutionControl::maxResidual
 (
-    const word& fieldName,
-    ITstream& data,
-    scalar& firstRes,
-    scalar& lastRes
+    const entry& solverPerfDictEntry
 ) const
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
-
-    if (mesh_.foundObject<fieldType>(fieldName))
-    {
-        const List<SolverPerformance<Type>> sp(data);
-        firstRes = cmptMax(sp.first().initialResidual());
-        lastRes = cmptMax(sp.last().initialResidual());
-    }
+    return maxResidual(mesh_, solverPerfDictEntry);
 }
 
 
-Foam::scalar Foam::solutionControl::maxResidual
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class Type>
+bool Foam::solutionControl::maxTypeResidual
 (
-    const word& fieldName,
-    ITstream& data,
-    scalar& lastRes
-) const
+    const fvMesh& fvmesh,
+    const entry& solverPerfDictEntry,
+    Pair<scalar>& residuals
+)
 {
-    scalar firstRes = 0;
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    maxTypeResidual<scalar>(fieldName, data, firstRes, lastRes);
-    maxTypeResidual<vector>(fieldName, data, firstRes, lastRes);
-    maxTypeResidual<sphericalTensor>(fieldName, data, firstRes, lastRes);
-    maxTypeResidual<symmTensor>(fieldName, data, firstRes, lastRes);
-    maxTypeResidual<tensor>(fieldName, data, firstRes, lastRes);
+    const word& fieldName = solverPerfDictEntry.keyword();
 
-    return firstRes;
+    if (fvmesh.foundObject<fieldType>(fieldName))
+    {
+        const List<SolverPerformance<Type>> sp(solverPerfDictEntry.stream());
+
+        residuals.first() = cmptMax(sp.first().initialResidual());
+        residuals.last()  = cmptMax(sp.last().initialResidual());
+
+        return true;
+    }
+
+    return false;
+}
+
+
+Foam::Pair<Foam::scalar> Foam::solutionControl::maxResidual
+(
+    const fvMesh& fvmesh,
+    const entry& solverPerfDictEntry
+)
+{
+    Pair<scalar> residuals(0,0);
+
+    // Check with builtin short-circuit
+    const bool ok =
+    (
+        maxTypeResidual<scalar>(fvmesh, solverPerfDictEntry, residuals)
+     || maxTypeResidual<vector>(fvmesh, solverPerfDictEntry, residuals)
+     || maxTypeResidual<sphericalTensor>(fvmesh, solverPerfDictEntry, residuals)
+     || maxTypeResidual<symmTensor>(fvmesh, solverPerfDictEntry, residuals)
+     || maxTypeResidual<tensor>(fvmesh, solverPerfDictEntry, residuals)
+    );
+
+    if (!ok && solutionControl::debug)
+    {
+        Info<<"no residual for " << solverPerfDictEntry.keyword()
+            << " on mesh " << fvmesh.name() << nl;
+    }
+
+    return residuals;
 }
 
 
@@ -232,12 +254,6 @@ Foam::solutionControl::solutionControl(fvMesh& mesh, const word& algorithmName)
     frozenFlow_(false),
     corr_(0),
     corrNonOrtho_(0)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::solutionControl::~solutionControl()
 {}
 
 

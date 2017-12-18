@@ -56,7 +56,6 @@ using namespace Foam;
 #include "emptyPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "SLList.H"
 #include "SLPtrList.H"
 
@@ -76,11 +75,10 @@ PtrList<SLList<label>> slPatchCellFaces;
 Map<word> cellTypes;
 label currentTypei = -1;
 
-
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -298,7 +296,7 @@ label findFace(const polyMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("ANSYS input file");
+    argList::addArgument("ANSYS input file");
     argList::addOption
     (
         "scale",
@@ -363,10 +361,10 @@ int main(int argc, char *argv[])
     }
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList labelsHex(8);
     labelList labelsPrism(6);
@@ -643,7 +641,7 @@ int main(int argc, char *argv[])
                     (
                         patchNames[patchi],
                         bFaceLabels,
-                        boolList(bFaceLabels.size(), false),
+                        false, // none are flipped
                         fz.size(),
                         pShapeMesh.faceZones()
                     )

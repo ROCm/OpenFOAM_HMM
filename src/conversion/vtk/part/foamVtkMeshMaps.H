@@ -105,10 +105,10 @@ public:
 
         //- Renumber cell ids (cellMap and additionalIds) to account for
         //  subset meshes
-        void renumberCells(const UList<label>& mapping);
+        void renumberCells(const labelUList& mapping);
 
         //- Renumber point ids (pointMap) to account for subset meshes
-        void renumberPoints(const UList<label>& mapping);
+        void renumberPoints(const labelUList& mapping);
 
 
         //- Original cell ids for all cells (regular and decomposed).

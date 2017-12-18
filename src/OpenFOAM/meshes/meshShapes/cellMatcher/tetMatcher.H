@@ -25,10 +25,10 @@ Class
     Foam::tetMatcher
 
 Description
-    A cellMatcher for tet cells
+    A cellMatcher for tet cells (cellModel::TET)
 
 See also
-    cellMatcher
+    cellMatcher, cellModel
 
 SourceFiles
     tetMatcher.C
@@ -53,21 +53,21 @@ class tetMatcher
 :
     public cellMatcher
 {
-    // Static data members
+    // Static Data Members
 
-        //- Constants for this shape
-        static const label vertPerCell;
-        static const label facePerCell;
-        static const label maxVertPerFace;
+        // Constants for this shape
+        static constexpr label vertPerCell = 4;
+        static constexpr label facePerCell = 4;
+        static constexpr label maxVertPerFace = 3;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        tetMatcher(const tetMatcher&);
+        tetMatcher(const tetMatcher&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const tetMatcher&);
+        tetMatcher& operator=(const tetMatcher&) = delete;
 
 
 public:

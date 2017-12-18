@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(geometricSurfacePatch, 0);
+    defineTypeNameAndDebug(geometricSurfacePatch, 0);
 }
 
 const Foam::word Foam::geometricSurfacePatch::emptyType = "empty";
@@ -64,7 +64,6 @@ Foam::geometricSurfacePatch::geometricSurfacePatch
     geometricType_(geometricType),
     name_(name),
     index_(index)
-
 {
     if (geometricType_.empty())
     {
@@ -83,7 +82,22 @@ Foam::geometricSurfacePatch::geometricSurfacePatch
     geometricType_(geometricType),
     name_(name),
     index_(index)
+{
+    if (geometricType_.empty())
+    {
+        geometricType_ = emptyType;
+    }
+}
 
+
+Foam::geometricSurfacePatch::geometricSurfacePatch
+(
+    const surfZoneIdentifier& ident
+)
+:
+    geometricType_(ident.geometricType()),
+    name_(ident.name()),
+    index_(ident.index())
 {
     if (geometricType_.empty())
     {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -68,8 +68,8 @@ class faceZone
 {
     // Private Member Functions
 
-        //- Set flip-map to constant value
-        void setFlipMap(const bool flipValue);
+        //- Set flip-map to uniform value
+        void setFlipMap(const bool val);
 
         //- Disallow default bitwise copy construct
         faceZone(const faceZone&) = delete;
@@ -148,6 +148,30 @@ public:
 
     // Constructors
 
+        //- Construct an empty zone
+        faceZone(const word& name, const label index, const faceZoneMesh& zm);
+
+        //- Construct from components with uniform flip map value
+        faceZone
+        (
+            const word& name,
+            const labelUList& addr,
+            const bool flipMapValue,
+            const label index,
+            const faceZoneMesh& zm
+        );
+
+        //- Construct from components with uniform flip map value,
+        //- transferring addressing.
+        faceZone
+        (
+            const word& name,
+            labelList&& addr,
+            const bool flipMapValue,
+            const label index,
+            const faceZoneMesh& zm
+        );
+
         //- Construct from components
         faceZone
         (
@@ -158,7 +182,7 @@ public:
             const faceZoneMesh& zm
         );
 
-        //- Construct from components, transferring contents
+        //- Construct from components, transferring addressing
         faceZone
         (
             const word& name,
@@ -177,22 +201,24 @@ public:
             const faceZoneMesh& zm
         );
 
-        //- Construct given the original zone and resetting the
-        //  face list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, resetting the face addressing
+        //- and flip-map.
         faceZone
         (
-            const faceZone& fz,
+            const faceZone& origZone,
             const labelUList& addr,
             const boolList& fm,
             const label index,
             const faceZoneMesh& zm
         );
 
-        //- Construct given the original zone,
-        //  resetting the face list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, (move) resetting the face addressing
+        //- and flip-map.
         faceZone
         (
-            const faceZone& fz,
+            const faceZone& origZone,
             const Xfer<labelList>& addr,
             const Xfer<boolList>& fm,
             const label index,
@@ -208,8 +234,8 @@ public:
             );
         }
 
-        //- Construct and return a clone, resetting the face list
-        //  and zone mesh
+        //- Construct and return a clone,
+        //- resetting the face list and zone mesh
         virtual autoPtr<faceZone> clone
         (
             const labelUList& addr,
@@ -228,7 +254,7 @@ public:
     // Selectors
 
         //- Return a pointer to a new face zone
-        //  created on freestore from dictionary
+        //- created on freestore from dictionary
         static autoPtr<faceZone> New
         (
             const word& name,
@@ -263,7 +289,7 @@ public:
       // Addressing into mesh
 
         //- Return labels of master cells (cells next to the master face
-        //  zone in the prescribed direction)
+        //- zone in the prescribed direction)
         const labelList& masterCells() const;
 
         //- Return labels of slave cells
@@ -276,6 +302,14 @@ public:
         //- Clear addressing
         virtual void clearAddressing();
 
+        //- Reset addressing - use uniform flip map value
+        //  Clears demand-driven data.
+        virtual void resetAddressing
+        (
+            const labelUList& addr,
+            const bool flipMapValue
+        );
+
         //- Reset addressing and flip map.
         //  Clears demand-driven data.
         virtual void resetAddressing
@@ -284,20 +318,12 @@ public:
             const boolList& flipMap
         );
 
-        //- Reset addressing - use constant flip map
-        //  Clears demand-driven data.
-        virtual void resetAddressing
-        (
-            const labelUList& addr,
-            const bool flipValue
-        );
-
-        //- Reset addressing - use constant flip map
+        //- Move reset addressing - use uniform flip map value
         //  Clears demand-driven data.
         virtual void resetAddressing
         (
             const Xfer<labelList>& addr,
-            const bool flipValue
+            const bool flipMapValue
         );
 
         //- Check zone definition. Return true if in error.

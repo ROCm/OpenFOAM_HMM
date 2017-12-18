@@ -161,12 +161,6 @@ Foam::fileOperations::uncollatedFileOperation::uncollatedFileOperation
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileOperations::uncollatedFileOperation::~uncollatedFileOperation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::fileOperations::uncollatedFileOperation::mkDir

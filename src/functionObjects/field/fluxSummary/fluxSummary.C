@@ -412,7 +412,7 @@ void Foam::functionObjects::fluxSummary::initialiseCellZoneAndDirection
 
     labelList cellAddr(mesh_.nCells(), -1);
     const labelList& cellIDs = mesh_.cellZones()[cellZonei];
-    UIndirectList<label>(cellAddr, cellIDs) = identity(cellIDs.size());
+    labelUIndList(cellAddr, cellIDs) = identity(cellIDs.size());
     labelList nbrFaceCellAddr(mesh_.nFaces() - nInternalFaces, -1);
 
     forAll(pbm, patchi)

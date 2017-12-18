@@ -194,10 +194,10 @@ public:
         );
 
         //- Renumber cell ids to account for subset meshes
-        void renumberCells(const UList<label>& mapping);
+        void renumberCells(const labelUList& mapping);
 
         //- Renumber point ids to account for subset meshes
-        void renumberPoints(const UList<label>& mapping);
+        void renumberPoints(const labelUList& mapping);
 
 
       // Storage Access

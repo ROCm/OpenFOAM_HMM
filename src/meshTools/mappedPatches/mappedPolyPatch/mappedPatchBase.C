@@ -634,8 +634,8 @@ void Foam::mappedPatchBase::calcMapping() const
             );
 
             // Insert
-            UIndirectList<label>(sampleProcs, subMap) = subSampleProcs;
-            UIndirectList<label>(sampleIndices, subMap) = subSampleIndices;
+            labelUIndList(sampleProcs, subMap) = subSampleProcs;
+            labelUIndList(sampleIndices, subMap) = subSampleIndices;
             UIndirectList<point>(sampleLocations, subMap) = subSampleLocations;
         }
     }
@@ -697,16 +697,8 @@ void Foam::mappedPatchBase::calcMapping() const
 
     forAll(subMap, proci)
     {
-        subMap[proci] = UIndirectList<label>
-        (
-            sampleIndices,
-            subMap[proci]
-        );
-        constructMap[proci] = UIndirectList<label>
-        (
-            patchFaces,
-            constructMap[proci]
-        );
+        subMap[proci] = labelUIndList(sampleIndices, subMap[proci]);
+        constructMap[proci] = labelUIndList(patchFaces, constructMap[proci]);
 
         //if (debug)
         //{

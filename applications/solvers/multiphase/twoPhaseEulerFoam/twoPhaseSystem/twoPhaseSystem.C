@@ -132,7 +132,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
     phasePair::scalarTable sigmaTable(lookup("sigma"));
     phasePair::dictTable aspectRatioTable(lookup("aspectRatio"));
 
-    pair_.set
+    pair_.reset
     (
         new phasePair
         (
@@ -143,7 +143,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    pair1In2_.set
+    pair1In2_.reset
     (
         new orderedPhasePair
         (
@@ -155,7 +155,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    pair2In1_.set
+    pair2In1_.reset
     (
         new orderedPhasePair
         (
@@ -170,7 +170,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
 
     // Models
 
-    drag_.set
+    drag_.reset
     (
         new BlendedInterfacialModel<dragModel>
         (
@@ -187,7 +187,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    virtualMass_.set
+    virtualMass_.reset
     (
         new BlendedInterfacialModel<virtualMassModel>
         (
@@ -203,7 +203,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    heatTransfer_.set
+    heatTransfer_.reset
     (
         new BlendedInterfacialModel<heatTransferModel>
         (
@@ -219,7 +219,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    lift_.set
+    lift_.reset
     (
         new BlendedInterfacialModel<liftModel>
         (
@@ -235,7 +235,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    wallLubrication_.set
+    wallLubrication_.reset
     (
         new BlendedInterfacialModel<wallLubricationModel>
         (
@@ -251,7 +251,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    turbulentDispersion_.set
+    turbulentDispersion_.reset
     (
         new BlendedInterfacialModel<turbulentDispersionModel>
         (

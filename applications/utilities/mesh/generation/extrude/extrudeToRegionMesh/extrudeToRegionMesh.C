@@ -521,8 +521,8 @@ labelListList globalEdgeFaces
 label findUncoveredPatchFace
 (
     const fvMesh& mesh,
-    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
-    const label meshEdgeI                       // mesh edge
+    const labelUIndList& extrudeMeshFaces,  // mesh faces that are extruded
+    const label meshEdgeI                   // mesh edge
 )
 {
     // Make set of extruded faces.
@@ -549,6 +549,7 @@ label findUncoveredPatchFace
             return facei;
         }
     }
+
     return -1;
 }
 
@@ -557,8 +558,8 @@ label findUncoveredPatchFace
 label findUncoveredCyclicPatchFace
 (
     const fvMesh& mesh,
-    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
-    const label meshEdgeI                       // mesh edge
+    const labelUIndList& extrudeMeshFaces,  // mesh faces that are extruded
+    const label meshEdgeI                   // mesh edge
 )
 {
     // Make set of extruded faces.
@@ -585,6 +586,7 @@ label findUncoveredCyclicPatchFace
             return facei;
         }
     }
+
     return -1;
 }
 
@@ -712,7 +714,7 @@ void countExtrudePatches
             label facei = findUncoveredPatchFace
             (
                 mesh,
-                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                labelUIndList(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
@@ -934,7 +936,7 @@ void addCoupledPatches
                 label facei = findUncoveredCyclicPatchFace
                 (
                     mesh,
-                    UIndirectList<label>(extrudeMeshFaces, eFaces),
+                    labelUIndList(extrudeMeshFaces, eFaces),
                     extrudeMeshEdges[edgeI]
                 );
 
@@ -2242,7 +2244,7 @@ int main(int argc, char *argv[])
             label facei = findUncoveredPatchFace
             (
                 mesh,
-                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                labelUIndList(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 

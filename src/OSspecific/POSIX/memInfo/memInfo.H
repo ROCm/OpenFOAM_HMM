@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,10 +25,11 @@ Class
     Foam::memInfo
 
 Description
-    Memory usage information for the process running this object.
+    Memory usage information for the current process, and the system memory
+    that is free.
 
 Note
-    Uses the information from /proc/PID/status
+    Uses the information from /proc/PID/status and from /proc/meminfo
 
 SourceFiles
     memInfo.C
@@ -69,25 +70,32 @@ class memInfo
         //- Resident set size of the process (VmRSS in /proc/PID/status)
         int rss_;
 
+        //- System memory free (MemFree in /proc/meminfo)
+        int free_;
+
 public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct and populate with values
         memInfo();
 
 
     //- Destructor
-    ~memInfo();
+    ~memInfo() = default;
 
 
     // Member Functions
 
-        //- Update according to /proc/PID/status contents
+        //- True if the memory information appears valid
+        bool valid() const;
+
+        //- Reset to zero
+        void clear();
+
+        //- Update according to /proc/PID/status and /proc/memory contents
         const memInfo& update();
 
-
-      // Access
 
         //- Peak memory (VmPeak in /proc/PID/status) at last update()
         inline int peak() const
@@ -107,8 +115,11 @@ public:
             return rss_;
         }
 
-        //- True if the memory information appears valid
-        bool valid() const;
+        //- System memory free (MemFree in /proc/meminfo)
+        inline int free() const
+        {
+            return free_;
+        }
 
 
       // Write

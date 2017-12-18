@@ -96,7 +96,7 @@ if (argList::postProcess(argc, argv))
     // if not constructed from runTime
     dictionary functionsDict;
 
-    HashSet<word> selectedFields;
+    HashSet<wordRe> selectedFields;
 
     // Construct functionObjectList
     autoPtr<functionObjectList> functionsPtr

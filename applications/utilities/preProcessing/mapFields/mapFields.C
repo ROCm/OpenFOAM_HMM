@@ -58,7 +58,7 @@ int readNumProcs
         dictFile = dictFile / dictName;
     }
 
-    return readInt
+    return decompositionMethod::nDomains
     (
         IOdictionary
         (
@@ -75,7 +75,7 @@ int readNumProcs
                 ),
                 dictFile
             )
-        ).lookup("numberOfSubdomains")
+        )
     );
 }
 
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         "map volume fields from one mesh to another"
     );
     argList::noParallel();
-    argList::validArgs.append("sourceCase");
+    argList::addArgument("sourceCase");
 
     argList::addOption
     (

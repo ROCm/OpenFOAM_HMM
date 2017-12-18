@@ -53,9 +53,9 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surfaceSubsetDict");
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceSubsetDict");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
     argList args(argc, argv);
 
     Info<< "Reading dictionary " << args[1] << " ..." << endl;

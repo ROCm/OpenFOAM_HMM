@@ -53,7 +53,6 @@ using namespace Foam;
 #include "polyMesh.H"
 #include "emptyPolyPatch.H"
 #include "preservePatchTypes.H"
-#include "cellModeller.H"
 #include "cellShape.H"
 #include "SLList.H"
 #include "SLPtrList.H"
@@ -83,7 +82,7 @@ label nValuesForPatchFaces = 0;
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -626,7 +625,7 @@ mtype                 {space}"MTYPE:"{space}
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("GAMBIT file");
+    argList::addArgument("GAMBIT file");
     argList::addOption
     (
         "scale",
@@ -699,10 +698,10 @@ int main(int argc, char *argv[])
         cellLookup[cellMap[celli] ] = celli;
     }
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList labelsHex(8);
     labelList labelsPrism(6);

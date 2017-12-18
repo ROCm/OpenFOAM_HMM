@@ -392,7 +392,7 @@ Foam::label Foam::faceCoupleInfo::mostAlignedCutEdge
     if (report)
     {
         Pout<< "mostAlignedEdge : finding nearest edge among "
-            << UIndirectList<edge>(cutFaces().edges(), pEdges)()
+            << UIndirectList<edge>(cutFaces().edges(), pEdges)
             << " connected to point " << pointi
             << " coord:" << localPoints[pointi]
             << " running between " << edgeStart << " coord:"
@@ -603,7 +603,7 @@ void Foam::faceCoupleInfo::setCutEdgeToPoints(const labelList& cutToMasterEdges)
                     FatalErrorInFunction
                         << " unsplitEdge:" << unsplitEdge
                         << " does not correspond to split edges "
-                        << UIndirectList<edge>(cutEdges, stringedEdges)()
+                        << UIndirectList<edge>(cutEdges, stringedEdges)
                         << abort(FatalError);
                 }
             }
@@ -615,7 +615,7 @@ void Foam::faceCoupleInfo::setCutEdgeToPoints(const labelList& cutToMasterEdges)
             //        (
             //            cutFaces().localPoints(),
             //            splitPoints.shrink()
-            //        )()
+            //        )
             //    << endl;
 
             cutEdgeToPoints_.insert(unsplitEdge, splitPoints.shrink());
@@ -638,9 +638,9 @@ Foam::label Foam::faceCoupleInfo::matchFaces
     {
         FatalErrorInFunction
             << "Different sizes for supposedly matching faces." << nl
-            << "f0:" << f0 << " coords:" << UIndirectList<point>(points0, f0)()
+            << "f0:" << f0 << " coords:" << UIndirectList<point>(points0, f0)
             << nl
-            << "f1:" << f1 << " coords:" << UIndirectList<point>(points1, f1)()
+            << "f1:" << f1 << " coords:" << UIndirectList<point>(points1, f1)
             << abort(FatalError);
     }
 
@@ -691,9 +691,9 @@ Foam::label Foam::faceCoupleInfo::matchFaces
         FatalErrorInFunction
             << "No unique match between two faces" << nl
             << "Face " << f0 << " coords "
-            << UIndirectList<point>(points0, f0)() << nl
+            << UIndirectList<point>(points0, f0) << nl
             << "Face " << f1 << " coords "
-            << UIndirectList<point>(points1, f1)()
+            << UIndirectList<point>(points1, f1)
             << "when using tolerance " << absTol
             << " and forwardMatching:" << sameOrientation
             << abort(FatalError);
@@ -886,6 +886,15 @@ void Foam::faceCoupleInfo::findPerfectMatchingFaces
     labelList& mesh1Faces
 )
 {
+    // Quick check: skip face matching if either mesh has no faces
+    if (!mesh0.nFaces() || !mesh1.nFaces())
+    {
+        mesh0Faces.clear();
+        mesh1Faces.clear();
+
+        return;
+    }
+
     // Face centres of external faces (without invoking
     // mesh.faceCentres since mesh might have been clearedOut)
 
@@ -1841,7 +1850,7 @@ void Foam::faceCoupleInfo::subDivisionMatch
             FatalErrorInFunction
                 << "Did not match all of cutFaces to a master face" << nl
                 << "First unmatched cut face:" << cutFacei << " with points:"
-                << UIndirectList<point>(cutFaces().points(), cutF)()
+                << UIndirectList<point>(cutFaces().points(), cutF)
                 << nl
                 << "This usually means that the slave patch is not a"
                 << " subdivision of the master patch"

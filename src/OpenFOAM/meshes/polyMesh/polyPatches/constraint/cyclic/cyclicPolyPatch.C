@@ -1415,7 +1415,7 @@ bool Foam::cyclicPolyPatch::order
                     << " : "
                     << "Cannot find point on face " << pp[oldFacei]
                     << " with vertices "
-                    << IndirectList<point>(pp.points(), pp[oldFacei])()
+                    << UIndirectList<point>(pp.points(), pp[oldFacei])
                     << " that matches point " << wantedAnchor
                     << " when matching the halves of processor patch " << name()
                     << "Continuing with incorrect face ordering from now on!"

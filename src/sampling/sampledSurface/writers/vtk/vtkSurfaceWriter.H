@@ -93,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~vtkSurfaceWriter();
+    virtual ~vtkSurfaceWriter() = default;
 
 
     // Member Functions

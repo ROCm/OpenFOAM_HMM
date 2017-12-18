@@ -112,7 +112,7 @@ Foam::autoPtr<Foam::OFstream> Foam::functionObjects::writeFile::createFile
             fName = fName + "_" + startTimeName;
         }
 
-        osPtr.set(new OFstream(outputDir/(fName + ".dat")));
+        osPtr.reset(new OFstream(outputDir/(fName + ".dat")));
 
         initStream(osPtr());
     }

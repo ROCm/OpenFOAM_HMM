@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,7 +105,7 @@ scalar getMergeDistance
     scalar mergeTol = defaultMergeTol;
     args.optionReadIfPresent("mergeTol", mergeTol);
 
-    scalar writeTol =
+    const scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
 
     Info<< "Merge tolerance : " << mergeTol << nl
@@ -236,7 +236,7 @@ void writeDecomposition
 (
     const word& name,
     const fvMesh& mesh,
-    const labelList& decomp
+    const labelUList& decomp
 )
 {
     // Write the decomposition as labelList for use with 'manual'
@@ -388,10 +388,9 @@ void determineDecomposition
 // Write addressing if decomposing (1 to many) or reconstructing (many to 1)
 void writeProcAddressing
 (
-    const bool decompose,
-    const fileName& meshSubDir,
     const fvMesh& mesh,
-    const mapDistributePolyMesh& map
+    const mapDistributePolyMesh& map,
+    const bool decompose
 )
 {
     Info<< "Writing procAddressing files to " << mesh.facesInstance()
@@ -403,7 +402,7 @@ void writeProcAddressing
         (
             "cellProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -416,7 +415,7 @@ void writeProcAddressing
         (
             "faceProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -429,7 +428,7 @@ void writeProcAddressing
         (
             "pointProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -442,7 +441,7 @@ void writeProcAddressing
         (
             "boundaryProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -545,10 +544,10 @@ void writeProcAddressing
         );
     }
 
-    bool cellOk = cellMap.write();
-    bool faceOk = faceMap.write();
-    bool pointOk = pointMap.write();
-    bool patchOk = patchMap.write();
+    const bool cellOk = cellMap.write();
+    const bool faceOk = faceMap.write();
+    const bool pointOk = pointMap.write();
+    const bool patchOk = patchMap.write();
 
     if (!cellOk || !faceOk || !pointOk || !patchOk)
     {
@@ -561,6 +560,24 @@ void writeProcAddressing
     }
 }
 
+
+// Remove addressing
+void removeProcAddressing(const polyMesh& mesh)
+{
+    for (const auto prefix : {"boundary", "cell", "face", "point"})
+    {
+        IOobject io
+        (
+            prefix + word("ProcAddressing"),
+            mesh.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh
+        );
+
+        const fileName procFile(io.objectPath());
+        rm(procFile);
+    }
+}
 
 
 // Generic mesh-based field reading
@@ -906,8 +923,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         // We don't want to map the decomposition (mapping already tested when
         // mapping the cell centre field)
-        IOobjectList::iterator iter = objects.find("cellDist");
-        if (iter != objects.end())
+        auto iter = objects.find("cellDist");
+        if (iter.found())
         {
             objects.erase(iter);
         }
@@ -1162,7 +1179,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         (
             "procAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
@@ -1181,16 +1198,16 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             mesh.write();
             topoSet::removeFiles(mesh);
-            forAll(pointFieldNames, i)
+            for (const word& fieldName : pointFieldNames)
             {
                 IOobject io
                 (
-                    pointFieldNames[i],
+                    fieldName,
                     runTime.timeName(),
                     mesh
                 );
 
-                fileName fieldFile(io.objectPath());
+                const fileName fieldFile(io.objectPath());
                 if (topoSet::debug) DebugVar(fieldFile);
                 rm(fieldFile);
             }
@@ -1204,16 +1221,16 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         mesh.write();
         topoSet::removeFiles(mesh);
-        forAll(pointFieldNames, i)
+        for (const word& fieldName : pointFieldNames)
         {
             IOobject io
             (
-                pointFieldNames[i],
+                fieldName,
                 runTime.timeName(),
                 mesh
             );
 
-            fileName fieldFile(io.objectPath());
+            const fileName fieldFile(io.objectPath());
             if (topoSet::debug) DebugVar(fieldFile);
             rm(fieldFile);
         }
@@ -1224,7 +1241,16 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
     if (decompose || nDestProcs == 1)
     {
-        writeProcAddressing(decompose, meshSubDir, mesh, map);
+        // Decompose (1 -> N) or reconstruct (N -> 1)
+        // so {boundary,cell,face,point}ProcAddressing have meaning
+        writeProcAddressing(mesh, map, decompose);
+    }
+    else
+    {
+        // Redistribute (N -> M)
+        // {boundary,cell,face,point}ProcAddressing would be incorrect
+        // - can either remove or redistribute previous
+        removeProcAddressing(mesh);
     }
 
 
@@ -2272,9 +2298,9 @@ int main(int argc, char *argv[])
     Foam::argList args(argc, argv);
     bool decompose = args.optionFound("decompose");
     const bool reconstruct = args.optionFound("reconstruct");
+    const bool writeCellDist = args.optionFound("cellDist");
+    const bool newTimes = args.optionFound("newTimes");
     bool overwrite = args.optionFound("overwrite");
-    bool writeCellDist = args.optionFound("cellDist");
-    bool newTimes = args.optionFound("newTimes");
 
 
     if (Foam::sigFpe::requested())
@@ -2363,8 +2389,7 @@ int main(int argc, char *argv[])
         Info<< "No processor directories; switching on decompose mode"
             << nl << endl;
     }
-    // If master changed to decompose mode make sure all nodes know about
-    // it
+    // If master changed to decompose mode make sure all nodes know about it
     Pstream::scatter(decompose);
 
 
@@ -2382,9 +2407,9 @@ int main(int argc, char *argv[])
             timeDirs = Time::findTimes(args.path(), "constant");
         }
         Pstream::scatter(timeDirs);
-        forAll(timeDirs, i)
+        for (const instant& t : timeDirs)
         {
-            mkDir(args.path()/timeDirs[i].name());
+            mkDir(args.path()/t.name());
         }
     }
 
@@ -2418,9 +2443,9 @@ int main(int argc, char *argv[])
             timeDirs = Time::findTimes(basePath, "constant");
         }
         Pstream::scatter(timeDirs);
-        forAll(timeDirs, i)
+        for (const instant& t : timeDirs)
         {
-            mkDir(basePath/timeDirs[i].name());
+            mkDir(basePath/t.name());
         }
     }
 
@@ -2441,31 +2466,30 @@ int main(int argc, char *argv[])
     if (newTimes)
     {
         instantList baseTimeDirs(baseRunTime.times());
-        forAll(baseTimeDirs, i)
+        for (const instant& t : baseTimeDirs)
         {
-            masterTimeDirSet.insert(baseTimeDirs[i].name());
+            masterTimeDirSet.insert(t.name());
         }
     }
 
 
     // Determine any region
     word regionName = polyMesh::defaultRegion;
-    fileName meshSubDir;
+    fileName meshSubDir = polyMesh::meshSubDir;
     if (args.optionReadIfPresent("region", regionName))
     {
         meshSubDir = regionName/polyMesh::meshSubDir;
     }
-    else
-    {
-        meshSubDir = polyMesh::meshSubDir;
-    }
     Info<< "Using mesh subdirectory " << meshSubDir << nl << endl;
 
+
+    // Allow override of decomposeParDict location
+    fileName decompDictFile;
+    args.optionReadIfPresent("decomposeParDict", decompDictFile);
 
 
     // Demand driven lagrangian mapper
     autoPtr<parLagrangianRedistributor> lagrangianReconstructorPtr;
-
 
 
     if (reconstruct)
@@ -2689,7 +2713,8 @@ int main(int argc, char *argv[])
         // detect points by hand
         if (mesh.pointsInstance() != mesh.facesInstance())
         {
-            Info<< "    Dected initial mesh motion; reconstructing points" << nl
+            Info<< "    Detected initial mesh motion;"
+                << " reconstructing points" << nl
                 << endl;
             fvReconstructorPtr().reconstructPoints();
         }
@@ -2917,11 +2942,6 @@ int main(int argc, char *argv[])
             runTime,
             mesh.bounds()
         );
-
-        // Allow override of decomposeParDict location
-        fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
-
 
         // Determine decomposition
         // ~~~~~~~~~~~~~~~~~~~~~~~

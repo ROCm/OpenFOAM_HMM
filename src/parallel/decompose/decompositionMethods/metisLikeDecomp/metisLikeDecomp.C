@@ -31,8 +31,8 @@ License
 
 Foam::label Foam::metisLikeDecomp::decomposeGeneral
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
 )
@@ -150,9 +150,28 @@ Foam::label Foam::metisLikeDecomp::decomposeGeneral
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::metisLikeDecomp::metisLikeDecomp(const dictionary& decompositionDict)
+Foam::metisLikeDecomp::metisLikeDecomp
+(
+    const word& derivedType,
+    const dictionary& decompDict,
+    int select
+)
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict),
+    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select))
+{}
+
+
+Foam::metisLikeDecomp::metisLikeDecomp
+(
+    const word& derivedType,
+    const dictionary& decompDict,
+    const word& regionName,
+    int select
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select))
 {}
 
 

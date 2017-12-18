@@ -35,7 +35,6 @@ SourceFiles
 #ifndef X3DsurfaceFormatCore_H
 #define X3DsurfaceFormatCore_H
 
-#include "MeshedSurface.H"
 #include "Ostream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -46,7 +45,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class X3DsurfaceFormatCore Declaration
+              Class fileFormats::X3DsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class X3DsurfaceFormatCore
@@ -55,10 +54,10 @@ protected:
     // Protected Member Functions
 
     //- Write file header
-    static void writeHeader(Ostream&);
+    static void writeHeader(Ostream& os);
 
     //- Write appearance node
-    static void writeAppearance(Ostream&);
+    static void writeAppearance(Ostream& os);
 
 };
 

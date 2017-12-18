@@ -5,43 +5,33 @@
 #   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
-# This file is part of OpenFOAM, licensed under the GNU General Public License
-# <http://www.gnu.org/licenses/>.
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/kahip
 #
 # Description
-#     Setup for kahip include/libraries.
+#     Setup for KAHIP include/libraries (usually ThirdParty installation).
 #     Sourced during wmake process only.
 #
-#     Normally used to specify the kahip version and location for a
-#     ThirdParty installation.
+#     To disable its use:               KAHIP_VERSION=kahip-none
+#     For system-wide installations:    KAHIP_VERSION=kahip-system
 #
-#     If using system-wide installations, use the following setting:
-#
-#         KAHIP_VERSION=kahip-system
-#
-#     If the system kahip is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         KAHIP_VERSION=kahip-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify kahip-system
-#         - provide full path for KAHIP_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use kahip-system
+#       2. and provide full path for KAHIP_ARCH_PATH
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process.
-#
-#     KaHIP can also be entirely disabled, by either renaming this file or
-#     by creating an empty one with the same name at a user or site location.
-#
 #     KaHIP is 32-bit precision only.
 #     An Int64 OpenFOAM version can use it, but the mesh size is limited
 #     accordingly.
 #
+#     No csh version, This file is only used by wmake.
+#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

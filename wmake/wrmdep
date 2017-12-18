@@ -104,7 +104,7 @@ while [ "$#" -gt 0 ]
 do
     case "$1" in
     # Print help
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     # All platforms

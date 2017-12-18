@@ -44,10 +44,6 @@ addToRunTimeSelectionTable
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::triSurfaceMeshFeatures::triSurfaceMeshFeatures
@@ -98,7 +94,7 @@ Foam::triSurfaceMeshFeatures::features() const
         (mode_ == extendedFeatureEdgeMesh::BOTH ? true : false)
     );
 
-    features.set
+    features.reset
     (
         new extendedFeatureEdgeMesh
         (

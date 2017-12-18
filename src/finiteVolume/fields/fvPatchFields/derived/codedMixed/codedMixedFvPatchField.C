@@ -278,7 +278,7 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
         // to choose our type
         dict.set("type", name_);
 
-        redirectPatchFieldPtr_.set
+        redirectPatchFieldPtr_.reset
         (
             dynamic_cast<mixedFvPatchField<Type>*>
             (

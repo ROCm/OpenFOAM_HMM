@@ -96,7 +96,7 @@ inline Foam::PackedBoolList::PackedBoolList(const labelUList& indices)
 {}
 
 
-inline Foam::PackedBoolList::PackedBoolList(const UIndirectList<label>& indices)
+inline Foam::PackedBoolList::PackedBoolList(const labelUIndList& indices)
 :
     PackedBoolList(indices.size(), indices)
 {}
@@ -117,7 +117,7 @@ inline Foam::PackedBoolList::PackedBoolList
 inline Foam::PackedBoolList::PackedBoolList
 (
     const label size,
-    const UIndirectList<label>& indices
+    const labelUIndList& indices
 )
 :
     PackedList<1>(size)
@@ -180,7 +180,7 @@ inline void Foam::PackedBoolList::operator=(const labelUList& indices)
 }
 
 
-inline void Foam::PackedBoolList::operator=(const UIndirectList<label>& indices)
+inline void Foam::PackedBoolList::operator=(const labelUIndList& indices)
 {
     clear();
     set(indices);
@@ -214,7 +214,7 @@ Foam::PackedBoolList::operator&=(const labelUList& indices)
 
 
 inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator&=(const UIndirectList<label>& indices)
+Foam::PackedBoolList::operator&=(const labelUIndList& indices)
 {
     subset(indices);
     return *this;
@@ -238,7 +238,7 @@ Foam::PackedBoolList::operator|=(const labelUList& indices)
 
 
 inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator|=(const UIndirectList<label>& indices)
+Foam::PackedBoolList::operator|=(const labelUIndList& indices)
 {
     set(indices);
     return *this;
@@ -260,7 +260,7 @@ Foam::PackedBoolList::operator+=(const labelUList& indices)
 
 
 inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator+=(const UIndirectList<label>& indices)
+Foam::PackedBoolList::operator+=(const labelUIndList& indices)
 {
     return operator|=(indices);
 }
@@ -283,7 +283,7 @@ Foam::PackedBoolList::operator-=(const labelUList& indices)
 
 
 inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator-=(const UIndirectList<label>& indices)
+Foam::PackedBoolList::operator-=(const labelUIndList& indices)
 {
     unset(indices);
     return *this;

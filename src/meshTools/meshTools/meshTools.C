@@ -550,7 +550,7 @@ Foam::label Foam::meshTools::otherEdge
 
     FatalErrorInFunction
         << "Can not find edge in "
-        << UIndirectList<edge>(mesh.edges(), edgeLabels)()
+        << UIndirectList<edge>(mesh.edges(), edgeLabels)
         << " connected to edge "
         << thisEdgeI << " with vertices " << mesh.edges()[thisEdgeI]
         << " on side " << thisVertI << abort(FatalError);

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STARCDCore
 
 Description
-    Core routines used when reading/writing pro-STAR vrt/cel/bnd files.
+    Core routines used when reading/writing PROSTAR vrt/cel/bnd files.
 
 SourceFiles
     STARCDCore.C
@@ -37,9 +37,10 @@ SourceFiles
 
 #include "IFstream.H"
 #include "Enum.H"
-#include "pointField.H"
 #include "Map.H"
+#include "point.H"
 #include "FixedList.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -121,11 +122,11 @@ protected:
 
     // Protected Member Functions
 
-        //- Face addressing from pro-STAR faces to OpenFOAM faces.
+        //- Face addressing from PROSTAR faces to OpenFOAM faces.
         //  For hex, prism, tet, pyr primitive shapes.
         static const Map<FixedList<int, 6>> starToFoamFaceAddr;
 
-        //- Face addressing from OpenFOAM faces to pro-STAR faces.
+        //- Face addressing from OpenFOAM faces to PROSTAR faces.
         //  For hex, prism, tet, pyr primitive shapes.
         static const Map<FixedList<int, 6>> foamToStarFaceAddr;
 
@@ -133,13 +134,13 @@ protected:
     // Constructors
 
         //- Construct null
-        STARCDCore();
+        STARCDCore() = default;
 
         //- Read header and check signature PROSTAR_(CELL|VERTEX|BOUNDARY)
-        static bool readHeader(IFstream&, const enum fileHeader);
+        static bool readHeader(IFstream& is, const enum fileHeader header);
 
         //- Write header for fileType (CELL|VERTEX|BOUNDARY)
-        static void writeHeader(Ostream&, const enum fileHeader);
+        static void writeHeader(Ostream& os, const enum fileHeader header);
 
 
 public:
@@ -150,7 +151,7 @@ public:
         static fileName starFileName
         (
             const fileName& baseName,
-            const enum fileExt
+            const enum fileExt ext
         );
 
 
@@ -173,16 +174,16 @@ public:
         // \endverbatim
         static label readPoints
         (
-            IFstream&,
-            pointField&,
-            labelList& ids
+            IFstream& is,
+            List<point>& points,
+            List<label>& ids
         );
 
         //- Write header and points to (.vrt) file, optionally with scaling
         static void writePoints
         (
-            Ostream&,
-            const pointField&,
+            Ostream& os,
+            const UList<point>& points,
             const scalar scaleFactor = 1.0
         );
 

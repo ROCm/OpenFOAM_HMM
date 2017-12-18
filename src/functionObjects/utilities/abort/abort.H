@@ -30,6 +30,7 @@ Group
 Description
     Watches for presence of the named file in the $FOAM_CASE directory
     and aborts the calculation if it is present.
+
     The presence of the abort file is only checked on the master process.
 
     Currently the following action types are supported:
@@ -73,9 +74,6 @@ class abort
 {
     // Private data
 
-        //- A subset of Time stopAtControls
-        static const Enum<Time::stopAtControls> actionNames_;
-
         //- Reference to the Time
         const Time& time_;
 
@@ -116,7 +114,7 @@ public:
 
 
     //- Destructor
-    virtual ~abort();
+    virtual ~abort() = default;
 
 
     // Member Functions

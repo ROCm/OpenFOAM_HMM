@@ -34,6 +34,12 @@ Description
     A SubList of labels.
 
 Typedef
+    Foam::labelUList
+
+Description
+    A UList of labels.
+
+Typedef
     Foam::labelListList
 
 Description
@@ -58,8 +64,7 @@ Description
 
 namespace Foam
 {
-    // Note: frequently used labelUList is defined in UList itself
-
+    // NB: labelUList is defined in UList itself
     typedef List<label> labelList;
     typedef SubList<label> labelSubList;
     typedef List<labelList> labelListList;

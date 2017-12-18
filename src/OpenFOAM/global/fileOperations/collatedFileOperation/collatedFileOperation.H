@@ -99,7 +99,7 @@ public:
 
 
     //- Destructor
-    virtual ~collatedFileOperation();
+    virtual ~collatedFileOperation() = default;
 
 
     // Member Functions

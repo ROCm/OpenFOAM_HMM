@@ -443,7 +443,6 @@ int main(int argc, char *argv[])
         }
 
 
-
         indirectPrimitivePatch extrudePatch
         (
             IndirectList<face>
@@ -1026,7 +1025,7 @@ int main(int argc, char *argv[])
             (
                 cutZoneName,
                 frontPatchFaces,
-                boolList(frontPatchFaces.size(), false),
+                false, // none are flipped
                 0,
                 mesh.faceZones()
             )

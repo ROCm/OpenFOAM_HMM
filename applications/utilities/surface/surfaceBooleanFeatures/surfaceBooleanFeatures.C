@@ -588,7 +588,7 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
 
         //s.transfer(dupSurf);
         s = dupSurf;
-        pointMap = UIndirectList<label>(pointMap, dupPointMap)();
+        pointMap = labelUIndList(pointMap, dupPointMap)();
     }
 
     return nNonManifold;
@@ -1513,9 +1513,9 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("action");
-    argList::validArgs.append("surfaceFile1");
-    argList::validArgs.append("surfaceFile2");
+    argList::addArgument("action");
+    argList::addArgument("surfaceFile1");
+    argList::addArgument("surfaceFile2");
 
     argList::addOption
     (
@@ -1577,7 +1577,7 @@ int main(int argc, char *argv[])
         { booleanSurface::DIFFERENCE, "difference" }
     };
 
-    if (!validActions.hasEnum(action))
+    if (!validActions.found(action))
     {
         FatalErrorInFunction
             << "Unsupported action " << action << endl

@@ -69,7 +69,13 @@ protected:
 
         //- Add registered GeometricField types to selection
         template<template<class> class PatchType, class MeshType>
-        void addFileGeoFields(wordHashSet& set) const;
+        void addGeoFieldTypes(wordHashSet& set) const;
+
+        //- Add registered Internal types to selection
+        void addInternalFieldTypes(wordHashSet& set) const;
+
+        //- Add registered uniform types to selection
+        void addUniformFieldTypes(wordHashSet& set) const;
 
         //- Add objects of a given type
         template<class Type>

@@ -116,9 +116,9 @@ int main(int argc, char *argv[])
     argList::noParallel();
     #include "addOverwriteOption.H"
 
-    argList::validArgs.append("faceSet");
-    argList::validArgs.append("masterPatch");
-    argList::validArgs.append("slavePatch");
+    argList::addArgument("faceSet");
+    argList::addArgument("masterPatch");
+    argList::addArgument("slavePatch");
 
     #include "setRootCase.H"
     #include "createTime.H"

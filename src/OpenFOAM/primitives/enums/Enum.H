@@ -25,10 +25,11 @@ Class
     Foam::Enum
 
 Description
-    A Enum is a wrapper around a list of names/values that represent
-    particular enumeration values.
+    Enum is a wrapper around a list of names/values that represent particular
+    enumeration values.
 
 SourceFiles
+    EnumI.H
     Enum.C
 
 \*---------------------------------------------------------------------------*/
@@ -111,7 +112,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The number of lookup names for the enumeration
         inline label size() const;
@@ -129,20 +130,28 @@ public:
         inline const List<int>& values() const;
 
 
-      // Query
+    // Query
 
         //- Test if there is an enumeration corresponding to the given name.
+        inline bool found(const word& enumName) const;
+
+        //- Test if there is a name corresponding to the given enumeration.
+        inline bool found(const EnumType e) const;
+
+        //- Test if there is an enumeration corresponding to the given name.
+        //  \deprecated Use found() - for compatibility with NamedEnum
         inline bool hasEnum(const word& enumName) const;
 
         //- Test if there is a name corresponding to the given enumeration.
+        //  \deprecated Use found() - for compatibility with NamedEnum
         inline bool hasName(const EnumType e) const;
 
 
-      // Lookup
+    // Lookup
 
         //- Lookup the key in the dictionary and return the corresponding
         //- enumeration element based on its name.
-        //  Fatal if anything is incorrect.
+        //  FatalError if anything is incorrect.
         EnumType lookup
         (
             const word& key,
@@ -152,7 +161,7 @@ public:
         //- Find the key in the dictionary and return the corresponding
         //- enumeration element based on its name.
         //  Return the default value if the key was not found in the dictionary.
-        //  Fatal if the enumerated name was incorrect.
+        //  FatalError if the enumerated name was incorrect.
         EnumType lookupOrDefault
         (
             const word& key,
@@ -173,7 +182,7 @@ public:
         ) const;
 
 
-      // IO
+    // IO
 
         //- Read a word from Istream and return the corresponding enumeration
         EnumType read(Istream& is) const;
@@ -193,12 +202,22 @@ public:
     // Member Operators
 
         //- Return the enumeration corresponding to the given name
-        //  Fatal if the name cannot be found.
-        inline const EnumType operator[](const word& name) const;
+        //  FatalError if the name is not found.
+        //  Identical to getEnum()
+        inline EnumType operator[](const word& enumName) const;
 
         //- Return the first name corresponding to the given enumeration.
         //  Returns an empty word on failure.
+        //  Identical to getName()
         inline const word& operator[](const EnumType e) const;
+
+        //- Return the enumeration corresponding to the given name or deflt
+        //- if the name is not found.
+        inline EnumType operator()
+        (
+            const word& enumName,
+            const EnumType deflt
+        ) const;
 
 
     // IOstream operators

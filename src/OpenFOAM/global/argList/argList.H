@@ -79,7 +79,8 @@ Note
       in the <tt>~OpenFOAM/controlDict</tt> file.
       The \%f token is used as a placeholder for the file name.
     - The valid (mandatory) arguments can be adjusted
-      by directly manipulating the argList::validArgs static member.
+      via the addArgument static method instead of directly
+      manipulating the argList::validArgs static member.
     - The valid options can be adjusted
       via the addOption/removeOption static methods instead of directly
       manipulating the argList::validOptions static member.
@@ -100,8 +101,9 @@ SourceFiles
 #include "word.H"
 #include "fileName.H"
 #include "parRun.H"
-#include "StringStream.H"
 #include "OSspecific.H"
+#include "ITstream.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -116,14 +118,17 @@ class argList
 {
     // Private data
 
+        //- Track enabled/disabled mandatory arguments
+        static bool argsMandatory_;
+
         //- Track enabled/disabled banner state
         static bool bannerEnabled_;
 
         //- Track enabled/disabled checking of processor directories state
         static bool checkProcessorDirectories_;
 
-        //- Switch on/off parallel mode. Has to be first to be constructed
-        //  so destructor is done last.
+        //- Switch on/off parallel mode.
+        //  Must be first to be constructed so destructor is done last.
         ParRunControl parRunControl_;
 
         //- The arguments after removing known options
@@ -141,6 +146,9 @@ class argList
 
 
     // Private Member Functions
+
+        //- Helper for resolving aliases for -options within validOptionsCompat
+        static word optionCompat(const word& optionName);
 
         //- Helper function for printUsage
         static void printOptionUsage
@@ -176,6 +184,10 @@ public:
 
         //- A list of valid parallel options
         static HashTable<string> validParOptions;
+
+        //- A list of aliases for options.
+        //  Stored as (alias = canonical, version)
+        static HashTable<std::pair<word,int>> validOptionsCompat;
 
         //- Short usage information for validOptions
         static HashTable<string> optionUsage;
@@ -265,47 +277,46 @@ public:
             //- Return the path to the caseName
             inline fileName path() const;
 
-            //- Return arguments
+            //- The command arguments (non-options)
             inline const stringList& args() const;
 
-            //- Return non-const access to arguments
+            //- Non-const access to the command arguments (non-options)
             inline stringList& args();
 
-            //- Return the argument corresponding to index.
-            inline const string& arg(const label index) const;
-
-            //- Return the number of arguments
+            //- Return the number of arguments, which includes the name of
+            //- the executable
             inline label size() const;
 
-            //- Read a value from the argument at index.
+            //- Read a value from the argument at the given index.
             //  Index 0 corresponds to the name of the executable.
             //  Index 1 corresponds to the first argument.
             template<class T>
-            inline T argRead(const label index) const;
+            inline T argRead(const label argIndex) const;
 
-            //- Return options
+            //- Return the command options
             inline const HashTable<string>& options() const;
 
-            //- Return non-const access to options
+            //- Return non-const access to the command options
             inline HashTable<string>& options();
 
-            //- Return the argument string associated with the named option
-            inline const string& option(const word& opt) const;
-
             //- Return true if the named option is found
-            inline bool optionFound(const word& opt) const;
+            inline bool optionFound(const word& optionName) const;
 
-            //- Return an IStringStream from the named option
-            inline IStringStream optionLookup(const word& opt) const;
+            //- Return an input token stream for the named option
+            inline ITstream optionLookup(const word& optionName) const;
 
             //- Read a value from the named option
             template<class T>
-            inline T optionRead(const word& opt) const;
+            inline T optionRead(const word& optionName) const;
 
             //- Read a value from the named option if present.
             //  Return true if the named option was found.
             template<class T>
-            inline bool optionReadIfPresent(const word& opt, T& val) const;
+            inline bool optionReadIfPresent
+            (
+                const word& optionName,
+                T& val
+            ) const;
 
             //- Read a value from the named option if present.
             //  Return true if the named option was found, otherwise
@@ -313,7 +324,7 @@ public:
             template<class T>
             inline bool optionReadIfPresent
             (
-                const word& opt,
+                const word& optionName,
                 T& val,
                 const T& deflt
             ) const;
@@ -323,33 +334,34 @@ public:
             template<class T>
             inline T optionLookupOrDefault
             (
-                const word& opt,
+                const word& optionName,
                 const T& deflt
             ) const;
 
-            //- Read a List of values from the named option
+            //- Read a List of values from the named option,
+            //- treating a single entry like a list of size 1.
             template<class T>
-            List<T> optionReadList(const word& opt) const
-            {
-                return Foam::readList<T>(optionLookup(opt)());
-            }
+            inline List<T> optionReadList(const word& optionName) const;
 
 
             //- Return the argument corresponding to index.
             //  Index 0 corresponds to the name of the executable.
             //  Index 1 corresponds to the first argument.
-            inline const string& operator[](const label index) const;
+            inline const string& operator[](const label argIndex) const;
 
-            //- Return the argument string associated with the named option
-            inline const string& operator[](const word& opt) const;
+            //- Return the string associated with the named option
+            inline const string& operator[](const word& optionName) const;
 
 
         // Edit
 
+            //- Append a (mandatory) argument to validArgs
+            static void addArgument(const string& argumentName);
+
             //- Add a bool option to validOptions with usage information
             static void addBoolOption
             (
-                const word& opt,
+                const word& optionName,
                 const string& usage = ""
             );
 
@@ -357,15 +369,28 @@ public:
             //  An option with an empty param is a bool option
             static void addOption
             (
-                const word& opt,
+                const word& optionName,
                 const string& param = "",
                 const string& usage = ""
+            );
+
+            //- Add an alias for the optionName.
+            //
+            //  \param optionName the currently used option name
+            //      OpenFOAM version for which they were used.
+            //  \param compat alias name and the last OpenFOAM version
+            //      (YYMM) for when the alias was not needed.
+            //      Setting a version of 0 suppresses warnings about the alias.
+            static void addOptionCompat
+            (
+                const word& optionName,
+                std::pair<const char*, int> compat
             );
 
             //- Add option usage information to optionUsage
             static void addUsage
             (
-                const word& opt,
+                const word& optionName,
                 const string& usage
             );
 
@@ -374,7 +399,10 @@ public:
             static void addNote(const string& note);
 
             //- Remove option from validOptions and from optionUsage
-            static void removeOption(const word& opt);
+            static void removeOption(const word& optionName);
+
+            //- Flag command arguments as being non-mandatory
+            static void nonMandatoryArgs();
 
             //- Disable emitting the banner information
             static void noBanner();
@@ -401,14 +429,14 @@ public:
             //- Set option directly (use with caution)
             //  An option with an empty param is a bool option.
             //  Not all valid options can also be set: eg, -case, -roots, ...
-            //  Return true if the existing option value needed changing,
-            //  or if the option did not previously exist.
-            bool setOption(const word& opt, const string& param = "");
+            //  \return true if the existing option value was changed or
+            //      did not previously exist.
+            bool setOption(const word& optionName, const string& param="");
 
             //- Unset option directly (use with caution)
             //  Not all valid options can also be unset: eg, -case, -roots ...
-            //  Return true if the option existed before being unset.
-            bool unsetOption(const word& opt);
+            //  \return true if the option existed before being unset.
+            bool unsetOption(const word& optionName);
 
 
         // Print
@@ -417,7 +445,7 @@ public:
             void printNotes() const;
 
             //- Print usage
-            void printUsage() const;
+            void printUsage(bool full=true) const;
 
             //- Display documentation in browser
             //  Optionally display the application source code

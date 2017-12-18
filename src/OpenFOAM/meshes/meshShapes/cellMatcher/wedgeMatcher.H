@@ -25,10 +25,10 @@ Class
     Foam::wedgeMatcher
 
 Description
-    A cellMatcher for wedge cells
+    A cellMatcher for wedge cells (cellModel::WEDGE).
 
 See also
-    cellMatcher
+    cellMatcher, cellModel
 
 SourceFiles
     wedgeMatcher.C
@@ -46,28 +46,28 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class wedgeMatcher Declaration
+                        Class wedgeMatcher Declaration
 \*---------------------------------------------------------------------------*/
 
 class wedgeMatcher
 :
     public cellMatcher
 {
-    // Static data members
+    // Static Data Members
 
-        //- Constants for this shape
-        static const label vertPerCell;
-        static const label facePerCell;
-        static const label maxVertPerFace;
+        // Constants for this shape
+        static constexpr label vertPerCell = 7;
+        static constexpr label facePerCell = 6;
+        static constexpr label maxVertPerFace = 4;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        wedgeMatcher(const wedgeMatcher&);
+        wedgeMatcher(const wedgeMatcher&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const wedgeMatcher&);
+        wedgeMatcher& operator=(const wedgeMatcher&) = delete;
 
 
 public:

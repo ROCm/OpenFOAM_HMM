@@ -54,6 +54,20 @@ inline const Foam::List<int>& Foam::Enum<EnumType>::values() const
 
 
 template<class EnumType>
+inline bool Foam::Enum<EnumType>::found(const word& enumName) const
+{
+    return getIndex(enumName) >= 0;
+}
+
+
+template<class EnumType>
+inline bool Foam::Enum<EnumType>::found(const EnumType e) const
+{
+    return getIndex(e) >= 0;
+}
+
+
+template<class EnumType>
 inline bool Foam::Enum<EnumType>::hasEnum(const word& enumName) const
 {
     return getIndex(enumName) >= 0;
@@ -81,12 +95,12 @@ inline Foam::Ostream& Foam::Enum<EnumType>::writeList
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class EnumType>
-inline const EnumType Foam::Enum<EnumType>::operator[]
+inline EnumType Foam::Enum<EnumType>::operator[]
 (
-    const word& name
+    const word& enumName
 ) const
 {
-    return getEnum(name);
+    return getEnum(enumName);
 }
 
 
@@ -97,6 +111,24 @@ inline const Foam::word& Foam::Enum<EnumType>::operator[]
 ) const
 {
     return getName(e);
+}
+
+
+template<class EnumType>
+inline EnumType Foam::Enum<EnumType>::operator()
+(
+    const word& enumName,
+    const EnumType deflt
+) const
+{
+    const label idx = getIndex(enumName);
+
+    if (idx >= 0)
+    {
+        return EnumType(values_[idx]);
+    }
+
+    return deflt;
 }
 
 

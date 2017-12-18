@@ -27,13 +27,6 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::prismMatcher::vertPerCell = 6;
-const Foam::label Foam::prismMatcher::facePerCell = 5;
-const Foam::label Foam::prismMatcher::maxVertPerFace = 4;
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::prismMatcher::prismMatcher()
@@ -43,7 +36,7 @@ Foam::prismMatcher::prismMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "prism"
+        "prism" // same as cellModel::modelNames[cellModel::PRISM]
     )
 {}
 
@@ -312,31 +305,25 @@ bool Foam::prismMatcher::faceSizeMatch
     label nTris = 0;
     label nQuads = 0;
 
-    forAll(myFaces, myFacei)
+    for (const label facei : myFaces)
     {
-        label size = faces[myFaces[myFacei]].size();
+        const label size = faces[facei].size();
 
         if (size == 3)
         {
-            nTris++;
+            ++nTris;
         }
         else if (size == 4)
         {
-            nQuads++;
+            ++nQuads;
         }
         else
         {
             return false;
         }
     }
-    if ((nTris == 2) && (nQuads == 3))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+
+    return (nTris == 2 && nQuads == 3);
 }
 
 
@@ -390,10 +377,8 @@ bool Foam::prismMatcher::matches
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

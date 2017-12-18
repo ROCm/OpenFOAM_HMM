@@ -183,7 +183,7 @@ Foam::searchablePlateFeatures::features() const
 
     labelList regionEdges;
 
-    features.set
+    features.reset
     (
         new extendedFeatureEdgeMesh
         (

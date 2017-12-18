@@ -38,11 +38,23 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-    argList::noFunctionObjects();
+    // argList::noFunctionObjects();
     argList::removeOption("case");
 
     argList::addOption("label", "value", "Test parsing of label");
     argList::addOption("scalar", "value", "Test parsing of scalar");
+
+    // These are actually lies (never had -parseLabel, -parseScalar etc),
+    // but good for testing...
+
+    // Emits warning about it being old
+    argList::addOptionCompat("label", {"parseLabel", 1612});
+
+    // Specifying version=0 to use alias without any warnings
+    argList::addOptionCompat("scalar", {"parseScalar", 0});
+
+    // Fake a future option...
+    argList::addOptionCompat("label", {"parse-label", 2112});
 
     argList args(argc, argv);
 

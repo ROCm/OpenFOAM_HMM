@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::validArgs.append("cellSet");
+    argList::addArgument("cellSet");
     argList::addOption
     (
         "patch",
@@ -453,7 +453,7 @@ int main(int argc, char *argv[])
             region,
             1,
             exposedFaces,
-            UIndirectList<label>(nearestExposedPatch, exposedFaces)(),
+            labelUIndList(nearestExposedPatch, exposedFaces)(),
             true
         );
     }

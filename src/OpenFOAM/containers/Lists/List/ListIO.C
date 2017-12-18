@@ -159,39 +159,4 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
 }
 
 
-template<class T>
-Foam::List<T> Foam::readList(Istream& is)
-{
-    List<T> L;
-    token firstToken(is);
-    is.putBack(firstToken);
-
-    if (firstToken.isPunctuation())
-    {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, expected '(', found "
-                << firstToken.info()
-                << exit(FatalIOError);
-        }
-
-        // Read as singly-linked list
-        SLList<T> sll(is);
-
-        // Convert the singly-linked list to this list
-        L = sll;
-    }
-    else
-    {
-        // Create list with a single item
-        L.setSize(1);
-
-        is >> L[0];
-    }
-
-    return L;
-}
-
-
 // ************************************************************************* //

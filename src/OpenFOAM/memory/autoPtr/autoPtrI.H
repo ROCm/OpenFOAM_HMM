@@ -29,6 +29,13 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
+inline Foam::autoPtr<T>::autoPtr()
+:
+    ptr_(nullptr)
+{}
+
+
+template<class T>
 inline Foam::autoPtr<T>::autoPtr(T* p)
 :
     ptr_(p)
@@ -89,9 +96,9 @@ inline bool Foam::autoPtr<T>::valid() const
 template<class T>
 inline T* Foam::autoPtr<T>::ptr()
 {
-    T* ptr = ptr_;
+    T* p = ptr_;
     ptr_ = nullptr;
-    return ptr;
+    return p;
 }
 
 

@@ -239,7 +239,7 @@ inline Foam::PackedList<nBits>::PackedList(const labelUList& lst)
 
 
 template<unsigned nBits>
-inline Foam::PackedList<nBits>::PackedList(const UIndirectList<label>& lst)
+inline Foam::PackedList<nBits>::PackedList(const labelUIndList& lst)
 :
     PackedListCore(),
     StorageList(packedLength(lst.size()), 0u),

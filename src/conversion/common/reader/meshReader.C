@@ -28,41 +28,7 @@ License
 #include "polyMesh.H"
 #include "faceSet.H"
 #include "emptyPolyPatch.H"
-#include "cellModeller.H"
 #include "demandDrivenData.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::cellModel* Foam::meshReader::unknownModel = Foam::cellModeller::
-lookup
-(
-    "unknown"
-);
-
-const Foam::cellModel* Foam::meshReader::tetModel = Foam::cellModeller::
-lookup
-(
-    "tet"
-);
-
-const Foam::cellModel* Foam::meshReader::pyrModel = Foam::cellModeller::
-lookup
-(
-    "pyr"
-);
-
-const Foam::cellModel* Foam::meshReader::prismModel = Foam::cellModeller::
-lookup
-(
-    "prism"
-);
-
-const Foam::cellModel* Foam::meshReader::hexModel = Foam::cellModeller::
-lookup
-(
-    "hex"
-);
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -97,7 +63,7 @@ void Foam::meshReader::addFaceZones(polyMesh& mesh) const
             (
                 iter.key(),
                 iter(),
-                boolList(iter().size(), false),
+                false, // none are flipped
                 nZone,
                 mesh.faceZones()
             )

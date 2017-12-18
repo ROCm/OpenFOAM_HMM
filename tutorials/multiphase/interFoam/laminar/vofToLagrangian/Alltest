@@ -1,0 +1,10 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+(cd eulerianInjection && ./Allrun)
+
+# Note: only running the Eulerian test - particle data not yet available
+# (after 1 iter) for subsequent Lagrangian cases
+
+#------------------------------------------------------------------------------

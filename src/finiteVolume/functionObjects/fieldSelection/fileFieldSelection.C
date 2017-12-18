@@ -29,6 +29,43 @@ License
 #include "fvPatchField.H"
 #include "surfaceMesh.H"
 #include "fvsPatchField.H"
+#include "pointMesh.H"
+#include "pointPatchField.H"
+#include "UniformDimensionedField.H"
+
+void Foam::functionObjects::fileFieldSelection::addInternalFieldTypes
+(
+    wordHashSet& set
+) const
+{
+    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
+
+    const IOobjectList allObjects(mesh, mesh.time().timeName());
+
+    addFromFile<DimensionedField<scalar, volMesh>>(allObjects, set);
+    addFromFile<DimensionedField<vector, volMesh>>(allObjects, set);
+    addFromFile<DimensionedField<sphericalTensor, volMesh>>(allObjects, set);
+    addFromFile<DimensionedField<symmTensor, volMesh>>(allObjects, set);
+    addFromFile<DimensionedField<tensor, volMesh>>(allObjects, set);
+}
+
+
+void Foam::functionObjects::fileFieldSelection::addUniformFieldTypes
+(
+    wordHashSet& set
+) const
+{
+    const fvMesh& mesh = static_cast<const fvMesh&>(obr_);
+
+    const IOobjectList allObjects(mesh, mesh.time().timeName());
+
+    addFromFile<UniformDimensionedField<scalar>>(allObjects, set);
+    addFromFile<UniformDimensionedField<vector>>(allObjects, set);
+    addFromFile<UniformDimensionedField<sphericalTensor>>(allObjects, set);
+    addFromFile<UniformDimensionedField<symmTensor>>(allObjects, set);
+    addFromFile<UniformDimensionedField<tensor>>(allObjects, set);
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -54,8 +91,16 @@ bool Foam::functionObjects::fileFieldSelection::updateSelection()
     wordHashSet oldSet;
     oldSet.swap(selection_);
 
-    addFileGeoFields<fvPatchField, volMesh>(selection_);
-    addFileGeoFields<fvsPatchField, surfaceMesh>(selection_);
+    // Geometric fields
+    addGeoFieldTypes<fvPatchField, volMesh>(selection_);
+    addGeoFieldTypes<fvsPatchField, surfaceMesh>(selection_);
+    addGeoFieldTypes<pointPatchField, pointMesh>(selection_);
+
+    // Internal fields
+    addInternalFieldTypes(selection_);
+
+    // Uniform fields
+    addUniformFieldTypes(selection_);
 
     return selection_ != oldSet;
 }

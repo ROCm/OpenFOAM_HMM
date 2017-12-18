@@ -450,6 +450,18 @@ bool Foam::functionObjects::timeControl::execute()
 }
 
 
+bool Foam::functionObjects::timeControl::execute(const label subIndex)
+{
+    if (active())
+    {
+        // Call underlying function object directly
+        foPtr_->execute(subIndex);
+    }
+
+    return true;
+}
+
+
 bool Foam::functionObjects::timeControl::write()
 {
     if (active() && (postProcess || writeControl_.execute()))
@@ -726,10 +738,8 @@ bool Foam::functionObjects::timeControl::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -29,18 +29,17 @@
 #     remove all core files
 #------------------------------------------------------------------------------
 
-# default is pwd
-if [ "$#" -eq 0 ]
-then
-    set -- .
-elif [ "$1" = "-h" -o "$1" = "-help" ]
-then
+case "$1" in
+-h | -help*)
     exec 1>&2
     echo "Usage: ${0##*/} [dir1] .. [dirN]"
     echo "    remove all core files"
     exit 1
-fi
+    ;;
+esac
 
+# Default is pwd
+[ "$#" -gt 0 ] || set -- .
 
 for i
 do

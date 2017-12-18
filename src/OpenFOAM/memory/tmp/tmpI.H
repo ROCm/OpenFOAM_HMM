@@ -46,12 +46,20 @@ inline void Foam::tmp<T>::operator++()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::tmp<T>::tmp(T* tPtr)
+inline Foam::tmp<T>::tmp()
 :
     type_(TMP),
-    ptr_(tPtr)
+    ptr_(nullptr)
+{}
+
+
+template<class T>
+inline Foam::tmp<T>::tmp(T* p)
+:
+    type_(TMP),
+    ptr_(p)
 {
-    if (tPtr && !tPtr->unique())
+    if (p && !p->unique())
     {
         FatalErrorInFunction
             << "Attempted construction of a " << typeName()
@@ -62,10 +70,10 @@ inline Foam::tmp<T>::tmp(T* tPtr)
 
 
 template<class T>
-inline Foam::tmp<T>::tmp(const T& tRef)
+inline Foam::tmp<T>::tmp(const T& t)
 :
     type_(CONST_REF),
-    ptr_(const_cast<T*>(&tRef))
+    ptr_(const_cast<T*>(&t))
 {}
 
 
@@ -171,30 +179,6 @@ inline Foam::word Foam::tmp<T>::typeName() const
 
 
 template<class T>
-inline T& Foam::tmp<T>::ref() const
-{
-    if (isTmp())
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Attempt to acquire non-const reference to const object"
-            << " from a " << typeName()
-            << abort(FatalError);
-    }
-
-    return *ptr_;
-}
-
-
-template<class T>
 inline T* Foam::tmp<T>::ptr() const
 {
     if (isTmp())
@@ -219,10 +203,32 @@ inline T* Foam::tmp<T>::ptr() const
 
         return ptr;
     }
+
+    return ptr_->clone().ptr();
+}
+
+
+template<class T>
+inline T& Foam::tmp<T>::ref() const
+{
+    if (isTmp())
+    {
+        if (!ptr_)
+        {
+            FatalErrorInFunction
+                << typeName() << " deallocated"
+                << abort(FatalError);
+        }
+    }
     else
     {
-        return ptr_->clone().ptr();
+        FatalErrorInFunction
+            << "Attempt to acquire non-const reference to const object"
+            << " from a " << typeName()
+            << abort(FatalError);
     }
+
+    return *ptr_;
 }
 
 
@@ -246,27 +252,6 @@ inline void Foam::tmp<T>::clear() const
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-#ifdef NON_CONST_TMP
-template<class T>
-inline T& Foam::tmp<T>::operator()()
-{
-    if (isTmp())
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-
-    // Const-ness is automatically cast-away which is why this operator is
-    // deprecated.  Use ref() where non-const access is required.
-    return *ptr_;
-}
-#endif
-
 
 template<class T>
 inline const T& Foam::tmp<T>::operator()() const
@@ -331,18 +316,18 @@ inline const T* Foam::tmp<T>::operator->() const
 
 
 template<class T>
-inline void Foam::tmp<T>::operator=(T* tPtr)
+inline void Foam::tmp<T>::operator=(T* p)
 {
     clear();
 
-    if (!tPtr)
+    if (!p)
     {
         FatalErrorInFunction
             << "Attempted copy of a deallocated " << typeName()
             << abort(FatalError);
     }
 
-    if (tPtr && !tPtr->unique())
+    if (p && !p->unique())
     {
         FatalErrorInFunction
             << "Attempted assignment of a " << typeName()
@@ -351,7 +336,7 @@ inline void Foam::tmp<T>::operator=(T* tPtr)
     }
 
     type_ = TMP;
-    ptr_ = tPtr;
+    ptr_ = p;
 }
 
 

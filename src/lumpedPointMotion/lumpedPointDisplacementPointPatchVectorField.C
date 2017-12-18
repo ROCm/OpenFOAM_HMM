@@ -187,6 +187,8 @@ void Foam::lumpedPointDisplacementPointPatchVectorField::updateCoeffs()
         return;
     }
 
+    enum Time::stopAtControls action = Time::stopAtControls::saUnknown;
+
     const bool masterPatch = (movement().ownerId() == this->patch().index());
     if (masterPatch)
     {
@@ -250,13 +252,14 @@ void Foam::lumpedPointDisplacementPointPatchVectorField::updateCoeffs()
             {
                 movement().writeData(forces, moments);
 
-                // signal external source to execute
+                // Signal external source to execute
                 movement().coupler().useSlave();
             }
         }
 
-        // Wait for slave to provide data - includes MPI barrier
-        movement().coupler().waitForSlave();
+        // Wait for slave to provide data (includes MPI barrier)
+        // and catch any abort information sent from slave
+        action = movement().coupler().waitForSlave();
 
         // Read data passed back from external source - includes MPI barrier
         const_cast<lumpedPointMovement&>(movement()).readState();
@@ -271,6 +274,16 @@ void Foam::lumpedPointDisplacementPointPatchVectorField::updateCoeffs()
     this->operator==(tdisp);
 
     fixedValuePointPatchField<vector>::updateCoeffs();
+
+    // Process any abort information sent from slave
+    if
+    (
+        action != this->db().time().stopAt()
+     && action != Time::stopAtControls::saUnknown
+    )
+    {
+        this->db().time().stopAt(action);
+    }
 }
 
 

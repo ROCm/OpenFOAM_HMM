@@ -60,13 +60,19 @@ class metisLikeDecomp
 
 protected:
 
+    // Protected data
+
+        //- Coefficients for all derived methods
+        const dictionary& coeffsDict_;
+
+
     // Protected Member Functions
 
         //- Serial and/or collect/distribute for parallel operation
         virtual label decomposeGeneral
         (
-            const UList<label>& adjncy,
-            const UList<label>& xadj,
+            const labelUList& adjncy,
+            const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
         );
@@ -74,8 +80,8 @@ protected:
         //- Decomposition with metis-like parameters
         virtual label decomposeSerial
         (
-            const UList<label>& adjncy,
-            const UList<label>& xadj,
+            const labelUList& adjncy,
+            const labelUList& xadj,
             const UList<scalar>& cellWeights,
             List<label>& decomp
         ) = 0;
@@ -84,8 +90,29 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        metisLikeDecomp(const dictionary& decompositionDict);
+        //- Construct for derived type name and decomposition dictionary.
+        //  The default search for the coefficients will return dictionary::null
+        //  on failure. This avoids a name clash of a metis "method" with the
+        //  top level.
+        metisLikeDecomp
+        (
+            const word& derivedType,
+            const dictionary& decompDict,
+            int select = selectionType::NULL_DICT
+        );
+
+        //- Construct for derived type name, decomposition dictionary
+        //-  and region name
+        //  The default search for the coefficients will return dictionary::null
+        //  on failure. This avoids a name clash of a metis "method" with the
+        //  top level.
+        metisLikeDecomp
+        (
+            const word& derivedType,
+            const dictionary& decompDict,
+            const word& regionName,
+            int select = selectionType::NULL_DICT
+        );
 
 
     //- Destructor

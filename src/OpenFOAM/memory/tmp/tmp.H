@@ -83,11 +83,14 @@ public:
 
     // Constructors
 
+        //- Null pointer construct
+        inline tmp();
+
         //- Store object pointer
-        inline explicit tmp(T* tPtr = nullptr);
+        inline explicit tmp(T* p);
 
         //- Store object const reference
-        inline tmp(const T& tRef);
+        inline tmp(const T& t);
 
         //- Construct copy and increment reference count
         inline tmp(const tmp<T>& t);
@@ -125,26 +128,19 @@ public:
 
         // Edit
 
-            //- Return non-const reference or generate a fatal error
-            //  if the object is const.
-            inline T& ref() const;
-
             //- Return tmp pointer for reuse.
             //  Returns a clone if the object is not a temporary
             inline T* ptr() const;
 
+            //- Return non-const reference. Fatal if the object is const.
+            inline T& ref() const;
+
             //- If object pointer points to valid object:
-            //  delete object and set pointer to nullptr
+            //- delete object and set pointer to nullptr
             inline void clear() const;
 
 
     // Member operators
-
-        #ifdef NON_CONST_TMP
-        //- Deprecated non-const dereference operator.
-        //  Use ref() where non-const access is required
-        inline T& operator()();
-        #endif
 
         //- Const dereference operator
         inline const T& operator()() const;
@@ -159,7 +155,7 @@ public:
         inline const T* operator->() const;
 
         //- Assignment to pointer changing this tmp to a temporary T
-        inline void operator=(T* tPtr);
+        inline void operator=(T* p);
 
         //- Assignment transferring the temporary T to this tmp
         inline void operator=(const tmp<T>& t);

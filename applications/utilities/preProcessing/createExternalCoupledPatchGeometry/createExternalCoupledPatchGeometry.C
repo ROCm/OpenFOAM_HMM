@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
     #include "addRegionsOption.H"
-    argList::validArgs.append("patchGroup");
+    argList::addArgument("patchGroup");
     argList::addOption
     (
         "commsDir",

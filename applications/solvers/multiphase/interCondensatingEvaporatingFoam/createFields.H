@@ -29,8 +29,10 @@ volVectorField U
 #include "createPhi.H"
 
 // Creating e based thermo
-autoPtr<twoPhaseMixtureEThermo> thermo;
-thermo.set(new twoPhaseMixtureEThermo(U, phi));
+autoPtr<twoPhaseMixtureEThermo> thermo
+(
+    new twoPhaseMixtureEThermo(U, phi)
+);
 
 // Create mixture and
 Info<< "Creating temperaturePhaseChangeTwoPhaseMixture\n" << endl;

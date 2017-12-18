@@ -1406,7 +1406,11 @@ static int waitpid(const pid_t pid)
 }
 
 
-int Foam::system(const std::string& command)
+int Foam::system
+(
+    const std::string& command,
+    const bool background
+)
 {
     if (command.empty())
     {
@@ -1436,7 +1440,7 @@ int Foam::system(const std::string& command)
             "sh",               // Command-name (name for the shell)
             "-c",               // Read commands from command_string operand
             command.c_str(),    // Command string
-            reinterpret_cast<char *>(0)
+            reinterpret_cast<char*>(0)
         );
 
         // obviously failed, since exec should not return at all
@@ -1446,12 +1450,24 @@ int Foam::system(const std::string& command)
     }
 
 
-    // in parent - blocking wait
+    // In parent:
+
+    if (background)
+    {
+        // Started as background process
+        return 0;
+    }
+
+    // blocking wait for the child
     return waitpid(child_pid);
 }
 
 
-int Foam::system(const Foam::UList<Foam::string>& command)
+int Foam::system
+(
+    const CStringList& command,
+    const bool background
+)
 {
     const int argc = command.size();
 
@@ -1478,7 +1494,70 @@ int Foam::system(const Foam::UList<Foam::string>& command)
 
     if (child_pid == 0)
     {
-        // in child:
+        // In child:
+        // Need command and arguments separately.
+        // args is a nullptr-terminated list of c-strings
+
+        // execvp uses the current environ
+        (void) ::execvp(command[0], command.strings(1));
+
+        // obviously failed, since exec should not return at all
+        FatalErrorInFunction
+            << "exec(" << command[0] << ", ...) failed"
+            << exit(FatalError);
+    }
+
+
+    // In parent:
+
+    if (background)
+    {
+        // Started as background process
+        return 0;
+    }
+
+    // blocking wait for the child
+    return waitpid(child_pid);
+}
+
+
+int Foam::system
+(
+    const Foam::UList<Foam::string>& command,
+    const bool background
+)
+{
+    // In the future simply call the CStringList version:
+    //
+    //     const CStringList cmd(command);
+    //     return Foam::system(cmd, background);
+
+    const int argc = command.size();
+
+    if (!argc)
+    {
+        // Treat an empty command as a successful no-op.
+        // For consistency with POSIX (man sh) behaviour for (sh -c command),
+        // which is what is mostly being replicated here.
+        return 0;
+    }
+
+    // NB: use vfork, not fork!
+    // vfork behaves more like a thread and avoids copy-on-write problems
+    // triggered by fork.
+    // The normal system() command has a fork buried in it that causes
+    // issues with infiniband and openmpi etc.
+    pid_t child_pid = ::vfork();
+    if (child_pid == -1)
+    {
+        FatalErrorInFunction
+            << "vfork() failed for system command " << command[0]
+            << exit(FatalError);
+    }
+
+    if (child_pid == 0)
+    {
+        // In child:
         // Need command and arguments separately.
         // args is a nullptr-terminated list of c-strings
 
@@ -1498,7 +1577,15 @@ int Foam::system(const Foam::UList<Foam::string>& command)
     }
 
 
-    // in parent - blocking wait
+    // In parent:
+
+    if (background)
+    {
+        // Started as background process
+        return 0;
+    }
+
+    // blocking wait for the child
     return waitpid(child_pid);
 }
 

@@ -3,15 +3,9 @@
 #include "fvMesh.H"
 #include "graph.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-void writePatchGraph
+void Foam::writePatchGraph
 (
     const volScalarField& vsf,
     const label patchLabel,
@@ -29,9 +23,5 @@ void writePatchGraph
     ).write(vsf.time().timePath()/vsf.name(), graphFormat);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

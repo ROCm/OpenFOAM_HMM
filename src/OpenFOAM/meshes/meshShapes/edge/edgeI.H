@@ -199,6 +199,7 @@ inline Foam::label Foam::edge::which(const label pointLabel) const
             return 1;
         }
     }
+
     return -1;
 }
 
@@ -328,7 +329,7 @@ inline bool Foam::edge::insert(const label index)
 }
 
 
-inline Foam::label Foam::edge::insert(const UList<label>& lst)
+inline Foam::label Foam::edge::insert(const labelUList& lst)
 {
     return insertMultiple(lst.begin(), lst.end());
 }
@@ -373,7 +374,7 @@ inline Foam::label Foam::edge::erase(const label index)
 }
 
 
-inline Foam::label Foam::edge::erase(const UList<label>& lst)
+inline Foam::label Foam::edge::erase(const labelUList& lst)
 {
     return eraseMultiple(lst.begin(), lst.end());
 }

@@ -155,6 +155,13 @@ namespace Foam
         scotchDecomp,
         dictionary
     );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        scotchDecomp,
+        dictionaryRegion
+    );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -178,17 +185,14 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::scotchDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
 )
 {
-    const dictionary* coeffsDictPtr =
-        decompositionDict_.subDictPtr("scotchCoeffs");
-
     // Dump graph
-    if (coeffsDictPtr && coeffsDictPtr->lookupOrDefault("writeGraph", false))
+    if (coeffsDict_.lookupOrDefault("writeGraph", false))
     {
         OFstream str(graphPath_);
 
@@ -230,20 +234,17 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     SCOTCH_Strat stradat;
     check(SCOTCH_stratInit(&stradat), "SCOTCH_stratInit");
 
-    if (coeffsDictPtr)
+    string strategy;
+    if (coeffsDict_.readIfPresent("strategy", strategy))
     {
-        string strategy;
-        if (coeffsDictPtr->readIfPresent("strategy", strategy))
+        if (debug)
         {
-            if (debug)
-            {
-                Info<< "scotchDecomp : Using strategy " << strategy << endl;
-            }
-            SCOTCH_stratGraphMap(&stradat, strategy.c_str());
-            //fprintf(stdout, "S\tStrat=");
-            //SCOTCH_stratSave(&stradat, stdout);
-            //fprintf(stdout, "\n");
+            Info<< "scotchDecomp : Using strategy " << strategy << endl;
         }
+        SCOTCH_stratGraphMap(&stradat, strategy.c_str());
+        //fprintf(stdout, "S\tStrat=");
+        //SCOTCH_stratSave(&stradat, stdout);
+        //fprintf(stdout, "\n");
     }
 
 
@@ -330,8 +331,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     List<label> processorWeights;
     if
     (
-        coeffsDictPtr
-     && coeffsDictPtr->readIfPresent("processorWeights", processorWeights)
+        coeffsDict_.readIfPresent("processorWeights", processorWeights)
      && processorWeights.size()
     )
     {
@@ -344,7 +344,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
         (
             SCOTCH_archCmpltw
             (
-                &archdat, nProcessors_, processorWeights.begin()
+                &archdat, nDomains_, processorWeights.begin()
             ),
             "SCOTCH_archCmpltw"
         );
@@ -353,7 +353,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     {
         check
         (
-            SCOTCH_archCmplt(&archdat, nProcessors_),
+            SCOTCH_archCmplt(&archdat, nDomains_),
             "SCOTCH_archCmplt"
         );
 
@@ -433,7 +433,7 @@ Foam::label Foam::scotchDecomp::decomposeSerial
     //    SCOTCH_graphPart
     //    (
     //        &grafdat,
-    //        nProcessors_,   // partnbr
+    //        nDomains_,      // partnbr
     //        &stradat,       // const SCOTCH_Strat *
     //        decomp.begin()  // parttab
     //    ),
@@ -453,9 +453,19 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::scotchDecomp::scotchDecomp(const dictionary& decompositionDict)
+Foam::scotchDecomp::scotchDecomp(const dictionary& decompDict)
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp(typeName, decompDict, selectionType::NULL_DICT)
+{}
+
+
+Foam::scotchDecomp::scotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp(typeName, decompDict, regionName, selectionType::NULL_DICT)
 {}
 
 

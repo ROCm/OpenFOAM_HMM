@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats"
+        "convert between surface formats, using triSurface library components"
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("outputFile");
+    argList::addArgument("inputFile");
+    argList::addArgument("outputFile");
 
     argList::addBoolOption
     (
@@ -96,16 +96,6 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    if (args.optionFound("writePrecision"))
-    {
-        label writePrecision = args.optionRead<label>("writePrecision");
-
-        IOstream::defaultPrecision(writePrecision);
-        Sout.precision(writePrecision);
-
-        Info<< "Output write precision set to " << writePrecision << endl;
-    }
-
     const fileName importName = args[1];
     const fileName exportName = args[2];
 
@@ -114,6 +104,26 @@ int main(int argc, char *argv[])
         FatalErrorInFunction
             << "Output file " << exportName << " would overwrite input file."
             << exit(FatalError);
+    }
+
+    // Check that reading/writing is supported
+    if
+    (
+        !triSurface::canRead(importName, true)
+     || !triSurface::canWriteType(exportName.ext(), true)
+    )
+    {
+        return 1;
+    }
+
+    if (args.optionFound("writePrecision"))
+    {
+        label writePrecision = args.optionRead<label>("writePrecision");
+
+        IOstream::defaultPrecision(writePrecision);
+        Sout.precision(writePrecision);
+
+        Info<< "Output write precision set to " << writePrecision << endl;
     }
 
     const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);

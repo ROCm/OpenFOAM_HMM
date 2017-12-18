@@ -327,7 +327,7 @@ Foam::label Foam::RBD::rigidBodyModel::merge
 
         makeComposite(sBody.masterID());
 
-        sBodyPtr.set
+        sBodyPtr.reset
         (
             new subBody
             (
@@ -342,7 +342,7 @@ Foam::label Foam::RBD::rigidBodyModel::merge
     {
         makeComposite(parentID);
 
-        sBodyPtr.set
+        sBodyPtr.reset
         (
             new subBody
             (

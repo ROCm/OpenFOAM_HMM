@@ -25,36 +25,29 @@ License
 
 #include "geomDecomp.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::geomDecomp::geomDecomp
-(
-    const dictionary& decompositionDict,
-    const word& derivedType
-)
-:
-    decompositionMethod(decompositionDict),
-    geomDecomDict_(decompositionDict.optionalSubDict(derivedType + "Coeffs")),
-    n_(geomDecomDict_.lookup("n")),
-    delta_(readScalar(geomDecomDict_.lookup("delta"))),
-    rotDelta_(I)
+void Foam::geomDecomp::readCoeffs()
 {
-    // check that the case makes sense :
+    coeffsDict_.readIfPresent("delta", delta_);
 
-    if (nProcessors_ != n_.x()*n_.y()*n_.z())
+    coeffsDict_.lookup("n") >> n_;
+
+    // Verify that the input makes sense
+    if (nDomains_ != n_.x()*n_.y()*n_.z())
     {
         FatalErrorInFunction
-            << "Wrong number of processor divisions in geomDecomp:" << nl
-            << "Number of domains    : " << nProcessors_ << nl
+            << "Wrong number of domain divisions in geomDecomp:" << nl
+            << "Number of domains    : " << nDomains_ << nl
             << "Wanted decomposition : " << n_
             << exit(FatalError);
     }
 
-    scalar d = 1 - 0.5*delta_*delta_;
-    scalar d2 = sqr(d);
+    const scalar d = 1 - 0.5*delta_*delta_;
+    const scalar d2 = sqr(d);
 
-    scalar a = delta_;
-    scalar a2 = sqr(a);
+    const scalar a = delta_;
+    const scalar a2 = sqr(a);
 
     rotDelta_ = tensor
     (
@@ -62,6 +55,43 @@ Foam::geomDecomp::geomDecomp
         a*d - a2*d,  a*a2 + d2,  -2*a*d,
         a*d2 + a2,   a*d - a2*d,  d2 - a2
     );
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::geomDecomp::geomDecomp
+(
+    const word& derivedType,
+    const dictionary& decompDict,
+    int select
+)
+:
+    decompositionMethod(decompDict),
+    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select)),
+    n_(1,1,1),
+    delta_(0.001),
+    rotDelta_(I)
+{
+    readCoeffs();
+}
+
+
+Foam::geomDecomp::geomDecomp
+(
+    const word& derivedType,
+    const dictionary& decompDict,
+    const word& regionName,
+    int select
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_(findCoeffsDict(derivedType + "Coeffs", select)),
+    n_(1,1,1),
+    delta_(0.001),
+    rotDelta_(I)
+{
+    readCoeffs();
 }
 
 

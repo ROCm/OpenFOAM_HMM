@@ -54,12 +54,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.clear();
-    argList::validOptions.insert
-    (
-        "pointsFile",
-        "filename"
-    );
+    argList::addOption("pointsFile", "filename");
 
     #include "addOverwriteOption.H"
 

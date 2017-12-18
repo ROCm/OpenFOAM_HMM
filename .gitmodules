@@ -1,0 +1,3 @@
+[submodule "cfmesh"]
+	path = modules/cfmesh
+	url = https://develop.openfoam.com/Community/integration-cfmesh.git

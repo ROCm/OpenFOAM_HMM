@@ -29,6 +29,7 @@ License
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
+#include "faMesh.H"
 #include "fvMeshSubset.H"
 #include "vtkPVFoamReader.h"
 #include "uindirectPrimitivePatch.H"
@@ -44,60 +45,58 @@ License
 
 void Foam::vtkPVFoam::convertMeshVolume()
 {
-    const arrayRange& range = rangeVolume_;
-    const fvMesh& mesh = *meshPtr_;
+    // Convert internalMesh - actually only one part
+    const List<label> partIds =
+        rangeVolume_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    // Convert the internalMesh
-    // this looks like more than one part, but it isn't
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (selectedPartIds_.found(partId))
+        const auto& longName = selectedPartIds_[partId];
+        foamVtuData& vtuData = cachedVtu_(longName);
+
+        vtkSmartPointer<vtkUnstructuredGrid> vtkgeom;
+        if (vtuData.nPoints())
         {
-            const auto& longName = selectedPartIds_[partId];
-            foamVtuData& vtuData = cachedVtu_(longName);
-
-            vtkSmartPointer<vtkUnstructuredGrid> vtkgeom;
-            if (vtuData.nPoints())
+            if (meshState_ == polyMesh::UNCHANGED)
             {
-                if (meshState_ == polyMesh::UNCHANGED)
+                if (debug)
                 {
-                    if (debug)
-                    {
-                        Info<< "reuse " << longName << nl;
-                    }
-                    vtuData.reuse(); // reuse
-                    continue;
+                    Info<< "reuse " << longName << nl;
                 }
-                else if (meshState_ == polyMesh::POINTS_MOVED)
-                {
-                    if (debug)
-                    {
-                        Info<< "move points " << longName << nl;
-                    }
-                    vtkgeom = vtuData.getCopy();
-                    vtkgeom->SetPoints(movePoints(mesh, vtuData));
-                }
+                vtuData.reuse(); // reuse
+                continue;
             }
-
-            if (!vtkgeom)
+            else if (meshState_ == polyMesh::POINTS_MOVED)
             {
-                // Nothing usable from cache - create new geometry
-                vtkgeom = volumeVTKMesh(mesh, vtuData);
+                if (debug)
+                {
+                    Info<< "move points " << longName << nl;
+                }
+                vtkgeom = vtuData.getCopy();
+                vtkgeom->SetPoints(movePoints(mesh, vtuData));
             }
-
-            vtuData.set(vtkgeom);
         }
+
+        if (!vtkgeom)
+        {
+            // Nothing usable from cache - create new geometry
+            vtkgeom = volumeVTKMesh(mesh, vtuData);
+        }
+
+        vtuData.set(vtkgeom);
     }
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -105,33 +104,32 @@ void Foam::vtkPVFoam::convertMeshVolume()
 
 void Foam::vtkPVFoam::convertMeshLagrangian()
 {
-    const arrayRange& range = rangeLagrangian_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangeClouds_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (selectedPartIds_.found(partId))
-        {
-            const auto& longName = selectedPartIds_[partId];
-            const word cloudName = getFoamName(longName);
+        const auto& longName = selectedPartIds_[partId];
+        const word cloudName = getFoamName(longName);
 
-            // Direct conversion, no caching for Lagrangian
-            cachedVtp_(longName).set
-            (
-                lagrangianVTKMesh(mesh, cloudName)
-            );
-        }
+        // Direct conversion, no caching for Lagrangian
+        cachedVtp_(longName).set
+        (
+            lagrangianVTKMesh(mesh, cloudName)
+        );
     }
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -139,22 +137,20 @@ void Foam::vtkPVFoam::convertMeshLagrangian()
 
 void Foam::vtkPVFoam::convertMeshPatches()
 {
-    const arrayRange& range = rangePatches_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangePatches_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
         const auto& longName = selectedPartIds_[partId];
         const word partName = getFoamName(longName);
         foamVtpData& vtpData = cachedVtp_(longName);
@@ -198,14 +194,14 @@ void Foam::vtkPVFoam::convertMeshPatches()
             if (debug)
             {
                 Info<< "Creating VTK mesh for patches [" << patchIds <<"] "
-                    << longName << endl;
+                    << longName << nl;
             }
 
             // Store good patch ids as additionalIds
             vtpData.additionalIds().reserve(patchIds.size());
 
             label sz = 0;
-            for (auto id : patchIds)
+            for (const auto id : patchIds)
             {
                 const label n = patches[id].size();
 
@@ -221,7 +217,7 @@ void Foam::vtkPVFoam::convertMeshPatches()
             DynamicList<label>& faceLabels = vtpData.cellMap();
             faceLabels.reserve(sz);
 
-            for (auto id : vtpData.additionalIds())
+            for (const auto id : vtpData.additionalIds())
             {
                 const auto& pp = patches[id];
                 forAll(pp, i)
@@ -252,7 +248,7 @@ void Foam::vtkPVFoam::convertMeshPatches()
             if (debug)
             {
                 Info<< "Creating VTK mesh for patch [" << patchId <<"] "
-                    << partName << endl;
+                    << partName << nl;
             }
 
             if (patchId >= 0)
@@ -276,7 +272,86 @@ void Foam::vtkPVFoam::convertMeshPatches()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
+        printMemory();
+    }
+}
+
+
+void Foam::vtkPVFoam::convertMeshArea()
+{
+    // Convert areaMesh - actually only one part
+    const List<label> partIds =
+        rangeArea_.intersection(selectedPartIds_);
+
+    if (partIds.empty())
+    {
+        return;
+    }
+    else if (!areaMeshPtr_ && volMeshPtr_)
+    {
+        areaMeshPtr_ = new faMesh(*volMeshPtr_);
+    }
+
+    if (!areaMeshPtr_)
+    {
+        return;
+    }
+
+    const faMesh& mesh = *areaMeshPtr_;
+
+    if (debug)
+    {
+        Info<< "<beg> " << FUNCTION_NAME << nl;
+        printMemory();
+    }
+
+    for (const auto partId : partIds)
+    {
+        const auto& longName = selectedPartIds_[partId];
+        foamVtpData& vtpData = cachedVtp_(longName);
+
+        vtkSmartPointer<vtkPolyData> vtkgeom;
+
+// This needs checking
+// #if 0
+//         if (vtpData.nPoints())
+//         {
+//             if (meshState_ == polyMesh::UNCHANGED)
+//             {
+//                 if (debug)
+//                 {
+//                     Info<< "reuse " << longName << nl;
+//                 }
+//                 vtpData.reuse(); // reuse
+//                 continue;
+//             }
+//             else if (meshState_ == polyMesh::POINTS_MOVED)
+//             {
+//                 if (debug)
+//                 {
+//                     Info<< "move points " << longName << nl;
+//                 }
+//                 vtkgeom = vtpData.getCopy();
+//                 vtkgeom->SetPoints(movePoints(mesh, vtpData));
+//             }
+//         }
+// #endif
+
+        if (!vtkgeom)
+        {
+            vtpData.clear(); // Remove any old mappings
+
+            // Nothing usable from cache - create new geometry
+            vtkgeom = patchVTKMesh(mesh.patch());
+        }
+
+        vtpData.set(vtkgeom);
+    }
+
+    if (debug)
+    {
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -284,28 +359,25 @@ void Foam::vtkPVFoam::convertMeshPatches()
 
 void Foam::vtkPVFoam::convertMeshCellZones()
 {
-    const arrayRange& range = rangeCellZones_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangeCellZones_.intersection(selectedPartIds_);
 
-    if (range.empty())
+    const fvMesh& mesh = *volMeshPtr_;
+
+    if (partIds.empty())
     {
         return;
     }
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
     const cellZoneMesh& zMesh = mesh.cellZones();
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
-
         const auto& longName = selectedPartIds_[partId];
         const word zoneName = getFoamName(longName);
         const label  zoneId = zMesh.findZoneID(zoneName);
@@ -318,7 +390,7 @@ void Foam::vtkPVFoam::convertMeshCellZones()
         if (debug)
         {
             Info<< "Creating VTK mesh for cellZone[" << zoneId << "] "
-                << zoneName << endl;
+                << zoneName << nl;
         }
 
         foamVtuData& vtuData = cachedVtu_(longName);
@@ -362,7 +434,7 @@ void Foam::vtkPVFoam::convertMeshCellZones()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -370,28 +442,25 @@ void Foam::vtkPVFoam::convertMeshCellZones()
 
 void Foam::vtkPVFoam::convertMeshCellSets()
 {
-    const arrayRange& range = rangeCellSets_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangeCellSets_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
-
         const auto& longName = selectedPartIds_[partId];
         const word partName = getFoamName(longName);
 
         if (debug)
         {
-            Info<< "Creating VTK mesh for cellSet=" << partName << endl;
+            Info<< "Creating VTK mesh for cellSet=" << partName << nl;
         }
 
         foamVtuData& vtuData = cachedVtu_(longName);
@@ -435,7 +504,7 @@ void Foam::vtkPVFoam::convertMeshCellSets()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -443,28 +512,25 @@ void Foam::vtkPVFoam::convertMeshCellSets()
 
 void Foam::vtkPVFoam::convertMeshFaceZones()
 {
-    const arrayRange& range = rangeFaceZones_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangeFaceZones_.intersection(selectedPartIds_);
 
-    if (range.empty())
+    const fvMesh& mesh = *volMeshPtr_;
+
+    if (partIds.empty())
     {
         return;
     }
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
     const faceZoneMesh& zMesh = mesh.faceZones();
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
-
         const auto& longName = selectedPartIds_[partId];
         const word zoneName = getFoamName(longName);
         const label  zoneId = zMesh.findZoneID(zoneName);
@@ -476,7 +542,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones()
         if (debug)
         {
             Info<< "Creating VTKmesh for faceZone[" << zoneId << "] "
-                << zoneName << endl;
+                << zoneName << nl;
         }
 
         foamVtpData& vtpData = cachedVtp_(longName);
@@ -513,7 +579,7 @@ void Foam::vtkPVFoam::convertMeshFaceZones()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -521,28 +587,25 @@ void Foam::vtkPVFoam::convertMeshFaceZones()
 
 void Foam::vtkPVFoam::convertMeshFaceSets()
 {
-    const arrayRange& range = rangeFaceSets_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangeFaceSets_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
-
         const auto& longName = selectedPartIds_[partId];
         const word partName = getFoamName(longName);
 
         if (debug)
         {
-            Info<< "Creating VTK mesh for faceSet=" << partName << endl;
+            Info<< "Creating VTK mesh for faceSet=" << partName << nl;
         }
 
         foamVtpData& vtpData = cachedVtp_(longName);
@@ -597,7 +660,7 @@ void Foam::vtkPVFoam::convertMeshFaceSets()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -605,84 +668,83 @@ void Foam::vtkPVFoam::convertMeshFaceSets()
 
 void Foam::vtkPVFoam::convertMeshPointZones()
 {
-    const arrayRange& range = rangePointZones_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangePointZones_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
+
+    if (partIds.empty())
+    {
+        return;
+    }
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    if (range.size())
+    const pointZoneMesh& zMesh = mesh.pointZones();
+    for (const auto partId : partIds)
     {
-        const pointZoneMesh& zMesh = mesh.pointZones();
-        for (auto partId : range)
+        const auto& longName = selectedPartIds_[partId];
+        const word zoneName = getFoamName(longName);
+        const label zoneId = zMesh.findZoneID(zoneName);
+
+        if (zoneId < 0)
         {
-            if (!selectedPartIds_.found(partId))
-            {
-                continue;
-            }
-
-            const auto& longName = selectedPartIds_[partId];
-            const word zoneName = getFoamName(longName);
-            const label zoneId = zMesh.findZoneID(zoneName);
-
-            if (zoneId < 0)
-            {
-                continue;
-            }
-
-            foamVtpData& vtpData = cachedVtp_(longName);
-
-            vtkSmartPointer<vtkPolyData> vtkgeom;
-            if (vtpData.nPoints() && vtpData.pointMap().size())
-            {
-                if (meshState_ == polyMesh::UNCHANGED)
-                {
-                    if (debug)
-                    {
-                        Info<< "reusing " << longName << nl;
-                    }
-                    vtpData.reuse();
-                    continue;
-                }
-                else if (meshState_ == polyMesh::POINTS_MOVED)
-                {
-                    if (debug)
-                    {
-                        Info<< "move points " << longName << nl;
-                    }
-                    vtkgeom = vtpData.getCopy();
-                }
-            }
-
-            if (!vtkgeom)
-            {
-                // First time, or topo change
-                vtkgeom = vtkSmartPointer<vtkPolyData>::New();
-                vtpData.pointMap() = zMesh[zoneId];
-            }
-
-            const pointField& points = mesh.points();
-            const labelUList& pointMap = vtpData.pointMap();
-
-            auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
-
-            vtkpoints->SetNumberOfPoints(pointMap.size());
-            forAll(pointMap, pointi)
-            {
-                vtkpoints->SetPoint(pointi, points[pointMap[pointi]].v_);
-            }
-
-            vtkgeom->SetPoints(vtkpoints);
-            vtpData.set(vtkgeom);
+            continue;
         }
+
+        foamVtpData& vtpData = cachedVtp_(longName);
+
+        vtkSmartPointer<vtkPolyData> vtkgeom;
+        if (vtpData.nPoints() && vtpData.pointMap().size())
+        {
+            if (meshState_ == polyMesh::UNCHANGED)
+            {
+                if (debug)
+                {
+                    Info<< "reusing " << longName << nl;
+                }
+                vtpData.reuse();
+                continue;
+            }
+            else if (meshState_ == polyMesh::POINTS_MOVED)
+            {
+                if (debug)
+                {
+                    Info<< "move points " << longName << nl;
+                }
+                vtkgeom = vtpData.getCopy();
+            }
+        }
+
+        if (!vtkgeom)
+        {
+            // First time, or topo change
+            vtkgeom = vtkSmartPointer<vtkPolyData>::New();
+            vtpData.pointMap() = zMesh[zoneId];
+        }
+
+        const pointField& points = mesh.points();
+        const labelUList& pointMap = vtpData.pointMap();
+
+        auto vtkpoints = vtkSmartPointer<vtkPoints>::New();
+
+        vtkpoints->SetNumberOfPoints(pointMap.size());
+        forAll(pointMap, pointi)
+        {
+            vtkpoints->SetPoint(pointi, points[pointMap[pointi]].v_);
+        }
+
+        vtkgeom->SetPoints(vtkpoints);
+        vtpData.set(vtkgeom);
     }
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }
@@ -690,22 +752,19 @@ void Foam::vtkPVFoam::convertMeshPointZones()
 
 void Foam::vtkPVFoam::convertMeshPointSets()
 {
-    const arrayRange& range = rangePointSets_;
-    const fvMesh& mesh = *meshPtr_;
+    const List<label> partIds =
+        rangePointSets_.intersection(selectedPartIds_);
+
+    const fvMesh& mesh = *volMeshPtr_;
 
     if (debug)
     {
-        Info<< "<beg> " << FUNCTION_NAME << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
         printMemory();
     }
 
-    for (auto partId : range)
+    for (const auto partId : partIds)
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
-
         const auto& longName = selectedPartIds_[partId];
         const word partName = getFoamName(longName);
 
@@ -757,7 +816,7 @@ void Foam::vtkPVFoam::convertMeshPointSets()
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
         printMemory();
     }
 }

@@ -81,12 +81,6 @@ Foam::profilingInformation::profilingInformation
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::profilingInformation::~profilingInformation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::profilingInformation::update(const scalar elapsed)

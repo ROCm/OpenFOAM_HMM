@@ -51,9 +51,9 @@ int main(int argc, char *argv[])
         "Merge points on surface if they are within absolute distance [m]."
     );
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("merge distance");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("merge distance");
+    argList::addArgument("output surfaceFile");
 
     argList::addOption
     (

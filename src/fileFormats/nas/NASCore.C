@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,27 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASCore.H"
+#include "IOmanip.H"
+#include "Ostream.H"
 #include "parsing.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+const Foam::Enum
+<
+    Foam::fileFormats::NASCore::fieldFormat
+>
+Foam::fileFormats::NASCore::fieldFormatNames
+{
+    { fieldFormat::SHORT, "short" },
+    { fieldFormat::LONG,  "long" },
+    { fieldFormat::FREE,  "free" },
+};
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::scalar Foam::fileFormats::NASCore::readNasScalar(const string& str)
+Foam::scalar Foam::fileFormats::NASCore::readNasScalar(const std::string& str)
 {
     const auto signPos = str.find_last_of("+-");
 
@@ -54,7 +70,7 @@ Foam::scalar Foam::fileFormats::NASCore::readNasScalar(const string& str)
     if
     (
         readScalar(str.substr(0, signPos), value)   // Mantissa
-     && readInt(str.substr(signPos),  exponent)     // Exponent (with sign)
+     && readInt(str.substr(signPos), exponent)      // Exponent (with sign)
     )
     {
         // Note: this does not catch underflow/overflow
@@ -74,10 +90,98 @@ Foam::scalar Foam::fileFormats::NASCore::readNasScalar(const string& str)
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+std::string Foam::fileFormats::NASCore::nextNasField
+(
+    const std::string& str,
+    std::string::size_type& pos,
+    std::string::size_type len
+)
+{
+    const auto beg = pos;
+    const auto end = str.find(',', pos);
 
-Foam::fileFormats::NASCore::NASCore()
-{}
+    if (end == std::string::npos)
+    {
+        pos = beg + len;    // Continue after field width
+    }
+    else
+    {
+        len = (end - beg);  // Efffective width
+        pos = end + 1;      // Continue after comma
+    }
+
+    return str.substr(beg, len);
+}
+
+
+void Foam::fileFormats::NASCore::setPrecision
+(
+    Ostream& os,
+    const fieldFormat format
+)
+{
+    os.setf(ios_base::scientific);
+
+    // Capitalise the E marker
+    os.setf(ios_base::uppercase);
+
+    const label offset = 7;
+
+    label prec = 16 - offset;
+    switch (format)
+    {
+        case fieldFormat::SHORT :
+        {
+            prec = 8 - offset;
+            break;
+        }
+
+        case fieldFormat::LONG :
+        case fieldFormat::FREE :
+        {
+            prec = 16 - offset;
+            break;
+        }
+    }
+
+    os.precision(prec);
+}
+
+
+Foam::Ostream& Foam::fileFormats::NASCore::writeKeyword
+(
+    Ostream& os,
+    const word& keyword,
+    const fieldFormat format
+)
+{
+    os.setf(ios_base::left);
+
+    switch (format)
+    {
+        case fieldFormat::SHORT :
+        {
+            os  << setw(8) << keyword;
+            break;
+        }
+
+        case fieldFormat::LONG :
+        {
+            os  << setw(8) << word(keyword + '*');
+            break;
+        }
+
+        case fieldFormat::FREE :
+        {
+            os  << keyword;
+            break;
+        }
+    }
+
+    os.unsetf(ios_base::left);
+
+    return os;
+}
 
 
 // ************************************************************************* //

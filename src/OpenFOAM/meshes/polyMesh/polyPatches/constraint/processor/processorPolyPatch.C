@@ -293,7 +293,7 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                     << endl
                     << "Mesh face:" << start()+facei
                     << " vertices:"
-                    << UIndirectList<point>(points(), operator[](facei))()
+                    << UIndirectList<point>(points(), operator[](facei))
                     << endl
                     << "If you are certain your matching is correct"
                     << " you can increase the 'matchTolerance' setting"
@@ -1084,7 +1084,7 @@ bool Foam::processorPolyPatch::order
                         << " : "
                         << "Cannot find point on face " << pp[oldFacei]
                         << " with vertices "
-                        << UIndirectList<point>(pp.points(), pp[oldFacei])()
+                        << UIndirectList<point>(pp.points(), pp[oldFacei])
                         << " that matches point " << wantedAnchor
                         << " when matching the halves of processor patch "
                         << name()

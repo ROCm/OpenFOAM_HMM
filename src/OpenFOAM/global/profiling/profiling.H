@@ -53,6 +53,7 @@ SourceFiles
 #define profiling_H
 
 #include "profilingTrigger.H"
+#include "IOdictionary.H"
 #include "HashPtrTable.H"
 #include "Tuple2.H"
 #include "LIFOStack.H"
@@ -77,7 +78,7 @@ class profilingSysInfo;
 
 class profiling
 :
-    public regIOobject
+    public IOdictionary
 {
 public:
 

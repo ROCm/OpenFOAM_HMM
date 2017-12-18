@@ -218,7 +218,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new pointZone
             (
                 "dummyPointZone",
-                labelList(0),
                 0,
                 dummyMesh.pointZones()
             )
@@ -229,8 +228,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new faceZone
             (
                 "dummyFaceZone",
-                labelList(0),
-                boolList(0),
                 0,
                 dummyMesh.faceZones()
             )
@@ -241,7 +238,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new cellZone
             (
                 "dummyCellZone",
-                labelList(0),
                 0,
                 dummyMesh.cellZones()
             )
@@ -347,7 +343,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             pz[i] = new pointZone
             (
                 pointZoneNames[i],
-                labelList(0),
                 i,
                 mesh.pointZones()
             );
@@ -358,8 +353,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             fz[i] = new faceZone
             (
                 faceZoneNames[i],
-                labelList(0),
-                boolList(0),
                 i,
                 mesh.faceZones()
             );
@@ -370,7 +363,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             cz[i] = new cellZone
             (
                 cellZoneNames[i],
-                labelList(0),
                 i,
                 mesh.cellZones()
             );

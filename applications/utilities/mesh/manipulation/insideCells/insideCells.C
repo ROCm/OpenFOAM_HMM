@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
         "Surface must be closed and singly connected."
     );
 
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("cellSet");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("cellSet");
 
     #include "setRootCase.H"
     #include "createTime.H"

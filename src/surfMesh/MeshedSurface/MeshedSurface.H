@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,19 +52,18 @@ SourceFiles
 #include "pointField.H"
 #include "face.H"
 #include "labelledTri.H"
-
+#include "HashSet.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
-#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class Time;
 class surfMesh;
@@ -124,10 +123,10 @@ private:
     // Private Member functions
 
         //- Read/construct from Istream
-        Istream& read(Istream&);
+        Istream& read(Istream& is);
 
         //- Write to Ostream
-        Ostream& write(Ostream&) const;
+        Ostream& write(Ostream& os) const;
 
 
 protected:
@@ -138,7 +137,7 @@ protected:
         //  Eg, transcribe face to triFace, or face -> labelledTri, including
         //  any addZonesToFaces adjustment.
         //  No general form, only specializations.
-        void transcribe(MeshedSurface<face>&);
+        void transcribe(MeshedSurface<face>& surf);
 
         //- Basic sanity check on zones
         void checkZones();
@@ -195,7 +194,10 @@ public:
         //- Can we write this file format?
         static bool canWriteType(const word& ext, const bool verbose=false);
 
+        //- Known readable file-types
         static wordHashSet readTypes();
+
+        //- Known writable file-types
         static wordHashSet writeTypes();
 
 
@@ -222,10 +224,10 @@ public:
             const UList<word>& zoneNames = UList<word>()
         );
 
-        //- Construct as copy
+        //- Copy construct
         MeshedSurface(const MeshedSurface& surf);
 
-        //- Construct from a UnsortedMeshedSurface
+        //- Copy construct from an UnsortedMeshedSurface
         MeshedSurface(const UnsortedMeshedSurface<Face>& surf);
 
         //- Construct from a boundary mesh with local points/faces
@@ -238,11 +240,11 @@ public:
         //- Construct from a surfMesh
         MeshedSurface(const surfMesh& mesh);
 
-        //- Construct by transferring the contents from a UnsortedMeshedSurface
-        MeshedSurface(const Xfer<UnsortedMeshedSurface<Face>>&);
-
         //- Construct by transferring the contents from a MeshedSurface
-        MeshedSurface(const Xfer<MeshedSurface<Face>>&);
+        MeshedSurface(const Xfer<MeshedSurface<Face>>& surf);
+
+        //- Construct by transferring the contents from a UnsortedMeshedSurface
+        MeshedSurface(const Xfer<UnsortedMeshedSurface<Face>>& surf);
 
         //- Construct from file name (uses extension to determine type)
         MeshedSurface(const fileName& name);
@@ -285,7 +287,7 @@ public:
         );
 
         //- Select constructed from filename (implicit extension)
-        static autoPtr<MeshedSurface> New(const fileName&);
+        static autoPtr<MeshedSurface> New(const fileName& name);
 
 
     //- Destructor
@@ -302,16 +304,18 @@ public:
             fileExtension,
             (
                 const fileName& name,
-                const MeshedSurface<Face>& surf
+                const MeshedSurface<Face>& surf,
+                const dictionary& options
             ),
-            (name, surf)
+            (name, surf, options)
         );
 
         //- Write to file, selecting writer based on its extension
         static void write
         (
             const fileName& name,
-            const MeshedSurface<Face>& surf
+            const MeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
         //- Write to file, selecting writer based on the given extension
@@ -319,7 +323,8 @@ public:
         (
             const fileName& name,
             const word& ext,
-            const MeshedSurface<Face>& surf
+            const MeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
 
@@ -405,15 +410,15 @@ public:
 
 
             //- Move points
-            virtual void movePoints(const pointField&);
+            virtual void movePoints(const pointField& newPoints);
 
             //- Scale points. A non-positive factor is ignored
-            virtual void scalePoints(const scalar);
+            virtual void scalePoints(const scalar scaleFactor);
 
             //- Reset by transferring contents of the argument and annul it
             virtual void reset
             (
-                const Xfer<MeshedSurface<Face>>&
+                const Xfer<MeshedSurface<Face>>& surf
             );
 
             //- Reset primitive data (points, faces and zones)
@@ -500,10 +505,10 @@ public:
         // Read
 
             //- Read from file. Chooses reader based on explicit extension
-            bool read(const fileName&, const word& ext);
+            bool read(const fileName& name, const word& ext);
 
             //- Read from file. Chooses reader based on detected extension
-            virtual bool read(const fileName&);
+            virtual bool read(const fileName& name);
 
 
         // Write
@@ -511,15 +516,19 @@ public:
             void writeStats(Ostream& os) const;
 
             //- Generic write routine. Chooses writer based on extension.
-            virtual void write(const fileName& name) const
+            virtual void write
+            (
+                const fileName& name,
+                const dictionary& options = dictionary::null
+            ) const
             {
-                write(name, *this);
+                write(name, *this, options);
             }
 
             //- Write to database
             void write
             (
-                const Time&,
+                const Time& t,
                 const word& surfName = word::null
             ) const;
 

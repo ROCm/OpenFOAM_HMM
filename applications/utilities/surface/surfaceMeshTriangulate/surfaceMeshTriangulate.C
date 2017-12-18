@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
-    argList::validArgs.append("output file");
+    argList::addArgument("output file");
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -219,11 +219,11 @@ int main(int argc, char *argv[])
 
             }
             Info<< "Additionally triangulating faceZones "
-                << UIndirectList<word>
-                  (
-                      allZoneNames,
-                      includeFaceZones.sortedToc()
-                  )
+                <<  UIndirectList<word>
+                    (
+                        allZoneNames,
+                        includeFaceZones.sortedToc()
+                    )
                 << endl;
         }
 

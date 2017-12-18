@@ -122,8 +122,8 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("surface file");
+    argList::addArgument("surface file");
+    argList::addArgument("surface file");
 
     #include "setRootCase.H"
     #include "createTime.H"

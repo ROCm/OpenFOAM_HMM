@@ -231,7 +231,7 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
     else if (selected_.size() == 1)
     {
         // Use scaling (if any)
-        output.set(new triSurface(directory_/selected_[0], scaleFactor));
+        output.reset(new triSurface(directory_/selected_[0], scaleFactor));
 
         triSurface& surf = output();
 
@@ -400,7 +400,7 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
         points *= scaleFactor;
     }
 
-    output.set(new triSurface(faces, patches, points, true));
+    output.reset(new triSurface(faces, patches, points, true));
 
     return output;
 }

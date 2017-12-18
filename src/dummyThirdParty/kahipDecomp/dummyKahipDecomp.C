@@ -56,8 +56,8 @@ namespace Foam
 
 Foam::label Foam::kahipDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cellWeights,
     List<label>& decomp
 )
@@ -73,10 +73,20 @@ Foam::label Foam::kahipDecomp::decomposeSerial
 
 Foam::kahipDecomp::kahipDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp("kahip", decompDict)
+{}
+
+
+Foam::kahipDecomp::kahipDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp("kahip", decompDict, regionName)
 {}
 
 

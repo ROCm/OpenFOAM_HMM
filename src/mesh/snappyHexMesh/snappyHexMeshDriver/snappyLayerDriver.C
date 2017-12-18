@@ -4347,7 +4347,7 @@ void Foam::snappyLayerDriver::addLayers
                 {
                     labelList meshPoints
                     (
-                        UIndirectList<label>(candidates, oldPoints)
+                        labelUIndList(candidates, oldPoints)
                     );
                     label masteri = min(meshPoints);
                     forAll(meshPoints, i)
@@ -4608,7 +4608,7 @@ void Foam::snappyLayerDriver::doLayers
         if (!preBalance)
         {
             // Check if there are faceZones on processor boundaries. This
-            // requires balancing to move them off the processor boundaries.   
+            // requires balancing to move them off the processor boundaries.
 
             // Is face on a faceZone
             PackedBoolList isExtrudedZoneFace(mesh.nFaces());

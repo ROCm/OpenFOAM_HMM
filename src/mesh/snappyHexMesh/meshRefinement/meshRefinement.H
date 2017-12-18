@@ -1353,7 +1353,7 @@ public:
                 // Pick up faces of cells of faces in set.
                 labelList growFaceCellFace
                 (
-                    const UList<label>& set
+                    const labelUList& set
                 ) const;
 
                 // Pick up faces of cells of faces in set.

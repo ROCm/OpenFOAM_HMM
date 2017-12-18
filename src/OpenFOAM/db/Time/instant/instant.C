@@ -30,10 +30,12 @@ License
 
 const char* const Foam::instant::typeName = "instant";
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::instant::instant()
 {}
+
 
 Foam::instant::instant(const scalar val, const word& tname)
 :
@@ -41,11 +43,13 @@ Foam::instant::instant(const scalar val, const word& tname)
     name_(tname)
 {}
 
+
 Foam::instant::instant(const scalar val)
 :
     value_(val),
     name_(Time::timeName(val))
 {}
+
 
 Foam::instant::instant(const word& tname)
 :
@@ -56,51 +60,51 @@ Foam::instant::instant(const word& tname)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::instant::equal(const scalar b) const
+bool Foam::instant::equal(const scalar val) const
 {
-    return (value_ < b + SMALL  && value_ > b - SMALL);
+    return ((value_ > val - SMALL) && (value_ < val + SMALL));
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 bool Foam::operator==(const instant& a, const instant& b)
 {
-    return a.equal(b.value_);
+    return a.equal(b.value());
 }
 
 
 bool Foam::operator!=(const instant& a, const instant& b)
 {
-    return !operator==(a, b);
+    return !a.equal(b.value());
 }
 
 
 bool Foam::operator<(const instant& a, const instant& b)
 {
-    return a.value_ < b.value_;
+    return a.value() < b.value();
 }
 
 
 bool Foam::operator>(const instant& a, const instant& b)
 {
-    return a.value_ > b.value_;
+    return a.value() > b.value();
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, instant& I)
+Foam::Istream& Foam::operator>>(Istream& is, instant& inst)
 {
-    is >> I.value_ >> I.name_;
+    is >> inst.value_ >> inst.name_;
 
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const instant& I)
+Foam::Ostream& Foam::operator<<(Ostream& os, const instant& inst)
 {
-   os << I.value_ << tab << I.name_;
+   os << inst.value() << tab << inst.name();
 
    return os;
 }

@@ -37,8 +37,8 @@ const cellShapeList& cellShapes = meshPtr->cellShapes();
 // hexa's
 if (which_type == Z_HEX08)
 {
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    //const cellModel& wedge = *(cellModeller::lookup("wedge"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    //const cellModel& wedge = cellModel::ref(cellModel::WEDGE);
 
     label counter = 1;
     for (label celli=0; celli<nCells; celli++)
@@ -56,7 +56,7 @@ if (which_type == Z_HEX08)
 // penta's
 if (which_type == Z_PEN06)
 {
-    const cellModel& prism = *(cellModeller::lookup("prism"));
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
 
     label counter = 1;
     for (label n=0; n<nCells; n++)
@@ -74,7 +74,7 @@ if (which_type == Z_PEN06)
 // pyramids's
 if (which_type == Z_PYR05)
 {
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
 
     label counter = 1;
     for (label n=0; n<nCells; n++)
@@ -92,7 +92,7 @@ if (which_type == Z_PYR05)
 // tet's
 if (which_type == Z_TET04)
 {
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     label counter = 1;
     for (label n=0; n<nCells; n++)

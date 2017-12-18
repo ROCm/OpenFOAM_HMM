@@ -64,8 +64,8 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const UList<label>& initxadj,
-    const UList<label>& initadjncy,
+    const labelUList& initxadj,
+    const labelUList& initadjncy,
     const UList<scalar>& initcWeights,
     List<label>& finalDecomp
 ) const
@@ -98,10 +98,22 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 Foam::ptscotchDecomp::ptscotchDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict),
+    coeffsDict_(dictionary::null)
+{}
+
+
+Foam::ptscotchDecomp::ptscotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_(dictionary::null)
 {}
 
 

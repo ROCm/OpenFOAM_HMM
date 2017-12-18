@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
 
-    argList::validArgs.append("featureAngle [0..180]");
+    argList::addArgument("featureAngle [0..180]");
     argList::addOption
     (
         "concaveAngle",

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
         "more information about decomposition"
     );
 
-    argList::validArgs.append("kaffpa-output-file");
+    argList::addArgument("kaffpa-output-file");
 
     // Include explicit constant options, have zero from time range
     timeSelector::addOptions(true, false);

@@ -30,11 +30,11 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(surfaceRegistry, 0);
+    defineTypeNameAndDebug(surfaceRegistry, 0);
 }
 
-
 const Foam::word Foam::surfaceRegistry::prefix("surfaces");
+
 Foam::word Foam::surfaceRegistry::defaultName("default");
 
 
@@ -58,12 +58,6 @@ Foam::surfaceRegistry::surfaceRegistry
             IOobject::NO_WRITE
         )
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceRegistry::~surfaceRegistry()
 {}
 
 

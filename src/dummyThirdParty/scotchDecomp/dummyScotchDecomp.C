@@ -63,8 +63,8 @@ void Foam::scotchDecomp::check(const int retVal, const char* str)
 
 Foam::label Foam::scotchDecomp::decomposeSerial
 (
-    const UList<label>& adjncy,
-    const UList<label>& xadj,
+    const labelUList& adjncy,
+    const labelUList& xadj,
     const UList<scalar>& cWeights,
     List<label>& decomp
 )
@@ -80,10 +80,20 @@ Foam::label Foam::scotchDecomp::decomposeSerial
 
 Foam::scotchDecomp::scotchDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    metisLikeDecomp(decompositionDict)
+    metisLikeDecomp("scotch", decompDict)
+{}
+
+
+Foam::scotchDecomp::scotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    metisLikeDecomp("scotch", decompDict, regionName)
 {}
 
 

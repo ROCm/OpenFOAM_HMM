@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
 
     argList::noBanner();
     argList::noJobInfo();
-    argList::validArgs.append("dictionary");
+    argList::addArgument("dictionary");
     argList::addBoolOption("keywords", "List keywords");
     argList::addOption("entry", "name", "report/select the named entry");
     argList::addBoolOption

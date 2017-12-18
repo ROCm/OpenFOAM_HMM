@@ -305,7 +305,7 @@ label findEdge
 
     FatalErrorInFunction
         << ' ' << v1 << " in candidates " << edgeLabels
-        << " with vertices:" << UIndirectList<edge>(surf.edges(), edgeLabels)()
+        << " with vertices:" << UIndirectList<edge>(surf.edges(), edgeLabels)
         << abort(FatalError);
 
     return -1;
@@ -345,7 +345,7 @@ label otherEdge
     FatalErrorInFunction
         << " verts:" << surf.localPoints()[facei]
         << " connected to point " << pointi
-        << " faceEdges:" << UIndirectList<edge>(surf.edges(), fEdges)()
+        << " faceEdges:" << UIndirectList<edge>(surf.edges(), fEdges)
         << abort(FatalError);
 
     return -1;
@@ -675,8 +675,8 @@ int main(int argc, char *argv[])
         "split multiply connected surface edges by duplicating points"
     );
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
     argList::addBoolOption
     (
         "debug",

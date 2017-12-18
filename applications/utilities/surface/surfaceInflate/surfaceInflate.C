@@ -597,9 +597,9 @@ int main(int argc, char *argv[])
         "switch on additional debug information"
     );
 
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("distance");
-    argList::validArgs.append("safety factor [1..]");
+    argList::addArgument("inputFile");
+    argList::addArgument("distance");
+    argList::addArgument("safety factor [1..]");
 
     #include "setRootCase.H"
     #include "createTime.H"

@@ -6,50 +6,34 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.csh/ADIOS
 #
 # Description
-#     Setup file for ADIOS include/libraries.
+#     Setup for ADIOS include/libraries (usually ThirdParty installation).
 #     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
-#     If using system-wide installations, use the following settings:
+#     To disable its use:               adios_version=adios-none
+#     For system-wide installations:    adios_version=adios-system
 #
-#         adios_version=adios-system
-#
-#     If the system adios is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         adios_version=adios-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify adios-system
-#         - provide full paths for ADIOS_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use adios-system
+#       2. and provide full path for ADIOS_ARCH_PATH
 #
 # Note
-#     When building OpenFOAM, any changes made here MUST be made in the
-#     equivalent config.sh version too, since that is the one which will
-#     be used during the build process. See further notes there.
+#     Changes made here MUST be made in the equivalent config.sh version too,
+#     since that is the one used in the build process.
+#     See further notes there.
 #
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set adios_version=ADIOS-1.11.1
+set adios_version=ADIOS-1.13.0
 setenv ADIOS_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$adios_version
 
 # END OF (NORMAL) USER EDITABLE PART
