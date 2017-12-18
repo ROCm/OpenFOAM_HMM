@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,8 +28,8 @@ Group
     grpFvOptionsSources
 
 Description
-    Heat exchanger source model, in which the heat exchanger is defined as a
-    selection of cells.
+    Heat exchanger source model, in which the heat exchanger is defined as an
+    energy source using a selection of cells.
 
     The total heat exchange source is given by:
     \f[
@@ -75,12 +75,20 @@ Usage
 
         secondaryMassFlowRate   1.0;
         secondaryInletT 336;
-        // primaryInletT 293;  // Constrain to this T if present
         faceZone        facesZoneInletOriented;
         outOfBounds     clamp;
         file            "effTable";
+
+        // Optional
+        // primaryInletT 293;
+        // targetQdot   1500;
     }
     \endverbatim
+
+    Optional entries:
+    - \c primaryInletT : sets the primary inlet temperature.  If not set, the
+      flux-averaged temperature is used.
+    - \c targetQdot : target heat rejection
 
     The effectiveness table is described in terms of the primary and secondary
     mass flow rates.  For example, the table:
@@ -95,7 +103,7 @@ Usage
     \endverbatim
 
 
-    Is specified by the following:
+    is specified by the following:
 
     \verbatim
         (
@@ -121,9 +129,9 @@ Usage
     \endverbatim
 
 Note
-- the table with name "file" should have the same units as the
+- the table with name \c file should have the same units as the
   secondary mass flow rate and kg/s for phi
-- faceZone is the faces at the inlet of the cellzone, it needs to be
+- \c faceZone is the faces at the inlet of the \c cellzone, it needs to be
   created with flip map flags. It is used to integrate the net mass flow
   rate into the heat exchanger
 
@@ -133,8 +141,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef effectivenessHeatExchangerSource_H
-#define effectivenessHeatExchangerSource_H
+#ifndef fv_effectivenessHeatExchangerSource_H
+#define fv_effectivenessHeatExchangerSource_H
 
 #include "cellSetOption.H"
 #include "autoPtr.H"
@@ -171,6 +179,18 @@ protected:
 
         //- Flag to use a user-specified primary inlet temperature
         bool userPrimaryInletT_;
+
+        //- Flag to use target heat rejection
+        bool targetQdotActive_;
+
+        //- Target heat rejection
+        scalar targetQdot_;
+
+        //- Target heat rejection calculation interval
+        label targetQdotCalcInterval_;
+
+        //- Target heat rejection temperature under-relaxation coefficient
+        scalar targetQdotRelax_;
 
         //- 2D look up table efficiency = function of primary and secondary
         // mass flow rates [kg/s]
@@ -214,7 +234,7 @@ private:
         //- Initialise heat exchanger source model
         void initialise();
 
-        //- Calculate total area of faceZone accross processors
+        //- Calculate total area of faceZone across processors
         void calculateTotalArea(scalar& area);
 
 
@@ -237,8 +257,7 @@ public:
 
 
     //- Destructor
-    virtual ~effectivenessHeatExchangerSource()
-    {}
+    virtual ~effectivenessHeatExchangerSource() = default;
 
 
     // Member Functions
