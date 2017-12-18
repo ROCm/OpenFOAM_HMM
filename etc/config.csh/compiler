@@ -31,7 +31,7 @@ case ThirdParty:
         set gcc_version=gcc-4.8.5
         breaksw
     case Gcc49:
-        set gcc_version=gcc-4.9.3
+        set gcc_version=gcc-4.9.4
         breaksw
     case Gcc51:
         set gcc_version=gcc-5.1.0
@@ -56,6 +56,9 @@ case ThirdParty:
         breaksw
     case Gcc63:
         set gcc_version=gcc-6.3.0
+        breaksw
+    case Gcc64:
+        set gcc_version=gcc-6.4.0
         breaksw
     case Gcc71:
         set gcc_version=gcc-7.1.0

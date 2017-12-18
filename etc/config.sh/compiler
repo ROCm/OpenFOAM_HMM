@@ -30,7 +30,7 @@ ThirdParty)
         gcc_version=gcc-4.8.5
         ;;
     Gcc49)
-        gcc_version=gcc-4.9.3
+        gcc_version=gcc-4.9.4
         ;;
     Gcc51)
         gcc_version=gcc-5.1.0
@@ -55,6 +55,9 @@ ThirdParty)
         ;;
     Gcc63)
         gcc_version=gcc-6.3.0
+        ;;
+    Gcc64)
+        gcc_version=gcc-6.4.0
         ;;
     Gcc71)
         gcc_version=gcc-7.1.0

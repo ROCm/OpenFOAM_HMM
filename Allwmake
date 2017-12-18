@@ -46,9 +46,10 @@ applications/Allwmake $targetType $*
 # Additional components/modules
 if [ -d "$WM_PROJECT_DIR/modules" ]
 then
-(
-    cd $WM_PROJECT_DIR/modules 2>/dev/null && wmake -all
-)
+    echo "========================================"
+    echo "Compile OpenFOAM modules"
+    echo
+    (cd $WM_PROJECT_DIR/modules 2>/dev/null && wmake -all)
 fi
 
 # Some summary information

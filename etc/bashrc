@@ -60,7 +60,7 @@ unset rc
 export WM_COMPILER_TYPE=system
 
 # [WM_COMPILER] - Compiler:
-# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-3] | Gcc7[1-2] | GccKNL |
+# = Gcc | Gcc4[8-9] | Gcc5[1-5] | Gcc6[1-4] | Gcc7[1-2] | GccKNL |
 #   Clang | Clang3[8-9] | Clang[45]0 | Icc | IccKNL | Cray
 export WM_COMPILER=Gcc
 
