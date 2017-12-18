@@ -58,6 +58,9 @@ Author
 #include "labelIOList.H"
 #include "FieldFields.H"
 #include "faGlobalMeshData.H"
+#include "faSchemes.H"
+#include "faSolution.H"
+#include "data.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -77,7 +80,10 @@ class faMesh
     public GeoMesh<polyMesh>,
     public MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>,
     public lduMesh,
-    public edgeInterpolation
+    public edgeInterpolation,
+    public faSchemes,
+    public faSolution,
+    public data
 {
     // Private data
 
@@ -402,6 +408,13 @@ public:
             //- Return reference to the mesh database
             virtual const objectRegistry& thisDb() const;
 
+            //- Name function is needed to disambiguate those inherited
+            //  from base classes
+            const word& name() const
+            {
+                return thisDb().name();
+            }
+
             //- Return constant reference to boundary mesh
             const faBoundaryMesh& boundary() const;
 
@@ -531,7 +544,7 @@ public:
             boolList& correctPatchPointNormals() const;
 
         //- Write mesh
-        virtual bool write() const;
+        virtual bool write(const bool valid = true) const;
 
 
     // Member Operators

@@ -90,7 +90,7 @@ correctedLnGrad<Type>::correction
                 gradScheme<typename pTraits<Type>::cmptType>::New
                 (
                     mesh,
-                    mesh.schemesDict().gradScheme(ssf.name())
+                    mesh.gradScheme(ssf.name())
                 )()
                .grad(vf.component(cmpt))
             )

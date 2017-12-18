@@ -57,8 +57,6 @@ void Foam::edgeInterpolation::clearOut()
 Foam::edgeInterpolation::edgeInterpolation(const faMesh& fam)
 :
     faMesh_(fam),
-    schemesDict_(fam()),
-    solutionDict_(fam()),
     lPN_(nullptr),
     weightingFactors_(nullptr),
     differenceFactors_(nullptr),
@@ -219,7 +217,7 @@ void Foam::edgeInterpolation::makeLPN() const
         (
             "lPN",
             faMesh_.time().constant(),
-            faMesh_.db(),
+            faMesh_(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false

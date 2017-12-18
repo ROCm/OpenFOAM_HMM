@@ -143,6 +143,8 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
 
     psi.correctBoundaryConditions();
 
+    psi.mesh().setSolverPerformance(psi.name(), solverPerfVec);
+
     return solverPerfVec;
 }
 
@@ -150,26 +152,14 @@ Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve
 template<class Type>
 Foam::SolverPerformance<Type> Foam::faMatrix<Type>::faSolver::solve()
 {
-    return solvei
-    (
-        faMat_.psi().mesh().solutionDict().solverDict
-        (
-            faMat_.psi().name()
-        )
-    );
+    return solve(faMat_.psi().mesh().solverDict(faMat_.psi().name()));
 }
 
 
 template<class Type>
 Foam::SolverPerformance<Type> Foam::faMatrix<Type>::solve()
 {
-    return solve
-    (
-        this->psi().mesh().solutionDict().solverDict
-        (
-            this->psi().name()
-        )
-    );
+    return solve(this->psi().mesh().solverDict(this->psi().name()));
 }
 
 

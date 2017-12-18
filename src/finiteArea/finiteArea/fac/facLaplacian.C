@@ -52,7 +52,7 @@ laplacian
     return fa::laplacianScheme<Type>::New
     (
         vf.mesh(),
-        vf.mesh().schemesDict().laplacianScheme(name)
+        vf.mesh().laplacianScheme(name)
     ).ref().facLaplacian(vf);
 }
 
@@ -172,7 +172,7 @@ laplacian
     return fa::laplacianScheme<Type>::New
     (
         vf.mesh(),
-        vf.mesh().schemesDict().laplacianScheme(name)
+        vf.mesh().laplacianScheme(name)
     ).ref().facLaplacian(gamma, vf);
 }
 
@@ -306,7 +306,7 @@ laplacian
     return fa::laplacianScheme<Type>::New
     (
         vf.mesh(),
-        vf.mesh().schemesDict().laplacianScheme(name)
+        vf.mesh().laplacianScheme(name)
     ).ref().facLaplacian(gamma, vf);
 }
 

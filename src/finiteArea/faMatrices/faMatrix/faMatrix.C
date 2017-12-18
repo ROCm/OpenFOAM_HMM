@@ -532,9 +532,9 @@ void Foam::faMatrix<Type>::relax(const scalar alpha)
 template<class Type>
 void Foam::faMatrix<Type>::relax()
 {
-    if (psi_.mesh().solutionDict().relaxEquation(psi_.name()))
+    if (psi_.mesh().relaxEquation(psi_.name()))
     {
-        relax(psi_.mesh().solutionDict().equationRelaxationFactor(psi_.name()));
+        relax(psi_.mesh().equationRelaxationFactor(psi_.name()));
     }
     else
     {
@@ -628,7 +628,7 @@ template<class Type>
 Foam::tmp<Foam::GeometricField<Type, Foam::faePatchField, Foam::edgeMesh>>
 Foam::faMatrix<Type>::flux() const
 {
-    if (!psi_.mesh().schemesDict().fluxRequired(psi_.name()))
+    if (!psi_.mesh().fluxRequired(psi_.name()))
     {
         FatalErrorInFunction
             << "flux requested but " << psi_.name()

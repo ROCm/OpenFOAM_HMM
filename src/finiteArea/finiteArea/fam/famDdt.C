@@ -52,7 +52,7 @@ ddt
     return fa::faDdtScheme<Type>::New
     (
         vf.mesh(),
-        vf.mesh().schemesDict().ddtScheme("ddt(" + vf.name() + ')')
+        vf.mesh().ddtScheme("ddt(" + vf.name() + ')')
     ).ref().famDdt(vf);
 }
 
@@ -68,7 +68,7 @@ ddt
     return fa::faDdtScheme<Type>::New
     (
         vf.mesh(),
-        vf.mesh().schemesDict().ddtScheme
+        vf.mesh().ddtScheme
         (
             "ddt(" + rho.name() + ',' + vf.name() + ')'
         )
@@ -87,7 +87,7 @@ ddt
     return fa::faDdtScheme<Type>::New
     (
         vf.mesh(),
-        vf.mesh().schemesDict().ddtScheme
+        vf.mesh().ddtScheme
         (
             "ddt(" + rho.name() + ',' + vf.name() + ')'
         )

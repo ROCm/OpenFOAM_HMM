@@ -55,8 +55,7 @@ const int Foam::faMesh::quadricsFit_ = 0;
 
 void Foam::faMesh::setPrimitiveMeshData()
 {
-    DebugInFunction
-        << "Setting primitive data" << endl;
+    DebugInFunction << "Setting primitive data" << endl;
 
     const indirectPrimitivePatch& bp = patch();
 
@@ -121,11 +120,7 @@ void Foam::faMesh::setPrimitiveMeshData()
 
 void Foam::faMesh::clearGeomNotAreas() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::clearGeomNotAreas() const : "
-            << "Clearing geometry" << endl;
-    }
+    DebugInFunction << "Clearing geometry" << endl;
 
     deleteDemandDrivenData(SPtr_);
     deleteDemandDrivenData(patchPtr_);
@@ -144,11 +139,7 @@ void Foam::faMesh::clearGeomNotAreas() const
 
 void Foam::faMesh::clearGeom() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::clearGeom() const : "
-            << "Clearing geometry" << endl;
-    }
+    DebugInFunction << "Clearing geometry" << endl;
 
     clearGeomNotAreas();
     deleteDemandDrivenData(S0Ptr_);
@@ -159,11 +150,7 @@ void Foam::faMesh::clearGeom() const
 
 void Foam::faMesh::clearAddressing() const
 {
-    if (debug)
-    {
-        Info<< "void faMesh::clearAddressing() const : "
-            << "Clearing addressing" << endl;
-    }
+    DebugInFunction << "Clearing addressing" << endl;
 
     deleteDemandDrivenData(lduPtr_);
 }
@@ -184,6 +171,9 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     GeoMesh<polyMesh>(pMesh),
     MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
+    faSchemes(mesh()),
+    faSolution(mesh()),
+    data(mesh()),
     faceLabels_
     (
         IOobject
@@ -229,11 +219,7 @@ Foam::faMesh::faMesh(const polyMesh& pMesh)
     correctPatchPointNormalsPtr_(nullptr),
     globalMeshDataPtr_(nullptr)
 {
-    if (debug)
-    {
-        Info<< "faMesh::faMesh(...) : "
-            << "Creating faMesh from IOobject" << endl;
-    }
+    DebugInFunction << "Creating faMesh from IOobject" << endl;
 
     setPrimitiveMeshData();
 
@@ -277,6 +263,9 @@ Foam::faMesh::faMesh
     GeoMesh<polyMesh>(pMesh),
     MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
+    faSchemes(mesh()),
+    faSolution(mesh()),
+    data(mesh()),
     faceLabels_
     (
         IOobject
@@ -324,11 +313,7 @@ Foam::faMesh::faMesh
     correctPatchPointNormalsPtr_(nullptr),
     globalMeshDataPtr_(nullptr)
 {
-    if (debug)
-    {
-        Info<< "faMesh::faMesh(...) : "
-            << "Creating faMesh from components" << endl;
-    }
+    DebugInFunction << "Creating faMesh from components" << endl;
 }
 
 
@@ -341,6 +326,9 @@ Foam::faMesh::faMesh
     GeoMesh<polyMesh>(pMesh),
     MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
+    faSchemes(mesh()),
+    faSolution(mesh()),
+    data(mesh()),
     faceLabels_
     (
         IOobject
@@ -388,8 +376,7 @@ Foam::faMesh::faMesh
     correctPatchPointNormalsPtr_(nullptr),
     globalMeshDataPtr_(nullptr)
 {
-    DebugInFunction
-        << "Creating faMesh from definition file" << endl;
+    DebugInFunction << "Creating faMesh from definition file" << endl;
 
     // Reading faMeshDefinition dictionary
     IOdictionary faMeshDefinition
@@ -791,6 +778,9 @@ Foam::faMesh::faMesh
     GeoMesh<polyMesh>(pMesh),
     MeshObject<polyMesh, Foam::UpdateableMeshObject, faMesh>(pMesh),
     edgeInterpolation(*this),
+    faSchemes(mesh()),
+    faSolution(mesh()),
+    data(mesh()),
     faceLabels_
     (
         IOobject
@@ -838,8 +828,7 @@ Foam::faMesh::faMesh
     correctPatchPointNormalsPtr_(nullptr),
     globalMeshDataPtr_(nullptr)
 {
-    DebugInFunction
-        << "Creating faMesh from polyPatch" << endl;
+    DebugInFunction << "Creating faMesh from polyPatch" << endl;
 
     const polyBoundaryMesh& pbm = pMesh.boundaryMesh();
 
@@ -977,8 +966,7 @@ const Foam::faceList& Foam::faMesh::faces() const
 
 void Foam::faMesh::addFaPatches(const List<faPatch*>& p)
 {
-    DebugInFunction
-        << "Adding patches to faMesh" << endl;
+    DebugInFunction << "Adding patches to faMesh" << endl;
 
     if (boundary().size() > 0)
     {
@@ -1304,7 +1292,7 @@ Foam::boolList& Foam::faMesh::correctPatchPointNormals() const
 }
 
 
-bool Foam::faMesh::write() const
+bool Foam::faMesh::write(const bool valid) const
 {
     faceLabels_.write();
     boundary_.write();

@@ -115,7 +115,7 @@ grad
         fa::gradScheme<Type>::New
         (
             vf.mesh(),
-            vf.mesh().schemesDict().gradScheme(name)
+            vf.mesh().gradScheme(name)
         ).ref().grad(vf);
 
     GeometricField<GradType, faPatchField, areaMesh>& gGrad = tgGrad.ref();

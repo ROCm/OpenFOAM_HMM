@@ -43,8 +43,6 @@ SourceFiles
 
 #include "tmp.H"
 #include "scalar.H"
-#include "faSchemes.H"
-#include "faSolution.H"
 #include "areaFieldsFwd.H"
 #include "edgeFieldsFwd.H"
 #include "className.H"
@@ -66,12 +64,6 @@ class edgeInterpolation
 
         // Reference to faMesh
         const faMesh& faMesh_;
-
-        //- Discretisation schemes
-        faSchemes schemesDict_;
-
-        //- Solver settings
-        faSolution solutionDict_;
 
 
         // Demand-driven data
@@ -151,30 +143,6 @@ public:
         const faMesh& mesh() const
         {
             return faMesh_;
-        }
-
-        //- Return schemes
-        const faSchemes& schemesDict() const
-        {
-            return schemesDict_;
-        }
-
-        //- Return access to schemes
-        faSchemes& schemesDict()
-        {
-            return schemesDict_;
-        }
-
-        //- Return solver settings
-        const faSolution& solutionDict() const
-        {
-            return solutionDict_;
-        }
-
-        //- Return access to solver settings
-        faSolution& solutionDict()
-        {
-            return solutionDict_;
         }
 
         //- Return reference to PN geodesic distance

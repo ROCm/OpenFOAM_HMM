@@ -50,8 +50,6 @@ SourceFiles
 namespace Foam
 {
 
-class mapPolyMesh;
-
 /*---------------------------------------------------------------------------*\
                      Class leastSquaresFaVectors Declaration
 \*---------------------------------------------------------------------------*/

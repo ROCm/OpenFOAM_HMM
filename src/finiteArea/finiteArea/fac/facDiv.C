@@ -107,7 +107,7 @@ div
     (
         fa::divScheme<Type>::New
         (
-            vf.mesh(), vf.mesh().schemesDict().divScheme(name)
+            vf.mesh(), vf.mesh().divScheme(name)
         ).ref().facDiv(vf)
     );
     GeometricField
@@ -207,7 +207,7 @@ div
         (
             vf.mesh(),
             flux,
-            vf.mesh().schemesDict().divScheme(name)
+            vf.mesh().divScheme(name)
         ).ref().facDiv(flux, vf)
     );
     GeometricField<Type, faPatchField, areaMesh>& Div = tDiv.ref();
