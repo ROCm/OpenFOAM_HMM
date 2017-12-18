@@ -34,7 +34,11 @@ solvers
     }
 }
 
-nOuterCorrectors 15;
+solution
+{
+    iterations 15;
+}
+//nOuterCorrectors 15;
 
 relaxationFactors
 {

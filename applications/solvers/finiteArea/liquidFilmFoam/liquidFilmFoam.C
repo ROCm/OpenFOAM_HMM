@@ -38,6 +38,7 @@ Author
 
 #include "fvCFD.H"
 #include "faCFD.H"
+#include "loopControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,7 +68,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        while (runTime.loop())
+        while (iters.loop())
         {
             phi2s = fac::interpolate(h)*phis;
 
@@ -91,11 +92,10 @@ int main(int argc, char *argv[])
             Us = UsEqn.H()/UsA;
             Us.correctBoundaryConditions();
 
-            phis = (fac::interpolate(Us) & aMesh.Le())
-              - fac::interpolate(1.0/(rhol*UsA))
-               *fac::lnGrad(ps*h)*aMesh.magLe()
-              + fac::interpolate(ps/(rhol*UsA))
-               *fac::lnGrad(h)*aMesh.magLe();
+            phis =
+                (fac::interpolate(Us) & aMesh.Le())
+              - fac::interpolate(1.0/(rhol*UsA))*fac::lnGrad(ps*h)*aMesh.magLe()
+              + fac::interpolate(ps/(rhol*UsA))*fac::lnGrad(h)*aMesh.magLe();
 
             faScalarMatrix hEqn
             (
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
                 (
                     h.primitiveField(),
                     fac::average(max(h, h0))().primitiveField()
-                    *pos(h0.value() - h.primitiveField())
+                   *pos(h0.value() - h.primitiveField())
                 ),
                 h0.value()
             );
