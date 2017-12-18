@@ -26,6 +26,9 @@ License
 Application
     liquidFilmFoam
 
+Group
+    grpFiniteAreaSolvers
+
 Description
     Transient solver for incompressible, laminar flow of Newtonian fluids in
     liquid film formulation.
@@ -147,6 +150,8 @@ int main(int argc, char *argv[])
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
     }
+
+    Info<< "End\n" << endl;
 
     return 0;
 }

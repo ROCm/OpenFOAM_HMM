@@ -69,11 +69,12 @@ public:
 
 int main(int argc, char *argv[])
 {
-#   include "addRegionOption.H"
+    #include "addRegionOption.H"
+    argList::noParallel();
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createNamedMesh.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createNamedMesh.H"
 
     // Reading faMeshDefinition dictionary
     IOdictionary faMeshDefinition
@@ -94,40 +95,38 @@ int main(int argc, char *argv[])
         faMeshDefinition.lookup("polyMeshPatches")
     );
 
-    dictionary bndDict = faMeshDefinition.subDict("boundary");
+    const dictionary& bndDict = faMeshDefinition.subDict("boundary");
 
-    wordList faPatchNames = bndDict.toc();
+    const wordList faPatchNames(bndDict.toc());
 
     List<faPatchData> faPatches(faPatchNames.size()+1);
 
-    forAll (faPatchNames, patchI)
+    forAll(faPatchNames, patchI)
     {
-        dictionary curPatchDict =
-            bndDict.subDict(faPatchNames[patchI]);
+        const dictionary& curPatchDict = bndDict.subDict(faPatchNames[patchI]);
 
         faPatches[patchI].name_ = faPatchNames[patchI];
 
-        faPatches[patchI].type_ =
-            word(curPatchDict.lookup("type"));
+        faPatches[patchI].type_ = word(curPatchDict.lookup("type"));
 
-        word ownName = curPatchDict.lookup("ownerPolyPatch");
+        const word ownName = curPatchDict.lookup("ownerPolyPatch");
 
         faPatches[patchI].ownPolyPatchID_ =
             mesh.boundaryMesh().findPatchID(ownName);
 
-        if ( faPatches[patchI].ownPolyPatchID_ < 0 )
+        if (faPatches[patchI].ownPolyPatchID_ < 0)
         {
             FatalErrorIn("makeFaMesh:")
                 << "neighbourPolyPatch " << ownName << " does not exist"
                 << exit(FatalError);
         }
 
-        word neiName = curPatchDict.lookup("neighbourPolyPatch");
+        const word neiName = curPatchDict.lookup("neighbourPolyPatch");
 
-        faPatches[patchI].ngbPolyPatchID_  =
+        faPatches[patchI].ngbPolyPatchID_ =
             mesh.boundaryMesh().findPatchID(neiName);
 
-        if ( faPatches[patchI].ngbPolyPatchID_ < 0 )
+        if (faPatches[patchI].ngbPolyPatchID_ < 0)
         {
             FatalErrorIn("makeFaMesh:")
                 << "neighbourPolyPatch " << neiName << " does not exist"
@@ -140,12 +139,12 @@ int main(int argc, char *argv[])
 
     labelList patchIDs(polyMeshPatches.size(), -1);
 
-    forAll (polyMeshPatches, patchI)
+    forAll(polyMeshPatches, patchI)
     {
         patchIDs[patchI] =
             mesh.boundaryMesh().findPatchID(polyMeshPatches[patchI]);
 
-        if ( patchIDs[patchI] < 0 )
+        if (patchIDs[patchI] < 0)
         {
             FatalErrorIn("makeFaMesh:")
                 << "Patch " << polyMeshPatches[patchI] << " does not exist"
@@ -163,13 +162,13 @@ int main(int argc, char *argv[])
     // Filling of faceLabels list
     label faceI = -1;
 
-    forAll (polyMeshPatches, patchI)
+    forAll(polyMeshPatches, patchI)
     {
         label start = mesh.boundaryMesh()[patchIDs[patchI]].start();
 
         label size  = mesh.boundaryMesh()[patchIDs[patchI]].size();
 
-        for(label i = 0; i < size; i++)
+        for (label i = 0; i < size; ++i)
         {
             faceLabels[++faceI] = start + i;
         }
@@ -192,7 +191,7 @@ int main(int argc, char *argv[])
 
     labelList faceCells(faceLabels.size(), -1);
 
-    forAll (faceCells, faceI)
+    forAll(faceCells, faceI)
     {
         label faceID = faceLabels[faceI];
 
@@ -214,7 +213,7 @@ int main(int argc, char *argv[])
 
     labelList bndEdgeFaPatchIDs(nTotalEdges - nInternalEdges, -1);
 
-    for (label edgeI = nInternalEdges; edgeI < nTotalEdges; edgeI++)
+    for (label edgeI = nInternalEdges; edgeI < nTotalEdges; ++edgeI)
     {
         label curMeshEdge = meshEdges[edgeI];
 
@@ -222,7 +221,7 @@ int main(int argc, char *argv[])
 
         label patchI = -1;
 
-        forAll (edgeFaces[curMeshEdge], faceI)
+        forAll(edgeFaces[curMeshEdge], faceI)
         {
             label curFace = edgeFaces[curMeshEdge][faceI];
 
@@ -234,7 +233,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        for(label pI = 0; pI < faPatches.size() - 1; pI++)
+        for (label pI = 0; pI < faPatches.size() - 1; ++pI)
         {
             if
             (
@@ -257,11 +256,11 @@ int main(int argc, char *argv[])
 
 
     // Set edgeLabels for each faPatch
-    for(label pI=0; pI<(faPatches.size()-1); pI++)
+    for (label pI=0; pI<(faPatches.size()-1); ++pI)
     {
         SLList<label> tmpList;
 
-        forAll (bndEdgeFaPatchIDs, eI)
+        forAll(bndEdgeFaPatchIDs, eI)
         {
             if (bndEdgeFaPatchIDs[eI] == pI)
             {
@@ -275,7 +274,7 @@ int main(int argc, char *argv[])
     // Check for undefined edges
     SLList<label> tmpList;
 
-    forAll (bndEdgeFaPatchIDs, eI)
+    forAll(bndEdgeFaPatchIDs, eI)
     {
         if (bndEdgeFaPatchIDs[eI] == -1)
         {
@@ -295,7 +294,7 @@ int main(int argc, char *argv[])
     // Add good patches to faMesh
     SLList<faPatch*> faPatchLst;
 
-    for(label pI = 0; pI < faPatches.size(); pI++)
+    for (label pI = 0; pI < faPatches.size(); ++pI)
     {
         faPatches[pI].dict_.add("type", faPatches[pI].type_);
         faPatches[pI].dict_.add("edgeLabels", faPatches[pI].edgeLabels_);

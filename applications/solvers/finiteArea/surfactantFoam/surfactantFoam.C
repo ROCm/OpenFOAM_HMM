@@ -27,7 +27,7 @@ Application
     surfactantFoam
 
 Group
-    grpBasicSolvers
+    grpFiniteAreaSolvers
 
 Description
     Passive scalar transport equation solver.
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
         CsEqn.solve();
 
-        if (runTime.outputTime())
+        if (runTime.writeTime())
         {
             vsm.mapToVolume(Cs, Cvf.boundaryFieldRef());
 
@@ -104,6 +104,8 @@ int main(int argc, char *argv[])
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
     }
+
+    Info<< "End\n" << endl;
 
     return 0;
 }
