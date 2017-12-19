@@ -1283,6 +1283,37 @@ Foam::argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+Foam::label Foam::argList::optionCount(const UList<word>& optionNames) const
+{
+    label n = 0;
+    for (const word& optName : optionNames)
+    {
+        if (options_.found(optName))
+        {
+            ++n;
+        }
+    }
+    return n;
+}
+
+
+Foam::label Foam::argList::optionCount
+(
+    std::initializer_list<word> optionNames
+) const
+{
+    label n = 0;
+    for (const word& optName : optionNames)
+    {
+        if (options_.found(optName))
+        {
+            ++n;
+        }
+    }
+    return n;
+}
+
+
 bool Foam::argList::setOption(const word& optionName, const string& param)
 {
     // Some options are always protected
