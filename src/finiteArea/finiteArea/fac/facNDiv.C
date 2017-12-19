@@ -58,7 +58,7 @@ ndiv
 
     GeometricField<Type, faPatchField, areaMesh>& v = tv.ref();
 
-    v.internalField() = n*(n & v.internalField());
+    v.primitiveFieldRef() = n*(n & v.internalField());
     v.correctBoundaryConditions();
 
     return v;
@@ -103,7 +103,7 @@ ndiv
     );
     GeometricField<Type, faPatchField, areaMesh>& Div = tDiv.ref();
 
-    Div.internalField() = n*(n & Div.internalField());
+    Div.primitiveFieldRef() = n*(n & Div.internalField());
     Div.correctBoundaryConditions();
 
     return tDiv;
@@ -198,7 +198,7 @@ ndiv
 
     GeometricField<Type, faPatchField, areaMesh>& Div = tDiv.ref();
 
-    Div.internalField() = n*(n &Div.internalField());
+    Div.primitiveFieldRef() = n*(n & Div.internalField());
     Div.correctBoundaryConditions();
 
     return tDiv;
