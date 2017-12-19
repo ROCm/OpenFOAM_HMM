@@ -11,7 +11,6 @@ EXE_LIBS = \
     -lfiniteVolume \
     -lgenericPatchFields \
     -llagrangian \
-    -lfiniteArea \
     -ldynamicMesh \
     -lmeshTools \
     -lreconstruct \
