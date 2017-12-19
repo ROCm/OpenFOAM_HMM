@@ -4,18 +4,22 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 runApplication blockMesh
 runApplication topoSet
+
+# Restore initial fields
+restore0Dir
+
 runApplication splitMeshRegions -cellZones -overwrite
 
-# remove fluid fields from solid regions (important for post-processing)
-for i in heater leftSolid rightSolid
+# Remove fluid fields from solid regions (important for post-processing)
+for region in $(foamListRegions solid)
 do
-   rm -f 0*/$i/{nut,alphat,epsilon,k,U,p_rgh}
+    rm -f 0/$region/{nut,alphat,epsilon,k,U,p_rgh}
+    rm -f processor*/0/$region/{nut,alphat,epsilon,k,U,p_rgh}
 done
 
-
-for i in bottomWater topAir heater leftSolid rightSolid
+for region in $(foamListRegions)
 do
-   changeDictionary -region $i > log.changeDictionary.$i 2>&1
+    runApplication -s $region changeDictionary -region $region
 done
 
 # Create coupling geometry
@@ -23,8 +27,7 @@ runApplication createExternalCoupledPatchGeometry \
     -regions '(topAir heater)' coupleGroup
 
 echo
-echo "creating files for paraview post-processing"
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
 echo
-paraFoam -touchAll 2>/dev/null
 
 #------------------------------------------------------------------------------

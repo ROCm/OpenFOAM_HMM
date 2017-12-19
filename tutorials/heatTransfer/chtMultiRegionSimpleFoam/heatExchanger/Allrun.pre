@@ -2,26 +2,27 @@
 cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
-#create meshes
+# Create meshes
 runApplication -s air    blockMesh -region air
 runApplication -s porous blockMesh -region porous
 
-# create rotor blades in air region
+# Create rotor blades in air region
 runApplication -s air.1 \
     topoSet -region air -dict system/topoSetDict.1
 
 runApplication createBaffles -region air -overwrite
 
-# create rotor zone in air region for MRF
+# Create rotor zone in air region for MRF
 runApplication -s air.2 \
     topoSet -region air -dict system/topoSetDict.2
 
 rm -rf constant/air/polyMesh/sets
 
-# create dummy files for post-processing
+# Create dummy files for post-processing
 paraFoam -touch -region porous
 paraFoam -touch -region air
 
+# Set initial fields
 restore0Dir
 
 #------------------------------------------------------------------------------

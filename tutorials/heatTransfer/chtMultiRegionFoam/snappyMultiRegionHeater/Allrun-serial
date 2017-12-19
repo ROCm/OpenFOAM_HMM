@@ -18,6 +18,7 @@ runApplication splitMeshRegions -cellZones -overwrite
 for region in $(foamListRegions solid)
 do
     rm -f 0/$region/{nut,alphat,epsilon,k,U,p_rgh}
+    rm -f processor*/0/$region/{nut,alphat,epsilon,k,U,p_rgh}
 done
 
 for region in $(foamListRegions)

@@ -13,6 +13,9 @@ externalCoupled
     // Does external process start first
     initByExternal  true;
 
+    // Frequency of coupling
+    calcFrequency   4;
+
     // Additional output
     log             true;
 

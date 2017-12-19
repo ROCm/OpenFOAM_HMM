@@ -10,18 +10,19 @@ runApplication splitMeshRegions -cellZones -overwrite
 rm -rf 0/domain3 constant/domain3 system/domain3
 
 # Remove fluid fields from solid regions (important for post-processing)
-for i in solid floor
+for region in $(foamListRegions solid)
 do
-   rm -f 0*/$i/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
+    rm -f 0/$region/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
+    rm -f processor*/0/$region/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
 done
 
 # Set the initial fields
 restore0Dir
 
-for i in air solid floor
+for region in $(foamListRegions)
 do
-    runApplication -s $i changeDictionary \
-        -region $i -subDict dictionaryReplacement
+    runApplication -s $region changeDictionary \
+        -region $region -subDict dictionaryReplacement
 done
 
 #------------------------------------------------------------------------------

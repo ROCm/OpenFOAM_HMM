@@ -8,24 +8,23 @@ cd ${0%/*} || exit 1                        # Run from this directory
 #-- Run on single processor
 
 # Agglomerate patch faces
-for i in air
+for region in air
 do
-    runApplication -s $i \
-        faceAgglomerate -region $i -dict constant/viewFactorsDict
+    runApplication -s $region \
+        faceAgglomerate -region $region -dict constant/viewFactorsDict
 done
 
 # Generate view factors
-for i in air
+for region in air
 do
-    runApplication -s $i \
-        viewFactorsGen -region $i
+    runApplication -s $region \
+        viewFactorsGen -region $region
 done
 
 runApplication $(getApplication)
 
 echo
-echo "Creating files for paraview post-processing"
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
 echo
-paraFoam -touchAll
 
 #------------------------------------------------------------------------------

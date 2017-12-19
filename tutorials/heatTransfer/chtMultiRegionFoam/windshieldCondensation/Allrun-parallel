@@ -30,8 +30,7 @@ runParallel $(getApplication)
 runApplication reconstructPar -allRegions
 
 echo
-echo "creating files for paraview post-processing"
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
 echo
-paraFoam -touchAll
 
 #------------------------------------------------------------------------------
