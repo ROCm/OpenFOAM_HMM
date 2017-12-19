@@ -48,19 +48,19 @@ void RotateFields
 (
     const fvMesh& mesh,
     const IOobjectList& objects,
-    const tensor& T
+    const tensor& rotT
 )
 {
-    // Search list of objects for volScalarFields
+    // Objects of field type
     IOobjectList fields(objects.lookupClass(GeometricField::typeName));
 
     forAllIter(IOobjectList, fields, fieldIter)
     {
         Info<< "    Rotating " << fieldIter()->name() << endl;
 
-        GeometricField theta(*fieldIter(), mesh);
-        transform(theta, dimensionedTensor(T), theta);
-        theta.write();
+        GeometricField fld(*fieldIter(), mesh);
+        transform(fld, dimensionedTensor(rotT), fld);
+        fld.write();
     }
 }
 
@@ -69,6 +69,12 @@ void RotateFields
 
 int main(int argc, char *argv[])
 {
+    argList::addNote
+    (
+        "Rotate mesh points and vector/tensor fields\n"
+        "Rotation from the <n1> vector to the <n2> vector"
+    );
+
     timeSelector::addOptions();
 
     argList::addArgument("n1");
@@ -83,7 +89,7 @@ int main(int argc, char *argv[])
     vector n2(args.argRead<vector>(2));
     n2 /= mag(n2);
 
-    tensor T(rotationTensor(n1, n2));
+    const tensor rotT(rotationTensor(n1, n2));
 
     {
         pointIOField points
@@ -100,7 +106,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        points = transform(T, points);
+        points = transform(rotT, points);
 
         // Set the precision of the points data to 10
         IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));
@@ -123,15 +129,15 @@ int main(int argc, char *argv[])
         // Search for list of objects for this time
         IOobjectList objects(mesh, runTime.timeName());
 
-        RotateFields<volVectorField>(mesh, objects, T);
-        RotateFields<volSphericalTensorField>(mesh, objects, T);
-        RotateFields<volSymmTensorField>(mesh, objects, T);
-        RotateFields<volTensorField>(mesh, objects, T);
+        RotateFields<volVectorField>(mesh, objects, rotT);
+        RotateFields<volSphericalTensorField>(mesh, objects, rotT);
+        RotateFields<volSymmTensorField>(mesh, objects, rotT);
+        RotateFields<volTensorField>(mesh, objects, rotT);
 
-        RotateFields<surfaceVectorField>(mesh, objects, T);
-        RotateFields<surfaceSphericalTensorField>(mesh, objects, T);
-        RotateFields<surfaceSymmTensorField>(mesh, objects, T);
-        RotateFields<surfaceTensorField>(mesh, objects, T);
+        RotateFields<surfaceVectorField>(mesh, objects, rotT);
+        RotateFields<surfaceSphericalTensorField>(mesh, objects, rotT);
+        RotateFields<surfaceSymmTensorField>(mesh, objects, rotT);
+        RotateFields<surfaceTensorField>(mesh, objects, rotT);
     }
 
     Info<< "End\n" << endl;

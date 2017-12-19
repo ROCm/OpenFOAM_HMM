@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,6 +40,9 @@ Usage
     -rotate (vector vector)
         Rotates the points from the first vector to the second,
 
+    -rotate-angle (vector angle)
+        Rotate angle degrees about vector axis.
+
      or -yawPitchRoll (yawdegrees pitchdegrees rolldegrees)
      or -rollPitchYaw (rolldegrees pitchdegrees yawdegrees)
 
@@ -68,7 +71,6 @@ Usage
 #include "pointFields.H"
 #include "transformField.H"
 #include "transformGeometricField.H"
-#include "StringStream.H"
 #include "mathematicalConstants.H"
 
 using namespace Foam;
@@ -81,7 +83,7 @@ void readAndRotateFields
 (
     PtrList<GeoField>& flds,
     const fvMesh& mesh,
-    const tensor& T,
+    const tensor& rotT,
     const IOobjectList& objects
 )
 {
@@ -89,7 +91,7 @@ void readAndRotateFields
     forAll(flds, i)
     {
         Info<< "Transforming " << flds[i].name() << endl;
-        dimensionedTensor dimT("t", flds[i].dimensions(), T);
+        const dimensionedTensor dimT("t", flds[i].dimensions(), rotT);
         transform(flds[i], dimT, flds[i]);
     }
 }
@@ -156,22 +158,33 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
+        "origin",
+        "point",
+        "Use specified <point> as origin for rotations"
+    );
+    argList::addOption
+    (
         "rotate",
         "(vectorA vectorB)",
-        "Transform as a rotation between <vectorA> and <vectorB> "
-        "- eg, '( (1 0 0) (0 0 1) )'"
+        "Rotate from <vectorA> to <vectorB> - eg, '((1 0 0) (0 0 1))'"
+    );
+    argList::addOption
+    (
+        "rotate-angle",
+        "(vector scalar)",
+        "Rotate <angle> degrees about <vector> - eg, '((1 0 0) 45)'"
     );
     argList::addOption
     (
         "rollPitchYaw",
         "vector",
-        "Rotate by '(roll pitch yaw)' in degrees"
+        "Rotate by '(roll pitch yaw)' degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "Rotate by '(yaw pitch roll)' in degrees"
+        "Rotate by '(yaw pitch roll)' degrees"
     );
     argList::addBoolOption
     (
@@ -182,24 +195,53 @@ int main(int argc, char *argv[])
     (
         "scale",
         "scalar | vector",
-        "Scale by the specified amount - eg, for a uniform [mm] to [m] scaling "
-        "use either (0.001 0.001 0.001)' or simply '0.001'"
+        "Scale by the specified amount - Eg, for uniform [mm] to [m] scaling "
+        "use either '(0.001 0.001 0.001)' or simply '0.001'"
     );
 
     #include "addRegionOption.H"
     #include "setRootCase.H"
+
+    const bool doRotateFields = args.optionFound("rotateFields");
+
+    // Verify that an operation has been specified
+    {
+        const List<word> operationNames
+        {
+            "translate",
+            "rotate",
+            "rotate-angle",
+            "rollPitchYaw",
+            "yawPitchRoll",
+            "scale"
+        };
+
+        if (!args.optionCount(operationNames))
+        {
+            FatalError
+                << "No operation supplied, "
+                << "use least one of the following:" << nl
+                << "   ";
+
+            for (const auto& opName : operationNames)
+            {
+                FatalError
+                    << " -" << opName;
+            }
+
+            FatalError
+                << nl << exit(FatalError);
+        }
+    }
+
     #include "createTime.H"
 
     word regionName = polyMesh::defaultRegion;
-    fileName meshDir;
+    fileName meshDir = polyMesh::meshSubDir;
 
     if (args.optionReadIfPresent("region", regionName))
     {
         meshDir = regionName/polyMesh::meshSubDir;
-    }
-    else
-    {
-        meshDir = polyMesh::meshSubDir;
     }
 
     pointIOField points
@@ -216,23 +258,20 @@ int main(int argc, char *argv[])
         )
     );
 
-    const bool doRotateFields = args.optionFound("rotateFields");
-
-    // this is not actually stringent enough:
-    if (args.options().empty())
-    {
-        FatalErrorInFunction
-            << "No options supplied, please use one or more of "
-               "-translate, -rotate or -scale options."
-            << exit(FatalError);
-    }
-
     vector v;
     if (args.optionReadIfPresent("translate", v))
     {
         Info<< "Translating points by " << v << endl;
 
         points += v;
+    }
+
+    vector origin;
+    const bool useOrigin = args.optionReadIfPresent("origin", origin);
+    if (useOrigin)
+    {
+        Info<< "Set origin for rotations to " << origin << endl;
+        points -= origin;
     }
 
     if (args.optionFound("rotate"))
@@ -243,15 +282,41 @@ int main(int argc, char *argv[])
         );
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
-        tensor T = rotationTensor(n1n2[0], n1n2[1]);
 
-        Info<< "Rotating points by " << T << endl;
+        const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
 
-        points = transform(T, points);
+        Info<< "Rotating points by " << rotT << endl;
+
+        points = transform(rotT, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, T);
+            rotateFields(args, runTime, rotT);
+        }
+    }
+    else if (args.optionFound("rotate-angle"))
+    {
+        const Tuple2<vector, scalar> axisAngle
+        (
+            args.optionLookup("rotate-angle")()
+        );
+
+        Info<< "Rotating points " << nl
+            << "    about " << axisAngle.first() << nl
+            << "    angle " << axisAngle.second() << nl;
+
+        const quaternion quat
+        (
+            axisAngle.first(),
+            axisAngle.second() * pi/180.0  // degToRad
+        );
+
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
+
+        if (doRotateFields)
+        {
+            rotateFields(args, runTime, quat.R());
         }
     }
     else if (args.optionReadIfPresent("rollPitchYaw", v))
@@ -264,14 +329,14 @@ int main(int argc, char *argv[])
         // degToRad
         v *= pi/180.0;
 
-        const quaternion R(quaternion::rotationSequence::XYZ, v);
+        const quaternion quat(quaternion::rotationSequence::XYZ, v);
 
-        Info<< "Rotating points by quaternion " << R << endl;
-        points = transform(R, points);
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, R.R());
+            rotateFields(args, runTime, quat.R());
         }
     }
     else if (args.optionReadIfPresent("yawPitchRoll", v))
@@ -284,14 +349,14 @@ int main(int argc, char *argv[])
         // degToRad
         v *= pi/180.0;
 
-        const quaternion R(quaternion::rotationSequence::ZYX, v);
+        const quaternion quat(quaternion::rotationSequence::ZYX, v);
 
-        Info<< "Rotating points by quaternion " << R << endl;
-        points = transform(R, points);
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
 
         if (doRotateFields)
         {
-            rotateFields(args, runTime, R.R());
+            rotateFields(args, runTime, quat.R());
         }
     }
 
@@ -324,6 +389,13 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
     }
+
+    if (useOrigin)
+    {
+        Info<< "Unset origin for rotations from " << origin << endl;
+        points += origin;
+    }
+
 
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(max(10u, IOstream::defaultPrecision()));

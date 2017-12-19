@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,6 +45,7 @@ Description
 #include "boundBox.H"
 #include "transformField.H"
 #include "Pair.H"
+#include "Tuple2.H"
 #include "quaternion.H"
 #include "mathematicalConstants.H"
 
@@ -75,45 +76,78 @@ int main(int argc, char *argv[])
     );
     argList::addOption
     (
-        "rotate",
-        "(vectorA vectorB)",
-        "Transform as a rotation between <vectorA> and <vectorB> "
-        "- eg, '( (1 0 0) (0 0 1) )'"
+        "origin",
+        "point",
+        "Use specified <point> as origin for rotations"
     );
     argList::addOption
     (
-        "scale",
-        "scalar | vector",
-        "Scale by the specified amount - eg, for a uniform [mm] to [m] scaling "
-        "use either (0.001 0.001 0.001)' or simply '0.001'"
+        "rotate",
+        "(vectorA vectorB)",
+        "Rotate from <vectorA> to <vectorB> - eg, '((1 0 0) (0 0 1))'"
+    );
+    argList::addOption
+    (
+        "rotate-angle",
+        "(vector scalar)",
+        "Rotate <angle> degrees about <vector> - eg, '((1 0 0) 45)'"
     );
     argList::addOption
     (
         "rollPitchYaw",
         "vector",
-        "Rotate by '(roll pitch yaw)' in degrees"
+        "Rotate by '(roll pitch yaw)' degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "Rotate by '(yaw pitch roll)' in degrees"
+        "Rotate by '(yaw pitch roll)' degrees"
+    );
+    argList::addOption
+    (
+        "scale",
+        "scalar | vector",
+        "Scale by the specified amount - Eg, for uniform [mm] to [m] scaling "
+        "use either '(0.001 0.001 0.001)' or simply '0.001'"
     );
     argList args(argc, argv);
+
+    // Verify that an operation has been specified
+    {
+        const List<word> operationNames
+        {
+            "translate",
+            "rotate",
+            "rotate-angle",
+            "rollPitchYaw",
+            "yawPitchRoll",
+            "scale"
+        };
+
+        if (!args.optionCount(operationNames))
+        {
+            FatalError
+                << "No operation supplied, "
+                << "use least one of the following:" << nl
+                << "   ";
+
+            for (const auto& opName : operationNames)
+            {
+                FatalError
+                    << " -" << opName;
+            }
+
+            FatalError
+                << nl << exit(FatalError);
+        }
+    }
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];
 
     Info<< "Reading surf from " << surfFileName << " ..." << nl
         << "Writing surf to " << outFileName << " ..." << endl;
-
-    if (args.options().empty())
-    {
-        FatalErrorInFunction
-            << "No options supplied, please use one or more of "
-               "-translate, -rotate or -scale options."
-            << exit(FatalError);
-    }
 
     meshedSurface surf1(surfFileName);
 
@@ -127,6 +161,14 @@ int main(int argc, char *argv[])
         points += v;
     }
 
+    vector origin;
+    const bool useOrigin = args.optionReadIfPresent("origin", origin);
+    if (useOrigin)
+    {
+        Info<< "Set origin for rotations to " << origin << endl;
+        points -= origin;
+    }
+
     if (args.optionFound("rotate"))
     {
         Pair<vector> n1n2
@@ -136,11 +178,31 @@ int main(int argc, char *argv[])
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
 
-        const tensor T = rotationTensor(n1n2[0], n1n2[1]);
+        const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
 
-        Info<< "Rotating points by " << T << endl;
+        Info<< "Rotating points by " << rotT << endl;
 
-        points = transform(T, points);
+        points = transform(rotT, points);
+    }
+    else if (args.optionFound("rotate-angle"))
+    {
+        const Tuple2<vector, scalar> axisAngle
+        (
+            args.optionLookup("rotate-angle")()
+        );
+
+        Info<< "Rotating points " << nl
+            << "    about " << axisAngle.first() << nl
+            << "    angle " << axisAngle.second() << nl;
+
+        const quaternion quat
+        (
+            axisAngle.first(),
+            axisAngle.second() * pi/180.0  // degToRad
+        );
+
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
     }
     else if (args.optionReadIfPresent("rollPitchYaw", v))
     {
@@ -152,10 +214,10 @@ int main(int argc, char *argv[])
         // degToRad
         v *= pi/180.0;
 
-        const quaternion R(quaternion::rotationSequence::XYZ, v);
+        const quaternion quat(quaternion::rotationSequence::XYZ, v);
 
-        Info<< "Rotating points by quaternion " << R << endl;
-        points = transform(R, points);
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
     }
     else if (args.optionReadIfPresent("yawPitchRoll", v))
     {
@@ -167,10 +229,10 @@ int main(int argc, char *argv[])
         // degToRad
         v *= pi/180.0;
 
-        const quaternion R(quaternion::rotationSequence::ZYX, v);
+        const quaternion quat(quaternion::rotationSequence::ZYX, v);
 
-        Info<< "Rotating points by quaternion " << R << endl;
-        points = transform(R, points);
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
     }
 
     if (args.optionFound("scale"))
@@ -201,6 +263,12 @@ int main(int argc, char *argv[])
                 << "given: " << args["scale"] << endl
                 << exit(FatalError);
         }
+    }
+
+    if (useOrigin)
+    {
+        Info<< "Unset origin for rotations from " << origin << endl;
+        points += origin;
     }
 
     surf1.movePoints(points);
