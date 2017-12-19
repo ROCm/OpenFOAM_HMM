@@ -16,4 +16,6 @@ runApplication createPatch -overwrite
 
 # rm -f 0/polyMesh/{cellZones,faceZones,pointZones}
 
+echo "End"
+
 # -----------------------------------------------------------------------------

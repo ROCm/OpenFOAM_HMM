@@ -347,9 +347,9 @@ int main(int argc, char *argv[])
     Info << "Write finite area mesh ... ";
     areaMesh.write();
 
-    Info << "Done" << endl;
+    Info << "\nEnd" << endl;
 
-    return(0);
+    return 0;
 }
 
 // ************************************************************************* //

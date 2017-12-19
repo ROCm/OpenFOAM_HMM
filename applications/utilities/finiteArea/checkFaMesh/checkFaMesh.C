@@ -46,12 +46,12 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-#   include "addRegionOption.H"
+    #include "addRegionOption.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createNamedMesh.H"
-#   include "createFaMesh.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createNamedMesh.H"
+    #include "createFaMesh.H"
 
     Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -76,7 +76,8 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    return(0);
+    Info << "\nEnd" << endl;
+    return 0;
 }
 
 
