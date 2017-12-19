@@ -14,7 +14,7 @@ rm -rf 0
 runApplication -s ami \
     createPatch -dict system/createPatchDict.ami -overwrite
 
-runApplication transformPoints -scale '(0.01 0.01 0.01)'
+runApplication transformPoints -scale 0.01  # Uniform scaling [cm] -> [m]
 
 runApplication mergeOrSplitBaffles -split -overwrite
 
