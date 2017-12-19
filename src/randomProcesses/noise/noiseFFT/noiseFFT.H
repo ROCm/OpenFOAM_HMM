@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,6 +53,7 @@ SeeAlso
 #include "scalarField.H"
 #include "graph.H"
 #include "windowModel.H"
+#include <fftw3.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,11 +68,17 @@ class noiseFFT
 :
     public scalarField
 {
-    // Private data
+    //- FFTW planner information
+    struct planInfo
+    {
+        bool active;
+        label windowSize;
+        scalarList in;
+        scalarList out;
+        fftw_plan plan;
+    };
 
-        //- Time spacing of the raw data
-        scalar deltaT_;
-
+    //- Octave band information
     struct octaveBandInfo
     {
         label octave;
@@ -84,26 +91,25 @@ class noiseFFT
     };
 
 
+    // Private data
+
+        //- Time spacing of the raw data (uniform)
+        scalar deltaT_;
+
+        //- Plan information for FFTW
+        mutable planInfo planInfo_;
+
+
 public:
 
     //- Reference pressure
     static scalar p0;
 
+    //- Construct from pressure field
+    noiseFFT(const scalar deltaT, const label windowSize = -1);
 
-    // Constructors
-
-        //- Construct from pressure field
-        noiseFFT
-        (
-            const scalar deltat,
-            const scalarField& pressure
-        );
-
-        //- Construct from Istream
-        noiseFFT(Istream&);
-
-        //- Construct from pressure field file name
-        noiseFFT(const fileName& pFileName, const label skip = 0);
+    //- Destructor
+    ~noiseFFT();
 
 
     // Member Functions
@@ -134,6 +140,14 @@ public:
             labelList& fBandIDs,
             scalarField& fCentre
         );
+
+        //- Set the pressure data
+        //- \note transfers storage to *this
+        void setData(scalarList& data);
+
+        //- Set the pressure data by reading from file with an optional offset
+        void setData(const fileName& pFileName, const label skip = 0);
+
 
         //- Return the graph of pressure as a function of time
         graph pt() const;
