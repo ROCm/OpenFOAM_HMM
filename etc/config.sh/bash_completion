@@ -41,8 +41,8 @@ then
 fi
 
 
-# Add completion for command or directory of commands
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Add completion for commands, directories of commands
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 unset -f foamAddCompletion 2>/dev/null
 foamAddCompletion()
 {
@@ -134,7 +134,10 @@ _of_complete_()
         # Not in cache, obtain by parsing application -help-full
         if [ -z "$choices" ]
         then
-            local helpText=$($appName -help-full 2>/dev/null | sed -ne '/^  *-/p')
+            # Treat ',' like space so '-a, -all' parses like '-a | -all'
+            # Options with '=' (Eg, -mode=ugo) are not handled very well.
+            local helpText=$($appName -help-full 2>/dev/null | \
+                sed -n -e 's/,/ /g' -e 's/=.*$/=/' -e '/^  *-/p')
 
             if [ -n "$helpText" ]
             then
@@ -206,6 +209,8 @@ then
 
         # Generate completions for predefined directories
         foamAddCompletion $FOAM_APPBIN
+        # And a few scripts from bin/
+        foamAddCompletion paraFoam
     fi
 else
     # Bash version is too old.
