@@ -220,7 +220,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
             typename CloudType::parcelType& p =
                 *cellOccupancy[realCelli][cellParticleI];
 
-            const point& pos = p.position();
+            const point pos(p.position());
 
             scalar r = wallModel_->pREff(p);
 

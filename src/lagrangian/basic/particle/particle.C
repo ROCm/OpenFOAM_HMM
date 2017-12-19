@@ -388,7 +388,7 @@ void Foam::particle::changeFace(const label tetTriI)
         tetFacei_ = newFaceI;
         tetPti_ = edgeI;
 
-        // Exit the loop now that the the tet point has been found
+        // Exit the loop now that the tet point has been found
         break;
     }
 
@@ -890,11 +890,11 @@ Foam::scalar Foam::particle::trackToMovingTri
     // Calculate the hit fraction
     label iH = -1;
     scalar muH = std::isnormal(detA[0]) && detA[0] <= 0 ? VGREAT : 1/detA[0];
-    for (label i = 0; i < 4; ++ i)
+    for (label i = 0; i < 4; ++i)
     {
         const Roots<3> mu = hitEqn[i].roots();
 
-        for (label j = 0; j < 3; ++ j)
+        for (label j = 0; j < 3; ++j)
         {
             if (mu.type(j) == roots::real && hitEqn[i].derivative(mu[j]) < 0)
             {
