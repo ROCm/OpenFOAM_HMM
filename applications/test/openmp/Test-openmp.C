@@ -30,7 +30,7 @@ Description
 #include <cstdlib>
 #include <iostream>
 
-#ifdef USE_OMP
+#if _OPENMP
 #include <omp.h>
 #endif
 
@@ -39,11 +39,19 @@ Description
 
 int main(int argc, char *argv[])
 {
+#if USE_OMP
+    std::cout << "USE_OMP defined (" << USE_OMP << ")\n";
+#else
+    std::cout << "USE_OMP undefined\n";
+#endif
+
+#if _OPENMP
+    std::cout << "_OPENMP = " << _OPENMP << "\n\n";
+
+    // Fork threads with their own copies of variables
     int nThreads, threadId;
 
-// Fork threads with their own copies of variables
-#ifdef USE_OMP
-#pragma omp parallel private(nThreads, threadId)
+    #pragma omp parallel private(nThreads, threadId)
     {
         threadId = omp_get_thread_num();
         nThreads = omp_get_num_threads();

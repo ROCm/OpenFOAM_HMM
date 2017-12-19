@@ -287,6 +287,7 @@ CLANG_NOT_FOUND
 
     _foamAddMan     $clangDir/share/man
     _foamAddPath    $clangDir/bin
+    _foamAddLib     $clangDir/lib  # For things like libomp (openmp) etc
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then

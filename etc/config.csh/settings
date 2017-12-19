@@ -302,6 +302,7 @@ CLANG_NOT_FOUND
 
     _foamAddMan     $clangDir/man
     _foamAddPath    $clangDir/bin
+    _foamAddLib     $clangDir/lib  # For things like libomp (openmp) etc
 
     if ($?FOAM_VERBOSE && $?prompt) then
         echo "Using ThirdParty compiler"
