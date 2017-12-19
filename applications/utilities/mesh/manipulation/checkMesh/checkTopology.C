@@ -663,12 +663,13 @@ Foam::label Foam::checkTopology
 
             const cellList& cells = mesh.cells();
             const faceList& faces = mesh.faces();
-            treeBoundBox bb(boundBox::invertedBox);
             PackedBoolList isZonePoint(mesh.nPoints());
 
             forAll(cellZones, zoneI)
             {
                 const cellZone& cZone = cellZones[zoneI];
+                boundBox bb;
+                isZonePoint.reset();  // clears all bits (reset count)
 
                 forAll(cZone, i)
                 {
@@ -686,6 +687,8 @@ Foam::label Foam::checkTopology
                          }
                     }
                 }
+
+                bb.reduce();  // Global min/max
 
                 Info<< "    "
                     << setw(20) << cZone.name()
