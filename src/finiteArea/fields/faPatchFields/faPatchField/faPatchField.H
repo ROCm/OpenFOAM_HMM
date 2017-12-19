@@ -270,14 +270,13 @@ public:
             }
 
             //- Return dimensioned internal field reference
-            const DimensionedField<Type, areaMesh>&
-            dimensionedInternalField() const
+            const DimensionedField<Type, areaMesh>& internalField() const
             {
                 return internalField_;
             }
 
             //- Return internal field reference
-            const Field<Type>& internalField() const
+            const Field<Type>& primitiveField() const
             {
                 return internalField_;
             }

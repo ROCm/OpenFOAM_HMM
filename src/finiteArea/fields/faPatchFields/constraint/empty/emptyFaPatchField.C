@@ -59,8 +59,8 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
             << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
     }
 }
@@ -82,8 +82,8 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
             << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
     }
 }
@@ -98,7 +98,7 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
     faPatchField<Type>
     (
         ptf.patch(),
-        ptf.dimensionedInternalField(),
+        ptf.internalField(),
         Field<Type>(0)
     )
 {}
@@ -120,12 +120,12 @@ Foam::emptyFaPatchField<Type>::emptyFaPatchField
 template<class Type>
 void Foam::emptyFaPatchField<Type>::updateCoeffs()
 {
-    if (this->dimensionedInternalField().mesh().nFaces())
+    if (this->internalField().mesh().nFaces())
     {
         if
         (
             this->patch().faPatch::size()
-          % this->dimensionedInternalField().mesh().nFaces()
+          % this->internalField().mesh().nFaces()
         )
         {
             FatalErrorInFunction

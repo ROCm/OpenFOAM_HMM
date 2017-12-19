@@ -40,9 +40,8 @@ wmakeLnInclude -u fvOptions
 wmake $targetType finiteVolume
 wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
-wmake $targetType genericPatchFields
-
 wmake $targetType finiteArea
+wmake $targetType genericPatchFields
 
 conversion/Allwmake $targetType $*
 wmake $targetType mesh/extrudeModel

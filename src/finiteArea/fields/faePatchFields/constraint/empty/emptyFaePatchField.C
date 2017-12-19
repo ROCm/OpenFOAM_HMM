@@ -93,7 +93,7 @@ Foam::emptyFaePatchField<Type>::emptyFaePatchField
     faePatchField<Type>
     (
         ptf.patch(),
-        ptf.dimensionedInternalField(),
+        ptf.internalField(),
         Field<Type>(0)
     )
 {}

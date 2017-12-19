@@ -15,7 +15,6 @@ EXE_LIBS = \
     -ldecompositionMethods \
     -L$(FOAM_LIBBIN)/dummy \
     -lkahipDecomp -lmetisDecomp -lscotchDecomp \
-    -lfiniteArea \
     -llagrangian \
     -ldynamicMesh \
     -lregionModels

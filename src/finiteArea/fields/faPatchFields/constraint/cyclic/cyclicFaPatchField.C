@@ -59,8 +59,8 @@ Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
             << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
     }
 }
@@ -83,8 +83,8 @@ Foam::cyclicFaPatchField<Type>::cyclicFaPatchField
             << "\n    patch type '" << p.type()
             << "' not constraint type '" << typeName << "'"
             << "\n    for patch " << p.name()
-            << " of field " << this->dimensionedInternalField().name()
-            << " in file " << this->dimensionedInternalField().objectPath()
+            << " of field " << this->internalField().name()
+            << " in file " << this->internalField().objectPath()
             << exit(FatalIOError);
     }
 
@@ -122,7 +122,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::cyclicFaPatchField<Type>::patchNeighbourField() const
 {
-    const Field<Type>& iField = this->internalField();
+    const Field<Type>& iField = this->primitiveField();
     const labelUList& faceCells = cyclicPatch_.faceCells();
 
     tmp<Field<Type>> tpnf(new Field<Type>(this->size()));
