@@ -177,8 +177,8 @@ protected:
 
             //- Flag to include the decay control
             Switch decayControl_;
-            dimensionedScalar omegaInf_;
             dimensionedScalar kInf_;
+            dimensionedScalar omegaInf_;
 
 
     // Protected Member Functions
