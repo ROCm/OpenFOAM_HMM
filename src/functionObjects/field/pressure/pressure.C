@@ -180,8 +180,16 @@ bool Foam::functionObjects::pressure::calc()
         (
             new volScalarField
             (
-                resultName_,
-                coeff(pRef(pDyn(p, rhoScale(p))))
+                IOobject
+                (
+                    resultName_,
+                    p.mesh().time().timeName(),
+                    p.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                coeff(pRef(pDyn(p, rhoScale(p)))),
+                fvPatchField<scalar>::calculatedType()
             )
         );
 
