@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,13 +52,21 @@ Description
     and the addition of the optional F3 term for rough walls from
     \verbatim
         Hellsten, A. (1998).
-        "Some Improvements in Menter's k-omega-SST turbulence model"
+        Some Improvements in Menter's k-omega-SST turbulence model
         29th AIAA Fluid Dynamics Conference, AIAA-98-2554.
+    \endverbatim
+
+    and the optional decay control from:
+    \verbatim
+        Spalart, P. R. and Rumsey, C. L. (2007).
+        Effective Inflow Conditions for Turbulence Models in Aerodynamic
+        Calculations
+        AIAA Journal, 45(10), 2544 - 2553.
     \endverbatim
 
     Note that this implementation is written in terms of alpha diffusion
     coefficients rather than the more traditional sigma (alpha = 1/sigma) so
-    that the blending can be applied to all coefficuients in a consistent
+    that the blending can be applied to all coefficients in a consistent
     manner.  The paper suggests that sigma is blended but this would not be
     consistent with the blending of the k-epsilon and k-omega models.
 
@@ -76,19 +84,24 @@ Description
     \verbatim
         kOmegaSSTBaseCoeffs
         {
-            alphaK1     0.85;
-            alphaK2     1.0;
-            alphaOmega1 0.5;
-            alphaOmega2 0.856;
-            beta1       0.075;
-            beta2       0.0828;
-            betaStar    0.09;
-            gamma1      5/9;
-            gamma2      0.44;
-            a1          0.31;
-            b1          1.0;
-            c1          10.0;
-            F3          no;
+            alphaK1         0.85;
+            alphaK2         1.0;
+            alphaOmega1     0.5;
+            alphaOmega2     0.856;
+            beta1           0.075;
+            beta2           0.0828;
+            betaStar        0.09;
+            gamma1          5/9;
+            gamma2          0.44;
+            a1              0.31;
+            b1              1.0;
+            c1              10.0;
+            F3              no;
+
+            // Optional decay control
+            decayControl    yes;
+            kInf            \<far-field k value\>;
+            omegaInf        \<far-field omega value\>;
         }
     \endverbatim
 
@@ -145,6 +158,7 @@ protected:
             dimensionedScalar b1_;
             dimensionedScalar c1_;
 
+            //- Flag to include the F3 term
             Switch F3_;
 
 
@@ -159,7 +173,17 @@ protected:
             volScalarField omega_;
 
 
+        // Decay control
+
+            //- Flag to include the decay control
+            Switch decayControl_;
+            dimensionedScalar omegaInf_;
+            dimensionedScalar kInf_;
+
+
     // Protected Member Functions
+
+        void setDecayControl(const dictionary& dict);
 
         virtual tmp<volScalarField> F1(const volScalarField& CDkOmega) const;
         virtual tmp<volScalarField> F2() const;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -384,14 +384,64 @@ kOmegaSSTBase<BasicEddyViscosityModel>::kOmegaSSTBase
             IOobject::AUTO_WRITE
         ),
         this->mesh_
+    ),
+    decayControl_
+    (
+        Switch::lookupOrAddToDict
+        (
+            "decayControl",
+            this->coeffDict_,
+            false
+        )
+    ),
+    kInf_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kInf",
+            this->coeffDict_,
+            k_.dimensions(),
+            0
+        )
+    ),
+    omegaInf_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "omegaInf",
+            this->coeffDict_,
+            omega_.dimensions(),
+            0
+        )
     )
 {
     bound(k_, this->kMin_);
     bound(omega_, this->omegaMin_);
+
+    setDecayControl(this->coeffDict_);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class BasicEddyViscosityModel>
+void kOmegaSSTBase<BasicEddyViscosityModel>::setDecayControl
+(
+    const dictionary& dict
+)
+{
+    decayControl_.readIfPresent("decayControl", this->coeffDict());
+
+    if (decayControl_)
+    {
+        kInf_.read(this->coeffDict());
+        omegaInf_.read(this->coeffDict());
+
+        Info<< "    Employing decay control with kInf:" << kInf_
+            << " and omegaInf:" << omegaInf_ << endl;
+    }
+}
+
 
 template<class BasicEddyViscosityModel>
 bool kOmegaSSTBase<BasicEddyViscosityModel>::read()
@@ -411,6 +461,8 @@ bool kOmegaSSTBase<BasicEddyViscosityModel>::read()
         b1_.readIfPresent(this->coeffDict());
         c1_.readIfPresent(this->coeffDict());
         F3_.readIfPresent("F3", this->coeffDict());
+
+        setDecayControl(this->coeffDict());
 
         return true;
     }
@@ -476,6 +528,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
                 alpha()*rho()*(F1() - scalar(1))*CDkOmega()/omega_(),
                 omega_
             )
+          + alpha()*rho()*beta*sqr(omegaInf_)
           + Qsas(S2(), gamma, beta)
           + omegaSource()
           + fvOptions(alpha, rho, omega_)
@@ -499,6 +552,7 @@ void kOmegaSSTBase<BasicEddyViscosityModel>::correct()
         alpha()*rho()*Pk(G)
       - fvm::SuSp((2.0/3.0)*alpha()*rho()*divU, k_)
       - fvm::Sp(alpha()*rho()*epsilonByk(F1, tgradU()), k_)
+      + alpha()*rho()*betaStar_*omegaInf_*kInf_
       + kSource()
       + fvOptions(alpha, rho, k_)
     );
