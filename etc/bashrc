@@ -36,7 +36,7 @@ export WM_PROJECT=OpenFOAM
 export WM_PROJECT_VERSION=plus
 
 # [FOAM_INST_DIR] - parent directory containing the OpenFOAM installation.
-#  * When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
+# \- When this file is located as $WM_PROJECT_DIR/etc/bashrc, the next lines
 #    should work when sourced by BASH or ZSH shells. If this however fails,
 #    set one of the fallback values to an appropriate path.
 # --
@@ -104,23 +104,18 @@ export WM_MPLIB=SYSTEMOPENMPI
 
 ################################################################################
 
-# The old dirs to be cleaned from the environment variables
+# Old directories to be cleaned from PATH, LD_LIBRARY_PATH
 foamOldDirs="$WM_PROJECT_DIR $WM_THIRD_PARTY_DIR \
     $HOME/$WM_PROJECT/$USER $FOAM_USER_APPBIN $FOAM_USER_LIBBIN \
     $WM_PROJECT_SITE $FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN"
 
-# Location of installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~
+# Location of installation and third-party software
 export WM_PROJECT_INST_DIR=$FOAM_INST_DIR
 export WM_PROJECT_DIR=$WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
-
-# Location of third-party software
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 
-# Location of site-specific templates etc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# unset is equivalent to $WM_PROJECT_INST_DIR/site
+# [WM_PROJECT_SITE] - Location of site-specific (group) files
+# default (unset) implies WM_PROJECT_INST_DIR/site
 if [ -d "$WM_PROJECT_SITE" ]
 then
     export WM_PROJECT_SITE
@@ -128,12 +123,10 @@ else
     unset WM_PROJECT_SITE
 fi
 
-# Location of user files
-# ~~~~~~~~~~~~~~~~~~~~~~
+# [WM_PROJECT_USER_DIR] - Location of user files
 export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Load shell functions
-# ~~~~~~~~~~~~~~~~~~~~
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Override definitions via prefs, with 'other' first so the sys-admin
@@ -163,34 +156,28 @@ cleaned=$($foamClean "$MANPATH" "$foamOldDirs") && MANPATH="$cleaned"
 export PATH LD_LIBRARY_PATH MANPATH
 
 
-# Source project setup files
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Setup for OpenFOAM compilation etc
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc config.sh/settings
 
-if /usr/bin/tty -s 2>/dev/null  # Interactive shell
-then
-    _foamEtc config.sh/aliases
-
-    # Bash completions
-    if [ "${BASH_VERSINFO:-0}" -ge 4 ]
-    then
-        _foamEtc config.sh/bash_completion
-    fi
-fi
-
-
-# Source user setup files for optional packages
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Setup for third-party packages
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc config.sh/mpi
 _foamEtc config.sh/paraview
 _foamEtc config.sh/vtk
 _foamEtc config.sh/ensight
 _foamEtc config.sh/gperftools
-
-#_foamEtc config.sh/ADIOS
+## _foamEtc config.csh/ADIOS
 _foamEtc config.sh/CGAL
 _foamEtc config.sh/scotch
 _foamEtc config.sh/FFTW
+
+# Interactive shell
+if /usr/bin/tty -s 2>/dev/null
+then
+    _foamEtc config.sh/aliases
+    [ "${BASH_VERSINFO:-0}" -ge 4 ] && _foamEtc config.sh/bash_completion
+fi
 
 
 # Clean environment paths again. Only remove duplicates
@@ -214,13 +201,13 @@ then
 fi
 
 
-# Cleanup environment
-# ~~~~~~~~~~~~~~~~~~~
+# Cleanup temporary information
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Functions
+# Unload shell functions
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
-# Variables (do as last for a clean exit code)
+# Variables (done as the last statement for a clean exit code)
 unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------
