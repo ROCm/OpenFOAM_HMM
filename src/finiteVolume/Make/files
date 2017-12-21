@@ -310,6 +310,7 @@ $(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 $(schemes)/linearUpwind/linearUpwind.C
 $(schemes)/linearUpwind/linearUpwindV.C
 $(schemes)/LUST/LUST.C
+$(schemes)/deferredCorrection/deferredCorrection.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
