@@ -310,6 +310,7 @@ $(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 $(schemes)/linearUpwind/linearUpwind.C
 $(schemes)/linearUpwind/linearUpwindV.C
 $(schemes)/LUST/LUST.C
+$(schemes)/deferredCorrection/deferredCorrection.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
@@ -425,6 +426,7 @@ $(coupling)/externalFileCoupler.C
 
 solutionControl = $(general)/solutionControl
 $(solutionControl)/solutionControl/solutionControl.C
+$(solutionControl)/loopControl/loopControl.C
 $(solutionControl)/simpleControl/simpleControl.C
 $(solutionControl)/pimpleControl/pimpleControl.C
 $(solutionControl)/pisoControl/pisoControl.C

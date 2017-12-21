@@ -54,7 +54,7 @@ bool Foam::functionEntries::includeFuncEntry::execute
 )
 {
     const word fNameArgs(is);
-    HashSet<word> selectedFields;
+    HashSet<wordRe> selectedFields;
 
     return functionObjectList::readFunctionObject
     (

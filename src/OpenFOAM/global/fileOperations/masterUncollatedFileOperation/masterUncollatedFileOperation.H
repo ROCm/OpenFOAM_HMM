@@ -427,7 +427,7 @@ public:
 
 
     //- Destructor
-    virtual ~masterUncollatedFileOperation();
+    virtual ~masterUncollatedFileOperation() = default;
 
 
     // Member Functions

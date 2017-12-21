@@ -489,13 +489,6 @@ masterUncollatedFileOperation
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileOperations::masterUncollatedFileOperation::
-~masterUncollatedFileOperation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::fileOperations::masterUncollatedFileOperation::mkDir

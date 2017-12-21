@@ -25,7 +25,7 @@ Class
     Foam::displacementComponentLaplacianFvMotionSolver
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre

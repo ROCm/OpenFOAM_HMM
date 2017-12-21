@@ -43,6 +43,35 @@ namespace Foam
     defineTypeNameAndDebug(foamPvCore, 0);
 }
 
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::foamPvCore::printDataArraySelection
+(
+    Ostream& os,
+    vtkDataArraySelection* select
+)
+{
+    if (!select)
+    {
+        return os;
+    }
+
+    const int n = select->GetNumberOfArrays();
+
+    os << n << '(';
+    for (int i=0; i < n; ++i)
+    {
+        if (i) os << ' ';
+        os  << select->GetArrayName(i) << '='
+            << (select->GetArraySetting(i) ? 1 : 0);
+    }
+    os << ')';
+
+    return os;
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::foamPvCore::addToBlock
@@ -229,10 +258,8 @@ Foam::word Foam::foamPvCore::getFoamName(const std::string& str)
         // Already checked for valid/invalid chars
         return word(str.substr(beg, beg+end), false);
     }
-    else
-    {
-        return word::null;
-    }
+
+    return word::null;
 }
 
 

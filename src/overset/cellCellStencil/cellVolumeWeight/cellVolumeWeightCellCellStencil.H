@@ -227,6 +227,15 @@ public:
         {
             return cellInterpolationWeight_;
         }
+
+        //- Calculate inverse distance weights for a single acceptor. Revert
+        //  to inverse distance (so not consistent with volume overlap!)
+        virtual void stencilWeights
+        (
+            const point& sample,
+            const pointList& donorCcs,
+            scalarList& weights
+        ) const;
 };
 
 

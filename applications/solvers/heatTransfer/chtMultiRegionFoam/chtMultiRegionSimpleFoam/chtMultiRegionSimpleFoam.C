@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ Description
 #include "radiationModel.H"
 #include "fvOptions.H"
 #include "coordinateSystem.H"
+#include "loopControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +57,6 @@ int main(int argc, char *argv[])
     #include "createMeshes.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
-
 
     while (runTime.loop())
     {
@@ -78,6 +78,35 @@ int main(int argc, char *argv[])
             #include "setRegionSolidFields.H"
             #include "readSolidMultiRegionSIMPLEControls.H"
             #include "solveSolid.H"
+        }
+
+        // Additional loops for energy solution only
+        {
+            loopControl looping(runTime, "SIMPLE", "energyCoupling");
+
+            while (looping.loop())
+            {
+                Info<< nl << looping << nl;
+
+                forAll(fluidRegions, i)
+                {
+                    Info<< "\nSolving for fluid region "
+                        << fluidRegions[i].name() << endl;
+                   #include "setRegionFluidFields.H"
+                   #include "readFluidMultiRegionSIMPLEControls.H"
+                   frozenFlow = true;
+                   #include "solveFluid.H"
+                }
+
+                forAll(solidRegions, i)
+                {
+                    Info<< "\nSolving for solid region "
+                        << solidRegions[i].name() << endl;
+                    #include "setRegionSolidFields.H"
+                    #include "readSolidMultiRegionSIMPLEControls.H"
+                    #include "solveSolid.H"
+                }
+            }
         }
 
         runTime.write();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,9 +29,10 @@ Group
 
 Description
     This functionObject provides a simple interface for explicit coupling with
-    an external application. The coupling is through plain text files
-    where OpenFOAM boundary data is read/written as one line per face
-    (data from all processors collated):
+    an external application.
+
+    The coupling is through plain text files where OpenFOAM boundary data
+    is read/written as one line per face (data from all processors collated):
     \verbatim
         # Patch: <patch name>
         <fld1> <fld2> .. <fldn>             //face0
@@ -167,7 +168,7 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class externalCoupled Declaration
+              Class functionObjects::externalCoupled Declaration
 \*---------------------------------------------------------------------------*/
 
 class externalCoupled
@@ -200,6 +201,9 @@ private:
         //- Calculation frequency
         label calcFrequency_;
 
+        //- The last timeIndex when coupling was triggered
+        label lastTrigger_;
+
         //- Names of (composite) regions
         DynamicList<word> regionGroupNames_;
 
@@ -231,7 +235,6 @@ private:
             const word& regionsName,
             const wordRe& groupName
         );
-
 
         //- Read data for a single region, single field
         template<class Type>
@@ -325,6 +328,9 @@ public:
 
         //- Called at each ++ or += of the time-loop
         virtual bool execute();
+
+        //- Manual execute (sub-loop or when converged)
+        virtual bool execute(const label subIndex);
 
         //- Called when Time::run() determines that the time-loop exits
         virtual bool end();

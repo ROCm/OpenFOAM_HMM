@@ -32,6 +32,7 @@ License
 //#include "IFstream.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
+#include "wordRes.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
 #include "IOdictionary.H"
@@ -175,7 +176,7 @@ bool Foam::functionObjectList::readFunctionObject
 (
     const string& funcNameArgs,
     dictionary& functionsDict,
-    HashSet<word>& requiredFields,
+    HashSet<wordRe>& requiredFields,
     const word& region
 )
 {
@@ -189,7 +190,7 @@ bool Foam::functionObjectList::readFunctionObject
     word funcName(funcNameArgs);
 
     int argLevel = 0;
-    wordList args;
+    wordReList args;
 
     List<Tuple2<word, string>> namedArgs;
     bool namedArg = false;
@@ -236,9 +237,12 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        word::validate
+                        wordRe
                         (
-                            funcNameArgs.substr(start, i - start)
+                            word::validate
+                            (
+                                funcNameArgs.substr(start, i - start)
+                            )
                         )
                     );
                 }
@@ -309,11 +313,11 @@ bool Foam::functionObjectList::readFunctionObject
     }
     else if (funcDict.found("field"))
     {
-        requiredFields.insert(word(funcDict.lookup("field")));
+        requiredFields.insert(wordRe(funcDict.lookup("field")));
     }
     else if (funcDict.found("fields"))
     {
-        requiredFields.insert(wordList(funcDict.lookup("fields")));
+        requiredFields.insert(wordReList(funcDict.lookup("fields")));
     }
 
     // Insert named arguments
@@ -383,7 +387,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     const argList& args,
     const Time& runTime,
     dictionary& controlDict,
-    HashSet<word>& requiredFields
+    HashSet<wordRe>& requiredFields
 )
 {
     autoPtr<functionObjectList> functionsPtr;
@@ -579,6 +583,7 @@ bool Foam::functionObjectList::execute()
             }
         }
     }
+
     // Force writing of state dictionary after function object execution
     if (time_.writeTime())
     {
@@ -594,6 +599,49 @@ bool Foam::functionObjectList::execute()
         );
 
         IOstream::precision_ = oldPrecision;
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute(const label subIndex)
+{
+    bool ok = execution_;
+
+    if (ok)
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            ok = funcObj.execute(subIndex) && ok;
+        }
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute
+(
+    const wordRes& functionNames,
+    const label subIndex
+)
+{
+    bool ok = execution_;
+
+    if (ok && functionNames.size())
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            if (functionNames.match(funcObj.name()))
+            {
+                ok = funcObj.execute(subIndex) && ok;
+            }
+        }
     }
 
     return ok;

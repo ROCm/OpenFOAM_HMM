@@ -74,6 +74,9 @@ protected:
         //- Dictionary of motion control parameters
         const dictionary dict_;
 
+        //- Small perturbation vector for geometric tests
+        vector smallVec_;
+
         //- Per cell the cell type
         labelList cellTypes_;
 
@@ -143,6 +146,8 @@ protected:
         static void markBoundaries
         (
             const fvMesh& mesh,
+            const vector& smallVec,
+
             const boundBox& bb,
             const labelVector& nDivs,
             PackedList<2>& patchTypes,
@@ -237,15 +242,6 @@ protected:
             scalarField& allWeight
         ) const;
 
-
-        //- Calculate inverse distance weights
-        static void calcStencilWeights
-        (
-            const point& sample,
-            const pointList& donorCcs,
-            scalarList& weights
-        );
-
         //- Create stencil starting from the donor containing the acceptor
         virtual void createStencil(const globalIndex&);
 
@@ -319,6 +315,14 @@ public:
         {
             return cellInterpolationWeight_;
         }
+
+        //- Calculate inverse distance weights for a single acceptor
+        virtual void stencilWeights
+        (
+            const point& sample,
+            const pointList& donorCcs,
+            scalarList& weights
+        ) const;
 };
 
 

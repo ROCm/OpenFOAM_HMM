@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,7 +37,7 @@ SourceFiles
 #ifndef LESModels_IDDESDelta_H
 #define LESModels_IDDESDelta_H
 
-#include "maxDeltaxyz.H"
+#include "LESdelta.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,9 @@ class IDDESDelta
 {
     // Private data
 
-        maxDeltaxyz hmax_;
+        //- Run-time selectable delta for hmax
+        //  Defaults to the maxDeltaXYZ model if not supplied
+        autoPtr<LESdelta> hmaxPtr_;
 
         scalar Cw_;
 
@@ -102,7 +104,7 @@ public:
         //- Return the hmax delta field
         const volScalarField& hmax() const
         {
-            return hmax_;
+            return hmaxPtr_();
         }
 
         // Correct values

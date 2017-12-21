@@ -4,7 +4,6 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 cleanCase0
 
-rm -rf constant/windshield/polyMesh
-rm -rf constant/cabin/polyMesh
+rm -rf constant/*/polyMesh  # region meshes
 
 #------------------------------------------------------------------------------

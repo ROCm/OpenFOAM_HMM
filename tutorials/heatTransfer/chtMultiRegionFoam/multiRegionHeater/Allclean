@@ -6,11 +6,6 @@ cleanCase0
 
 rm -rf VTK
 rm -rf constant/cellToRegion
-
-rm -rf constant/bottomWater/polyMesh
-rm -rf constant/topAir/polyMesh
-rm -rf constant/heater/polyMesh
-rm -rf constant/leftSolid/polyMesh
-rm -rf constant/rightSolid/polyMesh
+rm -rf constant/*/polyMesh  # region meshes
 
 #------------------------------------------------------------------------------

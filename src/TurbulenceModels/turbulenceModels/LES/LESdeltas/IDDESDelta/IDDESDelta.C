@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "IDDESDelta.H"
 #include "addToRunTimeSelectionTable.H"
 #include "wallDist.H"
+#include "maxDeltaxyz.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ namespace LESModels
 
 void Foam::LESModels::IDDESDelta::calcDelta()
 {
-    const volScalarField& hmax = hmax_;
+    const volScalarField& hmax = hmaxPtr_();
     const fvMesh& mesh = turbulenceModel_.mesh();
 
     // Wall-normal vectors
@@ -143,12 +144,7 @@ Foam::LESModels::IDDESDelta::IDDESDelta
 )
 :
     LESdelta(name, turbulence),
-    hmax_
-    (
-        IOobject::groupName("hmax", turbulence.U().group()),
-        turbulence,
-        dict
-    ),
+    hmaxPtr_(nullptr),
     Cw_
     (
         dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
@@ -158,6 +154,33 @@ Foam::LESModels::IDDESDelta::IDDESDelta
         )
     )
 {
+    if (dict.optionalSubDict(type() + "Coeffs").found("hmax"))
+    {
+        // User-defined hmax
+        hmaxPtr_ =
+            LESdelta::New
+            (
+                IOobject::groupName("hmax", turbulence.U().group()),
+                turbulence,
+                dict.optionalSubDict(type() + "Coeffs"),
+                "hmax"
+            );
+    }
+    else
+    {
+        Info<< "Employing " << maxDeltaxyz::typeName << " for hmax" << endl;
+
+        hmaxPtr_.reset
+        (
+            new maxDeltaxyz
+            (
+                IOobject::groupName("hmax", turbulence.U().group()),
+                turbulence,
+                dict.optionalSubDict(type() + "Coeffs")
+            )
+        );
+    }
+
     calcDelta();
 }
 
@@ -178,7 +201,7 @@ void Foam::LESModels::IDDESDelta::correct()
 {
     if (turbulenceModel_.mesh().changing())
     {
-        hmax_.correct();
+        hmaxPtr_->correct();
         calcDelta();
     }
 }

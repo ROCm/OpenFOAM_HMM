@@ -101,7 +101,8 @@ void pointNoise::processData
     fileName outDir(baseFileDir(dataseti)/fNameBase);
 
     // Create the fft
-    noiseFFT nfft(deltaT, p);
+    noiseFFT nfft(deltaT, win.nSamples());
+    nfft.setData(p);
 
 
     // Narrow band data

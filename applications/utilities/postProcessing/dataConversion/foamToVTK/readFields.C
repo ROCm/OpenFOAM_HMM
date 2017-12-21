@@ -72,6 +72,38 @@ label readFields
 }
 
 
+template<class GeoField>
+void readFields
+(
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields,
+    PtrList<const GeoField>& fields
+)
+{
+    // Search list of objects for fields of type GeomField
+    IOobjectList fieldObjects(objects.lookupClass(GeoField::typeName));
+
+    // Construct the fields
+    fields.setSize(fieldObjects.size());
+    label nFields = 0;
+
+    forAllIters(fieldObjects, iter)
+    {
+        if (selectedFields.empty() || selectedFields.found(iter()->name()))
+        {
+            fields.set
+            (
+                nFields++,
+                new GeoField(*iter(), mesh)
+            );
+        }
+    }
+
+    fields.setSize(nFields);
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

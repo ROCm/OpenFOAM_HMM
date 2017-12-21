@@ -37,7 +37,7 @@ void Foam::functionObjects::fileFieldSelection::addFromFile
     wordHashSet& set
 ) const
 {
-    DynamicList<word> names;
+    DynamicList<word> names(this->size());
 
     for (const wordRe& fieldName : *this)
     {
@@ -49,7 +49,7 @@ void Foam::functionObjects::fileFieldSelection::addFromFile
 
 
 template<template<class> class PatchType, class MeshType>
-void Foam::functionObjects::fileFieldSelection::addFileGeoFields
+void Foam::functionObjects::fileFieldSelection::addGeoFieldTypes
 (
     wordHashSet& set
 ) const

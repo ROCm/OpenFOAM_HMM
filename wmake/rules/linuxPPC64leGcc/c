@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cWARN        = -Wall
+cWARN       = -Wall
 
 cc          = gcc -m64 -mcpu=power8
 

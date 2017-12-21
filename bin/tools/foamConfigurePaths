@@ -7,26 +7,14 @@
 #    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamConfigurePaths
 #
 # Description
-#     Adjust hardcoded versions and installation paths (for bash, POSIX shell).
+#     Adjust hardcoded installation versions and paths in bashrc and config.sh/
 #
 #------------------------------------------------------------------------------
 usage() {
@@ -35,35 +23,37 @@ usage() {
     cat<<USAGE
 
 usage: ${0##*/}
-  -foamInstall dir        specify installation directory (eg, /opt)
-  -foamVersion ver        specify project version (eg, 1612)
-  -projectName name       specify project directory name (eg, openfoam1612)
+  -foamInstall DIR        specify installation directory (eg, /opt)
+  -foamVersion VER        specify project version (eg, 1612)
+  -projectName NAME       specify project directory name (eg, openfoam1612)
   -archOption 32|64       specify 'WM_ARCH_OPTION' architecture option
   -SP | -float32          specify 'WM_PRECISION_OPTION'
   -DP | -float64          specify 'WM_PRECISION_OPTION'
-  -int32  | -int64        specify 'WM_LABEL_SIZE'
-  -system name            specify 'system' compiler to be used
-  -third  name            specify 'ThirdParty' compiler to be used
-  -boost ver              specify 'boost_version'
-  -boost-path dir         specify 'BOOST_ARCH_PATH'
+  -int32 | -int64         specify 'WM_LABEL_SIZE'
+  -system NAME            specify 'system' compiler to use (eg, Gcc, Icc,...)
+  -third  NAME            specify 'ThirdParty' compiler to use (eg, Clang40,...)
+  -boost VER              specify 'boost_version'
+  -boost-path DIR         specify 'BOOST_ARCH_PATH'
   -cgal ver               specify 'cgal_version'
-  -cgal-path dir          specify 'CGAL_ARCH_PATH'
-  -clang ver              specify 'clang_version' for ThirdParty Clang
-  -cmake ver              specify 'cmake_version'
-  -fftw ver               specify 'fffw_version'
-  -fftw-path dir          specify 'FFTW_ARCH_PATH'
+  -cgal-path DIR          specify 'CGAL_ARCH_PATH'
+  -clang VER              specify 'clang_version' for ThirdParty Clang
+  -cmake VER              specify 'cmake_version'
+  -fftw VER               specify 'fffw_version'
+  -fftw-path DIR          specify 'FFTW_ARCH_PATH'
+  -kahip VER              specify 'KAHIP_VERSION'
+  -kahip-path DIR         specify 'KAHIP_ARCH_PATH'
   -metis ver              specify 'METIS_VERSION'
-  -metis-path dir         specify 'METIS_ARCH_PATH'
-  -paraview ver           specify 'ParaView_VERSION' (eg, 5.0.1)
-  -paraview-path dir      specify 'ParaView_DIR' (eg, /opt/paraviewopenfoam3120)
-  -mpi name               specify type for 'WM_MPLIB' (eg, FJMPI, INTELMPI, etc)
-  -openmpi ver            specify ThirdParty openmpi version for 'FOAM_MPI'
+  -metis-path DIR         specify 'METIS_ARCH_PATH'
+  -paraview VER           specify 'ParaView_VERSION' (eg, 5.4.1)
+  -paraview-path DIR      specify 'ParaView_DIR' (eg, /opt/ParaView-5.4.1)
+  -mpi NAME               specify 'WM_MPLIB' type (eg, FJMPI, INTELMPI, etc)
+  -openmpi VER            specify ThirdParty openmpi version for 'FOAM_MPI'
   -openmpi-system         activate system openmpi
   -openmpi-third          activate ThirdParty openmpi (using default version)
-  -scotch ver             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
-  -scotch-path dir        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
-  -vtk  ver               specify 'vtk_version' (eg, VTK-7.1.0)
-  -mesa ver               specify 'mesa_version' (eg, mesa-13.0.1)
+  -scotch VER             specify 'SCOTCH_VERSION' (eg, scotch_6.0.4)
+  -scotch-path DIR        specify 'SCOTCH_ARCH_PATH' (eg, /opt/OpenFOAM-scotch_6.0.4)
+  -vtk  VER               specify 'vtk_version' (eg, VTK-7.1.0)
+  -mesa VER               specify 'mesa_version' (eg, mesa-13.0.1)
   -sigfpe | -no-sigfpe    [defunct - now under etc/controlDict]
   gmp-VERSION             for ThirdParty gcc (gmp-system for system library)
   mpfr-VERSION            for ThirdParty gcc (mpfr-system for system library)
@@ -158,8 +148,7 @@ replace()
     local file="$1"
     shift
 
-    local key
-    local val
+    local key val
 
     while [ "$#" -ge 2 ]
     do
@@ -407,6 +396,22 @@ do
         # Replace ParaView_DIR=...
         [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         replace etc/config.sh/paraview  ParaView_DIR "$2"
+        adjusted=true
+        shift
+        ;;
+
+    -kahip)
+        # Replace KAHIP_VERSION=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/kahip  KAHIP_VERSION "$2"
+        adjusted=true
+        shift
+        ;;
+
+    -kahip-path)
+        # Replace KAHIP_ARCH_PATH=...
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        replace etc/config.sh/kahip  KAHIP_ARCH_PATH "$2"
         adjusted=true
         shift
         ;;

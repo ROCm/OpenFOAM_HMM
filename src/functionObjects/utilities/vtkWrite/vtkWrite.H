@@ -77,6 +77,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "foamVtkInternalWriter.H"
+#include "foamVtkSurfaceMeshWriter.H"
 #include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -121,6 +122,15 @@ class vtkWrite
         label writeFields(vtk::internalWriter& writer, bool verbose=true) const;
 
 
+        //- Write selected fields for GeoField type.
+        template<class GeoField>
+        label writeFields
+        (
+            vtk::surfaceMeshWriter& writer,
+            bool verbose=true
+        ) const;
+
+
         //- Disallow default bitwise copy construct
         vtkWrite(const vtkWrite&) = delete;
 
@@ -146,7 +156,7 @@ public:
 
 
     //- Destructor
-    virtual ~vtkWrite();
+    virtual ~vtkWrite() = default;
 
 
     // Member Functions

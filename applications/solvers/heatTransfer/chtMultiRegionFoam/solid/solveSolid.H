@@ -4,7 +4,7 @@ if (finalIter)
 }
 
 {
-    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; ++nonOrth)
     {
         fvScalarMatrix hEqn
         (
@@ -26,12 +26,12 @@ if (finalIter)
 
         fvOptions.correct(h);
     }
+
+    thermo.correct();
+
+    Info<< "Min/max T:" << min(thermo.T()).value() << ' '
+        << max(thermo.T()).value() << endl;
 }
-
-thermo.correct();
-
-Info<< "Min/max T:" << min(thermo.T()).value() << ' '
-    << max(thermo.T()).value() << endl;
 
 if (finalIter)
 {

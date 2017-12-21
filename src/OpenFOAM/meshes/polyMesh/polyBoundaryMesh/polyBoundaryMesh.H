@@ -233,10 +233,10 @@ public:
         void reorder(const labelUList&, const bool validBoundary);
 
         //- writeData member function required by regIOobject
-        bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream&) const;
 
         //- Write using given format, version and form uncompression
-        bool writeObject
+        virtual bool writeObject
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,

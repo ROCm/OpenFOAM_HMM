@@ -24,6 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "volFields.H"
+#include "cellCellStencil.H"
+#include "dynamicOversetFvMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -34,9 +36,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
-    zeroGradientFvPatchField<Type>(p, iF),
-    oversetPatch_(refCast<const oversetFvPatch>(p))
+    semiImplicitOversetFvPatchField<Type>(p, iF)
 {}
 
 
@@ -49,21 +49,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const fvPatchFieldMapper& mapper
 )
 :
-    LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
-    zeroGradientFvPatchField<Type>(ptf, p, iF, mapper),
-    oversetPatch_(refCast<const oversetFvPatch>(p))
-{
-    if (!isA<oversetFvPatch>(this->patch()))
-    {
-        FatalErrorInFunction
-            << "    patch type '" << p.type()
-            << "' not constraint type '" << typeName << "'"
-            << "\n    for patch " << p.name()
-            << " of field " << this->internalField().name()
-            << " in file " << this->internalField().objectPath()
-            << exit(FatalIOError);
-    }
-}
+    semiImplicitOversetFvPatchField<Type>(ptf, p, iF, mapper)
+{}
 
 
 template<class Type>
@@ -74,26 +61,8 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const dictionary& dict
 )
 :
-    LduInterfaceField<Type>(refCast<const oversetFvPatch>(p)),
-    zeroGradientFvPatchField<Type>(p, iF, dict),
-    oversetPatch_(refCast<const oversetFvPatch>(p))
-{
-    if (!isA<oversetFvPatch>(p))
-    {
-        FatalIOErrorInFunction(dict)
-            << "    patch type '" << p.type()
-            << "' not constraint type '" << typeName << "'"
-            << "\n    for patch " << p.name()
-            << " of field " << this->internalField().name()
-            << " in file " << this->internalField().objectPath()
-            << exit(FatalIOError);
-    }
-
-    if (!dict.found("value") && this->coupled())
-    {
-        this->evaluate(Pstream::commsTypes::blocking);
-    }
-}
+    semiImplicitOversetFvPatchField<Type>(p, iF, dict)
+{}
 
 
 template<class Type>
@@ -102,9 +71,7 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const oversetFvPatchField<Type>& ptf
 )
 :
-    LduInterfaceField<Type>(ptf.oversetPatch_),
-    zeroGradientFvPatchField<Type>(ptf),
-    oversetPatch_(ptf.oversetPatch_)
+    semiImplicitOversetFvPatchField<Type>(ptf)
 {}
 
 
@@ -115,14 +82,11 @@ Foam::oversetFvPatchField<Type>::oversetFvPatchField
     const DimensionedField<Type, volMesh>& iF
 )
 :
-    LduInterfaceField<Type>(ptf.oversetPatch_),
-    zeroGradientFvPatchField<Type>(ptf, iF),
-    oversetPatch_(ptf.oversetPatch_)
+    semiImplicitOversetFvPatchField<Type>(ptf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 template<class Type>
 void Foam::oversetFvPatchField<Type>::initEvaluate
@@ -130,7 +94,7 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
     const Pstream::commsTypes commsType
 )
 {
-    if (oversetPatch_.master())
+    if (this->oversetPatch_.master())
     {
         // Trigger interpolation
         const fvMesh& mesh = this->internalField().mesh();
@@ -139,24 +103,14 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
 
         if (&mesh.lduAddr() != &mesh.fvMesh::lduAddr())
         {
-            // Running extended addressing. Interpolate always.
+            // Running extended addressing. Flux correction already done
+            // in the linear solver (through the initUpdateInterfaceMatrix
+            // method below)
             if (debug)
             {
-                Info<< "Interpolating solved-for field " << fldName << endl;
+                Info<< "Skipping overset interpolation for solved-for field "
+                    << fldName << endl;
             }
-
-            // Interpolate without bc update (since would trigger infinite
-            // recursion back to oversetFvPatchField<Type>::evaluate)
-            // The only problem is bcs that use the new cell values
-            // (e.g. zeroGradient, processor). These need to appear -after-
-            // the 'overset' bc.
-            mesh.interpolate
-            (
-                const_cast<Field<Type>&>
-                (
-                    this->primitiveField()
-                )
-            );
         }
         else if
         (
@@ -207,31 +161,6 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
 
 
 template<class Type>
-void Foam::oversetFvPatchField<Type>::evaluate(const Pstream::commsTypes)
-{
-    if (!this->updated())
-    {
-        this->updateCoeffs();
-    }
-
-    zeroGradientFvPatchField<Type>::evaluate();
-}
-
-
-template<class Type>
-void Foam::oversetFvPatchField<Type>::initInterfaceMatrixUpdate
-(
-    scalarField& result,
-    const bool add,
-    const scalarField& psiInternal,
-    const scalarField& coeffs,
-    const direction cmpt,
-    const Pstream::commsTypes commsType
-) const
-{}
-
-
-template<class Type>
 void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
 (
     scalarField& result,
@@ -243,7 +172,10 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
 ) const
 {
     // Add remote values
-    if (oversetPatch_.master())
+
+    const oversetFvPatch& ovp = this->oversetPatch_;
+
+    if (ovp.master())
     {
         const fvMesh& mesh = this->patch().boundaryMesh().mesh();
 
@@ -251,11 +183,10 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
         // TBD. This should be cleaner.
         if (&mesh.lduAddr() == &mesh.fvMesh::lduAddr())
         {
-            //Pout<< "** not running extended addressing..." << endl;
             return;
         }
 
-        const labelListList& stencil = oversetPatch_.stencil();
+        const labelListList& stencil = ovp.stencil();
 
         if (stencil.size() != psiInternal.size())
         {
@@ -263,12 +194,11 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
                 << " stencil:" << stencil.size() << exit(FatalError);
         }
 
-        const mapDistribute& map = oversetPatch_.cellInterpolationMap();
-        const List<scalarList>& wghts =
-            oversetPatch_.cellInterpolationWeights();
-        const labelList& cellIDs = oversetPatch_.interpolationCells();
-        const scalarList& factor = oversetPatch_.cellInterpolationWeight();
-        const scalarField& normalisation = oversetPatch_.normalisation();
+        const mapDistribute& map = ovp.cellInterpolationMap();
+        const List<scalarList>& wghts = ovp.cellInterpolationWeights();
+        const labelList& cellIDs = ovp.interpolationCells();
+        const scalarList& factor = ovp.cellInterpolationWeight();
+        const scalarField& normalisation = ovp.normalisation();
 
 
         // Since we're inside initEvaluate/evaluate there might be processor
@@ -303,43 +233,6 @@ void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
             }
         }
     }
-}
-
-
-template<class Type>
-void Foam::oversetFvPatchField<Type>::initInterfaceMatrixUpdate
-(
-    Field<Type>&,
-    const bool add,
-    const Field<Type>&,
-    const scalarField&,
-    const Pstream::commsTypes commsType
-) const
-{
-    NotImplemented;
-}
-
-
-template<class Type>
-void Foam::oversetFvPatchField<Type>::updateInterfaceMatrix
-(
-    Field<Type>& result,
-    const bool add,
-    const Field<Type>& psiInternal,
-    const scalarField&,
-    const Pstream::commsTypes
-) const
-{
-    NotImplemented;
-}
-
-
-template<class Type>
-void Foam::oversetFvPatchField<Type>::write(Ostream& os) const
-{
-    zeroGradientFvPatchField<Type>::write(os);
-    // Make sure to write the value for ease of postprocessing.
-    this->writeEntry("value", os);
 }
 
 

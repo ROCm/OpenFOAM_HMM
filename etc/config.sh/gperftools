@@ -6,45 +6,32 @@
 #    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/gperftools
 #
 # Description
-#     Setup file for gperftools binaries and libraries.
+#     Setup file for GPERFTOOLS binaries/libraries.
 #     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
-#     If using system-wide installations, use the following settings:
+#     To disable its use:               gperftools_version=gperftools-none
+#     For system-wide installations:    gperftools_version=gperftools-system
 #
-#         gperftools_version=gperftools-system
-#
-#     If the system gperftools is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         gperftools_version=gperftools-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify gperftools-system
-#         - provide full paths for GPERFTOOLS_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use gperftools-system
+#       2. and provide full path for GPERFTOOLS_ARCH_PATH
 #
 # Note
 #     When _foamAddLib is unset (eg, called from makeGperftools):
-#         - gperftools_version variable are retained.
-#         - the LD_LIBRARY_PATH and PATH are not adjusted.
+#       - gperftools_version variable are retained.
+#       - the LD_LIBRARY_PATH and PATH are not adjusted.
+#
+#     No csh version, This file is only used by wmake.
+#
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

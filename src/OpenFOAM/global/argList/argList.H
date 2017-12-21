@@ -102,7 +102,7 @@ SourceFiles
 #include "fileName.H"
 #include "parRun.H"
 #include "OSspecific.H"
-#include "ITstream.H"
+#include "StringStream.H"
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -302,8 +302,14 @@ public:
             //- Return true if the named option is found
             inline bool optionFound(const word& optionName) const;
 
-            //- Return an input token stream for the named option
-            inline ITstream optionLookup(const word& optionName) const;
+            //- Return how many of the specified options were used
+            label optionCount(const UList<word>& optionNames) const;
+
+            //- Return how many of the specified options were used
+            label optionCount(std::initializer_list<word> optionNames) const;
+
+            //- Return an input stream for the named option
+            inline IStringStream optionLookup(const word& optionName) const;
 
             //- Read a value from the named option
             template<class T>

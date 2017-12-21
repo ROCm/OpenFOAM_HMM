@@ -77,7 +77,7 @@ public:
 
 
     //- Destructor
-    virtual ~uncollatedFileOperation();
+    virtual ~uncollatedFileOperation() = default;
 
 
     // Member Functions

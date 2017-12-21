@@ -105,12 +105,12 @@ inline bool Foam::argList::optionFound(const word& optionName) const
 }
 
 
-inline Foam::ITstream Foam::argList::optionLookup
+inline Foam::IStringStream Foam::argList::optionLookup
 (
     const word& optionName
 ) const
 {
-    return ITstream(optionName, options_[optionName]);
+    return IStringStream(options_[optionName]);
 }
 
 

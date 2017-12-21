@@ -155,6 +155,7 @@ Note
 #include "Cloud.H"
 #include "passiveParticle.H"
 #include "stringOps.H"
+#include "areaFields.H"
 
 #include "meshSubsetHelper.H"
 #include "readFields.H"
@@ -861,6 +862,119 @@ int main(int argc, char *argv[])
           + dTensorFld.size()
         );
 
+
+        // Finite-area mesh and fields - need not exist
+
+        autoPtr<faMesh> aMeshPtr;
+        {
+            const bool throwing = FatalError.throwExceptions();
+            try
+            {
+                aMeshPtr.reset(new faMesh(meshRef.baseMesh()));
+            }
+            catch (Foam::error& err)
+            {
+                aMeshPtr.clear();
+            }
+            FatalError.throwExceptions(throwing);
+        }
+
+        if (aMeshPtr.valid())
+        {
+            // Construct the area fields
+
+            PtrList<const areaScalarField> aScalarFld;
+            PtrList<const areaVectorField> aVectorFld;
+            PtrList<const areaSphericalTensorField> aSphTensorf;
+            PtrList<const areaSymmTensorField> aSymTensorFld;
+            PtrList<const areaTensorField> aTensorFld;
+
+            const faMesh& aMesh = aMeshPtr();
+
+            if (!specifiedFields || selectedFields.size())
+            {
+                readFields
+                (
+                    aMesh,
+                    objects,
+                    selectedFields,
+                    aScalarFld
+                );
+                print("    areaScalar           :", Info, aScalarFld);
+
+                readFields
+                (
+                    aMesh,
+                    objects,
+                    selectedFields,
+                    aVectorFld
+                );
+                print("    areaVector           :", Info, aVectorFld);
+
+                readFields
+                (
+                    aMesh,
+                    objects,
+                    selectedFields,
+                    aSphTensorf
+                );
+                print("    areaSphericalTensor   :", Info, aSphTensorf);
+
+                readFields
+                (
+                    aMesh,
+                    objects,
+                    selectedFields,
+                    aSymTensorFld
+                );
+                print("    areaSymmTensor        :", Info, aSymTensorFld);
+
+                readFields
+                (
+                    aMesh,
+                    objects,
+                    selectedFields,
+                    aTensorFld
+                );
+                print("    areaTensor            :", Info, aTensorFld);
+            }
+
+            const label nAreaFields =
+            (
+                aScalarFld.size()
+              + aVectorFld.size()
+              + aSphTensorf.size()
+              + aSymTensorFld.size()
+              + aTensorFld.size()
+            );
+
+            fileName outputName(fvPath/"finiteArea");
+
+            mkDir(outputName);
+
+            const auto& pp = aMesh.patch();
+
+            vtk::surfaceMeshWriter writer
+            (
+                pp,
+                aMesh.name(),
+                outputName/"finiteArea" + "_" + timeDesc,
+                fmtType
+            );
+
+            // Number of fields
+            writer.beginCellData(nAreaFields);
+
+            writer.write(aScalarFld);
+            writer.write(aVectorFld);
+            writer.write(aSphTensorf);
+            writer.write(aSymTensorFld);
+            writer.write(aTensorFld);
+
+            writer.endCellData();
+
+            writer.writeFooter();
+        }
 
         PtrList<const pointScalarField> pScalarFld;
         PtrList<const pointVectorField> pVectorFld;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,7 +26,6 @@ License
 #include "noiseFFT.H"
 #include "IFstream.H"
 #include "DynamicList.H"
-#include "SubField.H"
 #include "mathematicalConstants.H"
 #include "HashSet.H"
 #include "fft.H"
@@ -139,24 +138,61 @@ void Foam::noiseFFT::octaveBandInfo
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::noiseFFT::noiseFFT
-(
-    const scalar deltaT,
-    const scalarField& pressure
-)
+Foam::noiseFFT::noiseFFT(const scalar deltaT, const label windowSize)
 :
-    scalarField(pressure),
+    scalarField(),
     deltaT_(deltaT)
 {
+    if (windowSize > 1)
+    {
+        planInfo_.active = true;
+        planInfo_.windowSize = windowSize;
+        planInfo_.in.setSize(windowSize);
+        planInfo_.out.setSize(windowSize);
+
+        // Using real to half-complex fftw 'kind'
+        planInfo_.plan =
+            fftw_plan_r2r_1d
+            (
+                windowSize,
+                planInfo_.in.data(),
+                planInfo_.out.data(),
+                FFTW_R2HC,
+                windowSize <= 8192 ? FFTW_MEASURE : FFTW_ESTIMATE
+            );
+    }
+    else
+    {
+        planInfo_.active = false;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::noiseFFT::~noiseFFT()
+{
+    if (planInfo_.active)
+    {
+        planInfo_.active = false;
+        fftw_destroy_plan(planInfo_.plan);
+        fftw_cleanup();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::noiseFFT::setData(scalarList& data)
+{
+    this->transfer(data);
+
     scalarField& p = *this;
     p -= average(p);
 }
 
 
-Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
-:
-    scalarField(),
-    deltaT_(0.0)
+void Foam::noiseFFT::setData(const fileName& pFileName, const label skip)
 {
     // Construct pressure data file
     IFstream pFile(pFileName);
@@ -173,7 +209,7 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
     {
         scalar dummyt, dummyp;
 
-        for (label i = 0; i < skip; i++)
+        for (label i = 0; i < skip; ++i)
         {
             pFile >> dummyt;
 
@@ -190,7 +226,7 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
     }
 
     scalar t = 0, T0 = 0, T1 = 0;
-    DynamicList<scalar> pData(100000);
+    DynamicList<scalar> pData(1024);
     label i = 0;
 
     while (!(pFile >> t).eof())
@@ -213,8 +249,6 @@ Foam::noiseFFT::noiseFFT(const fileName& pFileName, const label skip)
     p -= average(p);
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::graph Foam::noiseFFT::pt() const
 {
@@ -240,33 +274,48 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
     const tmp<scalarField>& tpn
 ) const
 {
-    // Calculate the 2-sided fft
-    // Note: result not scaled
-    tmp<scalarField> tPn2
-    (
-        mag
-        (
-            fft::reverseTransform
-            (
-                ReComplexField(tpn),
-                List<int>(1, tpn().size())
-            )
-        )
-    );
+    if (planInfo_.active)
+    {
+        const scalarField& pn = tpn();
+        if (pn.size() != planInfo_.windowSize)
+        {
+            FatalErrorInFunction
+                << "Expected pressure data to have " << planInfo_.windowSize
+                << " values, but received " << pn.size() << " values"
+                << abort(FatalError);
+        }
 
-    tpn.clear();
+        List<scalar>& in = planInfo_.in;
+        const List<scalar>& out = planInfo_.out;
+        forAll(in, i)
+        {
+            in[i] = pn[i];
+        }
+        tpn.clear();
 
-    // Only storing the positive half
-    // Note: storing (N/2) values, DC component at position (0)
-    tmp<scalarField> tPn
-    (
-        new scalarField
-        (
-            scalarField::subField(tPn2(), tPn2().size()/2 + 1)
-        )
-    );
+        ::fftw_execute(planInfo_.plan);
 
-    return tPn;
+        const label n = planInfo_.windowSize;
+        const label nBy2 = n/2;
+        tmp<scalarField> tresult(new scalarField(nBy2 + 1));
+        scalarField& result = tresult.ref();
+
+        // 0 th value = DC component
+        // nBy2 th value = real only if n is even
+        result[0] = out[0];
+        for (label i = 1; i <= nBy2; ++i)
+        {
+            scalar re = out[i];
+            scalar im = out[n - i];
+            result[i] = sqrt(re*re + im*im);
+        }
+
+        return tresult;
+    }
+    else
+    {
+        return mag(fft::realTransform1D(tpn));
+    }
 }
 
 
@@ -421,7 +470,7 @@ Foam::graph Foam::noiseFFT::octaves
     scalarField octData(freqBandIDs.size() - 1, 0.0);
     scalarField fm(freqBandIDs.size() -1, 0.0);
 
-    for (label bandI = 0; bandI < freqBandIDs.size() - 1; bandI++)
+    for (label bandI = 0; bandI < freqBandIDs.size() - 1; ++bandI)
     {
         label fb0 = freqBandIDs[bandI];
         label fb1 = freqBandIDs[bandI+1];
@@ -431,7 +480,7 @@ Foam::graph Foam::noiseFFT::octaves
 
         if (integrate)
         {
-            for (label freqI = fb0; freqI < fb1; freqI++)
+            for (label freqI = fb0; freqI < fb1; ++freqI)
             {
                 label f0 = f[freqI];
                 label f1 = f[freqI + 1];
@@ -441,7 +490,7 @@ Foam::graph Foam::noiseFFT::octaves
         }
         else
         {
-            for (label freqI = fb0; freqI < fb1; freqI++)
+            for (label freqI = fb0; freqI < fb1; ++freqI)
             {
                 octData[bandI] += data[freqI];
             }

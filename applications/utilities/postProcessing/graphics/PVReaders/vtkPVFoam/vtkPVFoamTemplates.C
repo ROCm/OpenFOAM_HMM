@@ -69,9 +69,9 @@ vtkSmartPointer<vtkCellArray> Foam::vtkPVFoam::patchFacesVTKCells
     const faceList& faces = p.localFaces();
 
     label nAlloc = faces.size();
-    forAll(faces, facei)
+    for (const face& f : faces)
     {
-        nAlloc += faces[facei].size();
+        nAlloc += f.size();
     }
 
     auto cells = vtkSmartPointer<vtkCellArray>::New();
@@ -87,15 +87,13 @@ vtkSmartPointer<vtkCellArray> Foam::vtkPVFoam::patchFacesVTKCells
     // Cell connectivity for polygons
     // [size, verts..., size, verts... ]
     label idx = 0;
-    forAll(faces, facei)
+    for (const face& f : faces)
     {
-        const face& f = faces[facei];
-
         cellsUL[idx++] = f.size();
 
-        forAll(f, fp)
+        for (const label verti : f)
         {
-            cellsUL[idx++] = f[fp];
+            cellsUL[idx++] = verti;
         }
     }
 

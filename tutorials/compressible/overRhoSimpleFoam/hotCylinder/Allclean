@@ -1,0 +1,10 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # run from this directory
+
+# Extrude mesh around cylinder
+(cd cylinderAndBackground && ./Allclean)
+
+# Add background mesh
+(cd cylinderMesh && foamCleanTutorials)
+
+# ----------------------------------------------------------------- end-of-file

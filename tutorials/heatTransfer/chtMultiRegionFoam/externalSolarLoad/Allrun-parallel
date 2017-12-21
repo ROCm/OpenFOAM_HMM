@@ -11,17 +11,17 @@ cd ${0%/*} || exit 1                        # Run from this directory
 runApplication decomposePar -allRegions -constant
 
 # Agglomerate patch faces
-for i in air
+for region in air
 do
-    runParallel -s $i \
-        faceAgglomerate -region $i -dict constant/viewFactorsDict
+    runParallel -s $region \
+        faceAgglomerate -region $region -dict constant/viewFactorsDict
 done
 
 # Generate view factors
-for i in air
+for region in air
 do
-    runParallel -s $i \
-        viewFactorsGen -region $i
+    runParallel -s $region \
+        viewFactorsGen -region $region
 done
 
 # Set the initial fields
@@ -33,8 +33,7 @@ runParallel $(getApplication)
 runApplication reconstructPar -allRegions
 
 echo
-echo "Creating files for paraview post-processing"
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
 echo
-paraFoam -touchAll
 
 #------------------------------------------------------------------------------

@@ -178,16 +178,16 @@ Foam::label Foam::checkTopology
             {
                 cells.insert(celli);
             }
-            forAll(cFaces, i)
+            for (const label facei : cFaces)
             {
-                if (cFaces[i] < 0 || cFaces[i] >= mesh.nFaces())
+                if (facei < 0 || facei >= mesh.nFaces())
                 {
                     cells.insert(celli);
                     break;
                 }
             }
         }
-        label nCells = returnReduce(cells.size(), sumOp<label>());
+        const label nCells = returnReduce(cells.size(), sumOp<label>());
 
         if (nCells > 0)
         {
@@ -203,7 +203,6 @@ Foam::label Foam::checkTopology
             {
                 mergeAndWrite(surfWriter(), cells);
             }
-
         }
         else
         {
@@ -238,7 +237,7 @@ Foam::label Foam::checkTopology
             noFailedChecks++;
         }
 
-        label nFaces = returnReduce(faces.size(), sumOp<label>());
+        const label nFaces = returnReduce(faces.size(), sumOp<label>());
 
         if (nFaces > 0)
         {
@@ -259,7 +258,7 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            label nFaces = returnReduce(faces.size(), sumOp<label>());
+            const label nFaces = returnReduce(faces.size(), sumOp<label>());
 
             Info<< "  <<Writing " << nFaces
                 << " faces with out-of-range or duplicate vertices to set "
@@ -280,7 +279,7 @@ Foam::label Foam::checkTopology
         {
             noFailedChecks++;
 
-            label nCells = returnReduce(cells.size(), sumOp<label>());
+            const label nCells = returnReduce(cells.size(), sumOp<label>());
 
             Info<< "  <<Writing " << nCells
                 << " cells with over used edges to set " << cells.name()
@@ -303,7 +302,7 @@ Foam::label Foam::checkTopology
             noFailedChecks++;
         }
 
-        label nFaces = returnReduce(faces.size(), sumOp<label>());
+        const label nFaces = returnReduce(faces.size(), sumOp<label>());
         if (nFaces > 0)
         {
             Info<< "  <<Writing " << nFaces
@@ -334,9 +333,9 @@ Foam::label Foam::checkTopology
             {
                 const labelUList& owners = patches[patchi].faceCells();
 
-                forAll(owners, i)
+                for (const label facei : owners)
                 {
-                    nInternalFaces[owners[i]]++;
+                    nInternalFaces[facei]++;
                 }
             }
         }
@@ -444,14 +443,14 @@ Foam::label Foam::checkTopology
                 (
                     label facei = mesh.nInternalFaces();
                     facei < mesh.nFaces();
-                    facei++
+                    ++facei
                 )
                 {
-                    label regioni = rs[mesh.faceOwner()[facei]];
+                    const label regioni = rs[mesh.faceOwner()[facei]];
                     const face& f = mesh.faces()[facei];
-                    forAll(f, fp)
+                    for (const label verti : f)
                     {
-                        label& pRegion = pointToRegion[f[fp]];
+                        label& pRegion = pointToRegion[verti];
                         if (pRegion == -1)
                         {
                             pRegion = regioni;
@@ -467,7 +466,7 @@ Foam::label Foam::checkTopology
                             regionDisconnected[regioni] = false;
                             regionDisconnected[pRegion] = false;
                             pRegion = -2;
-                            points.insert(f[fp]);
+                            points.insert(verti);
                         }
                     }
                 }
@@ -618,9 +617,8 @@ Foam::label Foam::checkTopology
             }
             Info<< endl;
 
-            forAll(faceZones, zoneI)
+            for (const faceZone& fz : faceZones)
             {
-                const faceZone& fz = faceZones[zoneI];
                 checkPatch(allGeometry, fz.name(), fz(), points);
                 Info<< endl;
             }
@@ -631,7 +629,7 @@ Foam::label Foam::checkTopology
         }
     }
 
-    label nPoints = returnReduce(points.size(), sumOp<label>());
+    const label nPoints = returnReduce(points.size(), sumOp<label>());
 
     if (nPoints)
     {
@@ -654,45 +652,44 @@ Foam::label Foam::checkTopology
 
         if (cellZones.size())
         {
-
             Info<< "    "
                 << setw(20) << "CellZone"
                 << setw(9) << "Cells"
                 << setw(9) << "Points"
-                << setw(13) << "BoundingBox" <<endl;
+                << ' ' << "BoundingBox" <<endl;
 
             const cellList& cells = mesh.cells();
             const faceList& faces = mesh.faces();
-            treeBoundBox bb(boundBox::invertedBox);
             PackedBoolList isZonePoint(mesh.nPoints());
 
-            forAll(cellZones, zoneI)
+            for (const cellZone& cZone : cellZones)
             {
-                const cellZone& cZone = cellZones[zoneI];
+                boundBox bb;
+                isZonePoint.reset();  // clears all bits (reset count)
 
-                forAll(cZone, i)
+                for (const label celli : cZone)
                 {
-                    const label cellI = cZone[i];
-                    const cell& cFaces = cells[cellI];
-                    forAll(cFaces, cFacei)
+                    for (const label facei : cells[celli])
                     {
-                        const face& f = faces[cFaces[cFacei]];
-                        forAll(f, fp)
+                        const face& f = faces[facei];
+                        for (const label verti : f)
                         {
-                            if (isZonePoint.set(f[fp]))
+                            if (isZonePoint.set(verti))
                             {
-                                bb.add(mesh.points()[f[fp]]);
+                                bb.add(mesh.points()[verti]);
                             }
                          }
                     }
                 }
+
+                bb.reduce();  // Global min/max
 
                 Info<< "    "
                     << setw(20) << cZone.name()
                     << setw(9) << returnReduce(cZone.size(), sumOp<label>())
                     << setw(9)
                     << returnReduce(isZonePoint.count(), sumOp<label>())
-                    << setw(3) << bb << endl;
+                    << ' ' << bb << endl;
             }
         }
         else

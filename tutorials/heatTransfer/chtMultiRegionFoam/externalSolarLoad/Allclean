@@ -6,11 +6,7 @@ cleanCase0
 
 rm -rf VTK
 rm -rf constant/cellToRegion
-
-rm -rf constant/air/polyMesh
-rm -rf constant/solid/polyMesh
-rm -rf constant/floor/polyMesh
-rm -rf constant/triSurface
+rm -rf constant/*/polyMesh  # region meshes
 
 rm -f constant/air/F
 rm -f constant/air/constructMap*
@@ -18,12 +14,5 @@ rm -f constant/air/finalAgglom
 rm -f constant/air/globalFaceFaces
 rm -f constant/air/mapDist
 rm -f constant/air/visibleFaceFaces
-
-rm -f 0/air/facesAgglomeration
-rm -f 0/air/viewFactorField
-rm -f 0/air/cellToRegion
-rm -f 0/floor/cellToRegion
-rm -f 0/solid/cellToRegion
-rm -f 0/cellToRegion
 
 #------------------------------------------------------------------------------

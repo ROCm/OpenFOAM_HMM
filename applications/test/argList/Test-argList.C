@@ -58,6 +58,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
+    Info<<"have: "
+        <<args.optionCount({"label", "scalar"}) << " options" << nl;
+
     label ival;
     scalar sval;
 

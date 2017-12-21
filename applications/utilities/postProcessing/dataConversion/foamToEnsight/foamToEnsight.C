@@ -97,25 +97,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// file-scope helper
-static bool inFileNameList
-(
-    const fileNameList& nameList,
-    const word& name
-)
-{
-    forAll(nameList, i)
-    {
-        if (nameList[i] == name)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
@@ -641,7 +622,7 @@ int main(int argc, char *argv[])
 
             Info<< "Write " << cloudName << " (";
 
-            bool cloudExists = inFileNameList(currentCloudDirs, cloudName);
+            bool cloudExists = currentCloudDirs.found(cloudName);
             reduce(cloudExists, orOp<bool>());
 
             {

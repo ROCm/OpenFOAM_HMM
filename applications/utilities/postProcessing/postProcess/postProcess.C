@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
             args,
             runTime,
             functionsDict,
-            fields.selection()
+            fields
         )
     );
 
@@ -196,7 +196,7 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 functionsDict,
-                fields.selection()
+                fields
             );
         }
 

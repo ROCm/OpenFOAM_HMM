@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -269,17 +269,15 @@ void thermoSingleLayer::updateSubmodels()
 
 tmp<fvScalarMatrix> thermoSingleLayer::q(volScalarField& hs) const
 {
-    const volScalarField alpha(pos(delta_ - deltaSmall_));
-
     return
     (
         // Heat-transfer to the primary region
       - fvm::Sp(htcs_->h()/Cp_, hs)
-      + htcs_->h()*(hs/Cp_ + alpha*(TPrimary_ - T_))
+      + htcs_->h()*(hs/Cp_ + alpha_*(TPrimary_ - T_))
 
         // Heat-transfer to the wall
       - fvm::Sp(htcw_->h()/Cp_, hs)
-      + htcw_->h()*(hs/Cp_ + alpha*(Tw_- T_))
+      + htcw_->h()*(hs/Cp_ + alpha_*(Tw_- T_))
     );
 }
 

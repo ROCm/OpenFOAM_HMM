@@ -28,7 +28,7 @@ Description
     Simple class to hold region information for coupled region simulations.
 
     Gives per physics ('fluid', 'solid') the names of the regions. There
-    is no assumption on this level that one region should only have one
+    is no assumption on this level that a region should only have a single
     set of physics.
 
 SourceFiles
@@ -57,10 +57,10 @@ class regionProperties
 {
 
         //- Disallow default bitwise copy construct
-        regionProperties(const regionProperties&);
+        regionProperties(const regionProperties&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const regionProperties&);
+        void operator=(const regionProperties&) = delete;
 
 public:
 
