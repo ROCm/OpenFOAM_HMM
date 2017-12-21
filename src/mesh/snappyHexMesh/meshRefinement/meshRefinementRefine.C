@@ -2078,7 +2078,7 @@ Foam::labelList Foam::meshRefinement::refineCandidates
         label nAllowRefine = labelMax / Pstream::nProcs();
 
         // Marked for refinement (>= 0) or not (-1). Actual value is the
-        // index of the surface it intersects.
+        // index of the surface it intersects / shell it is inside.
         labelList refineCell(mesh_.nCells(), -1);
         label nRefine = 0;
 
@@ -2626,6 +2626,106 @@ Foam::meshRefinement::balanceAndRefine
     printMeshInfo(debug, "After refinement " + msg);
 
     return distMap;
+}
+
+
+Foam::labelList Foam::meshRefinement::directionalRefineCandidates
+(
+    const label maxGlobalCells,
+    const label maxLocalCells,
+    const labelList& currentLevel,
+    const direction dir
+) const
+{
+    const labelList& cellLevel = meshCutter_.cellLevel();
+    const pointField& cellCentres = mesh_.cellCentres();
+
+    label totNCells = mesh_.globalData().nTotalCells();
+
+    labelList cellsToRefine;
+
+    if (totNCells >= maxGlobalCells)
+    {
+        Info<< "No cells marked for refinement since reached limit "
+            << maxGlobalCells << '.' << endl;
+    }
+    else
+    {
+        // Disable refinement shortcut. nAllowRefine is per processor limit.
+        label nAllowRefine = labelMax / Pstream::nProcs();
+
+        // Marked for refinement (>= 0) or not (-1). Actual value is the
+        // index of the surface it intersects / shell it is inside
+        labelList refineCell(mesh_.nCells(), -1);
+        label nRefine = 0;
+
+        // Find cells inside the shells with directional levels
+        labelList insideShell;
+        shells_.findDirectionalLevel
+        (
+            cellCentres,
+            cellLevel,
+            currentLevel,  // current directional level
+            dir,
+            insideShell
+        );
+
+        // Mark for refinement
+        forAll(insideShell, celli)
+        {
+            if (insideShell[celli] >= 0)
+            {
+                bool reachedLimit = !markForRefine
+                (
+                    insideShell[celli],    // mark with any positive value
+                    nAllowRefine,
+                    refineCell[celli],
+                    nRefine
+                );
+
+                if (reachedLimit)
+                {
+                    if (debug)
+                    {
+                        Pout<< "Stopped refining cells"
+                            << " since reaching my cell limit of "
+                            << mesh_.nCells()+nAllowRefine << endl;
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Limit refinement
+        // ~~~~~~~~~~~~~~~~
+
+        {
+            label nUnmarked = unmarkInternalRefinement(refineCell, nRefine);
+            if (nUnmarked > 0)
+            {
+                Info<< "Unmarked for refinement due to limit shells"
+                    << "                : " << nUnmarked << " cells."  << endl;
+            }
+        }
+
+
+
+        // Pack cells-to-refine
+        // ~~~~~~~~~~~~~~~~~~~~
+
+        cellsToRefine.setSize(nRefine);
+        nRefine = 0;
+
+        forAll(refineCell, cellI)
+        {
+            if (refineCell[cellI] != -1)
+            {
+                cellsToRefine[nRefine++] = cellI;
+            }
+        }
+    }
+
+    return cellsToRefine;
 }
 
 
