@@ -1564,6 +1564,7 @@ void Foam::hexRef8::walkFaceFromMid
 Foam::label Foam::hexRef8::faceConsistentRefinement
 (
     const bool maxSet,
+    const labelUList& cellLevel,
     PackedBoolList& refineCell
 ) const
 {
@@ -1573,10 +1574,10 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
         label own = mesh_.faceOwner()[facei];
-        label ownLevel = cellLevel_[own] + refineCell.get(own);
+        label ownLevel = cellLevel[own] + refineCell.get(own);
 
         label nei = mesh_.faceNeighbour()[facei];
-        label neiLevel = cellLevel_[nei] + refineCell.get(nei);
+        label neiLevel = cellLevel[nei] + refineCell.get(nei);
 
         if (ownLevel > (neiLevel+1))
         {
@@ -1613,7 +1614,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
     {
         label own = mesh_.faceOwner()[i+mesh_.nInternalFaces()];
 
-        neiLevel[i] = cellLevel_[own] + refineCell.get(own);
+        neiLevel[i] = cellLevel[own] + refineCell.get(own);
     }
 
     // Swap to neighbour
@@ -1623,7 +1624,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
     forAll(neiLevel, i)
     {
         label own = mesh_.faceOwner()[i+mesh_.nInternalFaces()];
-        label ownLevel = cellLevel_[own] + refineCell.get(own);
+        label ownLevel = cellLevel[own] + refineCell.get(own);
 
         if (ownLevel > (neiLevel[i]+1))
         {
@@ -1650,6 +1651,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
 // Debug: check if wanted refinement is compatible with 2:1
 void Foam::hexRef8::checkWantedRefinementLevels
 (
+    const labelUList& cellLevel,
     const labelList& cellsToRefine
 ) const
 {
@@ -1662,10 +1664,10 @@ void Foam::hexRef8::checkWantedRefinementLevels
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
         label own = mesh_.faceOwner()[facei];
-        label ownLevel = cellLevel_[own] + refineCell.get(own);
+        label ownLevel = cellLevel[own] + refineCell.get(own);
 
         label nei = mesh_.faceNeighbour()[facei];
-        label neiLevel = cellLevel_[nei] + refineCell.get(nei);
+        label neiLevel = cellLevel[nei] + refineCell.get(nei);
 
         if (mag(ownLevel-neiLevel) > 1)
         {
@@ -1673,11 +1675,11 @@ void Foam::hexRef8::checkWantedRefinementLevels
             dumpCell(nei);
             FatalErrorInFunction
                 << "cell:" << own
-                << " current level:" << cellLevel_[own]
+                << " current level:" << cellLevel[own]
                 << " level after refinement:" << ownLevel
                 << nl
                 << "neighbour cell:" << nei
-                << " current level:" << cellLevel_[nei]
+                << " current level:" << cellLevel[nei]
                 << " level after refinement:" << neiLevel
                 << nl
                 << "which does not satisfy 2:1 constraints anymore."
@@ -1693,7 +1695,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
     {
         label own = mesh_.faceOwner()[i+mesh_.nInternalFaces()];
 
-        neiLevel[i] = cellLevel_[own] + refineCell.get(own);
+        neiLevel[i] = cellLevel[own] + refineCell.get(own);
     }
 
     // Swap to neighbour
@@ -1705,7 +1707,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
         label facei = i + mesh_.nInternalFaces();
 
         label own = mesh_.faceOwner()[facei];
-        label ownLevel = cellLevel_[own] + refineCell.get(own);
+        label ownLevel = cellLevel[own] + refineCell.get(own);
 
         if (mag(ownLevel - neiLevel[i]) > 1)
         {
@@ -1719,7 +1721,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
                 << " on patch " << patchi << " "
                 << mesh_.boundaryMesh()[patchi].name()
                 << " owner cell " << own
-                << " current level:" << cellLevel_[own]
+                << " current level:" << cellLevel[own]
                 << " level after refinement:" << ownLevel
                 << nl
                 << " (coupled) neighbour cell will get refinement "
@@ -2252,6 +2254,7 @@ Foam::hexRef8::hexRef8
 
 Foam::labelList Foam::hexRef8::consistentRefinement
 (
+    const labelUList& cellLevel,
     const labelList& cellsToRefine,
     const bool maxSet
 ) const
@@ -2270,7 +2273,12 @@ Foam::labelList Foam::hexRef8::consistentRefinement
 
     while (true)
     {
-        label nChanged = faceConsistentRefinement(maxSet, refineCell);
+        label nChanged = faceConsistentRefinement
+        (
+            maxSet,
+            cellLevel,
+            refineCell
+        );
 
         reduce(nChanged, sumOp<label>());
 
@@ -2312,7 +2320,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
 
     if (debug)
     {
-        checkWantedRefinementLevels(newCellsToRefine);
+        checkWantedRefinementLevels(cellLevel, newCellsToRefine);
     }
 
     return newCellsToRefine;
@@ -3115,11 +3123,11 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
             refineCell.set(celli);
         }
     }
-    faceConsistentRefinement(true, refineCell);
+    faceConsistentRefinement(true, cellLevel_, refineCell);
 
     while (true)
     {
-        label nChanged = faceConsistentRefinement(true, refineCell);
+        label nChanged = faceConsistentRefinement(true, cellLevel_, refineCell);
 
         reduce(nChanged, sumOp<label>());
 
@@ -3191,7 +3199,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         }
         const PackedBoolList savedRefineCell(refineCell);
 
-        label nChanged = faceConsistentRefinement(true, refineCell);
+        label nChanged = faceConsistentRefinement(true, cellLevel_, refineCell);
 
         {
             cellSet cellsOut2

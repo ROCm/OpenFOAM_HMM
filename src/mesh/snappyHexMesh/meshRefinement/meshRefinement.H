@@ -1037,6 +1037,16 @@ public:
                 const scalar maxLoadUnbalance
             );
 
+
+            //- Calculate list of cells to directionally refine
+            labelList directionalRefineCandidates
+            (
+                const label maxGlobalCells,
+                const label maxLocalCells,
+                const labelList& currentLevel,
+                const direction dir
+            ) const;
+
             //- Directionally refine in direction cmpt
             autoPtr<mapPolyMesh> directionalRefine
             (
