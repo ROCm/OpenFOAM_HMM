@@ -36,7 +36,7 @@ setenv WM_PROJECT OpenFOAM
 setenv WM_PROJECT_VERSION plus
 
 # [FOAM_INST_DIR] - parent directory containing the OpenFOAM installation.
-#  * When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines
+# \- When this file is located as $WM_PROJECT_DIR/etc/cshrc, the next lines
 #    should work when sourced by CSH or TCSH shells. If this however fails,
 #    set one of the fallback values to an appropriate path.
 # --
@@ -101,7 +101,7 @@ setenv WM_MPLIB SYSTEMOPENMPI
 
 ################################################################################
 
-# The old dirs to be cleaned from the environment variables
+# Old directories to be cleaned from PATH, LD_LIBRARY_PATH
 set foamOldDirs=
 if ( $?WM_PROJECT_DIR ) then
    set foamOldDirs="$foamOldDirs $WM_PROJECT_DIR"
@@ -119,18 +119,13 @@ if ( $?FOAM_SITE_LIBBIN ) then
    set foamOldDirs="$foamOldDirs $FOAM_SITE_LIBBIN"
 endif
 
-# Location of installation
-# ~~~~~~~~~~~~~~~~~~~~~~~~
+# Location of installation and third-party software
 setenv WM_PROJECT_INST_DIR $FOAM_INST_DIR
-setenv WM_PROJECT_DIR $WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
+setenv WM_PROJECT_DIR      $WM_PROJECT_INST_DIR/$WM_PROJECT-$WM_PROJECT_VERSION
+setenv WM_THIRD_PARTY_DIR  $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 
-# Location of third-party software
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-setenv WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
-
-# Location of site-specific templates etc
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# unset is equivalent to $WM_PROJECT_INST_DIR/site
+# [WM_PROJECT_SITE] - Location of site-specific (group) files
+# default (unset) implies WM_PROJECT_INST_DIR/site
 if ( $?WM_PROJECT_SITE ) then
     set foamOldDirs="$WM_PROJECT_SITE $foamOldDirs"
     if ( ! -d "$WM_PROJECT_SITE" ) unsetenv WM_PROJECT_SITE
@@ -138,8 +133,7 @@ else
     unsetenv WM_PROJECT_SITE
 endif
 
-# Location of user files
-# ~~~~~~~~~~~~~~~~~~~~~~
+# [WM_PROJECT_USER_DIR] - Location of user files
 setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 
 # Source an etc file, possibly with some verbosity
@@ -210,26 +204,25 @@ set cleaned=`$foamClean "$MANPATH" "$foamOldDirs"`
 if ( $status == 0 ) setenv MANPATH $cleaned
 
 
-# Source project setup files
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Setup for OpenFOAM compilation etc
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc config.csh/settings
 
-if ($?prompt) then  # Interactive shell
-    _foamEtc config.csh/aliases
-    _foamEtc config.csh/tcsh_completion
-endif
-
-
-# Source user setup files for optional packages
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Setup for third-party packages
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _foamEtc config.csh/mpi
 _foamEtc config.csh/paraview
 _foamEtc config.csh/vtk
 _foamEtc config.csh/ensight
-
-#_foamEtc config.csh/ADIOS
+## _foamEtc config.csh/ADIOS
 _foamEtc config.csh/CGAL
 _foamEtc config.csh/FFTW
+
+# Interactive shell
+if ($?prompt) then
+    _foamEtc config.csh/aliases
+    _foamEtc config.csh/tcsh_completion
+endif
 
 
 # Clean environment paths again. Only remove duplicates
@@ -253,12 +246,15 @@ if ( $?LD_PRELOAD ) then
 endif
 
 
-# Cleanup environment
-# ~~~~~~~~~~~~~~~~~~~
-unset cleaned foamClean foamOldDirs
+# Cleanup temporary information
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Unload shell "functions"
 unalias _foamEtc
 unalias _foamAddPath
 unalias _foamAddLib
 unalias _foamAddMan
+
+unset cleaned foamClean foamOldDirs
 
 #------------------------------------------------------------------------------
