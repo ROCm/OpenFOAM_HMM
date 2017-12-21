@@ -34,6 +34,60 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+Foam::tmp<Foam::complexField> fft::realTransform1D(const scalarField& field)
+{
+    const label n = field.size();
+    const label nBy2 = n/2;
+
+    // Copy of input field for use by fftw
+    // - fftw requires non-const access to input and output...
+    scalar in[n], out[n];
+    forAll(field, i)
+    {
+        in[i] = field[i];
+    }
+
+    // Using real to half-complex fftw 'kind'
+    fftw_plan plan = fftw_plan_r2r_1d
+    (
+        n,
+        in,
+        out,
+        FFTW_R2HC,
+        FFTW_ESTIMATE
+    );
+
+    fftw_execute(plan);
+
+    // field[0] = DC component
+    tmp<complexField> tresult(new complexField(nBy2 + 1));
+    complexField& result = tresult.ref();
+
+    result[0].Re() = out[0];
+    result[nBy2].Re() = out[nBy2];
+    for (label i = 1; i < nBy2; ++i)
+    {
+        result[i].Re() = out[i];
+        result[i].Im() = out[n - i];
+    }
+
+    fftw_destroy_plan(plan);
+
+    return tresult;
+}
+
+
+Foam::tmp<Foam::complexField> fft::realTransform1D
+(
+    const tmp<scalarField>& tfield
+)
+{
+    tmp<complexField> tresult = realTransform1D(tfield());
+    tfield.clear();
+    return tresult;
+}
+
+
 void fft::transform
 (
     complexField& field,
