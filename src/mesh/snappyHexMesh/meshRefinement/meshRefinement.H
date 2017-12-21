@@ -1037,7 +1037,6 @@ public:
                 const scalar maxLoadUnbalance
             );
 
-
             //- Calculate list of cells to directionally refine
             labelList directionalRefineCandidates
             (

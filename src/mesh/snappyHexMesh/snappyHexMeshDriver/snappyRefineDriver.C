@@ -1572,6 +1572,190 @@ Foam::label Foam::snappyRefineDriver::shellRefine
 
     return iter;
 }
+//XXXXXXXXXX
+Foam::List<Foam::direction> Foam::snappyRefineDriver::faceDirection() const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    List<direction> faceDir(mesh.nFaces());
+
+    vectorField nf(mesh.faceAreas());
+    nf /= mag(nf);
+
+    forAll(nf, facei)
+    {
+        const vector& n = nf[facei];
+        if (mag(n[0]) > 0.5)
+        {
+            faceDir[facei] = 0;
+        }
+        else if (mag(n[1]) > 0.5)
+        {
+            faceDir[facei] = 1;
+        }
+        else if (mag(n[2]) > 0.5)
+        {
+            faceDir[facei] = 2;
+        }
+    }
+
+    return faceDir;
+}
+Foam::label Foam::snappyRefineDriver::faceConsistentRefinement
+(
+    const PackedBoolList& isDirFace,
+    const List<labelVector>& dirCellLevel,
+    const direction dir,
+    const bool maxSet,
+    PackedBoolList& refineCell
+) const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    label nChanged = 0;
+
+    // Internal faces.
+    for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
+    {
+        if (isDirFace[facei])
+        {
+            label own = mesh.faceOwner()[facei];
+            label ownLevel = dirCellLevel[own][dir] + refineCell.get(own);
+
+            label nei = mesh.faceNeighbour()[facei];
+            label neiLevel = dirCellLevel[nei][dir] + refineCell.get(nei);
+
+            if (ownLevel > (neiLevel+1))
+            {
+                if (maxSet)
+                {
+                    refineCell.set(nei);
+                }
+                else
+                {
+                    refineCell.unset(own);
+                }
+                nChanged++;
+            }
+            else if (neiLevel > (ownLevel+1))
+            {
+                if (maxSet)
+                {
+                    refineCell.set(own);
+                }
+                else
+                {
+                    refineCell.unset(nei);
+                }
+                nChanged++;
+            }
+        }
+    }
+
+
+    // Coupled faces. Swap owner level to get neighbouring cell level.
+    // (only boundary faces of neiLevel used)
+    labelList neiLevel(mesh.nFaces()-mesh.nInternalFaces());
+
+    forAll(neiLevel, i)
+    {
+        label own = mesh.faceOwner()[i+mesh.nInternalFaces()];
+
+        neiLevel[i] = dirCellLevel[own][dir] + refineCell.get(own);
+    }
+
+    // Swap to neighbour
+    syncTools::swapBoundaryFaceList(mesh, neiLevel);
+
+    // Now we have neighbour value see which cells need refinement
+    forAll(neiLevel, i)
+    {
+        label facei = i+mesh.nInternalFaces();
+        if (isDirFace[facei])
+        {
+            label own = mesh.faceOwner()[facei];
+            label ownLevel = dirCellLevel[own][dir] + refineCell.get(own);
+
+            if (ownLevel > (neiLevel[i]+1))
+            {
+                if (!maxSet)
+                {
+                    refineCell.unset(own);
+                    nChanged++;
+                }
+            }
+            else if (neiLevel[i] > (ownLevel+1))
+            {
+                if (maxSet)
+                {
+                    refineCell.set(own);
+                    nChanged++;
+                }
+            }
+        }
+    }
+
+    return nChanged;
+}
+Foam::labelList Foam::snappyRefineDriver::consistentDirectionalRefinement
+(
+    const direction dir,
+    const List<labelVector>& dirCellLevel,
+    const labelUList& candidateCells,
+    const bool maxSet
+) const
+{
+    const fvMesh& mesh = meshRefiner_.mesh();
+
+    const List<direction> faceDir(faceDirection());
+
+    PackedBoolList isDirFace(mesh.nFaces());
+    forAll(faceDir, facei)
+    {
+        if (faceDir[facei] == dir)
+        {
+            isDirFace[facei] = true;
+        }
+    }
+
+    // Loop, modifying cellsToRefine, until no more changes to due to 2:1
+    // conflicts.
+    // maxSet = false : unselect cells to refine
+    // maxSet = true  : select cells to refine
+
+    // Go to straight boolList.
+    PackedBoolList isRefineCell(mesh.nCells());
+    isRefineCell.set(candidateCells);
+
+    while (true)
+    {
+        label nChanged = faceConsistentRefinement
+        (
+            isDirFace,
+            dirCellLevel,
+            dir,
+            maxSet,
+            isRefineCell
+        );
+
+        reduce(nChanged, sumOp<label>());
+
+        if (debug)
+        {
+            Pout<< "snappyRefineDriver::consistentDirectionalRefinement"
+                << " : Changed " << nChanged
+                << " refinement levels due to 2:1 conflicts."
+                << endl;
+        }
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+    }
+
+    return isRefineCell.used();
+}
 
 
 Foam::label Foam::snappyRefineDriver::directionalShellRefine
