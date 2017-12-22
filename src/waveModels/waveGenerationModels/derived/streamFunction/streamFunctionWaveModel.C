@@ -66,8 +66,9 @@ Foam::scalar Foam::waveModels::streamFunction::eta
    scalar strfnAux = 0.0;
    forAll(Ejs_, iterSF)
    {
-        strfnAux +=  Ejs_[iterSF]*cos((iterSF + 1)
-		     *(kx*x + ky*y - omega*t + phase));
+        strfnAux +=
+            Ejs_[iterSF]*cos((iterSF + 1)
+		   *(kx*x + ky*y - omega*t + phase));
    }
 
    return (1/k)*strfnAux;
@@ -95,14 +96,16 @@ Foam::vector Foam::waveModels::streamFunction::Uf
 
     forAll(Bjs_, iterSF2)
     {
-        u += (iterSF2 + 1)*Bjs_[iterSF2] *cosh((iterSF2 + 1)*k*z) 
-             /cosh((iterSF2 + 1)*k*h)*cos((iterSF2 + 1)*phaseTot);
+        u +=
+            (iterSF2 + 1)*Bjs_[iterSF2]*cosh((iterSF2 + 1)*k*z)
+           /cosh((iterSF2 + 1)*k*h)*cos((iterSF2 + 1)*phaseTot);
 
-        w += (iterSF2 + 1)*Bjs_[iterSF2]*sinh((iterSF2 + 1)*k*z) 
-             /cosh((iterSF2 + 1)*k*h)*sin((iterSF2 + 1)*phaseTot);
+        w +=
+            (iterSF2 + 1)*Bjs_[iterSF2]*sinh((iterSF2 + 1)*k*z)
+           /cosh((iterSF2 + 1)*k*h)*sin((iterSF2 + 1)*phaseTot);
     }
 
-    u = waveLengthSF_/T - uMean_ + sqrt(mag(g_)/k)*u;	
+    u = waveLength_/T - uMean_ + sqrt(mag(g_)/k)*u;
     w = sqrt(mag(g_)/k)*w;
 
     scalar v = u*sin(waveAngle_);
@@ -122,7 +125,7 @@ void Foam::waveModels::streamFunction::setLevel
 ) const
 {
     const scalar waveOmega = mathematical::twoPi/wavePeriod_;
-    const scalar waveK = mathematical::twoPi/waveLengthSF_;
+    const scalar waveK = mathematical::twoPi/waveLength_;
     const scalar waveKx = waveK*cos(waveAngle_);
     const scalar waveKy = waveK*sin(waveAngle_);
 
@@ -132,12 +135,12 @@ void Foam::waveModels::streamFunction::setLevel
             this->eta
             (
                 waterDepthRef_,
-		waveKx,
+        		waveKx,
                 waveKy,
                 wavePeriod_,
                 xPaddle_[paddlei],
                 yPaddle_[paddlei],
-		waveOmega,
+		        waveOmega,
                 t,
                 wavePhase_
             );
@@ -155,7 +158,7 @@ void Foam::waveModels::streamFunction::setVelocity
 )
 {
     const scalar waveOmega = mathematical::twoPi/wavePeriod_;
-    const scalar waveK = mathematical::twoPi/waveLengthSF_;
+    const scalar waveK = mathematical::twoPi/waveLength_;
     const scalar waveKx = waveK*cos(waveAngle_);
     const scalar waveKy = waveK*sin(waveAngle_);
 
@@ -181,7 +184,7 @@ void Foam::waveModels::streamFunction::setVelocity
                 wavePeriod_,
                 xPaddle_[paddlei],
                 yPaddle_[paddlei],
-		waveOmega,
+		        waveOmega,
                 t,
                 wavePhase_,
                 z
@@ -205,9 +208,8 @@ Foam::waveModels::streamFunction::streamFunction
 :
     regularWaveModel(dict, mesh, patch, false),
     uMean_(0),
-    waveLengthSF_(0),
-    Bjs_( List<scalar> (1, -1.0) ),
-    Ejs_( List<scalar> (1, -1.0) )
+    Bjs_(),
+    Ejs_()
 {
     if (readFields)
     {
@@ -228,10 +230,10 @@ bool Foam::waveModels::streamFunction::readDict(const dictionary& overrideDict)
 {
     if (regularWaveModel::readDict(overrideDict))
     {
-	lookup("uMean") >> uMean_;
-	lookup("waveLengthSF") >> waveLengthSF_;
-	lookup("Bjs") >> Bjs_;
-	lookup("Ejs") >> Ejs_;
+	    overrideDict.lookup("uMean") >> uMean_;
+	    overrideDict.lookup("waveLength") >> waveLength_;
+	    overrideDict.lookup("Bjs") >> Bjs_;
+	    overrideDict.lookup("Ejs") >> Ejs_;
 
         return true;
     }
@@ -245,9 +247,10 @@ void Foam::waveModels::streamFunction::info(Ostream& os) const
     regularWaveModel::info(os);
 
     os  << "    uMean : " << uMean_ << nl
-        << "    wave Length streamFunction : " << waveLengthSF_ << nl
+        << "    Stream function wavelength : " << waveLength_ << nl
         << "    Bj coefficients : " << Bjs_ << nl
         << "    Ej coefficients : " << Ejs_ << nl;
 }
 
 
+// ************************************************************************* //

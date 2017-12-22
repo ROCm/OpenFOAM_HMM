@@ -42,7 +42,7 @@ namespace waveModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class streamFunction Declaration
+                       Class streamFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 class streamFunction
@@ -50,8 +50,6 @@ class streamFunction
     public regularWaveModel
 {
 private:
-
-
 
     // Private Member Functions
 
@@ -91,9 +89,6 @@ protected:
 
         //- Mean fluid speed in frame of reference (stream function)
         scalar uMean_;
-
-        //-Stream waveLength
-        scalar waveLengthSF_;
 
         //- Stream Function Bj coefficients
         scalarList Bjs_;
