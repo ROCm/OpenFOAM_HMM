@@ -34,11 +34,11 @@ License
 #include "OSspecific.H"
 #include "Map.H"
 #include "globalMeshData.H"
-
+#include "decompositionModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void faMeshDecomposition::distributeFaces()
+void Foam::faMeshDecomposition::distributeFaces()
 {
     Info<< "\nCalculating distribution of faces" << endl;
 
@@ -71,7 +71,7 @@ void faMeshDecomposition::distributeFaces()
         // located at the end of the faceProcAddressing, cutting it at
         // i = owner.size() will correctly decompose faMesh faces.
         // Vanja Skuric, 2016-04-21
-        if (decompositionDict_.found("globalFaceZones"))
+        if (hasGlobalFaceZones_)
         {
             labelList faceProcAddressing
             (
@@ -153,25 +153,30 @@ void faMeshDecomposition::distributeFaces()
         << " s" << endl;
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
-faMeshDecomposition::faMeshDecomposition(const fvMesh& mesh)
+Foam::faMeshDecomposition::faMeshDecomposition
+(
+    const fvMesh& mesh,
+    const fileName& decompDictFile
+)
 :
     faMesh(mesh),
-    decompositionDict_
+    decompDictFile_(decompDictFile),
+    nProcs_
     (
-        IOobject
+        decompositionMethod::nDomains
         (
-            "decomposeParDict",
-            time().system(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
+            decompositionModel::New
+            (
+                mesh,
+                decompDictFile
+            )
         )
     ),
-    nProcs_(readInt(decompositionDict_.lookup("numberOfSubdomains"))),
     distributed_(false),
+    hasGlobalFaceZones_(false),
     faceToProc_(nFaces()),
     procFaceLabels_(nProcs_),
     procMeshEdgesMap_(nProcs_),
@@ -190,22 +195,20 @@ faMeshDecomposition::faMeshDecomposition(const fvMesh& mesh)
     globallySharedPoints_(0),
     cyclicParallel_(false)
 {
-    if (decompositionDict_.found("distributed"))
-    {
-        distributed_ = Switch(decompositionDict_.lookup("distributed"));
-    }
+    const decompositionModel& model = decompositionModel::New
+    (
+        mesh,
+        decompDictFile
+    );
+
+    model.readIfPresent("distributed", distributed_);
+    hasGlobalFaceZones_ = model.found("globalFaceZones");
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-faMeshDecomposition::~faMeshDecomposition()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void faMeshDecomposition::decomposeMesh()
+void Foam::faMeshDecomposition::decomposeMesh()
 {
     // Decide which cell goes to which processor
     distributeFaces();
@@ -273,7 +276,7 @@ void faMeshDecomposition::decomposeMesh()
             )
         );
 
-        HashTable<label, label, Hash<label> > fvFaceProcAddressingHash;
+        Map<label> fvFaceProcAddressingHash;
 
         {
             labelIOList fvFaceProcAddressing
@@ -323,11 +326,11 @@ void faMeshDecomposition::decomposeMesh()
         const indirectPrimitivePatch& patch = this->patch();
         const Map<label>& map = patch.meshPointMap();
 
-        HashTable<label, edge, Hash<edge> > edgesHash;
+        EdgeMap<label> edgesHash;
 
         label edgeI = -1;
 
-        label nIntEdges = patch.nInternalEdges();
+        const label nIntEdges = patch.nInternalEdges();
 
         for (label curEdge = 0; curEdge < nIntEdges; curEdge++)
         {
@@ -338,7 +341,7 @@ void faMeshDecomposition::decomposeMesh()
         {
             // Include emptyFaPatch
 
-            label size = boundary()[patchI].labelList::size();
+            const label size = boundary()[patchI].labelList::size();
 
             for(int eI=0; eI<size; eI++)
             {
@@ -428,8 +431,8 @@ void faMeshDecomposition::decomposeMesh()
                 // inside boundaries for the owner processor and try to find
                 // this inter-processor patch.
 
-                label ownerProc = faceToProc_[owner[edgeI]];
-                label neighbourProc = faceToProc_[neighbour[edgeI]];
+                const label ownerProc = faceToProc_[owner[edgeI]];
+                const label neighbourProc = faceToProc_[neighbour[edgeI]];
 
                 SLList<label>::iterator curInterProcBdrsOwnIter =
                     interProcBoundaries[ownerProc].begin();
@@ -559,7 +562,7 @@ void faMeshDecomposition::decomposeMesh()
 
                 const labelListList& eF = patch().edgeFaces();
 
-                label size = patches[patchI].labelList::size();
+                const label size = patches[patchI].labelList::size();
 
                 labelList patchEdgeFaces(size, -1);
 
@@ -1153,7 +1156,7 @@ void faMeshDecomposition::decomposeMesh()
 }
 
 
-bool faMeshDecomposition::writeDecomposition()
+bool Foam::faMeshDecomposition::writeDecomposition()
 {
     Info<< "\nConstructing processor FA meshes" << endl;
 
@@ -1412,3 +1415,6 @@ bool faMeshDecomposition::writeDecomposition()
 
     return true;
 }
+
+
+// ************************************************************************* //
