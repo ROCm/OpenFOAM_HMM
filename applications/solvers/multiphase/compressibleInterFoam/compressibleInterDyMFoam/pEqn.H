@@ -56,29 +56,13 @@
     }
     else
     {
-        #include "rhofs.H"
-
-        p_rghEqnComp1 =
-            pos(alpha1)
-           *(
-                (
-                    fvc::ddt(alpha1, rho1) + fvc::div(alphaPhi1*rho1f)
-                  - (fvOptions(alpha1, mixture.thermo1().rho())&rho1)
-                )/rho1
-              - fvc::ddt(alpha1) - fvc::div(alphaPhi1)
-              + (alpha1*psi1/rho1)*correction(fvm::ddt(p_rgh))
-            );
+         p_rghEqnComp1 =
+            fvc::ddt(rho1) + psi1*correction(fvm::ddt(p_rgh))
+          + fvc::div(phi, rho1) - fvc::Sp(fvc::div(phi), rho1);
 
         p_rghEqnComp2 =
-            pos(alpha2)
-           *(
-               (
-                   fvc::ddt(alpha2, rho2) + fvc::div(alphaPhi2*rho2f)
-                 - (fvOptions(alpha2, mixture.thermo2().rho())&rho2)
-               )/rho2
-             - fvc::ddt(alpha2) - fvc::div(alphaPhi2)
-             + (alpha2*psi2/rho2)*correction(fvm::ddt(p_rgh))
-            );
+            fvc::ddt(rho2) + psi2*correction(fvm::ddt(p_rgh))
+          + fvc::div(phi, rho2) - fvc::Sp(fvc::div(phi), rho2);
     }
 
     // Cache p_rgh prior to solve for density update
@@ -94,7 +78,11 @@
 
         solve
         (
-            p_rghEqnComp1() + p_rghEqnComp2() + p_rghEqnIncomp,
+            (
+                (max(alpha1, scalar(0))/rho1)*p_rghEqnComp1()
+              + (max(alpha2, scalar(0))/rho2)*p_rghEqnComp2()
+            )
+          + p_rghEqnIncomp,
             mesh.solver(p_rgh.select(pimple.finalInnerIter()))
         );
 
@@ -105,8 +93,8 @@
 
             dgdt =
             (
-                alpha1*(p_rghEqnComp2 & p_rgh)
-              - alpha2*(p_rghEqnComp1 & p_rgh)
+                pos(alpha2)*(p_rghEqnComp2 & p_rgh)/rho2
+              - pos(alpha1)*(p_rghEqnComp1 & p_rgh)/rho1
             );
 
             phi = phiHbyA + p_rghEqnIncomp.flux();
@@ -131,8 +119,11 @@
     rho = alpha1*rho1 + alpha2*rho2;
 
     // Correct p_rgh for consistency with p and the updated densities
+    p = max(p_rgh + rho*gh, pMin);
     p_rgh = p - rho*gh;
     p_rgh.correctBoundaryConditions();
+
+
 
     K = 0.5*magSqr(U);
 }
