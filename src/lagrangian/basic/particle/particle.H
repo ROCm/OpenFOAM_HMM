@@ -87,9 +87,6 @@ class particle
 {
     // Private member data
 
-        //- Write particle positions file (v1706 format and earlier)
-        static bool writeLagrangianPositions;
-
         //- Size in bytes of the position data
         static const std::size_t sizeofPosition;
 
@@ -347,6 +344,14 @@ public:
 
         //- Cumulative particle counter - used to provide unique ID
         static label particleCount_;
+
+        //- Write particle coordinates file (v1712 and later)
+        //- Default is true
+        static bool writeLagrangianCoordinates;
+
+        //- Write particle positions file (v1706 format and earlier)
+        //- Default is false
+        static bool writeLagrangianPositions;
 
 
     // Constructors
@@ -685,7 +690,7 @@ public:
         void writeCoordinates(Ostream&) const;
 
         //- Write the particle position and cell
-        void writePosition(Ostream&) const;
+        virtual void writePosition(Ostream&) const;
 
 
     // Friend Operators

@@ -37,6 +37,10 @@ Foam::label Foam::particle::particleCount_ = 0;
 namespace Foam
 {
     defineTypeNameAndDebug(particle, 0);
+    bool particle::writeLagrangianCoordinates
+    (
+        debug::infoSwitch("writeLagrangianCoordinates", 1)
+    );
     bool particle::writeLagrangianPositions
     (
         debug::infoSwitch("writeLagrangianPositions", 0)

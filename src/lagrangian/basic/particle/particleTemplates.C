@@ -72,6 +72,7 @@ void Foam::particle::writeFields(const TrackCloudType& c)
 {
     label np = c.size();
 
+    if (writeLagrangianCoordinates)
     {
         IOPosition<TrackCloudType> ioP(c);
         ioP.write(np > 0);

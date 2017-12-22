@@ -27,14 +27,16 @@ copyLagrangianData()
         exit 1
     fi
 
-    dir=$dir/${latestTime}/lagrangian
+    udir=$dir/${latestTime}/uniform/lagrangian
+    ldir=$dir/${latestTime}/lagrangian
 
     if [ -d $dir ]
     then
-        echo "Copying lagrangian data from $dir to 0 directory"
-        \cp -r $dir 0
+        echo "Copying lagrangian data from $ldir to 0 directory"
+        \cp -r $ldir 0
+        mkdir 0/uniform && \cp -r $udir 0/uniform
     else
-        echo "Error: unable to find Lagrangian data in case $dir"
+        echo "Error: unable to find Lagrangian data in case $ldir"
         exit 1
     fi
 }
@@ -46,10 +48,13 @@ copyLagrangianData ${eulerianCase}
 
 runApplication blockMesh
 
-runApplication decomposePar
+#runApplication decomposePar
 
-runParallel $(getApplication)
+#runParallel $(getApplication)
 
-runApplication reconstructPar
+#runApplication reconstructPar
+
+runApplication $(getApplication)
+
 
 #------------------------------------------------------------------------------

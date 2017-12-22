@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -167,10 +167,10 @@ Foam::Cloud<ParticleType>::Cloud
 )
 :
     cloud(pMesh, cloudName),
-    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES),
     polyMesh_(pMesh),
     labels_(),
-    cellWallFacesPtr_()
+    cellWallFacesPtr_(),
+    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES)
 {
     checkPatches();
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,6 +38,7 @@ Foam::string Foam::injectedParticle::propertyTypes_ =
 
 const std::size_t Foam::injectedParticle::sizeofFields
 (
+    // Note: does not include position_
     sizeof(label) + sizeof(scalar) + sizeof(scalar) + sizeof(vector)
 );
 
@@ -52,7 +53,8 @@ Foam::injectedParticle::injectedParticle
     bool newFormat
 )
 :
-    particle(mesh, is, readFields, newFormat),
+    particle(mesh, is, readFields, false), // force to read old positions file
+    position_(Zero),
     tag_(-1),
     soi_(0.0),
     d_(0.0),
@@ -60,6 +62,11 @@ Foam::injectedParticle::injectedParticle
 {
     if (readFields)
     {
+        // After the base particle class has read the fields from file and
+        // constructed the necessary barcentric co-ordinates we can update the
+        // particle position on this mesh
+        position_ = particle::position();
+
         if (is.format() == IOstream::ASCII)
         {
             tag_ = readLabel(is);
@@ -84,6 +91,8 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
         return;
     }
 
+    // Note: not reading local position_ - defer to base particle class
+
     particle::readFields(c);
 
     IOField<label> tag(c.fieldIOobject("tag", IOobject::MUST_READ));
@@ -100,7 +109,7 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
 
     label i = 0;
 
-    forAllIter(Cloud<injectedParticle>, c, iter)
+    forAllIters(c, iter)
     {
         injectedParticle& p = iter();
 
@@ -116,7 +125,13 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
 
 void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 {
+    // Force writing positions instead of coordinates
+    particle::writeLagrangianCoordinates = false;
+    particle::writeLagrangianPositions = true;
+
     particle::writeFields(c);
+
+    // Note: not writing local position_ - defer to base particle class
 
     label np =  c.size();
 
@@ -127,7 +142,7 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 
     label i = 0;
 
-    forAllConstIter(Cloud<injectedParticle>, c, iter)
+    forAllConstIters(c, iter)
     {
         const injectedParticle& p = iter();
 
@@ -152,6 +167,10 @@ void Foam::injectedParticle::writeObjects
     objectRegistry& obr
 )
 {
+    // Force writing positions instead of coordinates
+    particle::writeLagrangianCoordinates = false;
+    particle::writeLagrangianPositions = true;
+
     particle::writeObjects(c, obr);
 
     label np = c.size();
@@ -163,7 +182,7 @@ void Foam::injectedParticle::writeObjects
 
     label i = 0;
 
-    forAllConstIter(Cloud<injectedParticle>, c, iter)
+    forAllConstIters(c, iter)
     {
         const injectedParticle& p = iter();
 
@@ -177,6 +196,40 @@ void Foam::injectedParticle::writeObjects
 }
 
 
+void Foam::injectedParticle::writePosition(Ostream& os) const
+{
+    if (os.format() == IOstream::ASCII)
+    {
+        os  << position_ << token::SPACE << cell();
+    }
+    else
+    {
+        struct oldParticle
+        {
+            vector position;
+            label celli;
+            label facei;
+            scalar stepFraction;
+            label tetFacei;
+            label tetPti;
+            label origProc;
+            label origId;
+        } p;
+
+        const size_t s =
+            offsetof(oldParticle, facei) - offsetof(oldParticle, position);
+
+        p.position = position_;
+        p.celli = cell();
+
+        os.write(reinterpret_cast<const char*>(&p.position), s);
+    }
+
+    // Check state of Ostream
+    os.check(FUNCTION_NAME);
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<
@@ -185,6 +238,8 @@ Foam::Ostream& Foam::operator<<
     const injectedParticle& p
 )
 {
+    // Note: not writing local position_ - defer to base particle class
+
     if (os.format() == IOstream::ASCII)
     {
         os  << static_cast<const particle&>(p)

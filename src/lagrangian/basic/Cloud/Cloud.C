@@ -76,10 +76,10 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh, cloudName),
     IDLList<ParticleType>(),
-    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES),
     polyMesh_(pMesh),
     labels_(),
-    globalPositionsPtr_()
+    globalPositionsPtr_(),
+    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES)
 {
     checkPatches();
 

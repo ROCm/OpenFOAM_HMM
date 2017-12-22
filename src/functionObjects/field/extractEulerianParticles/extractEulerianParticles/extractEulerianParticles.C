@@ -314,7 +314,8 @@ void Foam::functionObjects::extractEulerianParticles::collectParticles
                     tag,
                     time,
                     d,
-                    U
+                    U,
+                    false // not looking to set cell owner etc.
                 );
 
                 cloud_.addParticle(ip);
