@@ -108,16 +108,29 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeLumleyCoeffs() const
     {
         fileName valsFile
         (
-            this->db().time().caseConstant()
-           /"boundaryData"
-           /this->patch().name()
-           /"0"
-           /"R"
+            fileHandler().filePath
+            (
+                fileName
+                (
+                    db().time().path()
+                   /db().time().caseConstant()
+                   /"boundaryData"
+                   /this->patch().name()
+                   /"0"
+                   /"R"
+                )
+            )
         );
 
-        IFstream is(valsFile);
+        autoPtr<ISstream> isPtr
+        (
+            fileHandler().NewIFstream
+            (
+                valsFile
+            )
+        );
 
-        Field<symmTensor> Rexp(is);
+        Field<symmTensor> Rexp(isPtr());
 
         OFstream os(db().time().path()/"lumley_input.out");
 

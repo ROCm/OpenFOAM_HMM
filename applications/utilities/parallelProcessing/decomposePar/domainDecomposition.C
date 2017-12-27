@@ -125,12 +125,6 @@ Foam::domainDecomposition::domainDecomposition
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::domainDecomposition::~domainDecomposition()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)

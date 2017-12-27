@@ -2545,7 +2545,8 @@ int main(int argc, char *argv[])
             haveMesh[Pstream::myProcNo()] = isFile(meshPath);
             Pstream::gatherList(haveMesh);
             Pstream::scatterList(haveMesh);
-            Info<< "Per processor mesh availability : " << haveMesh << endl;
+            Info<< "Per processor mesh availability:" << nl
+                << "    " << flatOutput(haveMesh) << nl << endl;
 
 
             // Addressing back to reconstructed mesh as xxxProcAddressing.
@@ -2898,7 +2899,8 @@ int main(int argc, char *argv[])
         haveMesh[Pstream::myProcNo()] = isFile(meshPath);
         Pstream::gatherList(haveMesh);
         Pstream::scatterList(haveMesh);
-        Info<< "Per processor mesh availability : " << haveMesh << endl;
+        Info<< "Per processor mesh availability:" << nl
+            << "    " << flatOutput(haveMesh) << nl << endl;
 
         // Load mesh (or create dummy one)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2930,7 +2932,7 @@ int main(int argc, char *argv[])
         fvMesh& mesh = meshPtr();
 
 
-        label nOldCells = mesh.nCells();
+        const label nOldCells = mesh.nCells();
         //Pout<< "Loaded mesh : nCells:" << nOldCells
         //    << " nPatches:" << mesh.boundaryMesh().size() << endl;
 

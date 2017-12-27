@@ -68,13 +68,14 @@ class noiseFFT
 :
     public scalarField
 {
-    //- FFTW planner information
+    //- FFTW planner information.
+    //  Storage as double for use directly with FFTW.
     struct planInfo
     {
         bool active;
         label windowSize;
-        scalarList in;
-        scalarList out;
+        List<double> in;
+        List<double> out;
         fftw_plan plan;
     };
 
@@ -174,7 +175,7 @@ public:
         graph octaves
         (
             const graph& g,
-            const labelList& freqBandIDs,
+            const labelUList& freqBandIDs,
             bool integrate
         ) const;
 

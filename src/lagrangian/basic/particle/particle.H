@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,9 +86,6 @@ class particle
     public IDLList<particle>::link
 {
     // Private member data
-
-        //- Write particle positions file (v1706 format and earlier)
-        static bool writeLagrangianPositions;
 
         //- Size in bytes of the position data
         static const std::size_t sizeofPosition;
@@ -335,8 +332,8 @@ public:
         //- String representation of properties
         DefinePropertyList
         (
-            "(Px Py Pz) celli tetFacei tetPti "
-            "facei stepFraction origProc origId"
+            "(coordinatesa coordinatesb coordinatesc coordinatesd) "
+            "celli tetFacei tetPti facei stepFraction origProc origId"
         );
 
         //- String representation of property types
@@ -347,6 +344,14 @@ public:
 
         //- Cumulative particle counter - used to provide unique ID
         static label particleCount_;
+
+        //- Write particle coordinates file (v1712 and later)
+        //- Default is true
+        static bool writeLagrangianCoordinates;
+
+        //- Write particle positions file (v1706 format and earlier)
+        //- Default is false
+        static bool writeLagrangianPositions;
 
 
     // Constructors
@@ -685,7 +690,7 @@ public:
         void writeCoordinates(Ostream&) const;
 
         //- Write the particle position and cell
-        void writePosition(Ostream&) const;
+        virtual void writePosition(Ostream&) const;
 
 
     // Friend Operators

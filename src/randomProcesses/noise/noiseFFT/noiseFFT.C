@@ -285,8 +285,8 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
                 << abort(FatalError);
         }
 
-        List<scalar>& in = planInfo_.in;
-        const List<scalar>& out = planInfo_.out;
+        List<double>& in = planInfo_.in;
+        const List<double>& out = planInfo_.out;
         forAll(in, i)
         {
             in[i] = pn[i];
@@ -305,8 +305,8 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Pf
         result[0] = out[0];
         for (label i = 1; i <= nBy2; ++i)
         {
-            scalar re = out[i];
-            scalar im = out[n - i];
+            const auto re = out[i];
+            const auto im = out[n - i];
             result[i] = sqrt(re*re + im*im);
         }
 
@@ -443,7 +443,7 @@ Foam::graph Foam::noiseFFT::PSD(const graph& gPSDf) const
 Foam::graph Foam::noiseFFT::octaves
 (
     const graph& g,
-    const labelList& freqBandIDs,
+    const labelUList& freqBandIDs,
     bool integrate
 ) const
 {

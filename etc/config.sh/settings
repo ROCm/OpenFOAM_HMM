@@ -133,7 +133,7 @@ export FOAM_LIBBIN=$WM_PROJECT_DIR/platforms/$WM_OPTIONS/lib
 # External (ThirdParty) libraries
 export FOAM_EXT_LIBBIN=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_LABEL_OPTION/lib
 
-# Site-specific directory
+# Site-specific (group) files
 if [ -n "$WM_PROJECT_SITE" ]
 then
     siteDir=$WM_PROJECT_SITE
@@ -141,8 +141,7 @@ else
     siteDir=$WM_PROJECT_INST_DIR/site
 fi
 
-# Shared site executables/libraries
-# Similar naming convention as ~OpenFOAM expansion
+# Shared site (group) executables/libraries
 export FOAM_SITE_APPBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/bin
 export FOAM_SITE_LIBBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 
@@ -150,8 +149,8 @@ export FOAM_SITE_LIBBIN=$siteDir/$WM_PROJECT_VERSION/platforms/$WM_OPTIONS/lib
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/bin
 export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/platforms/$WM_OPTIONS/lib
 
-# DynamicCode templates
-# - default location is the "~OpenFOAM/codeTemplates/dynamicCode" expansion
+# [FOAM_CODE_TEMPLATES] - dynamicCode templates
+# * fallback == "foamEtcFile -list codeTemplates/dynamicCode"
 # export FOAM_CODE_TEMPLATES=$WM_PROJECT_DIR/etc/codeTemplates/dynamicCode
 
 # Convenience
@@ -287,6 +286,7 @@ CLANG_NOT_FOUND
 
     _foamAddMan     $clangDir/share/man
     _foamAddPath    $clangDir/bin
+    _foamAddLib     $clangDir/lib  # For things like libomp (openmp) etc
 
     if [ "$FOAM_VERBOSE" -a "$PS1" ]
     then

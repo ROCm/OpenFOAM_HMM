@@ -292,7 +292,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                     continue;
                 }
 
-                const point& pP = pPtr->position();
+                const point pP(pPtr->position());
                 const vector& pU = pPtr->U();
 
                 // Generate a tetrahedron of new positions with the

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,9 +75,6 @@ class Cloud
 {
     // Private data
 
-        //- Geometry type
-        typename IOPosition<Cloud<ParticleType>>::geometryType geometryType_;
-
         //- Reference to the mesh database
         const polyMesh& polyMesh_;
 
@@ -107,6 +104,12 @@ class Cloud
 
         //- Write cloud properties dictionary
         void writeCloudUniformProperties() const;
+
+
+protected:
+
+        //- Geometry type
+        typename IOPosition<Cloud<ParticleType>>::geometryType geometryType_;
 
 
 public:

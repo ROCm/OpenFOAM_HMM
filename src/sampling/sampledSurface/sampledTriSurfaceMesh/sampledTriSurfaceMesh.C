@@ -787,6 +787,12 @@ bool Foam::sampledTriSurfaceMesh::update()
     {
         // Surface and mesh do not overlap at all. Guarantee a valid
         // bounding box so we don't get any 'invalid bounding box' errors.
+
+        WarningInFunction
+            << "Surface " << surface_.searchableSurface::name()
+            << " does not overlap bounding box of mesh " << mesh().bounds()
+            << endl;
+
         bb = treeBoundBox(mesh().bounds());
         const vector span(bb.span());
 

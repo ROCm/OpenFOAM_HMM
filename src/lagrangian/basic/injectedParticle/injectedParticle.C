@@ -38,6 +38,7 @@ namespace Foam
 Foam::injectedParticle::injectedParticle(const injectedParticle& p)
 :
     particle(p),
+    position_(p.position_),
     tag_(p.tag_),
     soi_(p.soi_),
     d_(p.d_),
@@ -52,6 +53,7 @@ Foam::injectedParticle::injectedParticle
 )
 :
     particle(p, mesh),
+    position_(p.position_),
     tag_(p.tag_),
     soi_(p.soi_),
     d_(p.d_),

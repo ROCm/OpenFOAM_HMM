@@ -48,10 +48,8 @@ SourceFiles
 #include "PtrList.H"
 #include "point.H"
 
-#ifndef namespaceFoam
-#define namespaceFoam
-    using namespace Foam;
-#endif
+namespace Foam
+{
 
 /*---------------------------------------------------------------------------*\
                            Class faMeshDecomposition Declaration
@@ -63,14 +61,17 @@ class faMeshDecomposition
 {
     // Private data
 
-        //- Mesh decomposition control dictionary
-        IOdictionary decompositionDict_;
+        //- Optional non-standard file for decomposeParDict
+        const fileName decompDictFile_;
 
         //- Number of processors in decomposition
         label nProcs_;
 
         //- Is the decomposition data to be distributed for each processor
         bool distributed_;
+
+        //- Are globalFaceZones being used
+        bool hasGlobalFaceZones_;
 
         //- Processor label for each cell
         labelList faceToProc_;
@@ -134,13 +135,17 @@ public:
 
     // Constructors
 
-        //- Construct from fvMesh
-        faMeshDecomposition(const fvMesh& mesh);
+        //- Construct from fvMesh (for mesh and optional non-standard
+        //- decomposeParDict location)
+        faMeshDecomposition
+        (
+            const fvMesh& mesh,
+            const fileName& decompDictFile = ""
+        );
 
 
-    // Destructor
-
-        ~faMeshDecomposition();
+    //- Destructor
+    ~faMeshDecomposition() = default;
 
 
     // Member Functions
@@ -170,6 +175,10 @@ public:
         }
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

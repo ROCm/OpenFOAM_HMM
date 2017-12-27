@@ -72,16 +72,29 @@ Foam::turbulentDFSEMInletFvPatchVectorField::interpolateBoundaryData
 
     fileName valsFile
     (
-        this->db().time().path()
-       /this->db().time().caseConstant()
-       /"boundaryData"
-       /patchName
-       /"0"
-       /fieldName
+        fileHandler().filePath
+        (
+            fileName
+            (
+                this->db().time().path()
+               /this->db().time().caseConstant()
+               /"boundaryData"
+               /patchName
+               /"0"
+               /fieldName
+            )
+        )
     );
 
-    IFstream is(valsFile);
-    Field<Type> vals(is);
+    autoPtr<ISstream> isPtr
+    (
+        fileHandler().NewIFstream
+        (
+            valsFile
+        )
+    );
+
+    Field<Type> vals(isPtr());
 
     Info<< "Turbulent DFSEM patch " << patchName
         << ": interpolating field " << fieldName
