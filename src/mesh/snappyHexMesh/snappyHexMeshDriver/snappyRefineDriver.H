@@ -146,26 +146,6 @@ class snappyRefineDriver
 
         // Directional refinement
 
-            //- Calculate direction of face (using geometry)
-            List<direction> faceDirection() const;
-
-            //- Check if level across (directed) face obeys 2:1
-            label faceConsistentRefinement
-            (
-                const PackedBoolList& isDirFace,
-                const List<labelVector>& dirCellLevel,
-                const direction dir,
-                const bool maxSet,
-                PackedBoolList& refineCell
-            ) const;
-            //- Make sure 2:1 refinement in given direction
-            labelList consistentDirectionalRefinement
-            (
-                const direction dir,
-                const List<labelVector>& dirCellLevel,
-                const labelUList& candidateCells,
-                const bool maxSet
-            ) const;
             //- Refine (directional) all cells inside/outside shell
             label directionalShellRefine
             (

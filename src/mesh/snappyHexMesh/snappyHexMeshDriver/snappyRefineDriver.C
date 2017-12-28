@@ -1586,6 +1586,8 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
 
     labelList& cellLevel =
         const_cast<labelIOList&>(meshRefiner_.meshCutter().cellLevel());
+    labelList& pointLevel =
+        const_cast<labelIOList&>(meshRefiner_.meshCutter().pointLevel());
 
 
     // Determine the minimum and maximum cell levels that are candidates for
@@ -1705,11 +1707,34 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
                     dirCellLevel
                 );
 
+                // Note: edges will have been split. The points might have
+                // inherited pointLevel from either side of the edge which
+                // might not be the same for coupled edges so sync
+                syncTools::syncPointList
+                (
+                    mesh,
+                    pointLevel,
+                    maxEqOp<label>(),
+                    labelMin
+                );
+
                 forAll(map().cellMap(), celli)
                 {
                     if (isRefineCell[map().cellMap()[celli]])
                     {
                         dirCellLevel[celli][dir]++;
+                    }
+                }
+
+                // Do something with the pointLevel. See discussion about the
+                // cellLevel. Do we keep min/max ?
+                forAll(map().pointMap(), pointi)
+                {
+                    label oldPointi = map().pointMap()[pointi];
+                    if (map().reversePointMap()[oldPointi] != pointi)
+                    {
+                        // Is added point (splitting an edge)
+                        pointLevel[pointi]++;
                     }
                 }
             }
