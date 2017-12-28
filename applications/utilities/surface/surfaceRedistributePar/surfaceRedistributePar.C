@@ -240,7 +240,10 @@ int main(int argc, char *argv[])
         if (Pstream::master())
         {
             // Actually load the surface
+            const bool oldParRun = Pstream::parRun();
+            Pstream::parRun() = false;
             triSurfaceMesh surf(io);
+            Pstream::parRun() = oldParRun;
             s = surf;
             bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::greatBox));
         }
