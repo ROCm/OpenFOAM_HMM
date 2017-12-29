@@ -206,16 +206,6 @@ bool Foam::noiseModel::read(const dictionary& dict)
     dict.readIfPresent("maxPressure", maxPressure_);
     dict.readIfPresent("outputPrefix", outputPrefix_);
 
-    // Check number of samples  - must be a power of 2 for our FFT
-    bool powerOf2 = ((nSamples_ != 0) && !(nSamples_ & (nSamples_ - 1)));
-    if (!powerOf2)
-    {
-        FatalIOErrorInFunction(dict)
-            << "N: Number of samples in sampling windows must be a "
-            << "power of 2"
-            << exit(FatalIOError);
-    }
-
     if (fLower_ < 0)
     {
         FatalIOErrorInFunction(dict)

@@ -95,20 +95,6 @@ void Foam::fft::transform
     transformDirection dir
 )
 {
-    forAll(nn, idim)
-    {
-        // Check for power of two
-        unsigned int dimCount = nn[idim];
-        if (!dimCount || (dimCount & (dimCount - 1)))
-        {
-            FatalErrorInFunction
-                << "number of elements in direction " << idim
-                << " is not a power of 2" << endl
-                << "    Number of elements in each direction = " << nn
-                << abort(FatalError);
-        }
-    }
-
     // Copy field into fftw containers
     const label N = field.size();
     fftw_complex in[N], out[N];

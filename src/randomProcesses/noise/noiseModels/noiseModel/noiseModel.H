@@ -66,9 +66,6 @@ Description
         writeOctaves | Write octaves data            | no        | yes
     \endtable
 
-Note
-    The number of samples in the sampling window must be a power of 2
-
 
 SourceFiles
     noiseModel.C

@@ -45,7 +45,7 @@ pointNoiseCoeffs
     separator       " ";
 
     // Number of samples in sampling window
-    // Must be a power of 2, default = 2^16 (=65536)
+    // default = 2^16 (=65536)
     N               4096;
 
     rhoRef          1.205;
