@@ -19,11 +19,11 @@ numberOfSubdomains 2;
 
 method          hierarchical;
 
-hierarchicalCoeffs
+coeffs
 {
     n           (2 1 1);
-    delta       0.001;
-    order       xyz;
+    //delta       0.001; // default=0.001
+    //order       xyz;   // default=xzy
 }
 
 // ************************************************************************* //

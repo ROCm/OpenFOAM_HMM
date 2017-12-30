@@ -54,10 +54,8 @@ Description
 
 int main(int argc, char *argv[])
 {
-    argList::addNote
-    (
-        "Experimental version of pimpleDyMFoam with support for overset meshes"
-    );
+    #include "postProcess.H"
+
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"

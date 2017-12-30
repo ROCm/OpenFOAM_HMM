@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,10 @@ Description
 #include "DynamicList.H"
 #include "IOstreams.H"
 #include "fileNameList.H"
+#include "stringOps.H"
 #include "stringList.H"
 #include "wordList.H"
+#include "SubStrings.H"
 
 using namespace Foam;
 
@@ -53,6 +55,26 @@ int print(const CStringList& cstrLst)
 }
 
 
+// Using nullptr termination
+int print(char *argv[])
+{
+    if (!argv)
+    {
+        Info<< "argv=null" << endl;
+        return 0;
+    }
+
+    int i=0;
+    while (argv[i])
+    {
+        Info<< "  argv[" << i << "] = \"" << argv[i] << "\"" << endl;
+        ++i;
+    }
+
+    return i;
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
@@ -62,18 +84,49 @@ int main(int argc, char *argv[])
 
     dynlst.append("string1 with content");
     dynlst.append("string2 other content");
-    dynlst.append("string3 done");
+    dynlst.append("string3 more");
+    dynlst.append("string4 done");
 
     {
         CStringList inC(dynlst);
 
-        Info<< "input: " << dynlst << endl;
+        Info<< "input: " << dynlst << nl;
         print(inC);
+
+        Info<< "null-terminated string list" << nl;
+        print(inC.strings());
+
+        Info<< "sublist: starting at " << inC.size()/2 << nl;
+        print(inC.strings(inC.size()/2));
+
+        Info<< nl;
+    }
+
+    {
+        string testInput
+        (
+            " A   test   input   line with various spacing  "
+            "  and  text to be split on whitespace  "
+        );
+
+        Info<< testInput << nl;
+        SubStrings<string> args = stringOps::splitSpace(testInput);
+        Info<< "split into " << args.size() << " args" << nl;
+
+        CStringList inC(args);
+        print(inC);
+
+        Info<< "sublist: starting at " << inC.size()/2 << nl;
+        print(inC.strings(inC.size()/2));
+
+        Info<< nl;
     }
 
     Info<<"command-line with " << CStringList::count(argv) << " items"<< endl;
 
     print(argc, argv);
+
+    Info<< nl;
     {
         dynlst.clear();
         for (int i=0; i<argc; ++i)

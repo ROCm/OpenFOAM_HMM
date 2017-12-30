@@ -73,7 +73,7 @@ Lavieville::fLiquid
 ) const
 {
     return
-        pos(alphaLiquid - alphaCrit_)
+        pos0(alphaLiquid - alphaCrit_)
        *(
             1 - 0.5*exp(-20*(alphaLiquid - alphaCrit_))
         )
@@ -88,7 +88,7 @@ void Foam::wallBoilingModels::partitioningModels::
 Lavieville::write(Ostream& os) const
 {
     partitioningModel::write(os);
-    os.writeKeyword("alphaCrit") << alphaCrit_ << token::END_STATEMENT << nl;
+    os.writeEntry("alphaCrit", alphaCrit_);
 }
 
 

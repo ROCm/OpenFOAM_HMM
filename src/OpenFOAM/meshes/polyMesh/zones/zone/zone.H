@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,10 @@ Class
     Foam::zone
 
 Description
-    Base class for zones
+    Base class for mesh zones.
+
+    A zone is a list of labels (eg, cells, faces, points) with
+    a name and associated with an index within another list.
 
 SourceFiles
     zone.C
@@ -49,7 +52,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class zone;
-Ostream& operator<<(Ostream&, const zone&);
+Ostream& operator<<(Ostream& os, const zone& zn);
 
 /*---------------------------------------------------------------------------*\
                            Class zone Declaration
@@ -59,6 +62,11 @@ class zone
 :
     public labelList
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        zone(const zone&) = delete;
+
 
 protected:
 
@@ -71,19 +79,16 @@ protected:
         label index_;
 
 
-        // Demand-driven private data
+      // Demand-driven private data
 
-            //- Map of labels in zone for fast location lookup
-            mutable Map<label>* lookupMapPtr_;
+        //- Map of labels in zone for fast location lookup
+        mutable Map<label>* lookupMapPtr_;
 
 
     // Protected Member Functions
 
         //- Construct the look-up map
         void calcLookupMap() const;
-
-        //- Disallow default bitwise copy construct
-        zone(const zone&);
 
 
 public:
@@ -94,7 +99,10 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct an empty zone
+        zone(const word& name, const label index);
+
+        //- Copy construct from components
         zone
         (
             const word& name,
@@ -102,7 +110,15 @@ public:
             const label index
         );
 
-        //- Construct from components, transferring contents
+        //- Move construct from components
+        zone
+        (
+            const word& name,
+            labelList&& addr,
+            const label index
+        );
+
+        //- Move construct from components
         zone
         (
             const word& name,
@@ -114,25 +130,34 @@ public:
         zone
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const word& labelsName,
             const label index
         );
 
-        //- Construct given the original zone and resetting the
-        //  cell list and zone mesh information
+        //- Construct given the name of the original zone (name is used)
+        //- and resetting addressing and index.
         zone
         (
-            const zone&,
+            const zone& origZone,
             const labelUList& addr,
             const label index
         );
 
-        //- Construct given the original zone, resetting the
-        //  cell list and zone mesh information
+        //- Construct given the name of the original zone (name is used)
+        //- and (move) resetting addressing and index.
         zone
         (
-            const zone&,
+            const zone& origZone,
+            labelList&& addr,
+            const label index
+        );
+
+        //- Construct given the name of the original zone (name is used)
+        //- and (move) resetting addressing and index.
+        zone
+        (
+            const zone& zn,
             const Xfer<labelList>& addr,
             const label index
         );
@@ -178,20 +203,20 @@ public:
         ) const;
 
         //- Correct patch after moving points
-        virtual void movePoints(const pointField&)
+        virtual void movePoints(const pointField& pts)
         {}
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
         //- Write dictionary
-        virtual void writeDict(Ostream&) const = 0;
+        virtual void writeDict(Ostream& os) const = 0;
 
 
     // I-O
 
         //- Ostream Operator
-        friend Ostream& operator<<(Ostream&, const zone&);
+        friend Ostream& operator<<(Ostream& os, const zone& zn);
 };
 
 

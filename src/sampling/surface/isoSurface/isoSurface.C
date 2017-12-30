@@ -748,7 +748,7 @@ void Foam::isoSurface::calcSnappedPoint
             FixedList<scalar, 4> s;
             FixedList<point, 4> pt;
 
-            label fp = findIndex(f, pointi);
+            label fp = f.find(pointi);
             s[0] = isoFraction(pVals[pointi], cVals[own]);
             pt[0] = (1.0-s[0])*pts[pointi] + s[0]*cc[own];
 
@@ -894,6 +894,9 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
     // Check that enough merged.
     if (debug)
     {
+        Pout<< "isoSurface : merged from " << triPoints.size()
+            << " down to " << newPoints.size() << " unique points." << endl;
+
         pointField newNewPoints;
         labelList oldToNew;
         bool hasMerged = mergePoints
@@ -1232,19 +1235,16 @@ void Foam::isoSurface::trimToBox
             {
                 dynInterpolatedPoints.append(pointI);
 
-                FixedList<label, 3> oldPoints;
-                oldPoints[0] = 3*oldTriI;
-                oldPoints[1] = 3*oldTriI+1;
-                oldPoints[2] = 3*oldTriI+2;
+                FixedList<label, 3> oldPoints
+                (
+                    {3*oldTriI, 3*oldTriI+1, 3*oldTriI+2}
+                );
                 dynInterpolatedOldPoints.append(oldPoints);
 
                 triPointRef tri(oldTriPoints, oldPoints);
-                FixedList<scalar, 3> bary;
-                tri.barycentric(pt, bary);
-                FixedList<scalar, 3> weights;
-                weights[0] = bary[0];
-                weights[1] = bary[1];
-                weights[2] = bary[2];
+                barycentric2D bary = tri.pointToBarycentric(pt);
+                FixedList<scalar, 3> weights({bary.a(), bary.b(), bary.c()});
+
                 dynInterpolationWeights.append(weights);
             }
         }

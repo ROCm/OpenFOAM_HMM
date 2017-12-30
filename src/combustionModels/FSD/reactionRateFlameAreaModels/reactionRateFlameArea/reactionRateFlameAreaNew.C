@@ -34,16 +34,15 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
     const combustionModel& combModel
 )
 {
-    word reactionRateFlameAreaType
+    const word modelType
     (
         dict.lookup("reactionRateFlameArea")
     );
 
     Info<< "Selecting reaction rate flame area correlation "
-        << reactionRateFlameAreaType << endl;
+        << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(reactionRateFlameAreaType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
@@ -51,15 +50,13 @@ Foam::autoPtr<Foam::reactionRateFlameArea> Foam::reactionRateFlameArea::New
         (
             dict
         )   << "Unknown reactionRateFlameArea type "
-            << reactionRateFlameAreaType << endl << endl
-            << "Valid reaction rate flame area types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << modelType << nl << nl
+            << "Valid reaction rate flame area types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
-    const label tempOpen = reactionRateFlameAreaType.find('<');
-
-    const word className = reactionRateFlameAreaType(0, tempOpen);
+    const word className = modelType.substr(0, modelType.find('<'));
 
     return autoPtr<reactionRateFlameArea>
         (cstrIter()(className, dict, mesh, combModel));

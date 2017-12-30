@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,7 +32,7 @@ Description
 #include "DynamicList.H"
 #include "labelPair.H"
 #include "primitiveMesh.H"
-#include "HashSet.H"
+#include "edgeHashes.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -94,9 +94,8 @@ void Foam::enrichedPatch::calcCutFaces() const
     //    the points projected onto the face.
 
     // Create a set of edge usage parameters
-    HashSet<edge, Hash<edge>> edgesUsedOnce(pp.size());
-    HashSet<edge, Hash<edge>> edgesUsedTwice
-        (pp.size()*primitiveMesh::edgesPerPoint_);
+    edgeHashSet edgesUsedOnce(pp.size());
+    edgeHashSet edgesUsedTwice(pp.size()*primitiveMesh::edgesPerPoint_);
 
 
     forAll(lf, facei)
@@ -145,9 +144,9 @@ void Foam::enrichedPatch::calcCutFaces() const
 
         // Insert the edges of current face into the seed list.
         edgeList cfe = curLocalFace.edges();
-        forAll(curLocalFace, edgeI)
+        for (const edge& e : cfe)
         {
-            edgeSeeds.append(cfe[edgeI]);
+            edgeSeeds.append(e);
         }
 
         // Grab face normal
@@ -156,9 +155,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
         while (edgeSeeds.size())
         {
-            // Pout<< "edgeSeeds.size(): "
-            //     << edgeSeeds.size()
-            //     << endl;
+            // Pout<< "edgeSeeds.size(): " << edgeSeeds.size() << endl;
 
             const edge curEdge = edgeSeeds.removeHead();
 
@@ -198,6 +195,7 @@ void Foam::enrichedPatch::calcCutFaces() const
             cutFaceGlobalPoints.append(mp[prevPointLabel]);
             cutFaceLocalPoints.append(prevPointLabel);
             // Pout<< "prevPointLabel: " << mp[prevPointLabel] << endl;
+
             // Grab current point and append it to the list
             label curPointLabel = curEdge.end();
             point curPoint = lp[curPointLabel];
@@ -217,7 +215,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                 const labelList& nextPoints = pp[curPointLabel];
 
                 // Pout<< "nextPoints: "
-                //     << UIndirectList<label>(mp, nextPoints)
+                //     << labelUIndList(mp, nextPoints)
                 //     << endl;
 
                 // Get the vector along the edge and the right vector
@@ -266,7 +264,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                         newDir /= magNewDir;
 
-                        scalar curAtanTurn =
+                        const scalar curAtanTurn =
                             atan2(newDir & right, newDir & ahead);
 
                         // Pout<< " atan: " << curAtanTurn << endl;
@@ -352,19 +350,18 @@ void Foam::enrichedPatch::calcCutFaces() const
                     // If the edge corresponds to a starting face edge,
                     // mark the starting face edge as true
 
-                    forAll(cutFaceLocal, cutI)
+                    forAll(cutFaceLocal, cuti)
                     {
                         const edge curCutFaceEdge
                         (
-                            cutFaceLocal[cutI],
-                            cutFaceLocal.nextLabel(cutI)
+                            cutFaceLocal[cuti],
+                            cutFaceLocal.nextLabel(cuti)
                         );
 
                         // Increment the usage count using two hash sets
-                        HashSet<edge, Hash<edge>>::iterator euoIter =
-                            edgesUsedOnce.find(curCutFaceEdge);
+                        auto euoIter = edgesUsedOnce.find(curCutFaceEdge);
 
-                        if (euoIter == edgesUsedOnce.end())
+                        if (!euoIter.found())
                         {
                             // Pout<< "Found edge not used before: "
                             //     << curCutFaceEdge
@@ -435,12 +432,12 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                     if (facei < slavePatch_.size())
                     {
-                        Map<labelList>::const_iterator mpfAddrIter =
-                            masterPointFaceAddr.find(cutFaceGlobal[0]);
+                        const auto mpfAddrIter =
+                            masterPointFaceAddr.cfind(cutFaceGlobal[0]);
 
                         bool otherSideFound = false;
 
-                        if (mpfAddrIter != masterPointFaceAddr.end())
+                        if (mpfAddrIter.found())
                         {
                             bool miss = false;
 
@@ -456,18 +453,13 @@ void Foam::enrichedPatch::calcCutFaces() const
                                 pointi++
                             )
                             {
-                                Map<labelList>::const_iterator
-                                    mpfAddrPointIter =
-                                        masterPointFaceAddr.find
-                                        (
-                                            cutFaceGlobal[pointi]
-                                        );
+                                const auto mpfAddrPointIter =
+                                    masterPointFaceAddr.cfind
+                                    (
+                                        cutFaceGlobal[pointi]
+                                    );
 
-                                if
-                                (
-                                    mpfAddrPointIter
-                                 == masterPointFaceAddr.end()
-                                )
+                                if (!mpfAddrPointIter.found())
                                 {
                                     // Point is off the master patch. Skip
                                     miss = true;
@@ -479,15 +471,11 @@ void Foam::enrichedPatch::calcCutFaces() const
 
                                 // For every current face, try to find it in the
                                 // zero-list
-                                forAll(curMasterFaces, i)
+                                for (const label facei : curMasterFaces)
                                 {
                                     forAll(masterFacesOfPZero, j)
                                     {
-                                        if
-                                        (
-                                            curMasterFaces[i]
-                                         == masterFacesOfPZero[j]
-                                        )
+                                        if (facei == masterFacesOfPZero[j])
                                         {
                                             hits[j]++;
                                             break;
@@ -644,7 +632,7 @@ void Foam::enrichedPatch::calcCutFaces() const
 
     } // end of local faces
 
-    // Re-pack the list into compact storage
+    // Re-pack lists into compact storage
     cutFacesPtr_ = new faceList();
     cutFacesPtr_->transfer(cf);
 

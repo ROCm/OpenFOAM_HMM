@@ -89,7 +89,7 @@ inline Foam::List<T>::List
         alloc();
 
         InputIterator iter = begIter;
-        forAll(*this, i)
+        for (label i = 0; i < s; ++i)
         {
             this->operator[](i) = *iter;
             ++iter;
@@ -142,35 +142,23 @@ inline void Foam::List<T>::resize(const label newSize)
 
 
 template<class T>
-inline void Foam::List<T>::resize(const label newSize, const T& a)
+inline void Foam::List<T>::resize(const label newSize, const T& val)
 {
-    this->setSize(newSize, a);
+    this->setSize(newSize, val);
 }
 
 
 template<class T>
 inline T& Foam::List<T>::newElmt(const label i)
 {
-    if (i >= this->size())
+    const label n = this->size();
+
+    if (i >= n)
     {
-        setSize(2*this->size());
+        setSize(2*n);
     }
 
     return UList<T>::operator[](i);
-}
-
-
-template<class T>
-inline void Foam::List<T>::size(const label n)
-{
-    UList<T>::size_ = n;
-}
-
-
-template<class T>
-inline Foam::label Foam::List<T>::size() const
-{
-    return UList<T>::size_;
 }
 
 
@@ -182,9 +170,19 @@ inline Foam::Xfer<Foam::List<T>> Foam::List<T>::xfer()
 
 
 template<class T>
-inline void Foam::List<T>::append(const T& t)
+inline void Foam::List<T>::append(const T& val)
 {
-    setSize(size()+1, t);
+    setSize(this->size() + 1, val);  // copy element
+}
+
+
+template<class T>
+inline void Foam::List<T>::append(T&& val)
+{
+    const label idx = this->size();
+    setSize(idx + 1);
+
+    this->operator[](idx) = std::move(val);  // move assign element
 }
 
 
@@ -197,12 +195,14 @@ inline void Foam::List<T>::append(const UList<T>& lst)
             << "attempted appending to self" << abort(FatalError);
     }
 
-    label nextFree = this->size();
-    setSize(nextFree + lst.size());
+    label idx = this->size();
+    const label n = lst.size();
 
-    forAll(lst, elemI)
+    setSize(idx + n);
+
+    for (label i=0; i<n; ++i)
     {
-        this->operator[](nextFree++) = lst[elemI];
+        this->operator[](idx++) = lst[i];  // copy element
     }
 }
 
@@ -210,12 +210,14 @@ inline void Foam::List<T>::append(const UList<T>& lst)
 template<class T>
 inline void Foam::List<T>::append(const UIndirectList<T>& lst)
 {
-    label nextFree = this->size();
-    setSize(nextFree + lst.size());
+    label idx = this->size();
+    const label n = lst.size();
 
-    forAll(lst, elemI)
+    setSize(idx + n);
+
+    for (label i=0; i<n; ++i)
     {
-        this->operator[](nextFree++) = lst[elemI];
+        this->operator[](idx++) = lst[i];  // copy element
     }
 }
 
@@ -223,9 +225,9 @@ inline void Foam::List<T>::append(const UIndirectList<T>& lst)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::List<T>::operator=(const T& t)
+inline void Foam::List<T>::operator=(const T& val)
 {
-    UList<T>::operator=(t);
+    UList<T>::operator=(val);
 }
 
 

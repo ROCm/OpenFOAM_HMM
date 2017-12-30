@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 runApplication blockMesh
 
@@ -16,7 +14,7 @@ rm -rf 0
 runApplication -s ami \
     createPatch -dict system/createPatchDict.ami -overwrite
 
-runApplication transformPoints -scale '(0.01 0.01 0.01)'
+runApplication transformPoints -scale 0.01  # Uniform scaling [cm] -> [m]
 
 runApplication mergeOrSplitBaffles -split -overwrite
 

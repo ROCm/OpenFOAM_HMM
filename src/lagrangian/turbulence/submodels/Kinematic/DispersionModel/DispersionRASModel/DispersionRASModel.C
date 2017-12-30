@@ -184,9 +184,8 @@ void Foam::DispersionRASModel<CloudType>::write(Ostream& os) const
 {
     DispersionModel<CloudType>::write(os);
 
-    os.writeKeyword("ownK") << ownK_ << token::END_STATEMENT << endl;
-    os.writeKeyword("ownEpsilon") << ownEpsilon_ << token::END_STATEMENT
-        << endl;
+    os.writeEntry("ownK", ownK_);
+    os.writeEntry("ownEpsilon", ownEpsilon_);
 }
 
 

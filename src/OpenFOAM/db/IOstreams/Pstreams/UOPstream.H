@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,15 +72,28 @@ class UOPstream
 
     // Private Member Functions
 
-        //- Write a T to the transfer buffer
-        template<class T>
-        inline void writeToBuffer(const T&);
-
-        //- Write a char to the transfer buffer
-        inline void writeToBuffer(const char&);
+        //- Prepare buffer for count bytes of output at specified alignment.
+        inline void prepareBuffer(const size_t count, const size_t align);
 
         //- Write data to the transfer buffer
-        inline void writeToBuffer(const void* data, size_t count, size_t align);
+        template<class T>
+        inline void writeToBuffer(const T& val);
+
+        //- Write a char to the transfer buffer
+        inline void writeToBuffer(const char& c);
+
+        //- Write count bytes of data to the transfer buffer
+        //  using align byte alignment
+        inline void writeToBuffer
+        (
+            const void* data,
+            const size_t count,
+            const size_t align
+        );
+
+        //- Write string length and content.
+        //  The content includes the trailing nul char.
+        inline void writeStringToBuffer(const std::string& str);
 
 
 public:
@@ -102,7 +115,7 @@ public:
         );
 
         //- Construct given buffers
-        UOPstream(const int toProcNo, PstreamBuffers&);
+        UOPstream(const int toProcNo, PstreamBuffers& buffers);
 
 
     //- Destructor
@@ -114,7 +127,7 @@ public:
         // Inquiry
 
             //- Return flags of output stream
-            ios_base::fmtflags flags() const
+            virtual ios_base::fmtflags flags() const
             {
                 return ios_base::fmtflags(0);
             }
@@ -133,79 +146,103 @@ public:
                 const label communicator = 0
             );
 
-            //- Write next token to stream
-            Ostream& write(const token&);
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok);
 
-            //- Write character
-            Ostream& write(const char);
+            //- Write single character. Whitespace is suppressed.
+            virtual Ostream& write(const char c);
 
-            //- Write character string
-            Ostream& write(const char*);
+            //- Write the word-characters of a character string.
+            //  Sends as a single char, or as word.
+            virtual Ostream& write(const char* str);
 
             //- Write word
-            Ostream& write(const word&);
+            virtual Ostream& write(const word& str);
 
             //- Write string
-            Ostream& write(const string&);
+            virtual Ostream& write(const string& str);
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
-            Ostream& writeQuoted
+            virtual Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& str,
                 const bool quoted=true
             );
 
-            //- Write int32_t
-            virtual Ostream& write(const int32_t);
+            //- Write int32_t as a label
+            virtual Ostream& write(const int32_t val);
 
-            //- Write int64_t
-            Ostream& write(const int64_t);
+            //- Write int64_t as a label
+            virtual Ostream& write(const int64_t val);
 
             //- Write floatScalar
-            Ostream& write(const floatScalar);
+            virtual Ostream& write(const floatScalar val);
 
             //- Write doubleScalar
-            Ostream& write(const doubleScalar);
+            virtual Ostream& write(const doubleScalar val);
 
-            //- Write binary block
-            Ostream& write(const char*, std::streamsize);
+            //- Write binary block with 8-byte alignment.
+            virtual Ostream& write
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- Begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual Ostream& beginRaw(const std::streamsize count);
+
+            //- Low-level raw binary output.
+            virtual Ostream& writeRaw
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- End marker for low-level raw binary output.
+            virtual Ostream& endRaw()
+            {
+                return *this;
+            }
 
             //- Add indentation characters
-            void indent()
+            virtual void indent()
             {}
 
 
         // Stream state functions
 
             //- Flush stream
-            void flush()
+            virtual void flush()
             {}
 
             //- Add newline and flush stream
-            void endl()
+            virtual void endl()
             {}
 
             //- Get width of output field
-            int width() const
+            virtual int width() const
             {
                 return 0;
             }
 
             //- Set width of output field (and return old width)
-            int width(const int)
+            virtual int width(const int)
             {
                  return 0;
             }
 
             //- Get precision of output field
-            int precision() const
+            virtual int precision() const
             {
                  return 0;
             }
 
             //- Set precision of output field (and return old precision)
-            int precision(const int)
+            virtual int precision(const int)
             {
                  return 0;
             }
@@ -223,7 +260,7 @@ public:
         // Print
 
             //- Print description of IOstream to Ostream
-            void print(Ostream&) const;
+            void print(Ostream& os) const;
 };
 
 

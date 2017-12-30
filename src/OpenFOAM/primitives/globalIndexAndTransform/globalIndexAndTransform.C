@@ -404,7 +404,7 @@ bool Foam::globalIndexAndTransform::uniqueTransform
     const labelPair& patchTrafo
 ) const
 {
-    if (findIndex(trafos, patchTrafo) == -1)
+    if (!trafos.found(patchTrafo))
     {
         // New transform. Check if already have 3
         if (trafos.size() == 3)

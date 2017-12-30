@@ -18,6 +18,8 @@ EXE_LIBS = \
     -L$(FASTDUALOCTREE_SRC_PATH) -lperf_main \
     -lGL \
     -lconformalVoronoiMesh \
-    -ldecompositionMethods -L$(FOAM_LIBBIN)/dummy -lscotchDecomp \
+    -ldecompositionMethods \
+    -L$(FOAM_LIBBIN)/dummy \
+    -lkahipDecomp -lmetisDecomp -lscotchDecomp \
     -lmeshTools \
     -ldynamicMesh

@@ -34,10 +34,11 @@ See also
 
 #include "argList.H"
 #include "FixedList.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
+#include "List.H"
 #include "IPstream.H"
 #include "OPstream.H"
+#include <numeric>
 
 using namespace Foam;
 
@@ -48,36 +49,101 @@ int main(int argc, char *argv[])
 {
     argList args(argc, argv);
 
-    FixedList<label, 4> list;
-    list[0] = 1;
-    list[1] = 2;
-    list[2] = 3;
-    list[3] = 4;
-
-    Info<< "list:" << list
-        << " hash:" << FixedList<label, 4>::Hash<>()(list) << endl;
-
-    label a[4] = {0, 1, 2, 3};
-    FixedList<label, 4> list2(a);
-
-    Info<< "list2:" << list2
-        << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
-
-    // Using FixedList for content too
+    if (false)
     {
-        List<FixedList<label, 4>> twolists{list, list2};
-        Info<<"List of FixedList: " << flatOutput(twolists) << endl;
-        sort(twolists);
-        // outer-sort only
-        Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
+        FixedList<string, 1> ident;
+
+        auto iter = ident.begin();
+
+        Info << iter->size() << endl;
+
+        auto riter = ident.rbegin();
+        Info << riter->size() << endl;
+
+        auto iter2 = ident.rbegin();
+
+        iter2 = iter;
     }
 
-    Info<< "list: " << list << nl
-        << "list2: " << list2 << endl;
-    list.swap(list2);
-    Info<< "Swapped via the swap() method" << endl;
-    Info<< "list: " << list << nl
-        << "list2: " << list2 << endl;
+    {
+        FixedList<label, 15> ident;
+        std::iota(ident.begin(), ident.end(), 0);
+
+        // auto iter = ident.begin();
+        //
+        // iter += 5;
+        // Info << *iter << "< " << endl;
+        // iter -= 2;
+        // Info << *iter << "< " << endl;
+
+        // Don't yet bother with making reverse iterators random access
+        // auto riter = ident.crbegin();
+
+        // riter += 5;
+        // Info << *riter << "< " << endl;
+        // riter += 2;
+        // Info << *riter << "< " << endl;
+
+        Info<<"Ident:";
+        forAllConstIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"reverse:";
+        forAllReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"const reverse:";
+        forAllConstReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+    }
+
+    {
+        FixedList<label, 4> list1{1, 2, 3, 4};
+
+        Info<< "list1:" << list1
+            << " hash:" << FixedList<label, 4>::Hash<>()(list1) << endl;
+
+        label a[4] = {0, 1, 2, 3};
+        FixedList<label, 4> list2(a);
+
+        Info<< "list2:" << list2
+            << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
+
+        // Using FixedList for content too
+        {
+            List<FixedList<label, 4>> twolists{list1, list2};
+            Info<<"List of FixedList: " << flatOutput(twolists) << endl;
+            sort(twolists);
+            // outer-sort only
+            Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
+        }
+
+        Info<< "====" << nl
+            << "Test swap" << nl;
+
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << endl;
+        list1.swap(list2);
+        Info<< "The swap() method" << endl;
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << endl;
+
+        Swap(list1, list2);
+        Info<< "The Swap() function" << endl;
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << endl;
+
+        Info<< "====" << nl;
+    }
 
     List<label> list3{0, 1, 2, 3};
     FixedList<label, 4> list4(list3.begin(), list3.end());

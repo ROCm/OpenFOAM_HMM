@@ -166,7 +166,7 @@ void Foam::fvsPatchField<Type>::rmap
 template<class Type>
 void Foam::fvsPatchField<Type>::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
     this->writeEntry("value", os);
 }
 

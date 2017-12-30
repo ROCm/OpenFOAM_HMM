@@ -39,10 +39,10 @@ void Foam::RBD::rigidBodyModelState::write(dictionary& dict) const
 
 void Foam::RBD::rigidBodyModelState::write(Ostream& os) const
 {
-    os.writeKeyword("q") << q_ << token::END_STATEMENT << nl;
-    os.writeKeyword("qDot") << qDot_ << token::END_STATEMENT << nl;
-    os.writeKeyword("qDdot") << qDdot_ << token::END_STATEMENT << nl;
-    os.writeKeyword("deltaT") << deltaT_ << token::END_STATEMENT << nl;
+    os.writeEntry("q", q_);
+    os.writeEntry("qDot", qDot_);
+    os.writeEntry("qDdot", qDdot_);
+    os.writeEntry("deltaT", deltaT_);
 }
 
 

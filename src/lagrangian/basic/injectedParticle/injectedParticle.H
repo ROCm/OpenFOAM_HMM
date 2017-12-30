@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,17 @@ Class
     Foam::injectedParticle
 
 Description
+    Primarly stores particle properties so that it can be injected at a later
+    time.  Note that this stores its own local position as opposed to the
+    base particle class barycentric coordinates since the particle is not
+    (usually) attached to a mesh, and instead used for post-processing.
 
 SourceFiles
     injectedParticle.C
     injectedParticleIO.C
+
+SeeAlso
+    Foam::functionObjects::extractEulerianParticles
 
 \*---------------------------------------------------------------------------*/
 
@@ -73,6 +80,9 @@ protected:
     // Protected data
 
         // Particle properties
+
+            //- Position
+            point position_;
 
             //- Tag
             label tag_;
@@ -125,7 +135,8 @@ public:
             const label tag,
             const scalar soi,
             const scalar d,
-            const vector& U
+            const vector& U,
+            const bool doLocate = true
         );
 
         //- Construct from Istream
@@ -133,7 +144,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct as a copy
@@ -223,6 +235,11 @@ public:
                 const Cloud<injectedParticle>& c,
                 objectRegistry& obr
             );
+
+            //- Write the particle position and cell
+            //  Note: This uses the local particle position, and bypasses the
+            //  barycentric description
+            virtual void writePosition(Ostream&) const;
 
 
     // Ostream Operator

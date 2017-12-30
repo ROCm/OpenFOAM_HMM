@@ -40,6 +40,13 @@ inline bool Foam::UPtrList<T>::empty() const
 
 
 template<class T>
+inline void Foam::UPtrList<T>::swap(UPtrList<T>& lst)
+{
+    ptrs_.swap(lst.ptrs_);
+}
+
+
+template<class T>
 inline T& Foam::UPtrList<T>::first()
 {
     return this->operator[](0);

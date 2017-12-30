@@ -44,7 +44,7 @@ Usage
     Specify a feature angle
 
 
-    E.g. inflate surface by 2cm with 1.5 safety factor:
+    E.g. inflate surface by 20mm with 1.5 safety factor:
         surfaceInflate DTC-scaled.obj 0.02 1.5 -featureAngle 45 -nSmooth 2
 
 \*---------------------------------------------------------------------------*/
@@ -70,7 +70,7 @@ scalar calcVertexNormalWeight
     const pointField& points
 )
 {
-    label index = findIndex(f, pI);
+    label index = f.find(pI);
 
     if (index == -1)
     {
@@ -292,7 +292,7 @@ label detectIntersectionPoints
             if
             (
                 hits[pointI].hit()
-            &&  findIndex(localFaces[hits[pointI].index()], pointI) == -1
+            &&  !localFaces[hits[pointI].index()].found(pointI)
             )
             {
                 scale[pointI] = max(0.0, scale[pointI]-0.2);
@@ -597,9 +597,9 @@ int main(int argc, char *argv[])
         "switch on additional debug information"
     );
 
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("distance");
-    argList::validArgs.append("safety factor [1..]");
+    argList::addArgument("inputFile");
+    argList::addArgument("distance");
+    argList::addArgument("safety factor [1..]");
 
     #include "setRootCase.H"
     #include "createTime.H"

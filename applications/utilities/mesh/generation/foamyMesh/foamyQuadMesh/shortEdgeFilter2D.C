@@ -43,7 +43,7 @@ void Foam::shortEdgeFilter2D::addRegion
     {
         bPointRegions.append(regionI);
     }
-    else if (findIndex(bPointRegions, regionI) == -1)
+    else if (!bPointRegions.found(regionI))
     {
         bPointRegions.append(regionI);
     }

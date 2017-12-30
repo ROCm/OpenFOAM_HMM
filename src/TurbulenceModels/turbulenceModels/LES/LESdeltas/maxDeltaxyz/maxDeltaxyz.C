@@ -64,14 +64,14 @@ void Foam::LESModels::maxDeltaxyz::calcDelta()
             const point& fc = faceC[facei];
             const vector& n = faceN[facei];
 
-            scalar tmp = magSqr(n*(n & (fc - cc)));
+            scalar tmp = mag(n & (fc - cc));
             if (tmp > deltaMaxTmp)
             {
                 deltaMaxTmp = tmp;
             }
         }
 
-        hmax[celli] = deltaCoeff_*Foam::sqrt(deltaMaxTmp);
+        hmax[celli] = deltaCoeff_*deltaMaxTmp;
     }
 
     if (nD == 3)
@@ -113,7 +113,7 @@ Foam::LESModels::maxDeltaxyz::maxDeltaxyz
         dict.optionalSubDict(type() + "Coeffs").lookupOrDefault<scalar>
         (
             "deltaCoeff",
-            1
+            2
         )
     )
 {

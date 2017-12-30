@@ -374,10 +374,6 @@ void Foam::GAMGAgglomeration::procAgglomerateLduAddressing
     const lduMesh& myMesh = meshLevels_[levelIndex-1];
 
 
-    label oldWarn = UPstream::warnComm;
-    UPstream::warnComm = meshComm;
-
-
     procAgglomMap_.set(levelIndex, new labelList(procAgglomMap));
     agglomProcIDs_.set(levelIndex, new labelList(procIDs));
     procCommunicator_[levelIndex] = allMeshComm;
@@ -435,8 +431,6 @@ void Foam::GAMGAgglomeration::procAgglomerateLduAddressing
     {
         clearLevel(levelIndex);
     }
-
-    UPstream::warnComm = oldWarn;
 }
 
 
@@ -710,11 +704,9 @@ void Foam::GAMGAgglomeration::calculateRegionMaster
     // processor
     agglomProcIDs = findIndices(procAgglomMap, myAgglom);
     // Make sure the master is the first element.
-    label index = findIndex
-    (
-        agglomProcIDs,
-        agglomToMaster[myAgglom]
-    );
+    const label index =
+        agglomProcIDs.find(agglomToMaster[myAgglom]);
+
     Swap(agglomProcIDs[0], agglomProcIDs[index]);
 }
 

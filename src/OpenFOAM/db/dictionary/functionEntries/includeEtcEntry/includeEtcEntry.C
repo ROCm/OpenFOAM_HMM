@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,21 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "includeEtcEntry.H"
-#include "etcFiles.H"
-#include "IFstream.H"
-#include "stringOps.H"
 #include "addToMemberFunctionSelectionTable.H"
+#include "etcFiles.H"
+#include "stringOps.H"
+#include "IFstream.H"
+#include "IOstreams.H"
+#include "fileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::word Foam::functionEntries::includeEtcEntry::typeName
-(
-    Foam::functionEntries::includeEtcEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include includeEtcEntry
-int Foam::functionEntries::includeEtcEntry::debug(0);
 
 bool Foam::functionEntries::includeEtcEntry::log(false);
 
@@ -47,27 +40,29 @@ namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEtcEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        includeEtc
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEtcEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        includeEtc
     );
 }
 }
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-Foam::fileName Foam::functionEntries::includeEtcEntry::includeEtcFileName
+Foam::fileName Foam::functionEntries::includeEtcEntry::resolveEtcFile
 (
     const fileName& f,
     const dictionary& dict
@@ -83,11 +78,9 @@ Foam::fileName Foam::functionEntries::includeEtcEntry::includeEtcFileName
     {
         return fName;
     }
-    else
-    {
-        // Search the etc directories for the file
-        return findEtcFile(fName);
-    }
+
+    // Search etc directories for the file
+    return Foam::findEtcFile(fName);
 }
 
 
@@ -99,12 +92,11 @@ bool Foam::functionEntries::includeEtcEntry::execute
     Istream& is
 )
 {
-    const fileName rawFName(is);
-    const fileName fName
-    (
-        includeEtcFileName(rawFName, parentDict)
-    );
-    IFstream ifs(fName);
+    const fileName rawName(is);
+    const fileName fName(resolveEtcFile(rawName, parentDict));
+
+    autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
+    ISstream& ifs = ifsPtr();
 
     if (ifs)
     {
@@ -115,18 +107,16 @@ bool Foam::functionEntries::includeEtcEntry::execute
         parentDict.read(ifs);
         return true;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open etc file "
-            << (ifs.name().size() ? ifs.name() : rawFName)
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "Cannot open etc file "
+        << (ifs.name().size() ? ifs.name() : rawName)
+        << " while reading dictionary " << parentDict.name()
+        << exit(FatalIOError);
+
+    return false;
 }
 
 
@@ -137,12 +127,11 @@ bool Foam::functionEntries::includeEtcEntry::execute
     Istream& is
 )
 {
-    const fileName rawFName(is);
-    const fileName fName
-    (
-        includeEtcFileName(rawFName, parentDict)
-    );
-    IFstream ifs(fName);
+    const fileName rawName(is);
+    const fileName fName(resolveEtcFile(rawName, parentDict));
+
+    autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
+    ISstream& ifs = ifsPtr();
 
     if (ifs)
     {
@@ -153,18 +142,16 @@ bool Foam::functionEntries::includeEtcEntry::execute
         entry.read(parentDict, ifs);
         return true;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open etc file "
-            << (ifs.name().size() ? ifs.name() : rawFName)
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "Cannot open etc file "
+        << (ifs.name().size() ? ifs.name() : rawName)
+        << " while reading dictionary " << parentDict.name()
+        << exit(FatalIOError);
+
+    return false;
 }
 
 

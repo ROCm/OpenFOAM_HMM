@@ -32,7 +32,6 @@ Description
 #include "dictionary.H"
 #include "nil.H"
 #include "IOstreams.H"
-#include "IStringStream.H"
 
 namespace Foam
 {
@@ -61,6 +60,10 @@ int main(int argc, char *argv[])
     {
         nil x;
         cout<<"nil:" << sizeof(x) << nl;
+    }
+    {
+        zero x;
+        cout<<"zero:" << sizeof(x) << nl;
     }
     {
         bool x(0);
@@ -92,6 +95,10 @@ int main(int argc, char *argv[])
         cout<<"long:" << sizeof(long) << nl;
         cout<<"float:" << sizeof(float) << nl;
         cout<<"double:" << sizeof(double) << nl;
+    }
+
+    {
+        cout<<"string:" << sizeof(Foam::string) << nl;
     }
 
 

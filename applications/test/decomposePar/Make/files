@@ -1,0 +1,3 @@
+Test-decomposePar.C
+
+EXE = $(FOAM_APPBIN)/Test-decomposePar

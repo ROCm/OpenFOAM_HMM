@@ -47,7 +47,7 @@ Usage
 #include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
-
+#include "IOdictionary.H"
 #include "MeshedSurfaces.H"
 
 using namespace Foam;
@@ -57,7 +57,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("outputFile.ext");
+    argList::addArgument("outputFile.ext");
     timeSelector::addOptions();
 
     argList::addOption

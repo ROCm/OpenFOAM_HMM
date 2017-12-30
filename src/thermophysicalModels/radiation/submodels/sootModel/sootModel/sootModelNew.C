@@ -44,21 +44,19 @@ Foam::radiation::sootModel::New
         Info<< "Selecting sootModel " << modelType << endl;
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown sootModel type "
             << modelType << nl << nl
-            << "Valid sootModel types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Valid sootModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
-    const label tempOpen = modelType.find('<');
-
-    const word className = modelType(0, tempOpen);
+    const word className = modelType.substr(0, modelType.find('<'));
 
     return autoPtr<sootModel>(cstrIter()(dict, mesh, className));
 }

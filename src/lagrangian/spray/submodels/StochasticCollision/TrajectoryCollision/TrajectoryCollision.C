@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,13 @@ License
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::TrajectoryCollision<CloudType>::collide(const scalar dt)
+void Foam::TrajectoryCollision<CloudType>::collide
+(
+    typename CloudType::parcelType::trackingData& td,
+    const scalar dt
+)
 {
-    ORourkeCollision<CloudType>::collide(dt);
+    ORourkeCollision<CloudType>::collide(td, dt);
 }
 
 
@@ -46,15 +50,15 @@ bool Foam::TrajectoryCollision<CloudType>::collideParcels
 {
     bool coalescence = false;
 
-    const vector& pos1 = p1.position();
-    const vector& pos2 = p2.position();
+    const vector pos1(p1.position());
+    const vector pos2(p2.position());
 
     const vector& U1 = p1.U();
     const vector& U2 = p2.U();
 
-    vector URel = U1 - U2;
+    vector URel(U1 - U2);
 
-    vector d = pos2 - pos1;
+    vector d(pos2 - pos1);
     scalar magd = mag(d);
 
     scalar vAlign = URel & (d/(magd + ROOTVSMALL));

@@ -45,15 +45,14 @@ Foam::autoPtr<Foam::cellLooper> Foam::cellLooper::New
     const polyMesh& mesh
 )
 {
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(type);
+    auto cstrIter = wordConstructorTablePtr_->cfind(type);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown set type "
+            << "Unknown cellLooper type "
             << type << nl << nl
-            << "Valid cellLooper types : " << endl
+            << "Valid cellLooper types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -149,7 +148,7 @@ Foam::labelList Foam::cellLooper::getVertEdgesNonFace
 
         if
         (
-            (findIndex(exclEdges, edgeI) == -1)
+            !exclEdges.found(edgeI)
          && meshTools::edgeOnCell(mesh(), celli, edgeI)
         )
         {

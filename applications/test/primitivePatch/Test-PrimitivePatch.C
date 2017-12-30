@@ -31,8 +31,7 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "primitivePatch.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 
 using namespace Foam;
 
@@ -213,7 +212,7 @@ void writeFaceFaces
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("patch");
+    argList::addArgument("patch");
 
     #include "setRootCase.H"
     #include "createTime.H"

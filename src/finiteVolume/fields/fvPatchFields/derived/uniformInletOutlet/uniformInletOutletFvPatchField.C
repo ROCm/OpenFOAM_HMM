@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -150,7 +150,7 @@ void Foam::uniformInletOutletFvPatchField<Type>::updateCoeffs()
             phiName_
         );
 
-    this->valueFraction() = 1.0 - pos(phip);
+    this->valueFraction() = 1.0 - pos0(phip);
 
     mixedFvPatchField<Type>::updateCoeffs();
 }
@@ -160,10 +160,7 @@ template<class Type>
 void Foam::uniformInletOutletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->uniformInletValue_->writeData(os);
     this->writeEntry("value", os);
 }

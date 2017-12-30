@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ SourceFiles
 #include "triFace.H"
 #include "edge.H"
 #include "pointField.H"
-#include "tetrahedron.H"
+#include "tetPointRef.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,10 +65,10 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null, with invalid point labels (-1)
         inline tetCell();
 
-        //- Construct from four points
+        //- Construct from four point labels
         inline tetCell
         (
             const label a,
@@ -77,8 +77,11 @@ public:
             const label d
         );
 
-        //- Construct from FixedList
+        //- Construct from FixedList of four point labels
         inline tetCell(const FixedList<label, 4>& lst);
+
+        //- Construct from an initializer list of four point labels
+        explicit inline tetCell(std::initializer_list<label> lst);
 
         //- Construct from Istream
         inline tetCell(Istream& is);
@@ -92,17 +95,17 @@ public:
             inline triFace face(const label facei) const;
 
             //- Return first face adjacent to the given edge
-            inline label edgeFace(const label edgeI) const;
+            inline label edgeFace(const label edgei) const;
 
             //- Return face adjacent to the given face sharing the same edge
             inline label edgeAdjacentFace
             (
-                const label edgeI,
+                const label edgei,
                 const label facei
             ) const;
 
             //- Return i-th edge
-            inline edge tetEdge(const label edgeI) const;
+            inline edge tetEdge(const label edgei) const;
 
 
         // Operations

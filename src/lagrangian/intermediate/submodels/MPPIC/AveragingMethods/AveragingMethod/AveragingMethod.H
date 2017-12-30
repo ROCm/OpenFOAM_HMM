@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,7 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
+#include "barycentric.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -137,7 +138,7 @@ public:
         //- Add point value to interpolation
         virtual void add
         (
-            const point position,
+            const barycentric& coordinates,
             const tetIndices& tetIs,
             const Type& value
         ) = 0;
@@ -145,14 +146,14 @@ public:
         //- Interpolate
         virtual Type interpolate
         (
-            const point position,
+            const barycentric& coordinates,
             const tetIndices& tetIs
         ) const = 0;
 
         //- Interpolate gradient
         virtual TypeGrad interpolateGrad
         (
-            const point position,
+            const barycentric& coordinates,
             const tetIndices& tetIs
         ) const = 0;
 
@@ -164,7 +165,7 @@ public:
         virtual bool writeData(Ostream&) const;
 
         //- Write using setting from DB
-        virtual bool write() const;
+        virtual bool write(const bool valid = true) const;
 
         //- Return an internal field of the average
         virtual tmp<Field<Type>> primitiveField() const = 0;

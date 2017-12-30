@@ -39,7 +39,7 @@ Foam::label Foam::ccm::writer::prostarCellFaceId
     const cellShape&  shape = mesh_.cellShapes()[cellId];
     const labelList& cFaces = mesh_.cells()[cellId];
 
-    label cellFaceId = findIndex(cFaces, faceI);
+    label cellFaceId = cFaces.find(faceI);
     label mapIndex = shape.model().index();
 
     if (ccm::debug > 1)
@@ -162,7 +162,8 @@ void Foam::ccm::writer::writeFaces
 
     if (ccm::debug)
     {
-        Info<<"CCMIOWriteFaces()  size:" << size << " streamSize:" << streamSize << endl;
+        Info<<"CCMIOWriteFaces()  size:" << size << " streamSize:"
+            << streamSize << endl;
     }
 
     CCMIOWriteFaces

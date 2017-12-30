@@ -27,6 +27,9 @@ Class
 Description
     Helper class for initializing parallel jobs from the command arguments.
 
+    This class also handles cleanup of parallel or serial jobs in a
+    uniform manner.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef parRun_H
@@ -60,10 +63,13 @@ public:
         if (RunPar)
         {
             Info<< "Finalising parallel run" << endl;
-            Pstream::exit(0);
         }
+
+        // Handles serial and parallel modes.
+        Pstream::exit(0);
     }
 
+    //- Initialize Pstream for a parallel run
     void runPar(int& argc, char**& argv)
     {
         RunPar = true;
@@ -75,6 +81,8 @@ public:
         }
     }
 
+
+    //- Is this a parallel run?
     bool parRun() const
     {
         return RunPar;

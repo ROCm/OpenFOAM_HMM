@@ -25,10 +25,10 @@ Class
     Foam::hexMatcher
 
 Description
-    A cellMatcher for hex cells
+    A cellMatcher for hex cells (cellModel::HEX).
 
 See also
-    cellMatcher
+    cellMatcher, cellModel
 
 SourceFiles
     hexMatcher.C
@@ -46,28 +46,28 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class hexMatcher Declaration
+                         Class hexMatcher Declaration
 \*---------------------------------------------------------------------------*/
 
 class hexMatcher
 :
     public cellMatcher
 {
-    // Static data members
+    // Static Data Members
 
-        //- Constants for this shape
-        static const label vertPerCell;
-        static const label facePerCell;
-        static const label maxVertPerFace;
+        // Constants for this shape
+        static constexpr label vertPerCell = 8;
+        static constexpr label facePerCell = 6;
+        static constexpr label maxVertPerFace = 4;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        hexMatcher(const hexMatcher&);
+        hexMatcher(const hexMatcher&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const hexMatcher&);
+        hexMatcher& operator=(const hexMatcher&) = delete;
 
 
 public:

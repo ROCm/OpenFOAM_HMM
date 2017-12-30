@@ -30,12 +30,7 @@ License
 #include "fvcDiv.H"
 #include "fvcGrad.H"
 #include "fvcSnGrad.H"
-
-// * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
-
-const Foam::scalar Foam::threePhaseInterfaceProperties::convertToRad =
-    Foam::constant::mathematical::pi/180.0;
-
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -83,7 +78,7 @@ void Foam::threePhaseInterfaceProperties::correctContactAngle
 
             scalarField theta
             (
-                convertToRad
+                degToRad()
               * (
                    twoPhaseAlpha2*(180 - a2cap.theta(U[patchi], nHatp))
                  + twoPhaseAlpha3*(180 - a3cap.theta(U[patchi], nHatp))
@@ -219,8 +214,8 @@ Foam::threePhaseInterfaceProperties::nearInterface() const
 {
     return max
     (
-        pos(mixture_.alpha1() - 0.01)*pos(0.99 - mixture_.alpha1()),
-        pos(mixture_.alpha2() - 0.01)*pos(0.99 - mixture_.alpha2())
+        pos0(mixture_.alpha1() - 0.01)*pos0(0.99 - mixture_.alpha1()),
+        pos0(mixture_.alpha2() - 0.01)*pos0(0.99 - mixture_.alpha2())
     );
 }
 

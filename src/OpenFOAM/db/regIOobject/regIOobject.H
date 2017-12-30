@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,6 +52,11 @@ namespace functionEntries
 {
     class codeStream;
 }
+namespace fileOperations
+{
+    class uncollatedFileOperation;
+    class masterUncollatedFileOperation;
+}
 
 /*---------------------------------------------------------------------------*\
                          Class regIOobject Declaration
@@ -61,25 +66,14 @@ class regIOobject
 :
     public IOobject
 {
-
 protected:
 
-        //- Read everywhere or only on master and scatter
-        bool read
-        (
-            const bool masterOnly,
-            const IOstream::streamFormat PstreamFormat,
-            const word& typeName
-        );
-
-public:
-        //- Check readOpt flags and read if necessary. Uses above read
+        //- Helper: check readOpt flags and read if necessary
         bool readHeaderOk
         (
             const IOstream::streamFormat PstreamFormat,
             const word& typeName
         );
-protected:
 
         //- Construct and return an IFstream for the object.
         //  The results is NULL if the stream construction failed
@@ -106,13 +100,13 @@ private:
         label eventNo_;
 
         //- Istream for reading
-        Istream* isPtr_;
+        autoPtr<ISstream> isPtr_;
 
 
     // Private Member Functions
 
         //- Return Istream
-        Istream& readStream();
+        Istream& readStream(const bool valid = true);
 
         //- Dissallow assignment
         void operator=(const regIOobject&);
@@ -123,6 +117,8 @@ public:
         //- Declare friendship with any classes that need access to
         //  masterOnlyReading
         friend class functionEntries::codeStream;
+        friend class fileOperations::uncollatedFileOperation;
+        friend class fileOperations::masterUncollatedFileOperation;
 
 
     // Static data
@@ -252,7 +248,7 @@ public:
             bool headerOk();
 
             //- Return Istream and check object type against that given
-            Istream& readStream(const word&);
+            Istream& readStream(const word&, const bool valid = true);
 
             //- Close Istream
             void close();
@@ -294,11 +290,12 @@ public:
             (
                 IOstream::streamFormat,
                 IOstream::versionNumber,
-                IOstream::compressionType
+                IOstream::compressionType,
+                const bool valid
             ) const;
 
             //- Write using setting from DB
-            virtual bool write() const;
+            virtual bool write(const bool valid = true) const;
 
 
         // Other

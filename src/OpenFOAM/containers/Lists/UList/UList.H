@@ -48,6 +48,8 @@ SourceFiles
 #include "nullObject.H"
 #include "zero.H"
 #include "stdFoam.H"
+#include "Swap.H"
+
 #include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -65,6 +67,8 @@ template<class T> class UList;
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 template<class T> Istream& operator>>(Istream&, UList<T>&);
 
+// Commonly required list types
+typedef UList<char> charUList;
 typedef UList<label> labelUList;
 
 /*---------------------------------------------------------------------------*\
@@ -100,15 +104,19 @@ protected:
 
     // Protected Member Functions
 
+        //- Override size to be inconsistent with allocated storage.
+        //  Use with care
+        inline void size(const label n);
+
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
         //- Return a validated (start,size) subset range, which means that it
-        //  always addresses a valid section of the list.
+        //- always addresses a valid section of the list.
         labelRange validateRange(const labelRange& range) const;
 
         //- Return a validated (start,size) subset range, which means that it
-        //  always addresses a valid section of the list.
+        //- always addresses a valid section of the list.
         labelRange validateRange
         (
             std::initializer_list<label> start_size_pair
@@ -133,39 +141,35 @@ public:
 
     // Public classes
 
-        //- Less function class that can be used for sorting
-        class less
+        //- A list compare binary predicate for normal sort
+        struct less
         {
-            const UList<T>& values_;
+            const UList<T>& values;
 
-        public:
-
-            less(const UList<T>& values)
+            less(const UList<T>& list)
             :
-                values_(values)
+                values(list)
             {}
 
-            bool operator()(const label a, const label b)
+            bool operator()(const label a, const label b) const
             {
-                return values_[a] < values_[b];
+                return values[a] < values[b];
             }
         };
 
-        //- Greater function class that can be used for sorting
-        class greater
+        //- A list compare binary predicate for reverse sort
+        struct greater
         {
-            const UList<T>& values_;
+            const UList<T>& values;
 
-        public:
-
-            greater(const UList<T>& values)
+            greater(const UList<T>& list)
             :
-                values_(values)
+                values(list)
             {}
 
-            bool operator()(const label a, const label b)
+            bool operator()(const label a, const label b) const
             {
-                return values_[a] > values_[b];
+                return values[a] > values[b];
             }
         };
 
@@ -181,31 +185,42 @@ public:
 
     // Member Functions
 
-
         // Access
 
-            //- Return the forward circular index, i.e. the next index
-            //  which returns to the first at the end of the list
+            //- Return the forward circular index, i.e. next index
+            //- which returns to the first at the end of the list
             inline label fcIndex(const label i) const;
 
-            //- Return the reverse circular index, i.e. the previous index
-            //  which returns to the last at the beginning of the list
+            //- Return forward circular value (ie, next value in the list)
+            inline const T& fcValue(const label i) const;
+
+            //- Return forward circular value (ie, next value in the list)
+            inline T& fcValue(const label i);
+
+            //- Return the reverse circular index, i.e. previous index
+            //- which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
 
+            //- Return reverse circular value (ie, previous value in the list)
+            inline const T& rcValue(const label i) const;
+
+            //- Return reverse circular value (ie, previous value in the list)
+            inline T& rcValue(const label i);
+
             //- Return the binary size in number of characters of the UList
-            //  if the element is a primitive type
+            //- if the element is a primitive type
             //  i.e. contiguous<T>() == true.
             //  Note that is of type streamsize since used in stream ops
             std::streamsize byteSize() const;
 
 
-            //- Return a const pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a const pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline const T* cdata() const;
 
-            //- Return a pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline T* data();
 
@@ -233,6 +248,44 @@ public:
             //- Check index i is within valid range (0 ... size-1)
             inline void checkIndex(const label i) const;
 
+
+      // Search
+
+        //- Find index of the first occurence of the value.
+        //  When start is specified, any occurences before start are ignored.
+        //  Linear search.
+        //  \return position in list or -1 if not found.
+        label find(const T& val, const label start=0) const;
+
+        //- Find index of the last occurence of the value.
+        //  When pos is specified, any occurences after pos are ignored.
+        //  Linear search.
+        //  \return position in list or -1 if not found.
+        label rfind(const T& val, const label pos=-1) const;
+
+        //- True if the value if found in the list.
+        //  When start is specified, any occurences before start are ignored.
+        //  Linear search.
+        //  \return true if found.
+        inline bool found(const T& val, const label start=0) const;
+
+
+      // Edit
+
+        //- Move element to the first position.
+        void moveFirst(const label i);
+
+        //- Move element to the last position.
+        void moveLast(const label i);
+
+        //- Swap element with the first element. Fatal on an empty list.
+        void swapFirst(const label i);
+
+        //- Swap element with the last element. Fatal on an empty list.
+        void swapLast(const label i);
+
+
+      // Copy
 
         //- Copy the pointer held by the given UList
         inline void shallowCopy(const UList<T>& a);
@@ -264,21 +317,21 @@ public:
         //- Return (start,size) subset from UList with non-const access.
         //  The range is subsetted with the list size itself to ensure that the
         //  result always addresses a valid section of the list.
-        UList<T> operator[](std::initializer_list<label> start_size_range);
+        UList<T> operator[](std::initializer_list<label> start_size);
 
         //- Return (start,size) subset from UList with const access.
         //  The range is subsetted with the list size itself to ensure that the
         //  result always addresses a valid section of the list.
         const UList<T> operator[]
         (
-            std::initializer_list<label> start_size_range
+            std::initializer_list<label> start_size
         ) const;
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
 
         //- Assignment of all entries to the given value
-        void operator=(const T& t);
+        void operator=(const T& val);
 
         //- Assignment of all entries to zero
         void operator=(const zero);
@@ -296,7 +349,7 @@ public:
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
-        //  UList iterator objects
+        //- UList iterator objects
         typedef label difference_type;
 
         //- The type that can represent the size of a UList
@@ -332,11 +385,94 @@ public:
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator end() const;
 
+    // Reverse iterators
 
-    // STL reverse_iterator
+        //- Generic const/non-const reverse iterator
+        template<bool Const>
+        class reverse_iterator_base
+        {
+        public:
+            //- The const/non-const type for entries
+            typedef typename std::conditional
+                <Const, const T, T>::type value_type;
 
-        //- Reverse iterator for reverse traversal of UList
-        typedef T* reverse_iterator;
+            //- A pointer to a const/non-const entry
+            typedef value_type* pointer;
+
+            //- A reference to a const/non-const entry
+            typedef value_type& reference;
+
+
+        private:
+
+            //- The element pointer
+            pointer ptr_;
+
+
+        public:
+
+            //- Construct null or from list element pointer
+            inline reverse_iterator_base(pointer ptr = nullptr)
+            :
+                ptr_(ptr)
+            {}
+
+
+            //- Copy construct
+            inline reverse_iterator_base(const reverse_iterator_base& iter)
+            :
+                ptr_(iter.ptr_)
+            {}
+
+
+            //- Reverse increment
+            inline void operator++()
+            {
+                --ptr_;
+            }
+
+            //- Reverse increment
+            inline reverse_iterator_base operator++(int)
+            {
+                reverse_iterator_base old(*this);
+                --ptr_;
+                return old;
+            }
+
+            //- Reverse increase
+            inline void operator+=(int n)
+            {
+                ptr_ -= n;
+            }
+
+            //- Dereference iterator
+            reference operator*() const
+            {
+                return *ptr_;
+            }
+
+            //- Dereference iterator
+            pointer operator->() const
+            {
+                return ptr_;
+            }
+
+            //- Equality
+            bool operator==(const reverse_iterator_base& iter) const
+            {
+                return ptr_ == iter.ptr_;
+            }
+
+            //- inequality
+            bool operator!=(const reverse_iterator_base& iter) const
+            {
+                return ptr_ != iter.ptr_;
+            }
+        };
+
+
+        //- STL reverse_iterator
+        typedef reverse_iterator_base<false> reverse_iterator;
 
         //- Return reverse_iterator to begin reverse traversing the UList
         inline reverse_iterator rbegin();
@@ -345,10 +481,8 @@ public:
         inline reverse_iterator rend();
 
 
-    // STL const_reverse_iterator
-
-        //- Reverse iterator for reverse traversal of constant UList
-        typedef const T* const_reverse_iterator;
+        //- STL const reverse iterator
+        typedef reverse_iterator_base<true> const_reverse_iterator;
 
         //- Return const_reverse_iterator to begin reverse traversing the UList
         inline const_reverse_iterator crbegin() const;
@@ -374,8 +508,8 @@ public:
         //- Return true if the UList is empty (ie, size() is zero)
         inline bool empty() const;
 
-        //- Swap two ULists of the same type in constant time
-        void swap(UList<T>& a);
+        //- Swap content with another UList of the same type in constant time
+        inline void swap(UList<T>& lst);
 
 
     // STL member operators
@@ -407,7 +541,8 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 
@@ -417,7 +552,7 @@ public:
         friend Ostream& operator<< <T>
         (
             Ostream& os,
-            const UList<T>& L
+            const UList<T>& lst
         );
 
         //- Read List contents from Istream.
@@ -429,28 +564,35 @@ public:
         );
 };
 
+
+// Global Functions
+
 template<class T>
 void sort(UList<T>& a);
 
-template<class T, class Cmp>
-void sort(UList<T>& a, const Cmp& cmp);
+template<class T, class Compare>
+void sort(UList<T>& a, const Compare& comp);
 
 template<class T>
 void stableSort(UList<T>& a);
 
-template<class T, class Cmp>
-void stableSort(UList<T>& a, const Cmp& cmp);
+template<class T, class Compare>
+void stableSort(UList<T>& a, const Compare& comp);
 
 template<class T>
 void shuffle(UList<T>& a);
 
 // Reverse the first n elements of the list
 template<class T>
-inline void reverse(UList<T>& ul, const label n);
+inline void reverse(UList<T>& lst, const label n);
 
 // Reverse all the elements of the list
 template<class T>
-inline void reverse(UList<T>& ul);
+inline void reverse(UList<T>& lst);
+
+// Exchange contents of lists - see UList::swap().
+template<class T>
+inline void Swap(UList<T>& a, UList<T>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

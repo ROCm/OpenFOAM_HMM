@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,7 @@ Foam::string Foam::ThermoParcel<ParcelType>::propertyTypes_ =
 template<class ParcelType>
 const std::size_t Foam::ThermoParcel<ParcelType>::sizeofFields
 (
-    offsetof(ThermoParcel<ParcelType>, Tc_)
+    sizeof(ThermoParcel<ParcelType>)
   - offsetof(ThermoParcel<ParcelType>, T_)
 );
 
@@ -51,14 +51,13 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     const polyMesh& mesh,
     Istream& is,
-    bool readFields
+    bool readFields,
+    bool newFormat
 )
 :
-    ParcelType(mesh, is, readFields),
+    ParcelType(mesh, is, readFields, newFormat),
     T_(0.0),
-    Cp_(0.0),
-    Tc_(0.0),
-    Cpc_(0.0)
+    Cp_(0.0)
 {
     if (readFields)
     {
@@ -81,17 +80,14 @@ template<class ParcelType>
 template<class CloudType>
 void Foam::ThermoParcel<ParcelType>::readFields(CloudType& c)
 {
-    if (!c.size())
-    {
-        return;
-    }
+    bool valid = c.size();
 
     ParcelType::readFields(c);
 
-    IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ));
+    IOField<scalar> T(c.fieldIOobject("T", IOobject::MUST_READ), valid);
     c.checkFieldIOobject(c, T);
 
-    IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::MUST_READ));
+    IOField<scalar> Cp(c.fieldIOobject("Cp", IOobject::MUST_READ), valid);
     c.checkFieldIOobject(c, Cp);
 
 
@@ -128,8 +124,8 @@ void Foam::ThermoParcel<ParcelType>::writeFields(const CloudType& c)
         i++;
     }
 
-    T.write();
-    Cp.write();
+    T.write(np > 0);
+    Cp.write(np > 0);
 }
 
 

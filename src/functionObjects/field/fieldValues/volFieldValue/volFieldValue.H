@@ -81,18 +81,18 @@ Usage
     The \c operation is one of:
     \plaintable
        none                 | No operation
-       sum                  | Sum
-       weightedSum          | Weighted sum
-       sumMag               | Sum of component magnitudes
-       average              | Ensemble average
-       weightedAverage      | Weighted average
-       volAverage           | Volume weighted average
-       weightedVolAverage   | Weighted volume average
-       volIntegrate         | Volume integral
-       weightedVolIntegrate | Weighted volume integral
        min                  | Minimum
        max                  | Maximum
+       sum                  | Sum
+       sumMag               | Sum of component magnitudes
+       average              | Ensemble average
+       volAverage           | Volume weighted average
+       volIntegrate         | Volume integral
        CoV                  | Coefficient of variation: standard deviation/mean
+       weightedSum          | Weighted sum
+       weightedAverage      | Weighted average
+       weightedVolAverage   | Weighted volume average
+       weightedVolIntegrate | Weighted volume integral
     \endplaintable
 
 See also
@@ -134,26 +134,45 @@ public:
 
     // Public data types
 
+        //- Bitmask values for operation variants
+        enum operationVariant
+        {
+            typeBase = 0,         //!< Base operation
+            typeWeighted = 0x100, //!< Operation using weighting
+        };
+
         //- Operation type enumeration
         enum operationType
         {
-            opNone,                 //!< None
-            opSum,                  //!< Sum
-            opWeightedSum,          //!< Weighted sum
-            opSumMag,               //!< Magnitude of sum
-            opAverage,              //!< Average
-            opWeightedAverage,      //!< Weighted average
-            opVolAverage,           //!< Volume average
-            opWeightedVolAverage,   //!< Weighted volume average
-            opVolIntegrate,         //!< Volume integral
-            opWeightedVolIntegrate, //!< Weighted volume integral
+            // Normal operations
+
+            opNone = 0,             //!< No operation
             opMin,                  //!< Minimum
             opMax,                  //!< Maximum
-            opCoV                   //!< Coefficient of variation
+            opSum,                  //!< Sum
+            opSumMag,               //!< Magnitude of sum
+            opAverage,              //!< Average
+            opVolAverage,           //!< Volume average
+            opVolIntegrate,         //!< Volume integral
+            opCoV,                  //!< Coefficient of variation
+
+            // Weighted variants
+
+            //! Weighted sum
+            opWeightedSum = (opSum | typeWeighted),
+
+            //! Weighted average
+            opWeightedAverage = (opAverage | typeWeighted),
+
+            //! Weighted volume average
+            opWeightedVolAverage = (opVolAverage | typeWeighted),
+
+            //! Weighted volume integral
+            opWeightedVolIntegrate = (opVolIntegrate | typeWeighted),
         };
 
         //- Operation type names
-        static const NamedEnum<operationType, 13> operationTypeNames_;
+        static const Enum<operationType> operationTypeNames_;
 
 
 protected:
@@ -169,11 +188,15 @@ protected:
 
     // Protected Member Functions
 
-        //- True if the specified operation needs the cell-volume
-        bool needsVol() const;
+        //- True if the operation needs the cell-volume
+        bool usesVol() const;
 
-        //- True if the specified operation needs a weight-field
-        bool needsWeight() const;
+        //- True if the operation variant uses a weight-field
+        bool usesWeight() const;
+
+        //- True if operation variant uses a weight-field that is available.
+        //  Checks for availability on any processor.
+        inline bool canWeight(const scalarField& weightField) const;
 
         //- Initialise, e.g. cell addressing
         void initialise(const dictionary& dict);

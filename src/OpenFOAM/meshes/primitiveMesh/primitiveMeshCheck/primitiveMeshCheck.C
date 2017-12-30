@@ -1436,7 +1436,7 @@ bool Foam::primitiveMesh::checkCommonOrder
             forAll(curFace, fp)
             {
                 // Get the index in the neighbouring face shared with curFace
-                label nb = findIndex(nbFace, curFace[fp]);
+                label nb = nbFace.find(curFace[fp]);
 
                 if (nb != -1)
                 {

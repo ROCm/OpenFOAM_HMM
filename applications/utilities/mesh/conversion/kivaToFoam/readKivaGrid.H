@@ -1,4 +1,4 @@
-ifstream kivaFile(kivaFileName.c_str());
+std::ifstream kivaFile(kivaFileName);
 
 if (!kivaFile.good())
 {
@@ -102,7 +102,7 @@ cellShapeList cellShapes(nPoints);
 
 labelList cellZoning(nPoints, -1);
 
-const cellModel& hex = *(cellModeller::lookup("hex"));
+const cellModel& hex = cellModel::ref(cellModel::HEX);
 labelList hexLabels(8);
 label activeCells = 0;
 
@@ -363,7 +363,7 @@ if
 
     if (pFaces[LINER][0].size() != newLinerFaces.size())
     {
-        Info<< "Transfered " << pFaces[LINER][0].size() - newLinerFaces.size()
+        Info<< "Transferred " << pFaces[LINER][0].size() - newLinerFaces.size()
             << " faces from liner region to cylinder head" << endl;
         pFaces[LINER][0] = newLinerFaces;
     }
@@ -392,7 +392,7 @@ if
 
     if (pFaces[CYLINDERHEAD][0].size() != newCylinderHeadFaces.size())
     {
-        Info<< "Transfered faces from cylinder-head region to linder" << endl;
+        Info<< "Transferred faces from cylinder-head region to linder" << endl;
         pFaces[CYLINDERHEAD][0] = newCylinderHeadFaces;
     }
 }
@@ -419,7 +419,7 @@ if (pFaces[WEDGE].size() && pFaces[WEDGE][0].size())
     {
         // Distribute the points to be +/- 2.5deg from the x-z plane
 
-        scalar tanTheta = Foam::tan(degToRad(2.5));
+        const scalar tanTheta = Foam::tan(degToRad(2.5));
 
         SLList<face>::iterator iterf = pFaces[WEDGE][0].begin();
         SLList<face>::iterator iterb = pFaces[WEDGE][1].begin();

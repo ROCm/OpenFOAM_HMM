@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,10 +78,11 @@ SourceFiles
 #define functionObjects_fieldMinMax_H
 
 #include "Switch.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
 #include "vector.H"
+#include "volFieldSelection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,7 +116,7 @@ protected:
     // Protected data
 
         //- Mode type names
-        static const NamedEnum<modeType, 2> modeTypeNames_;
+        static const Enum<modeType> modeTypeNames_;
 
         //- Switch to write location of min/max values
         Switch location_;
@@ -124,7 +125,7 @@ protected:
         modeType mode_;
 
         //- Fields to assess min/max
-        wordList fieldSet_;
+        volFieldSelection fieldSet_;
 
 
     // Protected Member Functions
@@ -147,7 +148,7 @@ protected:
 
 
         //- Output file header information
-        virtual void writeFileHeader(Ostream& os) const;
+        virtual void writeFileHeader(Ostream& os);
 
         //- Disallow default bitwise copy construct
         fieldMinMax(const fieldMinMax&) = delete;

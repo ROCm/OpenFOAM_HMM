@@ -70,22 +70,20 @@ Foam::chemistryReductionMethod<CompType, ThermoType>::New
 
     dictionary MRdict(dict.subDict("reduction"));
 
-    word chemistryReductionMethodTypeName =
+    word methodName =
         word(MRdict.lookup("method")) + '<'
       + word(dict.subDict("chemistryType").lookup("chemistryThermo")) + ','
       + thermoTypeName + '>';
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(chemistryReductionMethodTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown chemistryReductionMethodType type "
-            << chemistryReductionMethodTypeName
-            << endl << endl
-            << "Valid chemistryReductionMethodType types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Unknown chemistryReductionMethod type "
+            << methodName << nl << nl
+            << "Valid chemistryReductionMethod types :" << endl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

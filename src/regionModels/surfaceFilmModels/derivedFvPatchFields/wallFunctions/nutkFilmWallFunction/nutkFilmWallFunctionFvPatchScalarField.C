@@ -28,7 +28,7 @@ License
 #include "volFields.H"
 #include "turbulentFluidThermoModel.H"
 #include "addToRunTimeSelectionTable.H"
-#include "surfaceFilmModel.H"
+#include "surfaceFilmRegionModel.H"
 #include "mappedWallPolyPatch.H"
 #include "mapDistribute.H"
 
@@ -51,7 +51,7 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::calcUTau
     tmp<scalarField> tuTau(new scalarField(patch().size(), 0.0));
     scalarField& uTau = tuTau.ref();
 
-    typedef regionModels::surfaceFilmModels::surfaceFilmModel modelType;
+    typedef regionModels::surfaceFilmModels::surfaceFilmRegionModel modelType;
 
     bool foundFilm = db().time().foundObject<modelType>(filmRegionName_);
 
@@ -247,16 +247,15 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
 void nutkFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_
     );
     writeLocalEntries(os);
-    os.writeKeyword("B") << B_ << token::END_STATEMENT << nl;
-    os.writeKeyword("yPlusCrit") << yPlusCrit_ << token::END_STATEMENT << nl;
+    os.writeEntry("B", B_);
+    os.writeEntry("yPlusCrit", yPlusCrit_);
     writeEntry("value", os);
 }
 

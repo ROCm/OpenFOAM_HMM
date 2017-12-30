@@ -1,10 +1,10 @@
 #!/bin/sh
 
-if ! which gnuplot > /dev/null 2>&1
-then
-    echo "gnuplot not found - skipping graph creation" >&2
+# Test if gnuplot exists on the system
+command -v gnuplot >/dev/null 2>&1 || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
-fi
+}
 
 gnuplot<<EOF
     set terminal postscript eps color enhanced "Helvetica,20"
@@ -21,4 +21,4 @@ gnuplot<<EOF
         "chemkinII" with lines title "Chemkin II" lt -1
 EOF
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

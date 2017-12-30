@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,7 +74,7 @@ public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         Ostream
         (
             streamFormat format=ASCII,
@@ -96,48 +96,64 @@ public:
 
         // Write functions
 
-            //- Write next token to stream
-            virtual Ostream& write(const token&) = 0;
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok) = 0;
 
             //- Write character
-            virtual Ostream& write(const char) = 0;
+            virtual Ostream& write(const char c) = 0;
 
             //- Write character string
-            virtual Ostream& write(const char*) = 0;
+            virtual Ostream& write(const char* str) = 0;
 
             //- Write word
-            virtual Ostream& write(const word&) = 0;
+            virtual Ostream& write(const word& str) = 0;
 
             //- Write keyType
             //  A plain word is written unquoted.
             //  A regular expression is written as a quoted string.
-            virtual Ostream& write(const keyType&);
+            virtual Ostream& write(const keyType& kw);
 
             //- Write string
-            virtual Ostream& write(const string&) = 0;
+            virtual Ostream& write(const string& str) = 0;
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             virtual Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& str,
                 const bool quoted=true
             ) = 0;
 
             //- Write int32_t
-            virtual Ostream& write(const int32_t) = 0;
+            virtual Ostream& write(const int32_t val) = 0;
 
             //- Write int64_t
-            virtual Ostream& write(const int64_t) = 0;
+            virtual Ostream& write(const int64_t val) = 0;
 
             //- Write floatScalar
-            virtual Ostream& write(const floatScalar) = 0;
+            virtual Ostream& write(const floatScalar val) = 0;
 
             //- Write doubleScalar
-            virtual Ostream& write(const doubleScalar) = 0;
+            virtual Ostream& write(const doubleScalar val) = 0;
 
-            //- Write binary block
-            virtual Ostream& write(const char*, std::streamsize) = 0;
+            //- Write binary block.
+            virtual Ostream& write(const char* data, std::streamsize count) = 0;
+
+            //- Emit begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual Ostream& beginRaw(std::streamsize count) = 0;
+
+            //- Low-level raw binary output.
+            virtual Ostream& writeRaw
+            (
+                const char* data,
+                std::streamsize count
+            ) = 0;
+
+            //- Emit end marker for low-level raw binary output.
+            virtual Ostream& endRaw() = 0;
 
             //- Add indentation characters
             virtual void indent() = 0;
@@ -164,11 +180,11 @@ public:
             void decrIndent();
 
             //- Write the keyword followed by an appropriate indentation
-            virtual Ostream& writeKeyword(const keyType&);
+            virtual Ostream& writeKeyword(const keyType& kw);
 
             //- Write begin block group with the given name
             //  Increments indentation, adds newline.
-            virtual Ostream& beginBlock(const keyType&);
+            virtual Ostream& beginBlock(const keyType& keyword);
 
             //- Write begin block group without a name
             //  Increments indentation, adds newline.
@@ -193,6 +209,26 @@ public:
             {
                 writeKeyword(key) << value;
                 return endEntry();
+            }
+
+            //- Write a keyword/value entry only when the two values differ.
+            //  \param key the name of the entry
+            //  \param value1 the reference value
+            //  \param value2 the value to write if it differs from value1
+            template<class T>
+            Ostream& writeEntryIfDifferent
+            (
+                const word& key,
+                const T& value1,
+                const T& value2
+            )
+            {
+                if (value1 != value2)
+                {
+                    writeEntry(key, value2);
+                }
+
+                return *this;
             }
 
 
@@ -314,8 +350,8 @@ inline Ostream& endEntry(Ostream& os)
 
 
 // Useful aliases for tab and newline characters
-static const char tab = '\t';
-static const char nl = '\n';
+constexpr char tab = '\t';
+constexpr char nl = '\n';
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

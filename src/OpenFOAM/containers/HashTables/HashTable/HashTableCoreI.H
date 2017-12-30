@@ -36,16 +36,6 @@ inline IteratorType Foam::HashTableCore::iterator_begin
 
 
 template<class IteratorType, class TableType>
-inline IteratorType Foam::HashTableCore::iterator_begin
-(
-    const TableType& table
-)
-{
-    return IteratorType(table.begin());
-}
-
-
-template<class IteratorType, class TableType>
 inline IteratorType Foam::HashTableCore::iterator_cbegin
 (
     const TableType& table

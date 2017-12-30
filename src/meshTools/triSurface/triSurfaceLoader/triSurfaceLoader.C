@@ -30,11 +30,17 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::triSurfaceLoader::loadingOption>
+const Foam::Enum
+<
+    Foam::triSurfaceLoader::loadingOption
+>
 Foam::triSurfaceLoader::loadingOptionNames
-(
-    SINGLE_REGION, { "single", "file", "offset", "merge" }
-);
+{
+    { loadingOption::SINGLE_REGION, "single" },
+    { loadingOption::FILE_REGION, "file" },
+    { loadingOption::OFFSET_REGION, "offset" },
+    { loadingOption::MERGE_REGION, "merge" }
+};
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -212,7 +218,8 @@ Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
 
 Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
 (
-    const enum loadingOption opt
+    const enum loadingOption opt,
+    const scalar scaleFactor
 ) const
 {
     autoPtr<triSurface> output;
@@ -223,7 +230,8 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
     }
     else if (selected_.size() == 1)
     {
-        output.set(new triSurface(directory_/selected_[0]));
+        // Use scaling (if any)
+        output.reset(new triSurface(directory_/selected_[0], scaleFactor));
 
         triSurface& surf = output();
 
@@ -386,7 +394,13 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
         }
     }
 
-    output.set(new triSurface(faces, patches, points, true));
+    // Apply scaling (if any)
+    if (scaleFactor > VSMALL)
+    {
+        points *= scaleFactor;
+    }
+
+    output.reset(new triSurface(faces, patches, points, true));
 
     return output;
 }

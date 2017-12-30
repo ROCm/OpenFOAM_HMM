@@ -29,7 +29,6 @@ License
 #include "processorPolyPatch.H"
 #include "globalIndex.H"
 #include "syncTools.H"
-#include "FaceCellWave.H"
 #include "minData.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

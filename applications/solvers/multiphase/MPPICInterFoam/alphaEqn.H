@@ -118,27 +118,27 @@
             << "  Max(" << alpha1.name() << ") = " << max(alpha1).value()
             << endl;
 
-        tmp<surfaceScalarField> talphaPhiUD(alpha1Eqn.flux());
-        alphaPhi = talphaPhiUD();
+        tmp<surfaceScalarField> talphaPhi1UD(alpha1Eqn.flux());
+        alphaPhi10 = talphaPhi1UD();
 
-        if (alphaApplyPrevCorr && talphaPhiCorr0.valid())
+        if (alphaApplyPrevCorr && talphaPhi1Corr0.valid())
         {
             Info<< "Applying the previous iteration compression flux" << endl;
             MULES::correct
             (
                 alphac,
                 alpha1,
-                alphaPhi,
-                talphaPhiCorr0.ref(),
+                alphaPhi10,
+                talphaPhi1Corr0.ref(),
                 zeroField(), zeroField(),
                 1, 0
             );
 
-            alphaPhi += talphaPhiCorr0();
+            alphaPhi10 += talphaPhi1Corr0();
         }
 
         // Cache the upwind-flux
-        talphaPhiCorr0 = talphaPhiUD;
+        talphaPhi1Corr0 = talphaPhi1UD;
 
         alpha2 = 1.0 - alpha1;
 
@@ -152,7 +152,7 @@
 
         surfaceScalarField phir(phic*mixture.nHatf());
 
-        tmp<surfaceScalarField> talphaPhiUn
+        tmp<surfaceScalarField> talphaPhi1Un
         (
             fvc::flux
             (
@@ -170,15 +170,15 @@
 
         if (MULESCorr)
         {
-            tmp<surfaceScalarField> talphaPhiCorr(talphaPhiUn() - alphaPhi);
+            tmp<surfaceScalarField> talphaPhi1Corr(talphaPhi1Un() - alphaPhi10);
             volScalarField alpha10("alpha10", alpha1);
 
             MULES::correct
             (
                 alphac,
                 alpha1,
-                talphaPhiUn(),
-                talphaPhiCorr.ref(),
+                talphaPhi1Un(),
+                talphaPhi1Corr.ref(),
                 Sp,
                 (-Sp*alpha1)(),
                 1,
@@ -188,24 +188,24 @@
             // Under-relax the correction for all but the 1st corrector
             if (aCorr == 0)
             {
-                alphaPhi += talphaPhiCorr();
+                alphaPhi10 += talphaPhi1Corr();
             }
             else
             {
                 alpha1 = 0.5*alpha1 + 0.5*alpha10;
-                alphaPhi += 0.5*talphaPhiCorr();
+                alphaPhi10 += 0.5*talphaPhi1Corr();
             }
         }
         else
         {
-            alphaPhi = talphaPhiUn;
+            alphaPhi10 = talphaPhi1Un;
 
             MULES::explicitSolve
             (
                 alphac,
                 alpha1,
                 phiCN,
-                alphaPhi,
+                alphaPhi10,
                 Sp,
                 (Su + divU*min(alpha1(), scalar(1)))(),
                 1,
@@ -220,12 +220,12 @@
 
     if (alphaApplyPrevCorr && MULESCorr)
     {
-        talphaPhiCorr0 = alphaPhi - talphaPhiCorr0;
-        talphaPhiCorr0.ref().rename("alphaPhiCorr0");
+        talphaPhi1Corr0 = alphaPhi10 - talphaPhi1Corr0;
+        talphaPhi1Corr0.ref().rename("alphaPhi1Corr0");
     }
     else
     {
-        talphaPhiCorr0.clear();
+        talphaPhi1Corr0.clear();
     }
 
     if
@@ -235,19 +235,20 @@
     )
     {
         #include "rhofs.H"
-        rhoPhi = alphaPhi*(rho1f - rho2f) + phiCN*rho2f;
+        rhoPhi = alphaPhi10*(rho1f - rho2f) + phiCN*rho2f;
     }
     else
     {
         if (ocCoeff > 0)
         {
             // Calculate the end-of-time-step alpha flux
-            alphaPhi = (alphaPhi - (1.0 - cnCoeff)*alphaPhi.oldTime())/cnCoeff;
+            alphaPhi10 =
+                (alphaPhi10 - (1.0 - cnCoeff)*alphaPhi10.oldTime())/cnCoeff;
         }
 
         // Calculate the end-of-time-step mass flux
         #include "rhofs.H"
-        rhoPhi = alphaPhi*(rho1f - rho2f) + alphaPhic*rho2f;
+        rhoPhi = alphaPhi10*(rho1f - rho2f) + alphaPhic*rho2f;
     }
 
     Info<< "Phase-1 volume fraction = "

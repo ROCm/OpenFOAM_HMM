@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,7 @@ License
 #include "fvcFlux.H"
 #include "fvcMeshPhi.H"
 #include "surfaceInterpolate.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,10 +42,6 @@ namespace Foam
 {
     defineTypeNameAndDebug(multiphaseMixtureThermo, 0);
 }
-
-
-const Foam::scalar Foam::multiphaseMixtureThermo::convertToRad =
-    Foam::constant::mathematical::pi/180.0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -855,7 +852,7 @@ void Foam::multiphaseMixtureThermo::correctContactAngle
 
             bool matched = (tp.key().first() == alpha1.name());
 
-            scalar theta0 = convertToRad*tp().theta0(matched);
+            const scalar theta0 = degToRad(tp().theta0(matched));
             scalarField theta(boundary[patchi].size(), theta0);
 
             scalar uTheta = tp().uTheta();
@@ -863,8 +860,8 @@ void Foam::multiphaseMixtureThermo::correctContactAngle
             // Calculate the dynamic contact angle if required
             if (uTheta > SMALL)
             {
-                scalar thetaA = convertToRad*tp().thetaA(matched);
-                scalar thetaR = convertToRad*tp().thetaR(matched);
+                const scalar thetaA = degToRad(tp().thetaA(matched));
+                const scalar thetaR = degToRad(tp().thetaR(matched));
 
                 // Calculated the component of the velocity parallel to the wall
                 vectorField Uwall
@@ -953,7 +950,7 @@ Foam::multiphaseMixtureThermo::nearInterface() const
     forAllConstIter(PtrDictionary<phaseModel>, phases_, phase)
     {
         tnearInt.ref() =
-            max(tnearInt(), pos(phase() - 0.01)*pos(0.99 - phase()));
+            max(tnearInt(), pos0(phase() - 0.01)*pos0(0.99 - phase()));
     }
 
     return tnearInt;

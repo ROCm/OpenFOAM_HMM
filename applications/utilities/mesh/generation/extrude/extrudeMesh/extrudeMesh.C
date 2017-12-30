@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,6 +57,7 @@ Description
 #include "planeExtrusion.H"
 #include "emptyPolyPatch.H"
 #include "processorMeshes.H"
+#include "hexRef8Data.H"
 
 using namespace Foam;
 
@@ -69,18 +70,12 @@ enum ExtrudeMode
     SURFACE
 };
 
-namespace Foam
+static const Enum<ExtrudeMode> ExtrudeModeNames
 {
-    template<>
-    const char* NamedEnum<ExtrudeMode, 3>::names[] =
-    {
-        "mesh",
-        "patch",
-        "surface"
-    };
-}
-
-static const NamedEnum<ExtrudeMode, 3> ExtrudeModeNames;
+    { ExtrudeMode::MESH, "mesh" },
+    { ExtrudeMode::PATCH, "patch" },
+    { ExtrudeMode::SURFACE, "surface" },
+};
 
 
 void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
@@ -305,9 +300,10 @@ int main(int argc, char *argv[])
     const Switch flipNormals(dict.lookup("flipNormals"));
 
     // What to extrude
-    const ExtrudeMode mode = ExtrudeModeNames.read
+    const ExtrudeMode mode = ExtrudeModeNames.lookup
     (
-        dict.lookup("constructFrom")
+        "constructFrom",
+        dict
     );
 
     // Any merging of small edges
@@ -342,6 +338,9 @@ int main(int argc, char *argv[])
 
     // Optional added cells (get written to cellSet)
     labelHashSet addedCellsSet;
+
+    // Optional refinement data
+    autoPtr<hexRef8Data> refDataPtr;
 
     if (mode == PATCH || mode == MESH)
     {
@@ -442,7 +441,6 @@ int main(int argc, char *argv[])
                 mesh.movePoints(map().preMotionPoints());
             }
         }
-
 
 
         indirectPrimitivePatch extrudePatch
@@ -645,6 +643,32 @@ int main(int argc, char *argv[])
         // Expansion ratio not used.
         scalarField ratio(extrudePatch.nPoints(), 1.0);
 
+
+        // Load any refinement data
+        if (mode == MESH)
+        {
+            // Tricky: register hexRef8 onto the database
+            // since the mesh does not yet exist. It should not be registered
+            // onto the input mesh.
+            refDataPtr.reset
+            (
+                new hexRef8Data
+                (
+                    IOobject
+                    (
+                        "dummy",
+                        mesh.facesInstance(),
+                        polyMesh::meshSubDir,
+                        runTimeExtruded,        //mesh,
+                        IOobject::READ_IF_PRESENT,
+                        IOobject::NO_WRITE,
+                        false
+                    )
+                )
+            );
+        }
+
+
         // Topo change container. Either copy an existing mesh or start
         // with empty storage (number of patches only needed for checking)
         autoPtr<polyTopoChange> meshMod
@@ -750,6 +774,12 @@ int main(int argc, char *argv[])
             map().reverseFaceMap(),
             backPatchFaces
         );
+
+        // Update
+        if (refDataPtr.valid())
+        {
+            refDataPtr().updateMesh(map());
+        }
 
         // Store added cells
         if (mode == MESH)
@@ -914,6 +944,11 @@ int main(int argc, char *argv[])
             updateFaceLabels(map(), backPatchFaces);
             updateCellSet(map(), addedCellsSet);
 
+            if (refDataPtr.valid())
+            {
+                refDataPtr().updateMesh(map());
+            }
+
             // Move mesh (if inflation used)
             if (map().hasMotionPoints())
             {
@@ -990,7 +1025,7 @@ int main(int argc, char *argv[])
             (
                 cutZoneName,
                 frontPatchFaces,
-                boolList(frontPatchFaces.size(), false),
+                false, // none are flipped
                 0,
                 mesh.faceZones()
             )
@@ -1044,6 +1079,11 @@ int main(int argc, char *argv[])
         // Update local data
         updateCellSet(map(), addedCellsSet);
 
+        if (refDataPtr.valid())
+        {
+            refDataPtr().updateMesh(map());
+        }
+
         // Move mesh (if inflation used)
         if (map().hasMotionPoints())
         {
@@ -1076,6 +1116,12 @@ int main(int argc, char *argv[])
                 << exit(FatalError);
         }
     }
+
+    if (refDataPtr.valid())
+    {
+        refDataPtr().write();
+    }
+
 
     Info<< "End\n" << endl;
 

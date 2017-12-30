@@ -52,8 +52,10 @@ SourceFiles
 namespace Foam
 {
 
-class mapPolyMesh;
+// Forward declarations
 class argList;
+class mapPolyMesh;
+class wordRes;
 
 /*---------------------------------------------------------------------------*\
                      Class functionObjectList Declaration
@@ -94,19 +96,19 @@ class functionObjectList
         void createStateDict() const;
 
         //- Remove and return the function object pointer by name,
-        //  and returns the old index via the parameter.
+        //- and returns the old index via the parameter.
         //  Returns a nullptr (and index -1) if it didn't exist
-        functionObject* remove(const word&, label& oldIndex);
+        functionObject* remove(const word& key, label& oldIndex);
 
         //- Search the specified directory for functionObject
-        //  configuration files, add to the given map and recurse
+        //- configuration files, add to the given map and recurse
         static void listDir(const fileName& dir, HashSet<word>& foMap);
 
         //- Disallow default bitwise copy construct
-        functionObjectList(const functionObjectList&);
+        functionObjectList(const functionObjectList&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const functionObjectList&);
+        void operator=(const functionObjectList&) = delete;
 
 
 public:
@@ -114,7 +116,7 @@ public:
     // Static data members
 
         //- Default relative path to the directory structure
-        //  containing the functionObject dictionary files
+        //- containing the functionObject dictionary files
         static fileName functionObjectDictPath;
 
 
@@ -130,7 +132,7 @@ public:
 
         //- Construct from Time, a dictionary with "functions" entry
         //  and the execution setting.
-        //  \param[in]  t - the other Time instance to construct from
+        //  \param[in]  runTime - the other Time instance to construct from
         //  \param[in]  parentDict - the parent dictionary containing
         //    a "functions" entry, which can either be a list or a dictionary
         //    of functionObject specifications.
@@ -153,7 +155,7 @@ public:
             const argList& args,
             const Time& runTime,
             dictionary& controlDict,
-            HashSet<word>& requiredFields
+            HashSet<wordRe>& requiredFields
         );
 
 
@@ -188,7 +190,7 @@ public:
         label findObjectID(const word& name) const;
 
         //- Print a list of functionObject configuration files in
-        //  user/group/shipped directories.
+        //- user/group/shipped directories.
         //  The search scheme allows for version-specific and
         //  version-independent files using the following hierarchy:
         //  - \b user settings:
@@ -205,7 +207,7 @@ public:
         static void list();
 
         //- Search for functionObject dictionary file in
-        //  user/group/shipped directories.
+        //- user/group/shipped directories.
         //  The search scheme allows for version-specific and
         //  version-independent files using the following hierarchy:
         //  - \b user settings:
@@ -234,7 +236,7 @@ public:
         (
             const string& funcNameArgs0,
             dictionary& functionsDict,
-            HashSet<word>& requiredFields,
+            HashSet<wordRe>& requiredFields,
             const word& region = word::null
         );
 
@@ -257,6 +259,18 @@ public:
         //  postProcess overrides the usual executeControl behaviour and
         //  forces execution (used in post-processing mode)
         bool execute();
+
+        //- Execute function objects using the specified subIndex.
+        //  \param subIndex an execution sub-index corresponding to a
+        //      sub-cycle or something similar
+        bool execute(const label subIndex);
+
+        //- Execute a subset of function objects using the specified subIndex.
+        //  \param functionNames names or regex of existing functions to
+        //      execute
+        //  \param subIndex an execution sub-index corresponding to a
+        //      sub-cycle or something similar
+        bool execute(const wordRes& functionNames, const label subIndex);
 
         //- Called when Time::run() determines that the time-loop exits
         bool end();

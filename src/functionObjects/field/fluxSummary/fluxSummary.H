@@ -124,7 +124,7 @@ public:
         };
 
         //- Mode type names
-        static const NamedEnum<modeType, 5> modeTypeNames_;
+        static const Enum<modeType> modeTypeNames_;
 
 
 protected:

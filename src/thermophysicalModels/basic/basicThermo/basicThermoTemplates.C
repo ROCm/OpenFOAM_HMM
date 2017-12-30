@@ -38,7 +38,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 )
 {
     // Lookup the thermo package
-    typename Table::iterator cstrIter = tablePtr->find(thermoTypeName);
+    auto cstrIter = tablePtr->find(thermoTypeName);
 
     // Print error message if package not found in the table
     if (!cstrIter.found())
@@ -180,7 +180,7 @@ typename Table::iterator Foam::basicThermo::lookupThermo
 
         Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 
-        typename Table::iterator cstrIter = tablePtr->find(thermoTypeName);
+        auto cstrIter = tablePtr->find(thermoTypeName);
 
         if (!cstrIter.found())
         {
@@ -217,7 +217,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
         )
     );
 
-    typename Thermo::fvMeshConstructorTable::iterator cstrIter =
+    auto cstrIter =
         lookupThermo<Thermo, typename Thermo::fvMeshConstructorTable>
         (
             thermoDict,
@@ -236,7 +236,7 @@ Foam::autoPtr<Thermo> Foam::basicThermo::New
     const word& phaseName
 )
 {
-    typename Thermo::dictionaryConstructorTable::iterator cstrIter =
+    auto cstrIter =
         lookupThermo<Thermo, typename Thermo::dictionaryConstructorTable>
         (
             dict,

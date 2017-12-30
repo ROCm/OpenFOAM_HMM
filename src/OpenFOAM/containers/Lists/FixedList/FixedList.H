@@ -42,6 +42,8 @@ SourceFiles
 #include "uLabel.H"
 #include "Hash.H"
 #include "autoPtr.H"
+#include "Swap.H"
+
 #include <type_traits>
 #include <initializer_list>
 
@@ -125,10 +127,16 @@ public:
         inline FixedList();
 
         //- Construct from value
-        explicit inline FixedList(const T& t);
+        explicit inline FixedList(const T& val);
 
-        //- Construct from C-array
+        //- Copy construct from C-array
         explicit inline FixedList(const T lst[Size]);
+
+        //- Copy constructor
+        inline FixedList(const FixedList<T, Size>& lst);
+
+        //- Move constructor
+        inline FixedList(FixedList<T, Size>&& lst);
 
         //- Construct given begin/end iterators
         //  Uses std::distance when verifying the size.
@@ -144,9 +152,6 @@ public:
         //- Construct from SLList
         explicit inline FixedList(const SLList<T>& lst);
 
-        //- Copy constructor
-        inline FixedList(const FixedList<T, Size>& lst);
-
         //- Construct from Istream
         FixedList(Istream& is);
 
@@ -158,22 +163,34 @@ public:
 
         // Access
 
-            //- Return the forward circular index, i.e. the next index
-            //  which returns to the first at the end of the list
+            //- Return the forward circular index, i.e. next index
+            //- which returns to the first at the end of the list
             inline label fcIndex(const label i) const;
 
-            //- Return the reverse circular index, i.e. the previous index
-            //  which returns to the last at the beginning of the list
+            //- Return forward circular value (ie, next value in the list)
+            inline const T& fcValue(const label i) const;
+
+            //- Return forward circular value (ie, next value in the list)
+            inline T& fcValue(const label i);
+
+            //- Return the reverse circular index, i.e. previous index
+            //- which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
 
+            //- Return reverse circular value (ie, previous value in the list)
+            inline const T& rcValue(const label i) const;
 
-            //- Return a const pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return reverse circular value (ie, previous value in the list)
+            inline T& rcValue(const label i);
+
+
+            //- Return a const pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline const T* cdata() const;
 
-            //- Return a pointer to the first data element,
-            //  similar to the STL front() method and the string::data() method
+            //- Return a pointer to the first data element.
+            //  Similar to the STL front() method and the string::data() method
             //  This can be used (with caution) when interfacing with C code
             inline T* data();
 
@@ -202,19 +219,42 @@ public:
             inline void checkIndex(const label i) const;
 
 
+      // Search
+
+        //- Find index of the first occurence of the value.
+        //  Linear search.
+        //  \return -1 if not found.
+        label find(const T& val, const label start=0) const;
+
+        //- True if the value if found in the list. Linear search.
+        inline bool found(const T& val, const label start=0) const;
+
+
         // Edit
 
-            //- Dummy resize function
-            //  needed to make FixedList consistent with List
-            inline void resize(const label s);
+        //- Dummy resize function
+        //  needed to make FixedList consistent with List
+        inline void resize(const label s);
 
-            //- Dummy setSize function
-            //  needed to make FixedList consistent with List
-            inline void setSize(const label s);
+        //- Dummy setSize function
+        //  needed to make FixedList consistent with List
+        inline void setSize(const label s);
 
-            //- Copy (not transfer) the argument contents
-            //  needed to make FixedList consistent with List
-            void transfer(const FixedList<T, Size>& lst);
+        //- Move element to the first position.
+        void moveFirst(const label i);
+
+        //- Move element to the last position.
+        void moveLast(const label i);
+
+        //- Swap element with the first element.
+        void swapFirst(const label i);
+
+        //- Swap element with the last element.
+        void swapLast(const label i);
+
+        //- Copy (not transfer) the argument contents
+        //  needed to make FixedList consistent with List
+        void transfer(const FixedList<T, Size>& lst);
 
 
     // Member operators
@@ -238,7 +278,13 @@ public:
         inline void operator=(std::initializer_list<T> lst);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T& t);
+        inline void operator=(const T& val);
+
+        //- Copy assignment
+        inline void operator=(const FixedList<T, Size>& lst);
+
+        //- Move assignment
+        inline void operator=(FixedList<T, Size>&& lst);
 
 
     // STL type definitions
@@ -246,16 +292,14 @@ public:
         //- Type of values the FixedList contains
         typedef T value_type;
 
-        //- Type that can be used for storing into
-        //  FixedList::value_type objects
+        //- The type used for storing into value_type objects
         typedef T& reference;
 
-        //- Type that can be used for storing into
-        //  constant FixedList::value_type objects
+        //- The type used for reading from constant value_type objects.
         typedef const T& const_reference;
 
         //- The type that can represent the difference between any two
-        //  FixedList iterator objects
+        //- FixedList iterator objects
         typedef label difference_type;
 
         //- The type that can represent the size of a FixedList
@@ -292,10 +336,86 @@ public:
         inline const_iterator end() const;
 
 
-    // STL reverse_iterator
+    // Reverse iterators
 
-        //- Reverse iterator for reverse traversal of FixedList
-        typedef T* reverse_iterator;
+        //- Generic const/non-const reverse iterator
+        template<bool Const>
+        class reverse_iterator_base
+        {
+        public:
+            //- The const/non-const type for entries
+            typedef typename std::conditional
+                <Const, const T, T>::type value_type;
+
+            //- A pointer to a const/non-const entry
+            typedef value_type* pointer;
+
+            //- A reference to a const/non-const entry
+            typedef value_type& reference;
+
+
+        private:
+
+            //- The element pointer
+            pointer ptr_;
+
+        public:
+
+            //- Construct null or from list element pointer
+            inline reverse_iterator_base(pointer ptr = nullptr)
+            :
+                ptr_(ptr)
+            {}
+
+            //- Copy construct
+            inline reverse_iterator_base(const reverse_iterator_base& iter)
+            :
+                ptr_(iter.ptr_)
+            {}
+
+
+            //- Reverse increment
+            inline void operator++()
+            {
+                --ptr_;
+            }
+
+            //- Reverse increment
+            inline reverse_iterator_base operator++(int)
+            {
+                reverse_iterator_base old(*this);
+                --ptr_;
+                return old;
+            }
+
+            //- Dereference iterator
+            reference operator*() const
+            {
+                return *ptr_;
+            }
+
+            //- Dereference iterator
+            pointer operator->() const
+            {
+                return ptr_;
+            }
+
+            //- Equality
+            bool operator==(const reverse_iterator_base& iter) const
+            {
+                return ptr_ == iter.ptr_;
+            }
+
+            //- inequality
+            bool operator!=(const reverse_iterator_base& iter) const
+            {
+                return ptr_ != iter.ptr_;
+            }
+        };
+
+
+        //- STL reverse_iterator
+        typedef reverse_iterator_base<false> reverse_iterator;
 
         //- Return reverse_iterator to begin reverse traversing the FixedList
         inline reverse_iterator rbegin();
@@ -304,10 +424,8 @@ public:
         inline reverse_iterator rend();
 
 
-    // STL const_reverse_iterator
-
-        //- Reverse iterator for reverse traversal of constant FixedList
-        typedef const T* const_reverse_iterator;
+        //- STL const reverse iterator
+        typedef reverse_iterator_base<true> const_reverse_iterator;
 
         //- Return const_reverse_iterator to begin reverse traversing FixedList
         inline const_reverse_iterator crbegin() const;
@@ -333,14 +451,14 @@ public:
         //- Always false since zero-sized FixedList is compile-time disabled.
         inline bool empty() const;
 
-        //- Swap two FixedLists of the same type in constant time
-        void swap(FixedList<T, Size>& a);
+        //- Swap content with another FixedList of the same type.
+        void swap(FixedList<T, Size>& lst);
 
 
     // STL member operators
 
         //- Equality operation on FixedLists of the same type.
-        //  Returns true when the FixedLists are elementwise equal
+        //  Returns true when the FixedLists are element-wise equal
         //  (using FixedList::value_type::operator==).  Takes linear time
         bool operator==(const FixedList<T, Size>& a) const;
 
@@ -366,7 +484,8 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
 
@@ -386,6 +505,13 @@ public:
             const FixedList<T, Size>& L
         );
 };
+
+
+// Global Functions
+
+// Exchange contents of lists - see FixedList::swap().
+template<class T, unsigned Size>
+inline void Swap(FixedList<T,Size>& a, FixedList<T,Size>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

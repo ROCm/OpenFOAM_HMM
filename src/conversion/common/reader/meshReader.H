@@ -30,7 +30,7 @@ Description
     The derived classes are responsible for providing the protected data.
     This implementation is somewhat messy, but could/should be restructured
     to provide a more generalized reader (at the moment it has been written
-    for converting pro-STAR data).
+    for converting PROSTAR data).
 
     The meshReader supports cellTable information (see new user's guide entry).
 
@@ -203,13 +203,6 @@ private:
 protected:
 
     // Protected member data
-
-        //- Pointers to cell shape models
-        static const cellModel* unknownModel;
-        static const cellModel* tetModel;
-        static const cellModel* pyrModel;
-        static const cellModel* prismModel;
-        static const cellModel* hexModel;
 
         //- Referenced filename
         fileName geometryFile_;

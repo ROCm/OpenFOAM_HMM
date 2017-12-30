@@ -86,10 +86,10 @@ public:
             const label c
         );
 
-        //- Construct from a list of 3 labels.
+        //- Copy construct from a list of three point labels.
         explicit inline triFace(const labelUList& lst);
 
-        //- Construct from an initializer list of 3 labels
+        //- Construct from an initializer list of three point labels
         explicit inline triFace(std::initializer_list<label> lst);
 
         //- Construct from Istream
@@ -223,14 +223,14 @@ public:
         inline edge faceEdge(const label n) const;
 
         //- Return the edge direction on the face
-        //  Returns:
+        //  \return
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
         //  -  0: edge not found on the face
         inline int edgeDirection(const edge& e) const;
 
         //- Compare triFaces
-        //  Returns:
+        //  \return:
         //  -  0: different
         //  - +1: identical
         //  - -1: same face, but different orientation

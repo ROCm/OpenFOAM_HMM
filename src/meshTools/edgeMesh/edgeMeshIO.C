@@ -96,14 +96,13 @@ void Foam::edgeMesh::write
 
     const word ext = name.ext();
 
-    writefileExtensionMemberFunctionTable::iterator mfIter =
-        writefileExtensionMemberFunctionTablePtr_->find(ext);
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
 
     if (!mfIter.found())
     {
         FatalErrorInFunction
             << "Unknown file extension " << ext << nl << nl
-            << "Valid types are :" << endl
+            << "Valid types :" << endl
             << writefileExtensionMemberFunctionTablePtr_->sortedToc()
             << exit(FatalError);
     }

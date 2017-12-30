@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -229,10 +229,28 @@ namespace Foam
 {
     defineTypeNameAndDebug(ptscotchDecomp, 0);
 
-    addToRunTimeSelectionTable(decompositionMethod, ptscotchDecomp, dictionary);
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        ptscotchDecomp,
+        dictionary
+    );
+
+    addToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        ptscotchDecomp,
+        dictionaryRegion
+    );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::ptscotchDecomp::graphPath(const polyMesh& mesh)
+{
+    graphPath_ = mesh.time().path()/mesh.name();
+}
+
 
 void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 {
@@ -248,11 +266,9 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 ////- Does prevention of 0 cell domains and calls ptscotch.
 //Foam::label Foam::ptscotchDecomp::decomposeZeroDomains
 //(
-//    const fileName& meshPath,
-//    const List<label>& initadjncy,
-//    const List<label>& initxadj,
-//    const scalarField& initcWeights,
-//
+//    const labelUList& initadjncy,
+//    const labelUList& initxadj,
+//    const UList<scalar>& initcWeights,
 //    List<label>& finalDecomp
 //) const
 //{
@@ -272,7 +288,6 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //    {
 //        return decompose
 //        (
-//            meshPath,
 //            initadjncy,
 //            initxadj,
 //            initcWeights,
@@ -381,7 +396,7 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //
 //
 //    // Do decomposition as normal. Sets finalDecomp.
-//    label result = decompose(meshPath, adjncy, xadj, cWeights, finalDecomp);
+//    label result = decompose(adjncy, xadj, cWeights, finalDecomp);
 //
 //
 //    if (debug)
@@ -437,23 +452,19 @@ void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 //}
 
 
-// Call scotch with options from dictionary.
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const fileName& meshPath,
-    const List<label>& adjncy,
-    const List<label>& xadj,
-    const scalarField& cWeights,
+    const labelUList& adjncy,
+    const labelUList& xadj,
+    const UList<scalar>& cWeights,
     List<label>& finalDecomp
 ) const
 {
-    List<label> dummyAdjncy(1);
-    List<label> dummyXadj(1);
-    dummyXadj[0] = 0;
+    List<label> dummyAdjncy { 0 };
+    List<label> dummyXadj { 0 };
 
     return decompose
     (
-        meshPath,
         adjncy.size(),
         (adjncy.size() ? adjncy.begin() : dummyAdjncy.begin()),
         xadj.size(),
@@ -464,16 +475,13 @@ Foam::label Foam::ptscotchDecomp::decompose
 }
 
 
-// Call scotch with options from dictionary.
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const fileName& meshPath,
     const label adjncySize,
     const label adjncy[],
     const label xadjSize,
     const label xadj[],
-    const scalarField& cWeights,
-
+    const UList<scalar>& cWeights,
     List<label>& finalDecomp
 ) const
 {
@@ -483,56 +491,50 @@ Foam::label Foam::ptscotchDecomp::decompose
     }
 
     // Dump graph
-    if (decompositionDict_.found("scotchCoeffs"))
+    if (coeffsDict_.lookupOrDefault("writeGraph", false))
     {
-        const dictionary& scotchCoeffs =
-            decompositionDict_.subDict("scotchCoeffs");
+        OFstream str
+        (
+            graphPath_ + "_" + Foam::name(Pstream::myProcNo()) + ".dgr"
+        );
 
-        if (scotchCoeffs.lookupOrDefault("writeGraph", false))
+        Pout<< "Dumping Scotch graph file to " << str.name() << endl
+            << "Use this in combination with dgpart." << endl;
+
+        globalIndex globalCells(xadjSize-1);
+
+        // Distributed graph file (.grf)
+        const label version = 2;
+        str << version << nl;
+        // Number of files (procglbnbr)
+        str << Pstream::nProcs();
+        // My file number (procloc)
+        str << ' ' << Pstream::myProcNo() << nl;
+
+        // Total number of vertices (vertglbnbr)
+        str << globalCells.size();
+        // Total number of connections (edgeglbnbr)
+        str << ' ' << returnReduce(xadj[xadjSize-1], sumOp<label>()) << nl;
+        // Local number of vertices (vertlocnbr)
+        str << xadjSize-1;
+        // Local number of connections (edgelocnbr)
+        str << ' ' << xadj[xadjSize-1] << nl;
+        // Numbering starts from 0
+        label baseval = 0;
+        // 100*hasVertlabels+10*hasEdgeWeights+1*hasVertWeighs
+        str << baseval << ' ' << "000" << nl;
+        for (label celli = 0; celli < xadjSize-1; celli++)
         {
-            OFstream str
-            (
-               meshPath + "_" + Foam::name(Pstream::myProcNo()) + ".dgr"
-            );
+            const label start = xadj[celli];
+            const label end = xadj[celli+1];
 
-            Pout<< "Dumping Scotch graph file to " << str.name() << endl
-                << "Use this in combination with dgpart." << endl;
+            str << end-start; // size
 
-            globalIndex globalCells(xadjSize-1);
-
-            // Distributed graph file (.grf)
-            label version = 2;
-            str << version << nl;
-            // Number of files (procglbnbr)
-            str << Pstream::nProcs();
-            // My file number (procloc)
-            str << ' ' << Pstream::myProcNo() << nl;
-
-            // Total number of vertices (vertglbnbr)
-            str << globalCells.size();
-            // Total number of connections (edgeglbnbr)
-            str << ' ' << returnReduce(xadj[xadjSize-1], sumOp<label>())
-                << nl;
-            // Local number of vertices (vertlocnbr)
-            str << xadjSize-1;
-            // Local number of connections (edgelocnbr)
-            str << ' ' << xadj[xadjSize-1] << nl;
-            // Numbering starts from 0
-            label baseval = 0;
-            // 100*hasVertlabels+10*hasEdgeWeights+1*hasVertWeighs
-            str << baseval << ' ' << "000" << nl;
-            for (label celli = 0; celli < xadjSize-1; celli++)
+            for (label i = start; i < end; i++)
             {
-                label start = xadj[celli];
-                label end = xadj[celli+1];
-                str << end-start;
-
-                for (label i = start; i < end; i++)
-                {
-                    str << ' ' << adjncy[i];
-                }
-                str << nl;
+                str << ' ' << adjncy[i];
             }
+            str << nl;
         }
     }
 
@@ -543,26 +545,18 @@ Foam::label Foam::ptscotchDecomp::decompose
     SCOTCH_Strat stradat;
     check(SCOTCH_stratInit(&stradat), "SCOTCH_stratInit");
 
-    if (decompositionDict_.found("scotchCoeffs"))
+    string strategy;
+    if (coeffsDict_.readIfPresent("strategy", strategy))
     {
-        const dictionary& scotchCoeffs =
-            decompositionDict_.subDict("scotchCoeffs");
-
-
-        string strategy;
-        if (scotchCoeffs.readIfPresent("strategy", strategy))
+        if (debug)
         {
-            if (debug)
-            {
-                Info<< "ptscotchDecomp : Using strategy " << strategy << endl;
-            }
-            SCOTCH_stratDgraphMap(&stradat, strategy.c_str());
-            //fprintf(stdout, "S\tStrat=");
-            //SCOTCH_stratSave(&stradat, stdout);
-            //fprintf(stdout, "\n");
+            Info<< "ptscotchDecomp : Using strategy " << strategy << endl;
         }
+        SCOTCH_stratDgraphMap(&stradat, strategy.c_str());
+        //fprintf(stdout, "S\tStrat=");
+        //SCOTCH_stratSave(&stradat, stdout);
+        //fprintf(stdout, "\n");
     }
-
 
     // Graph
     // ~~~~~
@@ -572,8 +566,8 @@ Foam::label Foam::ptscotchDecomp::decompose
 
     // Check for externally provided cellweights and if so initialise weights
 
-    scalar minWeights = gMin(cWeights);
-    scalar maxWeights = gMax(cWeights);
+    const scalar minWeights = gMin(cWeights);
+    const scalar maxWeights = gMax(cWeights);
 
     if (maxWeights > minWeights)
     {
@@ -635,7 +629,6 @@ Foam::label Foam::ptscotchDecomp::decompose
             velotab[0] = 1;
         }
     }
-
 
 
     if (debug)
@@ -702,14 +695,11 @@ Foam::label Foam::ptscotchDecomp::decompose
     check(SCOTCH_archInit(&archdat), "SCOTCH_archInit");
 
     List<label> processorWeights;
-    if (decompositionDict_.found("scotchCoeffs"))
-    {
-        const dictionary& scotchCoeffs =
-            decompositionDict_.subDict("scotchCoeffs");
-
-        scotchCoeffs.readIfPresent("processorWeights", processorWeights);
-    }
-    if (processorWeights.size())
+    if
+    (
+        coeffsDict_.readIfPresent("processorWeights", processorWeights)
+     && processorWeights.size()
+    )
     {
         if (debug)
         {
@@ -719,7 +709,10 @@ Foam::label Foam::ptscotchDecomp::decompose
         }
         check
         (
-            SCOTCH_archCmpltw(&archdat, nProcessors_, processorWeights.begin()),
+            SCOTCH_archCmpltw
+            (
+                &archdat, nDomains_, processorWeights.begin()
+            ),
             "SCOTCH_archCmpltw"
         );
     }
@@ -731,7 +724,7 @@ Foam::label Foam::ptscotchDecomp::decompose
         }
         check
         (
-            SCOTCH_archCmplt(&archdat, nProcessors_),
+            SCOTCH_archCmplt(&archdat, nDomains_),
             "SCOTCH_archCmplt"
         );
     }
@@ -772,15 +765,15 @@ Foam::label Foam::ptscotchDecomp::decompose
     feenableexcept(oldExcepts);
     #endif
 
+    // See above note to have size 1. Undo.
+    finalDecomp.setSize(xadjSize-1);
 
-
-    //finalDecomp.setSize(xadjSize-1);
     //check
     //(
     //    SCOTCH_dgraphPart
     //    (
     //        &grafdat,
-    //        nProcessors_,       // partnbr
+    //        nDomains_,          // partnbr
     //        &stradat,           // const SCOTCH_Strat *
     //        finalDecomp.begin() // parttab
     //    ),
@@ -804,9 +797,21 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ptscotchDecomp::ptscotchDecomp(const dictionary& decompositionDict)
+Foam::ptscotchDecomp::ptscotchDecomp(const dictionary& decompDict)
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict),
+    coeffsDict_(findCoeffsDict("scotchCoeffs", selectionType::NULL_DICT))
+{}
+
+
+Foam::ptscotchDecomp::ptscotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_(findCoeffsDict("scotchCoeffs", selectionType::NULL_DICT))
 {}
 
 
@@ -819,6 +824,9 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const scalarField& pointWeights
 )
 {
+    // Where to write graph
+    graphPath(mesh);
+
     if (points.size() != mesh.nCells())
     {
         FatalErrorInFunction
@@ -835,7 +843,6 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     //   adjncy      : contains neighbours (= edges in graph)
     //   xadj(celli) : start of information in adjncy for celli
 
-
     CompactListList<label> cellCells;
     calcCellCells
     (
@@ -847,22 +854,15 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     );
 
     // Decompose using default weights
-    List<label> finalDecomp;
+    labelList decomp;
     decompose
     (
-        mesh.time().path()/mesh.name(),
         cellCells.m(),
         cellCells.offsets(),
         pointWeights,
-        finalDecomp
+        decomp
     );
 
-    // Copy back to labelList
-    labelList decomp(points.size());
-    forAll(decomp, i)
-    {
-        decomp[i] = finalDecomp[i];
-    }
     return decomp;
 }
 
@@ -875,6 +875,9 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const scalarField& pointWeights
 )
 {
+    // Where to write graph
+    graphPath(mesh);
+
     if (agglom.size() != mesh.nCells())
     {
         FatalErrorInFunction
@@ -898,14 +901,13 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     );
 
     // Decompose using weights
-    List<label> finalDecomp;
+    labelList decomp;
     decompose
     (
-        mesh.time().path()/mesh.name(),
         cellCells.m(),
         cellCells.offsets(),
         pointWeights,
-        finalDecomp
+        decomp
     );
 
     // Rework back into decomposition for original mesh
@@ -913,7 +915,7 @@ Foam::labelList Foam::ptscotchDecomp::decompose
 
     forAll(fineDistribution, i)
     {
-        fineDistribution[i] = finalDecomp[agglom[i]];
+        fineDistribution[i] = decomp[agglom[i]];
     }
 
     return fineDistribution;
@@ -927,6 +929,9 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     const scalarField& cWeights
 )
 {
+    // Where to write graph
+    graphPath_ = "ptscotch";
+
     if (cellCentres.size() != globalCellCells.size())
     {
         FatalErrorInFunction
@@ -943,22 +948,15 @@ Foam::labelList Foam::ptscotchDecomp::decompose
     CompactListList<label> cellCells(globalCellCells);
 
     // Decompose using weights
-    List<label> finalDecomp;
+    labelList decomp;
     decompose
     (
-        "ptscotch",
         cellCells.m(),
         cellCells.offsets(),
         cWeights,
-        finalDecomp
+        decomp
     );
 
-    // Copy back to labelList
-    labelList decomp(cellCentres.size());
-    forAll(decomp, i)
-    {
-        decomp[i] = finalDecomp[i];
-    }
     return decomp;
 }
 

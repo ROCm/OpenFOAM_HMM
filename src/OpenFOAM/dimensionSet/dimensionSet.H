@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -81,7 +81,9 @@ dimensionSet magSqr(const dimensionSet&);
 dimensionSet mag(const dimensionSet&);
 dimensionSet sign(const dimensionSet&);
 dimensionSet pos(const dimensionSet&);
+dimensionSet pos0(const dimensionSet&);
 dimensionSet neg(const dimensionSet&);
+dimensionSet neg0(const dimensionSet&);
 dimensionSet posPart(const dimensionSet&);
 dimensionSet negPart(const dimensionSet&);
 dimensionSet inv(const dimensionSet&);
@@ -118,26 +120,29 @@ Ostream& operator<<(Ostream&, const dimensionSet&);
 
 class dimensionSet
 {
-
 public:
+
+    //- The array of dimension exponents
+    typedef FixedList<scalar,7> list_type;
+
 
     // Member constants
 
         enum
         {
-            nDimensions = 7    // Number of dimensions in SI is 7
+            nDimensions = 7     //!< 7 base dimensions
         };
 
         //- Define an enumeration for the names of the dimension exponents
         enum dimensionType
         {
-            MASS,               // kilogram   kg
-            LENGTH,             // metre      m
-            TIME,               // second     s
-            TEMPERATURE,        // Kelvin     K
-            MOLES,              // mole       mol
-            CURRENT,            // Ampere     A
-            LUMINOUS_INTENSITY  // Candela    Cd
+            MASS,               //!< kilogram   kg
+            LENGTH,             //!< metre      m
+            TIME,               //!< second     s
+            TEMPERATURE,        //!< Kelvin     K
+            MOLES,              //!< mole       mol
+            CURRENT,            //!< Ampere     A
+            LUMINOUS_INTENSITY  //!< Candela    Cd
         };
 
 
@@ -147,6 +152,12 @@ public:
 
 
 private:
+
+    // Private data
+
+        //- The array of dimension exponents
+        list_type exponents_;
+
 
     // Private classes
 
@@ -165,17 +176,17 @@ private:
 
             // Private Member Functions
 
-                void push(const token&);
+                void push(const token& t);
 
                 token pop();
 
-                void unpop(const token&);
+                void unpop(const token& t);
 
         public:
 
             // Constructors
 
-                 tokeniser(Istream&);
+                 tokeniser(Istream& is);
 
 
             // Member Functions
@@ -210,13 +221,6 @@ private:
             const HashTable<dimensionedScalar>&
         ) const;
 
-
-    // private data
-
-        // dimensionSet stored as an array of dimension exponents
-        scalar exponents_[nDimensions];
-
-
 public:
 
     // Declare name of the class and its debug switch
@@ -225,8 +229,7 @@ public:
 
     // Constructors
 
-        //- Construct given individual dimension exponents for all
-        //  seven dimensions
+        //- Construct from exponents for the first five or all seven dimensions
         dimensionSet
         (
             const scalar mass,
@@ -234,20 +237,12 @@ public:
             const scalar time,
             const scalar temperature,
             const scalar moles,
-            const scalar current,
-            const scalar luminousIntensity
+            const scalar current = 0,
+            const scalar luminousIntensity = 0
         );
 
-        //- Construct given individual dimension exponents for first
-        //  five dimensions
-        dimensionSet
-        (
-            const scalar mass,
-            const scalar length,
-            const scalar time,
-            const scalar temperature,
-            const scalar moles
-        );
+        //- Construct from exponents for all seven dimensions
+        dimensionSet(const FixedList<scalar,7>& dimensions);
 
         //- Copy constructor
         dimensionSet(const dimensionSet& ds);
@@ -259,7 +254,7 @@ public:
         }
 
         //- Construct from Istream
-        dimensionSet(Istream&);
+        dimensionSet(Istream& is);
 
 
     // Member functions
@@ -267,7 +262,13 @@ public:
         //- Return true if it is dimensionless
         bool dimensionless() const;
 
-        void reset(const dimensionSet&);
+        //- Return const access to the exponents as a list
+        const FixedList<scalar,7>& values() const;
+
+        //- Return non-const access to the exponents as a list
+        FixedList<scalar,7>& values();
+
+        void reset(const dimensionSet& ds);
 
 
     // I/O
@@ -360,7 +361,7 @@ public:
         friend dimensionSet magSqr(const dimensionSet&);
         friend dimensionSet mag(const dimensionSet&);
         friend dimensionSet sign(const dimensionSet&);
-        friend dimensionSet pos(const dimensionSet&);
+        friend dimensionSet pos0(const dimensionSet&);
         friend dimensionSet neg(const dimensionSet&);
         friend dimensionSet inv(const dimensionSet&);
 

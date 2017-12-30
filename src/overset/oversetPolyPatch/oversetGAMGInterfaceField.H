@@ -52,11 +52,15 @@ class oversetGAMGInterfaceField
 :
     public GAMGInterfaceField
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Local reference cast into the interface
         const oversetGAMGInterface& oversetInterface_;
 
+
+private:
 
     // Private Member Functions
 

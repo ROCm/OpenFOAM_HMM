@@ -99,7 +99,7 @@ Foam::polyPatch::polyPatch
     (
         patchType != word::null
      && constraintType(patchType)
-     && findIndex(inGroups(), patchType) == -1
+     && !inGroups().found(patchType)
     )
     {
         inGroups().append(patchType);
@@ -160,7 +160,7 @@ Foam::polyPatch::polyPatch
     (
         patchType != word::null
      && constraintType(patchType)
-     && findIndex(inGroups(), patchType) == -1
+     && !inGroups().found(patchType)
     )
     {
         inGroups().append(patchType);
@@ -279,13 +279,7 @@ Foam::wordList Foam::polyPatch::constraintTypes()
 
     label i = 0;
 
-    for
-    (
-        dictionaryConstructorTable::iterator cstrIter =
-            dictionaryConstructorTablePtr_->begin();
-        cstrIter != dictionaryConstructorTablePtr_->end();
-        ++cstrIter
-    )
+    forAllConstIters(*dictionaryConstructorTablePtr_, cstrIter)
     {
         if (constraintType(cstrIter.key()))
         {
@@ -380,10 +374,10 @@ void Foam::polyPatch::clearAddressing()
 
 void Foam::polyPatch::write(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
     patchIdentifier::write(os);
-    os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
-    os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
+    os.writeEntry("nFaces", size());
+    os.writeEntry("startFace", start());
 }
 
 

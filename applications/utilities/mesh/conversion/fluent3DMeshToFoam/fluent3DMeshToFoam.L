@@ -126,7 +126,7 @@ void uniquify(word& name, HashSet<word>& patchNames)
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -221,6 +221,7 @@ redundantBlock             {space}({comment}|{unknownPeriodicFace}|{periodicFace
 endOfSection               {space}")"{space}
 
 
+/* balance "-quoted for editor */
 
  /* ------------------------------------------------------------------------ *\
                       -----  Exclusive start states -----
@@ -693,7 +694,7 @@ endOfSection               {space}")"{space}
 {lbrac}{label} {
         Warning
             << "Found unknown block of type: "
-            << Foam::string(YYText())(1, YYLeng()-1) << nl
+            << std::string(YYText()).substr(1, YYLeng()-1) << nl
             << "    on line " << lineNo << endl;
 
         yy_push_state(ignoreBlock);
@@ -770,7 +771,7 @@ endOfSection               {space}")"{space}
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("Fluent mesh file");
+    argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",
@@ -1155,7 +1156,6 @@ int main(int argc, char *argv[])
             new cellZone
             (
                 name,
-                labelList(0),
                 cellZonei,
                 mesh.cellZones()
             )
@@ -1185,8 +1185,6 @@ int main(int argc, char *argv[])
             new faceZone
             (
                 name,
-                labelList(0),
-                boolList(0),
                 faceZonei,
                 mesh.faceZones()
             )

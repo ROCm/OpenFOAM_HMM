@@ -299,7 +299,7 @@ void Foam::AMIMethod<SourcePatch, TargetPatch>::appendNbrFaces
             const vector& n1 = patch.faceNormals()[facei];
             const vector& n2 = patch.faceNormals()[nbrFacei];
 
-            scalar cosI = n1 & n2;
+            const scalar cosI = n1 & n2;
 
             if (cosI > Foam::cos(degToRad(89.0)))
             {

@@ -436,9 +436,8 @@ void thermalBaffle1DFvPatchScalarField<solidType>::write(Ostream& os) const
     }
 
     qrPrevious_.writeEntry("qrPrevious", os);
-    os.writeKeyword("qr")<< qrName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("relaxation")<< qrRelaxation_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("qr", qrName_);
+    os.writeEntry("relaxation", qrRelaxation_);
 }
 
 

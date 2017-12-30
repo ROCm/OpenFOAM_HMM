@@ -117,6 +117,8 @@ public:
 
     // Member Functions
 
+      // Access
+
         //- Is there a hit
         bool hit() const
         {
@@ -166,6 +168,8 @@ public:
         {
             return eligibleMiss_;
         }
+
+      // Edit
 
         void setHit()
         {

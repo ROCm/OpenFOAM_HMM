@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,10 +58,9 @@ Foam::limitedSurfaceInterpolationScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename MeshConstructorTable::iterator constructorIter =
-        MeshConstructorTablePtr_->find(schemeName);
+    auto cstrIter = MeshConstructorTablePtr_->cfind(schemeName);
 
-    if (!constructorIter.found())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -73,7 +72,7 @@ Foam::limitedSurfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    return constructorIter()(mesh, schemeData);
+    return cstrIter()(mesh, schemeData);
 }
 
 
@@ -107,10 +106,9 @@ Foam::limitedSurfaceInterpolationScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename MeshFluxConstructorTable::iterator constructorIter =
-        MeshFluxConstructorTablePtr_->find(schemeName);
+    auto cstrIter = MeshFluxConstructorTablePtr_->cfind(schemeName);
 
-    if (!constructorIter.found())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -122,7 +120,7 @@ Foam::limitedSurfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    return constructorIter()(mesh, faceFlux, schemeData);
+    return cstrIter()(mesh, faceFlux, schemeData);
 }
 
 
@@ -155,7 +153,7 @@ Foam::limitedSurfaceInterpolationScheme<Type>::weights
     {
         pWeights[face] =
             pWeights[face]*CDweights[face]
-          + (1.0 - pWeights[face])*pos(faceFlux_[face]);
+          + (1.0 - pWeights[face])*pos0(faceFlux_[face]);
     }
 
     surfaceScalarField::Boundary& bWeights =
@@ -172,7 +170,7 @@ Foam::limitedSurfaceInterpolationScheme<Type>::weights
         {
             pWeights[face] =
                 pWeights[face]*pCDweights[face]
-              + (1.0 - pWeights[face])*pos(pFaceFlux[face]);
+              + (1.0 - pWeights[face])*pos0(pFaceFlux[face]);
         }
     }
 

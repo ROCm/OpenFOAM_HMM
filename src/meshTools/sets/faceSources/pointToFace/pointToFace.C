@@ -36,18 +36,6 @@ namespace Foam
     defineTypeNameAndDebug(pointToFace, 0);
     addToRunTimeSelectionTable(topoSetSource, pointToFace, word);
     addToRunTimeSelectionTable(topoSetSource, pointToFace, istream);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::pointToFace::pointAction,
-        3
-    >::names[] =
-    {
-        "any",
-        "all",
-        "edge"
-    };
 }
 
 
@@ -61,8 +49,16 @@ Foam::topoSetSource::addToUsageTable Foam::pointToFace::usage_
     "    -two consecutive points (an edge) in the pointSet\n\n"
 );
 
-const Foam::NamedEnum<Foam::pointToFace::pointAction, 3>
-    Foam::pointToFace::pointActionNames_;
+const Foam::Enum
+<
+    Foam::pointToFace::pointAction
+>
+Foam::pointToFace::pointActionNames_
+{
+    { pointAction::ANY, "any" },
+    { pointAction::ALL, "all" },
+    { pointAction::EDGE, "edge" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -173,7 +169,7 @@ Foam::pointToFace::pointToFace
 :
     topoSetSource(mesh),
     setName_(dict.lookup("set")),
-    option_(pointActionNames_.read(dict.lookup("option")))
+    option_(pointActionNames_.lookup("option", dict))
 {}
 
 

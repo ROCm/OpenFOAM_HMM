@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,14 +24,53 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "fileName.H"
 #include "dictionary.H"
 #include "JobInfo.H"
 #include "Pstream.H"
 #include "OSspecific.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::error::warnAboutAge
+(
+    const char* what,
+    const int oldVersion
+)
+{
+    if (oldVersion < 1000)
+    {
+        // Emit warning
+        std::cerr
+            << "    This " << what << " is considered to be VERY old!\n"
+            << std::endl;
+    }
+    else if (OPENFOAM_PLUS > oldVersion)
+    {
+        const int months =
+        (
+            // YYMM -> months
+            (12 * (OPENFOAM_PLUS/100) + (OPENFOAM_PLUS % 100))
+          - (12 * (oldVersion/100) + (oldVersion % 100))
+        );
+
+        std::cerr
+            << "    This " << what << " is deemed to be " << months
+            << " months old.\n"
+            << std::endl;
+    }
+///// Uncertain if this is desirable
+///    else if (OPENFOAM_PLUS < oldVersion)
+///    {
+///        std::cerr
+///            << "    This " << what << " appears to be a future option\n"
+///            << std::endl;
+///    }
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::error::error(const string& title)
 :
@@ -88,11 +127,15 @@ Foam::error::error(const error& err)
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::error::~error() throw()
 {
     delete messageStreamPtr_;
 }
 
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 Foam::OSstream& Foam::error::operator()
 (
@@ -156,6 +199,8 @@ Foam::error::operator Foam::dictionary() const
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 Foam::string Foam::error::message() const
 {
     return messageStreamPtr_->str();
@@ -175,7 +220,17 @@ void Foam::error::exit(const int errNo)
         abort();
     }
 
-    if (Pstream::parRun())
+    if (throwExceptions_)
+    {
+        // Make a copy of the error to throw
+        error errorException(*this);
+
+        // Reset the message buffer for the next error message
+        messageStreamPtr_->reset();
+
+        throw errorException;
+    }
+    else if (Pstream::parRun())
     {
         Perr<< endl << *this << endl
             << "\nFOAM parallel run exiting\n" << endl;
@@ -183,22 +238,9 @@ void Foam::error::exit(const int errNo)
     }
     else
     {
-        if (throwExceptions_)
-        {
-            // Make a copy of the error to throw
-            error errorException(*this);
-
-            // Rewind the message buffer for the next error message
-            messageStreamPtr_->rewind();
-
-            throw errorException;
-        }
-        else
-        {
-            Perr<< endl << *this << endl
-                << "\nFOAM exiting\n" << endl;
-            ::exit(1);
-        }
+        Perr<< endl << *this << endl
+            << "\nFOAM exiting\n" << endl;
+        ::exit(1);
     }
 }
 
@@ -219,7 +261,17 @@ void Foam::error::abort()
         ::abort();
     }
 
-    if (Pstream::parRun())
+    if (throwExceptions_)
+    {
+        // Make a copy of the error to throw
+        error errorException(*this);
+
+        // Reset the message buffer for the next error message
+        messageStreamPtr_->reset();
+
+        throw errorException;
+    }
+    else if (Pstream::parRun())
     {
         Perr<< endl << *this << endl
             << "\nFOAM parallel run aborting\n" << endl;
@@ -228,40 +280,38 @@ void Foam::error::abort()
     }
     else
     {
-        if (throwExceptions_)
-        {
-            // Make a copy of the error to throw
-            error errorException(*this);
-
-            // Rewind the message buffer for the next error message
-            messageStreamPtr_->rewind();
-
-            throw errorException;
-        }
-        else
-        {
-            Perr<< endl << *this << endl
-                << "\nFOAM aborting\n" << endl;
-            printStack(Perr);
-            ::abort();
-        }
+        Perr<< endl << *this << endl
+            << "\nFOAM aborting\n" << endl;
+        printStack(Perr);
+        ::abort();
     }
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
+void Foam::error::write(Ostream& os, const bool includeTitle) const
 {
-    os  << endl
-        << fErr.title().c_str() << endl
-        << fErr.message().c_str();
-
-    if (error::level >= 2 && fErr.sourceFileLineNumber())
+    os  << nl;
+    if (includeTitle)
     {
-        os  << endl << endl
-            << "    From function " << fErr.functionName().c_str() << endl
-            << "    in file " << fErr.sourceFileName().c_str()
-            << " at line " << fErr.sourceFileLineNumber() << '.';
+        os  << title().c_str() << endl;
     }
+    os  << message().c_str();
+
+    if (error::level >= 2 && sourceFileLineNumber())
+    {
+        os  << nl << nl
+            << "    From function " << functionName().c_str() << endl
+            << "    in file " << sourceFileName().c_str()
+            << " at line " << sourceFileLineNumber() << '.';
+    }
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const error& err)
+{
+    err.write(os);
 
     return os;
 }
@@ -271,5 +321,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
 // Global error definitions
 
 Foam::error Foam::FatalError("--> FOAM FATAL ERROR: ");
+
 
 // ************************************************************************* //

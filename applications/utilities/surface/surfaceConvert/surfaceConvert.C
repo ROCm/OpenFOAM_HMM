@@ -64,47 +64,37 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats"
+        "convert between surface formats, using triSurface library components"
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("outputFile");
+    argList::addArgument("inputFile");
+    argList::addArgument("outputFile");
 
     argList::addBoolOption
     (
         "clean",
-        "perform some surface checking/cleanup on the input surface"
+        "Perform some surface checking/cleanup on the input surface"
     );
     argList::addBoolOption
     (
         "group",
-        "reorder faces into groups; one per region"
+        "Reorder faces into groups; one per region"
     );
     argList::addOption
     (
         "scale",
         "factor",
-        "geometry scaling factor - default is 1"
+        "Input geometry scaling factor"
     );
     argList::addOption
     (
         "writePrecision",
         "label",
-        "write to output with the specified precision"
+        "Write to output with the specified precision"
     );
 
     argList args(argc, argv);
-
-    if (args.optionFound("writePrecision"))
-    {
-        label writePrecision = args.optionRead<label>("writePrecision");
-
-        IOstream::defaultPrecision(writePrecision);
-        Sout.precision(writePrecision);
-
-        Info<< "Output write precision set to " << writePrecision << endl;
-    }
 
     const fileName importName = args[1];
     const fileName exportName = args[2];
@@ -116,8 +106,30 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
+    // Check that reading/writing is supported
+    if
+    (
+        !triSurface::canRead(importName, true)
+     || !triSurface::canWriteType(exportName.ext(), true)
+    )
+    {
+        return 1;
+    }
+
+    if (args.optionFound("writePrecision"))
+    {
+        label writePrecision = args.optionRead<label>("writePrecision");
+
+        IOstream::defaultPrecision(writePrecision);
+        Sout.precision(writePrecision);
+
+        Info<< "Output write precision set to " << writePrecision << endl;
+    }
+
+    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+
     Info<< "Reading : " << importName << endl;
-    triSurface surf(importName);
+    triSurface surf(importName, scaleFactor);
 
     Info<< "Read surface:" << endl;
     surf.writeStats(Info);
@@ -144,13 +156,6 @@ int main(int argc, char *argv[])
     }
 
     Info<< "writing " << exportName;
-
-    scalar scaleFactor = 0;
-    if (args.optionReadIfPresent("scale", scaleFactor) && scaleFactor > 0)
-    {
-        Info<< " with scaling " << scaleFactor;
-        surf.scalePoints(scaleFactor);
-    }
     Info<< endl;
 
     surf.write(exportName, sortByRegion);

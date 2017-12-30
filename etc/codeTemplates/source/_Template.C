@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) YEAR OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,9 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const dataType Foam::CLASSNAME::staticData();
+
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //

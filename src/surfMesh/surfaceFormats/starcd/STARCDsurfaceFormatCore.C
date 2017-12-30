@@ -26,7 +26,7 @@ License
 #include "STARCDsurfaceFormatCore.H"
 #include "clock.H"
 #include "regExp.H"
-#include "IStringStream.H"
+#include "IFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -37,7 +37,7 @@ License
 Foam::Map<Foam::word>
 Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
 (
-    IFstream& is
+    ISstream& is
 )
 {
     Map<word> lookup;
@@ -47,7 +47,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
         return lookup;
     }
 
-    regExp ctnameRE
+    const regExp ctnameRE
     (
         " *CTNA[^ ]*"        // keyword - min 4 chars
         "[[:space:]]+"       // space delimited
@@ -64,13 +64,11 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
         if (ctnameRE.match(line, groups))
         {
             const label tableId = atoi(groups[0].c_str());
+            const word tableName = word::validate(groups[1], true);
 
-            // strip bad chars
-            string::stripInvalid<word>(groups[1]);
-
-            if (!groups[1].empty())
+            if (!tableName.empty())
             {
-                lookup.insert(tableId, groups[1]);
+                lookup.insert(tableId, tableName);
             }
         }
     }
@@ -82,7 +80,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
 void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
 (
     Ostream& os,
-    const pointField& pointLst,
+    const UList<point>& pts,
     const label nFaces,
     const UList<surfZone>& zoneLst
 )
@@ -90,7 +88,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     const word caseName = os.name().nameLessExt();
 
     os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
-        << "! " << pointLst.size() << " points, " << nFaces << " faces" << nl
+        << "! " << pts.size() << " points, " << nFaces << " faces" << nl
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;
 

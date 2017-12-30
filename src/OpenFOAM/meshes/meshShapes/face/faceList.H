@@ -25,6 +25,25 @@ Typedef
     Foam::faceList
 
 Description
+    A List of faces.
+
+Typedef
+    Foam::faceUList
+
+Description
+    A UList of faces.
+
+Typedef
+    Foam::faceSubList
+
+Description
+    A SubList of faces.
+
+Typedef
+    Foam::faceListList
+
+Description
+    A List of faceList.
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,8 +54,6 @@ Description
 #include "List.H"
 #include "SubList.H"
 #include "faceListFwd.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

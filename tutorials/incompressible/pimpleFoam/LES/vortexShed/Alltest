@@ -1,0 +1,18 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+rm -f system/blockMeshDict
+m4 system/blockMeshDict.m4 > system/blockMeshDict
+
+runApplication blockMesh
+
+restore0Dir
+
+runApplication decomposePar
+
+runParallel $(getApplication)
+
+# Note: not running the noise utility since no pressure data will be generated
+
+#------------------------------------------------------------------------------

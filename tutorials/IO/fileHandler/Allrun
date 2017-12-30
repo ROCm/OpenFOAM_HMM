@@ -1,0 +1,28 @@
+#!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
+
+runApplication blockMesh
+
+application=$(getApplication)
+
+#- Test writing collated format
+runApplication decomposePar -fileHandler collated
+runParallel $application -fileHandler collated
+runApplication reconstructPar -latestTime -fileHandler collated
+
+#- Delete collated files
+rm -rf processors
+
+#- Test writing uncollated format
+runApplication -s uncollated decomposePar -fileHandler uncollated
+runParallel -s uncollated $application -fileHandler uncollated
+
+#- Restart from uncollated
+runParallel -s collated $application -fileHandler collated
+runApplication -s collated reconstructPar -latestTime -fileHandler collated
+
+#- Convert the parallel format to uncollated
+runParallel foamFormatConvert -fileHandler uncollated
+
+#------------------------------------------------------------------------------

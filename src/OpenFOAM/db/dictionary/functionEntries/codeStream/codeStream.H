@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -118,10 +118,8 @@ class codeStream
         //- Interpreter function type
         typedef void (*streamingFunctionType)(Ostream&, const dictionary&);
 
-    // Private Member Functions
 
-        //- Helper function: parent (of parent etc.) of dictionary up to the top
-        static const dictionary& topDict(const dictionary&);
+    // Private Member Functions
 
         //- Helper function: access IOobject for master-only-reading
         //  functionality
@@ -139,10 +137,10 @@ class codeStream
 
 
         //- Disallow default bitwise copy construct
-        codeStream(const codeStream&);
+        codeStream(const codeStream&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const codeStream&);
+        void operator=(const codeStream&) = delete;
 
 
 public:
@@ -165,14 +163,14 @@ public:
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
+        static bool execute(dictionary& parentDict, Istream& is);
 
         //- Execute the functionEntry in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
+            primitiveEntry& entry,
+            Istream& is
         );
 
 };

@@ -18,10 +18,7 @@ CAD.obj
 {
     extractionMethod     extractFromSurface;
 
-    extractFromSurfaceCoeffs
-    {
-        includedAngle    150;
-    }
+    includedAngle        150;
 
     subsetFeatures
     {

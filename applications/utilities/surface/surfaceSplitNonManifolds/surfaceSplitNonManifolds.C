@@ -154,14 +154,14 @@ void testSortedEdgeFaces(const triSurface& surf)
 
         forAll(myFaces, i)
         {
-            if (findIndex(sortMyFaces, myFaces[i]) == -1)
+            if (!sortMyFaces.found(myFaces[i]))
             {
                 FatalErrorInFunction << abort(FatalError);
             }
         }
         forAll(sortMyFaces, i)
         {
-            if (findIndex(myFaces, sortMyFaces[i]) == -1)
+            if (!myFaces.found(sortMyFaces[i]))
             {
                 FatalErrorInFunction << abort(FatalError);
             }
@@ -305,7 +305,7 @@ label findEdge
 
     FatalErrorInFunction
         << ' ' << v1 << " in candidates " << edgeLabels
-        << " with vertices:" << UIndirectList<edge>(surf.edges(), edgeLabels)()
+        << " with vertices:" << UIndirectList<edge>(surf.edges(), edgeLabels)
         << abort(FatalError);
 
     return -1;
@@ -345,7 +345,7 @@ label otherEdge
     FatalErrorInFunction
         << " verts:" << surf.localPoints()[facei]
         << " connected to point " << pointi
-        << " faceEdges:" << UIndirectList<edge>(surf.edges(), fEdges)()
+        << " faceEdges:" << UIndirectList<edge>(surf.edges(), fEdges)
         << abort(FatalError);
 
     return -1;
@@ -460,7 +460,7 @@ label sharedFace
 
     const triSurface::FaceType& f = surf.localFaces()[firstFacei];
 
-    label startIndex = findIndex(f, e.start());
+    label startIndex = f.find(e.start());
 
     // points in face in same order as edge
     bool edgeOrder = (f[f.fcIndex(startIndex)] == e.end());
@@ -471,7 +471,7 @@ label sharedFace
     const labelList& eFaces = surf.sortedEdgeFaces()[sharedEdgeI];
 
     // Get position of face in sorted edge faces
-    label faceIndex = findIndex(eFaces, firstFacei);
+    label faceIndex = eFaces.find(firstFacei);
 
     if (edgeOrder)
     {
@@ -675,8 +675,8 @@ int main(int argc, char *argv[])
         "split multiply connected surface edges by duplicating points"
     );
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
     argList::addBoolOption
     (
         "debug",

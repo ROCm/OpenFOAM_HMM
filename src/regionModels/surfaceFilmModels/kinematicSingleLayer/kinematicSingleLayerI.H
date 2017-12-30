@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -182,6 +182,12 @@ inline injectionModelList& kinematicSingleLayer::injection()
 }
 
 
+inline transferModelList& kinematicSingleLayer::transfer()
+{
+    return transfer_;
+}
+
+
 inline const filmTurbulenceModel& kinematicSingleLayer::turbulence() const
 {
     return turbulence_();
@@ -197,9 +203,11 @@ inline tmp<volScalarField> kinematicSingleLayer::mass() const
 inline tmp<volScalarField> kinematicSingleLayer::netMass() const
 {
     return
-        fvc::surfaceSum(pos(phi_)*phi_/(fvc::interpolate(delta_) + deltaSmall_))
-       *time().deltaT()
-      + deltaRho_*magSf();
+        fvc::surfaceSum
+        (
+            pos0(phi_)*phi_/(fvc::interpolate(delta_) + deltaSmall_)
+        )*time().deltaT()
+      + rho_*delta_*magSf();
 }
 
 

@@ -39,15 +39,14 @@ Foam::DevolatilisationModel<CloudType>::New
 
     Info<< "Selecting devolatilisation model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown devolatilisation model type "
+            << "Unknown devolatilisationModel type "
             << modelType << nl << nl
-            << "Valid devolatilisation model types are:" << nl
+            << "Valid devolatilisationModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,28 +27,37 @@ License
 #include "ListOps.H"
 #include "clock.H"
 #include "PackedBoolList.H"
-#include "IStringStream.H"
+#include "DynamicList.H"
+#include "StringStream.H"
 #include "OSspecific.H"
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::fileFormats::STARCDCore::fileHeader>
-    Foam::fileFormats::STARCDCore::fileHeaders_
-    {
-        { fileHeader::HEADER_CEL, "PROSTAR_CELL" },
-        { fileHeader::HEADER_VRT, "PROSTAR_VERTEX" },
-        { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" }
-    };
+const Foam::Enum
+<
+    Foam::fileFormats::STARCDCore::fileHeader
+>
+Foam::fileFormats::STARCDCore::fileHeaders_
+{
+    { fileHeader::HEADER_CEL, "PROSTAR_CELL" },
+    { fileHeader::HEADER_VRT, "PROSTAR_VERTEX" },
+    { fileHeader::HEADER_BND, "PROSTAR_BOUNDARY" }
+};
 
-const Foam::Enum<Foam::fileFormats::STARCDCore::fileExt>
-    Foam::fileFormats::STARCDCore::fileExtensions_
-    {
-        { fileExt::CEL_FILE, "cel" },
-        { fileExt::VRT_FILE, "vrt" },
-        { fileExt::BND_FILE, "bnd" },
-        { fileExt::INP_FILE, "inp" }
-    };
+
+const Foam::Enum
+<
+    Foam::fileFormats::STARCDCore::fileExt
+>
+Foam::fileFormats::STARCDCore::fileExtensions_
+{
+    { fileExt::CEL_FILE, "cel" },
+    { fileExt::VRT_FILE, "vrt" },
+    { fileExt::BND_FILE, "bnd" },
+    { fileExt::INP_FILE, "inp" }
+};
+
 
 const char* const Foam::fileFormats::STARCDCore::defaultBoundaryName =
     "Default_Boundary_Region";
@@ -75,12 +84,6 @@ Foam::fileFormats::STARCDCore::starToFoamFaceAddr =
     { starcdTet,   { 3, -1, 2, -1, 1, 0 } },
     { starcdPyr,   { 0, -1, 4, 2, 1, 3 } }
 };
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STARCDCore::STARCDCore()
-{}
 
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
@@ -165,8 +168,8 @@ void Foam::fileFormats::STARCDCore::removeFiles(const fileName& base)
 Foam::label Foam::fileFormats::STARCDCore::readPoints
 (
     IFstream& is,
-    pointField& points,
-    labelList& ids
+    List<point>& points,
+    List<label>& ids
 )
 {
     label maxId = 0;
@@ -211,7 +214,7 @@ Foam::label Foam::fileFormats::STARCDCore::readPoints
 void Foam::fileFormats::STARCDCore::writePoints
 (
     Ostream& os,
-    const pointField& points,
+    const UList<point>& points,
     const scalar scaleFactor
 )
 {

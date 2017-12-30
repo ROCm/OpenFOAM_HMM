@@ -319,7 +319,7 @@ bool Foam::meshTools::edgeOnCell
     const label edgeI
 )
 {
-    return findIndex(mesh.edgeCells(edgeI), celli) != -1;
+    return mesh.edgeCells(edgeI).found(celli);
 }
 
 
@@ -330,7 +330,7 @@ bool Foam::meshTools::edgeOnFace
     const label edgeI
 )
 {
-    return findIndex(mesh.faceEdges(facei), edgeI) != -1;
+    return mesh.faceEdges(facei).found(edgeI);
 }
 
 
@@ -550,7 +550,7 @@ Foam::label Foam::meshTools::otherEdge
 
     FatalErrorInFunction
         << "Can not find edge in "
-        << UIndirectList<edge>(mesh.edges(), edgeLabels)()
+        << UIndirectList<edge>(mesh.edges(), edgeLabels)
         << " connected to edge "
         << thisEdgeI << " with vertices " << mesh.edges()[thisEdgeI]
         << " on side " << thisVertI << abort(FatalError);

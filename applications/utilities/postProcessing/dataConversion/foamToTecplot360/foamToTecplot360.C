@@ -79,7 +79,7 @@ Usage
 #include "tensorIOField.H"
 #include "passiveParticleCloud.H"
 #include "faceSet.H"
-#include "stringListOps.H"
+#include "stringOps.H"
 #include "wordReList.H"
 
 #include "meshSubsetHelper.H"
@@ -137,7 +137,7 @@ labelList getSelectedPatches
             Info<< "    discarding empty/processor patch " << patchi
                 << " " << pp.name() << endl;
         }
-        else if (findStrings(excludePatches, pp.name()))
+        else if (stringOps::match(excludePatches, pp.name()))
         {
             Info<< "    excluding patch " << patchi
                 << " " << pp.name() << endl;
@@ -1168,8 +1168,9 @@ int main(int argc, char *argv[])
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
+            IOobject* coordinatesPtr = sprayObjs.lookup("coordinates");
 
-            if (positionsPtr)
+            if (positionsPtr || coordinatesPtr)
             {
                 mkDir(fvPath/cloud::prefix/cloudDirs[cloudI]);
 

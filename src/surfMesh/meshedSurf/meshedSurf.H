@@ -34,7 +34,7 @@ Description
 
 #include "pointField.H"
 #include "faceList.H"
-#include "ListOps.H"
+#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,13 +52,11 @@ public:
     // Constructors
 
         //- Construct null
-        meshedSurf()
-        {}
+        meshedSurf() = default;
 
 
     //- Destructor
-    virtual ~meshedSurf()
-    {}
+    virtual ~meshedSurf() = default;
 
 
     // Access Member Functions

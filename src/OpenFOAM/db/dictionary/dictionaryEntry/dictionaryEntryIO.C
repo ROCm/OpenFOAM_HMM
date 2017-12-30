@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "keyType.H"
 #include "dictionaryEntry.H"
 #include "IOstreams.H"
 
@@ -66,9 +65,9 @@ void Foam::dictionaryEntry::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryEntry& de)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryEntry& e)
 {
-    de.write(os);
+    e.write(os);
     return os;
 }
 

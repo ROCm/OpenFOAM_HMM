@@ -46,12 +46,9 @@ Description
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "IStringStream.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
-#include "OFstream.H"
-#include "IFstream.H"
 #include "IOobjectList.H"
 #include "SortableList.H"
 #include "timeSelector.H"
@@ -116,36 +113,28 @@ int main(int argc, char *argv[])
         pointSet set(*iter());
         SortableList<label> pointLabels(set.toc());
 
-        label zoneID = mesh.pointZones().findZoneID(set.name());
-        if (zoneID == -1)
+        // The original number of zones
+        const label nOrigZones = mesh.pointZones().size();
+
+        // Get existing or create new empty zone
+        pointZone& zn = mesh.pointZones()(set.name());
+
+        if (nOrigZones == mesh.pointZones().size())
         {
-            Info<< "Adding set " << set.name() << " as a pointZone." << endl;
-            label sz = mesh.pointZones().size();
-            mesh.pointZones().setSize(sz+1);
-            mesh.pointZones().set
-            (
-                sz,
-                new pointZone
-                (
-                    set.name(),             //name
-                    pointLabels,            //addressing
-                    sz,                     //index
-                    mesh.pointZones()       //pointZoneMesh
-                )
-            );
-            mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
-            mesh.pointZones().instance() = mesh.facesInstance();
+            Info<< "Overwriting contents of existing pointZone "
+                << zn.index()
+                << " with that of set " << set.name() << "." << endl;
         }
         else
         {
-            Info<< "Overwriting contents of existing pointZone " << zoneID
-                << " with that of set " << set.name() << "." << endl;
-            mesh.pointZones()[zoneID] = pointLabels;
-            mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
-            mesh.pointZones().instance() = mesh.facesInstance();
+            Info<< "Adding set " << set.name() << " as a pointZone." << endl;
         }
-    }
 
+        zn = pointLabels;
+
+        mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
+        mesh.pointZones().instance() = mesh.facesInstance();
+    }
 
 
     IOobjectList faceObjects(objects.lookupClass(faceSet::typeName));
@@ -247,39 +236,31 @@ int main(int argc, char *argv[])
             }
         }
 
-        label zoneID = mesh.faceZones().findZoneID(set.name());
-        if (zoneID == -1)
+        // The original number of zones
+        const label nOrigZones = mesh.faceZones().size();
+
+        // Get existing or create new empty zone
+        faceZone& zn = mesh.faceZones()(set.name());
+
+        if (nOrigZones == mesh.faceZones().size())
         {
-            Info<< "Adding set " << set.name() << " as a faceZone." << endl;
-            label sz = mesh.faceZones().size();
-            mesh.faceZones().setSize(sz+1);
-            mesh.faceZones().set
-            (
-                sz,
-                new faceZone
-                (
-                    set.name(),             //name
-                    addressing.shrink(),    //addressing
-                    flipMap.shrink(),       //flipmap
-                    sz,                     //index
-                    mesh.faceZones()        //pointZoneMesh
-                )
-            );
-            mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
-            mesh.faceZones().instance() = mesh.facesInstance();
+            Info<< "Overwriting contents of existing faceZone "
+                << zn.index()
+                << " with that of set " << set.name() << "." << endl;
         }
         else
         {
-            Info<< "Overwriting contents of existing faceZone " << zoneID
-                << " with that of set " << set.name() << "." << endl;
-            mesh.faceZones()[zoneID].resetAddressing
-            (
-                addressing.shrink(),
-                flipMap.shrink()
-            );
-            mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
-            mesh.faceZones().instance() = mesh.facesInstance();
+            Info<< "Adding set " << set.name() << " as a faceZone." << endl;
         }
+
+        zn.resetAddressing
+        (
+            addressing.shrink(),
+            flipMap.shrink()
+        );
+
+        mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+        mesh.faceZones().instance() = mesh.facesInstance();
     }
 
 
@@ -296,37 +277,28 @@ int main(int argc, char *argv[])
             cellSet set(*iter());
             SortableList<label> cellLabels(set.toc());
 
-            label zoneID = mesh.cellZones().findZoneID(set.name());
-            if (zoneID == -1)
+            // The original number of zones
+            const label nOrigZones = mesh.cellZones().size();
+
+            cellZone& zn = mesh.cellZones()(set.name());
+
+            if (nOrigZones == mesh.cellZones().size())
             {
-                Info<< "Adding set " << set.name() << " as a cellZone." << endl;
-                label sz = mesh.cellZones().size();
-                mesh.cellZones().setSize(sz+1);
-                mesh.cellZones().set
-                (
-                    sz,
-                    new cellZone
-                    (
-                        set.name(),             //name
-                        cellLabels,             //addressing
-                        sz,                     //index
-                        mesh.cellZones()        //pointZoneMesh
-                    )
-                );
-                mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
-                mesh.cellZones().instance() = mesh.facesInstance();
+                Info<< "Overwriting contents of existing cellZone "
+                    << zn.index()
+                    << " with that of set " << set.name() << "." << endl;
             }
             else
             {
-                Info<< "Overwriting contents of existing cellZone " << zoneID
-                    << " with that of set " << set.name() << "." << endl;
-                mesh.cellZones()[zoneID] = cellLabels;
-                mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
-                mesh.cellZones().instance() = mesh.facesInstance();
+                Info<< "Adding set " << set.name() << " as a cellZone." << endl;
             }
+
+            zn = cellLabels;
+
+            mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+            mesh.cellZones().instance() = mesh.facesInstance();
         }
     }
-
 
 
     Info<< "Writing mesh." << endl;

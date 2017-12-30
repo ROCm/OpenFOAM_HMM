@@ -163,14 +163,10 @@ void Foam::phaseHydrostaticPressureFvPatchScalarField::updateCoeffs()
 void Foam::phaseHydrostaticPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    if (phaseFraction_ != "alpha")
-    {
-        os.writeKeyword("phaseFraction")
-            << phaseFraction_ << token::END_STATEMENT << nl;
-    }
-    os.writeKeyword("rho") << rho_ << token::END_STATEMENT << nl;
-    os.writeKeyword("pRefValue") << pRefValue_ << token::END_STATEMENT << nl;
-    os.writeKeyword("pRefPoint") << pRefPoint_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("phaseFraction", "alpha", phaseFraction_);
+    os.writeEntry("rho", rho_);
+    os.writeEntry("pRefValue", pRefValue_);
+    os.writeEntry("pRefPoint", pRefPoint_);
     writeEntry("value", os);
 }
 

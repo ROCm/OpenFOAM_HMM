@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,20 @@ namespace Foam
 
 const char * const Foam::cellZone::labelsName = "cellLabels";
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::cellZone::cellZone
+(
+    const word& name,
+    const label index,
+    const cellZoneMesh& zm
+)
+:
+    zone(name, index),
+    zoneMesh_(zm)
+{}
+
 
 Foam::cellZone::cellZone
 (
@@ -53,6 +66,19 @@ Foam::cellZone::cellZone
 )
 :
     zone(name, addr, index),
+    zoneMesh_(zm)
+{}
+
+
+Foam::cellZone::cellZone
+(
+    const word& name,
+    labelList&& addr,
+    const label index,
+    const cellZoneMesh& zm
+)
+:
+    zone(name, std::move(addr), index),
     zoneMesh_(zm)
 {}
 
@@ -85,25 +111,39 @@ Foam::cellZone::cellZone
 
 Foam::cellZone::cellZone
 (
-    const cellZone& cz,
+    const cellZone& origZone,
     const labelUList& addr,
     const label index,
     const cellZoneMesh& zm
 )
 :
-    zone(cz, addr, index),
+    zone(origZone, addr, index),
     zoneMesh_(zm)
 {}
 
+
 Foam::cellZone::cellZone
 (
-    const cellZone& cz,
+    const cellZone& origZone,
+    labelList&& addr,
+    const label index,
+    const cellZoneMesh& zm
+)
+:
+    zone(origZone, std::move(addr), index),
+    zoneMesh_(zm)
+{}
+
+
+Foam::cellZone::cellZone
+(
+    const cellZone& origZone,
     const Xfer<labelList>& addr,
     const label index,
     const cellZoneMesh& zm
 )
 :
-    zone(cz, addr, index),
+    zone(origZone, addr, index),
     zoneMesh_(zm)
 {}
 

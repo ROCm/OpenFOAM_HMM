@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,7 +147,7 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
         patch().lookupPatchField<surfaceScalarField, scalar>(this->phiName_);
 
     this->refValue() = Cmu75*kp*sqrt(kp)/mixingLength_;
-    this->valueFraction() = 1.0 - pos(phip);
+    this->valueFraction() = 1.0 - pos0(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
 }
@@ -159,10 +159,9 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("mixingLength")
-        << mixingLength_ << token::END_STATEMENT << nl;
-    os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
+    os.writeEntry("mixingLength", mixingLength_);
+    os.writeEntry("phi", this->phiName_);
+    os.writeEntry("k", kName_);
     writeEntry("value", os);
 }
 

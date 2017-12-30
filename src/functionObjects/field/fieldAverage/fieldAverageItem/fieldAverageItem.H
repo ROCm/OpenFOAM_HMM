@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,11 +35,20 @@ Description
         base            time; // iteration
         window          200;  // optional averaging window
         windowName      w1;   // optional window name (default = "")
+        windowType      approximate; // window type
+
+        allowRestart    yes;  // optional, used for windowType 'exact'
     }
     \endverbatim
 
     The averaging window corresponds to the averaging interval (iters or time)
     If not specified, the averaging is over 'all iters/time'
+
+    Available window types:
+    - \c none : no windowing
+    - \c exact : exact windowing - additional files will be stored and written
+    - \c approximate : approximate variant that does not store/write additional
+      fields
 
 SourceFiles
     fieldAverageItem.C
@@ -50,8 +59,9 @@ SourceFiles
 #ifndef fieldAverageItem_H
 #define fieldAverageItem_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "Switch.H"
+#include "FIFOStack.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +71,7 @@ namespace Foam
 // Forward declaration of classes
 class Istream;
 class Ostream;
+class objectRegistry;
 
 namespace functionObjects
 {
@@ -88,11 +99,20 @@ public:
             //- Prime-squared average
             static const word EXT_PRIME2MEAN;
 
+
         //- Enumeration defining the averaging base type
-        enum baseType
+        enum class baseType
         {
             ITER,
             TIME
+        };
+
+        //- Enumeration defining the averaging window type
+        enum class windowType
+        {
+            NONE,
+            APPROXIMATE,
+            EXACT
         };
 
 
@@ -119,16 +139,37 @@ private:
         word prime2MeanFieldName_;
 
         //- Averaging base type names
-        static const NamedEnum<baseType, 2> baseTypeNames_;
+        static const Enum<baseType> baseTypeNames_;
 
         //- Averaging base type
         baseType base_;
+
+        //- Total number of iterations item has been evolved
+        label totalIter_;
+
+        //- Total time item has been evolved
+        scalar totalTime_;
 
         //- Averaging window - defaults to -1 for 'all iters/time'
         scalar window_;
 
         //- Averaging window name - defaults to 'window'
         word windowName_;
+
+        //- Averaging window type
+        windowType windowType_;
+
+        //- Averaging window type names
+        static const Enum<windowType> windowTypeNames_;
+
+        //- List of window times (windowType = EXACT)
+        FIFOStack<scalar> windowTimes_;
+
+        //- List of window field names (windowType = EXACT)
+        FIFOStack<word> windowFieldNames_;
+
+        //- Switch to write all necessary files for clean restart
+        bool allowRestart_;
 
 
 public:
@@ -154,86 +195,96 @@ public:
         // Access
 
             //- Return const access to the active flag
-            bool active() const
-            {
-                return active_;
-            }
+            inline bool active() const;
 
             //- Return non-const access to the active flag
-            bool& active()
-            {
-                return active_;
-            }
+            inline bool& active();
 
             //- Return const access to the field name
-            const word& fieldName() const
-            {
-                return fieldName_;
-            }
+            inline const word& fieldName() const;
 
             //- Return const access to the mean flag
-            bool mean() const
-            {
-                return mean_;
-            }
+            inline bool mean() const;
 
             //- Return non-const access to the mean flag
-            bool& mean()
-            {
-                return mean_;
-            }
+            inline bool& mean();
 
             //- Return const access to the mean field name
-            const word& meanFieldName() const
-            {
-                return meanFieldName_;
-            }
+            inline const word& meanFieldName() const;
 
             //- Return const access to the prime-squared mean flag
-            bool prime2Mean() const
-            {
-                return prime2Mean_;
-            }
+            inline bool prime2Mean() const;
 
             //- Return non-const access to the prime-squared mean flag
-            bool& prime2Mean()
-            {
-                return prime2Mean_;
-            }
+            inline bool& prime2Mean();
 
             //- Return const access to the prime-squared mean field name
-            const word& prime2MeanFieldName() const
-            {
-                return prime2MeanFieldName_;
-            }
+            inline const word& prime2MeanFieldName() const;
 
             //- Return averaging base type name
-            const word base() const
-            {
-                return baseTypeNames_[base_];
-            }
+            inline const word& base() const;
 
-            //- Return true if base is ITER
-            bool iterBase() const
-            {
-                return base_ == ITER;
-            }
+            //- Return the total number of iterations item has been evolved
+            inline label totalIter() const;
 
-            //- Return true if base is time
-            bool timeBase() const
-            {
-                return base_ == TIME;
-            }
+            //- Return the total time item has been evolved
+            inline scalar totalTime() const;
 
-            scalar window() const
-            {
-                return window_;
-            }
+            //- Return the window length (iterations or seconds)
+            inline scalar window() const;
 
-            const word& windowName() const
-            {
-                return windowName_;
-            }
+            //- Return the (optional) window name
+            inline const word& windowName() const;
+
+            //- Return the list of window times (windowType = EXACT)
+            inline const FIFOStack<scalar>& windowTimes() const;
+
+            //- Return the list of window field names (windowType = EXACT)
+            inline const FIFOStack<word>& windowFieldNames() const;
+
+            //- Return the allow restart flag
+            inline bool allowRestart() const;
+
+            //- Return the current time interval
+            inline scalar dt(const scalar deltaT) const;
+
+            //- Return the total time interval
+            inline scalar Dt() const;
+
+            //- Helper function to construct a window field name
+            inline word windowFieldName(const word& prefix) const;
+
+            //- Return true if time is inside window (including boundaries)
+            inline bool inWindow(const scalar t) const;
+
+            //- Return true if we wish to store window fields
+            inline bool storeWindowFields() const;
+
+            //- Return true if we wish to write window fields
+            inline bool writeWindowFields() const;
+
+            //- Add field to window
+            void addToWindow(const word& fieldName, const scalar deltaT);
+
+            //- Evolve and update
+            void evolve(const objectRegistry& obr);
+
+            //- Clear out all mean fields and (optionally) supporting data
+            void clear(const objectRegistry& obr, const bool fullClean);
+
+            //- Read state and re-initialise values
+            bool readState(const dictionary& dict);
+
+            //- Write state for restart
+            void writeState(dictionary& dict) const;
+
+            //- Calculate the mean field value
+            template<class Type>
+            bool calculateMeanField(const objectRegistry& obr) const;
+
+            //- Calculate prime-squared average fields
+            template<class Type1, class Type2>
+            bool calculatePrime2MeanField(const objectRegistry& obr) const;
 
 
     // Member Operators
@@ -257,8 +308,12 @@ public:
              && a.prime2Mean_ == b.prime2Mean_
              && a.prime2MeanFieldName_ == b.prime2MeanFieldName_
              && a.base_ == b.base_
+             && a.totalIter_ == b.totalIter_
+             && a.totalTime_ == b.totalTime_
              && a.window_ == b.window_
-             && a.windowName_ == b.windowName_;
+             && a.windowName_ == b.windowName_
+             && a.windowType_ == b.windowType_
+             && a.allowRestart_ == b.allowRestart_;
         }
 
         friend bool operator!=
@@ -282,6 +337,16 @@ public:
 
 } // End namespace functionObjects
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "fieldAverageItemI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "fieldAverageItemTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

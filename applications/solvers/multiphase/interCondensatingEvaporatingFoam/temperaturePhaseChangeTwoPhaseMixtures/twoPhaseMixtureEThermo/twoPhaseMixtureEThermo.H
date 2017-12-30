@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef flashThermo_H
-#define flashThermo_H
+#ifndef twoPhaseMixtureEThermo_H
+#define twoPhaseMixtureEThermo_H
 
 #include "volFields.H"
 

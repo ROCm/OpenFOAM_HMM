@@ -28,7 +28,7 @@ Group
     grpSurfaceUtilities
 
 Description
-    Surface coarsening using `bunnylod'
+    Surface coarsening using 'bunnylod'
 
     Reference:
     \verbatim
@@ -72,9 +72,16 @@ int mapVertex(::List<int>& collapse_map, int a, int mx)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("reductionFactor");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("reductionFactor");
+    argList::addArgument("output surfaceFile");
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "input geometry scaling factor"
+    );
+
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
@@ -90,40 +97,39 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< "Input surface   :" << inFileName << endl
-        << "Reduction factor:" << reduction << endl
-        << "Output surface  :" << outFileName << endl << endl;
+    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
 
-    const triSurface surf(inFileName);
+    Info<< "Input surface   :" << inFileName << nl
+        << "Scaling factor  :" << scaleFactor << nl
+        << "Reduction factor:" << reduction << nl
+        << "Output surface  :" << outFileName << nl
+        << endl;
+
+    const triSurface surf(inFileName, scaleFactor);
 
     Info<< "Surface:" << endl;
     surf.writeStats(Info);
     Info<< endl;
 
-
-    ::List< ::Vector> vert;     // global list of vertices
-    ::List< ::tridata> tri;     // global list of triangles
+    ::List<::Vector> vert;     // global list of vertices
+    ::List<::tridata> tri;     // global list of triangles
 
 
     // Convert triSurface to progmesh format. Note: can use global point
     // numbering since surface read in from file.
     const pointField& pts = surf.points();
 
-    forAll(pts, ptI)
+    for (const point& pt : pts)
     {
-        const point& pt = pts[ptI];
-
-        vert.Add( ::Vector(pt.x(), pt.y(), pt.z()));
+        vert.Add(::Vector(pt.x(), pt.y(), pt.z()));
     }
 
-    forAll(surf, facei)
+    for (const labelledTri& f : surf)
     {
-        const labelledTri& f = surf[facei];
-
         tridata td;
-        td.v[0]=f[0];
-        td.v[1]=f[1];
-        td.v[2]=f[2];
+        td.v[0] = f[0];
+        td.v[1] = f[1];
+        td.v[2] = f[2];
         tri.Add(td);
     }
 
@@ -133,20 +139,20 @@ int main(int argc, char *argv[])
     ::ProgressiveMesh(vert,tri,collapse_map,permutation);
 
     // rearrange the vertex list
-    ::List< ::Vector> temp_list;
-    for (int i=0;i<vert.num;i++)
+    ::List<::Vector> temp_list;
+    for (int i=0; i<vert.num; i++)
     {
         temp_list.Add(vert[i]);
     }
-    for (int i=0;i<vert.num;i++)
+    for (int i=0; i<vert.num; i++)
     {
-        vert[permutation[i]]=temp_list[i];
+        vert[permutation[i]] = temp_list[i];
     }
 
     // update the changes in the entries in the triangle list
-    for (int i=0;i<tri.num;i++)
+    for (int i=0; i<tri.num; i++)
     {
-        for (int j=0;j<3;j++)
+        for (int j=0; j<3; j++)
         {
             tri[i].v[j] = permutation[tri[i].v[j]];
         }

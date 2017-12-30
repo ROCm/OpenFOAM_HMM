@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,8 +25,7 @@ License
 
 #include "codeStream.H"
 #include "addToMemberFunctionSelectionTable.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "dynamicCode.H"
 #include "dynamicCodeContext.H"
 #include "Time.H"
@@ -39,22 +38,23 @@ namespace functionEntries
 {
     defineTypeNameAndDebug(codeStream, 0);
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         codeStream,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        codeStream
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         codeStream,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        codeStream
     );
-
 }
 }
 
@@ -176,7 +176,7 @@ Foam::functionEntries::codeStream::getFunction
     // create library if required
     if (!lib)
     {
-        bool create =
+        const bool create =
             Pstream::master()
          || (regIOobject::fileModificationSkew <= 0);   // not NFS
 

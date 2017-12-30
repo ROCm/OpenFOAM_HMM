@@ -475,7 +475,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
     if (debug)
     {
         Pout<< "hexRef8::getLevel0EdgeLength() :"
-            << " Crappy Edgelengths (squared) per refinementlevel:"
+            << " Poor Edgelengths (squared) per refinementlevel:"
             << maxEdgeLenSqr << endl;
     }
 
@@ -544,7 +544,7 @@ Foam::label Foam::hexRef8::getAnchorCell
 {
     if (cellAnchorPoints[celli].size())
     {
-        label index = findIndex(cellAnchorPoints[celli], pointi);
+        label index = cellAnchorPoints[celli].find(pointi);
 
         if (index != -1)
         {
@@ -559,7 +559,7 @@ Foam::label Foam::hexRef8::getAnchorCell
 
         forAll(f, fp)
         {
-            label index = findIndex(cellAnchorPoints[celli], f[fp]);
+            label index = cellAnchorPoints[celli].find(f[fp]);
 
             if (index != -1)
             {
@@ -756,7 +756,7 @@ Foam::label Foam::hexRef8::findLevel
 
             FatalErrorInFunction
                 << "face:" << f
-                << " level:" << UIndirectList<label>(pointLevel_, f)()
+                << " level:" << labelUIndList(pointLevel_, f)
                 << " startFp:" << startFp
                 << " wantedLevel:" << wantedLevel
                 << abort(FatalError);
@@ -784,7 +784,7 @@ Foam::label Foam::hexRef8::findLevel
 
     FatalErrorInFunction
         << "face:" << f
-        << " level:" << UIndirectList<label>(pointLevel_, f)()
+        << " level:" << labelUIndList(pointLevel_, f)
         << " startFp:" << startFp
         << " wantedLevel:" << wantedLevel
         << abort(FatalError);
@@ -1318,11 +1318,11 @@ void Foam::hexRef8::createInternalFaces
                             << "cell:" << celli << " cLevel:" << cLevel
                             << " cell points:" << cPoints
                             << " pointLevel:"
-                            << UIndirectList<label>(pointLevel_, cPoints)()
+                            << labelUIndList(pointLevel_, cPoints)
                             << " face:" << facei
                             << " f:" << f
                             << " pointLevel:"
-                            << UIndirectList<label>(pointLevel_, f)()
+                            << labelUIndList(pointLevel_, f)
                             << " faceAnchorLevel:" << faceAnchorLevel[facei]
                             << " faceMidPoint:" << faceMidPoint[facei]
                             << " faceMidPointi:" << faceMidPointi
@@ -1391,11 +1391,11 @@ void Foam::hexRef8::createInternalFaces
                             << "cell:" << celli << " cLevel:" << cLevel
                             << " cell points:" << cPoints
                             << " pointLevel:"
-                            << UIndirectList<label>(pointLevel_, cPoints)()
+                            << labelUIndList(pointLevel_, cPoints)
                             << " face:" << facei
                             << " f:" << f
                             << " pointLevel:"
-                            << UIndirectList<label>(pointLevel_, f)()
+                            << labelUIndList(pointLevel_, f)
                             << " faceAnchorLevel:" << faceAnchorLevel[facei]
                             << " faceMidPoint:" << faceMidPoint[facei]
                             << " faceMidPointi:" << faceMidPointi
@@ -1849,7 +1849,7 @@ bool Foam::hexRef8::matchHexShape
                         if (iter != pointFaces.end())
                         {
                             labelList& pFaces = iter();
-                            if (findIndex(pFaces, facei) == -1)
+                            if (!pFaces.found(facei))
                             {
                                 pFaces.append(facei);
                             }
@@ -3725,7 +3725,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                         << " lower level" << endl
                         << "cellPoints:" << cPoints << endl
                         << "pointLevels:"
-                        << UIndirectList<label>(pointLevel_, cPoints)() << endl
+                        << labelUIndList(pointLevel_, cPoints) << endl
                         << abort(FatalError);
                 }
             }
@@ -4376,12 +4376,12 @@ void Foam::hexRef8::updateMesh
             cellLevel_[newCelli] = fnd();
         }
 
-        //if (findIndex(cellLevel_, -1) != -1)
+        //if (cellLevel_.found(-1))
         //{
         //    WarningInFunction
         //        << "Problem : "
         //        << "cellLevel_ contains illegal value -1 after mapping
-        //        << " at cell " << findIndex(cellLevel_, -1) << endl
+        //        << " at cell " << cellLevel_.find(-1) << endl
         //        << "This means that another program has inflated cells"
         //        << " (created cells out-of-nothing) and hence we don't know"
         //        << " their cell level. Continuing with illegal value."
@@ -4450,12 +4450,12 @@ void Foam::hexRef8::updateMesh
             pointLevel_[newPointi] = fnd();
         }
 
-        //if (findIndex(pointLevel_, -1) != -1)
+        //if (pointLevel_.found(-1))
         //{
         //    WarningInFunction
         //        << "Problem : "
         //        << "pointLevel_ contains illegal value -1 after mapping"
-        //        << " at point" << findIndex(pointLevel_, -1) << endl
+        //        << " at point" << pointLevel_.find(-1) << endl
         //        << "This means that another program has inflated points"
         //        << " (created points out-of-nothing) and hence we don't know"
         //        << " their point level. Continuing with illegal value."
@@ -4516,7 +4516,7 @@ void Foam::hexRef8::subset
 
         cellLevel_.transfer(newCellLevel);
 
-        if (findIndex(cellLevel_, -1) != -1)
+        if (cellLevel_.found(-1))
         {
             FatalErrorInFunction
                 << "Problem : "
@@ -4537,7 +4537,7 @@ void Foam::hexRef8::subset
 
         pointLevel_.transfer(newPointLevel);
 
-        if (findIndex(pointLevel_, -1) != -1)
+        if (pointLevel_.found(-1))
         {
             FatalErrorInFunction
                 << "Problem : "
@@ -4692,7 +4692,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << facei
                     << " on patch " << patchi
                     << " " << mesh_.boundaryMesh()[patchi].name()
-                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)
                     << " has face area:" << magArea
                     << " (coupled) neighbour face area differs:"
                     << neiFaceAreas[i]
@@ -4734,7 +4734,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << facei
                     << " on patch " << patchi
                     << " " << mesh_.boundaryMesh()[patchi].name()
-                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)
                     << " has size:" << f.size()
                     << " (coupled) neighbour face has size:"
                     << nVerts[i]
@@ -4784,7 +4784,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << facei
                     << " on patch " << patchi
                     << " " << mesh_.boundaryMesh()[patchi].name()
-                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)
                     << " has anchor vector:" << anchorVec
                     << " (coupled) neighbour face anchor vector differs:"
                     << anchorPoints[i]
@@ -5741,16 +5741,16 @@ void Foam::hexRef8::setUnrefinement
 
 
 // Write refinement to polyMesh directory.
-bool Foam::hexRef8::write() const
+bool Foam::hexRef8::write(const bool valid) const
 {
     bool writeOk =
-        cellLevel_.write()
-     && pointLevel_.write()
-     && level0Edge_.write();
+        cellLevel_.write(valid)
+     && pointLevel_.write(valid)
+     && level0Edge_.write(valid);
 
     if (history_.active())
     {
-        writeOk = writeOk && history_.write();
+        writeOk = writeOk && history_.write(valid);
     }
     else
     {

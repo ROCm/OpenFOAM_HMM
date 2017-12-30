@@ -104,7 +104,7 @@ Foam::faceSet::faceSet
 (
     const polyMesh& mesh,
     const word& name,
-    const UList<label>& set,
+    const labelUList& set,
     writeOption w
 )
 :

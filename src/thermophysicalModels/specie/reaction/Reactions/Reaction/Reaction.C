@@ -211,17 +211,12 @@ Foam::Reaction<ReactionThermo>::specieCoeffs::specieCoeffs
     {
         word specieName = t.wordToken();
 
-        size_t i = specieName.find('^');
+        const size_t i = specieName.find('^');
 
         if (i != word::npos)
         {
-            string exponentStr = specieName
-            (
-                i + 1,
-                specieName.size() - i - 1
-            );
-            exponent = atof(exponentStr.c_str());
-            specieName = specieName(0, i);
+            exponent = atof(specieName.substr(i + 1).c_str());
+            specieName.resize(i);
         }
 
         if (species.contains(specieName))
@@ -366,15 +361,14 @@ Foam::Reaction<ReactionThermo>::New
 {
     const word& reactionTypeName = dict.lookup("type");
 
-    typename dictionaryConstructorTable::iterator cstrIter
-        = dictionaryConstructorTablePtr_->find(reactionTypeName);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(reactionTypeName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown reaction type "
             << reactionTypeName << nl << nl
-            << "Valid reaction types are :" << nl
+            << "Valid reaction types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -392,8 +386,7 @@ template<class ReactionThermo>
 void Foam::Reaction<ReactionThermo>::write(Ostream& os) const
 {
     OStringStream reaction;
-    os.writeKeyword("reaction") << reactionStr(reaction)
-        << token::END_STATEMENT << nl;
+    os.writeEntry("reaction", reactionStr(reaction));
 }
 
 

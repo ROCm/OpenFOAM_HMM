@@ -114,7 +114,7 @@ void Foam::wallBoilingModels::departureDiameterModels::
 KocamustafaogullariIshii::write(Ostream& os) const
 {
     departureDiameterModel::write(os);
-    os.writeKeyword("phi") << phi_ << token::END_STATEMENT << nl;
+    os.writeEntry("phi", phi_);
 }
 
 

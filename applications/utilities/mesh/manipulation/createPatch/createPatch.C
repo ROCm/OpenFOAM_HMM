@@ -53,6 +53,7 @@ Description
 #include "polyModifyFace.H"
 #include "wordReList.H"
 #include "processorMeshes.H"
+#include "IOdictionary.H"
 
 using namespace Foam;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,21 +24,14 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "includeEntry.H"
-#include "IFstream.H"
 #include "addToMemberFunctionSelectionTable.H"
 #include "stringOps.H"
+#include "IFstream.H"
+#include "IOstreams.H"
 #include "Time.H"
+#include "fileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::word Foam::functionEntries::includeEntry::typeName
-(
-    Foam::functionEntries::includeEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include includeEntry
-int Foam::functionEntries::includeEntry::debug(0);
 
 bool Foam::functionEntries::includeEntry::log(false);
 
@@ -47,50 +40,29 @@ namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        include
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        include
     );
 }
 }
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-Foam::fileName Foam::functionEntries::includeEntry::includeFileName
-(
-    Istream& is,
-    const dictionary& dict
-)
-{
-    fileName fName(is);
-    // Substitute dictionary and environment variables. Allow empty
-    // substitutions.
-    stringOps::inplaceExpand(fName, dict, true, true);
-
-    if (fName.empty() || fName.isAbsolute())
-    {
-        return fName;
-    }
-    else
-    {
-        // relative name
-        return fileName(is.name()).path()/fName;
-    }
-}
-
-
-Foam::fileName Foam::functionEntries::includeEntry::includeFileName
+Foam::fileName Foam::functionEntries::includeEntry::resolveFile
 (
     const fileName& dir,
     const fileName& f,
@@ -98,19 +70,18 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 )
 {
     fileName fName(f);
-    // Substitute dictionary and environment variables. Allow empty
-    // substitutions.
+
+    // Substitute dictionary and environment variables.
+    // Allow empty substitutions.
     stringOps::inplaceExpand(fName, dict, true, true);
 
     if (fName.empty() || fName.isAbsolute())
     {
         return fName;
     }
-    else
-    {
-        // relative name
-        return dir/fName;
-    }
+
+    // Relative name
+    return dir/fName;
 }
 
 
@@ -122,15 +93,11 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    const fileName rawFName(is);
-    const fileName fName
-    (
-        includeFileName(is.name().path(), rawFName, parentDict)
-    );
+    const fileName rawName(is);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
 
-
-    // Read contents of file into parentDict
-    IFstream ifs(fName);
+    autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
+    ISstream& ifs = ifsPtr();
 
     if (ifs)
     {
@@ -147,27 +114,22 @@ bool Foam::functionEntries::includeEntry::execute
             (
                 dynamic_cast<const regIOobject&>(top)
             );
-            //Info<< rio.name() << " : adding depenency on included file "
-            //    << fName << endl;
-
             rio.addWatch(fName);
         }
 
         parentDict.read(ifs);
         return true;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open include file "
-            << (ifs.name().size() ? ifs.name() : rawFName)
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "Cannot open include file "
+        << (ifs.name().size() ? ifs.name() : rawName)
+        << " while reading dictionary " << parentDict.name()
+        << exit(FatalIOError);
+
+    return false;
 }
 
 
@@ -178,15 +140,11 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    const fileName rawFName(is);
-    const fileName fName
-    (
-        includeFileName(is.name().path(), rawFName, parentDict)
-    );
+    const fileName rawName(is);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
 
-
-    // Read contents of file into parentDict
-    IFstream ifs(fName);
+    autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
+    ISstream& ifs = ifsPtr();
 
     if (ifs)
     {
@@ -203,27 +161,23 @@ bool Foam::functionEntries::includeEntry::execute
             (
                 dynamic_cast<const regIOobject&>(top)
             );
-            //Info<< rio.name() << " : adding depenency on included file "
-            //    << fName << endl;
-
             rio.addWatch(fName);
         }
 
         entry.read(parentDict, ifs);
         return true;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "Cannot open include file "
-            << (ifs.name().size() ? ifs.name() : rawFName)
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "Cannot open include file "
+        << (ifs.name().size() ? ifs.name() : rawName)
+        << " while reading dictionary " << parentDict.name()
+        << exit(FatalIOError);
+
+    return false;
 }
+
 
 // ************************************************************************* //

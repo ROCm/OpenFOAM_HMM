@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -47,11 +47,10 @@ SourceFiles
 #include "TimeState.H"
 #include "Switch.H"
 #include "instantList.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "typeInfo.H"
 #include "dlLibraryTable.H"
 #include "functionObjectList.H"
-#include "fileMonitor.H"
 #include "sigWriteNow.H"
 #include "sigStopAtWriteNow.H"
 
@@ -76,10 +75,48 @@ class Time
     public objectRegistry,
     public TimeState
 {
-    // Private data
+public:
 
-        //- file-change monitor for all registered files
-        mutable autoPtr<fileMonitor> monitorPtr_;
+        //- Write control options
+        enum writeControls
+        {
+            wcTimeStep,             //!< "timeStep"
+            wcRunTime,              //!< "runTime"
+            wcAdjustableRunTime,    //!< "adjustableRunTime"
+            wcClockTime,            //!< "clockTime"
+            wcCpuTime               //!< "cpuTime"
+        };
+
+        //- Stop-run control options, which are primarily used when
+        //- altering the stopAt condition.
+        enum stopAtControls
+        {
+            saEndTime,    //!< Stop when Time reaches prescribed endTime
+            saNoWriteNow, //!< Adjust endTime to stop immediately w/o writing
+            saWriteNow,   //!< adjust endTime to stop immediately w/ writing
+            saNextWrite,  //!< stop at the next data write interval
+            saUnknown     //!< Dummy no-op. Do not change current value.
+        };
+
+        //- Supported time directory name formats
+        enum fmtflags
+        {
+            general    = 0,                   //!< default float notation
+            fixed      = ios_base::fixed,     //!< fixed-point notation
+            scientific = ios_base::scientific //!< scientific notation
+        };
+
+
+        //- Names for writeControls
+        static const Enum<writeControls> writeControlNames;
+
+        //- Names for stopAtControls
+        static const Enum<stopAtControls> stopAtControlNames;
+
+
+private:
+
+    // Private data
 
         //- Profiling trigger for time-loop (for run, loop)
         mutable profilingTrigger* loopProfiling_;
@@ -92,36 +129,6 @@ class Time
         unwatchedIOdictionary controlDict_;
 
 
-public:
-
-        //- Write control options
-        enum writeControls
-        {
-            wcTimeStep,
-            wcRunTime,
-            wcAdjustableRunTime,
-            wcClockTime,
-            wcCpuTime
-        };
-
-        //- Stop-run control options
-        enum stopAtControls
-        {
-            saEndTime,    //!< stop when Time reaches the prescribed endTime
-            saNoWriteNow, //!< set endTime to stop immediately w/o writing
-            saWriteNow,   //!< set endTime to stop immediately w/ writing
-            saNextWrite   //!< stop the next time data are written
-        };
-
-        //- Supported time directory name formats
-        enum fmtflags
-        {
-            general    = 0,
-            fixed      = ios_base::fixed,
-            scientific = ios_base::scientific
-        };
-
-
 protected:
 
     // Protected data
@@ -130,34 +137,31 @@ protected:
         scalar startTime_;
         mutable scalar endTime_;
 
-        static const NamedEnum<stopAtControls, 4> stopAtControlNames_;
         mutable stopAtControls stopAt_;
 
-        static const NamedEnum<writeControls, 5> writeControlNames_;
         writeControls writeControl_;
 
         scalar writeInterval_;
 
         label  purgeWrite_;
+
         mutable FIFOStack<word> previousWriteTimes_;
+
+        //- The total number of sub-cycles, the current sub-cycle index,
+        //- or 0 if time is not being sub-cycled
+        label subCycling_;
 
         // One-shot writing
         bool writeOnce_;
 
-        //- Is the time currently being sub-cycled?
-        bool subCycling_;
-
         //- If time is being sub-cycled this is the previous TimeState
         autoPtr<TimeState> prevTimeState_;
 
+        //- Signal handler for one-shot writing upon signal
+        sigWriteNow sigWriteNow_;
 
-        // Signal handlers for writing
-
-            //- Enable one-shot writing upon signal
-            sigWriteNow sigWriteNow_;
-
-            //- Enable write and clean exit upon signal
-            sigStopAtWriteNow sigStopAtWriteNow_;
+        //- Signal handler for write and clean exit upon signal
+        sigStopAtWriteNow sigStopAtWriteNow_;
 
 
         //- Time directory name format
@@ -168,6 +172,7 @@ protected:
 
         //- Maximum time directory name precision
         static const int maxPrecision_;
+
 
         //- Adjust the time step so that writing occurs at the specified time
         void adjustDeltaT();
@@ -181,6 +186,9 @@ protected:
 
         //- Read the control dictionary and set the write controls etc.
         virtual void readDict();
+
+        //- Find IOobject in the objectPath
+        static bool exists(IOobject& io);
 
 
 private:
@@ -331,40 +339,8 @@ public:
             //- Read control dictionary, update controls and time
             virtual bool read();
 
-            // Automatic rereading
-
-                //- Read the objects that have been modified
-                void readModifiedObjects();
-
-                //- Helper: add watches for list of files
-                void addWatches
-                (
-                    regIOobject& rio,
-                    const fileNameList& files
-                ) const;
-
-                //- Find index (or -1) of file in list of handles
-                label findWatch
-                (
-                    const labelList& watchIndices,
-                    const fileName& fName
-                ) const;
-
-                //- Add watching of a file. Returns handle
-                label addTimeWatch(const fileName& fName) const;
-
-                //- Remove watch on a file (using handle)
-                bool removeWatch(const label watchIndex) const;
-
-                //- Get name of file being watched (using handle)
-                const fileName& getFile(const label watchIndex) const;
-
-                //- Get current state of file (using handle)
-                fileMonitor::fileState getState(const label watchIndex) const;
-
-                //- Set current state of file (using handle) to unmodified
-                void setUnmodified(const label watchIndex) const;
-
+            //- Read the objects that have been modified
+            void readModifiedObjects();
 
             //- Return the location of "dir" containing the file "name".
             //  (eg, used in reading mesh data)
@@ -410,9 +386,10 @@ public:
             //- Write using given format, version and compression
             virtual bool writeObject
             (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::streamFormat,
+                IOstream::versionNumber,
+                IOstream::compressionType,
+                const bool valid
             ) const;
 
             //- Write the objects now (not at end of iteration) and continue
@@ -455,6 +432,9 @@ public:
             //- Return end time
             virtual dimensionedScalar endTime() const;
 
+            //- Return the stop control information
+            virtual stopAtControls stopAt() const;
+
             //- Return the list of function objects
             const functionObjectList& functionObjects() const
             {
@@ -473,8 +453,12 @@ public:
                 return libs_;
             }
 
-            //- Return true if time currently being sub-cycled, otherwise false
-            bool subCycling() const
+            //- Zero (tests as false) if time is not being sub-cycled,
+            //- otherwise the current sub-cycle index or the total number of
+            //- sub-cycles.
+            //  The interpretation of non-zero values is dependent on the
+            //  routine.
+            label subCycling() const
             {
                 return subCycling_;
             }
@@ -530,10 +514,13 @@ public:
 
         // Edit
 
-            //- Adjust the current stopAtControl. Note that this value
-            //  only persists until the next time the dictionary is read.
-            //  Return true if the stopAtControl changed.
-            virtual bool stopAt(const stopAtControls sa) const;
+            //- Adjust the current stopAtControl.
+            //  \param stopCtrl the new stop control, whereby
+            //      stopAtControls::saUnknown is treated as a no-op.
+            //  \note this value only persists until the next time the
+            //      dictionary is read.
+            //  \return true if the stopAt() value was changed.
+            virtual bool stopAt(const stopAtControls stopCtrl) const;
 
             //- Reset the time and time-index to those of the given time
             virtual void setTime(const Time& t);
@@ -573,6 +560,13 @@ public:
 
             //- Set time to sub-cycle for the given number of steps
             virtual TimeState subCycle(const label nSubCycles);
+
+            //- Adjust the reported sub-cycle index.
+            //  \param index is the sub-cycle index.
+            //      This index is ignored sub-cycling was
+            //      not already registered, or if the index is zero or
+            //      negative.
+            virtual void subCycleIndex(const label index);
 
             //- Reset time after sub-cycling back to previous TimeState
             virtual void endSubCycle();

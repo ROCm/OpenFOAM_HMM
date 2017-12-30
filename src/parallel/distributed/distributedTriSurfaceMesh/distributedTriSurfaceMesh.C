@@ -51,23 +51,19 @@ namespace Foam
         distributedTriSurfaceMesh,
         dict
     );
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::distributedTriSurfaceMesh::distributionType,
-        3
-    >::names[] =
-    {
-        "follow",
-        "independent",
-        "frozen"
-    };
 }
 
 
-const Foam::NamedEnum<Foam::distributedTriSurfaceMesh::distributionType, 3>
-    Foam::distributedTriSurfaceMesh::distributionTypeNames_;
+const Foam::Enum
+<
+    Foam::distributedTriSurfaceMesh::distributionType
+>
+Foam::distributedTriSurfaceMesh::distributionTypeNames_
+{
+    { distributionType::FOLLOW, "follow" },
+    { distributionType::INDEPENDENT, "independent" },
+    { distributionType::FROZEN, "frozen" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -83,7 +79,7 @@ bool Foam::distributedTriSurfaceMesh::read()
     Pstream::scatterList(procBb_);
 
     // Distribution type
-    distType_ = distributionTypeNames_.read(dict_.lookup("distributionType"));
+    distType_ = distributionTypeNames_.lookup("distributionType", dict_);
 
     // Merge distance
     mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
@@ -1151,7 +1147,7 @@ Foam::label Foam::distributedTriSurfaceMesh::findTriangle
         if (f.region() == otherF.region())
         {
             // Find index of otherF[0]
-            label fp0 = findIndex(f, otherF[0]);
+            label fp0 = f.find(otherF[0]);
             // Check rest of triangle in same order
             label fp1 = f.fcIndex(fp0);
             label fp2 = f.fcIndex(fp1);
@@ -2381,7 +2377,8 @@ bool Foam::distributedTriSurfaceMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     // Make sure dictionary goes to same directory as surface
@@ -2408,7 +2405,7 @@ bool Foam::distributedTriSurfaceMesh::writeObject
     }
 
     // Dictionary needs to be written in ascii - binary output not supported.
-    return dict_.writeObject(IOstream::ASCII, ver, cmp);
+    return dict_.writeObject(IOstream::ASCII, ver, cmp, true);
 }
 
 

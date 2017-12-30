@@ -84,15 +84,14 @@ Foam::autoPtr<Foam::blockFace> Foam::blockFace::New
 
     const word faceType(is);
 
-    IstreamConstructorTable::iterator cstrIter =
-        IstreamConstructorTablePtr_->find(faceType);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(faceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown blockFace type "
             << faceType << nl << nl
-            << "Valid blockFace types are" << endl
+            << "Valid blockFace types :" << endl
             << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }

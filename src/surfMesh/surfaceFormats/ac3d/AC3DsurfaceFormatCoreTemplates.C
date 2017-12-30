@@ -24,17 +24,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AC3DsurfaceFormatCore.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Type Foam::fileFormats::AC3DsurfaceFormatCore::parse(const string& s)
+Type Foam::fileFormats::AC3DsurfaceFormatCore::parse(const string& str)
 {
-    IStringStream ss(s);
+    IStringStream is(str);
 
     Type t;
-    ss >> t;
+    is >> t;
+
     return t;
 }
 

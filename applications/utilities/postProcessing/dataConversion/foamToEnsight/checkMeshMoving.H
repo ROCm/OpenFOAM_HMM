@@ -1,4 +1,4 @@
-// check for "points" in any of the result directories
+// Check for "points" in any of the result directories
 
 bool meshMoving = false;
 

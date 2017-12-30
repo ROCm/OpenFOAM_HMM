@@ -32,7 +32,6 @@ License
 #include "polyMeshFilter.H"
 #include "polyTopoChange.H"
 #include "PrintTable.H"
-#include "pointMesh.H"
 #include "indexedVertexOps.H"
 #include "DelaunayMeshTools.H"
 #include "syncTools.H"
@@ -300,14 +299,14 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                IOobject::AUTO_WRITE,
 //                false
 //            ),
-//            UIndirectList<label>
+//            labelUIndList
 //            (
 //                vertexToDualAddressing,
 //                pointToDelaunayVertex
 //            )()
 //        );
 //
-//        label pointi = findIndex(pointDualAddressing, -1);
+//        label pointi = pointDualAddressing.find(-1);
 //        if (pointi != -1)
 //        {
 //            WarningInFunction

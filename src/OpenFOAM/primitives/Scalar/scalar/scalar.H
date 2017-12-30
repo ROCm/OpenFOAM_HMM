@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Typedef
     Foam::scalar
 
 Description
-    Single floating point number identical to float or double depending on
+    A floating-point number identical to float or double depending on
     whether WM_SP or WM_DP is defined.
 
 SourceFiles
@@ -49,15 +49,20 @@ namespace Foam
 {
     typedef floatScalar scalar;
 
-    static const scalar GREAT = floatScalarGREAT;
-    static const scalar VGREAT = floatScalarVGREAT;
-    static const scalar ROOTVGREAT = floatScalarROOTVGREAT;
-    static const scalar SMALL = floatScalarSMALL;
-    static const scalar ROOTSMALL = floatScalarROOTSMALL;
-    static const scalar VSMALL = floatScalarVSMALL;
-    static const scalar ROOTVSMALL = floatScalarROOTVSMALL;
+    constexpr scalar GREAT = floatScalarGREAT;
+    constexpr scalar VGREAT = floatScalarVGREAT;
+    constexpr scalar ROOTVGREAT = floatScalarROOTVGREAT;
+    constexpr scalar SMALL = floatScalarSMALL;
+    constexpr scalar ROOTSMALL = floatScalarROOTSMALL;
+    constexpr scalar VSMALL = floatScalarVSMALL;
+    constexpr scalar ROOTVSMALL = floatScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
+
+    inline scalar readScalar(const std::string& str)
+    {
+        return readFloat(str);
+    }
 }
 
 #elif defined(WM_DP)
@@ -68,15 +73,20 @@ namespace Foam
 {
     typedef doubleScalar scalar;
 
-    static const scalar GREAT = doubleScalarGREAT;
-    static const scalar VGREAT = doubleScalarVGREAT;
-    static const scalar ROOTVGREAT = doubleScalarROOTVGREAT;
-    static const scalar SMALL = doubleScalarSMALL;
-    static const scalar ROOTSMALL = doubleScalarROOTSMALL;
-    static const scalar VSMALL = doubleScalarVSMALL;
-    static const scalar ROOTVSMALL = doubleScalarROOTVSMALL;
+    constexpr scalar GREAT = doubleScalarGREAT;
+    constexpr scalar VGREAT = doubleScalarVGREAT;
+    constexpr scalar ROOTVGREAT = doubleScalarROOTVGREAT;
+    constexpr scalar SMALL = doubleScalarSMALL;
+    constexpr scalar ROOTSMALL = doubleScalarROOTSMALL;
+    constexpr scalar VSMALL = doubleScalarVSMALL;
+    constexpr scalar ROOTVSMALL = doubleScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
+
+    inline scalar readScalar(const std::string& str)
+    {
+        return readDouble(str);
+    }
 }
 
 #endif

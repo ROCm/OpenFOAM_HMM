@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,9 @@ License
 #include "SLList.H"
 #include "contiguous.H"
 
+#include <type_traits>
+#include <utility>
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, unsigned Size>
@@ -35,11 +38,11 @@ inline Foam::FixedList<T, Size>::FixedList()
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const T& t)
+inline Foam::FixedList<T, Size>::FixedList(const T& val)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = t;
+        v_[i] = val;
     }
 }
 
@@ -50,6 +53,29 @@ inline Foam::FixedList<T, Size>::FixedList(const T lst[Size])
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = lst[i];
+    }
+}
+
+
+template<class T, unsigned Size>
+inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
+{
+    for (unsigned i=0; i<Size; ++i)
+    {
+        v_[i] = lst[i];
+    }
+}
+
+
+template<class T, unsigned Size>
+inline Foam::FixedList<T, Size>::FixedList(FixedList<T, Size>&& lst)
+{
+    // No significant speedup observed for copy assignment on simple types,
+    // use move assignment for generality with more complex types
+
+    for (unsigned i=0; i<Size; ++i)
+    {
+        v_[i] = std::move(lst.v_[i]);
     }
 }
 
@@ -114,16 +140,6 @@ inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
-{
-    for (unsigned i=0; i<Size; ++i)
-    {
-        v_[i] = lst[i];
-    }
-}
-
-
-template<class T, unsigned Size>
 inline Foam::autoPtr<Foam::FixedList<T, Size>>
 Foam::FixedList<T, Size>::clone() const
 {
@@ -148,9 +164,37 @@ inline Foam::label Foam::FixedList<T, Size>::fcIndex(const label i) const
 
 
 template<class T, unsigned Size>
+inline const T& Foam::FixedList<T, Size>::fcValue(const label i) const
+{
+    return this->operator[](this->fcIndex(i));
+}
+
+
+template<class T, unsigned Size>
+inline T& Foam::FixedList<T, Size>::fcValue(const label i)
+{
+    return this->operator[](this->fcIndex(i));
+}
+
+
+template<class T, unsigned Size>
 inline Foam::label Foam::FixedList<T, Size>::rcIndex(const label i) const
 {
     return (i ? i-1 : Size-1);
+}
+
+
+template<class T, unsigned Size>
+inline const T& Foam::FixedList<T, Size>::rcValue(const label i) const
+{
+    return this->operator[](this->rcIndex(i));
+}
+
+
+template<class T, unsigned Size>
+inline T& Foam::FixedList<T, Size>::rcValue(const label i)
+{
+    return this->operator[](this->rcIndex(i));
 }
 
 
@@ -191,6 +235,17 @@ inline void Foam::FixedList<T, Size>::checkIndex(const label i) const
 
 
 template<class T, unsigned Size>
+inline bool Foam::FixedList<T, Size>::found
+(
+    const T& val,
+    const label start
+) const
+{
+    return (this->find(val, start) >= 0);
+}
+
+
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::resize(const label s)
 {
     #ifdef FULLDEBUG
@@ -205,6 +260,7 @@ inline void Foam::FixedList<T, Size>::setSize(const label s)
     checkSize(s);
     #endif
 }
+
 
 template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::transfer(const FixedList<T, Size>& lst)
@@ -329,11 +385,31 @@ inline void Foam::FixedList<T, Size>::operator=(std::initializer_list<T> lst)
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(const T& t)
+inline void Foam::FixedList<T, Size>::operator=(const T& val)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = t;
+        v_[i] = val;
+    }
+}
+
+template<class T, unsigned Size>
+inline void Foam::FixedList<T, Size>::operator=(const FixedList<T, Size>& lst)
+{
+    for (unsigned i=0; i<Size; ++i)
+    {
+        v_[i] = lst.v_[i];
+    }
+}
+
+template<class T, unsigned Size>
+inline void Foam::FixedList<T, Size>::operator=(FixedList<T, Size>&& lst)
+{
+    // No significant speedup observed for copy assignment on simple types,
+    // use move assignment for generality with more complex types
+    for (unsigned i=0; i<Size; ++i)
+    {
+        v_[i] = std::move(lst.v_[i]);
     }
 }
 
@@ -389,50 +465,50 @@ Foam::FixedList<T, Size>::cend() const
 
 
 template<class T, unsigned Size>
-inline typename Foam::FixedList<T, Size>::iterator
+inline typename Foam::FixedList<T, Size>::reverse_iterator
 Foam::FixedList<T, Size>::rbegin()
 {
-    return &v_[Size-1];
+    return reverse_iterator(&v_[Size-1]);
 }
 
 
 template<class T, unsigned Size>
-inline typename Foam::FixedList<T, Size>::const_iterator
+inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::rbegin() const
 {
-    return &v_[Size-1];
+    return const_reverse_iterator(&v_[Size-1]);
 }
 
 
 template<class T, unsigned Size>
-inline typename Foam::FixedList<T, Size>::const_iterator
+inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::crbegin() const
 {
-    return &v_[Size-1];
+    return const_reverse_iterator(&v_[Size-1]);
 }
 
 
 template<class T, unsigned Size>
-inline typename Foam::FixedList<T, Size>::iterator
+inline typename Foam::FixedList<T, Size>::reverse_iterator
 Foam::FixedList<T, Size>::rend()
 {
-    return &v_[-1];
+    return reverse_iterator(&v_[-1]);
 }
 
 
 template<class T, unsigned Size>
-inline typename Foam::FixedList<T, Size>::const_iterator
+inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::rend() const
 {
-    return &v_[-1];
+    return const_reverse_iterator(&v_[-1]);
 }
 
 
 template<class T, unsigned Size>
-inline typename Foam::FixedList<T, Size>::const_iterator
+inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::crend() const
 {
-    return &v_[-1];
+    return const_reverse_iterator(&v_[-1]);
 }
 
 
@@ -482,6 +558,15 @@ inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
 
         return val;
     }
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class T, unsigned Size>
+void Foam::Swap(FixedList<T, Size>& a, FixedList<T, Size>& b)
+{
+    a.swap(b);
 }
 
 

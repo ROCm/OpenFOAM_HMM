@@ -18,27 +18,41 @@ FoamFile
 
 Documentation
 {
-    docBrowser      "firefox %f";
+    docBrowser          "firefox -new-tab %f";
+    doxySourceFileExt   "_8C.html";
+
+    // Places to search for documentation, http is last in the list
     doxyDocDirs
     (
         "$WM_PROJECT_USER_DIR/html"
-        "~OpenFOAM/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
-    );
-    doxySourceFileExts
-    (
-        "App_8C.html"
-        "_8C.html"
+        "https://www.openfoam.com/documentation/cpp-guide/html"
     );
 }
 
 
 InfoSwitches
 {
+    // The default ASCII write precision
     writePrecision  6;
-    writeJobInfo    0;
+
     writeDictionaries 0;
     writeOptionalEntries 0;
+
+    // Write lagrangian "positions" file in v1706 format (at earlier)
+    writeLagrangianPositions 0;
+
+    // Report hosts used (parallel)
+    // - 0 = none
+    // - 1 = per-host-count, but unsorted
+    // - 2 = long output of "slave.pid" ...
+    writeHosts      1;
+
+    // Report list of roots used (parallel)
+    writeRoots      1;
+
+    // Enable job info
+    writeJobInfo    0;
 
     // Allow profiling
     allowProfiling  1;
@@ -61,9 +75,28 @@ OptimisationSwitches
     //  - inotifyMaster     : do inotify (and file reading) only on master.
     fileModificationChecking timeStampMaster;
 
+    //- Parallel IO file handler
+    //  uncollated (default), collated or masterUncollated
+    fileHandler uncollated;
+
+    //- collated: thread buffer size for queued file writes.
+    //  If set to 0 or not sufficient for the file size, threading is not used.
+    //  Default: 1e9
+    maxThreadFileBufferSize 0;
+
+    //- masterUncollated: non-blocking buffer size.
+    //  If the file exceeds this buffer size scheduled transfer is used.
+    //  Default: 1e9
+    maxMasterFileBufferSize 1e9;
+
     commsType       nonBlocking; //scheduled; //blocking;
     floatTransfer   0;
     nProcsSimpleSum 0;
+
+    // MPI buffer size (bytes)
+    // Can override with the MPI_BUFFER_SIZE env variable.
+    // The default and minimum is (20000000).
+    mpiBufferSize   0;
 
     // Optional max size (bytes) for unstructured data exchanges. In some
     // phases of OpenFOAM it can send over very large data chunks
@@ -74,20 +107,29 @@ OptimisationSwitches
     // global reduction, even if multi-pass is not needed)
     maxCommsSize    0;
 
+    // Trap floating point exception.
+    // Can override with FOAM_SIGFPE env variable (true|false)
+    trapFpe         1;
+
+    // Initialization malloced memory to NaN.
+    // Can override with FOAM_SETNAN env variable (true|false)
+    setNaN          0;
+
     // Force dumping (at next timestep) upon signal (-1 to disable)
-    writeNowSignal              -1; // 10;
+    // See 'kill -l' for signal numbers (eg, 10=USR1, 12=USR2)
+    writeNowSignal          -1; // 10;
 
     // Force dumping (at next timestep) upon signal (-1 to disable) and exit
-    stopAtWriteNowSignal        -1;
+    stopAtWriteNowSignal    -1;
 }
 
 /* Can specify fallback profiling settings
 profiling
 {
     active      true;
-    cpuInfo     true;
+    cpuInfo     false;
     memInfo     false;
-    sysInfo     true;
+    sysInfo     false;
 }
 */
 
@@ -293,7 +335,6 @@ DebugSwitches
     SpalartAllmarasIDDES    0;
     SphereDrag          0;
     StandardWallInteraction 0;
-    StaticHashTable     0;
     StochasticDispersionRAS 0;
     SuperBee            0;
     SuperBeeV           0;
@@ -922,66 +963,66 @@ DebugSwitches
 
 DimensionedConstants
 {
-    unitSet             SI; // USCS
+    unitSet SI; // USCS
 
     SICoeffs
     {
         universal
         {
-            c               c [0 1 -1 0 0 0 0] 2.99792e+08;
-            G               G [-1 3 -2 0 0 0 0] 6.67429e-11;
-            h               h [1 2 -1 0 0 0 0] 6.62607e-34;
+            c  c [0 1 -1 0 0 0 0] 2.99792e+08;
+            G  G [-1 3 -2 0 0 0 0] 6.67429e-11;
+            h  h [1 2 -1 0 0 0 0] 6.62607e-34;
         }
         electromagnetic
         {
-            e               e [0 0 1 0 0 1 0] 1.60218e-19;
+            e  e [0 0 1 0 0 1 0] 1.60218e-19;
         }
         atomic
         {
-            me              me [1 0 0 0 0 0 0] 9.10938e-31;
-            mp              mp [1 0 0 0 0 0 0] 1.67262e-27;
+            me me [1 0 0 0 0 0 0] 9.10938e-31;
+            mp mp [1 0 0 0 0 0 0] 1.67262e-27;
         }
         physicoChemical
         {
-            mu              mu [1 0 0 0 0 0 0] 1.66054e-27;
-            k               k [1 2 -2 -1 0 0 0] 1.38065e-23;
+            mu mu [1 0 0 0 0 0 0] 1.66054e-27;
+            k  k  [1 2 -2 -1 0 0 0] 1.38065e-23;
         }
         standard
         {
             //- Standard pressure [Pa]
-            Pstd            Pstd [1 -1 -2 0 0 0 0] 1e5;
+            Pstd Pstd [1 -1 -2 0 0 0 0] 1e5;
             //- Standard temperature [degK]
-            Tstd            Tstd [0 0 0 1 0 0 0] 298.15;
+            Tstd Tstd [0 0 0 1 0 0 0] 298.15;
         }
     }
     USCSCoeffs
     {
         universal
         {
-            c               c [0 1 -1 0 0 0 0] 9.83558e+08;
-            G               G [-1 3 -2 0 0 0 0] 1.06909e-09;
-            h               h [1 2 -1 0 0 0 0] 1.57234e-32;
+            c  c [0 1 -1 0 0 0 0] 9.83558e+08;
+            G  G [-1 3 -2 0 0 0 0] 1.06909e-09;
+            h  h [1 2 -1 0 0 0 0] 1.57234e-32;
         }
         electromagnetic
         {
-            e               e [0 0 1 0 0 1 0] 1.60218e-19;
+            e  e [0 0 1 0 0 1 0] 1.60218e-19;
         }
         atomic
         {
-            me              me [1 0 0 0 0 0 0] 2.00825e-30;
-            mp              mp [1 0 0 0 0 0 0] 3.68746e-27;
+            me  me [1 0 0 0 0 0 0] 2.00825e-30;
+            mp  mp [1 0 0 0 0 0 0] 3.68746e-27;
         }
         physicoChemical
         {
-            mu              mu [1 0 0 0 0 0 0] 3.66083e-27;
-            k               k [1 2 -2 -1 0 0 0] 1.82012e-22;
+            mu mu [1 0 0 0 0 0 0] 3.66083e-27;
+            k  k  [1 2 -2 -1 0 0 0] 1.82012e-22;
         }
         standard
         {
             //- Standard pressure [lbm/ft^2]
-            Pstd            Pstd [1 -1 -2 0 0 0 0] 2088.6;
+            Pstd  Pstd [1 -1 -2 0 0 0 0] 2088.6;
             //- Standard temperature [degR]
-            Tstd            Tstd [0 0 0 1 0 0 0] 536.67;
+            Tstd  Tstd [0 0 0 1 0 0 0] 536.67;
         }
     }
 }
@@ -989,7 +1030,7 @@ DimensionedConstants
 
 DimensionSets
 {
-    unitSet             SI; // USCS
+    unitSet SI; // USCS
 
     SICoeffs
     {

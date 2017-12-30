@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,6 +83,8 @@ public:
 
     // Member Functions
 
+      // Access
+
         //- Is there a hit
         inline bool hit() const
         {
@@ -93,6 +95,19 @@ public:
         inline label hitObject() const
         {
             return hitObject_;
+        }
+
+
+      // Edit
+
+        void setHit()
+        {
+            hit_ = true;
+        }
+
+        void setMiss()
+        {
+            hit_ = false;
         }
 
 

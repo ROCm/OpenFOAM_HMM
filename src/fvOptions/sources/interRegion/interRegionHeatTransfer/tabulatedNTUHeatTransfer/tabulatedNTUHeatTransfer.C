@@ -41,21 +41,17 @@ namespace Foam
             dictionary
         );
     }
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::fv::tabulatedNTUHeatTransfer::geometryModeType,
-        2
-    >::names[] =
-    {
-        "calculated",
-        "user"
-    };
 }
 
-const Foam::NamedEnum<Foam::fv::tabulatedNTUHeatTransfer::geometryModeType, 2>
-Foam::fv::tabulatedNTUHeatTransfer::geometryModelNames_;
+const Foam::Enum
+<
+    Foam::fv::tabulatedNTUHeatTransfer::geometryModeType
+>
+Foam::fv::tabulatedNTUHeatTransfer::geometryModelNames_
+{
+    { geometryModeType::gmCalculated, "calculated" },
+    { geometryModeType::gmUser, "user" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -77,15 +73,15 @@ const Foam::basicThermo& Foam::fv::tabulatedNTUHeatTransfer::thermo
     const fvMesh& mesh
 ) const
 {
-    if (!mesh.foundObject<basicThermo>("thermophysicalProperties"))
+    if (!mesh.foundObject<basicThermo>(basicThermo::dictName))
     {
         FatalErrorInFunction
             << " on mesh " << mesh.name()
-            << " could not find thermophysicalProperties "
+            << " could not find " << basicThermo::dictName
             << exit(FatalError);
     }
 
-    return mesh.lookupObject<basicThermo>("thermophysicalProperties");
+    return mesh.lookupObject<basicThermo>(basicThermo::dictName);
 }
 
 
@@ -93,8 +89,7 @@ void Foam::fv::tabulatedNTUHeatTransfer::initialiseGeometry()
 {
     if (Ain_ < 0)
     {
-        geometryMode_ =
-            geometryModelNames_.read(coeffs_.lookup("geometryMode"));
+        geometryMode_ = geometryModelNames_.lookup("geometryMode", coeffs_);
 
         Info<< "Region " << mesh_.name() << " " << type() << " " << name_ << " "
             << geometryModelNames_[geometryMode_] << " geometry:" << nl;

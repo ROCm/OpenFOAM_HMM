@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,6 +32,12 @@ License
 @{
     \ingroup grpSolvers
     This group contains moving mesh solvers solvers
+@}
+
+\defgroup grpFiniteAreaSolvers Finite area solvers
+@{
+    \ingroup grpSolvers
+    This group contains finite area solvers
 @}
 
 \*---------------------------------------------------------------------------*/

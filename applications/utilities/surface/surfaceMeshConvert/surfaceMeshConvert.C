@@ -75,12 +75,12 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats"
+        "convert between surface formats, using MeshSurface library components"
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("outputFile");
+    argList::addArgument("inputFile");
+    argList::addArgument("outputFile");
 
     argList::addBoolOption
     (
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    // check that reading/writing is supported
+    // Check that reading/writing is supported
     if
     (
         !MeshedSurface<face>::canRead(importName, true)
@@ -165,7 +165,7 @@ int main(int argc, char *argv[])
 
         if (dictPath.size())
         {
-            csDictIoPtr.set
+            csDictIoPtr.reset
             (
                 new IOobject
                 (
@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            csDictIoPtr.set
+            csDictIoPtr.reset
             (
                 new IOobject
                 (

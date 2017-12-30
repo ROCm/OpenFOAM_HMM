@@ -66,7 +66,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
 
         format.writeSize(payLoad * sizeof(label));
 
-        for (const Face& f : faces)
+        for (const auto& f : faces)
         {
             vtk::writeList(format, f);
         }
@@ -104,25 +104,19 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::writePolys
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::fileFormats::VTPsurfaceFormat<Face>::VTPsurfaceFormat()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
 void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary& options
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&   faceLst = surf.surfFaces();
+    const UList<label>&  faceMap = surf.faceMap();
 
     const List<surfZone>& zones =
     (
@@ -133,7 +127,7 @@ void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
 
-    std::ofstream os(filename.c_str(), std::ios::binary);
+    std::ofstream os(filename, std::ios::binary);
 
     autoPtr<vtk::formatter> format =
         vtk::newFormatter(os, fmtType);
@@ -226,15 +220,16 @@ template<class Face>
 void Foam::fileFormats::VTPsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
+    const UnsortedMeshedSurface<Face>& surf,
+    const dictionary& options
 )
 {
-    std::ofstream os(filename.c_str(), std::ios::binary);
+    std::ofstream os(filename, std::ios::binary);
 
     autoPtr<vtk::formatter> format =
         vtk::newFormatter(os, fmtType);
 
-    const List<Face>& faceLst = surf.surfFaces();
+    const UList<Face>& faceLst = surf.surfFaces();
 
     writeHeader(format(), surf.points(), faceLst.size());
 

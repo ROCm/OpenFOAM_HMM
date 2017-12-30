@@ -769,7 +769,8 @@ WARN_LOGFILE           =
 #INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global
 INPUT                  = $(WM_PROJECT_DIR)/src \
                          $(WM_PROJECT_DIR)/applications/utilities \
-                         $(WM_PROJECT_DIR)/applications/solvers
+                         $(WM_PROJECT_DIR)/applications/solvers \
+                         $(WM_PROJECT_DIR)/modules/doc
 
 #For testing only
 #INPUT                  = $(WM_PROJECT_DIR)/src/OpenFOAM/global \

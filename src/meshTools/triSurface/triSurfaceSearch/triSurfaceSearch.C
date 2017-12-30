@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ License
 bool Foam::triSurfaceSearch::checkUniqueHit
 (
     const pointIndexHit& currHit,
-    const DynamicList<pointIndexHit, 1, 1>& hits,
+    const UList<pointIndexHit>& hits,
     const vector& lineVec
 ) const
 {
@@ -109,10 +109,10 @@ bool Foam::triSurfaceSearch::checkUniqueHit
                             surface().faceNormals()[edgeFacei];
 
                         const label signCurrHit =
-                            pos(currHitNormal & lineVec);
+                            pos0(currHitNormal & lineVec);
 
                         const label signExistingHit =
-                            pos(existingHitNormal & lineVec);
+                            pos0(existingHitNormal & lineVec);
 
                         if (signCurrHit == signExistingHit)
                         {
@@ -387,7 +387,7 @@ void Foam::triSurfaceSearch::findLineAll
     indexedOctree<treeDataTriSurface>::perturbTol() = tolerance();
 
     // Work array
-    DynamicList<pointIndexHit, 1, 1> hits;
+    DynamicList<pointIndexHit> hits;
 
     DynamicList<label> shapeMask;
 

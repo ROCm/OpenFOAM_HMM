@@ -100,7 +100,7 @@ SourceFiles
 #define EDC_H
 
 #include "../laminar/laminar.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,7 +118,7 @@ enum class EDCversions
     v2016
 };
 
-extern const NamedEnum<EDCversions, 4> EDCversionNames;
+extern const Enum<EDCversions> EDCversionNames;
 extern const EDCversions EDCdefaultVersion;
 
 const scalar EDCexp1[] = {3, 2, 2, 2};

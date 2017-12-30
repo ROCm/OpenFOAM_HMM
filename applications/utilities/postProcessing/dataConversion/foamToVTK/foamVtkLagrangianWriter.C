@@ -76,7 +76,7 @@ void Foam::vtk::lagrangianWriter::writePoints()
 
     forAllConstIters(parcels, iter)
     {
-        const point& pt = iter().position();
+        const point pt(iter().position());
 
         vtk::write(format(), pt);
     }

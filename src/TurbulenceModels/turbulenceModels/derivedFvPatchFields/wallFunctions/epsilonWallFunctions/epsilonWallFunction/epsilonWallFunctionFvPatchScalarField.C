@@ -57,9 +57,9 @@ void Foam::epsilonWallFunctionFvPatchScalarField::writeLocalEntries
     Ostream& os
 ) const
 {
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    os.writeEntry("Cmu", Cmu_);
+    os.writeEntry("kappa", kappa_);
+    os.writeEntry("E", E_);
 }
 
 
@@ -234,16 +234,28 @@ void Foam::epsilonWallFunctionFvPatchScalarField::calculate
     {
         const label celli = patch.faceCells()[facei];
 
+        const scalar yPlus = Cmu25*y[facei]*sqrt(k[celli])/nuw[facei];
+
         const scalar w = cornerWeights[facei];
 
-        epsilon0[celli] += w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
-
-        G0[celli] +=
+        // Default high-Re form
+        scalar epsilonc = w*Cmu75*pow(k[celli], 1.5)/(kappa_*y[facei]);
+        scalar Gc =
             w
-            *(nutw[facei] + nuw[facei])
-            *magGradUw[facei]
-            *Cmu25*sqrt(k[celli])
-            /(kappa_*y[facei]);
+           *(nutw[facei] + nuw[facei])
+           *magGradUw[facei]
+           *Cmu25*sqrt(k[celli])
+           /(kappa_*y[facei]);
+
+        if (lowReCorrection_ && yPlus < yPlusLam_)
+        {
+            epsilonc = w*2.0*k[celli]*nuw[facei]/sqr(y[facei]);
+            Gc = 0;
+        }
+
+        epsilon0[celli] += epsilonc;
+
+        G0[celli] += Gc;
     }
 }
 
@@ -264,6 +276,7 @@ epsilonWallFunctionFvPatchScalarField
     yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     epsilon_(),
+    lowReCorrection_(false),
     initialised_(false),
     master_(-1),
     cornerWeights_()
@@ -288,6 +301,7 @@ epsilonWallFunctionFvPatchScalarField
     yPlusLam_(ptf.yPlusLam_),
     G_(),
     epsilon_(),
+    lowReCorrection_(ptf.lowReCorrection_),
     initialised_(false),
     master_(-1),
     cornerWeights_()
@@ -311,6 +325,7 @@ epsilonWallFunctionFvPatchScalarField
     yPlusLam_(nutWallFunctionFvPatchScalarField::yPlusLam(kappa_, E_)),
     G_(),
     epsilon_(),
+    lowReCorrection_(dict.lookupOrDefault("lowReCorrection", false)),
     initialised_(false),
     master_(-1),
     cornerWeights_()
@@ -335,6 +350,7 @@ epsilonWallFunctionFvPatchScalarField
     yPlusLam_(ewfpsf.yPlusLam_),
     G_(),
     epsilon_(),
+    lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
     cornerWeights_()
@@ -357,6 +373,7 @@ epsilonWallFunctionFvPatchScalarField
     yPlusLam_(ewfpsf.yPlusLam_),
     G_(),
     epsilon_(),
+    lowReCorrection_(ewfpsf.lowReCorrection_),
     initialised_(false),
     master_(-1),
     cornerWeights_()
@@ -483,11 +500,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::updateWeightedCoeffs
 
     typedef DimensionedField<scalar, volMesh> FieldType;
 
-    FieldType& G =
-        const_cast<FieldType&>
-        (
-            db().lookupObject<FieldType>(turbModel.GName())
-        );
+    FieldType& G = db().lookupObjectRef<FieldType>(turbModel.GName());
 
     FieldType& epsilon = const_cast<FieldType&>(internalField());
 
@@ -551,7 +564,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::manipulateMatrix
 
     forAll(weights, facei)
     {
-        // Anly set the values if the weights are > tolerance
+        // Only set the values if the weights are > tolerance
         if (weights[facei] > tolerance_)
         {
             nConstrainedCells++;
@@ -585,6 +598,7 @@ void Foam::epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     writeLocalEntries(os);
     fixedValueFvPatchField<scalar>::write(os);
+    os.writeEntry("lowReCorrection", lowReCorrection_);
 }
 
 

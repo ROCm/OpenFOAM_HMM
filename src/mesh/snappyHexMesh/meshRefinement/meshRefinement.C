@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,55 +63,45 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(meshRefinement, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::meshRefinement::IOdebugType,
-        5
-    >::names[] =
-    {
-        "mesh",
-        "intersections",
-        "featureSeeds",
-        "attraction",
-        "layerInfo"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::meshRefinement::IOoutputType,
-        1
-    >::names[] =
-    {
-        "layerInfo"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::meshRefinement::IOwriteType,
-        5
-    >::names[] =
-    {
-        "mesh",
-        "noRefinement",
-        "scalarLevels",
-        "layerSets",
-        "layerFields"
-    };
-
 }
 
-const Foam::NamedEnum<Foam::meshRefinement::IOdebugType, 5>
-Foam::meshRefinement::IOdebugTypeNames;
 
-const Foam::NamedEnum<Foam::meshRefinement::IOoutputType, 1>
-Foam::meshRefinement::IOoutputTypeNames;
+const Foam::Enum
+<
+    Foam::meshRefinement::debugType
+>
+Foam::meshRefinement::debugTypeNames
+{
+    { debugType::MESH, "mesh" },
+    { debugType::OBJINTERSECTIONS, "intersections" },
+    { debugType::FEATURESEEDS, "featureSeeds" },
+    { debugType::ATTRACTION, "attraction" },
+    { debugType::LAYERINFO, "layerInfo" },
+};
 
-const Foam::NamedEnum<Foam::meshRefinement::IOwriteType, 5>
-Foam::meshRefinement::IOwriteTypeNames;
+
+const Foam::Enum
+<
+    Foam::meshRefinement::outputType
+>
+Foam::meshRefinement::outputTypeNames
+{
+    { outputType::OUTPUTLAYERINFO, "layerInfo" }
+};
+
+
+const Foam::Enum
+<
+    Foam::meshRefinement::writeType
+>
+Foam::meshRefinement::writeTypeNames
+{
+    { writeType::WRITEMESH, "mesh" },
+    { writeType::NOWRITEREFINEMENT, "noRefinement" },
+    { writeType::WRITELEVELS, "scalarLevels" },
+    { writeType::WRITELAYERSETS, "layerSets" },
+    { writeType::WRITELAYERFIELDS, "layerFields" },
+};
 
 
 Foam::meshRefinement::writeType Foam::meshRefinement::writeLevel_;
@@ -2047,7 +2037,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     const dictionary& patchInfo
 )
 {
-    label meshedi = findIndex(meshedPatches_, name);
+    label meshedi = meshedPatches_.find(name);
 
     if (meshedi != -1)
     {
@@ -2351,7 +2341,7 @@ void Foam::meshRefinement::findRegions
         {
             // Do a quick check for locationsOutsideMesh overlapping with
             // inside ones.
-            label index = findIndex(insideRegions, regioni);
+            label index = insideRegions.find(regioni);
             if (index != -1)
             {
                 FatalErrorInFunction

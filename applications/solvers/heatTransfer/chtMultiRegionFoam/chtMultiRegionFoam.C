@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,7 @@ Description
 #include "radiationModel.H"
 #include "fvOptions.H"
 #include "coordinateSystem.H"
+#include "loopControl.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,11 +90,10 @@ int main(int argc, char *argv[])
             }
         }
 
-
         // --- PIMPLE loop
-        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
+        for (int oCorr=0; oCorr<nOuterCorr; ++oCorr)
         {
-            bool finalIter = oCorr == nOuterCorr-1;
+            const bool finalIter = (oCorr == nOuterCorr-1);
 
             forAll(fluidRegions, i)
             {
@@ -113,6 +113,35 @@ int main(int argc, char *argv[])
                 #include "solveSolid.H"
             }
 
+            // Additional loops for energy solution only
+            if (!oCorr && nOuterCorr > 1)
+            {
+                loopControl looping(runTime, pimple, "energyCoupling");
+
+                while (looping.loop())
+                {
+                    Info<< nl << looping << nl;
+
+                    forAll(fluidRegions, i)
+                    {
+                        Info<< "\nSolving for fluid region "
+                            << fluidRegions[i].name() << endl;
+                       #include "setRegionFluidFields.H"
+                       #include "readFluidMultiRegionPIMPLEControls.H"
+                       frozenFlow = true;
+                       #include "solveFluid.H"
+                    }
+
+                    forAll(solidRegions, i)
+                    {
+                        Info<< "\nSolving for solid region "
+                            << solidRegions[i].name() << endl;
+                        #include "setRegionSolidFields.H"
+                        #include "readSolidMultiRegionPIMPLEControls.H"
+                        #include "solveSolid.H"
+                    }
+                }
+            }
         }
 
         runTime.write();

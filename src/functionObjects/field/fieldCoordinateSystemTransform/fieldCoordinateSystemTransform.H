@@ -83,6 +83,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "coordinateSystem.H"
+#include "volFieldSelection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -104,7 +105,7 @@ protected:
     // Protected data
 
         //- Fields to transform
-        wordList fieldSet_;
+        volFieldSelection fieldSet_;
 
         //- Co-ordinate system to transform to
         coordinateSystem coordSys_;

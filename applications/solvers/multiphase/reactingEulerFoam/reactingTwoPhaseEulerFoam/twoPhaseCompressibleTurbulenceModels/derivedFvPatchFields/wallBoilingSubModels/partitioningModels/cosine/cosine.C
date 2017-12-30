@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,7 @@ cosine::fLiquid
 ) const
 {
     return
-        pos(alphaLiquid1_ - alphaLiquid)
+        pos0(alphaLiquid1_ - alphaLiquid)
        *(
             neg(alphaLiquid0_ - alphaLiquid)
            *(
@@ -97,10 +97,8 @@ void Foam::wallBoilingModels::partitioningModels::
 cosine::write(Ostream& os) const
 {
     partitioningModel::write(os);
-    os.writeKeyword("alphaLiquid1") << alphaLiquid1_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("alphaLiquid0") << alphaLiquid0_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("alphaLiquid1", alphaLiquid1_);
+    os.writeEntry("alphaLiquid0", alphaLiquid0_);
 }
 
 

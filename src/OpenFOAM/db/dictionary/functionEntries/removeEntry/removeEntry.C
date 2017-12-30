@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,31 +26,21 @@ License
 #include "removeEntry.H"
 #include "dictionary.H"
 #include "stringListOps.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
 #include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::word Foam::functionEntries::removeEntry::typeName
-(
-    Foam::functionEntries::removeEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include removeEntry
-int Foam::functionEntries::removeEntry::debug(0);
 
 namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         removeEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        remove
     );
 }
 }
@@ -64,17 +54,36 @@ bool Foam::functionEntries::removeEntry::execute
     Istream& is
 )
 {
-    wordList   dictKeys = parentDict.toc();
-    wordReList patterns = readList<wordRe>(is);
+    const List<keyType> patterns = functionEntry::readStringList<keyType>(is);
 
-    labelList indices = findStrings(patterns, dictKeys);
-
-    forAll(indices, indexI)
+    for (const keyType& key : patterns)
     {
-        parentDict.remove(dictKeys[indices[indexI]]);
+        if (key.find('/') != string::npos || !key.isPattern())
+        {
+            // Remove scoped keyword, or keyword in the local scope
+            dictionary::searcher finder =
+                parentDict.searchScoped(key, false, false);
+
+            if (finder.found())
+            {
+                finder.context().remove(finder.ptr()->keyword());
+            }
+        }
+        else
+        {
+            // Remove by pattern
+            const wordList dictKeys = parentDict.toc();
+            const labelList indices = findStrings(regExp(key), dictKeys);
+
+            for (const auto idx : indices)
+            {
+                parentDict.remove(dictKeys[idx]);
+            }
+        }
     }
 
     return true;
 }
+
 
 // ************************************************************************* //

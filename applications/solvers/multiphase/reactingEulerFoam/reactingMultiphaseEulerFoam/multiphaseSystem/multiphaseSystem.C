@@ -40,6 +40,8 @@ License
 #include "fvmLaplacian.H"
 #include "fvmSup.H"
 
+#include "unitConversion.H"
+
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
 namespace Foam
@@ -47,9 +49,6 @@ namespace Foam
     defineTypeNameAndDebug(multiphaseSystem, 0);
     defineRunTimeSelectionTable(multiphaseSystem, dictionary);
 }
-
-const Foam::scalar Foam::multiphaseSystem::convertToRad =
-    Foam::constant::mathematical::pi/180.0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -399,7 +398,7 @@ void Foam::multiphaseSystem::correctContactAngle
 
             bool matched = (tp.key().first() == phase1.name());
 
-            scalar theta0 = convertToRad*tp().theta0(matched);
+            const scalar theta0 = degToRad(tp().theta0(matched));
             scalarField theta(boundary[patchi].size(), theta0);
 
             scalar uTheta = tp().uTheta();
@@ -407,8 +406,8 @@ void Foam::multiphaseSystem::correctContactAngle
             // Calculate the dynamic contact angle if required
             if (uTheta > SMALL)
             {
-                scalar thetaA = convertToRad*tp().thetaA(matched);
-                scalar thetaR = convertToRad*tp().thetaR(matched);
+                const scalar thetaA = degToRad(tp().thetaA(matched));
+                const scalar thetaR = degToRad(tp().thetaR(matched));
 
                 // Calculated the component of the velocity parallel to the wall
                 vectorField Uwall
@@ -599,7 +598,7 @@ Foam::multiphaseSystem::nearInterface() const
         tnearInt.ref() = max
         (
             tnearInt(),
-            pos(phases()[phasei] - 0.01)*pos(0.99 - phases()[phasei])
+            pos0(phases()[phasei] - 0.01)*pos0(0.99 - phases()[phasei])
         );
     }
 
@@ -700,6 +699,9 @@ void Foam::multiphaseSystem::solve()
     {
         phaseModel& phase = phases()[phasei];
         phase.alphaRhoPhi() = fvc::interpolate(phase.rho())*phase.alphaPhi();
+
+        // Ensure the phase-fractions are bounded
+        phase.maxMin(0, 1);
     }
 
     calcAlphas();

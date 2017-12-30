@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,8 +24,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "IOobject.H"
+#include "fileOperation.H"
 #include "Istream.H"
-
 #include "IOstreams.H"
 #include "Pstream.H"
 
@@ -35,7 +35,8 @@ template<class Type>
 bool Foam::IOobject::typeHeaderOk
 (
     const bool checkType,
-    const bool search
+    const bool search,
+    const bool verbose
 )
 {
     bool ok = true;
@@ -48,55 +49,26 @@ bool Foam::IOobject::typeHeaderOk
          || IOobject::fileModificationChecking == inotifyMaster
         );
 
+    const fileOperation& fp = Foam::fileHandler();
 
     // Determine local status
     if (!masterOnly || Pstream::master())
     {
-        Istream* isPtr = objectStream(typeFilePath<Type>(*this, search));
+        fileName fName(typeFilePath<Type>(*this, search));
 
-        // If the stream has failed return
-        if (!isPtr)
+        ok = fp.readHeader(*this, fName, Type::typeName);
+        if (ok && checkType && headerClassName_ != Type::typeName)
         {
-            if (IOobject::debug)
+            if (verbose)
             {
-                InfoInFunction
-                    << "file " << objectPath() << " could not be opened"
-                    << endl;
+                WarningInFunction
+                    << "unexpected class name " << headerClassName_
+                    << " expected " << Type::typeName
+                    << " when reading " << fName << endl;
             }
 
             ok = false;
         }
-        else
-        {
-            // Try reading header
-            if (readHeader(*isPtr))
-            {
-                if (checkType && headerClassName_ != Type::typeName)
-                {
-                    if (debug)
-                    {
-                        IOWarningInFunction(*isPtr)
-                            << "unexpected class name " << headerClassName_
-                            << " expected " << Type::typeName << endl;
-                    }
-
-                    ok = false;
-                }
-            }
-            else
-            {
-                if (IOobject::debug)
-                {
-                    IOWarningInFunction(*isPtr)
-                        << "failed to read header of file " << objectPath()
-                        << endl;
-                }
-
-                ok = false;
-            }
-        }
-
-        delete isPtr;
     }
 
     // If masterOnly make sure all processors know about it
@@ -116,9 +88,8 @@ void Foam::IOobject::warnNoRereading() const
     {
         WarningInFunction
             << Type::typeName << ' ' << name()
-            << " constructed with IOobject::MUST_READ_IF_MODIFIED"
-            " but " << Type::typeName
-            << " does not support automatic rereading."
+            << " constructed with IOobject::MUST_READ_IF_MODIFIED but "
+            << Type::typeName << " does not support automatic rereading."
             << endl;
     }
 }

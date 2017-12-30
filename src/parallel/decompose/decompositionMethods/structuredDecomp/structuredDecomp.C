@@ -46,10 +46,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::structuredDecomp::structuredDecomp(const dictionary& decompositionDict)
+Foam::structuredDecomp::structuredDecomp(const dictionary& decompDict)
 :
-    decompositionMethod(decompositionDict),
-    methodDict_(decompositionDict_.optionalSubDict(typeName + "Coeffs")),
+    decompositionMethod(decompDict),
+    methodDict_(findCoeffsDict(typeName + "Coeffs", selectionType::MANDATORY)),
     patches_(methodDict_.lookup("patches"))
 {
     methodDict_.set("numberOfSubdomains", nDomains());
@@ -76,20 +76,16 @@ Foam::labelList Foam::structuredDecomp::decompose
     const labelHashSet patchIDs(pbm.patchSet(patches_));
 
     label nFaces = 0;
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchi : patchIDs)
     {
-        nFaces += pbm[iter.key()].size();
+        nFaces += pbm[patchi].size();
     }
 
     // Extract a submesh.
     labelHashSet patchCells(2*nFaces);
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchi : patchIDs)
     {
-        const labelUList& fc = pbm[iter.key()].faceCells();
-        forAll(fc, i)
-        {
-            patchCells.insert(fc[i]);
-        }
+        patchCells.insert(pbm[patchi].faceCells());
     }
 
     // Subset the layer of cells next to the patch
@@ -118,9 +114,9 @@ Foam::labelList Foam::structuredDecomp::decompose
     labelList patchFaces(nFaces);
     List<topoDistanceData> patchData(nFaces);
     nFaces = 0;
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchi : patchIDs)
     {
-        const polyPatch& pp = pbm[iter.key()];
+        const polyPatch& pp = pbm[patchi];
         const labelUList& fc = pp.faceCells();
         forAll(fc, i)
         {

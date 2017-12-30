@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::ITstream
 
 Description
-    Input token stream.
+    An input stream of tokens.
 
 SourceFiles
     ITstream.C
@@ -43,6 +43,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration
+class ISstream;
+
 /*---------------------------------------------------------------------------*\
                            Class ITstream Declaration
 \*---------------------------------------------------------------------------*/
@@ -59,6 +62,13 @@ class ITstream
 
         //- Index of token currently being read
         label tokenIndex_;
+
+
+    // Private Member Functions
+
+        //- Convert input sequence into a list of tokens.
+        //  \return the number of tokens in the resulting list.
+        static label parseStream(ISstream& input, tokenList& tokens);
 
 
 public:
@@ -103,6 +113,39 @@ public:
         }
 
 
+        //- Construct token list by parsing the input character sequence
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const UList<char>& input,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        );
+
+
+        //- Construct token list by parsing the input string
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const std::string& input,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        );
+
+
+        //- Construct token list by parsing the input character sequence
+        //  Uses UIListStream internally.
+        ITstream
+        (
+            const string& name,
+            const char* input,
+            streamFormat format=ASCII,
+            versionNumber version=currentVersion
+        );
+
+
         //- Construct as copy
         ITstream(const ITstream& its)
         :
@@ -121,18 +164,45 @@ public:
         {}
 
 
+    // Static Functions
+
+        //- Create token list by parsing the input character sequence until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const UList<char>& input,
+            streamFormat format=ASCII
+        );
+
+        //- Create token list by parsing the input string until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const std::string& input,
+            streamFormat format=ASCII
+        );
+
+        //- Create token list by parsing the input character sequence until
+        //- no good tokens remain.
+        static tokenList parse
+        (
+            const char* input,
+            streamFormat format=ASCII
+        );
+
+
     // Member functions
 
         // Inquiry
 
             //- Return the name of the stream
-            const fileName& name() const
+            virtual const fileName& name() const
             {
                 return name_;
             }
 
             //- Return non-const access to the name of the stream
-            fileName& name()
+            virtual fileName& name()
             {
                 return name_;
             }
@@ -165,7 +235,7 @@ public:
         // Read functions
 
             //- Return next token from stream
-            virtual Istream& read(token&);
+            virtual Istream& read(token& tok);
 
             //- Read a character
             virtual Istream& read(char&);
@@ -188,8 +258,8 @@ public:
             //- Read binary block
             virtual Istream& read(char*, std::streamsize);
 
-            //- Rewind and return the stream so that it may be read again
-            virtual Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            virtual void rewind();
 
 
         // Edit
@@ -203,8 +273,8 @@ public:
 
         // Print
 
-            //- Print description of IOstream to Ostream
-            void print(Ostream&) const;
+            //- Print description of stream to Ostream
+            void print(Ostream& os) const;
 };
 
 

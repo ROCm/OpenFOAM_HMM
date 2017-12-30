@@ -100,15 +100,14 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
             << exit(FatalError);
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(functionType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(functionType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown function type "
             << functionType << nl << nl
-            << "Valid functions are : " << nl
+            << "Valid function types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << endl
             << exit(FatalError);
     }
@@ -138,6 +137,12 @@ bool Foam::functionObject::read(const dictionary& dict)
         log = dict.lookupOrDefault<Switch>("log", true);
     }
 
+    return true;
+}
+
+
+bool Foam::functionObject::execute(const label)
+{
     return true;
 }
 

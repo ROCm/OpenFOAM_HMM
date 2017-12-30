@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "cellSizeFunction.H"
 #include "triSurfaceMesh.H"
 #include "searchableBox.H"
-#include "tetrahedron.H"
+#include "tetPointRef.H"
 #include "vectorTools.H"
 #include "quaternion.H"
 
@@ -379,7 +379,7 @@ void Foam::searchableSurfaceControl::initialVertices
             vectorField norms = features.featurePointNormals(info.index());
 
             // Create a triad from these norms.
-            pointAlignment.set(new triad());
+            pointAlignment.reset(new triad());
             forAll(norms, nI)
             {
                 pointAlignment() += norms[nI];
@@ -406,7 +406,7 @@ void Foam::searchableSurfaceControl::initialVertices
                 vectorField norms = features.edgeNormals(info.index());
 
                 // Create a triad from these norms.
-                pointAlignment.set(new triad());
+                pointAlignment.reset(new triad());
                 forAll(norms, nI)
                 {
                     pointAlignment() += norms[nI];
@@ -431,7 +431,7 @@ void Foam::searchableSurfaceControl::initialVertices
                     normals[0] = vector(1, 1, 1);
                 }
 
-                pointAlignment.set(new triad(normals[0]));
+                pointAlignment.reset(new triad(normals[0]));
 
                 if (infoList[0].hit())
                 {

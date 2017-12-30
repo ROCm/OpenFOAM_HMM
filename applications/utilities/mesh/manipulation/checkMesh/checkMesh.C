@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -47,15 +47,10 @@ Usage
       - \par -region \<name\>
         Specify an alternative mesh region.
 
-      - \par -writeSets \<surfaceFormat\>
-        Reconstruct all cellSets and faceSets geometry and write to
-        postProcessing directory according to surfaceFormat
-        (e.g. vtk or ensight). Additionally reconstructs all pointSets and
-        writes as vtk format.
-
     \param -writeSets \<surfaceFormat\> \n
-    Reconstruct all cellSets and faceSets geometry and write to postProcessing/
-    directory according to surfaceFormat (e.g. vtk or ensight)
+    Reconstruct all cellSets and faceSets geometry and write to postProcessing
+    directory according to surfaceFormat (e.g. vtk or ensight). Additionally
+    reconstructs all pointSets and writes as vtk format.
 
     \param -writeAllFields \n
     Writes all mesh quality measures as fields.
@@ -72,6 +67,7 @@ Usage
 #include "globalMeshData.H"
 #include "surfaceWriter.H"
 #include "vtkSetWriter.H"
+#include "IOdictionary.H"
 
 #include "checkTools.H"
 #include "checkTopology.H"

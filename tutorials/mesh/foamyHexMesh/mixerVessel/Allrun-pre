@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 intersectSurfaces()
 {
@@ -38,7 +36,7 @@ intersectSurfaces stirrer_baffles.stl stirrer.stl -surf1Baffle -perturb
 intersectSurfaces rotating.stl shaft.stl -surf1Baffle -perturb
 
 # Intersect blades with the plate
-for bladeI in $(seq 1 6);
+for bladeI in $(seq 1 6)
 do
     intersectSurfaces \
         stirrer_baffles_$bladeI.obj \

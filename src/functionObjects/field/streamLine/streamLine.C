@@ -52,7 +52,7 @@ void Foam::functionObjects::streamLine::track()
         initialParticles
     );
 
-    const sampledSet& seedPoints = sampledSetPtr_();
+    const sampledSet& seedPoints = sampledSetPoints();
 
     forAll(seedPoints, i)
     {
@@ -112,7 +112,7 @@ void Foam::functionObjects::streamLine::track()
     const scalar trackTime = Foam::sqrt(GREAT);
 
     // Track
-    particles.move(td, trackTime);
+    particles.move(particles, td, trackTime);
 }
 
 

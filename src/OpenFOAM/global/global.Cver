@@ -33,9 +33,29 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #include "foamVersion.H"
+#include "endian.H"
+#include "label.H"
+#include "scalar.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::FOAMversion = "VERSION_STRING";
 const char* const Foam::FOAMbuild = "BUILD_STRING";
+
+// Information about machine endian, label and scalar sizes
+const std::string Foam::FOAMbuildArch =
+(
+#ifdef WM_LITTLE_ENDIAN
+    "LSB"
+#elif defined (WM_BIG_ENDIAN)
+    "MSB"
+#else
+    "???"
+#endif
+    ";label="  + std::to_string(8*sizeof(Foam::label))
+  + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Setup an error handler for the global new operator
@@ -85,11 +105,6 @@ bool Foam::JobInfo::constructed(false);
 
 #include "constants.C"
 #include "dimensionedConstants.C"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Read and set cell models
-
-#include "globalCellModeller.C"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Create the jobInfo file in the $FOAM_JOB_DIR/runningJobs directory

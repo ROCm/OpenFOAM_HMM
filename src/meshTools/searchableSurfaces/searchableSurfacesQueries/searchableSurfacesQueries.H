@@ -138,7 +138,7 @@ public:
 
             //- Find nearest points that are on all supplied surfaces
             //  (nearest point if single surface; nearest intersection by
-            //   steepst descent if on multiple surfaces). Returns current
+            //   steepest descent if on multiple surfaces). Returns current
             //   best guess). Wip.
             static void findNearest
             (

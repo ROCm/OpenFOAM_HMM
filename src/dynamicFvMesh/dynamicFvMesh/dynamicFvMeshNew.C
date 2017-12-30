@@ -68,15 +68,14 @@ Foam::autoPtr<Foam::dynamicFvMesh> Foam::dynamicFvMesh::New(const IOobject& io)
             << exit(FatalError);
     }
 
-    IOobjectConstructorTable::iterator cstrIter =
-        IOobjectConstructorTablePtr_->find(dynamicFvMeshTypeName);
+    auto cstrIter = IOobjectConstructorTablePtr_->cfind(dynamicFvMeshTypeName);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown dynamicFvMesh type "
             << dynamicFvMeshTypeName << nl << nl
-            << "Valid dynamicFvMesh types are :" << endl
+            << "Valid dynamicFvMesh types :" << endl
             << IOobjectConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

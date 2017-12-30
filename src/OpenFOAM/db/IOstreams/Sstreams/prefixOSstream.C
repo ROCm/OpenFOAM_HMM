@@ -43,7 +43,7 @@ inline void Foam::prefixOSstream::checkWritePrefix()
 
 Foam::prefixOSstream::prefixOSstream
 (
-    ostream& os,
+    std::ostream& os,
     const string& name,
     streamFormat format,
     versionNumber version,
@@ -65,21 +65,41 @@ void Foam::prefixOSstream::print(Ostream& os) const
 }
 
 
-Foam::Ostream& Foam::prefixOSstream::write(const token& t)
+bool Foam::prefixOSstream::write(const token& tok)
 {
-    if (t.type() == token::VERBATIMSTRING)
+    // Direct token handling only for some types
+
+    switch (tok.type())
     {
-        write(char(token::HASH));
-        write(char(token::BEGIN_BLOCK));
-        writeQuoted(t.stringToken(), false);
-        write(char(token::HASH));
-        write(char(token::END_BLOCK));
+        case token::tokenType::FLAG :
+        {
+            // silently consume the flag
+            return true;
+        }
+
+        case token::tokenType::VERBATIMSTRING :
+        {
+            write(char(token::HASH));
+            write(char(token::BEGIN_BLOCK));
+            writeQuoted(tok.stringToken(), false);
+            write(char(token::HASH));
+            write(char(token::END_BLOCK));
+
+            return true;
+        }
+
+        case token::tokenType::VARIABLE :
+        {
+            writeQuoted(tok.stringToken(), false);
+
+            return true;
+        }
+
+        default:
+            break;
     }
-    else if (t.type() == token::VARIABLE)
-    {
-        writeQuoted(t.stringToken(), false);
-    }
-    return *this;
+
+    return false;
 }
 
 
@@ -102,7 +122,7 @@ Foam::Ostream& Foam::prefixOSstream::write(const char* str)
     checkWritePrefix();
     OSstream::write(str);
 
-    size_t len = strlen(str);
+    const size_t len = strlen(str);
     if (len && str[len-1] == token::NL)
     {
         printPrefix_ = true;
@@ -181,5 +201,6 @@ void Foam::prefixOSstream::indent()
     checkWritePrefix();
     OSstream::indent();
 }
+
 
 // ************************************************************************* //

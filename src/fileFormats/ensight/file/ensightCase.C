@@ -307,7 +307,8 @@ void Foam::ensightCase::noteCloud
     else
     {
         FatalErrorInFunction
-            << "Tried to add a cloud variable for writing without having added a cloud"
+            << "Tried to add a cloud variable for writing"
+            << " - without having added a cloud"
             << abort(FatalError);
     }
 }

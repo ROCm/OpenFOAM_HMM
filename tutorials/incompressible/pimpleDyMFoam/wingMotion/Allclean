@@ -1,24 +1,11 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/CleanFunctions  # Tutorial clean functions
 
-# Source tutorial clean functions
-. $WM_PROJECT_DIR/bin/tools/CleanFunctions
+( cd wingMotion_snappyHexMesh && cleanCase )
 
-(
-    cd wingMotion_snappyHexMesh || exit 1
-    cleanCase
-)
+( cd wingMotion2D_simpleFoam && cleanCase0 )
 
-(
-    cd wingMotion2D_simpleFoam || exit 1
-    cleanCase
-    rm -rf 0
-)
-
-(
-    cd wingMotion2D_pimpleDyMFoam || exit 1
-    cleanCase
-    rm -rf 0
-)
+( cd wingMotion2D_pimpleDyMFoam && cleanCase0 )
 
 #------------------------------------------------------------------------------

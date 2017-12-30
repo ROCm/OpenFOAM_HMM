@@ -36,17 +36,18 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(tetDecomposer, 0);
-
-    template<>
-    const char* NamedEnum<tetDecomposer::decompositionType, 2>::names[] =
-    {
-        "faceCentre",
-        "faceDiagonal"
-    };
-
-    const NamedEnum<tetDecomposer::decompositionType, 2>
-        tetDecomposer::decompositionTypeNames;
 }
+
+const Foam::Enum
+<
+    Foam::tetDecomposer::decompositionType
+>
+Foam::tetDecomposer::decompositionTypeNames
+{
+    { decompositionType::FACE_CENTRE_TRIS,  "faceCentre" },
+    { decompositionType::FACE_DIAG_TRIS, "faceDiagonal" },
+};
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -595,7 +596,7 @@ void Foam::tetDecomposer::setRefinement
                     // we are looping in the same order the tets added for
                     // otherFacei will be before those of facei
 
-                    label otherFp = findIndex(otherF, p0);
+                    label otherFp = otherF.find(p0);
                     if (otherF.nextLabel(otherFp) == p1)
                     {
                         // ok. otherFp is first vertex of edge.

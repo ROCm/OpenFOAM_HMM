@@ -28,7 +28,7 @@ Description
     An edge is a list of two point labels. The functionality it provides
     supports the discretisation on a 2-D flat mesh.
 
-    The edge is implemented as a FixedList of labels.
+    The edge is implemented as a Pair/FixedList of labels.
     As well as geometrically relevant methods, it also provides methods
     similar to HashSet for additional convenience.
     Valid point labels are always non-negative (since they correspond to
@@ -37,6 +37,7 @@ Description
     can be filled with a HashSet-like functionality.
 
 SourceFiles
+    edge.C
     edgeI.H
 
 \*---------------------------------------------------------------------------*/
@@ -44,10 +45,9 @@ SourceFiles
 #ifndef edge_H
 #define edge_H
 
-#include "FixedList.H"
 #include "labelPair.H"
-#include "pointField.H"
 #include "linePointRef.H"
+#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +60,7 @@ namespace Foam
 
 class edge
 :
-    public FixedList<label, 2>
+    public labelPair
 {
     // Private Member Functions
 
@@ -93,19 +93,19 @@ public:
         //- Construct null with invalid point labels (-1)
         inline edge();
 
-        //- Construct from components
+        //- Construct from two point labels
         inline edge(const label from, const label to);
 
-        //- Construct, optionally sorted with start less-than end
-        inline edge(const label from, const label to, const bool doSort);
-
-        //- Construct from two labels
+        //- Construct from pair of labels
         inline edge(const labelPair& pair);
 
-        //- Construct from FixedList
+        //- Construct from list
         inline edge(const FixedList<label, 2>& lst);
 
-        //- Construct, optionally sorted with start less-than end
+        //- Construct from two point labels, sorted with first less-than second
+        inline edge(const label from, const label to, const bool doSort);
+
+        //- Construct from list, sorted with first less-than second
         inline edge(const FixedList<label, 2>& lst, const bool doSort);
 
         //- Construct from Istream
@@ -116,16 +116,26 @@ public:
 
       // Access
 
-        //- Return start vertex label
+        //- Return first vertex label
+        using labelPair::first;
+
+        //- Return last (second) vertex label
+        using labelPair::last;
+
+        //- Return second (last) vertex label
+        using labelPair::second;
+
+
+        //- Return start (first) vertex label
         inline label start() const;
 
-        //- Return start vertex label
+        //- Return start (first) vertex label
         inline label& start();
 
-        //- Return end vertex label
+        //- Return end (last/second) vertex label
         inline label end() const;
 
-        //- Return end vertex label
+        //- Return end (last/second) vertex label
         inline label& end();
 
         //- Return reverse edge as copy.
@@ -142,10 +152,6 @@ public:
         //- Return the largest point label used by the edge
         //  No special handling of negative point labels.
         inline label maxVertex() const;
-
-        //- True if start() is less-than end()
-        //  No special handling of negative point labels.
-        inline bool sorted() const;
 
         //- Return true if point label is found in edge.
         //  Always false for a negative label.
@@ -175,14 +181,6 @@ public:
         //  Return the effective size after collapsing.
         inline label collapse();
 
-        //- Flip the edge in-place.
-        //  No special handling of negative point labels.
-        inline void flip();
-
-        //- Sort so that start() is less-than end()
-        //  No special handling of negative point labels.
-        inline void sort();
-
 
      // Hash-like functions
 
@@ -205,14 +203,14 @@ public:
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        inline label insert(const UList<label>& lst);
+        inline label insert(const labelUList& lst);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        template<unsigned AnySize>
-        inline label insert(const FixedList<label, AnySize>& lst);
+        template<unsigned Size>
+        inline label insert(const FixedList<label, Size>& lst);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
@@ -227,12 +225,12 @@ public:
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline label erase(const UList<label>& lst);
+        inline label erase(const labelUList& lst);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        template<unsigned AnySize>
-        inline label erase(const FixedList<label, AnySize>& lst);
+        template<unsigned Size>
+        inline label erase(const FixedList<label, Size>& lst);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
@@ -265,7 +263,7 @@ public:
      // Comparison
 
         //- Compare edges
-        //  Returns:
+        //  \return
         //  -  0: different
         //  - +1: identical values and order used
         //  - -1: identical values, but in different order
@@ -274,7 +272,14 @@ public:
 };
 
 
-// Global Operators
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
+
+//- Return reverse of an edge
+inline edge reverse(const edge& e)
+{
+    return edge(e.second(), e.first());
+}
+
 
 //- Compare edges for equal content, ignoring orientation
 inline bool operator==(const edge& a, const edge& b);
@@ -290,15 +295,15 @@ inline unsigned Hash<edge>::operator()(const edge& e, unsigned seed) const
 {
     unsigned val = seed;
 
-    if (e[0] < e[1])
+    if (e.first() < e.second())
     {
-        val = Hash<label>()(e[0], val);
-        val = Hash<label>()(e[1], val);
+        val = Hash<label>()(e.first(), val);
+        val = Hash<label>()(e.second(), val);
     }
     else
     {
-        val = Hash<label>()(e[1], val);
-        val = Hash<label>()(e[0], val);
+        val = Hash<label>()(e.second(), val);
+        val = Hash<label>()(e.first(), val);
     }
 
     return val;
@@ -313,7 +318,7 @@ inline unsigned Hash<edge>::operator()(const edge& e) const
     return Hash<edge>()(e, 0);
 }
 
-
+// Edges are a pair of labels - thus contiguous
 template<>
 inline bool contiguous<edge>()  {return true;}
 

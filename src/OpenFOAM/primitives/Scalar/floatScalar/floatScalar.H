@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Typedef
     Foam::floatScalar
 
 Description
-    Float precision floating point scalar type.
+    Floating-point single precision scalar type.
 
 SourceFiles
     floatScalar.C
@@ -48,58 +48,30 @@ namespace Foam
 
 typedef float floatScalar;
 
-// Largest and smallest scalar values allowed in certain parts of the code
+// Largest and smallest scalar values allowed in certain parts of the code.
 // (6 is the number of significant figures in an
 //  IEEE single precision number.  See limits.h or float.h)
-static const floatScalar floatScalarGREAT = 1.0e+6;
-static const floatScalar floatScalarVGREAT = 1.0e+37;
-static const floatScalar floatScalarROOTVGREAT = 1.0e+18;
-static const floatScalar floatScalarSMALL = 1.0e-6;
-static const floatScalar floatScalarROOTSMALL = 1.0e-3;
-static const floatScalar floatScalarVSMALL = 1.0e-37;
-static const floatScalar floatScalarROOTVSMALL = 1.0e-18;
+constexpr floatScalar floatScalarGREAT = 1.0e+6;
+constexpr floatScalar floatScalarVGREAT = 1.0e+37;
+constexpr floatScalar floatScalarROOTVGREAT = 1.0e+18;
+constexpr floatScalar floatScalarSMALL = 1.0e-6;
+constexpr floatScalar floatScalarROOTSMALL = 1.0e-3;
+constexpr floatScalar floatScalarVSMALL = 1.0e-37;
+constexpr floatScalar floatScalarROOTVSMALL = 1.0e-18;
 
-//- Read whole of buf as a scalar. Return true if succesful.
-inline bool readScalar(const char* buf, floatScalar& s)
-{
-    char* endPtr;
-    s = strtof(buf, &endPtr);
-
-    return (*endPtr == '\0');
-}
 
 #define Scalar floatScalar
 #define ScalarVGREAT floatScalarVGREAT
 #define ScalarVSMALL floatScalarVSMALL
 #define ScalarROOTVGREAT floatScalarROOTVGREAT
 #define ScalarROOTVSMALL floatScalarROOTVSMALL
-#define readScalar readFloatScalar
+#define ScalarRead readFloat
+
 
 inline Scalar mag(const Scalar s)
 {
     return ::fabsf(s);
 }
-
-#define transFunc(func)            \
-inline Scalar func(const Scalar s) \
-{                                  \
-    return ::func##f(s);           \
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "Scalar.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 inline Scalar hypot(const Scalar x, const Scalar y)
 {
@@ -121,18 +93,29 @@ inline Scalar yn(const int n, const Scalar s)
     return ::ynf(n, s);
 }
 
+// Single-precision transcendental functions (with 'f' appended to the name)
+#define transFunc(func)            \
+inline Scalar func(const Scalar s) \
+{                                  \
+    return ::func##f(s);           \
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "Scalar.H"
+
 #undef Scalar
 #undef ScalarVGREAT
 #undef ScalarVSMALL
 #undef ScalarROOTVGREAT
 #undef ScalarROOTVSMALL
-#undef readScalar
+#undef ScalarRead
 #undef transFunc
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

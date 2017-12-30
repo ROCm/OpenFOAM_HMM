@@ -25,7 +25,7 @@ License
 
 #include "entry.H"
 #include "dictionary.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -33,6 +33,17 @@ int Foam::entry::disableFunctionEntries
 (
     Foam::debug::infoSwitch("disableFunctionEntries", 0)
 );
+
+
+Foam::entry::inputMode Foam::entry::globalInputMode = inputMode::MERGE;
+
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::entry::resetInputMode()
+{
+    globalInputMode = inputMode::MERGE;
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

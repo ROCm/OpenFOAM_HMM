@@ -32,7 +32,7 @@ License
 void Foam::fileFormats::VTPsurfaceFormatCore::writeHeader
 (
     vtk::formatter& format,
-    const pointField& pts,
+    const UList<point>& pts,
     const label nFaces
 )
 {
@@ -142,7 +142,6 @@ void Foam::fileFormats::VTPsurfaceFormatCore::writeCellData
     format.endDataArray();
 
     format.endTag(vtk::fileTag::CELL_DATA);
-
 }
 
 

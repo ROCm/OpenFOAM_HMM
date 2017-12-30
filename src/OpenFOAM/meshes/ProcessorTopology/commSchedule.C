@@ -28,7 +28,7 @@ License
 #include "boolList.H"
 #include "IOstreams.H"
 #include "IOmanip.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "Pstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

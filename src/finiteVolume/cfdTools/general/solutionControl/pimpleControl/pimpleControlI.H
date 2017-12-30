@@ -51,7 +51,7 @@ inline bool Foam::pimpleControl::SIMPLErho() const
 
 inline bool Foam::pimpleControl::correct()
 {
-    corrPISO_++;
+    ++corrPISO_;
 
     if (debug)
     {
@@ -62,11 +62,9 @@ inline bool Foam::pimpleControl::correct()
     {
         return true;
     }
-    else
-    {
-        corrPISO_ = 0;
-        return false;
-    }
+
+    corrPISO_ = 0;
+    return false;
 }
 
 
@@ -92,8 +90,7 @@ inline bool Foam::pimpleControl::finalIter() const
 inline bool Foam::pimpleControl::finalInnerIter() const
 {
     return
-       finalIter()
-    && corrPISO_ == nCorrPISO_
+       corrPISO_ == nCorrPISO_
     && corrNonOrtho_ == nNonOrthCorr_ + 1;
 }
 

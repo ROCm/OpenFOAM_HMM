@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class prefixOSstream Declaration
+                       Class prefixOSstream Declaration
 \*---------------------------------------------------------------------------*/
 
 class prefixOSstream
@@ -68,10 +68,10 @@ public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct and set stream status
         prefixOSstream
         (
-            ostream& os,
+            std::ostream& os,
             const string& name,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
@@ -83,13 +83,13 @@ public:
 
         // Enquiry
 
-            //- Return the prefix of the stream
+            //- Return the sream prefix
             const string& prefix() const
             {
                 return prefix_;
             }
 
-            //- Return non-const access to the prefix of the stream
+            //- Return non-const access to the stream prefix
             string& prefix()
             {
                 return prefix_;
@@ -98,43 +98,44 @@ public:
 
         // Write functions
 
-            //- Write next token to stream
-            virtual Ostream& write(const token&);
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok);
 
             //- Write character
-            virtual Ostream& write(const char);
+            virtual Ostream& write(const char c);
 
             //- Write character string
-            virtual Ostream& write(const char*);
+            virtual Ostream& write(const char* str);
 
             //- Write word
-            virtual Ostream& write(const word&);
+            virtual Ostream& write(const word& val);
 
             //- Write string
-            virtual Ostream& write(const string&);
+            virtual Ostream& write(const string& val);
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             virtual Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& val,
                 const bool quoted=true
             );
 
             //- Write int32_t
-            virtual Ostream& write(const int32_t);
+            virtual Ostream& write(const int32_t val);
 
             //- Write int64_t
-            virtual Ostream& write(const int64_t);
+            virtual Ostream& write(const int64_t val);
 
             //- Write floatScalar
-            virtual Ostream& write(const floatScalar);
+            virtual Ostream& write(const floatScalar val);
 
             //- Write doubleScalar
-            virtual Ostream& write(const doubleScalar);
+            virtual Ostream& write(const doubleScalar val);
 
             //- Write binary block
-            virtual Ostream& write(const char*, std::streamsize);
+            virtual Ostream& write(const char* buf, std::streamsize count);
 
             //- Add indentation characters
             virtual void indent();
@@ -143,7 +144,7 @@ public:
         // Print
 
             //- Print description of IOstream to Ostream
-            virtual void print(Ostream&) const;
+            virtual void print(Ostream& os) const;
 };
 
 

@@ -84,7 +84,7 @@ class TableFile
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const TableFile<Type>&);
+        void operator=(const TableFile<Type>&) = delete;
 
 
 public:
@@ -99,13 +99,7 @@ public:
         TableFile(const word& entryName, const dictionary& dict);
 
         //- Copy constructor
-        TableFile(const TableFile<Type>& tbl);
-
-        //- Construct and return a clone
-        virtual tmp<Function1<Type>> clone() const
-        {
-            return tmp<Function1<Type>>(new TableFile<Type>(*this));
-        }
+        explicit TableFile(const TableFile<Type>& tbl);
 
 
     //- Destructor

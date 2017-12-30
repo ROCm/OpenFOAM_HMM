@@ -27,7 +27,7 @@ License
 #include "IOMap.H"
 #include "OFstream.H"
 #include "wordList.H"
-#include "stringListOps.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -179,7 +179,7 @@ Foam::Map<Foam::word> Foam::cellTable::names
             "cellTable_" + Foam::name(iter.key())
         );
 
-        if (findStrings(patterns, lookupName))
+        if (stringOps::match(patterns, lookupName))
         {
             lookup.insert(iter.key(), lookupName);
         }
@@ -523,7 +523,7 @@ void Foam::cellTable::combine(const dictionary& mapDict, labelList& tableIds)
         Map<word> matches;
         forAllConstIter(Map<word>, origNames, namesIter)
         {
-            if (findStrings(patterns, namesIter()))
+            if (stringOps::match(patterns, namesIter()))
             {
                 matches.insert(namesIter.key(), namesIter());
             }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,9 +50,9 @@ SourceFiles
 #include "surfZoneIdentifierList.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
+#include "HashSet.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
-#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -163,7 +163,10 @@ public:
         //- Can we write this file format?
         static bool canWriteType(const word& ext, const bool verbose=false);
 
+        //- Known readable file-types
         static wordHashSet readTypes();
+
+        //- Known writable file-types
         static wordHashSet writeTypes();
 
 
@@ -240,16 +243,16 @@ public:
         //- Select constructed from filename (explicit extension)
         static autoPtr<UnsortedMeshedSurface> New
         (
-            const fileName&,
+            const fileName& name,
             const word& ext
         );
 
         //- Select constructed from filename (implicit extension)
-        static autoPtr<UnsortedMeshedSurface> New(const fileName&);
+        static autoPtr<UnsortedMeshedSurface> New(const fileName& name);
 
 
     //- Destructor
-    virtual ~UnsortedMeshedSurface();
+    virtual ~UnsortedMeshedSurface() = default;
 
 
     // Member Function Selectors
@@ -262,16 +265,27 @@ public:
             fileExtension,
             (
                 const fileName& name,
-                const UnsortedMeshedSurface<Face>& surf
+                const UnsortedMeshedSurface<Face>& surf,
+                const dictionary& options
             ),
-            (name, surf)
+            (name, surf, options)
         );
 
-        //- Write to file
+        //- Write to file, select based on its extension
         static void write
         (
-            const fileName&,
-            const UnsortedMeshedSurface<Face>&
+            const fileName& name,
+            const UnsortedMeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
+        );
+
+        //- Write to file, selected based on given extension
+        static void write
+        (
+            const fileName& name,
+            const word& ext,
+            const UnsortedMeshedSurface<Face>& surf,
+            const dictionary& options
         );
 
 
@@ -381,16 +395,20 @@ public:
 
         // Write
 
-            //- Generic write routine. Chooses writer based on extension.
-            virtual void write(const fileName& name) const
+            //- Generic write routine. Chooses writer based on its extension.
+            virtual void write
+            (
+                const fileName& name,
+                const dictionary& options = dictionary::null
+            ) const
             {
-                write(name, *this);
+                write(name, *this, options);
             }
 
             //- Write to database
             void write
             (
-                const Time&,
+                const Time& t,
                 const word& surfName = word::null
             ) const;
 

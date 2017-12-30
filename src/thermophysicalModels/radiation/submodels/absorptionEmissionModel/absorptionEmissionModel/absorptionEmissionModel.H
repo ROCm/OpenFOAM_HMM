@@ -30,8 +30,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationAbsorptionEmissionModel_H
-#define radiationAbsorptionEmissionModel_H
+#ifndef radiation_absorptionEmissionModel_H
+#define radiation_absorptionEmissionModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,12 +23,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <iostream>  // for std::cerr
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::fileName::stripInvalid()
 {
-    // skip stripping unless debug is active to avoid
-    // costly operations
+    // Skip stripping unless debug is active (to avoid costly operations)
     if (debug && string::stripInvalid<fileName>(*this))
     {
         std::cerr
@@ -112,6 +113,12 @@ inline bool Foam::fileName::valid(char c)
      && c != '"'   // string quote
      && c != '\''  // string quote
     );
+}
+
+
+inline bool Foam::fileName::isAbsolute(const std::string& str)
+{
+    return !str.empty() && str[0] == '/';
 }
 
 

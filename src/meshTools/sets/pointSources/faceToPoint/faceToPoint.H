@@ -36,7 +36,7 @@ SourceFiles
 #define faceToPoint_H
 
 #include "topoSetSource.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ private:
         //- Add usage string
         static addToUsageTable usage_;
 
-        static const NamedEnum<faceAction, 1> faceActionNames_;
+        static const Enum<faceAction> faceActionNames_;
 
         //- Name of set to use
         word setName_;

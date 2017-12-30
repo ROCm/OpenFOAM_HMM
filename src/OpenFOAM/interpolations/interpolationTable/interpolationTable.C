@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "interpolationTable.H"
-#include "IFstream.H"
 #include "openFoamTableReader.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -59,7 +58,7 @@ template<class Type>
 Foam::interpolationTable<Type>::interpolationTable()
 :
     List<Tuple2<scalar, Type>>(),
-    boundsHandling_(interpolationTable::WARN),
+    bounding_(bounds::repeatableBounding::WARN),
     fileName_("fileNameIsUndefined"),
     reader_(nullptr)
 {}
@@ -69,12 +68,12 @@ template<class Type>
 Foam::interpolationTable<Type>::interpolationTable
 (
     const List<Tuple2<scalar, Type>>& values,
-    const boundsHandling bounds,
+    const bounds::repeatableBounding bounding,
     const fileName& fName
 )
 :
     List<Tuple2<scalar, Type>>(values),
-    boundsHandling_(bounds),
+    bounding_(bounding),
     fileName_(fName),
     reader_(nullptr)
 {}
@@ -84,7 +83,7 @@ template<class Type>
 Foam::interpolationTable<Type>::interpolationTable(const fileName& fName)
 :
     List<Tuple2<scalar, Type>>(),
-    boundsHandling_(interpolationTable::WARN),
+    bounding_(bounds::repeatableBounding::WARN),
     fileName_(fName),
     reader_(new openFoamTableReader<Type>(dictionary()))
 {
@@ -96,7 +95,15 @@ template<class Type>
 Foam::interpolationTable<Type>::interpolationTable(const dictionary& dict)
 :
     List<Tuple2<scalar, Type>>(),
-    boundsHandling_(wordToBoundsHandling(dict.lookup("outOfBounds"))),
+    bounding_
+    (
+        bounds::repeatableBoundingNames.lookupOrFailsafe
+        (
+            "outOfBounds",
+            dict,
+            bounds::repeatableBounding::WARN
+        )
+    ),
     fileName_(dict.lookup("file")),
     reader_(tableReader<Type>::New(dict))
 {
@@ -111,7 +118,7 @@ Foam::interpolationTable<Type>::interpolationTable
 )
 :
     List<Tuple2<scalar, Type>>(interpTable),
-    boundsHandling_(interpTable.boundsHandling_),
+    bounding_(interpTable.bounding_),
     fileName_(interpTable.fileName_),
     reader_(interpTable.reader_)    // note: steals reader. Used in write().
 {}
@@ -119,88 +126,6 @@ Foam::interpolationTable<Type>::interpolationTable
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::word Foam::interpolationTable<Type>::boundsHandlingToWord
-(
-     const boundsHandling& bound
-) const
-{
-    word enumName("warn");
-
-    switch (bound)
-    {
-        case interpolationTable::ERROR:
-        {
-            enumName = "error";
-            break;
-        }
-        case interpolationTable::WARN:
-        {
-            enumName = "warn";
-            break;
-        }
-        case interpolationTable::CLAMP:
-        {
-            enumName = "clamp";
-            break;
-        }
-        case interpolationTable::REPEAT:
-        {
-            enumName = "repeat";
-            break;
-        }
-    }
-
-    return enumName;
-}
-
-
-template<class Type>
-typename Foam::interpolationTable<Type>::boundsHandling
-Foam::interpolationTable<Type>::wordToBoundsHandling
-(
-    const word& bound
-) const
-{
-    if (bound == "error")
-    {
-        return interpolationTable::ERROR;
-    }
-    else if (bound == "warn")
-    {
-        return interpolationTable::WARN;
-    }
-    else if (bound == "clamp")
-    {
-        return interpolationTable::CLAMP;
-    }
-    else if (bound == "repeat")
-    {
-        return interpolationTable::REPEAT;
-    }
-    else
-    {
-        WarningInFunction
-            << "bad outOfBounds specifier " << bound << " using 'warn'" << endl;
-
-        return interpolationTable::WARN;
-    }
-}
-
-
-template<class Type>
-typename Foam::interpolationTable<Type>::boundsHandling
-Foam::interpolationTable<Type>::outOfBounds
-(
-    const boundsHandling& bound
-)
-{
-    boundsHandling prev = boundsHandling_;
-    boundsHandling_ = bound;
-    return prev;
-}
-
 
 template<class Type>
 void Foam::interpolationTable<Type>::check() const
@@ -230,7 +155,7 @@ template<class Type>
 void Foam::interpolationTable<Type>::write(Ostream& os) const
 {
     os.writeEntry("file", fileName_);
-    os.writeEntry("outOfBounds", boundsHandlingToWord(boundsHandling_));
+    os.writeEntry("outOfBounds", bounds::repeatableBoundingNames[bounding_]);
     if (reader_.valid())
     {
         reader_->write(os);
@@ -255,33 +180,34 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
 
     if (lookupValue < minLimit)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolationTable::ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << lookupValue << ") underflow" << nl
                     << exit(FatalError);
                 break;
             }
-            case interpolationTable::WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << lookupValue << ") underflow" << nl
                     << "    Zero rate of change."
                     << endl;
-                // behaviour as per 'CLAMP'
+
+                // Behaviour as per CLAMP
                 return 0;
                 break;
             }
-            case interpolationTable::CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 return 0;
                 break;
             }
-            case interpolationTable::REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
-                // adjust lookupValue to >= minLimit
+                // Adjust lookupValue to >= minLimit
                 scalar span = maxLimit-minLimit;
                 lookupValue = fmod(lookupValue-minLimit, span) + minLimit;
                 break;
@@ -290,33 +216,34 @@ Type Foam::interpolationTable<Type>::rateOfChange(const scalar value) const
     }
     else if (lookupValue >= maxLimit)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolationTable::ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << lookupValue << ") overflow" << nl
                     << exit(FatalError);
                 break;
             }
-            case interpolationTable::WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << lookupValue << ") overflow" << nl
                     << "    Zero rate of change."
                     << endl;
-                // Behaviour as per 'CLAMP'
+
+                // Behaviour as per CLAMP
                 return 0;
                 break;
             }
-            case interpolationTable::CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 return 0;
                 break;
             }
-            case interpolationTable::REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
-                // adjust lookupValue <= maxLimit
+                // Adjust lookupValue <= maxLimit
                 scalar span = maxLimit-minLimit;
                 lookupValue = fmod(lookupValue-minLimit, span) + minLimit;
                 break;
@@ -401,31 +328,32 @@ Foam::interpolationTable<Type>::operator[](const label i) const
     }
     else if (ii < 0)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolationTable::ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "index (" << ii << ") underflow" << nl
                     << exit(FatalError);
                 break;
             }
-            case interpolationTable::WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "index (" << ii << ") underflow" << nl
                     << "    Continuing with the first entry"
                     << endl;
+
                 // Behaviour as per 'CLAMP'
                 ii = 0;
                 break;
             }
-            case interpolationTable::CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 ii = 0;
                 break;
             }
-            case interpolationTable::REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
                 while (ii < 0)
                 {
@@ -437,31 +365,32 @@ Foam::interpolationTable<Type>::operator[](const label i) const
     }
     else if (ii >= n)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolationTable::ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "index (" << ii << ") overflow" << nl
                     << exit(FatalError);
                 break;
             }
-            case interpolationTable::WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "index (" << ii << ") overflow" << nl
                     << "    Continuing with the last entry"
                     << endl;
+
                 // Behaviour as per 'CLAMP'
                 ii = n - 1;
                 break;
             }
-            case interpolationTable::CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 ii = n - 1;
                 break;
             }
-            case interpolationTable::REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
                 while (ii >= n)
                 {
@@ -492,31 +421,32 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
 
     if (lookupValue < minLimit)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolationTable::ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << lookupValue << ") underflow" << nl
                     << exit(FatalError);
                 break;
             }
-            case interpolationTable::WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << lookupValue << ") underflow" << nl
                     << "    Continuing with the first entry"
                     << endl;
-                // Behaviour as per 'CLAMP'
+
+                // Behaviour as per CLAMP
                 return this->first().second();
                 break;
             }
-            case interpolationTable::CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 return this->first().second();
                 break;
             }
-            case interpolationTable::REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
                 // adjust lookupValue to >= minLimit
                 const scalar span = maxLimit-minLimit;
@@ -527,31 +457,32 @@ Type Foam::interpolationTable<Type>::operator()(const scalar value) const
     }
     else if (lookupValue >= maxLimit)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolationTable::ERROR:
+            case bounds::repeatableBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << lookupValue << ") overflow" << nl
                     << exit(FatalError);
                 break;
             }
-            case interpolationTable::WARN:
+            case bounds::repeatableBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << lookupValue << ") overflow" << nl
                     << "    Continuing with the last entry"
                     << endl;
+
                 // Behaviour as per 'CLAMP'
                 return this->last().second();
                 break;
             }
-            case interpolationTable::CLAMP:
+            case bounds::repeatableBounding::CLAMP:
             {
                 return this->last().second();
                 break;
             }
-            case interpolationTable::REPEAT:
+            case bounds::repeatableBounding::REPEAT:
             {
                 // adjust lookupValue <= maxLimit
                 const scalar span = maxLimit-minLimit;

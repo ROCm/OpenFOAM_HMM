@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Function1Fws_H
-#define Function1Fws_H
+#ifndef Function1Fwd_H
+#define Function1Fwd_H
 
 #include "Function1.H"
 #include "vector.H"

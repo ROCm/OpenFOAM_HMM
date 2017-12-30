@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,27 +27,21 @@ License
 #include "clock.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::fileFormats::SMESHsurfaceFormat<Face>::SMESHsurfaceFormat()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
 void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&  faceLst  = surf.surfFaces();
+    const UList<label>& faceMap  = surf.faceMap();
 
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst)
@@ -71,11 +65,11 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
         << pointLst.size() << " 3" << nl;    // 3: dimensions
 
     // Write vertex coords
-    forAll(pointLst, ptI)
+    forAll(pointLst, pti)
     {
-        const point& pt = pointLst[ptI];
+        const point& pt = pointLst[pti];
 
-        os  << ptI << ' ' << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+        os  << pti << ' ' << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
     os  << "# </points>" << nl
         << nl
@@ -85,38 +79,41 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 
 
     label faceIndex = 0;
-    forAll(zones, zoneI)
+    label zoneIndex = 0;
+    for (const surfZone& zone : zones)
     {
-        const surfZone& zone = zones[zoneI];
+        const label nLocalFaces = zone.size();
 
         if (useFaceMap)
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
                 os << f.size();
-                forAll(f, fp)
+                for (const label verti : f)
                 {
-                    os << ' ' << f[fp];
+                    os << ' ' << verti;
                 }
-                os << ' ' << zoneI << endl;
+                os << ' ' << zoneIndex << nl;
             }
         }
         else
         {
-            forAll(zones[zoneI], localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
 
                 os << f.size();
-                forAll(f, fp)
+                for (const label verti : f)
                 {
-                    os << ' ' << f[fp];
+                    os << ' ' << verti;
                 }
-                os << ' ' << zoneI << endl;
+                os << ' ' << zoneIndex << nl;
             }
         }
+
+        ++zoneIndex;
     }
 
     // write tail

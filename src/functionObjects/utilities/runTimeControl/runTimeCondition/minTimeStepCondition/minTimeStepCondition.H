@@ -37,7 +37,6 @@ SourceFiles
 #define functionObjects_runTimeConditions_minTimeStepCondition_H
 
 #include "runTimeCondition.H"
-#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

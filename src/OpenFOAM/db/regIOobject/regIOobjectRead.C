@@ -28,111 +28,9 @@ License
 #include "Time.H"
 #include "Pstream.H"
 #include "HashSet.H"
+#include "fileOperation.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-bool Foam::regIOobject::read
-(
-    const bool masterOnly,
-    const IOstream::streamFormat format,
-    const word& typeName
-)
-{
-    bool ok = true;
-    if (Pstream::master() || !masterOnly)
-    {
-        if (IFstream::debug)
-        {
-            Pout<< "regIOobject::read() : "
-                << "reading object " << name()
-                << " from file " << endl;
-        }
-
-        // Set flag for e.g. codeStream
-        const bool oldGlobal = globalObject();
-        globalObject() = masterOnly;
-        // If codeStream originates from dictionary which is
-        // not IOdictionary we have a problem so use global
-        const bool oldFlag = regIOobject::masterOnlyReading;
-        regIOobject::masterOnlyReading = masterOnly;
-
-        // Read file
-        ok = readData(readStream(typeName));
-        close();
-
-        // Restore flags
-        globalObject() = oldGlobal;
-        regIOobject::masterOnlyReading = oldFlag;
-    }
-
-    if (masterOnly && Pstream::parRun())
-    {
-        // Scatter master data using communication scheme
-
-        const List<Pstream::commsStruct>& comms =
-        (
-            (Pstream::nProcs() < Pstream::nProcsSimpleSum)
-          ? Pstream::linearCommunication()
-          : Pstream::treeCommunication()
-        );
-
-        // Master reads headerclassname from file. Make sure this gets
-        // transfered as well as contents.
-        Pstream::scatter
-        (
-            comms,
-            const_cast<word&>(headerClassName()),
-            Pstream::msgType(),
-            Pstream::worldComm
-        );
-        Pstream::scatter(comms, note(), Pstream::msgType(), Pstream::worldComm);
-
-
-        // Get my communication order
-        const Pstream::commsStruct& myComm = comms[Pstream::myProcNo()];
-
-        // Reveive from up
-        if (myComm.above() != -1)
-        {
-            if (IFstream::debug)
-            {
-                Pout<< "regIOobject::read() : "
-                    << "reading object " << name()
-                    << " from processor " << myComm.above()
-                    << endl;
-            }
-
-            IPstream fromAbove
-            (
-                Pstream::commsTypes::scheduled,
-                myComm.above(),
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm,
-                format
-            );
-            ok = readData(fromAbove);
-        }
-
-        // Send to my downstairs neighbours
-        forAllReverse(myComm.below(), belowI)
-        {
-            OPstream toBelow
-            (
-                Pstream::commsTypes::scheduled,
-                myComm.below()[belowI],
-                0,
-                Pstream::msgType(),
-                Pstream::worldComm,
-                format
-            );
-            bool okWrite = writeData(toBelow);
-            ok = ok && okWrite;
-        }
-    }
-    return ok;
-}
-
 
 bool Foam::regIOobject::readHeaderOk
 (
@@ -176,7 +74,7 @@ bool Foam::regIOobject::readHeaderOk
      || isHeaderOk
     )
     {
-        return regIOobject::read(masterOnly, format, typeName);
+        return fileHandler().read(*this, masterOnly, format, typeName);
     }
     else
     {
@@ -184,9 +82,10 @@ bool Foam::regIOobject::readHeaderOk
     }
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::regIOobject::readStream()
+Foam::Istream& Foam::regIOobject::readStream(const bool valid)
 {
     if (IFstream::debug)
     {
@@ -206,13 +105,13 @@ Foam::Istream& Foam::regIOobject::readStream()
     }
 
     // Construct object stream and read header if not already constructed
-    if (!isPtr_)
+    if (!isPtr_.valid())
     {
         fileName objPath;
         if (watchIndices_.size())
         {
             // File is being watched. Read exact file that is being watched.
-            objPath = time().getFile(watchIndices_.last());
+            objPath = fileHandler().getFile(watchIndices_.last());
         }
         else
         {
@@ -227,72 +126,47 @@ Foam::Istream& Foam::regIOobject::readStream()
                     << " in file " << objPath
                     << endl;
             }
-
-            if (!objPath.size())
-            {
-                FatalIOError
-                (
-                    "regIOobject::readStream()",
-                    __FILE__,
-                    __LINE__,
-                    objectPath(),
-                    0
-                )   << "cannot find file"
-                    << exit(FatalIOError);
-            }
         }
 
-        if (!(isPtr_ = IOobject::objectStream(objPath)))
-        {
-            FatalIOError
-            (
-                "regIOobject::readStream()",
-                __FILE__,
-                __LINE__,
-                objPath,
-                0
-            )   << "cannot open file"
-                << exit(FatalIOError);
-        }
-        else if (!readHeader(*isPtr_))
-        {
-            FatalIOErrorInFunction(*isPtr_)
-                << "problem while reading header for object " << name()
-                << exit(FatalIOError);
-        }
+        isPtr_ = fileHandler().readStream(*this, objPath, type(), valid);
     }
 
-    return *isPtr_;
+    return isPtr_();
 }
 
 
-Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
+Foam::Istream& Foam::regIOobject::readStream
+(
+    const word& expectName,
+    const bool valid
+)
 {
     if (IFstream::debug)
     {
         Pout<< "regIOobject::readStream(const word&) : "
             << "reading object " << name()
             << " of type " << type()
-            << " from file " << objectPath()
+            << " from file " << filePath()
             << endl;
     }
 
     // Construct IFstream if not already constructed
-    if (!isPtr_)
+    if (!isPtr_.valid())
     {
-        readStream();
+        readStream(valid);
 
         // Check the className of the regIOobject
         // dictionary is an allowable name in case the actual class
         // instantiated is a dictionary
         if
         (
-            expectName.size()
+            valid
+         && expectName.size()
          && headerClassName() != expectName
          && headerClassName() != "dictionary"
         )
         {
-            FatalIOErrorInFunction(*isPtr_)
+            FatalIOErrorInFunction(isPtr_())
                 << "unexpected class name " << headerClassName()
                 << " expected " << expectName << endl
                 << "    while reading object " << name()
@@ -300,7 +174,7 @@ Foam::Istream& Foam::regIOobject::readStream(const word& expectName)
         }
     }
 
-    return *isPtr_;
+    return isPtr_();
 }
 
 
@@ -309,15 +183,11 @@ void Foam::regIOobject::close()
     if (IFstream::debug)
     {
         Pout<< "regIOobject::close() : "
-            << "finished reading " << filePath()
+            << "finished reading " << isPtr_().name()
             << endl;
     }
 
-    if (isPtr_)
-    {
-        delete isPtr_;
-        isPtr_ = nullptr;
-    }
+    isPtr_.clear();
 }
 
 
@@ -341,11 +211,11 @@ bool Foam::regIOobject::read()
         oldWatchFiles.setSize(watchIndices_.size());
         forAll(watchIndices_, i)
         {
-            oldWatchFiles[i] = time().getFile(watchIndices_[i]);
+            oldWatchFiles[i] = fileHandler().getFile(watchIndices_[i]);
         }
         forAllReverse(watchIndices_, i)
         {
-            time().removeWatch(watchIndices_[i]);
+            fileHandler().removeWatch(watchIndices_[i]);
         }
         watchIndices_.clear();
     }
@@ -359,7 +229,9 @@ bool Foam::regIOobject::read()
          || regIOobject::fileModificationChecking == inotifyMaster
         );
 
-    bool ok = read(masterOnly, IOstream::BINARY, type());
+    // Note: IOstream::binary flag is for all the processor comms. (Only for
+    //       dictionaries should it be ascii)
+    bool ok = fileHandler().read(*this, masterOnly, IOstream::BINARY, type());
 
     if (oldWatchFiles.size())
     {
@@ -375,7 +247,7 @@ bool Foam::regIOobject::modified() const
 {
     forAllReverse(watchIndices_, i)
     {
-        if (time().getState(watchIndices_[i]) != fileMonitor::UNMODIFIED)
+        if (fileHandler().getState(watchIndices_[i]) != fileMonitor::UNMODIFIED)
         {
             return true;
         }
@@ -392,7 +264,7 @@ bool Foam::regIOobject::readIfModified()
     label modified = -1;
     forAllReverse(watchIndices_, i)
     {
-        if (time().getState(watchIndices_[i]) != fileMonitor::UNMODIFIED)
+        if (fileHandler().getState(watchIndices_[i]) != fileMonitor::UNMODIFIED)
         {
             modified = watchIndices_[i];
             break;
@@ -401,7 +273,7 @@ bool Foam::regIOobject::readIfModified()
 
     if (modified != -1)
     {
-        const fileName& fName = time().getFile(watchIndices_.last());
+        const fileName fName = fileHandler().getFile(watchIndices_.last());
 
         if (modified == watchIndices_.last())
         {
@@ -414,7 +286,8 @@ bool Foam::regIOobject::readIfModified()
             InfoInFunction
                 << "    Re-reading object " << name()
                 << " from file " << fName
-                << " because of modified file " << time().getFile(modified)
+                << " because of modified file "
+                << fileHandler().getFile(modified)
                 << endl;
         }
 

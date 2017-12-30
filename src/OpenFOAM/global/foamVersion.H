@@ -27,18 +27,24 @@ Namespace
 Description
     Namespace for OpenFOAM
 
-
 Global
     Foam::FOAMversion
 
 Description
-    OpenFOAM version number static string.
+    OpenFOAM version number as a static string.
 
 Global
     Foam::FOAMbuild
 
 Description
-    OpenFOAM version number static string with build information
+    OpenFOAM build information as a static string
+
+Global
+    Foam::FOAMbuildArch
+
+Description
+    OpenFOAM build architecture information (endian, label/scalar sizes)
+    as a static string
 
 SourceFiles
     global.Cver
@@ -47,6 +53,8 @@ SourceFiles
 
 #ifndef foamVersion_H
 #define foamVersion_H
+
+#include <string>
 
 // The directory name for user-resources (located in the HOME directory)
 #define WM_USER_RESOURCE_DIRNAME  ".OpenFOAM"
@@ -57,6 +65,10 @@ namespace Foam
 {
     extern const char* const FOAMversion;
     extern const char* const FOAMbuild;
+    extern const std::string FOAMbuildArch;
+
+    //- Additional OpenFOAM modules
+    namespace Module {}
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

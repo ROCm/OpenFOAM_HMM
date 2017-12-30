@@ -30,14 +30,18 @@ License
 
 template<class Face>
 Foam::autoPtr<Foam::UnsortedMeshedSurface<Face>>
-Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
+Foam::UnsortedMeshedSurface<Face>::New
+(
+    const fileName& name,
+    const word& ext
+)
 {
     if (debug)
     {
         InfoInFunction << "Constructing UnsortedMeshedSurface" << endl;
     }
 
-    auto cstrIter = fileExtensionConstructorTablePtr_->find(ext);
+    auto cstrIter = fileExtensionConstructorTablePtr_->cfind(ext);
 
     if (!cstrIter.found())
     {

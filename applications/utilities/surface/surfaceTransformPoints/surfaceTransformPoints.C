@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,11 +41,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "boundBox.H"
 #include "transformField.H"
 #include "Pair.H"
+#include "Tuple2.H"
 #include "quaternion.H"
 #include "mathematicalConstants.H"
 
@@ -61,61 +61,93 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "Transform (translate/rotate/scale) a surface. "
+        "Transform (translate / rotate / scale) surface points.\n"
         "Like transformPoints but for surfaces.\n"
-        "Note: roll=rotation about x, pitch=rotation about y, "
-        "yaw=rotation about z"
+        "Note: roll=rotate about x, pitch=rotate about y, yaw=rotate about z"
     );
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
     argList::addOption
     (
         "translate",
         "vector",
-        "translate by the specified <vector> - eg, '(1 0 0)'"
+        "Translate by specified <vector> - eg, '(1 0 0)' before rotations"
+    );
+    argList::addOption
+    (
+        "origin",
+        "point",
+        "Use specified <point> as origin for rotations"
     );
     argList::addOption
     (
         "rotate",
         "(vectorA vectorB)",
-        "transform in terms of a rotation between <vectorA> and <vectorB> "
-        "- eg, '( (1 0 0) (0 0 1) )'"
+        "Rotate from <vectorA> to <vectorB> - eg, '((1 0 0) (0 0 1))'"
     );
     argList::addOption
     (
-        "scale",
-        "vector",
-        "scale by the specified amount - eg, '(0.001 0.001 0.001)' for a "
-        "uniform [mm] to [m] scaling"
+        "rotate-angle",
+        "(vector scalar)",
+        "Rotate <angle> degrees about <vector> - eg, '((1 0 0) 45)'"
     );
     argList::addOption
     (
         "rollPitchYaw",
         "vector",
-        "rotate by '(roll pitch yaw)' in degrees"
+        "Rotate by '(roll pitch yaw)' degrees"
     );
     argList::addOption
     (
         "yawPitchRoll",
         "vector",
-        "rotate by '(yaw pitch roll)' in degrees"
+        "Rotate by '(yaw pitch roll)' degrees"
+    );
+    argList::addOption
+    (
+        "scale",
+        "scalar | vector",
+        "Scale by the specified amount - Eg, for uniform [mm] to [m] scaling "
+        "use either '(0.001 0.001 0.001)' or simply '0.001'"
     );
     argList args(argc, argv);
+
+    // Verify that an operation has been specified
+    {
+        const List<word> operationNames
+        {
+            "translate",
+            "rotate",
+            "rotate-angle",
+            "rollPitchYaw",
+            "yawPitchRoll",
+            "scale"
+        };
+
+        if (!args.optionCount(operationNames))
+        {
+            FatalError
+                << "No operation supplied, "
+                << "use least one of the following:" << nl
+                << "   ";
+
+            for (const auto& opName : operationNames)
+            {
+                FatalError
+                    << " -" << opName;
+            }
+
+            FatalError
+                << nl << exit(FatalError);
+        }
+    }
 
     const fileName surfFileName = args[1];
     const fileName outFileName  = args[2];
 
     Info<< "Reading surf from " << surfFileName << " ..." << nl
         << "Writing surf to " << outFileName << " ..." << endl;
-
-    if (args.options().empty())
-    {
-        FatalErrorInFunction
-            << "No options supplied, please use one or more of "
-               "-translate, -rotate or -scale options."
-            << exit(FatalError);
-    }
 
     meshedSurface surf1(surfFileName);
 
@@ -129,6 +161,14 @@ int main(int argc, char *argv[])
         points += v;
     }
 
+    vector origin;
+    const bool useOrigin = args.optionReadIfPresent("origin", origin);
+    if (useOrigin)
+    {
+        Info<< "Set origin for rotations to " << origin << endl;
+        points -= origin;
+    }
+
     if (args.optionFound("rotate"))
     {
         Pair<vector> n1n2
@@ -138,11 +178,31 @@ int main(int argc, char *argv[])
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
 
-        tensor T = rotationTensor(n1n2[0], n1n2[1]);
+        const tensor rotT = rotationTensor(n1n2[0], n1n2[1]);
 
-        Info<< "Rotating points by " << T << endl;
+        Info<< "Rotating points by " << rotT << endl;
 
-        points = transform(T, points);
+        points = transform(rotT, points);
+    }
+    else if (args.optionFound("rotate-angle"))
+    {
+        const Tuple2<vector, scalar> axisAngle
+        (
+            args.optionLookup("rotate-angle")()
+        );
+
+        Info<< "Rotating points " << nl
+            << "    about " << axisAngle.first() << nl
+            << "    angle " << axisAngle.second() << nl;
+
+        const quaternion quat
+        (
+            axisAngle.first(),
+            axisAngle.second() * pi/180.0  // degToRad
+        );
+
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
     }
     else if (args.optionReadIfPresent("rollPitchYaw", v))
     {
@@ -151,13 +211,13 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    yaw   " << v.z() << nl;
 
-        // Convert to radians
+        // degToRad
         v *= pi/180.0;
 
-        quaternion R(quaternion::rotationSequence::XYZ, v);
+        const quaternion quat(quaternion::rotationSequence::XYZ, v);
 
-        Info<< "Rotating points by quaternion " << R << endl;
-        points = transform(R, points);
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
     }
     else if (args.optionReadIfPresent("yawPitchRoll", v))
     {
@@ -166,29 +226,49 @@ int main(int argc, char *argv[])
             << "    pitch " << v.y() << nl
             << "    roll  " << v.z() << nl;
 
-
-        // Convert to radians
+        // degToRad
         v *= pi/180.0;
 
-        scalar yaw = v.x();
-        scalar pitch = v.y();
-        scalar roll = v.z();
+        const quaternion quat(quaternion::rotationSequence::ZYX, v);
 
-        quaternion R = quaternion(vector(0, 0, 1), yaw);
-        R *= quaternion(vector(0, 1, 0), pitch);
-        R *= quaternion(vector(1, 0, 0), roll);
-
-        Info<< "Rotating points by quaternion " << R << endl;
-        points = transform(R, points);
+        Info<< "Rotating points by quaternion " << quat << endl;
+        points = transform(quat, points);
     }
 
-    if (args.optionReadIfPresent("scale", v))
+    if (args.optionFound("scale"))
     {
-        Info<< "Scaling points by " << v << endl;
+        // Use readList to handle single or multiple values
+        const List<scalar> scaling = args.optionReadList<scalar>("scale");
 
-        points.replace(vector::X, v.x()*points.component(vector::X));
-        points.replace(vector::Y, v.y()*points.component(vector::Y));
-        points.replace(vector::Z, v.z()*points.component(vector::Z));
+        if (scaling.size() == 1)
+        {
+            Info<< "Scaling points uniformly by " << scaling[0] << nl;
+            points *= scaling[0];
+        }
+        else if (scaling.size() == 3)
+        {
+            Info<< "Scaling points by ("
+                << scaling[0] << " "
+                << scaling[1] << " "
+                << scaling[2] << ")" << nl;
+
+            points.replace(vector::X, scaling[0]*points.component(vector::X));
+            points.replace(vector::Y, scaling[1]*points.component(vector::Y));
+            points.replace(vector::Z, scaling[2]*points.component(vector::Z));
+        }
+        else
+        {
+            FatalError
+                << "-scale with 1 or 3 components only" << nl
+                << "given: " << args["scale"] << endl
+                << exit(FatalError);
+        }
+    }
+
+    if (useOrigin)
+    {
+        Info<< "Unset origin for rotations from " << origin << endl;
+        points += origin;
     }
 
     surf1.movePoints(points);

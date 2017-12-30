@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,15 +57,14 @@ Foam::radiation::radiationModel::New
 
     Info<< "Selecting radiationModel " << modelType << endl;
 
-    TConstructorTable::iterator cstrIter =
-        TConstructorTablePtr_->find(modelType);
+    auto cstrIter = TConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown radiationModel type "
             << modelType << nl << nl
-            << "Valid radiationModel types are:" << nl
+            << "Valid radiationModel types :" << nl
             << TConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -85,15 +84,14 @@ Foam::radiation::radiationModel::New
 
     Info<< "Selecting radiationModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown radiationModel type "
             << modelType << nl << nl
-            << "Valid radiationModel types are:" << nl
+            << "Valid radiationModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

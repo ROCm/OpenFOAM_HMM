@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,23 +29,20 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(cellZoneSet, 0);
 
 addToRunTimeSelectionTable(topoSet, cellZoneSet, word);
 addToRunTimeSelectionTable(topoSet, cellZoneSet, size);
 addToRunTimeSelectionTable(topoSet, cellZoneSet, set);
-
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void cellZoneSet::updateSet()
+void Foam::cellZoneSet::updateSet()
 {
     labelList order;
     sortedOrder(addressing_, order);
@@ -60,9 +57,9 @@ void cellZoneSet::updateSet()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-cellZoneSet::cellZoneSet
+Foam::cellZoneSet::cellZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -94,7 +91,7 @@ cellZoneSet::cellZoneSet
 }
 
 
-cellZoneSet::cellZoneSet
+Foam::cellZoneSet::cellZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -110,7 +107,7 @@ cellZoneSet::cellZoneSet
 }
 
 
-cellZoneSet::cellZoneSet
+Foam::cellZoneSet::cellZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -128,13 +125,13 @@ cellZoneSet::cellZoneSet
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-cellZoneSet::~cellZoneSet()
+Foam::cellZoneSet::~cellZoneSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void cellZoneSet::invert(const label maxLen)
+void Foam::cellZoneSet::invert(const label maxLen)
 {
     // Count
     label n = 0;
@@ -164,7 +161,7 @@ void cellZoneSet::invert(const label maxLen)
 }
 
 
-void cellZoneSet::subset(const topoSet& set)
+void Foam::cellZoneSet::subset(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 
@@ -185,7 +182,7 @@ void cellZoneSet::subset(const topoSet& set)
 }
 
 
-void cellZoneSet::addSet(const topoSet& set)
+void Foam::cellZoneSet::addSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_);
 
@@ -206,7 +203,7 @@ void cellZoneSet::addSet(const topoSet& set)
 }
 
 
-void cellZoneSet::deleteSet(const topoSet& set)
+void Foam::cellZoneSet::deleteSet(const topoSet& set)
 {
     DynamicList<label> newAddressing(addressing_.size());
 
@@ -228,7 +225,7 @@ void cellZoneSet::deleteSet(const topoSet& set)
 }
 
 
-void cellZoneSet::sync(const polyMesh& mesh)
+void Foam::cellZoneSet::sync(const polyMesh& mesh)
 {
     cellSet::sync(mesh);
 
@@ -238,23 +235,24 @@ void cellZoneSet::sync(const polyMesh& mesh)
 }
 
 
-label cellZoneSet::maxSize(const polyMesh& mesh) const
+Foam::label Foam::cellZoneSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nCells();
 }
 
 
-bool cellZoneSet::writeObject
+bool Foam::cellZoneSet::writeObject
 (
     IOstream::streamFormat s,
     IOstream::versionNumber v,
-    IOstream::compressionType c
+    IOstream::compressionType c,
+    const bool valid
 ) const
 {
     // Write shadow cellSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = cellSet::typeName;
-    bool ok = cellSet::writeObject(s, v, c);
+    bool ok = cellSet::writeObject(s, v, c, valid);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify cellZone
@@ -284,11 +282,11 @@ bool cellZoneSet::writeObject
     }
     cellZones.clearAddressing();
 
-    return ok && cellZones.write();
+    return ok && cellZones.write(valid);
 }
 
 
-void cellZoneSet::updateMesh(const mapPolyMesh& morphMap)
+void Foam::cellZoneSet::updateMesh(const mapPolyMesh& morphMap)
 {
     // cellZone
     labelList newAddressing(addressing_.size());
@@ -312,7 +310,7 @@ void cellZoneSet::updateMesh(const mapPolyMesh& morphMap)
 }
 
 
-void cellZoneSet::writeDebug
+void Foam::cellZoneSet::writeDebug
 (
     Ostream& os,
     const primitiveMesh& mesh,
@@ -322,9 +320,5 @@ void cellZoneSet::writeDebug
     cellSet::writeDebug(os, mesh, maxLen);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

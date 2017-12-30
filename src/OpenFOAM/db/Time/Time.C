@@ -29,6 +29,7 @@ License
 #include "HashSet.H"
 #include "profiling.H"
 #include "demandDrivenData.H"
+#include "IOdictionary.H"
 
 #include <sstream>
 
@@ -37,40 +38,36 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(Time, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::Time::stopAtControls,
-        4
-    >::names[] =
-    {
-        "endTime",
-        "noWriteNow",
-        "writeNow",
-        "nextWrite"
-    };
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::Time::writeControls,
-        5
-    >::names[] =
-    {
-        "timeStep",
-        "runTime",
-        "adjustableRunTime",
-        "clockTime",
-        "cpuTime"
-    };
 }
 
-const Foam::NamedEnum<Foam::Time::stopAtControls, 4>
-    Foam::Time::stopAtControlNames_;
+const Foam::Enum
+<
+    Foam::Time::stopAtControls
+>
+Foam::Time::stopAtControlNames
+{
+    { stopAtControls::saEndTime, "endTime" },
+    { stopAtControls::saNoWriteNow, "noWriteNow" },
+    { stopAtControls::saWriteNow, "writeNow" },
+    { stopAtControls::saNextWrite, "nextWrite" },
+    // NOTE: stopAtControls::saUnknown is left untabulated here so that it can
+    // be used as fallback value to flag unknown settings
+};
 
-const Foam::NamedEnum<Foam::Time::writeControls, 5>
-    Foam::Time::writeControlNames_;
+
+const Foam::Enum
+<
+    Foam::Time::writeControls
+>
+Foam::Time::writeControlNames
+{
+    { writeControls::wcTimeStep, "timeStep" },
+    { writeControls::wcRunTime, "runTime" },
+    { writeControls::wcAdjustableRunTime, "adjustableRunTime" },
+    { writeControls::wcClockTime, "clockTime" },
+    { writeControls::wcCpuTime, "cpuTime" },
+};
+
 
 Foam::Time::fmtflags Foam::Time::format_(Foam::Time::general);
 
@@ -183,13 +180,12 @@ void Foam::Time::setControls()
 
     // Check if time directory exists
     // If not increase time precision to see if it is formatted differently.
-    if (!exists(timePath(), false))
+    if (!fileHandler().exists(timePath(), false))
     {
         int oldPrecision = precision_;
         int requiredPrecision = -1;
         bool found = false;
         word oldTime(timeName());
-
         for
         (
             precision_ = maxPrecision_;
@@ -200,7 +196,6 @@ void Foam::Time::setControls()
             // Update the time formatting
             setTime(startTime_, 0);
 
-            // Check that the time name has changed otherwise exit loop
             word newTime(timeName());
             if (newTime == oldTime)
             {
@@ -209,7 +204,7 @@ void Foam::Time::setControls()
             oldTime = newTime;
 
             // Check the existence of the time directory with the new format
-            found = exists(timePath(), false);
+            found = fileHandler().exists(timePath(), false);
 
             if (found)
             {
@@ -363,7 +358,7 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     else if
     (
         profilingDict
-     && profilingDict->lookupOrDefault<Switch>("active", true)
+     && profilingDict->lookupOrDefault<bool>("active", true)
     )
     {
         profiling::initialize
@@ -385,17 +380,8 @@ void Foam::Time::setMonitoring(const bool forceProfiling)
     // Time objects not registered so do like objectRegistry::checkIn ourselves.
     if (runTimeModifiable_)
     {
-        monitorPtr_.reset
-        (
-            new fileMonitor
-            (
-                regIOobject::fileModificationChecking == inotify
-             || regIOobject::fileModificationChecking == inotifyMaster
-            )
-        );
-
         // Monitor all files that controlDict depends on
-        addWatches(controlDict_, controlDict_.files());
+        fileHandler().addWatches(controlDict_, controlDict_.files());
     }
 
     // Clear dependent files - not needed now
@@ -449,8 +435,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
     sigWriteNow_(true, *this),
     sigStopAtWriteNow_(true, *this),
 
@@ -518,8 +504,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
     sigWriteNow_(true, *this),
     sigStopAtWriteNow_(true, *this),
 
@@ -597,8 +583,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
     sigWriteNow_(true, *this),
     sigStopAtWriteNow_(true, *this),
 
@@ -667,9 +653,8 @@ Foam::Time::Time
     writeControl_(wcTimeStep),
     writeInterval_(GREAT),
     purgeWrite_(0),
+    subCycling_(0),
     writeOnce_(false),
-    subCycling_(false),
-
     writeFormat_(IOstream::ASCII),
     writeVersion_(IOstream::currentVersion),
     writeCompression_(IOstream::UNCOMPRESSED),
@@ -691,7 +676,7 @@ Foam::Time::~Time()
 
     forAllReverse(controlDict_.watchIndices(), i)
     {
-        removeWatch(controlDict_.watchIndices()[i]);
+        fileHandler().removeWatch(controlDict_.watchIndices()[i]);
     }
 
     // Destroy function objects first
@@ -703,86 +688,6 @@ Foam::Time::~Time()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::Time::addWatches(regIOobject& rio, const fileNameList& files) const
-{
-    const labelList& watchIndices = rio.watchIndices();
-
-    DynamicList<label> newWatchIndices;
-    labelHashSet removedWatches(watchIndices);
-
-    forAll(files, i)
-    {
-        const fileName& f = files[i];
-        label index = findWatch(watchIndices, f);
-
-        if (index == -1)
-        {
-            newWatchIndices.append(addTimeWatch(f));
-        }
-        else
-        {
-            // Existing watch
-            newWatchIndices.append(watchIndices[index]);
-            removedWatches.erase(index);
-        }
-    }
-
-    // Remove any unused watches
-    forAllConstIter(labelHashSet, removedWatches, iter)
-    {
-        removeWatch(watchIndices[iter.key()]);
-    }
-
-    rio.watchIndices() = newWatchIndices;
-}
-
-
-Foam::label Foam::Time::findWatch
-(
-    const labelList& watchIndices,
-    const fileName& fName
-) const
-{
-    forAll(watchIndices, i)
-    {
-        if (getFile(watchIndices[i]) == fName)
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
-
-Foam::label Foam::Time::addTimeWatch(const fileName& fName) const
-{
-    return monitorPtr_().addWatch(fName);
-}
-
-
-bool Foam::Time::removeWatch(const label watchIndex) const
-{
-    return monitorPtr_().removeWatch(watchIndex);
-}
-
-const Foam::fileName& Foam::Time::getFile(const label watchIndex) const
-{
-    return monitorPtr_().getFile(watchIndex);
-}
-
-
-Foam::fileMonitor::fileState Foam::Time::getState(const label watchIndex) const
-{
-    return monitorPtr_().getState(watchIndex);
-}
-
-
-void Foam::Time::setUnmodified(const label watchIndex) const
-{
-    monitorPtr_().setUnmodified(watchIndex);
-}
-
 
 Foam::word Foam::Time::timeName(const scalar t, const int precision)
 {
@@ -812,26 +717,22 @@ Foam::word Foam::Time::findInstancePath
     const instant& t
 ) const
 {
-    // Read directory entries into a list
-    fileNameList dirEntries(readDir(directory, fileName::DIRECTORY));
+    // Simplified version: use findTimes (readDir + sort). The expensive
+    // bit is the readDir, not the sorting. Tbd: avoid calling findInstancePath
+    // from filePath.
 
-    forAll(dirEntries, i)
+    instantList timeDirs = findTimes(path(), constant());
+    // Note:
+    // - times will include constant (with value 0) as first element.
+    //   For backwards compatibility make sure to find 0 in preference
+    //   to constant.
+    // - list is sorted so could use binary search
+
+    forAllReverse(timeDirs, i)
     {
-        scalar timeValue;
-        if (readScalar(dirEntries[i].c_str(), timeValue) && t.equal(timeValue))
+        if (t.equal(timeDirs[i].value()))
         {
-            return dirEntries[i];
-        }
-    }
-
-    if (t.equal(0.0))
-    {
-        const word& constantName = constant();
-
-        // Looking for 0 or constant. 0 already checked above.
-        if (isDir(directory/constantName))
-        {
-            return constantName;
+            return timeDirs[i].name();
         }
     }
 
@@ -925,6 +826,12 @@ Foam::dimensionedScalar Foam::Time::endTime() const
 }
 
 
+Foam::Time::stopAtControls Foam::Time::stopAt() const
+{
+    return stopAt_;
+}
+
+
 bool Foam::Time::run() const
 {
     deleteDemandDrivenData(loopProfiling_);
@@ -1013,20 +920,23 @@ bool Foam::Time::end() const
 }
 
 
-bool Foam::Time::stopAt(const stopAtControls sa) const
+bool Foam::Time::stopAt(const stopAtControls stopCtrl) const
 {
-    const bool changed = (stopAt_ != sa);
-    stopAt_ = sa;
+    if (stopCtrl == stopAtControls::saUnknown)
+    {
+        return false;
+    }
 
-    // adjust endTime
-    if (sa == saEndTime)
+    const bool changed = (stopAt_ != stopCtrl);
+    stopAt_ = stopCtrl;
+    endTime_ = GREAT;
+
+    // Adjust endTime
+    if (stopCtrl == stopAtControls::saEndTime)
     {
         controlDict_.lookup("endTime") >> endTime_;
     }
-    else
-    {
-        endTime_ = GREAT;
-    }
+
     return changed;
 }
 
@@ -1036,6 +946,7 @@ void Foam::Time::setTime(const Time& t)
     value() = t.value();
     dimensionedScalar::name() = t.dimensionedScalar::name();
     timeIndex_ = t.timeIndex_;
+    fileHandler().setTime(*this);
 }
 
 
@@ -1062,6 +973,7 @@ void Foam::Time::setTime(const instant& inst, const label newIndex)
     timeDict.readIfPresent("deltaT", deltaT_);
     timeDict.readIfPresent("deltaT0", deltaT0_);
     timeDict.readIfPresent("index", timeIndex_);
+    fileHandler().setTime(*this);
 }
 
 
@@ -1076,6 +988,7 @@ void Foam::Time::setTime(const scalar newTime, const label newIndex)
     value() = newTime;
     dimensionedScalar::name() = timeName(timeToUserTime(newTime));
     timeIndex_ = newIndex;
+    fileHandler().setTime(*this);
 }
 
 
@@ -1115,15 +1028,29 @@ void Foam::Time::setDeltaT(const scalar deltaT, const bool adjust)
 
 Foam::TimeState Foam::Time::subCycle(const label nSubCycles)
 {
-    subCycling_ = true;
-    prevTimeState_.set(new TimeState(*this));
+    prevTimeState_.set(new TimeState(*this));  // Fatal if already set
 
     setTime(*this - deltaT(), (timeIndex() - 1)*nSubCycles);
     deltaT_ /= nSubCycles;
     deltaT0_ /= nSubCycles;
     deltaTSave_ = deltaT0_;
 
+    subCycling_ = nSubCycles;
+
     return prevTimeState();
+}
+
+
+void Foam::Time::subCycleIndex(const label index)
+{
+    // Only permit adjustment if sub-cycling was already active
+    // and if the index is valid (positive, non-zero).
+    // This avoids potential mixups for deleting.
+
+    if (subCycling_ && index > 0)
+    {
+        subCycling_ = index;
+    }
 }
 
 
@@ -1131,10 +1058,11 @@ void Foam::Time::endSubCycle()
 {
     if (subCycling_)
     {
-        subCycling_ = false;
         TimeState::operator=(prevTimeState());
         prevTimeState_.clear();
     }
+
+    subCycling_ = 0;
 }
 
 
@@ -1210,7 +1138,7 @@ Foam::Time& Foam::Time::operator++()
             case wcRunTime:
             case wcAdjustableRunTime:
             {
-                label writeIndex = label
+                const label writeIndex = label
                 (
                     ((value() - startTime_) + 0.5*deltaT_)
                   / writeInterval_
@@ -1226,7 +1154,7 @@ Foam::Time& Foam::Time::operator++()
 
             case wcCpuTime:
             {
-                label writeIndex = label
+                const label writeIndex = label
                 (
                     returnReduce(elapsedCpuTime(), maxOp<double>())
                   / writeInterval_
@@ -1241,7 +1169,7 @@ Foam::Time& Foam::Time::operator++()
 
             case wcClockTime:
             {
-                label writeIndex = label
+                const label writeIndex = label
                 (
                     returnReduce(label(elapsedClockTime()), maxOp<label>())
                   / writeInterval_
@@ -1298,7 +1226,7 @@ Foam::Time& Foam::Time::operator++()
             // reinterpretation of the word
             if
             (
-                readScalar(dimensionedScalar::name().c_str(), timeNameValue)
+                readScalar(dimensionedScalar::name(), timeNameValue)
              && (mag(timeNameValue - oldTimeValue - userDeltaT) > timeTol)
             )
             {
@@ -1306,7 +1234,7 @@ Foam::Time& Foam::Time::operator++()
                 while
                 (
                     precision_ < maxPrecision_
-                 && readScalar(dimensionedScalar::name().c_str(), timeNameValue)
+                 && readScalar(dimensionedScalar::name(), timeNameValue)
                  && (mag(timeNameValue - oldTimeValue - userDeltaT) > timeTol)
                 )
                 {
@@ -1339,7 +1267,7 @@ Foam::Time& Foam::Time::operator++()
                     scalar oldTimeNameValue = -VGREAT;
                     if
                     (
-                        readScalar(oldTimeName.c_str(), oldTimeNameValue)
+                        readScalar(oldTimeName, oldTimeNameValue)
                      && (
                             sign(timeNameValue - oldTimeNameValue)
                          != sign(deltaT_)

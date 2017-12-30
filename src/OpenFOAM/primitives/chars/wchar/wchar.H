@@ -53,13 +53,13 @@ class Ostream;
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 //- Output wide character (Unicode) as UTF-8
-Ostream& operator<<(Ostream&, const wchar_t);
+Ostream& operator<<(Ostream& os, const wchar_t wc);
 
 //- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream&, const wchar_t*);
+Ostream& operator<<(Ostream& os, const wchar_t* wstr);
 
 //- Output wide character (Unicode) string as UTF-8
-Ostream& operator<<(Ostream&, const std::wstring&);
+Ostream& operator<<(Ostream& os, const std::wstring& wstr);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

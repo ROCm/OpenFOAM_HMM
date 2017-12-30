@@ -243,7 +243,7 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 }
 
 <readSolidName>{string} {
-    const word solidName(Foam::string::validate<word>(YYText()));
+    const word solidName(word::validate(YYText()));
 
     auto iter = lookup_.cfind(solidName);
     if (iter.found())
@@ -411,7 +411,7 @@ bool Foam::fileFormats::STLReader::readASCII
     const fileName& filename
 )
 {
-    format_ = UNKNOWN;
+    format_ = STLFormat::UNKNOWN;
 
     IFstream is(filename);
     if (!is)
@@ -434,7 +434,7 @@ bool Foam::fileFormats::STLReader::readASCII
     names_.transfer(lexer.names());
     sizes_.transfer(lexer.sizes());
 
-    format_ = ASCII;
+    format_ = STLFormat::ASCII;
     return true;
 }
 

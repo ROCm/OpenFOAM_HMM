@@ -22,16 +22,22 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Typedef
-    Foam::boolUList
-
-Description
-    A UList of bool
-
-Typedef
     Foam::boolList
 
 Description
-    Bool container classes
+    A List of bools.
+
+Typedef
+    Foam::boolUList
+
+Description
+    A UList of bools.
+
+Typedef
+    Foam::boolListList
+
+Description
+    A List of boolList.
 
 \*---------------------------------------------------------------------------*/
 

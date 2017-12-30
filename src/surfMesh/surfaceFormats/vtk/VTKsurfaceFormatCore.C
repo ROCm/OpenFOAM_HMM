@@ -32,7 +32,7 @@ License
 void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
 (
     vtk::formatter& format,
-    const pointField& pts
+    const UList<point>& pts
 )
 {
     vtk::legacy::fileHeader

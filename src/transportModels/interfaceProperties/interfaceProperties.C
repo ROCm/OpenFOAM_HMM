@@ -30,12 +30,7 @@ License
 #include "fvcDiv.H"
 #include "fvcGrad.H"
 #include "fvcSnGrad.H"
-
-// * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
-
-const Foam::scalar Foam::interfaceProperties::convertToRad =
-    Foam::constant::mathematical::pi/180.0;
-
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -72,7 +67,7 @@ void Foam::interfaceProperties::correctContactAngle
             fvsPatchVectorField& nHatp = nHatb[patchi];
             const scalarField theta
             (
-                convertToRad*acap.theta(U_.boundaryField()[patchi], nHatp)
+                degToRad() * acap.theta(U_.boundaryField()[patchi], nHatp)
             );
 
             const vectorField nf
@@ -226,7 +221,7 @@ Foam::interfaceProperties::surfaceTensionForce() const
 Foam::tmp<Foam::volScalarField>
 Foam::interfaceProperties::nearInterface() const
 {
-    return pos(alpha1_ - 0.01)*pos(0.99 - alpha1_);
+    return pos0(alpha1_ - 0.01)*pos0(0.99 - alpha1_);
 }
 
 

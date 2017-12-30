@@ -103,7 +103,7 @@ Foam::labelList Foam::refinementSurfaces::findHigherLevel
             shells.findHigherLevel
             (
                 samples,
-                UIndirectList<label>(surfaceLevel, retestSet)(),
+                labelUIndList(surfaceLevel, retestSet)(),
                 shellLevel
             );
             forAll(retestSet, i)
@@ -1435,7 +1435,7 @@ void Foam::refinementSurfaces::findNearest
     List<pointIndexHit>& hitInfo
 ) const
 {
-    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(labelUIndList(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     searchableSurfacesQueries::findNearest
@@ -1468,7 +1468,7 @@ void Foam::refinementSurfaces::findNearestRegion
     labelList& hitRegion
 ) const
 {
-    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(labelUIndList(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     List<pointIndexHit> hitInfo;
@@ -1533,7 +1533,7 @@ void Foam::refinementSurfaces::findNearestRegion
     vectorField& hitNormal
 ) const
 {
-    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(labelUIndList(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     searchableSurfacesQueries::findNearest
@@ -1718,7 +1718,7 @@ void Foam::refinementSurfaces::findNearest
     List<pointIndexHit>& hitInfo
 ) const
 {
-    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(labelUIndList(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     searchableSurfacesQueries::findNearest
@@ -1757,7 +1757,7 @@ void Foam::refinementSurfaces::findNearestRegion
     vectorField& hitNormal
 ) const
 {
-    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(labelUIndList(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     searchableSurfacesQueries::findNearest

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,7 +33,7 @@ Usage
       - \par -entry \<name\>
         Selects an entry
 
-      - \par -keywords \<name\>
+      - \par -keywords
         Prints the keywords (of the selected entry or of the top level if
         no entry was selected
 
@@ -47,6 +47,10 @@ Usage
         Remove the selected entry
 
       - \par -diff \<dictionary\>
+        Write differences with respect to the specified dictionary
+        (or sub entry if -entry specified)
+
+      - \par -diffEtc \<dictionary\>
         Write differences with respect to the specified dictionary
         (or sub entry if -entry specified)
 
@@ -90,13 +94,13 @@ Usage
 
       - Write the differences with respect to a template dictionary:
         \verbatim
-          foamDictionary 0/U -diff $FOAM_ETC/templates/closedVolume/0/U
+          foamDictionary 0/U -diffEtc templates/closedVolume/0/U
         \endverbatim
 
       - Write the differences in boundaryField with respect to a
         template dictionary:
         \verbatim
-          foamDictionary 0/U -diff $FOAM_ETC/templates/closedVolume/0/U \
+          foamDictionary 0/U -diffEtc templates/closedVolume/0/U \
             -entry boundaryField
         \endverbatim
 
@@ -114,52 +118,79 @@ Usage
 #include "argList.H"
 #include "profiling.H"
 #include "Time.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
+#include "etcFiles.H"
 #include "includeEntry.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Converts old scope syntax to new syntax
-word scope(const fileName& entryName)
+//- Convert older ':' scope syntax to newer '.' scope syntax,
+//  but leave anything with '/' delimiters untouched
+bool upgradeScope(word& entryName)
 {
-    if (entryName.find(':') != string::npos)
+    if
+    (
+        entryName.find('/') == string::npos
+     && entryName.find(':') != string::npos
+    )
     {
-        wordList entryNames(entryName.components(':'));
+        const wordList names(fileName(entryName).components(':'));
 
-        word entry(entryNames[0]);
-        for (label i = 1; i < entryNames.size(); i++)
+        entryName.resize(0);
+
+        for (const word& name : names)
         {
-            entry += word('.') + entryNames[i];
+            if (entryName.size()) entryName.append(".");
+
+            entryName.append(name);
         }
-        return entry;
+
+        return true;
     }
-    else
-    {
-        return entryName;
-    }
+
+    // Nothing changed
+    return false;
 }
 
 
-//- Extracts dict name and keyword
-Pair<word> dictAndKeyword(const word& scopedName)
+//- Split into dictionary name and the entry name
+class dictAndKeyword
 {
-    string::size_type i = scopedName.find_last_of(".");
-    if (i != string::npos)
+    word dict_;
+    word key_;
+
+public:
+    dictAndKeyword(const word& scopedName)
     {
-        return Pair<word>
-        (
-            scopedName.substr(0, i),
-            scopedName.substr(i+1, string::npos)
-        );
+        string::size_type i = scopedName.rfind('/');
+        if (i == string::npos)
+        {
+            i = scopedName.rfind('.');
+        }
+
+        if (i != string::npos)
+        {
+            dict_ = scopedName.substr(0, i);
+            key_  = scopedName.substr(i+1);
+        }
+        else
+        {
+            key_  = scopedName;
+        }
     }
-    else
+
+    inline const word& dict() const
     {
-        return Pair<word>("", scopedName);
+        return dict_;
     }
-}
+
+    inline const word& key() const
+    {
+        return key_;
+    }
+};
 
 
 const dictionary& lookupScopedDict
@@ -168,70 +199,55 @@ const dictionary& lookupScopedDict
     const word& subDictName
 )
 {
-    if (subDictName == "")
+    if (subDictName.empty())
     {
         return dict;
     }
-    else
+
+    const entry* eptr = dict.lookupScopedEntryPtr(subDictName, false, false);
+
+    if (!eptr || !eptr->isDict())
     {
-        const entry* entPtr = dict.lookupScopedEntryPtr
-        (
-            subDictName,
-            false,
-            false
-        );
-        if (!entPtr || !entPtr->isDict())
-        {
-            FatalIOErrorInFunction(dict)
-                << "keyword " << subDictName
-                << " is undefined in dictionary "
-                << dict.name() << " or is not a dictionary"
-                << endl
-                << "Valid keywords are " << dict.keys()
-                << exit(FatalIOError);
-        }
-        return entPtr->dict();
+        FatalIOErrorInFunction(dict)
+            << "keyword " << subDictName
+            << " is undefined in dictionary "
+            << dict.name() << " or is not a dictionary"
+            << endl
+            << "Valid keywords are " << dict.keys()
+            << exit(FatalIOError);
     }
+
+    return eptr->dict();
 }
 
 
-void remove(dictionary& dict, const dictionary& removeDict)
+void removeDict(dictionary& dict, const dictionary& dictToRemove)
 {
-    forAllConstIter(dictionary, removeDict, iter)
+    for (const entry& refEntry : dictToRemove)
     {
-        const entry* entPtr = dict.lookupEntryPtr
-        (
-            iter().keyword(),
-            false,
-            false
-        );
+        auto finder = dict.search(refEntry.keyword(), false, false);
 
-        if (entPtr)
+        bool purge = false;
+
+        if (finder.isDict())
         {
-            if (entPtr->isDict())
+            if (refEntry.isDict())
             {
-                if (iter().isDict())
-                {
-                    remove
-                    (
-                        const_cast<dictionary&>(entPtr->dict()),
-                        iter().dict()
-                    );
+                removeDict(finder.dict(), refEntry.dict());
 
-                    // Check if dictionary is empty
-                    if (!entPtr->dict().size())
-                    {
-                        dict.remove(iter().keyword());
-                    }
-                }
+                // Purge if dictionary is empty
+                purge = finder.dict().empty();
             }
-            else if (!iter().isDict())
-            {
-                if (*entPtr == iter())
-                {
-                    dict.remove(iter().keyword());
-                }
-            }
+        }
+        else if (finder.found() && !refEntry.isDict())
+        {
+            // Purge if entries match
+            purge = (finder.ref() == refEntry);
+        }
+
+        if (purge)
+        {
+            dict.remove(refEntry.keyword());
         }
     }
 }
@@ -243,8 +259,8 @@ int main(int argc, char *argv[])
 
     argList::noBanner();
     argList::noJobInfo();
-    argList::validArgs.append("dictionary");
-    argList::addBoolOption("keywords", "list keywords");
+    argList::addArgument("dictionary");
+    argList::addBoolOption("keywords", "List keywords");
     argList::addOption("entry", "name", "report/select the named entry");
     argList::addBoolOption
     (
@@ -273,6 +289,12 @@ int main(int argc, char *argv[])
         "diff",
         "dict",
         "Write differences with respect to the specified dictionary"
+    );
+    argList::addOption
+    (
+        "diffEtc",
+        "dict",
+        "As per -diff, but locate the file as per foamEtcFile"
     );
     argList::addBoolOption
     (
@@ -304,13 +326,12 @@ int main(int argc, char *argv[])
     const bool disableEntries = args.optionFound("disableFunctionEntries");
     if (disableEntries)
     {
-        Info<< "Not expanding variables or dictionary directives"
-            << endl;
+        Info<< "Not expanding variables or dictionary directives" << endl;
         entry::disableFunctionEntries = true;
     }
 
 
-    fileName dictFileName(args[1]);
+    const fileName dictFileName(args[1]);
 
     autoPtr<IFstream> dictFile(new IFstream(dictFileName));
     if (!dictFile().good())
@@ -342,28 +363,55 @@ int main(int argc, char *argv[])
     }
 
 
-    // Second dictionary for -diff
-    dictionary diffDict;
-    fileName diffFileName;
-    if (args.optionReadIfPresent("diff", diffFileName))
-    {
-        autoPtr<IFstream> diffFile(new IFstream(diffFileName));
-        if (!diffFile().good())
-        {
-            FatalErrorInFunction
-                << "Cannot open file " << diffFileName
-                << exit(FatalError, 1);
-        }
+    // Has "diff" or "diffEtc"
+    bool optDiff = false;
 
-        // Read but preserve headers
-        diffDict.read(diffFile(), true);
+    // Reference dictionary for -diff / -diffEtc
+    dictionary diffDict;
+    {
+        fileName diffFileName;
+        if (args.optionReadIfPresent("diff", diffFileName))
+        {
+            IFstream diffFile(diffFileName);
+            if (!diffFile.good())
+            {
+                FatalErrorInFunction
+                    << "Cannot open file " << diffFileName
+                    << exit(FatalError, 1);
+            }
+
+            // Read but preserve headers
+            diffDict.read(diffFile, true);
+            optDiff = true;
+        }
+        else if (args.optionReadIfPresent("diffEtc", diffFileName))
+        {
+            fileName foundName = findEtcFile(diffFileName);
+            if (foundName.empty())
+            {
+                FatalErrorInFunction
+                    << "Cannot find etcFile " << diffFileName
+                    << exit(FatalError, 1);
+            }
+
+            IFstream diffFile(foundName);
+            if (!diffFile.good())
+            {
+                FatalErrorInFunction
+                    << "Cannot open file " << foundName
+                    << exit(FatalError, 1);
+            }
+
+            // Read but preserve headers
+            diffDict.read(diffFile, true);
+            optDiff = true;
+        }
     }
 
-
-    word entryName;
-    if (args.optionReadIfPresent("entry", entryName))
+    word scopedName;  // Actually fileName, since it can contain '/' scoping
+    if (args.optionReadIfPresent("entry", scopedName))
     {
-        word scopedName(scope(entryName));
+        upgradeScope(scopedName);
 
         string newValue;
         if
@@ -372,13 +420,17 @@ int main(int argc, char *argv[])
          || args.optionReadIfPresent("add", newValue)
         )
         {
-            bool overwrite = args.optionFound("set");
+            const bool overwrite = args.optionFound("set");
 
-            Pair<word> dAk(dictAndKeyword(scopedName));
+            // Dictionary name and keyword
+            const dictAndKeyword dAk(scopedName);
 
-            IStringStream str(string(dAk.second()) + ' ' + newValue + ';');
+            // The context for the action
+            const dictionary& d(lookupScopedDict(dict, dAk.dict()));
+
+            // Create a new entry
+            IStringStream str(string(dAk.key()) + ' ' + newValue + ';');
             entry* ePtr(entry::New(str).ptr());
-            const dictionary& d(lookupScopedDict(dict, dAk.first()));
 
             if (overwrite)
             {
@@ -391,122 +443,116 @@ int main(int argc, char *argv[])
             changed = true;
 
             // Print the changed entry
-            const entry* entPtr = dict.lookupScopedEntryPtr
+            const auto finder = dict.csearchScoped
             (
                 scopedName,
                 false,
-                true            // Support wildcards
+                true  // Support wildcards
             );
-            if (entPtr)
+
+            if (finder.found())
             {
-                Info<< *entPtr;
+                Info<< finder.ref();
             }
         }
         else if (args.optionFound("remove"))
         {
-            // Extract dictionary name and keyword
-            Pair<word> dAk(dictAndKeyword(scopedName));
+            // Dictionary name and keyword
+            const dictAndKeyword dAk(scopedName);
 
-            const dictionary& d(lookupScopedDict(dict, dAk.first()));
-            const_cast<dictionary&>(d).remove(dAk.second());
+            // The context for the action
+            const dictionary& d(lookupScopedDict(dict, dAk.dict()));
+
+            const_cast<dictionary&>(d).remove(dAk.key());
             changed = true;
         }
         else
         {
             // Optionally remove a second dictionary
-            if (args.optionFound("diff"))
+            if (optDiff)
             {
-                Pair<word> dAk(dictAndKeyword(scopedName));
+                // Dictionary name and keyword
+                const dictAndKeyword dAk(scopedName);
 
-                const dictionary& d(lookupScopedDict(dict, dAk.first()));
-                const dictionary& d2(lookupScopedDict(diffDict, dAk.first()));
+                const dictionary& d1(lookupScopedDict(dict, dAk.dict()));
+                const dictionary& d2(lookupScopedDict(diffDict, dAk.dict()));
 
-                const entry* ePtr =
-                    d.lookupEntryPtr(dAk.second(), false, true);
-                const entry* e2Ptr =
-                    d2.lookupEntryPtr(dAk.second(), false, true);
+                const entry* e1Ptr = d1.lookupEntryPtr(dAk.key(), false, true);
+                const entry* e2Ptr = d2.lookupEntryPtr(dAk.key(), false, true);
 
-                if (ePtr && e2Ptr)
+                if (e1Ptr && e2Ptr)
                 {
-                    if (*ePtr == *e2Ptr)
+                    if (*e1Ptr == *e2Ptr)
                     {
-                        const_cast<dictionary&>(d).remove(dAk.second());
+                        const_cast<dictionary&>(d1).remove(dAk.key());
                     }
-                    else if (ePtr->isDict() && e2Ptr->isDict())
+                    else if (e1Ptr->isDict() && e2Ptr->isDict())
                     {
-                        remove
+                        removeDict
                         (
-                            const_cast<dictionary&>(ePtr->dict()),
+                            const_cast<dictionary&>(e1Ptr->dict()),
                             e2Ptr->dict()
                         );
                     }
                 }
             }
 
-
-            const entry* entPtr = dict.lookupScopedEntryPtr
+            const auto finder = dict.csearchScoped
             (
                 scopedName,
                 false,
-                true            // Support wildcards
+                true  // Support wildcards
             );
 
-            if (entPtr)
+            if (!finder.found())
             {
-                if (args.optionFound("keywords"))
+                FatalIOErrorInFunction(dictFile())
+                    << "Cannot find entry " << scopedName
+                    << exit(FatalIOError, 2);
+            }
+            else if (args.optionFound("keywords"))
+            {
+                for (const entry& e : finder.dict())
                 {
-                    const dictionary& dict = entPtr->dict();
-                    forAllConstIter(dictionary, dict, iter)
-                    {
-                        Info<< iter().keyword() << endl;
-                    }
+                    Info<< e.keyword() << endl;
                 }
-                else
+            }
+            else if (args.optionFound("value"))
+            {
+                if (finder.isDict())
                 {
-                    if (args.optionFound("value"))
+                    Info<< finder.dict();
+                }
+                else if (finder.ref().isStream())
+                {
+                    const tokenList& tokens = finder.ref().stream();
+                    forAll(tokens, i)
                     {
-                        if (entPtr->isStream())
+                        Info<< tokens[i];
+                        if (i < tokens.size() - 1)
                         {
-                            const tokenList& tokens = entPtr->stream();
-                            forAll(tokens, i)
-                            {
-                                Info<< tokens[i];
-                                if (i < tokens.size() - 1)
-                                {
-                                    Info<< token::SPACE;
-                                }
-                            }
-                            Info<< endl;
-                        }
-                        else if (entPtr->isDict())
-                        {
-                            Info<< entPtr->dict();
+                            Info<< token::SPACE;
                         }
                     }
-                    else
-                    {
-                        Info<< *entPtr;
-                    }
+                    Info<< endl;
                 }
             }
             else
             {
-                FatalIOErrorInFunction(dictFile)
-                    << "Cannot find entry " << entryName
-                    << exit(FatalIOError, 2);
+                Info<< finder.ref();
             }
         }
     }
     else if (args.optionFound("keywords"))
     {
-        forAllConstIter(dictionary, dict, iter)
+        for (const entry& e : dict)
         {
-            Info<< iter().keyword() << endl;
+            Info<< e.keyword() << endl;
         }
     }
-    else if (args.optionFound("diff"))
+    else if (optDiff)
     {
-        remove(dict, diffDict);
+        removeDict(dict, diffDict);
         dict.write(Info, false);
     }
     else

@@ -304,17 +304,16 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
             lduMeshConstructorTablePtr_
         );
 
-        lduMeshConstructorTable::iterator cstrIter =
-            lduMeshConstructorTablePtr_->find(agglomeratorType);
+        auto cstrIter = lduMeshConstructorTablePtr_->cfind(agglomeratorType);
 
         if (!cstrIter.found())
         {
             FatalErrorInFunction
                 << "Unknown GAMGAgglomeration type "
                 << agglomeratorType << ".\n"
-                << "Valid matrix GAMGAgglomeration types are :"
+                << "Valid matrix GAMGAgglomeration types :"
                 << lduMatrixConstructorTablePtr_->sortedToc() << endl
-                << "Valid geometric GAMGAgglomeration types are :"
+                << "Valid geometric GAMGAgglomeration types :"
                 << lduMeshConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }
@@ -369,8 +368,8 @@ const Foam::GAMGAgglomeration& Foam::GAMGAgglomeration::New
         }
         else
         {
-            lduMatrixConstructorTable::iterator cstrIter =
-                lduMatrixConstructorTablePtr_->find(agglomeratorType);
+            auto cstrIter =
+                lduMatrixConstructorTablePtr_->cfind(agglomeratorType);
 
             return store(cstrIter()(matrix, controlDict).ptr());
         }
@@ -405,15 +404,14 @@ Foam::autoPtr<Foam::GAMGAgglomeration> Foam::GAMGAgglomeration::New
         geometryConstructorTablePtr_
     );
 
-    geometryConstructorTable::iterator cstrIter =
-        geometryConstructorTablePtr_->find(agglomeratorType);
+    auto cstrIter = geometryConstructorTablePtr_->cfind(agglomeratorType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown GAMGAgglomeration type "
             << agglomeratorType << ".\n"
-            << "Valid geometric GAMGAgglomeration types are :"
+            << "Valid geometric GAMGAgglomeration types :"
             << geometryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -636,7 +634,7 @@ bool Foam::GAMGAgglomeration::checkRestriction
     {
         labelList& masters = coarseToMasters[restrict[celli]];
 
-        if (findIndex(masters, master[celli]) == -1)
+        if (!masters.found(master[celli]))
         {
             masters.append(master[celli]);
             nNewCoarse++;
@@ -674,7 +672,7 @@ bool Foam::GAMGAgglomeration::checkRestriction
         {
             label coarseI = restrict[celli];
 
-            label index = findIndex(coarseToMasters[coarseI], master[celli]);
+            label index = coarseToMasters[coarseI].find(master[celli]);
             newRestrict[celli] = coarseToNewCoarse[coarseI][index];
         }
 

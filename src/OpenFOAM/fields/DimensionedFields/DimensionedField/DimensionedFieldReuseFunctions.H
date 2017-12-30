@@ -42,7 +42,7 @@ tmp<DimensionedField<TypeR, GeoMesh>> New
 )
 {
     DimensionedField<TypeR, GeoMesh>& df1 =
-        const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf1());
+        const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
 
     if (tdf1.isTmp())
     {
@@ -115,7 +115,7 @@ public:
     )
     {
         DimensionedField<TypeR, GeoMesh>& df1 =
-            const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf1());
+            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
 
         if (tdf1.isTmp())
         {
@@ -192,7 +192,7 @@ public:
     {
         const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
         DimensionedField<TypeR, GeoMesh>& df2 =
-            const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf2());
+            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf2());
 
         if (tdf2.isTmp())
         {
@@ -235,7 +235,7 @@ public:
     )
     {
         DimensionedField<TypeR, GeoMesh>& df1 =
-            const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf1());
+            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
 
         if (tdf1.isTmp())
         {
@@ -278,9 +278,9 @@ public:
     )
     {
         DimensionedField<TypeR, GeoMesh>& df1 =
-            const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf1());
+            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
         DimensionedField<TypeR, GeoMesh>& df2 =
-            const_cast<DimensionedField<TypeR, GeoMesh>& >(tdf2());
+            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf2());
 
         if (tdf1.isTmp())
         {

@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -19,11 +18,9 @@ numberOfSubdomains  4;
 
 method          simple;
 
-simpleCoeffs
+coeffs
 {
     n           (1 2 2);
-    delta       0.001;
 }
-
 
 // ************************************************************************* //

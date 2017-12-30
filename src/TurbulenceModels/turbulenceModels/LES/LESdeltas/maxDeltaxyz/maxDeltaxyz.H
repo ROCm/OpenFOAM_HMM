@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef maxDeltaxyzDelta_H
-#define maxDeltaxyzDelta_H
+#ifndef LESModels_maxDeltaxyz_H
+#define LESModels_maxDeltaxyz_H
 
 #include "LESdelta.H"
 

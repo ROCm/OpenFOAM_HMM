@@ -48,9 +48,10 @@ void Foam::OBJstream::writeAndCheck(const char c)
         startOfLine_ = false;
         if (c == 'v')
         {
-            nVertices_++;
+            ++nVertices_;
         }
     }
+
     OFstream::write(c);
 }
 
@@ -71,12 +72,6 @@ Foam::OBJstream::OBJstream
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::OBJstream::~OBJstream()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::OBJstream::write(const char c)
@@ -88,9 +83,9 @@ Foam::Ostream& Foam::OBJstream::write(const char c)
 
 Foam::Ostream& Foam::OBJstream::write(const char* str)
 {
-    for (const char* p = str; *p != '\0'; ++p)
+    for (const char* iter = str; *iter; ++iter)
     {
-        writeAndCheck(*p);
+        writeAndCheck(*iter);
     }
     return *this;
 }
@@ -114,63 +109,52 @@ Foam::Ostream& Foam::OBJstream::writeQuoted
     const bool quoted
 )
 {
-    if (quoted)
+    if (!quoted)
     {
-        OFstream::write(token::BEGIN_STRING);
-
-        int backslash = 0;
-        for
-        (
-            std::string::const_iterator iter = str.begin();
-            iter != str.end();
-            ++iter
-        )
-        {
-            char c = *iter;
-
-            if (c == '\\')
-            {
-                backslash++;
-                // suppress output until we know if other characters follow
-                continue;
-            }
-            else if (c == token::NL)
-            {
-                lineNumber_++;
-                backslash++;    // backslash escape for newline
-            }
-            else if (c == token::END_STRING)
-            {
-                backslash++;    // backslash escape for quote
-            }
-
-            // output pending backslashes
-            while (backslash)
-            {
-                OFstream::write('\\');
-                backslash--;
-            }
-
-            writeAndCheck(c);
-        }
-
-        // silently drop any trailing backslashes
-        // they would otherwise appear like an escaped end-quote
-        OFstream::write(token::END_STRING);
-    }
-    else
-    {
-        // output unquoted string, only advance line number on newline
-        for
-        (
-            std::string::const_iterator iter = str.begin();
-            iter != str.end();
-            ++iter
-        )
+        // Output unquoted, only advance line number on newline
+        for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
         {
             writeAndCheck(*iter);
         }
+        return *this;
     }
+
+
+    OFstream::write(token::BEGIN_STRING);
+
+    unsigned backslash = 0;
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    {
+        const char c = *iter;
+
+        if (c == '\\')
+        {
+            ++backslash;
+            continue; // only output after escaped character is known
+        }
+        else if (c == token::NL)
+        {
+            ++lineNumber_;
+            ++backslash;    // backslash escape for newline
+        }
+        else if (c == token::END_STRING)
+        {
+            ++backslash;    // backslash escape for quote
+        }
+
+        // output all pending backslashes
+        while (backslash)
+        {
+            OFstream::write('\\');
+            --backslash;
+        }
+
+        writeAndCheck(c);
+    }
+
+    // silently drop any trailing backslashes
+    // they would otherwise appear like an escaped end-quote
+    OFstream::write(token::END_STRING);
 
     return *this;
 }

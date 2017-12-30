@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2013-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Class
     Foam::sixDoFRigidBodyMotionSolver
 
 Group
-   grpMeshMotionSolvers 
+   grpMeshMotionSolvers
 
 Description
     6-DoF solid-body mesh motion solver for an fvMesh.
@@ -59,7 +59,7 @@ class sixDoFRigidBodyMotionSolver
 {
     // Private data
 
-        //- Six dof motion object
+        //- Six DoF motion object
         sixDoFRigidBodyMotion motion_;
 
         wordReList patches_;
@@ -127,6 +127,9 @@ public:
 
     // Member Functions
 
+        //- Return the six DoF motion object
+        const sixDoFRigidBodyMotion& motion() const;
+
         //- Return point location obtained from the current motion field
         virtual tmp<pointField> curPoints() const;
 
@@ -138,7 +141,8 @@ public:
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,
-            IOstream::compressionType cmp
+            IOstream::compressionType cmp,
+            const bool valid
         ) const;
 
         //- Read dynamicMeshDict dictionary

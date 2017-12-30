@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ Foam::hexRef8Data::hexRef8Data
             new labelIOList
             (
                 rio,
-                UIndirectList<label>(data.cellLevelPtr_(), cellMap)()
+                labelUIndList(data.cellLevelPtr_(), cellMap)()
             )
         );
     }
@@ -129,7 +129,7 @@ Foam::hexRef8Data::hexRef8Data
             new labelIOList
             (
                 rio,
-                UIndirectList<label>(data.pointLevelPtr_(), pointMap)()
+                labelUIndList(data.pointLevelPtr_(), pointMap)()
             )
         );
     }
@@ -176,7 +176,7 @@ Foam::hexRef8Data::hexRef8Data
         forAll(procDatas, procI)
         {
             const labelList& procCellLevel = procDatas[procI].cellLevelPtr_();
-            UIndirectList<label>(cellLevel, cellMaps[procI]) = procCellLevel;
+            labelUIndList(cellLevel, cellMaps[procI]) = procCellLevel;
         }
     }
 
@@ -194,7 +194,7 @@ Foam::hexRef8Data::hexRef8Data
         forAll(procDatas, procI)
         {
             const labelList& procPointLevel = procDatas[procI].pointLevelPtr_();
-            UIndirectList<label>(pointLevel, pointMaps[procI]) = procPointLevel;
+            labelUIndList(pointLevel, pointMaps[procI]) = procPointLevel;
         }
     }
 
@@ -305,6 +305,76 @@ void Foam::hexRef8Data::sync(const IOobject& io)
         rio.rename("refinementHistory");
         rio.readOpt() = IOobject::NO_READ;
         refHistoryPtr_.reset(new refinementHistory(rio, mesh.nCells(), true));
+    }
+}
+
+
+void Foam::hexRef8Data::updateMesh(const mapPolyMesh& map)
+{
+    // Sanity check
+    if
+    (
+         (cellLevelPtr_.valid() && cellLevelPtr_().size() != map.nOldCells())
+      || (pointLevelPtr_.valid() && pointLevelPtr_().size() != map.nOldPoints())
+    )
+    {
+        cellLevelPtr_.clear();
+        pointLevelPtr_.clear();
+        level0EdgePtr_.clear();
+        refHistoryPtr_.clear();
+        return;
+    }
+
+
+
+    if (cellLevelPtr_.valid())
+    {
+        const labelList& cellMap = map.cellMap();
+        labelList& cellLevel = cellLevelPtr_();
+
+        labelList newCellLevel(cellMap.size());
+        forAll(cellMap, newCelli)
+        {
+            label oldCelli = cellMap[newCelli];
+
+            if (oldCelli == -1)
+            {
+                newCellLevel[newCelli] = 0;
+            }
+            else
+            {
+                newCellLevel[newCelli] = cellLevel[oldCelli];
+            }
+        }
+        cellLevel.transfer(newCellLevel);
+    }
+    if (pointLevelPtr_.valid())
+    {
+        const labelList& pointMap = map.pointMap();
+        labelList& pointLevel = pointLevelPtr_();
+
+        labelList newPointLevel(pointMap.size());
+        forAll(pointMap, newPointi)
+        {
+            label oldPointi = pointMap[newPointi];
+
+            if (oldPointi == -1)
+            {
+                newPointLevel[newPointi] = 0;
+            }
+            else
+            {
+                newPointLevel[newPointi] = pointLevel[oldPointi];
+            }
+        }
+        pointLevel.transfer(newPointLevel);
+    }
+
+    // No need to map the level0Edge
+
+    if (refHistoryPtr_.valid() && refHistoryPtr_().active())
+    {
+        refHistoryPtr_().updateMesh(map);
     }
 }
 

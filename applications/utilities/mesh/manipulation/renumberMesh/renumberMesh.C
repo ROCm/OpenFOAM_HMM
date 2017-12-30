@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -497,8 +497,8 @@ autoPtr<mapPolyMesh> reorderMesh
             sortedOrder(newAddressing, newToOld);
             fZone.resetAddressing
             (
-                UIndirectList<label>(newAddressing, newToOld)(),
-                UIndirectList<bool>(newFlipMap, newToOld)()
+                labelUIndList(newAddressing, newToOld)(),
+                boolUIndList(newFlipMap, newToOld)()
             );
         }
     }
@@ -508,7 +508,7 @@ autoPtr<mapPolyMesh> reorderMesh
         cellZones.clearAddressing();
         forAll(cellZones, zoneI)
         {
-            cellZones[zoneI] = UIndirectList<label>
+            cellZones[zoneI] = labelUIndList
             (
                 reverseCellOrder,
                 cellZones[zoneI]
@@ -1074,7 +1074,7 @@ int main(int argc, char *argv[])
         );
 
         // Combine point reordering into map.
-        const_cast<labelList&>(map().pointMap()) = UIndirectList<label>
+        const_cast<labelList&>(map().pointMap()) = labelUIndList
         (
             map().pointMap(),
             pointOrderMap().pointMap()
@@ -1094,14 +1094,16 @@ int main(int argc, char *argv[])
     // Update proc maps
     if (cellProcAddressing.headerOk())
     {
-        if (cellProcAddressing.size() == mesh.nCells())
+        bool localOk = (cellProcAddressing.size() == mesh.nCells());
+
+        if (returnReduce(localOk, andOp<bool>()))
         {
             Info<< "Renumbering processor cell decomposition map "
                 << cellProcAddressing.name() << endl;
 
             cellProcAddressing = labelList
             (
-                UIndirectList<label>(cellProcAddressing, map().cellMap())
+                labelUIndList(cellProcAddressing, map().cellMap())
             );
         }
         else
@@ -1118,14 +1120,16 @@ int main(int argc, char *argv[])
 
     if (faceProcAddressing.headerOk())
     {
-        if (faceProcAddressing.size() == mesh.nFaces())
+        bool localOk = (faceProcAddressing.size() == mesh.nFaces());
+
+        if (returnReduce(localOk, andOp<bool>()))
         {
             Info<< "Renumbering processor face decomposition map "
                 << faceProcAddressing.name() << endl;
 
             faceProcAddressing = labelList
             (
-                UIndirectList<label>(faceProcAddressing, map().faceMap())
+                labelUIndList(faceProcAddressing, map().faceMap())
             );
 
             // Detect any flips.
@@ -1158,14 +1162,16 @@ int main(int argc, char *argv[])
 
     if (pointProcAddressing.headerOk())
     {
-        if (pointProcAddressing.size() == mesh.nPoints())
+        bool localOk = (pointProcAddressing.size() == mesh.nPoints());
+
+        if (returnReduce(localOk, andOp<bool>()))
         {
             Info<< "Renumbering processor point decomposition map "
                 << pointProcAddressing.name() << endl;
 
             pointProcAddressing = labelList
             (
-                UIndirectList<label>(pointProcAddressing, map().pointMap())
+                labelUIndList(pointProcAddressing, map().pointMap())
             );
         }
         else
@@ -1182,7 +1188,16 @@ int main(int argc, char *argv[])
 
     if (boundaryProcAddressing.headerOk())
     {
-        if (boundaryProcAddressing.size() != mesh.boundaryMesh().size())
+        bool localOk =
+        (
+            boundaryProcAddressing.size()
+         == mesh.boundaryMesh().size()
+        );
+        if (returnReduce(localOk, andOp<bool>()))
+        {
+            // No renumbering needed
+        }
+        else
         {
             Info<< "Not writing inconsistent processor patch decomposition"
                 << " map " << boundaryProcAddressing.filePath() << endl;

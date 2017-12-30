@@ -245,8 +245,7 @@ void Foam::JohnsonJacksonParticleSlipFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("specularityCoefficient")
-        << specularityCoefficient_ << token::END_STATEMENT << nl;
+    os.writeEntry("specularityCoefficient", specularityCoefficient_);
     writeEntry("value", os);
 }
 

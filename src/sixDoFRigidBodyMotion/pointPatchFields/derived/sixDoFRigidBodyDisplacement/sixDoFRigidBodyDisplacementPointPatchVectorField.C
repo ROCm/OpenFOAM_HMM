@@ -255,16 +255,16 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 {
     pointPatchField<vector>::write(os);
 
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    os.writeEntry("rho", rhoName_);
 
     if (rhoName_ == "rhoInf")
     {
-        os.writeKeyword("rhoInf") << rhoInf_ << token::END_STATEMENT << nl;
+        os.writeEntry("rhoInf", rhoInf_);
     }
 
     if (lookupGravity_ == 0 || lookupGravity_ == -2)
     {
-        os.writeKeyword("g") << g_ << token::END_STATEMENT << nl;
+        os.writeEntry("g", g_);
     }
 
     motion_.write(os);

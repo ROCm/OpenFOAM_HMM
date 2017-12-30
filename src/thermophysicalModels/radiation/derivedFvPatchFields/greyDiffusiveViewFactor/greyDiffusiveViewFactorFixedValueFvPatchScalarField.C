@@ -192,7 +192,7 @@ write
 {
     fixedValueFvPatchScalarField::write(os);
     qro_.writeEntry("qro", os);
-    os.writeKeyword("solarLoad") << solarLoad_ << token::END_STATEMENT << nl;
+    os.writeEntry("solarLoad", solarLoad_);
 }
 
 

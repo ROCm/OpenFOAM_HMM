@@ -35,22 +35,22 @@ namespace Foam
 {
 namespace functionEntries
 {
-    defineTypeNameAndDebug(calcEntry, 0);
-
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         calcEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        calc
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         calcEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        calc
     );
 
 }
@@ -66,7 +66,7 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    Info<< "Using #calcEntry at line " << is.lineNumber()
+    Info<< "Using #calc at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << endl;
 
     dynamicCode::checkSecurity
@@ -110,7 +110,7 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    Info<< "Using #calcEntry at line " << is.lineNumber()
+    Info<< "Using #calc at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << endl;
 
     dynamicCode::checkSecurity

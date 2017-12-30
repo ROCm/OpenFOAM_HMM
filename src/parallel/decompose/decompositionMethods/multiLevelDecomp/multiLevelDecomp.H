@@ -25,7 +25,7 @@ Class
     Foam::multiLevelDecomp
 
 Description
-    Decomposition given using consecutive application of decomposers.
+    Decompose given using consecutive application of decomposers.
 
 SourceFiles
     multiLevelDecomp.C
@@ -50,12 +50,23 @@ class multiLevelDecomp
 {
     // Private data
 
+        //- Original coefficients for this method
+        const dictionary& coeffsDict_;
+
+        //- Rewritten dictionary of individual methods
         dictionary methodsDict_;
 
         PtrList<decompositionMethod> methods_;
 
 
     // Private Member Functions
+
+        //- Fill the methodsDict_
+        void createMethodsDict();
+
+        //- Set methods based on the contents of the methodsDict_
+        void setMethods();
+
 
         //- Given connectivity across processors work out connectivity
         //  for a (consistent) subset
@@ -98,7 +109,14 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        multiLevelDecomp(const dictionary& decompositionDict);
+        multiLevelDecomp(const dictionary& decompDict);
+
+        //- Construct given decomposition dictionary and region name
+        multiLevelDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor

@@ -47,43 +47,6 @@ class osha1stream;
 class OSHA1stream;
 
 /*---------------------------------------------------------------------------*\
-                        Class sha1streambuf Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A streambuf class for calculating SHA1 digests
-class sha1streambuf
-:
-    public std::streambuf
-{
-    // Private data
-
-    //- This does all the work and has its own buffering
-    SHA1 sha1_;
-
-    friend class osha1stream;
-
-public:
-
-    // Constructors
-
-        //- Construct null
-        sha1streambuf()
-        {}
-
-    // Member Functions
-
-    // Write
-
-        //- Process unbuffered
-        virtual std::streamsize xsputn(const char* str, std::streamsize n)
-        {
-            sha1_.append(str, n);
-            return n;
-        }
-};
-
-
-/*---------------------------------------------------------------------------*\
                          Class osha1stream Declaration
 \*---------------------------------------------------------------------------*/
 
@@ -93,9 +56,48 @@ class osha1stream
     virtual public std::ios,
     public std::ostream
 {
+    //- A streambuf class for calculating SHA1 digests
+    class sha1buf
+    :
+        public std::streambuf
+    {
+        //- This does all the work and has its own buffering
+        SHA1 sha1_;
+
+    protected:
+        // Protected members
+
+            //- Put sequence of characters
+            virtual std::streamsize xsputn(const char* str, std::streamsize n)
+            {
+                sha1_.append(str, n);
+                return n;
+            }
+
+
+    public:
+
+        // Constructors
+
+            //- Construct null
+            sha1buf()
+            {}
+
+
+        // Public member functions
+
+            //- Full access to the sha1
+            inline SHA1& sha1()
+            {
+                return sha1_;
+            }
+    };
+
+
     // Private data
 
-    sha1streambuf sbuf_;
+        //- Reference to the underlying buffer
+        sha1buf buf_;
 
 public:
 
@@ -104,23 +106,75 @@ public:
         //- Construct null
         osha1stream()
         :
-            std::ostream(&sbuf_)
+            std::ostream(&buf_)
         {}
+
 
     // Member Functions
 
-    // Access
-
         //- This hides both signatures of std::basic_ios::rdbuf()
-        sha1streambuf* rdbuf()
+        sha1buf* rdbuf()
         {
-            return &sbuf_;
+            return &buf_;
         }
 
         //- Full access to the sha1
         SHA1& sha1()
         {
-            return sbuf_.sha1_;
+            return buf_.sha1();
+        }
+
+};
+
+
+/*---------------------------------------------------------------------------*\
+                    Class OSHA1streamAllocator Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Allocator for an osha1stream
+class OSHA1streamAllocator
+{
+protected:
+
+    // Protected data
+
+        typedef osha1stream stream_type;
+
+        //- The output stream
+        stream_type stream_;
+
+
+    // Constructors
+
+        //- Construct null
+        OSHA1streamAllocator()
+        :
+            stream_()
+        {}
+
+
+public:
+
+    // Member Functions
+
+        //- Full access to the sha1
+        SHA1& sha1()
+        {
+            return stream_.sha1();
+        }
+
+
+        //- Return SHA1::Digest for the data processed until now
+        SHA1Digest digest()
+        {
+            return stream_.sha1().digest();
+        }
+
+
+        //- Clear the SHA1 calculation
+        void reset()
+        {
+            return stream_.sha1().clear();
         }
 
 };
@@ -133,64 +187,39 @@ public:
 //- The output stream for calculating SHA1 digests
 class OSHA1stream
 :
+    public OSHA1streamAllocator,
     public OSstream
 {
+    typedef OSHA1streamAllocator allocator_type;
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        OSHA1stream(const OSHA1stream&);
+        OSHA1stream(const OSHA1stream&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const OSHA1stream&);
+        void operator=(const OSHA1stream&) = delete;
 
 public:
 
     // Constructors
 
-        //- Construct and set stream status
+        //- Construct with an empty digest
         OSHA1stream
         (
             streamFormat format=ASCII,
             versionNumber version=currentVersion
         )
         :
-            OSstream
-            (
-                *(new osha1stream),
-                "OSHA1stream.sinkFile_",
-                format,
-                version
-            )
+            allocator_type(),
+            OSstream(stream_, "sha1", format, version)
         {}
-
-
-    //- Destructor
-    ~OSHA1stream()
-    {
-        delete &dynamic_cast<osha1stream&>(stdStream());
-    }
 
 
     // Member functions
 
-    // Access
-
-        //- Full access to the sha1
-        Foam::SHA1& sha1()
-        {
-            return dynamic_cast<osha1stream&>(stdStream()).sha1();
-        }
-
-        //- Return SHA1::Digest for the data processed until now
-        Foam::SHA1Digest digest()
-        {
-            return sha1().digest();
-        }
-
-    // Edit
-
         //- Clear the SHA1 calculation
+        //  \deprecated use reset instead (deprecated Jul 2017)
         void rewind()
         {
             sha1().clear();

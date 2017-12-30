@@ -209,16 +209,14 @@ void Foam::smoluchowskiJumpTFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
 
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
-    writeEntryIfDifferent<word>(os, "mu", "thermo:mu", muName_);
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
+    os.writeEntryIfDifferent<word>("mu", "thermo:mu", muName_);
 
-    os.writeKeyword("accommodationCoeff")
-        << accommodationCoeff_ << token::END_STATEMENT << nl;
+    os.writeEntry("accommodationCoeff", accommodationCoeff_);
     Twall_.writeEntry("Twall", os);
-    os.writeKeyword("gamma")
-        << gamma_ << token::END_STATEMENT << nl;
+    os.writeEntry("gamma", gamma_);
     writeEntry("value", os);
 }
 

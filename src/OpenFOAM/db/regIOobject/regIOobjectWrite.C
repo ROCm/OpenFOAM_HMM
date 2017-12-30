@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,8 @@ bool Foam::regIOobject::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     if (!good())
@@ -113,33 +114,34 @@ bool Foam::regIOobject::writeObject
 
     if (Pstream::master() || !masterOnly)
     {
-        if (mkDir(path()))
-        {
-            // Try opening an OFstream for object
-            OFstream os(objectPath(), fmt, ver, cmp);
-
-            // If any of these fail, return (leave error handling to Ostream
-            // class)
-            if (!os.good())
-            {
-                return false;
-            }
-
-            if (!writeHeader(os))
-            {
-                return false;
-            }
-
-            // Write the data to the Ostream
-            if (!writeData(os))
-            {
-                return false;
-            }
-
-            writeEndDivider(os);
-
-            osGood = os.good();
-        }
+        //if (mkDir(path()))
+        //{
+        //    // Try opening an OFstream for object
+        //    OFstream os(objectPath(), fmt, ver, cmp);
+        //
+        //    // If any of these fail, return (leave error handling to Ostream
+        //    // class)
+        //    if (!os.good())
+        //    {
+        //        return false;
+        //    }
+        //
+        //    if (!writeHeader(os))
+        //    {
+        //        return false;
+        //    }
+        //
+        //    // Write the data to the Ostream
+        //    if (!writeData(os))
+        //    {
+        //        return false;
+        //    }
+        //
+        //    writeEndDivider(os);
+        //
+        //    osGood = os.good();
+        //}
+        osGood = fileHandler().writeObject(*this, fmt, ver, cmp, valid);
     }
     else
     {
@@ -156,20 +158,21 @@ bool Foam::regIOobject::writeObject
     // i.e. lastModified_ is already set
     if (watchIndices_.size())
     {
-        time().setUnmodified(watchIndices_.last());
+        fileHandler().setUnmodified(watchIndices_.last());
     }
 
     return osGood;
 }
 
 
-bool Foam::regIOobject::write() const
+bool Foam::regIOobject::write(const bool valid) const
 {
     return writeObject
     (
         time().writeFormat(),
         IOstream::currentVersion,
-        time().writeCompression()
+        time().writeCompression(),
+        valid
     );
 }
 

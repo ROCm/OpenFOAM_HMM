@@ -23,9 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "cellModel.H"
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::word& Foam::cellModel::name() const
@@ -58,27 +55,9 @@ inline Foam::label Foam::cellModel::nFaces() const
 }
 
 
-//  Return the faces of a cellModel by untangling the geometry
-//  supplied in terms of the face labels
-inline Foam::edgeList Foam::cellModel::edges
-(
-    const UList<label>& pointLabels
-) const
+inline const Foam::edgeList& Foam::cellModel::modelEdges() const
 {
-    edgeList e(edges_.size());
-
-    // Translate model lebels into global labels
-    forAll(edges_, edgeI)
-    {
-         e[edgeI] =
-             edge
-             (
-                 pointLabels[edges_[edgeI].start()],
-                 pointLabels[edges_[edgeI].end()]
-             );
-    }
-
-    return e;
+    return edges_;
 }
 
 
@@ -90,14 +69,38 @@ inline const Foam::faceList& Foam::cellModel::modelFaces() const
 
 //  Return the faces of a cellModel by untangling the geometry
 //  supplied in terms of the face labels
+inline Foam::edgeList Foam::cellModel::edges
+(
+    const labelUList& pointLabels
+) const
+{
+    edgeList e(edges_.size());
+
+    // Translate model labels into global labels
+    forAll(edges_, edgei)
+    {
+         e[edgei] =
+             edge
+             (
+                 pointLabels[edges_[edgei].start()],
+                 pointLabels[edges_[edgei].end()]
+             );
+    }
+
+    return e;
+}
+
+
+//  Return the faces of a cellModel by untangling the geometry
+//  supplied in terms of the face labels
 inline Foam::faceList Foam::cellModel::faces
 (
-    const UList<label>& pointLabels
+    const labelUList& pointLabels
 ) const
 {
     faceList f(faces_.size());
 
-    // Translate model lebels into global labels
+    // Translate model labels into global labels
     forAll(faces_, facei)
     {
          const labelList& curModelLabels = faces_[facei];
@@ -106,9 +109,9 @@ inline Foam::faceList Foam::cellModel::faces
 
          curFace.setSize(curModelLabels.size());
 
-         forAll(curModelLabels, labelI)
+         forAll(curModelLabels, labeli)
          {
-             curFace[labelI] = pointLabels[curModelLabels[labelI]];
+             curFace[labeli] = pointLabels[curModelLabels[labeli]];
          }
     }
 
@@ -116,18 +119,17 @@ inline Foam::faceList Foam::cellModel::faces
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
-// Equality operator: true => ptr to models are equal !
-inline bool Foam::operator==(const cellModel& m1, const cellModel& m2)
+inline bool Foam::operator==(const cellModel& lhs, const cellModel& rhs)
 {
-    return (&m1 == &m2);
+    return (&lhs == &rhs);
 }
 
-// Inequality operator: true => ptr to models are not equal !
-inline bool Foam::operator!=(const cellModel& m1, const cellModel& m2)
+
+inline bool Foam::operator!=(const cellModel& lhs, const cellModel& rhs)
 {
-    return (&m1 != &m2);
+    return (&lhs != &rhs);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2014-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -267,7 +267,7 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::updateCoeffs()
         this->refValue() = 0.0;
 
         this->refGrad() =
-            pos(alpha - SMALL)
+            pos0(alpha - SMALL)
            *constant::mathematical::pi
            *specularityCoefficient_.value()
            *alpha
@@ -289,10 +289,8 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("restitutionCoefficient")
-        << restitutionCoefficient_ << token::END_STATEMENT << nl;
-    os.writeKeyword("specularityCoefficient")
-        << specularityCoefficient_ << token::END_STATEMENT << nl;
+    os.writeEntry("restitutionCoefficient", restitutionCoefficient_);
+    os.writeEntry("specularityCoefficient", specularityCoefficient_);
     writeEntry("value", os);
 }
 

@@ -22,7 +22,7 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::isothermal
+    Foam::diameterModels::isothermal
 
 Description
     Isothermal dispersed-phase particle diameter model.
@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef isothermal_H
-#define isothermal_H
+#ifndef diameterModels_isothermal_H
+#define diameterModels_isothermal_H
 
 #include "diameterModel.H"
 

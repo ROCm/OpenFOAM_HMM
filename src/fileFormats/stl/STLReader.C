@@ -38,7 +38,7 @@ bool Foam::fileFormats::STLReader::readBINARY
 )
 {
     sorted_ = true;
-    format_ = UNKNOWN;
+    format_ = STLFormat::UNKNOWN;
 
     label nTris = 0;
     autoPtr<istream> streamPtr = readBinaryHeader(filename, nTris);
@@ -125,7 +125,7 @@ bool Foam::fileFormats::STLReader::readBINARY
     names_.clear();
     sizes_.transfer(dynSizes);
 
-    format_ = BINARY;
+    format_ = STLFormat::BINARY;
     return true;
 }
 
@@ -133,10 +133,15 @@ bool Foam::fileFormats::STLReader::readBINARY
 bool Foam::fileFormats::STLReader::readFile
 (
     const fileName& filename,
-    const STLFormat& format
+    const STLFormat format
 )
 {
-    if (format == UNKNOWN ? detectBinaryHeader(filename) : format == BINARY)
+    if
+    (
+        format == STLFormat::UNKNOWN
+      ? detectBinaryHeader(filename)
+      : format == STLFormat::BINARY
+    )
     {
         return readBINARY(filename);
     }
@@ -159,17 +164,17 @@ Foam::fileFormats::STLReader::STLReader
     zoneIds_(),
     names_(),
     sizes_(),
-    format_(STLCore::UNKNOWN)
+    format_(STLFormat::UNKNOWN)
 {
     // Auto-detect ASCII/BINARY format
-    readFile(filename, STLCore::UNKNOWN);
+    readFile(filename, STLFormat::UNKNOWN);
 }
 
 
 Foam::fileFormats::STLReader::STLReader
 (
     const fileName& filename,
-    const STLFormat& format
+    const STLFormat format
 )
 :
     sorted_(true),
@@ -177,7 +182,7 @@ Foam::fileFormats::STLReader::STLReader
     zoneIds_(),
     names_(),
     sizes_(),
-    format_(STLCore::UNKNOWN)
+    format_(STLFormat::UNKNOWN)
 {
     // Manually specified ASCII/BINARY format
     readFile(filename, format);
@@ -199,7 +204,7 @@ void Foam::fileFormats::STLReader::clear()
     zoneIds_.clear();
     names_.clear();
     sizes_.clear();
-    format_ = UNKNOWN;
+    format_ = STLFormat::UNKNOWN;
 }
 
 
@@ -215,7 +220,7 @@ Foam::label Foam::fileFormats::STLReader::mergePointsMap
 
     return mergePointsMap
     (
-        (format_ == BINARY ? 10 : 100) * doubleScalarSMALL,
+        (format_ == STLFormat::BINARY ? 10 : 100) * doubleScalarSMALL,
         pointMap
     );
 }

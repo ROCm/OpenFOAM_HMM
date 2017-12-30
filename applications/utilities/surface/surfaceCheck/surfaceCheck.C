@@ -150,7 +150,7 @@ void writeZoning
     faceList faces(surf.size());
     forAll(surf, i)
     {
-        faces[i] = surf[i].triFaceFace();
+        faces[i] = surf[i];
     }
 
     vtkSurfaceWriter().write
@@ -279,7 +279,7 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
+    argList::addArgument("surfaceFile");
     argList::addBoolOption
     (
         "checkSelfIntersection",

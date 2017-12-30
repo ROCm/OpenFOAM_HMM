@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+   \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,7 +166,7 @@ public:
                             if (mesh_.isInternalFace(facei))
                             {
                                 // Apply upwind differencing
-                                w[facei] = pos(faceFlux_[facei]);
+                                w[facei] = pos0(faceFlux_[facei]);
                             }
                         }
                     }
@@ -183,7 +183,7 @@ public:
         }
 
         //- Return the explicit correction to the face-interpolate
-        //  set to zero on the near-boundary faces where upwinf is applied
+        //  set to zero on the near-boundary faces where upwind is applied
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
         correction
         (

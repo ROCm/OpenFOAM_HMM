@@ -276,7 +276,7 @@ Foam::scalar Foam::cell::mag
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 bool Foam::operator==(const cell& a, const cell& b)
 {
@@ -288,18 +288,16 @@ bool Foam::operator==(const cell& a, const cell& b)
 
     List<bool> fnd(a.size(), false);
 
-    forAll(b, bI)
+    for (const label curLabel : b)
     {
-        const label curLabel = b[bI];
-
         bool found = false;
 
-        forAll(a, aI)
+        forAll(a, ai)
         {
-            if (a[aI] == curLabel)
+            if (a[ai] == curLabel)
             {
                 found = true;
-                fnd[aI] = true;
+                fnd[ai] = true;
                 break;
             }
         }
@@ -311,9 +309,9 @@ bool Foam::operator==(const cell& a, const cell& b)
     }
 
     // Any faces missed?
-    forAll(fnd, aI)
+    forAll(fnd, ai)
     {
-        if (!fnd[aI])
+        if (!fnd[ai])
         {
             return false;
         }

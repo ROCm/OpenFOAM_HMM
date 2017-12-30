@@ -30,27 +30,16 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::energyRegionCoupledFvPatchScalarField::kappaMethodType,
-        3
-    >::names[] =
-    {
-        "solid",
-        "fluid",
-        "undefined"
-    };
-}
-
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::energyRegionCoupledFvPatchScalarField::kappaMethodType,
-    3
-> Foam::energyRegionCoupledFvPatchScalarField::methodTypeNames_;
+    Foam::energyRegionCoupledFvPatchScalarField::kappaMethodType
+>
+Foam::energyRegionCoupledFvPatchScalarField::methodTypeNames_
+{
+    { kappaMethodType::SOLID, "solid" },
+    { kappaMethodType::FLUID, "fluid" },
+    { kappaMethodType::UNDEFINED, "undefined" },
+};
 
 
 // * * * * * * * * * * * * * * * * Private members  * * * * * * * * * * * * *//

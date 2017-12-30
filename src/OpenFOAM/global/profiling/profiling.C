@@ -38,7 +38,8 @@ int Foam::profiling::allowed
     Foam::debug::infoSwitch("allowProfiling", 1)
 );
 
-Foam::profiling* Foam::profiling::pool_(0);
+Foam::profiling* Foam::profiling::pool_(nullptr);
+
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -48,8 +49,7 @@ Foam::profilingInformation* Foam::profiling::find
     const label parentId
 )
 {
-    StorageContainer::iterator iter = hash_.find(Key(descr, parentId));
-    return (iter.found() ? iter() : 0);
+    return hash_.lookup(Key(descr, parentId), nullptr);
 }
 
 
@@ -99,10 +99,8 @@ bool Foam::profiling::print(Ostream& os)
     {
         return pool_->writeData(os);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -110,12 +108,10 @@ bool Foam::profiling::writeNow()
 {
     if (active())
     {
-        return pool_->write();
+        return pool_->regIOobject::write();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -179,7 +175,7 @@ void Foam::profiling::stop(const Time& owner)
     if (pool_ && &owner == &(pool_->owner_))
     {
         delete pool_;
-        pool_ = 0;
+        pool_ = nullptr;
     }
 }
 
@@ -190,7 +186,7 @@ Foam::profilingInformation* Foam::profiling::New
     clockTime& timer
 )
 {
-    profilingInformation *info = 0;
+    profilingInformation *info = nullptr;
 
     if (active())
     {
@@ -247,7 +243,7 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    regIOobject(io),
+    IOdictionary(io),
     owner_(owner),
     clockTime_(),
     hash_(),
@@ -266,7 +262,7 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    regIOobject(io),
+    IOdictionary(io),
     owner_(owner),
     clockTime_(),
     hash_(),
@@ -274,18 +270,18 @@ Foam::profiling::profiling
     timers_(),
     sysInfo_
     (
-        dict.lookupOrDefault<Switch>("sysInfo", true)
-      ? new profilingSysInfo() : 0
+        dict.lookupOrDefault<bool>("sysInfo", false)
+      ? new profilingSysInfo() : nullptr
     ),
     cpuInfo_
     (
-        dict.lookupOrDefault<Switch>("cpuInfo", true)
-      ? new cpuInfo() : 0
+        dict.lookupOrDefault<bool>("cpuInfo", false)
+      ? new cpuInfo() : nullptr
     ),
     memInfo_
     (
-        dict.lookupOrDefault<Switch>("memInfo", false)
-      ? new memInfo() : 0
+        dict.lookupOrDefault<bool>("memInfo", false)
+      ? new memInfo() : nullptr
     )
 {}
 
@@ -300,7 +296,7 @@ Foam::profiling::~profiling()
 
     if (pool_ == this)
     {
-        pool_ = 0;
+        pool_ = nullptr;
         profilingInformation::nextId_ = 0;
     }
 }
@@ -312,6 +308,7 @@ const Foam::Time& Foam::profiling::owner() const
 {
     return owner_;
 }
+
 
 Foam::label Foam::profiling::size() const
 {
@@ -409,14 +406,16 @@ bool Foam::profiling::writeObject
 (
     IOstream::streamFormat,
     IOstream::versionNumber ver,
-    IOstream::compressionType
+    IOstream::compressionType,
+    const bool valid
 ) const
 {
     return regIOobject::writeObject
     (
         IOstream::ASCII,
         ver,
-        IOstream::UNCOMPRESSED
+        IOstream::UNCOMPRESSED,
+        true
     );
 }
 

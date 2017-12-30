@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,28 +32,25 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(faceZoneSet, 0);
 
 addToRunTimeSelectionTable(topoSet, faceZoneSet, word);
 addToRunTimeSelectionTable(topoSet, faceZoneSet, size);
 addToRunTimeSelectionTable(topoSet, faceZoneSet, set);
-
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void faceZoneSet::updateSet()
+void Foam::faceZoneSet::updateSet()
 {
     labelList order;
     sortedOrder(addressing_, order);
-    addressing_ = UIndirectList<label>(addressing_, order)();
-    flipMap_ = UIndirectList<bool>(flipMap_, order)();
+    addressing_ = labelUIndList(addressing_, order)();
+    flipMap_ = boolUIndList(flipMap_, order)();
 
     faceSet::clearStorage();
     faceSet::resize(2*addressing_.size());
@@ -64,9 +61,9 @@ void faceZoneSet::updateSet()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-faceZoneSet::faceZoneSet
+Foam::faceZoneSet::faceZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -100,7 +97,7 @@ faceZoneSet::faceZoneSet
 }
 
 
-faceZoneSet::faceZoneSet
+Foam::faceZoneSet::faceZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -117,7 +114,7 @@ faceZoneSet::faceZoneSet
 }
 
 
-faceZoneSet::faceZoneSet
+Foam::faceZoneSet::faceZoneSet
 (
     const polyMesh& mesh,
     const word& name,
@@ -136,13 +133,13 @@ faceZoneSet::faceZoneSet
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-faceZoneSet::~faceZoneSet()
+Foam::faceZoneSet::~faceZoneSet()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void faceZoneSet::invert(const label maxLen)
+void Foam::faceZoneSet::invert(const label maxLen)
 {
     // Count
     label n = 0;
@@ -173,7 +170,7 @@ void faceZoneSet::invert(const label maxLen)
 }
 
 
-void faceZoneSet::subset(const topoSet& set)
+void Foam::faceZoneSet::subset(const topoSet& set)
 {
     label nConflict = 0;
 
@@ -221,7 +218,7 @@ void faceZoneSet::subset(const topoSet& set)
 }
 
 
-void faceZoneSet::addSet(const topoSet& set)
+void Foam::faceZoneSet::addSet(const topoSet& set)
 {
     label nConflict = 0;
 
@@ -272,7 +269,7 @@ void faceZoneSet::addSet(const topoSet& set)
 }
 
 
-void faceZoneSet::deleteSet(const topoSet& set)
+void Foam::faceZoneSet::deleteSet(const topoSet& set)
 {
     label nConflict = 0;
 
@@ -324,7 +321,7 @@ void faceZoneSet::deleteSet(const topoSet& set)
 }
 
 
-void faceZoneSet::sync(const polyMesh& mesh)
+void Foam::faceZoneSet::sync(const polyMesh& mesh)
 {
     // Make sure that the faceZone is consistent with the faceSet
     {
@@ -453,23 +450,24 @@ void faceZoneSet::sync(const polyMesh& mesh)
 }
 
 
-label faceZoneSet::maxSize(const polyMesh& mesh) const
+Foam::label Foam::faceZoneSet::maxSize(const polyMesh& mesh) const
 {
     return mesh.nFaces();
 }
 
 
-bool faceZoneSet::writeObject
+bool Foam::faceZoneSet::writeObject
 (
     IOstream::streamFormat s,
     IOstream::versionNumber v,
-    IOstream::compressionType c
+    IOstream::compressionType c,
+    const bool valid
 ) const
 {
     // Write shadow faceSet
     word oldTypeName = typeName;
     const_cast<word&>(type()) = faceSet::typeName;
-    bool ok = faceSet::writeObject(s, v, c);
+    bool ok = faceSet::writeObject(s, v, c, valid);
     const_cast<word&>(type()) = oldTypeName;
 
     // Modify faceZone
@@ -500,11 +498,11 @@ bool faceZoneSet::writeObject
     }
     faceZones.clearAddressing();
 
-    return ok && faceZones.write();
+    return ok && faceZones.write(valid);
 }
 
 
-void faceZoneSet::updateMesh(const mapPolyMesh& morphMap)
+void Foam::faceZoneSet::updateMesh(const mapPolyMesh& morphMap)
 {
     // faceZone
     labelList newAddressing(addressing_.size());
@@ -532,7 +530,7 @@ void faceZoneSet::updateMesh(const mapPolyMesh& morphMap)
 }
 
 
-void faceZoneSet::writeDebug
+void Foam::faceZoneSet::writeDebug
 (
     Ostream& os,
     const primitiveMesh& mesh,
@@ -542,9 +540,5 @@ void faceZoneSet::writeDebug
     faceSet::writeDebug(os, mesh, maxLen);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

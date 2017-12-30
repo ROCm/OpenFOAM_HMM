@@ -71,7 +71,7 @@ do
     shift
 
     case "$arg" in
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     -fromWmake)

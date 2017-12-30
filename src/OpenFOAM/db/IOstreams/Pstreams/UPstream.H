@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "HashTable.H"
 #include "string.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "ListOps.H"
 #include "LIFOStack.H"
 
@@ -69,7 +69,8 @@ public:
         nonBlocking
     };
 
-    static const NamedEnum<commsTypes, 3> commsTypeNames;
+    //- Names of the communication types
+    static const Enum<commsTypes> commsTypeNames;
 
     // Public classes
 
@@ -87,8 +88,8 @@ public:
                 //- procIDs of all processors below (so not just directly below)
                 labelList allBelow_;
 
-                //- procIDs of all processors not below. (inverse set of
-                //  allBelow_ and minus myProcNo)
+                //- procIDs of all processors not below.
+                //  (inverse set of allBelow_ and minus myProcNo)
                 labelList allNotBelow_;
 
 
@@ -102,10 +103,10 @@ public:
                 //- Construct from components
                 commsStruct
                 (
-                    const label,
-                    const labelList&,
-                    const labelList&,
-                    const labelList&
+                    const label above,
+                    const labelList& below,
+                    const labelList& allBelow,
+                    const labelList& allNotBelow
                 );
 
                 //- Construct from components; construct allNotBelow_
@@ -113,9 +114,9 @@ public:
                 (
                     const label nProcs,
                     const label myProcID,
-                    const label,
-                    const labelList&,
-                    const labelList&
+                    const label above,
+                    const labelList& below,
+                    const labelList& allBelow
                 );
 
 
@@ -184,6 +185,9 @@ private:
         //- By default this is not a parallel run
         static bool parRun_;
 
+        //- Have support for threads?
+        static bool haveThreads_;
+
         //- Standard transfer message type
         static int msgType_;
 
@@ -209,6 +213,9 @@ private:
 
 
     // Private Member Functions
+
+        //- Set data for parallel running
+        static void setParRun(const label nProcs, const bool haveThreads);
 
         //- Calculate linear communication schedule
         static List<commsStruct> calcLinearComm(const label nProcs);
@@ -255,12 +262,12 @@ public:
     // Static data
 
         //- Should compact transfer be used in which floats replace doubles
-        //  reducing the bandwidth requirement at the expense of some loss
-        //  in accuracy
+        //- reducing the bandwidth requirement at the expense of some loss
+        //- in accuracy
         static bool floatTransfer;
 
         //- Number of processors at which the sum algorithm changes from linear
-        //  to tree
+        //- to tree
         static int nProcsSimpleSum;
 
         //- Default commsType
@@ -271,6 +278,9 @@ public:
 
         //- Optional maximum message size (bytes)
         static int maxCommsSize;
+
+        //- MPI buffer-size (bytes)
+        static const int mpiBufferSize;
 
         //- Default communicator (all processors)
         static label worldComm;
@@ -341,15 +351,15 @@ public:
         };
 
         //- Return physical processor number (i.e. processor number in
-        //  worldComm) given communicator and procssor
+        //- worldComm) given communicator and procssor
         static int baseProcNo(const label myComm, const int procID);
 
         //- Return processor number in communicator (given physical processor
-        //  number) (= reverse of baseProcNo)
+        //- number) (= reverse of baseProcNo)
         static label procNo(const label comm, const int baseProcID);
 
         //- Return processor number in communicator (given processor number
-        //  and communicator)
+        //- and communicator)
         static label procNo
         (
             const label myComm,
@@ -358,12 +368,22 @@ public:
         );
 
         //- Add the valid option this type of communications library
-        //  adds/requires on the command line
+        //- adds/requires on the command line
         static void addValidParOptions(HashTable<string>& validParOptions);
 
         //- Initialisation function called from main
-        //  Spawns slave processes and initialises inter-communication
+        //  Spawns slave processes and initialises inter-communication.
+        //  \note warns if MPI has already been initialized.
+        //      Fatal if MPI has already been finalized.
         static bool init(int& argc, char**& argv);
+
+        //- Special purpose initialisation function.
+        //  Performs a basic MPI_Init without any other setup.
+        //  Only used for applications that need MPI communication when
+        //  OpenFOAM is running in a non-parallel mode.
+        //  \note Behaves as a no-op if MPI has already been initialized.
+        //      Fatal if MPI has already been finalized.
+        static bool initNull();
 
         // Non-blocking comms
 
@@ -397,9 +417,11 @@ public:
             return parRun_;
         }
 
-        //- Set data for parallel running. Special case nProcs=0 to switch off
-        //  parallel running
-        static void setParRun(const label nProcs);
+        //- Have support for threads
+        static bool haveThreads()
+        {
+            return haveThreads_;
+        }
 
         //- Number of processes in parallel run
         static label nProcs(const label communicator = 0)
@@ -501,6 +523,47 @@ public:
         (
             const labelUList& sendData,
             labelUList& recvData,
+            const label communicator = 0
+        );
+
+        //- Exchange data with all processors (in the communicator)
+        //  sendSizes, sendOffsets give (per processor) the slice of
+        //  sendData to send, similarly recvSizes, recvOffsets give the slice
+        //  of recvData to receive
+        static void allToAll
+        (
+            const char* sendData,
+            const UList<int>& sendSizes,
+            const UList<int>& sendOffsets,
+
+            char* recvData,
+            const UList<int>& recvSizes,
+            const UList<int>& recvOffsets,
+
+            const label communicator = 0
+        );
+
+        //- Receive data from all processors on the master
+        static void gather
+        (
+            const char* sendData,
+            int sendSize,
+
+            char* recvData,
+            const UList<int>& recvSizes,
+            const UList<int>& recvOffsets,
+            const label communicator = 0
+        );
+
+        //- Send data to all processors from the root of the communicator
+        static void scatter
+        (
+            const char* sendData,
+            const UList<int>& sendSizes,
+            const UList<int>& sendOffsets,
+
+            char* recvData,
+            int recvSize,
             const label communicator = 0
         );
 };

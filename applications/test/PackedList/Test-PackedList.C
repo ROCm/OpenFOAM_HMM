@@ -41,7 +41,7 @@ using namespace Foam;
 template<unsigned nBits>
 inline void reportInfo()
 {
-    unsigned offset = PackedList<nBits>::packing();
+    const unsigned offset = PackedList<nBits>::packing();
 
     unsigned useSHL = ((1u << (nBits * offset)) - 1);
     unsigned useSHR = (~0u >> (sizeof(unsigned)*CHAR_BIT - nBits * offset));
@@ -82,7 +82,7 @@ inline void reportInfo()
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("file .. fileN");
+    argList::addArgument("file .. fileN");
 
     argList::addBoolOption("mask", "report information about the bit masks");
     argList::addBoolOption("count", "test the count() method");

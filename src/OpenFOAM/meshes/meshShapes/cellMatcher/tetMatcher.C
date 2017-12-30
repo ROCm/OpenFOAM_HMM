@@ -26,16 +26,8 @@ License
 #include "tetMatcher.H"
 #include "cellMatcher.H"
 #include "primitiveMesh.H"
-#include "primitiveMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "ListOps.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::tetMatcher::vertPerCell = 4;
-const Foam::label Foam::tetMatcher::facePerCell = 4;
-const Foam::label Foam::tetMatcher::maxVertPerFace = 3;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,7 +38,7 @@ Foam::tetMatcher::tetMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "tet"
+        "tet" // same as cellModel::modelNames[cellModel::TET]
     )
 {}
 
@@ -202,15 +194,16 @@ bool Foam::tetMatcher::faceSizeMatch
         return false;
     }
 
-    forAll(myFaces, myFacei)
+    for (const label facei : myFaces)
     {
-        label size = faces[myFaces[myFacei]].size();
+        const label size = faces[facei].size();
 
         if (size != 3)
         {
             return false;
         }
     }
+
     return true;
 }
 
@@ -265,10 +258,8 @@ bool Foam::tetMatcher::matches
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

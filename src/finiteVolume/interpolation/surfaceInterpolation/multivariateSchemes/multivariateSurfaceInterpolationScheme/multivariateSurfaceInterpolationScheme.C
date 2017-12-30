@@ -68,10 +68,9 @@ Foam::multivariateSurfaceInterpolationScheme<Type>::New
 
     const word schemeName(schemeData);
 
-    typename IstreamConstructorTable::iterator constructorIter =
-        IstreamConstructorTablePtr_->find(schemeName);
+    auto cstrIter = IstreamConstructorTablePtr_->cfind(schemeName);
 
-    if (!constructorIter.found())
+    if (!cstrIter.found())
     {
         FatalIOErrorInFunction
         (
@@ -82,7 +81,7 @@ Foam::multivariateSurfaceInterpolationScheme<Type>::New
             << exit(FatalIOError);
     }
 
-    return constructorIter()(mesh, vtfs, faceFlux, schemeData);
+    return cstrIter()(mesh, vtfs, faceFlux, schemeData);
 }
 
 

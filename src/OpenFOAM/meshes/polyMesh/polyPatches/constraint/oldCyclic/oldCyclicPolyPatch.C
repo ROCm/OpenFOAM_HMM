@@ -497,7 +497,7 @@ bool Foam::oldCyclicPolyPatch::matchAnchors
                     << "Patch:" << name() << " : "
                     << "Cannot find point on face " << f
                     << " with vertices:"
-                    << UIndirectList<point>(pp.points(), f)()
+                    << UIndirectList<point>(pp.points(), f)
                     << " that matches point " << wantedAnchor
                     << " when matching the halves of cyclic patch " << name()
                     << endl
@@ -1221,28 +1221,24 @@ bool Foam::oldCyclicPolyPatch::order
 void Foam::oldCyclicPolyPatch::write(Ostream& os) const
 {
     // Replacement of polyPatch::write to write 'cyclic' instead of type():
-    os.writeKeyword("type") << cyclicPolyPatch::typeName
-        << token::END_STATEMENT << nl;
+    os.writeEntry("type", cyclicPolyPatch::typeName);
     patchIdentifier::write(os);
-    os.writeKeyword("nFaces") << size() << token::END_STATEMENT << nl;
-    os.writeKeyword("startFace") << start() << token::END_STATEMENT << nl;
+    os.writeEntry("nFaces", size());
+    os.writeEntry("startFace", start());
 
 
-    os.writeKeyword("featureCos") << featureCos_ << token::END_STATEMENT << nl;
+    os.writeEntry("featureCos", featureCos_);
     switch (transform())
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("rotationAxis") << rotationAxis_
-                << token::END_STATEMENT << nl;
-            os.writeKeyword("rotationCentre") << rotationCentre_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("rotationAxis", rotationAxis_);
+            os.writeEntry("rotationCentre", rotationCentre_);
             break;
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("separationVector") << separationVector_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("separationVector", separationVector_);
             break;
         }
         default:

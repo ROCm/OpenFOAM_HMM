@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,74 +25,180 @@ License
 
 #include "error.H"
 #include "token.H"
-
-#include "IOstreams.H"
 #include "scalar.H"
+#include "IOstreams.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+template<class OS>
+static OS& printTokenInfo(OS& os, const token& tok)
+{
+    os  << "on line " << tok.lineNumber() << ": ";
+
+    switch (tok.type())
+    {
+        case token::tokenType::UNDEFINED:
+            os  << "undefined token";
+        break;
+
+        case token::tokenType::FLAG:
+            os  << "flag '" << int(tok.flagToken()) << '\'';
+        break;
+
+        case token::tokenType::PUNCTUATION:
+            os  << "punctuation '" << tok.pToken() << '\'';
+        break;
+
+        case token::tokenType::LABEL:
+            os  << "label " << tok.labelToken();
+        break;
+
+        case token::tokenType::FLOAT_SCALAR:
+            os  << "float " << tok.floatScalarToken();
+        break;
+
+        case token::tokenType::DOUBLE_SCALAR:
+            os  << "double " << tok.doubleScalarToken();
+        break;
+
+        case token::tokenType::WORD:
+            os  << "word '" << tok.wordToken() << '\'';
+        break;
+
+        case token::tokenType::STRING:
+            os  << "string " << tok.stringToken();
+        break;
+
+        case token::tokenType::VARIABLE:
+            os  << "variable " << tok.stringToken();
+        break;
+
+        case token::tokenType::VERBATIMSTRING:
+            os  << "verbatim string " << tok.stringToken();
+        break;
+
+        case token::tokenType::COMPOUND:
+        {
+            if (tok.compoundToken().empty())
+            {
+                os  << "empty ";
+            }
+            os  << "compound of type "
+                << tok.compoundToken().type();
+        }
+        break;
+
+        case token::tokenType::ERROR:
+            os  << "error";
+        break;
+
+        default:
+            os  << "unknown token type '" << int(tok.type()) << '\'';
+            break;
+    }
+
+    return os;
+}
+} // End namespace Foam
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::token::token(Istream& is)
 :
-    type_(UNDEFINED)
+    token()
 {
     is.read(*this);
 }
 
 
-// * * * * * * * * * * * * IOstream operators  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, token& t)
+Foam::word Foam::token::name() const
 {
-    t.clear();
-    return is.read(t);
+    switch (type_)
+    {
+        case token::tokenType::UNDEFINED: return "undefined";
+        case token::tokenType::FLAG: return "flag";
+        case token::tokenType::PUNCTUATION: return "punctuation";
+        case token::tokenType::LABEL: return "label";
+        case token::tokenType::FLOAT_SCALAR: return "float";
+        case token::tokenType::DOUBLE_SCALAR: return "double";
+        case token::tokenType::WORD: return "word";
+        case token::tokenType::STRING: return "string";
+        case token::tokenType::VERBATIMSTRING: return "verbatim";
+        case token::tokenType::VARIABLE: return "variable";
+        case token::tokenType::COMPOUND: return "compound";
+        case token::tokenType::ERROR: return "error";
+
+        default:
+            break;
+    }
+
+    return "unknown(" + std::to_string(int(type_)) + ")";
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const token& t)
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Istream& Foam::operator>>(Istream& is, token& tok)
 {
-    switch (t.type_)
+    tok.clear();
+    return is.read(tok);
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const token& tok)
+{
+    switch (tok.type_)
     {
-        case token::UNDEFINED:
+        case token::tokenType::UNDEFINED:
             os << "UNDEFINED";
             WarningInFunction
                 << "Undefined token" << endl;
         break;
 
-        case token::PUNCTUATION:
-            os << t.punctuationToken_;
+        case token::tokenType::FLAG:
+            // Swallow the flag
         break;
 
-        case token::WORD:
-            os << *t.wordTokenPtr_;
+        case token::tokenType::PUNCTUATION:
+            os << tok.data_.punctuationVal;
         break;
 
-        case token::STRING:
-        case token::VERBATIMSTRING:
-            os << *t.stringTokenPtr_;
+        case token::tokenType::LABEL:
+            os << tok.data_.labelVal;
         break;
 
-        case token::VARIABLE:
+        case token::tokenType::FLOAT_SCALAR:
+            os << tok.data_.floatVal;
+        break;
+
+        case token::tokenType::DOUBLE_SCALAR:
+            os << tok.data_.doubleVal;
+        break;
+
+        case token::tokenType::WORD:
+            os << *tok.data_.wordPtr;
+        break;
+
+        case token::tokenType::STRING:
+        case token::tokenType::VERBATIMSTRING:
+            os << *tok.data_.stringPtr;
+        break;
+
+        case token::tokenType::VARIABLE:
             // Behaviour differs according to stream type
-            os.write(t);
+            os.write(tok);
         break;
 
-        case token::LABEL:
-            os << t.labelToken_;
+        case token::tokenType::COMPOUND:
+            os << *tok.data_.compoundPtr;
         break;
 
-        case token::FLOAT_SCALAR:
-            os << t.floatScalarToken_;
-        break;
-
-        case token::DOUBLE_SCALAR:
-            os << t.doubleScalarToken_;
-        break;
-
-        case token::COMPOUND:
-            os << *t.compoundTokenPtr_;
-        break;
-
-        case token::ERROR:
+        case token::tokenType::ERROR:
             os << "ERROR";
             WarningInFunction
                 << "Error token" << endl;
@@ -135,144 +241,14 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const token::compound& ct)
 
 ostream& Foam::operator<<(ostream& os, const InfoProxy<token>& ip)
 {
-    const token& t = ip.t_;
-
-    os  << "on line " << t.lineNumber();
-
-    switch (t.type())
-    {
-        case token::UNDEFINED:
-            os  << " an undefined token";
-        break;
-
-        case token::PUNCTUATION:
-            os  << " the punctuation token " << '\'' << t.pToken() << '\'';
-        break;
-
-        case token::WORD:
-            os  << " the word " << '\'' << t.wordToken() << '\'';
-        break;
-
-        case token::STRING:
-            os  << " the string " << t.stringToken();
-        break;
-
-        case token::VARIABLE:
-            os  << " the variable " << t.stringToken();
-        break;
-
-        case token::VERBATIMSTRING:
-            os  << " the verbatim string " << t.stringToken();
-        break;
-
-        case token::LABEL:
-            os  << " the label " << t.labelToken();
-        break;
-
-        case token::FLOAT_SCALAR:
-            os  << " the floatScalar " << t.floatScalarToken();
-        break;
-
-        case token::DOUBLE_SCALAR:
-            os  << " the doubleScalar " << t.doubleScalarToken();
-        break;
-
-        case token::COMPOUND:
-        {
-            if (t.compoundToken().empty())
-            {
-                os  << " the empty compound of type "
-                    << t.compoundToken().type();
-            }
-            else
-            {
-                os  << " the compound of type "
-                    << t.compoundToken().type();
-            }
-        }
-        break;
-
-        case token::ERROR:
-            os  << " an error";
-        break;
-
-        default:
-            os  << " an unknown token type " << '\'' << int(t.type()) << '\'';
-    }
-
-    return os;
+    return printTokenInfo(os, ip.t_);
 }
 
 
 template<>
 Foam::Ostream& Foam::operator<<(Ostream& os, const InfoProxy<token>& ip)
 {
-    const token& t = ip.t_;
-
-    os  << "on line " << t.lineNumber();
-
-    switch (t.type())
-    {
-        case token::UNDEFINED:
-            os  << " an undefined token";
-        break;
-
-        case token::PUNCTUATION:
-            os  << " the punctuation token " << '\'' << t.pToken() << '\'';
-        break;
-
-        case token::WORD:
-            os  << " the word " << '\'' << t.wordToken() << '\'';
-        break;
-
-        case token::STRING:
-            os  << " the string " << t.stringToken();
-        break;
-
-        case token::VARIABLE:
-            os  << " the variable " << t.stringToken();
-        break;
-
-        case token::VERBATIMSTRING:
-            os  << " the verbatim string " << t.stringToken();
-        break;
-
-        case token::LABEL:
-            os  << " the label " << t.labelToken();
-        break;
-
-        case token::FLOAT_SCALAR:
-            os  << " the floatScalar " << t.floatScalarToken();
-        break;
-
-        case token::DOUBLE_SCALAR:
-            os  << " the doubleScalar " << t.doubleScalarToken();
-        break;
-
-        case token::COMPOUND:
-        {
-            if (t.compoundToken().empty())
-            {
-                os  << " the empty compound of type "
-                    << t.compoundToken().type();
-            }
-            else
-            {
-                os  << " the compound of type "
-                    << t.compoundToken().type();
-            }
-        }
-        break;
-
-        case token::ERROR:
-            os  << " an error";
-        break;
-
-        default:
-            os  << " an unknown token type "  << '\'' << int(t.type()) << '\'';
-    }
-
-    return os;
+    return printTokenInfo(os, ip.t_);
 }
 
 

@@ -38,9 +38,8 @@ Description
 #include "Time.H"
 #include "hexRef8.H"
 #include "cellSet.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "meshTools.H"
-#include "IFstream.H"
 #include "polyTopoChange.H"
 #include "mapPolyMesh.H"
 #include "volMesh.H"
@@ -59,7 +58,7 @@ int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::validArgs.append("cellSet");
+    argList::addArgument("cellSet");
     argList::addBoolOption
     (
         "minSet",

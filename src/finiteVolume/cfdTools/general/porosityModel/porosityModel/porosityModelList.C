@@ -153,7 +153,7 @@ void Foam::porosityModelList::addResistance
 (
     const fvVectorMatrix& UEqn,
     volTensorField& AU,
-    bool correctAUprocBC         
+    bool correctAUprocBC
 )
 {
     forAll(*this, i)

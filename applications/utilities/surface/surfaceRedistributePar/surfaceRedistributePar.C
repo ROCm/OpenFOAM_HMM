@@ -105,11 +105,12 @@ int main(int argc, char *argv[])
     argList::addNote
     (
         "Redistribute a triSurface. "
-        "The specified surface must be located in the constant/triSurface directory"
+        "The specified surface must be located in the constant/triSurface "
+        "directory"
     );
 
-    argList::validArgs.append("triSurfaceMesh");
-    argList::validArgs.append("distributionType");
+    argList::addArgument("triSurfaceMesh");
+    argList::addArgument("distributionType");
     argList::addBoolOption
     (
         "keepNonMapped",
@@ -239,7 +240,10 @@ int main(int argc, char *argv[])
         if (Pstream::master())
         {
             // Actually load the surface
+            const bool oldParRun = Pstream::parRun();
+            Pstream::parRun() = false;
             triSurfaceMesh surf(io);
+            Pstream::parRun() = oldParRun;
             s = surf;
             bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::greatBox));
         }

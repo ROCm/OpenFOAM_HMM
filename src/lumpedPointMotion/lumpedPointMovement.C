@@ -27,8 +27,7 @@ License
 #include "lumpedPointIOMovement.H"
 #include "demandDrivenData.H"
 #include "linearInterpolationWeights.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "PtrMap.H"
@@ -38,12 +37,15 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::lumpedPointMovement::outputFormatType>
-    Foam::lumpedPointMovement::formatNames
-    {
-        { outputFormatType::PLAIN, "plain" },
-        { outputFormatType::DICTIONARY, "dictionary" }
-    };
+const Foam::Enum
+<
+    Foam::lumpedPointMovement::outputFormatType
+>
+Foam::lumpedPointMovement::formatNames
+{
+    { outputFormatType::PLAIN, "plain" },
+    { outputFormatType::DICTIONARY, "dictionary" }
+};
 
 
 const Foam::word
@@ -299,7 +301,8 @@ void Foam::lumpedPointMovement::setBoundBox
         centre_ -= (centre_ & axis_) * axis_;
         if (lumpedPointIOMovement::debug)
         {
-            Pout<<"autoCentre on " << centre_ << " boundBox: " << boundBox_ << endl;
+            Pout<<"autoCentre on " << centre_
+                << " boundBox: " << boundBox_ << endl;
         }
     }
     else
@@ -307,7 +310,8 @@ void Foam::lumpedPointMovement::setBoundBox
         // User-specified centre
         if (lumpedPointIOMovement::debug)
         {
-            Pout<<"centre on " << centre_ << " boundBox: " << boundBox_ << endl;
+            Pout<<"centre on " << centre_
+                << " boundBox: " << boundBox_ << endl;
         }
     }
 }

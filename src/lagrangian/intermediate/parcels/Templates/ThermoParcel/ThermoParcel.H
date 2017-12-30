@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -147,10 +147,9 @@ public:
     };
 
 
-    template<class CloudType>
-    class TrackingData
+    class trackingData
     :
-        public ParcelType::template TrackingData<CloudType>
+        public ParcelType::trackingData
     {
     private:
 
@@ -180,19 +179,27 @@ public:
                 autoPtr<interpolation<scalar>> GInterp_;
 
 
+            // Cached continuous phase properties
+
+                //- Temperature [K]
+                scalar Tc_;
+
+                //- Specific heat capacity [J/(kg.K)]
+                scalar Cpc_;
+
+
     public:
 
-        typedef typename ParcelType::template TrackingData<CloudType>::trackPart
-            trackPart;
+        typedef typename ParcelType::trackingData::trackPart trackPart;
 
         // Constructors
 
             //- Construct from components
-            inline TrackingData
+            template <class TrackCloudType>
+            inline trackingData
             (
-                CloudType& cloud,
-                trackPart part = ParcelType::template
-                    TrackingData<CloudType>::tpLinearTrack
+                const TrackCloudType& cloud,
+                trackPart part = ParcelType::trackingData::tpLinearTrack
             );
 
 
@@ -219,6 +226,18 @@ public:
             //- Return const access to the interpolator for continuous
             //  radiation field
             inline const interpolation<scalar>& GInterp() const;
+
+            //- Return the continuous phase temperature
+            inline scalar Tc() const;
+
+            //- Access the continuous phase temperature
+            inline scalar& Tc();
+
+            //- Return the continuous phase specific heat capacity
+            inline scalar Cpc() const;
+
+            //- Access the continuous phase specific heat capacity
+            inline scalar& Cpc();
     };
 
 
@@ -235,24 +254,15 @@ protected:
             scalar Cp_;
 
 
-        // Cell-based quantities
-
-            //- Temperature [K]
-            scalar Tc_;
-
-            //- Specific heat capacity [J/(kg.K)]
-            scalar Cpc_;
-
-
     // Protected Member Functions
 
         //- Calculate new particle temperature
-        template<class TrackData>
+        template<class TrackCloudType>
         scalar calcHeatTransfer
         (
-            TrackData& td,
+            TrackCloudType& cloud,
+            trackingData& td,
             const scalar dt,           // timestep
-            const label celli,         // owner cell
             const scalar Re,           // Reynolds number
             const scalar Pr,           // Prandtl number - surface
             const scalar kappa,        // Thermal conductivity - surface
@@ -288,22 +298,31 @@ public:
 
     // Constructors
 
-        //- Construct from owner, position, and cloud owner
+        //- Construct from mesh, coordinates and topology
         //  Other properties initialised as null
         inline ThermoParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti
+        );
+
+        //- Construct from a position and a cell, searching for the rest of the
+        //  required topology. Other properties are initialised as null.
+        inline ThermoParcel
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli
         );
 
         //- Construct from components
         inline ThermoParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti,
@@ -323,7 +342,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct as a copy
@@ -380,12 +400,6 @@ public:
             //- Return the parcel sensible enthalpy
             inline scalar hs() const;
 
-            //- Return const access to carrier temperature
-            inline scalar Tc() const;
-
-            //- Return const access to carrier specific heat capacity
-            inline scalar Cpc() const;
-
 
         // Edit
 
@@ -399,29 +413,24 @@ public:
         // Main calculation loop
 
             //- Set cell values
-            template<class TrackData>
-            void setCellValues
-            (
-                TrackData& td,
-                const scalar dt,
-                const label celli
-            );
+            template<class TrackCloudType>
+            void setCellValues(TrackCloudType& cloud, trackingData& td);
 
             //- Correct cell values using latest transfer information
-            template<class TrackData>
+            template<class TrackCloudType>
             void cellValueSourceCorrection
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
             //- Calculate surface thermo properties
-            template<class TrackData>
+            template<class TrackCloudType>
             void calcSurfaceValues
             (
-                TrackData& td,
-                const label celli,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const scalar T,
                 scalar& Ts,
                 scalar& rhos,
@@ -431,12 +440,12 @@ public:
             ) const;
 
             //- Update parcel properties over the time interval
-            template<class TrackData>
+            template<class TrackCloudType>
             void calc
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
 

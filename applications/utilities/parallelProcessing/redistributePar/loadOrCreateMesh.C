@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,10 @@ License
 #include "Time.H"
 //#include "IOPtrList.H"
 #include "polyBoundaryMeshEntries.H"
+#include "IOobjectList.H"
+#include "pointSet.H"
+#include "faceSet.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -145,12 +149,13 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     // ~~~~~~~~~~~~
 
     // Check who has a mesh
-    //const bool haveMesh = isDir(io.time().path()/io.instance()/meshSubDir);
-    const bool haveMesh = isFile
+    const bool haveMesh = fileHandler().isFile
     (
-        io.time().path()/io.instance()/meshSubDir/"faces"
+        fileHandler().filePath
+        (
+            io.time().path()/io.instance()/meshSubDir/"faces"
+        )
     );
-
 
     if (!haveMesh)
     {
@@ -213,7 +218,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new pointZone
             (
                 "dummyPointZone",
-                labelList(0),
                 0,
                 dummyMesh.pointZones()
             )
@@ -224,8 +228,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new faceZone
             (
                 "dummyFaceZone",
-                labelList(0),
-                boolList(0),
                 0,
                 dummyMesh.faceZones()
             )
@@ -236,7 +238,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new cellZone
             (
                 "dummyCellZone",
-                labelList(0),
                 0,
                 dummyMesh.cellZones()
             )
@@ -342,7 +343,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             pz[i] = new pointZone
             (
                 pointZoneNames[i],
-                labelList(0),
                 i,
                 mesh.pointZones()
             );
@@ -353,8 +353,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             fz[i] = new faceZone
             (
                 faceZoneNames[i],
-                labelList(0),
-                boolList(0),
                 i,
                 mesh.faceZones()
             );
@@ -365,12 +363,46 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             cz[i] = new cellZone
             (
                 cellZoneNames[i],
-                labelList(0),
                 i,
                 mesh.cellZones()
             );
         }
         mesh.addZones(pz, fz, cz);
+    }
+
+
+    // Determine sets
+    // ~~~~~~~~~~~~~~
+
+    wordList pointSetNames;
+    wordList faceSetNames;
+    wordList cellSetNames;
+    if (Pstream::master())
+    {
+        // Read sets
+        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+        pointSetNames = objects.sortedNames(pointSet::typeName);
+        faceSetNames = objects.sortedNames(faceSet::typeName);
+        cellSetNames = objects.sortedNames(cellSet::typeName);
+    }
+    Pstream::scatter(pointSetNames);
+    Pstream::scatter(faceSetNames);
+    Pstream::scatter(cellSetNames);
+
+    if (!haveMesh)
+    {
+        forAll(pointSetNames, i)
+        {
+            pointSet(mesh, pointSetNames[i], 0).write();
+        }
+        forAll(faceSetNames, i)
+        {
+            faceSet(mesh, faceSetNames[i], 0).write();
+        }
+        forAll(cellSetNames, i)
+        {
+            cellSet(mesh, cellSetNames[i], 0).write();
+        }
     }
 
 

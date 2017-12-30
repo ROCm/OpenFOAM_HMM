@@ -25,7 +25,7 @@ Class
     Foam::rigidBodyMeshMotion
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Rigid-body mesh motion solver for fvMesh.
@@ -172,7 +172,8 @@ public:
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,
-            IOstream::compressionType cmp
+            IOstream::compressionType cmp,
+            const bool valid
         ) const;
 
         //- Read dynamicMeshDict dictionary

@@ -532,7 +532,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findAllIntersectOp::operator()
     point& intersectionPoint
 ) const
 {
-    if (findIndex(shapeMask_, index) != -1)
+    if (shapeMask_.found(index))
     {
         return false;
     }
@@ -564,7 +564,7 @@ bool Foam::treeDataPrimitivePatch<PatchType>::findSelfIntersectOp::operator()
     const typename PatchType::FaceType& f = patch.localFaces()[index];
     const edge& e = patch.edges()[edgeID_];
 
-    if (findIndex(f, e[0]) == -1 && findIndex(f, e[1]) == -1)
+    if (!f.found(e[0]) && !f.found(e[1]))
     {
         return findIntersection(tree_, index, start, end, intersectionPoint);
     }

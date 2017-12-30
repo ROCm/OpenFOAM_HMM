@@ -329,8 +329,9 @@ private:
         //- Get interfaces, cellTable and boundaryRegion information
         void readProblemDescription(const ccmID& probNode);
 
-        //- Get /InterfaceDefinitions, used by STARCCM to define in-place interfaces, etc
-        //  only handle in-place (IN_PLACE) ones at the moment
+        //- Get /InterfaceDefinitions, used by STARCCM to define in-place
+        //  interfaces, etc.
+        //  Only handle in-place (IN_PLACE) ones at the moment
         void readInterfaceDefinitions();
 
         //- Get boundaryRegion information
@@ -358,7 +359,8 @@ private:
         //- Read the monitoring
         void readMonitoring(const ccmID& topoId);
 
-        //- Move solid faces from Default_Boundary_Region -> Default_Boundary_Solid
+        //- Move solid faces from Default_Boundary_Region to
+        //  Default_Boundary_Solid
         void juggleSolids();
 
         //- Remove unwanted fluid/porous/solid regions

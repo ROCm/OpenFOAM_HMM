@@ -38,8 +38,7 @@ Description
 #include "argList.H"
 #include "fileName.H"
 #include "triSurface.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "triFace.H"
 #include "triFaceList.H"
 
@@ -56,9 +55,9 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
 
     argList::addOption
     (
@@ -71,6 +70,12 @@ int main(int argc, char *argv[])
         "mergeRegions",
         "combine regions from both surfaces"
     );
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "geometry scaling factor on input surfaces"
+    );
 
     argList args(argc, argv);
 
@@ -80,6 +85,8 @@ int main(int argc, char *argv[])
 
     const bool addPoint     = args.optionFound("points");
     const bool mergeRegions = args.optionFound("mergeRegions");
+
+    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
 
     if (addPoint)
     {
@@ -117,8 +124,12 @@ int main(int argc, char *argv[])
             << "Writing  : " << outFileName << nl << endl;
     }
 
-    const triSurface surface1(inFileName1);
+    if (scaleFactor > 0)
+    {
+        Info<< "Scaling  : " << scaleFactor << nl;
+    }
 
+    const triSurface surface1(inFileName1, scaleFactor);
     Info<< "Surface1:" << endl;
     surface1.writeStats(Info);
     Info<< endl;
@@ -131,7 +142,7 @@ int main(int argc, char *argv[])
     if (addPoint)
     {
         IFstream pointsFile(args["points"]);
-        pointField extraPoints(pointsFile);
+        const pointField extraPoints(pointsFile);
 
         Info<< "Additional Points:" << extraPoints.size() << endl;
 
@@ -139,17 +150,16 @@ int main(int argc, char *argv[])
         label pointi = pointsAll.size();
         pointsAll.setSize(pointsAll.size() + extraPoints.size());
 
-        forAll(extraPoints, i)
+        for (const auto& pt : extraPoints)
         {
-            pointsAll[pointi++] = extraPoints[i];
+            pointsAll[pointi++] = pt;
         }
 
         combinedSurf = triSurface(surface1, surface1.patches(), pointsAll);
     }
     else
     {
-        const triSurface surface2(inFileName2);
-
+        const triSurface surface2(inFileName2, scaleFactor);
         Info<< "Surface2:" << endl;
         surface2.writeStats(Info);
         Info<< endl;
@@ -165,20 +175,18 @@ int main(int argc, char *argv[])
 
         label pointi = 0;
         // Copy points1 into pointsAll
-        forAll(points1, point1i)
+        for (const auto& pt : points1)
         {
-            pointsAll[pointi++] = points1[point1i];
+            pointsAll[pointi++] = pt;
         }
         // Add surface2 points
-        forAll(points2, point2i)
+        for (const auto& pt : points2)
         {
-            pointsAll[pointi++] = points2[point2i];
+            pointsAll[pointi++] = pt;
         }
 
 
         label trianglei = 0;
-
-
 
         // Determine map for both regions
         label nNewPatches = 0;
@@ -192,17 +200,17 @@ int main(int argc, char *argv[])
             forAll(surface1.patches(), i)
             {
                 const word& name = surface1.patches()[i].name();
-                HashTable<label>::iterator iter = nameToPatch.find(name);
+                auto iter = nameToPatch.find(name);
 
                 label combinedi;
-                if (iter == nameToPatch.end())
+                if (iter.found())
                 {
-                    combinedi = nameToPatch.size();
-                    nameToPatch.insert(name, combinedi);
+                    combinedi = iter.object();
                 }
                 else
                 {
-                    combinedi = iter();
+                    combinedi = nameToPatch.size();
+                    nameToPatch.insert(name, combinedi);
                 }
                 patch1Map[i] = combinedi;
             }
@@ -212,17 +220,17 @@ int main(int argc, char *argv[])
             forAll(surface2.patches(), i)
             {
                 const word& name = surface2.patches()[i].name();
-                HashTable<label>::iterator iter = nameToPatch.find(name);
+                auto iter = nameToPatch.find(name);
 
                 label combinedi;
-                if (iter == nameToPatch.end())
+                if (iter.found())
                 {
-                    combinedi = nameToPatch.size();
-                    nameToPatch.insert(name, combinedi);
+                    combinedi = iter.object();
                 }
                 else
                 {
-                    combinedi = iter();
+                    combinedi = nameToPatch.size();
+                    nameToPatch.insert(name, combinedi);
                 }
                 patch2Map[i] = combinedi;
             }
@@ -245,11 +253,9 @@ int main(int argc, char *argv[])
         }
 
 
-
         // Copy triangles1 into trianglesAll
-        forAll(surface1, facei)
+        for (const labelledTri& tri : surface1)
         {
-            const labelledTri& tri = surface1[facei];
             labelledTri& destTri = facesAll[trianglei++];
 
             destTri.triFace::operator=(tri);
@@ -257,10 +263,8 @@ int main(int argc, char *argv[])
         }
 
         // Add (renumbered) surface2 triangles
-        forAll(surface2, facei)
+        for (const labelledTri& tri : surface2)
         {
-            const labelledTri& tri = surface2[facei];
-
             labelledTri& destTri = facesAll[trianglei++];
             destTri[0] = tri[0] + points1.size();
             destTri[1] = tri[1] + points1.size();

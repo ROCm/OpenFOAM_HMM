@@ -49,6 +49,9 @@ Description
     The thermal conductivity \c kappa can either be retrieved from various
     possible sources, as detailed in the class temperatureCoupledBase.
 
+    The ambient temperature Ta is specified as a Foam::Function1 of time but
+    uniform is space.
+
 Usage
     \table
     Property     | Description                 | Required | Default value
@@ -75,7 +78,7 @@ Usage
 
         mode            coefficient;
 
-        Ta              uniform 300.0;
+        Ta              constant 300.0;
         h               uniform 10.0;
         thicknessLayers (0.1 0.2 0.3 0.4);
         kappaLayers     (1 2 3 4);
@@ -95,11 +98,12 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidWallHeatFluxTemperatureFvPatchScalarField_H
-#define solidWallHeatFluxTemperatureFvPatchScalarField_H
+#ifndef externalWallHeatFluxTemperatureFvPatchScalarField_H
+#define externalWallHeatFluxTemperatureFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 #include "temperatureCoupledBase.H"
+#include "Function1.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,7 +131,7 @@ public:
             fixedHeatTransferCoeff,     //!< Fixed heat transfer coefficient
         };
 
-        static const NamedEnum<operationMode, 3> operationModeNames;
+        static const Enum<operationMode> operationModeNames;
 
 
 private:
@@ -147,7 +151,7 @@ private:
         scalarField h_;
 
         //- Ambient temperature [K]
-        scalarField Ta_;
+        autoPtr<Function1<scalar>> Ta_;
 
         //- Relaxation for the wall temperature (thermal inertia)
         scalar relaxation_;
@@ -241,6 +245,15 @@ public:
 
 
     // Member functions
+
+        // Access
+
+            //- Allow manipulation of the boundary values
+            virtual bool fixesValue() const
+            {
+                return false;
+            }
+
 
         // Mapping functions
 

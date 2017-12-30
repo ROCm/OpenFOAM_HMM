@@ -84,10 +84,10 @@ inline Foam::scalar Foam::powerSeriesReactionRate::operator()
 
 inline void Foam::powerSeriesReactionRate::write(Ostream& os) const
 {
-    os.writeKeyword("A") << A_ << token::END_STATEMENT << nl;
-    os.writeKeyword("beta") << beta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Ta") << Ta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("coeffs") << coeffs_ << token::END_STATEMENT << nl;
+    os.writeEntry("A", A_);
+    os.writeEntry("beta", beta_);
+    os.writeEntry("Ta", Ta_);
+    os.writeEntry("coeffs", coeffs_);
 }
 
 

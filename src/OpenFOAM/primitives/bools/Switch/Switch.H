@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,17 +69,13 @@ public:
 
     // Public data types
 
-        // avoid issues with pre-processor defines
+        // Avoid issues with possible pre-processor defines
         #undef FALSE
         #undef TRUE
-        #undef OFF
-        #undef ON
         #undef NO
         #undef YES
-        #undef NO_1
-        #undef YES_1
-        #undef FALSE_1
-        #undef TRUE_1
+        #undef OFF
+        #undef ON
         #undef NONE
         #undef PLACEHOLDER
         #undef INVALID
@@ -89,11 +85,9 @@ public:
         enum switchType
         {
             FALSE   = 0,  TRUE   = 1,
-            OFF     = 2,  ON     = 3,
-            NO      = 4,  YES    = 5,
-            NO_1    = 6,  YES_1  = 7,
-            FALSE_1 = 8,  TRUE_1 = 9,
-            NONE    = 10, PLACEHOLDER = 11,
+            NO      = 2,  YES    = 3,
+            OFF     = 4,  ON     = 5,
+            NONE    = 6,  PLACEHOLDER = 7,
             INVALID
         };
 
@@ -123,7 +117,7 @@ public:
         //- Construct null as false
         Switch()
         :
-            switch_(Switch::FALSE)
+            switch_(switchType::FALSE)
         {}
 
         //- Construct from enumerated value
@@ -135,25 +129,37 @@ public:
         //- Construct from bool
         Switch(const bool b)
         :
-            switch_(b ? Switch::TRUE : Switch::FALSE)
+            switch_(b ? switchType::TRUE : switchType::FALSE)
         {}
 
         //- Construct from integer values (treats integer as bool value)
         Switch(const int i)
         :
-            switch_(i ? Switch::TRUE : Switch::FALSE)
+            switch_(i ? switchType::TRUE : switchType::FALSE)
         {}
 
-        //- Construct from std::string, string, word
+        //- Construct from string - catches bad input.
+        explicit Switch(const std::string& str)
+        :
+            switch_(asEnum(str, false))
+        {}
+
+        //- Construct from character array - catches bad input.
+        explicit Switch(const char* str)
+        :
+            switch_(asEnum(std::string(str), false))
+        {}
+
+        //- Construct from string.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const std::string& str, const bool allowInvalid=false)
+        Switch(const std::string& str, const bool allowInvalid)
         :
             switch_(asEnum(str, allowInvalid))
         {}
 
-        //- Construct from character array
+        //- Construct from character array.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const char* str, const bool allowInvalid=false)
+        Switch(const char* str, const bool allowInvalid)
         :
             switch_(asEnum(std::string(str), allowInvalid))
         {}
@@ -167,7 +173,7 @@ public:
         (
             const word& name,
             dictionary& dict,
-            const Switch& defaultValue = false
+            const Switch& defaultValue = switchType::FALSE
         );
 
 

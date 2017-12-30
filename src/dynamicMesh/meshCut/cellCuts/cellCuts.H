@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,6 +112,10 @@ class cellCuts
 {
     // Private data
 
+        //- Warn for illegal cuts
+        const bool verbose_;
+
+
         // Per point/edge status
 
             //- Is mesh point cut
@@ -128,7 +132,7 @@ class cellCuts
 
             //- Cuts per existing face (includes those along edge of face)
             //  Cuts in no particular order.
-            mutable labelListList* faceCutsPtr_;
+            mutable autoPtr<labelListList> faceCutsPtr_;
 
             //- Per face : cut across edge (so not along existing edge)
             //  (can only be one per face)
@@ -418,6 +422,10 @@ class cellCuts
                 const List<scalarField>& cellLoopWeights
             );
 
+            //- Update basic cut information to be consistent across
+            //  coupled boundaries.
+            void syncProc();
+
             //- Cut cells and update basic cut information from cellLoops.
             //  Checks each loop for consistency with existing cut pattern.
             void setFromCellCutter
@@ -468,7 +476,8 @@ public:
             const labelList& cutCells,
             const labelList& meshVerts,
             const labelList& meshEdges,
-            const scalarField& meshEdgeWeights
+            const scalarField& meshEdgeWeights,
+            const bool verbose = true
         );
 
         //- Construct from pattern of cuts. Detect cells to cut.
@@ -477,7 +486,8 @@ public:
             const polyMesh& mesh,
             const labelList& meshVerts,
             const labelList& meshEdges,
-            const scalarField& meshEdgeWeights
+            const scalarField& meshEdgeWeights,
+            const bool verbose = true
         );
 
         //- Construct from complete cellLoops through specified cells.
@@ -488,7 +498,8 @@ public:
             const polyMesh& mesh,
             const labelList& cellLabels,
             const labelListList& cellLoops,
-            const List<scalarField>& cellEdgeWeights
+            const List<scalarField>& cellEdgeWeights,
+            const bool verbose = true
         );
 
         //- Construct from list of cells to cut and direction to cut in
@@ -497,7 +508,8 @@ public:
         (
             const polyMesh& mesh,
             const cellLooper& cellCutter,
-            const List<refineCell>& refCells
+            const List<refineCell>& refCells,
+            const bool verbose = true
         );
 
         //- Construct from list of cells to cut and plane to cut with and
@@ -507,7 +519,8 @@ public:
             const polyMesh& mesh,
             const cellLooper& cellCutter,
             const labelList& cellLabels,
-            const List<plane>& cutPlanes
+            const List<plane>& cutPlanes,
+            const bool verbose = true
         );
 
         //- Construct from components
@@ -520,7 +533,8 @@ public:
             const Map<edge>& faceSplitCut,
             const labelListList& cellLoops,
             const label nLoops,
-            const labelListList& cellAnchorPoints
+            const labelListList& cellAnchorPoints,
+            const bool verbose = true
         );
 
 
@@ -557,11 +571,11 @@ public:
             //  Cuts in no particular order
             const labelListList& faceCuts() const
             {
-                if (!faceCutsPtr_)
+                if (!faceCutsPtr_.valid())
                 {
                     calcFaceCuts();
                 }
-                return *faceCutsPtr_;
+                return faceCutsPtr_();
             }
 
             //- Gives for split face the two cuts that split the face into two.
@@ -626,7 +640,6 @@ public:
 
             //- debugging:Write edges of cell and loop
             void writeCellOBJ(const fileName& dir, const label celli) const;
-
 };
 
 

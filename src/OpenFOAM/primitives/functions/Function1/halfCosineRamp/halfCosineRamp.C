@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "halfCosineRamp.H"
-#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -53,14 +52,6 @@ Foam::Function1Types::halfCosineRamp::halfCosineRamp
 
 Foam::Function1Types::halfCosineRamp::~halfCosineRamp()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-Foam::scalar Foam::Function1Types::halfCosineRamp::value(const scalar t) const
-{
-    return 0.5*(1 - cos(constant::mathematical::pi*linearRamp(t)));
-}
 
 
 // ************************************************************************* //

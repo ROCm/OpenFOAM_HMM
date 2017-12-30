@@ -52,7 +52,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::noParallel();
     #include "addDictOption.H"
 

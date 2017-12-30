@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.insert("start size .. startN sizeN");
+    argList::addArgument("start size .. startN sizeN");
     argList::addOption("verbose");
     argList::addNote
     (

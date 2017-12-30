@@ -28,7 +28,7 @@ Description
 
 #include "cellShapeRecognition.H"
 #include "labelList.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ cellShape extrudedTriangleCellShape
 
     if (!prismModelPtr_)
     {
-        prismModelPtr_ = cellModeller::lookup("prism");
+        prismModelPtr_ = cellModel::ptr(cellModel::PRISM);
     }
 
     const cellModel& prism = *prismModelPtr_;

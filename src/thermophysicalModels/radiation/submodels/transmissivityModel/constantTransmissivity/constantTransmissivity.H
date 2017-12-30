@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationConstantTransmissivity_H
-#define radiationConstantTransmissivity_H
+#ifndef radiation_constantTransmissivity_H
+#define radiation_constantTransmissivity_H
 
 #include "transmissivityModel.H"
 

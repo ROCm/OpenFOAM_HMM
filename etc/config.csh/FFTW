@@ -2,54 +2,37 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.csh/FFTW
 #
 # Description
-#     Setup file for FFTW include/libraries.
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
+#     Setup for FFTW include/libraries (usually ThirdParty installation).
+#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
-#     If using system-wide installations, use the following settings:
+#     To disable its use:               fftw_version=fftw-none
+#     For system-wide installations:    fftw_version=fftw-system
 #
-#         fftw_version=fftw-system
-#
-#     If the system fftw is unusable (eg, too old) and you don't
-#     have or want a ThirdParty installation:
-#
-#         fftw_version=fftw-none
-#
-#     If using a central installation, but not located under ThirdParty:
-#         - specify fftw-system
-#         - provide full paths for FFTW_ARCH_PATH
+#     For central installations not located under ThirdParty:
+#       1. use fftw-system
+#       2. and provide full path for FFTW_ARCH_PATH
 #
 # Note
-#     When building OpenFOAM, any changes made here MUST be made in the
-#     equivalent config.sh version too, since that is the one which will
-#     be used during the build process.
+#     Changes made here MUST be made in the equivalent config.sh version too,
+#     since that is the one used in the build process.
 #
+#     Can also disable by renaming/removing this file or by creating an empty
+#     file with the same name at a user or site location.
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 
-set fftw_version=fftw-3.3.6-pl1
+set fftw_version=fftw-3.3.7
 setenv FFTW_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$fftw_version
 
 # END OF (NORMAL) USER EDITABLE PART

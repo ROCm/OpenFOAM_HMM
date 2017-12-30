@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,24 @@ namespace Foam
 }
 
 const char* const Foam::faceZone::labelsName = "faceLabels";
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::faceZone::setFlipMap(const bool val)
+{
+    // Match size for flipMap
+    if (flipMap_.size() == this->size())
+    {
+        flipMap_ = val;
+    }
+    else
+    {
+        // Avoid copying old values on resize
+        flipMap_.clear();
+        flipMap_.setSize(this->size(), val);
+    }
+}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -128,8 +146,8 @@ void Foam::faceZone::calcCellLayers() const
 
         forAll(mf, facei)
         {
-            label ownCelli = own[mf[facei]];
-            label neiCelli =
+            const label ownCelli = own[mf[facei]];
+            const label neiCelli =
             (
                 zoneMesh().mesh().isInternalFace(mf[facei])
               ? nei[mf[facei]]
@@ -182,6 +200,67 @@ void Foam::faceZone::checkAddressing() const
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::faceZone::faceZone
+(
+    const word& name,
+    const label index,
+    const faceZoneMesh& zm
+)
+:
+    zone(name, index),
+    flipMap_(),
+    zoneMesh_(zm),
+    patchPtr_(nullptr),
+    masterCellsPtr_(nullptr),
+    slaveCellsPtr_(nullptr),
+    mePtr_(nullptr)
+{}
+
+
+Foam::faceZone::faceZone
+(
+    const word& name,
+    const labelUList& addr,
+    const bool flipMapValue,
+    const label index,
+    const faceZoneMesh& zm
+)
+:
+    zone(name, addr, index),
+    flipMap_(),
+    zoneMesh_(zm),
+    patchPtr_(nullptr),
+    masterCellsPtr_(nullptr),
+    slaveCellsPtr_(nullptr),
+    mePtr_(nullptr)
+{
+    flipMap_.setSize(size(), flipMapValue);
+    checkAddressing();
+}
+
+
+Foam::faceZone::faceZone
+(
+    const word& name,
+    labelList&& addr,
+    const bool flipMapValue,
+    const label index,
+    const faceZoneMesh& zm
+)
+:
+    zone(name, std::move(addr), index),
+    flipMap_(),
+    zoneMesh_(zm),
+    patchPtr_(nullptr),
+    masterCellsPtr_(nullptr),
+    slaveCellsPtr_(nullptr),
+    mePtr_(nullptr)
+{
+    flipMap_.setSize(size(), flipMapValue);
+    checkAddressing();
+}
+
 
 Foam::faceZone::faceZone
 (
@@ -247,14 +326,14 @@ Foam::faceZone::faceZone
 
 Foam::faceZone::faceZone
 (
-    const faceZone& fz,
+    const faceZone& origZone,
     const labelUList& addr,
     const boolList& fm,
     const label index,
     const faceZoneMesh& zm
 )
 :
-    zone(fz, addr, index),
+    zone(origZone, addr, index),
     flipMap_(fm),
     zoneMesh_(zm),
     patchPtr_(nullptr),
@@ -268,14 +347,14 @@ Foam::faceZone::faceZone
 
 Foam::faceZone::faceZone
 (
-    const faceZone& fz,
+    const faceZone& origZone,
     const Xfer<labelList>& addr,
     const Xfer<boolList>& fm,
     const label index,
     const faceZoneMesh& zm
 )
 :
-    zone(fz, addr, index),
+    zone(origZone, addr, index),
     flipMap_(fm),
     zoneMesh_(zm),
     patchPtr_(nullptr),
@@ -377,12 +456,36 @@ void Foam::faceZone::clearAddressing()
 void Foam::faceZone::resetAddressing
 (
     const labelUList& addr,
+    const bool flipMapValue
+)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+    setFlipMap(flipMapValue);
+}
+
+
+void Foam::faceZone::resetAddressing
+(
+    const labelUList& addr,
     const boolList& flipMap
 )
 {
     clearAddressing();
     labelList::operator=(addr);
     flipMap_ = flipMap;
+}
+
+
+void Foam::faceZone::resetAddressing
+(
+    const Xfer<labelList>& addr,
+    const bool flipMapValue
+)
+{
+    clearAddressing();
+    labelList::operator=(addr);
+    setFlipMap(flipMapValue);
 }
 
 
@@ -511,11 +614,11 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
 }
 
 
-void Foam::faceZone::movePoints(const pointField& p)
+void Foam::faceZone::movePoints(const pointField& pts)
 {
     if (patchPtr_)
     {
-        patchPtr_->movePoints(p);
+        patchPtr_->movePoints(pts);
     }
 }
 

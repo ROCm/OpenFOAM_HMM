@@ -25,8 +25,6 @@ License
 
 #include "tetCell.H"
 #include "cellShape.H"
-#include "cellModeller.H"
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -36,12 +34,10 @@ Foam::cellShape Foam::tetCell::tetCellShape() const
 
     if (!tetModelPtr_)
     {
-        tetModelPtr_ = cellModeller::lookup("tet");
+        tetModelPtr_ = cellModel::ptr(cellModel::TET);
     }
 
-    const cellModel& tet = *tetModelPtr_;
-
-    return cellShape(tet, labelList(*this));
+    return cellShape(*tetModelPtr_, labelList(*this));
 }
 
 

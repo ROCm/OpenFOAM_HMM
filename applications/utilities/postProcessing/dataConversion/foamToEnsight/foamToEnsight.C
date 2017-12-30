@@ -61,9 +61,6 @@ Usage
       - \par -width \<n\>
         Width of EnSight data subdir (default: 8)
 
-      - \par -deprecatedOrder
-        Use older ordering for volume cells (hex prism pyr tet poly)
-
 Note
     Writes to \a EnSight directory to avoid collisions with
     foamToEnsightParts
@@ -99,25 +96,6 @@ Note
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// file-scope helper
-static bool inFileNameList
-(
-    const fileNameList& nameList,
-    const word& name
-)
-{
-    forAll(nameList, i)
-    {
-        if (nameList[i] == name)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -180,13 +158,6 @@ int main(int argc, char *argv[])
         "width",
         "n",
         "width of ensight data subdir"
-    );
-    argList::addBoolOption
-    (
-        "deprecatedOrder",
-        "Use old ordering (hex prism pyr tet poly) "
-        "instead of the ascending number of points "
-        "(tet pyr prism hex poly)."
     );
 
     // The volume field types that we handle
@@ -261,7 +232,6 @@ int main(int argc, char *argv[])
     //
     ensightMesh::options writeOpts(format);
     writeOpts.noPatches(args.optionFound("noPatches"));
-    writeOpts.deprecatedOrder(args.optionFound("deprecatedOrder"));
 
     if (args.optionFound("patches"))
     {
@@ -652,7 +622,7 @@ int main(int argc, char *argv[])
 
             Info<< "Write " << cloudName << " (";
 
-            bool cloudExists = inFileNameList(currentCloudDirs, cloudName);
+            bool cloudExists = currentCloudDirs.found(cloudName);
             reduce(cloudExists, orOp<bool>());
 
             {

@@ -72,7 +72,7 @@ public:
     //- Construct from dictionary
     uniform(const dictionary& dict, const label nSamples);
 
-    //- Destuctor
+    //- Destructor
     virtual ~uniform();
 };
 

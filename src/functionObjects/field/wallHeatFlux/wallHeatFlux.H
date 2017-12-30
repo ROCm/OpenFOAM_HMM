@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -42,6 +42,7 @@ Usage
         type        wallHeatFlux;
         libs        ("libfieldFunctionObjects.so");
         ...
+        region      fluid;
         patches     (".*Wall");
     }
     \endverbatim
@@ -51,6 +52,8 @@ Usage
         Property | Description                | Required   | Default value
         type     | type name: wallHeatFlux    | yes        |
         patches  | list of patches to process | no         | all wall patches
+        qr       | name of radiative heat flux field | no  | qr
+        region   | region to be evaluated     | no         | default region
     \endtable
 
 See also
@@ -95,6 +98,9 @@ protected:
 
         //- Optional list of patches to process
         labelHashSet patchSet_;
+
+        //- Name of radiative heat flux name, default = qr
+        word qrName_;
 
 
     // Protected Member Functions

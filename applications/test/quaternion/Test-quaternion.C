@@ -29,9 +29,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "quaternion.H"
 #include "septernion.H"
+#include "mathematicalConstants.H"
+#include "Tuple2.H"
 #include "IOstreams.H"
+#include "transform.H"
 
 using namespace Foam;
 
@@ -39,6 +43,95 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::addOption
+    (
+        "rollPitchYaw",
+        "vector",
+        "Rotate by '(roll pitch yaw)' in degrees"
+    );
+    argList::addOption
+    (
+        "yawPitchRoll",
+        "vector",
+        "Rotate by '(yaw pitch roll)' in degrees"
+    );
+
+    argList::addOption
+    (
+        "rotate-angle",
+        "(vector angle)",
+        "Rotate about the <vector> by <angle> degrees - eg, '((1 0 0) 45)'"
+    );
+    argList args(argc, argv);
+
+    vector rotVector;
+
+    if (args.optionReadIfPresent("rollPitchYaw", rotVector))
+    {
+        Info<< "Rotate by" << nl
+            << "    roll  " << rotVector.x() << nl
+            << "    pitch " << rotVector.y() << nl
+            << "    yaw   " << rotVector.z() << nl;
+
+        // degToRad
+        rotVector *= constant::mathematical::pi/180.0;
+
+        const quaternion quat(quaternion::rotationSequence::XYZ, rotVector);
+
+        Info<< "quaternion " << quat << endl;
+        Info<< "rotation   = " << quat.R() << endl;
+    }
+    if (args.optionReadIfPresent("yawPitchRoll", rotVector))
+    {
+        Info<< "Rotate by" << nl
+            << "    yaw   " << rotVector.x() << nl
+            << "    pitch " << rotVector.y() << nl
+            << "    roll  " << rotVector.z() << nl;
+
+        // degToRad
+        rotVector *= constant::mathematical::pi/180.0;
+
+        const quaternion quat(quaternion::rotationSequence::ZYX, rotVector);
+
+        Info<< "quaternion " << quat << endl;
+        Info<< "rotation   = " << quat.R() << endl;
+    }
+    if (args.optionFound("rotate-angle"))
+    {
+        const Tuple2<vector, scalar> axisAngle
+        (
+            args.optionLookup("rotate-angle")()
+        );
+
+        Info<< "Rotate" << nl
+            << "    about " << axisAngle.first() << nl
+            << "    angle " << axisAngle.second() << nl;
+
+        const quaternion quat
+        (
+            axisAngle.first(),
+            axisAngle.second() * constant::mathematical::pi/180.0  // degToRad
+        );
+
+        Info<< "quaternion " << quat << endl;
+        Info<< "rotation   = " << quat.R() << endl;
+
+        Info<< "transform Ra = "
+            << Ra
+               (
+                   axisAngle.first() / mag(axisAngle.first()),
+                   axisAngle.second() * constant::mathematical::pi/180.0
+               ) << endl;
+        Info<< "-ve Ra = "
+            << Ra
+               (
+                   axisAngle.first() / mag(axisAngle.first()),
+                   -axisAngle.second() * constant::mathematical::pi/180.0
+               ) << endl;
+    }
+
+    Info<< nl << nl;
+
     quaternion q(vector(1, 2, 3), 0.7853981);
     Info<< "q " << q << endl;
 

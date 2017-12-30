@@ -52,7 +52,7 @@ Hanning::Hanning(const dictionary& dict, const label nSamples)
     // Extend range if required
     label offset = extended_ ? 1 : 0;
     scalar m = nSamples - 1 + 2*offset;
-    
+
     scalarField t(nSamples);
     forAll(t, i)
     {

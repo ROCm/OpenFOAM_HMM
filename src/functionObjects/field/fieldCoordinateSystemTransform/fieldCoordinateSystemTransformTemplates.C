@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
             IOobject::NO_WRITE
         );
 
-        if (fieldHeader.typeHeaderOk<VolFieldType>(true))
+        if (fieldHeader.typeHeaderOk<VolFieldType>(true, true, false))
         {
             DebugInfo
                 << type() << ": Field " << fieldName << " read from file"
@@ -96,7 +96,7 @@ void Foam::functionObjects::fieldCoordinateSystemTransform::transform
                 lookupObject<VolFieldType>(fieldName)
             );
         }
-        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true))
+        else if (fieldHeader.typeHeaderOk<SurfaceFieldType>(true, true, false))
         {
             DebugInfo
                 << type() << ": Field " << fieldName << " read from file"

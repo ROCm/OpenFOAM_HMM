@@ -36,18 +36,24 @@ License
 
 // * * * * * * * * * * * * * * * Static Data * * * * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::vtk::fileTag>
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
 Foam::vtk::legacy::contentNames
 {
-    { vtk::fileTag::POLY_DATA,         "POLYDATA" },
+    { vtk::fileTag::POLY_DATA, "POLYDATA" },
     { vtk::fileTag::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
 };
 
 
-const Foam::Enum<Foam::vtk::fileTag>
+const Foam::Enum
+<
+    Foam::vtk::fileTag
+>
 Foam::vtk::legacy::dataTypeNames
 {
-    { vtk::fileTag::CELL_DATA,  "CELL_DATA" },
+    { vtk::fileTag::CELL_DATA, "CELL_DATA" },
     { vtk::fileTag::POINT_DATA, "POINT_DATA" }
 };
 
@@ -67,27 +73,27 @@ Foam::vtk::newFormatter
     switch (fmtType)
     {
         case formatType::INLINE_ASCII:
-            fmt.set(new vtk::asciiFormatter(os, prec));
+            fmt.reset(new vtk::asciiFormatter(os, prec));
             break;
 
         case formatType::INLINE_BASE64:
-            fmt.set(new vtk::base64Formatter(os));
+            fmt.reset(new vtk::base64Formatter(os));
             break;
 
         case formatType::APPEND_BASE64:
-            fmt.set(new vtk::appendBase64Formatter(os));
+            fmt.reset(new vtk::appendBase64Formatter(os));
             break;
 
         case formatType::APPEND_BINARY:
-            fmt.set(new vtk::appendRawFormatter(os));
+            fmt.reset(new vtk::appendRawFormatter(os));
             break;
 
         case formatType::LEGACY_ASCII:
-            fmt.set(new vtk::legacyAsciiFormatter(os, prec));
+            fmt.reset(new vtk::legacyAsciiFormatter(os, prec));
             break;
 
         case formatType::LEGACY_BINARY:
-            fmt.set(new vtk::legacyRawFormatter(os));
+            fmt.reset(new vtk::legacyRawFormatter(os));
             break;
     }
 

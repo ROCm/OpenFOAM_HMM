@@ -33,9 +33,9 @@ Description
         profiling
         {
             active      true;
-            cpuInfo     true;
+            cpuInfo     false;
             memInfo     false;
-            sysInfo     true;
+            sysInfo     false;
         }
     \endcode
     or simply using all defaults:
@@ -53,6 +53,7 @@ SourceFiles
 #define profiling_H
 
 #include "profilingTrigger.H"
+#include "IOdictionary.H"
 #include "HashPtrTable.H"
 #include "Tuple2.H"
 #include "LIFOStack.H"
@@ -77,7 +78,7 @@ class profilingSysInfo;
 
 class profiling
 :
-    public regIOobject
+    public IOdictionary
 {
 public:
 
@@ -128,7 +129,7 @@ private:
     // Private Static Data Members
 
         //- Only one global pool object is possible
-        static profiling *pool_;
+        static profiling* pool_;
 
 
     // Private Data Members
@@ -200,14 +201,14 @@ protected:
         profilingInformation* find(const string& descr, const label parentId);
 
         //- Add to hashed storage,
-        //  returns pointer to newly stored element for chaining
+        //  \return pointer to newly stored element for chaining
         profilingInformation* store(profilingInformation* info);
 
         //- Add to stack and set timer lookup (based on Id)
         void push(profilingInformation* info, clockTime& timer);
 
         //- Remove from stack and remove timer lookup (based on Id).
-        //  Returns pointer to profiling information element
+        //  \return pointer to profiling information element
         profilingInformation* pop();
 
 
@@ -276,7 +277,8 @@ public:
         (
             IOstream::streamFormat ignoreAlwaysASCII,
             IOstream::versionNumber ver,
-            IOstream::compressionType ignoreAlwaysUncompressed
+            IOstream::compressionType ignoreAlwaysUncompressed,
+            const bool valid
         ) const;
 
 };

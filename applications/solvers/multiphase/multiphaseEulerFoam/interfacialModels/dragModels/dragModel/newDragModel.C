@@ -34,22 +34,21 @@ Foam::autoPtr<Foam::dragModel> Foam::dragModel::New
     const phaseModel& phase2
 )
 {
-    word dragModelType(interfaceDict.lookup("type"));
+    const word modelType(interfaceDict.lookup("type"));
 
     Info << "Selecting dragModel for phase "
         << phase1.name()
         << ": "
-        << dragModelType << endl;
+        << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(dragModelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown dragModelType type "
-            << dragModelType << endl << endl
-            << "Valid dragModel types are : " << endl
+            << "Unknown dragModel type "
+            << modelType << nl << nl
+            << "Valid dragModel types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

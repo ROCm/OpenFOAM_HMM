@@ -26,28 +26,22 @@ License
 #include "X3DsurfaceFormat.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::fileFormats::X3DsurfaceFormat<Face>::X3DsurfaceFormat()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Face>
 void Foam::fileFormats::X3DsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&   faceLst = surf.surfFaces();
+    const UList<label>&  faceMap = surf.faceMap();
 
     // for no zones, suppress the group name
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst, word::null)
@@ -80,13 +74,13 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
         "  <IndexedFaceSet coordIndex='\n";
 
     label faceIndex = 0;
-    forAll(zones, zoneI)
+    for (const surfZone& zone : zones)
     {
-        const surfZone& zone = zones[zoneI];
+        const label nLocalFaces = zone.size();
 
         if (useFaceMap)
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
@@ -99,7 +93,7 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
         }
         else
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
 
@@ -116,11 +110,8 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
         "' >\n"
         "    <Coordinate point='\n";
 
-    // Write vertex coords
-    forAll(pointLst, ptI)
+    for (const point& pt : pointLst)
     {
-        const point& pt = pointLst[ptI];
-
         os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 
@@ -130,7 +121,6 @@ void Foam::fileFormats::X3DsurfaceFormat<Face>::write
         "  </Shape>\n"
         " </Group>\n"
         "</X3D>\n";
-
 }
 
 

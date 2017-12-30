@@ -41,7 +41,7 @@ Foam::orderedPhasePair::orderedPhasePair
 {
     if (aspectRatioTable.found(*this))
     {
-        aspectRatio_.set
+        aspectRatio_.reset
         (
             aspectRatioModel::New
             (

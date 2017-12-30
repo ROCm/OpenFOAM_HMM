@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -80,6 +80,13 @@ Foam::label Foam::snappyRefineDriver::featureEdgeRefine
     const label minRefine
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     addProfiling(edge, "snappyHexMesh::refine::edge");
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -190,6 +197,13 @@ Foam::label Foam::snappyRefineDriver::smallFeatureRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     addProfiling(feature, "snappyHexMesh::refine::smallFeature");
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -313,6 +327,13 @@ Foam::label Foam::snappyRefineDriver::surfaceOnlyRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     addProfiling(surface, "snappyHexMesh::refine::surface");
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -437,6 +458,13 @@ Foam::label Foam::snappyRefineDriver::gapOnlyRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     const fvMesh& mesh = meshRefiner_.mesh();
 
     // Determine the maximum refinement level over all surfaces. This
@@ -669,6 +697,13 @@ Foam::label Foam::snappyRefineDriver::bigGapOnlyRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     const fvMesh& mesh = meshRefiner_.mesh();
 
     label iter = 0;
@@ -811,6 +846,13 @@ Foam::label Foam::snappyRefineDriver::danglingCellRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     addProfiling(dangling, "snappyHexMesh::refine::danglingCell");
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -957,6 +999,13 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     addProfiling(interface, "snappyHexMesh::refine::transition");
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -1134,7 +1183,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
                 //    }
                 //}
 
-                const scalar oppositeCos = Foam::cos(Foam::degToRad(135));
+                const scalar oppositeCos = Foam::cos(degToRad(135.0));
 
                 forAllConstIter(cellSet, transitionCells, iter)
                 {
@@ -1313,6 +1362,7 @@ void Foam::snappyRefineDriver::removeInsideCells
     meshRefiner_.splitMesh
     (
         nBufferLayers,                  // nBufferLayers
+        refineParams.nErodeCellZone(),
         globalToMasterPatch_,
         globalToSlavePatch_,
         refineParams.locationsInMesh(),
@@ -1348,6 +1398,13 @@ Foam::label Foam::snappyRefineDriver::shellRefine
     const label maxIter
 )
 {
+    if (refineParams.minRefineCells() == -1)
+    {
+        // Special setting to be able to restart shm on meshes with inconsistent
+        // cellLevel/pointLevel
+        return 0;
+    }
+
     addProfiling(shell, "snappyHexMesh::refine::shell");
     const fvMesh& mesh = meshRefiner_.mesh();
 
@@ -1549,6 +1606,7 @@ void Foam::snappyRefineDriver::baffleAndSplitMesh
         refineParams.useTopologicalSnapDetection(),
         false,                          // perpendicular edge connected cells
         scalarField(0),                 // per region perpendicular angle
+        refineParams.nErodeCellZone(),
 
         motionDict,
         const_cast<Time&>(mesh.time()),
@@ -1616,6 +1674,7 @@ void Foam::snappyRefineDriver::zonify
         meshRefiner_.zonify
         (
             refineParams.allowFreeStandingZoneFaces(),
+            refineParams.nErodeCellZone(),
             refineParams.locationsInMesh(),
             refineParams.zonesInMesh(),
             zonesToFaceZone
@@ -1675,6 +1734,7 @@ void Foam::snappyRefineDriver::splitAndMergeBaffles
         refineParams.useTopologicalSnapDetection(),
         handleSnapProblems,                 // remove perp edge connected cells
         perpAngle,                          // perp angle
+        refineParams.nErodeCellZone(),
 
         motionDict,
         const_cast<Time&>(mesh.time()),

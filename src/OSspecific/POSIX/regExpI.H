@@ -23,6 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <algorithm>
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -35,6 +37,62 @@ inline bool Foam::regExp::meta(const char c)
      || (c == '(' || c == ')' || c == '|')   // grouping/branching
      || (c == '[' || c == ']')               // range
     );
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+inline Foam::regExp::regExp()
+:
+    preg_(nullptr)
+{}
+
+
+inline Foam::regExp::regExp(const char* pattern)
+:
+    preg_(nullptr)
+{
+    set(pattern, false);
+}
+
+
+inline Foam::regExp::regExp(const std::string& pattern)
+:
+    preg_(nullptr)
+{
+    set(pattern, false);
+}
+
+
+inline Foam::regExp::regExp(const char* pattern, bool ignoreCase)
+:
+    preg_(nullptr)
+{
+    set(pattern, ignoreCase);
+}
+
+
+inline Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
+:
+    preg_(nullptr)
+{
+    set(pattern, ignoreCase);
+}
+
+
+inline Foam::regExp::regExp(regExp&& rgx)
+:
+    preg_(rgx.preg_)
+{
+    rgx.preg_ = nullptr;
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+inline Foam::regExp::~regExp()
+{
+    clear();
 }
 
 
@@ -64,6 +122,12 @@ inline bool Foam::regExp::search(const std::string& text) const
 }
 
 
+inline void Foam::regExp::swap(regExp& rgx)
+{
+    std::swap(preg_, rgx.preg_);
+}
+
+
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 inline bool Foam::regExp::operator()(const std::string& text) const
@@ -81,6 +145,13 @@ inline void Foam::regExp::operator=(const char* pattern)
 inline void Foam::regExp::operator=(const std::string& pattern)
 {
     set(pattern);
+}
+
+
+inline void Foam::regExp::operator=(regExp&& rgx)
+{
+    clear();
+    swap(rgx);
 }
 
 

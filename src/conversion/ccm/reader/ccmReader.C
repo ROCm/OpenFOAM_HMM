@@ -211,7 +211,8 @@ void Foam::ccm::reader::readProblemDescription
 
 
 // readInterfaceDefinitions:
-// - get /InterfaceDefinitions. used by STARCCM to define in-place interfaces, etc
+// - get /InterfaceDefinitions.
+//   used by STARCCM to define in-place interfaces, etc
 // - only handle in-place one here
 void Foam::ccm::reader::readInterfaceDefinitions()
 {
@@ -364,7 +365,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             }
             else
             {
-                dict.add(opt, word::validated(str));
+                dict.add(opt, word::validate(str, true));
             }
         }
 
@@ -388,7 +389,8 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
             )
             {
 #ifdef DEBUG_CCMIOREAD
-                Info<< "boundary is on an interface: remap name for  " << Id << endl;
+                Info<< "boundary is on an interface: remap name for  "
+                    << Id << endl;
 #endif
                 // Substitute immediately with interface name
                 str = interfaceDefinitions_.interfaceName(Id);
@@ -405,7 +407,7 @@ void Foam::ccm::reader::readProblemDescription_boundaryRegion
 
             if (!str.empty())
             {
-                dict.add(opt, word::validated(str));
+                dict.add(opt, word::validate(str, true));
             }
         }
 
@@ -470,7 +472,7 @@ void Foam::ccm::reader::readProblemDescription_cellTable
                 str = "zone_" + ::Foam::name(Id);
             }
 
-            dict.add(opt, word::validated(str));
+            dict.add(opt, word::validate(str, true));
         }
 
 
@@ -482,7 +484,7 @@ void Foam::ccm::reader::readProblemDescription_cellTable
 
             if (!str.empty())
             {
-                dict.add(opt, word::validated(str));
+                dict.add(opt, word::validate(str, true));
             }
         }
 
@@ -585,7 +587,8 @@ void Foam::ccm::reader::writeMesh
     (
         fmt,
         IOstream::currentVersion,
-        IOstream::UNCOMPRESSED
+        IOstream::UNCOMPRESSED,
+        true
     );
     writeAux(mesh);
 }

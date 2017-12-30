@@ -35,8 +35,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "pointField.H"
 #include "unitConversion.H"
 
@@ -47,7 +46,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("dat file");
+    argList::addArgument("dat file");
 
     argList args(argc, argv);
 
@@ -58,7 +57,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    std::ifstream plot3dFile(args[1].c_str());
+    std::ifstream plot3dFile(args[1]);
 
     string line;
     std::getline(plot3dFile, line);
@@ -122,7 +121,7 @@ int main(int argc, char *argv[])
     fileName pointsFile(runTime.constantPath()/"points.tmp");
     OFstream pFile(pointsFile);
 
-    scalar a(degToRad(0.1));
+    const scalar a = degToRad(0.1);
     tensor rotateZ =
         tensor
         (

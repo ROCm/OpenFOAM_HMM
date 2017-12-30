@@ -191,9 +191,8 @@ void thermalBaffleFvPatchScalarField::createPatchMesh()
     dicts[bottomPatchID].add("inGroups", inGroups);
     dicts[bottomPatchID].add("sampleMode", mpp.sampleModeNames_[mpp.mode()]);
 
-    const label sepPos = coupleGroup.find('_');
-
-    const word coupleGroupSlave = coupleGroup(0, sepPos) + "_slave";
+    const word coupleGroupSlave =
+        coupleGroup.substr(0, coupleGroup.find('_')) + "_slave";
 
     inGroups[0] = coupleGroupSlave;
     dicts[topPatchID].add("coupleGroup", coupleGroupSlave);
@@ -286,11 +285,10 @@ void thermalBaffleFvPatchScalarField::write(Ostream& os) const
         os << dict_.subDict(extrudeModel) << nl;
 
         word regionName = dict_.lookup("region");
-        os.writeKeyword("region") << regionName << token::END_STATEMENT << nl;
+        os.writeEntry("region", regionName);
 
         bool active = readBool(dict_.lookup("active"));
-        os.writeKeyword("active") <<  active
-            << token::END_STATEMENT << nl;
+        os.writeEntry("active", active);
 
         os.writeKeyword("thermoType");
         os << dict_.subDict("thermoType") << nl;

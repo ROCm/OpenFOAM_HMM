@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,10 @@ SourceFiles
 
 namespace Foam
 {
+
+// Forward declarations
+class CStringList;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,7 +150,7 @@ time_t lastModified(const fileName& name, const bool followLink=true);
 
 //- Return time of last file modification
 //  Using an empty name is a no-op and always returns 0.
-double highResLastModified(const fileName& name);
+double highResLastModified(const fileName&, const bool followLink = true);
 
 //- Read a directory and return the entries as a fileName List.
 //  Using an empty directory name returns an empty list.
@@ -206,14 +210,32 @@ bool ping(const std::string& host, const label timeOut=10);
 //  Uses vfork/execl internally.
 //  Where possible, use the list version instead.
 //
-//  Treats an empty command as a successful no-op.
-int system(const std::string& command);
+//  \param background return immediately to parent process instead of waiting
+//      for the child. Can be used (with moderation) to create background
+//      processes.
+//
+//  \note treats an empty command as a successful no-op.
+int system(const std::string& command, const bool background=false);
 
 //- Execute the specified command with arguments.
 //  Uses vfork/execvp internally
 //
-//  Treats an empty command as a successful no-op.
-int system(const UList<string>& command);
+//  \param background return immediately to parent process instead of waiting
+//      for the child. Can be used (with moderation) to create background
+//      processes.
+//
+//  \note treats an empty command as a successful no-op.
+int system(const UList<string>& command, const bool background=false);
+
+//- Execute the specified command with arguments.
+//  Uses vfork/execvp internally
+//
+//  \param background return immediately to parent process instead of waiting
+//      for the child. Can be used (with moderation) to create background
+//      processes.
+//
+//  \note treats an empty command as a successful no-op.
+int system(const CStringList& command, const bool background=false);
 
 //- Open a shared library and return handle to library.
 //  Print error message if library cannot be loaded (suppress with check=true)
@@ -256,6 +278,33 @@ label osRandomInteger(List<char>& buffer);
 
 //- Return random double precision (uniform distribution between 0 and 1)
 scalar osRandomDouble(List<char>& buffer);
+
+
+// Thread handling
+
+//- Allocate a thread
+label allocateThread();
+
+//- Start a thread
+void createThread(const label, void *(*start_routine) (void *), void *arg);
+
+//- Wait for thread
+void joinThread(const label);
+
+//- Delete a thread
+void freeThread(const label);
+
+//- Allocate a mutex variable
+label allocateMutex();
+
+//- Lock a mutex variable
+void lockMutex(const label);
+
+//- Unlock a mutex variable
+void unlockMutex(const label);
+
+//- Free a mutex variable
+void freeMutex(const label);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

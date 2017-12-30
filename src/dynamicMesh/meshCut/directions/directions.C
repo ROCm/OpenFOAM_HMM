@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,23 +36,16 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+const Foam::Enum
+<
+    Foam::directions::directionType
+>
+Foam::directions::directionTypeNames_
 {
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::directions::directionType,
-        3
-    >::names[] =
-    {
-        "tan1",
-        "tan2",
-        "normal"
-    };
-}
-
-const Foam::NamedEnum<Foam::directions::directionType, 3>
-    Foam::directions::directionTypeNames_;
+    { directionType::TAN1, "tan1" },
+    { directionType::TAN2, "tan2" },
+    { directionType::NORMAL, "normal" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -257,7 +250,11 @@ Foam::vectorField Foam::directions::propagateDirection
         }
     }
 
-    Pout<< "Calculated local coords for " << defaultDir
+    reduce(nGeom, sumOp<label>());
+    reduce(nTopo, sumOp<label>());
+    reduce(nUnset, sumOp<label>());
+
+    Info<< "Calculated local coords for " << defaultDir
         << endl
         << "    Geometric cut cells   : " << nGeom << endl
         << "    Topological cut cells : " << nTopo << endl
@@ -289,9 +286,9 @@ Foam::directions::directions
 
     if (coordSystem != "fieldBased")
     {
-        forAll(wantedDirs, i)
+        for (const word& wantedName : wantedDirs)
         {
-            directionType wantedDir = directionTypeNames_[wantedDirs[i]];
+            directionType wantedDir = directionTypeNames_[wantedName];
 
             if (wantedDir == NORMAL)
             {
@@ -322,7 +319,7 @@ Foam::directions::directions
         vector normal = tan1 ^ tan2;
         normal /= mag(normal);
 
-        Pout<< "Global Coordinate system:" << endl
+        Info<< "Global Coordinate system:" << endl
             << "     normal : " << normal << endl
             << "     tan1   : " << tan1 << endl
             << "     tan2   : " << tan2

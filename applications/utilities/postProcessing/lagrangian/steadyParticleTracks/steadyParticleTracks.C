@@ -283,7 +283,7 @@ int main(int argc, char *argv[])
                         forAll(ids, j)
                         {
                             const label localId = particleIds[j];
-                            const vector& pos = particles[localId].position();
+                            const vector pos(particles[localId].position());
                             os  << pos.x() << ' ' << pos.y() << ' ' << pos.z()
                                 << nl;
                         }

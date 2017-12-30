@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 #include "uniformInterpolationTable.H"
 #include "Time.H"
 #include "IOstream.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * *  Private Member Functions * * * * * * * * * * * * //
 
@@ -233,7 +234,8 @@ void Foam::uniformInterpolationTable<Type>::write() const
     (
         IOstream::ASCII,
         IOstream::currentVersion,
-        dict.time().writeCompression()
+        dict.time().writeCompression(),
+        true
     );
 }
 

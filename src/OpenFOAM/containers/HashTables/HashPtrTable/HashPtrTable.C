@@ -29,6 +29,13 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
+Foam::HashPtrTable<T, Key, Hash>::HashPtrTable()
+:
+    parent_type()
+{}
+
+
+template<class T, class Key, class Hash>
 Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(const label size)
 :
     parent_type(size)
@@ -156,6 +163,7 @@ void Foam::HashPtrTable<T, Key, Hash>::operator=
         }
     }
 }
+
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 

@@ -36,8 +36,7 @@ Description
 #include "argList.H"
 #include "chemkinReader.H"
 #include "OFstream.H"
-#include "OStringStream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 using namespace Foam;
 
@@ -55,11 +54,11 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.append("CHEMKINFile");
-    argList::validArgs.append("CHEMKINThermodynamicsFile");
-    argList::validArgs.append("CHEMKINTransport");
-    argList::validArgs.append("FOAMChemistryFile");
-    argList::validArgs.append("FOAMThermodynamicsFile");
+    argList::addArgument("CHEMKINFile");
+    argList::addArgument("CHEMKINThermodynamicsFile");
+    argList::addArgument("CHEMKINTransport");
+    argList::addArgument("FOAMChemistryFile");
+    argList::addArgument("FOAMThermodynamicsFile");
 
     argList::addBoolOption
     (

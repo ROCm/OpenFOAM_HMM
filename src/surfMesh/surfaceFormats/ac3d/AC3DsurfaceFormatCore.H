@@ -35,10 +35,8 @@ SourceFiles
 #ifndef AC3DsurfaceFormatCore_H
 #define AC3DsurfaceFormatCore_H
 
-#include "IFstream.H"
-#include "Ostream.H"
-#include "OFstream.H"
-#include "MeshedSurface.H"
+#include "Fstream.H"
+#include "surfZone.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,27 +46,32 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class AC3DsurfaceFormatCore Declaration
+             Class fileFormats::AC3DsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class AC3DsurfaceFormatCore
 {
 protected:
 
-    // Protected Member Functions
+    // Protected Static Member Functions
 
         //- Read a type via IStringStream
         template<class Type>
-        static Type parse(const string&);
+        static Type parse(const string& str);
 
         //- Read cmd, args from IFstream
-        static bool readCmd(IFstream&, string& cmd, string& args);
+        //  The cmd is the content up to the first space, args is the balance
+        //  of the line (after the space).
+        //  \return if the command was read
+        static bool readCmd(IFstream& is, string& cmd, string& args);
 
-        //- Cue up to cmd, reading args
+        //- Read up to a line starting with cmd. Sets args to rest of line.
+        //
+        //  \return true if found, false if stream is not good anymore.
         static bool cueTo(IFstream&, const string& cmd, string& args);
 
-        //- Cue up to cmd, reading args or exit with a FatalError
-        //  returns the command args
+        //- Like cueTo(), but FatalError if not found.
+        //  \return the command args on success
         static string cueToOrDie
         (
             IFstream&,
@@ -76,8 +79,8 @@ protected:
             const string& errorMsg=string::null
         );
 
-        //- Write header with materials
-        static void writeHeader(Ostream&, const UList<surfZone>&);
+        //- Write header with materials for each zone
+        static void writeHeader(Ostream& os, const UList<surfZone>& zones);
 };
 
 

@@ -41,7 +41,7 @@ SourceFiles
 #define boundaryRadiationPropertiesPatch_H
 
 #include "scalarField.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "fvPatch.H"
 #include "calculatedFvPatchFields.H"
 #include "transmissivityModel.H"
@@ -74,7 +74,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<methodType, 3> methodTypeNames_;
+        static const Enum<methodType> methodTypeNames_;
 
         //- How to get property
         const methodType method_;

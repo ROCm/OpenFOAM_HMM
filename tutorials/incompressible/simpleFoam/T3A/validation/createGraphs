@@ -1,12 +1,13 @@
 #!/bin/sh
+cd ${0%/*} || exit 1                        # Run from this directory
 
-if ! which gnuplot > /dev/null 2>&1
-then
-    echo "gnuplot not found - skipping graph creation" >&2
+# Test if gnuplot exists on the system
+command -v gnuplot >/dev/null 2>&1 || {
+    echo "gnuplot not found - skipping graph creation" 1>&2
     exit 1
-fi
+}
 
-gnuplot<<EOF
+gnuplot<<GNUPLOT
     set term post enhanced color solid linewidth 2.0 20
     set out "graphs.eps"
     set encoding utf8
@@ -15,7 +16,7 @@ gnuplot<<EOF
     set style line 1 lt 1 linecolor rgb "blue"  linewidth 1.5
     set style line 11 lt 2 linecolor rgb "black" linewidth 1.5
 
-    time = system("foamListTimes -case .. | tail -1")
+    time = system("foamListTimes -case .. -latestTime")
 
     set xlabel "x"
     set ylabel "u'"
@@ -32,6 +33,6 @@ gnuplot<<EOF
         "../postProcessing/wallShearStressGraph/".time."/line_wallShearStress.xy" \
         u ((\$1-0.04)*5.4/1.5e-05):(-\$2/0.5/5.4**2) title "kOmegaSSTLM" w l, \
         "exptData/T3A.dat" u (\$1/1000*5.4/1.51e-05):2 title "Exp" w p ls 11
-EOF
+GNUPLOT
 
 #------------------------------------------------------------------------------

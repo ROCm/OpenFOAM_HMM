@@ -24,7 +24,7 @@ backgroundMesh
     rBcells 50;
 }
 
-convertToMeters 1;
+scale   1;
 
 vertices
 (

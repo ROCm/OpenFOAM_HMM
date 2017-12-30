@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,7 +93,7 @@ Foam::FreeStream<CloudType>::FreeStream
             numberDensitiesDict.lookup(molecules[i])
         );
 
-        moleculeTypeIds_[i] = findIndex(cloud.typeIdList(), molecules[i]);
+        moleculeTypeIds_[i] = cloud.typeIdList().find(molecules[i]);
 
         if (moleculeTypeIds_[i] == -1)
         {
@@ -403,16 +403,7 @@ void Foam::FreeStream<CloudType>::inflow()
                         cloud.constProps(typeId).internalDegreesOfFreedom()
                     );
 
-                    cloud.addNewParcel
-                    (
-                        p,
-                        U,
-                        Ei,
-                        celli,
-                        globalFaceIndex,
-                        faceTetIs.tetPt(),
-                        typeId
-                    );
+                    cloud.addNewParcel(p, celli, U, Ei, typeId);
 
                     particlesInserted++;
                 }

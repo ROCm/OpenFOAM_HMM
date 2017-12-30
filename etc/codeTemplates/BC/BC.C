@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) YEAR OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -207,7 +207,7 @@ void Foam::CLASS::updateCoeffs()
         (
             "phi"
         );
-    this->valueFraction() = 1.0 - pos(phip);
+    this->valueFraction() = 1.0 - pos0(phip);
 
     PARENT::updateCoeffs();
 }
@@ -220,11 +220,11 @@ void Foam::CLASS::write
 ) const
 {
     FVPATCHF::write(os);
-    os.writeKeyword("scalarData") << scalarData_ << token::END_STATEMENT << nl;
-    os.writeKeyword("data") << data_ << token::END_STATEMENT << nl;
+    os.writeEntry("scalarData", scalarData_);
+    os.writeEntry("data", data_);
     fieldData_.writeEntry("fieldData", os);
     timeVsData_->writeData(os);
-    os.writeKeyword("wordData") << wordData_ << token::END_STATEMENT << nl;
+    os.writeEntry("wordData", wordData_);
     this->writeEntry("value", os);
 }
 

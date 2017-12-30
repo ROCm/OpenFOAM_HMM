@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
-    argList::validArgs.append("output file");
+    argList::addArgument("output file");
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -219,18 +219,18 @@ int main(int argc, char *argv[])
 
             }
             Info<< "Additionally triangulating faceZones "
-                << UIndirectList<word>
-                  (
-                      allZoneNames,
-                      includeFaceZones.sortedToc()
-                  )
+                <<  UIndirectList<word>
+                    (
+                        allZoneNames,
+                        includeFaceZones.sortedToc()
+                    )
                 << endl;
         }
 
 
 
         // From (name of) patch to compact 'zone' index
-        HashTable<label> compactZoneID(1000);
+        HashTable<label> compactZoneID(1024);
         // Mesh face and compact zone indx
         DynamicList<label> faceLabels;
         DynamicList<label> compactZones;
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
         {
             // Collect sizes. Hash on names to handle local-only patches (e.g.
             //  processor patches)
-            HashTable<label> patchSize(1000);
+            HashTable<label> patchSize(1024);
             label nFaces = 0;
             forAllConstIter(labelHashSet, includePatches, iter)
             {
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
                 nFaces += pp.size();
             }
 
-            HashTable<label> zoneSize(1000);
+            HashTable<label> zoneSize(1024);
             forAllConstIter(labelHashSet, includeFaceZones, iter)
             {
                 const faceZone& pp = fzm[iter.key()];
@@ -431,6 +431,7 @@ int main(int argc, char *argv[])
             sortedFace.write(globalCasePath);
         }
     }
+
     Info<< "End\n" << endl;
 
     return 0;

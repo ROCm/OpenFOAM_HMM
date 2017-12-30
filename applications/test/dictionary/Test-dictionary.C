@@ -43,14 +43,14 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("dict .. dictN");
+    argList::addArgument("dict .. dictN");
     argList args(argc, argv, false, true);
 
     {
         dictionary dict;
         dict.add(word("aa" + getEnv("WM_MPLIB") + "cc"), 16);
 
-        string s("DDD${aa${WM_MPLIB}cc}EEE");
+        string s("DDD_${aa${WM_MPLIB}cc}_EEE");
         stringOps::inplaceExpand(s, dict, true, false);
         Info<< "variable expansion:" << s << endl;
     }

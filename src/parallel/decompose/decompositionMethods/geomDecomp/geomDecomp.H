@@ -25,7 +25,14 @@ Class
     Foam::geomDecomp
 
 Description
-    Geometrical domain decomposition
+    Base for geometrical domain decomposition methods
+
+    Base coefficients:
+    \table
+        Property  | Description                 | Required | Default
+        n         | (nx ny nz)                  | yes
+        delta     | delta for rotation matrix   | no | 0.001
+    \endtable
 
 SourceFiles
     geomDecomp.C
@@ -42,35 +49,55 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class geomDecomp Declaration
+                         Class geomDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
 class geomDecomp
 :
     public decompositionMethod
 {
+    // Private Member Functions
+
+        //- Read input values and initialize the rotDelta_
+        void readCoeffs();
+
 
 protected:
 
     // Protected data
 
-        const dictionary& geomDecomDict_;
+        //- Coefficients for all derived methods
+        const dictionary& coeffsDict_;
 
         Vector<label> n_;
+
+        //- Default = 0.001
         scalar delta_;
+
         tensor rotDelta_;
 
 public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        //  and the derived type name
+        //- Construct for derived type name and decomposition dictionary
         geomDecomp
         (
-            const dictionary& decompositionDict,
-            const word& derivedType
+            const word& derivedType,
+            const dictionary& decompDict,
+            int select = selectionType::DEFAULT
         );
+
+        //- Construct for derived type name, decomposition dictionary
+        //- and region name
+        geomDecomp
+        (
+            const word& derivedType,
+            const dictionary& decompDict,
+            const word& regionName,
+            int select = selectionType::DEFAULT
+        );
+
 
         //- Return for every coordinate the wanted processor number.
         virtual labelList decompose

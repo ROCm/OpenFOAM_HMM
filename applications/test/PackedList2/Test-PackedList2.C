@@ -31,11 +31,25 @@ Description
 #include "boolList.H"
 #include "PackedBoolList.H"
 #include "HashSet.H"
-#include "StaticHashTable.H"
 #include "cpuTime.H"
 #include <vector>
+#include <unordered_set>
 
 using namespace Foam;
+
+#undef TEST_STD_BOOLLIST
+#undef TEST_STD_UNORDERED_SET
+
+template<class T>
+void printInfo(const std::unordered_set<T, Foam::Hash<T>>& ht)
+{
+    Info<<"std::unordered_set elements:"
+        << ht.size()
+        << " buckets:" << ht.bucket_count()
+        << " load_factor: " << ht.load_factor()
+        << nl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,35 +61,45 @@ int main(int argc, char *argv[])
     const label n = 1000000;
     const label nIters = 1000;
 
-    unsigned int sum = 0;
+    unsigned long sum = 0;
 
     PackedBoolList packed(n, 1);
     boolList unpacked(n, true);
-    std::vector<bool> stlVector(n, true);
+
+    #ifdef TEST_STD_BOOLLIST
+    std::vector<bool> stdBoolList(n, true);
+    #endif
+
+    cpuTime timer;
 
     labelHashSet emptyHash;
-    labelHashSet fullHash(1000);
+    labelHashSet fullHash(1024);
     for (label i = 0; i < n; i++)
     {
         fullHash.insert(i);
     }
 
-    // fullStaticHash is really slow
-    // give it lots of slots to help
-    StaticHashTable<nil, label, Hash<label>> emptyStaticHash;
-    StaticHashTable<nil, label, Hash<label>> fullStaticHash(100000);
+    Info<< "populated labelHashSet in "
+        << timer.cpuTimeIncrement() << " s\n\n";
+
+    #ifdef TEST_STD_UNORDERED_SET
+    std::unordered_set<label, Foam::Hash<label>> emptyStdHash;
+    std::unordered_set<label, Foam::Hash<label>> fullStdHash;
+    fullStdHash.reserve(1024);
     for (label i = 0; i < n; i++)
     {
-        fullStaticHash.insert(i, nil());
+        fullStdHash.insert(i);
     }
+    Info<< "populated unordered_set in "
+        << timer.cpuTimeIncrement() << " s\n\n";
+    #endif
 
     emptyHash.printInfo(Info);
     fullHash.printInfo(Info);
-    emptyStaticHash.printInfo(Info);
-    fullStaticHash.printInfo(Info);
-
-
-    cpuTime timer;
+    #ifdef TEST_STD_UNORDERED_SET
+    printInfo(emptyStdHash);
+    printInfo(fullStdHash);
+    #endif
 
     for (label iter = 0; iter < nIters; ++iter)
     {
@@ -104,9 +128,11 @@ int main(int argc, char *argv[])
             sum += packed[i];
         }
     }
-    Info<< "Counting brute-force:" << timer.cpuTimeIncrement()
+
+    std::cout
+        << "Counting brute-force:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Count packed
@@ -115,9 +141,11 @@ int main(int argc, char *argv[])
     {
         sum += packed.count();
     }
-    Info<< "Counting via count():" << timer.cpuTimeIncrement()
+
+    std::cout
+        << "Counting via count():" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Dummy addition
@@ -129,25 +157,29 @@ int main(int argc, char *argv[])
             sum += i + 1;
         }
     }
-    Info<< "Dummy loop:" << timer.cpuTimeIncrement() << " s" << nl
-        << "  sum " << sum << " (sum is meaningless)" << endl;
+
+    std::cout
+        << "Dummy loop:" << timer.cpuTimeIncrement() << " s" << nl
+        << "  sum " << sum << " (sum is meaningless)" << nl;
 
     //
     // Read
     //
 
+    #ifdef TEST_STD_BOOLLIST
     // Read stl
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
-        for (unsigned int i = 0; i < stlVector.size(); i++)
+        for (unsigned int i = 0; i < stdBoolList.size(); i++)
         {
-            sum += stlVector[i];
+            sum += stdBoolList[i];
         }
     }
-    Info<< "Reading stl:" << timer.cpuTimeIncrement() << " s" << nl
-        << "  sum " << sum << endl;
-
+    std::cout
+        << "Reading stdBoolList:" << timer.cpuTimeIncrement() << " s" << nl
+        << "  sum " << sum << nl;
+    #endif
 
     // Read unpacked
     sum = 0;
@@ -158,8 +190,9 @@ int main(int argc, char *argv[])
             sum += unpacked[i];
         }
     }
-    Info<< "Reading unpacked:" << timer.cpuTimeIncrement() << " s" << nl
-        << "  sum " << sum << endl;
+    std::cout
+        << "Reading unpacked:" << timer.cpuTimeIncrement() << " s" << nl
+        << "  sum " << sum << nl;
 
 
     // Read packed
@@ -171,9 +204,10 @@ int main(int argc, char *argv[])
             sum += packed.get(i);
         }
     }
-    Info<< "Reading packed using get:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading packed using get:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Read packed
@@ -185,9 +219,10 @@ int main(int argc, char *argv[])
             sum += packed[i];
         }
     }
-    Info<< "Reading packed using reference:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading packed using reference:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Read via iterator
@@ -199,9 +234,10 @@ int main(int argc, char *argv[])
             sum += it;
         }
     }
-    Info<< "Reading packed using iterator:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading packed using iterator:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Read via iterator
@@ -213,9 +249,10 @@ int main(int argc, char *argv[])
             sum += cit();
         }
     }
-    Info<< "Reading packed using const_iterator():" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading packed using const_iterator():" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Read empty hash
@@ -227,9 +264,10 @@ int main(int argc, char *argv[])
             sum += emptyHash.found(i);
         }
     }
-    Info<< "Reading empty labelHashSet:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading empty labelHashSet:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
     // Read full hash
@@ -241,55 +279,59 @@ int main(int argc, char *argv[])
             sum += fullHash.found(i);
         }
     }
-    Info<< "Reading full labelHashSet:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading full labelHashSet:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
 
-    // Read empty static hash
+    #ifdef TEST_STD_UNORDERED_SET
+    // Read empty stl set
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
-            sum += emptyStaticHash.found(i);
+            sum += (emptyStdHash.find(i) != emptyStdHash.cend());
         }
     }
-    Info<< "Reading empty StaticHash:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading empty std::unordered_set:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
+        << "  sum " << sum << nl;
 
-#if 0
-    // we can skip this test - it is usually quite slow
-    // Read full static hash
+    // Read full stl set
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
         forAll(unpacked, i)
         {
-            sum += fullStaticHash.found(i);
+            sum += (fullStdHash.find(i) != fullStdHash.cend());
         }
     }
-    Info<< "Reading full StaticHash:" << timer.cpuTimeIncrement()
+    std::cout
+        << "Reading full std::unordered_set:" << timer.cpuTimeIncrement()
         << " s" << nl
-        << "  sum " << sum << endl;
-#endif
+        << "  sum " << sum << nl;
+    #endif
 
-    Info<< "Starting write tests" << endl;
+    Info<< "Starting write tests" << nl;
 
     //
     // Write
     //
 
-    // Write stl
+    #ifdef TEST_STD_BOOLLIST
+    // Read stl
     for (label iter = 0; iter < nIters; ++iter)
     {
-        for (unsigned int i = 0; i < stlVector.size(); i++)
+        for (unsigned int i = 0; i < stdBoolList.size(); i++)
         {
-            stlVector[i] = true;
+            stdBoolList[i] = true;
         }
     }
-    Info<< "Writing stl:" << timer.cpuTimeIncrement() << " s" << endl;
+    Info<< "Writing stdBoolList:" << timer.cpuTimeIncrement() << " s" << nl;
+    #endif
 
     // Write unpacked
     for (label iter = 0; iter < nIters; ++iter)
@@ -299,7 +341,7 @@ int main(int argc, char *argv[])
             unpacked[i] = true;
         }
     }
-    Info<< "Writing unpacked:" << timer.cpuTimeIncrement() << " s" << endl;
+    Info<< "Writing unpacked:" << timer.cpuTimeIncrement() << " s" << nl;
 
 
     // Write packed
@@ -311,7 +353,7 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Writing packed using reference:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
 
     // Write packed
@@ -323,7 +365,7 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Writing packed using set:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
     // Write packed
     for (label iter = 0; iter < nIters; ++iter)
@@ -334,7 +376,7 @@ int main(int argc, char *argv[])
         }
     }
     Info<< "Writing packed using iterator:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
 
     // Write packed
@@ -343,7 +385,7 @@ int main(int argc, char *argv[])
         packed = 0;
     }
     Info<< "Writing packed uniform 0:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
 
     // Write packed
@@ -352,7 +394,7 @@ int main(int argc, char *argv[])
         packed = 1;
     }
     Info<< "Writing packed uniform 1:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
 
     PackedList<3> oddPacked(n, 3);
@@ -363,7 +405,7 @@ int main(int argc, char *argv[])
         packed = 0;
     }
     Info<< "Writing packed<3> uniform 0:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
 
     // Write packed
@@ -372,7 +414,7 @@ int main(int argc, char *argv[])
         packed = 1;
     }
     Info<< "Writing packed<3> uniform 1:" << timer.cpuTimeIncrement()
-        << " s" << endl;
+        << " s" << nl;
 
 
     Info<< "End\n" << endl;

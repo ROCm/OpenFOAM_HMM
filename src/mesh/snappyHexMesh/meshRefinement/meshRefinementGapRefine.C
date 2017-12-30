@@ -526,7 +526,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //    const indexedOctree<treeDataTriSurface>& tree = s.tree();
 //
 //
-//    const scalar searchCos(Foam::cos(degToRad(30)));
+//    const scalar searchCos = Foam::cos(degToRad(30.0));
 //
 //    // Normals for ray shooting and inside/outside detection
 //    vectorField nearNormal;
@@ -651,7 +651,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //    map.setSize(compactI);
 //    oppositeInfo.setSize(compactI);
 //
-//    nearMap = UIndirectList<label>(nearMap, map)();
+//    nearMap = labelUIndList(nearMap, map)();
 //    nearGap = UIndirectList<scalar>(nearGap, map)();
 //    nearInfo = UIndirectList<pointIndexHit>(nearInfo, map)();
 //    nearNormal = UIndirectList<vector>(nearNormal, map)();
@@ -675,7 +675,7 @@ Foam::label Foam::meshRefinement::markSurfaceGapRefinement
 //        << returnReduce(map.size(), sumOp<label>()) << endl;
 //    map.setSize(compactI);
 //
-//    nearMap = UIndirectList<label>(nearMap, map)();
+//    nearMap = labelUIndList(nearMap, map)();
 //    nearGap = UIndirectList<scalar>(nearGap, map)();
 //    nearInfo = UIndirectList<pointIndexHit>(nearInfo, map)();
 //    oppositeInfo = UIndirectList<pointIndexHit>(oppositeInfo, map)();
@@ -1025,7 +1025,7 @@ void Foam::meshRefinement::selectGapCandidates
     shells_.findHigherGapLevel
     (
         pointField(cellCentres, cellMap),
-        UIndirectList<label>(cellLevel, cellMap)(),
+        labelUIndList(cellLevel, cellMap)(),
         shellGapInfo,
         shellGapMode
     );
@@ -1047,7 +1047,7 @@ void Foam::meshRefinement::selectGapCandidates
         << mesh_.globalData().nTotalCells() << endl;
 
     map.setSize(compactI);
-    cellMap = UIndirectList<label>(cellMap, map)();
+    cellMap = labelUIndList(cellMap, map)();
     shellGapInfo = UIndirectList<FixedList<label, 3>>(shellGapInfo, map)();
     shellGapMode = UIndirectList<volumeType>(shellGapMode, map)();
 }
@@ -1248,7 +1248,7 @@ Foam::label Foam::meshRefinement::markInternalGapRefinement
         rayEnd2.shrink();
         gapSize2.shrink();
 
-        cellMap = UIndirectList<label>(cellMap, map)();
+        cellMap = labelUIndList(cellMap, map)();
         nearNormal = UIndirectList<vector>(nearNormal, map)();
         shellGapInfo.clear();
         shellGapMode.clear();

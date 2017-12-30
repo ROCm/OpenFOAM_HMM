@@ -27,7 +27,7 @@ License
 #include "labelIOField.H"
 #include "scalarIOField.H"
 #include "stringIOList.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "vectorIOField.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

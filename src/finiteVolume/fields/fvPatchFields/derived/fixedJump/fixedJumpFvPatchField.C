@@ -155,8 +155,7 @@ template<class Type>
 void Foam::fixedJumpFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("patchType") << this->interfaceFieldType()
-        << token::END_STATEMENT << nl;
+    os.writeEntry("patchType", this->interfaceFieldType());
 
     if (this->cyclicPatch().owner())
     {

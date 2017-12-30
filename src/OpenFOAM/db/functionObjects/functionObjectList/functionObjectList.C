@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,13 @@ License
 #include "profiling.H"
 #include "argList.H"
 #include "timeControlFunctionObject.H"
-#include "IFstream.H"
+//#include "IFstream.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
+#include "wordRes.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
+#include "IOdictionary.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -73,7 +75,7 @@ Foam::functionObject* Foam::functionObjectList::remove
     label& oldIndex
 )
 {
-    functionObject* ptr = 0;
+    functionObject* ptr = nullptr;
 
     // Find index of existing functionObject
     HashTable<label>::iterator fnd = indices_.find(key);
@@ -103,7 +105,7 @@ void Foam::functionObjectList::listDir
 {
     // Search specified directory for functionObject configuration files
     {
-        fileNameList foFiles(readDir(dir));
+        fileNameList foFiles(fileHandler().readDir(dir));
         forAll(foFiles, f)
         {
             if (foFiles[f].ext().empty())
@@ -115,7 +117,7 @@ void Foam::functionObjectList::listDir
 
     // Recurse into sub-directories
     {
-        fileNameList foDirs(readDir(dir, fileName::DIRECTORY));
+        fileNameList foDirs(fileHandler().readDir(dir, fileName::DIRECTORY));
         forAll(foDirs, fd)
         {
             listDir(dir/foDirs[fd], foMap);
@@ -174,7 +176,7 @@ bool Foam::functionObjectList::readFunctionObject
 (
     const string& funcNameArgs,
     dictionary& functionsDict,
-    HashSet<word>& requiredFields,
+    HashSet<wordRe>& requiredFields,
     const word& region
 )
 {
@@ -188,7 +190,7 @@ bool Foam::functionObjectList::readFunctionObject
     word funcName(funcNameArgs);
 
     int argLevel = 0;
-    wordList args;
+    wordReList args;
 
     List<Tuple2<word, string>> namedArgs;
     bool namedArg = false;
@@ -210,7 +212,7 @@ bool Foam::functionObjectList::readFunctionObject
         {
             if (argLevel == 0)
             {
-                funcName = funcNameArgs(start, i - start);
+                funcName = funcNameArgs.substr(start, i - start);
                 start = i+1;
             }
             ++argLevel;
@@ -226,7 +228,7 @@ bool Foam::functionObjectList::readFunctionObject
                         Tuple2<word, string>
                         (
                             argName,
-                            funcNameArgs(start, i - start)
+                            funcNameArgs.substr(start, i - start)
                         )
                     );
                     namedArg = false;
@@ -235,7 +237,13 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        string::validate<word>(funcNameArgs(start, i - start))
+                        wordRe
+                        (
+                            word::validate
+                            (
+                                funcNameArgs.substr(start, i - start)
+                            )
+                        )
                     );
                 }
                 start = i+1;
@@ -252,7 +260,11 @@ bool Foam::functionObjectList::readFunctionObject
         }
         else if (c == '=')
         {
-            argName = string::validate<word>(funcNameArgs(start, i - start));
+            argName = word::validate
+            (
+                funcNameArgs.substr(start, i - start)
+            );
+
             start = i+1;
             namedArg = true;
         }
@@ -271,7 +283,10 @@ bool Foam::functionObjectList::readFunctionObject
     }
 
     // Read the functionObject dictionary
-    IFstream fileStream(path);
+    //IFstream fileStream(path);
+    autoPtr<ISstream> fileStreamPtr(fileHandler().NewIFstream(path));
+    ISstream& fileStream = fileStreamPtr();
+
     dictionary funcsDict(fileStream);
     dictionary* funcDictPtr = &funcsDict;
 
@@ -298,11 +313,11 @@ bool Foam::functionObjectList::readFunctionObject
     }
     else if (funcDict.found("field"))
     {
-        requiredFields.insert(word(funcDict.lookup("field")));
+        requiredFields.insert(wordRe(funcDict.lookup("field")));
     }
     else if (funcDict.found("fields"))
     {
-        requiredFields.insert(wordList(funcDict.lookup("fields")));
+        requiredFields.insert(wordReList(funcDict.lookup("fields")));
     }
 
     // Insert named arguments
@@ -323,7 +338,7 @@ bool Foam::functionObjectList::readFunctionObject
 
     // Merge this functionObject dictionary into functionsDict
     dictionary funcArgsDict;
-    funcArgsDict.add(string::validate<word>(funcNameArgs), funcDict);
+    funcArgsDict.add(word::validate(funcNameArgs), funcDict);
     functionsDict.merge(funcArgsDict);
 
     return true;
@@ -334,15 +349,15 @@ bool Foam::functionObjectList::readFunctionObject
 
 Foam::functionObjectList::functionObjectList
 (
-    const Time& t,
+    const Time& runTime,
     const bool execution
 )
 :
     PtrList<functionObject>(),
     digests_(),
     indices_(),
-    time_(t),
-    parentDict_(t.controlDict()),
+    time_(runTime),
+    parentDict_(runTime.controlDict()),
     stateDictPtr_(),
     execution_(execution),
     updated_(false)
@@ -351,7 +366,7 @@ Foam::functionObjectList::functionObjectList
 
 Foam::functionObjectList::functionObjectList
 (
-    const Time& t,
+    const Time& runTime,
     const dictionary& parentDict,
     const bool execution
 )
@@ -359,7 +374,7 @@ Foam::functionObjectList::functionObjectList
     PtrList<functionObject>(),
     digests_(),
     indices_(),
-    time_(t),
+    time_(runTime),
     parentDict_(parentDict),
     stateDictPtr_(),
     execution_(execution),
@@ -372,7 +387,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     const argList& args,
     const Time& runTime,
     dictionary& controlDict,
-    HashSet<word>& requiredFields
+    HashSet<wordRe>& requiredFields
 )
 {
     autoPtr<functionObjectList> functionsPtr;
@@ -570,7 +585,7 @@ bool Foam::functionObjectList::execute()
     }
 
     // Force writing of state dictionary after function object execution
-    if (time_.outputTime())
+    if (time_.writeTime())
     {
         label oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;
@@ -579,10 +594,54 @@ bool Foam::functionObjectList::execute()
         (
             IOstream::ASCII,
             IOstream::currentVersion,
-            time_.writeCompression()
+            time_.writeCompression(),
+            true
         );
 
         IOstream::precision_ = oldPrecision;
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute(const label subIndex)
+{
+    bool ok = execution_;
+
+    if (ok)
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            ok = funcObj.execute(subIndex) && ok;
+        }
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute
+(
+    const wordRes& functionNames,
+    const label subIndex
+)
+{
+    bool ok = execution_;
+
+    if (ok && functionNames.size())
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            if (functionNames.match(funcObj.name()))
+            {
+                ok = funcObj.execute(subIndex) && ok;
+            }
+        }
     }
 
     return ok;
@@ -745,8 +804,10 @@ bool Foam::functionObjectList::read()
             {
                 autoPtr<functionObject> foPtr;
 
-                FatalError.throwExceptions();
-                FatalIOError.throwExceptions();
+                // Throw FatalError, FatalIOError as exceptions
+                const bool throwingError = FatalError.throwExceptions();
+                const bool throwingIOerr = FatalIOError.throwExceptions();
+
                 try
                 {
                     // New functionObject
@@ -757,7 +818,7 @@ bool Foam::functionObjectList::read()
                     );
                     if (functionObjects::timeControl::entriesPresent(dict))
                     {
-                        foPtr.set
+                        foPtr.reset
                         (
                             new functionObjects::timeControl(key, time_, dict)
                         );
@@ -774,13 +835,18 @@ bool Foam::functionObjectList::read()
                 }
                 catch (Foam::error& err)
                 {
-                    WarningInFunction
-                        << "Caught FatalError " << err << nl << endl;
+                    // Bit of trickery to get the original message
+                    err.write(Warning, false);
+                    InfoInFunction << nl << endl;
                 }
-                FatalError.dontThrowExceptions();
-                FatalIOError.dontThrowExceptions();
 
-                if (foPtr.valid())
+                // Restore previous exception throwing state
+                FatalError.throwExceptions(throwingError);
+                FatalIOError.throwExceptions(throwingIOerr);
+
+                // If one processor only has thrown an exception (so exited the
+                // constructor) invalidate the whole functionObject
+                if (returnReduce(foPtr.valid(), andOp<bool>()))
                 {
                     objPtr = foPtr.ptr();
                 }

@@ -33,23 +33,14 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::vector::components,
-        3
-    >::names[] =
-    {
-        "x",
-        "y",
-        "z"
-    };
-}
-
-const Foam::NamedEnum<Foam::vector::components, 3>
-    Foam::channelIndex::vectorComponentsNames_;
+const Foam::Enum
+<
+    Foam::vector::components
+>
+Foam::channelIndex::vectorComponentsNames_
+(
+    Foam::vector::components::X, { "x", "y", "z" }
+);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -233,7 +224,7 @@ Foam::channelIndex::channelIndex
 )
 :
     symmetric_(readBool(dict.lookup("symmetric"))),
-    dir_(vectorComponentsNames_.read(dict.lookup("component")))
+    dir_(vectorComponentsNames_.lookup("component", dict))
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

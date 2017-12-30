@@ -24,12 +24,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include <cctype>
+#include <iostream>  // for std::cerr
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::word::stripInvalid()
 {
-    // skip stripping unless debug is active (to avoid costly operations)
+    // Skip stripping unless debug is active (to avoid costly operations)
     if (debug && string::stripInvalid<word>(*this))
     {
         std::cerr
@@ -110,6 +111,34 @@ inline Foam::word::word
 }
 
 
+inline Foam::word::word(word&& w)
+:
+    string(std::move(w))
+{}
+
+
+inline Foam::word::word(string&& s, const bool doStripInvalid)
+:
+    string(std::move(s))
+{
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
+}
+
+
+inline Foam::word::word(std::string&& s, const bool doStripInvalid)
+:
+    string(std::move(s))
+{
+    if (doStripInvalid)
+    {
+        stripInvalid();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline bool Foam::word::valid(char c)
@@ -147,9 +176,22 @@ inline void Foam::word::operator=(const word& w)
 }
 
 
+inline void Foam::word::operator=(word&& w)
+{
+    string::operator=(std::move(w));
+}
+
+
 inline void Foam::word::operator=(const string& s)
 {
     string::operator=(s);
+    stripInvalid();
+}
+
+
+inline void Foam::word::operator=(string&& s)
+{
+    string::operator=(std::move(s));
     stripInvalid();
 }
 
@@ -161,28 +203,17 @@ inline void Foam::word::operator=(const std::string& s)
 }
 
 
-inline void Foam::word::operator=(const char* s)
+inline void Foam::word::operator=(std::string&& s)
 {
-    string::operator=(s);
+    string::operator=(std::move(s));
     stripInvalid();
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-inline Foam::word Foam::operator&(const word& a, const word& b)
+inline void Foam::word::operator=(const char* s)
 {
-    if (b.size())
-    {
-        string ub = b;
-        ub.string::operator[](0) = char(toupper(ub.string::operator[](0)));
-
-        return a + ub;
-    }
-    else
-    {
-        return a;
-    }
+    string::operator=(s);
+    stripInvalid();
 }
 
 

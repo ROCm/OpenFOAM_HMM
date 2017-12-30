@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,10 +58,10 @@ void Foam::surfMeshSamplers::checkOutNames
 {
     objectRegistry& reg = const_cast<objectRegistry&>(registry);
 
-    forAll(names, namei)
+    for (const word& fldName : names)
     {
-        objectRegistry::iterator iter = reg.find(names[namei]);
-        if (iter != reg.end())
+        objectRegistry::iterator iter = reg.find(fldName);
+        if (iter.found())
         {
             registry.checkOut(*iter());
         }
@@ -156,10 +156,8 @@ bool Foam::surfMeshSamplers::execute()
         DynamicList<word> added(derivedNames_.size());
         DynamicList<word> cleanup(derivedNames_.size());
 
-        forAll(derivedNames_, namei)
+        for (const word& derivedName : derivedNames_)
         {
-            const word& derivedName = derivedNames_[namei];
-
             if (derivedName == "rhoU")
             {
                 added.append(derivedName);
@@ -190,20 +188,48 @@ bool Foam::surfMeshSamplers::execute()
                 {
                     cleanup.append(derivedName);
 
-                    db.store
-                    (
-                        new volScalarField
+                    const volScalarField& p =
+                        mesh_.lookupObject<volScalarField>("p");
+
+                    if (p.dimensions() == dimPressure)
+                    {
+                        db.store
                         (
-                            derivedName,
-                            // pTotal = p + U^2 / 2
+                            new volScalarField
                             (
-                                mesh_.lookupObject<volScalarField>("p")
-                              + 0.5
-                              * mesh_.lookupObject<volScalarField>("rho")
-                              * magSqr(mesh_.lookupObject<volVectorField>("U"))
+                                derivedName,
+                                // pTotal = p + rho U^2 / 2
+                                (
+                                    p
+                                  + 0.5
+                                  * mesh_.lookupObject<volScalarField>("rho")
+                                  * magSqr
+                                    (
+                                        mesh_.lookupObject<volVectorField>("U")
+                                    )
+                                )
                             )
-                        )
-                    );
+                        );
+                    }
+                    else
+                    {
+                        db.store
+                        (
+                            new volScalarField
+                            (
+                                derivedName,
+                                // pTotal = p + U^2 / 2
+                                (
+                                    p
+                                  + 0.5
+                                  * magSqr
+                                    (
+                                        mesh_.lookupObject<volVectorField>("U")
+                                    )
+                                )
+                            )
+                        );
+                    }
                 }
             }
             else
@@ -226,10 +252,8 @@ bool Foam::surfMeshSamplers::execute()
         const wordList fields = acceptable.sortedToc();
         if (!fields.empty())
         {
-            forAll(*this, surfI)
+            for (surfMeshSampler& s : surfaces())
             {
-                surfMeshSampler& s = operator[](surfI);
-
                 // Potentially monitor the update for writing geometry?
                 if (s.needsUpdate())
                 {
@@ -258,21 +282,20 @@ bool Foam::surfMeshSamplers::write()
     wordReList select(fieldSelection_.size() + derivedNames_.size());
 
     label nElem = 0;
-    forAll(fieldSelection_, i)
+    for (const auto& item : fieldSelection_)
     {
-        select[nElem++] = fieldSelection_[i];
+        select[nElem++] = item;
     }
-    forAll(derivedNames_, i)
+    for (const auto& derivedName : derivedNames_)
     {
-        select[nElem++] = derivedNames_[i];
+        select[nElem++] = derivedName;
     }
 
     // avoid duplicate entries
     select = wordRes::uniq(select);
 
-    forAll(*this, surfI)
+    for (const surfMeshSampler& s : surfaces())
     {
-        const surfMeshSampler& s = operator[](surfI);
         s.write(select);
     }
 
@@ -317,10 +340,8 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
         if (this->size())
         {
             Info<< "Reading surface description:" << nl;
-            forAll(*this, surfI)
+            for (surfMeshSampler& s : surfaces())
             {
-                surfMeshSampler& s = operator[](surfI);
-
                 Info<< "    " << s.name() << nl;
                 if (createOnRead)
                 {
@@ -370,9 +391,9 @@ void Foam::surfMeshSamplers::readUpdate(const polyMesh::readUpdateState state)
 
 bool Foam::surfMeshSamplers::needsUpdate() const
 {
-    forAll(*this, surfI)
+    for (const surfMeshSampler& s : surfaces())
     {
-        if (operator[](surfI).needsUpdate())
+        if (s.needsUpdate())
         {
             return true;
         }
@@ -386,9 +407,9 @@ bool Foam::surfMeshSamplers::expire()
 {
     bool justExpired = false;
 
-    forAll(*this, surfI)
+    for (surfMeshSampler& s : surfaces())
     {
-        if (operator[](surfI).expire())
+        if (s.expire())
         {
             justExpired = true;
         }
@@ -407,9 +428,9 @@ bool Foam::surfMeshSamplers::update()
     }
 
     bool updated = false;
-    forAll(*this, surfI)
+    for (surfMeshSampler& s : surfaces())
     {
-        if (operator[](surfI).update())
+        if (s.update())
         {
             updated = true;
         }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -114,10 +114,9 @@ public:
     };
 
 
-    template<class CloudType>
-    class TrackingData
+    class trackingData
     :
-        public ParcelType::template TrackingData<CloudType>
+        public ParcelType::trackingData
     {
     private:
 
@@ -129,19 +128,24 @@ public:
                 autoPtr<interpolation<scalar>> pInterp_;
 
 
+            // Cached continuous phase properties
+
+                //- Pressure [Pa]
+                scalar pc_;
+
+
     public:
 
-        typedef typename ParcelType::template TrackingData<CloudType>::trackPart
-            trackPart;
+        typedef typename ParcelType::trackingData::trackPart trackPart;
 
         // Constructors
 
             //- Construct from components
-            inline TrackingData
+            template<class TrackCloudType>
+            inline trackingData
             (
-                CloudType& cloud,
-                trackPart part = ParcelType::template
-                    TrackingData<CloudType>::tpLinearTrack
+                const TrackCloudType& cloud,
+                trackPart part = ParcelType::trackingData::tpLinearTrack
             );
 
 
@@ -150,6 +154,12 @@ public:
             //- Return const access to the interpolator for continuous phase
             //  pressure field
             inline const interpolation<scalar>& pInterp() const;
+
+            //- Return the continuous phase pressure
+            inline scalar pc() const;
+
+            //- Access the continuous phase pressure
+            inline scalar& pc();
     };
 
 
@@ -166,21 +176,15 @@ protected:
             scalarField Y_;
 
 
-        // Cell-based quantities
-
-            //- Pressure [Pa]
-            scalar pc_;
-
-
     // Protected Member Functions
 
         //- Calculate Phase change
-        template<class TrackData>
+        template<class TrackCloudType>
         void calcPhaseChange
         (
-            TrackData& td,
+            TrackCloudType& cloud,
+            trackingData& td,
             const scalar dt,           // timestep
-            const label celli,         // owner cell
             const scalar Re,           // Reynolds number
             const scalar Pr,           // Prandtl number
             const scalar Ts,           // Surface temperature
@@ -232,22 +236,31 @@ public:
 
     // Constructors
 
-        //- Construct from owner, position, and cloud owner
+        //- Construct from mesh, coordinates and topology
         //  Other properties initialised as null
         inline ReactingParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti
+        );
+
+        //- Construct from a position and a cell, searching for the rest of the
+        //  required topology. Other properties are initialised as null.
+        inline ReactingParcel
+        (
+            const polyMesh& mesh,
+            const vector& position,
+            const label celli
         );
 
         //- Construct from components
         inline ReactingParcel
         (
             const polyMesh& mesh,
-            const vector& position,
+            const barycentric& coordinates,
             const label celli,
             const label tetFacei,
             const label tetPti,
@@ -268,7 +281,8 @@ public:
         (
             const polyMesh& mesh,
             Istream& is,
-            bool readFields = true
+            bool readFields = true,
+            bool newFormat = true
         );
 
         //- Construct as a copy
@@ -329,12 +343,6 @@ public:
             //- Return const access to mass fractions of mixture []
             inline const scalarField& Y() const;
 
-            //- Return the owner cell pressure [Pa]
-            inline scalar pc() const;
-
-            //- Return reference to the owner cell pressure [Pa]
-            inline scalar& pc();
-
 
         // Edit
 
@@ -348,29 +356,24 @@ public:
         // Main calculation loop
 
             //- Set cell values
-            template<class TrackData>
-            void setCellValues
-            (
-                TrackData& td,
-                const scalar dt,
-                const label celli
-            );
+            template<class TrackCloudType>
+            void setCellValues(TrackCloudType& cloud, trackingData& td);
 
             //- Correct cell values using latest transfer information
-            template<class TrackData>
+            template<class TrackCloudType>
             void cellValueSourceCorrection
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
             //- Correct surface values due to emitted species
-            template<class TrackData>
+            template<class TrackCloudType>
             void correctSurfaceValues
             (
-                TrackData& td,
-                const label celli,
+                TrackCloudType& cloud,
+                trackingData& td,
                 const scalar T,
                 const scalarField& Cs,
                 scalar& rhos,
@@ -380,12 +383,12 @@ public:
             );
 
             //- Update parcel properties over the time interval
-            template<class TrackData>
+            template<class TrackCloudType>
             void calc
             (
-                TrackData& td,
-                const scalar dt,
-                const label celli
+                TrackCloudType& cloud,
+                trackingData& td,
+                const scalar dt
             );
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,7 +180,7 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
     operator==
     (
         p0_
-      - 0.5*rhop*(1.0 - pos(phip))*magSqr(Up)
+      - 0.5*rhop*(1.0 - pos0(phip))*magSqr(Up)
       - rhop*((g.value() & patch().Cf()) - ghRef.value())
     );
 
@@ -191,9 +191,9 @@ void Foam::prghTotalPressureFvPatchScalarField::updateCoeffs()
 void Foam::prghTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     p0_.writeEntry("p0", os);
     writeEntry("value", os);
 }

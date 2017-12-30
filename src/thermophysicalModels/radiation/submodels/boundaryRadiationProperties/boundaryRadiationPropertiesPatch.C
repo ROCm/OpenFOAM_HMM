@@ -30,26 +30,16 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::radiation::boundaryRadiationPropertiesPatch::methodType,
-        3
-    >::names[] =
-    {
-        "solidRadiation",
-        "lookup",
-        "model"
-    };
-}
-
-const Foam::NamedEnum
+const Foam::Enum
 <
-    Foam::radiation::boundaryRadiationPropertiesPatch::methodType,
-    3
-> Foam::radiation::boundaryRadiationPropertiesPatch::methodTypeNames_;
+    Foam::radiation::boundaryRadiationPropertiesPatch::methodType
+>
+Foam::radiation::boundaryRadiationPropertiesPatch::methodTypeNames_
+{
+    { methodType::SOLIDRADIATION, "solidRadiation" },
+    { methodType::LOOKUP, "lookup" },
+    { methodType::MODEL, "model" }
+};
 
 
 // * * * * * * * * * * * * * * * * Private functions * * * * * * * * * * * * //
@@ -84,7 +74,7 @@ boundaryRadiationPropertiesPatch
     const dictionary& dict
 )
 :
-    method_(methodTypeNames_.read(dict.lookup("mode"))),
+    method_(methodTypeNames_.lookup("mode", dict)),
     dict_(dict),
     absorptionEmission_(nullptr),
     transmissivity_(nullptr),
@@ -411,20 +401,15 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("mode") << methodTypeNames_[method_]
-        << token::END_STATEMENT << nl;
+    os.writeEntry("mode", methodTypeNames_[method_]);
 
     switch (method_)
     {
         case MODEL:
         {
-            word modelType
-            (
-                word(dict_.lookup("absorptionEmissionModel"))
-            );
+            word modelType(dict_.lookup("absorptionEmissionModel"));
 
-            os.writeKeyword("absorptionEmissionModel") << modelType
-                << token::END_STATEMENT << nl;
+            os.writeEntry("absorptionEmissionModel", modelType);
 
             word modelCoeffs(modelType + word("Coeffs"));
             os.writeKeyword(modelCoeffs);
@@ -433,8 +418,7 @@ void Foam::radiation::boundaryRadiationPropertiesPatch::write
 
             modelType = word(dict_.lookup("transmissivityModel"));
 
-            os.writeKeyword("transmissivityModel") << modelType
-                << token::END_STATEMENT << nl;
+            os.writeEntry("transmissivityModel", modelType);
 
             modelCoeffs = modelType + word("Coeffs");
 

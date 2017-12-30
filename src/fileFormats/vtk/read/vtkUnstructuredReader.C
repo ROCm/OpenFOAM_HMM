@@ -27,7 +27,7 @@ License
 #include "labelIOField.H"
 #include "scalarIOField.H"
 #include "stringIOList.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "vectorIOField.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
@@ -37,36 +37,47 @@ namespace Foam
     defineTypeNameAndDebug(vtkUnstructuredReader, 1);
 }
 
-const Foam::Enum<Foam::vtkUnstructuredReader::vtkDataType>
-    Foam::vtkUnstructuredReader::vtkDataTypeNames
-    {
-        { vtkDataType::VTK_INT, "int" },
-        { vtkDataType::VTK_UINT, "unsigned_int" },
-        { vtkDataType::VTK_LONG, "long" },
-        { vtkDataType::VTK_ULONG, "unsigned_long" },
-        { vtkDataType::VTK_FLOAT, "float" },
-        { vtkDataType::VTK_DOUBLE, "double" },
-        { vtkDataType::VTK_STRING, "string" },
-        { vtkDataType::VTK_ID, "vtkIdType" }
-    };
+const Foam::Enum
+<
+    Foam::vtkUnstructuredReader::vtkDataType
+>
+Foam::vtkUnstructuredReader::vtkDataTypeNames
+{
+    { vtkDataType::VTK_INT, "int" },
+    { vtkDataType::VTK_UINT, "unsigned_int" },
+    { vtkDataType::VTK_LONG, "long" },
+    { vtkDataType::VTK_ULONG, "unsigned_long" },
+    { vtkDataType::VTK_FLOAT, "float" },
+    { vtkDataType::VTK_DOUBLE, "double" },
+    { vtkDataType::VTK_STRING, "string" },
+    { vtkDataType::VTK_ID, "vtkIdType" }
+};
 
-const Foam::Enum<Foam::vtkUnstructuredReader::vtkDataSetType>
-    Foam::vtkUnstructuredReader::vtkDataSetTypeNames
-    {
-        { vtkDataSetType::VTK_FIELD, "FIELD" },
-        { vtkDataSetType::VTK_SCALARS, "SCALARS" },
-        { vtkDataSetType::VTK_VECTORS, "VECTORS" }
-    };
 
-const Foam::Enum<Foam::vtkUnstructuredReader::parseMode>
-    Foam::vtkUnstructuredReader::parseModeNames
-    {
-        { parseMode::NOMODE, "NOMODE" },
-        { parseMode::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
-        { parseMode::POLYDATA, "POLYDATA" },
-        { parseMode::CELL_DATA, "CELL_DATA" },
-        { parseMode::POINT_DATA, "POINT_DATA" }
-    };
+const Foam::Enum
+<
+    Foam::vtkUnstructuredReader::vtkDataSetType
+>
+Foam::vtkUnstructuredReader::vtkDataSetTypeNames
+{
+    { vtkDataSetType::VTK_FIELD, "FIELD" },
+    { vtkDataSetType::VTK_SCALARS, "SCALARS" },
+    { vtkDataSetType::VTK_VECTORS, "VECTORS" }
+};
+
+
+const Foam::Enum
+<
+    Foam::vtkUnstructuredReader::parseMode
+>
+Foam::vtkUnstructuredReader::parseModeNames
+{
+    { parseMode::NOMODE, "NOMODE" },
+    { parseMode::UNSTRUCTURED_GRID, "UNSTRUCTURED_GRID" },
+    { parseMode::POLYDATA, "POLYDATA" },
+    { parseMode::CELL_DATA, "CELL_DATA" },
+    { parseMode::POINT_DATA, "POINT_DATA" }
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -93,10 +104,10 @@ void Foam::vtkUnstructuredReader::extractCells
     const labelList& cellVertData
 )
 {
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList tetPoints(4);
     labelList pyrPoints(5);

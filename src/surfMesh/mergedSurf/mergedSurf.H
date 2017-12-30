@@ -72,7 +72,7 @@ public:
 
 
     //- Destructor
-    virtual ~mergedSurf();
+    virtual ~mergedSurf() = default;
 
 
     // Access Member Functions

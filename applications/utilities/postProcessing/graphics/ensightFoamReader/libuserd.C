@@ -43,8 +43,9 @@ Description
 #include "Cloud.H"
 #include "passiveParticle.H"
 #include "fvMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "globalFoam.H"
+#include "foamVersion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

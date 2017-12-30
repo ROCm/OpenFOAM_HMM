@@ -37,6 +37,7 @@ SourceFiles
 #define shellSurfaces_H
 
 #include "searchableSurface.H"
+#include "Enum.H"
 #include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -97,7 +98,7 @@ private:
     // Private data
 
         //- refineMode names
-        static const NamedEnum<refineMode, 3> refineModeNames_;
+        static const Enum<refineMode> refineModeNames_;
 
 
     // Private Member Functions

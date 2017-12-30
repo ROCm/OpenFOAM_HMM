@@ -75,7 +75,12 @@ tmp<volScalarField> v2f<BasicTurbulenceModel>::Ls() const
                     max
                     (
                         this->nu(),
-                        dimensionedScalar("zero", this->nu()().dimensions(), 0.0)
+                        dimensionedScalar
+                        (
+                            "zero",
+                            this->nu()().dimensions(),
+                            0.0
+                        )
                     )
                 )/epsilon_
             )

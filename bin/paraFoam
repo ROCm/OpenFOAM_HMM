@@ -4,37 +4,24 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     paraFoam
 #
 # Description
-#     Start paraview with the OpenFOAM libraries and reader modules.
+#     Start paraview with OpenFOAM libraries and reader modules.
 #
 # Note
-#     Combining -block or -builtin options with -region option yields
+#     Combining -block, -vtk, -builtin options with -region option yields
 #     undefined behaviour
 #------------------------------------------------------------------------------
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
+    # Print usage to stdout so that it can be captured for bash completion
     cat<<USAGE
 
 Usage: ${0##*/} [OPTION] [--] [PARAVIEW_OPTION]
@@ -44,10 +31,10 @@ options:
   -region <name>    specify alternative mesh region
   -touch            create the file (eg, .blockMesh, .OpenFOAM, .foam, ...)
   -touch-all | -touchAll
-                    create .blockMesh, .OpenFOAM files (and for all regions)
+                    create .blockMesh, .foam, .OpenFOAM files (for all regions)
   -touch-proc       same as '-touch' but for each processor
   -vtk | -builtin   use VTK builtin OpenFOAM reader (uses .foam extension)
-  -help             print the usage
+  -help |-help-full print the usage
   --help            paraview help
 
 Start paraview with the OpenFOAM libraries and reader modules.
@@ -56,8 +43,23 @@ Note that paraview options begin with double dashes.
   paraview=$(command -v paraview)
 
 USAGE
+    exit 0  # A clean exit
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
     exit 1
 }
+
+#-------------------------------------------------------------------------------
 
 # Do a nice exit to give paraview an opportunity to clean up
 unset FOAM_ABORT
@@ -76,8 +78,8 @@ unset regionName optTouch
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
-        usage
+    -h | -help*)
+        printHelp
         ;;
     -block*)
         extension=blockMesh
@@ -90,12 +92,12 @@ do
         shift
         ;;
     -case)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        cd "$2" 2>/dev/null || usage "directory does not exist:  '$2'"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
+        cd "$2" 2>/dev/null || die "directory does not exist: '$2'"
         shift 2
         ;;
     -region)
-        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        [ "$#" -ge 2 ] || die "'$1' option requires an argument"
         regionName=$2
         shift 2
         ;;
@@ -127,7 +129,7 @@ do
         break    # Stop here, treat this and balance as paraview options
         ;;
     *)
-        usage "unknown option/argument: '$1'"
+        die "unknown option/argument: '$1'"
         ;;
     esac
 done
@@ -198,8 +200,8 @@ all)
         touch "$caseName.blockMesh"
         echo "Created '$caseName.blockMesh'" 1>&2
     fi
-    touch "$caseName.$extension"
-    echo "Created '$caseName.$extension'" 1>&2
+    touch "$caseName.$extension" "$caseName.foam"
+    echo "Created '$caseName.$extension' '$caseName.foam'" 1>&2
     # Discover probable regions
     for region in constant/*
     do

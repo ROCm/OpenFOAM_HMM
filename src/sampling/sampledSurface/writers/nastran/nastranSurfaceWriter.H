@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -32,16 +32,16 @@ Description
     {
         nastran
         {
-            // From OpenFOAM field name to Nastran field name
+            // From OpenFOAM field name to NASTRAN field name
             fields
             (
-                (pMean PLOAD2)
-                (p     PLOAD4)
+                (pMean  PLOAD2)
+                (p      PLOAD4)
             );
             // Optional scale
-            scale 2.0;
+            scale   2.0;
             // Optional format
-            format free;    //short, long, free
+            format  free;    // short, long, free
         }
     };
     \endverbatim
@@ -56,7 +56,7 @@ SourceFiles
 #define nastranSurfaceWriter_H
 
 #include "surfaceWriter.H"
-#include "NamedEnum.H"
+#include "NASCore.H"
 #include "OFstream.H"
 #include "HashTable.H"
 
@@ -75,17 +75,14 @@ class nastranSurfaceWriter
 {
 public:
 
-    enum writeFormat
-    {
-        wfShort,
-        wfLong,
-        wfFree
-    };
+    //- File field formats
+    using fieldFormat = Foam::fileFormats::NASCore::fieldFormat;
 
-    enum dataFormat
+    //- Output load format
+    enum loadFormat
     {
-        dfPLOAD2,
-        dfPLOAD4
+        PLOAD2,
+        PLOAD4
     };
 
 
@@ -93,14 +90,13 @@ private:
 
     // Private data
 
-        static const NamedEnum<writeFormat, 3> writeFormatNames_;
-        static const NamedEnum<dataFormat,  2> dataFormatNames_;
+        static const Enum<loadFormat> loadFormatNames_;
 
-        //- Write option
-        writeFormat writeFormat_;
+        //- Field format (width and separator)
+        fieldFormat writeFormat_;
 
         //- Mapping from field name to data format enumeration
-        HashTable<dataFormat> fieldMap_;
+        HashTable<loadFormat> fieldMap_;
 
         //- Scale to apply to values (default = 1.0)
         scalar scale_;
@@ -111,14 +107,11 @@ private:
 
     // Private Member Functions
 
-        //- Initialise the output stream format parameters
-        void formatOS(Ostream& os) const;
-
         //- Write a coordinate
         void writeCoord
         (
             Ostream& os,
-            const point& p,
+            const point& pt,
             const label pointI  //!< 0-based Point Id
         ) const;
 
@@ -159,7 +152,7 @@ private:
         Ostream& writeFaceValue
         (
             Ostream& os,
-            const dataFormat& format,
+            const loadFormat format,
             const Type& value,
             const label EID     //!< 1-based Element Id
         ) const;
@@ -195,7 +188,7 @@ public:
 
 
     //- Destructor
-    virtual ~nastranSurfaceWriter();
+    virtual ~nastranSurfaceWriter() = default;
 
 
     // Member Functions

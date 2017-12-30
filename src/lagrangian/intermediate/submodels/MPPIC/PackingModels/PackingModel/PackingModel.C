@@ -86,15 +86,14 @@ Foam::PackingModel<CloudType>::New
 
     Info<< "Selecting packing model " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown packing model type " << modelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid packing model types are:" << nl
+            << "Unknown packing model type "
+            << modelType << nl << nl
+            << "Valid packing model types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

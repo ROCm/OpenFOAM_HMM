@@ -41,7 +41,6 @@ SourceFiles
 #include "IOdictionary.H"
 #include "autoPtr.H"
 #include "basicThermo.H"
-#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

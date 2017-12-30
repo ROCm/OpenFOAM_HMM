@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,8 @@ License
 #include "PstreamGlobals.H"
 #include "SubList.H"
 #include "allReduce.H"
+#include "int.H"
+#include "collatedFileOperation.H"
 
 #include <mpi.h>
 
@@ -41,6 +43,12 @@ License
 #elif defined(WM_DP)
     #define MPI_SCALAR MPI_DOUBLE
 #endif
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+// file-scope: min value and default for mpiBufferSize
+static const int minBufferSize = 20000000;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,9 +67,81 @@ void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
 }
 
 
+bool Foam::UPstream::initNull()
+{
+    int flag = 0;
+
+    MPI_Finalized(&flag);
+    if (flag)
+    {
+        // Already finalized - this is an error
+        FatalErrorInFunction
+            << "MPI was already finalized - cannot perform MPI_Init" << endl
+            << Foam::abort(FatalError);
+
+        return false;
+    }
+
+    MPI_Initialized(&flag);
+    if (flag)
+    {
+        // Already initialized - nothing to do
+        return true;
+    }
+
+    MPI_Init_thread
+    (
+        nullptr,    // argc
+        nullptr,    // argv
+        MPI_THREAD_SINGLE,
+        &flag       // provided_thread_support
+    );
+
+    return true;
+}
+
+
 bool Foam::UPstream::init(int& argc, char**& argv)
 {
-    MPI_Init(&argc, &argv);
+    int flag = 0;
+
+    MPI_Finalized(&flag);
+    if (flag)
+    {
+        // Already finalized - this is an error
+        FatalErrorInFunction
+            << "MPI was already finalized - cannot perform MPI_Init" << endl
+            << Foam::abort(FatalError);
+
+        return false;
+    }
+
+    MPI_Initialized(&flag);
+    if (flag)
+    {
+        // Already initialized - issue warning and skip the rest
+        WarningInFunction
+            << "MPI was already initialized - cannot perform MPI_Init" << nl
+            << "This could indicate an application programming error!" << endl;
+
+        return true;
+    }
+
+
+    //MPI_Init(&argc, &argv);
+    int wanted_thread_support = MPI_THREAD_SINGLE;
+    if (fileOperations::collatedFileOperation::maxThreadFileBufferSize > 0)
+    {
+        wanted_thread_support = MPI_THREAD_MULTIPLE;
+    }
+    int provided_thread_support;
+    MPI_Init_thread
+    (
+        &argc,
+        &argv,
+        wanted_thread_support,
+        &provided_thread_support
+    );
 
     int numprocs;
     MPI_Comm_size(MPI_COMM_WORLD, &numprocs);
@@ -77,42 +157,40 @@ bool Foam::UPstream::init(int& argc, char**& argv)
     if (numprocs <= 1)
     {
         FatalErrorInFunction
-            << "bool IPstream::init(int& argc, char**& argv) : "
-               "attempt to run parallel on 1 processor"
+            << "attempt to run parallel on 1 processor"
             << Foam::abort(FatalError);
     }
 
 
     // Initialise parallel structure
-    setParRun(numprocs);
+    setParRun(numprocs, provided_thread_support == MPI_THREAD_MULTIPLE);
 
     #ifndef SGIMPI
-    string bufferSizeName = getEnv("MPI_BUFFER_SIZE");
-
-    if (bufferSizeName.size())
     {
-        int bufferSize = atoi(bufferSizeName.c_str());
+        // Normally use UPstream::mpiBufferSize (optimisationSwitch),
+        // but allow override with the MPI_BUFFER_SIZE env variable
+        // which has an int value
+        int bufSize = 0;
 
-        if (bufferSize)
+        const std::string str = Foam::getEnv("MPI_BUFFER_SIZE");
+        if (str.empty() || !Foam::read(str, bufSize) || bufSize <= 0)
         {
-            MPI_Buffer_attach(new char[bufferSize], bufferSize);
+            bufSize = mpiBufferSize;
         }
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "UPstream::init(int& argc, char**& argv) : "
-            << "environment variable MPI_BUFFER_SIZE not defined"
-            << Foam::abort(FatalError);
+
+        if (bufSize < minBufferSize)
+        {
+            bufSize = minBufferSize;
+        }
+
+        if (debug)
+        {
+            Pout<< "UPstream::init : mpi-buffer-size " << bufSize << endl;
+        }
+
+        MPI_Buffer_attach(new char[bufSize], bufSize);
     }
     #endif
-
-    //int processorNameLen;
-    //char processorName[MPI_MAX_PROCESSOR_NAME];
-    //
-    //MPI_Get_processor_name(processorName, &processorNameLen);
-    //processorName[processorNameLen] = '\0';
-    //Pout<< "Processor name:" << processorName << endl;
 
     return true;
 }
@@ -125,11 +203,33 @@ void Foam::UPstream::exit(int errnum)
         Pout<< "UPstream::exit." << endl;
     }
 
+    int flag = 0;
+
+    MPI_Initialized(&flag);
+    if (!flag)
+    {
+        // Not initialized - just exit
+        ::exit(errnum);
+        return;
+    }
+
+    MPI_Finalized(&flag);
+    if (flag)
+    {
+        // Already finalized
+        FatalErrorInFunction
+            << "MPI was already finalized" << endl
+            << Foam::abort(FatalError);
+        return;
+    }
+
     #ifndef SGIMPI
-    int size;
-    char* buff;
-    MPI_Buffer_detach(&buff, &size);
-    delete[] buff;
+    {
+        int size;
+        char* buff;
+        MPI_Buffer_detach(&buff, &size);
+        delete[] buff;
+    }
     #endif
 
     if (PstreamGlobals::outstandingRequests_.size())
@@ -339,6 +439,199 @@ void Foam::UPstream::allToAll
             FatalErrorInFunction
                 << "MPI_Alltoall failed for " << sendData
                 << " on communicator " << communicator
+                << Foam::abort(FatalError);
+        }
+    }
+}
+
+
+void Foam::UPstream::allToAll
+(
+    const char* sendData,
+    const UList<int>& sendSizes,
+    const UList<int>& sendOffsets,
+
+    char* recvData,
+    const UList<int>& recvSizes,
+    const UList<int>& recvOffsets,
+
+    const label communicator
+)
+{
+    label np = nProcs(communicator);
+
+    if
+    (
+        sendSizes.size() != np
+     || sendOffsets.size() != np
+     || recvSizes.size() != np
+     || recvOffsets.size() != np
+    )
+    {
+        FatalErrorInFunction
+            << "Size of sendSize " << sendSizes.size()
+            << ", sendOffsets " << sendOffsets.size()
+            << ", recvSizes " << recvSizes.size()
+            << " or recvOffsets " << recvOffsets.size()
+            << " is not equal to the number of processors in the domain "
+            << np
+            << Foam::abort(FatalError);
+    }
+
+    if (!UPstream::parRun())
+    {
+        if (recvSizes[0] != sendSizes[0])
+        {
+            FatalErrorInFunction
+                << "Bytes to send " << sendSizes[0]
+                << " does not equal bytes to receive " << recvSizes[0]
+                << Foam::abort(FatalError);
+        }
+        memmove(recvData, &sendData[sendOffsets[0]], recvSizes[0]);
+    }
+    else
+    {
+        if
+        (
+            MPI_Alltoallv
+            (
+                sendData,
+                sendSizes.begin(),
+                sendOffsets.begin(),
+                MPI_BYTE,
+                recvData,
+                recvSizes.begin(),
+                recvOffsets.begin(),
+                MPI_BYTE,
+                PstreamGlobals::MPICommunicators_[communicator]
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Alltoallv failed for sendSizes " << sendSizes
+                << " recvSizes " << recvSizes
+                << " communicator " << communicator
+                << Foam::abort(FatalError);
+        }
+    }
+}
+
+
+void Foam::UPstream::gather
+(
+    const char* sendData,
+    int sendSize,
+
+    char* recvData,
+    const UList<int>& recvSizes,
+    const UList<int>& recvOffsets,
+    const label communicator
+)
+{
+    label np = nProcs(communicator);
+
+    if
+    (
+        UPstream::master(communicator)
+     && (recvSizes.size() != np || recvOffsets.size() < np)
+    )
+    {
+        // Note: allow recvOffsets to be e.g. 1 larger than np so we
+        // can easily loop over the result
+
+        FatalErrorInFunction
+            << "Size of recvSizes " << recvSizes.size()
+            << " or recvOffsets " << recvOffsets.size()
+            << " is not equal to the number of processors in the domain "
+            << np
+            << Foam::abort(FatalError);
+    }
+
+    if (!UPstream::parRun())
+    {
+        memmove(recvData, sendData, sendSize);
+    }
+    else
+    {
+        if
+        (
+            MPI_Gatherv
+            (
+                sendData,
+                sendSize,
+                MPI_BYTE,
+                recvData,
+                recvSizes.begin(),
+                recvOffsets.begin(),
+                MPI_BYTE,
+                0,
+                MPI_Comm(PstreamGlobals::MPICommunicators_[communicator])
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Gatherv failed for sendSize " << sendSize
+                << " recvSizes " << recvSizes
+                << " communicator " << communicator
+                << Foam::abort(FatalError);
+        }
+    }
+}
+
+
+void Foam::UPstream::scatter
+(
+    const char* sendData,
+    const UList<int>& sendSizes,
+    const UList<int>& sendOffsets,
+
+    char* recvData,
+    int recvSize,
+    const label communicator
+)
+{
+    label np = nProcs(communicator);
+
+    if
+    (
+        UPstream::master(communicator)
+     && (sendSizes.size() != np || sendOffsets.size() != np)
+    )
+    {
+        FatalErrorInFunction
+            << "Size of sendSizes " << sendSizes.size()
+            << " or sendOffsets " << sendOffsets.size()
+            << " is not equal to the number of processors in the domain "
+            << np
+            << Foam::abort(FatalError);
+    }
+
+    if (!UPstream::parRun())
+    {
+        memmove(recvData, sendData, recvSize);
+    }
+    else
+    {
+        if
+        (
+            MPI_Scatterv
+            (
+                sendData,
+                sendSizes.begin(),
+                sendOffsets.begin(),
+                MPI_BYTE,
+                recvData,
+                recvSize,
+                MPI_BYTE,
+                0,
+                MPI_Comm(PstreamGlobals::MPICommunicators_[communicator])
+            )
+        )
+        {
+            FatalErrorInFunction
+                << "MPI_Scatterv failed for sendSizes " << sendSizes
+                << " sendOffsets " << sendOffsets
+                << " communicator " << communicator
                 << Foam::abort(FatalError);
         }
     }

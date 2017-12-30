@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,15 +26,42 @@ License
 #include "UOPstream.H"
 #include "int.H"
 #include "token.H"
-
 #include <cctype>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class T>
-inline void Foam::UOPstream::writeToBuffer(const T& t)
+inline void Foam::UOPstream::prepareBuffer
+(
+    const size_t count,
+    const size_t align
+)
 {
-    writeToBuffer(&t, sizeof(T), sizeof(T));
+    if (!count)
+    {
+        return;
+    }
+
+    // The current output position
+    label pos = sendBuf_.size();
+
+    if (align > 1)
+    {
+        // Align output position. Pads sendBuf_.size() - oldPos characters.
+        pos = align + ((pos - 1) & ~(align - 1));
+    }
+
+    // Extend buffer (as required)
+    sendBuf_.reserve(max(1000, label(pos + count)));
+
+    // Move to the aligned output position
+    sendBuf_.setSize(pos);
+}
+
+
+template<class T>
+inline void Foam::UOPstream::writeToBuffer(const T& val)
+{
+    writeToBuffer(&val, sizeof(T), sizeof(T));
 }
 
 
@@ -51,31 +78,39 @@ inline void Foam::UOPstream::writeToBuffer(const char& c)
 inline void Foam::UOPstream::writeToBuffer
 (
     const void* data,
-    size_t count,
-    size_t align
+    const size_t count,
+    const size_t align
 )
 {
-    if (!sendBuf_.capacity())
+    if (!count)
     {
-        sendBuf_.setCapacity(1000);
+        return;
     }
 
-    label alignedPos = sendBuf_.size();
+    prepareBuffer(count, align);
 
-    if (align > 1)
+    // The aligned output position
+    const label pos = sendBuf_.size();
+
+    // Extend the addressable range for direct pointer access
+    sendBuf_.setSize(pos + count);
+
+    char* const __restrict__ buf = (sendBuf_.begin() + pos);
+    const char* const __restrict__ input = reinterpret_cast<const char*>(data);
+
+    for (size_t i = 0; i < count; ++i)
     {
-        // Align bufPosition. Pads sendBuf_.size() - oldPos characters.
-        alignedPos = align + ((sendBuf_.size() - 1) & ~(align - 1));
+        buf[i] = input[i];
     }
-
-    // Extend if necessary
-    sendBuf_.setSize(alignedPos + count);
-
-    const char* dataPtr = reinterpret_cast<const char*>(data);
-    size_t i = count;
-    while (i--) sendBuf_[alignedPos++] = *dataPtr++;
 }
 
+
+inline void Foam::UOPstream::writeStringToBuffer(const std::string& str)
+{
+    const size_t len = str.size();
+    writeToBuffer(len);
+    writeToBuffer(str.data(), len, 1);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
@@ -128,7 +163,7 @@ Foam::UOPstream::~UOPstream()
     {
         if
         (
-           !UOPstream::write
+            !UOPstream::write
             (
                 commsType_,
                 toProcNo_,
@@ -150,25 +185,41 @@ Foam::UOPstream::~UOPstream()
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::UOPstream::write(const token& t)
+bool Foam::UOPstream::write(const token& tok)
 {
-    // Raw token output only supported for verbatim strings for now
-    if (t.type() == token::VERBATIMSTRING)
+    // Direct token handling only for some types
+
+    switch (tok.type())
     {
-        write(char(token::VERBATIMSTRING));
-        write(t.stringToken());
+        case token::tokenType::FLAG :
+        {
+            writeToBuffer(char(token::tokenType::FLAG));
+            writeToBuffer(char(tok.flagToken()));
+
+            return true;
+        }
+
+        case token::tokenType::VERBATIMSTRING :
+        {
+            writeToBuffer(char(token::tokenType::VERBATIMSTRING));
+            write(tok.stringToken());
+
+            return true;
+        }
+
+        case token::tokenType::VARIABLE :
+        {
+            writeToBuffer(char(token::tokenType::VARIABLE));
+            write(tok.stringToken());
+
+            return true;
+        }
+
+        default:
+            break;
     }
-    else if (t.type() == token::VARIABLE)
-    {
-        write(char(token::VARIABLE));
-        write(t.stringToken());
-    }
-    else
-    {
-        NotImplemented;
-        setBad();
-    }
-    return *this;
+
+    return false;
 }
 
 
@@ -185,7 +236,7 @@ Foam::Ostream& Foam::UOPstream::write(const char c)
 
 Foam::Ostream& Foam::UOPstream::write(const char* str)
 {
-    word nonWhiteChars(string::validate<word>(str));
+    const word nonWhiteChars(string::validate<word>(str));
 
     if (nonWhiteChars.size() == 1)
     {
@@ -204,11 +255,8 @@ Foam::Ostream& Foam::UOPstream::write(const char* str)
 
 Foam::Ostream& Foam::UOPstream::write(const word& str)
 {
-    write(char(token::WORD));
-
-    size_t len = str.size();
-    writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeToBuffer(char(token::tokenType::WORD));
+    writeStringToBuffer(str);
 
     return *this;
 }
@@ -216,11 +264,8 @@ Foam::Ostream& Foam::UOPstream::write(const word& str)
 
 Foam::Ostream& Foam::UOPstream::write(const string& str)
 {
-    write(char(token::STRING));
-
-    size_t len = str.size();
-    writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeToBuffer(char(token::tokenType::STRING));
+    writeStringToBuffer(str);
 
     return *this;
 }
@@ -234,16 +279,13 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 {
     if (quoted)
     {
-        write(char(token::STRING));
+        writeToBuffer(char(token::tokenType::STRING));
     }
     else
     {
-        write(char(token::WORD));
+        writeToBuffer(char(token::tokenType::WORD));
     }
-
-    size_t len = str.size();
-    writeToBuffer(len);
-    writeToBuffer(str.c_str(), len + 1, 1);
+    writeStringToBuffer(str);
 
     return *this;
 }
@@ -251,7 +293,7 @@ Foam::Ostream& Foam::UOPstream::writeQuoted
 
 Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 {
-    write(char(token::LABEL));
+    writeToBuffer(char(token::tokenType::LABEL));
     writeToBuffer(val);
     return *this;
 }
@@ -259,7 +301,7 @@ Foam::Ostream& Foam::UOPstream::write(const int32_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 {
-    write(char(token::LABEL));
+    writeToBuffer(char(token::tokenType::LABEL));
     writeToBuffer(val);
     return *this;
 }
@@ -267,7 +309,7 @@ Foam::Ostream& Foam::UOPstream::write(const int64_t val)
 
 Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 {
-    write(char(token::FLOAT_SCALAR));
+    writeToBuffer(char(token::tokenType::FLOAT_SCALAR));
     writeToBuffer(val);
     return *this;
 }
@@ -275,13 +317,17 @@ Foam::Ostream& Foam::UOPstream::write(const floatScalar val)
 
 Foam::Ostream& Foam::UOPstream::write(const doubleScalar val)
 {
-    write(char(token::DOUBLE_SCALAR));
+    writeToBuffer(char(token::tokenType::DOUBLE_SCALAR));
     writeToBuffer(val);
     return *this;
 }
 
 
-Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
+Foam::Ostream& Foam::UOPstream::write
+(
+    const char* data,
+    const std::streamsize count
+)
 {
     if (format() != BINARY)
     {
@@ -291,6 +337,41 @@ Foam::Ostream& Foam::UOPstream::write(const char* data, std::streamsize count)
     }
 
     writeToBuffer(data, count, 8);
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::UOPstream::beginRaw
+(
+    const std::streamsize count
+)
+{
+    if (format() != BINARY)
+    {
+        FatalErrorInFunction
+            << "stream format not binary"
+            << Foam::abort(FatalError);
+    }
+
+    // Alignment = 8, as per write(const char*, streamsize)
+    prepareBuffer(count, 8);
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::UOPstream::writeRaw
+(
+    const char* data,
+    const std::streamsize count
+)
+{
+    // No check for format() == BINARY since this is either done in the
+    // beginRaw() method, or the caller knows what they are doing.
+
+    // Previously aligned and sizes reserved via beginRaw()
+    writeToBuffer(data, count, 1);
 
     return *this;
 }

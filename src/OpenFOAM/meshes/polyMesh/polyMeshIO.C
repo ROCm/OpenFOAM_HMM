@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,12 @@ void Foam::polyMesh::setInstance(const fileName& inst)
 
     cellZones_.writeOpt() = IOobject::AUTO_WRITE;
     cellZones_.instance() = inst;
+
+    if (tetBasePtIsPtr_.valid())
+    {
+        tetBasePtIsPtr_->writeOpt() = IOobject::AUTO_WRITE;
+        tetBasePtIsPtr_->instance() = inst;
+    }
 }
 
 
@@ -232,7 +238,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         // Boundary is set so can use initMesh now (uses boundary_ to
         // determine internal and active faces)
 
-        if (exists(owner_.objectPath()))
+        if (!owner_.headerClassName().empty())
         {
             initMesh();
         }
@@ -387,6 +393,9 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             cellZones_.set(czI, newCellZones[czI].clone(cellZones_));
         }
 
+        // Re-read tet base points
+        tetBasePtIsPtr_ = readTetBasePtIs();
+
 
         if (boundaryChanged)
         {
@@ -438,6 +447,13 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
 
         points_.transfer(newPoints);
         points_.instance() = pointsInst;
+
+        // Re-read tet base points
+        autoPtr<labelIOList> newTetBasePtIsPtr = readTetBasePtIs();
+        if (newTetBasePtIsPtr.valid())
+        {
+            tetBasePtIsPtr_ = newTetBasePtIsPtr;
+        }
 
         // Calculate the geometry for the patches (transformation tensors etc.)
         boundary_.calcGeometry();

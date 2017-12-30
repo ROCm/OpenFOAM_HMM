@@ -1,9 +1,7 @@
 #!/bin/sh
-
-cd ${0%/*} || exit 1    # Run from this directory
+cd ${0%/*} || exit 1                        # Run from this directory
 
 cp rawSurfaces/*.stl .
-
 
 # Vessel surface
 surfaceAdd outlet.stl vessel.stl vessel.stl
@@ -29,6 +27,5 @@ mv stirrer_bafflePart_0.stl stirrer_baffles.stl
 
 surfaceCheck stirrer_baffles.stl
 mv stirrer_baffles_0.obj stirrer_baffles_plate.obj
-
 
 #------------------------------------------------------------------------------

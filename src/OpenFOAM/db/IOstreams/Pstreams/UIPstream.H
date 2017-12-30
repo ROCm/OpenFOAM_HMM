@@ -80,10 +80,19 @@ class UIPstream
 
         //- Read a T from the transfer buffer
         template<class T>
-        inline void readFromBuffer(T&);
+        inline void readFromBuffer(T& val);
 
-        //- Read data from the transfer buffer
-        inline void readFromBuffer(void* data, size_t count, size_t align);
+        //- Read count bytes of data from the transfer buffer
+        //  using align byte alignment
+        inline void readFromBuffer
+        (
+            void* data,
+            const size_t count,
+            const size_t align
+        );
+
+        //- Read string length and its content.
+        inline Istream& readStringFromBuffer(std::string& str);
 
 
 public:
@@ -139,31 +148,31 @@ public:
             );
 
             //- Return next token from stream
-            Istream& read(token&);
+            Istream& read(token& t);
 
             //- Read a character
-            Istream& read(char&);
+            Istream& read(char& c);
 
             //- Read a word
-            Istream& read(word&);
+            Istream& read(word& str);
 
-            // Read a string (including enclosing double-quotes)
-            Istream& read(string&);
+            // Read a string
+            Istream& read(string& str);
 
             //- Read a label
-            Istream& read(label&);
+            Istream& read(label& val);
 
             //- Read a floatScalar
-            Istream& read(floatScalar&);
+            Istream& read(floatScalar& val);
 
             //- Read a doubleScalar
-            Istream& read(doubleScalar&);
+            Istream& read(doubleScalar& val);
 
-            //- Read binary block
-            Istream& read(char*, std::streamsize);
+            //- Read binary block with 8-byte alignment.
+            Istream& read(char* data, const std::streamsize count);
 
-            //- Rewind and return the stream so that it may be read again
-            Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            void rewind();
 
 
         // Edit

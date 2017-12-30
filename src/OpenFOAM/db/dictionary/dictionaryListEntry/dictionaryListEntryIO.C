@@ -24,12 +24,12 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dictionaryListEntry.H"
-#include "keyType.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-Foam::label Foam::dictionaryListEntry::realSize(const dictionary& dict)
+// File-scope: The dictionary size without the "FoamFile" entry
+static Foam::label realSize(const Foam::dictionary& dict)
 {
     if (dict.size() < 1 || dict.first()->keyword() != "FoamFile")
     {
@@ -47,6 +47,16 @@ Foam::label Foam::dictionaryListEntry::realSize(const dictionary& dict)
 Foam::dictionaryListEntry::dictionaryListEntry
 (
     const dictionary& parentDict,
+    const dictionaryListEntry& dictEnt
+)
+:
+    dictionaryEntry(parentDict, dictEnt)
+{}
+
+
+Foam::dictionaryListEntry::dictionaryListEntry
+(
+    const dictionary& parentDict,
     Istream& is
 )
 :
@@ -60,11 +70,11 @@ Foam::dictionaryListEntry::dictionaryListEntry
     token firstToken(is);
     if (firstToken.isLabel())
     {
-        label s = firstToken.labelToken();
+        const label sz = firstToken.labelToken();
 
         is.readBeginList("List");
 
-        for (label i=0; i<s; i++)
+        for (label i=0; i<sz; ++i)
         {
             entry::New(*this, is);
         }
@@ -79,7 +89,13 @@ Foam::dictionaryListEntry::dictionaryListEntry
         while (true)
         {
             token nextToken(is);
-            if
+            if (nextToken.error())
+            {
+                FatalIOErrorInFunction(is)
+                    << "parsing error " << nextToken.info()
+                    << exit(FatalIOError);
+            }
+            else if
             (
                 nextToken.isPunctuation()
              && nextToken.pToken() == token::END_LIST
@@ -121,9 +137,9 @@ void Foam::dictionaryListEntry::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * Ostream operator  * * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryListEntry& de)
+Foam::Ostream& Foam::operator<<(Ostream& os, const dictionaryListEntry& e)
 {
-    de.write(os);
+    e.write(os);
     return os;
 }
 

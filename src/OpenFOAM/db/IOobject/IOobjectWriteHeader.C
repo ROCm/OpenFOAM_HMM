@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,29 +29,91 @@ Description
 
 #include "IOobject.H"
 #include "objectRegistry.H"
-#include "endian.H"
-#include "label.H"
-#include "scalar.H"
+#include "foamVersion.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// file-scope
-// Hint about machine endian, OpenFOAM label and scalar sizes
-static const std::string archHint =
-(
-#ifdef WM_LITTLE_ENDIAN
-    "LSB"
-#elif defined (WM_BIG_ENDIAN)
-    "MSB"
-#else
-    "???"
-#endif
-    ";label="  + std::to_string(8*sizeof(Foam::label))
-  + ";scalar=" + std::to_string(8*sizeof(Foam::scalar))
-);
+// A banner corresponding to this:
+//
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  VERSION                               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+Foam::Ostream& Foam::IOobject::writeBanner(Ostream& os, bool noHint)
+{
+    // The version padded with spaces to fit after "Version:  "
+    // - initialized with zero-length string to detect if it has been populated
+    static char paddedVersion[39] = "";
+
+    if (!*paddedVersion)
+    {
+        // Populate: like strncpy but without trailing '\0'
+        const char *p = Foam::FOAMversion;
+
+        memset(paddedVersion, ' ', 38);
+        for (int i = 0; *p && i < 38; ++i)
+        {
+            paddedVersion[i] = *p++;
+        }
+        paddedVersion[38] = '\0';
+    }
+
+    os  <<
+        "/*--------------------------------";
+
+    if (noHint)
+    {
+        // Without syntax hint
+        os  << "---------";
+    }
+    else
+    {
+        // With syntax hint
+        os  << "*- C++ -*";
+    }
+
+    os  <<
+        "----------------------------------*\\\n"
+        "| =========                 |"
+        "                                                 |\n"
+        "| \\\\      /  F ield         |"
+        " OpenFOAM: The Open Source CFD Toolbox           |\n"
+        "|  \\\\    /   O peration     |"
+        " Version:  " << paddedVersion << "|\n"
+        "|   \\\\  /    A nd           |"
+        " Web:      www.OpenFOAM.com                      |\n"
+        "|    \\\\/     M anipulation  |"
+        "                                                 |\n"
+        "\\*-----------------------------------------"
+        "----------------------------------*/\n";
+
+    return os;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::Ostream& Foam::IOobject::writeDivider(Ostream& os)
+{
+    os  <<
+        "// * * * * * * * * * * * * * * * * * "
+        "* * * * * * * * * * * * * * * * * * * * //\n";
+
+    return os;
+}
+
+
+Foam::Ostream& Foam::IOobject::writeEndDivider(Ostream& os)
+{
+    os  << "\n\n"
+        "// *****************************************"
+        "******************************** //\n";
+
+    return os;
+}
+
 
 bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 {
@@ -72,7 +134,7 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
 
     if (os.format() == IOstream::BINARY)
     {
-        os  << "    arch        " << archHint << ";\n";
+        os  << "    arch        " << Foam::FOAMbuildArch << ";\n";
     }
 
     if (!note().empty())
@@ -84,7 +146,7 @@ bool Foam::IOobject::writeHeader(Ostream& os, const word& type) const
         << "    object      " << name() << ";\n"
         << "}" << nl;
 
-    writeDivider(os) << endl;
+    writeDivider(os) << nl;
 
     return true;
 }

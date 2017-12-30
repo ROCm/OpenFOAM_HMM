@@ -416,7 +416,7 @@ void visitPointRegion
 
 
 
-        label index = findIndex(s.pointFaces()[pointI], nextFaceI);
+        label index = s.pointFaces()[pointI].find(nextFaceI);
 
         if (pFacesZone[index] == -1)
         {
@@ -588,7 +588,7 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
 
         //s.transfer(dupSurf);
         s = dupSurf;
-        pointMap = UIndirectList<label>(pointMap, dupPointMap)();
+        pointMap = labelUIndList(pointMap, dupPointMap)();
     }
 
     return nNonManifold;
@@ -1513,10 +1513,16 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("action");
-    argList::validArgs.append("surfaceFile1");
-    argList::validArgs.append("surfaceFile2");
+    argList::addArgument("action");
+    argList::addArgument("surfaceFile1");
+    argList::addArgument("surfaceFile2");
 
+    argList::addOption
+    (
+        "scale",
+        "factor",
+        "Geometry scaling factor (both surfaces)"
+    );
     argList::addBoolOption
     (
         "surf1Baffle",
@@ -1571,7 +1577,7 @@ int main(int argc, char *argv[])
         { booleanSurface::DIFFERENCE, "difference" }
     };
 
-    if (!validActions.hasEnum(action))
+    if (!validActions.found(action))
     {
         FatalErrorInFunction
             << "Unsupported action " << action << endl
@@ -1587,6 +1593,10 @@ int main(int argc, char *argv[])
     }
 
 
+    // Scale factor for both surfaces:
+    const scalar scaleFactor
+        = args.optionLookupOrDefault<scalar>("scale", -1);
+
     const word surf1Name(args[2]);
     Info<< "Reading surface " << surf1Name << endl;
     triSurfaceMesh surf1
@@ -1599,6 +1609,11 @@ int main(int argc, char *argv[])
             runTime
         )
     );
+    if (scaleFactor > 0)
+    {
+        Info<< "Scaling  : " << scaleFactor << nl;
+        surf1.scalePoints(scaleFactor);
+    }
 
     Info<< surf1Name << " statistics:" << endl;
     surf1.writeStats(Info);
@@ -1616,6 +1631,11 @@ int main(int argc, char *argv[])
             runTime
         )
     );
+    if (scaleFactor > 0)
+    {
+        Info<< "Scaling  : " << scaleFactor << nl;
+        surf2.scalePoints(scaleFactor);
+    }
 
     Info<< surf2Name << " statistics:" << endl;
     surf2.writeStats(Info);
@@ -1627,7 +1647,7 @@ int main(int argc, char *argv[])
     edgeIntersections edgeCuts1;
     edgeIntersections edgeCuts2;
 
-    bool invertedSpace = args.optionFound("invertedSpace");
+    const bool invertedSpace = args.optionFound("invertedSpace");
 
     if (invertedSpace && validActions[action] == booleanSurface::DIFFERENCE)
     {
@@ -1736,9 +1756,7 @@ int main(int argc, char *argv[])
     const extendedFeatureEdgeMesh& feMesh = feMeshPtr();
 
     feMesh.writeStats(Info);
-
     feMesh.write();
-
     feMesh.writeObj(feMesh.path()/sFeatFileName);
 
     {

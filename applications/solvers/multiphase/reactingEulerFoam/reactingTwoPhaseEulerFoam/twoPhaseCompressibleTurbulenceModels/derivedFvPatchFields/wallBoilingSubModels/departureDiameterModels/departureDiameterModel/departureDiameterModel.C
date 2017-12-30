@@ -53,7 +53,7 @@ Foam::wallBoilingModels::departureDiameterModel::~departureDiameterModel()
 
 void Foam::wallBoilingModels::departureDiameterModel::write(Ostream& os) const
 {
-    os.writeKeyword("type") << this->type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", this->type());
 }
 
 // ************************************************************************* //

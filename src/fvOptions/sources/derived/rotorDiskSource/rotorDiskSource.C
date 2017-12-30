@@ -41,28 +41,30 @@ namespace Foam
         defineTypeNameAndDebug(rotorDiskSource, 0);
         addToRunTimeSelectionTable(option, rotorDiskSource, dictionary);
     }
-
-    template<> const char* NamedEnum<fv::rotorDiskSource::geometryModeType, 2>::
-        names[] =
-    {
-        "auto",
-        "specified"
-    };
-
-    const NamedEnum<fv::rotorDiskSource::geometryModeType, 2>
-        fv::rotorDiskSource::geometryModeTypeNames_;
-
-    template<> const char* NamedEnum<fv::rotorDiskSource::inletFlowType, 3>::
-        names[] =
-    {
-        "fixed",
-        "surfaceNormal",
-        "local"
-    };
-
-    const NamedEnum<fv::rotorDiskSource::inletFlowType, 3>
-        fv::rotorDiskSource::inletFlowTypeNames_;
 }
+
+
+const Foam::Enum
+<
+    Foam::fv::rotorDiskSource::geometryModeType
+>
+Foam::fv::rotorDiskSource::geometryModeTypeNames_
+{
+    { geometryModeType::gmAuto, "auto" },
+    { geometryModeType::gmSpecified, "specified" },
+};
+
+
+const Foam::Enum
+<
+    Foam::fv::rotorDiskSource::inletFlowType
+>
+Foam::fv::rotorDiskSource::inletFlowTypeNames_
+{
+    { inletFlowType::ifFixed, "fixed" },
+    { inletFlowType::ifSurfaceNormal, "surfaceNormal" },
+    { inletFlowType::ifLocal, "local" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -138,7 +140,7 @@ void Foam::fv::rotorDiskSource::setFaceArea(vector& axis, const bool correct)
 
     // Calculate cell addressing for selected cells
     labelList cellAddr(mesh_.nCells(), -1);
-    UIndirectList<label>(cellAddr, cells_) = identity(cells_.size());
+    labelUIndList(cellAddr, cells_) = identity(cells_.size());
     labelList nbrFaceCellAddr(mesh_.nFaces() - nInternalFaces, -1);
     forAll(pbm, patchi)
     {
@@ -267,7 +269,7 @@ void Foam::fv::rotorDiskSource::createCoordinateSystem()
     vector refDir(Zero);
 
     geometryModeType gm =
-        geometryModeTypeNames_.read(coeffs_.lookup("geometryMode"));
+        geometryModeTypeNames_.lookup("geometryMode", coeffs_);
 
     switch (gm)
     {
@@ -596,7 +598,7 @@ bool Foam::fv::rotorDiskSource::read(const dictionary& dict)
 
         coeffs_.lookup("nBlades") >> nBlades_;
 
-        inletFlow_ = inletFlowTypeNames_.read(coeffs_.lookup("inletFlowType"));
+        inletFlow_ = inletFlowTypeNames_.lookup("inletFlowType", coeffs_);
 
         coeffs_.lookup("tipEffect") >> tipEffect_;
 

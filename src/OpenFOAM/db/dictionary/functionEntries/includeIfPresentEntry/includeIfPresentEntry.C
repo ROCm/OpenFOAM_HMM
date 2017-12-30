@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,36 +28,30 @@ License
 #include "IFstream.H"
 #include "regIOobject.H"
 #include "addToMemberFunctionSelectionTable.H"
+#include "fileOperation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::word Foam::functionEntries::includeIfPresentEntry::typeName
-(
-    Foam::functionEntries::includeIfPresentEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include includeIfPresentEntry
-int Foam::functionEntries::includeIfPresentEntry::debug(0);
 
 namespace Foam
 {
 namespace functionEntries
 {
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeIfPresentEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        includeIfPresent
     );
 
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeIfPresentEntry,
         execute,
-        primitiveEntryIstream
+        primitiveEntryIstream,
+        includeIfPresent
     );
 }
 }
@@ -70,8 +64,11 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    const fileName fName(includeFileName(is, parentDict));
-    IFstream ifs(fName);
+    const fileName rawName(is);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
+
+    autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
+    ISstream& ifs = ifsPtr();
 
     if (ifs)
     {
@@ -105,8 +102,11 @@ bool Foam::functionEntries::includeIfPresentEntry::execute
     Istream& is
 )
 {
-    const fileName fName(includeFileName(is, parentDict));
-    IFstream ifs(fName);
+    const fileName rawName(is);
+    const fileName fName(resolveFile(is.name().path(), rawName, parentDict));
+
+    autoPtr<ISstream> ifsPtr(fileHandler().NewIFstream(fName));
+    ISstream& ifs = ifsPtr();
 
     if (ifs)
     {

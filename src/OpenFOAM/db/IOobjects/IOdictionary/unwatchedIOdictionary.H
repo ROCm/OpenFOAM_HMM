@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,7 +85,7 @@ public:
         //  either in the case/processor or case otherwise null
         virtual fileName filePath() const
         {
-            return globalFilePath();
+            return globalFilePath(type());
         }
 
         //- Add file watch on object (READ_IF_MODIFIED)

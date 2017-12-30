@@ -25,10 +25,9 @@ License
 
 #include "OFFsurfaceFormat.H"
 #include "clock.H"
-#include "IFstream.H"
-#include "IStringStream.H"
+#include "Fstream.H"
+#include "StringStream.H"
 #include "faceTraits.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -144,13 +143,14 @@ template<class Face>
 void Foam::fileFormats::OFFsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
-    const List<surfZone>& zoneLst = surf.surfZones();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&  faceLst  = surf.surfFaces();
+    const UList<label>& faceMap  = surf.faceMap();
+    const UList<surfZone>& zoneLst = surf.surfZones();
 
     OFstream os(filename);
     if (!os.good())
@@ -198,16 +198,18 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     {
         os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
 
+        const label nLocalFaces = zoneLst[zoneI].size();
+
         if (surf.useFaceMap())
         {
-            forAll(zoneLst[zoneI], localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
                 os << f.size();
-                forAll(f, fp)
+                for (const label verti : f)
                 {
-                    os << ' ' << f[fp];
+                    os << ' ' << verti;
                 }
 
                 // add optional zone information
@@ -216,14 +218,14 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
         }
         else
         {
-            forAll(zoneLst[zoneI], localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
 
                 os << f.size();
-                forAll(f, fp)
+                for (const label verti : f)
                 {
-                    os << ' ' << f[fp];
+                    os << ' ' << verti;
                 }
 
                 // add optional zone information

@@ -1,5 +1,3 @@
-externalCoupler.C
-
 lumpedPointMovement.C
 lumpedPointMovementWriter.C
 lumpedPointState.C

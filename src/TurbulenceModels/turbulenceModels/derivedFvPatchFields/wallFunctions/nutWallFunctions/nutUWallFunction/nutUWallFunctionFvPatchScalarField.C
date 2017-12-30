@@ -54,7 +54,7 @@ tmp<scalarField> nutUWallFunctionFvPatchScalarField::calcNut() const
     const scalarField& nuw = tnuw();
 
     tmp<scalarField> tyPlus = calcYPlus(magUp);
-    scalarField& yPlus = tyPlus.ref();
+    const scalarField& yPlus = tyPlus();
 
     tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
     scalarField& nutw = tnutw.ref();

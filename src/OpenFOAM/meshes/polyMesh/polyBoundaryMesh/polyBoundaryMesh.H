@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,15 +163,19 @@ public:
         //- Return patch indices for all matches. Optionally matches patchGroups
         labelList findIndices
         (
-            const keyType&,
+            const keyType& key,
             const bool usePatchGroups = true
         ) const;
 
         //- Return patch index for the first match, return -1 if not found
-        label findIndex(const keyType&) const;
+        label findIndex(const keyType& key) const;
 
         //- Find patch index given a name
-        label findPatchID(const word& patchName) const;
+        label findPatchID
+        (
+            const word& patchName,
+            const bool allowNotFound = true
+        ) const;
 
         //- Find patch indices for a given polyPatch type
         template<class Type>
@@ -229,14 +233,15 @@ public:
         void reorder(const labelUList&, const bool validBoundary);
 
         //- writeData member function required by regIOobject
-        bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream&) const;
 
         //- Write using given format, version and form uncompression
-        bool writeObject
+        virtual bool writeObject
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,
-            IOstream::compressionType cmp
+            IOstream::compressionType cmp,
+            const bool valid
         ) const;
 
 

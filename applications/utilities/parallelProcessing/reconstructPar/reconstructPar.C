@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,11 @@ Description
 #include "pointFieldReconstructor.H"
 #include "reconstructLagrangian.H"
 
+#include "faCFD.H"
+#include "faMesh.H"
+#include "processorFaMeshes.H"
+#include "faFieldReconstructor.H"
+
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
@@ -54,14 +59,14 @@ Description
 
 bool haveAllTimes
 (
-    const HashSet<word>& masterTimeDirSet,
+    const wordHashSet& masterTimeDirSet,
     const instantList& timeDirs
 )
 {
     // Loop over all times
-    forAll(timeDirs, timei)
+    for (const instant& t : timeDirs)
     {
-        if (!masterTimeDirSet.found(timeDirs[timei].name()))
+        if (!masterTimeDirSet.found(t.name()))
         {
             return false;
         }
@@ -126,11 +131,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
-    {
-        args.optionLookup("fields")() >> selectedFields;
-    }
+    wordHashSet selectedFields;
+    args.optionReadIfPresent("fields", selectedFields);
 
     const bool noFields = args.optionFound("noFields");
 
@@ -158,8 +160,8 @@ int main(int argc, char *argv[])
     }
 
 
-    HashSet<word> selectedLagrangianFields;
-    if (args.optionFound("lagrangianFields"))
+    wordHashSet selectedLagrangianFields;
+    if (args.optionReadIfPresent("lagrangianFields", selectedLagrangianFields))
     {
         if (noLagrangian)
         {
@@ -168,21 +170,44 @@ int main(int argc, char *argv[])
                 << "options together."
                 << exit(FatalError);
         }
-
-        args.optionLookup("lagrangianFields")() >> selectedLagrangianFields;
     }
 
 
     const bool newTimes   = args.optionFound("newTimes");
     const bool allRegions = args.optionFound("allRegions");
 
-
-    // determine the processor count directly
-    label nProcs = 0;
-    while (isDir(args.path()/(word("processor") + name(nProcs))))
+    wordList regionNames;
+    wordList regionDirs;
+    if (allRegions)
     {
-        ++nProcs;
+        Info<< "Reconstructing all regions in regionProperties" << nl << endl;
+        regionProperties rp(runTime);
+
+        wordHashSet names;
+        forAllConstIters(rp, iter)
+        {
+            names.insert(iter.object());
+        }
+
+        regionNames = names.sortedToc();
+        regionDirs = regionNames;
     }
+    else
+    {
+        regionNames = {fvMesh::defaultRegion};
+        if (args.optionReadIfPresent("region", regionNames[0]))
+        {
+            regionDirs = regionNames;
+        }
+        else
+        {
+            regionDirs = {word::null};
+        }
+    }
+
+
+    // Determine the processor count
+    label nProcs = fileHandler().nProcs(args.path(), regionDirs[0]);
 
     if (!nProcs)
     {
@@ -225,9 +250,8 @@ int main(int argc, char *argv[])
 
     if (timeDirs.empty())
     {
-        FatalErrorInFunction
-            << "No times selected"
-            << exit(FatalError);
+        WarningInFunction << "No times selected";
+        exit(1);
     }
 
 
@@ -237,10 +261,10 @@ int main(int argc, char *argv[])
     {
         masterTimeDirs = runTime.times();
     }
-    HashSet<word> masterTimeDirSet(2*masterTimeDirs.size());
-    forAll(masterTimeDirs, i)
+    wordHashSet masterTimeDirSet(2*masterTimeDirs.size());
+    for (const instant& t : masterTimeDirs)
     {
-        masterTimeDirSet.insert(masterTimeDirs[i].name());
+        masterTimeDirSet.insert(t.name());
     }
 
 
@@ -248,42 +272,6 @@ int main(int argc, char *argv[])
     forAll(databases, proci)
     {
         databases[proci].setTime(runTime);
-    }
-
-
-    wordList regionNames;
-    wordList regionDirs;
-    if (allRegions)
-    {
-        Info<< "Reconstructing for all regions in regionProperties" << nl
-            << endl;
-        regionProperties rp(runTime);
-        forAllConstIter(HashTable<wordList>, rp, iter)
-        {
-            const wordList& regions = iter();
-            forAll(regions, i)
-            {
-                if (findIndex(regionNames, regions[i]) == -1)
-                {
-                    regionNames.append(regions[i]);
-                }
-            }
-        }
-        regionDirs = regionNames;
-    }
-    else
-    {
-        word regionName;
-        if (args.optionReadIfPresent("region", regionName))
-        {
-            regionNames = wordList(1, regionName);
-            regionDirs = regionNames;
-        }
-        else
-        {
-            regionNames = wordList(1, fvMesh::defaultRegion);
-            regionDirs = wordList(1, word::null);
-        }
     }
 
 
@@ -553,40 +541,48 @@ int main(int argc, char *argv[])
 
                 forAll(databases, proci)
                 {
-                    fileNameList cloudDirs
+                    fileName lagrangianDir
                     (
-                        readDir
+                        fileHandler().filePath
                         (
                             databases[proci].timePath()
                           / regionDir
-                          / cloud::prefix,
-                            fileName::DIRECTORY
+                          / cloud::prefix
                         )
                     );
 
-                    forAll(cloudDirs, i)
+                    fileNameList cloudDirs;
+                    if (!lagrangianDir.empty())
+                    {
+                        cloudDirs = fileHandler().readDir
+                        (
+                            lagrangianDir,
+                            fileName::DIRECTORY
+                        );
+                    }
+
+                    for (const fileName& cloudDir : cloudDirs)
                     {
                         // Check if we already have cloud objects for this
                         // cloudname
-                        HashTable<IOobjectList>::const_iterator iter =
-                            cloudObjects.find(cloudDirs[i]);
-
-                        if (iter == cloudObjects.end())
+                        if (!cloudObjects.found(cloudDir))
                         {
                             // Do local scan for valid cloud objects
                             IOobjectList sprayObjs
                             (
                                 procMeshes.meshes()[proci],
                                 databases[proci].timeName(),
-                                cloud::prefix/cloudDirs[i]
+                                cloud::prefix/cloudDir
                             );
 
                             IOobject* positionsPtr =
                                 sprayObjs.lookup(word("positions"));
+                            IOobject* coordsPtr =
+                                sprayObjs.lookup(word("coordinates"));
 
-                            if (positionsPtr)
+                            if (coordsPtr || positionsPtr)
                             {
-                                cloudObjects.insert(cloudDirs[i], sprayObjs);
+                                cloudObjects.insert(cloudDir, sprayObjs);
                             }
                         }
                     }
@@ -598,13 +594,10 @@ int main(int argc, char *argv[])
                     // Pass2: reconstruct the cloud
                     forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)
                     {
-                        const word cloudName = string::validate<word>
-                        (
-                            iter.key()
-                        );
+                        const word cloudName = word::validate(iter.key());
 
                         // Objects (on arbitrary processor)
-                        const IOobjectList& sprayObjs = iter();
+                        const IOobjectList& sprayObjs = iter.object();
 
                         Info<< "Reconstructing lagrangian fields for cloud "
                             << cloudName << nl << endl;
@@ -721,6 +714,47 @@ int main(int argc, char *argv[])
                 }
             }
 
+
+            // If there are any FA fields, reconstruct them
+
+            if
+            (
+                objects.lookupClass(areaScalarField::typeName).size()
+             || objects.lookupClass(areaVectorField::typeName).size()
+             || objects.lookupClass(areaSphericalTensorField::typeName).size()
+             || objects.lookupClass(areaSymmTensorField::typeName).size()
+             || objects.lookupClass(areaTensorField::typeName).size()
+             || objects.lookupClass(edgeScalarField::typeName).size()
+            )
+            {
+                Info << "Reconstructing FA fields" << nl << endl;
+                
+                faMesh aMesh(mesh);
+
+                processorFaMeshes procFaMeshes(procMeshes.meshes());
+
+                faFieldReconstructor faReconstructor
+                (
+                    aMesh,
+                    procFaMeshes.meshes(),
+                    procFaMeshes.edgeProcAddressing(),
+                    procFaMeshes.faceProcAddressing(),
+                    procFaMeshes.boundaryProcAddressing()
+                );
+
+                faReconstructor.reconstructFaAreaFields<scalar>(objects);
+                faReconstructor.reconstructFaAreaFields<vector>(objects);
+                faReconstructor
+                    .reconstructFaAreaFields<sphericalTensor>(objects);
+                faReconstructor.reconstructFaAreaFields<symmTensor>(objects);
+                faReconstructor.reconstructFaAreaFields<tensor>(objects);
+                
+                faReconstructor.reconstructFaEdgeFields<scalar>(objects);
+            }
+            else
+            {
+                Info << "No FA fields" << nl << endl;
+            }
 
             if (!noReconstructSets)
             {
@@ -1070,12 +1104,15 @@ int main(int argc, char *argv[])
             {
                 fileName uniformDir0
                 (
-                    databases[0].timePath()/regionDir/"uniform"
+                    fileHandler().filePath
+                    (
+                        databases[0].timePath()/regionDir/"uniform"
+                    )
                 );
 
-                if (isDir(uniformDir0))
+                if (!uniformDir0.empty() && fileHandler().isDir(uniformDir0))
                 {
-                    cp(uniformDir0, runTime.timePath()/regionDir);
+                    fileHandler().cp(uniformDir0, runTime.timePath()/regionDir);
                 }
             }
 
@@ -1085,12 +1122,15 @@ int main(int argc, char *argv[])
             {
                 fileName uniformDir0
                 (
-                    databases[0].timePath()/"uniform"
+                    fileHandler().filePath
+                    (
+                        databases[0].timePath()/"uniform"
+                    )
                 );
 
-                if (isDir(uniformDir0))
+                if (!uniformDir0.empty() && fileHandler().isDir(uniformDir0))
                 {
-                    cp(uniformDir0, runTime.timePath());
+                    fileHandler().cp(uniformDir0, runTime.timePath());
                 }
             }
         }

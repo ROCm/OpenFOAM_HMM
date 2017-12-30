@@ -48,7 +48,7 @@ Description
 #include "IFstream.H"
 #include "polyPatch.H"
 #include "ListOps.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 #include <fstream>
 
@@ -60,7 +60,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".msh file");
+    argList::addArgument(".msh file");
     argList::addBoolOption
     (
         "hex",
@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
 
     cellShapeList cells(nCells);
 
-    const cellModel& tet = *(cellModeller::lookup("tet"));
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& tet = cellModel::ref(cellModel::TET);
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     labelList tetPoints(4);
     labelList hexPoints(8);

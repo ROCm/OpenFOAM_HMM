@@ -27,97 +27,44 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::wallBoundedParticle::patchInteraction
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    trackingData& td,
     const scalar trackFraction
 )
 {
-    typedef typename TrackData::cloudType::particleType particleType;
+    typename TrackCloudType::particleType& p =
+        static_cast<typename TrackCloudType::particleType&>(*this);
+    typename TrackCloudType::particleType::trackingData& ttd =
+        static_cast<typename TrackCloudType::particleType::trackingData&>(td);
 
-    particleType& p = static_cast<particleType&>(*this);
-    p.hitFace(td);
-
-    if (!internalFace(facei_))
+    if (!mesh().isInternalFace(face()))
     {
-        label origFacei = facei_;
-        label patchi = patch(facei_);
+        label origFacei = face();
+        label patchi = patch();
 
-        // No action taken for tetPti_ for tetFacei_ here, handled by
-        // patch interaction call or later during processor transfer.
-
-
-        // Dummy tet indices. What to do here?
-        tetIndices faceHitTetIs;
-
-        if
-        (
-            !p.hitPatch
-            (
-                mesh_.boundaryMesh()[patchi],
-                td,
-                patchi,
-                trackFraction,
-                faceHitTetIs
-            )
-        )
+        // Did patch interaction model switch patches?
+        // Note: recalculate meshEdgeStart_, diagEdge_!
+        if (face() != origFacei)
         {
-            // Did patch interaction model switch patches?
-            // Note: recalculate meshEdgeStart_, diagEdge_!
-            if (facei_ != origFacei)
-            {
-                patchi = patch(facei_);
-            }
+            patchi = patch();
+        }
 
-            const polyPatch& patch = mesh_.boundaryMesh()[patchi];
+        const polyPatch& patch = mesh().boundaryMesh()[patchi];
 
-            if (isA<wedgePolyPatch>(patch))
-            {
-                p.hitWedgePatch
-                (
-                    static_cast<const wedgePolyPatch&>(patch), td
-                );
-            }
-            else if (isA<symmetryPlanePolyPatch>(patch))
-            {
-                p.hitSymmetryPlanePatch
-                (
-                    static_cast<const symmetryPlanePolyPatch&>(patch), td
-                );
-            }
-            else if (isA<symmetryPolyPatch>(patch))
-            {
-                p.hitSymmetryPatch
-                (
-                    static_cast<const symmetryPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<cyclicPolyPatch>(patch))
-            {
-                p.hitCyclicPatch
-                (
-                    static_cast<const cyclicPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<processorPolyPatch>(patch))
-            {
-                p.hitProcessorPatch
-                (
-                    static_cast<const processorPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<wallPolyPatch>(patch))
-            {
-                p.hitWallPatch
-                (
-                    static_cast<const wallPolyPatch&>(patch), td, faceHitTetIs
-                );
-            }
-            else
-            {
-                p.hitPatch(patch, td);
-            }
+        if (isA<processorPolyPatch>(patch))
+        {
+            p.hitProcessorPatch(cloud, ttd);
+        }
+        else if (isA<wallPolyPatch>(patch))
+        {
+            p.hitWallPatch(cloud, ttd);
+        }
+        else
+        {
+            td.keepParticle = false;
         }
     }
 }
@@ -125,10 +72,11 @@ void Foam::wallBoundedParticle::patchInteraction
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class TrackData>
+template<class TrackCloudType>
 Foam::scalar Foam::wallBoundedParticle::trackToEdge
 (
-    TrackData& td,
+    TrackCloudType& cloud,
+    trackingData& td,
     const vector& endPosition
 )
 {
@@ -147,7 +95,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
     // - optionally meshEdgeStart_ or  diagEdge_ set (edge particle is on)
 
     //checkInside();
-    //checkOnTriangle(position());
+    //checkOnTriangle(localPosition_);
     //if (meshEdgeStart_ != -1 || diagEdge_ != -1)
     //{
     //    checkOnEdge();
@@ -163,39 +111,36 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
 
         // If internal face check whether to go to neighbour cell or just
         // check to the other internal tet on the edge.
-        if (mesh_.isInternalFace(tetFace()))
+        if (mesh().isInternalFace(tetFace()))
         {
             label nbrCelli =
             (
-                celli_ == mesh_.faceOwner()[facei_]
-              ? mesh_.faceNeighbour()[facei_]
-              : mesh_.faceOwner()[facei_]
+                cell() == mesh().faceOwner()[face()]
+              ? mesh().faceNeighbour()[face()]
+              : mesh().faceOwner()[face()]
             );
             // Check angle to nbrCell tet. Is it in the direction of the
             // endposition? i.e. since volume of nbr tet is positive the
             // tracking direction should be into the tet.
-            tetIndices nbrTi(nbrCelli, tetFacei_, tetPti_, mesh_);
+            tetIndices nbrTi(nbrCelli, tetFace(), tetPt());
 
-            bool posVol = (nbrTi.tet(mesh_).mag() > 0);
+            const bool posVol = (nbrTi.tet(mesh()).mag() > 0);
+            const vector path(endPosition - localPosition_);
 
-            if
-            (
-                posVol
-             == ((nbrTi.faceTri(mesh_).normal() & (endPosition-position())) < 0)
-            )
+            if (posVol == ((nbrTi.faceTri(mesh()).normal() & path) < 0))
             {
                 // Change into nbrCell. No need to change tetFace, tetPt.
                 //Pout<< "    crossed from cell:" << celli_
                 //    << " into " << nbrCelli << endl;
-                celli_ = nbrCelli;
-                patchInteraction(td, trackFraction);
+                cell() = nbrCelli;
+                patchInteraction(cloud, td, trackFraction);
             }
             else
             {
                 // Walk to other face on edge. Changes tetFace, tetPt but not
                 // cell.
                 crossEdgeConnectedFace(meshEdge);
-                patchInteraction(td, trackFraction);
+                patchInteraction(cloud, td, trackFraction);
             }
         }
         else
@@ -203,7 +148,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             // Walk to other face on edge. This might give loop since
             // particle should have been removed?
             crossEdgeConnectedFace(meshEdge);
-            patchInteraction(td, trackFraction);
+            patchInteraction(cloud, td, trackFraction);
         }
     }
     else
@@ -211,41 +156,42 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
         // We're inside a tet on the wall. Check if the current tet is
         // the one to cross. If not we cross into the neighbouring triangle.
 
-        if (mesh_.isInternalFace(tetFace()))
+        if (mesh().isInternalFace(tetFace()))
         {
             FatalErrorInFunction
                 << "Can only track on boundary faces."
                 << " Face:" << tetFace()
-                << " at:" << mesh_.faceCentres()[tetFace()]
+                << " at:" << mesh().faceCentres()[tetFace()]
                 << abort(FatalError);
         }
 
-        const triFace tri(currentTetIndices().faceTriIs(mesh_));
-        vector n = tri.normal(mesh_.points());
+        const triFace tri(currentTetIndices().faceTriIs(mesh(), false));
+        vector n = tri.normal(mesh().points());
         n /= mag(n);
 
         point projectedEndPosition = endPosition;
 
-        const bool posVol = (currentTetIndices().tet(mesh_).mag() > 0);
+        const bool posVol = (currentTetIndices().tet(mesh()).mag() > 0);
 
         if (!posVol)
         {
             // Negative tet volume. Track back by setting the end point
-            projectedEndPosition = position() - (endPosition-position());
+            projectedEndPosition =
+                localPosition_ - (endPosition - localPosition_);
 
             // Make sure to use a large enough vector to cross the negative
             // face. Bit overkill.
-            const vector d(endPosition-position());
+            const vector d(endPosition - localPosition_);
             const scalar magD(mag(d));
             if (magD > ROOTVSMALL)
             {
                 // Get overall mesh bounding box
-                treeBoundBox meshBb(mesh_.bounds());
+                treeBoundBox meshBb(mesh().bounds());
                 // Extend to make 3D
                 meshBb.inflate(ROOTSMALL);
 
                 // Create vector guaranteed to cross mesh bounds
-                projectedEndPosition = position()-meshBb.mag()*d/magD;
+                projectedEndPosition = localPosition_ - meshBb.mag()*d/magD;
 
                 // Clip to mesh bounds
                 point intPt;
@@ -253,9 +199,9 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                 bool ok = meshBb.intersects
                 (
                     projectedEndPosition,
-                    position()-projectedEndPosition,
+                    localPosition_ - projectedEndPosition,
                     projectedEndPosition,
-                    position(),
+                    localPosition_,
                     intPt,
                     intPtBits
                 );
@@ -269,8 +215,8 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
 
         // Remove normal component
         {
-            const point& basePt = mesh_.points()[tri[0]];
-            projectedEndPosition -= ((projectedEndPosition-basePt)&n)*n;
+            const point& basePt = mesh().points()[tri[0]];
+            projectedEndPosition -= ((projectedEndPosition - basePt)&n)*n;
         }
 
 
@@ -304,7 +250,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             }
 
             const tetIndices ti(currentTetIndices());
-
+            const triFace trif(ti.triIs(mesh(), false));
             // Triangle (faceTriIs) gets constructed from
             //    f[faceBasePtI_],
             //    f[facePtAI_],
@@ -315,21 +261,21 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             // 1 : edge between facePtAI_ and facePtBI_ (is always a real edge)
             // 2 : edge between facePtBI_ and faceBasePtI_
 
-            const Foam::face& f = mesh_.faces()[ti.face()];
-            const label fp0 = ti.faceBasePt();
+            const Foam::face& f = mesh().faces()[ti.face()];
+            const label fp0 = trif[0];
 
             if (triEdgei == 0)
             {
-                if (ti.facePtA() == f.fcIndex(fp0))
+                if (trif[1] == f.fcIndex(fp0))
                 {
                     //Pout<< "Real edge." << endl;
                     diagEdge_ = -1;
                     meshEdgeStart_ = fp0;
                     //checkOnEdge();
                     crossEdgeConnectedFace(currentEdge());
-                    patchInteraction(td, trackFraction);
+                    patchInteraction(cloud, td, trackFraction);
                 }
-                else if (ti.facePtA() == f.rcIndex(fp0))
+                else if (trif[1] == f.rcIndex(fp0))
                 {
                     //Note: should not happen since boundary face so owner
                     //Pout<< "Real edge." << endl;
@@ -340,12 +286,12 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                     meshEdgeStart_ = f.rcIndex(fp0);
                     //checkOnEdge();
                     crossEdgeConnectedFace(currentEdge());
-                    patchInteraction(td, trackFraction);
+                    patchInteraction(cloud, td, trackFraction);
                 }
                 else
                 {
                     // Get index of triangle on other side of edge.
-                    diagEdge_ = ti.facePtA()-fp0;
+                    diagEdge_ = trif[1] - fp0;
                     if (diagEdge_ < 0)
                     {
                         diagEdge_ += f.size();
@@ -359,40 +305,39 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
             {
                 //Pout<< "Real edge." << endl;
                 diagEdge_ = -1;
-                meshEdgeStart_ = ti.facePtA();
+                meshEdgeStart_ = trif[1];
                 //checkOnEdge();
                 crossEdgeConnectedFace(currentEdge());
-                patchInteraction(td, trackFraction);
+                patchInteraction(cloud, td, trackFraction);
             }
             else // if (triEdgei == 2)
             {
-                if (ti.facePtB() == f.rcIndex(fp0))
+                if (trif[2] == f.rcIndex(fp0))
                 {
                     //Pout<< "Real edge." << endl;
                     diagEdge_ = -1;
-                    meshEdgeStart_ = ti.facePtB();
+                    meshEdgeStart_ = trif[2];
                     //checkOnEdge();
                     crossEdgeConnectedFace(currentEdge());
-                    patchInteraction(td, trackFraction);
+                    patchInteraction(cloud, td, trackFraction);
                 }
-                else if (ti.facePtB() == f.fcIndex(fp0))
+                else if (trif[2] == f.fcIndex(fp0))
                 {
                     //Note: should not happen since boundary face so owner
                     //Pout<< "Real edge." << endl;
-                    FatalErrorInFunction
-                        << abort(FatalError);
+                    FatalErrorInFunction << abort(FatalError);
 
                     diagEdge_ = -1;
                     meshEdgeStart_ = fp0;
                     //checkOnEdge();
                     crossEdgeConnectedFace(currentEdge());
-                    patchInteraction(td, trackFraction);
+                    patchInteraction(cloud, td, trackFraction);
                 }
                 else
                 {
                     //Pout<< "Triangle edge." << endl;
                     // Get index of triangle on other side of edge.
-                    diagEdge_ = ti.facePtB()-fp0;
+                    diagEdge_ = trif[2] - fp0;
                     if (diagEdge_ < 0)
                     {
                         diagEdge_ += f.size();
@@ -412,7 +357,7 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
                 // Particle is on mesh edge so change into other face on cell
                 crossEdgeConnectedFace(currentEdge());
                 //checkOnEdge();
-                patchInteraction(td, trackFraction);
+                patchInteraction(cloud, td, trackFraction);
             }
             else
             {
@@ -430,74 +375,11 @@ Foam::scalar Foam::wallBoundedParticle::trackToEdge
 }
 
 
-template<class TrackData>
-bool Foam::wallBoundedParticle::hitPatch
-(
-    const polyPatch&,
-    TrackData& td,
-    const label patchi,
-    const scalar trackFraction,
-    const tetIndices& tetIs
-)
-{
-    // Disable generic patch interaction
-    return false;
-}
-
-
-template<class TrackData>
-void Foam::wallBoundedParticle::hitWedgePatch
-(
-    const wedgePolyPatch& pp,
-    TrackData& td
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-template<class TrackData>
-void Foam::wallBoundedParticle::hitSymmetryPlanePatch
-(
-    const symmetryPlanePolyPatch& pp,
-    TrackData& td
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-template<class TrackData>
-void Foam::wallBoundedParticle::hitSymmetryPatch
-(
-    const symmetryPolyPatch& pp,
-    TrackData& td
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-template<class TrackData>
-void Foam::wallBoundedParticle::hitCyclicPatch
-(
-    const cyclicPolyPatch& pp,
-    TrackData& td
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::wallBoundedParticle::hitProcessorPatch
 (
-    const processorPolyPatch& pp,
-    TrackData& td
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {
     // Switch particle
@@ -508,44 +390,31 @@ void Foam::wallBoundedParticle::hitProcessorPatch
     // on the other side between 2 and 3 so edgeStart_ should be
     // f.size()-edgeStart_-1.
 
-    const Foam::face& f = mesh_.faces()[face()];
+    const Foam::face& f = mesh().faces()[face()];
 
     if (meshEdgeStart_ != -1)
     {
-        meshEdgeStart_ = f.size()-meshEdgeStart_-1;
+        meshEdgeStart_ = f.size() - meshEdgeStart_-1;
     }
     else
     {
         // diagEdge_ is relative to faceBasePt
-        diagEdge_ = f.size()-diagEdge_;
+        diagEdge_ = f.size() - diagEdge_;
     }
 }
 
 
-template<class TrackData>
+template<class TrackCloudType>
 void Foam::wallBoundedParticle::hitWallPatch
 (
-    const wallPolyPatch& wpp,
-    TrackData& td,
-    const tetIndices&
+    TrackCloudType& cloud,
+    trackingData& td
 )
 {}
 
 
-template<class TrackData>
-void Foam::wallBoundedParticle::hitPatch
-(
-    const polyPatch& wpp,
-    TrackData& td
-)
-{
-    // Remove particle
-    td.keepParticle = false;
-}
-
-
-template<class CloudType>
-void Foam::wallBoundedParticle::readFields(CloudType& c)
+template<class TrackCloudType>
+void Foam::wallBoundedParticle::readFields(TrackCloudType& c)
 {
     if (!c.size())
     {
@@ -554,34 +423,47 @@ void Foam::wallBoundedParticle::readFields(CloudType& c)
 
     particle::readFields(c);
 
+    IOField<point> localPosition
+    (
+        c.fieldIOobject("position", IOobject::MUST_READ)
+    );
+    c.checkFieldIOobject(c, localPosition);
+
     IOField<label> meshEdgeStart
     (
         c.fieldIOobject("meshEdgeStart", IOobject::MUST_READ)
     );
+    c.checkFieldIOobject(c, meshEdgeStart);
 
     IOField<label> diagEdge
     (
-        c.fieldIOobject("diagEdge_", IOobject::MUST_READ)
+        c.fieldIOobject("diagEdge", IOobject::MUST_READ)
     );
     c.checkFieldIOobject(c, diagEdge);
 
     label i = 0;
-    forAllIter(typename CloudType, c, iter)
+    forAllIters(c, iter)
     {
+        iter().localPosition_ = localPosition[i];
         iter().meshEdgeStart_ = meshEdgeStart[i];
         iter().diagEdge_ = diagEdge[i];
-        i++;
+        ++i;
     }
 }
 
 
-template<class CloudType>
-void Foam::wallBoundedParticle::writeFields(const CloudType& c)
+template<class TrackCloudType>
+void Foam::wallBoundedParticle::writeFields(const TrackCloudType& c)
 {
     particle::writeFields(c);
 
     label np =  c.size();
 
+    IOField<point> localPosition
+    (
+        c.fieldIOobject("position", IOobject::NO_READ),
+        np
+    );
     IOField<label> meshEdgeStart
     (
         c.fieldIOobject("meshEdgeStart", IOobject::NO_READ),
@@ -594,13 +476,15 @@ void Foam::wallBoundedParticle::writeFields(const CloudType& c)
     );
 
     label i = 0;
-    forAllConstIter(typename CloudType, c, iter)
+    forAllConstIters(c, iter)
     {
+        localPosition[i] = iter().localPosition_;
         meshEdgeStart[i] = iter().meshEdgeStart_;
         diagEdge[i] = iter().diagEdge_;
-        i++;
+        ++i;
     }
 
+    localPosition.write();
     meshEdgeStart.write();
     diagEdge.write();
 }

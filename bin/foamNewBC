@@ -70,7 +70,7 @@ cap() {
 [ "$#" -gt 1 ] || usage
 
 case "$1" in
-(-h | -help)
+(-h | -help*)
     usage
     ;;
 (-f | -fixedValue | fixedValue)

@@ -155,6 +155,7 @@ void Foam::cellCellStencils::inverseDistance::fill
 void Foam::cellCellStencils::inverseDistance::markBoundaries
 (
     const fvMesh& mesh,
+    const vector& smallVec,
 
     const boundBox& bb,
     const labelVector& nDivs,
@@ -188,6 +189,9 @@ void Foam::cellCellStencils::inverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
+                faceBb.min() -= smallVec;
+                faceBb.max() += smallVec;
+
                 if (bb.overlaps(faceBb))
                 {
                     fill(patchTypes, bb, nDivs, faceBb, patchCellType::PATCH);
@@ -213,6 +217,9 @@ void Foam::cellCellStencils::inverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
+                faceBb.min() -= smallVec;
+                faceBb.max() += smallVec;
+
                 if (bb.overlaps(faceBb))
                 {
                     fill(patchTypes, bb, nDivs, faceBb, patchCellType::OVERSET);
@@ -333,6 +340,10 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
             forAll(tgtCellMap, tgtCelli)
             {
                 label celli = tgtCellMap[tgtCelli];
+                treeBoundBox cBb(cellBb(mesh_, celli));
+                cBb.min() -= smallVec_;
+                cBb.max() += smallVec_;
+
                 if
                 (
                     overlaps
@@ -340,7 +351,7 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
                         srcPatchBb,
                         zoneDivs,
                         srcPatchTypes,
-                        cellBb(mesh_, celli),
+                        cBb,
                         patchCellType::PATCH
                     )
                 )
@@ -399,6 +410,9 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
                 forAll(tgtCellMap, tgtCelli)
                 {
                     label celli = tgtCellMap[tgtCelli];
+                    treeBoundBox cBb(cellBb(mesh_, celli));
+                    cBb.min() -= smallVec_;
+                    cBb.max() += smallVec_;
                     if
                     (
                         overlaps
@@ -406,7 +420,7 @@ void Foam::cellCellStencils::inverseDistance::markPatchesAsHoles
                             srcPatchBb,
                             zoneDivs,
                             srcPatchTypes,
-                            cellBb(mesh_, celli),
+                            cBb,
                             patchCellType::PATCH
                         )
                     )
@@ -501,7 +515,9 @@ void Foam::cellCellStencils::inverseDistance::markDonors
         label celli = tgtCellMap[tgtCelli];
         if (allStencil[celli].empty())
         {
-            const treeBoundBox subBb(cellBb(mesh_, celli));
+            treeBoundBox subBb(cellBb(mesh_, celli));
+            subBb.min() -= smallVec_;
+            subBb.max() += smallVec_;
 
             forAll(srcOverlapProcs, i)
             {
@@ -1087,7 +1103,7 @@ void Foam::cellCellStencils::inverseDistance::findHoles
         DebugInfo<< FUNCTION_NAME << " : Gathered region type" << endl;
 
         // Communicate region status through interpolative cells
-        labelList cellRegionType(UIndirectList<label>(regionType, cellRegion));
+        labelList cellRegionType(labelUIndList(regionType, cellRegion));
         map.distribute(cellRegionType);
 
         DebugInfo<< FUNCTION_NAME << " : Interpolated region type" << endl;
@@ -1194,9 +1210,17 @@ void Foam::cellCellStencils::inverseDistance::walkFront
     {
         if (isA<oversetFvPatch>(fvm[patchI]))
         {
-            forAll(fvm[patchI], i)
+            const labelList& fc = fvm[patchI].faceCells();
+            forAll(fc, i)
             {
-                isFront[fvm[patchI].start()+i] = true;
+                label cellI = fc[i];
+                if (allCellTypes[cellI] == INTERPOLATED)
+                {
+                    // Note that acceptors might have been marked hole if
+                    // there are no donors in which case we do not want to
+                    // walk this out. This is an extreme situation.
+                    isFront[fvm[patchI].start()+i] = true;
+                }
             }
         }
     }
@@ -1353,12 +1377,12 @@ void Foam::cellCellStencils::inverseDistance::walkFront
 }
 
 
-void Foam::cellCellStencils::inverseDistance::calcStencilWeights
+void Foam::cellCellStencils::inverseDistance::stencilWeights
 (
     const point& sample,
     const pointList& donorCcs,
     scalarList& weights
-)
+) const
 {
     // Inverse-distance weighting
 
@@ -1500,7 +1524,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
         {
             label cellI = donorCells[i];
             const pointList& donorCentres = donorCellCentres[cellI];
-            calcStencilWeights
+            stencilWeights
             (
                 samples[cellI],
                 donorCentres,
@@ -1565,6 +1589,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
 :
     cellCellStencil(mesh),
     dict_(dict),
+    smallVec_(vector::zero),
     cellTypes_(labelList(mesh.nCells(), CALCULATED)),
     interpolationCells_(0),
     cellInterpolationMap_(),
@@ -1604,6 +1629,9 @@ Foam::cellCellStencils::inverseDistance::~inverseDistance()
 bool Foam::cellCellStencils::inverseDistance::update()
 {
     scalar layerRelax(dict_.lookupOrDefault("layerRelax", 1.0));
+
+    scalar tol = dict_.lookupOrDefault("tolerance", 1e-10);
+    smallVec_ = mesh_.bounds().span()*tol;
 
     const labelIOList& zoneID = this->zoneID();
 
@@ -1745,6 +1773,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
         markBoundaries
         (
             meshParts[zoneI].subMesh(),
+            smallVec_,
 
             patchBb[zoneI][Pstream::myProcNo()],
             patchDivisions[zoneI],
@@ -1758,7 +1787,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
 
     // Print a bit
     {
-        Info<< typeName << " : detected " << nZones
+        Info<< type() << " : detected " << nZones
             << " mesh regions" << endl;
         Info<< incrIndent;
         forAll(nCellsPerZone, zoneI)
@@ -1862,6 +1891,16 @@ bool Foam::cellCellStencils::inverseDistance::update()
                     }
                     else
                     {
+                        // If there are no donors we can either set the
+                        // acceptor cell to 'hole' i.e. nothing gets calculated
+                        // if the acceptor cells go outside the donor meshes or
+                        // we can set it to 'calculated' to have something
+                        // like an acmi type behaviour where only covered
+                        // acceptor cell use the interpolation and non-covered
+                        // become calculated. Uncomment below line. Note: this
+                        // should be switchable?
+                        //allCellTypes[cellI] = CALCULATED;
+
                         allCellTypes[cellI] = HOLE;
                     }
                 }
@@ -1915,7 +1954,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
         // Dump stencil
         mkDir(mesh_.time().timePath());
         OBJstream str(mesh_.time().timePath()/"injectionStencil.obj");
-        Pout<< typeName << " : dumping injectionStencil to "
+        Pout<< type() << " : dumping injectionStencil to "
             << str.name() << endl;
         pointField cc(mesh_.cellCentres());
         cellInterpolationMap_.distribute(cc);
@@ -1973,7 +2012,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
         // Dump stencil
         mkDir(mesh_.time().timePath());
         OBJstream str(mesh_.time().timePath()/"stencil.obj");
-        Pout<< typeName << " : dumping to " << str.name() << endl;
+        Pout<< type() << " : dumping to " << str.name() << endl;
         pointField cc(mesh_.cellCentres());
         cellInterpolationMap_.distribute(cc);
 

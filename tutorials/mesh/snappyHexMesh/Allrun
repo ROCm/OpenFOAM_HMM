@@ -1,21 +1,9 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # Run from this directory
 
-
-(
-    cd flange || exit
-    ./Allrun $*
-)
-
-(
-    cd addLayersToFaceZone || exit
-    ./Allrun
-)
-
-(
-    cd gap_detection || exit
-    ./Allrun
-)
+( cd flange && ./Allrun $* )
+( cd addLayersToFaceZone && ./Allrun )
+( cd gap_detection && ./Allrun )
 
 exit 0
 

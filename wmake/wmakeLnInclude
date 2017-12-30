@@ -78,7 +78,7 @@ unset update silentOpt
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-        -h | -help)   # Provide immediate help
+        -h | -help*)   # Provide immediate help
             usage
             ;;
         -u | -update)

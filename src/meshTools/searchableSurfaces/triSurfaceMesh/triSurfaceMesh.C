@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,8 +51,8 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     const fileName fName
     (
         isGlobal
-      ? io.globalFilePath()
-      : io.localFilePath()
+      ? io.globalFilePath(typeName)
+      : io.localFilePath(typeName)
     );
     if (fName.empty())
     {
@@ -65,9 +65,34 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
 }
 
 
+Foam::fileName Foam::triSurfaceMesh::relativeFilePath
+(
+    const regIOobject& io,
+    const fileName& f,
+    const bool isGlobal
+)
+{
+    fileName fName(f);
+    fName.expand();
+    if (!fName.isAbsolute())
+    {
+        // Is the specified file:
+        // - local to the cwd?
+        // - local to the case dir?
+        // - or just another name?
+        fName = fileHandler().filePath
+        (
+            isGlobal,
+            IOobject(io, fName),
+            word::null
+        );
+    }
+    return fName;
+}
+
 Foam::fileName Foam::triSurfaceMesh::checkFile
 (
-    const IOobject& io,
+    const regIOobject& io,
     const dictionary& dict,
     const bool isGlobal
 )
@@ -75,11 +100,8 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     fileName fName;
     if (dict.readIfPresent("file", fName, false, false))
     {
-        fName.expand();
-        if (!fName.isAbsolute())
-        {
-            fName = io.objectPath().path()/fName;
-        }
+        fName = relativeFilePath(io, fName, isGlobal);
+
         if (!exists(fName))
         {
             FatalErrorInFunction
@@ -89,7 +111,12 @@ Foam::fileName Foam::triSurfaceMesh::checkFile
     }
     else
     {
-        fName = (isGlobal ? io.globalFilePath() : io.localFilePath());
+        fName =
+        (
+            isGlobal
+          ? io.globalFilePath(typeName)
+          : io.localFilePath(typeName)
+        );
 
         if (!exists(fName))
         {
@@ -148,7 +175,7 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
         forAll(pFaces, i)
         {
             const triSurface::FaceType& f = triSurface::operator[](pFaces[i]);
-            label fp = findIndex(f, pointi);
+            label fp = f.find(pointi);
 
             // Something weird: if I expand the code of addFaceToEdge in both
             // below instances it gives a segmentation violation on some
@@ -222,7 +249,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
         )
     ),
     triSurface(s),
-    triSurfaceRegionSearch(s),
+    triSurfaceRegionSearch(static_cast<const triSurface&>(*this)),
     minQuality_(-1),
     surfaceClosed_(-1),
     outsideVolType_(volumeType::UNKNOWN)
@@ -294,7 +321,15 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    dict.readIfPresent("file", fName_, false, false);
+    if (dict.readIfPresent("file", fName_, false, false))
+    {
+        fName_ = relativeFilePath
+        (
+            static_cast<const searchableSurface&>(*this),
+            fName_,
+            true
+        );
+    }
 
     scalar scaleFactor = 0;
 
@@ -386,7 +421,15 @@ Foam::triSurfaceMesh::triSurfaceMesh
     outsideVolType_(volumeType::UNKNOWN)
 {
     // Reading from supplied file name instead of objectPath/filePath
-    dict.readIfPresent("file", fName_, false, false);
+    if (dict.readIfPresent("file", fName_, false, false))
+    {
+        fName_ = relativeFilePath
+        (
+            static_cast<const searchableSurface&>(*this),
+            fName_,
+            isGlobal
+        );
+    }
 
     scalar scaleFactor = 0;
 
@@ -411,6 +454,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             << minQuality_ << " for normals calculation." << endl;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -883,7 +927,8 @@ bool Foam::triSurfaceMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
     const Time& runTime = searchableSurface::time();

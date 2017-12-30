@@ -6,7 +6,8 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-// Foam Dictionary.
+// An OpenFOAM dictionary of cellModels.
+// The index and name must match those listed in the cellModel class.
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -17,9 +18,7 @@ unknown
 {
     index 0;
     numberOfPoints 0;
-
     faces 0();
-
     edges 0();
 }
 

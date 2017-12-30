@@ -28,6 +28,7 @@ License
 #include "JobInfo.H"
 #include "OSspecific.H"
 #include "IOstreams.H"
+#include "Switch.H"
 
 #ifdef LINUX_GNUC
     #ifndef __USE_GNU
@@ -43,16 +44,40 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+bool Foam::sigFpe::switchFpe_(Foam::debug::optimisationSwitch("trapFpe", 0));
+bool Foam::sigFpe::switchNan_(Foam::debug::optimisationSwitch("setNaN", 0));
+
+bool Foam::sigFpe::sigActive_ = false;
+bool Foam::sigFpe::mallocNanActive_ = false;
+
 struct sigaction Foam::sigFpe::oldAction_;
 
-bool Foam::sigFpe::sigFpeActive_ = false;
+
+// File-scope function.
+// Controlled by env variable containing a bool (true|false|on|off ...)
+// or by the specified flag
+static bool isTrue(const char* envName, const bool flag)
+{
+    const std::string str = Foam::getEnv(envName);
+
+    if (str.size())
+    {
+        Foam::Switch sw(str, true); // silently ignore bad input
+        if (sw.valid())
+        {
+            return sw;
+        }
+    }
+
+    // Env was not set or did not contain a valid bool value
+    return flag;
+}
+
 
 void Foam::sigFpe::fillNan(UList<scalar>& lst)
 {
     lst = std::numeric_limits<scalar>::signaling_NaN();
 }
-
-bool Foam::sigFpe::mallocNanActive_ = false;
 
 
 #ifdef LINUX
@@ -128,9 +153,15 @@ Foam::sigFpe::~sigFpe()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::sigFpe::requested()
+{
+    return isTrue("FOAM_SIGFPE", switchFpe_);
+}
+
+
 void Foam::sigFpe::set(const bool verbose)
 {
-    if (!sigFpeActive_ && env("FOAM_SIGFPE"))
+    if (!sigActive_ && requested())
     {
         bool supported = false;
 
@@ -155,7 +186,7 @@ void Foam::sigFpe::set(const bool verbose)
                 << abort(FatalError);
         }
 
-        sigFpeActive_ = true;
+        sigActive_ = true;
 
         #elif defined(sgiN32) || defined(sgiN32Gcc)
         supported = true;
@@ -179,28 +210,28 @@ void Foam::sigFpe::set(const bool verbose)
             nullptr
         );
 
-        sigFpeActive_ = true;
+        sigActive_ = true;
 
         #endif
 
 
         if (verbose)
         {
+            Info<< "trapFpe: Floating point exception trapping ";
+
             if (supported)
             {
-                Info<< "sigFpe : Enabling floating point exception trapping"
-                    << " (FOAM_SIGFPE)." << endl;
+                Info<< "enabled (FOAM_SIGFPE)." << endl;
             }
             else
             {
-                Info<< "sigFpe : Floating point exception trapping"
-                    << " - not supported on this platform" << endl;
+                Info<< "- not supported on this platform" << endl;
             }
         }
     }
 
 
-    if (env("FOAM_SETNAN"))
+    if (isTrue("FOAM_SETNAN", switchNan_))
     {
         #ifdef LINUX
         mallocNanActive_ = true;
@@ -208,15 +239,15 @@ void Foam::sigFpe::set(const bool verbose)
 
         if (verbose)
         {
+            Info<< "setNaN : Initialise allocated memory to NaN ";
+
             if (mallocNanActive_)
             {
-                Info<< "SetNaN : Initialising allocated memory to NaN"
-                    << " (FOAM_SETNAN)." << endl;
+                Info<< "enabled (FOAM_SETNAN)." << endl;
             }
             else
             {
-                Info<< "SetNaN : Initialise allocated memory to NaN"
-                    << " - not supported on this platform" << endl;
+                Info<< " - not supported on this platform" << endl;
             }
         }
     }
@@ -227,7 +258,7 @@ void Foam::sigFpe::unset(const bool verbose)
 {
     #ifdef LINUX_GNUC
     // Reset signal
-    if (sigFpeActive_)
+    if (sigActive_)
     {
         if (verbose)
         {
@@ -256,7 +287,7 @@ void Foam::sigFpe::unset(const bool verbose)
                 << "Cannot reset SIGFPE trapping"
                 << abort(FatalError);
         }
-        sigFpeActive_ = false;
+        sigActive_ = false;
     }
     #endif
 

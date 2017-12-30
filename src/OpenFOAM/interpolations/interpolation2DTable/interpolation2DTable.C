@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IFstream.H"
 #include "openFoamTableReader.H"
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
@@ -55,7 +54,7 @@ template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable()
 :
     List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(),
-    boundsHandling_(interpolation2DTable::WARN),
+    bounding_(bounds::normalBounding::WARN),
     fileName_("fileNameIsUndefined"),
     reader_(nullptr)
 {}
@@ -65,12 +64,12 @@ template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable
 (
     const List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>& values,
-    const boundsHandling bounds,
+    const bounds::normalBounding bounding,
     const fileName& fName
 )
 :
     List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(values),
-    boundsHandling_(bounds),
+    bounding_(bounding),
     fileName_(fName),
     reader_(nullptr)
 {}
@@ -80,7 +79,7 @@ template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable(const fileName& fName)
 :
     List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(),
-    boundsHandling_(interpolation2DTable::WARN),
+    bounding_(bounds::normalBounding::WARN),
     fileName_(fName),
     reader_(new openFoamTableReader<Type>(dictionary()))
 {
@@ -92,7 +91,15 @@ template<class Type>
 Foam::interpolation2DTable<Type>::interpolation2DTable(const dictionary& dict)
 :
     List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(),
-    boundsHandling_(wordToBoundsHandling(dict.lookup("outOfBounds"))),
+    bounding_
+    (
+        bounds::normalBoundingNames.lookupOrFailsafe
+        (
+            "outOfBounds",
+            dict,
+            bounds::normalBounding::WARN
+        )
+    ),
     fileName_(dict.lookup("file")),
     reader_(tableReader<Type>::New(dict))
 {
@@ -107,7 +114,7 @@ Foam::interpolation2DTable<Type>::interpolation2DTable
 )
 :
     List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>(interpTable),
-    boundsHandling_(interpTable.boundsHandling_),
+    bounding_(interpTable.bounding_),
     fileName_(interpTable.fileName_),
     reader_(interpTable.reader_)    // note: steals reader. Used in write().
 {}
@@ -130,9 +137,9 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
 
     if (lookupValue < minLimit)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolation2DTable::ERROR:
+            case bounds::normalBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << lookupValue << ") less than lower "
@@ -140,18 +147,19 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
                     << exit(FatalError);
                 break;
             }
-            case interpolation2DTable::WARN:
+            case bounds::normalBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << lookupValue << ") less than lower "
                     << "bound (" << minLimit << ")" << nl
                     << "    Continuing with the first entry"
                     << endl;
-                // Behaviour as per 'CLAMP'
+
+                // Behaviour as per CLAMP
                 return data.first().second();
                 break;
             }
-            case interpolation2DTable::CLAMP:
+            case bounds::normalBounding::CLAMP:
             {
                 return data.first().second();
                 break;
@@ -160,9 +168,9 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
     }
     else if (lookupValue >= maxLimit)
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolation2DTable::ERROR:
+            case bounds::normalBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << lookupValue << ") greater than upper "
@@ -170,18 +178,19 @@ Type Foam::interpolation2DTable<Type>::interpolateValue
                     << exit(FatalError);
                 break;
             }
-            case interpolation2DTable::WARN:
+            case bounds::normalBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << lookupValue << ") greater than upper "
                     << "bound (" << maxLimit << ")" << nl
                     << "    Continuing with the last entry"
                     << endl;
-                // Behaviour as per 'CLAMP'
+
+                // Behaviour as per CLAMP
                 return data.last().second();
                 break;
             }
-            case interpolation2DTable::CLAMP:
+            case bounds::normalBounding::CLAMP:
             {
                 return data.last().second();
                 break;
@@ -241,25 +250,26 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
 
     if (bop(valueX, t[limitI].first()))
     {
-        switch (boundsHandling_)
+        switch (bounding_)
         {
-            case interpolation2DTable::ERROR:
+            case bounds::normalBounding::ERROR:
             {
                 FatalErrorInFunction
                     << "value (" << valueX << ") out of bounds"
                     << exit(FatalError);
                 break;
             }
-            case interpolation2DTable::WARN:
+            case bounds::normalBounding::WARN:
             {
                 WarningInFunction
                     << "value (" << valueX << ") out of bounds"
                     << endl;
-                // Behaviour as per 'CLAMP'
+
+                // Behaviour as per CLAMP
                 return limitI;
                 break;
             }
-            case interpolation2DTable::CLAMP:
+            case bounds::normalBounding::CLAMP:
             {
                 return limitI;
                 break;
@@ -267,7 +277,7 @@ Foam::label Foam::interpolation2DTable<Type>::Xi
             default:
             {
                 FatalErrorInFunction
-                    << "Unhandled enumeration " << boundsHandling_
+                    << "Unhandled bounding type " << int(bounding_)
                     << abort(FatalError);
             }
         }
@@ -352,79 +362,6 @@ Type Foam::interpolation2DTable<Type>::operator()
 
 
 template<class Type>
-Foam::word Foam::interpolation2DTable<Type>::boundsHandlingToWord
-(
-     const boundsHandling& bound
-) const
-{
-    word enumName("warn");
-
-    switch (bound)
-    {
-        case interpolation2DTable::ERROR:
-        {
-            enumName = "error";
-            break;
-        }
-        case interpolation2DTable::WARN:
-        {
-            enumName = "warn";
-            break;
-        }
-        case interpolation2DTable::CLAMP:
-        {
-            enumName = "clamp";
-            break;
-        }
-    }
-
-    return enumName;
-}
-
-
-template<class Type>
-typename Foam::interpolation2DTable<Type>::boundsHandling
-Foam::interpolation2DTable<Type>::wordToBoundsHandling
-(
-    const word& bound
-) const
-{
-    if (bound == "error")
-    {
-        return interpolation2DTable::ERROR;
-    }
-    else if (bound == "warn")
-    {
-        return interpolation2DTable::WARN;
-    }
-    else if (bound == "clamp")
-    {
-        return interpolation2DTable::CLAMP;
-    }
-    else
-    {
-        WarningInFunction
-            << "bad outOfBounds specifier " << bound << " using 'warn'" << endl;
-
-        return interpolation2DTable::WARN;
-    }
-}
-
-
-template<class Type>
-typename Foam::interpolation2DTable<Type>::boundsHandling
-Foam::interpolation2DTable<Type>::outOfBounds
-(
-    const boundsHandling& bound
-)
-{
-    boundsHandling prev = boundsHandling_;
-    boundsHandling_ = bound;
-    return prev;
-}
-
-
-template<class Type>
 void Foam::interpolation2DTable<Type>::checkOrder() const
 {
     const label n = this->size();
@@ -453,7 +390,7 @@ template<class Type>
 void Foam::interpolation2DTable<Type>::write(Ostream& os) const
 {
     os.writeEntry("file", fileName_);
-    os.writeEntry("outOfBounds", boundsHandlingToWord(boundsHandling_));
+    os.writeEntry("outOfBounds", bounds::normalBoundingNames[bounding_]);
 
     os  << *this;
 }

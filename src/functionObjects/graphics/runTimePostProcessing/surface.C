@@ -48,27 +48,21 @@ namespace runTimePostPro
     defineRunTimeSelectionTable(surface, dictionary);
 }
 }
-template<>
-const char* NamedEnum
-<
-    functionObjects::runTimePostPro::surface::representationType,
-    5
->::names[] =
-{
-    "none",
-    "wireframe",
-    "surface",
-    "surfaceWithEdges",
-    "glyph"
-};
 }
 
-const Foam::NamedEnum
+
+const Foam::Enum
 <
-    Foam::functionObjects::runTimePostPro::surface::representationType,
-    5
+    Foam::functionObjects::runTimePostPro::surface::representationType
 >
-    Foam::functionObjects::runTimePostPro::surface::representationTypeNames;
+Foam::functionObjects::runTimePostPro::surface::representationTypeNames
+{
+    { representationType::rtNone, "none" },
+    { representationType::rtWireframe, "wireframe" },
+    { representationType::rtSurface, "surface" },
+    { representationType::rtSurfaceWithEdges, "surfaceWithEdges" },
+    { representationType::rtGlyph, "glyph" },
+};
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -120,8 +114,7 @@ void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
         return;
     }
 
-    vtkSmartPointer<vtkFeatureEdges> featureEdges =
-        vtkSmartPointer<vtkFeatureEdges>::New();
+    auto featureEdges = vtkSmartPointer<vtkFeatureEdges>::New();
     featureEdges->SetInputData(data);
     featureEdges->BoundaryEdgesOn();
     featureEdges->FeatureEdgesOn();
@@ -131,8 +124,7 @@ void Foam::functionObjects::runTimePostPro::surface::addFeatureEdges
     featureEdges->ColoringOff();
     featureEdges->Update();
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper =
-        vtkSmartPointer<vtkPolyDataMapper>::New();
+    auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetInputConnection(featureEdges->GetOutputPort());
     mapper->ScalarVisibilityOff();
 
@@ -157,7 +149,7 @@ Foam::functionObjects::runTimePostPro::surface::surface
     geometryBase(parent, dict, colours),
     representation_
     (
-        representationTypeNames.read(dict.lookup("representation"))
+        representationTypeNames.lookup("representation", dict)
     ),
     featureEdges_(false),
     surfaceColour_(nullptr),
@@ -217,15 +209,14 @@ Foam::functionObjects::runTimePostPro::surface::New
         Info<< "Selecting surface " << surfaceType << endl;
     }
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(surfaceType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(surfaceType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown surface type "
             << surfaceType << nl << nl
-            << "Valid surface types are:" << endl
+            << "Valid surface types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

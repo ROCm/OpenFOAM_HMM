@@ -84,8 +84,8 @@ public:
             PARTIAL
         };
 
-        //- Direction names
-        static const NamedEnum<typeOfMatch, 2> typeOfMatchNames_;
+        //- Names for the types of matches
+        static const Enum<typeOfMatch> typeOfMatchNames;
 
 private:
 

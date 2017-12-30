@@ -39,16 +39,16 @@ Foam::radiation::absorptionEmissionModel::New
 
     Info<< "Selecting absorptionEmissionModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown absorptionEmissionModel type "
             << modelType << nl << nl
-            << "Valid absorptionEmissionModel types are :" << nl
-            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+            << "Valid absorptionEmissionModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
 
     return autoPtr<absorptionEmissionModel>(cstrIter()(dict, mesh));

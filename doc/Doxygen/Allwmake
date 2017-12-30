@@ -12,7 +12,7 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: ${0##*/} [OPTION]
+usage: ${0##*/} [OPTION] [dir1 .. dirN]
 options:
   -config name      use alternative doxygen config
   -dir    name      process given directory name directly
@@ -20,9 +20,12 @@ options:
                     local source code
   -help
 
+Run doxygen on OpenFOAM sources, or on specified directories only.
+
 USAGE
     exit 1
 }
+
 
 # -----------------------------------------------------------------------------
 
@@ -44,13 +47,13 @@ defineURL() {
 }
 
 
-unset configName dirName
+unset configName dirNames
 
 # Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     -config)
@@ -73,15 +76,29 @@ do
         shift
         ;;
     -dir)
-        dirName="$2"
-        [ -d "$dirName" ] || {
-            echo "Could not resolve input directory: $dirName" 1>&2
-            exit 1
-        }
         shift
+        if [ -d "$1" ]
+        then
+            dirNames="$dirNames $1"
+        else
+            echo "Could not resolve input directory: $1" 1>&2
+            exit 1
+        fi
         ;;
     -online)
         defineURL
+        ;;
+    -*)
+        usage "unknown option: '$1'"
+        ;;
+
+    *)  # dirName
+        if [ -d "$1" ]
+        then
+            dirNames="$dirNames $1"
+        else
+            echo "Could not resolve input directory: $1" 1>&2
+        fi
         ;;
     *)
         usage "unknown option/argument: '$1'"
@@ -102,14 +119,12 @@ rm -rf html-stagedRemove$$ >/dev/null 2>&1 &
 # Ensure that created files are readable by everyone
 umask 22
 
-if [ -n "$dirName" ]
+if [ -n "$dirNames" ]
 then
-    # Create a temporary with only the specified directory
-    tmpConfig="${TMPDIR:-/tmp}/Doxyfile.$$"
-    trap 'rm -f $tmpConfig 2>/dev/null; exit 0' EXIT TERM INT
-    cat $PWD/Doxyfile > $tmpConfig
-    echo "INPUT = $dirName" >> $tmpConfig
-    doxygen $tmpConfig
+    (
+        cat ${configName:-Doxyfile}
+        echo "INPUT = $dirNames"
+    ) | doxygen -
 else
     doxygen $configName
 fi

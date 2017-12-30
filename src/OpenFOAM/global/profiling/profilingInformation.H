@@ -153,7 +153,7 @@ public:
 
 
     //- Destructor
-    ~profilingInformation();
+    ~profilingInformation() = default;
 
 
     // Member Functions

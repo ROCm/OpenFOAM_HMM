@@ -75,7 +75,7 @@ bool Foam::localPointRegion::isDuplicate
         return false;
     }
 
-    label fp1 = findIndex(f1, f0[0]);
+    label fp1 = f1.find(f0[0]);
 
     if (fp1 == -1)
     {
@@ -160,7 +160,7 @@ void Foam::localPointRegion::countPointRegions
                         if (iter != meshPointMap_.end())
                         {
                             labelList& regions = pointRegions[iter()];
-                            if (findIndex(regions, region) == -1)
+                            if (!regions.found(region))
                             {
                                 label sz = regions.size();
                                 regions.setSize(sz+1);

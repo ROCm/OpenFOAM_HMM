@@ -36,8 +36,7 @@ Description
 
     Note:
     If new points are created during master-slave edge cutting, they
-    should be registred with the pointMap.
-
+    should be registered with the pointMap.
 
 SourceFiles
     enrichedPatch.C
@@ -134,10 +133,10 @@ class enrichedPatch
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        enrichedPatch(const enrichedPatch&);
+        enrichedPatch(const enrichedPatch&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const enrichedPatch&);
+        void operator=(const enrichedPatch&) = delete;
 
         // Creation of demand-driven private data
 
@@ -177,9 +176,6 @@ class enrichedPatch
         //- Estimated ratio of original-to-enriched face size
         static const label enrichedFaceRatio_;
 
-        //- Estimated number of master face hits by slave points
-        static const label nFaceHits_;
-
         //- Size of face on which the check is forced
         static const label maxFaceSizeDebug_;
 
@@ -196,11 +192,11 @@ public:
         (
             const primitiveFacePatch& masterPatch,
             const primitiveFacePatch& slavePatch,
-            const labelList& slavePointPointHits,
+            const labelUList& slavePointPointHits,
                                             // -1 or common point snapped to
-            const labelList& slavePointEdgeHits,
+            const labelUList& slavePointEdgeHits,
                                             // -1 or common edge snapped to
-            const List<objectHit>& slavePointFaceHits
+            const UList<objectHit>& slavePointFaceHits
                                             // master face snapped to
         );
 
@@ -213,23 +209,17 @@ public:
 
         // Access
 
-            //- Return non-const access to point map to add points
-            Map<point>& pointMap();
-
             //- Return map of points
-            const Map<point>& pointMap() const;
+            inline const Map<point>& pointMap() const;
+
+            //- Return non-const access to point map to add points
+            inline Map<point>& pointMap();
 
             //- Return map of point merges
-            Map<label>& pointMergeMap()
-            {
-                return pointMergeMap_;
-            }
+            inline const Map<label>& pointMergeMap() const;
 
             //- Return map of point merges
-            const Map<label>& pointMergeMap() const
-            {
-                return pointMergeMap_;
-            }
+            inline Map<label>& pointMergeMap();
 
 
         // Topological data
@@ -278,13 +268,17 @@ public:
 
 
         //- Debugging: dump graphical representation to obj format file
-        void writeOBJ(const fileName&) const;
+        void writeOBJ(const fileName& fName) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "enrichedPatchI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -29,8 +29,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "momentOfInertia.H"
 #include "cartesianCS.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -109,16 +108,29 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::writeLumleyCoeffs() const
     {
         fileName valsFile
         (
-            this->db().time().caseConstant()
-           /"boundaryData"
-           /this->patch().name()
-           /"0"
-           /"R"
+            fileHandler().filePath
+            (
+                fileName
+                (
+                    db().time().path()
+                   /db().time().caseConstant()
+                   /"boundaryData"
+                   /this->patch().name()
+                   /"0"
+                   /"R"
+                )
+            )
         );
 
-        IFstream is(valsFile);
+        autoPtr<ISstream> isPtr
+        (
+            fileHandler().NewIFstream
+            (
+                valsFile
+            )
+        );
 
-        Field<symmTensor> Rexp(is);
+        Field<symmTensor> Rexp(isPtr());
 
         OFstream os(db().time().path()/"lumley_input.out");
 
@@ -1104,12 +1116,12 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
     writeEntry("value", os);
-    os.writeKeyword("delta") << delta_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<scalar>(os, "d", 1.0, d_);
-    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
-    writeEntryIfDifferent<scalar>(os, "perturb", 1e-5, perturb_);
-    writeEntryIfDifferent<label>(os, "nCellPerEddy", 5, nCellPerEddy_);
-    writeEntryIfDifferent(os, "writeEddies", false, writeEddies_);
+    os.writeEntry("delta", delta_);
+    os.writeEntryIfDifferent<scalar>("d", 1.0, d_);
+    os.writeEntryIfDifferent<scalar>("kappa", 0.41, kappa_);
+    os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
+    os.writeEntryIfDifferent<label>("nCellPerEddy", 5, nCellPerEddy_);
+    os.writeEntryIfDifferent("writeEddies", false, writeEddies_);
 
     if (!interpolateR_)
     {
@@ -1126,14 +1138,14 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::write(Ostream& os) const
         U_.writeEntry("U", os);
     }
 
-    if
-    (
-       !mapMethod_.empty()
-     && mapMethod_ != "planarInterpolation"
-    )
+    if (!mapMethod_.empty())
     {
-        os.writeKeyword("mapMethod") << mapMethod_
-            << token::END_STATEMENT << nl;
+        os.writeEntryIfDifferent<word>
+        (
+            "mapMethod",
+            "planarInterpolation",
+            mapMethod_
+        );
     }
 }
 

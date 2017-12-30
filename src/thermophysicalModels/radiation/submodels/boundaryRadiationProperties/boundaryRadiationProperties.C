@@ -73,7 +73,7 @@ Foam::radiation::boundaryRadiationProperties::boundaryRadiationProperties
             {
                 const dictionary& dict = radiationDict.subDict(pp.name());
 
-                radBoundaryPropertiesPtrList_[patchi].set
+                radBoundaryPropertiesPtrList_[patchi].reset
                 (
                     new boundaryRadiationPropertiesPatch(pp, dict)
                 );

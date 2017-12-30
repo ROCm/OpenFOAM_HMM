@@ -33,7 +33,7 @@ License
 template<class T, class CombineOp, class negateOp>
 void Foam::mapDistributeBase::flipAndCombine
 (
-    const UList<label>& map,
+    const labelUList& map,
     const bool hasFlip,
     const UList<T>& rhs,
     const CombineOp& cop,
@@ -1276,7 +1276,7 @@ void Foam::mapDistributeBase::distribute
 {
     fld.shrink();
 
-    List<T>& fldList = static_cast<List<T>& >(fld);
+    List<T>& fldList = static_cast<List<T>&>(fld);
 
     distribute(fldList, tag);
 

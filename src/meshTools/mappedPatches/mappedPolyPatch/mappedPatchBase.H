@@ -111,25 +111,25 @@ public:
         //- Mesh items to sample
         enum sampleMode
         {
-            NEARESTCELL,         // nearest cell containing sample
-            NEARESTPATCHFACE,    // nearest face on selected patch
-            NEARESTPATCHFACEAMI, // nearest patch face + AMI interpolation
-            NEARESTPATCHPOINT,   // nearest point on selected patch
-            NEARESTFACE,         // nearest face
-            NEARESTONLYCELL      // nearest cell (even if not containing cell)
+            NEARESTCELL,         //!< nearest cell containing sample
+            NEARESTPATCHFACE,    //!< nearest face on selected patch
+            NEARESTPATCHFACEAMI, //!< nearest patch face + AMI interpolation
+            NEARESTPATCHPOINT,   //!< nearest point on selected patch
+            NEARESTFACE,         //!< nearest face
+            NEARESTONLYCELL      //!< nearest cell (even if not containing cell)
         };
 
         //- How to project face centres
         enum offsetMode
         {
-            UNIFORM,            // single offset vector
-            NONUNIFORM,         // per-face offset vector
-            NORMAL              // use face normal + distance
+            UNIFORM,            //!< single offset vector
+            NONUNIFORM,         //!< per-face offset vector
+            NORMAL              //!< use face normal + distance
         };
 
-        static const NamedEnum<sampleMode, 6> sampleModeNames_;
+        static const Enum<sampleMode> sampleModeNames_;
 
-        static const NamedEnum<offsetMode, 3> offsetModeNames_;
+        static const Enum<offsetMode> offsetModeNames_;
 
 
     //- Helper class for finding nearest

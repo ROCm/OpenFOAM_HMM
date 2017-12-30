@@ -41,7 +41,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
     is.fatalCheck
     (
-        "HashPtrTable<T, Key, Hash>::read(Istream&, const INew&) : "
+        "HashPtrTable::read(Istream&, const INew&) : "
         "reading first token"
     );
 
@@ -50,7 +50,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
         const label s = firstToken.labelToken();
 
         // Read beginning of contents
-        const char delimiter = is.readBeginList("HashPtrTable<T, Key, Hash>");
+        const char delimiter = is.readBeginList("HashPtrTable");
 
         if (s)
         {
@@ -69,8 +69,8 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
                     is.fatalCheck
                     (
-                        "HashPtrTable<T, Key, Hash>::"
-                        "read(Istream&, const INew&) : reading entry"
+                        "HashPtrTable::read(Istream&, const INew&) : "
+                        "reading entry"
                     );
                 }
             }
@@ -114,7 +114,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
             is.fatalCheck
             (
-                "HashPtrTable<T, Key, Hash>::read(Istream&, const INew&) : "
+                "HashPtrTable::read(Istream&, const INew&) : "
                 "reading entry"
             );
 
@@ -155,7 +155,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read
 template<class T, class Key, class Hash>
 void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
 {
-    for (const_iterator iter = this->begin(); iter != this->end(); ++iter)
+    for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
     {
         const T* ptr = iter.object();
         if (ptr)
@@ -209,29 +209,34 @@ Foam::Ostream& Foam::operator<<
     const HashPtrTable<T, Key, Hash>& tbl
 )
 {
-    using const_iterator = typename HashPtrTable<T, Key, Hash>::const_iterator;
+    const label sz = tbl.size();
 
-    // Write size and start delimiter
-    os << nl << tbl.size() << nl << token::BEGIN_LIST << nl;
-
-    // Write contents
-    for (const_iterator iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
+    if (sz)
     {
-        const T* ptr = iter.object();
+        // Size and start list delimiter
+        os << nl << sz << nl << token::BEGIN_LIST << nl;
 
-        os << iter.key();
-        if (ptr)
+        // Contents
+        for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
         {
-            os << token::SPACE << *ptr;
+            const T* ptr = iter.object();
+
+            os << iter.key();
+            if (ptr)
+            {
+                os << token::SPACE << *ptr;
+            }
+            os << nl;
         }
-        os << nl;
+        os << token::END_LIST; // End list delimiter
+    }
+    else
+    {
+        // Empty hash table
+        os << sz << token::BEGIN_LIST << token::END_LIST;
     }
 
-    // Write end delimiter
-    os << token::END_LIST;
-
     os.check(FUNCTION_NAME);
-
     return os;
 }
 

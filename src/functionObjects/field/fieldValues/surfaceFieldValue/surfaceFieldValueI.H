@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceFieldValue.H"
 #include "Time.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -50,6 +49,22 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::faceFlip() const
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline bool
+Foam::functionObjects::fieldValues::surfaceFieldValue::usesMag() const
+{
+    // Operation specifically tagged to use mag
+    return (operation_ & typeAbsolute);
+}
+
+
+inline bool
+Foam::functionObjects::fieldValues::surfaceFieldValue::usesWeight() const
+{
+    // Operation specifically tagged to require a weight field
+    return (operation_ & typeWeighted);
+}
+
 
 inline const Foam::functionObjects::fieldValues::surfaceFieldValue::regionTypes&
 Foam::functionObjects::fieldValues::surfaceFieldValue::regionType() const

@@ -170,7 +170,7 @@ protected:
         template<class T, class CombineOp, class negateOp>
         static void flipAndCombine
         (
-            const UList<label>& map,
+            const labelUList& map,
             const bool hasFlip,
             const UList<T>& rhs,
             const CombineOp& cop,

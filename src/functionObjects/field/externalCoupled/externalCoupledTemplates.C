@@ -26,14 +26,13 @@ License
 #include "externalCoupled.H"
 //#include "fvMesh.H"
 #include "OSspecific.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "Fstream.H"
 #include "volFields.H"
 #include "externalCoupledMixedFvPatchFields.H"
 #include "mixedFvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
 #include "fixedValueFvPatchFields.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 #include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -62,7 +61,7 @@ bool Foam::functionObjects::externalCoupled::readData
     {
         const fileName transferFile
         (
-            groupDir(commsDir_, compositeName(regionNames), groupName)
+            groupDir(commDirectory(), compositeName(regionNames), groupName)
           / fieldName + ".in"
         );
 
@@ -81,46 +80,40 @@ bool Foam::functionObjects::externalCoupled::readData
 
 
     label nFound = 0;
-    forAll(meshes, i)
+    for (const fvMesh& mesh : meshes)
     {
-        const fvMesh& mesh = meshes[i];
+        const volFieldType* vfptr =
+            mesh.lookupObjectPtr<volFieldType>(fieldName);
 
-        if (!mesh.foundObject<volFieldType>(fieldName))
+        if (!vfptr)
         {
             continue;
         }
-
         nFound++;
 
-        const volFieldType& cvf = mesh.lookupObject<volFieldType>(fieldName);
-        const typename volFieldType::Boundary& bf = cvf.boundaryField();
-
+        typename volFieldType::Boundary& bf =
+            const_cast<volFieldType*>(vfptr)->boundaryFieldRef();
 
         // Get the patches
         const labelList patchIDs
         (
             mesh.boundaryMesh().patchSet
             (
-                List<wordRe>(1, groupName)
+                List<wordRe>{groupName}
             ).sortedToc()
         );
 
         // Handle column-wise reading of patch data. Supports most easy types
-        forAll(patchIDs, i)
+        for (const label patchi : patchIDs)
         {
-            label patchi = patchIDs[i];
-
             if (isA<patchFieldType>(bf[patchi]))
             {
                 // Explicit handling of externalCoupledMixed bcs - they
                 // have specialised reading routines.
 
-                patchFieldType& pf = const_cast<patchFieldType&>
+                patchFieldType& pf = refCast<patchFieldType>
                 (
-                    refCast<const patchFieldType>
-                    (
-                        bf[patchi]
-                    )
+                    bf[patchi]
                 );
 
                 // Read from master into local stream
@@ -141,6 +134,11 @@ bool Foam::functionObjects::externalCoupled::readData
             }
             else if (isA<mixedFvPatchField<Type>>(bf[patchi]))
             {
+                mixedFvPatchField<Type>& pf = refCast<mixedFvPatchField<Type>>
+                (
+                    bf[patchi]
+                );
+
                 // Read columns from file for
                 // value, snGrad, refValue, refGrad, valueFraction
                 List<scalarField> data;
@@ -150,15 +148,6 @@ bool Foam::functionObjects::externalCoupled::readData
                     4*pTraits<Type>::nComponents+1, // nColumns: 4*Type+1*scalar
                     masterFilePtr,
                     data
-                );
-
-                mixedFvPatchField<Type>& pf =
-                const_cast<mixedFvPatchField<Type>&>
-                (
-                    refCast<const mixedFvPatchField<Type>>
-                    (
-                        bf[patchi]
-                    )
                 );
 
                 // Transfer read data to bc.
@@ -193,6 +182,9 @@ bool Foam::functionObjects::externalCoupled::readData
             }
             else if (isA<fixedGradientFvPatchField<Type>>(bf[patchi]))
             {
+                fixedGradientFvPatchField<Type>& pf =
+                    refCast<fixedGradientFvPatchField<Type>>(bf[patchi]);
+
                 // Read columns for value and gradient
                 List<scalarField> data;
                 readColumns
@@ -201,15 +193,6 @@ bool Foam::functionObjects::externalCoupled::readData
                     2*pTraits<Type>::nComponents,   // nColumns: Type
                     masterFilePtr,
                     data
-                );
-
-                fixedGradientFvPatchField<Type>& pf =
-                const_cast<fixedGradientFvPatchField<Type>&>
-                (
-                    refCast<const fixedGradientFvPatchField<Type>>
-                    (
-                        bf[patchi]
-                    )
                 );
 
                 // Transfer gradient to bc
@@ -234,6 +217,9 @@ bool Foam::functionObjects::externalCoupled::readData
             }
             else if (isA<fixedValueFvPatchField<Type>>(bf[patchi]))
             {
+                fixedValueFvPatchField<Type>& pf =
+                    refCast<fixedValueFvPatchField<Type>>(bf[patchi]);
+
                 // Read columns for value only
                 List<scalarField> data;
                 readColumns
@@ -256,15 +242,6 @@ bool Foam::functionObjects::externalCoupled::readData
                     value.replace(cmpt, data[cmpt]);
                 }
 
-                fixedValueFvPatchField<Type>& pf =
-                const_cast<fixedValueFvPatchField<Type>&>
-                (
-                    refCast<const fixedValueFvPatchField<Type>>
-                    (
-                        bf[patchi]
-                    )
-                );
-
                 pf == value;
 
                 // Update the value from the read coefficicient. Bypass any
@@ -280,7 +257,7 @@ bool Foam::functionObjects::externalCoupled::readData
                     << exit(FatalError);
             }
 
-            initialised_ = true;
+            initialisedCoupling_ = true;
         }
     }
 
@@ -357,7 +334,7 @@ bool Foam::functionObjects::externalCoupled::writeData
     {
         const fileName transferFile
         (
-            groupDir(commsDir_, compositeName(regionNames), groupName)
+            groupDir(commDirectory(), compositeName(regionNames), groupName)
           / fieldName + ".out"
         );
 
@@ -379,35 +356,32 @@ bool Foam::functionObjects::externalCoupled::writeData
 
     label nFound = 0;
 
-    forAll(meshes, i)
+    for (const fvMesh& mesh : meshes)
     {
-        const fvMesh& mesh = meshes[i];
+        const volFieldType* vfptr =
+            mesh.lookupObjectPtr<volFieldType>(fieldName);
 
-        if (!mesh.foundObject<volFieldType>(fieldName))
+        if (!vfptr)
         {
             continue;
         }
-
         nFound++;
 
-        const volFieldType& cvf = mesh.lookupObject<volFieldType>(fieldName);
-        const typename volFieldType::Boundary& bf = cvf.boundaryField();
-
+        const typename volFieldType::Boundary& bf =
+            vfptr->boundaryField();
 
         // Get the patches
         const labelList patchIDs
         (
             mesh.boundaryMesh().patchSet
             (
-                List<wordRe>(1, groupName)
+                List<wordRe>{groupName}
             ).sortedToc()
         );
 
         // Handle column-wise writing of patch data. Supports most easy types
-        forAll(patchIDs, i)
+        for (const label patchi : patchIDs)
         {
-            label patchi = patchIDs[i];
-
             const globalIndex globalFaces(bf[patchi].size());
 
             if (isA<patchFieldType>(bf[patchi]))

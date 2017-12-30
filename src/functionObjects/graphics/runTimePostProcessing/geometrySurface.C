@@ -79,11 +79,9 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
     const Field<point>& surfPoints = surf.points();
     const Field<vector>& surfFaceNormals = surf.faceNormals();
 
-    vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-    vtkSmartPointer<vtkCellArray> triangles =
-        vtkSmartPointer<vtkCellArray>::New();
-    vtkSmartPointer<vtkDoubleArray> faceNormals =
-        vtkSmartPointer<vtkDoubleArray>::New();
+    auto points = vtkSmartPointer<vtkPoints>::New();
+    auto triangles = vtkSmartPointer<vtkCellArray>::New();
+    auto faceNormals = vtkSmartPointer<vtkDoubleArray>::New();
 
     faceNormals->SetNumberOfComponents(3);
 
@@ -97,8 +95,7 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
     {
         const Foam::face& f = surf[i];
 
-        vtkSmartPointer<vtkTriangle> triangle =
-            vtkSmartPointer<vtkTriangle>::New();
+        auto triangle = vtkSmartPointer<vtkTriangle>::New();
         triangle->GetPointIds()->SetId(0, f[0]);
         triangle->GetPointIds()->SetId(1, f[1]);
         triangle->GetPointIds()->SetId(2, f[2]);
@@ -114,14 +111,12 @@ void Foam::functionObjects::runTimePostPro::geometrySurface::addGeometryToScene
 
     surf.clearOut();
 
-    vtkSmartPointer<vtkPolyData> polyData =
-        vtkSmartPointer<vtkPolyData>::New();
+    auto polyData = vtkSmartPointer<vtkPolyData>::New();
     polyData->SetPoints(points);
     polyData->SetPolys(triangles);
     polyData->GetCellData()->SetNormals(faceNormals);
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper =
-        vtkSmartPointer<vtkPolyDataMapper>::New();
+    auto mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->ScalarVisibilityOff();
     mapper->SetInputData(polyData);
 

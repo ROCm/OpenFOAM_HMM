@@ -34,6 +34,7 @@ namespace Foam
     defineTypeNameAndDebug(decompositionModel, 0);
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::decompositionModel::decompositionModel

@@ -48,8 +48,7 @@ Foam::autoPtr<Foam::renumberMethod> Foam::renumberMethod::New
 
     //Info<< "Selecting renumberMethod " << methodType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(methodType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
     if (!cstrIter.found())
     {

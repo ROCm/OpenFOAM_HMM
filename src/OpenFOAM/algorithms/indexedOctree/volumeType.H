@@ -34,7 +34,7 @@ SourceFiles
 #ifndef volumeType_H
 #define volumeType_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,8 +44,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class volumeType;
-Istream& operator>>(Istream& is, volumeType&);
-Ostream& operator<<(Ostream& os, const volumeType& C);
+Istream& operator>>(Istream& is, volumeType& vt);
+Ostream& operator<<(Ostream& os, const volumeType& vt);
 
 
 /*---------------------------------------------------------------------------*\
@@ -65,6 +65,9 @@ public:
         OUTSIDE = 3
     };
 
+    // Static data
+    static const Enum<volumeType> names;
+
 
 private:
 
@@ -75,11 +78,6 @@ private:
 
 
 public:
-
-    // Static data
-
-        static const NamedEnum<volumeType, 4> names;
-
 
     // Constructors
 

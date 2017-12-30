@@ -60,9 +60,8 @@ public:
 
     // Constructors
 
-
         //- Construct from IOobject
-        pointSet(const IOobject& obj);
+        explicit pointSet(const IOobject& obj);
 
         //- Construct from objectRegistry and name
         pointSet
@@ -105,7 +104,7 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
-            const UList<label>& set,
+            const labelUList& set,
             writeOption w=NO_WRITE
         );
 

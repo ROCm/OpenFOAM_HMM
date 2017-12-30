@@ -85,7 +85,7 @@ tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
 )
 {
     GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-        const_cast<GeometricField<TypeR, PatchField, GeoMesh>& >(tgf1());
+        const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
 
     if (reusable(tgf1))
     {
@@ -171,7 +171,7 @@ public:
     )
     {
         GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>& >(tgf1());
+            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
 
         if (reusable(tgf1))
         {
@@ -264,7 +264,7 @@ public:
     {
         const GeometricField<Type1, PatchField, GeoMesh>& gf1 = tgf1();
         GeometricField<TypeR, PatchField, GeoMesh>& gf2 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>& >(tgf2());
+            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf2());
 
         if (reusable(tgf2))
         {
@@ -313,7 +313,7 @@ public:
     )
     {
         GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>& >(tgf1());
+            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
 
         if (reusable(tgf1))
         {
@@ -356,9 +356,9 @@ public:
     )
     {
         GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>& >(tgf1());
+            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
         GeometricField<TypeR, PatchField, GeoMesh>& gf2 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>& >(tgf2());
+            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf2());
 
         if (reusable(tgf1))
         {

@@ -26,7 +26,6 @@ License
 #include "argList.H"
 #include "Time.H"
 #include "fvMesh.H"
-#include "IStringStream.H"
 #include "indexedOctree.H"
 #include "treeDataCell.H"
 #include "OFstream.H"
@@ -38,7 +37,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("point (x y z)");
+    argList::addArgument("point (x y z)");
 
     #include "setRootCase.H"
     #include "createTime.H"

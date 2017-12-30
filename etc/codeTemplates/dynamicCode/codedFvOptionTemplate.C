@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) YEAR OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) YEAR AUTHOR,AFFILIATION
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -179,7 +179,7 @@ void ${typeName}FvOption${SourceType}::addSup
 }
 
 
-void ${typeName}FvOption${SourceType}::setValue
+void ${typeName}FvOption${SourceType}::constrain
 (
     fvMatrix<${TemplateType}>& eqn,
     const label fieldi
@@ -187,7 +187,7 @@ void ${typeName}FvOption${SourceType}::setValue
 {
     if (${verbose:-false})
     {
-        Info<<"${typeName}FvOption${SourceType}::setValue()\n";
+        Info<<"${typeName}FvOption${SourceType}::constrain()\n";
     }
 
 //{{{ begin code

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,9 @@ Foam::injectedParticleCloud::injectedParticleCloud
 :
     Cloud<injectedParticle>(mesh, cloudName, false)
 {
+    geometryType_ =
+        IOPosition<Cloud<injectedParticle>>::geometryType::POSITIONS;
+
     if (readFields)
     {
         injectedParticle::readFields(*this);

@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 # Setup case
 ./Allrun.pre
@@ -10,23 +8,23 @@ cd ${0%/*} || exit 1    # Run from this directory
 #-- Run on single processor
 
 # Agglomerate patch faces
-for i in air
+for region in air
 do
-    faceAgglomerate -region $i -dict constant/viewFactorsDict > log.faceAgglomerate.$i 2>&1
+    runApplication -s $region \
+        faceAgglomerate -region $region -dict constant/viewFactorsDict
 done
 
 # Generate view factors
-for i in air
+for region in air
 do
-    viewFactorsGen -region $i > log.viewFactorsGen.$i 2>&1
+    runApplication -s $region \
+        viewFactorsGen -region $region
 done
 
 runApplication $(getApplication)
 
-
 echo
-echo "creating files for paraview post-processing"
+echo "Use paraFoam -touch-all to create files for paraview post-processing"
 echo
-paraFoam -touchAll
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

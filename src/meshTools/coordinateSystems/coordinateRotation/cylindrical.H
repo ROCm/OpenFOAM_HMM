@@ -69,7 +69,7 @@ class cylindrical
 {
     // Private data
 
-        //- AutoPtr to transformation tensor
+        //- An autoPtr to the transformation tensor
         autoPtr<tensorField> Rptr_;
 
         //- Origin of the coordinate system

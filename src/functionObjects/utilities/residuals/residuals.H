@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,6 +62,7 @@ SourceFiles
 
 #include "fvMeshFunctionObject.H"
 #include "writeFile.H"
+#include "solverFieldSelection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -84,13 +85,13 @@ protected:
     // Protected data
 
         //- Fields to write residuals
-        wordList fieldSet_;
+        solverFieldSelection fieldSet_;
 
 
     // Protected Member Functions
 
         //- Output file header information
-        void writeFileHeader(Ostream& os) const;
+        void writeFileHeader(Ostream& os);
 
         //- Output file header information per primitive type value
         template<class Type>

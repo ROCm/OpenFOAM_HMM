@@ -27,7 +27,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "surfaceFields.H"
 #include "pyrolysisModel.H"
-#include "surfaceFilmModel.H"
+#include "surfaceFilmRegionModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -123,7 +123,9 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::updateCoeffs()
         return;
     }
 
-    typedef regionModels::surfaceFilmModels::surfaceFilmModel filmModelType;
+    typedef regionModels::surfaceFilmModels::surfaceFilmRegionModel
+        filmModelType;
+
     typedef regionModels::pyrolysisModels::pyrolysisModel pyrModelType;
 
     // Since we're inside initEvaluate/evaluate there might be processor
@@ -210,22 +212,20 @@ void Foam::filmPyrolysisVelocityCoupledFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_
     );
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "pyrolysisRegion",
         "pyrolysisProperties",
         pyrolysisRegionName_
     );
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     writeEntry("value", os);
 }
 

@@ -64,10 +64,10 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
     }
     else if (firstToken.isLabel())
     {
-        const label s = firstToken.labelToken();
+        const label sz = firstToken.labelToken();
 
         // Set list length to that read
-        L.setSize(s);
+        L.setSize(sz);
 
         // Read list contents depending on data format
 
@@ -76,11 +76,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
             // Read beginning of contents
             const char delimiter = is.readBeginList("List");
 
-            if (s)
+            if (sz)
             {
                 if (delimiter == token::BEGIN_LIST)
                 {
-                    for (label i=0; i<s; ++i)
+                    for (label i=0; i<sz; ++i)
                     {
                         is >> L[i];
 
@@ -92,7 +92,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                 }
                 else
                 {
-                    // uniform content (delimiter == token::BEGIN_BLOCK)
+                    // Uniform content (delimiter == token::BEGIN_BLOCK)
 
                     T element;
                     is >> element;
@@ -103,7 +103,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                         "reading the single entry"
                     );
 
-                    for (label i=0; i<s; ++i)
+                    for (label i=0; i<sz; ++i)
                     {
                         L[i] = element;
                     }
@@ -115,11 +115,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         }
         else
         {
-            // contents are binary and contiguous
+            // Contents are binary and contiguous
 
-            if (s)
+            if (sz)
             {
-                is.read(reinterpret_cast<char*>(L.data()), s*sizeof(T));
+                is.read(reinterpret_cast<char*>(L.data()), sz*sizeof(T));
 
                 is.fatalCheck
                 (
@@ -141,7 +141,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         // Putback the opening bracket
         is.putBack(firstToken);
 
-        // Now read as a singly-linked list
+        // Read as a singly-linked list
         SLList<T> sll(is);
 
         // Convert the singly-linked list to this list
@@ -156,38 +156,6 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
     }
 
     return is;
-}
-
-
-template<class T>
-Foam::List<T> Foam::readList(Istream& is)
-{
-    List<T> L;
-    token firstToken(is);
-    is.putBack(firstToken);
-
-    if (firstToken.isPunctuation())
-    {
-        if (firstToken.pToken() != token::BEGIN_LIST)
-        {
-            FatalIOErrorInFunction(is)
-                << "incorrect first token, expected '(', found "
-                << firstToken.info()
-                << exit(FatalIOError);
-        }
-
-        // Read via a singly-linked list
-        L = SLList<T>(is);
-    }
-    else
-    {
-        // Create list with a single item
-        L.setSize(1);
-
-        is >> L[0];
-    }
-
-    return L;
 }
 
 

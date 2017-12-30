@@ -74,7 +74,7 @@ void Foam::moleculeCloud::buildConstProps()
         {
             const word& siteId = siteIdNames[sI];
 
-            siteIds[sI] = findIndex(siteIdList, siteId);
+            siteIds[sI] = siteIdList.find(siteId);
 
             if (siteIds[sI] == -1)
             {
@@ -293,23 +293,22 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                         if (evaluatePotentialLimit(*molI, *molJ))
                         {
-                            label idI = molI->id();
-
-                            label idJ = molJ->id();
+                            const label idI = molI->id();
+                            const label idJ = molJ->id();
 
                             if
                             (
                                 idI == idJ
-                             || findIndex(pot_.removalOrder(), idJ)
-                              < findIndex(pot_.removalOrder(), idI)
+                             || pot_.removalOrder().find(idJ)
+                              < pot_.removalOrder().find(idI)
                             )
                             {
-                                if (findIndex(molsToDelete, molJ) == -1)
+                                if (!molsToDelete.found(molJ))
                                 {
                                     molsToDelete.append(molJ);
                                 }
                             }
-                            else if (findIndex(molsToDelete, molI) == -1)
+                            else if (!molsToDelete.found(molI))
                             {
                                 molsToDelete.append(molI);
                             }
@@ -326,23 +325,22 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
                 {
                     if (evaluatePotentialLimit(*molI, *molJ))
                     {
-                        label idI = molI->id();
-
-                        label idJ = molJ->id();
+                        const label idI = molI->id();
+                        const label idJ = molJ->id();
 
                         if
                         (
                             idI == idJ
-                         || findIndex(pot_.removalOrder(), idJ)
-                          < findIndex(pot_.removalOrder(), idI)
+                         || pot_.removalOrder().find(idJ)
+                          < pot_.removalOrder().find(idI)
                         )
                         {
-                            if (findIndex(molsToDelete, molJ) == -1)
+                            if (!molsToDelete.found(molJ))
                             {
                                 molsToDelete.append(molJ);
                             }
                         }
-                        else if (findIndex(molsToDelete, molI) == -1)
+                        else if (!molsToDelete.found(molI))
                         {
                             molsToDelete.append(molI);
                         }
@@ -405,25 +403,24 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                         if (evaluatePotentialLimit(*molI, *molJ))
                         {
-                            label idI = molI->id();
-
-                            label idJ = molJ->id();
+                            const label idI = molI->id();
+                            const label idJ = molJ->id();
 
                             if
                             (
-                                findIndex(pot_.removalOrder(), idI)
-                              < findIndex(pot_.removalOrder(), idJ)
+                                pot_.removalOrder().find(idI)
+                              < pot_.removalOrder().find(idJ)
                             )
                             {
-                                if (findIndex(molsToDelete, molI) == -1)
+                                if (!molsToDelete.found(molI))
                                 {
                                     molsToDelete.append(molI);
                                 }
                             }
                             else if
                             (
-                                findIndex(pot_.removalOrder(), idI)
-                             == findIndex(pot_.removalOrder(), idJ)
+                                pot_.removalOrder().find(idI)
+                             == pot_.removalOrder().find(idJ)
                             )
                             {
                                 // Remove one of the molecules
@@ -433,7 +430,7 @@ void Foam::moleculeCloud::removeHighEnergyOverlaps()
 
                                 if (molI->origId() > molJ->origId())
                                 {
-                                    if (findIndex(molsToDelete, molI) == -1)
+                                    if (!molsToDelete.found(molI))
                                     {
                                         molsToDelete.append(molI);
                                     }
@@ -566,7 +563,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                     forAll(latticeIds, i)
                     {
-                        label id = findIndex(pot_.idList(), latticeIds[i]);
+                        label id = pot_.idList().find(latticeIds[i]);
 
                         const molecule::constantProperties& cP(constProps(id));
 
@@ -726,7 +723,7 @@ void Foam::moleculeCloud::initialiseMolecules
 
                         forAll(latticePositions, p)
                         {
-                            label id = findIndex(pot_.idList(), latticeIds[p]);
+                            label id = pot_.idList().find(latticeIds[p]);
 
                             const vector& latticePosition =
                                 vector
@@ -746,26 +743,15 @@ void Foam::moleculeCloud::initialiseMolecules
                                 globalPosition
                             );
 
-                            label cell = -1;
-                            label tetFace = -1;
-                            label tetPt = -1;
+                            const label cell =
+                                mesh_.cellTree().findInside(globalPosition);
 
-                            mesh_.findCellFacePt
-                            (
-                                globalPosition,
-                                cell,
-                                tetFace,
-                                tetPt
-                            );
-
-                            if (findIndex(zone, cell) != -1)
+                            if (zone.found(cell))
                             {
                                 createMolecule
                                 (
                                     globalPosition,
                                     cell,
-                                    tetFace,
-                                    tetPt,
                                     id,
                                     tethered,
                                     temperature,
@@ -803,11 +789,8 @@ void Foam::moleculeCloud::initialiseMolecules
                                 {
                                     forAll(latticePositions, p)
                                     {
-                                        label id = findIndex
-                                        (
-                                            pot_.idList(),
-                                            latticeIds[p]
-                                        );
+                                        const label id =
+                                            pot_.idList().find(latticeIds[p]);
 
                                         const vector& latticePosition =
                                             vector
@@ -834,26 +817,18 @@ void Foam::moleculeCloud::initialiseMolecules
                                                 globalPosition
                                             );
 
-                                        label cell = -1;
-                                        label tetFace = -1;
-                                        label tetPt = -1;
+                                        const label cell =
+                                            mesh_.cellTree().findInside
+                                            (
+                                                globalPosition
+                                            );
 
-                                        mesh_.findCellFacePt
-                                        (
-                                            globalPosition,
-                                            cell,
-                                            tetFace,
-                                            tetPt
-                                        );
-
-                                        if (findIndex(zone, cell) != -1)
+                                        if (zone.found(cell))
                                         {
                                             createMolecule
                                             (
                                                 globalPosition,
                                                 cell,
-                                                tetFace,
-                                                tetPt,
                                                 id,
                                                 tethered,
                                                 temperature,
@@ -882,11 +857,8 @@ void Foam::moleculeCloud::initialiseMolecules
                                 {
                                     forAll(latticePositions, p)
                                     {
-                                        label id = findIndex
-                                        (
-                                            pot_.idList(),
-                                            latticeIds[p]
-                                        );
+                                        const label id =
+                                            pot_.idList().find(latticeIds[p]);
 
                                         const vector& latticePosition =
                                             vector
@@ -913,26 +885,18 @@ void Foam::moleculeCloud::initialiseMolecules
                                                 globalPosition
                                             );
 
-                                        label cell = -1;
-                                        label tetFace = -1;
-                                        label tetPt = -1;
+                                        const label cell =
+                                            mesh_.cellTree().findInside
+                                            (
+                                                globalPosition
+                                            );
 
-                                        mesh_.findCellFacePt
-                                        (
-                                            globalPosition,
-                                            cell,
-                                            tetFace,
-                                            tetPt
-                                        );
-
-                                        if (findIndex(zone, cell) != -1)
+                                        if (zone.found(cell))
                                         {
                                             createMolecule
                                             (
                                                 globalPosition,
                                                 cell,
-                                                tetFace,
-                                                tetPt,
                                                 id,
                                                 tethered,
                                                 temperature,
@@ -996,26 +960,12 @@ void Foam::moleculeCloud::createMolecule
 (
     const point& position,
     label cell,
-    label tetFace,
-    label tetPt,
     label id,
     bool tethered,
     scalar temperature,
     const vector& bulkVelocity
 )
 {
-    if (cell == -1)
-    {
-        mesh_.findCellFacePt(position, cell, tetFace, tetPt);
-    }
-
-    if (cell == -1)
-    {
-        FatalErrorInFunction
-            << "Position specified does not correspond to a mesh cell." << nl
-            << abort(FatalError);
-    }
-
     point specialPosition(Zero);
 
     label special = 0;
@@ -1068,8 +1018,6 @@ void Foam::moleculeCloud::createMolecule
             mesh_,
             position,
             cell,
-            tetFace,
-            tetPt,
             Q,
             v,
             Zero,
@@ -1162,18 +1110,18 @@ Foam::moleculeCloud::moleculeCloud
 void Foam::moleculeCloud::evolve()
 {
     molecule::trackingData td0(*this, 0);
-    Cloud<molecule>::move(td0, mesh_.time().deltaTValue());
+    Cloud<molecule>::move(*this, td0, mesh_.time().deltaTValue());
 
     molecule::trackingData td1(*this, 1);
-    Cloud<molecule>::move(td1, mesh_.time().deltaTValue());
+    Cloud<molecule>::move(*this, td1, mesh_.time().deltaTValue());
 
     molecule::trackingData td2(*this, 2);
-    Cloud<molecule>::move(td2, mesh_.time().deltaTValue());
+    Cloud<molecule>::move(*this, td2, mesh_.time().deltaTValue());
 
     calculateForce();
 
     molecule::trackingData td3(*this, 3);
-    Cloud<molecule>::move(td3, mesh_.time().deltaTValue());
+    Cloud<molecule>::move(*this, td3, mesh_.time().deltaTValue());
 }
 
 

@@ -43,26 +43,17 @@ using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<>
-const char* Foam::NamedEnum
+const Foam::Enum
 <
     Foam::compressible::
-    alphatWallBoilingWallFunctionFvPatchScalarField::phaseType,
-    2
->::names[] =
-{
-    "vapor",
-    "liquid"
-};
-
-const Foam::NamedEnum
-<
-    Foam::compressible::
-    alphatWallBoilingWallFunctionFvPatchScalarField::phaseType,
-    2
+    alphatWallBoilingWallFunctionFvPatchScalarField::phaseType
 >
 Foam::compressible::
-alphatWallBoilingWallFunctionFvPatchScalarField::phaseTypeNames_;
+alphatWallBoilingWallFunctionFvPatchScalarField::phaseTypeNames_
+{
+    { phaseType::vaporPhase, "vapor" },
+    { phaseType::liquidPhase, "liquid" },
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -111,7 +102,7 @@ alphatWallBoilingWallFunctionFvPatchScalarField
 )
 :
     alphatPhaseChangeJayatillekeWallFunctionFvPatchScalarField(p, iF, dict),
-    phaseType_(phaseTypeNames_.read(dict.lookup("phaseType"))),
+    phaseType_(phaseTypeNames_.lookup("phaseType", dict)),
     relax_(dict.lookupOrDefault<scalar>("relax", 0.5)),
     AbyV_(p.size(), 0),
     alphatConv_(p.size(), 0),
@@ -605,42 +596,36 @@ void alphatWallBoilingWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
 
-    os.writeKeyword("phaseType") << phaseTypeNames_[phaseType_]
-        << token::END_STATEMENT << nl;
+    os.writeEntry("phaseType", phaseTypeNames_[phaseType_]);
 
-    os.writeKeyword("relax") << relax_ << token::END_STATEMENT << nl;
+    os.writeEntry("relax", relax_);
 
     switch (phaseType_)
     {
         case vaporPhase:
         {
-            os.writeKeyword("partitioningModel") << nl;
-            os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("partitioningModel");
             partitioningModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
             break;
         }
         case liquidPhase:
         {
-            os.writeKeyword("partitioningModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("partitioningModel");
             partitioningModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            os.writeKeyword("nucleationSiteModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("nucleationSiteModel");
             nucleationSiteModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            os.writeKeyword("departureDiamModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("departureDiamModel");
             departureDiamModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
-            os.writeKeyword("departureFreqModel") << nl;
-            os << indent << token::BEGIN_BLOCK << incrIndent << nl;
+            os.beginBlock("departureFreqModel");
             departureFreqModel_->write(os);
-            os << decrIndent << indent << token::END_BLOCK << nl;
+            os.endBlock();
 
             break;
         }

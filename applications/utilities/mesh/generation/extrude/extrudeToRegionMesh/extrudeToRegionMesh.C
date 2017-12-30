@@ -464,7 +464,7 @@ public:
         {
             forAll(y, yi)
             {
-                if (findIndex(x, y[yi]) == -1)
+                if (!x.found(y[yi]))
                 {
                     label sz = x.size();
                     x.setSize(sz+1);
@@ -521,8 +521,8 @@ labelListList globalEdgeFaces
 label findUncoveredPatchFace
 (
     const fvMesh& mesh,
-    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
-    const label meshEdgeI                       // mesh edge
+    const labelUIndList& extrudeMeshFaces,  // mesh faces that are extruded
+    const label meshEdgeI                   // mesh edge
 )
 {
     // Make set of extruded faces.
@@ -549,6 +549,7 @@ label findUncoveredPatchFace
             return facei;
         }
     }
+
     return -1;
 }
 
@@ -557,8 +558,8 @@ label findUncoveredPatchFace
 label findUncoveredCyclicPatchFace
 (
     const fvMesh& mesh,
-    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
-    const label meshEdgeI                       // mesh edge
+    const labelUIndList& extrudeMeshFaces,  // mesh faces that are extruded
+    const label meshEdgeI                   // mesh edge
 )
 {
     // Make set of extruded faces.
@@ -585,6 +586,7 @@ label findUncoveredCyclicPatchFace
             return facei;
         }
     }
+
     return -1;
 }
 
@@ -712,7 +714,7 @@ void countExtrudePatches
             label facei = findUncoveredPatchFace
             (
                 mesh,
-                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                labelUIndList(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
@@ -934,7 +936,7 @@ void addCoupledPatches
                 label facei = findUncoveredCyclicPatchFace
                 (
                     mesh,
-                    UIndirectList<label>(extrudeMeshFaces, eFaces),
+                    labelUIndList(extrudeMeshFaces, eFaces),
                     extrudeMeshEdges[edgeI]
                 );
 
@@ -2242,7 +2244,7 @@ int main(int argc, char *argv[])
             label facei = findUncoveredPatchFace
             (
                 mesh,
-                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                labelUIndList(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
@@ -2488,14 +2490,14 @@ int main(int argc, char *argv[])
 
         if (isA<mappedWallPolyPatch>(pp))
         {
-            if (findIndex(interRegionTopPatch, patchi) != -1)
+            if (interRegionTopPatch.found(patchi))
             {
-                label zoneI = findIndex(interRegionTopPatch, patchi);
+                label zoneI = interRegionTopPatch.find(patchi);
                 topOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
             }
-            else if (findIndex(interRegionBottomPatch, patchi) != -1)
+            else if (interRegionBottomPatch.found(patchi))
             {
-                label zoneI = findIndex(interRegionBottomPatch, patchi);
+                label zoneI = interRegionBottomPatch.find(patchi);
                 bottomOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
             }
         }

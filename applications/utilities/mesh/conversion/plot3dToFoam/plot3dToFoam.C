@@ -50,7 +50,6 @@ Description
 #include "wallPolyPatch.H"
 #include "symmetryPolyPatch.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "mergePoints.H"
 
 using namespace Foam;
@@ -60,7 +59,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("PLOT3D geom file");
+    argList::addArgument("PLOT3D geom file");
     argList::addOption
     (
         "scale",
@@ -93,8 +92,8 @@ int main(int argc, char *argv[])
 
     const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
 
-    bool readBlank = !args.optionFound("noBlank");
-    bool singleBlock = args.optionFound("singleBlock");
+    const bool readBlank = !args.optionFound("noBlank");
+    const bool singleBlock = args.optionFound("singleBlock");
     scalar twoDThickness = -1;
     if (args.optionReadIfPresent("2D", twoDThickness))
     {
@@ -202,7 +201,7 @@ int main(int argc, char *argv[])
 
     cellShapeList cellShapes(nMeshCells);
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     label nCreatedCells = 0;
 

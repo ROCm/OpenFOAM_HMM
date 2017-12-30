@@ -67,22 +67,17 @@ Foam::Function1Types::Scale<Type>::~Scale()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-Type Foam::Function1Types::Scale<Type>::value(const scalar t) const
-{
-    return scale_->value(t)*value_->value(t);
-}
-
-
-template<class Type>
 void Foam::Function1Types::Scale<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
     os  << token::END_STATEMENT << nl;
-    os  << indent << word(this->name() + "Coeffs") << nl;
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+
+    os.beginBlock(word(this->name() + "Coeffs"));
+
     scale_->writeData(os);
     value_->writeData(os);
-    os  << decrIndent << indent << token::END_BLOCK << endl;
+
+    os.endBlock();
 }
 
 

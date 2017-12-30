@@ -68,7 +68,7 @@ void Foam::profilingTrigger::stop()
         profiling::unstack(ptr_);
         // pointer is managed by pool storage -> thus no delete here
     }
-    ptr_ = 0;
+    ptr_ = nullptr;
 }
 
 

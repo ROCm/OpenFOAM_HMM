@@ -25,6 +25,7 @@ License
 
 #include "word.H"
 #include "debug.H"
+#include <cctype>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -35,52 +36,28 @@ const Foam::word Foam::word::null;
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::word Foam::word::validated(const std::string& s)
+Foam::word Foam::word::validate(const std::string& s, const bool prefix)
 {
-    std::string::size_type count = 0;
-    bool prefix = false;
+    word out;
+    out.resize(s.size() + (prefix ? 1 : 0));
 
-    // Count number of valid characters and detect if the first character
-    // happens to be a digit, which we'd like to avoid having since this
-    // will cause parse issues when read back later.
-    for (std::string::const_iterator it = s.cbegin(); it != s.cend(); ++it)
+    std::string::size_type count = 0;
+
+    // As per validate, but optionally detect if the first character
+    // is a digit, which we'd like to avoid having since this will
+    // cause parse issues when read back later.
+    for (auto iter = s.cbegin(); iter != s.cend(); ++iter)
     {
-        const char c = *it;
+        const char c = *iter;
 
         if (word::valid(c))
         {
-            if (!count && isdigit(c))
+            if (!count && prefix && isdigit(c))
             {
                 // First valid character was a digit - prefix with '_'
-                prefix = true;
-                ++count;
+                out[count++] = '_';
             }
 
-            ++count;
-        }
-    }
-
-    if (count == s.size() && !prefix)
-    {
-        return word(s, false);  // Already checked, can just return as word
-    }
-
-    word out;
-    out.resize(count);
-    count = 0;
-
-    // Copy valid content.
-    if (prefix)
-    {
-        out[count++] = '_';
-    }
-
-    for (std::string::const_iterator it = s.cbegin(); it != s.cend(); ++it)
-    {
-        const char c = *it;
-
-        if (word::valid(c))
-        {
             out[count++] = c;
         }
     }
@@ -101,10 +78,8 @@ Foam::word Foam::word::lessExt() const
     {
         return *this;
     }
-    else
-    {
-        return substr(0, i);
-    }
+
+    return substr(0, i);
 }
 
 
@@ -130,6 +105,30 @@ bool Foam::word::hasExt(const word& ending) const
 bool Foam::word::hasExt(const wordRe& ending) const
 {
     return string::hasExt(ending);
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
+
+Foam::word Foam::operator&(const word& a, const word& b)
+{
+    if (a.size())
+    {
+        if (b.size())
+        {
+            // Two non-empty words: can concatenate and perform camel case
+            word camelCase(a + b);
+            camelCase[a.size()] = char(toupper(b[0]));
+
+            return camelCase;
+        }
+
+        return a;
+    }
+
+    // Or, if the first string is empty (or both are empty)
+
+    return b;
 }
 
 

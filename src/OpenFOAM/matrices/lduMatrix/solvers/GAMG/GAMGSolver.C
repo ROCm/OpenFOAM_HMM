@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -253,14 +253,7 @@ Foam::GAMGSolver::GAMGSolver
 
             if (matrixLevels_.set(coarsestLevel))
             {
-                const lduMesh& coarsestMesh =
-                    matrixLevels_[coarsestLevel].mesh();
-
-                label coarseComm = coarsestMesh.comm();
-                label oldWarn = UPstream::warnComm;
-                UPstream::warnComm = coarseComm;
-
-                coarsestLUMatrixPtr_.set
+                coarsestLUMatrixPtr_.reset
                 (
                     new LUscalarMatrix
                     (
@@ -269,8 +262,6 @@ Foam::GAMGSolver::GAMGSolver
                         interfaceLevels_[coarsestLevel]
                     )
                 );
-
-                UPstream::warnComm = oldWarn;
             }
         }
     }

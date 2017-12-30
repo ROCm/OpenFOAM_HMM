@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "OStringStream.H"
 #include "OSspecific.H"
 #include "IFstream.H"
+#include "StringStream.H"
 
-#include <inttypes.h>
+#include <cinttypes>
 #include <cxxabi.h>
 #include <execinfo.h>
 #include <dlfcn.h>
@@ -40,12 +40,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-string pOpen(const string &cmd, label line=0)
+string pOpen(const string& cmd, label line=0)
 {
-    string res = "\n";
+    string res;
 
     FILE *cmdPipe = popen(cmd.c_str(), "r");
-
     if (cmdPipe)
     {
         char *buf = nullptr;
@@ -54,8 +53,7 @@ string pOpen(const string &cmd, label line=0)
         for (label cnt = 0; cnt <= line; cnt++)
         {
             size_t linecap = 0;
-            ssize_t linelen;
-            linelen = getline(&buf, &linecap, cmdPipe);
+            ssize_t linelen = ::getline(&buf, &linecap, cmdPipe);
 
             if (linelen < 0)
             {
@@ -65,6 +63,11 @@ string pOpen(const string &cmd, label line=0)
             if (cnt == line)
             {
                 res = string(buf);
+                // Trim trailing newline
+                if (res.size())
+                {
+                    res.resize(res.size()-1);
+                }
                 break;
             }
         }
@@ -77,7 +80,7 @@ string pOpen(const string &cmd, label line=0)
         pclose(cmdPipe);
     }
 
-    return res.substr(0, res.size() - 1);
+    return res;
 }
 
 

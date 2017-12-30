@@ -25,7 +25,7 @@ License
 
 #include "rotatedBoxToCell.H"
 #include "polyMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 #include "addToRunTimeSelectionTable.H"
 
@@ -73,7 +73,7 @@ void Foam::rotatedBoxToCell::combine(topoSet& set, const bool add) const
         boxVerts[i] = i;
     }
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     // Get outwards pointing faces.
     faceList boxFaces(cellShape(hex, boxVerts).faces());

@@ -1,0 +1,364 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 CINECA
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software: you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Script
+#     foamCreateModuleInclude
+#
+# Description
+#     Script to create module settings.
+#     This is still incomplete, but can be a useful basis when using a module
+#     system.
+#------------------------------------------------------------------------------
+usage() {
+    exec 1>&2
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: ${0##*/} [OPTION] projectDir
+options:
+  -output=file      The output name (default: ModuleInclude.tcl)
+  -preload=file     Specify (module) file to preload. Can use multiple times
+  -tmpdir=file      The tmp directory to use.
+  -help             print the usage
+
+Create module settings for inclusion in a top-level openfoam module.
+
+USAGE
+    exit 1
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+
+unset optBackend optDebug preload projectDir
+unset moduleOutput moduleTmpDir
+
+# Parse some options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    '')
+        # Ignore empty args
+        ;;
+    -h | -help*)
+        usage
+        ;;
+    -debug)
+        optDebug=true
+        ;;
+    -preload=*)
+        preload="$preload${preload:+ }${1#*=}"
+        ;;
+    --recursive-backend--)
+        optBackend=true
+        ;;
+    --output=*)
+        moduleOutput="${1#*=}"
+        ;;
+    --tmpdir=*)
+        moduleTmpDir="${1#*=}"
+        ;;
+    -*)
+        die "unknown option: $1"
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+[ "$#" -eq 1 ] || die "missing projectDir, or too many arguments"
+projectDir="${1%/}"
+
+#------------------------------------------------------------------------------
+
+# Filter accepts system paths only
+syspath() {
+    local path
+
+    set -- $(echo "${1}" | tr ':' '\n' )
+    for i in $@
+    do
+        case $i in
+        /bin | /usr/bin | /usr/lib*)
+            path="${path}${path:+:}$i";;
+        esac
+    done
+    echo "$path"
+}
+
+
+# Frontend: do all basic sanity checks in the front-end only
+if [ -z "$optBackend" ]
+then
+    # Check that it appears to be an OpenFOAM installation
+    [ -d "$projectDir" -a -f "$projectDir/etc/bashrc" ] || \
+        die "Incorrect projectDir? $projectDir"
+
+    # Check preloads
+    for file in $preloads
+    do
+        [ -f "$file" ] || echo "No such file to preload: $file" 1>&2
+    done
+
+    # Call itself with clean environment.
+    # Tag the start/end of the original PATH, LD_LIBRARY_PATH
+    exec env -i \
+        HOME=$HOME \
+        USER=$USER \
+        PATH=":MOD_PREPEND:$(syspath $PATH):MOD_APPEND:" \
+        LD_LIBRARY_PATH=":MOD_PREPEND:$(syspath $LD_LIBRARY_PATH):MOD_APPEND:" \
+        $0 \
+        --recursive-backend-- \
+        "${optDebug:+-debug}" \
+        "${output:+-output=$moduleOutput}" \
+        "${preloads:+-preload=$preloads}" \
+        "${moduleTmpDir:+-tmpdir=$moduleTmpDir}" \
+        $projectDir
+
+    exitCode=$? # exec failed?
+
+    echo "exec somehow failed?" 1>&2
+    exit $exitCode
+fi
+
+#------------------------------------------------------------------------------
+# Backend
+
+: ${moduleOutput:=ModuleInclude.tcl}
+: ${moduleTmpDir:=${TMPDIR:-/tmp}}
+
+# Preload any/all modules
+for file in $preloads
+do
+    [ -f "$file" ] && . "$file" ''
+done
+
+# Temporary files
+tmpFiles="$moduleTmpDir/modules-$USER.$$"
+if [ -n "$optDebug" ]
+then
+    echo "Preserving intermediate files: $tmpFiles.*" 1>&2
+else
+    trap 'rm -f $tmpFiles.* 2>/dev/null; exit 0' EXIT TERM INT
+fi
+
+
+# Snapshot of aliases - sorted
+printAlias()
+{
+    alias | sort -f
+}
+
+
+# Snapshot of environment - without functions
+# Sorted as non-OpenFOAM, WM_*, FOAM_*
+printEnv()
+{
+    # Non FOAM_*, WM_* settings
+    echo "# non-OpenFOAM"
+    env | sed -n -e '\@^FOAM_@d' -e '\@^WM_@d' -e '\@^[^ {}]@p' \
+        | sort -f
+
+    # WM_* settings
+    echo "# OpenFOAM"
+    env | sed -n -e '\@^WM_@p' \
+        | sort -f
+
+    # FOAM_* settings
+    echo "# OpenFOAM"
+    env | sed -n -e '\@^FOAM_@p' \
+        | sort -f
+}
+
+#
+# Initial snapshot of the environment (without functions)
+#
+printEnv   > $tmpFiles.env.pre.log
+printAlias > $tmpFiles.alias.pre.log
+
+# OpenFOAM settings
+. $projectDir/etc/bashrc ''
+
+echo "Using openfoam: $WM_PROJECT_DIR" 1>&2
+echo "==> $moduleOutput" 1>&2
+
+# Remove some cruft
+unset FOAM_JOB_DIR FOAM_RUN FOAM_SETTINGS FOAM_INST_DIR
+unset WM_PROJECT_USER_DIR WM_THIRD_PARTY_DIR
+unset SCOTCH_VERSION
+
+
+# Also remove user directories as being unreliable
+
+foamOldDirs="$CEI_HOME $BOOST_ARCH_PATH $CGAL_ARCH_PATH $FFTW_ARCH_PATH $MPI_ARCH_PATH $SCOTCH_ARCH_PATH \
+$FOAM_SITE_APPBIN $FOAM_SITE_LIBBIN $WM_PROJECT_SITE \
+$FOAM_USER_APPBIN $FOAM_USER_LIBBIN"
+foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
+
+if [ -x "$foamClean" ]
+then
+    cleaned=$($foamClean "$PATH" "$foamOldDirs") && PATH="$cleaned"
+    cleaned=$($foamClean "$LD_LIBRARY_PATH" "$foamOldDirs") \
+        && LD_LIBRARY_PATH="$cleaned"
+
+    # May not have/need any third party at all
+    if [ -n "$FOAM_EXT_LIBBIN" -a ! -d "$FOAM_EXT_LIBBIN" ]
+    then
+        cleaned=$($foamClean "$LD_LIBRARY_PATH" "$FOAM_EXT_LIBBIN") \
+            && LD_LIBRARY_PATH="$cleaned"
+
+        unset FOAM_EXT_LIBBIN
+    fi
+fi
+unset CEI_HOME
+unset ENSIGHT9_INPUT  ENSIGHT9_READER
+unset ENSIGHT10_INPUT ENSIGHT10_READER
+
+# Always consider site to be bogus. If needed, should be done elsewhere.
+unset FOAM_SITE_APPBIN FOAM_SITE_LIBBIN WM_PROJECT_SITE
+
+# Remove non-essential aliases
+unalias wmDP        2>/dev/null
+unalias wmInt32     2>/dev/null
+unalias wmInt64     2>/dev/null
+unalias wmSP        2>/dev/null
+unalias wmSchedOff  2>/dev/null
+unalias wmSchedOn   2>/dev/null
+unalias wmSet       2>/dev/null
+unalias wmUnset     2>/dev/null
+unalias app         2>/dev/null
+unalias foamSite    2>/dev/null
+unalias lib         2>/dev/null
+unalias run         2>/dev/null
+unalias sol         2>/dev/null
+unalias src         2>/dev/null
+unalias tut         2>/dev/null
+unalias util        2>/dev/null
+
+#------------------------------------------------
+
+# Generalize environment.
+# This needs rethinking since it largely duplicates logic from the etc/config.sh/settings
+rewriteEnv()
+{
+    sed \
+    -e 's@^\(FOAM_USER_APPBIN=\).*@\1$env(HOME)/OpenFOAM/$env(USER)-$env(WM_PROJECT_VERSION)/platforms/$env(WM_OPTIONS)/bin@' \
+    -e 's@^\(FOAM_USER_LIBBIN=\).*@\1$env(HOME)/OpenFOAM/$env(USER)-$env(WM_PROJECT_VERSION)/platforms/$env(WM_OPTIONS)/lib@' \
+    ;
+}
+
+#
+# Updated snapshot of the environment (without functions)
+#
+printEnv   | rewriteEnv > $tmpFiles.env.post.log
+printAlias > $tmpFiles.alias.post.log
+
+
+# Create a diff of the environment and aliases
+diff $tmpFiles.env.pre.log    $tmpFiles.env.post.log   > $tmpFiles.env.diff.log
+diff $tmpFiles.alias.pre.log  $tmpFiles.alias.post.log > $tmpFiles.alias.diff.log
+
+echo "# -------------------"  > $moduleOutput
+
+# --------------------------------------------------
+# Environment other than PATH, LD_LIBRARY_PATH
+echo "# Environment"  >> $moduleOutput
+grep '> ' $tmpFiles.env.diff.log | \
+sed \
+    -e '/^> *PATH=/d' \
+    -e '/^> *LD_LIBRARY_PATH=/d' \
+    -e 's/^>/setenv     /' \
+    -e 's/=/ "/' -e 's/$/\"/' >> $moduleOutput
+
+
+# --------------------------------------------------
+# Changes in PATH - without junk and system directories
+echo "# PATH"  >> $moduleOutput
+
+sed -ne 's/^< *PATH=//p' $tmpFiles.env.diff.log | tr ':' '\n' > $tmpFiles.path.pre.log
+sed -ne 's/^> *PATH=//p' $tmpFiles.env.diff.log | tr ':' '\n' > $tmpFiles.path.post.log
+
+grep -vxFf $tmpFiles.path.pre.log $tmpFiles.path.post.log | \
+sed \
+    -e '\@^/bin$@d' \
+    -e '\@^/usr/bin$@d' \
+    -e '\@^/usr/local/bin$@d' \
+    -e '\@^[.]$@d' \
+    -e '\@^$@d' \
+    > $tmpFiles.path.diff.log
+
+sed \
+    -e 's/^/append-path PATH "/' \
+    -e 's/$/\"/' \
+    $tmpFiles.path.diff.log  >> $moduleOutput
+# --------------------------------------------------
+
+# --------------------------------------------------
+# Changes in LD_LIBRARY_PATH - without junk and system directories
+echo "# LD_LIBRARY_PATH"  >> $moduleOutput
+
+sed -ne 's/^< *LD_LIBRARY_PATH=//p' $tmpFiles.env.diff.log | tr ':' '\n' > $tmpFiles.ldpath.pre.log
+sed -ne 's/^> *LD_LIBRARY_PATH=//p' $tmpFiles.env.diff.log | tr ':' '\n' > $tmpFiles.ldpath.post.log
+
+grep -vxFf $tmpFiles.ldpath.pre.log $tmpFiles.ldpath.post.log | \
+sed \
+    -e '\@^/lib.*$@d' \
+    -e '\@^/usr/lib.*$@d' \
+    -e '\@^/usr/local/lib.*$@d' \
+    -e '\@^[.]$@d' \
+    -e '\@^$@d' \
+    > $tmpFiles.ldpath.diff.log
+
+sed \
+    -e 's/^/append-path LD_LIBRARY_PATH "/' \
+    -e 's/$/\"/' \
+    $tmpFiles.ldpath.diff.log >> $moduleOutput
+
+
+# -------------------
+# aliases
+# Some diff give "> alias". Others give ">", needed extended regular expressions '-r'
+
+echo "# aliases"  >> $moduleOutput
+cat $tmpFiles.alias.diff.log | \
+    sed -r -n -e 's/^> (alias)?/set-alias   /p' | \
+    sed -e "s/='/ \"/" -e "s/'/\"/g" >> $moduleOutput
+
+echo "# -------------------"   >> $moduleOutput
+
+# -----------------------------------------------------------------------------

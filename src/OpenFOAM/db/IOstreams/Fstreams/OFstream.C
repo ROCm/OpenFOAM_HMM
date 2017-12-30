@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,10 +40,11 @@ namespace Foam
 Foam::OFstreamAllocator::OFstreamAllocator
 (
     const fileName& pathname,
-    IOstream::compressionType compression
+    IOstream::compressionType compression,
+    const bool append
 )
 :
-    ofPtr_(nullptr)
+    allocatedPtr_(nullptr)
 {
     if (pathname.empty())
     {
@@ -53,32 +54,65 @@ Foam::OFstreamAllocator::OFstreamAllocator
         }
     }
 
+    std::ios_base::openmode mode(std::ios_base::out);
+    if (append)
+    {
+        mode |= std::ios_base::app;
+    }
+
     if (compression == IOstream::COMPRESSED)
     {
-        // get identically named uncompressed version out of the way
-        if (isFile(pathname, false))
+        // Get identically named uncompressed version out of the way
+        fileName::Type pathType = Foam::type(pathname, false);
+        if (pathType == fileName::FILE || pathType == fileName::LINK)
         {
             rm(pathname);
         }
+        fileName gzPathName(pathname + ".gz");
 
-        ofPtr_ = new ogzstream((pathname + ".gz").c_str());
+        if (!append && Foam::type(gzPathName) == fileName::LINK)
+        {
+            // Disallow writing into softlink to avoid any problems with
+            // e.g. softlinked initial fields
+            rm(gzPathName);
+        }
+
+        allocatedPtr_ = new ogzstream(gzPathName.c_str(), mode);
     }
     else
     {
         // get identically named compressed version out of the way
-        if (isFile(pathname + ".gz", false))
+        fileName gzPathName(pathname + ".gz");
+        fileName::Type gzType = Foam::type(gzPathName, false);
+        if (gzType == fileName::FILE || gzType == fileName::LINK)
         {
-            rm(pathname + ".gz");
+            rm(gzPathName);
+        }
+        if (!append && Foam::type(pathname, false) == fileName::LINK)
+        {
+            // Disallow writing into softlink to avoid any problems with
+            // e.g. softlinked initial fields
+            rm(pathname);
         }
 
-        ofPtr_ = new ofstream(pathname.c_str());
+        allocatedPtr_ = new std::ofstream(pathname, mode);
     }
 }
 
 
 Foam::OFstreamAllocator::~OFstreamAllocator()
 {
-    delete ofPtr_;
+    deallocate();
+}
+
+
+void Foam::OFstreamAllocator::deallocate()
+{
+    if (allocatedPtr_)
+    {
+        delete allocatedPtr_;
+        allocatedPtr_ = nullptr;
+    }
 }
 
 
@@ -89,15 +123,22 @@ Foam::OFstream::OFstream
     const fileName& pathname,
     streamFormat format,
     versionNumber version,
-    compressionType compression
+    compressionType compression,
+    const bool append
 )
 :
-    OFstreamAllocator(pathname, compression),
-    OSstream(*ofPtr_, "OFstream.sinkFile_", format, version, compression),
-    pathname_(pathname)
+    OFstreamAllocator(pathname, compression, append),
+    OSstream
+    (
+        *allocatedPtr_,
+        pathname,
+        format,
+        version,
+        compression
+    )
 {
     setClosed();
-    setState(ofPtr_->rdstate());
+    setState(allocatedPtr_->rdstate());
 
     if (!good())
     {
@@ -105,8 +146,7 @@ Foam::OFstream::OFstream
         {
             InfoInFunction
                 << "Could not open file " << pathname
-                << "for input\n"
-                   "in stream " << info() << Foam::endl;
+                << " for output" << nl << info() << Foam::endl;
         }
 
         setBad();
@@ -130,29 +170,29 @@ Foam::OFstream::~OFstream()
 
 std::ostream& Foam::OFstream::stdStream()
 {
-    if (!ofPtr_)
+    if (!allocatedPtr_)
     {
         FatalErrorInFunction
             << "No stream allocated." << abort(FatalError);
     }
-    return *ofPtr_;
+    return *allocatedPtr_;
 }
 
 
 const std::ostream& Foam::OFstream::stdStream() const
 {
-    if (!ofPtr_)
+    if (!allocatedPtr_)
     {
         FatalErrorInFunction
             << "No stream allocated." << abort(FatalError);
     }
-    return *ofPtr_;
+    return *allocatedPtr_;
 }
 
 
 void Foam::OFstream::print(Ostream& os) const
 {
-    os  << "    OFstream: ";
+    os  << "OFstream: ";
     OSstream::print(os);
 }
 

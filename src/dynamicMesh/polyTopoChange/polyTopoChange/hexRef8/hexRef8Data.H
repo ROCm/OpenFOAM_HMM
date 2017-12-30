@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,6 +116,9 @@ public:
         //- Parallel synchronise. This enforces valid objects on all processors
         //  (even if they don't have a mesh). Used by redistributePar.
         void sync(const IOobject& io);
+
+        //- Update local numbering for changed mesh.
+        void updateMesh(const mapPolyMesh&);
 
         //- In-place distribute
         void distribute(const mapDistributePolyMesh&);

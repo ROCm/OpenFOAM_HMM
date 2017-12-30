@@ -7,26 +7,14 @@
 #    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamCleanPath
 #
 # Description
-#     Usage: foamCleanPath [-strip] path [wildcard] .. [wildcard]
+#     Usage: foamCleanPath [OPTION] path [wildcard] .. [wildcard]
 #
 #     Prints its argument (which should be a ':' separated path)
 #     without the following:
@@ -46,6 +34,7 @@ Usage: ${0##*/} [OPTION] path [wildcard1] .. [wildcardN]
 options:
   -debug            print debug information to stderr
   -strip            remove inaccessible directories
+  -verbose          report some progress (input, output, ...)
   -help             print the usage
 
 Prints its argument (which should be a ':' separated list) cleansed from
@@ -64,11 +53,11 @@ USAGE
 
 
 # Parse options
-unset optDebug optStrip
+unset optDebug optStrip optVerbose
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     -debug)
@@ -76,6 +65,9 @@ do
         ;;
     -strip)
         optStrip=true
+        ;;
+    -verbose)
+        optVerbose=true
         ;;
     *)
         break
@@ -117,13 +109,17 @@ oldIFS="$IFS"   # Preserve initial IFS
 IFS=': '        # Split on colon, whitespace
 set -- $*
 
+if [ -n "$optVerbose" ]
+then
+    echo "clean: $dirList" 1>&2
+    echo "with:  $@" 1>&2
+fi
+
 printDebug "input>$dirList<"
 
 # Strip out wildcards via sed. Path and wildcard cannot contain '?'.
-while [ "$#" -ge 1 ]
+for wildcard
 do
-    wildcard="$1"
-    shift
     if [ -n "$wildcard" ]
     then
         printDebug "remove>$wildcard<"
@@ -157,6 +153,12 @@ do
 done
 
 printDebug "output>$dirList<"
+
+if [ -n "$optVerbose" ]
+then
+    echo "output: $dirList" 1>&2
+fi
+
 echo "$dirList"
 
 #------------------------------------------------------------------------------

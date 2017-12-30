@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,11 +37,16 @@ SourceFiles
 
 #include "scalar.H"
 #include "string.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward declarations
+class Ostream;
+
 namespace fileFormats
 {
 
@@ -53,16 +58,64 @@ class NASCore
 {
 public:
 
-    // Public Member Functions
+        //- File field formats
+        enum fieldFormat
+        {
+            SHORT,      //<! Short format (field width = 8)
+            LONG,       //<! Long format (field width = 16)
+            FREE        //<! Free format (comma-separated fields)
+        };
 
-        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
-        static scalar parseNASCoord(const string& s);
+        //- Selection names for the NASTRAN file field formats
+        static const Enum<fieldFormat> fieldFormatNames;
 
 
     // Constructors
 
         //- Construct null
-        NASCore();
+        NASCore() = default;
+
+
+    // Public Static Member Functions
+
+        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
+        static scalar readNasScalar(const std::string& str);
+
+        //- Extract numbers from things like "-2.358-8" (same as "-2.358e-8")
+        // \deprecated use readNasScalar instead (deprecated Sep 2017)
+        inline static scalar parseNASCoord(const std::string& str)
+        {
+            return readNasScalar(str);
+        }
+
+        //- A string::substr() to handle fixed-format and free-format NASTRAN.
+        //  Returns the substr to the next comma (if found) or the given length
+        //
+        //  \param str The string to extract from
+        //  \param pos On input, the position of the first character of the
+        //      substring. On output, advances to the next position to use.
+        //  \param len The fixed-format length to use if a comma is not found.
+        static std::string nextNasField
+        (
+            const std::string& str,
+            std::string::size_type& pos,
+            std::string::size_type len
+        );
+
+
+        //- Set output stream precision and format flags
+        static void setPrecision(Ostream& os, const fieldFormat format);
+
+
+        //- Write initial keyword (eg, 'GRID' or 'GRID*') followed by the
+        //- requisite number of spaces for the field-width
+        static Ostream& writeKeyword
+        (
+            Ostream& os,
+            const word& keyword,
+            const fieldFormat format
+        );
+
 };
 
 

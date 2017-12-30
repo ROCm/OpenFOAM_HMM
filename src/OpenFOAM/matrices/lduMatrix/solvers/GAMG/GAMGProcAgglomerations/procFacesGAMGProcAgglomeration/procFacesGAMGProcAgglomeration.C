@@ -192,7 +192,7 @@ Foam::procFacesGAMGProcAgglomeration::processorAgglomeration
         sortedOrder(coarseToMaster, newToOld);
         labelList oldToNew(invert(newToOld.size(), newToOld));
 
-        fineToCoarse = UIndirectList<label>(oldToNew, fineToCoarse)();
+        fineToCoarse = labelUIndList(oldToNew, fineToCoarse)();
     }
 
     Pstream::scatter(fineToCoarse, Pstream::msgType(), mesh.comm());

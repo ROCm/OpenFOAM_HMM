@@ -23,13 +23,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ISstream.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::ISstream::ISstream
 (
-    istream& is,
+    std::istream& is,
     const string& name,
     streamFormat format,
     versionNumber version,
@@ -61,7 +59,7 @@ inline Foam::ISstream& Foam::ISstream::get(char& c)
 
     if (good() && c == '\n')
     {
-        lineNumber_++;
+        ++lineNumber_;
     }
 
     return *this;
@@ -74,21 +72,21 @@ inline int Foam::ISstream::peek()
 }
 
 
-inline Foam::ISstream& Foam::ISstream::getLine(string& s)
+inline Foam::ISstream& Foam::ISstream::getLine(string& str)
 {
-    getline(is_, s);
+    std::getline(is_, str);
     setState(is_.rdstate());
-    lineNumber_++;
+    ++lineNumber_;
 
     return *this;
 }
 
 
-inline Foam::ISstream& Foam::ISstream::putback(const char& c)
+inline Foam::ISstream& Foam::ISstream::putback(const char c)
 {
     if (c == '\n')
     {
-        lineNumber_--;
+        --lineNumber_;
     }
 
     if (!is_.putback(c))

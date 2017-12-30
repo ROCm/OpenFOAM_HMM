@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,18 +25,28 @@ License
 
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
+#include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 void Foam::UPstream::addValidParOptions(HashTable<string>& validParOptions)
 {}
 
+bool Foam::UPstream::initNull()
+{
+    WarningInFunction
+        << "The dummy Pstream library cannot be used in parallel mode"
+        << endl;
+
+    return false;
+}
+
 
 bool Foam::UPstream::init(int& argc, char**& argv)
 {
     FatalErrorInFunction
-        << "Trying to use the dummy Pstream library." << nl
-        << "This dummy library cannot be used in parallel mode"
+        << "The dummy Pstream library cannot be used in parallel mode"
+        << endl
         << Foam::exit(FatalError);
 
     return false;
@@ -45,13 +55,15 @@ bool Foam::UPstream::init(int& argc, char**& argv)
 
 void Foam::UPstream::exit(int errnum)
 {
-    NotImplemented;
+    // No MPI - just exit
+    ::exit(errnum);
 }
 
 
 void Foam::UPstream::abort()
 {
-    NotImplemented;
+    // No MPI - just abort
+    ::abort();
 }
 
 
@@ -89,6 +101,36 @@ void Foam::UPstream::allToAll
 )
 {
     recvData.deepCopy(sendData);
+}
+
+
+void Foam::UPstream::gather
+(
+    const char* sendData,
+    int sendSize,
+
+    char* recvData,
+    const UList<int>& recvSizes,
+    const UList<int>& recvOffsets,
+    const label communicator
+)
+{
+    memmove(recvData, sendData, sendSize);
+}
+
+
+void Foam::UPstream::scatter
+(
+    const char* sendData,
+    const UList<int>& sendSizes,
+    const UList<int>& sendOffsets,
+
+    char* recvData,
+    int recvSize,
+    const label communicator
+)
+{
+    memmove(recvData, sendData, recvSize);
 }
 
 

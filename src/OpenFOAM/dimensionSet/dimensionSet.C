@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ License
 
 #include "dimensionSet.H"
 #include "dimensionedScalar.H"
-#include "OStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -59,23 +59,10 @@ Foam::dimensionSet::dimensionSet
 }
 
 
-Foam::dimensionSet::dimensionSet
-(
-    const scalar mass,
-    const scalar length,
-    const scalar time,
-    const scalar temperature,
-    const scalar moles
-)
-{
-    exponents_[MASS] = mass;
-    exponents_[LENGTH] = length;
-    exponents_[TIME] = time;
-    exponents_[TEMPERATURE] = temperature;
-    exponents_[MOLES] = moles;
-    exponents_[CURRENT] = 0;
-    exponents_[LUMINOUS_INTENSITY] = 0;
-}
+Foam::dimensionSet::dimensionSet(const FixedList<scalar,7>& dims)
+:
+    exponents_(dims)
+{}
 
 
 Foam::dimensionSet::dimensionSet(const dimensionSet& ds)
@@ -88,13 +75,13 @@ Foam::dimensionSet::dimensionSet(const dimensionSet& ds)
 
 bool Foam::dimensionSet::dimensionless() const
 {
-    for (int Dimension=0; Dimension<nDimensions; ++Dimension)
+    for (int d=0; d<nDimensions; ++d)
     {
-        // ie, mag(exponents_[Dimension]) > smallExponent
+        // ie, mag(exponents_[d]) > smallExponent
         if
         (
-            exponents_[Dimension] > smallExponent
-         || exponents_[Dimension] < -smallExponent
+            exponents_[d] > smallExponent
+         || exponents_[d] < -smallExponent
         )
         {
             return false;
@@ -105,12 +92,21 @@ bool Foam::dimensionSet::dimensionless() const
 }
 
 
+const Foam::FixedList<Foam::scalar,7>& Foam::dimensionSet::values() const
+{
+    return exponents_;
+}
+
+
+Foam::FixedList<Foam::scalar,7>& Foam::dimensionSet::values()
+{
+    return exponents_;
+}
+
+
 void Foam::dimensionSet::reset(const dimensionSet& ds)
 {
-    for (int Dimension=0; Dimension<nDimensions; ++Dimension)
-    {
-        exponents_[Dimension] = ds.exponents_[Dimension];
-    }
+    exponents_ = ds.exponents_;
 }
 
 
@@ -142,11 +138,11 @@ Foam::scalar& Foam::dimensionSet::operator[](const label type)
 
 bool Foam::dimensionSet::operator==(const dimensionSet& ds) const
 {
-    for (int Dimension=0; Dimension < nDimensions; ++Dimension)
+    for (int d=0; d<nDimensions; ++d)
     {
         if
         (
-            mag(exponents_[Dimension] - ds.exponents_[Dimension])
+            mag(exponents_[d] - ds.exponents_[d])
           > smallExponent
         )
         {
@@ -411,7 +407,19 @@ Foam::dimensionSet Foam::pos(const dimensionSet&)
 }
 
 
+Foam::dimensionSet Foam::pos0(const dimensionSet&)
+{
+    return dimless;
+}
+
+
 Foam::dimensionSet Foam::neg(const dimensionSet&)
+{
+    return dimless;
+}
+
+
+Foam::dimensionSet Foam::neg0(const dimensionSet&)
 {
     return dimless;
 }
@@ -524,9 +532,9 @@ Foam::dimensionSet Foam::operator*
 {
     dimensionSet dimProduct(ds1);
 
-    for (int Dimension=0; Dimension<dimensionSet::nDimensions; Dimension++)
+    for (int d=0; d<dimensionSet::nDimensions; ++d)
     {
-        dimProduct.exponents_[Dimension] += ds2.exponents_[Dimension];
+        dimProduct.exponents_[d] += ds2.exponents_[d];
     }
 
     return dimProduct;
@@ -541,9 +549,9 @@ Foam::dimensionSet Foam::operator/
 {
     dimensionSet dimQuotient(ds1);
 
-    for (int Dimension=0; Dimension<dimensionSet::nDimensions; Dimension++)
+    for (int d=0; d<dimensionSet::nDimensions; ++d)
     {
-        dimQuotient.exponents_[Dimension] -= ds2.exponents_[Dimension];
+        dimQuotient.exponents_[d] -= ds2.exponents_[d];
     }
 
     return dimQuotient;

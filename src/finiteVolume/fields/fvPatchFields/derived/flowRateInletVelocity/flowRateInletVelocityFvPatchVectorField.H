@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,9 @@ Group
     grpInletBoundaryConditions
 
 Description
-    This boundary condition provides a velocity boundary condition, derived
-    from the flux (volumetric or mass-based), whose direction is assumed
-    to be normal to the patch.
+    Velocity inlet boundary condition either correcting the extrapolated
+    velocity or creating a uniform velocity field normal to the patch adjusted
+    to match the specified flow rate
 
     For a mass-based flux:
     - the flow rate should be provided in kg/s
@@ -47,6 +47,7 @@ Usage
         Property     | Description             | Required    | Default value
         massFlowRate | mass flow rate [kg/s]   | no          |
         volumetricFlowRate | volumetric flow rate [m3/s]| no |
+        rho          | density field name      | no          | rho
         rhoInlet     | inlet density           | no          |
         extrapolateProfile | Extrapolate velocity profile | no | false
     \endtable
@@ -87,6 +88,7 @@ Note
 See also
     Foam::fixedValueFvPatchField
     Foam::Function1Types
+    Foam::flowRateOutletVelocityFvPatchVectorField
 
 SourceFiles
     flowRateInletVelocityFvPatchVectorField.C

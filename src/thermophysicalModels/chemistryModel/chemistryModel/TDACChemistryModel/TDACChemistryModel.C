@@ -123,6 +123,7 @@ Foam::TDACChemistryModel<CompType, ThermoType>::TDACChemistryModel
     if (tabulation_->log())
     {
         cpuAddFile_ = logFile("cpu_add.out");
+        cpuGrowFile_ = logFile("cpu_grow.out");
         cpuRetrieveFile_ = logFile("cpu_retrieve.out");
     }
 
@@ -404,13 +405,15 @@ void Foam::TDACChemistryModel<CompType, ThermoType>::jacobian
     // but according to the informations of the complete set
     // (i.e. for the third-body efficiencies)
 
-    const scalar T = c[this->nSpecie_];
-    const scalar p = c[this->nSpecie_ + 1];
+    const label nSpecie = this->nSpecie_;
+
+    const scalar T = c[nSpecie];
+    const scalar p = c[nSpecie + 1];
 
     if (reduced)
     {
         this->c_ = completeC_;
-        for (label i=0; i<NsDAC_; i++)
+        for (label i=0; i<NsDAC_; ++i)
         {
             this->c_[simplifiedToCompleteIndex_[i]] = max(0.0, c[i]);
         }
@@ -556,20 +559,19 @@ void Foam::TDACChemistryModel<CompType, ThermoType>::jacobian
     const scalar delta = 1e-3;
 
     omega(this->c_, T + delta, p, this->dcdt_);
-    for (label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<nSpecie; ++i)
     {
-        dfdc(i, this->nSpecie_) = this->dcdt_[i];
+        dfdc(i, nSpecie) = this->dcdt_[i];
     }
 
     omega(this->c_, T - delta, p, this->dcdt_);
-    for (label i=0; i<this->nSpecie_; i++)
+    for (label i=0; i<nSpecie; ++i)
     {
-        dfdc(i, this->nSpecie_) =
-            0.5*(dfdc(i, this->nSpecie_) - this->dcdt_[i])/delta;
+        dfdc(i, nSpecie) = 0.5*(dfdc(i, nSpecie) - this->dcdt_[i])/delta;
     }
 
-    dfdc(this->nSpecie_, this->nSpecie_) = 0;
-    dfdc(this->nSpecie_ + 1, this->nSpecie_) = 0;
+    dfdc(nSpecie, nSpecie) = 0;
+    dfdc(nSpecie + 1, nSpecie) = 0;
 }
 
 
@@ -613,6 +615,7 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
     clockTime_.timeIncrement();
     scalar reduceMechCpuTime_ = 0;
     scalar addNewLeafCpuTime_ = 0;
+    scalar growCpuTime_ = 0;
     scalar solveChemistryCpuTime_ = 0;
     scalar searchISATCpuTime_ = 0;
 
@@ -664,12 +667,13 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
 
         for (label i=0; i<this->nSpecie_; i++)
         {
-            c[i] = rhoi*this->Y_[i][celli]/this->specieThermo_[i].W();
+            const volScalarField& Yi = this->Y_[i];
+            c[i] = rhoi*Yi[celli]/this->specieThermo_[i].W();
             c0[i] = c[i];
-            phiq[i] = this->Y()[i][celli];
+            phiq[i] = Yi[celli];
         }
-        phiq[this->nSpecie()]=Ti;
-        phiq[this->nSpecie() + 1]=pi;
+        phiq[this->nSpecie()] = Ti;
+        phiq[this->nSpecie() + 1] = pi;
         if (tabulation_->variableTimeStep())
         {
             phiq[this->nSpecie() + 2] = deltaT[celli];
@@ -690,7 +694,7 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
         if (tabulation_->active() && tabulation_->retrieve(phiq, Rphiq))
         {
             // Retrieved solution stored in Rphiq
-            for (label i=0; i<this->nSpecie(); i++)
+            for (label i=0; i<this->nSpecie(); ++i)
             {
                 c[i] = rhoi*Rphiq[i]/this->specieThermo_[i].W();
             }
@@ -703,16 +707,19 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
         // (it will either expand the current data or add a new stored point).
         else
         {
-            clockTime_.timeIncrement();
+            // Store total time waiting to attribute to add or grow
+            scalar timeTmp = clockTime_.timeIncrement();
+
             if (reduced)
             {
                 // Reduce mechanism change the number of species (only active)
                 mechRed_->reduceMechanism(c, Ti, pi);
                 nActiveSpecies += mechRed_->NsSimp();
-                nAvg++;
+                ++nAvg;
+                scalar timeIncr = clockTime_.timeIncrement();
+                reduceMechCpuTime_ += timeIncr;
+                timeTmp += timeIncr;
             }
-
-            reduceMechCpuTime_ += clockTime_.timeIncrement();
 
             // Calculate the chemical source terms
             while (timeLeft > SMALL)
@@ -730,7 +737,7 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
                         simplifiedC_, Ti, pi, dt, this->deltaTChem_[celli]
                     );
 
-                    for (label i=0; i<NsDAC_; i++)
+                    for (label i=0; i<NsDAC_; ++i)
                     {
                         c[simplifiedToCompleteIndex_[i]] = simplifiedC_[i];
                     }
@@ -742,7 +749,11 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
                 timeLeft -= dt;
             }
 
-            solveChemistryCpuTime_ += clockTime_.timeIncrement();
+            {
+                scalar timeIncr = clockTime_.timeIncrement();
+                solveChemistryCpuTime_ += timeIncr;
+                timeTmp += timeIncr;
+            }
 
             // If tabulation is used, we add the information computed here to
             // the stored points (either expand or add)
@@ -765,16 +776,18 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
                 }
                 label growOrAdd =
                     tabulation_->add(phiq, Rphiq, rhoi, deltaT[celli]);
+
                 if (growOrAdd)
                 {
                     this->setTabulationResultsAdd(celli);
+                    addNewLeafCpuTime_ += clockTime_.timeIncrement() + timeTmp;
                 }
                 else
                 {
                     this->setTabulationResultsGrow(celli);
+                    growCpuTime_ += clockTime_.timeIncrement() + timeTmp;
                 }
             }
-            addNewLeafCpuTime_ += clockTime_.timeIncrement();
 
             // When operations are done and if mechanism reduction is active,
             // the number of species (which also affects nEqns) is set back
@@ -787,7 +800,7 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
         }
 
         // Set the RR vector (used in the solver)
-        for (label i=0; i<this->nSpecie_; i++)
+        for (label i=0; i<this->nSpecie_; ++i)
         {
             this->RR_[i][celli] =
                 (c[i] - c0[i])*this->specieThermo_[i].W()/deltaT[celli];
@@ -821,6 +834,10 @@ Foam::scalar Foam::TDACChemistryModel<CompType, ThermoType>::solve
             cpuRetrieveFile_()
                 << this->time().timeOutputValue()
                 << "    " << searchISATCpuTime_ << endl;
+
+            cpuGrowFile_()
+                << this->time().timeOutputValue()
+                << "    " << growCpuTime_ << endl;
 
             cpuAddFile_()
                 << this->time().timeOutputValue()

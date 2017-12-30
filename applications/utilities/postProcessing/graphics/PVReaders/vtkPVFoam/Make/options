@@ -1,0 +1,24 @@
+sinclude $(GENERAL_RULES)/paraview
+
+EXE_INC = \
+    ${c++LESSWARN} \
+    -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
+    -I$(LIB_SRC)/finiteArea/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
+    -I$(LIB_SRC)/lagrangian/basic/lnInclude \
+    -I$(LIB_SRC)/fileFormats/lnInclude \
+    -I$(LIB_SRC)/conversion/lnInclude \
+    -I$(ParaView_INCLUDE_DIR) \
+    -I$(ParaView_INCLUDE_DIR)/vtkkwiml \
+    -I../foamPv \
+    -I../PVFoamReader
+
+LIB_LIBS = \
+    -lfiniteArea \
+    -ldynamicMesh \
+    -lconversion \
+    -lgenericPatchFields \
+    -llagrangian \
+    -L$(FOAM_LIBBIN) -lfoamPv-pv${ParaView_MAJOR} \
+    $(GLIBS)

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ Class
 
 Description
     A subset of mesh points.
+
     The labels of points in the zone can be obtained from the addressing()
     list.
 
@@ -53,7 +54,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class pointZone;
-Ostream& operator<<(Ostream&, const pointZone&);
+Ostream& operator<<(Ostream& os, const pointZone& zn);
 
 
 /*---------------------------------------------------------------------------*\
@@ -64,6 +65,11 @@ class pointZone
 :
     public zone
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        pointZone(const pointZone&) = delete;
+
 
 protected:
 
@@ -72,10 +78,6 @@ protected:
         //- Reference to zone list
         const pointZoneMesh& zoneMesh_;
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        pointZone(const pointZone&);
 
 public:
 
@@ -108,13 +110,25 @@ public:
 
     // Constructors
 
+        //- Construct an empty zone
+        pointZone(const word& name, const label index, const pointZoneMesh& zm);
+
         //- Construct from components
         pointZone
         (
             const word& name,
             const labelUList& addr,
             const label index,
-            const pointZoneMesh&
+            const pointZoneMesh& zm
+        );
+
+        //- Construct from components, transferring addressing
+        pointZone
+        (
+            const word& name,
+            labelList&& addr,
+            const label index,
+            const pointZoneMesh& zm
         );
 
         //- Construct from components, transferring contents
@@ -123,37 +137,48 @@ public:
             const word& name,
             const Xfer<labelList>& addr,
             const label index,
-            const pointZoneMesh&
+            const pointZoneMesh& zm
         );
 
         //- Construct from dictionary
         pointZone
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const label index,
-            const pointZoneMesh&
+            const pointZoneMesh& zm
         );
 
-        //- Construct given the original zone and resetting the
-        //  point list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, resetting the point addressing.
         pointZone
         (
-            const pointZone&,
+            const pointZone& origZone,
             const labelUList& addr,
             const label index,
-            const pointZoneMesh&
+            const pointZoneMesh& zm
         );
 
-        //- Construct given the original zone, resetting the
-        //  face list and zone mesh information
+        //- Construct with a new index and zone mesh information, the name
+        //- of the original zone, (move) resetting the point addressing.
         pointZone
         (
-            const pointZone&,
+            const pointZone& origZone,
+            labelList&& addr,
+            const label index,
+            const pointZoneMesh& zm
+        );
+
+        //- Construct with a new index and zone mesh information from
+        //- an original zone, (move) resetting the point list.
+        pointZone
+        (
+            const pointZone& origZone,
             const Xfer<labelList>& addr,
             const label index,
-            const pointZoneMesh&
+            const pointZoneMesh& zm
         );
+
 
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<pointZone> clone(const pointZoneMesh& zm) const
@@ -187,9 +212,9 @@ public:
         static autoPtr<pointZone> New
         (
             const word& name,
-            const dictionary&,
+            const dictionary& dict,
             const label index,
-            const pointZoneMesh&
+            const pointZoneMesh& zm
         );
 
 
@@ -208,8 +233,8 @@ public:
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 
-        //- Check whether zone is synchronised across coupled boundaries. Return
-        //  true if in error.
+        //- Check whether zone is synchronised across coupled boundaries.
+        //  \return True if any errors.
         virtual bool checkParallelSync(const bool report = false) const;
 
         //- Correct patch after moving points
@@ -217,25 +242,25 @@ public:
         {}
 
         //- Write dictionary
-        virtual void writeDict(Ostream&) const;
+        virtual void writeDict(Ostream& os) const;
 
 
     // Member Operators
 
         //- Assign to zone, clearing demand-driven data
-        void operator=(const pointZone&);
+        void operator=(const pointZone& zn);
 
         //- Assign addressing, clearing demand-driven data
-        void operator=(const labelUList&);
+        void operator=(const labelUList& addr);
 
         //- Assign addressing, clearing demand-driven data
-        void operator=(const Xfer<labelList>&);
+        void operator=(const Xfer<labelList>& addr);
 
 
     // I-O
 
         //- Ostream Operator
-        friend Ostream& operator<<(Ostream&, const pointZone&);
+        friend Ostream& operator<<(Ostream& os, const pointZone& zn);
 };
 
 

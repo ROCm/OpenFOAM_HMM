@@ -27,8 +27,7 @@ License
 #include "point.H"
 #include "Istream.H"
 #include "Ostream.H"
-#include "OStringStream.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 

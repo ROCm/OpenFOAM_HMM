@@ -108,7 +108,10 @@ Foam::LESModels::vanDriestDelta::vanDriestDelta
         (
             IOobject::groupName("geometricDelta", turbulence.U().group()),
             turbulence,
-            dict.optionalSubDict(type() + "Coeffs")
+            // Note: cannot use optionalSubDict - if no *Coeffs dict the
+            // code will get stuck in a loop attempting to read the delta entry
+            // - consider looking up "geometricDelta" instead of "delta"?
+            dict.subDict(type() + "Coeffs")
         )
     ),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),

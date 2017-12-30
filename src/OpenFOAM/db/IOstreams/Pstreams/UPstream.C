@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -34,32 +34,29 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(UPstream, 0);
-
-    template<>
-    const char* Foam::NamedEnum
-    <
-        Foam::UPstream::commsTypes,
-        3
-    >::names[] =
-    {
-        "blocking",
-        "scheduled",
-        "nonBlocking"
-    };
 }
 
-
-const Foam::NamedEnum<Foam::UPstream::commsTypes, 3>
-    Foam::UPstream::commsTypeNames;
+const Foam::Enum
+<
+    Foam::UPstream::commsTypes
+>
+Foam::UPstream::commsTypeNames
+{
+    { commsTypes::blocking, "blocking" },
+    { commsTypes::scheduled, "scheduled" },
+    { commsTypes::nonBlocking, "nonBlocking" },
+};
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::UPstream::setParRun(const label nProcs)
+void Foam::UPstream::setParRun(const label nProcs, const bool haveThreads)
 {
     if (nProcs == 0)
     {
         parRun_ = false;
+        haveThreads_ = haveThreads;
+
         freeCommunicator(UPstream::worldComm);
         label comm = allocateCommunicator(-1, labelList(1, label(0)), false);
         if (comm != UPstream::worldComm)
@@ -76,6 +73,7 @@ void Foam::UPstream::setParRun(const label nProcs)
     else
     {
         parRun_ = true;
+        haveThreads_ = haveThreads;
 
         // Redo worldComm communicator (this has been created at static
         // initialisation time)
@@ -224,12 +222,12 @@ Foam::label Foam::UPstream::procNo(const label myComm, const int baseProcID)
 
     if (parentComm == -1)
     {
-        return findIndex(parentRanks, baseProcID);
+        return parentRanks.find(baseProcID);
     }
     else
     {
-        label parentRank = procNo(parentComm, baseProcID);
-        return findIndex(parentRanks, parentRank);
+        const label parentRank = procNo(parentComm, baseProcID);
+        return parentRanks.find(parentRank);
     }
 }
 
@@ -351,13 +349,15 @@ template<>
 const Foam::UPstream::commsStruct&
 Foam::UList<Foam::UPstream::commsStruct>::operator[](const label procID) const
 {
-    return const_cast<UList<UPstream::commsStruct>& >(*this).operator[](procID);
+    return const_cast<UList<UPstream::commsStruct>&>(*this).operator[](procID);
 }
 
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 bool Foam::UPstream::parRun_(false);
+
+bool Foam::UPstream::haveThreads_(false);
 
 Foam::LIFOStack<Foam::label> Foam::UPstream::freeComms_;
 
@@ -411,7 +411,11 @@ registerOptSwitch
 
 Foam::UPstream::commsTypes Foam::UPstream::defaultCommsType
 (
-    commsTypeNames.read(Foam::debug::optimisationSwitches().lookup("commsType"))
+    commsTypeNames.lookup
+    (
+        "commsType",
+        Foam::debug::optimisationSwitches()
+    )
 );
 
 namespace Foam
@@ -473,6 +477,12 @@ registerOptSwitch
     "maxCommsSize",
     int,
     Foam::UPstream::maxCommsSize
+);
+
+
+const int Foam::UPstream::mpiBufferSize
+(
+    Foam::debug::optimisationSwitch("mpiBufferSize", 0)
 );
 
 

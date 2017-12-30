@@ -58,12 +58,46 @@ namespace Foam
 
 typedef INT_SIZE(int, _t) label;
 
-static const label labelMin = INT_SIZE(INT, _MIN);
-static const label labelMax = INT_SIZE(INT, _MAX);
+constexpr label labelMin = INT_SIZE(INT, _MIN);
+constexpr label labelMax = INT_SIZE(INT, _MAX);
 
+//- Read label from stream.
+//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
 inline label readLabel(Istream& is)
 {
     return INT_SIZE(readInt,) (is);
+}
+
+//- Parse entire buffer as a label, skipping leading/trailing whitespace.
+//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
+//  \return Parsed value or FatalIOError on any problem
+inline label readLabel(const char* buf)
+{
+    return INT_SIZE(readInt,) (buf);
+}
+
+//- Parse entire string as a label, skipping leading/trailing whitespace.
+//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
+//  \return Parsed value or FatalIOError on any problem
+inline label readLabel(const std::string& str)
+{
+    return INT_SIZE(readInt,) (str);
+}
+
+//- Parse entire buffer as a label, skipping leading/trailing whitespace.
+//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
+//  \return True if successful.
+inline bool readLabel(const char* buf, label& val)
+{
+    return INT_SIZE(readInt,) (buf, val);
+}
+
+//- Parse entire string as a label, skipping leading/trailing whitespace.
+//  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
+//  \return True if successful.
+inline bool readLabel(const std::string& str, label& val)
+{
+    return INT_SIZE(readInt,) (str, val);
 }
 
 

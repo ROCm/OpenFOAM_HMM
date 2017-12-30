@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,7 +72,7 @@ class keyType
 
     // Private Member Functions
 
-        //- Disallow assignments where we cannot determine string/word type
+        //- No assignment where we cannot determine string/word type
         void operator=(const std::string&) = delete;
 
 public:
@@ -88,21 +88,33 @@ public:
         //- Construct null
         inline keyType();
 
-        //- Construct as copy, retaining type (literal or regex)
+        //- Copy construct, retaining type (literal or regex)
         inline keyType(const keyType& s);
 
-        //- Construct as copy of word. Not treated as a regular expression
+        //- Copy construct from word. Not treated as a regular expression
         inline keyType(const word& s);
 
-        //- Construct as copy of string. Treat as regular expression.
+        //- Copy construct from string. Treat as regular expression.
         inline keyType(const string& s);
 
         //- Construct as copy of character array.
         //  Not treated as a regular expression
         inline keyType(const char* s);
 
-        //- Construct as copy of std::string with specified treatment
+        //- Copy construct from std::string with specified treatment
         inline keyType(const std::string& s, const bool isPattern);
+
+        //- Move construct, retaining type (literal or regex)
+        inline keyType(keyType&& s);
+
+        //- Move construct from word. Not treated as a regular expression
+        inline keyType(word&& s);
+
+        //- Move construct from string. Treat as regular expression.
+        inline keyType(string&& s);
+
+        //- Move construct from std::string with specified treatment
+        inline keyType(std::string&& s, const bool isPattern);
 
         //- Construct from Istream
         //  Treat as regular expression if surrounded by quotation marks.
@@ -111,8 +123,16 @@ public:
 
     // Member functions
 
+        //- Is this character valid for a keyType?
+        //  This is largely identical with what word accepts, but also
+        //  permit brace-brackets, which are valid for some regexs.
+        inline static bool valid(char c);
+
         //- Treat as a pattern rather than a literal string?
         inline bool isPattern() const;
+
+        //- Swap contents
+        inline void swap(keyType& s);
 
         //- Smart match as regular expression or as a string.
         //  Optionally force a literal match only
@@ -121,26 +141,24 @@ public:
 
     // Member operators
 
-        //- Avoid masking the normal operator()
-        using word::operator();
-
         //- Perform smart match on text
         inline bool operator()(const std::string& text) const;
 
 
-      // Assignment
-
-        //- Assignment operator, retaining type (literal or regex)
+        //- Copy assignment, retaining type (literal or regex)
         inline void operator=(const keyType& s);
 
         //- Assign as word, not treated as a regular expression.
         inline void operator=(const word& s);
 
-        //- Assign as regular expression
+        //- Assign from Foam::string as regular expression
         inline void operator=(const string& s);
 
         //- Assign as word, not treated as a regular expression.
         inline void operator=(const char* s);
+
+        //- Move assignment, retaining type (literal or regex)
+        inline void operator=(keyType&& s);
 
 
     // IOstream operators

@@ -28,29 +28,119 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+template<class StringType>
+Foam::label Foam::foamPvCore::addToArray
+(
+    vtkDataArraySelection *select,
+    const std::string& prefix,
+    const UList<StringType>& names
+)
+{
+    if (prefix.empty())
+    {
+        for (const auto& name : names)
+        {
+            select->AddArray(name.c_str());
+        }
+    }
+    else
+    {
+        for (const auto& name : names)
+        {
+            select->AddArray((prefix + name).c_str());
+        }
+    }
+
+    return names.size();
+}
+
+
+template<class StringType>
+Foam::label Foam::foamPvCore::addToArray
+(
+    vtkDataArraySelection *select,
+    const UList<StringType>& names,
+    const std::string& suffix
+)
+{
+    if (suffix.empty())
+    {
+        for (const auto& name : names)
+        {
+            select->AddArray(name.c_str());
+        }
+    }
+    else
+    {
+        for (const auto& name : names)
+        {
+            select->AddArray((name + suffix).c_str());
+        }
+    }
+
+    return names.size();
+}
+
+
+template<class Type>
+Foam::label Foam::foamPvCore::addToSelection
+(
+    vtkDataArraySelection *select,
+    const std::string& prefix,
+    const IOobjectList& objects
+)
+{
+    return addToArray(select, prefix, objects.sortedNames(Type::typeName));
+}
+
+
 template<class Type>
 Foam::label Foam::foamPvCore::addToSelection
 (
     vtkDataArraySelection *select,
     const IOobjectList& objects,
-    const std::string& prefix
+    const std::string& suffix
 )
 {
-    const wordList names = objects.sortedNames(Type::typeName);
+    return addToArray(select, objects.sortedNames(Type::typeName), suffix);
+}
 
-    forAll(names, i)
+
+template<class Type>
+Foam::label Foam::foamPvCore::addToSelection
+(
+    vtkDataArraySelection *select,
+    const std::string& prefix,
+    const HashTable<wordHashSet>& objects
+)
+{
+    auto iter = objects.cfind(Type::typeName);
+
+    if (iter.found())
     {
-        if (prefix.empty())
-        {
-            select->AddArray(names[i].c_str());
-        }
-        else
-        {
-            select->AddArray((prefix + names[i]).c_str());
-        }
+        return addToArray(select, prefix, iter.object().sortedToc());
     }
 
-    return names.size();
+    return 0;
+}
+
+
+template<class Type>
+Foam::label Foam::foamPvCore::addToSelection
+(
+    vtkDataArraySelection *select,
+    const HashTable<wordHashSet>& objects,
+    const std::string& suffix
+)
+{
+    auto iter = objects.cfind(Type::typeName);
+
+    if (iter.found())
+    {
+        return addToArray(select, iter.object().sortedToc(), suffix);
+    }
+
+    return 0;
 }
 
 
@@ -62,7 +152,8 @@ void Foam::foamPvCore::setSelectedArrayEntries
 )
 {
     const int n = select->GetNumberOfArrays();
-    // disable everything not explicitly enabled
+
+    // Disable everything not explicitly enabled
     select->DisableAllArrays();
 
     // Loop through entries, enabling as required

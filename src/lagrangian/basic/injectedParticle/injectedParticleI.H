@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,10 +33,12 @@ inline Foam::injectedParticle::injectedParticle
     const label tag,
     const scalar soi,
     const scalar d,
-    const vector& U
+    const vector& U,
+    const bool doLocate
 )
 :
-    particle(mesh, position, -1, false),
+    particle(mesh, position, -1, -1, -1, doLocate),
+    position_(position),
     tag_(tag),
     soi_(soi),
     d_(d),

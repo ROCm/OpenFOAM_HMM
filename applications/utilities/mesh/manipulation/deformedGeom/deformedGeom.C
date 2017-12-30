@@ -36,7 +36,6 @@ Description
 #include "argList.H"
 #include "fvMesh.H"
 #include "pointFields.H"
-#include "IStringStream.H"
 #include "volPointInterpolation.H"
 
 using namespace Foam;
@@ -45,7 +44,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("scaling factor");
+    argList::addArgument("scaling factor");
 
     #include "setRootCase.H"
 

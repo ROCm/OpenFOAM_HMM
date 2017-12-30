@@ -114,6 +114,7 @@ template<class CloudType>
 Foam::forceSuSp Foam::InterfaceForce<CloudType>::calcNonCoupled
 (
     const typename CloudType::parcelType& p,
+    const typename CloudType::parcelType::trackingData& td,
     const scalar dt,
     const scalar mass,
     const scalar Re,
@@ -122,13 +123,12 @@ Foam::forceSuSp Foam::InterfaceForce<CloudType>::calcNonCoupled
 {
     forceSuSp value(vector::zero, 0.0);
 
-    const interpolation<vector>& gradInterForceInterp =
-        gradInterForceInterpPtr_();
+    const interpolation<vector>& interp = gradInterForceInterpPtr_();
 
-    value.Su()=
+    value.Su() =
        C_
       *mass
-      *gradInterForceInterp.interpolate(p.position(), p.currentTetIndices());
+      *interp.interpolate(p.coordinates(), p.currentTetIndices());
 
     return value;
 }

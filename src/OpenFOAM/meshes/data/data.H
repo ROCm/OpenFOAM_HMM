@@ -63,10 +63,10 @@ class data
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        data(const data&);
+        data(const data&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const data&);
+        void operator=(const data&) = delete;
 
 
 public:
@@ -83,27 +83,24 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Return the dictionary of solver performance data which
+        //- includes initial and final residuals for convergence checking
+        const dictionary& solverPerformanceDict() const;
 
-            //- Return the dictionary of solver performance data
-            //  which includes initial and final residuals for convergence
-            //  checking
-            const dictionary& solverPerformanceDict() const;
+        //- Add/set the solverPerformance entry for the named field
+        template<class Type>
+        void setSolverPerformance
+        (
+            const word& name,
+            const SolverPerformance<Type>& sp
+        ) const;
 
-            //- Add/set the solverPerformance entry for the named field
-            template<class Type>
-            void setSolverPerformance
-            (
-                const word& name,
-                const SolverPerformance<Type>&
-            ) const;
-
-            //- Add/set the solverPerformance entry, using its fieldName
-            template<class Type>
-            void setSolverPerformance
-            (
-                const SolverPerformance<Type>&
-            ) const;
+        //- Add/set the solverPerformance entry, using its fieldName
+        template<class Type>
+        void setSolverPerformance
+        (
+            const SolverPerformance<Type>& sp
+        ) const;
 };
 
 

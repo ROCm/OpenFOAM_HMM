@@ -81,7 +81,7 @@ Description
     - A scalar transport equation for the carrier specie is required, e.g.
       supplied via a function object or in the main solver. This specie
       transports the vapour phase in the main ragion.
-    - The boundary condition of this specie on the coupled wall must be 
+    - The boundary condition of this specie on the coupled wall must be
       fixedGradient in order to allow condensation or evaporation of the
       vapour in or out of this wall
 
@@ -188,7 +188,7 @@ private:
 
     // Private data
 
-        static const NamedEnum<massTransferMode, 4> massModeTypeNames_;
+        static const Enum<massTransferMode> massModeTypeNames_;
 
         //- Operating mode
         massTransferMode mode_;
@@ -217,7 +217,7 @@ private:
             //- Name of the radiative heat flux field
             const word qrName_;
 
-            //- Name of the species on which the mass transfered (default H2O)
+            //- Name of the species on which the mass transferred (default H2O)
             const word specieName_;
 
 

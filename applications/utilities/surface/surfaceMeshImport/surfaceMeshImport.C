@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
+    argList::addArgument("inputFile");
 
     argList::addBoolOption
     (
@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
         {
             const fileName dictPath = args["dict"];
 
-            ioPtr.set
+            ioPtr.reset
             (
                 new IOobject
                 (
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            ioPtr.set
+            ioPtr.reset
             (
                 new IOobject
                 (

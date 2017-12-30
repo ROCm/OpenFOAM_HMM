@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef options_H
-#define options_H
+#ifndef fv_options_H
+#define fv_options_H
 
 #include "fvOptionList.H"
 #include "IOdictionary.H"

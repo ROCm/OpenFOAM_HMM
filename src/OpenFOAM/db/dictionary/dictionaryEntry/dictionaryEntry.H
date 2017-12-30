@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,14 +52,12 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-
 class dictionaryEntry;
-
-Ostream& operator<<(Ostream&, const dictionaryEntry&);
+Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class dictionaryEntry Declaration
+                       Class dictionaryEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class dictionaryEntry
@@ -69,10 +67,8 @@ class dictionaryEntry
 {
     // Private Member Functions
 
-        void readData(Istream&);
-
-        //- Dissallow bitwise copy
-        dictionaryEntry(const dictionary&);
+        //- Disallow bitwise copy
+        dictionaryEntry(const dictionaryEntry&) = delete;
 
 
 public:
@@ -80,20 +76,20 @@ public:
     // Constructors
 
         //- Construct from the parent dictionary and Istream
-        dictionaryEntry(const dictionary& parentDict, Istream&);
+        dictionaryEntry(const dictionary& parentDict, Istream& is);
 
         //- Construct from the keyword, parent dictionary and a Istream
         dictionaryEntry
         (
-            const keyType&,
+            const keyType& key,
             const dictionary& parentDict,
-            Istream&
+            Istream& is
         );
 
         //- Construct from the keyword, parent dictionary and a dictionary
         dictionaryEntry
         (
-            const keyType&,
+            const keyType& key,
             const dictionary& parentDict,
             const dictionary& dict
         );
@@ -102,7 +98,7 @@ public:
         dictionaryEntry
         (
             const dictionary& parentDict,
-            const dictionaryEntry&
+            const dictionaryEntry& dictEnt
         );
 
         autoPtr<entry> clone(const dictionary& parentDict) const
@@ -113,19 +109,13 @@ public:
 
     // Member functions
 
-        //- Return the local dictionary name (final part of scoped name)
-        const word dictName() const
-        {
-            return dictionary::dictName();
-        }
-
-        //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
+        //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
         const fileName& name() const
         {
             return dictionary::name();
         }
 
-        //- Return the dictionary name (scoped, e.g. dictA::dictB::dictC)
+        //- Return the scoped dictionary name (eg, dictA.dictB.dictC)
         fileName& name()
         {
             return dictionary::name();
@@ -141,11 +131,12 @@ public:
         //  calling this function generates a FatalError
         ITstream& stream() const;
 
-        //- Return true because this entry is a dictionary
-        bool isDict() const
-        {
-            return true;
-        }
+
+        //- Return pointer to this dictionary
+        virtual const dictionary* dictPtr() const;
+
+        //- Return non-const pointer to this dictionary
+        virtual dictionary* dictPtr();
 
         //- Return dictionary
         const dictionary& dict() const;
@@ -153,8 +144,9 @@ public:
         //- Return non-const access to dictionary
         dictionary& dict();
 
+
         //- Write
-        void write(Ostream&) const;
+        void write(Ostream& os) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream
@@ -166,12 +158,12 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const dictionaryEntry&);
+        friend Ostream& operator<<(Ostream& os, const dictionaryEntry& e);
 };
 
 
 template<>
-Ostream& operator<<(Ostream&, const InfoProxy<dictionaryEntry>&);
+Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

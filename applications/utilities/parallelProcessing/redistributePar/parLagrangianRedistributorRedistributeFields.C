@@ -29,7 +29,7 @@ License
 #include "mapDistributePolyMesh.H"
 #include "cloud.H"
 #include "CompactIOField.H"
-#include "passiveParticleCloud.H"
+#include "passivePositionParticleCloud.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -105,7 +105,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                0
+                label(0)
             );
 
             map.distribute(field);
@@ -179,7 +179,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
             Info<< "        " <<  objectNames[i] << endl;
 
             // Read if present
-            CompactIOField<Field<Type>, Type > field
+            CompactIOField<Field<Type>, Type> field
             (
                 IOobject
                 (
@@ -191,7 +191,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                0
+                label(0)
             );
 
             // Distribute
@@ -223,7 +223,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
 template<class Container>
 void Foam::parLagrangianRedistributor::readLagrangianFields
 (
-    const passiveParticleCloud& cloud,
+    const passivePositionParticleCloud& cloud,
     const IOobjectList& objects,
     const HashSet<word>& selectedFields
 )
@@ -259,7 +259,7 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
                     IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 ),
-                0
+                label(0)
             );
 
             fieldPtr->store();
@@ -272,12 +272,12 @@ template<class Container>
 void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
 (
     const mapDistributeBase& map,
-    passiveParticleCloud& cloud
+    passivePositionParticleCloud& cloud
 ) const
 {
     HashTable<Container*> fields
     (
-        cloud.lookupClass<Container >()
+        cloud.lookupClass<Container>()
     );
 
     if (fields.size())

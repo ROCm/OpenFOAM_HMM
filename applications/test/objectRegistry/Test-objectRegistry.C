@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
         "skip",
         "skip some parts"
     );
-    argList::validArgs.append("recursive (true|false)");
+    argList::addArgument("recursive (true|false)");
 
     #include "setRootCase.H"
     #include "createTime.H"

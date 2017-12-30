@@ -126,10 +126,10 @@ public:
 protected:
 
          //- Sun direction models
-        static const NamedEnum<sunDirModel, 2> sunDirectionModelTypeNames_;
+        static const Enum<sunDirModel> sunDirectionModelTypeNames_;
 
         //- Sun load models
-        static const NamedEnum<sunLModel, 3> sunLoadModelTypeNames_;
+        static const Enum<sunLModel> sunLoadModelTypeNames_;
 
 private:
 

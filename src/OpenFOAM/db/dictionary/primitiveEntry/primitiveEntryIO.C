@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,64 +28,57 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::primitiveEntry::append
+bool Foam::primitiveEntry::acceptToken
 (
-    const token& currToken,
+    const token& tok,
     const dictionary& dict,
     Istream& is
 )
 {
-    if (currToken.isWord())
-    {
-        const word& w = currToken.wordToken();
+    bool accept = tok.good();
 
-        if
+    if (tok.isWord())
+    {
+        const word& key = tok.wordToken();
+
+        accept =
         (
             disableFunctionEntries
-         || w.size() == 1
+         || key.size() == 1
          || (
-                !(w[0] == '$' && expandVariable(w, dict))
-             && !(w[0] == '#' && expandFunction(w, dict, is))
+                !(key[0] == '$' && expandVariable(key.substr(1), dict))
+             && !(key[0] == '#' && expandFunction(key.substr(1), dict, is))
             )
-        )
-        {
-            newElmt(tokenIndex()++) = currToken;
-        }
+        );
     }
-    else if (currToken.isVariable())
+    else if (tok.isVariable())
     {
-        const string& w = currToken.stringToken();
+        const string& key = tok.stringToken();
 
-        if
+        accept =
         (
             disableFunctionEntries
-         || w.size() <= 3
+         || key.size() <= 3
          || !(
-                w[0] == '$'
-             && w[1] == token::BEGIN_BLOCK
-             && expandVariable(w, dict)
+                key[0] == '$'
+             && key[1] == token::BEGIN_BLOCK
+             && expandVariable(key.substr(1), dict)
             )
-        )
-        {
-            newElmt(tokenIndex()++) = currToken;
-        }
+        );
     }
-    else
-    {
-        newElmt(tokenIndex()++) = currToken;
-    }
+
+    return accept;
 }
 
 
 bool Foam::primitiveEntry::expandFunction
 (
-    const word& keyword,
-    const dictionary& parentDict,
+    const word& functionName,
+    const dictionary& dict,
     Istream& is
 )
 {
-    word functionName = keyword(1, keyword.size()-1);
-    return functionEntry::execute(functionName, parentDict, *this, is);
+    return functionEntry::execute(functionName, dict, *this, is);
 }
 
 
@@ -93,65 +86,41 @@ bool Foam::primitiveEntry::read(const dictionary& dict, Istream& is)
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    label blockCount = 0;
-    token currToken;
+    label depth = 0;
+    token tok;
 
-    if
+    while
     (
-        !is.read(currToken).bad()
-     && currToken.good()
-     && currToken != token::END_STATEMENT
+        !is.read(tok).bad() && tok.good()
+     && !(tok == token::END_STATEMENT && depth == 0)
     )
     {
-        append(currToken, dict, is);
-
-        if
-        (
-            currToken == token::BEGIN_BLOCK
-         || currToken == token::BEGIN_LIST
-        )
+        if (tok.isPunctuation())
         {
-            blockCount++;
+            const char c = tok.pToken();
+            if (c == token::BEGIN_BLOCK || c == token::BEGIN_LIST)
+            {
+                ++depth;
+            }
+            else if (c == token::END_BLOCK || c == token::END_LIST)
+            {
+                --depth;
+            }
         }
 
-        while
-        (
-            !is.read(currToken).bad()
-         && currToken.good()
-         && !(currToken == token::END_STATEMENT && blockCount == 0)
-        )
+        if (acceptToken(tok, dict, is))
         {
-            if
-            (
-                currToken == token::BEGIN_BLOCK
-             || currToken == token::BEGIN_LIST
-            )
-            {
-                blockCount++;
-            }
-            else if
-            (
-                currToken == token::END_BLOCK
-             || currToken == token::END_LIST
-            )
-            {
-                blockCount--;
-            }
-
-            append(currToken, dict, is);
+            newElmt(tokenIndex()++) = std::move(tok);
         }
+
+        // With/without move: clear any old content and force to have a
+        // known good token so that we can rely on it for the return value.
+
+        tok = token::punctuationToken::NULL_TOKEN;
     }
 
     is.fatalCheck(FUNCTION_NAME);
-
-    if (currToken.good())
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return tok.good();
 }
 
 
@@ -228,24 +197,19 @@ void Foam::primitiveEntry::write(Ostream& os, const bool contentsOnly) const
         os.writeKeyword(keyword());
     }
 
-    for (label i=0; i<size(); ++i)
+    bool addSpace = false;  // Separate from previous tokens with a space
+    for (const token& tok : *this)
     {
-        const token& t = operator[](i);
-        if (t.type() == token::VERBATIMSTRING)
+        if (addSpace) os << token::SPACE;
+
+        // Try to output token directly, with special handling in Ostreams.
+
+        if (!os.write(tok))
         {
-            // Bypass token output operator to avoid losing verbatimness.
-            // Handle in Ostreams themselves
-            os.write(t);
-        }
-        else
-        {
-            os  << t;
+            os  << tok;   // Revert to normal '<<' output operator
         }
 
-        if (i < size()-1)
-        {
-            os  << token::SPACE;
-        }
+        addSpace = true;  // Separate from following tokens
     }
 
     if (!contentsOnly)

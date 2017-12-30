@@ -168,12 +168,8 @@ template<class Type>
 void Foam::outletMappedUniformInletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("outletPatch")
-        << outletPatchName_ << token::END_STATEMENT << nl;
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntry("outletPatch", outletPatchName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->writeEntry("value", os);
 }
 

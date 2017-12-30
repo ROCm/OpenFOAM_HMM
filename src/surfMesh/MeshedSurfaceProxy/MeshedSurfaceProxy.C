@@ -58,10 +58,11 @@ template<class Face>
 void Foam::MeshedSurfaceProxy<Face>::write
 (
     const fileName& name,
-    const MeshedSurfaceProxy& surf
+    const MeshedSurfaceProxy& surf,
+    const dictionary& options
 )
 {
-    write(name, name.ext(), surf);
+    write(name, name.ext(), surf, options);
 }
 
 
@@ -70,7 +71,8 @@ void Foam::MeshedSurfaceProxy<Face>::write
 (
     const fileName& name,
     const word& ext,
-    const MeshedSurfaceProxy& surf
+    const MeshedSurfaceProxy& surf,
+    const dictionary& options
 )
 {
     if (debug)
@@ -78,7 +80,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
         InfoInFunction << "Writing to " << name << endl;
     }
 
-    auto mfIter = writefileExtensionMemberFunctionTablePtr_->find(ext);
+    auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
 
     if (!mfIter.found())
     {
@@ -89,7 +91,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
             << exit(FatalError);
     }
 
-    mfIter()(name, surf);
+    mfIter()(name, surf, options);
 }
 
 
@@ -180,8 +182,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
 
         if (this->useFaceMap())
         {
-            // this is really a bit annoying (and wasteful) but no other way
-            os  << reorder(this->faceMap(), this->surfFaces());
+            os  << UIndirectList<Face>(this->surfFaces(), this->faceMap());
         }
         else
         {
@@ -226,22 +227,15 @@ template<class Face>
 Foam::MeshedSurfaceProxy<Face>::MeshedSurfaceProxy
 (
     const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst,
-    const List<label>& faceMap
+    const UList<Face>& faceLst,
+    const UList<surfZone>& zoneLst,
+    const labelUList& faceMap
 )
 :
     points_(pointLst),
     faces_(faceLst),
     zones_(zoneLst),
     faceMap_(faceMap)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::MeshedSurfaceProxy<Face>::~MeshedSurfaceProxy()
 {}
 
 
@@ -254,17 +248,14 @@ inline Foam::label Foam::MeshedSurfaceProxy<Face>::nTriangles() const
     {
         return this->size();
     }
-    else
-    {
-        label nTri = 0;
-        const List<Face>& faceLst = this->surfFaces();
-        forAll(faceLst, facei)
-        {
-            nTri += faceLst[facei].nTriangles();
-        }
 
-        return nTri;
+    label nTri = 0;
+    for (const Face& f : this->surfFaces())
+    {
+        nTri += f.nTriangles();
     }
+
+    return nTri;
 }
 
 

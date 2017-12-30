@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -149,7 +149,7 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
     }
 
     // Set the inlet-outlet choice based on the direction of the freestream
-    valueFraction() = 1.0 - pos(refValue() & patch().Sf());
+    valueFraction() = 1.0 - pos0(refValue() & patch().Sf());
 
     mixedFvPatchField<vector>::updateCoeffs();
 }
@@ -158,9 +158,9 @@ void Foam::SRFFreestreamVelocityFvPatchVectorField::updateCoeffs()
 void Foam::SRFFreestreamVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("relative") << relative_ << token::END_STATEMENT << nl;
-    os.writeKeyword("UInf") << UInf_ << token::END_STATEMENT << nl;
-    os.writeKeyword("phi") << this->phiName_ << token::END_STATEMENT << nl;
+    os.writeEntry("relative", relative_);
+    os.writeEntry("UInf", UInf_);
+    os.writeEntry("phi", this->phiName_);
     writeEntry("value", os);
 }
 

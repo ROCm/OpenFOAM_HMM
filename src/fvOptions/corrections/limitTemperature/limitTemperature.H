@@ -42,6 +42,7 @@ Usage
         selectionMode   all;
         min             200;
         max             500;
+        phase           gas; //optional
     }
     \endverbatim
 
@@ -80,6 +81,9 @@ protected:
 
         //- Maximum temperature limit [K]
         scalar Tmax_;
+
+        //- Optional phase name [K]
+        word phase_;
 
 
 private:

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ License
 
 #include "dictionary.H"
 #include "IFstream.H"
-#include "inputModeEntry.H"
+#include "regExp.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -49,19 +49,19 @@ Foam::dictionary::dictionary(Istream& is)
     parent_(dictionary::null)
 {
     // Reset input mode as this is a "top-level" dictionary
-    functionEntries::inputModeEntry::clear();
+    entry::resetInputMode();
 
     read(is);
 }
 
 
-Foam::dictionary::dictionary(Istream& is, const bool keepHeader)
+Foam::dictionary::dictionary(Istream& is, bool keepHeader)
 :
     dictionaryName(is.name()),
     parent_(dictionary::null)
 {
     // Reset input mode as this is a "top-level" dictionary
-    functionEntries::inputModeEntry::clear();
+    entry::resetInputMode();
 
     read(is, keepHeader);
 }
@@ -77,8 +77,14 @@ Foam::autoPtr<Foam::dictionary> Foam::dictionary::New(Istream& is)
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::dictionary::read(Istream& is, const bool keepHeader)
+bool Foam::dictionary::read(Istream& is, bool keepHeader)
 {
+    // Normally remove FoamFile header when read, but avoid this if it already
+    // existed prior to the current read.
+    // We would otherwise lose it with every top-level '#include ...'
+
+    keepHeader = keepHeader || hashedEntries_.found("FoamFile");
+
     // Check for empty dictionary
     if (is.eof())
     {
@@ -103,7 +109,6 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
     while (!is.eof() && entry::New(*this, is))
     {}
 
-    // normally remove the FoamFile header entry if it exists
     if (!keepHeader)
     {
         remove("FoamFile");
@@ -128,36 +133,12 @@ bool Foam::dictionary::read(Istream& is)
 }
 
 
-bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
-{
-    const word varName = keyword(1, keyword.size()-1);
-
-    // Lookup the variable name in the given dictionary
-    const entry* ePtr = lookupEntryPtr(varName, true, true);
-
-    // If defined insert its entries into this dictionary
-    if (ePtr != nullptr)
-    {
-        const dictionary& addDict = ePtr->dict();
-
-        forAllConstIter(IDLList<entry>, addDict, iter)
-        {
-            add(iter(), mergeEntry);
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-
 // * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>(Istream& is, dictionary& dict)
 {
     // Reset input mode assuming this is a "top-level" dictionary
-    functionEntries::inputModeEntry::clear();
+    entry::resetInputMode();
 
     dict.clear();
     dict.name() = is.name();
@@ -179,7 +160,7 @@ void Foam::dictionary::writeEntry(const keyType& kw, Ostream& os) const
 
 void Foam::dictionary::writeEntries(Ostream& os, const bool extraNewLine) const
 {
-    forAllConstIter(IDLList<entry>, *this, iter)
+    forAllConstIter(parent_type, *this, iter)
     {
         const entry& e = *iter;
 

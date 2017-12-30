@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,71 +23,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "SubStrings.H"
 
-template<class StringType>
-Foam::CStringList::CStringList
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class ListType>
+int Foam::CStringList::resetContent
 (
-    const UList<StringType>& input
-)
-:
-    argc_(0),
-    len_(0),
-    argv_(0),
-    data_(0)
-{
-    reset(input);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class StringType>
-void Foam::CStringList::reset
-(
-    const UList<StringType>& input
+    const ListType& input
 )
 {
     clear();
 
-    argc_ = input.size();
-    forAll(input, argI)
+    if (input.empty())
     {
-        len_ += input[argI].size();
-        ++len_;  // nul terminator for C-strings
+        // Special handling of an empty list
+        argv_ = new char*[1];
+        argv_[0] = nullptr;     // Final nullptr terminator
+        return 0;
     }
 
-    argv_ = new char*[argc_+1];
-    argv_[argc_] = nullptr; // extra terminator
-
-    if (argc_ > 0)
+    // Count overall required string length, including each trailing nul char
+    for (const auto& str : input)
     {
-        // allocation includes final nul terminator,
-        // but overall count does not
-        data_ = new char[len_--];
-
-        char* ptr = data_;
-        forAll(input, argI)
-        {
-            argv_[argI] = ptr;
-
-            const std::string& str =
-                static_cast<const std::string&>(input[argI]);
-
-            for
-            (
-                std::string::const_iterator iter = str.begin();
-                iter != str.end();
-                ++iter
-            )
-            {
-                *(ptr++) = *iter;
-            }
-            *(ptr++) = '\0';
-        }
+        len_ += str.length() + 1;
     }
+    --len_; // No final nul in overall count
+
+    argv_ = new char*[input.size()+1];  // Extra +1 for terminating nullptr
+    data_ = new char[len_+1];           // Extra +1 for terminating nul char
+
+    argv_[0] = data_;   // Starts here
+
+    for (const auto& str : input)
+    {
+        char *next = stringCopy(argv_[argc_], str);
+        argv_[++argc_] = next;   // The start of next string
+    }
+
+    argv_[argc_] = nullptr;     // Final nullptr terminator
+
+    return argc_;
 }
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class StringType>
 Foam::List<StringType>

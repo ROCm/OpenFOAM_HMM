@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,140 @@ License
 
 #include "error.H"
 #include "ITstream.H"
+#include "UIListStream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+Foam::label Foam::ITstream::parseStream(ISstream& is, tokenList& tokens)
+{
+    label nTok = 0;
+
+    tokens.clear();
+    tokens.setSize(64, token::undefinedToken);
+
+    token tok;
+    while (!is.read(tok).bad() && tok.good())
+    {
+        tokens.newElmt(nTok++) = std::move(tok);
+    }
+
+    tokens.setSize(nTok);
+
+    return nTok;
+}
+
+
+Foam::tokenList Foam::ITstream::parse
+(
+    const UList<char>& input,
+    streamFormat format
+)
+{
+    UIListStream is(input, format, IOstream::currentVersion);
+
+    tokenList tokens;
+    parseStream(is, tokens);
+    return tokens;
+}
+
+
+Foam::tokenList Foam::ITstream::parse
+(
+    const std::string& input,
+    streamFormat format
+)
+{
+    UIListStream is
+    (
+        input.data(),
+        input.size(),
+        format,
+        IOstream::currentVersion
+    );
+
+    tokenList tokens;
+    parseStream(is, tokens);
+    return tokens;
+}
+
+
+Foam::tokenList Foam::ITstream::parse
+(
+    const char* input,
+    streamFormat format
+)
+{
+    UIListStream is(input, strlen(input), format, IOstream::currentVersion);
+
+    tokenList tokens;
+    parseStream(is, tokens);
+    return tokens;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::ITstream::ITstream
+(
+    const string& name,
+    const UList<char>& input,
+    streamFormat format,
+    versionNumber version
+)
+:
+    Istream(format, version),
+    tokenList(),
+    name_(name),
+    tokenIndex_(0)
+{
+    UIListStream is(input, format, version);
+
+    parseStream(is, static_cast<tokenList&>(*this));
+    ITstream::rewind();
+}
+
+
+Foam::ITstream::ITstream
+(
+    const string& name,
+    const std::string& input,
+    streamFormat format,
+    versionNumber version
+)
+:
+    Istream(format, version),
+    tokenList(),
+    name_(name),
+    tokenIndex_(0)
+{
+    UIListStream is(input.data(), input.size(), format, version);
+
+    parseStream(is, static_cast<tokenList&>(*this));
+    ITstream::rewind();
+}
+
+
+Foam::ITstream::ITstream
+(
+    const string& name,
+    const char* input,
+    streamFormat format,
+    versionNumber version
+)
+:
+    Istream(format, version),
+    tokenList(),
+    name_(name),
+    tokenIndex_(0)
+{
+    UIListStream is(input, strlen(input), format, version);
+
+    parseStream(is, static_cast<tokenList&>(*this));
+    ITstream::rewind();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::ITstream::print(Ostream& os) const
 {
@@ -53,19 +185,19 @@ void Foam::ITstream::print(Ostream& os) const
 }
 
 
-Foam::Istream& Foam::ITstream::read(token& t)
+Foam::Istream& Foam::ITstream::read(token& tok)
 {
     // Return the put back token if it exists
-    if (Istream::getBack(t))
+    if (Istream::getBack(tok))
     {
-        lineNumber_ = t.lineNumber();
+        lineNumber_ = tok.lineNumber();
         return *this;
     }
 
     if (tokenIndex_ < size())
     {
-        t = operator[](tokenIndex_++);
-        lineNumber_ = t.lineNumber();
+        tok = operator[](tokenIndex_++);
+        lineNumber_ = tok.lineNumber();
 
         if (tokenIndex_ == size())
         {
@@ -89,15 +221,15 @@ Foam::Istream& Foam::ITstream::read(token& t)
             setEof();
         }
 
-        t = token::undefinedToken;
+        tok = token::undefinedToken;
 
         if (size())
         {
-            t.lineNumber() = tokenList::last().lineNumber();
+            tok.lineNumber() = tokenList::last().lineNumber();
         }
         else
         {
-            t.lineNumber() = lineNumber();
+            tok.lineNumber() = lineNumber();
         }
     }
 
@@ -154,18 +286,18 @@ Foam::Istream& Foam::ITstream::read(char*, std::streamsize)
 }
 
 
-Foam::Istream& Foam::ITstream::rewind()
+void Foam::ITstream::rewind()
 {
     tokenIndex_ = 0;
+    lineNumber_ = 0;
 
     if (size())
     {
         lineNumber_ = tokenList::first().lineNumber();
     }
 
+    setOpened();
     setGood();
-
-    return *this;
 }
 
 

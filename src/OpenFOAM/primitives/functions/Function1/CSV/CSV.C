@@ -25,7 +25,7 @@ License
 
 #include "CSV.H"
 #include "DynamicList.H"
-#include "IFstream.H"
+//#include "IFstream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -43,7 +43,7 @@ Foam::label Foam::Function1Types::CSV<Foam::label>::readValue
             << exit(FatalError);
     }
 
-    return readLabel(IStringStream(splitted[componentColumns_[0]])());
+    return readLabel(splitted[componentColumns_[0]]);
 }
 
 
@@ -61,7 +61,7 @@ Foam::scalar Foam::Function1Types::CSV<Foam::scalar>::readValue
             << exit(FatalError);
     }
 
-    return readScalar(IStringStream(splitted[componentColumns_[0]])());
+    return readScalar(splitted[componentColumns_[0]]);
 }
 
 
@@ -70,18 +70,17 @@ Type Foam::Function1Types::CSV<Type>::readValue(const List<string>& splitted)
 {
     Type result;
 
-    for (label i = 0; i < pTraits<Type>::nComponents; i++)
+    for (label i = 0; i < pTraits<Type>::nComponents; ++i)
     {
         if (componentColumns_[i] >= splitted.size())
         {
             FatalErrorInFunction
-            << "No column " << componentColumns_[i] << " in "
+                << "No column " << componentColumns_[i] << " in "
                 << splitted << endl
                 << exit(FatalError);
         }
 
-        result[i] =
-        readScalar(IStringStream(splitted[componentColumns_[i]])());
+        result[i] = readScalar(splitted[componentColumns_[i]]);
     }
 
     return result;
@@ -92,7 +91,9 @@ template<class Type>
 void Foam::Function1Types::CSV<Type>::read()
 {
     fileName expandedFile(fName_);
-    IFstream is(expandedFile.expand());
+    //IFstream is(expandedFile.expand());
+    autoPtr<ISstream> isPtr(fileHandler().NewIFstream(expandedFile.expand()));
+    ISstream& is = isPtr();
 
     if (!is.good())
     {
@@ -187,7 +188,7 @@ void Foam::Function1Types::CSV<Type>::read()
             break;
         }
 
-        scalar x = readScalar(IStringStream(splitted[refColumn_])());
+        scalar x = readScalar(splitted[refColumn_]);
         Type value = readValue(splitted);
 
         values.append(Tuple2<scalar,Type>(x, value));
@@ -230,15 +231,15 @@ Foam::Function1Types::CSV<Type>::CSV
 
 
 template<class Type>
-Foam::Function1Types::CSV<Type>::CSV(const CSV<Type>& tbl)
+Foam::Function1Types::CSV<Type>::CSV(const CSV<Type>& csv)
 :
-    TableBase<Type>(tbl),
-    nHeaderLine_(tbl.nHeaderLine_),
-    refColumn_(tbl.refColumn_),
-    componentColumns_(tbl.componentColumns_),
-    separator_(tbl.separator_),
-    mergeSeparators_(tbl.mergeSeparators_),
-    fName_(tbl.fName_)
+    TableBase<Type>(csv),
+    nHeaderLine_(csv.nHeaderLine_),
+    refColumn_(csv.refColumn_),
+    componentColumns_(csv.componentColumns_),
+    separator_(csv.separator_),
+    mergeSeparators_(csv.mergeSeparators_),
+    fName_(csv.fName_)
 {}
 
 

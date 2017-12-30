@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -178,8 +178,8 @@ void Foam::inletOutletTotalTemperatureFvPatchScalarField::updateCoeffs()
     scalar gM1ByG = (gamma_ - 1.0)/gamma_;
 
     this->refValue() =
-        T0_/(1.0 + 0.5*psip*gM1ByG*(1.0 - pos(phip))*magSqr(Up));
-    this->valueFraction() = 1.0 - pos(phip);
+        T0_/(1.0 + 0.5*psip*gM1ByG*(1.0 - pos0(phip))*magSqr(Up));
+    this->valueFraction() = 1.0 - pos0(phip);
 
     inletOutletFvPatchScalarField::updateCoeffs();
 }
@@ -189,10 +189,10 @@ void Foam::inletOutletTotalTemperatureFvPatchScalarField::write(Ostream& os)
 const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", this->phiName_);
-    writeEntryIfDifferent<word>(os, "psi", "psi", psiName_);
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
+    os.writeEntryIfDifferent<word>("psi", "psi", psiName_);
+    os.writeEntry("gamma", gamma_);
     T0_.writeEntry("T0", os);
     writeEntry("value", os);
 }

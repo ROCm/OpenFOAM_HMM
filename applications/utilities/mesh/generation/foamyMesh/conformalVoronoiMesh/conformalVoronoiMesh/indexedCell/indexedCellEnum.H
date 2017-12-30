@@ -34,7 +34,7 @@ SourceFiles
 #ifndef indexedCellEnum_H
 #define indexedCellEnum_H
 
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +47,6 @@ class indexedCellEnum
 {
 public:
 
-
     enum cellTypes
     {
         ctUnassigned    = INT_MIN,
@@ -58,7 +57,7 @@ public:
         ctFeaturePoint  = INT_MIN + 5
     };
 
-    static const Foam::NamedEnum<cellTypes, 6> cellTypesNames_;
+    static const Enum<cellTypes> cellTypesNames_;
 };
 
 

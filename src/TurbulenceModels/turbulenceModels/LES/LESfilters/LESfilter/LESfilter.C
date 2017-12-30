@@ -46,15 +46,14 @@ Foam::autoPtr<Foam::LESfilter> Foam::LESfilter::New
 {
     const word filterType(dict.lookup(filterDictName));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(filterType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(filterType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown LESfilter type "
             << filterType << nl << nl
-            << "Valid LESfilter types are :" << endl
+            << "Valid LESfilter types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

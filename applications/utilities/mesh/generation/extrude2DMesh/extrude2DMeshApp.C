@@ -60,17 +60,11 @@ enum ExtrudeMode
     MESHEDSURFACE
 };
 
-namespace Foam
+static const Enum<ExtrudeMode> ExtrudeModeNames
 {
-    template<>
-    const char* NamedEnum<ExtrudeMode, 2>::names[] =
-    {
-        "polyMesh2D",
-        "MeshedSurface"
-    };
-}
-
-static const NamedEnum<ExtrudeMode, 2> ExtrudeModeNames;
+    { ExtrudeMode::POLYMESH2D, "polyMesh2D" },
+    { ExtrudeMode::MESHEDSURFACE, "MeshedSurface" },
+};
 
 
 //pointField moveInitialPoints
@@ -116,7 +110,7 @@ static const NamedEnum<ExtrudeMode, 2> ExtrudeModeNames;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("surfaceFormat");
+    argList::addArgument("surfaceFormat");
 
     #include "addOverwriteOption.H"
 
@@ -165,7 +159,7 @@ int main(int argc, char *argv[])
 
     if (surfaceFormat == MESHEDSURFACE)
     {
-        fMesh.set(new MeshedSurface<face>("MeshedSurface.obj"));
+        fMesh.reset(new MeshedSurface<face>("MeshedSurface.obj"));
 
         EdgeMap<label> edgeRegionMap;
         wordList patchNames(1, "default");
@@ -190,7 +184,7 @@ int main(int argc, char *argv[])
 
         poly2DMesh.createMesh();
 
-        mesh.set
+        mesh.reset
         (
             new polyMesh
             (
@@ -230,7 +224,7 @@ int main(int argc, char *argv[])
     }
     else if (surfaceFormat == POLYMESH2D)
     {
-        mesh.set
+        mesh.reset
         (
             new polyMesh
             (
@@ -250,7 +244,7 @@ int main(int argc, char *argv[])
 
     extruder.addFrontBackPatches();
 
-    meshMod.set(new polyTopoChange(mesh().boundaryMesh().size()));
+    meshMod.reset(new polyTopoChange(mesh().boundaryMesh().size()));
 
     extruder.setRefinement(meshMod());
 

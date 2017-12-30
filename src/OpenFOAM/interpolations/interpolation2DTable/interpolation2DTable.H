@@ -38,6 +38,7 @@ SourceFiles
 
 #include "List.H"
 #include "Tuple2.H"
+#include "tableBounds.H"
 #include "tableReader.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,14 +59,6 @@ public:
 
     // Public data types
 
-        //- Enumeration for handling out-of-bound values
-        enum boundsHandling
-        {
-            ERROR,          //!< Exit with a FatalError
-            WARN,           //!< Issue warning and clamp value (default)
-            CLAMP           //!< Clamp value to the start/end value
-        };
-
         //- Convenience typedef
         typedef List<Tuple2<scalar, List<Tuple2<scalar, Type>>>> table;
 
@@ -74,8 +67,8 @@ private:
 
     // Private data
 
-        //- Enumeration for handling out-of-bound values
-        boundsHandling boundsHandling_;
+        //- Handling for out-of-bound values
+        bounds::normalBounding bounding_;
 
         //- File name
         fileName fileName_;
@@ -117,14 +110,14 @@ public:
         interpolation2DTable
         (
             const List<Tuple2<scalar, List<Tuple2<scalar, Type>>>>& values,
-            const boundsHandling bounds,
+            const bounds::normalBounding bounding,
             const fileName& fName
         );
 
         //- Construct given the name of the file containing the table of data
         interpolation2DTable(const fileName& fName);
 
-        //- Construct by reading the fileName and boundsHandling from dictionary
+        //- Construct by reading file name and outOfBounds from dictionary
         interpolation2DTable(const dictionary& dict);
 
         //- Construct copy
@@ -132,15 +125,6 @@ public:
 
 
     // Member Functions
-
-        //- Return the out-of-bounds handling as a word
-        word boundsHandlingToWord(const boundsHandling& bound) const;
-
-        //- Return the out-of-bounds handling as an enumeration
-        boundsHandling wordToBoundsHandling(const word& bound) const;
-
-        //- Set the out-of-bounds handling from enum, return previous setting
-        boundsHandling outOfBounds(const boundsHandling& bound);
 
         //- Check that list is monotonically increasing
         //  Exit with a FatalError if there is a problem
@@ -152,7 +136,7 @@ public:
 
     // Member Operators
 
-        //- Return an element of constant Tuple2<scalar, Type>
+        //- Return an element of constant List<Tuple2<scalar, Type>>
         const List<Tuple2<scalar, Type>>& operator[](const label) const;
 
         //- Return an interpolated value

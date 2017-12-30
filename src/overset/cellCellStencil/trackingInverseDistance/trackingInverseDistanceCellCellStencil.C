@@ -51,6 +51,7 @@ namespace cellCellStencils
 void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 (
     const fvMesh& mesh,
+    const vector& smallVec,
 
     const boundBox& bb,
     const labelVector& nDivs,
@@ -84,6 +85,9 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
+                faceBb.min() -= smallVec;
+                faceBb.max() += smallVec;
+
                 if (bb.overlaps(faceBb))
                 {
                     voxelMeshSearch::fill
@@ -116,6 +120,8 @@ void Foam::cellCellStencils::trackingInverseDistance::markBoundaries
 
                 // Mark in voxel mesh
                 boundBox faceBb(pp.points(), pp[i], false);
+                faceBb.min() -= smallVec;
+                faceBb.max() += smallVec;
                 if (bb.overlaps(faceBb))
                 {
                     voxelMeshSearch::fill
@@ -165,6 +171,9 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
             forAll(tgtCellMap, tgtCelli)
             {
                 label celli = tgtCellMap[tgtCelli];
+                boundBox cBb(allPoints, allCellPoints[celli], false);
+                cBb.min() -= smallVec_;
+                cBb.max() += smallVec_;
 
                 if
                 (
@@ -172,7 +181,7 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
                     (
                         srcPatchBb,
                         srcDivs,
-                        boundBox(allPoints, allCellPoints[celli], false),
+                        cBb,
                         srcPatchTypes,
                         static_cast<unsigned int>(patchCellType::PATCH)
                     )
@@ -231,13 +240,17 @@ void Foam::cellCellStencils::trackingInverseDistance::markPatchesAsHoles
                 forAll(tgtCellMap, tgtCelli)
                 {
                     label celli = tgtCellMap[tgtCelli];
+                    boundBox cBb(allPoints, allCellPoints[celli], false);
+                    cBb.min() -= smallVec_;
+                    cBb.max() += smallVec_;
+
                     if
                     (
                         voxelMeshSearch::overlaps
                         (
                             srcPatchBb,
                             srcDivs,
-                            boundBox(allPoints, allCellPoints[celli], false),
+                            cBb,
                             srcPatchTypes,
                             static_cast<unsigned int>(patchCellType::PATCH)
                         )
@@ -628,6 +641,7 @@ bool Foam::cellCellStencils::trackingInverseDistance::update()
         markBoundaries
         (
             meshParts_[zonei].subMesh(),
+            smallVec_,
 
             patchBb[zonei][Pstream::myProcNo()],
             patchDivisions[zonei],

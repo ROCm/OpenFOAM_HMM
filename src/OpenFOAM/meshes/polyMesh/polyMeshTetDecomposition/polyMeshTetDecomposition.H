@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ SourceFiles
 #include "polyMesh.H"
 #include "coupledPolyPatch.H"
 #include "syncTools.H"
-#include "tetrahedron.H"
+#include "tetPointRef.H"
 #include "tetIndices.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -128,15 +128,6 @@ public:
             const polyMesh& mesh,
             label fI,
             label cI
-        );
-
-        //- Return the tet decomposition of the given triangle of the given face
-        static tetIndices triangleTetIndices
-        (
-            const polyMesh& mesh,
-            label fI,
-            label cI,
-            const label tetPtI      // offset in face
         );
 
         //- Return the tet decomposition of the given cell, see

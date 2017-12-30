@@ -33,25 +33,32 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::lumpedPointState::inputFormatType>
-    Foam::lumpedPointState::formatNames
-    {
-        { inputFormatType::PLAIN, "plain" },
-        { inputFormatType::DICTIONARY, "dictionary" }
-    };
+const Foam::Enum
+<
+    Foam::lumpedPointState::inputFormatType
+>
+Foam::lumpedPointState::formatNames
+{
+    { inputFormatType::PLAIN, "plain" },
+    { inputFormatType::DICTIONARY, "dictionary" }
+};
 
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
 //! \cond fileScope
-static Foam::string getLineNoComment(Foam::ISstream& is)
+static Foam::string getLineNoComment
+(
+    Foam::ISstream& is,
+    const char comment = '#'
+)
 {
     Foam::string line;
     do
     {
         is.getLine(line);
     }
-    while ((line.empty() || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == comment) && is.good());
 
     return line;
 }
@@ -175,12 +182,12 @@ void Foam::lumpedPointState::relax
         if (prev.degrees_)
         {
             // Was degrees, now radians
-            convert = degToRad(1);
+            convert = degToRad();
         }
         else
         {
             // Was radians, now degrees
-            convert = radToDeg(1);
+            convert = radToDeg();
         }
     }
 
@@ -251,7 +258,7 @@ void Foam::lumpedPointState::writeDict(Ostream& os) const
     os.writeEntry("angles", angles_);
     if (degrees_)
     {
-        os.writeKeyword("degrees") << "true;" << nl;
+        os.writeEntry("degrees", word("true"));
     }
 }
 

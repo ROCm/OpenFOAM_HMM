@@ -13,18 +13,19 @@ FoamFile
     object      testDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-#inputMode  merge
+
 #includeIfPresent "someUnknownFile"
 #includeIfPresent "$FOAM_CASE/someUnknownFile"
 #includeIfPresent "$FOAM_CASE/someUnknownFile-$FOAM_CASENAME"
 
 internalField   uniform 1;
 
-// use 'protect' to supply defaults
-#inputMode  protect
-internalField   uniform 10;
-dimensions      [ 0 2 -2 0 0 0 0 ];
-#inputMode  merge
+// supply defaults
+#default internalField  uniform 10;
+#default dimensions     [ 1 2 -2 0 0 0 0 ];
+#overwrite dimensions   [ 0 2 -2 0 0 0 0 ];
+// #warn       dimensions      [ 0 2 -2 0 0 0 0 ];
+// #error      dimensions      [ 0 2 -2 0 0 0 0 ];
 
 active
 {
@@ -64,7 +65,8 @@ boundaryField
     inlet_4  { $inactive }
     inlet_5  "a primitiveEntry is squashed by a directory entry";
     inlet_5  { $inactive }
-    inlet_6  { $.inactive }     // Test scoping
+    inlet_6a { $...inactive }   // Relative scoping - fairly horrible to use
+    inlet_6b { $^inactive }     // Absolute scoping
     inlet_7  { ${inactive}}     // Test variable expansion
     inlet_8  { $inactive }
     ${key}   { $inactive }
@@ -85,13 +87,21 @@ boundaryField
     #remove inactive
 
     inlet_7  { ${${varType}}}   // Test indirection/recursive expansion
-    #inputMode overwrite
     inlet_8  { $active }
+
+    #overwrite inlet_8  { type none; }
 }
 
-// NB: the inputMode has a global scope
-#inputMode merge
+
 #include "testDict2"
+
+verbatim #{
+
+    This is a somewhat larger chunk of verbatim text that we would much
+    prefer to move as a token rather than copying its entire content each
+    time we do parsing or need to resize the token list.
+
+#};
 
 foo
 {

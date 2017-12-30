@@ -160,7 +160,7 @@ int USERD_set_filenames
         }
     }
 
-    IOobject sprayHeader
+    IOobject positionsHeader
     (
         "positions",
         runTime.timeName(),
@@ -171,7 +171,22 @@ int USERD_set_filenames
         false
     );
 
-    if (sprayHeader.typeHeaderOk<Cloud<passiveParticle>>(false))
+    IOobject coordinatesHeader
+    (
+        "coordinates",
+        runTime.timeName(),
+        cloud::prefix,
+        runTime,
+        IOobject::NO_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if
+    (
+        positionsHeader.typeHeaderOk<Cloud<passiveParticle>>(false)
+     || coordinatesHeader.typeHeaderOk<Cloud<passiveParticle>>(false)
+    )
     {
         Info<< "[Found lagrangian]" << endl;
 
@@ -181,10 +196,8 @@ int USERD_set_filenames
 
         IOobjectList objects(*meshPtr, runTime.timeName(), cloud::prefix);
 
-        lagrangianScalarNames =
-            objects.names(sprayScalarFieldName);
-        lagrangianVectorNames =
-            objects.names(sprayVectorFieldName);
+        lagrangianScalarNames = objects.names(sprayScalarFieldName);
+        lagrangianVectorNames = objects.names(sprayVectorFieldName);
 
         isSpray[fieldNames.size()] = true;
 

@@ -33,20 +33,19 @@ Foam::autoPtr<Foam::blendingMethod> Foam::blendingMethod::New
     const wordList& phaseNames
 )
 {
-    word blendingMethodType(dict.lookup("type"));
+    const word methodType(dict.lookup("type"));
 
     Info<< "Selecting " << dict.dictName() << " blending method: "
-        << blendingMethodType << endl;
+        << methodType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(blendingMethodType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(methodType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown blendingMethodType type "
-            << blendingMethodType << endl << endl
-            << "Valid blendingMethod types are : " << endl
+            << "Unknown blendingMethod type "
+            << methodType << nl << nl
+            << "Valid blendingMethod types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

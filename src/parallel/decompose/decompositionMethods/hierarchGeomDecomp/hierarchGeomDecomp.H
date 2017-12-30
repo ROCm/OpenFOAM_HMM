@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,10 @@ Class
     Foam::hierarchGeomDecomp
 
 Description
-    Does hierarchical decomposition of points. Works by first sorting the
-    points in x direction into equal sized bins, then in y direction and
-    finally in z direction.
+    Does hierarchical decomposition of points, selectable as \c hierarchical.
+
+    Works by first sorting the points in x direction into equal sized bins,
+    then in y direction and finally in z direction.
 
     Uses single array to hold decomposition which is indexed as if it is a
     3 dimensional array:
@@ -44,6 +45,13 @@ Description
     Since the domains are of equal size the maximum difference in size is
     n[0]*n[1] (or n[1]*n[2]?) (small anyway)
 
+    Method coefficients:
+    \table
+        Property  | Description                 | Required | Default
+        n         | (nx ny nz)                  | yes
+        delta     | delta for rotation matrix   | no | 0.001
+        order     | order of operation          | no | xyz
+    \endtable
 
 SourceFiles
     hierarchGeomDecomp.C
@@ -61,7 +69,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class hierarchGeomDecomp Declaration
+                     Class hierarchGeomDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
 class hierarchGeomDecomp
@@ -77,6 +85,7 @@ class hierarchGeomDecomp
     // Private Member Functions
 
         //- Convert ordering string ("xyz") into list of components.
+        //  Checks for bad entries, but no check for duplicate entries.
         void setDecompOrder();
 
         //- Evaluates the weighted sizes for each sorted point.
@@ -155,8 +164,8 @@ class hierarchGeomDecomp
         );
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const hierarchGeomDecomp&);
-        hierarchGeomDecomp(const hierarchGeomDecomp&);
+        void operator=(const hierarchGeomDecomp&) = delete;
+        hierarchGeomDecomp(const hierarchGeomDecomp&) = delete;
 
 
 public:
@@ -168,7 +177,14 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        hierarchGeomDecomp(const dictionary& decompositionDict);
+        hierarchGeomDecomp(const dictionary& decompDict);
+
+        //- Construct for decomposition dictionary and region name
+        hierarchGeomDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor

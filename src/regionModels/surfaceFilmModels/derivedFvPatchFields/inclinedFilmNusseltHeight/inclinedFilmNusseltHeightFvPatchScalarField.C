@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -175,11 +175,11 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::updateCoeffs()
     const volScalarField& rho = film.rho();
     const scalarField rhop(rho.boundaryField()[patchi].patchInternalField());
 
-    const scalarField Re(max(G, scalar(0.0))/mup);
+    const scalarField Re(max(G, scalar(0))/mup);
 
     operator==
     (
-        pow(3.0*sqr(mup/rhop)/(gTan + ROOTVSMALL), 0.333)*pow(Re, 0.333)
+        pow(3*sqr(mup/rhop)/(gTan + ROOTVSMALL), 1.0/3.0)*pow(Re, 1.0/3.0)
     );
 
     fixedValueFvPatchScalarField::updateCoeffs();
@@ -192,9 +192,8 @@ void Foam::inclinedFilmNusseltHeightFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_

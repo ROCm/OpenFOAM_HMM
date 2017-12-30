@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -76,7 +76,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "InfoProxy.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -129,7 +129,8 @@ public:
             inotifyMaster
         };
 
-        static const NamedEnum<fileCheckTypes, 4> fileCheckTypesNames;
+        static const Enum<fileCheckTypes> fileCheckTypesNames;
+
 
 private:
 
@@ -173,16 +174,8 @@ protected:
 
     // Protected Member Functions
 
-        //- Construct and return an IFstream for the object.
-        //  The results is nullptr if the stream construction failed
-        Istream* objectStream();
-
-        //- Construct and return an IFstream for the object given the
-        //  exact file. The results is nullptr if the stream construction failed
-        Istream* objectStream(const fileName&);
-
         //- Set the object state to bad
-        void setBad(const string&);
+        void setBad(const string& s);
 
 
 public:
@@ -191,9 +184,29 @@ public:
     TypeName("IOobject");
 
 
+    // Static data members
+
+        //- Type of file modification checking
+        static fileCheckTypes fileModificationChecking;
+
+
     // Static Member Functions
 
         //- Split path into instance, local, name components
+        //
+        // The splitting behaviour is as follows:
+        // \verbatim
+        //    input       | instance   | local | name
+        //    ----------- | ---------- | ----- | ----
+        //    a           |            |       | a
+        //    a/b         | a          |       | b
+        //    a/b/c/d     | a          | b/c   | d
+        //    /a/b/c      | /a/b       |       | c
+        //    ./a/b/c     | PWD/a/b    |       | c
+        //    ../a/b/c    | PWD/../a/b |       | c
+        //    a/b/        | ERROR      |       |
+        // \endverbatim
+        // where PWD is the Foam::cwd() current working directory
         static bool fileNameComponents
         (
             const fileName& path,
@@ -202,11 +215,9 @@ public:
             word& name
         );
 
-        template<class Name>
-        static inline word groupName(Name name, const word& group);
-
-        //- Type of file modification checking
-        static fileCheckTypes fileModificationChecking;
+        //- Create dot-delimited name.group
+        template<class StringType>
+        static inline word groupName(StringType name, const word& group);
 
 
     // Constructors
@@ -235,8 +246,12 @@ public:
             bool globalObject = false
         );
 
-        //- Construct from path, registry, io options
+        //- Construct from path, registry, io options.
         //  Uses fileNameComponents() to split path into components.
+        //  A path that starts with a '/' is regarded as a file system path.
+        //  Paths starting with either './' or '../' are relative to
+        //  current working directory (and replaced with absolute equivalents).
+        //  All other paths are considered to be relative to the case.
         IOobject
         (
             const fileName& path,
@@ -280,214 +295,174 @@ public:
 
     // Member Functions
 
-        // General access
+      // General access
 
-            //- Return time
-            const Time& time() const;
+        //- Return the local objectRegistry
+        const objectRegistry& db() const;
 
-            //- Return the local objectRegistry
-            const objectRegistry& db() const;
+        //- Return time
+        const Time& time() const;
 
-            //- Return name
-            const word& name() const
-            {
-                return name_;
-            }
+        //- Return name
+        inline const word& name() const;
 
-            //- Return name of the class name read from header
-            const word& headerClassName() const
-            {
-                return headerClassName_;
-            }
+        //- Return name of the class name read from header
+        inline const word& headerClassName() const;
 
-            //- Return non-constant access to the optional note
-            string& note()
-            {
-                return note_;
-            }
+        //- Return non-constant access to the class name read from header
+        inline word& headerClassName();
 
-            //- Return the optional note
-            const string& note() const
-            {
-                return note_;
-            }
+        //- Return the optional note
+        inline const string& note() const;
 
-            //- Rename
-            virtual void rename(const word& newName)
-            {
-                name_ = newName;
-            }
+        //- Return non-constant access to the optional note
+        inline string& note();
 
-            //- Register object created from this IOobject with registry if true
-            bool& registerObject()
-            {
-                return registerObject_;
-            }
+        //- Rename
+        virtual void rename(const word& newName)
+        {
+            name_ = newName;
+        }
 
-            //- Register object created from this IOobject with registry if true
-            bool registerObject() const
-            {
-                return registerObject_;
-            }
+        //- Register object created from this IOobject with registry if true
+        inline bool registerObject() const;
 
-            //- Is object same for all processors
-            bool& globalObject()
-            {
-                return globalObject_;
-            }
+        //- Register object created from this IOobject with registry if true
+        inline bool& registerObject();
 
-            //- Is object same for all processors
-            bool globalObject() const
-            {
-                return globalObject_;
-            }
+        //- Is object same for all processors
+        inline bool globalObject() const;
+
+        //- Is object same for all processors
+        inline bool& globalObject();
 
 
-        // Read/write options
+      // Read/write options
 
-            readOption readOpt() const
-            {
-                return rOpt_;
-            }
+        //- The read option
+        inline readOption readOpt() const;
 
-            readOption& readOpt()
-            {
-                return rOpt_;
-            }
+        //- Non-constant access to the read option
+        inline readOption& readOpt();
 
-            writeOption writeOpt() const
-            {
-                return wOpt_;
-            }
+        //- The write option
+        inline writeOption writeOpt() const;
 
-            writeOption& writeOpt()
-            {
-                return wOpt_;
-            }
+        //- Non-constant access to the write option
+        inline writeOption& writeOpt();
 
 
-        // Path components
+     // Path components
 
-            //- Return group (extension part of name)
-            word group() const;
+        //- Return group (extension part of name)
+        word group() const;
 
-            //- Return member (name without the extension)
-            word member() const;
+        //- Return member (name without the extension)
+        word member() const;
 
-            const fileName& rootPath() const;
+        const fileName& rootPath() const;
 
-            const fileName& caseName() const;
+        const fileName& caseName() const;
 
-            const fileName& instance() const
-            {
-                return instance_;
-            }
+        inline const fileName& instance() const;
 
-            fileName& instance()
-            {
-                return instance_;
-            }
+        inline fileName& instance();
 
-            const fileName& local() const
-            {
-                return local_;
-            }
+        inline const fileName& local() const;
 
-            //- Return complete path
-            fileName path() const;
+        //- Return complete path
+        fileName path() const;
 
-            //- Return complete path with alternative instance and local
-            fileName path
-            (
-                const word& instance,
-                const fileName& local = fileName::null
-            ) const;
+        //- Return complete path with alternative instance and local
+        fileName path
+        (
+            const word& instance,
+            const fileName& local = fileName::null
+        ) const;
 
-            //- Return complete path + object name
-            fileName objectPath() const
-            {
-                return path()/name();
-            }
+        //- Return complete path + object name
+        inline fileName objectPath() const;
 
-            //- Helper for filePath that searches locally.
-            //  When search is false, simply use the current instance,
-            //  otherwise search previous instances.
-            fileName localFilePath(const bool search=true) const;
+        //- Helper for filePath that searches locally.
+        //  When search is false, simply use the current instance,
+        //  otherwise search previous instances.
+        fileName localFilePath
+        (
+            const word& typeName,
+            const bool search=true
+        ) const;
 
-            //- Helper for filePath that searches up if in parallel
-            //  When search is false, simply use the current instance,
-            //  otherwise search previous instances.
-            fileName globalFilePath(const bool search=true) const;
+        //- Helper for filePath that searches up if in parallel
+        //  When search is false, simply use the current instance,
+        //  otherwise search previous instances.
+        fileName globalFilePath
+        (
+            const word& typeName,
+            const bool search=true
+        ) const;
 
 
-        // Reading
+      // Reading
 
-            //- Read header
-            bool readHeader(Istream&);
+        //- Read header
+        bool readHeader(Istream& is);
 
-            //- Read header (uses typeFilePath to find file) and check its info.
-            //  Optionally checks headerClassName against the type-name.
-            //  When search is false, simply use the current instance,
-            //  otherwise search previous instances.
-            template<class Type>
-            bool typeHeaderOk
-            (
-                const bool checkType = true,
-                const bool search = true
-            );
+        //- Read header (uses typeFilePath to find file) and check its info.
+        //  Optionally checks headerClassName against the type-name.
+        //  When search is false, simply use the current instance,
+        //  otherwise search previous instances.
+        template<class Type>
+        bool typeHeaderOk
+        (
+            const bool checkType = true,
+            const bool search = true,
+            const bool verbose = true
+        );
 
-            //- Helper: warn that type does not support re-reading
-            template<class Type>
-            void warnNoRereading() const;
-
-        // Writing
-
-            //- Write the standard OpenFOAM file/dictionary banner
-            //  Optionally without -*- C++ -*- editor hint (eg, for logs)
-            template<class Stream>
-            static inline Stream& writeBanner(Stream& os, bool noHint=false);
-
-            //- Write the standard file section divider
-            template<class Stream>
-            static inline Stream& writeDivider(Stream& os);
-
-            //- Write the standard end file divider
-            template<class Stream>
-            static inline Stream& writeEndDivider(Stream& os);
-
-            //- Write header
-            bool writeHeader(Ostream&) const;
-
-            //- Write header. Allow override of type
-            bool writeHeader(Ostream&, const word& objectType) const;
+        //- Helper: warn that type does not support re-reading
+        template<class Type>
+        void warnNoRereading() const;
 
 
-        // Error Handling
+      // Writing
 
-            bool good() const
-            {
-                return objState_ == GOOD;
-            }
+        //- Write the standard OpenFOAM file/dictionary banner
+        //  Optionally without -*- C++ -*- editor hint (eg, for logs)
+        static Ostream& writeBanner(Ostream& os, bool noHint=false);
 
-            bool bad() const
-            {
-                return objState_ == BAD;
-            }
+        //- Write the standard file section divider
+        static Ostream& writeDivider(Ostream& os);
+
+        //- Write the standard end file divider
+        static Ostream& writeEndDivider(Ostream& os);
+
+        //- Write header
+        bool writeHeader(Ostream& os) const;
+
+        //- Write header. Allow override of type
+        bool writeHeader(Ostream& os, const word& objectType) const;
 
 
-        // Info
+      // Error Handling
 
-            //- Return info proxy.
-            //  Used to print token information to a stream
-            InfoProxy<IOobject> info() const
-            {
-                return *this;
-            }
+        inline bool good() const;
+
+        inline bool bad() const;
+
+
+      // Info
+
+        //- Return info proxy.
+        //  Used to print token information to a stream
+        InfoProxy<IOobject> info() const
+        {
+            return *this;
+        }
 
 
     // Member operators
 
-        void operator=(const IOobject&);
+        void operator=(const IOobject& io);
 };
 
 
@@ -502,15 +477,16 @@ inline bool typeGlobal()
     return false;
 }
 
+
 //- Template function for obtaining local or global filePath
 template<class T>
-inline fileName typeFilePath(const IOobject& io, const bool search=true)
+inline fileName typeFilePath(const IOobject& io, const bool search = true)
 {
     return
     (
         typeGlobal<T>()
-      ? io.globalFilePath(search)
-      : io.localFilePath(search)
+      ? io.globalFilePath(T::typeName, search)
+      : io.localFilePath(T::typeName, search)
     );
 }
 

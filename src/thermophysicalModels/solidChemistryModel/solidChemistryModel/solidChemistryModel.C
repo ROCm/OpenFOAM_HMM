@@ -41,14 +41,14 @@ solidChemistryModel
     Ys_(this->solidThermo().composition().Y()),
     reactions_
     (
-        dynamic_cast<const reactingMixture<SolidThermo>& >
+        dynamic_cast<const reactingMixture<SolidThermo>&>
         (
             this->solidThermo()
         )
     ),
     solidThermo_
     (
-        dynamic_cast<const reactingMixture<SolidThermo>& >
+        dynamic_cast<const reactingMixture<SolidThermo>&>
         (
             this->solidThermo()
         ).speciesData()

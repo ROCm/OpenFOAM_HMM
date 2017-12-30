@@ -49,11 +49,10 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
-#include "polyMesh.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "repatchPolyTopoChanger.H"
 #include "cellSet.H"
 #include "faceSet.H"
@@ -137,7 +136,7 @@ label findFace(const primitivePatch& pp, const labelList& meshF)
 
         forAll(f, fp)
         {
-            if (findIndex(meshF, f[fp]) != -1)
+            if (meshF.found(f[fp]))
             {
                 nMatched++;
             }
@@ -169,7 +168,7 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
 
         forAll(f, fp)
         {
-            if (findIndex(meshF, f[fp]) != -1)
+            if (meshF.found(f[fp]))
             {
                 nMatched++;
             }
@@ -371,7 +370,7 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
             lineStr >> regionI >> regionName;
 
             Info<< "    " << regionI << '\t'
-                << string::validate<word>(regionName) << endl;
+                << word::validate(regionName) << endl;
         }
         else if (nSpaces == 2)
         {
@@ -381,21 +380,21 @@ void readPhysNames(IFstream& inFile, Map<word>& physicalNames)
             if (physType == 1)
             {
                 Info<< "    " << "Line " << regionI << '\t'
-                    << string::validate<word>(regionName) << endl;
+                    << word::validate(regionName) << endl;
             }
             else if (physType == 2)
             {
                 Info<< "    " << "Surface " << regionI << '\t'
-                    << string::validate<word>(regionName) << endl;
+                    << word::validate(regionName) << endl;
             }
             else if (physType == 3)
             {
                 Info<< "    " << "Volume " << regionI << '\t'
-                    << string::validate<word>(regionName) << endl;
+                    << word::validate(regionName) << endl;
             }
         }
 
-        physicalNames.insert(regionI, string::validate<word>(regionName));
+        physicalNames.insert(regionI, word::validate(regionName));
     }
 
     inFile.getLine(line);
@@ -436,10 +435,10 @@ void readCells
 
     Info<< "Starting to read cells at line " << inFile.lineNumber() << endl;
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     face triPoints(3);
     face quadPoints(4);
@@ -770,7 +769,7 @@ void readCells
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".msh file");
+    argList::addArgument(".msh file");
     argList::addBoolOption
     (
         "keepOrientation",
@@ -1103,7 +1102,7 @@ int main(int argc, char *argv[])
                 (
                     zoneName,
                     zoneFaces[zoneI],
-                    boolList(zoneFaces[zoneI].size(), true),
+                    true, // all are flipped
                     nValidFaceZones,
                     mesh.faceZones()
                 );

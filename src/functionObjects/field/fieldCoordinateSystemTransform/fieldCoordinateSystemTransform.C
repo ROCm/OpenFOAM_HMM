@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,7 @@ fieldCoordinateSystemTransform
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    fieldSet_(),
+    fieldSet_(mesh_),
     coordSys_(mesh_, dict.subDict("coordinateSystem"))
 {
     read(dict);
@@ -90,23 +90,27 @@ bool Foam::functionObjects::fieldCoordinateSystemTransform::read
     const dictionary& dict
 )
 {
-    fvMeshFunctionObject::read(dict);
+    if (fvMeshFunctionObject::read(dict))
+    {
+        fieldSet_.read(dict);
+        return true;
+    }
 
-    dict.lookup("fields") >> fieldSet_;
-
-    return true;
+    return false;
 }
 
 
 bool Foam::functionObjects::fieldCoordinateSystemTransform::execute()
 {
-    forAll(fieldSet_, fieldi)
+    fieldSet_.updateSelection();
+
+    for (const word& fieldName : fieldSet_.selection())
     {
-        transform<scalar>(fieldSet_[fieldi]);
-        transform<vector>(fieldSet_[fieldi]);
-        transform<sphericalTensor>(fieldSet_[fieldi]);
-        transform<symmTensor>(fieldSet_[fieldi]);
-        transform<tensor>(fieldSet_[fieldi]);
+        transform<scalar>(fieldName);
+        transform<vector>(fieldName);
+        transform<sphericalTensor>(fieldName);
+        transform<symmTensor>(fieldName);
+        transform<tensor>(fieldName);
     }
 
     return true;
@@ -115,9 +119,9 @@ bool Foam::functionObjects::fieldCoordinateSystemTransform::execute()
 
 bool Foam::functionObjects::fieldCoordinateSystemTransform::write()
 {
-    forAll(fieldSet_, fieldi)
+    forAllConstIters(fieldSet_, iter)
     {
-        writeObject(transformFieldName(fieldSet_[fieldi]));
+        writeObject(transformFieldName(iter()));
     }
 
     return true;

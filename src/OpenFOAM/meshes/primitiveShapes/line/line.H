@@ -57,10 +57,10 @@ class Ostream;
 template<class Point, class PointRef> class line;
 
 template<class Point, class PointRef>
-inline Istream& operator>>(Istream&, line<Point, PointRef>&);
+inline Istream& operator>>(Istream& is, line<Point, PointRef>& l);
 
 template<class Point, class PointRef>
-inline Ostream& operator<<(Ostream&, const line<Point, PointRef>&);
+inline Ostream& operator<<(Ostream& os, const line<Point, PointRef>& l);
 
 
 /*---------------------------------------------------------------------------*\
@@ -72,7 +72,11 @@ class line
 {
     // Private data
 
-        PointRef a_, b_;
+        //- First point
+        PointRef a_;
+
+        //- Second point
+        PointRef b_;
 
 
 public:
@@ -86,7 +90,7 @@ public:
         //  The indices could be from edge etc.
         inline line
         (
-            const UList<Point>&,
+            const UList<Point>& points,
             const FixedList<label, 2>& indices
         );
 
@@ -96,56 +100,62 @@ public:
 
     // Member functions
 
-        // Access
+      // Access
 
-            //- Return first point
-            inline PointRef start() const;
+        //- Return first point
+        inline PointRef first() const;
 
-            //- Return second point
-            inline PointRef end() const;
+        //- Return second point
+        inline PointRef second() const;
+
+        //- Return first point
+        inline PointRef start() const;
+
+        //- Return second point
+        inline PointRef end() const;
 
 
-        // Properties
+      // Properties
 
-            //- Return centre (centroid)
-            inline Point centre() const;
+        //- Return centre (centroid)
+        inline Point centre() const;
 
-            //- Return scalar magnitude
-            inline scalar mag() const;
+        //- Return scalar magnitude
+        inline scalar mag() const;
 
-            //- Return start-to-end vector
-            inline Point vec() const;
+        //- Return start-to-end vector
+        inline Point vec() const;
 
-            //- Return the unit vector (start-to-end)
-            inline Point unitVec() const;
+        //- Return the unit vector (start-to-end)
+        inline Point unitVec() const;
 
-            //- Return nearest distance to line from a given point
-            //  If the nearest point is on the line, return a hit
-            PointHit<Point> nearestDist(const Point& p) const;
+        //- Return nearest distance to line from a given point
+        //  If the nearest point is on the line, return a hit
+        PointHit<Point> nearestDist(const Point& p) const;
 
-            //- Return nearest distance from line to line. Returns distance
-            //  and sets both points (one on *this, one on the provided
-            //  linePointRef.
-            scalar nearestDist
-            (
-                const line<Point, const Point&>& edge,
-                Point& thisPoint,
-                Point& edgePoint
-            ) const;
+        //- Return nearest distance from line to line. Returns distance
+        //  and sets both points (one on *this, one on the provided
+        //  linePointRef.
+        scalar nearestDist
+        (
+            const line<Point, const Point&>& edge,
+            Point& thisPoint,
+            Point& edgePoint
+        ) const;
 
 
     // Ostream operator
 
         friend Istream& operator>> <Point, PointRef>
         (
-            Istream&,
-            line&
+            Istream& is,
+            line& l
         );
 
         friend Ostream& operator<< <Point, PointRef>
         (
-            Ostream&,
-            const line&
+            Ostream& os,
+            const line& l
         );
 };
 

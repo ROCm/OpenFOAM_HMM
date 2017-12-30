@@ -43,7 +43,7 @@ void Foam::ensightGeoFile::initialize()
 
     // Description line 2
     #ifdef OPENFOAM_PLUS
-    write(string("Written by OpenFOAM+ " STRING_QUOTE(OPENFOAM_PLUS)));
+    write(string("Written by OpenFOAM-" STRING_QUOTE(OPENFOAM_PLUS)));
     #else
     write(string("Written by OpenFOAM-" + string(Foam::FOAMversion)));
     #endif

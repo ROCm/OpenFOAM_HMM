@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,8 +52,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class dictionaryListEntry;
-
-Ostream& operator<<(Ostream&, const dictionaryListEntry&);
+Ostream& operator<<(Ostream& os, const dictionaryListEntry& e);
 
 
 /*---------------------------------------------------------------------------*\
@@ -66,11 +65,8 @@ class dictionaryListEntry
 {
     // Private Member Functions
 
-        //- Returns size of dictionary without FoamFile
-        static label realSize(const dictionary&);
-
-        //- Dissallow bitwise copy
-        dictionaryListEntry(const dictionary&);
+        //- Disallow bitwise copy
+        dictionaryListEntry(const dictionaryListEntry&) = delete;
 
 
 public:
@@ -78,13 +74,13 @@ public:
     // Constructors
 
         //- Construct from the parent dictionary and Istream
-        dictionaryListEntry(const dictionary& parentDict, Istream&);
+        dictionaryListEntry(const dictionary& parentDict, Istream& is);
 
         //- Construct as copy for the given parent dictionary
         dictionaryListEntry
         (
             const dictionary& parentDict,
-            const dictionaryListEntry&
+            const dictionaryListEntry& dictEnt
         );
 
         autoPtr<entry> clone(const dictionary& parentDict) const
@@ -96,7 +92,7 @@ public:
     // Member functions
 
         //- Write
-        virtual void write(Ostream&) const;
+        virtual void write(Ostream& os) const;
 
         //- Return info proxy.
         //  Used to print token information to a stream
@@ -108,12 +104,12 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream&, const dictionaryListEntry&);
+        friend Ostream& operator<<(Ostream& os, const dictionaryListEntry& e);
 };
 
 
 template<>
-Ostream& operator<<(Ostream&, const InfoProxy<dictionaryListEntry>&);
+Ostream& operator<<(Ostream& os, const InfoProxy<dictionaryListEntry>& ip);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

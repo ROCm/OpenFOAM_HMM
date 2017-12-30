@@ -66,10 +66,14 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 
         if (nonDimensional_)
         {
-            scalarField deltap = this->jumpTable_->value(Un);
+            scalarField deltap(this->jumpTable_->value(Un));
+
             // Convert adimensional deltap from curve into deltaP
-            scalarField pdFan =
-                deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800;
+            scalarField pdFan
+            (
+                deltap*pow4(constant::mathematical::pi)*sqr(dm_*rpm_)/1800.0
+            );
+
             this->jump_ = max(pdFan, scalar(0));
         }
         else
@@ -100,41 +104,7 @@ Foam::fanFvPatchField<Foam::scalar>::fanFvPatchField
 {
     if (this->cyclicPatch().owner())
     {
-        if (dict.found("f"))
-        {
-            // Backwards compatibility
-            Istream& is = dict.lookup("f");
-            is.format(IOstream::ASCII);
-            scalarList f(is);
-
-            label nPows = 0;
-            forAll(f, powI)
-            {
-                if (mag(f[powI]) > VSMALL)
-                {
-                    nPows++;
-                }
-            }
-            List<Tuple2<scalar, scalar>> coeffs(nPows);
-            nPows = 0;
-            forAll(f, powI)
-            {
-                if (mag(f[powI]) > VSMALL)
-                {
-                    coeffs[nPows++] = Tuple2<scalar, scalar>(f[powI], powI);
-                }
-            }
-
-            this->jumpTable_.reset
-            (
-                new Function1Types::Polynomial<scalar>("jumpTable", coeffs)
-            );
-        }
-        else
-        {
-            // Generic input constructed from dictionary
-            this->jumpTable_ = Function1<scalar>::New("jumpTable", dict);
-        }
+        this->jumpTable_ = Function1<scalar>::New("jumpTable", dict);
     }
 
     if (dict.found("value"))

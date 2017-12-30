@@ -20,22 +20,12 @@ numberOfSubdomains 6;
 method          hierarchical;
 // method          ptscotch;
 
-simpleCoeffs
+coeffs
 {
-    n               (4 1 1);
-    delta           0.001;
-}
-
-hierarchicalCoeffs
-{
-    n               (3 2 1);
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "cellDecomposition";
+    n           (3 2 1);
+    //delta       0.001; // default=0.001
+    //order       xyz;   // default=xzy
+    dataFile    "cellDecomposition";
 }
 
 

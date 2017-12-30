@@ -131,6 +131,10 @@ public:
             //- Return the table of contents as a sorted list
             wordList sortedToc() const;
 
+            //- Return table of contents sorted using the specified comparator
+            template<class Compare>
+            wordList sortedToc(const Compare& comp) const;
+
 
         // Editing
 

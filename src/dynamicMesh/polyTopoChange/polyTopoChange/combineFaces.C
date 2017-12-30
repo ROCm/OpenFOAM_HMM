@@ -254,7 +254,7 @@ bool Foam::combineFaces::faceNeighboursValid
 
                 if (iter == faceRegion.end())
                 {
-                    if (findIndex(neighbourFaces, nbrI) == -1)
+                    if (!neighbourFaces.found(nbrI))
                     {
                         neighbourFaces.append(nbrI);
                     }
@@ -453,8 +453,8 @@ Foam::face Foam::combineFaces::getOutsideFace
     bool edgeLoopConsistent = false;
 
     {
-        label index0 = findIndex(outsideLoop, e[0]);
-        label index1 = findIndex(outsideLoop, e[1]);
+        label index0 = outsideLoop.find(e[0]);
+        label index1 = outsideLoop.find(e[1]);
 
         if (index0 == -1 || index1 == -1)
         {
@@ -496,7 +496,7 @@ Foam::face Foam::combineFaces::getOutsideFace
 
     {
         // Find edge in face.
-        label index = findIndex(fp.faceEdges()[eFaces[0]], bEdgeI);
+        label index = fp.faceEdges()[eFaces[0]].find(bEdgeI);
 
         if (index == -1)
         {

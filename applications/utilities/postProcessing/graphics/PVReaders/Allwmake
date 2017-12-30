@@ -12,6 +12,13 @@ export WM_CONTINUE_ON_ERROR=true
 
 # -----------------------------------------------------------------------------
 
+warnIncomplete()
+{
+    echo
+    echo "    WARNING: incomplete build of ParaView plugin: $@"
+    echo
+}
+
 # major version as per paraview include directory:
 # Eg, "PREFIX/include/paraview-5.0" -> "5.0"
 major="${ParaView_INCLUDE_DIR##*-}"
@@ -22,8 +29,14 @@ case "$major" in
     then
     (
         wmakeLibPv foamPv
-        PVblockMeshReader/Allwmake $targetType $*
-        PVFoamReader/Allwmake $targetType $*
+        wmakeLibPv vtkPVblockMesh
+        wmakeLibPv vtkPVFoam
+
+        if [ "$targetType" != objects ]
+        then
+            cmakePv $PWD/PVblockMeshReader || warnIncomplete "BlockMesh"
+            cmakePv $PWD/PVFoamReader || warnIncomplete "OpenFOAM"
+        fi
     )
     fi
     ;;

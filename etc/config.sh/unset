@@ -6,20 +6,8 @@
 #    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/unset
@@ -117,7 +105,6 @@ fi
 unset ENSIGHT9_READER
 unset ParaView_DIR
 unset ParaView_INCLUDE_DIR
-unset ParaView_MAJOR
 unset ParaView_VERSION
 unset PV_PLUGIN_PATH
 unset VTK_DIR
@@ -126,6 +113,8 @@ unset VTK_DIR
 # unset other ThirdParty environment variables
 
 unset ADIOS_ARCH_PATH
+unset ADIOS1_ARCH_PATH
+unset ADIOS2_ARCH_PATH
 unset BOOST_ARCH_PATH
 unset CCMIO_ARCH_PATH
 unset CGAL_ARCH_PATH
@@ -134,6 +123,7 @@ unset GPERFTOOLS_ARCH_PATH
 unset GMP_ARCH_PATH
 unset MPFR_ARCH_PATH
 unset MESA_ARCH_PATH
+unset KAHIP_ARCH_PATH
 unset METIS_ARCH_PATH
 unset SCOTCH_ARCH_PATH
 
@@ -167,7 +157,6 @@ unalias wmSchedOn   2>/dev/null
 unalias wmSchedOff  2>/dev/null
 
 unalias foam        2>/dev/null
-unalias foamSite    2>/dev/null
 
 unalias src         2>/dev/null
 unalias lib         2>/dev/null
@@ -181,16 +170,21 @@ unset -f wmRefresh  2>/dev/null
 unset -f foamVersion 2>/dev/null
 unset -f foamPV     2>/dev/null
 
-# Cleanup bash completions, which look like this:
-#     "complete ... -F _of_APPNAME APPNAME
-# For economy, obtain list first but also add in 'filter_opts' helper
-foamClean="$(complete 2>/dev/null | sed -n -e 's/complete.*-F _of_.* \(..*\)$/\1/p')"
-for cleaned in $foamClean filter_opts
+# Remove old completions, which look like
+#     "complete ... -F _of_complete_ APPNAME
+# For economy, obtain list first
+foamOldDirs="$(complete 2>/dev/null | sed -ne 's/^.*-F _of_.* \(..*\)$/\1/p')"
+for cleaned in $foamOldDirs
 do
-    unset -f _of_$cleaned 2>/dev/null
-    complete -r $cleaned  2>/dev/null
+    complete -r $cleaned 2>/dev/null
 done
 
+# Completion functions
+unset -f foamAddCompletion 2>/dev/null
+unset -f _of_complete_  2>/dev/null
+
+# Completion cache
+unset _of_complete_cache_
 
 #------------------------------------------------------------------------------
 # Intermediate variables (do as last for a clean exit code)

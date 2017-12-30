@@ -1,11 +1,12 @@
-SUFFIXES += .C
+SUFFIXES += .C .cc .cpp .cxx
 
-c++WARN     = -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof
+c++WARN     = -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter \
+              -Wno-invalid-offsetof -Wno-attributes
 
 # Suppress some warnings for flex++ and CGAL
 c++LESSWARN = -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds
 
-CC          = g++ -std=c++11 -m64 -march=knl -DvectorMachine
+CC          = g++ -std=c++11 -m64 -march=knl
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
 

@@ -133,11 +133,11 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validOptions.clear();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("lambda (0..1)");
-    argList::validArgs.append("mu (0..1)");
-    argList::validArgs.append("iterations");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("lambda (0..1)");
+    argList::addArgument("mu (0..1)");
+    argList::addArgument("iterations");
+    argList::addArgument("output surfaceFile");
     argList::addOption
     (
         "featureFile",
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
 
     if (args.optionFound("featureFile"))
     {
-        const fileName featureFileName(args.option("featureFile"));
+        const fileName featureFileName(args["featureFile"]);
         Info<< "Reading features from " << featureFileName << " ..." << endl;
 
         edgeMesh feMesh(featureFileName);

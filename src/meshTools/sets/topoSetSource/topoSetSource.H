@@ -45,7 +45,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -132,7 +132,7 @@ protected:
 
 private:
 
-        static const NamedEnum<setAction, 8> actionNames_;
+        static const Enum<setAction> actionNames_;
 
         static const string illegalSource_;
 
@@ -140,10 +140,10 @@ private:
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        topoSetSource(const topoSetSource&);
+        topoSetSource(const topoSetSource&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const topoSetSource&);
+        void operator=(const topoSetSource&) = delete;
 
 
 public:

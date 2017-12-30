@@ -26,7 +26,6 @@ License
 #include <fstream>
 #include <iostream>
 
-using std::ofstream;
 using std::ios;
 
 #include "Time.H"
@@ -35,7 +34,7 @@ using std::ios;
 #include "wallFvPatch.H"
 #include "symmetryPlaneFvPatch.H"
 #include "symmetryFvPatch.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -49,18 +48,16 @@ Foam::fluentFvMesh::fluentFvMesh(const IOobject& io)
 
 void Foam::fluentFvMesh::writeFluentMesh() const
 {
-    // make a directory called proInterface in the case
+    // Make a directory called fluentInterface in the case
     mkDir(time().rootPath()/time().caseName()/"fluentInterface");
 
-    // open a file for the mesh
-    ofstream fluentMeshFile
+    // Open a file for the mesh
+    std::ofstream fluentMeshFile
     (
-        (
-            time().rootPath()/
-            time().caseName()/
-            "fluentInterface"/
-            time().caseName() + ".msh"
-        ).c_str()
+        time().rootPath()
+      / time().caseName()
+      / "fluentInterface"
+      / time().caseName() + ".msh"
     );
 
     Info<< "Writing Header" << endl;
@@ -221,10 +218,10 @@ void Foam::fluentFvMesh::writeFluentMesh() const
         << "(12 (1 1 "
         << nCells() << " 1 0)(" << std::endl;
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     const cellShapeList& cells = cellShapes();
 

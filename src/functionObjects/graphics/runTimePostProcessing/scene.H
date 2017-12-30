@@ -62,9 +62,8 @@ SourceFiles
 #include "vector.H"
 #include "point.H"
 #include "boundBox.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "HashPtrTable.H"
-#include "vector.H"
 
 // VTK includes
 #include "vtkSmartPointer.h"

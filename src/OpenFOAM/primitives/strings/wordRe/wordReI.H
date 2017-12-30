@@ -31,6 +31,12 @@ inline bool Foam::wordRe::meta(const char c)
 }
 
 
+inline bool Foam::wordRe::valid(char c)
+{
+    return keyType::valid(c);
+}
+
+
 inline bool Foam::wordRe::isPattern(const std::string& str)
 {
     return string::meta<regExp>(str);
@@ -142,6 +148,13 @@ inline Foam::wordRe::wordRe(const word& str, const compOption opt)
 }
 
 
+inline Foam::wordRe::wordRe(wordRe&& str)
+:
+    word(std::move(static_cast<word&>(str))),
+    re_(std::move(str.re_))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline bool Foam::wordRe::isPattern() const
@@ -243,6 +256,13 @@ inline void Foam::wordRe::set(const char* str, const compOption opt)
 }
 
 
+inline void Foam::wordRe::swap(wordRe& str)
+{
+    word::swap(static_cast<word&>(str));
+    re_.swap(str.re_);
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline bool Foam::wordRe::operator()(const std::string& text) const
@@ -304,6 +324,13 @@ inline void Foam::wordRe::operator=(const char* str)
 {
     string::operator=(str);
     compile(wordRe::DETECT);  // Auto-detect regex
+}
+
+
+inline void Foam::wordRe::operator=(wordRe&& str)
+{
+    clear();
+    swap(str);
 }
 
 

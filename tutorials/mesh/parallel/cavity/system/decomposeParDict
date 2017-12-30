@@ -43,13 +43,14 @@ numberOfSubdomains  2;
 //  for a balanced number of particles in a lagrangian simulation.
 // weightField dsmcRhoNMean;
 
-method          scotch;
-//method          hierarchical;
-// method          simple;
-// method          metis;
-// method          manual;
-// method          multiLevel;
-// method          structured;  // does 2D decomposition of structured mesh
+method      scotch;
+// method      kahip;
+// method      metis;
+// method      hierarchical;
+// method      simple;
+// method      manual;
+// method      multiLevel;
+// method      structured;  // does 2D decomposition of structured mesh
 
 multiLevelCoeffs
 {

@@ -67,7 +67,7 @@ class Constant
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Constant<Type>&);
+        void operator=(const Constant<Type>&) = delete;
 
 
 public:
@@ -90,7 +90,7 @@ public:
         Constant(const word& entryName, Istream& is);
 
         //- Copy constructor
-        Constant(const Constant<Type>& cnst);
+        explicit Constant(const Constant<Type>& cnst);
 
         //- Construct and return a clone
         virtual tmp<Function1<Type>> clone() const
@@ -106,14 +106,32 @@ public:
     // Member Functions
 
         //- Return constant value
-        Type value(const scalar) const;
+        virtual inline Type value(const scalar) const;
 
         //- Integrate between two values
-        Type integrate(const scalar x1, const scalar x2) const;
+        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+
+        //- Return value as a function of (scalar) independent variable
+        virtual tmp<Field<Type>> value(const scalarField& x) const;
+
+        //- Integrate between two (scalar) values
+        virtual tmp<Field<Type>> integrate
+        (
+            const scalarField& x1,
+            const scalarField& x2
+        ) const;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
 };
+
+
+template<>
+tmp<Field<label>> Function1Types::Constant<label>::integrate
+(
+    const scalarField& x1,
+    const scalarField& x2
+) const;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -122,6 +140,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "ConstantI.H"
 
 #ifdef NoRepository
     #include "Constant.C"

@@ -61,7 +61,7 @@ class OneConstant
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const OneConstant<Type>&);
+        void operator=(const OneConstant<Type>&) = delete;
 
 
 public:
@@ -73,7 +73,7 @@ public:
     // Constructors
 
         //- Construct from entry name
-        OneConstant(const word& entryName);
+        explicit OneConstant(const word& entryName);
 
         //- Construct from entry name and dictionary
         OneConstant(const word& entryName, const dictionary& dict);
@@ -92,10 +92,20 @@ public:
     // Member Functions
 
         //- Return constant value
-        Type value(const scalar) const;
+        virtual inline Type value(const scalar) const;
 
         //- Integrate between two values
-        Type integrate(const scalar x1, const scalar x2) const;
+        virtual inline Type integrate(const scalar x1, const scalar x2) const;
+
+        //- Return value as a function of (scalar) independent variable
+        virtual tmp<Field<Type>> value(const scalarField& x) const;
+
+        //- Integrate between two (scalar) values
+        virtual tmp<Field<Type>> integrate
+        (
+            const scalarField& x1,
+            const scalarField& x2
+        ) const;
 
         //- Write in dictionary format
         virtual void writeData(Ostream& os) const;
@@ -108,6 +118,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "OneConstantI.H"
 
 #ifdef NoRepository
     #include "OneConstant.C"

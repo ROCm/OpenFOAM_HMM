@@ -66,7 +66,7 @@ SourceFiles
 #define temperatureCoupledBase_H
 
 #include "scalarField.H"
-#include "NamedEnum.H"
+#include "Enum.H"
 #include "fvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -98,7 +98,7 @@ protected:
 
     // Protected data
 
-        static const NamedEnum<KMethodType, 4> KMethodTypeNames_;
+        static const Enum<KMethodType> KMethodTypeNames_;
 
         //- Underlying patch
         const fvPatch& patch_;

@@ -58,32 +58,18 @@ class includeIfPresentEntry
 :
     public includeEntry
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        includeIfPresentEntry(const includeIfPresentEntry&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const includeIfPresentEntry&);
-
 public:
 
-    //- Runtime type information
-    ClassName("includeIfPresent");
+    //- Include (if present) in a sub-dict context
+    static bool execute(dictionary& parentDict, Istream& is);
 
-
-    // Member Functions
-
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream&);
-
-        //- Execute the functionEntry in a primitiveEntry context
-        static bool execute
-        (
-            const dictionary& parentDict,
-            primitiveEntry&,
-            Istream&
-        );
+    //- Include (if present) in a primitiveEntry context
+    static bool execute
+    (
+        const dictionary& parentDict,
+        primitiveEntry& entry,
+        Istream& is
+    );
 
 };
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,8 @@ Class
     Foam::one
 
 Description
-    A class representing the concept of 1 (scalar(1.0)) used to avoid
-    unnecessary manipulations for objects which are known to be one at
-    compile-time.
+    A class representing the concept of 1 (or 1.0) used to avoid unnecessary
+    manipulations for objects that are known to be one at compile-time.
 
 SourceFiles
     oneI.H
@@ -44,6 +43,11 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes, friend functions and operators
+class Istream;
+class Ostream;
+class one;
+
 /*---------------------------------------------------------------------------*\
                            Class one Declaration
 \*---------------------------------------------------------------------------*/
@@ -51,13 +55,20 @@ namespace Foam
 class one
 {
 public:
-
     typedef one value_type;
+
+    // Forward declaration
+    class null;
+
 
     // Constructors
 
-        //- Construct null
+        //- Null constructible
         one()
+        {}
+
+        //- Construct null from Istream. Consumes no content.
+        explicit one(Istream&)
         {}
 
 
@@ -81,6 +92,43 @@ public:
             return 1;
         }
 };
+
+
+/*---------------------------------------------------------------------------*\
+                          Class one::null Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A one class with a null output adapter.
+class one::null
+:
+    public one
+{
+public:
+    typedef null value_type;
+
+    //- Null constructible
+    null()
+    {}
+
+    //- Construct null from Istream without consuming any content.
+    explicit null(Istream&)
+    {}
+};
+
+
+// IOstream Operators
+
+//- Read from Istream consumes no content.
+inline Istream& operator>>(Istream& is, one&)
+{
+    return is;
+}
+
+//- Write to Ostream emits no content.
+inline Ostream& operator<<(Ostream& os, const one::null&)
+{
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

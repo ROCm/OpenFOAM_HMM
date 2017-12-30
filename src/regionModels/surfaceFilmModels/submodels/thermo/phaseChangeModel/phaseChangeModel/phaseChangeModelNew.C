@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,23 +38,23 @@ namespace surfaceFilmModels
 
 autoPtr<phaseChangeModel> phaseChangeModel::New
 (
-    surfaceFilmModel& model,
+    surfaceFilmRegionModel& model,
     const dictionary& dict
 )
 {
-    word modelType(dict.lookup("phaseChangeModel"));
+    const word modelType(dict.lookup("phaseChangeModel"));
 
     Info<< "    Selecting phaseChangeModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown phaseChangeModel type " << modelType
-            << nl << nl << "Valid phaseChangeModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Unknown phaseChangeModel type "
+            << modelType << nl << nl
+            << "Valid phaseChangeModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

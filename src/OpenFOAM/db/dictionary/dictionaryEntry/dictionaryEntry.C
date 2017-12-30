@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,10 +58,8 @@ Foam::label Foam::dictionaryEntry::startLineNumber() const
     {
         return first()->startLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -71,10 +69,8 @@ Foam::label Foam::dictionaryEntry::endLineNumber() const
     {
         return last()->endLineNumber();
     }
-    else
-    {
-        return -1;
-    }
+
+    return -1;
 }
 
 
@@ -85,6 +81,18 @@ Foam::ITstream& Foam::dictionaryEntry::stream() const
         << abort(FatalIOError);
 
     return lookup("");
+}
+
+
+const Foam::dictionary* Foam::dictionaryEntry::dictPtr() const
+{
+    return this;
+}
+
+
+Foam::dictionary* Foam::dictionaryEntry::dictPtr()
+{
+    return this;
 }
 
 

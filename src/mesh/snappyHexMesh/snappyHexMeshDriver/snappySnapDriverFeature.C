@@ -679,7 +679,7 @@ void Foam::snappySnapDriver::calcNearestFacePointProperties
         pNormals = List<point>(pNormals, visitOrder);
         pDisp = List<point>(pDisp, visitOrder);
         pFc = List<point>(pFc, visitOrder);
-        pFid = UIndirectList<label>(pFid, visitOrder)();
+        pFid = labelUIndList(pFid, visitOrder)();
     }
 }
 
@@ -1703,7 +1703,7 @@ Foam::labelPair Foam::snappySnapDriver::findDiagonalAttraction
         //forAll(cPoints, i)
         //{
         //    label pointi = cPoints[i];
-        //    if (findIndex(meshF, pointi) == -1)
+        //    if (!meshF.found(pointi))
         //    {
         //        cc += mesh.points()[pointi];
         //    }
@@ -2839,7 +2839,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
     // Detect baffle edges. Assume initial mesh will have 0,90 or 180
     // (baffle) degree angles so smoothing should make 0,90
     // to be less than 90. Choose reasonable value
-    const scalar baffleFeatureCos = Foam::cos(degToRad(110));
+    const scalar baffleFeatureCos = Foam::cos(degToRad(110.0));
 
 
     autoPtr<OBJstream> baffleEdgeStr;

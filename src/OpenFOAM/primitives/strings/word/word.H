@@ -31,6 +31,7 @@ Description
     semicolons or brace brackets. Words are delimited by whitespace.
 
 SourceFiles
+    wordI.H
     word.C
     wordIO.C
 
@@ -48,7 +49,6 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 class word;
-inline word operator&(const word& a, const word& b);
 Istream& operator>>(Istream& is, word& w);
 Ostream& operator<<(Ostream& os, const word& w);
 
@@ -64,6 +64,7 @@ class word
     // Private Member Functions
 
         //- Strip invalid characters from this word
+        //  Trips an abort on invalid characters for debug 2 or greater
         inline void stripInvalid();
 
 
@@ -83,7 +84,7 @@ public:
         //- Construct null
         inline word();
 
-        //- Construct as copy
+        //- Copy construct
         inline word(const word& w);
 
         //- Construct as copy of character array
@@ -97,11 +98,20 @@ public:
             const bool doStripInvalid
         );
 
-        //- Construct as copy of string
+        //- Construct as copy of Foam::string
         inline word(const string& s, const bool doStripInvalid=true);
 
         //- Construct as copy of std::string
         inline word(const std::string& s, const bool doStripInvalid=true);
+
+        //- Move construct
+        inline word(word&& w);
+
+        //- Move construct from Foam::string
+        inline word(string&& s, const bool doStripInvalid=true);
+
+        //- Move construct from std::string
+        inline word(std::string&& s, const bool doStripInvalid=true);
 
         //- Construct from Istream
         word(Istream& is);
@@ -112,9 +122,10 @@ public:
         //- Is this character valid for a word?
         inline static bool valid(char c);
 
-        //- Construct a validated word, in which all invalid characters have
-        //  been stripped out and any leading digit is '_'-prefixed.
-        static word validated(const std::string& s);
+        //- Construct validated word (no invalid characters).
+        //  Optionally prefix any leading digit with '_' to have words
+        //  that work nicely as dictionary keywords.
+        static word validate(const std::string& s, const bool prefix=false);
 
 
       // File-like functions
@@ -147,24 +158,26 @@ public:
 
       // Assignment
 
-        //- Copy, no character validation required
+        //- Copy assignment, no character validation required
         inline void operator=(const word& w);
 
-        //- Copy, stripping invalid characters
+        //- Copy assignment from Foam::string, stripping invalid characters
         inline void operator=(const string& s);
 
-        //- Copy, stripping invalid characters
+        //- Copy assignment from std::string, stripping invalid characters
         inline void operator=(const std::string& s);
 
         //- Copy, stripping invalid characters
         inline void operator=(const char* s);
 
+        //- Move assignment
+        inline void operator=(word&& w);
 
-    // Friend Operators
+        //- Move assignment from Foam::string, stripping invalid characters
+        inline void operator=(string&& s);
 
-        //- Join word a and b, capitalising the first letter of b
-        //  (so-called camelCase)
-        friend word operator&(const word& a, const word& b);
+        //- Move assignment from std::string, stripping invalid characters
+        inline void operator=(std::string&& s);
 
 
     // IOstream operators
@@ -172,6 +185,13 @@ public:
         friend Istream& operator>>(Istream& is, word& w);
         friend Ostream& operator<<(Ostream& os, const word& w);
 };
+
+
+// Global Operators
+
+//- Join words as camelCase, capitalizing the first letter of b.
+//  No effect if either argument is empty.
+word operator&(const word& a, const word& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

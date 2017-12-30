@@ -35,6 +35,18 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+const Foam::Enum
+<
+    Foam::sampledTriSurfaceMesh::samplingSource
+>
+Foam::sampledTriSurfaceMesh::samplingSourceNames_
+{
+    { samplingSource::cells, "cells" },
+    { samplingSource::insideCells, "insideCells" },
+    { samplingSource::boundaryFaces, "boundaryFaces" },
+};
+
+
 namespace Foam
 {
     defineTypeNameAndDebug(sampledTriSurfaceMesh, 0);
@@ -44,18 +56,6 @@ namespace Foam
         sampledTriSurfaceMesh,
         word
     );
-
-    template<>
-    const char* NamedEnum<sampledTriSurfaceMesh::samplingSource, 3>::names[] =
-    {
-        "cells",
-        "insideCells",
-        "boundaryFaces"
-    };
-
-    const NamedEnum<sampledTriSurfaceMesh::samplingSource, 3>
-    sampledTriSurfaceMesh::samplingSourceNames_;
-
 
     //- Private class for finding nearest
     //  Comprising:
@@ -437,7 +437,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     }
 
     // Subset cellOrFaceLabels (for compact faces)
-    cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
+    cellOrFaceLabels = labelUIndList(cellOrFaceLabels, faceMap)();
 
     // Store any face per point (without using pointFaces())
     labelList pointToFace(pointMap.size());
@@ -683,9 +683,10 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
-        )
+        ),
+        dict
     ),
-    sampleSource_(samplingSourceNames_[dict.lookup("source")]),
+    sampleSource_(samplingSourceNames_.lookup("source", dict)),
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault<Switch>("keepIds", false)),
     originalIds_(),
@@ -779,15 +780,34 @@ bool Foam::sampledTriSurfaceMesh::update()
         surface_.triSurface::meshPoints()
     );
 
-    bb.intersect(mesh().bounds());
+    // Check for overlap with (global!) mesh bb
+    const bool intersect = bb.intersect(mesh().bounds());
 
-    // Extend a bit
-    const vector span(bb.span());
+    if (!intersect)
+    {
+        // Surface and mesh do not overlap at all. Guarantee a valid
+        // bounding box so we don't get any 'invalid bounding box' errors.
 
-    bb.min() -= 0.5*span;
-    bb.max() += 0.5*span;
+        WarningInFunction
+            << "Surface " << surface_.searchableSurface::name()
+            << " does not overlap bounding box of mesh " << mesh().bounds()
+            << endl;
 
-    bb.inflate(1e-6);
+        bb = treeBoundBox(mesh().bounds());
+        const vector span(bb.span());
+
+        bb.min() += (0.5-1e-6)*span;
+        bb.max() -= (0.5-1e-6)*span;
+    }
+    else
+    {
+        // Extend a bit
+        const vector span(bb.span());
+        bb.min() -= 0.5*span;
+        bb.max() += 0.5*span;
+
+        bb.inflate(1e-6);
+    }
 
     // Mesh search engine, no triangulation of faces.
     meshSearch meshSearcher(mesh(), bb, polyMesh::FACE_PLANES);

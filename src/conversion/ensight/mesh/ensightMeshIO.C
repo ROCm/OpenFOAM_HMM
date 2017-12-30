@@ -452,28 +452,6 @@ void Foam::ensightMesh::writeCellConnectivity
     ensightGeoFile& os
 ) const
 {
-    if (deprecatedOrder())
-    {
-        // element ordering used in older versions
-        ensightCells::elemType oldOrder[5] =
-        {
-            ensightCells::HEXA8,
-            ensightCells::PENTA6,
-            ensightCells::PYRAMID5,
-            ensightCells::TETRA4,
-            ensightCells::NFACED
-        };
-
-        for (label typei=0; typei < ensightCells::nTypes; ++typei)
-        {
-            const ensightCells::elemType& what = oldOrder[typei];
-
-            writeCellConnectivity(what, ensCells, pointToGlobal, os);
-        }
-
-        return;
-    }
-
     for (label typei=0; typei < ensightCells::nTypes; ++typei)
     {
         const ensightCells::elemType what = ensightCells::elemType(typei);

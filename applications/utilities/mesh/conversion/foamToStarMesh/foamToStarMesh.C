@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Reads an OpenFOAM mesh and writes a pro-STAR (v4) bnd/cel/vrt format.
+    Reads an OpenFOAM mesh and writes a STARCD/PROSTAR (v4) bnd/cel/vrt format.
 
 Usage
     \b foamToStarMesh [OPTION]
@@ -57,6 +57,7 @@ See also
 #include "Time.H"
 #include "polyMesh.H"
 #include "STARCDMeshWriter.H"
+#include "IOdictionary.H"
 
 using namespace Foam;
 
@@ -66,7 +67,7 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "read OpenFOAM mesh and write a pro-STAR (v4) bnd/cel/vrt format"
+        "read OpenFOAM mesh and write a STARCD/PROSTAR (v4) bnd/cel/vrt format"
     );
     argList::noParallel();
     timeSelector::addOptions();
@@ -133,5 +134,6 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
 
 // ************************************************************************* //

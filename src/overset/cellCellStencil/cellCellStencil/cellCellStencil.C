@@ -35,22 +35,19 @@ namespace Foam
 {
     defineTypeNameAndDebug(cellCellStencil, 0);
     defineRunTimeSelectionTable(cellCellStencil, mesh);
-
-    template<>
-    const char* NamedEnum
-    <
-        cellCellStencil::cellType,
-        3
-    >::names[] =
-    {
-        "calculated",
-        "interpolated",
-        "hole"
-    };
 }
 
-const Foam::NamedEnum<Foam::cellCellStencil::cellType, 3>
-Foam::cellCellStencil::cellTypeNames_;
+const Foam::Enum
+<
+    Foam::cellCellStencil::cellType
+>
+Foam::cellCellStencil::cellTypeNames_
+{
+    { cellType::CALCULATED, "calculated" },
+    { cellType::INTERPOLATED, "interpolated" },
+    { cellType::HOLE, "hole" },
+};
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -71,18 +68,16 @@ Foam::autoPtr<Foam::cellCellStencil> Foam::cellCellStencil::New
         InfoInFunction << "Constructing cellCellStencil" << endl;
     }
 
-    word type(dict.lookup("method"));
+    const word stencilType(dict.lookup("method"));
 
-
-    meshConstructorTable::iterator cstrIter =
-        meshConstructorTablePtr_->find(type);
+    auto cstrIter = meshConstructorTablePtr_->cfind(stencilType);
 
     if (cstrIter == meshConstructorTablePtr_->end())
     {
         FatalErrorInFunction
             << "Unknown cellCellStencil type "
-            << type << nl << nl
-            << "Valid cellCellStencil types are" << endl
+            << stencilType << nl << nl
+            << "Valid cellCellStencil types :" << endl
             << meshConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
@@ -99,22 +94,22 @@ Foam::cellCellStencil::~cellCellStencil()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::labelIOList& Foam::cellCellStencil::zoneID() const
+const Foam::labelIOList& Foam::cellCellStencil::zoneID(const fvMesh& mesh)
 {
-    if (!mesh_.foundObject<labelIOList>("zoneID"))
+    if (!mesh.foundObject<labelIOList>("zoneID"))
     {
         labelIOList* zoneIDPtr = new labelIOList
         (
             IOobject
             (
                 "zoneID",
-                mesh_.facesInstance(),
+                mesh.facesInstance(),
                 polyMesh::meshSubDir,
-                mesh_,
+                mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            mesh_.nCells()
+            mesh.nCells()
         );
         labelIOList& zoneID = *zoneIDPtr;
 
@@ -123,13 +118,13 @@ const Foam::labelIOList& Foam::cellCellStencil::zoneID() const
             IOobject
             (
                 "zoneID",
-                mesh_.time().findInstance(mesh_.dbDir(), "zoneID"),
-                mesh_,
+                mesh.time().findInstance(mesh.dbDir(), "zoneID"),
+                mesh,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
                 false
             ),
-            mesh_
+            mesh
         );
         forAll(volZoneID, cellI)
         {
@@ -138,7 +133,7 @@ const Foam::labelIOList& Foam::cellCellStencil::zoneID() const
 
         zoneIDPtr->store();
     }
-    return mesh_.lookupObject<labelIOList>("zoneID");
+    return mesh.lookupObject<labelIOList>("zoneID");
 }
 
 
@@ -261,7 +256,7 @@ void Foam::cellCellStencil::globalCellCells
             }
 
             SubList<label> current(stencil, compacti);
-            if (findIndex(current, nbrCelli) == -1)
+            if (!current.found(nbrCelli))
             {
                 stencil[compacti] = nbrCelli;
                 stencilPoints[compacti++] = nbrCc;

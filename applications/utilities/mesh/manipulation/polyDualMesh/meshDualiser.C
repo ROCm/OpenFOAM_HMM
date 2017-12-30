@@ -71,7 +71,7 @@ void Foam::meshDualiser::checkPolyTopoChange(const polyTopoChange& meshMod)
                 FatalErrorInFunction
                     << "duplicate verts:" << newToOld[newI]
                     << " coords:"
-                    << UIndirectList<point>(points, newToOld[newI])()
+                    << UIndirectList<point>(points, newToOld[newI])
                     << abort(FatalError);
             }
         }
@@ -137,7 +137,7 @@ Foam::label Foam::meshDualiser::findDualCell
     }
     else
     {
-        label index = findIndex(mesh_.pointCells()[pointi], celli);
+        label index = mesh_.pointCells()[pointi].find(celli);
 
         return dualCells[index];
     }
@@ -275,7 +275,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //n /= mag(n);
         //Pout<< "Generated internal dualFace:" << dualFacei
         //    << " verts:" << newFace
-        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
+        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
         //    << " n:" << n
         //    << " between dualowner:" << dualCell0
         //    << " dualneigbour:" << dualCell1
@@ -302,7 +302,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //n /= mag(n);
         //Pout<< "Generated internal dualFace:" << dualFacei
         //    << " verts:" << newFace
-        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
+        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
         //    << " n:" << n
         //    << " between dualowner:" << dualCell1
         //    << " dualneigbour:" << dualCell0
@@ -359,7 +359,7 @@ Foam::label Foam::meshDualiser::addBoundaryFace
     //n /= mag(n);
     //Pout<< "Generated boundary dualFace:" << dualFacei
     //    << " verts:" << newFace
-    //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
+    //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)
     //    << " n:" << n
     //    << " on dualowner:" << dualCelli
     //    << endl;
@@ -421,7 +421,7 @@ void Foam::meshDualiser::createFacesAroundEdge
     }
     if (faceToDualPoint_[ie.faceLabel()] != -1)
     {
-        doneEFaces[findIndex(eFaces, ie.faceLabel())] = true;
+        doneEFaces[eFaces.find(ie.faceLabel())] = true;
         verts.append(faceToDualPoint_[ie.faceLabel()]);
     }
     if (cellToDualPoint_[ie.cellLabel()] != -1)
@@ -439,7 +439,7 @@ void Foam::meshDualiser::createFacesAroundEdge
         label facei = ie.faceLabel();
 
         // Mark face as visited.
-        doneEFaces[findIndex(eFaces, facei)] = true;
+        doneEFaces[eFaces.find(facei)] = true;
 
         if (faceToDualPoint_[facei] != -1)
         {
@@ -513,7 +513,7 @@ void Foam::meshDualiser::createFacesAroundEdge
             {
                 label startDual = faceToDualPoint_[startFaceLabel];
 
-                if (startDual != -1 && findIndex(verts, startDual) == -1)
+                if (startDual != -1 && !verts.found(startDual))
                 {
                     verts.append(startDual);
                 }
@@ -554,7 +554,7 @@ void Foam::meshDualiser::createFaceFromInternalFace
 
     //Pout<< "createFaceFromInternalFace : At face:" << facei
     //    << " verts:" << f
-    //    << " points:" << UIndirectList<point>(mesh_.points(), f)()
+    //    << " points:" << UIndirectList<point>(mesh_.points(), f)
     //    << " started walking at edge:" << fEdges[fp]
     //    << " verts:" << mesh_.edges()[fEdges[fp]]
     //    << endl;
@@ -603,7 +603,7 @@ void Foam::meshDualiser::createFaceFromInternalFace
             {
                 FatalErrorInFunction
                     << "face:" << facei << " verts:" << f
-                    << " points:" << UIndirectList<point>(mesh_.points(), f)()
+                    << " points:" << UIndirectList<point>(mesh_.points(), f)
                     << " no feature edge between " << f[fp]
                     << " and " << f[nextFp] << " although have different"
                     << " dual cells." << endl
@@ -666,7 +666,7 @@ void Foam::meshDualiser::createFacesAroundBoundaryPoint
 
         while (true)
         {
-            label index = findIndex(pFaces, facei-pp.start());
+            label index = pFaces.find(facei-pp.start());
 
             // Has face been visited already?
             if (donePFaces[index])
@@ -682,7 +682,7 @@ void Foam::meshDualiser::createFacesAroundBoundaryPoint
 
             // Get the edge before the patchPointi
             const face& f = mesh_.faces()[facei];
-            label fp = findIndex(f, pointi);
+            label fp = f.find(pointi);
             label prevFp = f.rcIndex(fp);
             label edgeI = mesh_.faceEdges()[facei][prevFp];
 
@@ -763,7 +763,7 @@ void Foam::meshDualiser::createFacesAroundBoundaryPoint
 
         // Find edge between pointi and next point on face.
         const labelList& fEdges = mesh_.faceEdges()[facei];
-        label nextEdgeI = fEdges[findIndex(mesh_.faces()[facei], pointi)];
+        label nextEdgeI = fEdges[mesh_.faces()[facei].find(pointi)];
         if (edgeToDualPoint_[nextEdgeI] != -1)
         {
             verts.append(edgeToDualPoint_[nextEdgeI]);
@@ -771,7 +771,7 @@ void Foam::meshDualiser::createFacesAroundBoundaryPoint
 
         do
         {
-            label index = findIndex(pFaces, facei-pp.start());
+            label index = pFaces.find(facei-pp.start());
 
             // Has face been visited already?
             if (donePFaces[index])
@@ -786,7 +786,7 @@ void Foam::meshDualiser::createFacesAroundBoundaryPoint
             // Find edge before pointi on facei
             const labelList& fEdges = mesh_.faceEdges()[facei];
             const face& f = mesh_.faces()[facei];
-            label prevFp = f.rcIndex(findIndex(f, pointi));
+            label prevFp = f.rcIndex(f.find(pointi));
             label edgeI = fEdges[prevFp];
 
             if (edgeToDualPoint_[edgeI] != -1)
@@ -912,7 +912,7 @@ void Foam::meshDualiser::setRefinement
         {
             featureFaceSet[featureFaces[i]] = true;
         }
-        label facei = findIndex(featureFaceSet, false);
+        label facei = featureFaceSet.find(false);
 
         if (facei != -1)
         {
@@ -929,7 +929,7 @@ void Foam::meshDualiser::setRefinement
         {
             featureEdgeSet[featureEdges[i]] = true;
         }
-        label edgeI = findIndex(featureEdgeSet, false);
+        label edgeI = featureEdgeSet.find(false);
 
         if (edgeI != -1)
         {

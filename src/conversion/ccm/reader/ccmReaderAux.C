@@ -174,7 +174,8 @@ void Foam::ccm::reader::writeMeshLabelList
     (
         fmt,
         IOstream::currentVersion,
-        IOstream::UNCOMPRESSED
+        IOstream::UNCOMPRESSED,
+        true
     );
 }
 

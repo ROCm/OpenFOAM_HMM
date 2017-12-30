@@ -76,15 +76,14 @@ Foam::autoPtr<Foam::RBD::rigidBody> Foam::RBD::rigidBody::New
 {
     const word bodyType(dict.lookup("type"));
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(bodyType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(bodyType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown rigidBody type "
             << bodyType << nl << nl
-            << "Valid rigidBody types are : " << endl
+            << "Valid rigidBody types :" << endl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
@@ -119,17 +118,10 @@ void Foam::RBD::rigidBody::merge(const subBody& subBody)
 
 void Foam::RBD::rigidBody::write(Ostream& os) const
 {
-    os.writeKeyword("type")
-        << type() << token::END_STATEMENT << nl;
-
-    os.writeKeyword("mass")
-        << m() << token::END_STATEMENT << nl;
-
-    os.writeKeyword("centreOfMass")
-        << c() << token::END_STATEMENT << nl;
-
-    os.writeKeyword("inertia")
-        << Ic() << token::END_STATEMENT << nl;
+    os.writeEntry("type", type());
+    os.writeEntry("mass", m());
+    os.writeEntry("centreOfMass", c());
+    os.writeEntry("inertia", Ic());
 }
 
 

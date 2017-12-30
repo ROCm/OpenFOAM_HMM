@@ -27,8 +27,8 @@ Class
 Description
     A topoSetSource to select cells based on cell shape.
 
-    Handles all ones from cellModeller and splitHex with 10 degrees
-    feature angle.
+    Handles all known ones from static collection in cellModel
+    and splitHex with 10 degrees feature angle.
 
 SourceFiles
     shapeToCell.C

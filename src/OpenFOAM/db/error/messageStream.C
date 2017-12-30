@@ -31,17 +31,18 @@ License
 
 int Foam::messageStream::level(Foam::debug::debugSwitch("level", 2));
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::messageStream::messageStream
 (
     const string& title,
-    errorSeverity sev,
+    const errorSeverity severity,
     const int maxErrors
 )
 :
     title_(title),
-    severity_(sev),
+    severity_(severity),
     maxErrors_(maxErrors),
     errorCount_(0)
 {}
@@ -55,6 +56,8 @@ Foam::messageStream::messageStream(const dictionary& dict)
     errorCount_(0)
 {}
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 {
@@ -76,6 +79,8 @@ Foam::OSstream& Foam::messageStream::masterStream(const label communicator)
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
 Foam::OSstream& Foam::messageStream::operator()
 (
     const char* functionName,
@@ -85,8 +90,8 @@ Foam::OSstream& Foam::messageStream::operator()
 {
     OSstream& os = operator OSstream&();
 
-    os  << endl
-        << "    From function " << functionName << endl
+    os  << nl
+        << "    From function " << functionName << nl
         << "    in file " << sourceFileName
         << " at line " << sourceFileLineNumber << endl
         << "    ";
@@ -189,7 +194,7 @@ Foam::messageStream::operator Foam::OSstream&()
 {
     if (level)
     {
-        bool collect = (severity_ == INFO || severity_ == WARNING);
+        const bool collect = (severity_ == INFO || severity_ == WARNING);
 
         // Report the error
         if (!Pstream::master() && collect)
@@ -237,7 +242,7 @@ Foam::messageStream::operator Foam::OSstream&()
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Variables  * * * * * * * * * * * * * //
 
 Foam::messageStream Foam::SeriousError
 (

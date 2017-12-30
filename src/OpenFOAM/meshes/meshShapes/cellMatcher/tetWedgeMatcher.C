@@ -26,16 +26,8 @@ License
 #include "tetWedgeMatcher.H"
 #include "cellMatcher.H"
 #include "primitiveMesh.H"
-#include "primitiveMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "ListOps.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::tetWedgeMatcher::vertPerCell = 5;
-const Foam::label Foam::tetWedgeMatcher::facePerCell = 4;
-const Foam::label Foam::tetWedgeMatcher::maxVertPerFace = 4;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,7 +38,7 @@ Foam::tetWedgeMatcher::tetWedgeMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-       "tetWedge"
+        "tetWedge" // same as cellModel::modelNames[cellModel::TETWEDGE]
     )
 {}
 
@@ -240,31 +232,25 @@ bool Foam::tetWedgeMatcher::faceSizeMatch
     label nTris = 0;
     label nQuads = 0;
 
-    forAll(myFaces, myFacei)
+    for (const label facei : myFaces)
     {
-        label size = faces[myFaces[myFacei]].size();
+        const label size = faces[facei].size();
 
         if (size == 3)
         {
-            nTris++;
+            ++nTris;
         }
         else if (size == 4)
         {
-            nQuads++;
+            ++nQuads;
         }
         else
         {
             return false;
         }
     }
-    if ((nTris == 2) && (nQuads == 2))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+
+    return (nTris == 2 && nQuads == 2);
 }
 
 
@@ -318,10 +304,8 @@ bool Foam::tetWedgeMatcher::matches
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

@@ -35,21 +35,21 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+const Foam::Enum
+<
+    Foam::discreteSurface::samplingSource
+>
+Foam::discreteSurface::samplingSourceNames_
+{
+    { samplingSource::cells, "cells" },
+    { samplingSource::insideCells, "insideCells" },
+    { samplingSource::boundaryFaces, "boundaryFaces" },
+};
+
+
 namespace Foam
 {
     defineTypeNameAndDebug(discreteSurface, 0);
-
-    template<>
-    const char* NamedEnum<discreteSurface::samplingSource, 3>::names[] =
-    {
-        "cells",
-        "insideCells",
-        "boundaryFaces"
-    };
-
-    const NamedEnum<discreteSurface::samplingSource, 3>
-    discreteSurface::samplingSourceNames_;
-
 
     //- Private class for finding nearest
     //  Comprising:
@@ -431,7 +431,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
     }
 
     // Subset cellOrFaceLabels (for compact faces)
-    cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
+    cellOrFaceLabels = labelUIndList(cellOrFaceLabels, faceMap)();
 
     // Store any face per point (without using pointFaces())
     labelList pointToFace(pointMap.size());
@@ -686,7 +686,7 @@ Foam::discreteSurface::discreteSurface
             false
         )
     ),
-    sampleSource_(samplingSourceNames_[dict.lookup("source")]),
+    sampleSource_(samplingSourceNames_.lookup("source", dict)),
     needsUpdate_(true),
     keepIds_(dict.lookupOrDefault<Switch>("keepIds", false)),
     originalIds_(),

@@ -44,9 +44,9 @@ SourceFiles
 namespace Foam
 {
 
-// Read the fields and optionally subset and put on the pointer list
+// Read the fields, optionally subset, and place on the pointer list
 template<class GeoField>
-void readFields
+label readFields
 (
     const meshSubsetHelper& helper,
     const typename GeoField::Mesh& mesh,

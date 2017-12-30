@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -36,13 +36,12 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "globalMeshData.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "pointSet.H"
 #include "topoSetSource.H"
-#include "OFstream.H"
-#include "IFstream.H"
+#include "Fstream.H"
 #include "demandDrivenData.H"
 #include "foamVtkWriteCellSetFaces.H"
 #include "foamVtkWriteFaceSet.H"
@@ -52,6 +51,7 @@ Description
 #include "faceZoneSet.H"
 #include "pointZoneSet.H"
 #include "timeSelector.H"
+#include "collatedFileOperation.H"
 
 #include <stdio.h>
 
@@ -85,7 +85,7 @@ void writeVTK
         vtk::writeFaceSet
         (
             mesh,
-            currentSet,
+            dynamicCast<const faceSet&>(currentSet),
             mesh.time().path()/vtkBaseName,
             vtk::formatType::LEGACY_BINARY
         );
@@ -96,7 +96,7 @@ void writeVTK
         vtk::writeCellSetFaces
         (
             mesh,
-            currentSet,
+            dynamicCast<const cellSet&>(currentSet),
             mesh.time().path()/vtkBaseName,
             vtk::formatType::LEGACY_BINARY
         );
@@ -106,7 +106,7 @@ void writeVTK
         vtk::writePointSet
         (
             mesh,
-            currentSet,
+            dynamicCast<const pointSet&>(currentSet),
             mesh.time().path()/vtkBaseName,
             vtk::formatType::LEGACY_BINARY
         );
@@ -743,6 +743,11 @@ commandStatus parseAction(const word& actionName)
 
 int main(int argc, char *argv[])
 {
+    // Specific to topoSet/setSet: quite often we want to block upon writing
+    // a set so we can immediately re-read it. So avoid use of threading
+    // for set writing.
+    fileOperations::collatedFileOperation::maxThreadFileBufferSize = 0;
+
     timeSelector::addOptions(true, false);
     #include "addRegionOption.H"
     argList::addBoolOption("noVTK", "do not write VTK files");
@@ -903,10 +908,10 @@ int main(int argc, char *argv[])
             }
 
             // Strip off anything after #
-            string::size_type i = rawLine.find_first_of("#");
+            string::size_type i = rawLine.find('#');
             if (i != string::npos)
             {
-                rawLine = rawLine(0, i);
+                rawLine.resize(i);
             }
 
             if (rawLine.empty())

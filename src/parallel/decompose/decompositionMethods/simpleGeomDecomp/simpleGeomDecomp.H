@@ -25,6 +25,14 @@ Class
     Foam::simpleGeomDecomp
 
 Description
+    Simple geometric decomposition, selectable as \c simple
+
+    Method coefficients:
+    \table
+        Property  | Description                 | Required | Default
+        n         | (nx ny nz)                  | yes
+        delta     | delta for rotation matrix   | no | 0.001
+    \endtable
 
 SourceFiles
     simpleGeomDecomp.C
@@ -40,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class simpleGeomDecomp Declaration
+                      Class simpleGeomDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
 class simpleGeomDecomp
@@ -69,8 +77,8 @@ class simpleGeomDecomp
         ) const;
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const simpleGeomDecomp&);
-        simpleGeomDecomp(const simpleGeomDecomp&);
+        void operator=(const simpleGeomDecomp&) = delete;
+        simpleGeomDecomp(const simpleGeomDecomp&) = delete;
 
 
 public:
@@ -81,8 +89,15 @@ public:
 
     // Constructors
 
-        //- Construct given the decomposition dictionary
-        simpleGeomDecomp(const dictionary& decompositionDict);
+        //- Construct given decomposition dictionary
+        simpleGeomDecomp(const dictionary& decompDict);
+
+        //- Construct given decomposition dictionary and region name
+        simpleGeomDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor

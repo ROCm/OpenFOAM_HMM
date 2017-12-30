@@ -656,7 +656,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 
     if (debug)
     {
-        label index = findIndex(map().reverseFaceMap(), -1);
+        label index = map().reverseFaceMap().find(-1);
 
         if (index != -1)
         {
@@ -789,7 +789,7 @@ void Foam::fvMeshDistribute::getNeighbourData
 
             // Which processor they will end up on
             SubList<label>(nbrNewNbrProc, pp.size(), offset) =
-                UIndirectList<label>(distribution, pp.faceCells())();
+                labelUIndList(distribution, pp.faceCells())();
         }
     }
 
@@ -1413,7 +1413,7 @@ void Foam::fvMeshDistribute::sendMesh
     //
     //    forAll(cellZones, zoneI)
     //    {
-    //        UIndirectList<label>(cellZoneID, cellZones[zoneI]) = zoneI;
+    //        labelUIndList(cellZoneID, cellZones[zoneI]) = zoneI;
     //    }
     //}
 

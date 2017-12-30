@@ -43,29 +43,26 @@ void Foam::AABBTree<Type>::writeOBJ
 ) const
 {
     const pointField pts(bb.points());
-    forAll(pts, i)
+    for (const point& pt : pts)
     {
-        meshTools::writeOBJ(os, pts[i]);
+        meshTools::writeOBJ(os, pt);
     }
 
     if (writeLinesOnly)
     {
-        forAll(bb.edges, i)
+        for (const edge& e : bb.edges)
         {
-            const edge& e = bb.edges[i];
             os  << "l " << e[0] + vertI + 1 << ' ' << e[1] + vertI + 1 << nl;
         }
     }
     else
     {
-        forAll(bb.faces, i)
+        for (const face& f : bb.faces)
         {
-            const face& f = bb.faces[i];
-
             os  << 'f';
-            forAll(f, fp)
+            for (const label fpi : f)
             {
-                os  << ' ' << f[fp] + vertI + 1;
+                os  << ' ' << fpi + vertI + 1;
             }
             os  << nl;
         }
@@ -144,7 +141,7 @@ void Foam::AABBTree<Type>::createBoxes
 
     direction maxDir = 0;
     scalar maxSpan = span[maxDir];
-    for (label dirI = 1; dirI < 3; dirI++)
+    for (label dirI = 1; dirI < 3; ++dirI)
     {
         if (span[dirI] > maxSpan)
         {
@@ -163,14 +160,12 @@ void Foam::AABBTree<Type>::createBoxes
         PackedBoolList isUsedPoint(points.size());
         DynamicList<scalar> component(points.size());
 
-        forAll(objectIDs, i)
+        for (const label objI : objectIDs)
         {
-            const label objI = objectIDs[i];
             const Type& obj = objects[objI];
 
-            forAll(obj, pI)
+            for (const label pointI : obj)
             {
-                const label pointI = obj[pI];
                 if (isUsedPoint.set(pointI))
                 {
                     component.append(points[pointI][maxDir]);
@@ -203,17 +198,15 @@ void Foam::AABBTree<Type>::createBoxes
     DynamicList<label> maxBinObjectIDs(objectIDs.size());
     treeBoundBox maxBb(boundBox::invertedBox);
 
-    forAll(objectIDs, i)
+    for (const label objI : objectIDs)
     {
-        const label objI = objectIDs[i];
         const Type& obj = objects[objI];
 
         bool intoMin = false;
         bool intoMax = false;
 
-        forAll(obj, pI)
+        for (const label pointI : obj)
         {
-            const label pointI = obj[pI];
             const point& pt = points[pointI];
             if (pt[maxDir] < divMin)
             {
@@ -225,7 +218,8 @@ void Foam::AABBTree<Type>::createBoxes
             }
         }
 
-
+        // Note: object is inserted into both min/max child boxes (duplicated)
+        // if it crosses the bin boundaries
         if (intoMin)
         {
             minBinObjectIDs.append(objI);
@@ -238,7 +232,7 @@ void Foam::AABBTree<Type>::createBoxes
         }
     }
 
-    // inflate box in case geometry reduces to 2-D
+    // Inflate box in case geometry reduces to 2-D
     if (minBinObjectIDs.size())
     {
         minBb.inflate(0.01);
@@ -255,13 +249,13 @@ void Foam::AABBTree<Type>::createBoxes
     label minI;
     if (minBinObjectIDs.size() > minLeafSize_ && level < maxLevel_)
     {
-        // new leaf
+        // New leaf
         minI = nodes.size();
         nodes.append(labelPair(-1, -1));
     }
     else
     {
-        // update existing leaf
+        // Update existing leaf
         minI = -addressing.size() - 1;
         addressing.append(minBinObjectIDs);
     }
@@ -269,13 +263,13 @@ void Foam::AABBTree<Type>::createBoxes
     label maxI;
     if (maxBinObjectIDs.size() > minLeafSize_ && level < maxLevel_)
     {
-        // new leaf
+        // New leaf
         maxI = nodes.size();
         nodes.append(labelPair(-1, -1));
     }
     else
     {
-        // update existing leaf
+        // Update existing leaf
         maxI = -addressing.size() - 1;
         addressing.append(maxBinObjectIDs);
     }
@@ -283,7 +277,7 @@ void Foam::AABBTree<Type>::createBoxes
     nodes(nodeI) = labelPair(minI, maxI);
     bbs(nodeI) = Pair<treeBoundBox>(minBb, maxBb);
 
-    // recurse
+    // Recurse
     if (minI >= 0)
     {
         createBoxes
@@ -437,10 +431,8 @@ const Foam::List<Foam::labelList>& Foam::AABBTree<Type>::addressing() const
 template<class Type>
 bool Foam::AABBTree<Type>::pointInside(const point& pt) const
 {
-    forAll(boundBoxes_, i)
+    for (const treeBoundBox& bb : boundBoxes_)
     {
-        const treeBoundBox& bb = boundBoxes_[i];
-
         if (bb.contains(pt))
         {
             return true;
@@ -454,10 +446,8 @@ bool Foam::AABBTree<Type>::pointInside(const point& pt) const
 template<class Type>
 bool Foam::AABBTree<Type>::overlaps(const boundBox& bbIn) const
 {
-    forAll(boundBoxes_, i)
+    for (const treeBoundBox& bb : boundBoxes_)
     {
-        const treeBoundBox& bb = boundBoxes_[i];
-
         if (bb.overlaps(bbIn))
         {
             return true;

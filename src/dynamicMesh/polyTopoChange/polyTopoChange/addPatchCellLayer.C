@@ -520,7 +520,7 @@ void Foam::addPatchCellLayer::findZoneFace
     const polyMesh& mesh,
     const indirectPrimitivePatch& pp,
     const label ppEdgeI,
-    const UIndirectList<label>& excludeFaces,
+    const labelUIndList& excludeFaces,
     const labelList& meshFaces,
 
     label& inflateFaceI,
@@ -540,7 +540,7 @@ void Foam::addPatchCellLayer::findZoneFace
 
         if
         (
-            (findIndex(excludeFaces, faceI) == -1)
+            !excludeFaces.found(faceI)
          && (
                 (mesh.isInternalFace(faceI) && useInternalFaces)
              || (!mesh.isInternalFace(faceI) && useBoundaryFaces)
@@ -749,7 +749,7 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
 
             if (otherProci != -1)
             {
-                if (findIndex(gd[Pstream::myProcNo()], otherProci) != -1)
+                if (gd[Pstream::myProcNo()].found(otherProci))
                 {
                     // There is already a processorPolyPatch to otherProci.
                     // Use it. Note that we can only index procPatchMap
@@ -789,7 +789,7 @@ void Foam::addPatchCellLayer::calcExtrudeInfo
     {
         if (edgePatchID[edgei] == -1)
         {
-            UIndirectList<label> ppFaces(pp.addressing(), edgeFaces[edgei]);
+            labelUIndList ppFaces(pp.addressing(), edgeFaces[edgei]);
 
             label meshEdgei = meshEdges[edgei];
             const labelList& meshFaces = mesh.edgeFaces
@@ -1113,7 +1113,7 @@ void Foam::addPatchCellLayer::setRefinement
 
         {
             labelList n(mesh_.nPoints(), 0);
-            UIndirectList<label>(n, meshPoints) = nPointLayers;
+            labelUIndList(n, meshPoints) = nPointLayers;
             syncTools::syncPointList(mesh_, n, maxEqOp<label>(), label(0));
 
             // Non-synced
@@ -1916,7 +1916,7 @@ void Foam::addPatchCellLayer::setRefinement
                                                 stringedVerts
                                             ) << nl
                                         << "stringNLayers:"
-                                        <<  UIndirectList<label>
+                                        <<  labelUIndList
                                             (
                                                 nPointLayers,
                                                 stringedVerts

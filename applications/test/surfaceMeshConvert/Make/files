@@ -1,0 +1,3 @@
+Test-surfaceMeshConvert.C
+
+EXE = $(FOAM_APPBIN)/Test-surfaceMeshConvert

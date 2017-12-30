@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,17 +27,22 @@ Class
 Description
     Remove a dictionary entry.
 
-    The \c \#remove directive takes a list or a single wordRe.
+    The \c \#remove directive takes a list or a single keyType.
     For example,
     \verbatim
         #remove entry0
         #remove ( entry1 entry2 entry3 otherEntry )
         #remove "entry[1-3]"
         #remove ( "entry[1-3]" otherEntry )
+        #remove ^dict1.subdict2.entry2
+        #remove "/dict1/subdict2/entry1"
     \endverbatim
 
-    The removal only occurs in the current context.
-    Removing sub-entries or parent entries is not supported.
+Note
+    Unless otherwise scoped, the removal occurs in the current context.
+    To remove from other scopes, a dot-scoped or slash-scoped syntax is
+    required. The slash-scoped syntax must be quoted to ensure that it
+    is properly parsed.
 
 SourceFiles
     removeEntry.C
@@ -57,32 +62,17 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class removeEntry Declaration
+                         Class removeEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class removeEntry
 :
     public functionEntry
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        removeEntry(const removeEntry&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const removeEntry&) = delete;
-
-
 public:
 
-    //- Runtime type information
-    ClassName("remove");
-
-
-    // Member Functions
-
-        //- Execute the functionEntry in a sub-dict context
-        static bool execute(dictionary& parentDict, Istream& is);
+    //- Remove single or multiple entries. Local or scoped entries.
+    static bool execute(dictionary& parentDict, Istream& is);
 };
 
 

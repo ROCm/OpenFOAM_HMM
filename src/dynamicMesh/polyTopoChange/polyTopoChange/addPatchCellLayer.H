@@ -146,7 +146,7 @@ class addPatchCellLayer
                 {
                     forAll(y, yi)
                     {
-                        if (findIndex(x, y[yi]) == -1)
+                        if (!x.found(y[yi]))
                         {
                             label sz = x.size();
                             x.setSize(sz+1);
@@ -270,7 +270,7 @@ class addPatchCellLayer
             const polyMesh& mesh,
             const indirectPrimitivePatch& pp,
             const label ppEdgeI,
-            const UIndirectList<label>& excludeFaces,
+            const labelUIndList& excludeFaces,
             const labelList& meshFaces,
 
             label& inflateFaceI,

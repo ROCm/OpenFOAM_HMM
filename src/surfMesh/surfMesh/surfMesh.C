@@ -424,9 +424,9 @@ void Foam::surfMesh::addZones
 {
     surfZoneList& zones = Allocator::storedIOZones();
 
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        zones[zoneI] = surfZone(srfZones[zoneI], zoneI);
+        zones[zonei] = surfZone(srfZones[zonei], zonei);
     }
 
     if (validate)
@@ -452,20 +452,29 @@ void Foam::surfMesh::removeFiles() const
 }
 
 
-void Foam::surfMesh::write(const fileName& name, const surfMesh& surf)
+void Foam::surfMesh::write
+(
+    const fileName& name,
+    const dictionary& options
+) const
 {
-    MeshedSurfaceProxy<face>
-    (
-        surf.points(),
-        surf.faces(),
-        surf.surfZones()
-    ).write(name);
+    write(name, name.ext(), options);
 }
 
 
-void Foam::surfMesh::write(const fileName& name)
+void Foam::surfMesh::write
+(
+    const fileName& name,
+    const word& ext,
+    const dictionary& options
+) const
 {
-    write(name, *this);
+    MeshedSurfaceProxy<face>
+    (
+        this->points(),
+        this->faces(),
+        this->surfZones()
+    ).write(name, ext, options);
 }
 
 

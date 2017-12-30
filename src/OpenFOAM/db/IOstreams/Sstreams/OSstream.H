@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,23 +56,23 @@ class OSstream
     // Private data
 
         fileName name_;
-        ostream& os_;
+        std::ostream& os_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const OSstream&);
+        void operator=(const OSstream&) = delete;
 
 
 public:
 
     // Constructors
 
-        //- Set stream status
+        //- Construct as wrapper around std::ostream and set stream status
         OSstream
         (
-            ostream& os,
+            std::ostream& os,
             const string& name,
             streamFormat format=ASCII,
             versionNumber version=currentVersion,
@@ -104,46 +104,66 @@ public:
 
         // Write functions
 
-            //- Write next token to stream
-            virtual Ostream& write(const token&);
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok);
 
             //- Write character
-            virtual Ostream& write(const char);
+            virtual Ostream& write(const char c);
 
             //- Write character string
-            virtual Ostream& write(const char*);
+            virtual Ostream& write(const char* str);
 
             //- Write word
-            virtual Ostream& write(const word&);
+            virtual Ostream& write(const word& str);
 
-            //- Write string
+            //- Write string (quoted)
             //  In the rare case that the string contains a final trailing
             //  backslash, it will be dropped to the appearance of an escaped
             //  double-quote.
-            virtual Ostream& write(const string&);
+            virtual Ostream& write(const string& str);
 
             //- Write std::string surrounded by quotes.
             //  Optional write without quotes.
             virtual Ostream& writeQuoted
             (
-                const std::string&,
+                const std::string& str,
                 const bool quoted=true
             );
 
             //- Write int32_t
-            virtual Ostream& write(const int32_t);
+            virtual Ostream& write(const int32_t val);
 
             //- Write int64_t
-            virtual Ostream& write(const int64_t);
+            virtual Ostream& write(const int64_t val);
 
             //- Write floatScalar
-            virtual Ostream& write(const floatScalar);
+            virtual Ostream& write(const floatScalar val);
 
             //- Write doubleScalar
-            virtual Ostream& write(const doubleScalar);
+            virtual Ostream& write(const doubleScalar val);
 
             //- Write binary block
-            virtual Ostream& write(const char*, std::streamsize);
+            virtual Ostream& write
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- Begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual Ostream& beginRaw(const std::streamsize count);
+
+            //- Low-level raw binary output.
+            virtual Ostream& writeRaw
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- End marker for low-level raw binary output.
+            virtual Ostream& endRaw();
 
             //- Add indentation characters
             virtual void indent();
@@ -151,8 +171,8 @@ public:
 
         // Stream state functions
 
-            //- Set flags of output stream
-            virtual ios_base::fmtflags flags(const ios_base::fmtflags flags);
+            //- Set stream flags
+            virtual ios_base::fmtflags flags(const ios_base::fmtflags f);
 
             //- Flush stream
             virtual void flush();
@@ -163,26 +183,28 @@ public:
             //- Get width of output field
             virtual int width() const;
 
-            //- Set width of output field (and return old width)
-            virtual int width(const int);
+            //- Set width of output field
+            // \return previous width
+            virtual int width(const int w);
 
             //- Get precision of output field
             virtual int precision() const;
 
-            //- Set precision of output field (and return old precision)
-            virtual int precision(const int);
+            //- Set precision of output field
+            // \return old precision
+            virtual int precision(const int p);
 
 
         // STL stream
 
             //- Access to underlying std::ostream
-            virtual ostream& stdStream()
+            virtual std::ostream& stdStream()
             {
                 return os_;
             }
 
             //- Const access to underlying std::ostream
-            virtual const ostream& stdStream() const
+            virtual const std::ostream& stdStream() const
             {
                 return os_;
             }
@@ -191,7 +213,7 @@ public:
         // Print
 
             //- Print description of IOstream to Ostream
-            virtual void print(Ostream&) const;
+            virtual void print(Ostream& os) const;
 };
 
 

@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STARCDsurfaceFormat
 
 Description
-    Read/write the surface shells from pro-STAR vrt/cel files.
+    Read/write the surface shells from PROSTAR vrt/cel files.
 
 Note
     Uses the extension \a .inp (input) to denote the format.
@@ -54,7 +54,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class STARCDsurfaceFormat Declaration
+              Class fileFormats::STARCDsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -67,8 +67,8 @@ class STARCDsurfaceFormat
 
         static inline void writeShell
         (
-            Ostream&,
-            const Face&,
+            Ostream& os,
+            const Face& f,
             const label cellId,
             const label cellTableId
         );
@@ -85,42 +85,37 @@ public:
     // Constructors
 
         //- Construct from file name
-        STARCDsurfaceFormat(const fileName&);
-
-
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<MeshedSurface<Face>> New(const fileName& name)
-        {
-            return autoPtr<MeshedSurface<Face>>
-            (
-                new STARCDsurfaceFormat<Face>(name)
-            );
-        }
+        STARCDsurfaceFormat(const fileName& filename);
 
 
     //- Destructor
-    virtual ~STARCDsurfaceFormat()
-    {}
+    virtual ~STARCDsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& filename);
 
         //- Write object
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 };
 

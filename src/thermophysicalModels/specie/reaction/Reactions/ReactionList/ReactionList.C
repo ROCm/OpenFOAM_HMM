@@ -106,20 +106,21 @@ bool Foam::ReactionList<ThermoType>::readReactionDict()
 template<class ThermoType>
 void Foam::ReactionList<ThermoType>::write(Ostream& os) const
 {
-    os  << "reactions" << nl;
-    os  << token::BEGIN_BLOCK << incrIndent << nl;
+    os.beginBlock("reactions");
 
     forAllConstIter(typename SLPtrList<Reaction<ThermoType>>, *this, iter)
     {
         const Reaction<ThermoType>& r = iter();
-        os  << indent << r.name() << nl
-            << indent << token::BEGIN_BLOCK << incrIndent << nl;
-        os.writeKeyword("type") << r.type() << token::END_STATEMENT << nl;
+
+        os.beginBlock(r.name());
+
+        os.writeEntry("type", r.type());
         r.write(os);
-        os  << decrIndent << indent << token::END_BLOCK << nl;
+
+        os.endBlock();
     }
 
-    os << decrIndent << token::END_BLOCK << nl;
+    os.endBlock();
 }
 
 

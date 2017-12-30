@@ -59,8 +59,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationModelsolarLoad_H
-#define radiationModelsolarLoad_H
+#ifndef radiation_solarLoad_H
+#define radiation_solarLoad_H
 
 #include "radiationModel.H"
 #include "singleCellFvMesh.H"

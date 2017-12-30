@@ -40,15 +40,14 @@ Foam::autoPtr<Foam::pairPotential> Foam::pairPotential::New
         << potentialType << " for "
         << name << " interaction." << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(potentialType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(potentialType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown pairPotential type "
             << potentialType << nl << nl
-            << "Valid pairPotentials are:" << nl
+            << "Valid pairPotential types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

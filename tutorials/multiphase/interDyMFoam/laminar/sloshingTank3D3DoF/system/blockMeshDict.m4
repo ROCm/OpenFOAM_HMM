@@ -28,7 +28,7 @@ define(backQuad, (b$1 b$4 b$3 b$2))
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // User-defined parameters
 
-convertToMeters 1;
+scale   1;
 
 define(l, 20)       // Length of tank (x-direction)
 define(b, 40)       // Breadth of tank (y-direction)

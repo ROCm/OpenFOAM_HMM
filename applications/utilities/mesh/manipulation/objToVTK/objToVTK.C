@@ -34,15 +34,11 @@ Description
 
 #include "argList.H"
 #include "OFstream.H"
-#include <fstream>
-#include <sstream>
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "point.H"
 #include "DynamicList.H"
 
-
 using namespace Foam;
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,14 +111,14 @@ labelList parseVertices(const string& line)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("OBJ file");
-    argList::validArgs.append("output VTK file");
+    argList::addArgument("OBJ file");
+    argList::addArgument("output VTK file");
     argList args(argc, argv);
 
     const fileName objName = args[1];
     const fileName outName = args[2];
 
-    std::ifstream OBJfile(objName.c_str());
+    std::ifstream OBJfile(objName);
 
     if (!OBJfile.good())
     {

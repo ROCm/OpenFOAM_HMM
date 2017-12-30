@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,23 +38,23 @@ namespace surfaceFilmModels
 
 autoPtr<filmRadiationModel> filmRadiationModel::New
 (
-    surfaceFilmModel& model,
+    surfaceFilmRegionModel& model,
     const dictionary& dict
 )
 {
-    word modelType(dict.lookup("radiationModel"));
+    const word modelType(dict.lookup("radiationModel"));
 
     Info<< "    Selecting radiationModel " << modelType << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown radiationModel type " << modelType << nl << nl
-            << "Valid filmRadiationModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Unknown radiationModel type "
+            << modelType << nl << nl
+            << "Valid filmRadiationModel types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

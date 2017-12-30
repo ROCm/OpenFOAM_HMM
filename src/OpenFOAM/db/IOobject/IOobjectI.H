@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,95 +23,143 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "foamVersion.H"
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Name>
-inline Foam::word Foam::IOobject::groupName(Name name, const word& group)
+template<class StringType>
+inline Foam::word Foam::IOobject::groupName(StringType name, const word& group)
 {
-    if (group != word::null)
-    {
-        return name + ('.' + group);
-    }
-    else
+    if (group.empty())
     {
         return name;
     }
-}
-
-
-template<class Stream>
-inline Stream& Foam::IOobject::writeBanner(Stream& os, bool noHint)
-{
-    static bool spacesSet(false);
-    static char spaces[40];
-
-    if (!spacesSet)
-    {
-        memset(spaces, ' ', 40);
-
-        size_t len = strlen(Foam::FOAMversion);
-        if (len < 38)
-        {
-            spaces[38 - len] = '\0';
-        }
-        else
-        {
-            spaces[0] = '\0';
-        }
-        spacesSet = true;
-    }
-
-    if (noHint)
-    {
-        os  <<
-            "/*--------------------------------------"
-            "-------------------------------------*\\\n";
-    }
     else
     {
-        os  <<
-            "/*--------------------------------*- C++ "
-            "-*----------------------------------*\\\n";
+        return name + ('.' + group);
     }
-
-    os  <<
-        "| =========                 |"
-        "                                                 |\n"
-        "| \\\\      /  F ield         |"
-        " OpenFOAM: The Open Source CFD Toolbox           |\n"
-        "|  \\\\    /   O peration     |"
-        " Version:  " << FOAMversion << spaces << "|\n"
-        "|   \\\\  /    A nd           |"
-        " Web:      www.OpenFOAM.com                      |\n"
-        "|    \\\\/     M anipulation  |"
-        "                                                 |\n"
-        "\\*-----------------------------------------"
-        "----------------------------------*/\n";
-
-    return os;
 }
 
 
-template<class Stream>
-inline Stream& Foam::IOobject::writeDivider(Stream& os)
-{
-    os  <<
-        "// * * * * * * * * * * * * * * * * * "
-        "* * * * * * * * * * * * * * * * * * * * //\n";
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-    return os;
+// General access
+
+inline const Foam::word& Foam::IOobject::name() const
+{
+    return name_;
 }
 
-template<class Stream>
-inline Stream& Foam::IOobject::writeEndDivider(Stream& os)
-{
-    os  << "\n\n"
-        "// *****************************************"
-        "******************************** //\n";
 
-    return os;
+inline const Foam::word& Foam::IOobject::headerClassName() const
+{
+    return headerClassName_;
+}
+
+
+inline Foam::word& Foam::IOobject::headerClassName()
+{
+    return headerClassName_;
+}
+
+
+inline const Foam::string& Foam::IOobject::note() const
+{
+    return note_;
+}
+
+
+inline Foam::string& Foam::IOobject::note()
+{
+    return note_;
+}
+
+
+inline bool Foam::IOobject::registerObject() const
+{
+    return registerObject_;
+}
+
+
+inline bool& Foam::IOobject::registerObject()
+{
+    return registerObject_;
+}
+
+
+inline bool Foam::IOobject::globalObject() const
+{
+    return globalObject_;
+}
+
+
+inline bool& Foam::IOobject::globalObject()
+{
+    return globalObject_;
+}
+
+
+// Read/write options
+
+inline Foam::IOobject::readOption Foam::IOobject::readOpt() const
+{
+    return rOpt_;
+}
+
+
+inline Foam::IOobject::readOption& Foam::IOobject::readOpt()
+{
+    return rOpt_;
+}
+
+
+inline Foam::IOobject::writeOption Foam::IOobject::writeOpt() const
+{
+    return wOpt_;
+}
+
+
+inline Foam::IOobject::writeOption& Foam::IOobject::writeOpt()
+{
+    return wOpt_;
+}
+
+
+// Path components
+
+inline const Foam::fileName& Foam::IOobject::instance() const
+{
+    return instance_;
+}
+
+
+inline Foam::fileName& Foam::IOobject::instance()
+{
+    return instance_;
+}
+
+
+inline const Foam::fileName& Foam::IOobject::local() const
+{
+    return local_;
+}
+
+
+inline Foam::fileName Foam::IOobject::objectPath() const
+{
+    return path()/name();
+}
+
+
+// Error Handling
+
+inline bool Foam::IOobject::good() const
+{
+    return objState_ == GOOD;
+}
+
+
+inline bool Foam::IOobject::bad() const
+{
+    return objState_ == BAD;
 }
 
 

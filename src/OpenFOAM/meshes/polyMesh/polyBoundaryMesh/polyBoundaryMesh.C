@@ -27,7 +27,6 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "processorPolyPatch.H"
-#include "stringListOps.H"
 #include "PstreamBuffers.H"
 #include "lduSchedule.H"
 #include "globalMeshData.H"
@@ -657,7 +656,11 @@ Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
 }
 
 
-Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
+Foam::label Foam::polyBoundaryMesh::findPatchID
+(
+    const word& patchName,
+    bool allowNotFound
+) const
 {
     const polyPatchList& patches = *this;
 
@@ -667,6 +670,20 @@ Foam::label Foam::polyBoundaryMesh::findPatchID(const word& patchName) const
         {
             return patchi;
         }
+    }
+
+    if (!allowNotFound)
+    {
+        string regionStr("");
+        if (mesh_.name() != polyMesh::defaultRegion)
+        {
+            regionStr = "in region '" + mesh_.name() + "' ";
+        }
+
+        FatalErrorInFunction
+            << "Patch '" << patchName << "' not found. "
+            << "Available patch names " << regionStr << "include: " << names()
+            << exit(FatalError);
     }
 
     // Patch not found
@@ -1120,10 +1137,11 @@ bool Foam::polyBoundaryMesh::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
-    IOstream::compressionType cmp
+    IOstream::compressionType cmp,
+    const bool valid
 ) const
 {
-    return regIOobject::writeObject(fmt, ver, IOstream::UNCOMPRESSED);
+    return regIOobject::writeObject(fmt, ver, IOstream::UNCOMPRESSED, valid);
 }
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //

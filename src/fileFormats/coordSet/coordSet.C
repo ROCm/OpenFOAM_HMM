@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +27,33 @@ License
 
 // * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * * //
 
-const Foam::Enum<Foam::coordSet::coordFormat>
-    Foam::coordSet::coordFormatNames_
+const Foam::Enum
+<
+    Foam::coordSet::coordFormat
+>
+Foam::coordSet::coordFormatNames_
+{
+    { coordFormat::XYZ, "xyz" },
+    { coordFormat::X, "x" },
+    { coordFormat::Y, "y" },
+    { coordFormat::Z, "z" },
+    { coordFormat::DISTANCE, "distance" }
+};
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::coordSet::checkDimensions() const
+{
+    if (size() != curveDist_.size())
     {
-        { coordFormat::XYZ, "xyz" },
-        { coordFormat::X, "x" },
-        { coordFormat::Y, "y" },
-        { coordFormat::Z, "z" },
-        { coordFormat::DISTANCE, "distance" }
-    };
+        FatalErrorInFunction
+            << "Size of points and curve distance must be the same" << nl
+            << "    points size : " << size()
+            << "    curve size  : " << curveDist_.size()
+            << abort(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -65,49 +83,61 @@ Foam::coordSet::coordSet
     name_(name),
     axis_(coordFormatNames_[axis]),
     curveDist_(curveDist)
-{}
+{
+    checkDimensions();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::coordSet::hasVectorAxis() const
 {
-    return axis_ == XYZ;
+    return axis_ == coordFormat::XYZ;
 }
 
 
-Foam::scalar Foam::coordSet::scalarCoord
-(
-    const label index
-)   const
+Foam::scalar Foam::coordSet::scalarCoord(const label index) const
 {
     const point& p = operator[](index);
 
-    if (axis_ == X)
+    switch (axis_)
     {
-        return p.x();
-    }
-    else if (axis_ == Y)
-    {
-        return p.y();
-    }
-    else if (axis_ == Z)
-    {
-        return p.z();
-    }
-    else if (axis_ == DISTANCE)
-    {
-        // Use distance to reference point
-        return curveDist_[index];
-    }
-    else
-    {
-        FatalErrorInFunction
-            << "Illegal axis specification " << axis_
-            << " for sampling line " << name_
-            << exit(FatalError);
+        case coordFormat::X:
+        {
+            return p.x();
+        }
+        case coordFormat::Y:
+        {
+            return p.y();
+        }
+        case coordFormat::Z:
+        {
+            return p.z();
+        }
+        case coordFormat::DISTANCE:
+        {
+            // Note: If this has been constructed from the 'name' and 'axis'
+            // constructor the curveDist list will not have been set
 
-        return 0;
+            if (curveDist_.empty())
+            {
+                FatalErrorInFunction
+                    << "Axis type '" << coordFormatNames_[axis_]
+                    << "' requested but curve distance has not been set"
+                    << abort(FatalError);
+            }
+
+            return curveDist_[index];
+        }
+        default:
+        {
+            FatalErrorInFunction
+                << "Illegal axis specification '" << coordFormatNames_[axis_]
+                << "' for sampling line " << name_
+                << exit(FatalError);
+
+            return 0;
+        }
     }
 }
 
@@ -122,14 +152,14 @@ Foam::point Foam::coordSet::vectorCoord(const label index) const
 
 Foam::Ostream& Foam::coordSet::write(Ostream& os) const
 {
-    os  << "name:" << name_ << " axis:" << axis_
-        << endl
-        << endl << "\t(coord)"
+    os  << "name:" << name_ << " axis:" << coordFormatNames_[axis_]
+        << nl
+        << nl << "\t(coord)"
         << endl;
 
-    forAll(*this, sampleI)
+    for (const point& pt : *this)
     {
-        os  << '\t' << operator[](sampleI) << endl;
+        os  << '\t' << pt << endl;
     }
 
     return os;

@@ -19,12 +19,12 @@ bool massFluxInterpolation
     pimple.dict().lookupOrDefault("massFluxInterpolation", false)
 );
 
-bool ddtCorr
-(
-    pimple.dict().lookupOrDefault("ddtCorr", true)
-);
-
 bool adjustFringe
 (
     pimple.dict().lookupOrDefault("oversetAdjustPhi", false)
+);
+
+bool ddtCorr
+(
+    pimple.dict().lookupOrDefault("ddtCorr", true)
 );

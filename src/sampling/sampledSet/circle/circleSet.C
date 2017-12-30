@@ -52,19 +52,7 @@ void Foam::circleSet::calcSamples
     DynamicList<scalar>& samplingCurveDist
 ) const
 {
-    static const string funcName =
-    (
-        "void circleSet::calcSamples"
-        "("
-            "DynamicList<point>&, "
-            "DynamicList<label>&, "
-            "DynamicList<label>&, "
-            "DynamicList<label>&, "
-            "DynamicList<scalar>&"
-        ") const"
-    );
-
-    // set start point
+    // Set start point
     label celli = searchEngine().findCell(startPoint_);
     if (celli != -1)
     {
@@ -81,12 +69,12 @@ void Foam::circleSet::calcSamples
             << " at location " << startPoint_ << endl;
     }
 
-    // add remaining points
+    // Add remaining points
     const scalar alpha = constant::mathematical::pi/180.0*dTheta_;
     const scalar sinAlpha = sin(alpha);
     const scalar cosAlpha = cos(alpha);
 
-    // first axis
+    // First axis
     vector axis1 = startPoint_ - origin_;
     const scalar radius = mag(axis1);
 
@@ -214,7 +202,7 @@ Foam::circleSet::circleSet
     startPoint_(dict.lookup("startPoint")),
     dTheta_(readScalar(dict.lookup("dTheta")))
 {
-    // normalise circleAxis
+    // Normalise circleAxis
     circleAxis_ /= mag(circleAxis_);
 
     genSamples();

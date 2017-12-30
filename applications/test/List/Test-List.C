@@ -37,7 +37,7 @@ See also
 #include "wordReList.H"
 
 #include "IOstreams.H"
-#include "IStringStream.H"
+#include "StringStream.H"
 #include "scalar.H"
 #include "vector.H"
 
@@ -47,8 +47,23 @@ See also
 #include "SubList.H"
 
 #include <list>
+#include <numeric>
 
 using namespace Foam;
+
+template<class T, class ListType>
+void testFind(const T& val, const ListType& lst)
+{
+    Info<< nl
+        << "Search for "<< val << " in " << flatOutput(lst) << nl
+        <<" found() = " << lst.found(val)
+        <<" find() = " << lst.find(val)
+        <<" rfind() = " << lst.rfind(val)
+        <<" find(2) = " << lst.find(val, 2)
+        <<" rfind(2) = " << lst.rfind(val, 2)
+        <<" findIndex = " << findIndex(lst, val) << nl
+        << nl;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -64,6 +79,33 @@ int main(int argc, char *argv[])
     argList::addBoolOption("flag");
 
     #include "setRootCase.H"
+
+    {
+        List<label> ident(15);
+        std::iota(ident.begin(), ident.end(), 0);
+
+        Info<<"Ident:";
+        forAllConstIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"reverse:";
+        forAllReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"const reverse:";
+        forAllConstReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+    }
+
 
     if (false)
     {
@@ -84,14 +126,36 @@ int main(int argc, char *argv[])
     {
         vector(0, 1, 2),
         vector(3, 4, 5),
-        vector(6, 7, 8)
+        vector(6, 7, 8),
+        vector(0, 1, 2),
+        vector(3, 4, 5),
+        vector(6, 7, 8),
     };
     Info<< "list2: " << list2 << endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllConstIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstReverseIters(list2): ";
+    forAllConstReverseIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllIters(list2, iter) { *iter *= 2; Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllReverseIters(list2): ";
+    forAllReverseIters(list2, iter) { *iter *= 0.5; Info<< " " << *iter; }
+    Info<< endl;
 
     list1.append(list2);
     Info<< "list1.append(list2): " << list1 << endl;
 
-    Info<< findIndex(list2, vector(3, 4, 5)) << endl;
+    for (const vector& val : { vector(3, 4, 5), vector(10,11, 12)} )
+    {
+        testFind(val, list2);
+    }
 
     list2.setSize(10, vector(1, 2, 3));
     Info<< "list2: " << list2 << endl;

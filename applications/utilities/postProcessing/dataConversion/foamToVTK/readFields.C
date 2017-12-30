@@ -34,9 +34,47 @@ namespace Foam
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class GeoField>
-void readFields
+label readFields
 (
     const meshSubsetHelper& helper,
+    const typename GeoField::Mesh& mesh,
+    const IOobjectList& objects,
+    const HashSet<word>& selectedFields,
+    PtrList<const GeoField>& fields
+)
+{
+    label nFields = 0;
+
+    // Available fields of type GeomField
+    const wordList fieldNames = objects.sortedNames(GeoField::typeName);
+
+    fields.setSize(fieldNames.size());
+
+    // Construct the fields
+    for (const word& fieldName : fieldNames)
+    {
+        if (selectedFields.empty() || selectedFields.found(fieldName))
+        {
+            fields.set
+            (
+                nFields++,
+                helper.interpolate
+                (
+                    GeoField(*(objects[fieldName]), mesh)
+                ).ptr()
+            );
+        }
+    }
+
+    fields.setSize(nFields);
+
+    return nFields;
+}
+
+
+template<class GeoField>
+void readFields
+(
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
     const HashSet<word>& selectedFields,
@@ -50,17 +88,14 @@ void readFields
     fields.setSize(fieldObjects.size());
     label nFields = 0;
 
-    forAllConstIter(IOobjectList, fieldObjects, iter)
+    forAllIters(fieldObjects, iter)
     {
         if (selectedFields.empty() || selectedFields.found(iter()->name()))
         {
             fields.set
             (
                 nFields++,
-                helper.interpolate
-                (
-                    GeoField(*iter(), mesh)
-                ).ptr()
+                new GeoField(*iter(), mesh)
             );
         }
     }

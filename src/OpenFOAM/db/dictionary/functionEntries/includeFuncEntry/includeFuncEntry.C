@@ -33,14 +33,13 @@ namespace Foam
 {
 namespace functionEntries
 {
-    defineTypeNameAndDebug(includeFuncEntry, 0);
-
-    addToMemberFunctionSelectionTable
+    addNamedToMemberFunctionSelectionTable
     (
         functionEntry,
         includeFuncEntry,
         execute,
-        dictionaryIstream
+        dictionaryIstream,
+        includeFunc
     );
 }
 }
@@ -55,7 +54,7 @@ bool Foam::functionEntries::includeFuncEntry::execute
 )
 {
     const word fNameArgs(is);
-    HashSet<word> selectedFields;
+    HashSet<wordRe> selectedFields;
 
     return functionObjectList::readFunctionObject
     (

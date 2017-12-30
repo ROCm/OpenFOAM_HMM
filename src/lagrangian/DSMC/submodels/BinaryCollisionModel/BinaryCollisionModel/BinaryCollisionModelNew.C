@@ -39,15 +39,14 @@ Foam::BinaryCollisionModel<CloudType>::New
 
     Info<< "Selecting BinaryCollisionModel " << modelType << endl;
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(modelType);
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(modelType);
 
     if (!cstrIter.found())
     {
         FatalErrorInFunction
             << "Unknown BinaryCollisionModel type "
             << modelType << nl << nl
-            << "Valid BinaryCollisionModel types are:" << nl
+            << "Valid BinaryCollisionModel types :" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }

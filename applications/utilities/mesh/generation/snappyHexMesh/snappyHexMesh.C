@@ -53,7 +53,6 @@ Description
 #include "faceSet.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
-#include "cellModeller.H"
 #include "uindirectPrimitivePatch.H"
 #include "surfZoneIdentifierList.H"
 #include "UnsortedMeshedSurface.H"
@@ -315,7 +314,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         }
     }
 
-    surfacePtr.set
+    surfacePtr.reset
     (
         new refinementSurfaces
         (
@@ -393,7 +392,7 @@ void extractSurface
 
     // Collect sizes. Hash on names to handle local-only patches (e.g.
     //  processor patches)
-    HashTable<label> patchSize(1000);
+    HashTable<label> patchSize(1024);
     label nFaces = 0;
     forAllConstIter(labelHashSet, includePatches, iter)
     {
@@ -405,7 +404,7 @@ void extractSurface
 
 
     // Allocate zone/patch for all patches
-    HashTable<label> compactZoneID(1000);
+    HashTable<label> compactZoneID(1024);
     forAllConstIter(HashTable<label>, patchSize, iter)
     {
         label sz = compactZoneID.size();
@@ -531,6 +530,7 @@ void extractSurface
           ? runTime.path()/".."/outFileName
           : runTime.path()/outFileName
         );
+        globalCasePath.clean();
 
         Info<< "Writing merged surface to " << globalCasePath << endl;
 
@@ -731,7 +731,7 @@ int main(int argc, char *argv[])
                 << runTime.timeName() << nl << endl;
         }
 
-        meshPtr.set
+        meshPtr.reset
         (
             new fvMesh
             (
@@ -848,7 +848,7 @@ int main(int argc, char *argv[])
             (
                 meshRefinement::readFlags
                 (
-                    meshRefinement::IOdebugTypeNames,
+                    meshRefinement::debugTypeNames,
                     flags
                 )
             );
@@ -873,7 +873,7 @@ int main(int argc, char *argv[])
                 (
                     meshRefinement::readFlags
                     (
-                        meshRefinement::IOwriteTypeNames,
+                        meshRefinement::writeTypeNames,
                         flags
                     )
                 )
@@ -892,7 +892,7 @@ int main(int argc, char *argv[])
                 (
                     meshRefinement::readFlags
                     (
-                        meshRefinement::IOoutputTypeNames,
+                        meshRefinement::outputTypeNames,
                         flags
                     )
                 )
@@ -982,7 +982,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        surfacesPtr.set
+        surfacesPtr.reset
         (
             new refinementSurfaces
             (

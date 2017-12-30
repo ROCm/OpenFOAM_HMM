@@ -81,7 +81,7 @@ void Foam::functionObjects::runTimePostPro::text::addGeometryToScene
         return;
     }
 
-    vtkSmartPointer<vtkTextActor> actor = vtkSmartPointer<vtkTextActor>::New();
+    auto actor = vtkSmartPointer<vtkTextActor>::New();
 
     // Concatenate string with timeStamp if true
     string textAndTime = string_;

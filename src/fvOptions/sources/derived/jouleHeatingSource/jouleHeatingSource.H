@@ -40,24 +40,24 @@ Description
     To provide a Joule heating contribution according to:
 
     Differential form of Joule heating - power per unit volume:
-    
+
     \f[
         \frac{d(P)}{d(V)} = J \cdot E
     \f]
-    
+
     where \f$ J \f$ is the current density and \f$ E \f$ the electric field.
     If no magnetic field is present:
-    
+
     \f[
         J = \sigma E
     \f]
-    
+
     The electric field given by
-    
+
     \f[
         E = \grad V
     \f]
-    
+
     Therefore:
 
     \f[
@@ -79,7 +79,7 @@ Usage
         sigma           table
         (
             (273        1e5)
-            (1000       1e5)   
+            (1000       1e5)
         );
     }
     \endverbatim

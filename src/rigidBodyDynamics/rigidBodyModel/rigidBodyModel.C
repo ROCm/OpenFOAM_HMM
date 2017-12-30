@@ -327,7 +327,7 @@ Foam::label Foam::RBD::rigidBodyModel::merge
 
         makeComposite(sBody.masterID());
 
-        sBodyPtr.set
+        sBodyPtr.reset
         (
             new subBody
             (
@@ -342,7 +342,7 @@ Foam::label Foam::RBD::rigidBodyModel::merge
     {
         makeComposite(parentID);
 
-        sBodyPtr.set
+        sBodyPtr.reset
         (
             new subBody
             (
@@ -377,17 +377,14 @@ Foam::spatialTransform Foam::RBD::rigidBodyModel::X0
         const subBody& mBody = mergedBody(bodyId);
         return mBody.masterXT() & X0_[mBody.masterID()];
     }
-    else
-    {
-        return X0_[bodyId];
-    }
+
+    return X0_[bodyId];
 }
 
 
 void Foam::RBD::rigidBodyModel::write(Ostream& os) const
 {
-    os  << indent << "bodies" << nl
-        << indent << token::BEGIN_BLOCK << incrIndent << nl;
+    os.beginBlock("bodies");
 
     // Write the moving bodies
     for (label i=1; i<nBodies(); i++)
@@ -396,61 +393,52 @@ void Foam::RBD::rigidBodyModel::write(Ostream& os) const
         // of composite joints
         if (!isType<jointBody>(bodies_[i]))
         {
-            os  << indent << bodies_[i].name() << nl
-                << indent << token::BEGIN_BLOCK << incrIndent << endl;
+            os.beginBlock(bodies_[i].name());
 
             bodies_[i].write(os);
 
-            os.writeKeyword("parent")
-                << bodies_[lambda_[i]].name() << token::END_STATEMENT << nl;
+            os.writeEntry("parent", bodies_[lambda_[i]].name());
+            os.writeEntry("transform", XT_[i]);
 
-            os.writeKeyword("transform")
-                << XT_[i] << token::END_STATEMENT << nl;
+            os  << indent << "joint" << nl
+                << joints_[i] << endl;
 
-            os  << indent << "joint" << nl << joints_[i] << endl;
-
-            os  << decrIndent << indent << token::END_BLOCK << endl;
+            os.endBlock();
         }
     }
 
     // Write the bodies merged into the parent bodies for efficiency
     forAll(mergedBodies_, i)
     {
-        os  << indent << mergedBodies_[i].name() << nl
-            << indent << token::BEGIN_BLOCK << incrIndent << endl;
+        os.beginBlock(mergedBodies_[i].name());
 
         mergedBodies_[i].body().write(os);
 
-        os.writeKeyword("transform")
-            << mergedBodies_[i].masterXT() << token::END_STATEMENT << nl;
+        os.writeEntry("transform", mergedBodies_[i].masterXT());
+        os.writeEntry("mergeWith", mergedBodies_[i].masterName());
 
-        os.writeKeyword("mergeWith")
-            << mergedBodies_[i].masterName() << token::END_STATEMENT << nl;
-
-        os  << decrIndent << indent << token::END_BLOCK << endl;
+        os.endBlock();
     }
 
-    os  << decrIndent << indent << token::END_BLOCK << nl;
+    os.endBlock();
 
 
     if (!restraints_.empty())
     {
-        os  << indent << "restraints" << nl
-            << indent << token::BEGIN_BLOCK << incrIndent << nl;
+        os.beginBlock("restraints");
 
         forAll(restraints_, ri)
         {
-            word restraintType = restraints_[ri].type();
+            const word& restraintType(restraints_[ri].type());
 
-            os  << indent << restraints_[ri].name() << nl
-                << indent << token::BEGIN_BLOCK << incrIndent << endl;
+            os.beginBlock(restraints_[ri].name());
 
             restraints_[ri].write(os);
 
-            os  << decrIndent << indent << token::END_BLOCK << endl;
+            os.endBlock();
         }
 
-        os  << decrIndent << indent << token::END_BLOCK << nl;
+        os.endBlock();
     }
 }
 

@@ -40,12 +40,12 @@ void Foam::Cloud<ParticleType>::checkPatches() const
 {
     const polyBoundaryMesh& pbm = polyMesh_.boundaryMesh();
     bool ok = true;
-    forAll(pbm, patchi)
+    for (const polyPatch& pp : pbm)
     {
-        if (isA<cyclicAMIPolyPatch>(pbm[patchi]))
+        if (isA<cyclicAMIPolyPatch>(pp))
         {
             const cyclicAMIPolyPatch& cami =
-                refCast<const cyclicAMIPolyPatch>(pbm[patchi]);
+                refCast<const cyclicAMIPolyPatch>(pp);
 
             if (cami.owner())
             {
@@ -64,32 +64,6 @@ void Foam::Cloud<ParticleType>::checkPatches() const
 }
 
 
-template<class ParticleType>
-void Foam::Cloud<ParticleType>::calcCellWallFaces() const
-{
-    cellWallFacesPtr_.reset(new PackedBoolList(pMesh().nCells(), false));
-
-    PackedBoolList& cellWallFaces = cellWallFacesPtr_();
-
-    const polyBoundaryMesh& patches = polyMesh_.boundaryMesh();
-
-    forAll(patches, patchi)
-    {
-        if (isA<wallPolyPatch>(patches[patchi]))
-        {
-            const polyPatch& patch = patches[patchi];
-
-            const labelList& pFaceCells = patch.faceCells();
-
-            forAll(pFaceCells, pFCI)
-            {
-                cellWallFaces[pFaceCells[pFCI]] = true;
-            }
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
@@ -104,8 +78,8 @@ Foam::Cloud<ParticleType>::Cloud
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
     labels_(),
-    nTrackingRescues_(),
-    cellWallFacesPtr_()
+    globalPositionsPtr_(),
+    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES)
 {
     checkPatches();
 
@@ -124,19 +98,6 @@ Foam::Cloud<ParticleType>::Cloud
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-const Foam::PackedBoolList& Foam::Cloud<ParticleType>::cellHasWallFaces()
-const
-{
-    if (!cellWallFacesPtr_.valid())
-    {
-        calcCellWallFaces();
-    }
-
-    return cellWallFacesPtr_();
-}
-
-
-template<class ParticleType>
 void Foam::Cloud<ParticleType>::addParticle(ParticleType* pPtr)
 {
     this->append(pPtr);
@@ -153,7 +114,7 @@ void Foam::Cloud<ParticleType>::deleteParticle(ParticleType& p)
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::deleteLostParticles()
 {
-    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    forAllIters(*this, pIter)
     {
         ParticleType& p = pIter();
 
@@ -180,17 +141,19 @@ void Foam::Cloud<ParticleType>::cloudReset(const Cloud<ParticleType>& c)
 
 
 template<class ParticleType>
-template<class TrackData>
-void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
+template<class TrackCloudType>
+void Foam::Cloud<ParticleType>::move
+(
+    TrackCloudType& cloud,
+    typename ParticleType::trackingData& td,
+    const scalar trackTime
+)
 {
     const polyBoundaryMesh& pbm = pMesh().boundaryMesh();
     const globalMeshData& pData = polyMesh_.globalData();
 
     // Which patches are processor patches
     const labelList& procPatches = pData.processorPatches();
-
-    // Indexing of patches into the procPatches list
-    const labelList& procPatchIndices = pData.processorPatchIndices();
 
     // Indexing of equivalent patch on neighbour processor into the
     // procPatches list on the neighbour
@@ -208,16 +171,12 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
     }
 
     // Initialise the stepFraction moved for the particles
-    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    forAllIters(*this, pIter)
     {
         pIter().stepFraction() = 0;
     }
 
-    // Reset nTrackingRescues
-    nTrackingRescues_ = 0;
-
-
-    // List of lists of particles to be transfered for all of the
+    // List of lists of particles to be transferred for all of the
     // neighbour processors
     List<IDLList<ParticleType>> particleTransferLists
     (
@@ -234,6 +193,8 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
     // Allocate transfer buffers
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 
+    // Clear the global positions as there are about to change
+    globalPositionsPtr_.clear();
 
     // While there are particles to transfer
     while (true)
@@ -245,49 +206,52 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         }
 
         // Loop over all particles
-        forAllIter(typename Cloud<ParticleType>, *this, pIter)
+        forAllIters(*this, pIter)
         {
             ParticleType& p = pIter();
 
             // Move the particle
-            bool keepParticle = p.move(td, trackTime);
+            bool keepParticle = p.move(cloud, td, trackTime);
 
             // If the particle is to be kept
             // (i.e. it hasn't passed through an inlet or outlet)
             if (keepParticle)
             {
-                // If we are running in parallel and the particle is on a
-                // boundary face
-                if
-                (
-                    Pstream::parRun()
-                 && td.switchProcessor
-                 && p.face() >= pMesh().nInternalFaces()
-                )
+                if (td.switchProcessor)
                 {
-                    label patchi = pbm.whichPatch(p.face());
-
-                    // ... and the face is on a processor patch
-                    // prepare it for transfer
-                    if (procPatchIndices[patchi] != -1)
+                    #ifdef FULLDEBUG
+                    if
+                    (
+                        !Pstream::parRun()
+                     || !p.onBoundaryFace()
+                     || procPatchNeighbours[p.patch()] < 0
+                    )
                     {
-                        label n = neighbourProcIndices
-                        [
-                            refCast<const processorPolyPatch>
-                            (
-                                pbm[patchi]
-                            ).neighbProcNo()
-                        ];
-
-                        p.prepareForParallelTransfer(patchi, td);
-
-                        particleTransferLists[n].append(this->remove(&p));
-
-                        patchIndexTransferLists[n].append
-                        (
-                            procPatchNeighbours[patchi]
-                        );
+                        FatalErrorInFunction
+                            << "Switch processor flag is true when no parallel "
+                            << "transfer is possible. This is a bug."
+                            << exit(FatalError);
                     }
+                    #endif
+
+                    const label patchi = p.patch();
+
+                    const label n = neighbourProcIndices
+                    [
+                        refCast<const processorPolyPatch>
+                        (
+                            pbm[patchi]
+                        ).neighbProcNo()
+                    ];
+
+                    p.prepareForParallelTransfer();
+
+                    particleTransferLists[n].append(this->remove(&p));
+
+                    patchIndexTransferLists[n].append
+                    (
+                        procPatchNeighbours[patchi]
+                    );
                 }
             }
             else
@@ -328,28 +292,26 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
         pBufs.finishedSends(allNTrans);
 
 
-        bool transfered = false;
+        bool transferred = false;
 
-        forAll(allNTrans, i)
+        for (const label n : allNTrans)
         {
-            if (allNTrans[i])
+            if (n)
             {
-                transfered = true;
+                transferred = true;
                 break;
             }
         }
-        reduce(transfered, orOp<bool>());
+        reduce(transferred, orOp<bool>());
 
-        if (!transfered)
+        if (!transferred)
         {
             break;
         }
 
         // Retrieve from receive buffers
-        forAll(neighbourProcs, i)
+        for (const label neighbProci : neighbourProcs)
         {
-            label neighbProci = neighbourProcs[i];
-
             label nRec = allNTrans[neighbProci];
 
             if (nRec)
@@ -366,7 +328,7 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
 
                 label pI = 0;
 
-                forAllIter(typename Cloud<ParticleType>, newParticles, newpIter)
+                forAllIters(newParticles, newpIter)
                 {
                     ParticleType& newp = newpIter();
 
@@ -379,34 +341,19 @@ void Foam::Cloud<ParticleType>::move(TrackData& td, const scalar trackTime)
             }
         }
     }
-
-    if (cloud::debug)
-    {
-        reduce(nTrackingRescues_, sumOp<label>());
-
-        if (nTrackingRescues_ > 0)
-        {
-            Info<< nTrackingRescues_ << " tracking rescue corrections" << endl;
-        }
-    }
 }
 
 
 template<class ParticleType>
-template<class TrackData>
-void Foam::Cloud<ParticleType>::autoMap
-(
-    TrackData& td,
-    const mapPolyMesh& mapper
-)
+void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
 {
-    if (cloud::debug)
+    if (!globalPositionsPtr_.valid())
     {
-        InfoInFunction << "for lagrangian cloud " << cloud::name() << endl;
+        FatalErrorInFunction
+            << "Global positions are not available. "
+            << "Cloud::storeGlobalPositions has not been called."
+            << exit(FatalError);
     }
-
-    const labelList& reverseCellMap = mapper.reverseCellMap();
-    const labelList& reverseFaceMap = mapper.reverseFaceMap();
 
     // Reset stored data that relies on the mesh
     //    polyMesh_.clearCellTree();
@@ -417,51 +364,13 @@ void Foam::Cloud<ParticleType>::autoMap
     // there is a comms mismatch.
     polyMesh_.tetBasePtIs();
 
+    const vectorField& positions = globalPositionsPtr_();
 
-    forAllIter(typename Cloud<ParticleType>, *this, pIter)
+    label i = 0;
+    forAllIters(*this, iter)
     {
-        ParticleType& p = pIter();
-
-        if (reverseCellMap[p.cell()] >= 0)
-        {
-            p.cell() = reverseCellMap[p.cell()];
-
-            if (p.face() >= 0 && reverseFaceMap[p.face()] >= 0)
-            {
-                p.face() = reverseFaceMap[p.face()];
-            }
-            else
-            {
-                p.face() = -1;
-            }
-
-            p.initCellFacePt();
-        }
-        else
-        {
-            label trackStartCell = mapper.mergedCell(p.cell());
-
-            if (trackStartCell < 0)
-            {
-                trackStartCell = 0;
-                p.cell() = 0;
-            }
-            else
-            {
-                p.cell() = trackStartCell;
-            }
-
-            vector pos = p.position();
-
-            const_cast<vector&>(p.position()) =
-                polyMesh_.cellCentres()[trackStartCell];
-
-            p.stepFraction() = 0;
-
-            p.initCellFacePt();
-
-            p.track(pos, td);
-        }
+        iter().autoMap(positions[i], mapper);
+        ++i;
     }
 }
 
@@ -474,14 +383,36 @@ void Foam::Cloud<ParticleType>::writePositions() const
         this->db().time().path()/this->name() + "_positions.obj"
     );
 
-    forAllConstIter(typename Cloud<ParticleType>, *this, pIter)
+    forAllConstIters(*this, pIter)
     {
         const ParticleType& p = pIter();
-        pObj<< "v " << p.position().x() << " " << p.position().y() << " "
-            << p.position().z() << nl;
+        const point position(p.position());
+        pObj<< "v " << position.x() << " " << position.y() << " "
+            << position.z() << nl;
     }
 
     pObj.flush();
+}
+
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::storeGlobalPositions() const
+{
+    // Store the global positions for later use by autoMap. It would be
+    // preferable not to need this. If the mapPolyMesh object passed to autoMap
+    // had a copy of the old mesh then the global positions could be recovered
+    // within autoMap, and this pre-processing would not be necessary.
+
+    globalPositionsPtr_.reset(new vectorField(this->size()));
+
+    vectorField& positions = globalPositionsPtr_();
+
+    label i = 0;
+    forAllConstIters(*this, iter)
+    {
+        positions[i] = iter().position();
+        ++i;
+    }
 }
 
 

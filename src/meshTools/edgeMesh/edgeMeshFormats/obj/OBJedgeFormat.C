@@ -25,10 +25,9 @@ License
 
 #include "OBJedgeFormat.H"
 #include "clock.H"
-#include "IFstream.H"
-#include "IStringStream.H"
+#include "Fstream.H"
 #include "Ostream.H"
-#include "OFstream.H"
+#include "StringStream.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -116,10 +115,9 @@ bool Foam::fileFormats::OBJedgeFormat::read(const fileName& filename)
     {
         string line = this->getLineNoComment(is);
 
-        // handle continuations
-        if (line[line.size()-1] == '\\')
+        // Handle continuations
+        if (line.removeEnd("\\"))
         {
-            line.substr(0, line.size()-1);
             line += this->getLineNoComment(is);
         }
 

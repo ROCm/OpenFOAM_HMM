@@ -9,6 +9,14 @@ global/profiling/profilingSysInfo.C
 global/profiling/profilingTrigger.C
 global/etcFiles/etcFiles.C
 
+fileOps = global/fileOperations
+$(fileOps)/fileOperation/fileOperation.C
+$(fileOps)/uncollatedFileOperation/uncollatedFileOperation.C
+$(fileOps)/masterUncollatedFileOperation/masterUncollatedFileOperation.C
+$(fileOps)/collatedFileOperation/collatedFileOperation.C
+$(fileOps)/collatedFileOperation/threadedCollatedOFstream.C
+$(fileOps)/collatedFileOperation/OFstreamCollator.C
+
 bools = primitives/bools
 $(bools)/bool/bool.C
 $(bools)/bool/boolIO.C
@@ -81,7 +89,7 @@ primitives/septernion/septernion.C
 primitives/triad/triad.C
 
 /* Run-time selectable functions */
-primitives/functions/Function1/makeDataEntries.C
+primitives/functions/Function1/makeFunction1s.C
 primitives/functions/Function1/ramp/ramp.C
 primitives/functions/Function1/linearRamp/linearRamp.C
 primitives/functions/Function1/quadraticRamp/quadraticRamp.C
@@ -104,8 +112,11 @@ $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyType.C
 $(strings)/wordRe/wordRe.C
 $(strings)/wordRes/wordRes.C
+$(strings)/lists/CStringList.C
 $(strings)/lists/hashedWordList.C
 $(strings)/stringOps/stringOps.C
+$(strings)/stringOps/stringOpsSort.C
+$(strings)/parsing/parsing.C
 
 ops = primitives/ops
 $(ops)/flipOp.C
@@ -123,6 +134,7 @@ $(ranges)/labelRange/labelRange.C
 $(ranges)/labelRange/labelRanges.C
 $(ranges)/scalarRange/scalarRange.C
 $(ranges)/scalarRange/scalarRanges.C
+$(ranges)/tableBounds/tableBounds.C
 
 spatialVectorAlgebra = primitives/spatialVectorAlgebra
 $(spatialVectorAlgebra)/SpatialVector/spatialVector/spatialVector.C
@@ -132,8 +144,10 @@ $(spatialVectorAlgebra)/CompactSpatialTensor/compactSpatialTensor/compactSpatial
 primitives/polynomialEqns/cubicEqn/cubicEqn.C
 primitives/polynomialEqns/quadraticEqn/quadraticEqn.C
 
+primitives/Barycentric/barycentric/barycentric.C
+primitives/Barycentric2D/barycentric2D/barycentric2D.C
+
 containers/HashTables/HashTable/HashTableCore.C
-containers/HashTables/StaticHashTable/StaticHashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
 containers/Lists/PackedList/PackedListCore.C
 containers/Lists/PackedList/PackedBoolList.C
@@ -162,15 +176,19 @@ $(hashes)/base64Layer.C
 gzstream = $(Streams)/gzstream
 $(gzstream)/gzstream.C
 
+memstream = $(Streams)/memory
+$(memstream)/ListStream.C
+
 Fstreams = $(Streams)/Fstreams
 $(Fstreams)/IFstream.C
 $(Fstreams)/OFstream.C
+$(Fstreams)/masterOFstream.C
 
 Tstreams = $(Streams)/Tstreams
 $(Tstreams)/ITstream.C
 
 StringStreams = $(Streams)/StringStreams
-$(StringStreams)/StringStreamsPrint.C
+$(StringStreams)/StringStream.C
 
 Pstreams = $(Streams)/Pstreams
 $(Pstreams)/UIPstream.C
@@ -185,6 +203,8 @@ $(Pstreams)/PstreamBuffers.C
 dictionary = db/dictionary
 $(dictionary)/dictionary.C
 $(dictionary)/dictionaryIO.C
+$(dictionary)/dictionarySearch.C
+$(dictionary)/dictionaryCompat.C
 
 entry = $(dictionary)/entry
 $(entry)/entry.C
@@ -199,7 +219,6 @@ $(dictionaryEntry)/dictionaryEntry.C
 $(dictionaryEntry)/dictionaryEntryIO.C
 
 dictionaryListEntry = $(dictionary)/dictionaryListEntry
-$(dictionaryListEntry)/dictionaryListEntry.C
 $(dictionaryListEntry)/dictionaryListEntryIO.C
 
 functionEntries = $(dictionary)/functionEntries
@@ -210,7 +229,7 @@ $(functionEntries)/includeEntry/includeEntry.C
 $(functionEntries)/includeEtcEntry/includeEtcEntry.C
 $(functionEntries)/includeFuncEntry/includeFuncEntry.C
 $(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
-$(functionEntries)/inputModeEntry/inputModeEntry.C
+$(functionEntries)/inputMode/inputMode.C
 $(functionEntries)/removeEntry/removeEntry.C
 
 IOdictionary = db/IOobjects/IOdictionary
@@ -221,6 +240,9 @@ $(IOdictionary)/localIOdictionary.C
 $(IOdictionary)/unwatchedIOdictionary.C
 
 db/IOobjects/IOMap/IOMapName.C
+db/IOobjects/decomposedBlockData/decomposedBlockData.C
+db/IOobjects/GlobalIOField/GlobalIOFields.C
+
 
 db/IOobjects/GlobalIOList/globalIOLists.C
 
@@ -262,6 +284,7 @@ $(Time)/Time.C
 $(Time)/TimeIO.C
 $(Time)/findTimes.C
 $(Time)/subCycleTime.C
+$(Time)/subLoopTime.C
 $(Time)/findInstance.C
 $(Time)/timeSelector.C
 
@@ -421,11 +444,9 @@ $(cell)/cellIOList.C
 tetCell = $(meshShapes)/tetCell
 $(tetCell)/tetCell.C
 
-cellModeller = $(meshShapes)/cellModeller
-$(cellModeller)/cellModeller.C
-
 cellModel = $(meshShapes)/cellModel
 $(cellModel)/cellModel.C
+$(cellModel)/cellModels.C
 $(cellModel)/cellModelIO.C
 
 cellShape = $(meshShapes)/cellShape
@@ -605,6 +626,8 @@ Fields = fields/Fields
 
 $(Fields)/labelField/labelField.C
 $(Fields)/scalarField/scalarField.C
+$(Fields)/vectorField/vectorField.C
+$(Fields)/vector2DField/vector2DField.C
 $(Fields)/sphericalTensorField/sphericalTensorField.C
 $(Fields)/diagTensorField/diagTensorField.C
 $(Fields)/symmTensorField/symmTensorField.C
@@ -632,8 +655,6 @@ $(Fields)/tensorField/tensorFieldIOField.C
 $(Fields)/quaternionField/quaternionIOField.C
 $(Fields)/triadField/triadIOField.C
 $(Fields)/transformField/transformField.C
-
-$(Fields)/globalFields/globalIOFields.C
 
 
 pointPatchFields = fields/pointPatchFields

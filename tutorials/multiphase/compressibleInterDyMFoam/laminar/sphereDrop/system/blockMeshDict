@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 1;
+scale   1;
 
 // Domain
 axisLevel               0.0;  // x-coord of axis (right boundary of domain)

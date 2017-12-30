@@ -40,7 +40,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("patch");
+    argList::addArgument("patch");
 
     #include "setRootCase.H"
     #include "createTime.H"

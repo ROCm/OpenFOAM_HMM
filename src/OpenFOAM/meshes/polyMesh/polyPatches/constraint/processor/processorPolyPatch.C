@@ -293,7 +293,7 @@ void Foam::processorPolyPatch::calcGeometry(PstreamBuffers& pBufs)
                     << endl
                     << "Mesh face:" << start()+facei
                     << " vertices:"
-                    << UIndirectList<point>(points(), operator[](facei))()
+                    << UIndirectList<point>(points(), operator[](facei))
                     << endl
                     << "If you are certain your matching is correct"
                     << " you can increase the 'matchTolerance' setting"
@@ -362,7 +362,7 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
             const face& f = localFaces()[facei];
 
-            pointIndex[patchPointi] = findIndex(f, patchPointi);
+            pointIndex[patchPointi] = f.find(patchPointi);
         }
 
         // Express all edges as patch face and index in face.
@@ -377,7 +377,7 @@ void Foam::processorPolyPatch::initUpdateMesh(PstreamBuffers& pBufs)
 
             const labelList& fEdges = faceEdges()[facei];
 
-            edgeIndex[patchEdgeI] = findIndex(fEdges, patchEdgeI);
+            edgeIndex[patchEdgeI] = fEdges.find(patchEdgeI);
         }
 
         UOPstream toNeighbProc(neighbProcNo(), pBufs);
@@ -1084,7 +1084,7 @@ bool Foam::processorPolyPatch::order
                         << " : "
                         << "Cannot find point on face " << pp[oldFacei]
                         << " with vertices "
-                        << UIndirectList<point>(pp.points(), pp[oldFacei])()
+                        << UIndirectList<point>(pp.points(), pp[oldFacei])
                         << " that matches point " << wantedAnchor
                         << " when matching the halves of processor patch "
                         << name()
@@ -1112,10 +1112,8 @@ bool Foam::processorPolyPatch::order
 void Foam::processorPolyPatch::write(Ostream& os) const
 {
     coupledPolyPatch::write(os);
-    os.writeKeyword("myProcNo") << myProcNo_
-        << token::END_STATEMENT << nl;
-    os.writeKeyword("neighbProcNo") << neighbProcNo_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("myProcNo", myProcNo_);
+    os.writeEntry("neighbProcNo", neighbProcNo_);
 }
 
 
