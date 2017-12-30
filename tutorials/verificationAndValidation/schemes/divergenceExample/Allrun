@@ -8,7 +8,7 @@ runApplication blockMesh
 
 cat system/schemesToTest | while read scheme
 do
-    echo "Updating fvSchmes to use $scheme"
+    echo "Updating fvSchemes to use $scheme"
     sed "s/DIVSCHEME/$scheme/g" system/fvSchemes.template > system/fvSchemes
 
     # Create a sanitised name for the scheme - remove 'special' characters
