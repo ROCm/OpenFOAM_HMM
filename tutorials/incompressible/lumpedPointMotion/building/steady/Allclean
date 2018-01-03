@@ -4,4 +4,7 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 cleanCase0
 
+# Clean up copied/derived files
+rm -rf constant/triSurface
+
 #------------------------------------------------------------------------------
