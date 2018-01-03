@@ -205,7 +205,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             const face& f = faces[facei];
             for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
             {
-                label fp2 = f.fcIndex(fp1);
+                const label fp2 = f.fcIndex(fp1);
 
                 dynFaces.append(Face{f[0], f[fp1], f[fp2]});
                 dynZones.append(zones[facei]);
@@ -221,8 +221,8 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
 
         this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-        // add zones, culling empty ones
-        this->addZones(zoneSizes, zoneNames, true);
+        // Add zones (retaining empty ones)
+        this->addZones(zoneSizes, zoneNames);
     }
     else
     {
@@ -241,8 +241,8 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
 
         this->sortFacesAndStore(dynFaces.xfer(), zones.xfer(), sorted);
 
-        // add zones, culling empty ones
-        this->addZones(zoneSizes, zoneNames, true);
+        // Add zones, retaining any empty ones
+        this->addZones(zoneSizes, zoneNames);
     }
     this->addZonesToFaces(); // for labelledTri
 

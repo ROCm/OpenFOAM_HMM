@@ -245,8 +245,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     this->storedPoints().transfer(dynPoints);
     this->storedFaces().transfer(dynFaces);
 
-    // add zones, culling empty ones
-    this->addZones(sizes, names, true);
+    // Add zones (retaining empty ones)
+    this->addZones(sizes, names);
     this->addZonesToFaces(); // for labelledTri
     this->stitchFaces(SMALL);
 

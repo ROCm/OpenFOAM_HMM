@@ -222,7 +222,8 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    this->addZones(dynSizes, dynNames, true); // add zones, cull empty ones
+    // Add zones (retaining empty ones)
+    this->addZones(dynSizes, dynNames);
     this->addZonesToFaces(); // for labelledTri
 
     return true;
