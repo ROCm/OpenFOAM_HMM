@@ -49,17 +49,23 @@ inline constexpr unsigned int Foam::PackedList<nBits>::packing()
 
 
 template<unsigned nBits>
-inline unsigned int Foam::PackedList<nBits>::maskLower(unsigned offset)
+inline constexpr unsigned int Foam::PackedList<nBits>::maskLower
+(
+    unsigned offset
+)
 {
     // Return (1u << (nBits * offset)) - 1;
     // The next one works more reliably with overflows
     // eg, when compiled without optimization
-    return (~0u >> ( sizeof(StorageType)*CHAR_BIT - nBits * offset));
+    return (~0u >> (sizeof(StorageType)*CHAR_BIT - nBits * offset));
 }
 
 
 template<unsigned nBits>
-inline Foam::label Foam::PackedList<nBits>::packedLength(const label nElem)
+inline constexpr Foam::label Foam::PackedList<nBits>::packedLength
+(
+    const label nElem
+)
 {
     return (nElem + packing() - 1) / packing();
 }
@@ -826,7 +832,6 @@ inline void Foam::PackedList<nBits>::setSize
 }
 
 
-
 template<unsigned nBits>
 inline Foam::label Foam::PackedList<nBits>::capacity() const
 {
@@ -911,6 +916,7 @@ inline void Foam::PackedList<nBits>::shrink()
         StorageList::setSize(len);
     }
 }
+
 
 template<unsigned nBits>
 inline Foam::List<unsigned int>& Foam::PackedList<nBits>::storage()

@@ -124,11 +124,11 @@ public:
         explicit inline PackedBoolList(const UList<bool>& lst);
 
         //- Construct from a list of labels
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         explicit inline PackedBoolList(const labelUList& indices);
 
         //- Construct from a list of labels
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         explicit inline PackedBoolList(const labelUIndList& indices);
 
         //- Clone
@@ -183,11 +183,11 @@ public:
       // Edit
 
         //- Transfer the contents of the argument list into this list
-        //  and annul the argument list.
+        //- and annul the argument list.
         inline void transfer(PackedBoolList& lst);
 
         //- Transfer the contents of the argument list into this list
-        //  and annul the argument list.
+        //- and annul the argument list.
         inline void transfer(PackedList<1>& lst);
 
         //- Transfer contents to the Xfer container
@@ -209,11 +209,11 @@ public:
         void operator=(const UList<bool>& lst);
 
         //- Assignment operator,
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         inline void operator=(const labelUList& indices);
 
         //- Assignment operator,
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         inline void operator=(const labelUIndList& indices);
 
         //- Complement operator
@@ -223,11 +223,11 @@ public:
         inline PackedBoolList& operator&=(const PackedList<1>& lst);
 
         //- And operator (lists may be dissimilar sizes)
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         inline PackedBoolList& operator&=(const labelUList& indices);
 
         //- And operator (lists may be dissimilar sizes)
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         inline PackedBoolList& operator&=(const labelUIndList& indices);
 
         //- Xor operator (lists may be dissimilar sizes)
@@ -238,11 +238,11 @@ public:
         inline PackedBoolList& operator|=(const PackedList<1>& lst);
 
         //- Or operator (lists may be dissimilar sizes),
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         inline PackedBoolList& operator|=(const labelUList& indices);
 
         //- Or operator (lists may be dissimilar sizes),
-        //  using the labels as indices to indicate which bits are set
+        //- using the labels as indices to indicate which bits are set
         inline PackedBoolList& operator|=(const labelUIndList& indices);
 
 

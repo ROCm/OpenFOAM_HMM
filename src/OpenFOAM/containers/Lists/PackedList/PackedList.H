@@ -158,7 +158,7 @@ protected:
     // Protected Member Functions
 
         //- Calculate the list length when packed
-        inline static label packedLength(const label nElem);
+        inline static constexpr label packedLength(const label nElem);
 
         //- Read a list entry (allows for specialization)
         inline static unsigned int readValue(Istream& is);
@@ -211,7 +211,7 @@ public:
         inline static constexpr unsigned int packing();
 
         //- Masking for all bits below the offset
-        inline static unsigned int maskLower(unsigned offset);
+        inline static constexpr unsigned int maskLower(unsigned offset);
 
 
     // Forward declaration of iterators
