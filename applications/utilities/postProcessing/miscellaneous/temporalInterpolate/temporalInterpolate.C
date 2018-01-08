@@ -217,9 +217,9 @@ int main(int argc, char *argv[])
     runTime.functionObjects().off();
 
     HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
+    if (args.found("fields"))
     {
-        args.optionLookup("fields")() >> selectedFields;
+        args.lookup("fields")() >> selectedFields;
     }
     if (selectedFields.size())
     {
@@ -232,14 +232,14 @@ int main(int argc, char *argv[])
 
 
     int divisions = 1;
-    if (args.optionFound("divisions"))
+    if (args.found("divisions"))
     {
-        args.optionLookup("divisions")() >> divisions;
+        args.lookup("divisions")() >> divisions;
     }
     Info<< "Using " << divisions << " per time interval" << nl << endl;
 
 
-    const word interpolationType = args.optionLookupOrDefault<word>
+    const word interpolationType = args.lookupOrDefault<word>
     (
         "interpolationType",
         "linear"

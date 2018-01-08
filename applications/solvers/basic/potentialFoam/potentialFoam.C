@@ -181,13 +181,13 @@ int main(int argc, char *argv[])
     phi.write();
 
     // Optionally write Phi
-    if (args.optionFound("writePhi"))
+    if (args.found("writePhi"))
     {
         Phi.write();
     }
 
     // Calculate the pressure field from the Euler equation
-    if (args.optionFound("writep"))
+    if (args.found("writep"))
     {
         Info<< nl << "Calculating approximate pressure field" << endl;
 

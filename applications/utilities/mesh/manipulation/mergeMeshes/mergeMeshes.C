@@ -97,20 +97,20 @@ int main(int argc, char *argv[])
          FatalError.exit();
     }
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     fileName masterCase = args[1];
     fileName addCase = args[2];
 
     const word masterRegion =
-        args.optionLookupOrDefault<word>
+        args.lookupOrDefault<word>
         (
             "masterRegion",
             polyMesh::defaultRegion
         );
 
     const word addRegion =
-        args.optionLookupOrDefault<word>
+        args.lookupOrDefault<word>
         (
             "masterRegion",
             polyMesh::defaultRegion
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
     const bool specifiedInstance =
     (
         !overwrite
-     && args.optionReadIfPresent("resultTime", meshInstance)
+     && args.readIfPresent("resultTime", meshInstance)
     );
 
     if (specifiedInstance)

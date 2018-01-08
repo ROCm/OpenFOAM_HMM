@@ -1,6 +1,6 @@
-    Foam::word regionName;
+    Foam::word regionName = Foam::fvMesh::defaultRegion;
 
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         Foam::Info
             << "Create mesh " << regionName << " for time = "
@@ -8,12 +8,10 @@
     }
     else
     {
-        regionName = Foam::fvMesh::defaultRegion;
         Foam::Info
             << "Create mesh for time = "
             << runTime.timeName() << Foam::nl << Foam::endl;
     }
-
 
     autoPtr<dynamicFvMesh> meshPtr
     (

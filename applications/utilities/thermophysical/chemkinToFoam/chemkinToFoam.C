@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const bool newFormat = args.optionFound("newFormat");
+    const bool newFormat = args.found("newFormat");
 
     speciesTable species;
 

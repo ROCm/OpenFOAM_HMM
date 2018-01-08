@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     if (!overwrite)
     {

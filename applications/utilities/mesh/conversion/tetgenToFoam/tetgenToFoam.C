@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const fileName prefix = args[1];
-    const bool readFaceFile = !args.optionFound("noFaceFile");
+    const bool readFaceFile = !args.found("noFaceFile");
 
     const fileName nodeFile(prefix + ".node");
     const fileName eleFile(prefix + ".ele");

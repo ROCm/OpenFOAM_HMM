@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
     //
     ensightCase::options caseOpts(format);
 
-    caseOpts.width(args.optionLookupOrDefault<label>("width", 8));
+    caseOpts.width(args.lookupOrDefault<label>("width", 8));
     caseOpts.overwrite(false); // leave existing output directory
 
     // Can also have separate directory for lagrangian
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
     // Define sub-directory name to use for EnSight data.
     // The path to the ensight directory is at case level only
     // - For parallel cases, data only written from master
-    fileName ensightDir = args.optionLookupOrDefault<word>("name", "Ensight");
+    fileName ensightDir = args.lookupOrDefault<word>("name", "Ensight");
     if (!ensightDir.isAbsolute())
     {
         ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
@@ -214,11 +214,11 @@ int main(int argc, char *argv[])
 
     // Control for renumbering iterations
     label indexingNumber = 0;
-    const bool optIndex = args.optionReadIfPresent("index", indexingNumber);
-    const bool noLagrangian = args.optionFound("noLagrangian");
+    const bool optIndex = args.readIfPresent("index", indexingNumber);
+    const bool noLagrangian = args.found("noLagrangian");
 
     // Always write the geometry, unless the -noMesh option is specified
-    bool optNoMesh = args.optionFound("noMesh");
+    bool optNoMesh = args.found("noMesh");
 
 
     // Construct the list of ensight parts for the entire mesh

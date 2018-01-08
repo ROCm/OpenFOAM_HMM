@@ -91,15 +91,15 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     const label maxOut =
-        Foam::max(0, args.optionLookupOrDefault<label>("max", 0));
+        Foam::max(0, args.lookupOrDefault<label>("max", 0));
 
     const label span =
-        Foam::max(1, args.optionLookupOrDefault<label>("span", 1));
+        Foam::max(1, args.lookupOrDefault<label>("span", 1));
 
-    const scalar relax = args.optionLookupOrDefault<scalar>("scale", 1);
+    const scalar relax = args.lookupOrDefault<scalar>("scale", 1);
 
-    const bool slave = args.optionFound("slave");
-    const bool removeLock = args.optionFound("removeLock");
+    const bool slave = args.found("slave");
+    const bool removeLock = args.found("removeLock");
 
     #include "createTime.H"
 

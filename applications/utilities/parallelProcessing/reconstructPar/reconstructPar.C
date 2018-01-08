@@ -132,9 +132,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     wordHashSet selectedFields;
-    args.optionReadIfPresent("fields", selectedFields);
+    args.readIfPresent("fields", selectedFields);
 
-    const bool noFields = args.optionFound("noFields");
+    const bool noFields = args.found("noFields");
 
     if (noFields)
     {
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    const bool noLagrangian = args.optionFound("noLagrangian");
+    const bool noLagrangian = args.found("noLagrangian");
 
     if (noLagrangian)
     {
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
     }
 
 
-    const bool noReconstructSets = args.optionFound("noSets");
+    const bool noReconstructSets = args.found("noSets");
 
     if (noReconstructSets)
     {
@@ -161,7 +161,7 @@ int main(int argc, char *argv[])
 
 
     wordHashSet selectedLagrangianFields;
-    if (args.optionReadIfPresent("lagrangianFields", selectedLagrangianFields))
+    if (args.readIfPresent("lagrangianFields", selectedLagrangianFields))
     {
         if (noLagrangian)
         {
@@ -173,8 +173,8 @@ int main(int argc, char *argv[])
     }
 
 
-    const bool newTimes   = args.optionFound("newTimes");
-    const bool allRegions = args.optionFound("allRegions");
+    const bool newTimes   = args.found("newTimes");
+    const bool allRegions = args.found("allRegions");
 
     wordList regionNames;
     wordList regionDirs;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
     else
     {
         regionNames = {fvMesh::defaultRegion};
-        if (args.optionReadIfPresent("region", regionNames[0]))
+        if (args.readIfPresent("region", regionNames[0]))
         {
             regionDirs = regionNames;
         }

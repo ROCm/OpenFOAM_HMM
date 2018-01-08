@@ -105,18 +105,12 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    const bool keepEmpty = args.optionFound("empty");
+    const bool keepEmpty = args.found("empty");
 
-    int nopts = 0;
-    for (auto optName : { "any", "slash", "space", "sub", "fixed", "char" })
-    {
-        if (args.optionFound(optName))
-        {
-            ++nopts;
-        }
-    }
+    const label nopts =
+        args.count({"any", "slash", "space", "sub", "fixed", "char"});
 
-    if (args.optionFound("any"))
+    if (args.found("any"))
     {
         const std::string& str = args["any"];
         Info<< "split on any chars" << nl
@@ -135,7 +129,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("sub"))
+    if (args.found("sub"))
     {
         const std::string& str = args["sub"];
         Info<< "split on substring" << nl
@@ -154,7 +148,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("space"))
+    if (args.found("space"))
     {
         Info<< "split on space" << nl
             << "~~~~~~~~~~~~~~" << nl;
@@ -171,7 +165,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("char"))
+    if (args.found("char"))
     {
         const char delim = args["char"][0];
 
@@ -190,9 +184,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("fixed"))
+    if (args.found("fixed"))
     {
-        const label width = readLabel(args["fixed"]);
+        const label width = args.opt<label>("fixed");
 
         Info<< "split on fixed width = " << width << nl
             << "~~~~~~~~~~~~~~" << nl;
@@ -210,7 +204,7 @@ int main(int argc, char *argv[])
     }
 
     // Default
-    if (!nopts || args.optionFound("slash"))
+    if (!nopts || args.found("slash"))
     {
         const char delim = '/';
 

@@ -160,11 +160,11 @@ int main(int argc, char *argv[])
     Time runTime(args.rootPath(), args.caseName());
     runTime.functionObjects().off();
 
-    const bool optList = args.optionFound("list");
+    const bool optList = args.found("list");
 
     // exportName only has a size when export is in effect
     fileName exportName;
-    if (args.optionReadIfPresent("name", exportName))
+    if (args.readIfPresent("name", exportName))
     {
         const word ext = exportName.ext();
         // strip erroneous extension (.ccm, .ccmg, .ccmp)
@@ -173,22 +173,22 @@ int main(int argc, char *argv[])
             exportName = exportName.lessExt();
         }
     }
-    else if (args.optionFound("export"))
+    else if (args.found("export"))
     {
         exportName = ccm::writer::defaultMeshName;
-        if (args.optionFound("case"))
+        if (args.found("case"))
         {
             exportName += '-' + args.globalCaseName();
         }
     }
 
     // By default, no scaling
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
 
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
@@ -201,15 +201,15 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~~~~
 
     ccm::reader::options rOpts;
-    rOpts.removeBaffles(args.optionFound("noBaffles"));
-    rOpts.mergeInterfaces(args.optionFound("merge"));
+    rOpts.removeBaffles(args.found("noBaffles"));
+    rOpts.mergeInterfaces(args.found("merge"));
 
-    if (args.optionFound("numbered"))
+    if (args.found("numbered"))
     {
         rOpts.useNumberedNames(true);
     }
 
-    if (args.optionFound("solids"))
+    if (args.found("solids"))
     {
         Info<< "treating solids like fluids" << endl;
         rOpts.keepSolid(true);
@@ -235,7 +235,7 @@ int main(int argc, char *argv[])
 
             if
             (
-                args.optionFound("remap")
+                args.found("remap")
               ? reader.remapMeshInfo(runTime, args["remap"])
               : reader.remapMeshInfo(runTime)
             )
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
     {
         autoPtr<polyMesh> mesh =
         (
-            args.optionFound("remap")
+            args.found("remap")
           ? reader.mesh(runTime, args["remap"])
           : reader.mesh(runTime)
         );

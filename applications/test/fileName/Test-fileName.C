@@ -177,9 +177,9 @@ int main(int argc, char *argv[])
 
     // Run default tests, unless only specific tests are requested
     const bool defaultTests =
-        args.optionFound("default") || args.options().empty();
+        args.found("default") || args.options().empty();
 
-    if (args.optionFound("construct"))
+    if (args.found("construct"))
     {
         Info<< "From initializer_list<word> = ";
         fileName file1
@@ -231,7 +231,7 @@ int main(int argc, char *argv[])
 
 
     // Test various ext() methods
-    if (args.optionFound("ext"))
+    if (args.found("ext"))
     {
         Info<<nl << nl << "handling of fileName extension" << nl;
 
@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (args.optionFound("validate"))
+    if (args.found("validate"))
     {
         unsigned nFail = 0;
         Info<< nl << "Test fileName::validate" << nl;

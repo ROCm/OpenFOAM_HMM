@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const labelVector n(args.argRead<labelVector>(1));
+    const labelVector n(args.read<labelVector>(1));
     const fileName exportName = args[2];
 
     Info<< "Reading surfaces as specified in the foamyHexMeshDict and"

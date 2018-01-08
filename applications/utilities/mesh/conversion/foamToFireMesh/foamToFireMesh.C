@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     fileName exportName = meshWriter::defaultMeshName;
-    if (args.optionFound("case"))
+    if (args.found("case"))
     {
         exportName += '-' + args.globalCaseName();
     }
@@ -89,11 +89,11 @@ int main(int argc, char *argv[])
 
     // write control options
     // ~~~~~~~~~~~~~~~~~~~~~
-    fileFormats::FIREMeshWriter::binary = !args.optionFound("ascii");
+    fileFormats::FIREMeshWriter::binary = !args.found("ascii");
 
     // Default: no rescaling
     scalar scaleFactor = 1;
-    if (args.optionReadIfPresent("scale", scaleFactor))
+    if (args.readIfPresent("scale", scaleFactor))
     {
         if (scaleFactor <= 0)
         {

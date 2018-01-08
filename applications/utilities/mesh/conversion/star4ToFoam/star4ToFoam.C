@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     // Binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
@@ -113,8 +113,8 @@ int main(int argc, char *argv[])
         prefix,
         runTime,
         // Default rescale from [mm] to [m]
-        args.optionLookupOrDefault("scale", 0.001),
-        args.optionFound("solids")
+        args.lookupOrDefault("scale", 0.001),
+        args.found("solids")
     );
 
 

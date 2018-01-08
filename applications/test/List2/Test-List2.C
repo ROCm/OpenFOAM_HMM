@@ -212,28 +212,28 @@ int main(int argc, char *argv[])
     std::initializer_list<label> increments
         = {10000, 20000, 40000, 80000, 160000};
 
-    if (args.optionFound("label"))
+    if (args.found("label"))
     {
         List<label> list(10, 1);
 
         runResizeTest(100000, list, increments);
     }
 
-    if (args.optionFound("float"))
+    if (args.found("float"))
     {
         List<double> list(10, 1.0);
 
         runResizeTest(10000, list, increments);
     }
 
-    if (args.optionFound("vector"))
+    if (args.found("vector"))
     {
         List<vector> list(10, vector::one);
 
         runResizeTest(10000, list, increments);
     }
 
-    if (args.optionFound("labelList"))
+    if (args.found("labelList"))
     {
         typedef labelList testType;
         testType initVal(500, label(1));
@@ -243,7 +243,7 @@ int main(int argc, char *argv[])
         runResizeTest(200, list, increments);
     }
 
-    if (args.optionFound("vectorList"))
+    if (args.found("vectorList"))
     {
         typedef vectorList testType;
         testType initVal(500, vector::one);
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
         runResizeTest(100, list, increments);
     }
 
-    if (args.optionFound("order"))
+    if (args.found("order"))
     {
         List<label> list(100000000, 1);
 

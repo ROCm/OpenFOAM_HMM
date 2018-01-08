@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
 
     if (useCommandArgs)
     {
-        if (args.optionFound("dict"))
+        if (args.found("dict"))
         {
             FatalErrorInFunction
                 << "Cannot specify both dictionary and command-line arguments"
@@ -171,21 +171,21 @@ int main(int argc, char *argv[])
     {
         // Carp about inapplicable options
 
-        if (args.optionFound("integral"))
+        if (args.found("integral"))
         {
             FatalErrorInFunction
                 << "Only specify -integral with command-line arguments"
                 << endl;
         }
 
-        if (args.optionFound("partial"))
+        if (args.found("partial"))
         {
             FatalErrorInFunction
                 << "Only specify -partial with command-line arguments"
                 << endl;
         }
 
-        if (args.optionFound("perfect"))
+        if (args.found("perfect"))
         {
             FatalErrorInFunction
                 << "Only specify -perfect with command-line arguments"
@@ -199,8 +199,8 @@ int main(int argc, char *argv[])
 
     const word oldInstance = mesh.pointsInstance();
 
-    const bool intermediate = args.optionFound("intermediate");
-    const bool overwrite = args.optionFound("overwrite");
+    const bool intermediate = args.found("intermediate");
+    const bool overwrite = args.found("overwrite");
 
     const word dictName("stitchMeshDict");
 
@@ -210,9 +210,9 @@ int main(int argc, char *argv[])
     if (useCommandArgs)
     {
         // Command argument driven:
-        const int integralCover = args.optionFound("integral");
-        const int partialCover  = args.optionFound("partial");
-        const int perfectCover  = args.optionFound("perfect");
+        const int integralCover = args.found("integral");
+        const int partialCover  = args.found("partial");
+        const int perfectCover  = args.found("perfect");
 
         if ((integralCover + partialCover + perfectCover) > 1)
         {
@@ -377,7 +377,7 @@ int main(int argc, char *argv[])
 
     // set up the tolerances for the sliding mesh
     dictionary slidingTolerances;
-    if (args.optionFound("toleranceDict"))
+    if (args.found("toleranceDict"))
     {
         IOdictionary toleranceFile
         (

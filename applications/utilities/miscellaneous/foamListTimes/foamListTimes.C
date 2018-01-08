@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     label nProcs = 0;
     instantList timeDirs;
 
-    if (args.optionFound("processor"))
+    if (args.found("processor"))
     {
         // Determine the processor count
         nProcs = fileHandler().nProcs(args.path());
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (args.optionFound("rm"))
+    if (args.found("rm"))
     {
         if (nProcs)
         {

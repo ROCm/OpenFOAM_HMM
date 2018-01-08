@@ -102,10 +102,10 @@ int main(int argc, char *argv[])
 
     IOdictionary collapseDict(dictIO);
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
-    const bool collapseFaces = args.optionFound("collapseFaces");
-    const bool collapseFaceSet = args.optionFound("collapseFaceSet");
+    const bool collapseFaces = args.found("collapseFaces");
+    const bool collapseFaceSet = args.found("collapseFaceSet");
 
     if (collapseFaces && collapseFaceSet)
     {
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     word faceSetName("indirectPatchFaces");
     IOobject::readOption readFlag = IOobject::READ_IF_PRESENT;
 
-    if (args.optionReadIfPresent("collapseFaceSet", faceSetName))
+    if (args.readIfPresent("collapseFaceSet", faceSetName))
     {
         readFlag = IOobject::MUST_READ;
     }

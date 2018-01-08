@@ -687,7 +687,7 @@ int main(int argc, char *argv[])
 
     const fileName inSurfName  = args[1];
     const fileName outSurfName = args[2];
-    const bool debug = args.optionFound("debug");
+    const bool debug = args.found("debug");
 
     Info<< "Reading surface from " << inSurfName << endl;
 

@@ -653,9 +653,9 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const bool readDict = args.optionFound("dict");
-    const bool doFrontWidth = args.optionFound("frontWidth");
-    const bool overwrite = args.optionFound("overwrite");
+    const bool readDict = args.found("dict");
+    const bool doFrontWidth = args.found("frontWidth");
+    const bool overwrite = args.found("overwrite");
 
     label band;
     scalar profile;

@@ -312,10 +312,10 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
-    const bool splitNonManifold = args.optionFound("splitNonManifold");
+    const bool checkSelfIntersect = args.found("checkSelfIntersection");
+    const bool splitNonManifold = args.found("splitNonManifold");
     const label outputThreshold =
-        args.optionLookupOrDefault("outputThreshold", 10);
+        args.lookupOrDefault("outputThreshold", 10);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
 
 
     // write bounding box corners
-    if (args.optionFound("blockMesh"))
+    if (args.found("blockMesh"))
     {
         pointField cornerPts(boundBox(surf.points(), false).points());
 

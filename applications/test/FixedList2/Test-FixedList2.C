@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Specify an option! " << nl << endl;
     }
 
-    if (args.optionFound("label"))
+    if (args.found("label"))
     {
         FixedList<label, 100000> list1(1);
         FixedList<label, 100000> list2(0);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         runSwapTest(1000001, list1, list2);
     }
 
-    if (args.optionFound("float"))
+    if (args.found("float"))
     {
         FixedList<double, 100000> list1(1.0);
         FixedList<double, 100000> list2(0.0);
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
         runSwapTest(1000001, list1, list2);
     }
 
-    if (args.optionFound("vector"))
+    if (args.found("vector"))
     {
         FixedList<vector, 100000> list1(vector::one);
         FixedList<vector, 100000> list2(vector::zero);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         runSwapTest(100001, list1, list2);
     }
 
-    if (args.optionFound("labelList"))
+    if (args.found("labelList"))
     {
         typedef labelList testType;
         testType initVal(500);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
         runSwapTest(100001, list1, list2);
     }
 
-    if (args.optionFound("vectorList"))
+    if (args.found("vectorList"))
     {
         typedef vectorList testType;
         testType initVal(500);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
         runSwapTest(100001, list1, list2);
     }
 
-    if (args.optionFound("fixedLabel"))
+    if (args.found("fixedLabel"))
     {
         typedef FixedList<label,1000> testType;
 
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
         runSwapTest(100001, list1, list2);
     }
 
-    if (args.optionFound("fixedLabelList"))
+    if (args.found("fixedLabelList"))
     {
         typedef labelList testType;
         typedef FixedList<testType,10> containerType;

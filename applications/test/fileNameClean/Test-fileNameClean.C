@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
     }
 
     fileName pathName;
-    if (args.optionReadIfPresent("case", pathName))
+    if (args.readIfPresent("case", pathName))
     {
         Info<< nl
             << "-case" << nl
@@ -95,10 +95,8 @@ int main(int argc, char *argv[])
         printCleaning(pathName);
     }
 
-    if (args.optionFound("istream"))
+    if (args.readIfPresent("istream", pathName))
     {
-        args.optionLookup("istream")() >> pathName;
-
         Info<< nl
             << "-case" << nl
             << "path = " << args.path() << nl

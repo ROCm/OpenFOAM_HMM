@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 
-    const bool checkAMI  = args.optionFound("checkAMI");
+    const bool checkAMI  = args.found("checkAMI");
 
     if (checkAMI)
     {

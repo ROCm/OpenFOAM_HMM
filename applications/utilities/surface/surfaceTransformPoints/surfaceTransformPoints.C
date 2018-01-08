@@ -125,11 +125,11 @@ int main(int argc, char *argv[])
             "scale"
         };
 
-        if (!args.optionCount(operationNames))
+        if (!args.count(operationNames))
         {
             FatalError
                 << "No operation supplied, "
-                << "use least one of the following:" << nl
+                << "use at least one of the following:" << nl
                 << "   ";
 
             for (const auto& opName : operationNames)
@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
     pointField points(surf1.points());
 
     vector v;
-    if (args.optionReadIfPresent("translate", v))
+    if (args.readIfPresent("translate", v))
     {
         Info<< "Translating points by " << v << endl;
 
@@ -162,18 +162,18 @@ int main(int argc, char *argv[])
     }
 
     vector origin;
-    const bool useOrigin = args.optionReadIfPresent("origin", origin);
+    const bool useOrigin = args.readIfPresent("origin", origin);
     if (useOrigin)
     {
         Info<< "Set origin for rotations to " << origin << endl;
         points -= origin;
     }
 
-    if (args.optionFound("rotate"))
+    if (args.found("rotate"))
     {
         Pair<vector> n1n2
         (
-            args.optionLookup("rotate")()
+            args.lookup("rotate")()
         );
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
@@ -184,11 +184,11 @@ int main(int argc, char *argv[])
 
         points = transform(rotT, points);
     }
-    else if (args.optionFound("rotate-angle"))
+    else if (args.found("rotate-angle"))
     {
         const Tuple2<vector, scalar> axisAngle
         (
-            args.optionLookup("rotate-angle")()
+            args.lookup("rotate-angle")()
         );
 
         Info<< "Rotating points " << nl
@@ -204,7 +204,7 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by quaternion " << quat << endl;
         points = transform(quat, points);
     }
-    else if (args.optionReadIfPresent("rollPitchYaw", v))
+    else if (args.readIfPresent("rollPitchYaw", v))
     {
         Info<< "Rotating points by" << nl
             << "    roll  " << v.x() << nl
@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by quaternion " << quat << endl;
         points = transform(quat, points);
     }
-    else if (args.optionReadIfPresent("yawPitchRoll", v))
+    else if (args.readIfPresent("yawPitchRoll", v))
     {
         Info<< "Rotating points by" << nl
             << "    yaw   " << v.x() << nl
@@ -235,10 +235,10 @@ int main(int argc, char *argv[])
         points = transform(quat, points);
     }
 
-    if (args.optionFound("scale"))
+    if (args.found("scale"))
     {
         // Use readList to handle single or multiple values
-        const List<scalar> scaling = args.optionReadList<scalar>("scale");
+        const List<scalar> scaling = args.readList<scalar>("scale");
 
         if (scaling.size() == 1)
         {

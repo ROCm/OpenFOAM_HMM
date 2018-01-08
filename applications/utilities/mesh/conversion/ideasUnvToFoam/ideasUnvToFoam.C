@@ -1122,7 +1122,7 @@ int main(int argc, char *argv[])
 
 
     // For debugging: dump boundary faces as OBJ surface mesh
-    if (args.optionFound("dump"))
+    if (args.found("dump"))
     {
         Info<< "Writing boundary faces to OBJ file boundaryFaces.obj"
             << nl << endl;

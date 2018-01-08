@@ -45,11 +45,11 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const label maxCount = args.optionLookupOrDefault<label>("max", 1000);
+    const label maxCount = args.lookupOrDefault<label>("max", 1000);
 
     externalFileCoupler coupler;
 
-    if (args.optionFound("slave"))
+    if (args.found("slave"))
     {
         const word role = "slave";
         Info<< "Running as " << role << " max=" << maxCount << endl;

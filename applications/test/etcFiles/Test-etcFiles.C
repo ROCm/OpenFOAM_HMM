@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     // First handle no parameters
     if (args.size() == 1)
     {
-        if (args.optionFound("list"))
+        if (args.found("list"))
         {
             fileNameList results = findEtcDirs();
             printList(results);
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const bool listAll = (args.optionFound("all") || args.optionFound("list"));
+    const bool listAll = (args.found("all") || args.found("list"));
 
     int error = 0;
 

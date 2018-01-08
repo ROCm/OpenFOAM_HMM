@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
     #include "createNamedPolyMesh.H"
 
     const word zoneName  = args[1];
-    const point outsidePoint = args.argRead<point>(2);
+    const point outsidePoint = args.read<point>(2);
 
     Info<< "Orienting faceZone " << zoneName
         << " such that " << outsidePoint << " is outside"

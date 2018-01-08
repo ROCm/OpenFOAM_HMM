@@ -289,7 +289,7 @@ int main(int argc, char *argv[])
 
     const IOdictionary dict(dictIO);
 
-    const scalar dist(args.argRead<scalar>(1));
+    const scalar dist(args.read<scalar>(1));
     const scalar matchTolerance(max(1e-6*dist, SMALL));
     const label maxIters = 100;
 

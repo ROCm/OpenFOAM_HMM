@@ -691,7 +691,7 @@ int main(int argc, char *argv[])
     Info<< "Reading blocked cells from cellSet " << blockedSetName
         << endl;
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
 
     // Read faceSets, lookup patches

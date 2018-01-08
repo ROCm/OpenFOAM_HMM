@@ -65,10 +65,10 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar   mergeTol = args.argRead<scalar>(2);
+    const scalar   mergeTol = args.read<scalar>(2);
     const fileName outFileName = args[3];
 
-    const scalar scaling = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl
         << "Merging points within " << mergeTol << " metre." << nl;

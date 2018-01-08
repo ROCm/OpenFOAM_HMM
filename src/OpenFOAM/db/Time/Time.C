@@ -519,9 +519,9 @@ Foam::Time::Time
     (
         *this,
         argList::validOptions.found("withFunctionObjects")
-      ? args.optionFound("withFunctionObjects")
+      ? args.found("withFunctionObjects")
       : argList::validOptions.found("noFunctionObjects")
-      ? !args.optionFound("noFunctionObjects")
+      ? !args.found("noFunctionObjects")
       : false
     )
 {
@@ -534,7 +534,7 @@ Foam::Time::Time
     setControls();
 
     // '-profiling' = force profiling, ignore controlDict entry
-    setMonitoring(args.optionFound("profiling"));
+    setMonitoring(args.found("profiling"));
 }
 
 

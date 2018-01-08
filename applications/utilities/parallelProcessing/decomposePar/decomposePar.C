@@ -280,15 +280,17 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const bool optRegion        = args.optionFound("region");
-    const bool allRegions       = args.optionFound("allRegions");
-    const bool writeCellDist    = args.optionFound("cellDist");
-    const bool copyZero         = args.optionFound("copyZero");
-    const bool copyUniform      = args.optionFound("copyUniform");
-    const bool decomposeSets    = !args.optionFound("noSets");
-    bool decomposeFieldsOnly    = args.optionFound("fields");
-    bool forceOverwrite         = args.optionFound("force");
-    const bool ifRequiredDecomposition = args.optionFound("ifRequired");
+    const bool optRegion        = args.found("region");
+    const bool allRegions       = args.found("allRegions");
+    const bool writeCellDist    = args.found("cellDist");
+    const bool copyZero         = args.found("copyZero");
+    const bool copyUniform      = args.found("copyUniform");
+    const bool decomposeSets    = !args.found("noSets");
+    const bool ifRequiredDecomposition = args.found("ifRequired");
+
+    bool decomposeFieldsOnly = args.found("fields");
+    bool forceOverwrite      = args.found("force");
+
 
     // Set time from database
     #include "createTime.H"
@@ -298,7 +300,7 @@ int main(int argc, char *argv[])
 
     // Allow override of decomposeParDict location
     fileName decompDictFile;
-    args.optionReadIfPresent("decomposeParDict", decompDictFile);
+    args.readIfPresent("decomposeParDict", decompDictFile);
 
     wordList regionNames;
     if (allRegions)
@@ -317,7 +319,7 @@ int main(int argc, char *argv[])
     else
     {
         regionNames = {fvMesh::defaultRegion};
-        args.optionReadIfPresent("region", regionNames[0]);
+        args.readIfPresent("region", regionNames[0]);
     }
 
     forAll(regionNames, regioni)

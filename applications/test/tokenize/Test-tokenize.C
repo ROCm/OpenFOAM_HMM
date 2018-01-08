@@ -51,9 +51,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    const label repeat = args.optionLookupOrDefault<label>("repeat", 1);
+    const label repeat = args.lookupOrDefault<label>("repeat", 1);
 
-    const bool optVerbose = args.optionFound("verbose");
+    const bool optVerbose = args.found("verbose");
 
     cpuTime timer;
     for (label count = 0; count < repeat; ++count)
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
         << timer.cpuTimeIncrement() << " s\n\n";
 
     fileName inputFile;
-    if (args.optionReadIfPresent("file", inputFile))
+    if (args.readIfPresent("file", inputFile))
     {
         IFstream is(inputFile);
 

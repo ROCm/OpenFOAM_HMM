@@ -804,15 +804,15 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    args.optionReadIfPresent("scale", scaleFactor);
+    args.readIfPresent("scale", scaleFactor);
 
     wordHashSet ignoreCellGroups;
     wordHashSet ignoreFaceGroups;
 
-    args.optionReadIfPresent("ignoreCellGroups", ignoreCellGroups);
-    args.optionReadIfPresent("ignoreFaceGroups", ignoreFaceGroups);
+    args.readIfPresent("ignoreCellGroups", ignoreCellGroups);
+    args.readIfPresent("ignoreFaceGroups", ignoreFaceGroups);
 
-    cubitFile = args.optionFound("cubit");
+    cubitFile = args.found("cubit");
 
     if (cubitFile)
     {

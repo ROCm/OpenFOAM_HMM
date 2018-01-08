@@ -82,10 +82,10 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const fileName kivaFileName =
-        args.optionLookupOrDefault<fileName>("file", "otape17");
+        args.lookupOrDefault<fileName>("file", "otape17");
 
     kivaVersions kivaVersion = kiva3v;
-    if (args.optionFound("version"))
+    if (args.found("version"))
     {
         const word versionName = args["version"];
 
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
     }
 
     scalar zHeadMin = -GREAT;
-    args.optionReadIfPresent("zHeadMin", zHeadMin);
+    args.readIfPresent("zHeadMin", zHeadMin);
 
     #include "readKivaGrid.H"
 

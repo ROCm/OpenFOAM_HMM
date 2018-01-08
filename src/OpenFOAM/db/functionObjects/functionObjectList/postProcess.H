@@ -78,7 +78,7 @@ if (argList::postProcess(argc, argv))
 
     #include "setRootCase.H"
 
-    if (args.optionFound("list"))
+    if (args.found("list"))
     {
         functionObjectList::list();
         return 0;

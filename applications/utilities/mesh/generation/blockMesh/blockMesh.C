@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     word regionPath;
 
     // Check if the region is specified otherwise mesh the default region
-    if (args.optionReadIfPresent("region", regionName, polyMesh::defaultRegion))
+    if (args.readIfPresent("region", regionName, polyMesh::defaultRegion))
     {
         Info<< nl << "Generating mesh for region " << regionName << endl;
         regionPath = regionName;
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
     fileName dictPath;
 
     // Check if the dictionary is specified on the command-line
-    if (args.optionReadIfPresent("dict", dictPath))
+    if (args.readIfPresent("dict", dictPath))
     {
         if (isDir(dictPath))
         {
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         dictPath = runTime.system()/regionPath/dictName;
     }
 
-    if (!args.optionFound("noClean"))
+    if (!args.found("noClean"))
     {
         fileName polyMeshPath
         (
@@ -223,7 +223,7 @@ int main(int argc, char *argv[])
     IOdictionary meshDict(meshDictIO);
     blockMesh blocks(meshDict, regionName);
 
-    if (args.optionFound("blockTopology"))
+    if (args.found("blockTopology"))
     {
         // Write mesh as edges.
         {
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Writing polyMesh with "
         << mesh.cellZones().size() << " cellZones";
-    if (args.optionFound("sets") && !mesh.cellZones().empty())
+    if (args.found("sets") && !mesh.cellZones().empty())
     {
         Info<< " (written as cellSets too)";
     }
@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    if (args.optionFound("sets"))
+    if (args.found("sets"))
     {
         forAll(mesh.cellZones(), zonei)
         {

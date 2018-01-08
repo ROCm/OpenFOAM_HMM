@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
     const bool includeProcPatches =
        !(
-            args.optionFound("excludeProcPatches")
+            args.found("excludeProcPatches")
          || Pstream::parRun()
         );
 
@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
 
         labelHashSet includePatches(bMesh.size());
 
-        if (args.optionFound("patches"))
+        if (args.found("patches"))
         {
             includePatches = bMesh.patchSet
             (
-                wordReList(args.optionLookup("patches")())
+                wordReList(args.lookup("patches")())
             );
         }
         else
@@ -195,9 +195,9 @@ int main(int argc, char *argv[])
         const faceZoneMesh& fzm = mesh.faceZones();
         labelHashSet includeFaceZones(fzm.size());
 
-        if (args.optionFound("faceZones"))
+        if (args.found("faceZones"))
         {
-            wordReList zoneNames(args.optionLookup("faceZones")());
+            wordReList zoneNames(args.lookup("faceZones")());
             const wordList allZoneNames(fzm.names());
             forAll(zoneNames, i)
             {

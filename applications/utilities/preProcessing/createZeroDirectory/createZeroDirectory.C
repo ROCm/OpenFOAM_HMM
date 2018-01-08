@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
     (
         "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"
     );
-    if (args.optionFound("templateDir"))
+    if (args.found("templateDir"))
     {
         baseDir = args["templateDir"];
     }

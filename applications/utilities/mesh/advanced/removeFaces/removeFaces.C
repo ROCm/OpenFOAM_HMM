@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     // Read faces
     faceSet candidateSet(mesh, setName);

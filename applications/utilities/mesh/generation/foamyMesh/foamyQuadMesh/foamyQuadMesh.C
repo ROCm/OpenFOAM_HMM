@@ -82,13 +82,13 @@ int main(int argc, char *argv[])
     const dictionary& extrusionDict(controlDict.subDict("extrusion"));
 
     Switch extrude(extrusionDict.lookup("extrude"));
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     // Read and triangulation
     // ~~~~~~~~~~~~~~~~~~~~~~
     CV2D mesh(runTime, controlDict);
 
-    if (args.optionFound("pointsFile"))
+    if (args.found("pointsFile"))
     {
         mesh.insertPoints(args["pointsFile"]);
     }

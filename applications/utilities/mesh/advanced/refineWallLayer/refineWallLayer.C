@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
     const wordReList patches((IStringStream(args[1])()));
     const labelHashSet patchSet(mesh.boundaryMesh().patchSet(patches));
 
-    const scalar weight  = args.argRead<scalar>(2);
-    const bool overwrite = args.optionFound("overwrite");
+    const scalar weight  = args.read<scalar>(2);
+    const bool overwrite = args.found("overwrite");
 
     if (!patchSet.size())
     {
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
     // Edit list of cells to refine according to specified set
     word setName;
-    if (args.optionReadIfPresent("useSet", setName))
+    if (args.readIfPresent("useSet", setName))
     {
         Info<< "Subsetting cells to cut based on cellSet"
             << setName << nl << endl;

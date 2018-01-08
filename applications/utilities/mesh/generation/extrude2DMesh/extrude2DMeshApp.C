@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     runTimeExtruded.functionObjects().off();
 
     const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     Info<< "Extruding from " << ExtrudeModeNames[surfaceFormat]
         << " at time " << runTimeExtruded.timeName() << endl;

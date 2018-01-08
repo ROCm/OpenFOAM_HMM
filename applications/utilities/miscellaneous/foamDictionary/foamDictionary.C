@@ -316,14 +316,14 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const bool listIncludes = args.optionFound("includes");
+    const bool listIncludes = args.found("includes");
 
     if (listIncludes)
     {
         Foam::functionEntries::includeEntry::log = true;
     }
 
-    const bool disableEntries = args.optionFound("disableFunctionEntries");
+    const bool disableEntries = args.found("disableFunctionEntries");
     if (disableEntries)
     {
         Info<< "Not expanding variables or dictionary directives" << endl;
@@ -352,7 +352,7 @@ int main(int argc, char *argv[])
     {
         return 0;
     }
-    else if (args.optionFound("expand"))
+    else if (args.found("expand"))
     {
         IOobject::writeBanner(Info)
             <<"//\n// " << dictFileName << "\n//\n";
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
     dictionary diffDict;
     {
         fileName diffFileName;
-        if (args.optionReadIfPresent("diff", diffFileName))
+        if (args.readIfPresent("diff", diffFileName))
         {
             IFstream diffFile(diffFileName);
             if (!diffFile.good())
@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
             diffDict.read(diffFile, true);
             optDiff = true;
         }
-        else if (args.optionReadIfPresent("diffEtc", diffFileName))
+        else if (args.readIfPresent("diffEtc", diffFileName))
         {
             fileName foundName = findEtcFile(diffFileName);
             if (foundName.empty())
@@ -409,18 +409,18 @@ int main(int argc, char *argv[])
     }
 
     word scopedName;  // Actually fileName, since it can contain '/' scoping
-    if (args.optionReadIfPresent("entry", scopedName))
+    if (args.readIfPresent("entry", scopedName))
     {
         upgradeScope(scopedName);
 
         string newValue;
         if
         (
-            args.optionReadIfPresent("set", newValue)
-         || args.optionReadIfPresent("add", newValue)
+            args.readIfPresent("set", newValue)
+         || args.readIfPresent("add", newValue)
         )
         {
-            const bool overwrite = args.optionFound("set");
+            const bool overwrite = args.found("set");
 
             // Dictionary name and keyword
             const dictAndKeyword dAk(scopedName);
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
                 Info<< finder.ref();
             }
         }
-        else if (args.optionFound("remove"))
+        else if (args.found("remove"))
         {
             // Dictionary name and keyword
             const dictAndKeyword dAk(scopedName);
@@ -510,14 +510,14 @@ int main(int argc, char *argv[])
                     << "Cannot find entry " << scopedName
                     << exit(FatalIOError, 2);
             }
-            else if (args.optionFound("keywords"))
+            else if (args.found("keywords"))
             {
                 for (const entry& e : finder.dict())
                 {
                     Info<< e.keyword() << endl;
                 }
             }
-            else if (args.optionFound("value"))
+            else if (args.found("value"))
             {
                 if (finder.isDict())
                 {
@@ -543,7 +543,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    else if (args.optionFound("keywords"))
+    else if (args.found("keywords"))
     {
         for (const entry& e : dict)
         {

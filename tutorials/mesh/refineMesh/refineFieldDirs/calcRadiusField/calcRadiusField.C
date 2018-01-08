@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     instantList timeDirs = timeSelector::select0(runTime, args);
-    const bool calcDirections = args.optionFound("calcDirections");
+    const bool calcDirections = args.found("calcDirections");
 
     #include "createNamedMesh.H"
 

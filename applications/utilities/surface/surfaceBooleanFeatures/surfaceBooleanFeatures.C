@@ -1587,7 +1587,7 @@ int main(int argc, char *argv[])
 
 
     List<Pair<word>> surfaceAndSide;
-    if (args.optionReadIfPresent("trim", surfaceAndSide))
+    if (args.readIfPresent("trim", surfaceAndSide))
     {
         Info<< "Trimming edges with " << surfaceAndSide << endl;
     }
@@ -1595,7 +1595,7 @@ int main(int argc, char *argv[])
 
     // Scale factor for both surfaces:
     const scalar scaleFactor
-        = args.optionLookupOrDefault<scalar>("scale", -1);
+        = args.lookupOrDefault<scalar>("scale", -1);
 
     const word surf1Name(args[2]);
     Info<< "Reading surface " << surf1Name << endl;
@@ -1641,13 +1641,13 @@ int main(int argc, char *argv[])
     surf2.writeStats(Info);
     Info<< endl;
 
-    const bool surf1Baffle = args.optionFound("surf1Baffle");
-    const bool surf2Baffle = args.optionFound("surf2Baffle");
+    const bool surf1Baffle = args.found("surf1Baffle");
+    const bool surf2Baffle = args.found("surf2Baffle");
 
     edgeIntersections edgeCuts1;
     edgeIntersections edgeCuts2;
 
-    const bool invertedSpace = args.optionFound("invertedSpace");
+    const bool invertedSpace = args.found("invertedSpace");
 
     if (invertedSpace && validActions[action] == booleanSurface::DIFFERENCE)
     {
@@ -1663,7 +1663,7 @@ int main(int argc, char *argv[])
     (
         surf1,
         surf2,
-        args.optionFound("perturb"),
+        args.found("perturb"),
         edgeCuts1,
         edgeCuts2
     );
@@ -1673,7 +1673,7 @@ int main(int argc, char *argv[])
     (
         surf1,
         surf2,
-        args.optionFound("perturb"),
+        args.found("perturb"),
         edgeCuts1,
         edgeCuts2
     );

@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    bool useBSpline = args.optionFound("B");
-    bool useCatmullRom = args.optionFound("CMR");
-    label nSeg = args.optionLookupOrDefault<label>("n", 20);
+    bool useBSpline = args.found("B");
+    bool useCatmullRom = args.found("CMR");
+    label nSeg = args.lookupOrDefault<label>("n", 20);
 
     if (!useCatmullRom && !useBSpline)
     {

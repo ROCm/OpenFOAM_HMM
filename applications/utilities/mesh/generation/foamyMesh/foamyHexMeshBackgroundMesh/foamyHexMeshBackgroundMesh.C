@@ -62,7 +62,7 @@ scalar getMergeDistance
 )
 {
     scalar mergeTol = defaultMergeTol;
-    args.optionReadIfPresent("mergeTol", mergeTol);
+    args.readIfPresent("mergeTol", mergeTol);
 
     scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
@@ -404,7 +404,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const bool writeMesh = args.optionFound("writeMesh");
+    const bool writeMesh = args.found("writeMesh");
 
     if (writeMesh)
     {
@@ -523,7 +523,7 @@ int main(int argc, char *argv[])
 
         // Allow override of decomposeParDict location
         fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        args.readIfPresent("decomposeParDict", decompDictFile);
 
         labelList decomp = decompositionModel::New
         (

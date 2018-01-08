@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const bool readHex = args.optionFound("hex");
+    const bool readHex = args.found("hex");
     IFstream mshStream(args[1]);
 
     label nCells;

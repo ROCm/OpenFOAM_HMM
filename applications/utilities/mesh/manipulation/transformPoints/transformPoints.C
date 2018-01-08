@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     #include "addRegionOption.H"
     #include "setRootCase.H"
 
-    const bool doRotateFields = args.optionFound("rotateFields");
+    const bool doRotateFields = args.found("rotateFields");
 
     // Verify that an operation has been specified
     {
@@ -216,11 +216,11 @@ int main(int argc, char *argv[])
             "scale"
         };
 
-        if (!args.optionCount(operationNames))
+        if (!args.count(operationNames))
         {
             FatalError
                 << "No operation supplied, "
-                << "use least one of the following:" << nl
+                << "use at least one of the following:" << nl
                 << "   ";
 
             for (const auto& opName : operationNames)
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
     word regionName = polyMesh::defaultRegion;
     fileName meshDir = polyMesh::meshSubDir;
 
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         meshDir = regionName/polyMesh::meshSubDir;
     }
@@ -259,7 +259,7 @@ int main(int argc, char *argv[])
     );
 
     vector v;
-    if (args.optionReadIfPresent("translate", v))
+    if (args.readIfPresent("translate", v))
     {
         Info<< "Translating points by " << v << endl;
 
@@ -267,18 +267,18 @@ int main(int argc, char *argv[])
     }
 
     vector origin;
-    const bool useOrigin = args.optionReadIfPresent("origin", origin);
+    const bool useOrigin = args.readIfPresent("origin", origin);
     if (useOrigin)
     {
         Info<< "Set origin for rotations to " << origin << endl;
         points -= origin;
     }
 
-    if (args.optionFound("rotate"))
+    if (args.found("rotate"))
     {
         Pair<vector> n1n2
         (
-            args.optionLookup("rotate")()
+            args.lookup("rotate")()
         );
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
@@ -294,11 +294,11 @@ int main(int argc, char *argv[])
             rotateFields(args, runTime, rotT);
         }
     }
-    else if (args.optionFound("rotate-angle"))
+    else if (args.found("rotate-angle"))
     {
         const Tuple2<vector, scalar> axisAngle
         (
-            args.optionLookup("rotate-angle")()
+            args.lookup("rotate-angle")()
         );
 
         Info<< "Rotating points " << nl
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
             rotateFields(args, runTime, quat.R());
         }
     }
-    else if (args.optionReadIfPresent("rollPitchYaw", v))
+    else if (args.readIfPresent("rollPitchYaw", v))
     {
         Info<< "Rotating points by" << nl
             << "    roll  " << v.x() << nl
@@ -339,7 +339,7 @@ int main(int argc, char *argv[])
             rotateFields(args, runTime, quat.R());
         }
     }
-    else if (args.optionReadIfPresent("yawPitchRoll", v))
+    else if (args.readIfPresent("yawPitchRoll", v))
     {
         Info<< "Rotating points by" << nl
             << "    yaw   " << v.x() << nl
@@ -360,10 +360,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("scale"))
+    if (args.found("scale"))
     {
         // Use readList to handle single or multiple values
-        const List<scalar> scaling = args.optionReadList<scalar>("scale");
+        const List<scalar> scaling = args.readList<scalar>("scale");
 
         if (scaling.size() == 1)
         {

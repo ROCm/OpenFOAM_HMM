@@ -90,14 +90,14 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 
     fileName exportName = meshWriter::defaultMeshName;
-    if (args.optionFound("case"))
+    if (args.found("case"))
     {
         exportName += '-' + args.globalCaseName();
     }
 
     // Default rescale from [m] to [mm]
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1000.0);
-    const bool  writeBndFile = !args.optionFound("noBnd");
+    const scalar scaleFactor = args.lookupOrDefault("scale", 1000.0);
+    const bool  writeBndFile = !args.found("noBnd");
 
     #include "createPolyMesh.H"
 

@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
         << " s\n" << endl << endl;
 
 
-    const scalar featureAngle = args.argRead<scalar>(1);
-    const bool overwrite      = args.optionFound("overwrite");
+    const scalar featureAngle = args.read<scalar>(1);
+    const bool overwrite      = args.found("overwrite");
 
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 

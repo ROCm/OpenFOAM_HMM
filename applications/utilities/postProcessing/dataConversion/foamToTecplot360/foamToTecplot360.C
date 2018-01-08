@@ -209,10 +209,10 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const bool doWriteInternal = !args.optionFound("noInternal");
-    const bool doFaceZones     = !args.optionFound("noFaceZones");
-    const bool nearCellValue = args.optionFound("nearCellValue");
-    const bool noPointValues = args.optionFound("noPointValues");
+    const bool doWriteInternal = !args.found("noInternal");
+    const bool doFaceZones     = !args.found("noFaceZones");
+    const bool nearCellValue = args.found("nearCellValue");
+    const bool noPointValues = args.found("noPointValues");
 
     if (nearCellValue)
     {
@@ -228,9 +228,9 @@ int main(int argc, char *argv[])
     }
 
     List<wordRe> excludePatches;
-    if (args.optionFound("excludePatches"))
+    if (args.found("excludePatches"))
     {
-        args.optionLookup("excludePatches")() >> excludePatches;
+        args.lookup("excludePatches")() >> excludePatches;
 
         Info<< "Not including patches " << excludePatches << nl << endl;
     }
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
     word faceSetName;
     string pltName = runTime.caseName();
 
-    if (args.optionReadIfPresent("cellSet", cellSetName))
+    if (args.readIfPresent("cellSet", cellSetName))
     {
         pltName = cellSetName;
     }
@@ -255,7 +255,7 @@ int main(int argc, char *argv[])
             pltName = pltName.substr(i);
         }
     }
-    args.optionReadIfPresent("faceSet", faceSetName);
+    args.readIfPresent("faceSet", faceSetName);
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
@@ -276,8 +276,8 @@ int main(int argc, char *argv[])
     {
         if
         (
-            args.optionFound("time")
-         || args.optionFound("latestTime")
+            args.found("time")
+         || args.found("latestTime")
          || cellSetName.size()
          || faceSetName.size()
          || regionName != polyMesh::defaultRegion
@@ -325,9 +325,9 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         HashSet<word> selectedFields;
-        if (args.optionFound("fields"))
+        if (args.found("fields"))
         {
-            args.optionLookup("fields")() >> selectedFields;
+            args.lookup("fields")() >> selectedFields;
         }
 
         // Construct the vol fields (on the original mesh if subsetted)

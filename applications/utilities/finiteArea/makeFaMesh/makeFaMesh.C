@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
     }
 
     word emptyPatchName;
-    if (args.optionReadIfPresent("addEmptyPatch", emptyPatchName))
+    if (args.readIfPresent("addEmptyPatch", emptyPatchName))
     {
         dictionary emptyPatchDict;
         emptyPatchDict.add("type", "empty");
