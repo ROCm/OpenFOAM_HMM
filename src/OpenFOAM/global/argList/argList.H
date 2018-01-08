@@ -102,7 +102,7 @@ SourceFiles
 #include "fileName.H"
 #include "parRun.H"
 #include "OSspecific.H"
-#include "StringStream.H"
+#include "ITstream.H"
 #include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -317,7 +317,7 @@ public:
         label count(std::initializer_list<word> optionNames) const;
 
         //- Return an input stream from the named option
-        inline IStringStream lookup(const word& optName) const;
+        inline ITstream lookup(const word& optName) const;
 
         //- Read a value from the named option
         //  The default template parameter is string (ie, no conversion).
@@ -369,7 +369,7 @@ public:
 
         //- Return an input stream from the named option
         //  \deprecated in favour of lookup() - JAN-2018
-        inline IStringStream optionLookup(const word& optName) const;
+        inline ITstream optionLookup(const word& optName) const;
 
         //- Read a value from the named option
         //  \deprecated in favour of opt() - JAN-2018

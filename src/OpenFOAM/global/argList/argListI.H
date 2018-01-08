@@ -105,9 +105,9 @@ inline bool Foam::argList::found(const word& optName) const
 }
 
 
-inline Foam::IStringStream Foam::argList::lookup(const word& optName) const
+inline Foam::ITstream Foam::argList::lookup(const word& optName) const
 {
-    return IStringStream(options_[optName]);
+    return ITstream(optName, options_[optName]);
 }
 
 
@@ -329,8 +329,7 @@ inline bool Foam::argList::optionFound(const word& optName) const
 }
 
 
-inline Foam::IStringStream
-Foam::argList::optionLookup(const word& optName) const
+inline Foam::ITstream Foam::argList::optionLookup(const word& optName) const
 {
     return lookup(optName);
 }
