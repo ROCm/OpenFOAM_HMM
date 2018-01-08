@@ -498,7 +498,7 @@ int main(int argc, char *argv[])
         }
 
 
-        fileName regionPrefix = "";
+        fileName regionPrefix;
         if (regionName != fvMesh::defaultRegion)
         {
             regionPrefix = regionName;
@@ -520,8 +520,7 @@ int main(int argc, char *argv[])
 
         if (args.optionFound("subDict"))
         {
-            word subDictName(args.optionLookup("subDict")());
-            replaceDictsPtr = &dict.subDict(subDictName);
+            replaceDictsPtr = &dict.subDict(args["subDict"]);
         }
 
         const dictionary& replaceDicts = *replaceDictsPtr;

@@ -319,9 +319,9 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("addEmptyPatch"))
+    word emptyPatchName;
+    if (args.optionReadIfPresent("addEmptyPatch", emptyPatchName))
     {
-        word emptyPatchName(args.optionLookup("addEmptyPatch")());
         dictionary emptyPatchDict;
         emptyPatchDict.add("type", "empty");
         emptyPatchDict.add("edgeLabels", labelList());

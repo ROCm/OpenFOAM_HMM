@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ Foam::functionObject* Foam::functionObjectList::remove
         oldIndex = fnd();
 
         // Retrieve the pointer and remove it from the old list
-        ptr = this->set(oldIndex, 0).ptr();
+        ptr = this->set(oldIndex, nullptr).ptr();
         indices_.erase(fnd);
     }
     else
@@ -106,11 +106,11 @@ void Foam::functionObjectList::listDir
     // Search specified directory for functionObject configuration files
     {
         fileNameList foFiles(fileHandler().readDir(dir));
-        forAll(foFiles, f)
+        for (const fileName& f : foFiles)
         {
-            if (foFiles[f].ext().empty())
+            if (f.ext().empty())
             {
-                foMap.insert(foFiles[f]);
+                foMap.insert(f);
             }
         }
     }
@@ -118,9 +118,9 @@ void Foam::functionObjectList::listDir
     // Recurse into sub-directories
     {
         fileNameList foDirs(fileHandler().readDir(dir, fileName::DIRECTORY));
-        forAll(foDirs, fd)
+        for (const fileName& d : foDirs)
         {
-            listDir(dir/foDirs[fd], foMap);
+            listDir(dir/d, foMap);
         }
     }
 }
@@ -132,9 +132,9 @@ void Foam::functionObjectList::list()
 
     fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
 
-    forAll(etcDirs, ed)
+    for (const fileName& d : etcDirs)
     {
-        listDir(etcDirs[ed], foMap);
+        listDir(d, foMap);
     }
 
     Info<< nl
@@ -154,17 +154,15 @@ Foam::fileName Foam::functionObjectList::findDict(const word& funcName)
     {
         return dictFile;
     }
-    else
-    {
-        fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
 
-        forAll(etcDirs, i)
+    fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
+
+    for (const fileName& d : etcDirs)
+    {
+        dictFile = search(funcName, d);
+        if (!dictFile.empty())
         {
-            dictFile = search(funcName, etcDirs[i]);
-            if (!dictFile.empty())
-            {
-                return dictFile;
-            }
+            return dictFile;
         }
     }
 
@@ -390,8 +388,6 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     HashSet<wordRe>& requiredFields
 )
 {
-    autoPtr<functionObjectList> functionsPtr;
-
     controlDict.add
     (
         dictionaryEntry("functions", controlDict, dictionary::null)
@@ -399,64 +395,66 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
     dictionary& functionsDict = controlDict.subDict("functions");
 
-    word region = word::null;
+    word region;
+    args.optionReadIfPresent("region", region);
 
-    // Set the region name if specified
-    if (args.optionFound("region"))
+    bool modifiedControlDict = false;
+
+    if (args.optionFound("dict"))
     {
-        region = args["region"];
+        modifiedControlDict = true;
+
+        controlDict.merge
+        (
+            IOdictionary
+            (
+                IOobject
+                (
+                    args["dict"],
+                    runTime,
+                    IOobject::MUST_READ_IF_MODIFIED
+                )
+            )
+        );
     }
 
-    if
-    (
-        args.optionFound("dict")
-     || args.optionFound("func")
-     || args.optionFound("funcs")
-    )
+    if (args.optionFound("func"))
     {
-        if (args.optionFound("dict"))
-        {
-            controlDict.merge
-            (
-                IOdictionary
-                (
-                    IOobject
-                    (
-                        args["dict"],
-                        runTime,
-                        IOobject::MUST_READ_IF_MODIFIED
-                    )
-                )
-            );
-        }
+        modifiedControlDict = true;
 
-        if (args.optionFound("func"))
+        readFunctionObject
+        (
+            args["func"],
+            functionsDict,
+            requiredFields,
+            region
+        );
+    }
+
+    if (args.optionFound("funcs"))
+    {
+        modifiedControlDict = true;
+
+        ITstream is("funcs", args["funcs"]);
+        wordList funcNames(is);
+
+        for (const word& funcName : funcNames)
         {
             readFunctionObject
             (
-                args["func"],
+                funcName,
                 functionsDict,
                 requiredFields,
                 region
             );
         }
+    }
 
-        if (args.optionFound("funcs"))
-        {
-            wordList funcs(args.optionLookup("funcs")());
 
-            forAll(funcs, i)
-            {
-                readFunctionObject
-                (
-                    funcs[i],
-                    functionsDict,
-                    requiredFields,
-                    region
-                );
-            }
-        }
+    autoPtr<functionObjectList> functionsPtr;
 
+    if (modifiedControlDict)
+    {
         functionsPtr.reset(new functionObjectList(runTime, controlDict));
     }
     else
