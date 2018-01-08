@@ -668,7 +668,7 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 (
     const indirectPrimitivePatch& pp,
     const labelList& meshEdges,
-    const scalar minCos,
+    const scalar minAngle,
     pointField& patchDisp,
     labelList& patchNLayers,
     List<extrudeMode>& extrudeStatus
@@ -676,7 +676,10 @@ void Foam::snappyLayerDriver::handleFeatureAngle
 {
     const fvMesh& mesh = meshRefiner_.mesh();
 
-    Info<< nl << "Handling feature edges ..." << endl;
+    const scalar minCos = Foam::cos(degToRad(minAngle));
+
+    Info<< nl << "Handling feature edges (angle < " << minAngle
+        << ") ..." << endl;
 
     if (minCos < 1-SMALL)
     {
@@ -3647,7 +3650,7 @@ void Foam::snappyLayerDriver::addLayers
         (
             pp,
             meshEdges,
-            degToRad(layerParams.featureAngle()),
+            layerParams.featureAngle(),
 
             patchDisp,
             patchNLayers,
