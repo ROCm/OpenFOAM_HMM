@@ -93,17 +93,20 @@ Foam::nutUBlendedWallFunctionFvPatchScalarField::calcUTau
     forAll(uTaup, facei)
     {
         scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
-        scalar error = GREAT;
-        label iter = 0;
-        while (iter++ < 10 && error > 0.001)
+        if (mag(ut) > ROOTVSMALL)
         {
-            scalar yPlus = y[facei]*ut/nuw[facei];
-            scalar uTauVis = magUp[facei]/yPlus;
-            scalar uTauLog = kappa_*magUp[facei]/log(E_*yPlus);
+            scalar error = GREAT;
+            label iter = 0;
+            while (iter++ < 10 && error > 0.001)
+            {
+                scalar yPlus = y[facei]*ut/nuw[facei];
+                scalar uTauVis = magUp[facei]/yPlus;
+                scalar uTauLog = kappa_*magUp[facei]/log(E_*yPlus);
 
-            scalar utNew = pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);
-            error = mag(ut - utNew)/(ut + ROOTVSMALL);
-            ut = 0.5*(ut + utNew);
+                scalar utNew = pow(pow(uTauVis, n_) + pow(uTauLog, n_), 1.0/n_);
+                error = mag(ut - utNew)/(ut + ROOTVSMALL);
+                ut = 0.5*(ut + utNew);
+            }
         }
         uTaup[facei] = ut;
     }
