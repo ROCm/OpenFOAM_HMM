@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,7 +27,6 @@ License
 #include "ListOps.H"
 #include "argList.H"
 #include "Time.H"
-#include "StringStream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,9 +36,9 @@ Foam::timeSelector::timeSelector()
 {}
 
 
-Foam::timeSelector::timeSelector(Istream& is)
+Foam::timeSelector::timeSelector(const std::string& str)
 :
-    scalarRanges(is)
+    scalarRanges(str)
 {}
 
 
@@ -47,7 +46,7 @@ Foam::timeSelector::timeSelector(Istream& is)
 
 bool Foam::timeSelector::selected(const instant& value) const
 {
-    return scalarRanges::selected(value.value());
+    return scalarRanges::operator()(value.value());
 }
 
 
@@ -67,7 +66,7 @@ Foam::List<bool> Foam::timeSelector::selected(const instantList& times) const
     // Check specific values
     for (const scalarRange& range : *this)
     {
-        if (range.isExact())
+        if (range.single())
         {
             const scalar target = range.value();
 
@@ -97,8 +96,7 @@ Foam::List<bool> Foam::timeSelector::selected(const instantList& times) const
 }
 
 
-Foam::instantList Foam::timeSelector::select(const instantList& times)
-const
+Foam::instantList Foam::timeSelector::select(const instantList& times) const
 {
     return subset(selected(times), times);
 }
@@ -211,10 +209,7 @@ Foam::instantList Foam::timeSelector::select
         if (args.optionFound("time"))
         {
             // Can match 0/, but can never match constant/
-            selectTimes = timeSelector
-            (
-                args.optionLookup("time")()
-            ).selected(times);
+            selectTimes = timeSelector(args["time"]).selected(times);
         }
 
         // Add in latestTime (if selected)
@@ -301,7 +296,7 @@ Foam::instantList Foam::timeSelector::selectIfPresent
     }
 
     // No timeSelector option specified. Do not change runTime.
-    return instantList(1, instant(runTime.value(), runTime.timeName()));
+    return instantList{ instant(runTime.value(), runTime.timeName()) };
 }
 
 

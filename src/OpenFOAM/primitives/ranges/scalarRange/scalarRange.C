@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,334 +24,106 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "scalarRange.H"
-#include "token.H"
+#include "string.H"
+#include "error.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-namespace Foam
+bool Foam::scalarRange::parse(const std::string& str, scalarRange& range)
 {
-int scalarRange::debug(debug::debugSwitch("scalarRange", 0));
-}
+    range.clear();
 
+    const auto colon = str.find(':');
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::scalarRange::scalarRange()
-:
-    type_(EMPTY),
-    value_(0),
-    value2_(0)
-{}
-
-
-Foam::scalarRange::scalarRange(const scalar lower, const scalar upper)
-:
-    type_(RANGE),
-    value_(lower),
-    value2_(upper)
-{
-    if (lower > upper)
+    if (colon == std::string::npos)
     {
-        clear();  // Mark invalid range as empty
+        // "VALUE"
+        scalar val;
+        if (readScalar(str, val))
+        {
+            range = scalarRange(val);
+        }
     }
-}
-
-
-Foam::scalarRange::scalarRange(Istream& is)
-:
-    type_(EXACT),
-    value_(0),
-    value2_(0)
-{
-    is >> *this;
-
-    if (scalarRange::debug)
+    else if (str.find(':', colon+1) != std::string::npos)
     {
-        Info<<"constructed scalarRange: " << *this << endl;
+        // A second colon is a syntax error
+        return false;
     }
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::scalarRange::clear()
-{
-    type_   = scalarRange::EMPTY;
-    value_  = 0;
-    value2_ = 0;
-}
-
-
-bool Foam::scalarRange::empty() const
-{
-    return type_ == EMPTY;
-}
-
-
-bool Foam::scalarRange::valid() const
-{
-    return type_ != EMPTY;
-}
-
-
-bool Foam::scalarRange::isExact() const
-{
-    return type_ == EXACT;
-}
-
-
-Foam::scalar Foam::scalarRange::value() const
-{
-    return value_;
-}
-
-
-Foam::scalar Foam::scalarRange::lower() const
-{
-    if (type_ == UPPER)
+    else if (colon == 0)
     {
-        return -Foam::GREAT;
+        // ":MAX"
+        scalar val;
+        if (readScalar(str.substr(1), val))
+        {
+            range = scalarRange::le(val);
+        }
+    }
+    else if (colon == str.size()-1)
+    {
+        // "MIN:"
+        scalar val;
+        if (readScalar(str.substr(0, colon), val))
+        {
+            range = scalarRange::ge(val);
+        }
     }
     else
     {
-        return value_;
+        // "MIN:MAX"
+        scalar minVal, maxVal;
+        if
+        (
+            readScalar(str.substr(0, colon), minVal)
+         && readScalar(str.substr(colon+1), maxVal)
+        )
+        {
+            range = scalarRange(minVal, maxVal);
+        }
     }
+
+    return range.valid();
 }
 
-Foam::scalar Foam::scalarRange::upper() const
+
+Foam::scalarRange Foam::scalarRange::parse(const std::string& str)
 {
-    switch (type_)
+    scalarRange range;
+
+    if (!parse(str, range))
     {
-        case LOWER:
-            return Foam::GREAT;
-            break;
-
-        case RANGE:
-            return value2_;
-            break;
-
-        default:
-            return value_;
-            break;
+        Info<< "Bad scalar-range while parsing: " << str << endl;
     }
-}
 
-
-bool Foam::scalarRange::selected(const scalar value) const
-{
-    switch (type_)
-    {
-        case LOWER:
-            return value >= value_;
-
-        case UPPER:
-            return value <= value_;
-
-        case RANGE:
-            return value >= value_ && value <= value2_;
-
-        case EXACT:
-            return value == value_;
-
-        default:
-            return false;
-    }
-}
-
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-bool Foam::scalarRange::operator==(const scalarRange& range) const
-{
-    return
-    (
-        type_ == range.type_
-     && value_ == range.value_
-     && value2_ == range.value2_
-    );
-}
-
-
-bool Foam::scalarRange::operator!=(const scalarRange& range) const
-{
-    return !(operator==(range));
+    return range;
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, scalarRange& range)
-{
-    range.type_ = scalarRange::EXACT;
-    range.value_ = 0;
-    range.value2_ = 0;
-
-    List<token> toks(4);
-    label nTok = 0;
-
-    // skip leading ','
-    do
-    {
-        is.read(toks[nTok]);
-        is.check("scalarRange token read");
-    }
-    while
-    (
-        toks[nTok].isPunctuation()
-     && toks[nTok].pToken() == token::COMMA
-    );
-
-    ++nTok;
-
-    // looks like ':VALUE'
-    if
-    (
-        toks[nTok-1].isPunctuation()
-     && toks[nTok-1].pToken() == token::COLON
-    )
-    {
-        range.type_ = scalarRange::UPPER;
-        is.read(toks[nTok++]);
-        is.check("scalarRange token read");
-    }
-
-    // a number is now required
-    if (!toks[nTok-1].isNumber())
-    {
-        range.clear();  // Mark invalid range as empty
-        Info<< "rejected ill-formed or empty range:";
-        for (label i=0; i<nTok; ++i)
-        {
-            Info<< " " << toks[i];
-        }
-        Info<< endl;
-        is.setBad();
-        return is;
-    }
-
-    range.value_ = toks[nTok-1].number();
-    is.read(toks[nTok++]);
-    is.check("scalarRange token read");
-
-    if (scalarRange::debug)
-    {
-        Info<<"tokens:";
-        for (label i=0; i<nTok; ++i)
-        {
-            Info<< " " << toks[i];
-        }
-        Info<< endl;
-    }
-
-    // could be 'VALUE:' or 'VALUE:VALUE'
-    if
-    (
-        toks[nTok-1].isPunctuation()
-     && toks[nTok-1].pToken() == token::COLON
-    )
-    {
-        if (range.type_ == scalarRange::UPPER)
-        {
-            range.clear();  // Mark invalid range as empty
-            Info<< "rejected ill-formed range:";
-            for (label i=0; i<nTok; ++i)
-            {
-                Info<< " " << toks[i];
-            }
-            Info<< endl;
-            is.setBad();
-            return is;
-        }
-
-        is.read(toks[nTok++]);
-        is.check("scalarRange token read");
-
-        if (scalarRange::debug)
-        {
-            Info<<"tokens:";
-            for (label i=0; i<nTok; ++i)
-            {
-                Info<< " " << toks[i];
-            }
-            Info<< endl;
-        }
-
-
-        // if there is a number, we have 'VALUE:VALUE' and not simply 'VALUE:'
-        if (toks[nTok-1].isNumber())
-        {
-            range.type_ = scalarRange::RANGE;
-            range.value2_ = toks[nTok-1].number();
-            is.read(toks[nTok++]);
-            is.check("scalarRange token read");
-        }
-        else
-        {
-            range.type_ = scalarRange::LOWER;
-        }
-    }
-
-    if (scalarRange::debug)
-    {
-        Info<<"tokens:";
-        for (label i=0; i<nTok; ++i)
-        {
-            Info<< " " << toks[i];
-        }
-        Info<< endl;
-    }
-
-
-    // some remaining tokens, but they are not the next comma
-    // - this is a problem!
-    if
-    (
-        toks[nTok-1].good()
-     &&
-        (
-            !toks[nTok-1].isPunctuation()
-         || toks[nTok-1].pToken() != token::COMMA
-        )
-    )
-    {
-        range.clear();  // Mark invalid range as empty
-        Info<< "rejected ill-formed range:";
-        for (label i=0; i<nTok; ++i)
-        {
-            Info<< " " << toks[i];
-        }
-        Info<< endl;
-        is.setBad();
-        return is;
-    }
-
-    return is;
-}
-
-
 Foam::Ostream& Foam::operator<<(Ostream& os, const scalarRange& range)
 {
     switch (range.type_)
     {
-        case scalarRange::LOWER:
-            os << range.value_ << " <=> Inf";
+        case scalarRange::EQ:
+            os << range.min_;
             break;
 
-        case scalarRange::UPPER:
-            os << "-Inf <=> " << range.value_;
+        case scalarRange::GE:
+        case scalarRange::GT:
+            os << range.min_ << ":Inf";
             break;
 
-        case scalarRange::RANGE:
-            os << range.value_ << " <=> " << range.value2_;
+        case scalarRange::LE:
+        case scalarRange::LT:
+            os << "-Inf:" << range.max_;
             break;
 
-        case scalarRange::EXACT:
-            os << range.value_;
+        case scalarRange::GE_LE:
+            os << range.min_ << ":" << range.max_;
             break;
 
         default:
-            os << "empty";
+            os << "false";
             break;
     }
 

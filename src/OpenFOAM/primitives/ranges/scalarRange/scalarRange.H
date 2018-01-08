@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,12 +25,10 @@ Class
     Foam::scalarRange
 
 Description
-    A scalar range specifier.
+    Scalar bounds to be used as a unary predicate.
 
-    The range selector can be specified as an "LOWER:UPPER" range, as a
-    "LOWER:" bound, as an ":UPPER" bound or simply as an "EXACT" value.
-    The read constructor uses a colon (:) as a range marker and a comma (,)
-    to delimit the next possible range selector.
+    The bound can be specified as an "MIN:MAX" range, as a "MIN:" or ":MAX"
+    bound or simply as a single "VALUE".
 
 SourceFiles
     scalarRange.C
@@ -46,96 +44,125 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
+// Forward declarations
 class scalarRange;
-Istream& operator>>(Istream& is, scalarRange& range);
+class Ostream;
 Ostream& operator<<(Ostream& os, const scalarRange& range);
 
 
 /*---------------------------------------------------------------------------*\
-                        Class scalarRange Declaration
+                         Class scalarRange Declaration
 \*---------------------------------------------------------------------------*/
 
 class scalarRange
 {
-    //- Enumeration defining the types of token
-    enum rangeType
+    //- Enumeration defining type of range test to use
+    enum testType
     {
-        EMPTY = 0,
-        EXACT,
-        LOWER,
-        UPPER,
-        RANGE
+        NONE = 0,   //!< An empty, invalid (inverse) range. Never matches.
+        EQ,         //!< A single value test.
+        GE,         //!< Greater-than-equal.
+        GT,         //!< Greater-than.
+        LE,         //!< Less-than-equal.
+        LT,         //!< Less-than.
+        GE_LE       //!< An inclusive range.
     };
 
 
     // Private Member Data
 
-        enum rangeType type_;
-        scalar value_;
-        scalar value2_;
+        //- The type of range test
+        enum testType type_;
+
+        //- The min value of the range
+        scalar min_;
+
+        //- The max value of the range
+        scalar max_;
+
+        //- Construct from components without sanity checking
+        inline scalarRange(const testType type, scalar minVal, scalar maxVal);
 
 
 public:
 
-        static int debug;
-
-
     // Constructors
 
-        //- Construct an empty range
-        scalarRange();
+        //- Construct an empty (inverse) range
+        inline scalarRange();
 
-        //- Construct a range from lower to upper
-        scalarRange(const scalar lower, const scalar upper);
+        //- Construct an exact value matcher
+        explicit inline scalarRange(const scalar value);
 
-        //- Construct from Istream.
-        //  Since commas can be used as list delimiters,
-        //  leading and trailing commas are ignored.
-        scalarRange(Istream& is);
+        //- Construct a range from min-value to max-value
+        inline scalarRange(const scalar minVal, const scalar maxVal);
+
+
+    // Static Constructors
+
+        //- Construct by parsing string content.
+        //  A colon (:) is used as a range marker or when specifying
+        //  greater-than or less-than bounds.
+        //  \return True if no parse problems were encountered.
+        static bool parse(const std::string& str, scalarRange& range);
+
+        //- Construct by parsing string content.
+        //  Any parse problems are emitted as information and the returned
+        //  range is of type empty().
+        //  \return The parsed range, which is empty() on any problems
+        static scalarRange parse(const std::string& str);
+
+
+        //- Construct a greater-than-equals bound
+        inline static scalarRange ge(const scalar minVal);
+
+        //- Construct a greater-than bound
+        inline static scalarRange gt(const scalar minVal);
+
+        //- Construct a less-than-equals bound
+        inline static scalarRange le(const scalar maxVal);
+
+        //- Construct a less-than bound
+        inline static scalarRange lt(const scalar maxVal);
 
 
     // Member Functions
 
-        //- Reset to an empty range.
-        void clear();
+        //- Reset to an empty (inverse) range.
+        inline void clear();
 
-        //- Is the range empty?
-        bool empty() const;
+        //- True if bounds are empty (eg, inverted)
+        inline bool empty() const;
 
-        //- Is the range non-empty?
-        bool valid() const;
+        //- True if bounds are non-empty.
+        inline bool valid() const;
 
-        //- Is the range 'EXACT'?
-        bool isExact() const;
+        //- True if the bounds represents a single value.
+        inline bool single() const;
 
-        //- The value constituting an 'EXACT' match
-        //  or the values for 'UPPER' or 'LOWER' limits
-        scalar value() const;
+        //- The min value of the range.
+        inline scalar min() const;
 
-        //- The lower limit
-        scalar lower() const;
+        //- The max value of the range.
+        inline scalar max() const;
 
-        //- The upper limit
-        scalar upper() const;
-
-        //- Return true if the value is within the range
-        bool selected(const scalar value) const;
+        //- A representative (average) value for the range.
+        //  For GE, LE bounds it is the min/max value, respectively.
+        inline scalar value() const;
 
 
     // Member Operators
 
-        bool operator==(const scalarRange& range) const;
-        bool operator!=(const scalarRange& range) const;
+        //- Unary predicate to test if the value is within the bounds
+        inline bool operator()(const scalar& value) const;
+
+        inline bool operator==(const scalarRange& rhs) const;
+        inline bool operator!=(const scalarRange& rhs) const;
 
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream& is, scalarRange& range);
+        //- Print information about the bounds.
         friend Ostream& operator<<(Ostream& os, const scalarRange& range);
 };
 
@@ -145,6 +172,8 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "scalarRangeI.H"
 
 #endif
 

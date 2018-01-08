@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,17 +89,17 @@ class Time;
 
 class timeSelector
 :
-    public scalarRanges
+    private scalarRanges
 {
 public:
 
     // Constructors
 
-        //- Construct Null
+        //- Construct null
         timeSelector();
 
-        //- Construct from Istream
-        timeSelector(Istream& is);
+        //- Construct by parsing string for time ranges
+        timeSelector(const std::string& str);
 
 
     // Member Functions

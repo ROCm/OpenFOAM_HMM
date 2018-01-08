@@ -813,7 +813,6 @@ DebugSwitches
     saturateEvaporationModel 0;
     scalarAverageField  0;
     scalarField         0;
-    scalarRange         0;
     scaleSimilarity     0;
     scatterModel        0;
     searchableBox       0;
