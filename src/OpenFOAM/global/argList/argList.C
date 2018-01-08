@@ -42,6 +42,7 @@ License
 #include "CStringList.H"
 #include "uncollatedFileOperation.H"
 #include "masterUncollatedFileOperation.H"
+#include "IOmanip.H"
 
 #include <cctype>
 
@@ -55,6 +56,7 @@ Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
 Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
+Foam::HashTable<std::pair<bool,int>> Foam::argList::ignoreOptionsCompat;
 Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
@@ -212,6 +214,20 @@ void Foam::argList::addOptionCompat
     (
         compat.first,
         std::pair<word,int>(optName, compat.second)
+    );
+}
+
+
+void Foam::argList::ignoreOptionCompat
+(
+    std::pair<const char*,int> compat,
+    const bool expectArg
+)
+{
+    ignoreOptionsCompat.insert
+    (
+        compat.first,
+        std::pair<bool,int>(expectArg, compat.second)
     );
 }
 
@@ -466,9 +482,59 @@ Foam::word Foam::argList::optionCompat(const word& optName)
 }
 
 
+int Foam::argList::optionIgnore(const word& optName)
+{
+    // NB: optName is without the leading '-'
+
+    if (!ignoreOptionsCompat.empty())
+    {
+        const auto fnd = ignoreOptionsCompat.cfind(optName);
+
+        if (fnd.found())
+        {
+            const auto& iter = *fnd;
+
+            // Number to skip (including the option itself)
+            // '-option ARG' or '-option'
+            const int nskip = (iter.first ? 2 : 1);
+
+            // Emit warning if there is versioning (non-zero) and it is not
+            // tagged as future change (ie, ThisVersion > version).
+
+            if
+            (
+                iter.second
+             &&
+                (
+                    (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
+                  ? (OPENFOAM_PLUS > iter.second)
+                  : true
+                )
+            )
+            {
+                std::cerr
+                    << "--> FOAM IOWarning :" << nl
+                    << "    Ignoring [v" << iter.second << "] '-"
+                    << optName << (nskip > 1 ? " ARG" : "")
+                    << "' option"
+                    << nl
+                    << std::endl;
+
+                error::warnAboutAge("option", iter.second);
+            }
+
+            return nskip;
+        }
+    }
+
+    return 0; // Do not skip
+}
+
+
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
     int nArgs = 1;
+    int ignore = 0;
     unsigned depth = 0;
     string group;  // For grouping ( ... ) arguments
 
@@ -516,6 +582,14 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
             {
                 // Known option name
                 args_[nArgs++] = argv[argi];
+            }
+            else if ((ignore = optionIgnore(optName)) > 0)
+            {
+                // Option to be ignored (with/without an argument)
+                if (ignore > 1)
+                {
+                    ++argi;
+                }
             }
             else
             {
@@ -754,9 +828,11 @@ void Foam::argList::parse
     //   -help-full   print the full usage
     //   -doc         display application documentation in browser
     //   -doc-source  display source code in browser
+    //   -list-compat print compatibility information
     {
         bool quickExit = false;
 
+        // Only display one or the other
         if (options_.found("help-full"))
         {
             printUsage(true);
@@ -781,6 +857,12 @@ void Foam::argList::parse
         )
         {
             displayDoc(true);
+            quickExit = true;
+        }
+
+        if (options_.found("list-compat"))
+        {
+            printCompat();
             quickExit = true;
         }
 
@@ -1449,6 +1531,75 @@ void Foam::argList::printUsage(bool full) const
     Info<< nl;
     printBuildInfo();
     Info<< endl;
+}
+
+
+void Foam::argList::printCompat() const
+{
+    const label nopt
+    (
+        argList::validOptionsCompat.size()
+      + argList::ignoreOptionsCompat.size()
+    );
+
+    Info<< nopt << " compatibility options for " << executable_ << nl;
+    if (nopt)
+    {
+        Info<< setf(ios_base::left) << setw(34) << "old option"
+            << setf(ios_base::left) << setw(32) << "new option"
+            << "version" << nl
+            << setf(ios_base::left) << setw(34) << "~~~~~~~~~~"
+            << setf(ios_base::left) << setw(32) << "~~~~~~~~~~"
+            << "~~~~~~~" << nl;
+
+        for (const word& k : argList::validOptionsCompat.sortedToc())
+        {
+            const auto& iter = *argList::validOptionsCompat.cfind(k);
+
+            Info<< "  -"
+                << setf(ios_base::left) << setw(32) << k
+                << " -"
+                << setf(ios_base::left) << setw(30) << iter.first;
+
+            if (iter.second)
+            {
+                Info<< " " << iter.second;
+            }
+            else
+            {
+                Info<< " -";
+            }
+            Info<< nl;
+        }
+
+        for (const word& k : argList::ignoreOptionsCompat.sortedToc())
+        {
+            const auto& iter = *argList::ignoreOptionsCompat.cfind(k);
+
+            if (iter.first)
+            {
+                Info<< "  -"
+                    << setf(ios_base::left) << setw(32)
+                    << (k + " <arg>").c_str();
+            }
+            else
+            {
+                Info<< "  -"
+                    << setf(ios_base::left) << setw(32) << k;
+            }
+
+            Info<< setf(ios_base::left) << setw(32) << " removed";
+            if (iter.second)
+            {
+                Info<< " " << iter.second;
+            }
+            else
+            {
+                Info<< " -";
+            }
+            Info<< nl;
+        }
+    }
 }
 
 

@@ -57,12 +57,22 @@ int main(int argc, char *argv[])
     // Fake a future option...
     argList::addOptionCompat("label", {"parse-label", 2112});
 
+    // Ignore an old bool option
+    argList::ignoreOptionCompat({"xml", 1700}, false);
+
+    // Ignore an old option with arg. Specified version=0 to suppress warnings
+    argList::ignoreOptionCompat({"format", 0}, true);
+
+    // Ignore a future option? Fairly pointless
+    argList::ignoreOptionCompat({"ascii", 2112}, false);
+
     argList::addArgument("label");
     argList::addArgument("...");
     argList::addArgument("label");
     argList::nonMandatoryArgs();
 
     argList args(argc, argv, false, true);
+
 
     Info<<"have: "
         <<args.count({"label", "scalar"}) << " options" << nl;

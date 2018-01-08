@@ -150,6 +150,9 @@ class argList
         //- Helper for resolving aliases for -options within validOptionsCompat
         static word optionCompat(const word& optName);
 
+        //- Helper for resolving ignored options
+        static int optionIgnore(const word& optName);
+
         //- Helper function for printUsage
         static void printOptionUsage
         (
@@ -188,6 +191,10 @@ public:
         //- A list of aliases for options.
         //  Stored as (alias = canonical, version)
         static HashTable<std::pair<word,int>> validOptionsCompat;
+
+        //- A list of options to ignore.
+        //  Stored as (option = bool, version)
+        static HashTable<std::pair<bool,int>> ignoreOptionsCompat;
 
         //- Short usage information for validOptions
         static HashTable<string> optionUsage;
@@ -431,13 +438,25 @@ public:
         //- Specify an alias for the option name.
         //
         //  \param optName the currently used option name
-        //  \param compat alias name and the last OpenFOAM version
-        //      (YYMM) for when the alias was not needed.
+        //  \param compat alias name and the last OpenFOAM version (YYMM)
+        //      when the alias was not needed.
         //      Setting a version of 0 suppresses warnings about the alias.
         static void addOptionCompat
         (
             const word& optName,
             std::pair<const char*, int> compat
+        );
+
+        //- Specify an option to be ignored.
+        //
+        //  \param compat optName and the last OpenFOAM version (YYMM)
+        //      when the option was directly supported.
+        //      Setting a version of 0 suppresses warnings about the alias.
+        //  \param expectArg the option is non-bool
+        static void ignoreOptionCompat
+        (
+            std::pair<const char*,int> compat,
+            const bool expectArg
         );
 
         //- Add option usage information to optionUsage
@@ -493,6 +512,9 @@ public:
 
 
     // Print
+
+        //- Print option compatibility
+        void printCompat() const;
 
         //- Print notes (if any)
         void printNotes() const;
