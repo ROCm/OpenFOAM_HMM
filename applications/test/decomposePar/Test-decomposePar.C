@@ -89,14 +89,14 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "domains",
-        "N"
+        "N",
         "override numberOfSubdomains"
     );
 
     argList::addOption
     (
         "method",
-        "name"
+        "name",
         "override method"
     );
 
