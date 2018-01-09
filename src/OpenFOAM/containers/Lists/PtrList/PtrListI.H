@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,38 +26,42 @@ License
 #include "autoPtr.H"
 #include "tmp.H"
 
+// * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
+
+template<class T>
+inline Foam::PtrList<T>::PtrList(const label nElem)
+:
+    UPtrList<T>(nElem)
+{}
+
+
+template<class T>
+inline Foam::PtrList<T>::PtrList(PtrList<T>&& lst)
+:
+    UPtrList<T>(std::move(lst))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::PtrList<T>::resize(const label newSize)
+inline void Foam::PtrList<T>::resize(const label newLen)
 {
-    this->setSize(newSize);
-}
-
-
-template<class T>
-inline void Foam::PtrList<T>::append(T* ptr)
-{
-    const label idx = this->size();
-    this->setSize(idx + 1);
-    this->ptrs_[idx] = ptr;
+    this->setSize(newLen);
 }
 
 
 template<class T>
 inline void Foam::PtrList<T>::append(const autoPtr<T>& aptr)
 {
-    return append(const_cast<autoPtr<T>&>(aptr).ptr());
+    return UPtrList<T>::append(const_cast<autoPtr<T>&>(aptr).ptr());
 }
 
 
 template<class T>
-inline void Foam::PtrList<T>::append
-(
-    const tmp<T>& t
-)
+inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
 {
-    return append(const_cast<tmp<T>&>(t).ptr());
+    return UPtrList<T>::append(const_cast<tmp<T>&>(tptr).ptr());
 }
 
 
@@ -92,10 +96,18 @@ template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set
 (
     const label i,
-    const tmp<T>& t
+    const tmp<T>& tptr
 )
 {
-    return set(i, const_cast<tmp<T>&>(t).ptr());
+    return set(i, const_cast<tmp<T>&>(tptr).ptr());
+}
+
+
+template<class T>
+inline void Foam::PtrList<T>::transfer(PtrList<T>& lst)
+{
+    this->clear();
+    UPtrList<T>::swap(lst);
 }
 
 
@@ -103,6 +115,16 @@ template<class T>
 inline Foam::Xfer<Foam::PtrList<T>> Foam::PtrList<T>::xfer()
 {
     return xferMove(*this);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class T>
+inline void Foam::PtrList<T>::operator=(PtrList<T>&& lst)
+{
+    this->clear();
+    this->swap(lst);
 }
 
 

@@ -139,16 +139,11 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 
         setSize(sllPtrs.size());
 
-        // Pointers - can simply copy
+        // A list of pointers - can simply copy
         label i = 0;
-        for
-        (
-            typename SLList<T*>::const_iterator iter = sllPtrs.cbegin();
-            iter != sllPtrs.cend();
-            ++iter
-        )
+        for (T* ptr : sllPtrs)
         {
-            set(i++, *iter);
+            set(i++, ptr);
         }
 
         return;

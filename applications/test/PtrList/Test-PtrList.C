@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,10 +21,8 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Application
-
 Description
-
+    Test behaviour of UPtrList, PtrList
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
@@ -102,13 +100,13 @@ int main(int argc, char *argv[])
 
         forAllIters(llist1, it)
         {
-            Info<< typeid(*it).name() << endl;
-            Info<< "reversed: " << *it << endl;
+            Info<< typeid(*it).name() << nl
+                << "reversed: " << *it << endl;
         }
         for (const auto& it : llist1)
         {
-            Info<< typeid(it).name() << endl;
-            Info<< "for-: " << it << endl;
+            Info<< typeid(it).name() << nl
+                << "for-: " << it << endl;
         }
     }
 
@@ -127,9 +125,10 @@ int main(int argc, char *argv[])
         listApp.append(new Scalar(1.3*i));
     }
 
-    Info<<"list1: " << list1 << endl;
-    Info<<"list2: " << list2 << endl;
-    Info<<"listApp: " << listApp << endl;
+    Info<< nl
+        <<"list1: " << list1 << nl
+        <<"list2: " << list2 << nl
+        <<"list-appended: " << listApp << endl;
 
     Info<<"indirectly delete some items via set(.., 0) :" << endl;
     for (label i = 0; i < 3; i++)
@@ -140,8 +139,8 @@ int main(int argc, char *argv[])
     Info<<"transfer list2 -> list1:" << endl;
     list1.transfer(list2);
 
-    Info<<"list1: " << list1 << endl;
-    Info<<"list2: " << list2 << endl;
+    Info<<"list1: " << list1 << nl
+        <<"list2: " << list2 << endl;
 
     Info<<"indirectly delete some items via setSize :" << endl;
     list1.setSize(4);
@@ -151,16 +150,71 @@ int main(int argc, char *argv[])
     PtrList<Scalar> list3(list1.xfer());
     Info<< "Transferred via the xfer() method" << endl;
 
-    Info<<"list1: " << list1 << endl;
-    Info<<"list2: " << list2 << endl;
-    Info<<"list3: " << list3 << endl;
+    Info<<"list1: " << list1 << nl
+        <<"list2: " << list2 << nl
+        <<"list3: " << list3 << endl;
+
+
+    Info<<"Move construct:" << endl;
+
+    PtrList<Scalar> list4(std::move(list3));
+
+    Info<<"list3: " << list3 << nl
+        <<"list4: " << list4 << endl;
+
+    Info<<"Move assign:" << endl;
+    list3 = std::move(list4);
+
+    Info<<"list3: " << list3 << nl
+        <<"list4: " << list4 << endl;
+
+
+    Info<<"UPtrList from PtrList" << nl;
+
+    UPtrList<Scalar> ulist1(list3);
+
+    Info<<"ulist1: " << ulist1 << nl;
+
+    Info<<"Move construct:" << endl;
+
+    UPtrList<Scalar> ulist2(std::move(ulist1));
+
+    Info<<"ulist1: " << ulist1 << nl
+        <<"ulist2: " << ulist2 << nl;
+
+    Info<<"Copy assign:" << endl;
+    ulist1 = ulist2;
+
+    Info<<"ulist1: " << ulist1 << nl
+        <<"ulist2: " << ulist2 << nl;
+
+    Info<<"Move assign:" << endl;
+    ulist1 = std::move(ulist2);
+
+    Info<<"ulist1: " << ulist1 << nl
+        <<"ulist2: " << ulist2 << nl;
+
+    // Test iterator random access
+    {
+        auto iter1 = ulist1.begin();
+        auto iter2 = iter1 + 3;
+
+        Info<<"begin:" << *iter1 << " (+3):" << *iter2 << nl;
+        Info<< "diff= " << (iter1 - iter2) << nl;
+        Info<< "iter[2]=" << iter1[2] << nl;
+        Info<< "iter1 < iter2 : " << (iter1 < iter2) << nl;
+        Info<< "iter1 >= iter2 : " << (iter1 >= iter2) << nl;
+    }
 
     PtrList<plane> planes;
     planes.append(new plane(vector::one, vector::one));
     planes.append(new plane(vector(1,2,3), vector::one));
 
-    forAll(planes, p)
-        Info<< "plane " << planes[p] << endl;
+    Info<< nl << "appended values" << nl;
+    for (const plane& p : planes)
+    {
+        Info<< "    plane " << p << endl;
+    }
 
     Info<< nl << "Done." << endl;
     return 0;
