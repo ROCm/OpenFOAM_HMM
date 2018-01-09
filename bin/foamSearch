@@ -4,74 +4,80 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamSearch
 #
 # Description
-#     Searches a directory for dictionary files of a particular name and
-#     extracts entries of a particular keyword, sorting into a unique list.
+#     Search a directory for dictionary files of a particular name and
+#     extract entries of a particular keyword, sorting into a unique list.
 #
 #     Requires foamDictionary.
 #
 #------------------------------------------------------------------------------
-usage() {
-    exec 1>&2
-    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+printHelp() {
+    # Print usage to stdout so that it can be captured for bash completion
     cat<<USAGE
-Usage: ${0##*/} [OPTIONS] <directory> <keyword> <file>
+
+Usage: ${0##*/} [OPTIONS] <directory> <keyword> <fileName>
+       ${0##*/} [OPTIONS] <keyword> <fileName>
 
 Options:
--c | -count       prefix lines by the number of occurrences
--h | -help        help
+    -c | -count     prefix lines by the number of occurrences
+    -help           help
 
-* Searches the <directory> for files named <file> and extracts entries with
-  <keyword>.  Sorts result into a list of unique entries (removing repeats).
+* Searches the <directory> for files named <fileName> and extracts entries
+  with <keyword>. Sorts result into a list of unique entries.
+  Uses the cwd if the <directory> is not provided.
 
-  Examples:
-  * Default ddtSchemes entries in the fvSchemes files in all tutorials:
-      foamSearch \$FOAM_TUTORIALS ddtSchemes.default fvSchemes
-  * Relaxations factors for U in fvSolutions files in all tutorials:
-      foamSearch -c \$FOAM_TUTORIALS relaxationFactors.equations.U fvSolution
+Examples:
+* Default ddtSchemes entries in the fvSchemes files in all tutorials:
+    foamSearch \$FOAM_TUTORIALS ddtSchemes/default fvSchemes
+
+* Relaxations factors for U in fvSolutions files in all tutorials:
+    foamSearch -count \$FOAM_TUTORIALS relaxationFactors/equations/U fvSolution
 
 USAGE
-    exit 1
+    exit 0  # A clean exit
 }
 
 
-#------------------------------------------------------------------------------
-unset optCount
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${0##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+#-------------------------------------------------------------------------------
 
 # Parse options
+unset optCount
+unset dirName keyword fileName
+
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
-        usage
+        printHelp
         ;;
     -c | -count)
         optCount="-c"
         shift
         ;;
     -*)
-        usage "unknown option: '$1'"
+        die "unknown option: '$1'"
         ;;
     *)
         break
@@ -79,26 +85,44 @@ do
     esac
 done
 
-[ "$#" -eq 3 ] || usage "Wrong number of arguments: expected 3, found $#"
-[ -d "$1" ] || usage "$1 is not a directory"
+# Basic checks
+if [ "$#" -eq 2 ]
+then
+    dirName="./"
+    keyword="$1"
+    fileName="$2"
+elif [ "$#" -eq 3 ]
+then
+    dirName="$1"
+    keyword="$2"
+    fileName="$3"
+else
+    die "Expected 2 or 3 arguments, but found $# instead"
+fi
 
-dirName="$1"
-key="$2"
-fileName="$3"
+[ -d "$dirName" ] || die "Not a directory: $dirName"
+command -v foamDictionary > /dev/null || die "No foamDictionary command"
 
-fileList=$(find $dirName -name $fileName -type f)
-[ -n "$fileList" ] || usage "No file $fileName found in $dir"
+#-------------------------------------------------------------------------------
 
-tmpFile=temp.$$
+fileList=$(find $dirName -name "$fileName" -type f)
+[ -n "$fileList" ] || {
+    echo "No '$fileName' file found in $dirName" 1>&2
+    exit 2
+}
+
+echo "Processing $(echo $fileList | wc -w) $fileName files..." 1>&2
+
+tmpFile=${TMPDIR:-/tmp}/foamSearch.$$
 trap "rm -f $tmpFile 2>/dev/null; exit 0" EXIT TERM INT
 
 for i in $fileList
 do
-    foamDictionary -entry "$key" $i 2>/dev/null
+    foamDictionary -entry "$keyword" $i 2>/dev/null
 done > $tmpFile
 
 [ -s "$tmpFile" ] && \
     sort $tmpFile | uniq $optCount | sed '/^[\t 1-9]*$/d' || \
-    echo "No keyword '$key' found in '$fileName' files" 1>&2
+    echo "No keyword '$keyword' found in '$fileName' files" 1>&2
 
 #------------------------------------------------------------------------------
