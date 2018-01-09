@@ -4,23 +4,11 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     foamRunTutorials
@@ -28,6 +16,10 @@
 # Description
 #     Run either Allrun or blockMesh/application in current directory
 #     and all its subdirectories.
+#
+#     For tutorials that are known to run poorly, an Allrun-optional
+#     placeholder can be used instead of the usual Allrun script.
+#     When this is detected, the case will be skipped.
 #
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
@@ -52,6 +44,8 @@ do
         passArgs="-test"
         runTests=true
         ;;
+
+    # Avoid infinite recursion when invoked from an Allrun or Alltest script
     -s | -skipFirst)
         skipFirst=true
         ;;
@@ -62,22 +56,23 @@ do
     shift
 done
 
-# If an argument is supplied do not execute ./Allrun to avoid recursion
-if ! $skipFirst && $runTests && [ -f "./Alltest" ]
+if ! $skipFirst && $runTests && test -f Alltest
 then
-    # Run speciallised Alltest script.
+    # Run specialized Alltest script
     ./Alltest $passArgs $*
-elif ! $skipFirst && [ -f "./Allrun" ]
+elif ! $skipFirst && test -f Allrun
 then
-    # Run specialised Allrun script.
+    # Run specialized Allrun script
     ./Allrun $passArgs $*
+elif ! $skipFirst && test -f Allrun-optional
+then
+    # Found Allrun-optional script - skip this tutorial.
+    echo "Skipped optional case $PWD"
 elif [ -d system ]
 then
-    # Run normal case.
-    parentDir=$(dirname $PWD)
-    application=$(getApplication)
+    # Run normal case with blockMesh and the application
     runApplication blockMesh
-    runApplication $application
+    runApplication $(getApplication)
 else
     # Loop over sub-directories and compile any applications
     for caseName in *
