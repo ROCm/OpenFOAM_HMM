@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,6 +85,24 @@ inline bool Foam::wordRes::operator()(const std::string& text) const
 inline const Foam::wordRe& Foam::wordRes::operator[](const label i) const
 {
     return list_[i];
+}
+
+
+inline Foam::Ostream& Foam::wordRes::writeList
+(
+    Ostream& os,
+    const label shortListLen
+) const
+{
+    return list_.writeList(os, shortListLen);
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+inline Foam::Ostream& Foam::operator<<(Ostream& os, const wordRes& wres)
+{
+    return wres.writeList(os, 10);
 }
 
 

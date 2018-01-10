@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The number of elements in the list
         inline label size() const;
@@ -94,7 +94,7 @@ public:
         inline bool empty() const;
 
 
-      // Searching
+    // Searching
 
         //- Return true if string matches any of the regular expressions
         //  Smart match as regular expression or as a string.
@@ -117,7 +117,25 @@ public:
         //- Return element of constant list
         inline const wordRe& operator[](const label i) const;
 
+
+    // Writing
+
+        //- Write wordReList, with line-breaks in ASCII if the list length
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
+        inline Ostream& writeList
+        (
+            Ostream& os,
+            const label shortListLen=0
+        ) const;
+
 };
+
+
+// Global Functions
+
+//- Write to Ostream, as per wordRes::writeList() with shortListLen=10
+inline Ostream& operator<<(Ostream& os, const wordRes& wres);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
