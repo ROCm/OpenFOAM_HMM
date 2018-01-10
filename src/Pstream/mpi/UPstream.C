@@ -495,13 +495,13 @@ void Foam::UPstream::allToAll
         (
             MPI_Alltoallv
             (
-                sendData,
-                sendSizes.begin(),
-                sendOffsets.begin(),
+                const_cast<char*>(sendData),
+                const_cast<int*>(sendSizes.begin()),
+                const_cast<int*>(sendOffsets.begin()),
                 MPI_BYTE,
                 recvData,
-                recvSizes.begin(),
-                recvOffsets.begin(),
+                const_cast<int*>(recvSizes.begin()),
+                const_cast<int*>(recvOffsets.begin()),
                 MPI_BYTE,
                 PstreamGlobals::MPICommunicators_[communicator]
             )
@@ -557,12 +557,12 @@ void Foam::UPstream::gather
         (
             MPI_Gatherv
             (
-                sendData,
+                const_cast<char*>(sendData),
                 sendSize,
                 MPI_BYTE,
                 recvData,
-                recvSizes.begin(),
-                recvOffsets.begin(),
+                const_cast<int*>(recvSizes.begin()),
+                const_cast<int*>(recvOffsets.begin()),
                 MPI_BYTE,
                 0,
                 MPI_Comm(PstreamGlobals::MPICommunicators_[communicator])
@@ -616,9 +616,9 @@ void Foam::UPstream::scatter
         (
             MPI_Scatterv
             (
-                sendData,
-                sendSizes.begin(),
-                sendOffsets.begin(),
+                const_cast<char*>(sendData),
+                const_cast<int*>(sendSizes.begin()),
+                const_cast<int*>(sendOffsets.begin()),
                 MPI_BYTE,
                 recvData,
                 recvSize,
