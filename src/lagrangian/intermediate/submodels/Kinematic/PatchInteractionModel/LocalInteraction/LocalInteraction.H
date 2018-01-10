@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,26 +61,34 @@ class LocalInteraction
         // Counters for particle fates
 
             //- Number of parcels escaped
-            List<label> nEscape_;
+            List<List<label>> nEscape_;
 
             //- Mass of parcels escaped
-            List<scalar> massEscape_;
+            List<List<scalar>> massEscape_;
 
             //- Number of parcels stuck to patches
-            List<label> nStick_;
+            List<List<label>> nStick_;
 
             //- Mass of parcels stuck to patches
-            List<scalar> massStick_;
+            List<List<scalar>> massStick_;
 
 
         //- Flag to output data as fields
         Switch writeFields_;
+
+        //- Flag to output escaped/mass particles sorted by injectorID
+        Switch outputByInjectorId_;
+
+        //- InjectorId to index map
+        Map<label> injIdToIndex_;
 
         //- Mass escape field
         autoPtr<volScalarField> massEscapePtr_;
 
         //- Mass stick field
         autoPtr<volScalarField> massStickPtr_;
+
+
 
 
 public:
