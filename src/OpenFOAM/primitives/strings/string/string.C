@@ -39,16 +39,14 @@ const Foam::string Foam::string::null;
 
 Foam::word Foam::string::ext() const
 {
-    const size_type i = find_ext();
+    const auto i = find_ext();
 
     if (i == npos)
     {
         return word::null;
     }
-    else
-    {
-        return substr(i+1, npos);
-    }
+
+    return substr(i+1, npos);
 }
 
 
@@ -68,7 +66,7 @@ bool Foam::string::ext(const Foam::word& ending)
 
 bool Foam::string::hasExt(const word& ending) const
 {
-    size_type i = find_ext();
+    auto i = find_ext();
     if (i == npos)
     {
         return false;
@@ -86,7 +84,7 @@ bool Foam::string::hasExt(const word& ending) const
 
 bool Foam::string::hasExt(const wordRe& ending) const
 {
-    const size_type i = find_ext();
+    const auto i = find_ext();
     if (i == npos)
     {
         return false;

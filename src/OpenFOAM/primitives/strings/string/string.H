@@ -84,7 +84,11 @@ protected:
 
         //- Find position of a file extension dot, return npos on failure.
         //  A wrapped version of find_last_of("./") with additional logic.
-        inline size_type find_ext() const;
+        inline static std::string::size_type find_ext(const std::string& str);
+
+        //- Find position of a file extension dot, return npos on failure.
+        //  A wrapped version of find_last_of("./") with additional logic.
+        inline std::string::size_type find_ext() const;
 
         //- Return file name extension (part after last .)
         word ext() const;

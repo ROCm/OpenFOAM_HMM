@@ -79,36 +79,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
-//
 //! \cond fileScope
-//
-// Return true if filename appears to be a backup file
-//
-static inline bool isBackupName(const Foam::fileName& name)
-{
-    if (name.empty())
-    {
-        return false;
-    }
-    else if (name.back() == '~')
-    {
-        return true;
-    }
-
-    // Now check the extension
-    const Foam::word ext = name.ext();
-    if (ext.empty())
-    {
-        return false;
-    }
-
-    return
-    (
-        ext == "bak" || ext == "BAK"
-     || ext == "old" || ext == "save"
-    );
-}
-
 
 // Like fileName "/" global operator, but retain any invalid characters
 static inline Foam::fileName fileNameConcat
@@ -793,7 +764,7 @@ Foam::fileNameList Foam::readDir
         else if
         (
             (type == fileName::DIRECTORY)
-         || (type == fileName::FILE && !isBackupName(name))
+         || (type == fileName::FILE && !fileName::isBackup(name))
         )
         {
             if ((directory/name).type(followLink) == type)

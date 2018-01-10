@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -119,6 +119,40 @@ bool Foam::fileName::equals(const std::string& s1, const std::string& s2)
 
     // Equal if it made it all the way through both strings
     return (i1 == n1 && i2 == n2);
+}
+
+
+bool Foam::fileName::isBackup(const std::string& str)
+{
+    if (str.empty())
+    {
+        return false;
+    }
+    else if (str.back() == '~')
+    {
+        return true;
+    }
+
+    // Now check the extension
+    const auto dot = find_ext(str);
+
+    if (dot == npos)
+    {
+        return false;
+    }
+
+    const std::string ending = str.substr(dot+1, npos);
+
+    if (ending.empty())
+    {
+        return false;
+    }
+
+    return
+    (
+        ending == "bak" || ending == "BAK"
+     || ending == "old" || ending == "save"
+    );
 }
 
 

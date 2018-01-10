@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -83,10 +83,10 @@ public:
     //- Enumerations to handle file types and modes.
     enum Type
     {
-        UNDEFINED,
-        FILE,
-        DIRECTORY,
-        LINK
+        UNDEFINED,  //!< Undefined file type.
+        FILE,       //!< A file
+        DIRECTORY,  //!< A directory
+        LINK        //!< A symlink
     };
 
 
@@ -190,8 +190,8 @@ public:
 
       // Interrogation
 
-        //- Return the file type: FILE, DIRECTORY, UNDEFINED or
-        //  LINK (only if followLink=false)
+        //- Return the file type: FILE, DIRECTORY, LINK or UNDEFINED.
+        //  LINK is only returned if followLink=false
         Type type(const bool followLink = true) const;
 
         //- Return true if string starts with a '/'
@@ -202,6 +202,12 @@ public:
 
         //- Convert from relative to absolute
         fileName& toAbsolute();
+
+        //- Return true if string ends with "~", ".bak", ".old", ".save"
+        static bool isBackup(const std::string& str);
+
+        //- Return true if file name ends with "~", ".bak", ".old", ".save"
+        inline bool isBackup() const;
 
 
       // Decomposition
