@@ -63,9 +63,19 @@ public:
         explicit polyBoundaryMeshEntries(const IOobject& io)
         :
             regIOobject(io),
-            PtrList<entry>(readStream(typeName))
+            PtrList<entry>()
         {
-            close();
+            if
+            (
+                (
+                    io.readOpt() == IOobject::MUST_READ
+                 || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+                )
+             || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+            )
+            {
+                readStream(typeName) >> *this;
+            }
         }
 
 
