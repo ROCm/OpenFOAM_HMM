@@ -33,14 +33,14 @@ Description
     log region contributions.
 
         \f[
-            uTau = (uTau_v^n + uTau_l^n)^(1/n)
+            u_\tau = (u_{\tau,v}^n + u_{\tau,l}^n)^{1/n}
         \f]
 
     where
     \vartable
-        uTau    | friction velocity
-        uTau_v  | friction velocity in the viscous region
-        uTau_l  | friction velocity in the log region
+        u_\tau     | friction velocity
+        u_{\tau,v} | friction velocity in the viscous region
+        u_{\tau,l} | friction velocity in the log region
     \endvartable
 
 

@@ -37,7 +37,7 @@ Description
     as:
 
     \f[
-        h = 0.5 \rho_\infty \C_{p,\infty} |U_{\infty}| C_f
+        h = 0.5 \rho_\infty C_{p,\infty} |U_{\infty}| C_f
     \f]
 
 Usage
