@@ -50,6 +50,7 @@ Description
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    #include "addCheckCaseOptions.H"
 
     #include "setRootCase.H"
 

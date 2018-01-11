@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
         "write the paramagnetic particle force field"
     );
 
+    #include "addCheckCaseOptions.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

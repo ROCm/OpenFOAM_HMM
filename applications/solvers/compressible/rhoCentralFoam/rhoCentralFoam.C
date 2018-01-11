@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
     #define NO_CONTROL
     #include "postProcess.H"
 
+    #include "addCheckCaseOptions.H"
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"

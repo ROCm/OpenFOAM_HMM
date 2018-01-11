@@ -38,6 +38,7 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "addCheckCaseOptions.H"
     #include "setRootCase.H"
 
     #include "createTime.H"

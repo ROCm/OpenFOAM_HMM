@@ -21,6 +21,7 @@
 #include "findRefCell.H"
 #include "IOMRFZoneList.H"
 #include "constants.H"
+#include "dummyFvMesh.H"
 
 #include "OSspecific.H"
 #include "argList.H"
