@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/FFTW
+#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
 #     Setup for FFTW include/libraries (usually ThirdParty installation).
-#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #     To disable its use:               fftw_version=fftw-none
 #     For system-wide installations:    fftw_version=fftw-system
@@ -24,7 +24,7 @@
 #       2. and provide full path for FFTW_ARCH_PATH
 #
 # Note
-#     When _foamAddLib is unset (eg, called from makeFFTW):
+#     When _foamAddLibAuto is unset (eg, called from makeFFTW):
 #       - fftw_version variable is retained.
 #       - LD_LIBRARY_PATH is not adjusted.
 #
@@ -43,20 +43,12 @@ then
     echo "Using fftw ($fftw_version)  ->  $FFTW_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddLib > /dev/null 2>&1  # normal sourcing
+if command -v _foamAddLibAuto > /dev/null 2>&1  # Normal sourcing (not makeFFTW)
 then
 
-    # If FFTW_ARCH_PATH does not end with '-system' or '-none',
-    # it is either located within ThirdParty, or a central installation
-    # outside of ThirdParty and must be added to the lib-path.
+    _foamAddLibAuto $FFTW_ARCH_PATH  lib$WM_COMPILER_LIB_ARCH
 
-    ending="${FFTW_ARCH_PATH##*-}"
-    if [ "$ending" != none -a "$ending" != system ]
-    then
-        _foamAddLib $FFTW_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
-    fi
-
-    unset fftw_version ending
+    unset fftw_version
 
 fi
 

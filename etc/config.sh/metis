@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/metis
+#     - sourced during wmake process only.
 #
 # Description
 #     Setup for METIS include/libraries (usually ThirdParty installation).
-#     Sourced during wmake process only.
 #
 #     To disable its use:               METIS_VERSION=metis-none
 #     For system-wide installations:    METIS_VERSION=metis-system

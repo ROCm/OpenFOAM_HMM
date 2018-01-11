@@ -11,15 +11,15 @@
 #
 # File
 #     config.sh/example/compiler
+#     - sourced by OpenFOAM-*/etc/config.sh/settings
 #
 # Description
 #     Example of fine tuning compiler versions and settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/config.sh/settings
 #
 #------------------------------------------------------------------------------
 
 # Load the standard versions
-eval $($WM_PROJECT_DIR/bin/foamEtcFile -sh -mode=o config.sh/compiler)
+eval $($WM_PROJECT_DIR/bin/foamEtcFile -mode=o -sh -config compiler)
 
 # Modify/override compiler settings
 case "$WM_COMPILER" in

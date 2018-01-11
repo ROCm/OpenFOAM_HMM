@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/compiler
+#     - sourced by OpenFOAM-*/etc/config.csh/settings
 #
 # Description
 #     Setup for custom compiler versions for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/config.csh/settings
 #
 #------------------------------------------------------------------------------
 

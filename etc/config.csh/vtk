@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/vtk
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Setup file for VTK (and MESA)
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
 #     The library path is only adjusted when the paths specified here
 #     actually exist at the time of sourcing.

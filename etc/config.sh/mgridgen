@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/mgridgen
+#     - sourced during wmake process only.
 #
 # Description
 #     Setup for MGRIDGEN include/libraries (usually ThirdParty installation).
-#     Sourced during wmake process only.
 #
 #     Normally used to specify the MGridGen version and location for a
 #     ThirdParty installation.

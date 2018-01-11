@@ -11,12 +11,10 @@
 #
 # File
 #     config.sh/example/prefs.sh
+#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
-#     Preset variables for the OpenFOAM configuration - POSIX shell syntax.
-#
-#     The prefs.sh file will be sourced by the OpenFOAM etc/bashrc when it is
-#     found by foamEtcFile.
+#     Example of preset variables for the OpenFOAM configuration (POSIX shell)
 #
 # See also
 #     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
@@ -24,13 +22,8 @@
 #
 #------------------------------------------------------------------------------
 
-#- Compiler location:
-WM_COMPILER_TYPE=ThirdParty
-
-#- Compiler:
+export WM_COMPILER_TYPE=ThirdParty
 export WM_COMPILER=Clang
-
-#- MPI implementation:
 export WM_MPLIB=SYSTEMOPENMPI
 
 #------------------------------------------------------------------------------

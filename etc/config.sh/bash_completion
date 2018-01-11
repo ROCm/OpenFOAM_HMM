@@ -11,6 +11,7 @@
 #
 # File
 #     etc/config.sh/bash_completion
+#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
 #     Bash completion handler for OpenFOAM applications and automatic

@@ -11,12 +11,10 @@
 #
 # File
 #     config.csh/example/prefs.csh
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
-#     Preset variables for the OpenFOAM configuration - C-Shell shell syntax.
-#
-#     The prefs.csh file will be sourced by the OpenFOAM etc/cshrc when it is
-#     found by foamEtcFile.
+#     Example of preset variables for the OpenFOAM configuration (C-Shell shell)
 #
 # See also
 #     'foamEtcFile -help' or 'foamEtcFile -list' for information about the
@@ -24,13 +22,8 @@
 #
 #------------------------------------------------------------------------------
 
-#- Compiler location:
 setenv WM_COMPILER_TYPE ThirdParty
-
-#- Compiler:
 setenv WM_COMPILER Clang
-
-#- MPI implementation:
 setenv WM_MPLIB SYSTEMOPENMPI
 
 #------------------------------------------------------------------------------

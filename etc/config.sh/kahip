@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/kahip
+#     - sourced during wmake process only.
 #
 # Description
 #     Setup for KAHIP include/libraries (usually ThirdParty installation).
-#     Sourced during wmake process only.
 #
 #     To disable its use:               KAHIP_VERSION=kahip-none
 #     For system-wide installations:    KAHIP_VERSION=kahip-system
