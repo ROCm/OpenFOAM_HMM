@@ -90,7 +90,6 @@ class LocalInteraction
 
 
 
-
 public:
 
     //- Runtime type information

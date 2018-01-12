@@ -88,8 +88,6 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
             {
                 injIdToIndex_.insert(cloud.injectors()[i].injectorID(), i);
             }
-
-            DebugVar(injIdToIndex_);
         }
 
         nEscape_[patchi].setSize(nInjectors, 0);
@@ -114,6 +112,7 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     massStick_(pim.massStick_),
     writeFields_(pim.writeFields_),
     outputByInjectorId_(pim.outputByInjectorId_),
+    injIdToIndex_(pim.injIdToIndex_),
     massEscapePtr_(nullptr),
     massStickPtr_(nullptr)
 {}

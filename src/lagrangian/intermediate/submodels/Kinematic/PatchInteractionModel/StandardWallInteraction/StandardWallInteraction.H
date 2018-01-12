@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,9 @@ protected:
 
     // Protected data
 
+        // Reference to mesh
+        const fvMesh& mesh_;
+
         //- Interaction type
         typename PatchInteractionModel<CloudType>::interactionType
             interactionType_;
@@ -82,17 +85,23 @@ protected:
 
         // Counters for particle fates
 
-            //- Number of parcels escaped
-            label nEscape_;
+             //- Number of parcels escaped
+            List<List<label>> nEscape_;
 
             //- Mass of parcels escaped
-            scalar massEscape_;
+            List<List<scalar>> massEscape_;
 
             //- Number of parcels stuck to patches
-            label nStick_;
+            List<List<label>> nStick_;
 
             //- Mass of parcels stuck to patches
-            scalar massStick_;
+            List<List<scalar>> massStick_;
+
+            //- Flag to output escaped/mass particles sorted by injectorID
+            Switch outputByInjectorId_;
+
+            //- InjectorId to index map
+            Map<label> injIdToIndex_;
 
 
 public:
