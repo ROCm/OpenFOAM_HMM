@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     Info<< "Reading surface from " << surfName << " ..." << endl;
 
     word setName;
-    const bool readSet = args.optionReadIfPresent("faceSet", setName);
+    const bool readSet = args.readIfPresent("faceSet", setName);
 
     if (readSet)
     {
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
             << " triangle ..." << endl;
     }
 
-    const scalar searchTol = args.optionLookupOrDefault("tol", 1e-3);
+    const scalar searchTol = args.lookupOrDefault("tol", 1e-3);
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.bounds();

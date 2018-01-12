@@ -523,13 +523,13 @@ int main(int argc, char *argv[])
     runTime.functionObjects().off();
 
     Foam::word meshRegionName = polyMesh::defaultRegion;
-    args.optionReadIfPresent("region", meshRegionName);
+    args.readIfPresent("region", meshRegionName);
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     #include "createNamedPolyMesh.H"
 
-    const bool writeObj = args.optionFound("writeObj");
+    const bool writeObj = args.found("writeObj");
 
     const word oldInstance = mesh.pointsInstance();
 

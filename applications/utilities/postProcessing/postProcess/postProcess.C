@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    if (args.optionFound("list"))
+    if (args.found("list"))
     {
         functionObjectList::list();
         return 0;
@@ -155,13 +155,13 @@ int main(int argc, char *argv[])
 
     // Initialize the set of selected fields from the command-line options
     functionObjects::fileFieldSelection fields(mesh);
-    if (args.optionFound("fields"))
+    if (args.found("fields"))
     {
-        args.optionLookup("fields")() >> fields;
+        args.lookup("fields")() >> fields;
     }
-    if (args.optionFound("field"))
+    if (args.found("field"))
     {
-        fields.insert(args.optionLookup("field")());
+        fields.insert(args.lookup("field")());
     }
 
     // Externally stored dictionary for functionObjectList

@@ -1,5 +1,5 @@
 fileName dictPath;
-if (args.optionReadIfPresent("dict", dictPath))
+if (args.readIfPresent("dict", dictPath))
 {
     if (isDir(dictPath))
     {

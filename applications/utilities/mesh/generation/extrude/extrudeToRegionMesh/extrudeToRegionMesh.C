@@ -1473,8 +1473,6 @@ void extrudeGeometricProperties
 }
 
 
-
-
 int main(int argc, char *argv[])
 {
     argList::addNote("Create region mesh by extruding a faceZone or faceSet");
@@ -1501,8 +1499,7 @@ int main(int argc, char *argv[])
 
 
     const word oldInstance = mesh.pointsInstance();
-    bool overwrite = args.optionFound("overwrite");
-
+    const bool overwrite = args.found("overwrite");
 
     const word dictName("extrudeToRegionMeshDict");
 
@@ -1510,10 +1507,8 @@ int main(int argc, char *argv[])
 
     IOdictionary dict(dictIO);
 
-
     // Point generator
     autoPtr<extrudeModel> model(extrudeModel::New(dict));
-
 
     // Region
     const word shellRegionName(dict.lookup("region"));
@@ -1522,7 +1517,7 @@ int main(int argc, char *argv[])
     wordList zoneNames;
     wordList zoneShadowNames;
 
-    bool hasZones = dict.found("faceZones");
+    const bool hasZones = dict.found("faceZones");
     if (hasZones)
     {
         dict.lookup("faceZones") >> zoneNames;

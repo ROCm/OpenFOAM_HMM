@@ -73,9 +73,9 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word cellSetName(args[1]);
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
-    const bool minSet = args.optionFound("minSet");
+    const bool minSet = args.found("minSet");
 
     Info<< "Reading cells to refine from cellSet " << cellSetName
         << nl << endl;

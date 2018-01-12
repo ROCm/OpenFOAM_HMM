@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     const word setName = args[1];
     const word masterPatch = args[2];
     const word slavePatch = args[3];
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     // List of faces to split
     faceSet facesSet(mesh, setName);

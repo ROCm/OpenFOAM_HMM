@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     wordReList matcher;
-    if (args.optionFound("re"))
+    if (args.found("re"))
     {
-        matcher = args.optionReadList<wordRe>("re");
+        matcher = args.readList<wordRe>("re");
         Info<<"limit names: " << matcher << nl;
 
     }

@@ -28,7 +28,7 @@ surfaceScalarField phi
     fvc::flux(U)
 );
 
-if (args.optionFound("initialiseUBCs"))
+if (args.found("initialiseUBCs"))
 {
     U.correctBoundaryConditions();
     phi = fvc::flux(U);
@@ -41,7 +41,7 @@ if (args.optionFound("initialiseUBCs"))
 word pName("p");
 
 // Update name of the pressure field from the command-line option
-args.optionReadIfPresent("pName", pName);
+args.readIfPresent("pName", pName);
 
 // Infer the pressure BCs from the velocity
 wordList pBCTypes

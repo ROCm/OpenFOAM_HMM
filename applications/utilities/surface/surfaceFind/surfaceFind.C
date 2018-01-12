@@ -54,9 +54,9 @@ int main(int argc, char *argv[])
 
     const point samplePt
     (
-        args.optionLookupOrDefault<scalar>("x", 0),
-        args.optionLookupOrDefault<scalar>("y", 0),
-        args.optionLookupOrDefault<scalar>("z", 0)
+        args.lookupOrDefault<scalar>("x", 0),
+        args.lookupOrDefault<scalar>("y", 0),
+        args.lookupOrDefault<scalar>("z", 0)
     );
     Info<< "Looking for nearest face/vertex to " << samplePt << endl;
 

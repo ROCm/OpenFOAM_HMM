@@ -783,7 +783,7 @@ int main(int argc, char *argv[])
 
     Foam::word regionName;
 
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         Foam::Info
             << "Creating polyMesh for region " << regionName << endl;
@@ -793,7 +793,7 @@ int main(int argc, char *argv[])
         regionName = Foam::polyMesh::defaultRegion;
     }
 
-    const bool keepOrientation = args.optionFound("keepOrientation");
+    const bool keepOrientation = args.found("keepOrientation");
     IFstream inFile(args[1]);
 
     // Storage for points

@@ -299,7 +299,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    if (!args.optionFound("ybl") && !args.optionFound("Cbl"))
+    if (!args.found("ybl") && !args.found("Cbl"))
     {
         FatalErrorInFunction
             << "Neither option 'ybl' or 'Cbl' have been provided to calculate "
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
             << "Please choose either 'ybl' OR 'Cbl'."
             << exit(FatalError);
     }
-    else if (args.optionFound("ybl") && args.optionFound("Cbl"))
+    else if (args.found("ybl") && args.found("Cbl"))
     {
         FatalErrorInFunction
             << "Both 'ybl' and 'Cbl' have been provided to calculate "
@@ -316,7 +316,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    bool writeNut = args.optionFound("write-nut");
+    const bool writeNut = args.found("write-nut");
 
     #include "createTime.H"
     #include "createNamedMesh.H"

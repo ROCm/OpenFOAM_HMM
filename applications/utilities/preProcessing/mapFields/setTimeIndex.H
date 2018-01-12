@@ -1,6 +1,6 @@
     instantList sourceTimes = runTimeSource.times();
     label sourceTimeIndex = runTimeSource.timeIndex();
-    if (args.optionFound("sourceTime"))
+    if (args.found("sourceTime"))
     {
         if (args["sourceTime"] == "latestTime")
         {
@@ -11,7 +11,7 @@
             sourceTimeIndex = Time::findClosestTimeIndex
             (
                 sourceTimes,
-                args.optionRead<scalar>("sourceTime")
+                args.opt<scalar>("sourceTime")
             );
         }
     }

@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
     word sourceRegion = fvMesh::defaultRegion;
-    if (args.optionFound("sourceRegion"))
+    if (args.found("sourceRegion"))
     {
         sourceRegion = args["sourceRegion"];
         Info<< "Source region: " << sourceRegion << endl;
@@ -208,13 +208,13 @@ int main(int argc, char *argv[])
 
     Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
     word targetRegion = fvMesh::defaultRegion;
-    if (args.optionFound("targetRegion"))
+    if (args.found("targetRegion"))
     {
         targetRegion = args["targetRegion"];
         Info<< "Target region: " << targetRegion << endl;
     }
 
-    const bool consistent = args.optionFound("consistent");
+    const bool consistent = args.found("consistent");
 
 
     word mapMethod = meshToMesh::interpolationMethodNames_
@@ -222,7 +222,7 @@ int main(int argc, char *argv[])
         meshToMesh::imCellVolumeWeight
     ];
 
-    if  (args.optionReadIfPresent("mapMethod", mapMethod))
+    if  (args.readIfPresent("mapMethod", mapMethod))
     {
         Info<< "Mapping method: " << mapMethod << endl;
     }
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     }
 
     // Optionally override
-    if (args.optionFound("patchMapMethod"))
+    if (args.found("patchMapMethod"))
     {
         patchMapMethod = args["patchMapMethod"];
 
@@ -258,19 +258,19 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const bool subtract = args.optionFound("subtract");
+    const bool subtract = args.found("subtract");
     if (subtract)
     {
         Info<< "Subtracting mapped source field from target" << endl;
     }
 
     HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
+    if (args.found("fields"))
     {
-        args.optionLookup("fields")() >> selectedFields;
+        args.lookup("fields")() >> selectedFields;
     }
 
-    const bool noLagrangian = args.optionFound("noLagrangian");
+    const bool noLagrangian = args.found("noLagrangian");
 
     #include "createTimes.H"
 

@@ -151,9 +151,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const bool optStd = args.optionFound("std");
-    const bool optSet = args.optionFound("set");
-    const bool optFnd = args.optionFound("find");
+    const bool optStd = args.found("std");
+    const bool optSet = args.found("set");
+    const bool optFnd = args.found("find");
 
 
     cpuTime timer;

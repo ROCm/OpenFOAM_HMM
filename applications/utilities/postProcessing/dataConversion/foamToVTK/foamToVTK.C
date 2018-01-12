@@ -285,15 +285,15 @@ vtk::outputOptions getOutputOptions(const argList& args)
 {
     vtk::outputOptions opts;
 
-    if (args.optionFound("xml"))
+    if (args.found("xml"))
     {
-        opts.ascii(args.optionFound("ascii"));
+        opts.ascii(args.found("ascii"));
     }
     else
     {
         opts.legacy(true);
 
-        if (!args.optionFound("ascii"))
+        if (!args.found("ascii"))
         {
             if (sizeof(floatScalar) != 4 || sizeof(label) != 4)
             {
@@ -466,13 +466,13 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
 
-    const bool decomposePoly   = !args.optionFound("poly");
-    const bool doWriteInternal = !args.optionFound("noInternal");
-    const bool doFaceZones     = !args.optionFound("noFaceZones");
-    const bool doLinks         = !args.optionFound("noLinks");
-    const bool useTimeName     = args.optionFound("useTimeName");
-    const bool noLagrangian    = args.optionFound("noLagrangian");
-    const bool nearCellValue   = args.optionFound("nearCellValue");
+    const bool decomposePoly   = !args.found("poly");
+    const bool doWriteInternal = !args.found("noInternal");
+    const bool doFaceZones     = !args.found("noFaceZones");
+    const bool doLinks         = !args.found("noLinks");
+    const bool useTimeName     = args.found("useTimeName");
+    const bool noLagrangian    = args.found("noLagrangian");
+    const bool nearCellValue   = args.found("nearCellValue");
 
     const vtk::outputOptions fmtType = getOutputOptions(args);
 
@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    const bool noPointValues = args.optionFound("noPointValues");
+    const bool noPointValues = args.found("noPointValues");
 
     if (noPointValues)
     {
@@ -492,12 +492,12 @@ int main(int argc, char *argv[])
             << nl;
     }
 
-    const bool allPatches = args.optionFound("allPatches");
+    const bool allPatches = args.found("allPatches");
 
     wordReList excludePatches;
-    if (args.optionFound("excludePatches"))
+    if (args.found("excludePatches"))
     {
-        args.optionLookup("excludePatches")() >> excludePatches;
+        args.lookup("excludePatches")() >> excludePatches;
 
         Info<< "Not including patches " << excludePatches << nl << endl;
     }
@@ -506,12 +506,12 @@ int main(int argc, char *argv[])
 
     meshSubsetHelper::subsetType cellSubsetType = meshSubsetHelper::NONE;
     word cellSubsetName;
-    if (args.optionReadIfPresent("cellSet", cellSubsetName))
+    if (args.readIfPresent("cellSet", cellSubsetName))
     {
         vtkName = cellSubsetName;
         cellSubsetType = meshSubsetHelper::SET;
     }
-    else if (args.optionReadIfPresent("cellZone", cellSubsetName))
+    else if (args.readIfPresent("cellZone", cellSubsetName))
     {
         vtkName = cellSubsetName;
         cellSubsetType = meshSubsetHelper::ZONE;
@@ -528,13 +528,13 @@ int main(int argc, char *argv[])
     }
 
     word faceSetName;
-    args.optionReadIfPresent("faceSet", faceSetName);
+    args.readIfPresent("faceSet", faceSetName);
 
     word pointSetName;
-    args.optionReadIfPresent("pointSet", pointSetName);
+    args.readIfPresent("pointSet", pointSetName);
 
     // Define sub-directory name to use for VTK data.
-    const word vtkDirName = args.optionLookupOrDefault<word>("name", "VTK");
+    const word vtkDirName = args.lookupOrDefault<word>("name", "VTK");
 
     #include "createNamedMesh.H"
 
@@ -553,8 +553,8 @@ int main(int argc, char *argv[])
     {
         if
         (
-            args.optionFound("time")
-         || args.optionFound("latestTime")
+            args.found("time")
+         || args.found("latestTime")
          || cellSubsetName.size()
          || faceSetName.size()
          || pointSetName.size()
@@ -702,7 +702,7 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         wordHashSet selectedFields;
-        const bool specifiedFields = args.optionReadIfPresent
+        const bool specifiedFields = args.readIfPresent
         (
             "fields",
             selectedFields
@@ -870,7 +870,7 @@ int main(int argc, char *argv[])
 
         // Finite-area mesh and fields - need not exist
 
-        if (args.optionFound("finiteAreaFields"))
+        if (args.found("finiteAreaFields"))
         {
             autoPtr<faMesh> aMeshPtr;
             {
@@ -1154,7 +1154,7 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        if (args.optionFound("surfaceFields"))
+        if (args.found("surfaceFields"))
         {
             PtrList<const surfaceScalarField> sScalarFld;
             readFields

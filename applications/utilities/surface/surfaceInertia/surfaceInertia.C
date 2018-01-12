@@ -85,10 +85,10 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const scalar density = args.optionLookupOrDefault("density", 1.0);
+    const scalar density = args.lookupOrDefault("density", 1.0);
 
     vector refPt = Zero;
-    bool calcAroundRefPt = args.optionReadIfPresent("referencePoint", refPt);
+    bool calcAroundRefPt = args.readIfPresent("referencePoint", refPt);
 
     const triSurface surf(surfFileName);
 
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     vector cM = Zero;
     tensor J = Zero;
 
-    if (args.optionFound("shellProperties"))
+    if (args.found("shellProperties"))
     {
         momentOfInertia::massPropertiesShell(surf, density, m, cM, J);
     }

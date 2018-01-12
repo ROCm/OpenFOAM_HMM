@@ -182,9 +182,9 @@ int main(int argc, char *argv[])
     // Read/construct control dictionary
     //
 
-    const bool readDict = args.optionFound("dict");
-    const bool refineAllCells = args.optionFound("all");
-    const bool overwrite = args.optionFound("overwrite");
+    const bool readDict = args.found("dict");
+    const bool refineAllCells = args.found("all");
+    const bool overwrite = args.found("overwrite");
 
     // List of cells to refine
     labelList refCells;

@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     #include "addRegionOption.H"
     #include "setRootCase.H"
 
-    // const bool verbose = args.optionFound("verbose");
+    // const bool verbose = args.found("verbose");
 
     #include "createTime.H"
 

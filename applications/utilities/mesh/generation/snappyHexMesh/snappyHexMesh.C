@@ -711,22 +711,21 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const bool overwrite = args.optionFound("overwrite");
-    const bool checkGeometry = args.optionFound("checkGeometry");
-    const bool surfaceSimplify = args.optionFound("surfaceSimplify");
+    const bool overwrite = args.found("overwrite");
+    const bool checkGeometry = args.found("checkGeometry");
+    const bool surfaceSimplify = args.found("surfaceSimplify");
 
     autoPtr<fvMesh> meshPtr;
 
     {
-        word regionName;
-        if (args.optionReadIfPresent("region", regionName))
+        word regionName = fvMesh::defaultRegion;
+        if (args.readIfPresent("region", regionName))
         {
             Info<< "Create mesh " << regionName << " for time = "
                 << runTime.timeName() << nl << endl;
         }
         else
         {
-            regionName = fvMesh::defaultRegion;
             Info<< "Create mesh for time = "
                 << runTime.timeName() << nl << endl;
         }
@@ -792,7 +791,7 @@ int main(int argc, char *argv[])
     if (Pstream::parRun())
     {
         fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        args.readIfPresent("decomposeParDict", decompDictFile);
 
         // A demand-driven decompositionMethod can have issues finding
         // an alternative decomposeParDict location.
@@ -1663,11 +1662,11 @@ int main(int argc, char *argv[])
 
         labelHashSet includePatches(bMesh.size());
 
-        if (args.optionFound("patches"))
+        if (args.found("patches"))
         {
             includePatches = bMesh.patchSet
             (
-                wordReList(args.optionLookup("patches")())
+                wordReList(args.lookup("patches")())
             );
         }
         else
@@ -1685,7 +1684,7 @@ int main(int argc, char *argv[])
 
         fileName outFileName
         (
-            args.optionLookupOrDefault<fileName>
+            args.lookupOrDefault<fileName>
             (
                 "outFile",
                 "constant/triSurface/simplifiedSurface.stl"

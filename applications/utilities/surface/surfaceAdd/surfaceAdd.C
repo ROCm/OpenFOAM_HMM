@@ -83,10 +83,10 @@ int main(int argc, char *argv[])
     const fileName inFileName2 = args[2];
     const fileName outFileName = args[3];
 
-    const bool addPoint     = args.optionFound("points");
-    const bool mergeRegions = args.optionFound("mergeRegions");
+    const bool addPoint     = args.found("points");
+    const bool mergeRegions = args.found("mergeRegions");
 
-    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     if (addPoint)
     {

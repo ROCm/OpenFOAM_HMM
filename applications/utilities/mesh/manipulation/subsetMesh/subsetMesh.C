@@ -376,8 +376,8 @@ int main(int argc, char *argv[])
     word meshInstance = mesh.pointsInstance();
     word fieldsInstance = runTime.timeName();
 
-    const bool overwrite = args.optionFound("overwrite");
-    const bool specifiedInstance = args.optionReadIfPresent
+    const bool overwrite = args.found("overwrite");
+    const bool specifiedInstance = args.readIfPresent
     (
         "resultTime",
         fieldsInstance
@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
 
     labelList exposedPatchIDs;
 
-    if (args.optionFound("patch"))
+    if (args.found("patch"))
     {
         const word patchName = args["patch"];
 
@@ -412,9 +412,9 @@ int main(int argc, char *argv[])
         Info<< "Adding exposed internal faces to patch " << patchName
             << nl << endl;
     }
-    else if (args.optionFound("patches"))
+    else if (args.found("patches"))
     {
-        const wordReList patchNames(args.optionRead<wordReList>("patches"));
+        const wordReList patchNames(args.opt<wordReList>("patches"));
 
         exposedPatchIDs = mesh.boundaryMesh().patchSet(patchNames).sortedToc();
 

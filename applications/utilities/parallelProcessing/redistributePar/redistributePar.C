@@ -103,7 +103,7 @@ scalar getMergeDistance
 )
 {
     scalar mergeTol = defaultMergeTol;
-    args.optionReadIfPresent("mergeTol", mergeTol);
+    args.readIfPresent("mergeTol", mergeTol);
 
     const scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
@@ -2296,12 +2296,12 @@ int main(int argc, char *argv[])
     // (replacement for setRootCase that does not abort)
 
     Foam::argList args(argc, argv);
-    bool decompose = args.optionFound("decompose");
-    const bool reconstruct = args.optionFound("reconstruct");
-    const bool writeCellDist = args.optionFound("cellDist");
-    const bool newTimes = args.optionFound("newTimes");
-    bool overwrite = args.optionFound("overwrite");
+    const bool reconstruct = args.found("reconstruct");
+    const bool writeCellDist = args.found("cellDist");
+    const bool newTimes = args.found("newTimes");
 
+    bool decompose = args.found("decompose");
+    bool overwrite = args.found("overwrite");
 
     if (Foam::sigFpe::requested())
     {
@@ -2476,7 +2476,7 @@ int main(int argc, char *argv[])
     // Determine any region
     word regionName = polyMesh::defaultRegion;
     fileName meshSubDir = polyMesh::meshSubDir;
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         meshSubDir = regionName/polyMesh::meshSubDir;
     }
@@ -2485,7 +2485,7 @@ int main(int argc, char *argv[])
 
     // Allow override of decomposeParDict location
     fileName decompDictFile;
-    args.optionReadIfPresent("decomposeParDict", decompDictFile);
+    args.readIfPresent("decomposeParDict", decompDictFile);
 
 
     // Demand driven lagrangian mapper

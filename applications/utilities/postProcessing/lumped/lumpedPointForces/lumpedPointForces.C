@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
     #include "addRegionOption.H"
     #include "setRootCase.H"
 
-    const bool withVTK = args.optionFound("vtk");
+    const bool withVTK = args.found("vtk");
 
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);

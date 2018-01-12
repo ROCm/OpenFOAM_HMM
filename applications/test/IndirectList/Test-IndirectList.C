@@ -117,7 +117,7 @@ int main(int argc, char *argv[])
     printInfo(idl3);
 
     fileName binaryOutput;
-    if (args.optionReadIfPresent("binary", binaryOutput))
+    if (args.readIfPresent("binary", binaryOutput))
     {
         Info<<"Writing output to " << binaryOutput << endl;
 

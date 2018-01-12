@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
 
     psi.write();
 
-    if (!args.optionFound("noH") || args.optionFound("HdotGradH"))
+    if (!args.found("noH") || args.found("HdotGradH"))
     {
         volVectorField H
         (
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
             fvc::reconstruct(fvc::snGrad(psi)*mesh.magSf())
         );
 
-        if (!args.optionFound("noH"))
+        if (!args.found("noH"))
         {
             Info<< nl
                 << "Creating field H for time "
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             H.write();
         }
 
-        if (args.optionFound("HdotGradH"))
+        if (args.found("HdotGradH"))
         {
             Info<< nl
                 << "Creating field HdotGradH for time "
@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (!args.optionFound("noB"))
+    if (!args.found("noB"))
     {
         Info<< nl
             << "Creating field B for time "

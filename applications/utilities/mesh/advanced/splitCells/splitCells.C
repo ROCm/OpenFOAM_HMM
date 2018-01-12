@@ -553,15 +553,15 @@ int main(int argc, char *argv[])
     #include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar featureAngle = args.read<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
     const scalar minSin = Foam::sin(degToRad(featureAngle));
 
-    const bool readSet   = args.optionFound("set");
-    const bool geometry  = args.optionFound("geometry");
-    const bool overwrite = args.optionFound("overwrite");
+    const bool readSet   = args.found("set");
+    const bool geometry  = args.found("geometry");
+    const bool overwrite = args.found("overwrite");
 
-    const scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
+    const scalar edgeTol = args.lookupOrDefault("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl

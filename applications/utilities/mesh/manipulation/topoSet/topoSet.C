@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 
     #include "createNamedPolyMesh.H"
 
-    const bool noSync = args.optionFound("noSync");
+    const bool noSync = args.found("noSync");
 
     const word dictName("topoSetDict");
     #include "setSystemMeshDictionaryIO.H"

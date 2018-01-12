@@ -142,8 +142,8 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const bool     optStdout = args.optionFound("stdout");
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 0.0);
+    const bool     optStdout = args.found("stdout");
+    const scalar scaleFactor = args.lookupOrDefault("scale", 0.0);
 
     const fileName importName = args[1];
     const fileName exportName = optStdout ? "-stdout" : args[2];
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 
     if
     (
-        !args.optionFound("triSurface")
+        !args.found("triSurface")
     &&
          (
             !MeshedSurface<face>::canRead(importName, true)
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (args.optionFound("triSurface"))
+    if (args.found("triSurface"))
     {
         triSurface surf(importName);
 
@@ -198,14 +198,14 @@ int main(int argc, char *argv[])
             // surf2.read(is); // FAIL: private method
         }
 
-        if (args.optionFound("orient"))
+        if (args.found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
             PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
-        if (args.optionFound("clean"))
+        if (args.found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
@@ -234,10 +234,10 @@ int main(int argc, char *argv[])
         else
         {
             // normally write sorted (looks nicer)
-            surf.write(exportName, !args.optionFound("unsorted"));
+            surf.write(exportName, !args.found("unsorted"));
         }
     }
-    else if (args.optionFound("unsorted"))
+    else if (args.found("unsorted"))
     {
         UnsortedMeshedSurface<face> surf(importName);
 
@@ -263,14 +263,14 @@ int main(int argc, char *argv[])
             // surf2.read(is);  // FAIL: private method
         }
 
-        if (args.optionFound("orient"))
+        if (args.found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
             PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
-        if (args.optionFound("clean"))
+        if (args.found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
@@ -301,7 +301,7 @@ int main(int argc, char *argv[])
             surf.write(exportName);
         }
     }
-    else if (args.optionFound("triFace"))
+    else if (args.found("triFace"))
     {
         MeshedSurface<triFace> surf(importName);
 
@@ -327,14 +327,14 @@ int main(int argc, char *argv[])
             // surf2.read(is);  // FAIL: private method
         }
 
-        if (args.optionFound("orient"))
+        if (args.found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
             PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
-        if (args.optionFound("clean"))
+        if (args.found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
@@ -391,14 +391,14 @@ int main(int argc, char *argv[])
             // surf2.read(is);  // FAIL: private method
         }
 
-        if (args.optionFound("orient"))
+        if (args.found("orient"))
         {
             Info<< "Checking surface orientation" << endl;
             PatchTools::checkOrientation(surf, true);
             Info<< endl;
         }
 
-        if (args.optionFound("clean"))
+        if (args.found("clean"))
         {
             Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
             Info<< endl;
         }
 
-        if (args.optionFound("testModify"))
+        if (args.found("testModify"))
         {
             Info<< "Use ModifiableMeshedSurface to shift (1, 0, 0)" << endl;
             Info<< "original" << nl;
@@ -457,7 +457,7 @@ int main(int argc, char *argv[])
             surf.write(exportName);
         }
 
-        if (args.optionFound("surfMesh"))
+        if (args.found("surfMesh"))
         {
             Foam::Time runTime
             (

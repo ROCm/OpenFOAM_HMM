@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     // enable noConstant by switching
-    if (!args.optionFound("noConstant"))
+    if (!args.found("noConstant"))
     {
         args.setOption("constant", "");
     }
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
     // Optional mesh (used to read Clouds)
     autoPtr<polyMesh> meshPtr;
 
-    const bool enableEntries = args.optionFound("enableFunctionEntries");
+    const bool enableEntries = args.found("enableFunctionEntries");
     if (enableEntries)
     {
         Info<< "Allowing dictionary preprocessing ('#include', '#codeStream')."
@@ -288,7 +288,7 @@ int main(int argc, char *argv[])
     fileName meshDir = polyMesh::meshSubDir;
     fileName regionPrefix = "";
     word regionName = polyMesh::defaultRegion;
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         Info<< "Using region " << regionName << nl << endl;
         regionPrefix = regionName;

@@ -90,12 +90,12 @@ int main(int argc, char *argv[])
          FatalError.exit();
     }
 
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
 
-    const bool readBlank = !args.optionFound("noBlank");
-    const bool singleBlock = args.optionFound("singleBlock");
+    const bool readBlank = !args.found("noBlank");
+    const bool singleBlock = args.found("singleBlock");
     scalar twoDThickness = -1;
-    if (args.optionReadIfPresent("2D", twoDThickness))
+    if (args.readIfPresent("2D", twoDThickness))
     {
         Info<< "Reading 2D case by extruding points by " << twoDThickness
             << " in z direction." << nl << endl;

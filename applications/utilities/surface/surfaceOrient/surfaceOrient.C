@@ -73,11 +73,11 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const point visiblePoint    = args.argRead<point>(2);
+    const point visiblePoint    = args.read<point>(2);
     const fileName outFileName  = args[3];
 
-    const bool orientInside = args.optionFound("inside");
-    const bool usePierceTest = args.optionFound("usePierceTest");
+    const bool orientInside = args.found("inside");
+    const bool usePierceTest = args.found("usePierceTest");
 
     Info<< "Reading surface from " << surfFileName << nl
         << "Orienting surface such that visiblePoint " << visiblePoint
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         Info<< "outside" << endl;
     }
 
-    const scalar scaling = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
     if (scaling > 0)
     {
         Info<< "Input scaling: " << scaling << nl;

@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
     forAll(times, timei)
     {
         word instance;
-        if (args.optionFound("instance"))
+        if (args.found("instance"))
         {
             if (times.size() > 1)
             {
@@ -455,7 +455,7 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
 
-            args.optionLookup("instance")() >> instance;
+            args.lookup("instance")() >> instance;
         }
         else
         {
@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
 
         #include "createNamedMesh.H"
 
-        const bool literalRE = args.optionFound("literalRE");
+        const bool literalRE = args.found("literalRE");
         if (literalRE)
         {
             Info<< "Not interpreting any regular expressions (RE)"
@@ -474,7 +474,7 @@ int main(int argc, char *argv[])
                 << " not present." << endl;
         }
 
-        const bool enableEntries = args.optionFound("enableFunctionEntries");
+        const bool enableEntries = args.found("enableFunctionEntries");
         if (enableEntries)
         {
             Info<< "Allowing dictionary preprocessing ('#include', '#codeStream')."
@@ -489,7 +489,7 @@ int main(int argc, char *argv[])
         }
 
 
-        const bool disablePatchGroups = args.optionFound("disablePatchGroups");
+        const bool disablePatchGroups = args.found("disablePatchGroups");
         if (disablePatchGroups)
         {
             Info<< "Not interpreting any keys in the changeDictionary"
@@ -518,7 +518,7 @@ int main(int argc, char *argv[])
 
         const dictionary* replaceDictsPtr = &dict;
 
-        if (args.optionFound("subDict"))
+        if (args.found("subDict"))
         {
             replaceDictsPtr = &dict.subDict(args["subDict"]);
         }

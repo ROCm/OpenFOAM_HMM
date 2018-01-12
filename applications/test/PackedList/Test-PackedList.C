@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv, false, true);
 
 
-    if (args.optionFound("mask"))
+    if (args.found("mask"))
     {
         Info<< "bit width: " << unsigned(sizeof(unsigned)*CHAR_BIT) << endl;
         reportInfo<1>();
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
         Info<< "size: " << packLst.size() << nl;
 
-        if (args.optionFound("count"))
+        if (args.found("count"))
         {
             unsigned int rawCount = 0;
             forAll(rawLst, elemI)
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
                 << "packed count: " << packLst.count() << nl;
         }
 
-        if (args.optionFound("info"))
+        if (args.found("info"))
         {
             packLst.printInfo(Info);
         }

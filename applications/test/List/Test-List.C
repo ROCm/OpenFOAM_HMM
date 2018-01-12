@@ -331,29 +331,29 @@ int main(int argc, char *argv[])
 
     scalar xxx(-1);
 
-    if (args.optionFound("flag"))
+    if (args.found("flag"))
     {
         Info<<"-flag:" << args["flag"] << endl;
     }
 
-    if (args.optionReadIfPresent<scalar>("float", xxx))
+    if (args.readIfPresent<scalar>("float", xxx))
     {
         Info<<"read float " << xxx << endl;
     }
 
-    if (args.optionFound("reList"))
+    if (args.found("reList"))
     {
-        reLst = args.optionReadList<wordRe>("reList");
+        reLst = args.readList<wordRe>("reList");
     }
 
-    if (args.optionFound("wordList"))
+    if (args.found("wordList"))
     {
-        wLst = args.optionReadList<word>("wordList");
+        wLst = args.readList<word>("wordList");
     }
 
-    if (args.optionFound("stringList"))
+    if (args.found("stringList"))
     {
-        sLst = args.optionReadList<string>("stringList");
+        sLst = args.readList<string>("stringList");
     }
 
     Info<< nl

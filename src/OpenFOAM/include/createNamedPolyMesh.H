@@ -1,6 +1,6 @@
-Foam::word regionName;
+Foam::word regionName = Foam::polyMesh::defaultRegion;
 
-if (args.optionReadIfPresent("region", regionName))
+if (args.readIfPresent("region", regionName))
 {
     Foam::Info
         << "Create polyMesh " << regionName << " for time = "
@@ -8,7 +8,6 @@ if (args.optionReadIfPresent("region", regionName))
 }
 else
 {
-    regionName = Foam::polyMesh::defaultRegion;
     Foam::Info
         << "Create polyMesh for time = "
         << runTime.timeName() << Foam::nl << Foam::endl;

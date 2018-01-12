@@ -181,12 +181,12 @@ int main(int argc, char *argv[])
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
 
-    const bool nodeValues = args.optionFound("nodeValues");
+    const bool nodeValues = args.found("nodeValues");
 
     cpuTime timer;
     memInfo mem;
@@ -209,8 +209,8 @@ int main(int argc, char *argv[])
     //
     ensightCase::options caseOpts(format);
 
-    caseOpts.nodeValues(args.optionFound("nodeValues"));
-    caseOpts.width(args.optionLookupOrDefault<label>("width", 8));
+    caseOpts.nodeValues(args.found("nodeValues"));
+    caseOpts.width(args.lookupOrDefault<label>("width", 8));
     caseOpts.overwrite(true); // remove existing output directory
 
     // Can also have separate directory for lagrangian
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
     // Define sub-directory name to use for EnSight data.
     // The path to the ensight directory is at case level only
     // - For parallel cases, data only written from master
-    fileName ensightDir = args.optionLookupOrDefault<word>("name", "EnSight");
+    fileName ensightDir = args.lookupOrDefault<word>("name", "EnSight");
     if (!ensightDir.isAbsolute())
     {
         ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
@@ -231,30 +231,30 @@ int main(int argc, char *argv[])
     // Output configuration (geometry related)
     //
     ensightMesh::options writeOpts(format);
-    writeOpts.noPatches(args.optionFound("noPatches"));
+    writeOpts.noPatches(args.found("noPatches"));
 
-    if (args.optionFound("patches"))
+    if (args.found("patches"))
     {
-        writeOpts.patchSelection(args.optionReadList<wordRe>("patches"));
+        writeOpts.patchSelection(args.readList<wordRe>("patches"));
     }
-    if (args.optionFound("faceZones"))
+    if (args.found("faceZones"))
     {
-        writeOpts.faceZoneSelection(args.optionReadList<wordRe>("faceZones"));
+        writeOpts.faceZoneSelection(args.readList<wordRe>("faceZones"));
     }
 
     //
     // output configuration (field related)
     //
-    const bool noLagrangian = args.optionFound("noLagrangian");
+    const bool noLagrangian = args.found("noLagrangian");
 
     wordReList fieldPatterns;
-    if (args.optionFound("fields"))
+    if (args.found("fields"))
     {
-        fieldPatterns = args.optionReadList<wordRe>("fields");
+        fieldPatterns = args.readList<wordRe>("fields");
     }
 
     word cellZoneName;
-    if (args.optionReadIfPresent("cellZone", cellZoneName))
+    if (args.readIfPresent("cellZone", cellZoneName))
     {
         Info<< "Converting cellZone " << cellZoneName
             << " only (puts outside faces into patch "

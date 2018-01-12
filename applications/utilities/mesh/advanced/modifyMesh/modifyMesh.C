@@ -345,7 +345,7 @@ int main(int argc, char *argv[])
     #include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     Info<< "Reading modifyMeshDict\n" << endl;
 

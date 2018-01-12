@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar featureAngle = args.read<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl
@@ -409,7 +409,7 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    const bool splitAllFaces = args.optionFound("splitAllFaces");
+    const bool splitAllFaces = args.found("splitAllFaces");
     if (splitAllFaces)
     {
         Info<< "Splitting all internal faces to create multiple faces"
@@ -417,12 +417,9 @@ int main(int argc, char *argv[])
             << endl;
     }
 
-    const bool overwrite = args.optionFound("overwrite");
-    const bool doNotPreserveFaceZones = args.optionFound
-    (
-        "doNotPreserveFaceZones"
-    );
-    const bool concaveMultiCells = args.optionFound("concaveMultiCells");
+    const bool overwrite = args.found("overwrite");
+    const bool doNotPreserveFaceZones = args.found("doNotPreserveFaceZones");
+    const bool concaveMultiCells = args.found("concaveMultiCells");
     if (concaveMultiCells)
     {
         Info<< "Generating multiple cells for points on concave feature edges."

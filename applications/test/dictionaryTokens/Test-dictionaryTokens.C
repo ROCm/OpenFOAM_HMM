@@ -54,8 +54,8 @@ int main(int argc, char *argv[])
     argList::addArgument("dict .. dictN");
     argList args(argc, argv, false, true);
 
-    const bool optInfo  = args.optionFound("info");
-    const bool optValue = args.optionFound("value");
+    const bool optInfo  = args.found("info");
+    const bool optValue = args.found("value");
 
     for (label argi=1; argi < args.size(); ++argi)
     {

@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    bool writeObj = args.optionFound("writeObj");
-    bool normalise = args.optionFound("normalise");
+    bool writeObj = args.found("writeObj");
+    bool normalise = args.found("normalise");
 
     #include "createMesh.H"
 

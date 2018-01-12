@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
         << "Using distribution method "
         << distTypeName << nl << endl;
 
-    const bool keepNonMapped = args.optionFound("keepNonMapped");
+    const bool keepNonMapped = args.found("keepNonMapped");
 
     if (keepNonMapped)
     {
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     if (distType == distributedTriSurfaceMesh::INDEPENDENT)
     {
         fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        args.readIfPresent("decomposeParDict", decompDictFile);
 
         // A demand-driven decompositionMethod can have issues finding
         // an alternative decomposeParDict location.

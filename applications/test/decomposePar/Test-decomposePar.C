@@ -105,15 +105,15 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    const bool region     = args.optionFound("region");
-    const bool allRegions = args.optionFound("allRegions");
-    const bool verbose    = args.optionFound("verbose");
+    const bool region     = args.found("region");
+    const bool allRegions = args.found("allRegions");
+    const bool verbose    = args.found("verbose");
 
     const label numSubdomains =
-        args.optionLookupOrDefault<label>("domains", 0);
+        args.lookupOrDefault<label>("domains", 0);
 
     const word methodName =
-        args.optionLookupOrDefault<word>("method", word::null);
+        args.lookupOrDefault<word>("method", word::null);
 
 
     // Set time from database
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
     // Allow override of decomposeParDict location
     fileName decompDictFile;
-    args.optionReadIfPresent("decomposeParDict", decompDictFile);
+    args.readIfPresent("decomposeParDict", decompDictFile);
 
     wordList regionNames;
     wordList regionDirs;
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
     else
     {
         word regionName;
-        if (args.optionReadIfPresent("region", regionName))
+        if (args.readIfPresent("region", regionName))
         {
             regionNames = wordList(1, regionName);
             regionDirs = regionNames;

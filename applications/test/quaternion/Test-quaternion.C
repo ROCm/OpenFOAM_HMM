@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
     vector rotVector;
 
-    if (args.optionReadIfPresent("rollPitchYaw", rotVector))
+    if (args.readIfPresent("rollPitchYaw", rotVector))
     {
         Info<< "Rotate by" << nl
             << "    roll  " << rotVector.x() << nl
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
         Info<< "quaternion " << quat << endl;
         Info<< "rotation   = " << quat.R() << endl;
     }
-    if (args.optionReadIfPresent("yawPitchRoll", rotVector))
+    if (args.readIfPresent("yawPitchRoll", rotVector))
     {
         Info<< "Rotate by" << nl
             << "    yaw   " << rotVector.x() << nl
@@ -96,11 +96,11 @@ int main(int argc, char *argv[])
         Info<< "quaternion " << quat << endl;
         Info<< "rotation   = " << quat.R() << endl;
     }
-    if (args.optionFound("rotate-angle"))
+    if (args.found("rotate-angle"))
     {
         const Tuple2<vector, scalar> axisAngle
         (
-            args.optionLookup("rotate-angle")()
+            args.lookup("rotate-angle")()
         );
 
         Info<< "Rotate" << nl

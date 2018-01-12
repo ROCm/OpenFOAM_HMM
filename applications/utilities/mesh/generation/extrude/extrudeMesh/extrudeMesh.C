@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
     // Get optional regionName
     word regionName;
     word regionDir;
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         regionDir = regionName;
         Info<< "Create mesh " << regionName << " for time = "

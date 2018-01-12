@@ -194,7 +194,7 @@ Foam::instantList Foam::timeSelector::select
 
         // Determine latestTime selection (if any)
         // This must appear before the -time option processing
-        if (args.optionFound("latestTime"))
+        if (args.found("latestTime"))
         {
             selectTimes = false;
             latestIdx = times.size() - 1;
@@ -206,7 +206,7 @@ Foam::instantList Foam::timeSelector::select
             }
         }
 
-        if (args.optionFound("time"))
+        if (args.found("time"))
         {
             // Can match 0/, but can never match constant/
             selectTimes = timeSelector(args["time"]).selected(times);
@@ -221,13 +221,13 @@ Foam::instantList Foam::timeSelector::select
         if (constantIdx >= 0)
         {
             // Only add constant/ if specifically requested
-            selectTimes[constantIdx] = args.optionFound("constant");
+            selectTimes[constantIdx] = args.found("constant");
         }
 
         // Special treatment for 0/
         if (zeroIdx >= 0)
         {
-            if (args.optionFound("noZero"))
+            if (args.found("noZero"))
             {
                 // Exclude 0/ if specifically requested
                 selectTimes[zeroIdx] = false;
@@ -235,7 +235,7 @@ Foam::instantList Foam::timeSelector::select
             else if (argList::validOptions.found("withZero"))
             {
                 // With -withZero enabled, drop 0/ unless specifically requested
-                selectTimes[zeroIdx] = args.optionFound("withZero");
+                selectTimes[zeroIdx] = args.found("withZero");
             }
         }
 
@@ -285,11 +285,11 @@ Foam::instantList Foam::timeSelector::selectIfPresent
 {
     if
     (
-        args.optionFound("latestTime")
-     || args.optionFound("time")
-     || args.optionFound("constant")
-     || args.optionFound("noZero")
-     || args.optionFound("withZero")
+        args.found("latestTime")
+     || args.found("time")
+     || args.found("constant")
+     || args.found("noZero")
+     || args.found("withZero")
     )
     {
         return select0(runTime, args);
@@ -309,7 +309,7 @@ Foam::instantList Foam::timeSelector::select
 {
     instantList times(timeSelector::select0(runTime, args));
 
-    if (times.size() && args.optionFound("newTimes"))
+    if (times.size() && args.found("newTimes"))
     {
         List<bool> selectTimes(times.size(), true);
 

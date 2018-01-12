@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const bool noFlipMap = args.optionFound("noFlipMap");
+    const bool noFlipMap = args.found("noFlipMap");
 
     // Get times list
     (void)timeSelector::selectIfPresent(runTime, args);

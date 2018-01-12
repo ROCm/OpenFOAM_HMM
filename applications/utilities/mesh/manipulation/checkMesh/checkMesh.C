@@ -126,20 +126,20 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
     #include "createNamedMesh.H"
 
-    const bool noTopology  = args.optionFound("noTopology");
-    const bool allGeometry = args.optionFound("allGeometry");
-    const bool allTopology = args.optionFound("allTopology");
-    const bool meshQuality = args.optionFound("meshQuality");
+    const bool noTopology  = args.found("noTopology");
+    const bool allGeometry = args.found("allGeometry");
+    const bool allTopology = args.found("allTopology");
+    const bool meshQuality = args.found("meshQuality");
 
     word surfaceFormat;
-    const bool writeSets = args.optionReadIfPresent("writeSets", surfaceFormat);
+    const bool writeSets = args.readIfPresent("writeSets", surfaceFormat);
     HashSet<word> selectedFields;
-    bool writeFields = args.optionReadIfPresent
+    bool writeFields = args.readIfPresent
     (
         "writeFields",
         selectedFields
     );
-    if (!writeFields && args.optionFound("writeAllFields"))
+    if (!writeFields && args.found("writeAllFields"))
     {
         selectedFields.insert("nonOrthoAngle");
         selectedFields.insert("faceWeight");

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,7 @@ License
 #include "CStringList.H"
 #include "uncollatedFileOperation.H"
 #include "masterUncollatedFileOperation.H"
+#include "IOmanip.H"
 
 #include <cctype>
 
@@ -55,6 +56,7 @@ Foam::HashTable<Foam::string> Foam::argList::validOptions;
 Foam::HashTable<Foam::string> Foam::argList::validParOptions;
 Foam::HashTable<Foam::string> Foam::argList::optionUsage;
 Foam::HashTable<std::pair<Foam::word,int>> Foam::argList::validOptionsCompat;
+Foam::HashTable<std::pair<bool,int>> Foam::argList::ignoreOptionsCompat;
 Foam::SLList<Foam::string>    Foam::argList::notes;
 Foam::string::size_type Foam::argList::usageMin = 20;
 Foam::string::size_type Foam::argList::usageMax = 80;
@@ -171,64 +173,78 @@ static void printBuildInfo(const bool full=true)
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-void Foam::argList::addArgument(const string& argumentName)
+void Foam::argList::addArgument(const string& argName)
 {
-    validArgs.append(argumentName);
+    validArgs.append(argName);
 }
 
 
 void Foam::argList::addBoolOption
 (
-    const word& optionName,
+    const word& optName,
     const string& usage
 )
 {
-    addOption(optionName, "", usage);
+    addOption(optName, "", usage);
 }
 
 
 void Foam::argList::addOption
 (
-    const word& optionName,
+    const word& optName,
     const string& param,
     const string& usage
 )
 {
-    validOptions.set(optionName, param);
+    validOptions.set(optName, param);
     if (!usage.empty())
     {
-        optionUsage.set(optionName, usage);
+        optionUsage.set(optName, usage);
     }
 }
 
 
 void Foam::argList::addOptionCompat
 (
-    const word& optionName,
+    const word& optName,
     std::pair<const char*,int> compat
 )
 {
     validOptionsCompat.insert
     (
         compat.first,
-        std::pair<word,int>(optionName, compat.second)
+        std::pair<word,int>(optName, compat.second)
+    );
+}
+
+
+void Foam::argList::ignoreOptionCompat
+(
+    std::pair<const char*,int> compat,
+    const bool expectArg
+)
+{
+    ignoreOptionsCompat.insert
+    (
+        compat.first,
+        std::pair<bool,int>(expectArg, compat.second)
     );
 }
 
 
 void Foam::argList::addUsage
 (
-    const word& optionName,
+    const word& optName,
     const string& usage
 )
 {
     if (usage.empty())
     {
-        optionUsage.erase(optionName);
+        optionUsage.erase(optName);
     }
     else
     {
-        optionUsage.set(optionName, usage);
+        optionUsage.set(optName, usage);
     }
 }
 
@@ -242,10 +258,10 @@ void Foam::argList::addNote(const string& note)
 }
 
 
-void Foam::argList::removeOption(const word& optionName)
+void Foam::argList::removeOption(const word& optName)
 {
-    validOptions.erase(optionName);
-    optionUsage.erase(optionName);
+    validOptions.erase(optName);
+    optionUsage.erase(optName);
 }
 
 
@@ -419,15 +435,18 @@ bool Foam::argList::postProcess(int argc, char *argv[])
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::word Foam::argList::optionCompat(const word& optionName)
+Foam::word Foam::argList::optionCompat(const word& optName)
 {
+    // NB: optName includes the leading '-' so that the return value
+    // can be used directly
+
     if (!validOptionsCompat.empty())
     {
-        auto canonical = validOptionsCompat.cfind(optionName.substr(1));
+        const auto fnd = validOptionsCompat.cfind(optName.substr(1));
 
-        if (canonical.found())
+        if (fnd.found())
         {
-            const auto& iter = *canonical;
+            const auto& iter = *fnd;
 
             // Emit warning if there is versioning (non-zero) and it is not
             // tagged as future change (ie, ThisVersion > version).
@@ -446,7 +465,7 @@ Foam::word Foam::argList::optionCompat(const word& optionName)
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
                     << "    Found [v" << iter.second << "] '"
-                    << optionName << "' instead of '-"
+                    << optName << "' instead of '-"
                     << iter.first << "' option"
                     << nl
                     << std::endl;
@@ -459,13 +478,63 @@ Foam::word Foam::argList::optionCompat(const word& optionName)
     }
 
     // Nothing found - pass through the original input
-    return optionName;
+    return optName;
+}
+
+
+int Foam::argList::optionIgnore(const word& optName)
+{
+    // NB: optName is without the leading '-'
+
+    if (!ignoreOptionsCompat.empty())
+    {
+        const auto fnd = ignoreOptionsCompat.cfind(optName);
+
+        if (fnd.found())
+        {
+            const auto& iter = *fnd;
+
+            // Number to skip (including the option itself)
+            // '-option ARG' or '-option'
+            const int nskip = (iter.first ? 2 : 1);
+
+            // Emit warning if there is versioning (non-zero) and it is not
+            // tagged as future change (ie, ThisVersion > version).
+
+            if
+            (
+                iter.second
+             &&
+                (
+                    (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
+                  ? (OPENFOAM_PLUS > iter.second)
+                  : true
+                )
+            )
+            {
+                std::cerr
+                    << "--> FOAM IOWarning :" << nl
+                    << "    Ignoring [v" << iter.second << "] '-"
+                    << optName << (nskip > 1 ? " ARG" : "")
+                    << "' option"
+                    << nl
+                    << std::endl;
+
+                error::warnAboutAge("option", iter.second);
+            }
+
+            return nskip;
+        }
+    }
+
+    return 0; // Do not skip
 }
 
 
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
     int nArgs = 1;
+    int ignore = 0;
     unsigned depth = 0;
     string group;  // For grouping ( ... ) arguments
 
@@ -507,12 +576,20 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
         else if (argv[argi][0] == '-')
         {
             // Appears to be an option
-            const char *optionName = &argv[argi][1];
+            const char *optName = &argv[argi][1];
 
-            if (validOptions.found(optionName))
+            if (validOptions.found(optName))
             {
                 // Known option name
                 args_[nArgs++] = argv[argi];
+            }
+            else if ((ignore = optionIgnore(optName)) > 0)
+            {
+                // Option to be ignored (with/without an argument)
+                if (ignore > 1)
+                {
+                    ++argi;
+                }
             }
             else
             {
@@ -625,9 +702,9 @@ Foam::argList::argList
     {
         if (argv[argi][0] == '-')
         {
-            const char *optionName = &argv[argi][1];
+            const char *optName = &argv[argi][1];
 
-            if (validParOptions.found(optionName))
+            if (validParOptions.found(optName))
             {
                 parRunControl_.runPar(argc, argv);
                 break;
@@ -652,9 +729,9 @@ Foam::argList::argList
 
         if (args_[argi][0] == '-')
         {
-            const char *optionName = &args_[argi][1];
+            const char *optName = &args_[argi][1];
 
-            if (!*optionName)
+            if (!*optName)
             {
                 Warning
                     <<"Ignoring lone '-' on the command-line" << endl;
@@ -662,11 +739,11 @@ Foam::argList::argList
             else if
             (
                 (
-                    (optIter = validOptions.cfind(optionName)).found()
+                    (optIter = validOptions.cfind(optName)).found()
                  && !optIter.object().empty()
                 )
              || (
-                    (optIter = validParOptions.cfind(optionName)).found()
+                    (optIter = validParOptions.cfind(optName)).found()
                  && !optIter.object().empty()
                 )
             )
@@ -680,7 +757,7 @@ Foam::argList::argList
                     printBuildInfo(false);
 
                     Info<<nl
-                        <<"Error: option '-" << optionName
+                        <<"Error: option '-" << optName
                         << "' requires an argument" << nl << nl
                         << "See '" << executable_ << " -help' for usage"
                         << nl << nl;
@@ -691,14 +768,14 @@ Foam::argList::argList
                 argListStr_ += ' ';
                 argListStr_ += args_[argi];
                 // Handle duplicates by taking the last -option specified
-                options_.set(optionName, args_[argi]);
+                options_.set(optName, args_[argi]);
             }
             else
             {
                 // All other options (including unknown ones) are simply
                 // registered as existing.
 
-                options_.insert(optionName, "");
+                options_.insert(optName, "");
             }
         }
         else
@@ -751,9 +828,11 @@ void Foam::argList::parse
     //   -help-full   print the full usage
     //   -doc         display application documentation in browser
     //   -doc-source  display source code in browser
+    //   -list-compat print compatibility information
     {
         bool quickExit = false;
 
+        // Only display one or the other
         if (options_.found("help-full"))
         {
             printUsage(true);
@@ -778,6 +857,12 @@ void Foam::argList::parse
         )
         {
             displayDoc(true);
+            quickExit = true;
+        }
+
+        if (options_.found("list-compat"))
+        {
+            printCompat();
             quickExit = true;
         }
 
@@ -916,19 +1001,7 @@ void Foam::argList::parse
             {
                 distributed_ = true;
                 source = "-roots";
-                ITstream is("roots", options_["roots"]);
-
-                if (is.size() == 1)
-                {
-                    // Single token - treated like list with one entry
-                    roots.setSize(1);
-
-                    is >> roots[0];
-                }
-                else
-                {
-                    is >> roots;
-                }
+                roots = this->readList<fileName>("roots");
 
                 if (roots.size() != 1)
                 {
@@ -1283,7 +1356,7 @@ Foam::argList::~argList()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::argList::optionCount(const UList<word>& optionNames) const
+Foam::label Foam::argList::count(const UList<word>& optionNames) const
 {
     label n = 0;
     for (const word& optName : optionNames)
@@ -1297,7 +1370,7 @@ Foam::label Foam::argList::optionCount(const UList<word>& optionNames) const
 }
 
 
-Foam::label Foam::argList::optionCount
+Foam::label Foam::argList::count
 (
     std::initializer_list<word> optionNames
 ) const
@@ -1314,30 +1387,25 @@ Foam::label Foam::argList::optionCount
 }
 
 
-bool Foam::argList::setOption(const word& optionName, const string& param)
+bool Foam::argList::setOption(const word& optName, const string& param)
 {
     // Some options are always protected
     if
     (
-        optionName == "case"
-     || optionName == "parallel"
-     || optionName == "roots"
+        optName == "case"
+     || optName == "parallel"
+     || optName == "roots"
     )
     {
         FatalErrorInFunction
-            <<"Option: '" << optionName << "' is protected" << nl
+            <<"Option: '" << optName << "' is protected" << nl
             << exit(FatalError);
         return false;
     }
 
-    if
-    (
-        options_.found(optionName)
-      ? (options_[optionName] != param)
-      : true
-    )
+    if (options_.found(optName) ? (options_[optName] != param) : true)
     {
-        options_.set(optionName, param);
+        options_.set(optName, param);
         return true;
     }
 
@@ -1345,24 +1413,24 @@ bool Foam::argList::setOption(const word& optionName, const string& param)
 }
 
 
-bool Foam::argList::unsetOption(const word& optionName)
+bool Foam::argList::unsetOption(const word& optName)
 {
     // Some options are always protected
     if
     (
-        optionName == "case"
-     || optionName == "parallel"
-     || optionName == "roots"
+        optName == "case"
+     || optName == "parallel"
+     || optName == "roots"
     )
     {
         FatalErrorInFunction
-            <<"Option: '" << optionName << "' is protected" << nl
+            <<"Option: '" << optName << "' is protected" << nl
             << exit(FatalError);
         return false;
     }
 
     // Remove the option, return true if state changed
-    return options_.erase(optionName);
+    return options_.erase(optName);
 }
 
 
@@ -1408,27 +1476,26 @@ void Foam::argList::printUsage(bool full) const
 
     Info<< "\noptions:\n";
 
-    const wordList opts = validOptions.sortedToc();
-    for (const word& optionName : opts)
+    for (const word& optName : validOptions.sortedToc())
     {
-        if (!full)
-        {
-            // Adhoc filtering of some options to suppress
-            if
+        // Ad hoc suppression of some options for regular (non-full) help
+        if
+        (
+            !full
+         &&
             (
-                optionName.startsWith("list")
-             && optionName != "list"
+                // '-listXXX' and '-list-XXX' but not '-list'
+                (optName.size() > 4 && optName.startsWith("list"))
             )
-            {
-                continue;
-            }
+        )
+        {
+            continue;
         }
 
-        Info<< "  -" << optionName;
-        label len = optionName.size() + 3;  // Length includes leading '  -'
+        Info<< "  -" << optName;
+        label len = optName.size() + 3;  // Length includes leading '  -'
 
-        auto optIter = validOptions.cfind(optionName);
-
+        const auto optIter = validOptions.cfind(optName);
         if (optIter().size())
         {
             // Length includes space between option/param and '<>'
@@ -1436,8 +1503,7 @@ void Foam::argList::printUsage(bool full) const
             Info<< " <" << optIter().c_str() << '>';
         }
 
-        auto usageIter = optionUsage.cfind(optionName);
-
+        const auto usageIter = optionUsage.cfind(optName);
         if (usageIter.found())
         {
             printOptionUsage(len, usageIter());
@@ -1465,6 +1531,75 @@ void Foam::argList::printUsage(bool full) const
     Info<< nl;
     printBuildInfo();
     Info<< endl;
+}
+
+
+void Foam::argList::printCompat() const
+{
+    const label nopt
+    (
+        argList::validOptionsCompat.size()
+      + argList::ignoreOptionsCompat.size()
+    );
+
+    Info<< nopt << " compatibility options for " << executable_ << nl;
+    if (nopt)
+    {
+        Info<< setf(ios_base::left) << setw(34) << "old option"
+            << setf(ios_base::left) << setw(32) << "new option"
+            << "version" << nl
+            << setf(ios_base::left) << setw(34) << "~~~~~~~~~~"
+            << setf(ios_base::left) << setw(32) << "~~~~~~~~~~"
+            << "~~~~~~~" << nl;
+
+        for (const word& k : argList::validOptionsCompat.sortedToc())
+        {
+            const auto& iter = *argList::validOptionsCompat.cfind(k);
+
+            Info<< "  -"
+                << setf(ios_base::left) << setw(32) << k
+                << " -"
+                << setf(ios_base::left) << setw(30) << iter.first;
+
+            if (iter.second)
+            {
+                Info<< " " << iter.second;
+            }
+            else
+            {
+                Info<< " -";
+            }
+            Info<< nl;
+        }
+
+        for (const word& k : argList::ignoreOptionsCompat.sortedToc())
+        {
+            const auto& iter = *argList::ignoreOptionsCompat.cfind(k);
+
+            if (iter.first)
+            {
+                Info<< "  -"
+                    << setf(ios_base::left) << setw(32)
+                    << (k + " <arg>").c_str();
+            }
+            else
+            {
+                Info<< "  -"
+                    << setf(ios_base::left) << setw(32) << k;
+            }
+
+            Info<< setf(ios_base::left) << setw(32) << " removed";
+            if (iter.second)
+            {
+                Info<< " " << iter.second;
+            }
+            else
+            {
+                Info<< " -";
+            }
+            Info<< nl;
+        }
+    }
 }
 
 
@@ -1560,15 +1695,15 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
         {
             forAllConstIters(options_, iter)
             {
-                const word& optionName = iter.key();
+                const word& optName = iter.key();
                 if
                 (
-                    !validOptions.found(optionName)
-                 && !validParOptions.found(optionName)
+                    !validOptions.found(optName)
+                 && !validParOptions.found(optName)
                 )
                 {
                     FatalError
-                        << "Invalid option: -" << optionName << endl;
+                        << "Invalid option: -" << optName << endl;
                     ok = false;
                 }
             }
@@ -1599,7 +1734,7 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    fileName pathDir(fileHandler().filePath(path()));
+    const fileName pathDir(fileHandler().filePath(path()));
 
     if (checkProcessorDirectories_ && pathDir.empty() && Pstream::master())
     {

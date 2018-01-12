@@ -768,10 +768,10 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool writeVTK = !args.optionFound("noVTK");
-    const bool loop = args.optionFound("loop");
-    const bool batch = args.optionFound("batch");
-    const bool noSync = args.optionFound("noSync");
+    const bool writeVTK = !args.found("noVTK");
+    const bool loop = args.found("loop");
+    const bool batch = args.found("batch");
+    const bool noSync = args.found("noSync");
 
     if (loop && !batch)
     {

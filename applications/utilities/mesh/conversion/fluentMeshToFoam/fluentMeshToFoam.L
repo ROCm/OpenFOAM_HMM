@@ -898,10 +898,10 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
 
-    const bool writeSets  = args.optionFound("writeSets");
-    const bool writeZones = args.optionFound("writeZones");
+    const bool writeSets  = args.found("writeSets");
+    const bool writeZones = args.found("writeZones");
 
     #include "createTime.H"
 
@@ -975,7 +975,7 @@ int main(int argc, char *argv[])
 
         scalar twoDThickness = 1.0;
 
-        if (!args.optionReadIfPresent("2D", twoDThickness))
+        if (!args.readIfPresent("2D", twoDThickness))
         {
             const scalar extrusionFactor = 0.02; //0.01 in each direction
             boundBox box(points);

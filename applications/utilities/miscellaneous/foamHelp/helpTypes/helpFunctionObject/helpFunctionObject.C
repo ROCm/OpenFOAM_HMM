@@ -72,7 +72,7 @@ void Foam::helpTypes::helpFunctionObject::execute
 {
     word function(word::null);
 
-    if (args.optionReadIfPresent("browse", function))
+    if (args.readIfPresent("browse", function))
     {
         displayDoc(function, ".*[fF]unctionObject.*", true, "H");
     }

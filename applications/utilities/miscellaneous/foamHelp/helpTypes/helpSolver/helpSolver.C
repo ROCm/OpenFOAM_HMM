@@ -79,11 +79,11 @@ void Foam::helpTypes::helpSolver::execute
 {
     word solver(word::null);
 
-    if (args.optionReadIfPresent("browse", solver))
+    if (args.readIfPresent("browse", solver))
     {
         displayDoc(solver, ".*solvers/.*Foam/", true, "C");
     }
-    else if (args.optionFound("read"))
+    else if (args.found("read"))
     {
         mesh.time().controlDict().lookup("application") >> solver;
         displayDoc(solver, ".*solvers/.*Foam/", true, "C");

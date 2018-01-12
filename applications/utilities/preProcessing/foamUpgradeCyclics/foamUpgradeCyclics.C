@@ -416,16 +416,16 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool isTestRun = args.optionFound("test");
+    const bool isTestRun = args.found("test");
     if (isTestRun)
     {
         Info<< "-test option: no changes made" << nl << endl;
     }
-    const bool enableEntries = args.optionFound("enableFunctionEntries");
+    const bool enableEntries = args.found("enableFunctionEntries");
 
 
     Foam::word regionName = polyMesh::defaultRegion;
-    args.optionReadIfPresent("region", regionName);
+    args.readIfPresent("region", regionName);
 
     fileName regionPrefix = "";
     if (regionName != polyMesh::defaultRegion)

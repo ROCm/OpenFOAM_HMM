@@ -396,11 +396,11 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     dictionary& functionsDict = controlDict.subDict("functions");
 
     word region;
-    args.optionReadIfPresent("region", region);
+    args.readIfPresent("region", region);
 
     bool modifiedControlDict = false;
 
-    if (args.optionFound("dict"))
+    if (args.found("dict"))
     {
         modifiedControlDict = true;
 
@@ -418,7 +418,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
         );
     }
 
-    if (args.optionFound("func"))
+    if (args.found("func"))
     {
         modifiedControlDict = true;
 
@@ -431,7 +431,7 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
         );
     }
 
-    if (args.optionFound("funcs"))
+    if (args.found("funcs"))
     {
         modifiedControlDict = true;
 

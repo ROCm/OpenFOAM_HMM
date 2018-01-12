@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    const bool expand = args.optionFound("expand");
+    const bool expand = args.found("expand");
 
 
     #include "createNamedMesh.H"

@@ -96,6 +96,16 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
+    if (args.found("writePrecision"))
+    {
+        const label writePrecision = args.opt<label>("writePrecision");
+
+        IOstream::defaultPrecision(writePrecision);
+        Sout.precision(writePrecision);
+
+        Info<< "Output write precision set to " << writePrecision << endl;
+    }
+
     const fileName importName = args[1];
     const fileName exportName = args[2];
 
@@ -116,17 +126,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (args.optionFound("writePrecision"))
-    {
-        label writePrecision = args.optionRead<label>("writePrecision");
-
-        IOstream::defaultPrecision(writePrecision);
-        Sout.precision(writePrecision);
-
-        Info<< "Output write precision set to " << writePrecision << endl;
-    }
-
-    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     Info<< "Reading : " << importName << endl;
     triSurface surf(importName, scaleFactor);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
     surf.writeStats(Info);
     Info<< endl;
 
-    if (args.optionFound("clean"))
+    if (args.found("clean"))
     {
         Info<< "Cleaning up surface" << endl;
         surf.cleanup(true);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    const bool sortByRegion = args.optionFound("group");
+    const bool sortByRegion = args.found("group");
     if (sortByRegion)
     {
         Info<< "Reordering faces into groups; one per region." << endl;

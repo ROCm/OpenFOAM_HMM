@@ -62,12 +62,12 @@ int main(int argc, char *argv[])
 
     runTime.functionObjects().off();
 
-    const bool checkGeometry = args.optionFound("checkGeometry");
-    const bool conformationOnly = args.optionFound("conformationOnly");
+    const bool checkGeometry = args.found("checkGeometry");
+    const bool conformationOnly = args.found("conformationOnly");
 
     // Allow override of decomposeParDict location
     fileName decompDictFile;
-    args.optionReadIfPresent("decomposeParDict", decompDictFile);
+    args.readIfPresent("decomposeParDict", decompDictFile);
 
     IOdictionary foamyHexMeshDict
     (

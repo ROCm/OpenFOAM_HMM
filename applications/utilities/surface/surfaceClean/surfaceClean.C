@@ -71,8 +71,8 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
-    const scalar minLen = args.argRead<scalar>(2);
-    const scalar minQuality = args.argRead<scalar>(3);
+    const scalar minLen = args.read<scalar>(2);
+    const scalar minQuality = args.read<scalar>(3);
     const fileName outFileName = args[4];
 
     Info<< "Reading surface " << inFileName << nl
@@ -87,11 +87,11 @@ int main(int argc, char *argv[])
     triSurface surf
     (
         inFileName,
-        args.optionLookupOrDefault<scalar>("scale", -1)
+        args.lookupOrDefault<scalar>("scale", -1)
     );
     surf.writeStats(Info);
 
-    if (!args.optionFound("noClean"))
+    if (!args.found("noClean"))
     {
         Info<< "Removing duplicate and illegal triangles ..." << nl << endl;
         surf.cleanup(true);
