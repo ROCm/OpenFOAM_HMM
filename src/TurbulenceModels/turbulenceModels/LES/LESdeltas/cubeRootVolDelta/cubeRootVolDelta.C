@@ -72,9 +72,12 @@ void Foam::LESModels::cubeRootVolDelta::calcDelta()
     }
     else
     {
-        FatalErrorInFunction
-            << "Case is not 3D or 2D, LES is not applicable"
-            << exit(FatalError);
+        if (debug)
+        {
+            FatalErrorInFunction
+                << "Case is not 3D or 2D, LES is not applicable"
+                << exit(FatalError);
+        }
     }
 
     // Handle coupled boundaries
