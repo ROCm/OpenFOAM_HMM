@@ -198,22 +198,35 @@ Foam::Field<Type>::Field
             else if (firstToken.wordToken() == "nonuniform")
             {
                 is >> static_cast<List<Type>&>(*this);
-                if (this->size() != len)
+                label currentSize = this->size();
+                if (currentSize != len)
                 {
-                    FatalIOErrorInFunction
-                    (
-                        dict
-                    )   << "size " << this->size()
-                        << " is not equal to the given value of " << len
-                        << exit(FatalIOError);
+                    if (len < currentSize && allowConstructFromLargerSize)
+                    {
+                        #ifdef FULLDEBUG
+                        IOWarningInFunction(dict)
+                            << "Sizes do not match. "
+                            << "Re-sizing " << currentSize
+                            << " entries to " << len
+                            << endl;
+                        #endif
+
+                        // Resize the data
+                        this->setSize(len);
+                    }
+                    else
+                    {
+                        FatalIOErrorInFunction(dict)
+                            << "size " << this->size()
+                            << " is not equal to the given value of " << len
+                            << exit(FatalIOError);
+                    }
                 }
             }
             else
             {
-                FatalIOErrorInFunction
-                (
-                    dict
-                )   << "expected keyword 'uniform' or 'nonuniform', found "
+                FatalIOErrorInFunction(dict)
+                    << "expected keyword 'uniform' or 'nonuniform', found "
                     << firstToken.wordToken()
                     << exit(FatalIOError);
             }

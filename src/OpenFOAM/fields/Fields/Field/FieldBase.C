@@ -29,5 +29,7 @@ License
 
 const char* const Foam::FieldBase::typeName("Field");
 
+bool Foam::FieldBase::allowConstructFromLargerSize = false;
+
 
 // ************************************************************************* //

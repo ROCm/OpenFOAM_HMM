@@ -57,6 +57,8 @@ public:
         //- Typename for Field
         static const char* const typeName;
 
+        static bool allowConstructFromLargerSize;
+
 
     // Constructors
 
