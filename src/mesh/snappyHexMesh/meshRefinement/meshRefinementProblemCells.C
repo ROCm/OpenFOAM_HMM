@@ -718,10 +718,11 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     // On-the-fly addressing storage.
     DynamicList<label> dynFEdges;
     DynamicList<label> dynCPoints;
+    labelHashSet pSet;
 
     forAll(cellLevel, celli)
     {
-        const labelList& cPoints = mesh_.cellPoints(celli, dynCPoints);
+        const labelList& cPoints = mesh_.cellPoints(celli, pSet, dynCPoints);
 
         // Get number of anchor points (pointLevel <= cellLevel)
 
