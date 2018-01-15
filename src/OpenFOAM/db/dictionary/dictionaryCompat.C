@@ -25,6 +25,31 @@ License
 
 #include "dictionary.H"
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Should issue warning if there is +ve versioning (+ve version number)
+// and if this version number is not in the future (ie, version > current).
+// No warning for 0 (unversioned) or -ve values (silent versioning)
+static inline constexpr bool shouldWarnVersion(const int version)
+{
+    return
+    (
+        version > 0
+     &&
+        (
+            (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
+          ? (OPENFOAM_PLUS > version)
+          : true
+        )
+    );
+}
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
@@ -48,9 +73,8 @@ Foam::dictionary::const_searcher Foam::dictionary::csearchCompat
 
         if (finder.found())
         {
-            if (iter.second)
+            if (shouldWarnVersion(iter.second))
             {
-                // Emit warning, but only if version (non-zero) was provided
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
                     << "    Found [v" << iter.second << "] '"

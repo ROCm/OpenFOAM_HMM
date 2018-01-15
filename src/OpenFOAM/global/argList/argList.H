@@ -440,7 +440,8 @@ public:
         //  \param optName the currently used option name
         //  \param compat alias name and the last OpenFOAM version (YYMM)
         //      when the alias was not needed.
-        //      Setting a version of 0 suppresses warnings about the alias.
+        //      Setting a zero or negative version suppresses warnings about
+        //      the alias.
         static void addOptionCompat
         (
             const word& optName,
@@ -451,7 +452,8 @@ public:
         //
         //  \param compat optName and the last OpenFOAM version (YYMM)
         //      when the option was directly supported.
-        //      Setting a version of 0 suppresses warnings about the alias.
+        //      Setting a zero or negative version suppresses warnings about
+        //      the alias.
         //  \param expectArg the option is non-bool
         static void ignoreOptionCompat
         (

@@ -106,8 +106,8 @@ Foam::argList::initValidTables::initValidTables()
     Pstream::addValidParOptions(validParOptions);
 }
 
-
 Foam::argList::initValidTables dummyInitValidTables;
+
 
 // * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
@@ -166,6 +166,24 @@ static void printBuildInfo(const bool full=true)
     {
         Info << "Arch:  " << Foam::FOAMbuildArch << nl;
     }
+}
+
+
+// Should issue warning if there is +ve versioning (+ve version number)
+// and if this version number is not in the future (ie, version > current).
+// No warning for 0 (unversioned) or -ve values (silent versioning)
+static inline constexpr bool shouldWarnVersion(const int version)
+{
+    return
+    (
+        version > 0
+     &&
+        (
+            (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
+          ? (OPENFOAM_PLUS > version)
+          : true
+        )
+    );
 }
 
 } // End namespace Foam
@@ -448,19 +466,7 @@ Foam::word Foam::argList::optionCompat(const word& optName)
         {
             const auto& iter = *fnd;
 
-            // Emit warning if there is versioning (non-zero) and it is not
-            // tagged as future change (ie, ThisVersion > version).
-
-            if
-            (
-                iter.second
-             &&
-                (
-                    (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
-                  ? (OPENFOAM_PLUS > iter.second)
-                  : true
-                )
-            )
+            if (shouldWarnVersion(iter.second))
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
@@ -498,19 +504,7 @@ int Foam::argList::optionIgnore(const word& optName)
             // '-option ARG' or '-option'
             const int nskip = (iter.first ? 2 : 1);
 
-            // Emit warning if there is versioning (non-zero) and it is not
-            // tagged as future change (ie, ThisVersion > version).
-
-            if
-            (
-                iter.second
-             &&
-                (
-                    (OPENFOAM_PLUS > 1700)  // Guard against bad #define value
-                  ? (OPENFOAM_PLUS > iter.second)
-                  : true
-                )
-            )
+            if (shouldWarnVersion(iter.second))
             {
                 std::cerr
                     << "--> FOAM IOWarning :" << nl
@@ -1548,9 +1542,9 @@ void Foam::argList::printCompat() const
         Info<< setf(ios_base::left) << setw(34) << "old option"
             << setf(ios_base::left) << setw(32) << "new option"
             << "version" << nl
-            << setf(ios_base::left) << setw(34) << "~~~~~~~~~~"
-            << setf(ios_base::left) << setw(32) << "~~~~~~~~~~"
-            << "~~~~~~~" << nl;
+            << setf(ios_base::left) << setw(34) << "=========="
+            << setf(ios_base::left) << setw(32) << "=========="
+            << "=======" << nl;
 
         for (const word& k : argList::validOptionsCompat.sortedToc())
         {
@@ -1559,15 +1553,19 @@ void Foam::argList::printCompat() const
             Info<< "  -"
                 << setf(ios_base::left) << setw(32) << k
                 << " -"
-                << setf(ios_base::left) << setw(30) << iter.first;
+                << setf(ios_base::left) << setw(30) << iter.first << ' ';
 
-            if (iter.second)
+            if (iter.second > 0)
             {
-                Info<< " " << iter.second;
+                Info<< (iter.second);
+            }
+            else if (iter.second < 0)
+            {
+                Info<< (-iter.second);
             }
             else
             {
-                Info<< " -";
+                Info<< '-';
             }
             Info<< nl;
         }
@@ -1588,14 +1586,18 @@ void Foam::argList::printCompat() const
                     << setf(ios_base::left) << setw(32) << k;
             }
 
-            Info<< setf(ios_base::left) << setw(32) << " removed";
-            if (iter.second)
+            Info<< setf(ios_base::left) << setw(32) << " removed" << ' ';
+            if (iter.second > 0)
             {
-                Info<< " " << iter.second;
+                Info<< (iter.second);
+            }
+            else if (iter.second < 0)
+            {
+                Info<< (-iter.second);
             }
             else
             {
-                Info<< " -";
+                Info<< '-';
             }
             Info<< nl;
         }

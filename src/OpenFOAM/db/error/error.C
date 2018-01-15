@@ -39,7 +39,11 @@ void Foam::error::warnAboutAge
     const int oldVersion
 )
 {
-    if (oldVersion < 1000)
+    if (oldVersion <= 0)
+    {
+        // No warning for 0 (unversioned) or -ve values (silent versioning)
+    }
+    else if (oldVersion < 1000)
     {
         // Emit warning
         std::cerr
