@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/aliases
+#     - sourced by OpenFOAM-*/etc/cshrc  (or from the user's ~/.cshrc)
 #
 # Description
 #     Aliases for working with OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc and/or ~/.cshrc
 #
 #------------------------------------------------------------------------------
 

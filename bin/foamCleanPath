@@ -4,7 +4,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -15,6 +15,7 @@
 #
 # Description
 #     Usage: foamCleanPath [OPTION] path [wildcard] .. [wildcard]
+#            foamCleanPath [OPTION] -env=name [wildcard1] .. [wildcardN]
 #
 #     Prints its argument (which should be a ':' separated path)
 #     without the following:
@@ -23,24 +24,48 @@
 #         - inaccessible directories (with the -strip option)
 #
 # Note
-#     - this routine will fail when directories have embedded spaces
+#     - this routine fails when directories have embedded spaces
 #     - false matches possible if a wildcard contains '.' (sed regex)
 #     - the wildcards themselves can be written together and separated
 #       by colons or whitespace
+#
+# Examples for cleaning the path:
+#
+#     - Using explicit arguments
+#       cleaned=$(foamCleanPath "$PATH" dir1:dir2) && PATH=$cleaned
+#
+#     - Variable to clean passed as an option
+#       cleaned=$(foamCleanPath -env=PATH dir1:dir2) && PATH=$cleaned
+#
+#     - Using shell evaluation for the output
+#       eval $(foamCleanPath -sh=PATH "$PATH" dir1:dir2)
+#       eval $(foamCleanPath -sh=PATH -env=PATH dir1:dir2)
+#       eval $(foamCleanPath -sh-env=PATH dir1:dir2)
+#
+#     - Similarly for c-shell
+#       eval `foamCleanPath -csh-env=PATH dir1:dir2`
+#
 #------------------------------------------------------------------------------
 usage() {
     cat <<USAGE 1>&2
-Usage: ${0##*/} [OPTION] path [wildcard1] .. [wildcardN]
+Usage: foamCleanPath [OPTION] path [wildcard1] .. [wildcardN]]
+       foamCleanPath [OPTION] -env=name [wildcard1] .. [wildcardN]
+
 options:
+  -csh=NAME         Produce 'setenv NAME ...' output for csh eval
+  -sh=NAME          Produce 'NAME=...' output for sh eval
+  -csh-env=NAME     As per -csh, with -env for initial content
+  -sh-env=NAME      As per -sh,  with -env for initial content
+  -env=NAME         Evaluate NAME to obtain initial content
   -debug            print debug information to stderr
   -strip            remove inaccessible directories
   -verbose          report some progress (input, output, ...)
   -help             print the usage
 
 Prints its argument (which should be a ':' separated list) cleansed from
-  - duplicate elements
-  - elements whose start matches one of the wildcard(s)
-  - inaccessible directories (with the -strip option)
+  * duplicate elements
+  * elements whose start matches one of the wildcard(s)
+  * inaccessible directories (the -strip option)
 
 Exit status
     0  on success
@@ -51,14 +76,57 @@ USAGE
     exit 1
 }
 
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See 'foamCleanPath -help' for usage"
+    echo
+    exit 1
+}
+
+#-------------------------------------------------------------------------------
+
+# Input and outputs
+unset dirList shellOutput
 
 # Parse options
-unset optDebug optStrip optVerbose
+unset optDebug optEnvName optStrip optVerbose
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help*)
         usage
+        ;;
+    -csh=* | -sh=* | -csh-env=* | -sh-env=*)
+        name="${1#*=}"
+        [ -n "$name" ] || die "Option '$1' missing an ENVNAME"
+
+        # Output prefix
+        case "$1" in
+        -csh*)
+            shellOutput="setenv $name "     # eg, "setenv PATH xyz"
+            ;;
+        *)
+            shellOutput="$name="            # eg, "PATH=xyz"
+            ;;
+        esac
+
+        # For (-csh-env | -sh-env) also use name for input evaluation
+        case "$1" in
+        *-env=*)
+            optEnvName="$name"
+            ;;
+        esac
+        ;;
+    -env=*)
+        name="${1#*=}"
+        [ -n "$name" ] || die "Option '$1' missing an ENVNAME"
+        optEnvName="$name"
         ;;
     -debug)
         optDebug=true
@@ -76,11 +144,18 @@ do
     shift
 done
 
-# Basic checks, setup
-[ "$#" -ge 1 ] || usage
 
-dirList="$1"
-shift
+# Basic checks
+if [ -n "$optEnvName" ]
+then
+    eval "dirList=\$$optEnvName"
+elif [ "$#" -ge 1 ]
+then
+    dirList="$1"
+    shift
+else
+    die "Requires at least one argument, or use the -env option"
+fi
 
 [ -n "$dirList" ] || exit 2     # Quick exit on empty 'dirList'
 
@@ -105,8 +180,8 @@ fi
 # The "wildcard1 ... wildcardN" may have been passed as a single parameter
 # or may contain ':' separators
 
-oldIFS="$IFS"   # Preserve initial IFS
-IFS=': '        # Split on colon, whitespace
+oldIFS="$IFS"       # Preserve initial IFS
+IFS=': '            # Split on colon, whitespace
 set -- $*
 
 if [ -n "$optVerbose" ]
@@ -128,10 +203,10 @@ do
 done
 printDebug "intermediate>$dirList<"
 
-IFS=': '        # Split on colon, whitespace (to avoid surprises)
+IFS=': '            # Split on colon, whitespace (to avoid surprises)
 set -- $dirList
 
-IFS="$oldIFS"   # Restore initial IFS
+IFS="$oldIFS"       # Restore initial IFS
 
 # Rebuild the list
 unset dirList
@@ -153,12 +228,11 @@ do
 done
 
 printDebug "output>$dirList<"
-
 if [ -n "$optVerbose" ]
 then
     echo "output: $dirList" 1>&2
 fi
 
-echo "$dirList"
+echo "$shellOutput$dirList"
 
 #------------------------------------------------------------------------------

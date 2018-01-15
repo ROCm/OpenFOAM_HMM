@@ -11,14 +11,13 @@
 #
 # File
 #     config.sh/example/openmpi
+#     - sourced by OpenFOAM-*/etc/config.sh/mpi
 #
 # Description
 #     Example of fine tuning openmpi settings for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/config.sh/settings
 #
 #------------------------------------------------------------------------------
 
-# Modified openmpi settings
 export FOAM_MPI=openmpi-3.0.0
 
 #------------------------------------------------------------------------------

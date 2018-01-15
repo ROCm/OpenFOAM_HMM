@@ -1,0 +1,162 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#-------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# Script
+#     tools/lib-dir [OPTION] DIR [LIBEXT]
+#
+# Description
+#     Since csh/tcsh doesn't have functions, this script can be used to manage
+#     slightly more complex logic.
+#
+#     Resolves for the existence of DIR/lib64 and DIR/lib, or uses the fallback
+#     LIBEXT if these failed. A DIR ending in "-none" or "-system" is skipped.
+#
+#     output -csh:     setenv LD_LIBRARY_PATH dir/lib:$LD_LIBRARY_PATH
+#     output -make:    -Ldir/lib
+#     output -sh:      LD_LIBRARY_PATH=dir/lib:$LD_LIBRARY_PATH
+#
+#------------------------------------------------------------------------------
+printHelp() {
+    cat<<USAGE
+
+Usage: ${0##*/} [OPTION] DIR [LIBEXT]
+
+options:
+   -sh               Emit POSIX shell syntax (default)
+   -csh              Emit C-shell shell syntax
+   -make             Emit content for a makefile
+   -help             Print the usage
+
+Resolves for the existence of DIR/lib64 and DIR/lib, or uses the fallback
+LIBEXT if these failed. A DIR ending in "-none" or "-system" is skipped.
+
+With -sh             LD_LIBRARY_PATH=dir/lib:$LD_LIBRARY_PATH
+With -csh            setenv LD_LIBRARY_PATH dir/lib:$LD_LIBRARY_PATH
+With -make           -Ldir/lib
+
+Exit status is zero (success) or non-zero (failure)
+USAGE
+    exit 0  # A clean exit
+}
+
+# Report error and exit
+die()
+{
+    exec 1>&2
+    echo
+    echo "Error encountered:"
+    while [ "$#" -ge 1 ]; do echo "    $1"; shift; done
+    echo
+    echo "See '${Script##*/} -help' for usage"
+    echo
+    exit 1
+}
+
+
+#------------------------------------------------------------------------------
+
+optSyntax=sh
+
+# Parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help*)
+        printHelp
+        ;;
+    -csh | -sh | -make)
+        optSyntax="${1#-}"
+        ;;
+    --)
+        shift
+        break
+        ;;
+    -*)
+        die "unknown option: '$1'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+    shift
+done
+
+#------------------------------------------------------------------------------
+
+dir="$1"   # $1 = base directory for 'lib' or 'lib64'
+alt="$2"   # $2 = fallback libname ('lib' or 'lib64')
+
+unset resolved
+
+# 0)
+# Skip entirely if directory ends in "-none" or "-system".
+# These special cases (disabled, system directories) should not require
+# adjustment of LD_LIBRARY_PATH
+
+case "$dir" in
+none |  system  | *-none | *-system)
+    unset dir
+    ;;
+esac
+
+if [ -z "$dir" ]
+then
+    exit 1
+elif [ -d "$dir" ]
+then
+    # 1) Check for dir/lib64 and dir/lib
+    for end in lib$WM_COMPILER_LIB_ARCH lib
+    do
+        if [ -d "$dir/$end" ]
+        then
+            resolved=$dir/$end
+            break
+        fi
+    done
+fi
+
+# 2) Use fallback if the previous failed
+if [ -z "$resolved" -a -n "$alt" ]
+then
+    # Fallback
+    case "$alt" in
+    /*)
+        resolved=$alt
+        ;;
+    (*)
+        resolved=$dir/$alt
+        ;;
+    esac
+    return 0
+fi
+
+
+if [ -n "$resolved" ]
+then
+    case "$optSyntax" in
+    csh)
+        echo "setenv LD_LIBRARY_PATH $resolved:$LD_LIBRARY_PATH"
+        ;;
+    make)
+        printf "%s\n" "-L$resolved"
+        ;;
+    *)
+        echo "LD_LIBRARY_PATH=$resolved:$LD_LIBRARY_PATH"
+        ;;
+    esac
+    exit 0      # Good
+else
+    exit 1    # Error
+fi
+
+
+#------------------------------------------------------------------------------

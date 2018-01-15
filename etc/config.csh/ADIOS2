@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/ADIOS2
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Setup for ADIOS2 include/libraries (usually ThirdParty installation).
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade

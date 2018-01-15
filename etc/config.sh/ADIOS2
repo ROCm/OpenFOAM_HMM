@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/ADIOS2
+#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
 #     Setup for ADIOS2 include/libraries (usually ThirdParty installation).
-#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
@@ -29,7 +29,7 @@ then
     echo "Using adios ($adios2_version)  ->  $ADIOS2_ARCH_PATH" 1>&2
 fi
 
-if command -v _foamAddPath >/dev/null 2>&1  # normal sourcing
+if command -v _foamAddPath >/dev/null 2>&1      # Normal sourcing
 then
     # If *_ARCH_PATH does not end with '-system' or '-none',
     # it is located within ThirdParty, or a central installation

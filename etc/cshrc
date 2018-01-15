@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -136,12 +136,8 @@ endif
 # [WM_PROJECT_USER_DIR] - Location of user files
 setenv WM_PROJECT_USER_DIR $HOME/$WM_PROJECT/$LOGNAME-$WM_PROJECT_VERSION
 
-# Source an etc file, possibly with some verbosity
-if ($?FOAM_VERBOSE && $?prompt) then
-    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
-else
-    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
-endif
+# Load shell "functions" (actually aliases)
+source $WM_PROJECT_DIR/etc/config.csh/functions
 
 # Override definitions via prefs, with 'other' first so the sys-admin
 # can provide base values independent of WM_PROJECT_SITE
@@ -181,68 +177,53 @@ while ( $#argv > 0 )
 end
 
 
-# Clean standard environment variables (PATH, LD_LIBRARY_PATH, MANPATH)
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-set foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
-
+# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Prevent local variables from shadowing setenv variables
 unset PATH MANPATH LD_LIBRARY_PATH LD_PRELOAD
-
 if (! $?LD_LIBRARY_PATH ) setenv LD_LIBRARY_PATH
 if (! $?MANPATH ) setenv MANPATH
 
-# Clean PATH (path)
-set cleaned=`$foamClean "$PATH" "$foamOldDirs"`
-if ( $status == 0 ) setenv PATH $cleaned
-
-# Clean LD_LIBRARY_PATH
-set cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"`
-if ( $status == 0 ) setenv LD_LIBRARY_PATH $cleaned
-
-# Clean MANPATH
-set cleaned=`$foamClean "$MANPATH" "$foamOldDirs"`
-if ( $status == 0 ) setenv MANPATH $cleaned
+_foamClean PATH "$foamOldDirs"
+_foamClean MANPATH "$foamOldDirs"
+_foamClean LD_LIBRARY_PATH "$foamOldDirs"
 
 
 # Setup for OpenFOAM compilation etc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamEtc config.csh/settings
+_foamEtc -config  settings
 
 # Setup for third-party packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamEtc config.csh/mpi
-_foamEtc config.csh/paraview
-_foamEtc config.csh/vtk
-_foamEtc config.csh/ensight
-## _foamEtc config.csh/ADIOS
-_foamEtc config.csh/CGAL
-_foamEtc config.csh/FFTW
+_foamEtc -config  mpi
+_foamEtc -config  paraview
+_foamEtc -config  vtk
+_foamEtc -config  ensight
+## _foamEtc -config  ADIOS
+_foamEtc -config  CGAL
+_foamEtc -config  FFTW
 
 # Interactive shell
 if ($?prompt) then
-    _foamEtc config.csh/aliases
-    _foamEtc config.csh/tcsh_completion
+    _foamEtc -config  aliases
+    _foamEtc -config  tcsh_completion
 endif
 
 
 # Clean environment paths again. Only remove duplicates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean PATH (path)
-set cleaned=`$foamClean "$PATH"`
-if ( $status == 0 ) setenv PATH $cleaned
 
-# Clean LD_LIBRARY_PATH
-set cleaned=`$foamClean "$LD_LIBRARY_PATH"`
-if ( $status == 0 ) setenv LD_LIBRARY_PATH $cleaned
+_foamClean PATH
+_foamClean MANPATH
+_foamClean LD_LIBRARY_PATH
 
-# Clean MANPATH (trailing ':' to find system pages)
-set cleaned=`$foamClean "$MANPATH"`
-if ( $status == 0 ) setenv MANPATH "${cleaned}:"
+# Add trailing ':' for system manpages
+if ( $?MANPATH ) then
+    setenv MANPATH "${MANPATH}:"
+endif
 
-# Clean LD_PRELOAD
 if ( $?LD_PRELOAD ) then
-    set cleaned=`$foamClean "$LD_PRELOAD"`
-    if ( $status == 0 ) setenv LD_PRELOAD $cleaned
+    _foamClean LD_PRELOAD
 endif
 
 
@@ -250,11 +231,14 @@ endif
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Unload shell "functions"
+unalias _foamClean
 unalias _foamEtc
 unalias _foamAddPath
-unalias _foamAddLib
 unalias _foamAddMan
+unalias _foamAddLib
+unalias _foamAddLibAuto
 
-unset cleaned foamClean foamOldDirs
+# Variables (done as the last statement for a clean exit code)
+unset cleaned foamOldDirs
 
 #------------------------------------------------------------------------------

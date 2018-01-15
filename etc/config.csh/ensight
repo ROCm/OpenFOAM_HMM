@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/ensight
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Setup for ENSIGHT
-#     Sourced from OpenFOAM-*/etc/cshrc
 #
 #------------------------------------------------------------------------------
 

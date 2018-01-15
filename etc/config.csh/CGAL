@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/CGAL
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
-#     Setup file for CGAL (& boost) include/libraries.
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
+#     Setup CGAL (& boost) include/libraries (usually ThirdParty installation).
 #
 #     To disable its use:
 #         boost_version=boost-none
@@ -29,6 +29,9 @@
 #       2. and provide full paths for BOOST_ARCH_PATH / CGAL_ARCH_PATH
 #
 # Note
+#     Define GMP_ARCH_PATH and MPFR_ARCH_PATH here, if required and when not
+#     using a ThirdParty gcc.
+#
 #     Changes made here MUST be made in the equivalent config.sh version too,
 #     since that is the one used in the build process.
 #
@@ -50,20 +53,19 @@ if ($?FOAM_VERBOSE && $?prompt) then
     echo "Using CGAL ($cgal_version)  ->  $CGAL_ARCH_PATH"
 endif
 
-# If BOOST_ARCH_PATH, CGAL_ARCH_PATH do not end with '-system' or '-none',
-# they are either located within ThirdParty, or a central installation
-# outside of ThirdParty and must be added to the lib-path.
+_foamAddLibAuto $BOOST_ARCH_PATH  lib$WM_COMPILER_LIB_ARCH
+_foamAddLibAuto $CGAL_ARCH_PATH   lib$WM_COMPILER_LIB_ARCH
 
-set ending="${BOOST_ARCH_PATH:t}"
-if ( "$ending" != "boost-none" && "$ending" != "boost-system" ) then
-    _foamAddLib $BOOST_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
+# GMP/MPFR may have already been added with ThirdParty compiler, but cannot
+# be certain so add here. If they are duplicates, they will be removed later.
+
+if ( $?GMP_ARCH_PATH ) then
+    _foamAddLibAuto $GMP_ARCH_PATH   # No fallback libdir
+endif
+if ( $?MPFR_ARCH_PATH ) then
+    _foamAddLibAuto $MPFR_ARCH_PATH  # No fallback libdir
 endif
 
-set ending="${CGAL_ARCH_PATH:t}"
-if ( "$ending" != "cgal-none" && "$ending" != "cgal-system" ) then
-    _foamAddLib $CGAL_ARCH_PATH/lib$WM_COMPILER_LIB_ARCH
-endif
-
-unset boost_version cgal_version ending
+unset boost_version cgal_version
 
 #------------------------------------------------------------------------------

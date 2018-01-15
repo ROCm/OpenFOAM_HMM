@@ -11,6 +11,7 @@
 #
 # File
 #     etc/config.csh/tcsh_completion
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Tcsh completions for OpenFOAM applications

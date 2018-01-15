@@ -139,65 +139,55 @@ _foamEtc -mode=ug prefs.sh
 export FOAM_SETTINGS="$@"
 _foamEval $@
 
-# Clean standard environment variables (PATH, LD_LIBRARY_PATH, MANPATH)
+# Clean standard environment variables (PATH, MANPATH, LD_LIBRARY_PATH)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-foamClean=$WM_PROJECT_DIR/bin/foamCleanPath
-
-# Clean PATH
-cleaned=$($foamClean "$PATH" "$foamOldDirs") && PATH="$cleaned"
-
-# Clean LD_LIBRARY_PATH
-cleaned=$($foamClean "$LD_LIBRARY_PATH" "$foamOldDirs") \
-    && LD_LIBRARY_PATH="$cleaned"
-
-# Clean MANPATH
-cleaned=$($foamClean "$MANPATH" "$foamOldDirs") && MANPATH="$cleaned"
-
-export PATH LD_LIBRARY_PATH MANPATH
-
+export PATH MANPATH LD_LIBRARY_PATH
+_foamClean PATH "$foamOldDirs"
+_foamClean MANPATH "$foamOldDirs"
+_foamClean LD_LIBRARY_PATH "$foamOldDirs"
 
 # Setup for OpenFOAM compilation etc
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamEtc config.sh/settings
+_foamEtc -config  settings
 
 # Setup for third-party packages
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_foamEtc config.sh/mpi
-_foamEtc config.sh/paraview
-_foamEtc config.sh/vtk
-_foamEtc config.sh/ensight
-_foamEtc config.sh/gperftools
-## _foamEtc config.csh/ADIOS
-_foamEtc config.sh/CGAL
-_foamEtc config.sh/scotch
-_foamEtc config.sh/FFTW
+_foamEtc -config  mpi
+_foamEtc -config  paraview
+_foamEtc -config  vtk
+_foamEtc -config  ensight
+_foamEtc -config  gperftools
+## _foamEtc -config  ADIOS
+_foamEtc -config  CGAL
+_foamEtc -config  scotch
+_foamEtc -config  FFTW
 
 # Interactive shell
 if /usr/bin/tty -s 2>/dev/null
 then
-    _foamEtc config.sh/aliases
-    [ "${BASH_VERSINFO:-0}" -ge 4 ] && _foamEtc config.sh/bash_completion
+    _foamEtc -config  aliases
+    [ "${BASH_VERSINFO:-0}" -ge 4 ] && _foamEtc -config  bash_completion
 fi
 
 
 # Clean environment paths again. Only remove duplicates
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# Clean PATH
-cleaned=$($foamClean "$PATH") && PATH="$cleaned"
+export PATH MANPATH LD_LIBRARY_PATH
 
-# Clean LD_LIBRARY_PATH
-cleaned=$($foamClean "$LD_LIBRARY_PATH") && LD_LIBRARY_PATH="$cleaned"
+_foamClean PATH
+_foamClean MANPATH
+_foamClean LD_LIBRARY_PATH
 
-# Clean MANPATH (trailing ':' to find system pages)
-cleaned=$($foamClean "$MANPATH") && MANPATH="${cleaned}:"
+# Add trailing ':' for system manpages
+if [ -n "$MANPATH" ]
+then
+    MANPATH="${MANPATH}:"
+fi
 
-export PATH LD_LIBRARY_PATH MANPATH
-
-# Clean LD_PRELOAD
 if [ -n "$LD_PRELOAD" ]
 then
-    cleaned=$($foamClean "$LD_PRELOAD") && LD_PRELOAD="$cleaned"
     export LD_PRELOAD
+    _foamClean LD_PRELOAD
 fi
 
 
@@ -208,6 +198,6 @@ fi
 . $WM_PROJECT_DIR/etc/config.sh/functions
 
 # Variables (done as the last statement for a clean exit code)
-unset cleaned foamClean foamOldDirs
+unset cleaned foamOldDirs
 
 #------------------------------------------------------------------------------

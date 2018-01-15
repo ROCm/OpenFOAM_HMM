@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/vtk
+#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
 #     Setup file for VTK (and MESA)
-#     Sourced from OpenFOAM-<VERSION>/etc/bashrc
 #
 #     The library path is only adjusted when the paths specified here
 #     actually exist at the time of sourcing.

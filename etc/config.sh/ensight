@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.sh/ensight
+#     - sourced by OpenFOAM-*/etc/bashrc
 #
 # Description
 #     Setup for ENSIGHT
-#     Sourced from OpenFOAM-*/etc/bashrc
 #
 #------------------------------------------------------------------------------
 

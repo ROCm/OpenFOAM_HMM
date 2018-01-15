@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -93,7 +93,7 @@ unset MPI_ARCH_PATH
 unset MPI_BUFFER_SIZE
 
 # Undefine OPAL_PREFIX if set to one of the paths on foamOldDirs
-if [ -z "$($foamClean "$OPAL_PREFIX" "$foamOldDirs")" ]
+if [ -z "$($foamClean -env=OPAL_PREFIX "$foamOldDirs")" ]
 then
     unset OPAL_PREFIX
 fi
@@ -110,7 +110,7 @@ unset PV_PLUGIN_PATH
 unset VTK_DIR
 
 #------------------------------------------------------------------------------
-# unset other ThirdParty environment variables
+# Unset other ThirdParty environment variables
 
 unset ADIOS_ARCH_PATH
 unset ADIOS1_ARCH_PATH
@@ -133,9 +133,9 @@ unset SCOTCH_ARCH_PATH
 
 if [ -n "$foamClean" ]
 then
-    cleaned=$($foamClean "$PATH" "$foamOldDirs") && PATH="$cleaned"
-    cleaned=$($foamClean "$LD_LIBRARY_PATH" "$foamOldDirs") && LD_LIBRARY_PATH="$cleaned"
-    cleaned=$($foamClean "$MANPATH" "$foamOldDirs") && MANPATH="$cleaned"
+    eval $($foamClean -sh-env=PATH "$foamOldDirs")
+    eval $($foamClean -sh-env=LD_LIBRARY_PATH "$foamOldDirs")
+    eval $($foamClean -sh-env=MANPATH "$foamOldDirs")
 fi
 
 [ -n "$LD_LIBRARY_PATH" ] || unset LD_LIBRARY_PATH

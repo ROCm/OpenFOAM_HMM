@@ -11,10 +11,10 @@
 #
 # File
 #     etc/config.csh/ADIOS
+#     - sourced by OpenFOAM-*/etc/cshrc
 #
 # Description
 #     Setup for ADIOS include/libraries (usually ThirdParty installation).
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc
 #
 #     To disable its use:               adios_version=adios-none
 #     For system-wide installations:    adios_version=adios-system
