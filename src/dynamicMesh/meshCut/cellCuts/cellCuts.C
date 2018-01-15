@@ -3236,7 +3236,10 @@ void Foam::cellCuts::writeOBJ(Ostream& os) const
 
     forAll(cellLoops_, celli)
     {
-        writeOBJ(os, loopPoints(celli), vertI);
+        if (cellLoops_[celli].size())
+        {
+            writeOBJ(os, loopPoints(celli), vertI);
+        }
     }
 }
 
