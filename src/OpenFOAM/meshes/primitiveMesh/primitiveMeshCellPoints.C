@@ -73,14 +73,9 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints
 
         set.clear();
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            const labelList& f = fcs[cFaces[i]];
-
-            forAll(f, fp)
-            {
-                set.insert(f[fp]);
-            }
+            set.insert(fcs[facei]);
         }
 
         storage.clear();
@@ -89,9 +84,9 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints
             storage.setCapacity(set.size());
         }
 
-        forAllConstIter(labelHashSet, set, iter)
+        for (const label pointi : set)
         {
-            storage.append(iter.key());
+            storage.append(pointi);
         }
 
         return storage;
@@ -104,7 +99,5 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints(const label celli) const
     return cellPoints(celli, labelSet_, labels_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

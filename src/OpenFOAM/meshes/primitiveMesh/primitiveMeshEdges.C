@@ -644,26 +644,20 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
 
         set.clear();
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            const labelList& fe = faceEdges(cFaces[i]);
-
-            forAll(fe, feI)
-            {
-                set.insert(fe[feI]);
-            }
+            set.insert(faceEdges(facei));
         }
 
         storage.clear();
-
         if (set.size() > storage.capacity())
         {
             storage.setCapacity(set.size());
         }
 
-        forAllConstIter(labelHashSet, set, iter)
+        for (const label edgei : set)
         {
-            storage.append(iter.key());
+            storage.append(edgei);
         }
 
         return storage;
