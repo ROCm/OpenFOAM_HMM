@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,6 +35,7 @@ See also
     These differ somewhat from \c Perl and \c sed regular expressions.
 
 SourceFiles
+    regExpI.H
     regExp.C
 
 \*---------------------------------------------------------------------------*/
@@ -50,8 +51,8 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class T> class List;
+// Forward declarations
+template<class String> class SubStrings;
 
 
 /*---------------------------------------------------------------------------*\
@@ -65,34 +66,22 @@ class regExp
         //- Precompiled regular expression
         regex_t* preg_;
 
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        regExp(const regExp&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const regExp&) = delete;
-
-        //- Return true if it matches and sets the sub-groups matched.
-        bool matchGrouping
-        (
-            const std::string& text,
-            List<std::string>& groups
-        ) const;
-
-
 public:
+
+    //- Type for matches
+    typedef SubStrings<std::string> results_type;
+
 
     // Static Member Functions
 
-        //- Is character a regular expression meta-character?
-        //  any character: '.' \n
-        //  quantifiers: '*', '+', '?' \n
-        //  grouping: '(', '|', ')' \n
-        //  range: '[', ']' \n
+        //- Test if character appears to be a regular expression meta-character
+        //  \return true if character is one of the following:
+        //  - any character: '.' \n
+        //  - quantifiers:  '*', '+', '?' \n
+        //  - grouping: '(', '|', ')' \n
+        //  - range: '[', ']' \n
         //
-        //  Don't bother checking for '{digit}' bounds
+        // \note The presence of '{', '}' regex bounds is not considered
         inline static bool meta(const char c);
 
 
@@ -100,6 +89,12 @@ public:
 
         //- Construct null
         inline regExp();
+
+        //- Copy construct - disallowed
+        regExp(const regExp&) = delete;
+
+        //- Move construct
+        inline regExp(regExp&& rgx);
 
         //- Construct from character array
         inline explicit regExp(const char* pattern);
@@ -113,9 +108,6 @@ public:
         //- Construct from string, optionally ignore case
         inline regExp(const std::string& pattern, bool ignoreCase);
 
-        //- Move construct
-        inline regExp(regExp&& rgx);
-
 
     //- Destructor
     inline ~regExp();
@@ -123,27 +115,18 @@ public:
 
     // Member functions
 
-      // Access
+    // Access
 
         //- Return true if a precompiled expression does not exist
         inline bool empty() const;
 
-        //- Does a precompiled expression exist?
+        //- Return true if a precompiled expression exists
         inline bool exists() const;
 
         //- The number of capture groups for a non-empty expression
         inline unsigned ngroups() const;
 
-
-      // Editing
-
-        //- Compile pattern into a regular expression, optionally ignore case.
-        //  \return True if the pattern was compiled
-        bool set(const char* pattern, bool ignoreCase=false);
-
-        //- Compile pattern into a regular expression, optionally ignore case
-        //  \return True if the pattern was compiled
-        bool set(const std::string& pattern, bool ignoreCase=false);
+    // Editing
 
         //- Clear expression.
         //  \return True if expression had existed prior to the clear.
@@ -152,8 +135,15 @@ public:
         //- Swap contents
         inline void swap(regExp& rgx);
 
+        //- Compile pattern into a regular expression, optionally ignore case.
+        //  \return True if the pattern was compiled
+        bool set(const char* pattern, bool ignoreCase=false);
 
-      // Matching/Searching
+        //- Compile pattern into a regular expression, optionally ignore case.
+        //  \return True if the pattern was compiled
+        bool set(const std::string& pattern, bool ignoreCase=false);
+
+    // Matching/Searching
 
         //- Find position within the text.
         //  \return The index where it begins or string::npos if not found
@@ -163,9 +153,10 @@ public:
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
         bool match(const std::string& text) const;
 
-        //- True if the regex matches the text, set the sub-groups matched.
+        //- True if the regex matches the text, set the matches.
+        //  The first group starts at index 1 (0 is the entire match).
         //  The begin-of-line (^) and end-of-line ($) anchors are implicit
-        bool match(const std::string& text, List<std::string>& groups) const;
+        bool match(const std::string& text, results_type& matches) const;
 
         //- Return true if the regex was found within the text
         inline bool search(const std::string& text) const;
@@ -176,16 +167,19 @@ public:
         //- Perform match on text
         inline bool operator()(const std::string& text) const;
 
-        //- Assign and compile pattern from a character array
-        //  Always case sensitive
-        inline void operator=(const char* pattern);
-
-        //- Assign and compile pattern from string
-        //  Always case sensitive
-        inline void operator=(const std::string& pattern);
+        //- Copy assignment - disallowed
+        void operator=(const regExp&) = delete;
 
         //- Move assignment
         inline void operator=(regExp&& rgx);
+
+        //- Assign and compile pattern from a character array.
+        //  Matching is case sensitive.
+        inline void operator=(const char* pattern);
+
+        //- Assign and compile pattern from string.
+        //  Matching is case sensitive.
+        inline void operator=(const std::string& pattern);
 
 };
 

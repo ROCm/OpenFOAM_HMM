@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,52 +30,108 @@ Description
 #include "IOobject.H"
 #include "IFstream.H"
 #include "regExp.H"
-#include "List.H"
-#include "Tuple2.H"
+#include "SubStrings.H"
+#include "Switch.H"
 
 using namespace Foam;
+
+
+//- Simple structure for holding regex tests
+struct regexTest
+{
+    bool expected;
+    string pattern;
+    string text;
+
+    friend Istream& operator>>(Istream& is, struct regexTest& obj)
+    {
+        is.readBegin("struct");
+        is >> obj.expected >> obj.pattern >> obj.text;
+        is.readEnd("struct");
+        is.check(FUNCTION_NAME);
+        return is;
+    }
+
+    friend Ostream& operator<<(Ostream& os, const struct regexTest& obj)
+    {
+        os  << "( "
+            << obj.expected << " " << obj.pattern << " " << obj.text
+            << " )";
+        return os;
+    }
+};
+
+// Needed for list output. Just treat everything as unequal.
+bool operator!=(const struct regexTest&, const struct regexTest&)
+{
+    return true;
+}
+
+// Simple output of match groups
+static Ostream& operator<<(Ostream& os, const regExp::results_type& sm)
+{
+    for (std::smatch::size_type i = 1; i < sm.size(); ++i)
+    {
+        os << " " << sm.str(i);
+    }
+
+    return os;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    List<Tuple2<string, string>> rawList(IFstream("testRegexps")());
+    List<regexTest> rawList(IFstream("testRegexps")());
     Info<< "Test expressions:" << rawList << endl;
     IOobject::writeDivider(Info) << endl;
 
-    List<std::string> groups;
+    regExp::results_type match;
+
+    // Expect some failures:
+    const bool throwingError = FatalError.throwExceptions();
 
     // Report matches:
-    forAll(rawList, elemI)
+    for (const auto& testseq : rawList)
     {
-        const string& pat = rawList[elemI].first();
-        const string& str = rawList[elemI].second();
-        regExp re(pat);
+        const bool expected = testseq.expected;
+        const string& pat = testseq.pattern;
+        const string& str = testseq.text;
 
-        Info<< str << " =~ m/" << pat.c_str() << "/ == ";
+        Info<< "Test " << Switch(expected) << ": "
+            << str << " =~ m/" << pat.c_str() << "/ == ";
 
-        if (re.match(str, groups))
+        regExp re;
+
+        try
         {
-            Info<< "true";
-            if (re.ngroups())
+            re = pat;
+
+            if (re.match(str, match))
             {
-                Info<< nl << "groups: " << groups;
+                Info<< "true";
+                if (re.ngroups())
+                {
+                    Info<< " (" << re.ngroups() << " groups):" << match;
+                }
             }
-        }
-        else
-        {
-            if (re.search(str))
+            else if (re.search(str))
             {
-                Info<< " partial match";
+                Info<< "partial match";
             }
             else
             {
                 Info<< "false";
             }
+            Info<< endl;
         }
-
-        Info<< endl;
+        catch (Foam::error& err)
+        {
+            Info<< "Caught FatalError " << err << nl << endl;
+            continue;
+        }
 
         if (false)
         {
@@ -96,68 +152,111 @@ int main(int argc, char *argv[])
     Info<< nl << "test regExp(const char*) ..." << endl;
     string me("Mark");
 
-    // Handling of null strings
-    if (regExp(nullptr).match(me))
+    try
     {
-        Info<< "fail - matched: " << me << endl;
+        // Handling of null strings
+        if (regExp(nullptr).match(me))
+        {
+            Info<< "fail - matched: " << me << endl;
+        }
+        else
+        {
+            Info<< "pass - null pointer is no expression" << endl;
+        }
     }
-    else
+    catch (Foam::error& err)
     {
-        Info<< "pass - null pointer is no expression" << endl;
-    }
-
-    // Normal match
-    if (regExp("[Mm]ar[ck]").match(me))
-    {
-        Info<< "pass - matched: " << me << endl;
-    }
-    else
-    {
-        Info<< "no match" << endl;
+        Info<< "Caught FatalError " << err << nl << endl;
     }
 
-    // Match ignore case
-    if (regExp("mar[ck]", true).match(me))
+    try
     {
-        Info<< "pass - matched: " << me << endl;
+        // Normal match
+        if (regExp("[Mm]ar[ck]").match(me))
+        {
+            Info<< "pass - matched: " << me << endl;
+        }
+        else
+        {
+            Info<< "no match" << endl;
+        }
     }
-    else
+    catch (Foam::error& err)
     {
-        Info<< "no match" << endl;
-    }
-
-    // Embedded prefix for match ignore case
-    if (regExp("(?i)mar[ck]").match(me))
-    {
-        Info<< "pass - matched: " << me << endl;
-    }
-    else
-    {
-        Info<< "no match" << endl;
+        Info<< "Caught FatalError " << err << nl << endl;
     }
 
-    // Handling of empty expression
-    if (regExp("").match(me))
+    try
     {
-        Info<< "fail - matched: " << me << endl;
+        // Match ignore case
+        if (regExp("mar[ck]", true).match(me))
+        {
+            Info<< "pass - matched: " << me << endl;
+        }
+        else
+        {
+            Info<< "no match" << endl;
+        }
     }
-    else
+    catch (Foam::error& err)
     {
-        Info<< "pass - no match on empty expression" << endl;
-    }
-
-    // Embedded prefix - but expression is empty
-    if (regExp("(?i)").match(me))
-    {
-        Info<< "fail - matched: " << me << endl;
-    }
-    else
-    {
-        Info<< "pass - no match on empty expression" << endl;
+        Info<< "Caught FatalError " << err << nl << endl;
     }
 
+    try
+    {
+        // Embedded prefix for match ignore case
+        if (regExp("(?i)mar[ck]").match(me))
+        {
+            Info<< "pass - matched: " << me << endl;
+        }
+        else
+        {
+            Info<< "no match" << endl;
+        }
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "Caught FatalError " << err << nl << endl;
+    }
 
-    Info<< endl;
+    try
+    {
+        // Handling of empty expression
+        if (regExp("").match(me))
+        {
+            Info<< "fail - matched: " << me << endl;
+        }
+        else
+        {
+            Info<< "pass - no match on empty expression" << endl;
+        }
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "Caught FatalError " << err << nl << endl;
+    }
+
+    try
+    {
+        // Embedded prefix - but expression is empty
+        if (regExp("(?i)").match(me))
+        {
+            Info<< "fail - matched: " << me << endl;
+        }
+        else
+        {
+            Info<< "pass - no match on empty expression" << endl;
+        }
+    }
+    catch (Foam::error& err)
+    {
+        Info<< "Caught FatalError " << err << nl << endl;
+    }
+
+    FatalError.throwExceptions(throwingError);
+
+    Info<< "\nDone" << nl << endl;
 
     return 0;
 }
