@@ -181,7 +181,7 @@ fi
 # or may contain ':' separators
 
 oldIFS="$IFS"       # Preserve initial IFS
-IFS=': '            # Split on colon, whitespace
+IFS=':; '           # Split on colon, whitespace (semi-colon for good measure)
 set -- $*
 
 if [ -n "$optVerbose" ]
@@ -203,7 +203,7 @@ do
 done
 printDebug "intermediate>$dirList<"
 
-IFS=': '            # Split on colon, whitespace (to avoid surprises)
+IFS=':; '           # Split on colon, whitespace (semi-colon for good measure)
 set -- $dirList
 
 IFS="$oldIFS"       # Restore initial IFS

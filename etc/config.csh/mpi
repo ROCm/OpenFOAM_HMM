@@ -56,7 +56,7 @@ case OPENMPI:
     # Respect MPI_ARCH_PATH if set to a valid directory (ie, from user adjustments)
     if (! $?MPI_ARCH_PATH ) setenv MPI_ARCH_PATH
     if (! -d "$MPI_ARCH_PATH" ) then
-        setenv mpiDir=$WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
+        setenv MPI_ARCH_PATH $WM_THIRD_PARTY_DIR/platforms/$WM_ARCH$WM_COMPILER/$FOAM_MPI
     endif
 
     # Inform openmpi where to find its install directory
