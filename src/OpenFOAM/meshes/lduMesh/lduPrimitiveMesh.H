@@ -73,6 +73,7 @@ class lduPrimitiveMesh
         //- Communicator to use for any parallel communication
         const label comm_;
 
+
     // Private Member Functions
 
         //- Get size of all meshes
@@ -91,6 +92,7 @@ public:
 
         // Declare name of the class and its debug switch
         ClassName("lduPrimitiveMesh");
+
 
     // Constructors
 
@@ -169,6 +171,12 @@ public:
     // Member Functions
 
         // Access
+
+            //- Return true if thisDb() is a valid DB
+            virtual bool hasDb() const
+            {
+                return false;
+            }
 
             //- Return ldu addressing
             virtual const lduAddressing& lduAddr() const

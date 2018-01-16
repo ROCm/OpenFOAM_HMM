@@ -74,6 +74,12 @@ public:
 
     // Member Functions
 
+        //- Return true if thisDb() is a valid DB - here = false
+        bool hasDb() const
+        {
+            return true;
+        }
+
         //- Return the object registry
         const objectRegistry& thisDb() const
         {

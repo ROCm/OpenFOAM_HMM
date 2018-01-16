@@ -96,6 +96,8 @@ Foam::solverPerformance Foam::PBiCGStab::solve
     scalarField rA(source - yA);
     scalar* __restrict__ rAPtr = rA.begin();
 
+    matrix().setResidualField(rA, fieldName_, true);
+
     // --- Calculate normalisation factor
     const scalar normFactor = this->normFactor(psi, source, yA, pA);
 
@@ -247,6 +249,8 @@ Foam::solverPerformance Foam::PBiCGStab::solve
          || solverPerf.nIterations() < minIter_
         );
     }
+
+    matrix().setResidualField(rA, fieldName_, false);
 
     return solverPerf;
 }

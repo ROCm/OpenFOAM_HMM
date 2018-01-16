@@ -79,6 +79,69 @@ void Foam::functionObjects::residuals::writeFileHeader(Ostream& os)
 }
 
 
+void Foam::functionObjects::residuals::createField(const word& fieldName)
+{
+    if (!writeFields_)
+    {
+        return;
+    }
+
+    const word residualName("initialResidual:" + fieldName);
+
+    if (!mesh_.foundObject<IOField<scalar>>(residualName))
+    {
+        IOField<scalar>* fieldPtr =
+            new IOField<scalar>
+            (
+                IOobject
+                (
+                    residualName,
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                Field<scalar>(mesh_.nCells(), scalar(0))
+            );
+
+        fieldPtr->store();
+    }
+}
+
+
+void Foam::functionObjects::residuals::writeField(const word& fieldName) const
+{
+    const word residualName("initialResidual:" + fieldName);
+
+    const IOField<scalar>* residualPtr =
+        mesh_.lookupObjectPtr<IOField<scalar>>(residualName);
+
+    if (residualPtr)
+    {
+        volScalarField residual
+        (
+            IOobject
+            (
+                residualName,
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("0", dimless, 0),
+            zeroGradientFvPatchField<scalar>::typeName
+        );
+
+        residual.primitiveFieldRef() = *residualPtr;
+        residual.correctBoundaryConditions();
+
+        residual.write();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::functionObjects::residuals::residuals
@@ -90,7 +153,9 @@ Foam::functionObjects::residuals::residuals
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    fieldSet_(mesh_)
+    fieldSet_(mesh_),
+    writeFields_(false),
+    initialised_(false)
 {
     read(dict);
 }
@@ -109,6 +174,9 @@ bool Foam::functionObjects::residuals::read(const dictionary& dict)
     if (fvMeshFunctionObject::read(dict))
     {
         fieldSet_.read(dict);
+
+        writeFields_ = dict.lookupOrDefault("writeFields", false);
+
         return true;
     }
 
@@ -118,29 +186,45 @@ bool Foam::functionObjects::residuals::read(const dictionary& dict)
 
 bool Foam::functionObjects::residuals::execute()
 {
+    // Note: delaying initialisation until after first iteration so that
+    // we can find wildcard fields
+    if (!initialised_)
+    {
+        writeFileHeader(file());
+
+        if (writeFields_)
+        {
+            for (const word& fieldName : fieldSet_.selection())
+            {
+                initialiseField<scalar>(fieldName);
+                initialiseField<vector>(fieldName);
+                initialiseField<sphericalTensor>(fieldName);
+                initialiseField<symmTensor>(fieldName);
+                initialiseField<tensor>(fieldName);
+            }
+        }
+
+        initialised_ = true;
+    }
+
     return true;
 }
 
 
 bool Foam::functionObjects::residuals::write()
 {
-    if (Pstream::master())
+    writeTime(file());
+
+    for (const word& fieldName : fieldSet_.selection())
     {
-        writeFileHeader(file());
-
-        writeTime(file());
-
-        for (const word& fieldName : fieldSet_.selection())
-        {
-            writeResidual<scalar>(fieldName);
-            writeResidual<vector>(fieldName);
-            writeResidual<sphericalTensor>(fieldName);
-            writeResidual<symmTensor>(fieldName);
-            writeResidual<tensor>(fieldName);
-        }
-
-        file() << endl;
+        writeResidual<scalar>(fieldName);
+        writeResidual<vector>(fieldName);
+        writeResidual<sphericalTensor>(fieldName);
+        writeResidual<symmTensor>(fieldName);
+        writeResidual<tensor>(fieldName);
     }
+
+    file() << endl;
 
     return true;
 }

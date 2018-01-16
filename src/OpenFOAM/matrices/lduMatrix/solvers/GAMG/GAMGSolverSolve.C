@@ -59,6 +59,8 @@ Foam::solverPerformance Foam::GAMGSolver::solve
     // Calculate initial finest-grid residual field
     scalarField finestResidual(source - Apsi);
 
+    matrix().setResidualField(finestResidual, fieldName_, true);
+
     // Calculate normalised residual for convergence test
     solverPerf.initialResidual() = gSumMag
     (
@@ -142,6 +144,8 @@ Foam::solverPerformance Foam::GAMGSolver::solve
          || solverPerf.nIterations() < minIter_
         );
     }
+
+    matrix().setResidualField(finestResidual, fieldName_, false);
 
     return solverPerf;
 }

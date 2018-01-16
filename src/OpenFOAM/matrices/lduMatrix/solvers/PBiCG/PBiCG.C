@@ -93,6 +93,8 @@ Foam::solverPerformance Foam::PBiCG::solve
     scalarField rA(source - wA);
     scalar* __restrict__ rAPtr = rA.begin();
 
+    matrix().setResidualField(rA, fieldName_, true);
+
     // --- Calculate normalisation factor
     const scalar normFactor = this->normFactor(psi, source, wA, pA);
 
@@ -217,6 +219,8 @@ Foam::solverPerformance Foam::PBiCG::solve
             << "    Please try the more robust PBiCGStab solver."
             << exit(FatalError);
     }
+
+    matrix().setResidualField(rA, fieldName_, false);
 
     return solverPerf;
 }

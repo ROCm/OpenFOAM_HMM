@@ -124,6 +124,7 @@ public:
 
             profilingTrigger profiling_;
 
+
         // Protected Member Functions
 
             //- Read the control parameters from the controlDict_
@@ -258,7 +259,7 @@ public:
             ) const = 0;
 
             //- Return the matrix norm used to normalise the residual for the
-            //  stopping criterion
+            //- stopping criterion
             scalar normFactor
             (
                 const scalarField& psi,
@@ -485,7 +486,7 @@ public:
         // Member functions
 
             //- Read and reset the preconditioner parameters
-            //  from the given stream
+            //- from the given stream
             virtual void read(const dictionary&)
             {}
 
@@ -498,7 +499,7 @@ public:
             ) const = 0;
 
             //- Return wT the transpose-matrix preconditioned form of
-            //  residual rT.
+            //- residual rT.
             //  This is only required for preconditioning asymmetric matrices.
             virtual void preconditionT
             (
@@ -531,7 +532,7 @@ public:
         lduMatrix(lduMatrix&, bool reuse);
 
         //- Construct given an LDU addressed mesh and an Istream
-        //  from which the coefficients are read
+        //- from which the coefficients are read
         lduMatrix(const lduMesh&, Istream&);
 
 
@@ -669,7 +670,7 @@ public:
 
 
             //- Initialise the update of interfaced interfaces
-            //  for matrix operations
+            //- for matrix operations
             void initMatrixInterfaces
             (
                 const bool add,
@@ -691,6 +692,14 @@ public:
                 const direction cmpt
             ) const;
 
+            //- Set the residual field using an IOField on the object registry
+            //- if it exists
+            void setResidualField
+            (
+                const Field<scalar>& residual,
+                const word& fieldName,
+                const bool initial
+            ) const;
 
             template<class Type>
             tmp<Field<Type>> H(const Field<Type>&) const;

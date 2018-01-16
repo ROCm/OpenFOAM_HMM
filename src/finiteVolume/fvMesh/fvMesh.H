@@ -239,6 +239,12 @@ public:
                 return polyMesh::time();
             }
 
+            //- Return true if thisDb() is a valid DB
+            virtual bool hasDb() const
+            {
+                return true;
+            }
+
             //- Return the object registry - resolve conflict polyMesh/lduMesh
             virtual const objectRegistry& thisDb() const
             {

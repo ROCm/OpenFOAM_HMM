@@ -77,6 +77,9 @@ public:
 
         // Access
 
+            //- Return true if thisDb() is a valid DB
+            virtual bool hasDb() const = 0;
+
             //- Return the object registry
             virtual const objectRegistry& thisDb() const;
 

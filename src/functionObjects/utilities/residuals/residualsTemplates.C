@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "residuals.H"
 #include "volFields.H"
 #include "ListOps.H"
+#include "zeroGradientFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,11 +62,42 @@ void Foam::functionObjects::residuals::writeFileHeader
 
 
 template<class Type>
+void Foam::functionObjects::residuals::initialiseField(const word& fieldName)
+{
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
+
+    if (foundObject<volFieldType>(fieldName))
+    {
+        const Foam::dictionary& solverDict = mesh_.solverPerformanceDict();
+
+        if (solverDict.found(fieldName))
+        {
+            typename pTraits<Type>::labelType validComponents
+            (
+                mesh_.validComponents<Type>()
+            );
+
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
+            {
+                if (component(validComponents, cmpt) != -1)
+                {
+                    const word resultName =
+                        fieldName + word(pTraits<Type>::componentNames[cmpt]);
+
+                    createField(resultName);
+                }
+            }
+        }
+    }
+}
+
+
+template<class Type>
 void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
 {
-    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+    typedef GeometricField<Type, fvPatchField, volMesh> volFieldType;
 
-    if (foundObject<fieldType>(fieldName))
+    if (foundObject<volFieldType>(fieldName))
     {
         const Foam::dictionary& solverDict = mesh_.solverPerformanceDict();
 
@@ -83,7 +115,7 @@ void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
                 mesh_.validComponents<Type>()
             );
 
-            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; cmpt++)
+            for (direction cmpt=0; cmpt<pTraits<Type>::nComponents; ++cmpt)
             {
                 if (component(validComponents, cmpt) != -1)
                 {
@@ -94,6 +126,8 @@ void Foam::functionObjects::residuals::writeResidual(const word& fieldName)
                     const word resultName =
                         fieldName + word(pTraits<Type>::componentNames[cmpt]);
                     setResult(resultName, r);
+
+                    writeField(resultName);
                 }
             }
         }

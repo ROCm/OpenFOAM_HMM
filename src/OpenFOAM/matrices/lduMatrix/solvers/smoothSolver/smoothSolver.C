@@ -113,6 +113,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
     else
     {
         scalar normFactor = 0;
+        scalarField residual;
 
         {
             scalarField Apsi(psi.size());
@@ -124,12 +125,13 @@ Foam::solverPerformance Foam::smoothSolver::solve
             // Calculate normalisation factor
             normFactor = this->normFactor(psi, source, Apsi, temp);
 
+            residual = source - Apsi;
+
+            matrix().setResidualField(residual, fieldName_, true);
+
             // Calculate residual magnitude
-            solverPerf.initialResidual() = gSumMag
-            (
-                (source - Apsi)(),
-                matrix().mesh().comm()
-            )/normFactor;
+            solverPerf.initialResidual() =
+                gSumMag(residual, matrix().mesh().comm())/normFactor;
             solverPerf.finalResidual() = solverPerf.initialResidual();
         }
 
@@ -170,9 +172,7 @@ Foam::solverPerformance Foam::smoothSolver::solve
                     nSweeps_
                 );
 
-                // Calculate the residual to check convergence
-                solverPerf.finalResidual() = gSumMag
-                (
+                residual =
                     matrix_.residual
                     (
                         psi,
@@ -180,9 +180,11 @@ Foam::solverPerformance Foam::smoothSolver::solve
                         interfaceBouCoeffs_,
                         interfaces_,
                         cmpt
-                    )(),
-                    matrix().mesh().comm()
-                )/normFactor;
+                    );
+
+                // Calculate the residual to check convergence
+                solverPerf.finalResidual() =
+                    gSumMag(residual, matrix().mesh().comm())/normFactor;
             } while
             (
                 (
@@ -192,6 +194,8 @@ Foam::solverPerformance Foam::smoothSolver::solve
              || solverPerf.nIterations() < minIter_
             );
         }
+
+        matrix().setResidualField(residual, fieldName_, false);
     }
 
     return solverPerf;
