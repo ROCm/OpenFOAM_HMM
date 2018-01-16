@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
 
     #include "createTime.H"
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     #include "readConversionProperties.H"
 

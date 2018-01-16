@@ -154,7 +154,7 @@ int main(int argc, char *argv[])
 
 
     // Read the mesh
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     // Read the tetDualMesh
     Info<< "Create tetDualMesh for time = "

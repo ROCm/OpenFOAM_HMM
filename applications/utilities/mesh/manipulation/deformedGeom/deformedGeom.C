@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     const scalar scaleFactor = args.read<scalar>(1);
 
     #include "createTime.H"
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     volPointInterpolation pInterp(mesh);
 

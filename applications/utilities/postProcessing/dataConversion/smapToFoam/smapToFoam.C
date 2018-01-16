@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     if (fieldNameDict.found("epsilon")) nameMap.add("ED", word("epsilon"));
     if (fieldNameDict.found("nuEff")) nameMap.add("VIS", word("nuEff"));
 
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     IFstream smapFile(args[1]);
 

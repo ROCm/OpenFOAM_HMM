@@ -380,7 +380,7 @@ int main(int argc, char *argv[])
             sourceCaseDir
         );
 
-        #include "createMesh.H"
+        #include "createNamedMesh.H"
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

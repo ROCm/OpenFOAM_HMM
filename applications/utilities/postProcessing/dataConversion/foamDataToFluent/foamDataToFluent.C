@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     // make a directory called proInterface in the case
     mkDir(runTime.rootPath()/runTime.caseName()/"fluentInterface");

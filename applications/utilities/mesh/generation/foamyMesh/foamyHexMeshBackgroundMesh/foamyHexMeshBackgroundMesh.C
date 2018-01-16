@@ -514,7 +514,7 @@ int main(int argc, char *argv[])
     // Distribute the initial mesh
     if (Pstream::parRun())
     {
-        #include "createMesh.H"
+        #include "createNamedMesh.H"
         Info<< "Loaded mesh:" << endl;
         printMeshData(mesh);
 

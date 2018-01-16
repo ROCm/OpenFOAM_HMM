@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     forAll(timeDirs, timeI)
     {

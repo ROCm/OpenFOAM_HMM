@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
     else
     {
         // convert fields with or without converting mesh
-        #include "createMesh.H"
+        #include "createNamedMesh.H"
 
         // #include "checkHasMovingMesh.H"
         // #include "checkHasLagrangian.H"

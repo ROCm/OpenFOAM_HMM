@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     runTime.functionObjects().off();
     instantList timeDirs = timeSelector::selectIfPresent(runTime, args);
 
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
 
     const word oldInstance = mesh.pointsInstance();
 
