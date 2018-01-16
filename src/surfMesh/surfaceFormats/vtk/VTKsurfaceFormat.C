@@ -241,7 +241,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
 
         this->sortFacesAndStore(dynFaces.xfer(), zones.xfer(), sorted);
 
-        // Add zones, retaining any empty ones
+        // Add zones (retaining empty ones)
         this->addZones(zoneSizes, zoneNames);
     }
     this->addZonesToFaces(); // for labelledTri

@@ -58,18 +58,11 @@ class OBJedgeFormat
 {
     // Private Member Functions
 
-        void readVertices
-        (
-            const string& line,
-            string::size_type& endNum,
-            DynamicList<label>& dynVertices
-        );
-
         //- Disallow default bitwise copy construct
-        OBJedgeFormat(const OBJedgeFormat&);
+        OBJedgeFormat(const OBJedgeFormat&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const OBJedgeFormat&);
+        void operator=(const OBJedgeFormat&) = delete;
 
 
 public:
@@ -93,8 +86,7 @@ public:
 
 
     //- Destructor
-    virtual ~OBJedgeFormat()
-    {}
+    virtual ~OBJedgeFormat() = default;
 
 
     // Member Functions

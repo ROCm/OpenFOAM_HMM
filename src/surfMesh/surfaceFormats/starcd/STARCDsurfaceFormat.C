@@ -84,7 +84,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     fileName baseName = filename.lessExt();
 
-    // read cellTable names (if possible)
+    // Read cellTable names (if possible)
     Map<word> cellTableLookup = readInpCellTable
     (
         IFstream(starFileName(baseName, STARCDCore::INP_FILE))()
@@ -111,7 +111,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     pointId.clear();
 
 
-    // read .cel file
+    // Read .cel file
     // ~~~~~~~~~~~~~~
     IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
     if (!is.good())
@@ -131,7 +131,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     // assume the cellTableIds are not intermixed
     bool sorted = true;
-    label zoneI = 0;
+    label zoneId = 0;
 
     label lineLabel, shapeId, nLabels, cellTableId, typeId;
     DynamicList<label> vertexLabels(64);
@@ -159,27 +159,27 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
         if (typeId == starcdShellType)
         {
-            // Convert groupID into zoneID
-            const auto fnd = lookup.cfind(cellTableId);
-            if (fnd.found())
+            // Convert cellTableId to zoneId
+            const auto iterGroup = lookup.cfind(cellTableId);
+            if (iterGroup.found())
             {
-                if (zoneI != fnd())
+                if (zoneId != *iterGroup)
                 {
                     // cellTableIds are intermixed
                     sorted = false;
                 }
-                zoneI = fnd();
+                zoneId = *iterGroup;
             }
             else
             {
-                zoneI = dynSizes.size();
-                lookup.insert(cellTableId, zoneI);
+                zoneId = dynSizes.size();
+                lookup.insert(cellTableId, zoneId);
 
-                const auto tableNameIter = cellTableLookup.cfind(cellTableId);
+                const auto iterTableName = cellTableLookup.cfind(cellTableId);
 
-                if (tableNameIter.found())
+                if (iterTableName.found())
                 {
-                    dynNames.append(tableNameIter());
+                    dynNames.append(*iterTableName);
                 }
                 else
                 {
@@ -206,15 +206,15 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                 {
                     // a triangular 'face', convert to 'triFace' etc
                     dynFaces.append(Face(tri));
-                    dynZones.append(zoneI);
-                    dynSizes[zoneI]++;
+                    dynZones.append(zoneId);
+                    dynSizes[zoneId]++;
                 }
             }
-            else
+            else if (nLabels >= 3)
             {
                 dynFaces.append(Face(vertices));
-                dynZones.append(zoneI);
-                dynSizes[zoneI]++;
+                dynZones.append(zoneId);
+                dynSizes[zoneId]++;
             }
         }
     }
@@ -262,9 +262,9 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeHeader(os, STARCDCore::HEADER_CEL);
 
     label faceIndex = 0;
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        const surfZone& zone = zones[zoneI];
+        const surfZone& zone = zones[zonei];
         const label nLocalFaces = zone.size();
 
         if (useFaceMap)
@@ -272,7 +272,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
             for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, f, faceIndex, zoneI + 1);
+                writeShell(os, f, faceIndex, zonei + 1);
             }
         }
         else
@@ -280,7 +280,7 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
             for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
-                writeShell(os, f, faceIndex, zoneI + 1);
+                writeShell(os, f, faceIndex, zonei + 1);
             }
         }
     }

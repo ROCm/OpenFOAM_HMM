@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,8 +27,55 @@ License
 #include "clock.H"
 #include "Fstream.H"
 #include "Ostream.H"
-#include "StringStream.H"
-#include "ListOps.H"
+#include "stringOps.H"
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// Token list with one of the following:
+//     f v1 v2 v3 ...
+//     f v1/vt1 v2/vt2 v3/vt3 ...
+//     l v1 v2 v3 ...
+//     l v1/vt1 v2/vt2 v3/vt3 ...
+static label readObjVertices
+(
+    const SubStrings<string>& tokens,
+    DynamicList<label>& verts
+)
+{
+    verts.clear();
+
+    bool first = true;
+    for (const auto& tok : tokens)
+    {
+        if (first)
+        {
+            // skip initial "f" or "l"
+            first = false;
+            continue;
+        }
+
+        const string vrtSpec(tok);
+        const auto slash = vrtSpec.find('/');
+
+        const label vertId =
+        (
+            slash != string::npos
+          ? readLabel(vrtSpec.substr(0, slash))
+          : readLabel(vrtSpec)
+        );
+
+        verts.append(vertId - 1);
+    }
+
+    return verts.size();
+}
+
+} // End namespace Foam
+
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -43,56 +90,6 @@ Foam::fileFormats::OBJedgeFormat::OBJedgeFormat
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::fileFormats::OBJedgeFormat::readVertices
-(
-    const string& line,
-    string::size_type& endNum,
-    DynamicList<label>& dynVertices
-)
-{
-    dynVertices.clear();
-    while (true)
-    {
-        string::size_type startNum =
-            line.find_first_not_of(' ', endNum);
-
-        if (startNum == string::npos)
-        {
-            break;
-        }
-
-        endNum = line.find(' ', startNum);
-
-        string vertexSpec;
-        if (endNum != string::npos)
-        {
-            vertexSpec = line.substr(startNum, endNum-startNum);
-        }
-        else
-        {
-            vertexSpec = line.substr(startNum, line.size() - startNum);
-        }
-
-        string::size_type slashPos = vertexSpec.find('/');
-
-        label vertI = 0;
-        if (slashPos != string::npos)
-        {
-            IStringStream intStream(vertexSpec.substr(0, slashPos));
-
-            intStream >> vertI;
-        }
-        else
-        {
-            IStringStream intStream(vertexSpec);
-
-            intStream >> vertI;
-        }
-        dynVertices.append(vertI - 1);
-    }
-}
-
-
 bool Foam::fileFormats::OBJedgeFormat::read(const fileName& filename)
 {
     clear();
@@ -106,97 +103,97 @@ bool Foam::fileFormats::OBJedgeFormat::read(const fileName& filename)
     }
 
     DynamicList<point> dynPoints;
-    DynamicList<edge> dynEdges;
+    DynamicList<label> dynVerts;
+    DynamicList<edge>  dynEdges;
     DynamicList<label> dynUsedPoints;
-
-    DynamicList<label> dynVertices;
 
     while (is.good())
     {
         string line = this->getLineNoComment(is);
 
-        // Handle continuations
-        if (line.removeEnd("\\"))
+        // Line continuations
+        while (line.removeEnd("\\"))
         {
             line += this->getLineNoComment(is);
         }
 
-        // Read first word
-        IStringStream lineStream(line);
-        word cmd;
-        lineStream >> cmd;
+        const SubStrings<string> tokens = stringOps::splitSpace(line);
+
+        // Require command and some arguments
+        if (tokens.size() < 2)
+        {
+            continue;
+        }
+
+        const word cmd = word::validate(tokens[0]);
 
         if (cmd == "v")
         {
-            scalar x, y, z;
-            lineStream >> x >> y >> z;
+            // Vertex
+            // v x y z
 
-            dynPoints.append(point(x, y, z));
+            dynPoints.append
+            (
+                point
+                (
+                    readScalar(tokens[1]),
+                    readScalar(tokens[2]),
+                    readScalar(tokens[3])
+                )
+            );
+
             dynUsedPoints.append(-1);
         }
         else if (cmd == "l")
         {
-            // Assume 'l' is followed by space.
-            string::size_type endNum = 1;
+            // Line
+            // l v1 v2 v3 ...
+            // OR
+            // l v1/vt1 v2/vt2 v3/vt3 ...
 
-            readVertices
-            (
-                line,
-                endNum,
-                dynVertices
-            );
+            readObjVertices(tokens, dynVerts);
 
-
-            for (label i = 1; i < dynVertices.size(); i++)
+            for (label i = 1; i < dynVerts.size(); i++)
             {
-                edge edgeRead(dynVertices[i-1], dynVertices[i]);
+                const edge e(dynVerts[i-1], dynVerts[i]);
+                dynEdges.append(e);
 
-                dynUsedPoints[edgeRead[0]] = edgeRead[0];
-                dynUsedPoints[edgeRead[1]] = edgeRead[1];
-
-                dynEdges.append(edgeRead);
+                dynUsedPoints[e[0]] = e[0];
+                dynUsedPoints[e[1]] = e[1];
             }
         }
         else if (cmd == "f")
         {
-            // Support for faces with 2 vertices
+            // Face - support for faces with 2 vertices
 
-            // Assume 'f' is followed by space.
-            string::size_type endNum = 1;
+            // f v1 v2 v3 ...
+            // OR
+            // f v1/vt1 v2/vt2 v3/vt3 ...
 
-            readVertices
-            (
-                line,
-                endNum,
-                dynVertices
-            );
-
-            if (dynVertices.size() == 2)
+            if (readObjVertices(tokens, dynVerts) == 2)
             {
-                for (label i = 1; i < dynVertices.size(); i++)
+                for (label i = 1; i < dynVerts.size(); i++)
                 {
-                    edge edgeRead(dynVertices[i-1], dynVertices[i]);
+                    const edge e(dynVerts[i-1], dynVerts[i]);
+                    dynEdges.append(e);
 
-                    dynUsedPoints[edgeRead[0]] = edgeRead[0];
-                    dynUsedPoints[edgeRead[1]] = edgeRead[1];
-
-                    dynEdges.append(edgeRead);
+                    dynUsedPoints[e[0]] = e[0];
+                    dynUsedPoints[e[1]] = e[1];
                 }
             }
         }
     }
 
-    // cull unused points
+    // Cull unused points
     label nUsed = 0;
-
     forAll(dynPoints, pointi)
     {
         if (dynUsedPoints[pointi] >= 0)
         {
             if (nUsed != pointi)
             {
-                dynPoints[nUsed] = dynPoints[pointi];
-                dynUsedPoints[pointi] = nUsed;   // new position
+                dynPoints[nUsed] = std::move(dynPoints[pointi]);
+                dynUsedPoints[pointi] = nUsed;   // The new list location
             }
             ++nUsed;
         }
@@ -204,16 +201,14 @@ bool Foam::fileFormats::OBJedgeFormat::read(const fileName& filename)
 
     dynPoints.setSize(nUsed);
 
-    // transfer to normal lists
+    // Transfer to normal lists
     storedPoints().transfer(dynPoints);
 
-    // renumber edge vertices
+    // Renumber edge vertices
     if (nUsed != dynUsedPoints.size())
     {
-        forAll(dynEdges, edgeI)
+        for (edge& e : dynEdges)
         {
-            edge& e = dynEdges[edgeI];
-
             e[0] = dynUsedPoints[e[0]];
             e[1] = dynUsedPoints[e[1]];
         }
@@ -252,10 +247,8 @@ void Foam::fileFormats::OBJedgeFormat::write
         << "# <points count=\"" << pointLst.size() << "\">" << nl;
 
     // Write vertex coords
-    forAll(pointLst, ptI)
+    for (const point& p : pointLst)
     {
-        const point& p = pointLst[ptI];
-
         os  << "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
     }
 
@@ -264,10 +257,8 @@ void Foam::fileFormats::OBJedgeFormat::write
         << "# <edges count=\"" << edgeLst.size() << "\">" << endl;
 
     // Write line connectivity
-    forAll(edgeLst, edgeI)
+    for (const edge& e : edgeLst)
     {
-        const edge& e = edgeLst[edgeI];
-
         os << "l " << (e[0] + 1) << " " << (e[1] + 1) << nl;
     }
     os << "# </edges>" << endl;
