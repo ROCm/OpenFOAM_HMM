@@ -26,18 +26,21 @@ setDecompressionTankFine()
 # Do decompressionTank
 ( cd decompressionTank && foamRunTutorials )
 
-# Clone case
-cloneCase decompressionTank decompressionTankFine
+if ! isTest $@
+then
+    # Clone case
+    cloneCase decompressionTank decompressionTankFine
 
-(
-    cd decompressionTankFine || exit
+    (
+        cd decompressionTankFine || exit
 
-    # Modify case
-    setDecompressionTankFine
+        # Modify case
+        setDecompressionTankFine
 
-    # And execute
-    runApplication blockMesh
-    runApplication $(getApplication)
-)
+        # And execute
+        runApplication blockMesh
+        runApplication $(getApplication)
+    )
+fi
 
 #------------------------------------------------------------------------------

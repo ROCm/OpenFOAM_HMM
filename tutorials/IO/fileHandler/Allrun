@@ -2,6 +2,17 @@
 cd ${0%/*} || exit 1                        # Run from this directory
 . $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
+if isTest $@
+then
+    # Reset the controlDict
+    if [ -f system/controlDict.orig ]
+    then
+        echo "$0: restoring the controlDict from controlDict.orig"
+        mv system/controlDict.orig system/controlDict
+    fi
+fi
+
+
 runApplication blockMesh
 
 application=$(getApplication)

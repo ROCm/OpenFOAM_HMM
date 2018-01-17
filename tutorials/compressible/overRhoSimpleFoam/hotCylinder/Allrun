@@ -5,4 +5,4 @@
 (cd cylinderMesh && ./Allrun.pre)
 
 # Add background mesh
-(cd cylinderAndBackground && ./Allrun)
+(cd cylinderAndBackground && ./Allrun $*)

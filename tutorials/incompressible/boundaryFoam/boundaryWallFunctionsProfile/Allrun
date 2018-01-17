@@ -32,37 +32,39 @@ do
     rm -rf logs
 done
 
+if ! isTest $@
+then
+    # create validation plot
+    # Test if gnuplot exists on the system
+    command -v gnuplot >/dev/null 2>&1 || {
+        echo "gnuplot not found - skipping graph creation" 1>&2
+        exit 1
+    }
 
-# create validation plot
-# Test if gnuplot exists on the system
-command -v gnuplot >/dev/null 2>&1 || {
-    echo "gnuplot not found - skipping graph creation" 1>&2
-    exit 1
-}
+    graphName="OF_vs_ANALYTICAL.eps"
 
-graphName="OF_vs_ANALYTICAL.eps"
-
-echo "Creating graph of u+ vs y+ to $graphName"
-gnuplot<<EOF
-    set terminal postscript eps color enhanced
-    set output "$graphName"
-    set grid
-    set xlabel "y+"
-    set ylabel "u+"
-    set key top left
-    set size 0.75, 0.75
-    set parametric
-    # u+ range
-    set trange [0:35]
-    # Spaldings law
-    k=0.41
-    E=9.8
-    f(t) = t + 1/E*(exp(k*t) - 1 - k*t*(1 + 0.5*k*t) - 1/6*k*t**3)
-    set logscale x
-    set format x "10^{%T}"
-    plot f(t),t title "Spalding" with lines linetype -1, \
-        "yPlus_vs_uPlus" title "OpenFOAM" with points lt 1 pt 6
+    echo "Creating graph of u+ vs y+ to $graphName"
+    gnuplot<<EOF
+        set terminal postscript eps color enhanced
+        set output "$graphName"
+        set grid
+        set xlabel "y+"
+        set ylabel "u+"
+        set key top left
+        set size 0.75, 0.75
+        set parametric
+        # u+ range
+        set trange [0:35]
+        # Spaldings law
+        k=0.41
+        E=9.8
+        f(t) = t + 1/E*(exp(k*t) - 1 - k*t*(1 + 0.5*k*t) - 1/6*k*t**3)
+        set logscale x
+        set format x "10^{%T}"
+        plot f(t),t title "Spalding" with lines linetype -1, \
+            "yPlus_vs_uPlus" title "OpenFOAM" with points lt 1 pt 6
 EOF
+fi
 
 echo Done
 

@@ -4,55 +4,56 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 setControlDict()
 {
-    sed \
-    -e "s/\(deltaT[ \t]*\) 5e-06;/\1 1e-05;/g" \
-    -e "s/\(endTime[ \t]*\) 0.005;/\1 0.015;/g" \
-    -e "s/\(writeInterval[ \t]*\) 10;/\1 50;/g" \
-    -i system/controlDict
+    foamDictionary -entry "deltaT" -set "1e-05" system/controlDict
+    foamDictionary -entry "endTime" -set "0.015" system/controlDict
+    foamDictionary -entry "writeInterval" -set "50" system/controlDict
 }
 
 setCombustionProperties()
 {
-    sed \
-    -e "s/\(laminarFlameSpeedCorrelation[ \t]*\) Gulders;/\1 RaviPetersen;/g" \
-    -e "s/\(fuel[ \t]*\) Propane;/\1 HydrogenInAir;/g" \
-    -i constant/combustionProperties
+    foamDictionary -entry "laminarFlameSpeedCorrelation" \
+        -set "RaviPetersen" constant/combustionProperties
+    foamDictionary -entry "fuel" \
+        -set "HydrogenInAir" constant/combustionProperties
 }
 
 # Do moriyoshiHomogeneous
 ( cd moriyoshiHomogeneous && foamRunTutorials )
 
-# Clone case for second phase
-cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2
+if ! isTest $@
+then
+    # Clone case for second phase
+    cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2
 
-# Modify and execute
-(
-    cd moriyoshiHomogeneousPart2 || exit
+    # Modify and execute
+    (
+        cd moriyoshiHomogeneousPart2 || exit
 
-    # The following 2 command lines are a generic implementation of the
-    # following command:
-    #     cp -r ../moriyoshiHomogeneous/0.005 .
+        # The following 2 command lines are a generic implementation of the
+        # following command:
+        #     cp -r ../moriyoshiHomogeneous/0.005 .
 
-    lastTimeStep=$(foamListTimes -case ../moriyoshiHomogeneous -latestTime)
-    cp -r ../moriyoshiHomogeneous/$lastTimeStep .
+        lastTimeStep=$(foamListTimes -case ../moriyoshiHomogeneous -latestTime)
+        cp -r ../moriyoshiHomogeneous/$lastTimeStep .
 
-    setControlDict
-    runApplication $(getApplication)
-)
+        setControlDict
+        runApplication $(getApplication)
+    )
 
-# Clone case for hydrogen
-cloneCase moriyoshiHomogeneous moriyoshiHomogeneousHydrogen
+    # Clone case for hydrogen
+    cloneCase moriyoshiHomogeneous moriyoshiHomogeneousHydrogen
 
-# Modify and execute
-(
-    cd moriyoshiHomogeneousHydrogen || exit
+    # Modify and execute
+    (
+        cd moriyoshiHomogeneousHydrogen || exit
 
-    setCombustionProperties
-    mv constant/thermophysicalProperties \
-       constant/thermophysicalProperties.propane
-    mv constant/thermophysicalProperties.hydrogen \
-       constant/thermophysicalProperties
-    runApplication $(getApplication)
-)
+        setCombustionProperties
+        mv constant/thermophysicalProperties \
+           constant/thermophysicalProperties.propane
+        mv constant/thermophysicalProperties.hydrogen \
+           constant/thermophysicalProperties
+        runApplication $(getApplication)
+    )
+fi
 
 #------------------------------------------------------------------------------
