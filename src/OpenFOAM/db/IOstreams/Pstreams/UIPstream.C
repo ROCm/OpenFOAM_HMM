@@ -106,17 +106,16 @@ inline Foam::Istream& Foam::UIPstream::readStringFromBuffer(std::string& str)
     size_t len;
     readFromBuffer(len);
 
-    if (len == 0)
+    if (len)
     {
-        str.clear();
+        str.assign(&externalBuf_[externalBufPosition_], len);
+        externalBufPosition_ += len;
+        checkEof();
     }
     else
     {
-        str.assign(&externalBuf_[externalBufPosition_], len);
+        str.clear();
     }
-
-    externalBufPosition_ += len;
-    checkEof();
 
     return *this;
 }
