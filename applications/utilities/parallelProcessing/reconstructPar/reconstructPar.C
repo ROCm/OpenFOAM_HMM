@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -728,7 +728,7 @@ int main(int argc, char *argv[])
             )
             {
                 Info << "Reconstructing FA fields" << nl << endl;
-                
+
                 faMesh aMesh(mesh);
 
                 processorFaMeshes procFaMeshes(procMeshes.meshes());
@@ -748,7 +748,7 @@ int main(int argc, char *argv[])
                     .reconstructFaAreaFields<sphericalTensor>(objects);
                 faReconstructor.reconstructFaAreaFields<symmTensor>(objects);
                 faReconstructor.reconstructFaAreaFields<tensor>(objects);
-                
+
                 faReconstructor.reconstructFaEdgeFields<scalar>(objects);
             }
             else
