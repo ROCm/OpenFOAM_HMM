@@ -178,6 +178,32 @@ Foam::Pair<Foam::scalar> Foam::solutionControl::maxResidual
 }
 
 
+void Foam::solutionControl::setFirstIterFlag
+(
+    const bool check,
+    const bool force
+)
+{
+    DebugInfo
+        << "solutionControl: force:" << force
+        << " check: " << check
+        << " corr: " << corr_
+        << " corrNonOrtho:" << corrNonOrtho_
+        << endl;
+
+    if (force || (check && corr_ <= 1 && corrNonOrtho_ == 0))
+    {
+        DebugInfo<< "solutionControl: set firstIteration flag" << endl;
+        mesh_.data::set("firstIteration", true);
+    }
+    else
+    {
+        DebugInfo<< "solutionControl: remove firstIteration flag" << endl;
+        mesh_.data::remove("firstIteration");
+    }
+}
+
+
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>

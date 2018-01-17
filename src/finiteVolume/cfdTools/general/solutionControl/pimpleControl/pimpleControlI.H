@@ -51,6 +51,8 @@ inline bool Foam::pimpleControl::SIMPLErho() const
 
 inline bool Foam::pimpleControl::correct()
 {
+    setFirstIterFlag();
+
     ++corrPISO_;
 
     if (debug)
@@ -64,6 +66,9 @@ inline bool Foam::pimpleControl::correct()
     }
 
     corrPISO_ = 0;
+
+    setFirstIterFlag();
+
     return false;
 }
 
@@ -101,8 +106,27 @@ inline bool Foam::pimpleControl::solveFlow() const
 }
 
 
-inline bool Foam::pimpleControl::turbCorr() const
+inline bool Foam::pimpleControl::turbCorr()
 {
+    if (turbOnFinalIterOnly_)
+    {
+        if (finalIter())
+        {
+            setFirstIterFlag(true, true);
+        }
+    }
+    else
+    {
+        if (firstIter())
+        {
+            setFirstIterFlag(true, true);
+        }
+        else
+        {
+            setFirstIterFlag();
+        }
+    }
+
     return !turbOnFinalIterOnly_ || finalIter();
 }
 

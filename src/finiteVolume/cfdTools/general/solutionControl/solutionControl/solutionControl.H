@@ -162,6 +162,13 @@ protected:
         //      as second (last) member
         Pair<scalar> maxResidual(const entry& solverPerfDictEntry) const;
 
+        //- Set the firstIteration flag on the mesh data dictionary
+        virtual void setFirstIterFlag
+        (
+            const bool check = true,
+            const bool force = false
+        );
+
 
 private:
 

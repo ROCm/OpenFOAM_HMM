@@ -120,6 +120,18 @@ bool Foam::pimpleControl::criteriaSatisfied()
 }
 
 
+void Foam::pimpleControl::setFirstIterFlag(const bool check, const bool force)
+{
+    DebugInfo
+        << "corr:" << corr_
+        << " corrPISO:" << corrPISO_
+        << " corrNonOrtho:" << corrNonOrtho_
+        << endl;
+
+    solutionControl::setFirstIterFlag(check && corrPISO_ <= 1, force);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pimpleControl::pimpleControl(fvMesh& mesh, const word& dictName)
@@ -180,6 +192,8 @@ bool Foam::pimpleControl::loop()
     {
         Info<< algorithmName_ << " loop: corr = " << corr_ << endl;
     }
+
+    setFirstIterFlag();
 
     if (corr_ == nCorrPIMPLE_ + 1)
     {

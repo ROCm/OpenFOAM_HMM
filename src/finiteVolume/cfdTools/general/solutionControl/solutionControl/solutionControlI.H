@@ -81,6 +81,8 @@ inline bool Foam::solutionControl::frozenFlow() const
 
 inline bool Foam::solutionControl::correctNonOrthogonal()
 {
+    setFirstIterFlag();
+
     ++corrNonOrtho_;
 
     if (debug)
@@ -95,6 +97,9 @@ inline bool Foam::solutionControl::correctNonOrthogonal()
     }
 
     corrNonOrtho_ = 0;
+
+    setFirstIterFlag();
+
     return false;
 }
 

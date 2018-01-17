@@ -122,6 +122,8 @@ Foam::simpleControl::simpleControl(fvMesh& mesh, const word& dictName)
 
 bool Foam::simpleControl::loop()
 {
+    solutionControl::setFirstIterFlag(true, true);
+
     read();
 
     Time& runTime = const_cast<Time&>(mesh_.time());

@@ -342,7 +342,26 @@ void Foam::lduMatrix::setResidualField
 
     if (residualPtr)
     {
-        *residualPtr = residual;
+        const IOdictionary* dataPtr =
+            lduMesh_.thisDb().lookupObjectPtr<IOdictionary>("data");
+
+        if (dataPtr)
+        {
+            if (initial && dataPtr->found("firstIteration"))
+            {
+                *residualPtr = residual;
+                DebugInfo
+                    << "Setting residual field for first solver iteration "
+                    << "for solver field: " << fieldName << endl;
+            }
+        }
+        else
+        {
+            *residualPtr = residual;
+            DebugInfo
+                << "Setting residual field for solver field "
+                << fieldName << endl;
+        }
     }
 }
 
