@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ Scalar ScalarRead(const char* buf)
 }
 
 
-bool readScalar(const char* buf, Scalar& val)
+bool ScalarRead(const char* buf, Scalar& val)
 {
     char* endptr = nullptr;
     errno = 0;
@@ -153,6 +153,7 @@ Istream& operator>>(Istream& is, Scalar& val)
     if (t.isNumber())
     {
         val = t.number();
+        is.check(FUNCTION_NAME);
     }
     else
     {
@@ -160,11 +161,8 @@ Istream& operator>>(Istream& is, Scalar& val)
         FatalIOErrorInFunction(is)
             << "wrong token type - expected Scalar, found " << t.info()
             << exit(FatalIOError);
-
-        return is;
     }
 
-    is.check(FUNCTION_NAME);
     return is;
 }
 

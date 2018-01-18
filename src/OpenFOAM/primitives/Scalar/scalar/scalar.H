@@ -59,9 +59,24 @@ namespace Foam
 
     scalar readScalar(Istream& is);
 
+    inline scalar readScalar(const char* buf)
+    {
+        return readFloat(buf);
+    }
+
+    inline bool readScalar(const char* buf, scalar& val)
+    {
+        return readFloat(buf, val);
+    }
+
     inline scalar readScalar(const std::string& str)
     {
         return readFloat(str);
+    }
+
+    inline bool readScalar(const std::string& str, scalar& val)
+    {
+        return readFloat(str, val);
     }
 }
 
@@ -83,9 +98,24 @@ namespace Foam
 
     scalar readScalar(Istream& is);
 
+    inline scalar readScalar(const char* buf)
+    {
+        return readDouble(buf);
+    }
+
+    inline bool readScalar(const char* buf, scalar& val)
+    {
+        return readDouble(buf, val);
+    }
+
     inline scalar readScalar(const std::string& str)
     {
         return readDouble(str);
+    }
+
+    inline bool readScalar(const std::string& str, scalar& val)
+    {
+        return readDouble(str, val);
     }
 }
 
