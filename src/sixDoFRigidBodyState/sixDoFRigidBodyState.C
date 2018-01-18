@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,6 +46,34 @@ namespace functionObjects
 }
 }
 
+const Foam::Enum
+<
+    Foam::functionObjects::sixDoFRigidBodyState::angleTypes
+>
+Foam::functionObjects::sixDoFRigidBodyState::angleTypeNames_
+{
+    { angleTypes::RADIANS, "radians" },
+    { angleTypes::DEGREES, "degrees" }
+};
+
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void Foam::functionObjects::sixDoFRigidBodyState::writeFileHeader(Ostream& os)
+{
+    writeHeader(os, "Motion State");
+    writeHeaderValue(os, "Angle Units", angleTypeNames_[angleFormat_]);
+    writeCommented(os, "Time");
+
+    os  << tab
+        << "centreOfRotation" << tab
+        << "centreOfMass" << tab
+        << "rotation" << tab
+        << "velocity" << tab
+        << "omega" << endl;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,10 +85,11 @@ Foam::functionObjects::sixDoFRigidBodyState::sixDoFRigidBodyState
 )
 :
     fvMeshFunctionObject(name, runTime, dict),
-    logFiles(obr_, name)
+    writeFile(mesh_, name, typeName, dict),
+    angleFormat_(angleTypes::RADIANS)
 {
     read(dict);
-    resetName(typeName);
+    writeFileHeader(file());
 }
 
 
@@ -74,27 +103,20 @@ Foam::functionObjects::sixDoFRigidBodyState::~sixDoFRigidBodyState()
 
 bool Foam::functionObjects::sixDoFRigidBodyState::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
-    angleFormat_ = dict.lookupOrDefault<word>("angleFormat", "radians");
+    if (fvMeshFunctionObject::read(dict))
+    {
+        angleFormat_ =
+            angleTypeNames_.lookupOrDefault
+            (
+                "angleFormat",
+                dict,
+                angleTypes::RADIANS
+            );
 
-    return true;
-}
+        return true;
+    }
 
-
-void Foam::functionObjects::sixDoFRigidBodyState::writeFileHeader(const label)
-{
-    OFstream& file = this->file();
-
-    writeHeader(file, "Motion State");
-    writeHeaderValue(file, "Angle Units", angleFormat_);
-    writeCommented(file, "Time");
-
-    file<< tab
-        << "centreOfRotation" << tab
-        << "centreOfMass" << tab
-        << "rotation" << tab
-        << "velocity" << tab
-        << "omega" << endl;
+    return false;
 }
 
 
@@ -106,26 +128,29 @@ bool Foam::functionObjects::sixDoFRigidBodyState::execute()
 
 bool Foam::functionObjects::sixDoFRigidBodyState::write()
 {
-    logFiles::write();
+    const dynamicMotionSolverFvMesh& mesh =
+        refCast<const dynamicMotionSolverFvMesh>(obr_);
 
-    if (Pstream::master())
+    const sixDoFRigidBodyMotionSolver& motionSolver_ =
+        refCast<const sixDoFRigidBodyMotionSolver>(mesh.motion());
+
+    const sixDoFRigidBodyMotion& motion = motionSolver_.motion();
+
+    vector rotationAngle
+    (
+        quaternion(motion.orientation()).eulerAngles(quaternion::XYZ)
+    );
+
+    vector angularVelocity(motion.omega());
+
+    switch (angleFormat_)
     {
-        const dynamicMotionSolverFvMesh& mesh =
-            refCast<const dynamicMotionSolverFvMesh>(obr_);
-
-        const sixDoFRigidBodyMotionSolver& motionSolver_ =
-            refCast<const sixDoFRigidBodyMotionSolver>(mesh.motion());
-
-        const sixDoFRigidBodyMotion& motion = motionSolver_.motion();
-
-        vector rotationAngle
-        (
-            quaternion(motion.orientation()).eulerAngles(quaternion::XYZ)
-        );
-
-        vector angularVelocity(motion.omega());
-
-        if (angleFormat_ == "degrees")
+        case angleTypes::RADIANS:
+        {
+            // Nothing to do - already in radians
+            break;
+        }
+        case angleTypes::DEGREES:
         {
             rotationAngle.x() = radToDeg(rotationAngle.x());
             rotationAngle.y() = radToDeg(rotationAngle.y());
@@ -134,17 +159,24 @@ bool Foam::functionObjects::sixDoFRigidBodyState::write()
             angularVelocity.x() = radToDeg(angularVelocity.x());
             angularVelocity.y() = radToDeg(angularVelocity.y());
             angularVelocity.z() = radToDeg(angularVelocity.z());
+            break;
         }
-
-        writeTime(file());
-        file()
-            << tab
-            << motion.centreOfRotation()  << tab
-            << motion.centreOfMass()  << tab
-            << rotationAngle  << tab
-            << motion.v()  << tab
-            << angularVelocity << endl;
+        default:
+        {
+            FatalErrorInFunction
+                << "Unhandled enumeration " << angleTypeNames_[angleFormat_]
+                << abort(FatalError);
+        }
     }
+
+    writeTime(file());
+    file()
+        << tab
+        << motion.centreOfRotation()  << tab
+        << motion.centreOfMass()  << tab
+        << rotationAngle  << tab
+        << motion.v()  << tab
+        << angularVelocity << endl;
 
     return true;
 }
