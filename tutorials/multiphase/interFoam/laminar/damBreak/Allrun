@@ -24,21 +24,24 @@ setDamBreakFine ()
 # Do damBreak
 (cd damBreak && foamRunTutorials)
 
-# Clone case
-cloneCase damBreak damBreakFine
+if ! isTest $@
+then
+    # Clone case
+    cloneCase damBreak damBreakFine
 
-(
-    cd damBreakFine || exit
+    (
+        cd damBreakFine || exit
 
-    # Modify case
-    setDamBreakFine
-    \cp ../damBreak/0/alpha.water.orig 0/alpha.water
-    # And execute
-    runApplication blockMesh
-    runApplication setFields
-    runApplication decomposePar
-    runParallel $(getApplication)
-    runApplication reconstructPar
-)
+        # Modify case
+        setDamBreakFine
+        \cp ../damBreak/0/alpha.water.orig 0/alpha.water
+        # And execute
+        runApplication blockMesh
+        runApplication setFields
+        runApplication decomposePar
+        runParallel $(getApplication)
+        runApplication reconstructPar
+    )
+fi
 
 #------------------------------------------------------------------------------

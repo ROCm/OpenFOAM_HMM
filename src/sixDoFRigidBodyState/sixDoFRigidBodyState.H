@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::functionObjects::sixDoFRigidBodyState
 
 Group
-    grpFieldFunctionObjects
+    grpSixDoFRigidBodyFunctionObjects
 
 Description
     Writes the 6-DoF motion state.
@@ -49,7 +49,7 @@ Usage
 
 See also
     Foam::functionObjects::fvMeshFunctionObject
-    Foam::functionObjects::logFiles
+    Foam::functionObjects::writeFile
 
 SourceFiles
     sixDoFRigidBodyState.C
@@ -60,7 +60,8 @@ SourceFiles
 #define sixDoFRigidBodyState_H
 
 #include "fvMeshFunctionObject.H"
-#include "logFiles.H"
+#include "writeFile.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,17 +71,27 @@ namespace functionObjects
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class sixDoFRigidBodyState Declaration
+                    Class sixDoFRigidBodyState Declaration
 \*---------------------------------------------------------------------------*/
 
 class sixDoFRigidBodyState
 :
     public fvMeshFunctionObject,
-    public logFiles
+    public writeFile
 {
     // Private data
 
-        word angleFormat_;
+        enum class angleTypes
+        {
+            RADIANS,        //!< Radians
+            DEGREES         //!< Degrees
+        };
+
+        //- Angle type names
+        static const Enum<angleTypes> angleTypeNames_;
+
+        //- Angle format
+        angleTypes angleFormat_;
 
 
     // Private Member Functions
@@ -96,8 +107,8 @@ protected:
 
     // Protected Member Functions
 
-        //- overloaded writeFileHeader from writeFile
-        virtual void writeFileHeader(const label i = 0);
+        //- Overloaded writeFileHeader from writeFile
+        virtual void writeFileHeader(Ostream& os);
 
 
 public:

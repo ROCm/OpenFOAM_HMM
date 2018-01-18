@@ -79,6 +79,7 @@ functionObjects/Allwmake $targetType $*
 
 wmake $targetType lumpedPointMotion
 wmake $targetType sixDoFRigidBodyMotion
+wmake $targetType sixDoFRigidBodyState
 wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
 
