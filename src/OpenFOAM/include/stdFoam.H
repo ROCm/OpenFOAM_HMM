@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,6 +155,21 @@ constexpr auto crend(const C& c) -> decltype(c.rend())
     return c.rend();
 }
 
+//- Return the lesser of the parameters.
+//  Definition as per std::min C++14
+template<class T>
+constexpr inline const T& min(const T& a, const T& b)
+{
+    return (b < a) ? b : a;
+}
+
+//- Return the greater of the parameters.
+//  Definition as per std::max C++14
+template<class T>
+constexpr inline const T& max(const T& a, const T& b)
+{
+    return (a < b) ? b : a;
+}
 
 } // End namespace stdFoam
 
