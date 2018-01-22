@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,9 +30,25 @@ Description
 #include "IOstreams.H"
 #include "argList.H"
 
+#include <sstream>
+#include <vector>
+
 using namespace Foam;
 
 Ostream& toString(Ostream& os, const UList<char>& list)
+{
+    os << '"';
+    for (const char c : list)
+    {
+        os << c;
+    }
+    os << '"';
+
+    return os;
+}
+
+
+Ostream& toString(Ostream& os, const std::vector<char>& list)
 {
     os << '"';
     for (const char c : list)
@@ -51,6 +67,15 @@ void printInfo(const BufType& buf)
     Info<< nl << "=========================" << endl;
     buf.print(Info);
     toString(Info, buf.list());
+    Info<< nl << "=========================" << endl;
+}
+
+
+template<>
+void printInfo(const UList<char>& buf)
+{
+    Info<< nl << "=========================" << endl;
+    toString(Info, buf);
     Info<< nl << "=========================" << endl;
 }
 
@@ -82,7 +107,7 @@ int main(int argc, char *argv[])
     DynamicList<char> storage(1000);
 
     UOListStream obuf(storage);
-    obuf << 1002 << " " << "abcd" << " " << "def" << " " << 3.14159 << ";\n";
+    obuf << 1002 << "\n" << "abcd" << "\n" << "def" << "\n" << 3.14159 << ";\n";
 
     obuf.print(Info);
 
@@ -92,15 +117,73 @@ int main(int argc, char *argv[])
     Info<<"as string: " << string(storage.cdata(), storage.size()) << endl;
 
     // Attach input buffer - could also do without previous resize
+    {
+        UIListStream ibuf(storage);
 
-    UIListStream ibuf(storage);
+        printTokens(ibuf);
 
-    printTokens(ibuf);
+        Info<< nl << "Repeat..." << endl;
+        ibuf.rewind();
 
-    Info<< nl << "Repeat..." << endl;
-    ibuf.rewind();
+        printTokens(ibuf);
+    }
 
-    printTokens(ibuf);
+
+    // Attach input buffer - could also do without previous resize
+    {
+        Info<< "parse as std::istream\n";
+
+        uiliststream is(storage.cdata(), storage.size());
+
+        string tok;
+
+        while (std::getline(is, tok))
+        {
+            std::cerr << "tok: " << tok << nl;
+        }
+
+        Info<< nl << "Repeat..." << endl;
+
+        is.rewind();
+        while (std::getline(is, tok))
+        {
+            std::cerr << "tok: " << tok << nl;
+        }
+    }
+
+
+    // Simple test using stl items only
+    {
+        std::vector<char> chars;
+        chars.reserve(1024);
+
+        for (int i=0; i < 10; ++i)
+        {
+            chars.push_back('A' + i);
+            chars.push_back('0' + i);
+            chars.push_back('\n');
+        }
+
+        Info<< "parse std::vector of char: ";
+        toString(Info, chars);
+        Info<< "----" << nl;
+
+        uiliststream is(chars.data(), chars.size());
+        string tok;
+        std::cerr<< nl << "Parsed..." << nl;
+        while (std::getline(is, tok))
+        {
+            std::cerr << "tok: " << tok << nl;
+        }
+
+        Info<< nl << "Repeat..." << endl;
+
+        is.rewind();
+        while (std::getline(is, tok))
+        {
+            std::cerr << "tok: " << tok << nl;
+        }
+    }
 
     Info<< "\nEnd\n" << endl;
 

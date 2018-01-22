@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ Description
         {
             UOListStream os(buffer);
             os << "content1" << " and more content";
-            buffer.setSize(os.size());      // synchronize sizes
+            buffer.resize(os.size());       // synchronize sizes
         }
 
         something.write(buffer, buffer.size());
@@ -53,13 +53,13 @@ Description
 
         UOListStream os(buffer);
         os << "content1" << " and more content";
-        buffer.setSize(os.size());          // synchronize sizes
+        buffer.resize(os.size());           // synchronize sizes
 
         something.write(buffer, buffer.size());
 
         os.rewind();
         os << "content2";
-        buffer.setSize(os.size());      // synchronize sizes
+        buffer.resize(os.size());      // synchronize sizes
 
         something.write(buffer, buffer.size());
 
@@ -91,51 +91,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class UOListAllocator Declaration
+                    Class UOListStreamAllocator Declaration
 \*---------------------------------------------------------------------------*/
 
 //- An stream/stream-buffer allocator for external buffers
-class UOListAllocator
+class UOListStreamAllocator
 {
-    //- A streambuf adapter for output to UList or equivalent
-    class ulistbuf
-    :
-        public memorybuf::out
-    {
-        friend UOListAllocator;
-
-        //- Underlying list storage
-        UList<char> list_;
-
-    public:
-
-      // Constructors
-
-        //- Construct for specified buffer
-        ulistbuf(char* buffer, std::streamsize num)
-        :
-            list_(buffer, num)
-        {
-            set_pbuffer(list_);
-        }
-
-
-      // Member Functions
-
-        //- Return the current list output capacity
-        inline label capacity() const
-        {
-            return list_.size();
-        }
-
-        //- Sync put buffer pointers to agree with list dimensions
-        inline void sync_pbuffer_to_list()
-        {
-            set_pbuffer(list_);
-        }
-    };
-
-
 protected:
 
     // Protected data
@@ -143,7 +104,7 @@ protected:
         typedef std::ostream stream_type;
 
         //- The stream buffer
-        ulistbuf buf_;
+        memorybuf::out buf_;
 
         //- The stream
         stream_type stream_;
@@ -151,25 +112,33 @@ protected:
 
     // Constructors
 
-        //- Construct with buffer and number of bytes
-        UOListAllocator(char *buffer, size_t nbytes)
+        //- Construct for character array and number of bytes
+        UOListStreamAllocator(char *buffer, size_t nbytes)
         :
             buf_(buffer, nbytes),
             stream_(&buf_)
         {}
 
-
-    // Protected Member Functions
-
         void printBufInfo(Ostream& os) const
         {
-            os  << "pos=" << buf_.tellp()
-                << " capacity=" << buf_.capacity();
+            buf_.printBufInfo(os);
         }
 
 public:
 
     // Public Member Functions
+
+        //- Const UList access to the characters written (shallow copy).
+        inline const UList<char> list() const
+        {
+            return buf_.list();
+        }
+
+        //- Non-const UList access to the characters written (shallow copy).
+        inline UList<char> list()
+        {
+            return buf_.list();
+        }
 
         //- The current list output capacity
         inline label capacity() const
@@ -177,36 +146,12 @@ public:
             return buf_.capacity();
         }
 
-
         //- The current output position in the buffer,
-        //  which is also the addressed list size
+        //- which is also the addressed list size
         inline label size() const
         {
             return buf_.tellp();
         }
-
-
-        //- Const access to written contents as a list of characters
-        inline const UList<char> list() const
-        {
-            return UList<char>
-            (
-                const_cast<char*>(buf_.list_.cdata()),
-                buf_.tellp()
-            );
-        }
-
-
-        //- Non-const access to written contents as a list of characters
-        inline UList<char> list()
-        {
-            return UList<char>
-            (
-                const_cast<char*>(buf_.list_.cdata()),
-                buf_.tellp()
-            );
-        }
-
 
         //- Move to buffer start, clear errors
         void rewind()
@@ -224,10 +169,10 @@ public:
 //- An OSstream attached to an unallocated external buffer
 class UOListStream
 :
-    public UOListAllocator,
+    public UOListStreamAllocator,
     public OSstream
 {
-    typedef UOListAllocator allocator_type;
+    typedef UOListStreamAllocator allocator_type;
 
 public:
 

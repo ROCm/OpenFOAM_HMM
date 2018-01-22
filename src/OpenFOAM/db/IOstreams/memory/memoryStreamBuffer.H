@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,9 @@ Description
 
 namespace Foam
 {
+
+// Forward declarations
+class Ostream;
 
 /*---------------------------------------------------------------------------*\
                           Class memorybuf Declaration
@@ -126,6 +129,19 @@ protected:
     }
 
 
+    //- \return the current buffer get position
+    inline std::streamsize tellg() const
+    {
+        return (gptr() - eback());
+    }
+
+    //- \return the current buffer put position
+    inline std::streamsize tellp() const
+    {
+        return (pptr() - pbase());
+    }
+
+
 public:
 
     // Forward declarations
@@ -145,6 +161,9 @@ class memorybuf::in
 {
 protected:
 
+    //- Default construct null
+    in() = default;
+
     //- Get sequence of characters
     virtual std::streamsize xsgetn(char* s, std::streamsize n)
     {
@@ -159,17 +178,53 @@ protected:
         return count;
     }
 
+public:
 
-    //- The buffer get position
-    inline std::streamsize tellg() const
+    //- Construct for character array and number of bytes
+    in(char* s, std::streamsize n)
     {
-        return (gptr() - eback());
+        resetg(s, n);
     }
 
-    //- Sync get buffer pointers to agree with list dimensions
-    inline void set_gbuffer(UList<char>& list)
+    //- Reset for character array and number of bytes
+    inline void resetg(char* s, std::streamsize n)
     {
-        setg(list.begin(), list.begin(), list.end());
+        if (s)
+        {
+            setg(s, s, s + n);
+        }
+        else
+        {
+            setg(nullptr, nullptr, nullptr);
+        }
+    }
+
+    //- The buffer get position
+    using memorybuf::tellg;
+
+    //- The buffer capacity
+    inline std::streamsize capacity() const
+    {
+        return (egptr() - eback());
+    }
+
+    //- Const UList access to the input characters (shallow copy).
+    inline const UList<char> list() const
+    {
+        return UList<char>(eback(), (egptr() - eback()));
+    }
+
+    //- Non-const UList access to the input characters (shallow copy).
+    inline UList<char> list()
+    {
+        return UList<char>(eback(), (egptr() - eback()));
+    }
+
+    //- Some information about the input buffer position/capacity
+    inline void printBufInfo(Ostream& os) const
+    {
+        os  << "get=" << (gptr() - eback()) // tellp()
+            << "/" << (egptr() - eback());  // capacity
     }
 };
 
@@ -185,6 +240,9 @@ class memorybuf::out
 {
 protected:
 
+    //- Default construct null
+    out() = default;
+
     //- Put sequence of characters
     virtual std::streamsize xsputn(const char* s, std::streamsize n)
     {
@@ -198,18 +256,54 @@ protected:
         return count;
     }
 
+public:
+
+    //- Construct for character array and number of bytes
+    out(char* s, std::streamsize n)
+    {
+        resetp(s, n);
+    }
+
+    //- Reset for character array and number of bytes
+    inline void resetp(char* s, std::streamsize n)
+    {
+        if (s)
+        {
+            setp(s, s + n);
+        }
+        else
+        {
+            setp(nullptr, nullptr);
+        }
+    }
+
     //- The buffer put position
-    inline std::streamsize tellp() const
+    using memorybuf::tellp;
+
+    //- The buffer capacity
+    inline std::streamsize capacity() const
     {
-        return (pptr() - pbase());
+        return (epptr() - pbase());
     }
 
-    //- Sync put buffer pointers to agree with list dimensions
-    inline void set_pbuffer(UList<char>& list)
+    //- Const UList access to the characters written (shallow copy).
+    inline const UList<char> list() const
     {
-        setp(list.begin(), list.end());
+        return UList<char>(pbase(), (pptr() - pbase()));
     }
 
+    //- Non-const UList access to the characters written (shallow copy).
+    inline UList<char> list()
+    {
+        return UList<char>(pbase(), (pptr() - pbase()));
+    }
+
+    //- Some information about the output buffer position/capacity
+    inline void printBufInfo(Ostream& os) const
+    {
+        os  << "put=" << (pptr() - pbase()) // tellp()
+            << "/" << (epptr() - pbase());  // capacity
+    }
 };
 
 

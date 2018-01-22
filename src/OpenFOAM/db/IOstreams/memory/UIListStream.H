@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,10 @@ Description
 
     An example of possible use:
     \code
-        DynamicList<char> buffer(4096);   // allocate some large buffer
+        DynamicList<char> buffer(4096);     // allocate some large buffer
 
         nread = something.read(buffer.data(),1024); // fill with content
-        buffer.setSize(nread);            // content size
+        buffer.resize(nread);               // content size
 
         // construct dictionary, or something else
         UIListStream is(buffer)
@@ -46,7 +46,7 @@ Description
 
         // sometime later
         nread = something.read(buffer.data(),2048); // fill with content
-        buffer.setSize(nread);              // content size
+        buffer.resize(nread);               // content size
 
         // without intermediate variable
         dictionary dict2(UIListStream(buffer)());
@@ -73,47 +73,49 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class UIListAllocator Declaration
+                        Class uiliststream Declaration
 \*---------------------------------------------------------------------------*/
 
-//- An stream/stream-buffer input allocator for a externally allocated lists
+//- Similar to std::istringstream, but with an externally managed input buffer.
+//  This allows the input buffer to be filled or refilled from various sources
+//  without copying.
+class uiliststream
+:
+    virtual public std::ios,
+    protected memorybuf::in,
+    public std::istream
+{
+public:
+
+    //- Construct for character array and number of bytes
+    uiliststream(const char* buffer, size_t nbytes)
+    :
+        memorybuf::in(const_cast<char*>(buffer), nbytes),
+        std::istream(static_cast<memorybuf::in*>(this))
+    {}
+
+    //- Reset buffer pointers
+    inline void reset(char *buffer, size_t nbytes)
+    {
+        resetg(buffer, nbytes);
+    }
+
+    //- Rewind the stream, clearing any old errors
+    void rewind()
+    {
+        this->pubseekpos(0, std::ios_base::in);
+        clear(); // for safety, clear any old errors
+    }
+};
+
+
+/*---------------------------------------------------------------------------*\
+                    Class UIListStreamAllocator Declaration
+\*---------------------------------------------------------------------------*/
+
+//- An stream/stream-buffer input allocator for a externally allocated list
 class UIListStreamAllocator
 {
-    //- A streambuf class for input from UList or equivalent
-    class ulistbuf
-    :
-        public memorybuf::in
-    {
-        friend UIListStreamAllocator;
-
-        //- Underlying list storage
-        UList<char> list_;
-
-    public:
-
-        //- Construct for specified buffer
-        ulistbuf(UList<char>& buffer)
-        :
-            list_(buffer)
-        {
-            set_gbuffer(list_);
-        }
-
-        //- Construct for specified buffer
-        ulistbuf(char* buffer, std::streamsize num)
-        :
-            list_(buffer, num)
-        {
-            set_gbuffer(list_);
-        }
-
-        //- Sync get buffer pointers to agree with list dimensions
-        inline void sync_gbuffer_to_list()
-        {
-            set_gbuffer(list_);
-        }
-    };
-
 protected:
 
     // Protected data
@@ -121,7 +123,7 @@ protected:
         typedef std::istream stream_type;
 
         //- The stream buffer
-        ulistbuf buf_;
+        memorybuf::in buf_;
 
         //- The stream
         stream_type stream_;
@@ -129,14 +131,7 @@ protected:
 
     // Constructors
 
-        //- Construct with list buffer
-        UIListStreamAllocator(UList<char>& list)
-        :
-            buf_(list),
-            stream_(&buf_)
-        {}
-
-        //- Construct with buffer and number of bytes
+        //- Construct for character array and number of bytes
         UIListStreamAllocator(char *buffer, size_t nbytes)
         :
             buf_(buffer, nbytes),
@@ -146,49 +141,44 @@ protected:
 
     // Protected Member Functions
 
-        //- Sync get buffer pointers to agree with list dimensions
-        inline void sync_gbuffer_to_list()
+        //- Reset buffer pointers
+        inline void reset(char *buffer, size_t nbytes)
         {
-            buf_.sync_gbuffer_to_list();
+            buf_.resetg(buffer, nbytes);
         }
 
         void printBufInfo(Ostream& os) const
         {
-            os  << "pos=" << buf_.tellg()
-                << " size=" << buf_.list_.size();
+            buf_.printBufInfo(os);
         }
 
 public:
 
     // Public Member Functions
 
-        //- Const access to available contents as a list of characters
-        inline const UList<char>& list() const
+        //- Const UList access to the input characters (shallow copy).
+        inline const UList<char> list() const
         {
-            return buf_.list_;
+            return buf_.list();
         }
 
-
-        //- Non-const access to available contents as a list of characters
+        //- Non-const UList access to the input characters (shallow copy).
         inline UList<char> list()
         {
-            return buf_.list_;
+            return buf_.list();
         }
-
 
         //- The list size
         inline label size() const
         {
-            return buf_.list_.size();
+            return buf_.capacity();
         }
-
 
         //- Position of the get buffer
         std::streampos tellg() const
         {
             return buf_.tellg();
         }
-
 
         //- Move to buffer start, clear errors
         void rewind()
@@ -278,14 +268,12 @@ public:
             return allocator_type::tellg();
         }
 
-
         //- Rewind the stream, clearing any old errors
         virtual void rewind()
         {
             allocator_type::rewind();
             setGood();  // resynchronize with internal state
         }
-
 
         //- Print description to Ostream
         virtual void print(Ostream& os) const;
