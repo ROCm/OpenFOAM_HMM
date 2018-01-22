@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,17 +40,26 @@ int main(int argc, char *argv[])
     OCountStream cnt;
     OStringStream str;
 
+    ocountstream plain;
+
     for (label i = 0; i < 50; ++i)
     {
-        str << 1002 << " " << "abcd" << " "
+        str
+            << 1002 << " " << "abcd" << " "
             << "def" << " " << 3.14159 << ";\n";
 
-        cnt << 1002 << " " << "abcd" << " "
+        cnt
+            << 1002 << " " << "abcd" << " "
+            << "def" << " " << 3.14159 << ";\n";
+
+        plain
+            << 1002 << " " << "abcd" << " "
             << "def" << " " << 3.14159 << ";\n";
     }
 
     cnt.print(Info);
     Info<< "via string-stream: " << str.str().size() << " chars" << endl;
+    Info<< "via ocountstream: " << plain.size() << " chars" << endl;
 
     Info<< "\nEnd\n" << endl;
 
