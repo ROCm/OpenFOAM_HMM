@@ -38,10 +38,10 @@ Description
     - \c calculated:
         - inlet area of each region and core volume determined by interrogating
           mesh patches, and mesh-to-mesh interpolation volume
-        - calculated core volume canbe partially blocked by specifying a
+        - calculated core volume can be partially blocked by specifying a
           \c coreBlockageRatio [0-1] entry
     - \c user:
-        - inlet area of each region privided by the user
+        - inlet area of each region provided by the user
         - core volume automatically calculated by the mesh-to-mesh
           interpolation volume if not provided by user
 
