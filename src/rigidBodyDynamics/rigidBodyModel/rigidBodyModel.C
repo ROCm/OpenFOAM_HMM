@@ -429,7 +429,7 @@ void Foam::RBD::rigidBodyModel::write(Ostream& os) const
 
         forAll(restraints_, ri)
         {
-            const word& restraintType(restraints_[ri].type());
+            // const word& restraintType(restraints_[ri].type());
 
             os.beginBlock(restraints_[ri].name());
 
