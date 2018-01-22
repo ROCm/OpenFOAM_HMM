@@ -120,7 +120,7 @@ void Foam::oversetFvPatchField<Type>::initEvaluate
         {
             IOWarningInFunction(fvSchemes)
                 << "Missing required dictionary entries"
-                << " 'oversetInterpolation' or 'oversetInterpolationRequired'"
+                << " 'oversetInterpolation' and 'oversetInterpolationRequired'"
                 << ". Skipping overset interpolation for field "
                 << fldName << endl;
         }
