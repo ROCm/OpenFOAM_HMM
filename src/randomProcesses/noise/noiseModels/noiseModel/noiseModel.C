@@ -236,6 +236,7 @@ bool Foam::noiseModel::read(const dictionary& dict)
     readWriteOption(optDict, "writePrmsf", writePrmsf_);
     readWriteOption(optDict, "writeSPL", writeSPL_);
     readWriteOption(optDict, "writePSD", writePSD_);
+    readWriteOption(optDict, "writePSDf", writePSDf_);
     readWriteOption(optDict, "writeOctaves", writeOctaves_);
 
 

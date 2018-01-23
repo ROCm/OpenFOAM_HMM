@@ -1,12 +1,12 @@
 // check all time directories for the following:
 
 // Any cloud names:
-HashSet<fileName> allCloudDirs;
+HashSet<word> allCloudDirs;
 
 if (timeDirs.size() && !noLagrangian)
 {
     const fileName& baseDir = mesh.time().path();
-    const fileName& cloudPrefix = regionPrefix/cloud::prefix;
+    const fileName cloudPrefix(regionPrefix/cloud::prefix);
 
     Info<< "Searching for lagrangian ... " << flush;
 
@@ -32,14 +32,15 @@ if (timeDirs.size() && !noLagrangian)
                 cloudPrefix/cloudName
             );
 
-            // Clouds always require "positions"/"coordinates"
-            if (cloudObjs.found("positions") || cloudObjs.found("coordinates"))
+            // Clouds require "coordinates".
+            // The "positions" are for v1706 and lower.
+            if (cloudObjs.found("coordinates") || cloudObjs.found("positions"))
             {
                 if (allCloudDirs.insert(cloudName))
                 {
-                    Info<< "At time: " << timeName
+                    Info<< nl << "    At time: " << timeName
                         << " detected cloud directory : " << cloudName
-                        << endl;
+                        << flush;
                 }
             }
         }
@@ -49,14 +50,21 @@ if (timeDirs.size() && !noLagrangian)
     {
         Info<< "none detected." << endl;
     }
+
+    if (Pstream::parRun())
+    {
+        Pstream::combineGather(allCloudDirs, HashSetPlusEqOp<word>());
+        Pstream::combineScatter(allCloudDirs);
+    }
 }
 
-// sorted list of cloud names
-const fileNameList cloudNames(allCloudDirs.sortedToc());
+
+// Sorted list of cloud names
+const wordList cloudNames(allCloudDirs.sortedToc());
 
 if (cloudNames.size())
 {
-    // complete the echo information
+    // Complete the echo information
     Info<< "(";
     for (const word& cloudName : cloudNames)
     {

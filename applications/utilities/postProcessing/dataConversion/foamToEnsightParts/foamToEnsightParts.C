@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -275,10 +275,10 @@ int main(int argc, char *argv[])
 
         Info<< "Write volume field (" << flush;
 
-        forAllConstIter(HashTable<word>, volumeFields, fieldIter)
+        forAllConstIters(volumeFields, fieldIter)
         {
             const word& fieldName = fieldIter.key();
-            const word& fieldType = fieldIter();
+            const word& fieldType = fieldIter.object();
 
             IOobject fieldObject
             (
@@ -364,10 +364,12 @@ int main(int argc, char *argv[])
         Info<< " )" << endl;
 
         // Check for clouds
-        forAllConstIter(HashTable<HashTable<word>>, cloudFields, cloudIter)
+        forAllConstIters(cloudFields, cloudIter)
         {
             const word& cloudName = cloudIter.key();
-            const fileName& cloudPrefix = regionPrefix/cloud::prefix;
+            const HashTable<word>& theseCloudFields = cloudIter.object();
+
+            const fileName cloudPrefix(regionPrefix/cloud::prefix);
 
             if (!isDir(runTime.timePath()/cloudPrefix/cloudName))
             {
@@ -381,13 +383,15 @@ int main(int argc, char *argv[])
                 cloudPrefix/cloudName
             );
 
-            // Check that the positions/coordinates field is present for this
-            // time
-            if
+            // Clouds require "coordinates".
+            // The "positions" are for v1706 and lower.
+            const bool cloudExists =
             (
-                !cloudObjs.found("positions")
-             || !cloudObjs.found("coordinates")
-            )
+                cloudObjs.found("coordinates")
+             || cloudObjs.found("positions")
+            );
+
+            if (!cloudExists)
             {
                 continue;
             }
@@ -403,18 +407,17 @@ int main(int argc, char *argv[])
             Info<< " positions";
 
 
-            forAllConstIter(HashTable<word>, cloudIter(), fieldIter)
+            forAllConstIters(theseCloudFields, fieldIter)
             {
                 const word& fieldName = fieldIter.key();
-                const word& fieldType = fieldIter();
+                const word& fieldType = fieldIter.object();
 
                 IOobject *fieldObject = cloudObjs.lookup(fieldName);
 
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/cloudPrefix/cloudName
-                        / fieldName
+                        << runTime.timeName()/cloudPrefix/cloudName/fieldName
                         << endl;
                     continue;
                 }

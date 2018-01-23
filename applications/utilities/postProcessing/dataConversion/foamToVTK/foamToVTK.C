@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -146,6 +146,8 @@ Note
 #include "pointMesh.H"
 #include "volPointInterpolation.H"
 #include "emptyPolyPatch.H"
+#include "PstreamCombineReduceOps.H"
+#include "HashTableOps.H"
 #include "labelIOField.H"
 #include "scalarIOField.H"
 #include "sphericalTensorIOField.H"
@@ -156,7 +158,6 @@ Note
 #include "passiveParticle.H"
 #include "stringOps.H"
 #include "areaFields.H"
-
 #include "meshSubsetHelper.H"
 #include "readFields.H"
 #include "faceSet.H"
@@ -190,13 +191,17 @@ void print(const char* msg, Ostream& os, const UPtrList<const GeoField>& flds)
 }
 
 
-void print(Ostream& os, const wordList& flds)
+void print(const char* msg, Ostream& os, const wordList& flds)
 {
-    forAll(flds, i)
+    if (flds.size())
     {
-        os  << ' ' << flds[i];
+        os  << msg;
+        forAll(flds, i)
+        {
+            os  << ' ' << flds[i];
+        }
+        os  << endl;
     }
-    os  << endl;
 }
 
 
@@ -615,6 +620,16 @@ int main(int argc, char *argv[])
         pointSphericalTensorField::typeName,
         pointSymmTensorField::typeName,
         pointTensorField::typeName
+    };
+
+    // Supported cloud (lagrangian) field types
+    const wordHashSet cFieldTypes
+    {
+        labelIOField::typeName,
+        scalarIOField::typeName,
+        vectorIOField::typeName,
+        symmTensorIOField::typeName,
+        tensorIOField::typeName
     };
 
     forAll(timeDirs, timei)
@@ -1446,7 +1461,7 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        for (const fileName& cloudName : cloudNames)
+        for (const word& cloudName : cloudNames)
         {
             // Always create the cloud directory.
             mkDir(fvPath/cloud::prefix/cloudName);
@@ -1459,50 +1474,84 @@ int main(int argc, char *argv[])
             Info<< "    Lagrangian: "
                 << relativeName(runTime, outputName) << nl;
 
-            IOobjectList sprayObjs
+            IOobjectList cloudObjs
             (
                 mesh,
                 runTime.timeName(),
                 cloud::prefix/cloudName
             );
 
-            if (sprayObjs.found("positions") || sprayObjs.found("coordinates"))
+            // Clouds require "coordinates".
+            // The "positions" are for v1706 and lower.
+            bool cloudExists =
+            (
+                cloudObjs.found("coordinates")
+             || cloudObjs.found("positions")
+            );
+            reduce(cloudExists, orOp<bool>());
+
+            if (cloudExists)
             {
-                wordList labelNames(sprayObjs.names(labelIOField::typeName));
-                Info<< "        labels      :";
-                print(Info, labelNames);
+                // Limited to types that we explicitly handle
+                HashTable<wordHashSet> cloudFields = cloudObjs.classes();
+                cloudFields.retain(cFieldTypes);
 
-                wordList scalarNames(sprayObjs.names(scalarIOField::typeName));
-                Info<< "        scalars     :";
-                print(Info, scalarNames);
+                // The number of cloud fields (locally)
+                label nCloudFields = 0;
+                forAllConstIters(cloudFields, citer)
+                {
+                    nCloudFields += citer.object().size();
+                }
 
-                wordList vectorNames(sprayObjs.names(vectorIOField::typeName));
-                Info<< "        vectors     :";
-                print(Info, vectorNames);
-
-                wordList sphereNames
-                (
-                    sprayObjs.names
+                // Ensure all processes have identical information
+                if (Pstream::parRun())
+                {
+                    Pstream::mapCombineGather
                     (
-                        sphericalTensorIOField::typeName
-                    )
-                );
-                Info<< "        sphTensors  :";
-                print(Info, sphereNames);
+                        cloudFields,
+                        HashSetPlusEqOp<word>()
+                    );
+                    Pstream::mapCombineScatter(cloudFields);
+                }
 
-                wordList symmNames
+
+                // Build lists of field names and echo some information
+
+                const wordList labelNames
                 (
-                    sprayObjs.names
-                    (
-                        symmTensorIOField::typeName
-                    )
+                    cloudFields(labelIOField::typeName).sortedToc()
                 );
-                Info<< "        symmTensors :";
-                print(Info, symmNames);
+                print("        labels      :", Info, labelNames);
 
-                wordList tensorNames(sprayObjs.names(tensorIOField::typeName));
-                Info<< "        tensors     :";
-                print(Info, tensorNames);
+                const wordList scalarNames
+                (
+                    cloudFields(scalarIOField::typeName).sortedToc()
+                );
+                print("        scalars     :", Info, scalarNames);
+
+                const wordList vectorNames
+                (
+                    cloudFields(vectorIOField::typeName).sortedToc()
+                );
+                print("        vectors     :", Info, vectorNames);
+
+                const wordList sphNames
+                (
+                    cloudFields(sphericalTensorIOField::typeName).sortedToc()
+                );
+                print("        sphTensors  :", Info, sphNames);
+
+                const wordList symmNames
+                (
+                    cloudFields(symmTensorIOField::typeName).sortedToc()
+                );
+                print("        symmTensors :", Info, symmNames);
+
+                const wordList tensorNames
+                (
+                    cloudFields(tensorIOField::typeName).sortedToc()
+                );
+                print("        tensors     :", Info, tensorNames);
 
                 vtk::lagrangianWriter writer
                 (
@@ -1512,22 +1561,14 @@ int main(int argc, char *argv[])
                     fmtType
                 );
 
-                // Write number of fields
-                writer.beginParcelData
-                (
-                    labelNames.size()
-                  + scalarNames.size()
-                  + vectorNames.size()
-                  + sphereNames.size()
-                  + symmNames.size()
-                  + tensorNames.size()
-                );
+                // Write number of fields (on this processor)
+                writer.beginParcelData(nCloudFields);
 
                 // Fields
                 writer.writeIOField<label>(labelNames);
                 writer.writeIOField<scalar>(scalarNames);
                 writer.writeIOField<vector>(vectorNames);
-                writer.writeIOField<sphericalTensor>(sphereNames);
+                writer.writeIOField<sphericalTensor>(sphNames);
                 writer.writeIOField<symmTensor>(symmNames);
                 writer.writeIOField<tensor>(tensorNames);
 

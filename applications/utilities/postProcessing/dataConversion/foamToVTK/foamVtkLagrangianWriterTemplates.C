@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,30 +29,48 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::vtk::lagrangianWriter::writeIOField
-(
-    const wordList& objectNames
-)
+void Foam::vtk::lagrangianWriter::writeIOField(const wordList& fieldNames)
 {
     const int nCmpt(pTraits<Type>::nComponents);
 
     const bool useIntField =
         std::is_integral<typename pTraits<Type>::cmptType>();
 
-    for (const word& fldName : objectNames)
+    const fileName cloudDir(cloud::prefix/cloudName_);
+
+    for (const word& fldName : fieldNames)
     {
-        IOobject header
+        // Globally the field is expected to exist (MUST_READ), but can
+        // be missing on a local processor.
+        //
+        // However, constructing IOField with MUST_READ and valid=false fails.
+        // Workaround: READ_IF_PRESENT and verify the header globally
+
+        IOobject fieldObject
         (
             fldName,
             mesh_.time().timeName(),
-            cloud::prefix/cloudName_,
+            cloudDir,
             mesh_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false  // no register
+            IOobject::READ_IF_PRESENT
         );
 
-        IOField<Type> fld(header);
+        // Check global existence - could make an error
+        const bool fieldExists =
+            returnReduce
+            (
+                fieldObject.typeHeaderOk<IOField<Type>>(false),
+                orOp<bool>()
+            );
+
+        if (!fieldExists)
+        {
+            continue;
+        }
+
+        IOField<Type> fld(fieldObject);
+
+        // NOTE: Could skip if there are no local parcels...
 
         if (useIntField)
         {

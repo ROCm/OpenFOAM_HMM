@@ -81,7 +81,12 @@ tmp<volScalarField::Internal> kOmegaSSTLM<BasicTurbulenceModel>::Fthetat
     const volScalarField::Internal& omega = this->omega_();
     const volScalarField::Internal& y = this->y_();
 
-    const volScalarField::Internal delta(375*Omega*nu*ReThetat_()*y/sqr(Us));
+    dimensionedScalar deltaMin("deltaMin", dimLength, SMALL);
+    volScalarField::Internal delta
+    (
+        max(375*Omega*nu*ReThetat_()*y/sqr(Us), deltaMin)
+    );
+
     const volScalarField::Internal ReOmega(sqr(y)*omega/nu);
     const volScalarField::Internal Fwake(exp(-sqr(ReOmega/1e5)));
 
@@ -617,11 +622,11 @@ void kOmegaSSTLM<BasicTurbulenceModel>::correct()
         return;
     }
 
-    // Correct ReThetat and gammaInt
-    correctReThetatGammaInt();
-
     // Correct k and omega
     kOmegaSST<BasicTurbulenceModel>::correct();
+
+    // Correct ReThetat and gammaInt
+    correctReThetatGammaInt();
 }
 
 

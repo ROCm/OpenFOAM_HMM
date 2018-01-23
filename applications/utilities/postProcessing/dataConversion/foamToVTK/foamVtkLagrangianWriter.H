@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::vtk::lagrangianWriter
 
 Description
-    Write fields (internal).
+    Write lagrangian positions and fields (clouds).
 
 SourceFiles
     lagrangianWriter.C
@@ -36,11 +36,11 @@ SourceFiles
 #ifndef foamVtkLagrangianWriter_H
 #define foamVtkLagrangianWriter_H
 
-#include "OFstream.H"
 #include "Cloud.H"
 #include "volFields.H"
 #include "pointFields.H"
 #include "foamVtkOutputOptions.H"
+#include <fstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,7 +115,7 @@ public:
 
 
     //- Destructor
-    ~lagrangianWriter();
+    ~lagrangianWriter() = default;
 
 
     // Member Functions
@@ -135,15 +135,17 @@ public:
             return nParcels_;
         }
 
+        //- Begin parcel data (point data).
+        //  The nFields parameter is only needed for legacy format.
         void beginParcelData(label nFields);
         void endParcelData();
 
         //- Write file footer
         void writeFooter();
 
-        //- Write IOField
+        //- Write IOFields
         template<class Type>
-        void writeIOField(const wordList& objectNames);
+        void writeIOField(const wordList& fieldNames);
 };
 
 
