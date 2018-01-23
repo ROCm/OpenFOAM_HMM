@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -78,6 +78,7 @@ Description
         div(phi,U)      Gauss DEShybrid
             linear                    // scheme 1
             linearUpwind grad(U)      // scheme 2
+            hmax                      // LES delta name, e.g. 'delta', 'hmax'
             0.65                      // DES coefficient, typically = 0.65
             30                        // Reference velocity scale
             2                         // Reference length scale
@@ -139,6 +140,9 @@ class DEShybrid
 
         //- Scheme 2
         tmp<surfaceInterpolationScheme<Type>> tScheme2_;
+
+        //- Name of the LES delta field
+        word deltaName_;
 
         //- DES Coefficient
         scalar CDES_;
@@ -258,6 +262,7 @@ public:
             (
                 surfaceInterpolationScheme<Type>::New(mesh, is)
             ),
+            deltaName_(is),
             CDES_(readScalar(is)),
             U0_("U0", dimLength/dimTime, readScalar(is)),
             L0_("L0", dimLength, readScalar(is)),
@@ -323,6 +328,7 @@ public:
             (
                 surfaceInterpolationScheme<Type>::New(mesh, faceFlux, is)
             ),
+            deltaName_(is),
             CDES_(readScalar(is)),
             U0_("U0", dimLength/dimTime, readScalar(is)),
             L0_("L0", dimLength, readScalar(is)),
@@ -385,9 +391,9 @@ public:
             typedef compressible::turbulenceModel cmpModel;
             typedef incompressible::turbulenceModel icoModel;
 
-            // Assuming that LES delta field is called "delta"
+            // Lookup the LES delta from the mesh database
             const volScalarField& delta = this->mesh().template
-                 lookupObject<const volScalarField>("delta");
+                 lookupObject<const volScalarField>(deltaName_);
 
             // Could avoid the compressible/incompressible case by looking
             // up all fields from the database - but retrieving from model
