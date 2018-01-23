@@ -265,6 +265,9 @@ public:
         //- Return directory path name (part before last /)
         fileName path() const;
 
+        //- Return name after stripping off the parent directory
+        fileName relative(const fileName& parent) const;
+
         //- Return file name without extension (part before last .)
         fileName lessExt() const;
 

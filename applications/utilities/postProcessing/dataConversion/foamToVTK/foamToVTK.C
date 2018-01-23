@@ -320,31 +320,6 @@ vtk::outputOptions getOutputOptions(const argList& args)
 }
 
 
-fileName relativeName(const fileName& parent, const fileName& file)
-{
-    string::size_type next = parent.size();
-    if
-    (
-        file.startsWith(parent)
-     && next < file.size()
-     && file[next] == '/'
-    )
-    {
-        return file.substr(next+1);
-    }
-    else
-    {
-        return file;
-    }
-}
-
-
-fileName relativeName(const Time& runTime, const fileName& file)
-{
-    return relativeName(runTime.path(), file);
-}
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
@@ -672,7 +647,7 @@ int main(int argc, char *argv[])
               + timeDesc
             );
             Info<< "    faceSet   : "
-                << relativeName(runTime, outputName) << nl;
+                << outputName.relative(runTime.path()) << nl;
 
             vtk::writeFaceSet
             (
@@ -700,7 +675,7 @@ int main(int argc, char *argv[])
               + timeDesc
             );
             Info<< "    pointSet  : "
-                << relativeName(runTime, outputName) << nl;
+                << outputName.relative(runTime.path()) << nl;
 
             vtk::writePointSet
             (
@@ -1095,7 +1070,7 @@ int main(int argc, char *argv[])
               + timeDesc
             );
             Info<< "    Internal  : "
-                << relativeName(runTime, outputName) << endl;
+                << outputName.relative(runTime.path()) << nl;
 
             // Write mesh
             vtk::internalWriter writer
@@ -1255,7 +1230,7 @@ int main(int argc, char *argv[])
               + timeDesc
             );
             Info<< "    Combined patches    : "
-                << relativeName(runTime, outputName) << nl;
+                << outputName.relative(runTime.path()) << nl;
 
             vtk::patchWriter writer
             (
@@ -1325,7 +1300,7 @@ int main(int argc, char *argv[])
                   + timeDesc
                 );
                 Info<< "    Patch     : "
-                    << relativeName(runTime, outputName) << nl;
+                    << outputName.relative(runTime.path()) << nl;
 
                 vtk::patchWriter writer
                 (
@@ -1426,7 +1401,7 @@ int main(int argc, char *argv[])
                   + timeDesc
                 );
                 Info<< "    FaceZone  : "
-                    << relativeName(runTime, outputName) << nl;
+                    << outputName.relative(runTime.path()) << nl;
 
                 indirectPrimitivePatch pp
                 (
@@ -1472,7 +1447,7 @@ int main(int argc, char *argv[])
               + "_" + timeDesc
             );
             Info<< "    Lagrangian: "
-                << relativeName(runTime, outputName) << nl;
+                << outputName.relative(runTime.path()) << nl;
 
             IOobjectList cloudObjs
             (

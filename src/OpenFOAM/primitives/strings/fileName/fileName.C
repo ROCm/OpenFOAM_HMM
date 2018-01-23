@@ -404,6 +404,25 @@ Foam::fileName Foam::fileName::path() const
 }
 
 
+Foam::fileName Foam::fileName::relative(const fileName& parent) const
+{
+    const auto top = parent.size();
+    const fileName& f = *this;
+
+    // Everything after "parent/xxx" -> "xxx"
+    if
+    (
+        top && (f.size() > (top+1)) && (*this)[top] == '/'
+     && f.startsWith(parent)
+    )
+    {
+        return f.substr(top+1);
+    }
+
+    return f;
+}
+
+
 Foam::fileName Foam::fileName::lessExt() const
 {
     const auto i = find_ext();

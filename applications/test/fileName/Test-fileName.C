@@ -161,6 +161,29 @@ unsigned testEquals
 }
 
 
+unsigned testRelative(std::initializer_list<Pair<std::string>> tests)
+{
+    Info<< nl << "Checking fileName::relative()" << nl << endl;
+
+    unsigned nFail = 0;
+
+    for (const Pair<std::string>& test : tests)
+    {
+        const std::string& dir    = test.first();
+        const std::string& parent = test.second();
+
+        fileName relative = fileName(dir).relative(parent);
+
+        Info<< "directory: " << dir << nl
+            << "parent   : " << parent << nl
+            << "relative = " << relative << nl
+            << endl;
+    }
+
+    return nFail;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
@@ -170,12 +193,13 @@ int main(int argc, char *argv[])
     argList::addBoolOption("validate", "test fileName::validate");
     argList::addBoolOption("ext", "test handing of file extensions");
     argList::addBoolOption("construct", "test constructors");
+    argList::addBoolOption("relative", "test relative operations");
     argList::addBoolOption("default", "reinstate default tests");
     argList::addNote("runs default tests or specified ones only");
 
     #include "setRootCase.H"
 
-    // Run default tests, unless only specific tests are requested
+    // Run default tests, unless specific tests are requested
     const bool defaultTests =
         args.found("default") || args.options().empty();
 
@@ -415,6 +439,49 @@ int main(int argc, char *argv[])
             Info<< "passed all";
         }
         Info<< " fileName::validate tests" << nl;
+    }
+
+
+    if (args.found("relative"))
+    {
+        unsigned nFail = 0;
+
+        nFail += testRelative
+        (
+            {
+                { "/some/dir/subdir/name",  "" },
+                { "/some/dir/subdir/name",  "/" },
+                { "/some/dir/subdir/name",  "/some" },
+                { "/some/dir/subdir/name",  "/some/" },
+                { "/some/dir/subdir/name",  "/some/dir" },
+                { "/some/dir/subdir/name",  "/some/dir/" },
+                { "/some/dir/subdir/name",  "/some/dir/subdir/name" },
+                { "/some/dir/subdir/name",  "/some/dir/subdir/name/" },
+                { "/some/dir/subdir/name",  "/some/other" },
+
+                // With single-char for name
+                { "/some/dir/subdir/a",  "" },
+                { "/some/dir/subdir/a",  "/" },
+                { "/some/dir/subdir/a",  "/some" },
+                { "/some/dir/subdir/a",  "/some/" },
+                { "/some/dir/subdir/a",  "/some/dir" },
+                { "/some/dir/subdir/a",  "/some/dir/" },
+                { "/some/dir/subdir/a",  "/some/dir/subdir/a" },
+                { "/some/dir/subdir/a",  "/some/dir/subdir/a/" },
+                { "/some/dir/subdir/a",  "/some/other" },
+
+                // Bad input (trailing slash)
+                { "/some/dir/subdir/a/",  "" },
+                { "/some/dir/subdir/a/",  "/" },
+                { "/some/dir/subdir/a/",  "/some" },
+                { "/some/dir/subdir/a/",  "/some/" },
+                { "/some/dir/subdir/a/",  "/some/dir" },
+                { "/some/dir/subdir/a/",  "/some/dir/" },
+                { "/some/dir/subdir/a/",  "/some/dir/subdir/a" },
+                { "/some/dir/subdir/a/",  "/some/dir/subdir/a/" },
+                { "/some/dir/subdir/a/",  "/some/other" },
+            }
+        );
     }
 
 
