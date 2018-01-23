@@ -352,6 +352,16 @@ int main()
     HashTable<scalar> table1b(std::move(table2));
     Info<<"table1 =  " << table1b << nl <<"table2 =  " << table2 << nl;
 
+    table1b.set("more", 14.0);
+    table1b.set("less", 15.0);
+    table1b.set("other", 16.0);
+
+    Info<<"Test a += b " << nl;
+    Info<<"a = " << flatOutput(table1b.sortedToc()) << nl
+        <<"b = " << flatOutput(table3.sortedToc()) << nl;
+
+    Info<<"=> " << (table1b += table3) << nl;
+
     Info<< "\nDone\n";
 
     return 0;

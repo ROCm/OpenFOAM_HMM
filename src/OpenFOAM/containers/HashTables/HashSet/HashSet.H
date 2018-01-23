@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ Description
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 template<class Key, class Hash> class HashSet;
 
 template<class Key, class Hash>
@@ -175,14 +175,14 @@ public:
         {}
 
         //- Construct from the keys of another HashTable,
-        //  the type of values held is arbitrary.
+        //- the type of values held is arbitrary.
         template<class AnyType, class AnyHash>
         explicit HashSet(const HashTable<AnyType, Key, AnyHash>& tbl);
 
 
     // Member Functions
 
-      // Edit
+    // Edit
 
         //- Insert a new entry, not overwriting existing entries.
         //  \return True if the entry inserted, which means that it did
@@ -329,7 +329,7 @@ public:
         }
 
 
-      // Comparison
+    // Comparison
 
         //- Sets are equal if all keys are equal,
         //- independent of order or underlying storage size.
@@ -339,7 +339,7 @@ public:
         bool operator!=(const this_type& rhs) const;
 
 
-      // Assignment
+    // Assignment
 
         //- Assignment from a UList of keys
         void operator=(const UList<Key>& lst);
@@ -352,25 +352,25 @@ public:
         void operator=(std::initializer_list<Key> lst);
 
 
-      // Logical operations
+    // Logical and set operations
 
-        //- Combine entries from HashSets
-        void operator|=(const this_type& rhs);
+        //- Add entries to this HashSet
+        this_type& operator|=(const this_type& rhs);
 
         //- Only retain entries found in both HashSets
-        inline void operator&=(const this_type& rhs);
+        inline this_type& operator&=(const this_type& rhs);
 
         //- Only retain unique entries (xor)
-        void operator^=(const this_type& rhs);
+        this_type& operator^=(const this_type& rhs);
 
-        //- Add entries listed in the given HashSet to this HashSet
-        inline void operator+=(const this_type& rhs)
+        //- Add entries to this HashSet
+        inline this_type& operator+=(const this_type& rhs)
         {
-            this->operator|=(rhs);
+            return this->operator|=(rhs);
         }
 
-        //- Remove entries listed in the given HashSet from this HashSet
-        inline void operator-=(const this_type& rhs);
+        //- Remove entries from this HashSet
+        inline this_type& operator-=(const this_type& rhs);
 
 
     // IOstream Operator

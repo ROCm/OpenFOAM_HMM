@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -641,6 +641,9 @@ public:
         //- The opposite of the equality operation.
         bool operator!=(const HashTable<T, Key, Hash>& rhs) const;
 
+        //- Add entries into this HashTable
+        this_type& operator+=(const this_type& rhs);
+
 
 protected:
 
@@ -785,7 +788,7 @@ public:
           // Constructors
 
             //- Construct null (end iterator)
-            inline iterator() {}
+            inline iterator() = default;
 
             //- Copy construct from similar access type
             inline explicit iterator(const Iterator<false>& iter)
@@ -829,7 +832,7 @@ public:
           // Constructors
 
             //- Construct null (end iterator)
-            inline const_iterator() {}
+            inline const_iterator() = default;
 
             //- Copy construct from similar access type
             inline explicit const_iterator(const Iterator<true>& iter)

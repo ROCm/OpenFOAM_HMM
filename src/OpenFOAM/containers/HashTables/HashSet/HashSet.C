@@ -224,25 +224,31 @@ bool Foam::HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& rhs) const
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
+Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
 {
     // Add rhs elements into lhs
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         this->insert(iter.key());
     }
+
+    return *this;
 }
 
 
 template<class Key, class Hash>
-inline void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
+inline Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
 {
     this->parent_type::retain(rhs);
+    return *this;
 }
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
+Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 {
     // Add missed rhs elements, remove duplicate elements
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
@@ -256,13 +262,18 @@ void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
             this->insert(iter.key());
         }
     }
+
+    return *this;
 }
 
 
 template<class Key, class Hash>
-inline void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
+inline Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {
     this->parent_type::erase(rhs);
+
+    return *this;
 }
 
 

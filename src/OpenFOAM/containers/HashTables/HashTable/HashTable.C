@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -877,6 +877,32 @@ bool Foam::HashTable<T, Key, Hash>::operator!=
 ) const
 {
     return !operator==(rhs);
+}
+
+
+template<class T, class Key, class Hash>
+Foam::HashTable<T, Key, Hash>& Foam::HashTable<T, Key, Hash>::operator+=
+(
+    const HashTable<T, Key, Hash>& rhs
+)
+{
+    // Avoid no-ops:
+    if (rhs.size() || this != &rhs)
+    {
+        if (this->size())
+        {
+            for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
+            {
+                insert(iter.key(), iter.object());
+            }
+        }
+        else
+        {
+            (*this) = rhs;
+        }
+    }
+
+    return *this;
 }
 
 

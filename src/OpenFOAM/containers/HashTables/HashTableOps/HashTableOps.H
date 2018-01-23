@@ -63,20 +63,7 @@ struct HashTablePlusEqOp
 
     void operator()(value_type& a, const value_type& b) const
     {
-        if (b.size())
-        {
-            if (a.size())
-            {
-                forAllConstIters(b, citer)
-                {
-                    a.insert(citer.key(), citer.object());
-                }
-            }
-            else
-            {
-                a = b;
-            }
-        }
+        a += b;
     }
 };
 
