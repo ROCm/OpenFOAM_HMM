@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,6 +72,8 @@ Note
 #include "IOobjectList.H"
 #include "IOmanip.H"
 #include "OFstream.H"
+#include "PstreamCombineReduceOps.H"
+#include "HashTableOps.H"
 
 #include "fvc.H"
 #include "volFields.H"
@@ -622,8 +624,13 @@ int main(int argc, char *argv[])
 
             Info<< "Write " << cloudName << " (";
 
-            bool cloudExists = currentCloudDirs.found(cloudName);
-            reduce(cloudExists, orOp<bool>());
+            const bool cloudExists =
+                returnReduce
+                (
+                    currentCloudDirs.found(cloudName),
+                    orOp<bool>()
+                );
+
 
             {
                 autoPtr<ensightFile> os = ensCase.newCloud(cloudName);
@@ -643,10 +650,10 @@ int main(int argc, char *argv[])
                 }
             }
 
-            forAllConstIter(HashTable<word>, theseCloudFields, fieldIter)
+            forAllConstIters(theseCloudFields, fieldIter)
             {
                 const word& fieldName = fieldIter.key();
-                const word& fieldType = fieldIter();
+                const word& fieldType = fieldIter.object();
 
                 IOobject fieldObject
                 (
@@ -657,10 +664,13 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ
                 );
 
-                // cannot have field without cloud positions
-                bool fieldExists = cloudExists;
+                bool fieldExists = cloudExists; // No field without positions
                 if (cloudExists)
                 {
+                    // Want MUST_READ (globally) and valid=false (locally),
+                    // but that combination does not work.
+                    // So check the header and sync globally
+
                     fieldExists =
                         fieldObject.typeHeaderOk<IOField<scalar>>(false);
 

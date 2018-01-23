@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,8 @@ void Foam::vtk::lagrangianWriter::writePoints()
     }
     else
     {
-        beginPiece(); // Tricky - hide in here
+        beginPiece();           // Tricky - hide begin piece in here
+        if (!nParcels_) return; // No parcels? ... skip everything else
 
         format().tag(vtk::fileTag::POINTS)
             .openDataArray<float,3>(vtk::dataArrayAttr::POINTS)
@@ -219,16 +220,12 @@ Foam::vtk::lagrangianWriter::lagrangianWriter
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::lagrangianWriter::~lagrangianWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::vtk::lagrangianWriter::beginParcelData(label nFields)
 {
+    if (!nParcels_) return;   // Skip if there are no parcels
+
     const vtk::fileTag dataType =
     (
         useVerts_
@@ -249,6 +246,8 @@ void Foam::vtk::lagrangianWriter::beginParcelData(label nFields)
 
 void Foam::vtk::lagrangianWriter::endParcelData()
 {
+    if (!nParcels_) return;   // Skip if there are no parcels
+
     const vtk::fileTag dataType =
     (
         useVerts_

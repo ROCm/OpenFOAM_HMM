@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -21,74 +21,69 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Namespace
-    Foam::ensightOutput
+InNamspace
+    Foam
 
 Description
-    A collection of global functions for writing ensight file content.
+    Various functions to operate on HashTables.
 
 SourceFiles
-    ensightOutputCloud.C
-    ensightOutputCloudTemplates.C
+    HashTableOps.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ensightOutputCloud_H
-#define ensightOutputCloud_H
+#ifndef HashTableOps_H
+#define HashTableOps_H
 
-#include "ensightFile.H"
-#include "ensightMesh.H"
-
-#include "autoPtr.H"
-#include "IOField.H"
-#include "volFields.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 namespace Foam
 {
-namespace ensightCloud
+
+//- Combine HashSet operation. Equivalent to 'a += b'
+template<class Key=word, class Hash=string::hash>
+struct HashSetPlusEqOp
 {
+    typedef HashSet<Key, Hash> value_type;
 
-//- Write cloud positions
-void writePositions
-(
-    const fvMesh& mesh,
-    const word& cloudName,
-    const bool exists,
-    autoPtr<ensightFile>& output
-);
+    void operator()(value_type& a, const value_type& b) const
+    {
+        a += b;
+    }
+};
 
 
-//- Write cloud field, returning true if the field is non-empty.
-template<class Type>
-bool writeCloudField
-(
-    const IOField<Type>& field,
-    ensightFile& os
-);
+//- Combine HashTable operation. Equivalent to 'a += b'
+template<class T, class Key=word, class Hash=string::hash>
+struct HashTablePlusEqOp
+{
+    typedef HashTable<T, Key, Hash> value_type;
 
-
-//- Write cloud field from IOobject, always returning true.
-template<class Type>
-bool writeCloudField
-(
-    IOobject& fieldObject,
-    const bool exists,
-    autoPtr<ensightFile>& output
-);
-
-
-} // namespace ensightCloud
-} // namespace Foam
+    void operator()(value_type& a, const value_type& b) const
+    {
+        if (b.size())
+        {
+            if (a.size())
+            {
+                forAllConstIters(b, citer)
+                {
+                    a.insert(citer.key(), citer.object());
+                }
+            }
+            else
+            {
+                a = b;
+            }
+        }
+    }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-    #include "ensightOutputCloudTemplates.C"
-#endif
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

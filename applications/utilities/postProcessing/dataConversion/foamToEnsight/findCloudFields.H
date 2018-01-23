@@ -7,7 +7,7 @@ HashTable<HashTable<word>> cloudFields;
 if (timeDirs.size() && !noLagrangian)
 {
     const fileName& baseDir = mesh.time().path();
-    const fileName& cloudPrefix = regionPrefix/cloud::prefix;
+    const fileName cloudPrefix(regionPrefix/cloud::prefix);
 
     Info<< "Searching for lagrangian ... " << flush;
 
@@ -35,11 +35,12 @@ if (timeDirs.size() && !noLagrangian)
                 cloudPrefix/cloudName
             );
 
-            // Clouds always have "positions" (v1706 and lower) or "coordinates"
-            if (cloudObjs.found("positions") || cloudObjs.found("coordinates"))
+            // Clouds require "coordinates".
+            // The "positions" are for v1706 and lower.
+            if (cloudObjs.found("coordinates") || cloudObjs.found("positions"))
             {
                 // Save the cloud fields on a per cloud basis
-                auto fieldsPerCloud = cloudFields(cloudName);
+                auto& fieldsPerCloud = cloudFields(cloudName);
 
                 forAllConstIters(cloudObjs, fieldIter)
                 {
@@ -57,6 +58,12 @@ if (timeDirs.size() && !noLagrangian)
     {
         cloudIter().erase("coordinates");
         cloudIter().erase("positions");
+    }
+
+    if (Pstream::parRun())
+    {
+        Pstream::mapCombineGather(cloudFields, HashTablePlusEqOp<word>());
+        Pstream::mapCombineScatter(cloudFields);
     }
 
     if (cloudFields.empty())
