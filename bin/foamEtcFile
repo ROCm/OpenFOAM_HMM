@@ -46,7 +46,7 @@
 printHelp() {
     cat<<USAGE
 
-Usage: foamEtcFile [OPTION] fileName
+Usage: foamEtcFile [OPTION] fileName [-- args]
        foamEtcFile [OPTION] [-list|-list-test] [fileName]
 
 options:
@@ -270,6 +270,31 @@ done
 
 #-------------------------------------------------------------------------------
 
+# Split arguments into filename (for searching) and trailing bits for shell eval
+# Silently remove leading ~OpenFOAM/ (as per Foam::findEtcFile)
+nArgs=$#
+fileName="${1#~OpenFOAM/}"
+unset evalArgs
+
+if [ "$nArgs" -eq 1 ]
+then
+    if [ "$1" = "--" ]
+    then
+        nArgs=0
+        unset fileName
+    fi
+elif [ "$nArgs" -ge 2 ]
+then
+    if [ "$2" = "--" ]
+    then
+        nArgs=1
+        shift 2
+        evalArgs="$@"
+    fi
+fi
+
+
+# Get version information
 if [ -n "$optVersion" ]
 then
     setVersion $optVersion
@@ -291,12 +316,6 @@ groupDir="${WM_PROJECT_SITE:-$prefixDir/site}"
 # do
 #     eval echo "$i=\$$i" 1>&2
 # done
-
-
-# Save the essential bits of information
-# silently remove leading ~OpenFOAM/ (used in Foam::findEtcFile)
-nArgs=$#
-fileName="${1#~OpenFOAM/}"
 
 # Define the various places to be searched:
 unset dirList
@@ -435,7 +454,12 @@ else
                 echo "$verboseOutput$resolved" 1>&2
             fi
 
-            echo "$shellOutput$resolved"
+            if [ -n "$shellOutput" ]
+            then
+                echo "$shellOutput$resolved $evalArgs"
+            else
+                echo "$resolved"
+            fi
             [ -n "$optAll" ] || break
         fi
     done
