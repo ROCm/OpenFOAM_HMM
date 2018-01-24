@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -273,6 +273,9 @@ public:
 
             //- Return mass of particles injected (cumulative)
             inline scalar massInjected() const;
+
+            //- Return injectorID
+            inline label injectorID() const;
 
             //- Return the end-of-injection time
             virtual scalar timeEnd() const = 0;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,6 +52,13 @@ template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::massInjected() const
 {
     return massInjected_;
+}
+
+
+template<class CloudType>
+Foam::label Foam::InjectionModel<CloudType>::injectorID() const
+{
+    return injectorID_;
 }
 
 

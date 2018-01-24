@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,11 +36,13 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
     patchData_(cloud.mesh(), this->coeffDict()),
-    nEscape_(patchData_.size(), 0),
-    massEscape_(patchData_.size(), 0.0),
-    nStick_(patchData_.size(), 0),
-    massStick_(patchData_.size(), 0.0),
+    nEscape_(patchData_.size()),
+    massEscape_(patchData_.size()),
+    nStick_(patchData_.size()),
+    massStick_(patchData_.size()),
     writeFields_(this->coeffDict().lookupOrDefault("writeFields", false)),
+    outputByInjectorId_(this->coeffDict().lookupOrDefault("outputByInjectorId", false)),
+    injIdToIndex_(cloud.injectors().size()),
     massEscapePtr_(nullptr),
     massStickPtr_(nullptr)
 {
@@ -77,6 +79,21 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
                 << this->PatchInteractionModel<CloudType>::interactionTypeNames_
                 << nl << exit(FatalError);
         }
+
+        label nInjectors(1);
+        if (outputByInjectorId_)
+        {
+            nInjectors = cloud.injectors().size();
+            for (label i=0; i<nInjectors; i++)
+            {
+                injIdToIndex_.insert(cloud.injectors()[i].injectorID(), i);
+            }
+        }
+
+        nEscape_[patchi].setSize(nInjectors, 0);
+        massEscape_[patchi].setSize(nInjectors, 0.0);
+        nStick_[patchi].setSize(nInjectors, 0);
+        massStick_[patchi].setSize(nInjectors, 0.0);
     }
 }
 
@@ -94,6 +111,8 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     nStick_(pim.nStick_),
     massStick_(pim.massStick_),
     writeFields_(pim.writeFields_),
+    outputByInjectorId_(pim.outputByInjectorId_),
+    injIdToIndex_(pim.injIdToIndex_),
     massEscapePtr_(nullptr),
     massStickPtr_(nullptr)
 {}
@@ -199,8 +218,16 @@ bool Foam::LocalInteraction<CloudType>::correct
                 keepParticle = false;
                 p.active(false);
                 U = Zero;
-                nEscape_[patchi]++;
-                massEscape_[patchi] += dm;
+                if (outputByInjectorId_)
+                {
+                    nEscape_[patchi][injIdToIndex_[p.typeId()]]++;
+                    massEscape_[patchi][injIdToIndex_[p.typeId()]] += dm;
+                }
+                else
+                {
+                    nEscape_[patchi][0]++;
+                    massEscape_[patchi][0] += dm;
+                }
                 if (writeFields_)
                 {
                     label pI = pp.index();
@@ -216,8 +243,16 @@ bool Foam::LocalInteraction<CloudType>::correct
                 keepParticle = true;
                 p.active(false);
                 U = Zero;
-                nStick_[patchi]++;
-                massStick_[patchi] += dm;
+                if (outputByInjectorId_)
+                {
+                    nStick_[patchi][injIdToIndex_[p.typeId()]]++;
+                    massStick_[patchi][injIdToIndex_[p.typeId()]] += dm;
+                }
+                else
+                {
+                    nStick_[patchi][0]++;
+                    massStick_[patchi][0] += dm;
+                }
                 if (writeFields_)
                 {
                     label pI = pp.index();
@@ -279,59 +314,91 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
     PatchInteractionModel<CloudType>::info(os);
 
     // retrieve any stored data
-    labelList npe0(patchData_.size(), 0);
+    labelListList npe0(nEscape_);
     this->getModelProperty("nEscape", npe0);
 
-    scalarList mpe0(patchData_.size(), 0.0);
+    scalarListList mpe0(massEscape_);
     this->getModelProperty("massEscape", mpe0);
 
-    labelList nps0(patchData_.size(), 0);
+    labelListList nps0(nStick_);
     this->getModelProperty("nStick", nps0);
 
-    scalarList mps0(patchData_.size(), 0.0);
+    scalarListList mps0(massStick_);
     this->getModelProperty("massStick", mps0);
 
     // accumulate current data
-    labelList npe(nEscape_);
-    Pstream::listCombineGather(npe, plusEqOp<label>());
-    npe = npe + npe0;
-
-    scalarList mpe(massEscape_);
-    Pstream::listCombineGather(mpe, plusEqOp<scalar>());
-    mpe = mpe + mpe0;
-
-    labelList nps(nStick_);
-    Pstream::listCombineGather(nps, plusEqOp<label>());
-    nps = nps + nps0;
-
-    scalarList mps(massStick_);
-    Pstream::listCombineGather(mps, plusEqOp<scalar>());
-    mps = mps + mps0;
-
-
-    forAll(patchData_, i)
+    labelListList npe(nEscape_);
+    forAll(npe, i)
     {
-        os  << "    Parcel fate: patch " <<  patchData_[i].patchName()
-            << " (number, mass)" << nl
-            << "      - escape                      = " << npe[i]
-            << ", " << mpe[i] << nl
-            << "      - stick                       = " << nps[i]
-            << ", " << mps[i] << nl;
+        Pstream::listCombineGather(npe[i], plusEqOp<label>());
+        npe[i] = npe[i] + npe0[i];
+    }
+
+    scalarListList mpe(massEscape_);
+    forAll(mpe, i)
+    {
+        Pstream::listCombineGather(mpe[i], plusEqOp<scalar>());
+        mpe[i] = mpe[i] + mpe0[i];
+    }
+
+    labelListList nps(nStick_);
+    forAll(nps, i)
+    {
+        Pstream::listCombineGather(nps[i], plusEqOp<label>());
+        nps[i] = nps[i] + nps0[i];
+    }
+
+    scalarListList mps(massStick_);
+    forAll(nps, i)
+    {
+        Pstream::listCombineGather(mps[i], plusEqOp<scalar>());
+        mps[i] = mps[i] + mps0[i];
+    }
+
+
+    if (outputByInjectorId_)
+    {
+        forAll(patchData_, i)
+        {
+            forAll (mpe[i], injId)
+            {
+                os  << "    Parcel fate: patch " <<  patchData_[i].patchName()
+                    << " (number, mass)" << nl
+                    << "      - escape  (injector " << injIdToIndex_.toc()[injId]
+                    << " )  = " << npe[i][injId]
+                    << ", " << mpe[i][injId] << nl
+                    << "      - stick   (injector " << injIdToIndex_.toc()[injId]
+                    << " )  = " << nps[i][injId]
+                    << ", " << mps[i][injId] << nl;
+            }
+        }
+    }
+    else
+    {
+        forAll(patchData_, i)
+        {
+            os  << "    Parcel fate: patch " <<  patchData_[i].patchName()
+                << " (number, mass)" << nl
+                << "      - escape                      = " << npe[i][0]
+                << ", " << mpe[i][0] << nl
+                << "      - stick                       = " << nps[i][0]
+                << ", " << mps[i][0] << nl;
+        }
     }
 
     if (this->writeTime())
     {
         this->setModelProperty("nEscape", npe);
-        nEscape_ = 0;
+        nEscape_ = Zero;
 
         this->setModelProperty("massEscape", mpe);
-        massEscape_ = 0.0;
+        massEscape_ = Zero;
 
         this->setModelProperty("nStick", nps);
-        nStick_ = 0;
+        nStick_ = Zero;
 
         this->setModelProperty("massStick", mps);
-        massStick_ = 0.0;
+        massStick_ = Zero;
     }
 }
 
