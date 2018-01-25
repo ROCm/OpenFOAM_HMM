@@ -223,9 +223,13 @@ inline Foam::PackedList<nBits>::PackedList(const PackedList<nBits>& lst)
 
 
 template<unsigned nBits>
-inline Foam::PackedList<nBits>::PackedList(const Xfer<PackedList<nBits>>& lst)
+inline Foam::PackedList<nBits>::PackedList(PackedList<nBits>&& lst)
+:
+    PackedListCore(),
+    StorageList(),
+    size_(0)
 {
-    transfer(lst());
+    transfer(lst);
 }
 
 
@@ -953,13 +957,6 @@ inline void Foam::PackedList<nBits>::transfer(PackedList<nBits>& lst)
     lst.size_ = 0;
 
     StorageList::transfer(lst);
-}
-
-
-template<unsigned nBits>
-inline Foam::Xfer<Foam::PackedList<nBits>> Foam::PackedList<nBits>::xfer()
-{
-    return xferMove(*this);
 }
 
 

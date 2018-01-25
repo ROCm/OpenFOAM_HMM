@@ -25,12 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::PackedBoolList::PackedBoolList()
-:
-    PackedList<1>()
-{}
-
-
 inline Foam::PackedBoolList::PackedBoolList(const label size)
 :
     PackedList<1>(size)
@@ -59,18 +53,20 @@ inline Foam::PackedBoolList::PackedBoolList(const PackedList<1>& lst)
 {}
 
 
-inline Foam::PackedBoolList::PackedBoolList(const Xfer<PackedBoolList>& lst)
+inline Foam::PackedBoolList::PackedBoolList(PackedBoolList&& lst)
 :
     PackedList<1>()
 {
-    transfer(lst());
+    transfer(lst);
 }
 
 
-inline Foam::PackedBoolList::PackedBoolList(const Xfer<PackedList<1>>& lst)
+inline Foam::PackedBoolList::PackedBoolList(PackedList<1>&& lst)
 :
-    PackedList<1>(lst)
-{}
+    PackedList<1>()
+{
+    transfer(lst);
+}
 
 
 inline Foam::PackedBoolList::PackedBoolList(const UList<bool>& lst)
@@ -147,12 +143,6 @@ inline void Foam::PackedBoolList::transfer(PackedList<1>& lst)
 }
 
 
-inline Foam::Xfer<Foam::PackedBoolList> Foam::PackedBoolList::xfer()
-{
-    return xferMove(*this);
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 inline void Foam::PackedBoolList::operator=(const bool val)
@@ -170,6 +160,18 @@ inline void Foam::PackedBoolList::operator=(const PackedBoolList& lst)
 inline void Foam::PackedBoolList::operator=(const PackedList<1>& lst)
 {
     PackedList<1>::operator=(lst);
+}
+
+
+inline void Foam::PackedBoolList::operator=(PackedBoolList&& lst)
+{
+    transfer(lst);
+}
+
+
+inline void Foam::PackedBoolList::operator=(PackedList<1>&& lst)
+{
+    transfer(lst);
 }
 
 

@@ -141,16 +141,16 @@ void Foam::PackedList<nBits>::flip()
 
 
 template<unsigned nBits>
-Foam::Xfer<Foam::labelList> Foam::PackedList<nBits>::values() const
+Foam::labelList Foam::PackedList<nBits>::values() const
 {
     labelList elems(size_);
 
-    forAll(*this, i)
+    for (label i=0; i < size_; ++i)
     {
         elems[i] = get(i);
     }
 
-    return elems.xfer();
+    return elems;
 }
 
 
@@ -519,6 +519,13 @@ void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 {
     StorageList::operator=(lst);
     size_ = lst.size();
+}
+
+
+template<unsigned nBits>
+void Foam::PackedList<nBits>::operator=(PackedList<nBits>&& lst)
+{
+    transfer(lst);
 }
 
 
