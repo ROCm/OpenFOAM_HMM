@@ -218,17 +218,4 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()
 }
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-template<class T, class Key, class Hash>
-inline void Foam::Swap
-(
-    HashTable<T, Key, Hash>& a,
-    HashTable<T, Key, Hash>& b
-)
-{
-    a.swap(b);
-}
-
-
 // ************************************************************************* //

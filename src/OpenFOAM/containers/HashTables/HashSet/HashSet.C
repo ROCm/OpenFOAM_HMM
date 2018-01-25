@@ -170,26 +170,25 @@ inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& lst)
+void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& rhs)
 {
-    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
 }
 
 
 template<class Key, class Hash>
 template<unsigned Size>
-void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& lst)
+void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& rhs)
 {
-    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
 }
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> lst)
+void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> rhs)
 {
-    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
 }
-
 
 
 template<class Key, class Hash>
@@ -283,24 +282,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
 }
 
 
-// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
-
-template<class Key, class Hash>
-inline void Foam::Swap
-(
-    HashSet<Key, Hash>& a,
-    HashSet<Key, Hash>& b
-)
-{
-    a.swap(b);
-}
-
-
 /* * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * */
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>
-Foam::operator|
+Foam::HashSet<Key, Hash> Foam::operator|
 (
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
@@ -313,8 +298,7 @@ Foam::operator|
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>
-Foam::operator&
+Foam::HashSet<Key, Hash> Foam::operator&
 (
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
@@ -327,8 +311,7 @@ Foam::operator&
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>
-Foam::operator^
+Foam::HashSet<Key, Hash> Foam::operator^
 (
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
