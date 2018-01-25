@@ -736,7 +736,8 @@ bool Foam::functionObjects::timeControl::read(const dictionary& dict)
         executeControl_.read(dict);
         readControls();
 
-        return true;
+        // Forward to underlying function object
+        return foPtr_->read(dict);
     }
 
     return false;
