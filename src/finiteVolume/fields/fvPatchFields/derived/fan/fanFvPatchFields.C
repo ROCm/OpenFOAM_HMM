@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,11 +51,10 @@ void Foam::fanFvPatchField<Foam::scalar>::calcFanJump()
 
             if (nonDimensional_)
             {
-                // Create an adimensional volumetric flow rate
+                // Create an adimensional velocity
                 Un =
                     120.0*Un/pow3(constant::mathematical::pi)
-                  * patch().magSf()
-                  / pow3(dm_)/rpm_;
+                  / dm_/rpm_;
             }
         }
 
