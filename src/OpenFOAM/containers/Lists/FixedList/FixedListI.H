@@ -33,11 +33,6 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList()
-{}
-
-
-template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const T& val)
 {
     for (unsigned i=0; i<Size; ++i)
@@ -62,7 +57,7 @@ inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst[i];
+        v_[i] = lst.v_[i];
     }
 }
 
@@ -70,9 +65,6 @@ inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
 template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(FixedList<T, Size>&& lst)
 {
-    // No significant speedup observed for copy assignment on simple types,
-    // use move assignment for generality with more complex types
-
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = std::move(lst.v_[i]);
@@ -82,7 +74,7 @@ inline Foam::FixedList<T, Size>::FixedList(FixedList<T, Size>&& lst)
 
 template<class T, unsigned Size>
 template<class InputIterator>
-Foam::FixedList<T, Size>::FixedList
+inline Foam::FixedList<T, Size>::FixedList
 (
     InputIterator begIter,
     InputIterator endIter
@@ -130,7 +122,7 @@ inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
 {
     checkSize(lst.size());
 
-    typename SLList<T>::const_iterator iter = lst.begin();
+    auto iter = lst.begin();
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = *iter;
@@ -246,28 +238,38 @@ inline bool Foam::FixedList<T, Size>::found
 
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::resize(const label s)
+inline void Foam::FixedList<T, Size>::resize(const label n)
 {
     #ifdef FULLDEBUG
-    checkSize(s);
+    checkSize(n);
     #endif
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::setSize(const label s)
+inline void Foam::FixedList<T, Size>::setSize(const label n)
 {
     #ifdef FULLDEBUG
-    checkSize(s);
+    checkSize(n);
     #endif
 }
 
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::transfer(const FixedList<T, Size>& lst)
+inline void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& lst)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst[i];
+        Foam::Swap(v_[i], lst.v_[i]);
+    }
+}
+
+
+template<class T, unsigned Size>
+inline void Foam::FixedList<T, Size>::transfer(FixedList<T, Size>& lst)
+{
+    for (unsigned i=0; i<Size; ++i)
+    {
+        v_[i] = std::move(lst[i]);
     }
 }
 
@@ -444,7 +446,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::iterator
 Foam::FixedList<T, Size>::end()
 {
-    return &v_[Size];
+    return (v_ + Size);
 }
 
 
@@ -452,7 +454,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::end() const
 {
-    return &v_[Size];
+    return (v_ + Size);
 }
 
 
@@ -460,7 +462,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::cend() const
 {
-    return &v_[Size];
+    return (v_ + Size);
 }
 
 
@@ -468,7 +470,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::reverse_iterator
 Foam::FixedList<T, Size>::rbegin()
 {
-    return reverse_iterator(&v_[Size-1]);
+    return reverse_iterator(end());
 }
 
 
@@ -476,7 +478,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::rbegin() const
 {
-    return const_reverse_iterator(&v_[Size-1]);
+    return const_reverse_iterator(end());
 }
 
 
@@ -484,7 +486,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::crbegin() const
 {
-    return const_reverse_iterator(&v_[Size-1]);
+    return const_reverse_iterator(end());
 }
 
 
@@ -492,7 +494,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::reverse_iterator
 Foam::FixedList<T, Size>::rend()
 {
-    return reverse_iterator(&v_[-1]);
+    return reverse_iterator(begin());
 }
 
 
@@ -500,7 +502,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::rend() const
 {
-    return const_reverse_iterator(&v_[-1]);
+    return const_reverse_iterator(begin());
 }
 
 
@@ -508,7 +510,7 @@ template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_reverse_iterator
 Foam::FixedList<T, Size>::crend() const
 {
-    return const_reverse_iterator(&v_[-1]);
+    return const_reverse_iterator(begin());
 }
 
 
@@ -562,9 +564,9 @@ inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T, unsigned Size>
-void Foam::Swap(FixedList<T, Size>& a, FixedList<T, Size>& b)
+inline void Foam::Swap(FixedList<T, Size>& lhs, FixedList<T, Size>& rhs)
 {
-    a.swap(b);
+    lhs.swap(rhs);
 }
 
 
