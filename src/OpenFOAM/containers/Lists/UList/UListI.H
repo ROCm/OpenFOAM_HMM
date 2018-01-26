@@ -188,10 +188,10 @@ inline bool Foam::UList<T>::found(const T& val, const label start) const
 
 
 template<class T>
-inline void Foam::UList<T>::shallowCopy(const UList<T>& a)
+inline void Foam::UList<T>::shallowCopy(const UList<T>& list)
 {
-    size_ = a.size_;
-    v_ = a.v_;
+    size_ = list.size_;
+    v_ = list.v_;
 }
 
 
@@ -217,10 +217,8 @@ namespace Foam
         {
             return v_[i];
         }
-        else
-        {
-            return Foam::pTraits<bool>::zero;
-        }
+
+        return Foam::pTraits<bool>::zero;
     }
 }
 
@@ -268,63 +266,63 @@ template<class T>
 inline typename Foam::UList<T>::iterator
 Foam::UList<T>::end()
 {
-    return &v_[size_];
+    return (v_ + size_);
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_iterator
 Foam::UList<T>::end() const
 {
-    return &v_[size_];
+    return (v_ + size_);
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_iterator
 Foam::UList<T>::cend() const
 {
-    return &v_[size_];
+    return (v_ + size_);
 }
 
 template<class T>
 inline typename Foam::UList<T>::reverse_iterator
 Foam::UList<T>::rbegin()
 {
-    return reverse_iterator(&v_[size_-1]);
+    return reverse_iterator(end());
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::rbegin() const
 {
-    return const_reverse_iterator(&v_[size_-1]);
+    return const_reverse_iterator(end());
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::crbegin() const
 {
-    return const_reverse_iterator(&v_[size_-1]);
+    return const_reverse_iterator(end());
 }
 
 template<class T>
 inline typename Foam::UList<T>::reverse_iterator
 Foam::UList<T>::rend()
 {
-    return reverse_iterator(&v_[-1]);
+    return reverse_iterator(begin());
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::rend() const
 {
-    return const_reverse_iterator(&v_[-1]);
+    return const_reverse_iterator(begin());
 }
 
 template<class T>
 inline typename Foam::UList<T>::const_reverse_iterator
 Foam::UList<T>::crend() const
 {
-    return const_reverse_iterator(&v_[-1]);
+    return const_reverse_iterator(begin());
 }
 
 

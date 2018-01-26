@@ -51,6 +51,8 @@ SourceFiles
 #include "Swap.H"
 
 #include <initializer_list>
+#include <iterator>
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,8 +63,6 @@ namespace Foam
 class labelRange;
 template<class T> class List;
 template<class T> class SubList;
-
-// Forward declaration of friend functions and operators
 template<class T> class UList;
 template<class T> Ostream& operator<<(Ostream&, const UList<T>&);
 template<class T> Istream& operator>>(Istream&, UList<T>&);
@@ -97,7 +97,7 @@ class UList
         //  for the default assignment to be either.  The solution is to
         //  disallow default assignment and provide separate 'shallowCopy' and
         //  'deepCopy' member functions
-        void operator=(const UList<T>&) = delete;
+        UList<T>& operator=(const UList<T>&) = delete;
 
 
 protected:
@@ -124,6 +124,42 @@ protected:
 
 public:
 
+    // STL type definitions
+
+        //- The value type the list contains
+        typedef T value_type;
+
+        //- The pointer type for non-const access to value_type items
+        typedef T* pointer;
+
+        //- The pointer type for const access to value_type items
+        typedef const T* const_pointer;
+
+        //- The type used for storing into value_type objects
+        typedef T& reference;
+
+        //- The type used for reading from constant value_type objects.
+        typedef const T& const_reference;
+
+        //- Random access iterator for traversing a UList
+        typedef T* iterator;
+
+        //- Random access iterator for traversing a UList
+        typedef const T* const_iterator;
+
+        //- The type to represent the size of a UList
+        typedef label size_type;
+
+        //- The difference between iterator objects
+        typedef label difference_type;
+
+        //- Reverse iterator (non-const access)
+        typedef std::reverse_iterator<iterator>  reverse_iterator;
+
+        //- Reverse iterator (const access)
+        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+
+
     // Related types
 
         //- Declare friendship with the List class
@@ -135,7 +171,7 @@ public:
 
     // Static Member Functions
 
-        //- Return a null UList
+        //- Return a UList reference to a nullObject
         inline static const UList<T>& null();
 
 
@@ -169,7 +205,7 @@ public:
 
             bool operator()(const label a, const label b) const
             {
-                return values[a] > values[b];
+                return values[b] < values[a];
             }
         };
 
@@ -288,10 +324,10 @@ public:
       // Copy
 
         //- Copy the pointer held by the given UList
-        inline void shallowCopy(const UList<T>& a);
+        inline void shallowCopy(const UList<T>& list);
 
         //- Copy elements of the given UList
-        void deepCopy(const UList<T>& a);
+        void deepCopy(const UList<T>& list);
 
 
     // Member operators
@@ -337,29 +373,7 @@ public:
         void operator=(const zero);
 
 
-    // STL type definitions
-
-        //- Type of values the UList contains
-        typedef T value_type;
-
-        //- The type used for storing into value_type objects
-        typedef T& reference;
-
-        //- The type used for reading from constant value_type objects.
-        typedef const T& const_reference;
-
-        //- The type that can represent the difference between any two
-        //- UList iterator objects
-        typedef label difference_type;
-
-        //- The type that can represent the size of a UList
-        typedef label size_type;
-
-
-    // STL iterator
-
-        //- Random access iterator for traversing UList
-        typedef T* iterator;
+    // Random access iterator (non-const)
 
         //- Return an iterator to begin traversing the UList
         inline iterator begin();
@@ -368,10 +382,7 @@ public:
         inline iterator end();
 
 
-    // STL const_iterator
-
-        //- Random access iterator for traversing UList
-        typedef const T* const_iterator;
+    // Random access iterator (const)
 
         //- Return const_iterator to begin traversing the constant UList
         inline const_iterator cbegin() const;
@@ -385,94 +396,8 @@ public:
         //- Return const_iterator to end traversing the constant UList
         inline const_iterator end() const;
 
-    // Reverse iterators
 
-        //- Generic const/non-const reverse iterator
-        template<bool Const>
-        class reverse_iterator_base
-        {
-        public:
-            //- The const/non-const type for entries
-            typedef typename std::conditional
-                <Const, const T, T>::type value_type;
-
-            //- A pointer to a const/non-const entry
-            typedef value_type* pointer;
-
-            //- A reference to a const/non-const entry
-            typedef value_type& reference;
-
-
-        private:
-
-            //- The element pointer
-            pointer ptr_;
-
-
-        public:
-
-            //- Construct null or from list element pointer
-            inline reverse_iterator_base(pointer ptr = nullptr)
-            :
-                ptr_(ptr)
-            {}
-
-
-            //- Copy construct
-            inline reverse_iterator_base(const reverse_iterator_base& iter)
-            :
-                ptr_(iter.ptr_)
-            {}
-
-
-            //- Reverse increment
-            inline void operator++()
-            {
-                --ptr_;
-            }
-
-            //- Reverse increment
-            inline reverse_iterator_base operator++(int)
-            {
-                reverse_iterator_base old(*this);
-                --ptr_;
-                return old;
-            }
-
-            //- Reverse increase
-            inline void operator+=(int n)
-            {
-                ptr_ -= n;
-            }
-
-            //- Dereference iterator
-            reference operator*() const
-            {
-                return *ptr_;
-            }
-
-            //- Dereference iterator
-            pointer operator->() const
-            {
-                return ptr_;
-            }
-
-            //- Equality
-            bool operator==(const reverse_iterator_base& iter) const
-            {
-                return ptr_ == iter.ptr_;
-            }
-
-            //- inequality
-            bool operator!=(const reverse_iterator_base& iter) const
-            {
-                return ptr_ != iter.ptr_;
-            }
-        };
-
-
-        //- STL reverse_iterator
-        typedef reverse_iterator_base<false> reverse_iterator;
+    // Reverse iterators (non-const)
 
         //- Return reverse_iterator to begin reverse traversing the UList
         inline reverse_iterator rbegin();
@@ -481,8 +406,7 @@ public:
         inline reverse_iterator rend();
 
 
-        //- STL const reverse iterator
-        typedef reverse_iterator_base<true> const_reverse_iterator;
+    // Reverse iterators (const)
 
         //- Return const_reverse_iterator to begin reverse traversing the UList
         inline const_reverse_iterator crbegin() const;
@@ -523,7 +447,7 @@ public:
         bool operator!=(const UList<T>& a) const;
 
         //- Compare two ULists lexicographically. Takes linear time
-        bool operator<(const UList<T>& a) const;
+        bool operator<(const UList<T>& list) const;
 
         //- Compare two ULists lexicographically. Takes linear time
         bool operator>(const UList<T>& a) const;

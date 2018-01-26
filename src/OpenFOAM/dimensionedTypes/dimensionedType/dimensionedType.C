@@ -624,17 +624,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const dimensioned<Type>& dt)
 // * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Type>
-bool Foam::operator>
-(
-    const dimensioned<Type>& dt1,
-    const dimensioned<Type>& dt2
-)
-{
-    return dt1.value() > dt2.value();
-}
-
-
-template<class Type>
 bool Foam::operator<
 (
     const dimensioned<Type>& dt1,
@@ -642,6 +631,17 @@ bool Foam::operator<
 )
 {
     return dt1.value() < dt2.value();
+}
+
+
+template<class Type>
+bool Foam::operator>
+(
+    const dimensioned<Type>& dt1,
+    const dimensioned<Type>& dt2
+)
+{
+    return dt2.value() < dt1.value();
 }
 
 
