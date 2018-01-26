@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,29 +38,18 @@ Description
 
     When transferring between dissimilar types, the xferCopyTo() and
     xferMoveTo() functions can prove useful. An example is transferring
-    from a DynamicList to a List.  Since the
-    List\<T\>::transfer(List\<T\>&) method could result in some allocated
-    memory becoming inaccessible, the xferMoveTo() function should be used to
-    invoke the correct List\<T\>::transfer(DynamicList\<T\>&) method.
+    from a DynamicList to a List.
 
     \code
-        DynamicList<label> dynLst;
+        List<label> list1;
+        DynamicList<label> list2;
         ...
-        labelList plainLst( xferMoveTo<labelList>(dynLst) );
-    \endcode
 
-    Of course, since this example is a very common operation, the
-    DynamicList::xfer() method transfers to a plain List anyhow.
-    It would thus be simpler (and clearer) just to use the following code:
-
-    \code
-        DynamicList<label> dynLst;
-        ...
-        labelList plainLst(dynLst.xfer());
+        SomeClass obj(xferCopy(list1), xferMoveTo<labelList>(list1));
     \endcode
 
 See also
-    xferCopy, xferCopyTo, xferMove, xferMoveTo, xferTmp
+    xferCopy, xferCopyTo, xferMove, xferMoveTo
 
 SourceFiles
     XferI.H
@@ -74,9 +63,6 @@ SourceFiles
 
 namespace Foam
 {
-
-// Forward declaration of classes
-template<class T> class tmp;
 
 /*---------------------------------------------------------------------------*\
                            Class Xfer Declaration
@@ -95,81 +81,80 @@ public:
 
     typedef T Type;
 
-
     // Constructors
 
         //- Store object pointer and manage its deletion
         //  Can also be used later to transfer by assignment
         inline explicit Xfer(T* p = nullptr);
 
-        //- Construct by copying or by transferring the parameter contents
-        inline explicit Xfer(T& t, bool allowTransfer=false);
-
-        //- Construct by copying the parameter contents
-        inline explicit Xfer(const T& t);
-
-        //- Construct by transferring the contents
-        inline Xfer(const Xfer<T>& t);
+        //- Construct, transferring its contents
+        inline Xfer(const Xfer<T>& xf);
 
 
     //- Destructor
     inline ~Xfer();
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Return a null object reference
         inline static const Xfer<T>& null();
 
+        //- Construct new Xfer container with forwarding arguments to T
+        template<class... Args>
+        inline static Xfer<T> New(Args&&... args);
+
+
+    // Member Functions
+
+        //- Pointer to the underlying object
+        inline T* get() const;
+
+        //- Swaps the managed objects
+        void swap(Xfer<T>& other) noexcept;
+
 
     // Member Operators
 
-        //- Transfer the contents into the object
-        inline void operator=(T& t);
+        //- Transfer contents into the object
+        inline void operator=(const Xfer<T>& xf);
 
-        //- Transfer the contents into the object
-        inline void operator=(const Xfer<T>& t);
+        //- Reference to the underlying object
+        inline T& operator*() const;
 
-        //- Reference to the underlying datatype
+        //- Pointer to the underlying object
+        inline T* operator->() const;
+
+        //- Reference to the underlying object
         inline T& operator()() const;
 
-        //- Pointer to the underlying datatype
-        inline T* operator->() const;
 };
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-//- Construct by copying the contents of the \a arg
+
+//- Copy construct contents of the \a obj
 //
-//  \sa xferCopyTo, xferMove, xferMoveTo, xferTmp and Foam::Xfer
+//  \sa xferCopyTo, xferMove, xferMoveTo and Foam::Xfer
 template<class T>
-inline Xfer<T> xferCopy(const T& t);
+inline Xfer<T> xferCopy(const T& obj);
 
-//- Construct by transferring the contents of the \a arg
+//- Transfer construct contents of the \a obj
 //
-//  \sa xferCopy, xferCopyTo, xferMoveTo, xferTmp and Foam::Xfer
+//  \sa xferCopy, xferCopyTo, xferMoveTo and Foam::Xfer
 template<class T>
-inline Xfer<T> xferMove(T& t);
+inline Xfer<T> xferMove(T& obj);
 
 
-//- Construct by transferring the contents of the \a arg
+//- Copy construct contents of the \a obj from dissimilar type
 //
-//  \sa xferCopy, xferCopyTo, xferMove, xferMoveTo and Foam::Xfer
-template<class T>
-inline Xfer<T> xferTmp(Foam::tmp<T>& tt);
+//  \sa xferCopy, xferMove, xferMoveTo and Foam::Xfer
+template<class T, class From>
+inline Xfer<T> xferCopyTo(const From& obj);
 
 
-//- Construct by copying the contents of the \a arg
-//  between dissimilar types
-//
-//  \sa xferCopy, xferMove, xferMoveTo, xferTmp and Foam::Xfer
-template<class To, class From>
-inline Xfer<To> xferCopyTo(const From& t);
-
-
-//- Construct by transferring the contents of the \a arg
-//  between dissimilar types
+//- Transfer construct contents of the \a obj from dissimilar type
 //
 //  \par Example Use
 //  \code
@@ -178,9 +163,9 @@ inline Xfer<To> xferCopyTo(const From& t);
 //      labelList plainLst( xferMoveTo<labelList>(dynLst) );
 //  \endcode
 //
-//  \sa xferCopy, xferCopyTo, xferMove, xferTmp and Foam::Xfer
-template<class To, class From>
-inline Xfer<To> xferMoveTo(From& t);
+//  \sa xferCopy, xferCopyTo, xferMove and Foam::Xfer
+template<class T, class From>
+inline Xfer<T> xferMoveTo(From& obj);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

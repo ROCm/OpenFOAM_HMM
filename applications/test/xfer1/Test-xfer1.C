@@ -39,61 +39,83 @@ Description
 using namespace Foam;
 
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
-    List<label> lstA(10);
-    List<label> lstC
+    labelList lstA(10);
+    labelList lstC
     {
         1, 2, 3, 4
     };
 
     forAll(lstA, i)
     {
-        lstA[i] = i;
+        lstA[i] = 5 - i;
     }
 
-    Info<< "lstA: " << lstA << endl;
-    Info<< "lstC: " << lstC << endl;
+    Info<< "lstA: " << lstA << nl
+        << "lstC: " << lstC << nl;
 
-    Xfer<List<label>> xA = xferMove(lstA);
-    Xfer<List<label>> xB;
+    Xfer<labelList> xA = xferMove(lstA);
+    Xfer<labelList> xB;
 
-    List<label> lstB( xA );
+    labelList lstB( xA );
 
-    Info<< "xA: " << xA() << endl;
-    Info<< "xB: " << xB() << endl;
-    Info<< "lstA: " << lstA << endl;
-    Info<< "lstB: " << lstB << endl;
-    Info<< "lstC: " << lstC << endl;
+    Info<< "xA: " << xA() << nl
+        << "xB: " << xB() << nl
+        << "lstA: " << lstA << nl
+        << "lstB: " << lstB << nl
+        << "lstC: " << lstC << nl;
 
-    xA = lstB;
+    // Now illegal: xA = lstB;
 
-    Info<< "xA: " << xA() << endl;
-    Info<< "xB: " << xB() << endl;
-    Info<< "lstA: " << lstA << endl;
-    Info<< "lstB: " << lstB << endl;
-    Info<< "lstC: " << lstC << endl;
+    xA->transfer(lstB);
+
+    Info<< "xA: " << xA() << nl
+        << "xB: " << xB() << nl
+        << "lstA: " << lstA << nl
+        << "lstB: " << lstB << nl
+        << "lstC: " << lstC << nl;
 
     xB = xA;
 
-    List<label> lstD(xferCopy(lstC));
-    List<label> lstE(xferMove(lstC));
+    // Construct with forwarding. For this example, truly ugly.
+    Xfer<labelList> xFwdA =
+        Xfer<labelList>::New
+        (
+            std::initializer_list<label>
+            {
+               1, 2, 10, 20, 15, 24, 200
+            }
+        );
+
+    Xfer<labelList> xFwdB = Xfer<labelList>::New(label(8), 123);
+    Xfer<labelList> xFwdC = Xfer<labelList>::New();
+
+    Info<< nl
+        << "Constructed with forwarding: " << nl
+        << *xFwdA << nl
+        << *xFwdB << nl
+        << *xFwdC << nl
+        << nl;
+
+
+    labelList lstD(xferCopy(lstC));
+    labelList lstE(xferMove(lstC));
 
     // this must be empty
-    List<label> lstF = xferCopy(lstC);
+    labelList lstF = xferCopy(lstC);
 
-    Info<< "xA: " << xA() << endl;
-    Info<< "xB: " << xB() << endl;
-    Info<< "lstA: " << lstA << endl;
-    Info<< "lstB: " << lstB << endl;
-    Info<< "lstC: " << lstC << endl;
-    Info<< "lstD: " << lstD << endl;
-    Info<< "lstE: " << lstE << endl;
-    Info<< "lstF: " << lstF << endl;
+    Info<< "xA: " << xA() << nl
+        << "xB: " << xB() << nl
+        << "lstA: " << lstA << nl
+        << "lstB: " << lstB << nl
+        << "lstC: " << lstC << nl
+        << "lstD: " << lstD << nl
+        << "lstE: " << lstE << nl
+        << "lstF: " << lstF << nl;
 
     Info<< "xB[" << xB->size() << "]\n";
 
@@ -102,7 +124,7 @@ int main(int argc, char *argv[])
 
     Info<< "xB[" << xB->size() << "]\n";
 
-    DynamicList<label> dl(10);
+    DynamicList<label> dl;
     for (label i = 0; i < 5; ++i)
     {
         dl.append(i);
@@ -111,9 +133,9 @@ int main(int argc, char *argv[])
     face f1(dl);
     face f2(xferCopy<labelList>(dl));
 
-    Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << endl;
-    Info<< "f1: " << f1 << endl;
-    Info<< "f2: " << f2 << endl;
+    Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << nl;
+    Info<< "f1: " << f1 << nl;
+    Info<< "f2: " << f2 << nl;
 
     // add some more labels
     for (label i = 5; i < 8; ++i)
@@ -123,18 +145,18 @@ int main(int argc, char *argv[])
 
     // note: xfer() method returns a plain labelList
     face f3(dl.xfer());
-    Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << endl;
-    Info<< "f3: " << f3 << endl;
+    Info<< "dl[" << dl.size() << "/" << dl.capacity() << "] " << dl << nl;
+    Info<< "f3: " << f3 << nl;
 
-    Info<<"\nflip faces:" << endl;
+    Info<<"\nflip faces:" << nl;
     f1.flip();
     f3.flip();
-    Info<< "f1: " << f1 << endl;
-    Info<< "f3: " << f3 << endl;
+    Info<< "f1: " << f1 << nl;
+    Info<< "f3: " << f3 << nl;
 
 
     {
-        Info<<"\nTest xfer with fields:" << endl;
+        Info<<"\nTest xfer with fields:" << nl;
         List<point> list1
         {
             { 0, 1, 2 },
@@ -180,7 +202,6 @@ int main(int argc, char *argv[])
             <<"xfer copy construct from Field (as Field): " << nl
             <<"input (field) = " << field4 << nl
             <<"output (dyn-field) = " << dyfield1 << nl;
-
     }
 
     return 0;

@@ -48,16 +48,16 @@ inline void Foam::tmp<T>::operator++()
 template<class T>
 inline Foam::tmp<T>::tmp()
 :
-    type_(TMP),
-    ptr_(nullptr)
+    ptr_(nullptr),
+    type_(TMP)
 {}
 
 
 template<class T>
 inline Foam::tmp<T>::tmp(T* p)
 :
-    type_(TMP),
-    ptr_(p)
+    ptr_(p),
+    type_(TMP)
 {
     if (p && !p->unique())
     {
@@ -72,16 +72,16 @@ inline Foam::tmp<T>::tmp(T* p)
 template<class T>
 inline Foam::tmp<T>::tmp(const T& t)
 :
-    type_(CONST_REF),
-    ptr_(const_cast<T*>(&t))
+    ptr_(const_cast<T*>(&t)),
+    type_(CONST_REF)
 {}
 
 
 template<class T>
 inline Foam::tmp<T>::tmp(const tmp<T>& t)
 :
-    type_(t.type_),
-    ptr_(t.ptr_)
+    ptr_(t.ptr_),
+    type_(t.type_)
 {
     if (isTmp())
     {
@@ -102,8 +102,8 @@ inline Foam::tmp<T>::tmp(const tmp<T>& t)
 template<class T>
 inline Foam::tmp<T>::tmp(const tmp<T>&& t)
 :
-    type_(t.type_),
-    ptr_(t.ptr_)
+    ptr_(t.ptr_),
+    type_(t.type_)
 {
     if (isTmp())
     {
@@ -115,8 +115,8 @@ inline Foam::tmp<T>::tmp(const tmp<T>&& t)
 template<class T>
 inline Foam::tmp<T>::tmp(const tmp<T>& t, bool allowTransfer)
 :
-    type_(t.type_),
-    ptr_(t.ptr_)
+    ptr_(t.ptr_),
+    type_(t.type_)
 {
     if (isTmp())
     {
@@ -335,8 +335,8 @@ inline void Foam::tmp<T>::operator=(T* p)
             << abort(FatalError);
     }
 
-    type_ = TMP;
     ptr_ = p;
+    type_ = TMP;
 }
 
 
