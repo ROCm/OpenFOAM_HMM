@@ -53,12 +53,47 @@ inline Foam::CompactListList<T, Container>::CompactListList
 (
     const label mRows,
     const label nData,
-    const T& t
+    const T& val
 )
 :
     size_(mRows),
     offsets_(mRows+1, 0),
-    m_(nData, t)
+    m_(nData, val)
+{}
+
+
+template<class T, class Container>
+inline Foam::CompactListList<T, Container>::CompactListList
+(
+    const CompactListList<T, Container>& lst
+)
+:
+    size_(lst.size()),
+    offsets_(lst.offsets_),
+    m_(lst.m_)
+{}
+
+
+template<class T, class Container>
+inline Foam::CompactListList<T, Container>::CompactListList
+(
+    CompactListList<T, Container>&& lst
+)
+{
+    transfer(lst);
+}
+
+
+template<class T, class Container>
+inline Foam::CompactListList<T, Container>::CompactListList
+(
+    CompactListList<T, Container>& lst,
+    bool reuse
+)
+:
+    size_(lst.size()),
+    offsets_(lst.offsets_, reuse),
+    m_(lst.m_, reuse)
 {}
 
 
@@ -220,7 +255,7 @@ inline Foam::UList<T> Foam::CompactListList<T, Container>::operator[]
     const label i
 )
 {
-    label start = offsets_[i];
+    const label start = offsets_[i];
     return UList<T>(m_.begin() + start, offsets_[i+1] - start);
 }
 
@@ -232,7 +267,7 @@ Foam::CompactListList<T, Container>::operator[]
     const label i
 ) const
 {
-    label start = offsets_[i];
+    const label start = offsets_[i];
     return UList<T>
     (
         const_cast<T*>(m_.begin() + start),
@@ -264,9 +299,31 @@ inline const T& Foam::CompactListList<T, Container>::operator()
 
 
 template<class T, class Container>
-inline void Foam::CompactListList<T, Container>::operator=(const T& t)
+inline void Foam::CompactListList<T, Container>::operator=(const T& val)
 {
-    m_ = t;
+    m_ = val;
+}
+
+
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::operator=
+(
+    const CompactListList<T, Container>& lst
+)
+{
+    size_ = lst.size_;
+    offsets_ = lst.offsets_,
+    m_ = lst.m_;
+}
+
+
+template<class T, class Container>
+inline void Foam::CompactListList<T, Container>::operator=
+(
+    CompactListList<T, Container>&& lst
+)
+{
+    transfer(lst);
 }
 
 

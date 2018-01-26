@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
         Info<< "cll1:" << cll1 << endl;
 
         // Resize and assign row by row
-        labelList row0(2, 0);
-        labelList row1(3, 1);
+        labelList row0(2, label(0));
+        labelList row1(3, label(1));
 
         labelList rowSizes(2);
         rowSizes[0] = row0.size();
@@ -140,8 +140,8 @@ int main(int argc, char *argv[])
 
     {
         faceList fcs(2);
-        fcs[0] = face(labelList(1, 111));
-        fcs[1] = face(labelList(2, 222));
+        fcs[0] = face(labelList(1, label(111)));
+        fcs[1] = face(labelList(2, label(222)));
 
         CompactListList<label, face> compactFcs(fcs);
         Info<< "comactFcs:" << compactFcs << endl;
