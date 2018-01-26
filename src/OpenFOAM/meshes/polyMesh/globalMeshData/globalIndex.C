@@ -94,12 +94,6 @@ Foam::globalIndex::globalIndex(const label localSize)
 }
 
 
-Foam::globalIndex::globalIndex(const labelList& offsets)
-:
-    offsets_(offsets)
-{}
-
-
 Foam::globalIndex::globalIndex(Istream& is)
 {
     is >> offsets_;

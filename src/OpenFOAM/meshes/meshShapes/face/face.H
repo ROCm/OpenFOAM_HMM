@@ -150,20 +150,17 @@ public:
         //- Construct given size, with invalid point labels (-1)
         explicit inline face(const label sz);
 
-        //- Construct from list of labels
+        //- Copy construct from list of labels
         explicit inline face(const labelUList& lst);
 
-        //- Construct from list of labels
+        //- Copy construct from list of labels
         template<unsigned Size>
         explicit inline face(const FixedList<label, Size>& lst);
 
-        //- Construct from an initializer list of labels
+        //- Copy construct from an initializer list of labels
         explicit inline face(std::initializer_list<label> lst);
 
-        //- Transfer (move) construct
-        explicit inline face(const Xfer<labelList>& lst);
-
-        //- Move construct
+        //- Move construct from list of labels
         explicit inline face(labelList&& lst);
 
         //- Copy construct from triFace

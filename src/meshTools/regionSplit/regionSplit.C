@@ -172,7 +172,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
         {
             offsets[i] = mesh().nFaces();
         }
-        const globalIndex globalRegions(offsets.xfer());
+        const globalIndex globalRegions(std::move(offsets));
 
         // Minimise regions across connected cells
         // Note: still uses global decisions so all processors are running
@@ -215,7 +215,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
             compactOffsets[i] = globalToCompact.size();
         }
 
-        return autoPtr<globalIndex>(new globalIndex(compactOffsets.xfer()));
+        return autoPtr<globalIndex>(new globalIndex(std::move(compactOffsets)));
     }
 
 

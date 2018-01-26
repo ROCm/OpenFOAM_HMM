@@ -298,8 +298,8 @@ Foam::distributedTriSurfaceMesh::distributeSegments
             sendMap[proci].transfer(dynSendMap[proci]);
         }
 
-        allSegments.transfer(dynAllSegments.shrink());
-        allSegmentMap.transfer(dynAllSegmentMap.shrink());
+        allSegments.transfer(dynAllSegments);
+        allSegmentMap.transfer(dynAllSegmentMap);
     }
 
 
@@ -743,9 +743,9 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
             sendMap[proci].transfer(dynSendMap[proci]);
         }
 
-        allCentres.transfer(dynAllCentres.shrink());
-        allRadiusSqr.transfer(dynAllRadiusSqr.shrink());
-        allSegmentMap.transfer(dynAllSegmentMap.shrink());
+        allCentres.transfer(dynAllCentres);
+        allRadiusSqr.transfer(dynAllRadiusSqr);
+        allSegmentMap.transfer(dynAllSegmentMap);
     }
 
 

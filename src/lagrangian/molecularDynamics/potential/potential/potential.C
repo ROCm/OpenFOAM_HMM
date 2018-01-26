@@ -89,7 +89,7 @@ void Foam::potential::setSiteIdList(const dictionary& moleculePropertiesDict)
         }
     }
 
-    siteIdList_.transfer(pairPotentialSiteIdList.shrink());
+    siteIdList_.transfer(pairPotentialSiteIdList);
 }
 
 

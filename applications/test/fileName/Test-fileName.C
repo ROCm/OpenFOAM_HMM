@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
     argList::addBoolOption("ext", "test handing of file extensions");
     argList::addBoolOption("construct", "test constructors");
     argList::addBoolOption("relative", "test relative operations");
+    argList::addBoolOption("system", "test filesystem operations");
     argList::addBoolOption("default", "reinstate default tests");
     argList::addNote("runs default tests or specified ones only");
 
@@ -485,72 +486,8 @@ int main(int argc, char *argv[])
     }
 
 
-    if (!defaultTests)
-    {
-        return 0;
-    }
-
-    DynamicList<word> wrdList
-    {
-        "hello",
-        "hello1",
-        "hello2",
-        "hello3",
-        "hello4.hmm"
-    };
-
-    fileName pathName(wrdList);
-
-    Info<< "pathName = " << pathName << nl
-        << "pathName.name()     = >" << pathName.name() << "<\n"
-        << "pathName.path()     = "  << pathName.path() << nl
-        << "pathName.ext()      = >" << pathName.ext() << "<\n"
-        << "pathName.name(true) = >" << pathName.name(true) << "<\n";
-
-    Info<< "pathName.components() = " << pathName.components() << nl
-        << "pathName.component(2) = " << pathName.component(2) << nl
-        << endl;
-
-    // try with different combination
-    // The final one should emit warnings
-    for (label start = 0; start <= wrdList.size(); ++start)
-    {
-        fileName instance, local;
-        word name;
-
-        fileName path(SubList<word>(wrdList, wrdList.size()-start, start));
-        fileName path2 = "."/path;
-
-        IOobject::fileNameComponents
-        (
-            path,
-            instance,
-            local,
-            name
-        );
-
-        Info<< "IOobject::fileNameComponents for " << path << nl
-            << "  instance = " << instance << nl
-            << "  local    = " << local << nl
-            << "  name     = " << name << endl;
-
-        IOobject::fileNameComponents
-        (
-            path2,
-            instance,
-            local,
-            name
-        );
-
-        Info<< "IOobject::fileNameComponents for " << path2 << nl
-            << "  instance = " << instance << nl
-            << "  local    = " << local << nl
-            << "  name     = " << name << endl;
-
-    }
-
-
     // Test some copying and deletion
+    if (args.found("system"))
     {
         const fileName dirA("dirA");
         const fileName lnA("lnA");
@@ -660,6 +597,71 @@ int main(int argc, char *argv[])
         // Verify that rmDir works with bad names too
         Foam::rmDir(dirA);
         Foam::rm(lnA);
+    }
+
+
+    if (!defaultTests)
+    {
+        return 0;
+    }
+
+    DynamicList<word> wrdList
+    {
+        "hello",
+        "hello1",
+        "hello2",
+        "hello3",
+        "hello4.hmm"
+    };
+
+    fileName pathName(wrdList);
+
+    Info<< "pathName = " << pathName << nl
+        << "pathName.name()     = >" << pathName.name() << "<\n"
+        << "pathName.path()     = "  << pathName.path() << nl
+        << "pathName.ext()      = >" << pathName.ext() << "<\n"
+        << "pathName.name(true) = >" << pathName.name(true) << "<\n";
+
+    Info<< "pathName.components() = " << pathName.components() << nl
+        << "pathName.component(2) = " << pathName.component(2) << nl
+        << endl;
+
+    // try with different combination
+    // The final one should emit warnings
+    for (label start = 0; start <= wrdList.size(); ++start)
+    {
+        fileName instance, local;
+        word name;
+
+        fileName path(SubList<word>(wrdList, wrdList.size()-start, start));
+        fileName path2 = "."/path;
+
+        IOobject::fileNameComponents
+        (
+            path,
+            instance,
+            local,
+            name
+        );
+
+        Info<< "IOobject::fileNameComponents for " << path << nl
+            << "  instance = " << instance << nl
+            << "  local    = " << local << nl
+            << "  name     = " << name << endl;
+
+        IOobject::fileNameComponents
+        (
+            path2,
+            instance,
+            local,
+            name
+        );
+
+        Info<< "IOobject::fileNameComponents for " << path2 << nl
+            << "  instance = " << instance << nl
+            << "  local    = " << local << nl
+            << "  name     = " << name << endl;
+
     }
 
 
