@@ -222,7 +222,7 @@ const Foam::wordList& Foam::searchableBox::regions() const
 
 Foam::tmp<Foam::pointField> Foam::searchableBox::coordinates() const
 {
-    tmp<pointField> tCtrs = tmp<pointField>(new pointField(6));
+    tmp<pointField> tCtrs(new pointField(6));
     pointField& ctrs = tCtrs.ref();
 
     const pointField pts(treeBoundBox::points());

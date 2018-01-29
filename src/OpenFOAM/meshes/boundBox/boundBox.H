@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +45,9 @@ Note
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class boundBox;
+class plane;
 template<class T> class tmp;
 
 Istream& operator>>(Istream& is, boundBox& bb);
@@ -166,6 +166,14 @@ public:
             //- Average length/height/width dimension
             inline scalar avgDim() const;
 
+            //- Count the number of positive, non-zero dimensions.
+            //  \return -1 if any dimensions are negative,
+            //  0 = 0D (point),
+            //  1 = 1D (line aligned with an axis),
+            //  2 = 2D (plane aligned with an axis),
+            //  3 = 3D (box)
+            inline label nDim() const;
+
             //- Corner points in an order corresponding to a 'hex' cell
             tmp<pointField> points() const;
 
@@ -211,12 +219,17 @@ public:
             //- Parallel reduction of min/max values
             void reduce();
 
+        // Query
+
             //- Intersection (union) with the second box.
             //  The return value is true if the intersection is non-empty.
             bool intersect(const boundBox& bb);
 
-
-        // Query
+            //- Does plane intersect this bounding box.
+            //  There is an intersection if the plane segments the corner points
+            //  \note the results are unreliable when plane coincides almost
+            //  exactly with a box face
+            bool intersects(const plane& pln) const;
 
             //- Overlaps/touches boundingBox?
             inline bool overlaps(const boundBox& bb) const;
