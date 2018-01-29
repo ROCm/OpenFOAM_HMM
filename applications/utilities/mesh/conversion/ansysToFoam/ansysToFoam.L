@@ -48,8 +48,6 @@ Description
 #include "scalar.H"
 #include "StringStream.H"
 
-using namespace Foam;
-
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
@@ -58,6 +56,11 @@ using namespace Foam;
 #include "cellShape.H"
 #include "SLList.H"
 #include "SLPtrList.H"
+
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma GCC diagnostic ignored "-Wdeprecated-register"
+
+using namespace Foam;
 
 SLList<point> slPoints;
 SLList<label> slPointMap;

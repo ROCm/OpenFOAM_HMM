@@ -58,15 +58,14 @@ Description
 #include "cellShapeRecognition.H"
 #include "repatchPolyTopoChanger.H"
 
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma GCC diagnostic ignored "-Wdeprecated-register"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace Foam;
 
 const scalar convertToMeters = 1.0;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 label dimensionOfGrid = 0;
 
