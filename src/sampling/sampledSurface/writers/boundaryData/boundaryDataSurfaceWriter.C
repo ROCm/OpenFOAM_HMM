@@ -33,19 +33,6 @@ namespace Foam
     makeSurfaceWriterType(boundaryDataSurfaceWriter);
 }
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::boundaryDataSurfaceWriter::boundaryDataSurfaceWriter()
-:
-    surfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boundaryDataSurfaceWriter::~boundaryDataSurfaceWriter()
-{}
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

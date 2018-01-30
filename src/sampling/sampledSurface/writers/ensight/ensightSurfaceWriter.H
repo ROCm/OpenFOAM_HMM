@@ -117,7 +117,7 @@ public:
 
 
     //- Destructor
-    virtual ~ensightSurfaceWriter();
+    virtual ~ensightSurfaceWriter() = default;
 
 
     // Member Functions

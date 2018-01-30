@@ -115,11 +115,11 @@ public:
     // Constructors
 
         //- Construct null
-        boundaryDataSurfaceWriter();
+        boundaryDataSurfaceWriter() = default;
 
 
     //- Destructor
-    virtual ~boundaryDataSurfaceWriter();
+    virtual ~boundaryDataSurfaceWriter() = default;
 
 
     // Member Functions

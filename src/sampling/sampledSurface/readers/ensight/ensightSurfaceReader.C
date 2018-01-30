@@ -264,12 +264,6 @@ Foam::ensightSurfaceReader::ensightSurfaceReader(const fileName& fName)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightSurfaceReader::~ensightSurfaceReader()
-{}
-
-
 // * * * * * * * * * * * * * Public Member Functions   * * * * * * * * * * * //
 
 const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
