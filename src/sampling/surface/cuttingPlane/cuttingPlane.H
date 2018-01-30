@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -116,7 +116,7 @@ protected:
     // Constructors
 
         //- Construct plane description without cutting
-        cuttingPlane(const plane&);
+        cuttingPlane(const plane& pln);
 
 
     // Protected Member Functions
@@ -141,8 +141,8 @@ public:
         //  possibly restricted to a list of cells
         cuttingPlane
         (
-            const plane&,
-            const primitiveMesh&,
+            const plane& pln,
+            const primitiveMesh& mesh,
             const bool triangulate,
             const labelUList& cellIdLabels = labelUList::null()
         );
@@ -178,7 +178,8 @@ public:
 
     // Member Operators
 
-        void operator=(const cuttingPlane&);
+        //- Copy assignment
+        void operator=(const cuttingPlane& rhs);
 };
 
 
