@@ -37,7 +37,7 @@ License
 #include "OSspecific.H"
 
 // Flex may use register, which is deprecated and incompatible with C++17
-#pragma GCC diagnostic ignored "-Wdeprecated-register"
+#pragma clang diagnostic ignored "-Wdeprecated-register"
 
 using namespace Foam;
 // Dummy yyFlexLexer::yylex() to keep the linker happy. It is not called

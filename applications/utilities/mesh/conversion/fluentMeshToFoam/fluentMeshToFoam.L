@@ -59,7 +59,7 @@ Description
 #include "repatchPolyTopoChanger.H"
 
 // Flex may use register, which is deprecated and incompatible with C++17
-#pragma GCC diagnostic ignored "-Wdeprecated-register"
+#pragma clang diagnostic ignored "-Wdeprecated-register"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
