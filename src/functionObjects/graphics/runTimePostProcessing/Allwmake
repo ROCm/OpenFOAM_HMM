@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source CMake functions
-. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions
+cd ${0%/*} || exit 1                             # Run from this directory
+. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions   # The CMake functions
 
 # -----------------------------------------------------------------------------
 
@@ -23,7 +21,7 @@ if [ -n "$depend" ]
 then
     if [ "$targetType" != objects ]
     then
-        if type cmake > /dev/null 2>&1
+        if command -v cmake > /dev/null 2>&1
         then
             cmakeVersioned "$depend" $PWD || {
                 echo

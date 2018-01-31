@@ -1,14 +1,8 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Optional unit: continue-on-error
-export WM_CONTINUE_ON_ERROR=true
-
-# Parse arguments for library compilation
-. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments
-
-# Source CMake functions
-. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions
+cd ${0%/*} || exit 1                            # Run from this directory
+export WM_CONTINUE_ON_ERROR=true                # Optional unit
+. $WM_PROJECT_DIR/wmake/scripts/AllwmakeParseArguments  # Parse arguments
+. $WM_PROJECT_DIR/wmake/scripts/cmakeFunctions  # The CMake functions
 
 # -----------------------------------------------------------------------------
 
