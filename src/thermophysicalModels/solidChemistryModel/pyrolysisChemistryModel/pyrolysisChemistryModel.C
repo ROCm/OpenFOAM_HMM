@@ -389,7 +389,7 @@ jacobian
                     {
                         if (c2[si]>SMALL)
                         {
-                            kf *= exp*pow(c2[si] + VSMALL, exp - 1.0);
+                            kf *= exp*pow(c2[si], exp - 1.0);
                         }
                         else
                         {
