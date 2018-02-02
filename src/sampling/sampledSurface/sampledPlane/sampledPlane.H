@@ -59,7 +59,10 @@ class sampledPlane
     // Private data
 
         //- If restricted to zones, name of this zone or a regular expression
-        keyType zoneKey_;
+        const keyType zoneKey_;
+
+        //- Optional bounding box to trim triangles against
+        const boundBox bounds_;
 
         //- Triangulated faces or keep faces as is
         const bool triangulate_;
@@ -110,7 +113,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledPlane();
+    virtual ~sampledPlane() = default;
 
 
     // Member Functions

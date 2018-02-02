@@ -33,8 +33,8 @@ License
 // Set values for what is close to zero and what is considered to
 // be positive (and not just rounding noise)
 //! \cond localScope
-const Foam::scalar zeroish  = Foam::SMALL;
-const Foam::scalar positive = Foam::SMALL * 1E3;
+static const Foam::scalar zeroish  = Foam::SMALL;
+static const Foam::scalar positive = Foam::SMALL * 1E3;
 //! \endcond
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -49,31 +49,25 @@ void Foam::cuttingPlane::calcCutCells
     const labelListList& cellEdges = mesh.cellEdges();
     const edgeList& edges = mesh.edges();
 
-    label listSize = cellEdges.size();
-    if (notNull(cellIdLabels))
-    {
-        listSize = cellIdLabels.size();
-    }
+    const label len =
+        (notNull(cellIdLabels) ? cellIdLabels.size() : cellEdges.size());
 
-    meshCells_.setSize(listSize);
+    meshCells_.setSize(len);
     label cutcelli(0);
 
     // Find the cut cells by detecting any cell that uses points with
     // opposing dotProducts.
-    for (label listI = 0; listI < listSize; ++listI)
+    for (label listi = 0; listi < len; ++listi)
     {
-        label celli = listI;
-
-        if (notNull(cellIdLabels))
-        {
-            celli = cellIdLabels[listI];
-        }
+        const label celli =
+            (notNull(cellIdLabels) ? cellIdLabels[listi] : listi);
 
         const labelList& cEdges = cellEdges[celli];
         label nCutEdges = 0;
-        forAll(cEdges, i)
+
+        for (const label edgei : cEdges)
         {
-            const edge& e = edges[cEdges[i]];
+            const edge& e = edges[edgei];
 
             if
             (
@@ -81,9 +75,7 @@ void Foam::cuttingPlane::calcCutCells
              || (dotProducts[e[1]] < zeroish && dotProducts[e[0]] > positive)
             )
             {
-                nCutEdges++;
-
-                if (nCutEdges > 2)
+                if (++nCutEdges > 2)
                 {
                     meshCells_[cutcelli++] = celli;
                     break;
@@ -129,7 +121,7 @@ void Foam::cuttingPlane::intersectEdges
             const point& p0 = points[e[0]];
             const point& p1 = points[e[1]];
 
-            scalar alpha = lineIntersect(linePointRef(p0, p1));
+            const scalar alpha = lineIntersect(linePointRef(p0, p1));
 
             if (alpha < zeroish)
             {
@@ -186,10 +178,8 @@ bool Foam::cuttingPlane::walkCell
         // If so should e.g. decompose the cells on both faces and redo
         // the calculation.
 
-        forAll(fEdges, i)
+        for (const label edge2I : fEdges)
         {
-            label edge2I = fEdges[i];
-
             if (edge2I != edgeI && edgePoint[edge2I] != -1)
             {
                 nextEdgeI = edge2I;
@@ -212,7 +202,7 @@ bool Foam::cuttingPlane::walkCell
 
         edgeI = nextEdgeI;
 
-        nIter++;
+        ++nIter;
 
         if (nIter > 1000)
         {
@@ -232,16 +222,14 @@ bool Foam::cuttingPlane::walkCell
     {
         return true;
     }
-    else
-    {
-        WarningInFunction
-            << "Did not find closed walk along surface of cell " << celli
-            << " starting from edge " << startEdgeI << nl
-            << "Collected cutPoints so far:" << faceVerts
-            << endl;
 
-        return false;
-    }
+    WarningInFunction
+        << "Did not find closed walk along surface of cell " << celli
+        << " starting from edge " << startEdgeI << nl
+        << "Collected cutPoints so far:" << faceVerts
+        << endl;
+
+    return false;
 }
 
 
@@ -261,19 +249,15 @@ void Foam::cuttingPlane::walkCellCuts
     // scratch space for calculating the face vertices
     DynamicList<label> faceVerts(10);
 
-    forAll(meshCells_, i)
+    for (const label celli : meshCells_)
     {
-        label celli = meshCells_[i];
-
         // Find the starting edge to walk from.
         const labelList& cEdges = mesh.cellEdges()[celli];
 
         label startEdgeI = -1;
 
-        forAll(cEdges, cEdgeI)
+        for (const label edgeI : cEdges)
         {
-            label edgeI = cEdges[cEdgeI];
-
             if (edgePoint[edgeI] != -1)
             {
                 startEdgeI = edgeI;
@@ -309,7 +293,7 @@ void Foam::cuttingPlane::walkCellCuts
                 f.flip();
             }
 
-            // the cut faces are usually quite ugly, so optionally triangulate
+            // The cut faces can be quite ugly, so optionally triangulate
             if (triangulate)
             {
                 label nTri = f.triangles(cutPoints, dynCutFaces);
@@ -326,8 +310,18 @@ void Foam::cuttingPlane::walkCellCuts
         }
     }
 
-    this->storedFaces().transfer(dynCutFaces);
-    meshCells_.transfer(dynCutCells);
+    // No cuts? Then no need for any of this information
+    if (dynCutCells.empty())
+    {
+        this->storedPoints().clear();
+        this->storedFaces().clear();
+        meshCells_.clear();
+    }
+    else
+    {
+        this->storedFaces().transfer(dynCutFaces);
+        meshCells_.transfer(dynCutCells);
+    }
 }
 
 
@@ -351,7 +345,6 @@ Foam::cuttingPlane::cuttingPlane
 {
     reCut(mesh, triangulate, cellIdLabels);
 }
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -391,6 +384,7 @@ void Foam::cuttingPlane::remapFaces
     {
         MeshStorage::remapFaces(faceMap);
 
+        // Renumber
         List<label> newCutCells(faceMap.size());
         forAll(faceMap, facei)
         {

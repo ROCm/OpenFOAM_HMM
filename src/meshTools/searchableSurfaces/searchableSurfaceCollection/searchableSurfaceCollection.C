@@ -324,7 +324,7 @@ Foam::label Foam::searchableSurfaceCollection::size() const
 Foam::tmp<Foam::pointField>
 Foam::searchableSurfaceCollection::coordinates() const
 {
-    tmp<pointField> tCtrs = tmp<pointField>(new pointField(size()));
+    tmp<pointField> tCtrs(new pointField(size()));
     pointField& ctrs = tCtrs.ref();
 
     // Append individual coordinates

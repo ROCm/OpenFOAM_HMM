@@ -52,6 +52,9 @@ Description
 #include "IFstream.H"
 #include "readHexLabel.H"
 
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace Foam;

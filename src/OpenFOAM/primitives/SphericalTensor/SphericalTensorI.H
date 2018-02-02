@@ -157,6 +157,34 @@ inline Cmpt magSqr(const SphericalTensor<Cmpt>& st)
 }
 
 
+template<class Cmpt>
+inline Cmpt cmptMax(const SphericalTensor<Cmpt>& st)
+{
+    return st.ii();
+}
+
+
+template<class Cmpt>
+inline Cmpt cmptMin(const SphericalTensor<Cmpt>& st)
+{
+    return st.ii();
+}
+
+
+template<class Cmpt>
+inline Cmpt cmptSum(const SphericalTensor<Cmpt>& st)
+{
+    return 3*st.ii();
+}
+
+
+template<class Cmpt>
+inline Cmpt cmptAv(const SphericalTensor<Cmpt>& st)
+{
+    return st.ii();
+}
+
+
 //- Return the trace of a spherical tensor
 template<class Cmpt>
 inline Cmpt tr(const SphericalTensor<Cmpt>& st)

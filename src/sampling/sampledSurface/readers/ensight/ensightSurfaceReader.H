@@ -146,7 +146,7 @@ public:
 
 
     //- Destructor
-    virtual ~ensightSurfaceReader();
+    virtual ~ensightSurfaceReader() = default;
 
 
     // Member Functions

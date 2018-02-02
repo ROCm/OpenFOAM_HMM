@@ -70,7 +70,7 @@ public:
 
 
     //- Destructor
-    virtual ~proxySurfaceWriter();
+    virtual ~proxySurfaceWriter() = default;
 
 
     // Member Functions

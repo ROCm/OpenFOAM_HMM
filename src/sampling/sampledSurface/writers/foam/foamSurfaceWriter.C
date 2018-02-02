@@ -35,20 +35,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::foamSurfaceWriter::foamSurfaceWriter()
-:
-    surfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::foamSurfaceWriter::~foamSurfaceWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::foamSurfaceWriter::write

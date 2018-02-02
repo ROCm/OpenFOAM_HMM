@@ -97,11 +97,11 @@ public:
     // Constructors
 
         //- Construct null
-        surfaceWriter();
+        surfaceWriter() = default;
 
 
     //- Destructor
-    virtual ~surfaceWriter();
+    virtual ~surfaceWriter() = default;
 
 
     // Member Functions

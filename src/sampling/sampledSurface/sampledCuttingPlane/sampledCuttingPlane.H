@@ -133,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledCuttingPlane();
+    virtual ~sampledCuttingPlane() = default;
 
 
     // Member Functions

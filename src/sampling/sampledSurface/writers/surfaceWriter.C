@@ -97,16 +97,4 @@ Foam::surfaceWriter::New(const word& writeType, const dictionary& optDict)
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::surfaceWriter::surfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceWriter::~surfaceWriter()
-{}
-
-
 // ************************************************************************* //

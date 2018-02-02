@@ -42,10 +42,4 @@ Foam::surfaceReader::surfaceReader(const fileName& fName)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfaceReader::~surfaceReader()
-{}
-
-
 // ************************************************************************* //

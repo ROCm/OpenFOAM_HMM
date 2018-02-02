@@ -74,20 +74,6 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::starcdSurfaceWriter::starcdSurfaceWriter()
-:
-    surfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::starcdSurfaceWriter::~starcdSurfaceWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::starcdSurfaceWriter::write

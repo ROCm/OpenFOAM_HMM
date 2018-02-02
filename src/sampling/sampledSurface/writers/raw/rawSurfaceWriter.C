@@ -222,12 +222,6 @@ Foam::rawSurfaceWriter::rawSurfaceWriter(const dictionary& options)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::rawSurfaceWriter::~rawSurfaceWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::rawSurfaceWriter::write
