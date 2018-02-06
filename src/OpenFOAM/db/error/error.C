@@ -236,7 +236,7 @@ void Foam::error::exit(const int errNo)
     {
         Perr<< endl << *this << endl
             << "\nFOAM exiting\n" << endl;
-        ::exit(1);
+        ::exit(errNo);
     }
 }
 
