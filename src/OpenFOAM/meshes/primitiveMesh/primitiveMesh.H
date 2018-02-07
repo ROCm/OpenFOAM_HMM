@@ -822,6 +822,7 @@ public:
             const labelList& cellPoints
             (
                 const label celli,
+                labelHashSet&,
                 DynamicList<label>&
             ) const;
 
@@ -876,6 +877,7 @@ public:
             const labelList& cellEdges
             (
                 const label celli,
+                labelHashSet&,
                 DynamicList<label>&
             ) const;
 

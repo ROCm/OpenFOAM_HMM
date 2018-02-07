@@ -305,6 +305,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
     // Lists of faces that can be merged.
     DynamicList<labelList> allFaceSets(boundaryCells.size() / 10);
     // Storage for on-the-fly cell-edge addressing.
+    labelHashSet set;
     DynamicList<label> storage;
 
     // On all cells regionise the faces
@@ -314,7 +315,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
         const cell& cFaces = mesh_.cells()[celli];
 
-        const labelList& cEdges = mesh_.cellEdges(celli, storage);
+        const labelList& cEdges = mesh_.cellEdges(celli, set, storage);
 
         // Region per face
         Map<label> faceRegion(cFaces.size());
