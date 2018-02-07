@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -483,67 +483,70 @@ void Foam::searchableSurfacesQueries::findNearest
             near[i] = info[i].hitPoint();
         }
     }
+
+    // Store normal as constraint
     constraint.setSize(near.size());
-
-
-    if (surfacesToTest.size() == 1)
+    constraint = pointConstraint();
+    forAll(constraint, i)
     {
-        constraint = pointConstraint();
-        forAll(info, i)
+        if (info[i].hit())
         {
-            if (info[i].hit())
-            {
-                constraint[i].applyConstraint(normal[i]);
-            }
+            constraint[i].applyConstraint(normal[i]);
         }
     }
-    else if (surfacesToTest.size() >= 2)
+
+    if (surfacesToTest.size() >= 2)
     {
         // Work space
-        pointField near1;
+        //pointField near1;
         vectorField normal1;
 
         label surfi = 1;
         for (label iter = 0; iter < nIter; iter++)
         {
-            constraint = pointConstraint();
-            forAll(constraint, i)
-            {
-                if (info[i].hit())
-                {
-                    constraint[i].applyConstraint(normal[i]);
-                }
-            }
-
-            // Find intersection with next surface
+            // Find nearest on next surface
             const searchableSurface& s = allSurfaces[surfacesToTest[surfi]];
+
+            // Update: info, normal1
             s.findNearest(near, distSqr, info);
             s.getNormal(info, normal1);
-            near1.setSize(info.size());
-            forAll(info, i)
+
+            // Move to intersection of
+            //    - previous surface(s) : near+normal
+            //    - current surface     : info+normal1
+            forAll(near, i)
             {
-                if (info[i].hit())
+                if (info[i].hit() && normal[i] != vector::zero)
                 {
-                    near1[i] = info[i].hitPoint();
-                }
-            }
+                    if (mag(normal[i]&normal1[i]) < 1.0-1e-6)
+                    {
+                        plane pl0(near[i], normal[i], false);
+                        plane pl1(info[i].hitPoint(), normal1[i], false);
 
-            // Move to intersection
-            forAll(near, pointi)
-            {
-                if (info[pointi].hit())
-                {
-                    plane pl0(near[pointi], normal[pointi]);
-                    plane pl1(near1[pointi], normal1[pointi]);
-                    plane::ray r(pl0.planeIntersect(pl1));
-                    vector n = r.dir() / mag(r.dir());
+                        plane::ray r(pl0.planeIntersect(pl1));
+                        vector n = r.dir() / mag(r.dir());
 
-                    vector d(r.refPoint()-near[pointi]);
-                    d -= (d&n)*n;
+                        // Calculate vector to move onto intersection line
+                        vector d(r.refPoint()-near[i]);
+                        d -= (d&n)*n;
 
-                    near[pointi] += d;
-                    normal[pointi] = normal1[pointi];
-                    constraint[pointi].applyConstraint(normal1[pointi]);
+                        // Trim the max distance
+                        scalar magD = mag(d);
+                        if (magD > SMALL)
+                        {
+                            scalar maxDist = Foam::sqrt(distSqr[i]);
+                            if (magD > maxDist)
+                            {
+                                // Clip
+                                d /= magD;
+                                d *= maxDist;
+                            }
+
+                            near[i] += d;
+                            normal[i] = normal1[i];
+                            constraint[i].applyConstraint(normal1[i]);
+                        }
+                    }
                 }
             }
 
