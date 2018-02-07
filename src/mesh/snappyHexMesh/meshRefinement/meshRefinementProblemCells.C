@@ -730,10 +730,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         label nNonAnchorBoundary = 0;
         label nonBoundaryAnchor = -1;
 
-        forAll(cPoints, i)
+        for (const label pointi : cPoints)
         {
-            label pointi = cPoints[i];
-
             if (pointLevel[pointi] <= cellLevel[celli])
             {
                 // Anchor point
