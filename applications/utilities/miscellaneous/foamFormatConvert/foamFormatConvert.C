@@ -162,13 +162,13 @@ bool writeZones(const word& name, const fileName& meshDir, Time& runTime)
 }
 
 
-// Reduction for non-empty strings
-class uniqueEqOp
+// Reduction for non-empty strings.
+template<class StringType>
+struct uniqueEqOp
 {
-    public:
-    void operator()(stringList& x, const stringList& y) const
+    void operator()(List<StringType>& x, const List<StringType>& y) const
     {
-        stringList newX(x.size()+y.size());
+        List<StringType> newX(x.size()+y.size());
         label n = 0;
         forAll(x, i)
         {
@@ -215,8 +215,8 @@ bool writeOptionalMeshObject
     bool haveFile = io.typeHeaderOk<IOField<label>>(false);
 
     // Make sure all know if there is a valid class name
-    stringList classNames(1, io.headerClassName());
-    combineReduce(classNames, uniqueEqOp());
+    wordList classNames(1, io.headerClassName());
+    combineReduce(classNames, uniqueEqOp<word>());
 
     // Check for correct type
     if (classNames[0] == T::typeName)
@@ -395,7 +395,7 @@ int main(int argc, char *argv[])
 
 
         // Check for lagrangian
-        stringList lagrangianDirs
+        fileNameList lagrangianDirs
         (
             1,
             fileHandler().filePath
@@ -406,7 +406,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        combineReduce(lagrangianDirs, uniqueEqOp());
+        combineReduce(lagrangianDirs, uniqueEqOp<fileName>());
 
         if (!lagrangianDirs.empty())
         {
@@ -434,7 +434,7 @@ int main(int argc, char *argv[])
                 );
             }
 
-            stringList cloudDirs
+            fileNameList cloudDirs
             (
                 fileHandler().readDir
                 (
@@ -443,7 +443,7 @@ int main(int argc, char *argv[])
                 )
             );
 
-            combineReduce(cloudDirs, uniqueEqOp());
+            combineReduce(cloudDirs, uniqueEqOp<fileName>());
 
             forAll(cloudDirs, i)
             {
@@ -464,13 +464,11 @@ int main(int argc, char *argv[])
                 IOobjectList sprayObjs(runTime, runTime.timeName(), dir);
 
                 // Combine with all other cloud objects
-                stringList sprayFields(sprayObjs.sortedToc());
-                combineReduce(sprayFields, uniqueEqOp());
+                wordList sprayFields(sprayObjs.sortedToc());
+                combineReduce(sprayFields, uniqueEqOp<word>());
 
-                forAll(sprayFields, fieldi)
+                for (const word& name : sprayFields)
                 {
-                    const word& name = sprayFields[fieldi];
-
                     // Note: try the various field types. Make sure to
                     //       exit once sucessful conversion to avoid re-read
                     //       converted file.
