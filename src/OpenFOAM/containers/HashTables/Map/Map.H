@@ -100,18 +100,6 @@ public:
             parent_type(std::move(map))
         {}
 
-        //- Construct by transferring the parameter contents
-        Map(const Xfer<this_type>& map)
-        :
-            parent_type(map)
-        {}
-
-        //- Construct by transferring the parameter contents
-        Map(const Xfer<parent_type>& map)
-        :
-            parent_type(map)
-        {}
-
         //- Construct from an initializer list
         Map(std::initializer_list<std::pair<label, T>> map)
         :

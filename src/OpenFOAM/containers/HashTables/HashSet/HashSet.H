@@ -162,18 +162,6 @@ public:
             parent_type(std::move(hs))
         {}
 
-        //- Construct by transferring the parameter contents
-        HashSet(const Xfer<this_type>& hs)
-        :
-            parent_type(hs)
-        {}
-
-        //- Construct by transferring the parameter contents
-        HashSet(const Xfer<parent_type>& hs)
-        :
-            parent_type(hs)
-        {}
-
         //- Construct from the keys of another HashTable,
         //- the type of values held is arbitrary.
         template<class AnyType, class AnyHash>

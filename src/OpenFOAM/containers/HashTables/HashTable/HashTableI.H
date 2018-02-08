@@ -137,14 +137,6 @@ inline bool Foam::HashTable<T, Key, Hash>::set
 
 
 template<class T, class Key, class Hash>
-inline Foam::Xfer<Foam::HashTable<T, Key, Hash>>
-Foam::HashTable<T, Key, Hash>::xfer()
-{
-    return xferMove(*this);
-}
-
-
-template<class T, class Key, class Hash>
 inline const T& Foam::HashTable<T, Key, Hash>::lookup
 (
     const Key& key,
@@ -223,17 +215,6 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()
 
     this->insert(key, deflt);
     return find(key).object();
-}
-
-
-template<class T, class Key, class Hash>
-inline const T& Foam::HashTable<T, Key, Hash>::operator()
-(
-    const Key& key,
-    const T& deflt
-) const
-{
-    return this->lookup(key, deflt);
 }
 
 
