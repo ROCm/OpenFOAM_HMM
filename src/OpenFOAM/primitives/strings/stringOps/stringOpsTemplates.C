@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,48 +23,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include <cstdio>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// NOTE: with C++11 could consider variadic templates for a more general
-// sprintf implementation
-
-template<class PrimitiveType>
-Foam::word Foam::stringOps::name
-(
-    const char* fmt,
-    const PrimitiveType& val
-)
-{
-    word output;
-
-    // snprintf with zero to find size (without '\0') required
-    int n = ::snprintf(nullptr, 0, fmt, val);
-    if (n > 0)
-    {
-        output.resize(n+1);
-        char* buf = &(output[0]);
-
-        // Print directly into buffer, no stripping desired
-        n = ::snprintf(buf, n+1, fmt, val);
-        output.resize(n);
-    }
-
-    return output;
-}
-
-
-template<class PrimitiveType>
-Foam::word Foam::stringOps::name
-(
-    const std::string& fmt,
-    const PrimitiveType& val
-)
-{
-    return stringOps::name(fmt.c_str(), val);
-}
-
 
 template<class StringType>
 Foam::SubStrings<StringType> Foam::stringOps::split

@@ -64,14 +64,14 @@ int main(int argc, char *argv[])
 
     // Test Foam::name with formatting string
     {
-        word formatted = Foam::name("formatted=<%X>", 0xdeadbeef);
+        word formatted = word::printf("formatted=<%X>", 0xdeadbeef);
         Info<<"formatted: " << formatted << nl;
     }
 
     Info<<"formatted: "
-        << Foam::name("formatted not checked for validity=<%X>", 0xdeadbeef)
+        << word::printf("formatted not checked for validity=<%X>", 0xdeadbeef)
         << nl
-        << endl
+        << endl;
 
 
     Info<< "string:" << test << nl << "hash:"
@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
 
     cout<< "\ntest Foam::name()\n";
 
-    Info<< "hash: = " << Foam::name("0x%012X", string::hash()(s2)) << endl;
+    Info<< "hash: = " << word::printf("0x%012X", string::hash()(s2)) << endl;
 
     // test formatting on int
     {
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
         Info<< "int " << val << " as word >"
             << Foam::name(val) << "< or "
-            << Foam::name("formatted >%08d<", val) << "\n";
+            << word::printf("formatted >%08d<", val) << "\n";
     }
 
     // test formatting on scalar
@@ -244,7 +244,7 @@ int main(int argc, char *argv[])
         scalar val = 3.1415926535897931;
         Info<< "scalar " << val << " as word >"
             << Foam::name(val) << "< or "
-            << Foam::name("formatted >%.9f<", val) << "\n";
+            << word::printf("formatted >%.9f<", val) << "\n";
     }
 
     // test formatting on uint
@@ -254,7 +254,7 @@ int main(int argc, char *argv[])
 
         Info<< "uint64 " << val << " as word >"
             << Foam::name(val) << "< or "
-            << Foam::name("formatted >%08d<", val) << "\n";
+            << word::printf("formatted >%08d<", val) << "\n";
     }
 
     // test startsWith, endsWith methods

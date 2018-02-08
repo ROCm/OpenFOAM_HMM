@@ -220,7 +220,7 @@ private:
             }
             else if (elementName[0] == 'E')
             {
-                elementName = 'e';
+                elementName = "e";
             }
         }
 
@@ -314,8 +314,7 @@ public:
 
 
     //- Destructor
-    virtual ~chemkinReader()
-    {}
+    virtual ~chemkinReader() = default;
 
 
     // Member functions

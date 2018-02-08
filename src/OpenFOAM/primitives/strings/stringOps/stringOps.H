@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -319,19 +319,6 @@ namespace stringOps
 
     //- Inplace transform string with std::toupper on each character
     void inplaceUpper(std::string& s);
-
-
-    //- Using printf-formatter for a word representation of the primitive.
-    //  The representation is not checked for valid word characters -
-    //  it is assumed that the caller knows what they are doing
-    template<class PrimitiveType>
-    Foam::word name(const char* fmt, const PrimitiveType& val);
-
-    //- Using printf-formatter for a word representation of the primitive.
-    //  The representation is not checked for valid word characters -
-    //  it is assumed that the caller knows what they are doing
-    template<class PrimitiveType>
-    Foam::word name(const std::string& fmt, const PrimitiveType& val);
 
 
     //- Split string into sub-strings at the delimiter character.

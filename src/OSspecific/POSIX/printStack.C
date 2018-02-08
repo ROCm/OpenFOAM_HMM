@@ -133,7 +133,7 @@ void printSourceFileAndLine
         else
         {
             string cwdLine(line.replaceAll(cwd() + '/', ""));
-            string homeLine(cwdLine.replaceAll(home(), '~'));
+            string homeLine(cwdLine.replaceAll(home(), "~"));
 
             os  << " at " << homeLine.c_str();
         }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,6 +25,34 @@ License
 
 #include <cctype>
 #include <iostream>  // for std::cerr
+
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class PrimitiveType>
+inline Foam::word Foam::word::printf
+(
+    const char* fmt,
+    const PrimitiveType& val
+)
+{
+    word output;
+    string_printf(output, fmt, val);
+    return output;
+}
+
+
+template<class PrimitiveType>
+inline Foam::word Foam::word::printf
+(
+    const std::string& fmt,
+    const PrimitiveType& val
+)
+{
+    word output;
+    string_printf(output, fmt, val);
+    return output;
+}
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

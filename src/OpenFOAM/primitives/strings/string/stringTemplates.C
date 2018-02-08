@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2014-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,27 +23,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "int64.H"
+#include <cstdio>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const int64_t Foam::pTraits<int64_t>::zero = 0;
-const int64_t Foam::pTraits<int64_t>::one = 1;
-const int64_t Foam::pTraits<int64_t>::min = INT64_MIN;
-const int64_t Foam::pTraits<int64_t>::max = INT64_MAX;
-const int64_t Foam::pTraits<int64_t>::rootMin = pTraits<int64_t>::min;
-const int64_t Foam::pTraits<int64_t>::rootMax = pTraits<int64_t>::max;
+// Could also consider generalizing with C++11 variadic templates
 
-const char* const Foam::pTraits<int64_t>::componentNames[] = { "" };
-
-Foam::pTraits<int64_t>::pTraits(const int64_t& val)
-:
-    p_(val)
-{}
-
-Foam::pTraits<int64_t>::pTraits(Istream& is)
+template<class PrimitiveType>
+std::string::size_type Foam::string::string_printf
+(
+    std::string& output,
+    const char* fmt,
+    const PrimitiveType& val
+)
 {
-    is >> p_;
+    // Use snprintf with zero to establish the size (without '\0') required
+    int n = ::snprintf(nullptr, 0, fmt, val);
+    if (n > 0)
+    {
+        output.resize(n+1);
+        char* buf = &(output[0]);
+
+        // Print directly into buffer, no stripping desired
+        n = ::snprintf(buf, n+1, fmt, val);
+        output.resize(n);
+    }
+    else
+    {
+        output.clear();
+    }
+
+    return output.size();
+}
+
+
+template<class PrimitiveType>
+std::string::size_type Foam::string::string_printf
+(
+    std::string& output,
+    const std::string& fmt,
+    const PrimitiveType& val
+)
+{
+    return string_printf(output, fmt.c_str(), val);
 }
 
 

@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "stringOps.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -61,18 +59,6 @@ word name(const Scalar val)
     std::ostringstream buf;
     buf << val;
     return buf.str();
-}
-
-
-word name(const char* fmt, const Scalar val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
-word name(const std::string& fmt, const Scalar val)
-{
-    return stringOps::name(fmt, val);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -117,7 +117,28 @@ public:
         word(Istream& is);
 
 
-    // Member functions
+    // Member Functions
+
+        //- Use a printf-style formatter for a primitive.
+        //  The representation is not checked for valid characters -
+        //  it is assumed that the caller knows what they are doing
+        template<class PrimitiveType>
+        inline static word printf
+        (
+            const char* fmt,
+            const PrimitiveType& val
+        );
+
+        //- Use a printf-style formatter for a primitive.
+        //  The representation is not checked for valid characters -
+        //  it is assumed that the caller knows what they are doing
+        template<class PrimitiveType>
+        inline static word printf
+        (
+            const std::string& fmt,
+            const PrimitiveType& val
+        );
+
 
         //- Is this character valid for a word?
         inline static bool valid(char c);
@@ -128,7 +149,7 @@ public:
         static word validate(const std::string& s, const bool prefix=false);
 
 
-      // File-like functions
+    // File-like Functions
 
         //- Return word without extension (part before last .)
         word lessExt() const;
@@ -156,7 +177,7 @@ public:
 
     // Member operators
 
-      // Assignment
+    // Assignment
 
         //- Copy assignment, no character validation required
         inline void operator=(const word& w);

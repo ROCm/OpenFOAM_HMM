@@ -24,21 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "uint32.H"
-#include "stringOps.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::word Foam::name(const char* fmt, const uint32_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
-Foam::word Foam::name(const std::string& fmt, const uint32_t val)
-{
-    return stringOps::name(fmt, val);
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
