@@ -1,0 +1,29 @@
+// -*- C++ -*-
+// An example of using systemCall
+system
+{
+    type    systemCall;
+    libs    ("libutilityFunctionObjects.so");
+
+    // Execute on the master process only
+    master  true;
+
+    executeCalls
+    (
+        "echo execute: shell $$"
+    );
+
+    writeCalls
+    (
+        "echo \*\*\* writing data \*\*\*"
+    );
+
+    endCalls
+    (
+        "echo \*\*\* end of run \*\*\*"
+        "grep application system/controlDict"
+        "echo \*\*\* done \*\*\*"
+    );
+}
+
+// ************************************************************************* //
