@@ -143,15 +143,14 @@ public:
         static const string null;
 
 
-    //- Hashing function class, shared by all the derived classes
-    class hash
+    //- Hashing function for string and derived string classes
+    struct hash
     {
-    public:
-        hash() = default;
-
-        //- Hash for string.
-        //  Uses Foam::string instead of std::string for automatic conversions.
-        inline unsigned operator()(const string& str, unsigned seed = 0) const;
+        inline unsigned operator()
+        (
+            const std::string& str,
+            unsigned seed = 0
+        ) const;
     };
 
 

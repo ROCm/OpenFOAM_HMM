@@ -254,7 +254,7 @@ inline bool Foam::string::operator()(const std::string& text) const
 
 inline unsigned Foam::string::hash::operator()
 (
-    const string& str,
+    const std::string& str,
     unsigned seed
 ) const
 {

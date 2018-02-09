@@ -44,21 +44,16 @@ Description
 
 namespace Foam
 {
-//template<class Type> class Hash;
-//template<> class Hash<label>;
+//template<class Type> struct Hash;
+//template<> struct Hash<label>;
 
 /*---------------------------------------------------------------------------*\
                             Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class PrimitiveType>
-class Hash
+struct Hash
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const PrimitiveType& p, unsigned seed) const
     {
         return Hasher(&p, sizeof(p), seed);
@@ -76,13 +71,8 @@ public:
 
 //- Hash specialization for hashing labels
 template<>
-class Hash<Foam::label>
+struct Hash<Foam::label>
 {
-public:
-
-    Hash()
-    {}
-
     //- Incrementally hash a label.
     //  This will necessarily return a different value than the
     //  non-incremental version.
@@ -103,13 +93,8 @@ public:
 
 //- Hash specialization for hashing strings
 template<>
-class Hash<Foam::string>
+struct Hash<Foam::string>
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const string& p, unsigned seed) const
     {
         return string::hash()(p, seed);
@@ -123,13 +108,8 @@ public:
 
 //- Hash specialization for hashing words
 template<>
-class Hash<Foam::word>
+struct Hash<Foam::word>
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const word& p, unsigned seed) const
     {
         return word::hash()(p, seed);
@@ -143,13 +123,8 @@ public:
 
 //- Hash specialization for hashing fileNames
 template<>
-class Hash<Foam::fileName>
+struct Hash<Foam::fileName>
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const fileName& p, unsigned seed) const
     {
         return fileName::hash()(p, seed);
@@ -163,13 +138,8 @@ public:
 
 //- Hash specialization for hashing wordRes
 template<>
-class Hash<Foam::wordRe>
+struct Hash<Foam::wordRe>
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const wordRe& p, unsigned seed) const
     {
         return wordRe::hash()(p, seed);
@@ -183,13 +153,8 @@ public:
 
 //- Hash specialization for hashing keyTypes
 template<>
-class Hash<Foam::keyType>
+struct Hash<Foam::keyType>
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const keyType& p, unsigned seed) const
     {
         return keyType::hash()(p, seed);
@@ -201,18 +166,12 @@ public:
 };
 
 
-
 //- Hash specialization for hashing pointer addresses.
 //  Treat a pointer like a long.
 //  This should work for both 32-bit and 64-bit pointers.
 template<>
-class Hash<void*>
+struct Hash<void*>
 {
-public:
-
-    Hash()
-    {}
-
     unsigned operator()(const void* const& p, unsigned seed) const
     {
         return Hash<long>()(long(p), seed);

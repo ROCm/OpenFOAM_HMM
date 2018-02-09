@@ -546,18 +546,16 @@ inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
         // Hash directly
         return Hasher(lst.v_, sizeof(lst.v_), seed);
     }
-    else
+
+    // Hash incrementally
+    unsigned val = seed;
+
+    for (unsigned i=0; i<Size; ++i)
     {
-        // Hash incrementally
-        unsigned val = seed;
-
-        for (unsigned i=0; i<Size; ++i)
-        {
-            val = HashT()(lst[i], val);
-        }
-
-        return val;
+        val = HashT()(lst[i], val);
     }
+
+    return val;
 }
 
 
