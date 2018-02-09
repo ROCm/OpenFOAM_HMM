@@ -54,13 +54,6 @@ Foam::PrintTable<KeyType, DataType>::PrintTable
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class KeyType, class DataType>
-Foam::PrintTable<KeyType, DataType>::~PrintTable()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class KeyType, class DataType>
@@ -71,7 +64,7 @@ void Foam::PrintTable<KeyType, DataType>::print
     const bool printAverage
 ) const
 {
-    HashTable<HashTable<DataType, label>, KeyType> combinedTable;
+    HashTable<Map<DataType>, KeyType> combinedTable;
 
     List<HashTableData> procData(Pstream::nProcs(), HashTableData());
 
@@ -90,36 +83,25 @@ void Foam::PrintTable<KeyType, DataType>::print
         {
             const HashTableData& procIData = procData[proci];
 
-            for
-            (
-                typename HashTableData::const_iterator iter = procIData.begin();
-                iter != procIData.end();
-                ++iter
-            )
+            forAllConstIters(procIData, iter)
             {
                 if (!combinedTable.found(iter.key()))
                 {
                     combinedTable.insert
                     (
                         iter.key(),
-                        HashTable<DataType, label>()
+                        Map<DataType>()
                     );
                 }
 
-                HashTable<DataType, label>& key = combinedTable[iter.key()];
+                Map<DataType>& key = combinedTable[iter.key()];
 
-                key.insert(proci, iter());
+                key.insert(proci, iter.object());
 
-                for
-                (
-                    typename HashTable<DataType, label>
-                        ::const_iterator dataIter = key.begin();
-                    dataIter != key.end();
-                    ++dataIter
-                )
+                forAllConstIters(key, dataIter)
                 {
                     std::ostringstream buf;
-                    buf << dataIter();
+                    buf << dataIter.object();
 
                     largestDataLength = max
                     (
@@ -172,7 +154,7 @@ void Foam::PrintTable<KeyType, DataType>::print
 
         forAll(sortedTable, keyI)
         {
-            const HashTable<DataType, label>& procDataList
+            const Map<DataType>& procDataList
                 = combinedTable[sortedTable[keyI]];
 
             os.width(largestKeyLength);

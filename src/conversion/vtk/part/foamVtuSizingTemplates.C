@@ -224,7 +224,7 @@ void Foam::vtk::vtuSizing::populateArrays
     const labelList& owner = mesh.faceOwner();
 
     // Unique vertex labels per polyhedral
-    HashSet<label> hashUniqId(2*256);
+    labelHashSet hashUniqId(2*256);
 
     // Index into vertLabels, faceLabels for normal cells
     label nVertLabels = 0;

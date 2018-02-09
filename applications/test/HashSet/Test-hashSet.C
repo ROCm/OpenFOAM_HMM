@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 
     setA = { "kjhk", "kjhk2", "abced" };
 
-    HashTable<label, word> tableA
+    HashTable<label> tableA
     {
         { "value1", 1 },
         { "value2", 2 },

@@ -58,7 +58,7 @@ Ostream& operator<<(Ostream&, const pointFeatureEdgesTypes&);
 //- Hold the types of feature edges attached to the point.
 class pointFeatureEdgesTypes
 :
-    public HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
+    public HashTable<label, extendedFeatureEdgeMesh::edgeStatus, Hash<label>>
 {
     // Private data
 
@@ -82,7 +82,7 @@ public:
 
 
     //- Destructor
-    ~pointFeatureEdgesTypes();
+    ~pointFeatureEdgesTypes() = default;
 
 
     // Member Functions

@@ -59,12 +59,6 @@ Foam::vtk::vtuSizing::vtuSizing()
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::vtk::vtuSizing::~vtuSizing()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::vtk::vtuSizing::reset
@@ -83,7 +77,7 @@ void Foam::vtk::vtuSizing::reset
     const cellShapeList& shapes = mesh.cellShapes();
 
     // Unique vertex labels per polyhedral
-    HashSet<label> hashUniqId(2*256);
+    labelHashSet hashUniqId(2*256);
 
     decompose_ = decompose;
     nCells_    = mesh.nCells();
