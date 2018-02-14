@@ -103,7 +103,7 @@ public:
 
 
     //- Destructor
-    virtual ~FIREMeshWriter();
+    virtual ~FIREMeshWriter() = default;
 
 
     // Member Functions

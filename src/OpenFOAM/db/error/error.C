@@ -191,7 +191,7 @@ Foam::error::operator Foam::dictionary() const
     dictionary errDict;
 
     string oneLineMessage(message());
-    oneLineMessage.replaceAll('\n', ' ');
+    oneLineMessage.replaceAll("\n", " ");
 
     errDict.add("type", word("Foam::error"));
     errDict.add("message", oneLineMessage);

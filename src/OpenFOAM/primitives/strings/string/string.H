@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ See also
 SourceFiles
     string.C
     stringIO.C
+    stringTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -90,6 +91,24 @@ protected:
         //  A wrapped version of find_last_of("./") with additional logic.
         inline std::string::size_type find_ext() const;
 
+        //- A printf-style formatter for a primitive.
+        template<class PrimitiveType>
+        static std::string::size_type string_printf
+        (
+            std::string& output,
+            const char* fmt,
+            const PrimitiveType& val
+        );
+
+        //- A printf-style formatter for a primitive.
+        template<class PrimitiveType>
+        static std::string::size_type string_printf
+        (
+            std::string& output,
+            const std::string& fmt,
+            const PrimitiveType& val
+        );
+
         //- Return file name extension (part after last .)
         word ext() const;
 
@@ -124,16 +143,14 @@ public:
         static const string null;
 
 
-    //- Hashing function class, shared by all the derived classes
-    class hash
+    //- Hashing function for string and derived string classes
+    struct hash
     {
-    public:
-        hash()
-        {}
-
-        //- Hash for string.
-        //  Uses Foam::string instead of std::string for automatic conversions.
-        inline unsigned operator()(const string& str, unsigned seed = 0) const;
+        inline unsigned operator()
+        (
+            const std::string& str,
+            unsigned seed = 0
+        ) const;
     };
 
 
@@ -152,9 +169,9 @@ public:
         inline string(const char* str, const size_type len);
 
         //- Construct from a single character
-        inline string(const char c);
+        inline explicit string(const char c);
 
-        //- Construct from copies of a single character
+        //- Construct fill copies of a single character
         inline string(const size_type len, const char c);
 
         //- Move construct from std::string
@@ -291,6 +308,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "stringI.H"
+
+#ifdef NoRepository
+    #include "stringTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

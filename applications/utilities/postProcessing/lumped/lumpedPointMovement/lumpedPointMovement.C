@@ -226,14 +226,16 @@ int main(int argc, char *argv[])
 
             // State/response = what comes back from FEM
             {
-                const word outputName = Foam::name("state_%06d.vtp", index);
+                const word outputName = word::printf("state_%06d.vtp", index);
+
                 Info<<"    " << outputName << endl;
 
                 state.writeVTP(outputName, movement().axis());
             }
 
             {
-                const word outputName = Foam::name("geom_%06d.vtp", index);
+                const word outputName = word::printf("geom_%06d.vtp", index);
+
                 Info<<"    " << outputName << endl;
 
                 movement().writeVTP(outputName, state, mesh, patchLst, points0);

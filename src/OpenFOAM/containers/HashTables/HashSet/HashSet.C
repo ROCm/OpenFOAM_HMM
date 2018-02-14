@@ -122,10 +122,7 @@ Foam::HashSet<Key, Hash>::HashSet
 :
     parent_type(tbl.capacity())
 {
-    using other_iter =
-        typename HashTable<AnyType, Key, AnyHash>::const_iterator;
-
-    for (other_iter iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
+    for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
         this->insert(iter.key());
     }

@@ -60,7 +60,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::init()
             (
                 IOobject
                 (
-                    "Rijk" + name(k),
+                    "Rijk" + Foam::name(k),
                     this->mesh_.time().timeName(),
                     this->mesh_,
                     IOobject::NO_READ,
@@ -160,14 +160,6 @@ diffusionMulticomponent
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CombThermoType, class ThermoType>
-Foam::combustionModels::diffusionMulticomponent<CombThermoType, ThermoType>::
-~diffusionMulticomponent()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class CombThermoType, class ThermoType>
@@ -200,7 +192,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
                 (
                     IOobject
                     (
-                        "Rijl" + word(k),
+                        "Rijl" + Foam::name(k),
                         this->mesh_.time().timeName(),
                         this->mesh_,
                         IOobject::NO_READ,
@@ -258,7 +250,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 
             const volScalarField ft
             (
-                "ft" + name(k),
+                "ft" + Foam::name(k),
                 (
                     s_[k]*Yfuel - (Yox - YoxStream_[k])
                 )
@@ -279,7 +271,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 
             const volScalarField preExp
             (
-                "preExp" + name(k),
+                "preExp" + Foam::name(k),
                  1.0  + sqr(OAvailScaled)
             );
 
@@ -291,7 +283,7 @@ diffusionMulticomponent<CombThermoType, ThermoType>::correct()
 
             const volScalarField topHatFilter(pos(filter - 1e-3));
 
-            const volScalarField prob("prob" + name(k), preExp*filter);
+            const volScalarField prob("prob" + Foam::name(k), preExp*filter);
 
             const volScalarField RijkDiff
             (
@@ -438,10 +430,8 @@ diffusionMulticomponent<CombThermoType, ThermoType>::read()
         this->coeffs().readIfPresent("laminarIgn", laminarIgn_);
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

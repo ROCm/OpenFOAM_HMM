@@ -36,12 +36,12 @@ inline void Foam::List<T>::alloc()
 
 
 template<class T>
-inline void Foam::List<T>::reAlloc(const label s)
+inline void Foam::List<T>::reAlloc(const label len)
 {
-    if (this->size_ != s)
+    if (this->size_ != len)
     {
         clear();
-        this->size_ = s;
+        this->size_ = len;
         alloc();
     }
 }
@@ -51,24 +51,11 @@ template<class T>
 template<class List2>
 inline void Foam::List<T>::copyList(const List2& lst)
 {
-    if (this->size_)
-    {
-        forAll(*this, i)
-        {
-            this->operator[](i) = lst[i];
-        }
-    }
-}
+    const label len = this->size_;
 
-
-template<class T>
-template<class List2>
-inline void Foam::List<T>::allocCopyList(const List2& lst)
-{
-    if (this->size_)
+    for (label i=0; i<len; ++i)
     {
-        alloc();
-        copyList(lst);
+        this->operator[](i) = lst[i];
     }
 }
 
@@ -79,17 +66,17 @@ inline Foam::List<T>::List
 (
     InputIterator begIter,
     InputIterator endIter,
-    const label s
+    const label len
 )
 :
-    UList<T>(nullptr, s)
+    UList<T>(nullptr, len)
 {
     if (this->size_)
     {
         alloc();
 
         InputIterator iter = begIter;
-        for (label i = 0; i < s; ++i)
+        for (label i = 0; i < len; ++i)
         {
             this->operator[](i) = *iter;
             ++iter;
@@ -135,16 +122,16 @@ inline void Foam::List<T>::clear()
 
 
 template<class T>
-inline void Foam::List<T>::resize(const label newSize)
+inline void Foam::List<T>::resize(const label len)
 {
-    this->setSize(newSize);
+    this->setSize(len);
 }
 
 
 template<class T>
-inline void Foam::List<T>::resize(const label newSize, const T& val)
+inline void Foam::List<T>::resize(const label len, const T& val)
 {
-    this->setSize(newSize, val);
+    this->setSize(len, val);
 }
 
 

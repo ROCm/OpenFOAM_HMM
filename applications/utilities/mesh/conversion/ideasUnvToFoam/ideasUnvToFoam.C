@@ -853,7 +853,7 @@ int main(int argc, char *argv[])
 
     labelList own(boundaryFaces.size(), -1);
     labelList nei(boundaryFaces.size(), -1);
-    HashTable<label, label> faceToCell[2];
+    Map<label> faceToCell[2];
 
     {
         HashTable<label, face, Hash<face>> faceToFaceID(boundaryFaces.size());

@@ -48,6 +48,23 @@ See also
 
 #include <list>
 #include <numeric>
+#include <functional>
+
+namespace Foam
+{
+
+// Verify inheritance
+class MyStrings
+:
+    public List<string>
+{
+public:
+
+    using List<string>::List;
+};
+
+} // end namespace Foam
+
 
 using namespace Foam;
 
@@ -66,6 +83,14 @@ void testFind(const T& val, const ListType& lst)
 }
 
 
+void printMyString(const UList<string>& lst)
+{
+    MyStrings slist2(lst);
+
+    Info<<slist2 << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -76,6 +101,7 @@ int main(int argc, char *argv[])
     argList::addOption("wordList", "wordList");
     argList::addOption("stringList", "stringList");
     argList::addOption("float", "xx");
+    argList::addBoolOption("transform", "Test List::createList functionality");
     argList::addBoolOption("flag");
 
     #include "setRootCase.H"
@@ -336,6 +362,85 @@ int main(int argc, char *argv[])
         Info<<"-flag:" << args["flag"] << endl;
     }
 
+    if (args.found("transform"))
+    {
+        Info<< nl << "Test List::createList functionality" << nl;
+
+        const auto labels = identity(15);
+        Info<< "labels: " << flatOutput(labels) << endl;
+
+        {
+            auto scalars = List<scalar>::createList
+            (
+                labels,
+                [](const label& val){ return scalar(1.5*val); }
+            );
+            Info<< "scalars: " << flatOutput(scalars) << endl;
+        }
+
+        {
+            auto vectors = List<vector>::createList
+            (
+                labels,
+                [](const label& val){ return vector(1.2*val, -1.2*val, 0); }
+            );
+            Info<< "vectors: " << flatOutput(vectors) << endl;
+        }
+
+        {
+            auto longs = List<long>::createList
+            (
+                labels,
+                [](const label& val){ return val; }
+            );
+            Info<< "longs: " << flatOutput(longs) << endl;
+        }
+        {
+            auto negs = List<label>::createList
+            (
+                labels,
+                std::negate<label>()
+            );
+            Info<< "negs: " << flatOutput(negs) << endl;
+        }
+
+        {
+            auto scalars = List<scalar>::createList
+            (
+                labelRange::null.cbegin(),
+                labelRange::identity(15).cend(),
+                [](const label& val){ return scalar(-1.125*val); }
+            );
+            Info<< "scalars: " << flatOutput(scalars) << endl;
+        }
+
+        #if WM_LABEL_SIZE == 32
+        {
+            List<int64_t> input(10);
+            std::iota(input.begin(), input.end(), 0);
+
+            auto output = List<label>::createList
+            (
+                input,
+                toLabel<int64_t>()
+            );
+            Info<< "label (from int64): " << flatOutput(output) << endl;
+        }
+        #elif WM_LABEL_SIZE == 64
+        {
+            List<int32_t> input(10);
+            std::iota(input.begin(), input.end(), 0);
+
+            auto output = List<label>::createList
+            (
+                input,
+                toLabel<int32_t>()
+            );
+            Info<< "label (from int32): " << flatOutput(output) << endl;
+        }
+        #endif
+    }
+
     if (args.readIfPresent<scalar>("float", xxx))
     {
         Info<<"read float " << xxx << endl;
@@ -354,6 +459,8 @@ int main(int argc, char *argv[])
     if (args.found("stringList"))
     {
         sLst = args.readList<string>("stringList");
+
+        printMyString(sLst);
     }
 
     Info<< nl

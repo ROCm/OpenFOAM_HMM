@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
         {
             entry* e = dict1.add
             (
-                Foam::name("entry%d", i),
+                word::printf("entry%d", i),
                 string("entry" + Foam::name(i))
             );
             entryInfo(e);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         {
             entry* e = tmpdict.add
             (
-                Foam::name("subentry%d", i),
+                word::printf("subentry%d", i),
                 string("subentry" + Foam::name(i))
             );
             entryInfo(e);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
         {
             entry* e = dict1.add
             (
-                Foam::name("dict%d", i),
+                word::printf("dict%d", i),
                 tmpdict
             );
             entryInfo(e);

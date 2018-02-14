@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -50,16 +50,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 
 class Istream;
 class Ostream;
 
-// Forward declaration of friend functions and operators
 template<class T> class List;
-
-template<class T> Istream& operator>>(Istream& is, List<T>& L);
-
 template<class T, unsigned Size> class FixedList;
 template<class T> class PtrList;
 
@@ -75,7 +71,10 @@ template<class T> class IndirectList;
 template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
+template<class T> Istream& operator>>(Istream& is, List<T>& L);
+
 typedef List<char> charList;
+
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -92,15 +91,11 @@ class List
         inline void alloc();
 
         //- Reallocate list storage to the given size
-        inline void reAlloc(const label s);
+        inline void reAlloc(const label len);
 
-        //- Copy list of given type
+        //- Copy list of given type.
         template<class List2>
         inline void copyList(const List2& lst);
-
-        //- Allocate storage and copy list of given type
-        template<class List2>
-        inline void allocCopyList(const List2& lst);
 
         //- Construct given begin/end iterators and number of elements
         //  Since the size is provided, the end iterator is actually ignored.
@@ -109,7 +104,7 @@ class List
         (
             InputIterator begIter,
             InputIterator endIter,
-            const label s
+            const label len
         );
 
 
@@ -120,6 +115,44 @@ public:
         //- Return a null List
         inline static const List<T>& null();
 
+        //- Create from a list of a dissimilar type.
+        //  Eg, convert a list of ints to floats, vectors etc.
+        //  For example,
+        //  \code
+        //  auto vectors = List<vector>::createList
+        //  (
+        //      ints,
+        //      [](const int& val){ return vector(1.5*val, 0, 0); }
+        //  );
+        //
+        //  auto neg = labelList::createList
+        //  (
+        //      ints,
+        //      std::negate<label>()
+        //  );
+        //  auto labels = labelList::createList
+        //  (
+        //      ints,
+        //      toLabel<int>()
+        //  );
+        //  \endcode
+        template<class T2, class UnaryOperation>
+        static List<T> createList
+        (
+            const UList<T2>& input,
+            const UnaryOperation& op
+        );
+
+        //- Create from an iterator range (uses std::distance for the size).
+        //  The unary operation can be used to convert to other types.
+        template<class InputIterator, class UnaryOperation>
+        static List<T> createList
+        (
+            InputIterator begIter,
+            InputIterator endIter,
+            const UnaryOperation& op
+        );
+
 
     // Constructors
 
@@ -127,22 +160,19 @@ public:
         inline List();
 
         //- Construct with given size
-        explicit List(const label s);
+        explicit List(const label len);
 
         //- Construct with given size and value for all elements
-        List(const label s, const T& val);
+        List(const label len, const T& val);
 
         //- Construct with given size initializing all elements to zero
-        List(const label s, const zero);
+        List(const label len, const zero);
 
-        //- Copy constructor from list
+        //- Copy construct from list
         List(const List<T>& a);
 
-        //- Copy constructor from list containing another type.
-        //  This is primarily useful to convert a list of ints into floats,
-        //  for example.
-        template<class T2>
-        explicit List(const List<T2>& a);
+        //- Copy construct contents from list
+        explicit List(const UList<T>& a);
 
         //- Construct as copy or re-use as specified
         List(List<T>& a, bool reuse);
@@ -151,7 +181,7 @@ public:
         List(const UList<T>& lst, const labelUList& mapAddressing);
 
         //- Construct given begin/end iterators.
-        //  Uses std::distance to determine the size.
+        //  Uses std::distance for the size.
         template<class InputIterator>
         List(InputIterator begIter, InputIterator endIter);
 

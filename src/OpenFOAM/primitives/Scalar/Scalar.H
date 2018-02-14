@@ -105,16 +105,9 @@ public:
 
 // * * * * * * * * * * * * * * * IO/Conversion * * * * * * * * * * * * * * * //
 
-//- Return a string representation of a Scalar
+//- Return a word representation of a Scalar.
+//  Uses stringstream instead of std::to_string for more consistent formatting.
 word name(const Scalar val);
-
-//- Return a word representation of a Scalar, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const char* fmt, const Scalar val);
-
-//- Return a word representation of a Scalar, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const std::string& fmt, const Scalar val);
 
 //- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
 //  \return Parsed value or FatalIOError on any problem

@@ -42,8 +42,7 @@ inline void Foam::hashedWordList::rehash(const bool unique)
 
 inline Foam::hashedWordList::hashedWordList()
 :
-    List<word>(),
-    indices_()
+    List<word>()
 {}
 
 
