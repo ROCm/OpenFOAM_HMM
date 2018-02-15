@@ -28,6 +28,7 @@ License
 #include "topoDistanceData.H"
 #include "pointTopoDistanceData.H"
 #include "PointEdgeWave.H"
+#include "globalIndex.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -99,7 +100,10 @@ bool Foam::meshStructure::isStructuredCell
 void Foam::meshStructure::correct
 (
     const polyMesh& mesh,
-    const uindirectPrimitivePatch& pp
+    const uindirectPrimitivePatch& pp,
+    const globalIndex& globalFaces,
+    const globalIndex& globalEdges,
+    const globalIndex& globalPoints
 )
 {
     // Field on cells and faces.
@@ -121,7 +125,11 @@ void Foam::meshStructure::correct
         forAll(pp, patchFacei)
         {
             patchFaces[patchFacei] = pp.addressing()[patchFacei];
-            patchData[patchFacei] = topoDistanceData(patchFacei, 0);
+            patchData[patchFacei] = topoDistanceData
+            (
+                globalFaces.toGlobal(patchFacei),
+                0
+            );
         }
 
 
@@ -230,7 +238,11 @@ void Foam::meshStructure::correct
         forAll(pp.meshPoints(), patchPointi)
         {
             patchPoints[patchPointi] = pp.meshPoints()[patchPointi];
-            patchData[patchPointi] = pointTopoDistanceData(patchPointi, 0);
+            patchData[patchPointi] = pointTopoDistanceData
+            (
+                globalPoints.toGlobal(patchPointi),
+                0
+            );
         }
 
 
@@ -257,7 +269,13 @@ void Foam::meshStructure::correct
         EdgeMap<label> pointsToEdge(pp.nEdges());
         forAll(pp.edges(), edgeI)
         {
-            pointsToEdge.insert(pp.edges()[edgeI], edgeI);
+            const edge& e = pp.edges()[edgeI];
+            edge globalEdge
+            (
+                globalPoints.toGlobal(e[0]),
+                globalPoints.toGlobal(e[1])
+            );
+            pointsToEdge.insert(globalEdge, globalEdges.toGlobal(edgeI));
         }
 
         // Look up on faces
@@ -380,7 +398,34 @@ Foam::meshStructure::meshStructure
     const uindirectPrimitivePatch& pp
 )
 {
-    correct(mesh, pp);
+    correct
+    (
+        mesh,
+        pp,
+        globalIndex(pp.size()),
+        globalIndex(pp.nEdges()),
+        globalIndex(pp.nPoints())
+    );
+}
+
+
+Foam::meshStructure::meshStructure
+(
+    const polyMesh& mesh,
+    const uindirectPrimitivePatch& pp,
+    const globalIndex& globalFaces,
+    const globalIndex& globalEdges,
+    const globalIndex& globalPoints
+)
+{
+    correct
+    (
+        mesh,
+        pp,
+        globalFaces,
+        globalEdges,
+        globalPoints
+    );
 }
 
 
