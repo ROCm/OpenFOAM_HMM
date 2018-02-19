@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::cloud
 
 Description
-    A cloud is a collection of lagrangian particles
+    A cloud is a registry collection of lagrangian particles.
 
 SourceFiles
     cloud.C
@@ -36,6 +36,7 @@ SourceFiles
 #define cloud_H
 
 #include "objectRegistry.H"
+#include "Enum.H"
 #include "IOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,13 +59,23 @@ class cloud
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        cloud(const cloud&);
+        cloud(const cloud&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const cloud&);
+        void operator=(const cloud&) = delete;
 
 
 public:
+
+    //- Cloud geometry type (internal or IO representations)
+    enum class geometryType
+    {
+        COORDINATES,    //!< barycentric coordinates
+        POSITIONS       //!< positions
+    };
+
+    static const Enum<geometryType> geometryTypeNames;
+
 
     //- Runtime type information
     TypeName("cloud");
@@ -83,7 +94,7 @@ public:
 
 
     //- Destructor
-    virtual ~cloud();
+    virtual ~cloud() = default;
 
 
     // Member Functions

@@ -35,8 +35,8 @@ SourceFiles
 #ifndef IOPosition_H
 #define IOPosition_H
 
+#include "cloud.H"
 #include "regIOobject.H"
-#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,22 +52,9 @@ class IOPosition
 :
     public regIOobject
 {
-public:
-
-    enum class geometryType
-    {
-        POSITIONS,
-        COORDINATES
-    };
-
-    static const Enum<geometryType> geometryTypeNames_;
-
-
-private:
-
     // Private data
 
-        geometryType geometryType_;
+        cloud::geometryType geometryType_;
 
         //- Reference to the cloud
         const CloudType& cloud_;
@@ -90,7 +77,8 @@ public:
         IOPosition
         (
             const CloudType& c,
-            const geometryType& geomType = geometryType::COORDINATES
+            const cloud::geometryType& geomType
+              = cloud::geometryType::COORDINATES
         );
 
 

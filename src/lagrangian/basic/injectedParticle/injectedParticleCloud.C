@@ -41,8 +41,7 @@ Foam::injectedParticleCloud::injectedParticleCloud
 :
     Cloud<injectedParticle>(mesh, cloudName, false)
 {
-    geometryType_ =
-        IOPosition<Cloud<injectedParticle>>::geometryType::POSITIONS;
+    geometryType_ = cloud::geometryType::POSITIONS;
 
     if (readFields)
     {

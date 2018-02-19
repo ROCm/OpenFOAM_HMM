@@ -109,7 +109,7 @@ class Cloud
 protected:
 
         //- Geometry type
-        typename IOPosition<Cloud<ParticleType>>::geometryType geometryType_;
+        cloud::geometryType geometryType_;
 
 
 public:

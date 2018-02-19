@@ -79,7 +79,7 @@ Foam::Cloud<ParticleType>::Cloud
     polyMesh_(pMesh),
     labels_(),
     globalPositionsPtr_(),
-    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES)
+    geometryType_(cloud::geometryType::COORDINATES)
 {
     checkPatches();
 

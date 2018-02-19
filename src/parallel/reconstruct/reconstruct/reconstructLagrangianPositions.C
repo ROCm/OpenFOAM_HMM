@@ -84,7 +84,7 @@ void Foam::reconstructLagrangianPositions
         IOPosition<Cloud<passiveParticle>>
         (
             lagrangianPositions,
-            IOPosition<Cloud<passiveParticle>>::geometryType::POSITIONS
+            cloud::geometryType::POSITIONS
         ).write();
     }
 }

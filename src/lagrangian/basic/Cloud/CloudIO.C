@@ -57,11 +57,11 @@ void Foam::Cloud<ParticleType>::readCloudUniformProperties()
         // Fall back to positions mode if the entry is not present for
         // backwards compatibility
         geometryType_ =
-            IOPosition<Cloud<ParticleType>>::geometryTypeNames_.lookupOrDefault
+            cloud::geometryTypeNames.lookupOrDefault
             (
                 "geometry",
                 uniformPropsDict,
-                IOPosition<Cloud<ParticleType>>::geometryType::POSITIONS
+                cloud::geometryType::POSITIONS
             );
 
         const word procName("processor" + Foam::name(Pstream::myProcNo()));
@@ -104,7 +104,7 @@ void Foam::Cloud<ParticleType>::writeCloudUniformProperties() const
     uniformPropsDict.add
     (
         "geometry",
-        IOPosition<Cloud<ParticleType>>::geometryTypeNames_[geometryType_]
+        cloud::geometryTypeNames[geometryType_]
     );
 
     forAll(np, i)
@@ -146,8 +146,8 @@ void Foam::Cloud<ParticleType>::initCloud(const bool checkClass)
             << "Assuming the initial cloud contains 0 particles." << endl;
     }
 
-    // Always operate in co-ordinates mode after reading
-    geometryType_ = IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES;
+    // Always operate in coordinates mode after reading
+    geometryType_ = cloud::geometryType::COORDINATES;
 
     // Ask for the tetBasePtIs to trigger all processors to build
     // them, otherwise, if some processors have no particles then
@@ -170,7 +170,7 @@ Foam::Cloud<ParticleType>::Cloud
     polyMesh_(pMesh),
     labels_(),
     cellWallFacesPtr_(),
-    geometryType_(IOPosition<Cloud<ParticleType>>::geometryType::COORDINATES)
+    geometryType_(cloud::geometryType::COORDINATES)
 {
     checkPatches();
 
