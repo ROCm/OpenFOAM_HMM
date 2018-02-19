@@ -443,8 +443,7 @@ public:
 
 
     //- Destructor
-    virtual ~particle()
-    {}
+    virtual ~particle() = default;
 
 
     // Member Functions

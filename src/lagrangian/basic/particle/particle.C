@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,25 +27,32 @@ License
 #include "transform.H"
 #include "treeDataCell.H"
 #include "cubicEqn.H"
+#include "registerSwitch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(particle, 0);
+}
 
 const Foam::scalar Foam::particle::negativeSpaceDisplacementFactor = 1.01;
 
 Foam::label Foam::particle::particleCount_ = 0;
 
-namespace Foam
-{
-    defineTypeNameAndDebug(particle, 0);
-    bool particle::writeLagrangianCoordinates
-    (
-        debug::infoSwitch("writeLagrangianCoordinates", 1)
-    );
-    bool particle::writeLagrangianPositions
-    (
-        debug::infoSwitch("writeLagrangianPositions", 0)
-    );
-}
+bool Foam::particle::writeLagrangianCoordinates = true;
+
+bool Foam::particle::writeLagrangianPositions
+(
+    Foam::debug::infoSwitch("writeLagrangianPositions", 0)
+);
+
+registerInfoSwitch
+(
+    "writeLagrangianPositions",
+    bool,
+    Foam::particle::writeLagrangianPositions
+);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

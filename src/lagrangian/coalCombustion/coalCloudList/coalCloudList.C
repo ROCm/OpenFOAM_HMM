@@ -54,10 +54,8 @@ Foam::coalCloudList::coalCloudList
     setSize(cloudNames.size());
 
     label i = 0;
-    forAllConstIter(wordHashSet, cloudNames, iter)
+    for (const word& name : cloudNames)
     {
-        const word& name = iter.key();
-
         Info<< "creating cloud: " << name << endl;
 
         set

@@ -126,6 +126,9 @@ void Foam::injectedParticle::readFields(Cloud<injectedParticle>& c)
 void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
 {
     // Force writing positions instead of coordinates
+    const bool oldWriteCoordinates = particle::writeLagrangianCoordinates;
+    const bool oldWritePositions = particle::writeLagrangianPositions;
+
     particle::writeLagrangianCoordinates = false;
     particle::writeLagrangianPositions = true;
 
@@ -151,13 +154,17 @@ void Foam::injectedParticle::writeFields(const Cloud<injectedParticle>& c)
         d[i] = p.d();
         U[i] = p.U();
 
-        i++;
+        ++i;
     }
 
     tag.write();
     soi.write();
     d.write();
     U.write();
+
+    // Restore
+    particle::writeLagrangianCoordinates = oldWriteCoordinates;
+    particle::writeLagrangianPositions = oldWritePositions;
 }
 
 
@@ -168,6 +175,9 @@ void Foam::injectedParticle::writeObjects
 )
 {
     // Force writing positions instead of coordinates
+    const bool oldWriteCoordinates = particle::writeLagrangianCoordinates;
+    const bool oldWritePositions = particle::writeLagrangianPositions;
+
     particle::writeLagrangianCoordinates = false;
     particle::writeLagrangianPositions = true;
 
@@ -191,8 +201,12 @@ void Foam::injectedParticle::writeObjects
         d[i] = p.d();
         U[i] = p.U();
 
-        i++;
+        ++i;
     }
+
+    // Restore
+    particle::writeLagrangianCoordinates = oldWriteCoordinates;
+    particle::writeLagrangianPositions = oldWritePositions;
 }
 
 
