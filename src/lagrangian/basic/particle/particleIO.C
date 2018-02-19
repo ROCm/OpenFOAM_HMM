@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,17 +86,7 @@ Foam::particle::particle
     }
     else
     {
-        struct oldParticle
-        {
-            vector position;
-            label celli;
-            label facei;
-            scalar stepFraction;
-            label tetFacei;
-            label tetPti;
-            label origProc;
-            label origId;
-        } p;
+        positionsCompat1706 p;
 
         if (is.format() == IOstream::ASCII)
         {
@@ -118,15 +108,20 @@ Foam::particle::particle
             {
                 // Read whole struct
                 const size_t s =
-                    sizeof(oldParticle) - offsetof(oldParticle, position);
+                (
+                    sizeof(positionsCompat1706)
+                  - offsetof(positionsCompat1706, position)
+                );
                 is.read(reinterpret_cast<char*>(&p.position), s);
             }
             else
             {
                 // Read only position and cell
                 const size_t s =
-                    offsetof(oldParticle, facei)
-                  - offsetof(oldParticle, position);
+                (
+                    offsetof(positionsCompat1706, facei)
+                  - offsetof(positionsCompat1706, position)
+                );
                 is.read(reinterpret_cast<char*>(&p.position), s);
             }
         }
@@ -181,20 +176,13 @@ void Foam::particle::writePosition(Ostream& os) const
     }
     else
     {
-        struct oldParticle
-        {
-            vector position;
-            label celli;
-            label facei;
-            scalar stepFraction;
-            label tetFacei;
-            label tetPti;
-            label origProc;
-            label origId;
-        } p;
+        positionsCompat1706 p;
 
         const size_t s =
-            offsetof(oldParticle, facei) - offsetof(oldParticle, position);
+        (
+            offsetof(positionsCompat1706, facei)
+          - offsetof(positionsCompat1706, position)
+        );
 
         p.position = position();
         p.celli = celli_;

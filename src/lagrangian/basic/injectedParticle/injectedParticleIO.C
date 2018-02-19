@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -204,20 +204,12 @@ void Foam::injectedParticle::writePosition(Ostream& os) const
     }
     else
     {
-        struct oldParticle
-        {
-            vector position;
-            label celli;
-            label facei;
-            scalar stepFraction;
-            label tetFacei;
-            label tetPti;
-            label origProc;
-            label origId;
-        } p;
+        positionsCompat1706 p;
 
         const size_t s =
-            offsetof(oldParticle, facei) - offsetof(oldParticle, position);
+        (
+            offsetof(positionsCompat1706, facei)
+          - offsetof(positionsCompat1706, position));
 
         p.position = position_;
         p.celli = cell();

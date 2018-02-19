@@ -126,6 +126,20 @@ public:
     };
 
 
+    //- Old particle positions content for OpenFOAM-1706 and earlier
+    struct positionsCompat1706
+    {
+        vector position;
+        label celli;
+        label facei;
+        scalar stepFraction;
+        label tetFacei;
+        label tetPti;
+        label origProc;
+        label origId;
+    };
+
+
 private:
 
     // Private data
