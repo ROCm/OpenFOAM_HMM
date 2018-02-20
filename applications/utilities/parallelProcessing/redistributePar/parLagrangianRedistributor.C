@@ -86,30 +86,25 @@ void Foam::parLagrangianRedistributor::findClouds
 
     objectNames.setSize(cloudNames.size());
 
-    forAll(localCloudDirs, i)
+    for (const fileName& localCloudName : localCloudDirs)
     {
         // Do local scan for valid cloud objects
         IOobjectList sprayObjs
         (
             mesh,
             mesh.time().timeName(),
-            cloud::prefix/localCloudDirs[i]
+            cloud::prefix/localCloudName
         );
 
-        if
-        (
-            sprayObjs.lookup(word("coordinates"))
-         || sprayObjs.lookup(word("positions"))
-        )
+        if (sprayObjs.found("coordinates") || sprayObjs.found("positions"))
         {
-            // One of the objects is coordinates/positions so must be valid
-            // cloud
+            // Has coordinates/positions - so must be a valid cloud
 
-            label cloudI = cloudNames.find(localCloudDirs[i]);
+            const label cloudI = cloudNames.find(localCloudName);
 
             objectNames[cloudI].setSize(sprayObjs.size());
             label objectI = 0;
-            forAllConstIter(IOobjectList, sprayObjs, iter)
+            forAllConstIters(sprayObjs, iter)
             {
                 const word& name = iter.key();
                 if (name != "coordinates" && name != "positions")
@@ -160,8 +155,8 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
         {
             passivePositionParticle& ppi = iter();
 
-            label destProcI = destinationProcID_[ppi.cell()];
-            label destCellI = destinationCell_[ppi.cell()];
+            const label destProcI = destinationProcID_[ppi.cell()];
+            const label destCellI = destinationCell_[ppi.cell()];
 
             ppi.cell() = destCellI;
             destProc[particleI++] = destProcI;
@@ -211,7 +206,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
         // Retrieve from receive buffers
         forAll(allNTrans, procI)
         {
-            label nRec = allNTrans[procI];
+            const label nRec = allNTrans[procI];
 
             //Pout<< "From processor " << procI << " receiving bytes " << nRec
             //    << endl;
@@ -240,8 +235,18 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
             }
         }
 
-
+        // Write coordinates file
         IOPosition<passivePositionParticleCloud>(lagrangianPositions).write();
+
+        // Optionally write positions file in v1706 format and earlier
+        if (particle::writeLagrangianPositions)
+        {
+            IOPosition<passivePositionParticleCloud>
+            (
+                 lagrangianPositions,
+                 cloud::geometryType::POSITIONS
+             ).write();
+        }
 
         // Restore cloud name
         lpi.rename(cloudName);
@@ -262,7 +267,7 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     label constructSize = 0;
     forAll(constructMap, procI)
     {
-        label nRecv = sizes[procI][UPstream::myProcNo()];
+        const label nRecv = sizes[procI][UPstream::myProcNo()];
 
         labelList& map = constructMap[procI];
 

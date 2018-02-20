@@ -37,7 +37,7 @@ template<class Container>
 Foam::wordList Foam::parLagrangianRedistributor::filterObjects
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const word fieldClassName(Container::typeName);
@@ -69,7 +69,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
     const mapDistributeBase& map,
     const word& cloudName,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     const wordList objectNames
@@ -141,7 +141,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
     const mapDistributeBase& map,
     const word& cloudName,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     wordList objectNames
@@ -225,7 +225,7 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
 (
     const passivePositionParticleCloud& cloud,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const wordList objectNames

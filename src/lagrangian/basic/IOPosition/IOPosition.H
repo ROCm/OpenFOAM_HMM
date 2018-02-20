@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::IOPosition
 
 Description
-    Helper IO class to read and write particle positions
+    Helper IO class to read and write particle coordinates (positions).
 
 SourceFiles
     IOPosition.C
@@ -77,8 +77,7 @@ public:
         IOPosition
         (
             const CloudType& c,
-            const cloud::geometryType& geomType
-              = cloud::geometryType::COORDINATES
+            cloud::geometryType geomType = cloud::geometryType::COORDINATES
         );
 
 

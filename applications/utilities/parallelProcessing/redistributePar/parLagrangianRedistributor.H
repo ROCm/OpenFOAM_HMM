@@ -126,7 +126,7 @@ public:
         static wordList filterObjects
         (
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         );
 
         //- Read, redistribute and write all/selected lagrangian fields
@@ -136,7 +136,7 @@ public:
             const mapDistributeBase& map,
             const word& cloudName,
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         ) const;
 
         //- Read, redistribute and write all/selected lagrangian fieldFields
@@ -146,7 +146,7 @@ public:
             const mapDistributeBase& map,
             const word& cloudName,
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         ) const;
 
         //- Read and store all fields of a cloud
@@ -155,7 +155,7 @@ public:
         (
             const passivePositionParticleCloud& cloud,
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         );
 
         //- Redistribute and write stored lagrangian fields

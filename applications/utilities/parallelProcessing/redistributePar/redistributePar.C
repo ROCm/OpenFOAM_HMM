@@ -115,9 +115,9 @@ scalar getMergeDistance
     {
         FatalErrorInFunction
             << "Your current settings specify ASCII writing with "
-            << IOstream::defaultPrecision() << " digits precision." << endl
+            << IOstream::defaultPrecision() << " digits precision." << nl
             << "Your merging tolerance (" << mergeTol << ") is finer than this."
-            << endl
+            << nl
             << "Please change your writeFormat to binary"
             << " or increase the writePrecision" << endl
             << "or adjust the merge tolerance (-mergeTol)."
@@ -168,9 +168,9 @@ void printMeshData(const polyMesh& mesh)
     label totProcPatches = 0;
     label maxProcFaces = 0;
 
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    for (label procI = 0; procI < Pstream::nProcs(); ++procI)
     {
-        Info<< endl
+        Info<< nl
             << "Processor " << procI << nl
             << "    Number of cells = " << globalCells.localSize(procI)
             << endl;
@@ -312,9 +312,9 @@ void determineDecomposition
         WarningInFunction
             << "You have selected decomposition method "
             << decomposer.typeName
-            << " which does" << endl
+            << " which does" << nl
             << "not synchronise the decomposition across"
-            << " processor patches." << endl
+            << " processor patches." << nl
             << "    You might want to select a decomposition method"
             << " which is aware of this. Continuing."
             << endl;
@@ -637,7 +637,7 @@ void readFields
     {
         FatalErrorInFunction
             << "differing fields of type " << GeoField::typeName
-            << " on processors." << endl
+            << " on processors." << nl
             << "Master has:" << masterNames << endl
             << Pstream::myProcNo() << " has:" << objectNames
             << abort(FatalError);
@@ -662,7 +662,7 @@ void readFields
                 tmp<GeoField> tsubfld = subsetterPtr().interpolate(fields[i]);
 
                 // Send to all processors that don't have a mesh
-                for (label procI = 1; procI < Pstream::nProcs(); procI++)
+                for (label procI = 1; procI < Pstream::nProcs(); ++procI)
                 {
                     if (!haveMesh[procI])
                     {
@@ -752,10 +752,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             forAll(bfld, patchi)
             {
-                typename GeoField::Patch& pfld = bfld[patchi];
+                auto& pfld = bfld[patchi];
 
-                //if (pfld.coupled())
-                //if (isA<CoupledPatchType>(pfld))
                 if (pfld.patch().coupled())
                 {
                     pfld.initEvaluate(Pstream::defaultCommsType);
@@ -772,12 +770,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
                 Pstream::waitRequests(nReq);
             }
 
-            forAll(bfld, patchi)
+            for (auto& pfld : bfld)
             {
-                typename GeoField::Patch& pfld = bfld[patchi];
-
-                //if (pfld.coupled())
-                //if (isA<CoupledPatchType>(pfld))
                 if (pfld.patch().coupled())
                 {
                     pfld.evaluate(Pstream::defaultCommsType);
@@ -791,11 +785,9 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             forAll(patchSchedule, patchEvali)
             {
-                label patchi = patchSchedule[patchEvali].patch;
-                typename GeoField::Patch& pfld = bfld[patchi];
+                const label patchi = patchSchedule[patchEvali].patch;
+                auto& pfld = bfld[patchi];
 
-                //if (pfld.coupled())
-                //if (isA<CoupledPatchType>(pfld))
                 if (pfld.patch().coupled())
                 {
                     if (patchSchedule[patchEvali].init)
@@ -869,7 +861,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         // Create 0 sized mesh to do all the generation of zero sized
         // fields on processors that have zero sized meshes. Note that this is
-        // only nessecary on master but since polyMesh construction with
+        // only necessary on master but since polyMesh construction with
         // Pstream::parRun does parallel comms we have to do it on all
         // processors
         autoPtr<fvMeshSubset> subsetterPtr;
@@ -1695,7 +1687,7 @@ void reconstructMeshFields
 (
     const parFvFieldReconstructor& fvReconstructor,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     // Dimensioned fields
@@ -1792,7 +1784,7 @@ void reconstructLagrangian
     const fvMesh& baseMesh,
     const fvMesh& mesh,
     const mapDistributePolyMesh& distMap,
-    const HashSet<word>& selectedLagrangianFields
+    const wordHashSet& selectedLagrangianFields
 )
 {
     // Clouds (note: might not be present on all processors)
@@ -1820,62 +1812,62 @@ void reconstructLagrangian
         const parLagrangianRedistributor& lagrangianReconstructor =
             lagrangianReconstructorPtr();
 
-        forAll(cloudNames, i)
+        for (const word& cloudName : cloudNames)
         {
             Info<< "Reconstructing lagrangian fields for cloud "
-                << cloudNames[i] << nl << endl;
+                << cloudName << nl << endl;
 
             autoPtr<mapDistributeBase> lagrangianMap =
             lagrangianReconstructor.redistributeLagrangianPositions
             (
-                cloudNames[i]
+                cloudName
             );
             IOobjectList sprayObjs
             (
                 mesh,
                 mesh.time().timeName(),
-                cloud::prefix/cloudNames[i]
+                cloud::prefix/cloudName
             );
 
             lagrangianReconstructor.redistributeLagrangianFields<label>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<label>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<scalar>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<scalar>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<vector>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<vector>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1883,7 +1875,7 @@ void reconstructLagrangian
             <sphericalTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1891,14 +1883,14 @@ void reconstructLagrangian
             <sphericalTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<symmTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1906,21 +1898,21 @@ void reconstructLagrangian
             <symmTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<tensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<tensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1928,12 +1920,13 @@ void reconstructLagrangian
     }
 }
 
+
 // Read clouds (note: might not be present on all processors)
 void readLagrangian
 (
     const fvMesh& mesh,
     const wordList& cloudNames,
-    const HashSet<word>& selectedLagrangianFields,
+    const wordHashSet& selectedLagrangianFields,
     PtrList<unmappedPassivePositionParticleCloud>& clouds
 )
 {
@@ -2313,8 +2306,8 @@ int main(int argc, char *argv[])
     }
 
 
-    const HashSet<word> selectedFields(0);
-    const HashSet<word> selectedLagrangianFields(0);
+    const wordHashSet selectedFields(0);
+    const wordHashSet selectedLagrangianFields(0);
 
 
     if (decompose)
@@ -2462,7 +2455,7 @@ int main(int argc, char *argv[])
     );
 
 
-    HashSet<word> masterTimeDirSet;
+    wordHashSet masterTimeDirSet;
     if (newTimes)
     {
         instantList baseTimeDirs(baseRunTime.times());
