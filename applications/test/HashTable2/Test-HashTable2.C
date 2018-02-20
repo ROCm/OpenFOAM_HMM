@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
     Info<< "table3: " << table3 << nl
         << "toc: " << table3.toc() << endl;
 
-    Map<label> table4(table3.xfer());
+    Map<label> table4(std::move(table3));
 
     Info<< "table3: " << table3 << nl
         << "toc: " << table3.toc() << endl;

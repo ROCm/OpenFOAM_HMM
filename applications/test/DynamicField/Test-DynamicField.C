@@ -36,8 +36,8 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    DynamicField<point, 0, 10, 11> testField;
-    DynamicField<point, 0, 10, 11> testField2;
+    DynamicField<point> testField;
+    DynamicField<point> testField2;
 
     testField.setSize(5);
     testField2.setSize(5);

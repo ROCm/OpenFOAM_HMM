@@ -76,7 +76,7 @@ void writeAndRead
     Pout<< "** Writing:" << writeType
         << " Reading:" << readType << endl;
 
-    autoPtr<fileOperation> writeHandler(fileOperation::New(writeType));
+    autoPtr<fileOperation> writeHandler(fileOperation::New(writeType, true));
     fileHandler(writeHandler);
 
     // Delete
@@ -84,20 +84,21 @@ void writeAndRead
     fileHandler().rm(fileHandler().filePath(io.objectPath()));
 
     // Write
-    Pout<< "Writing:" << fileHandler().objectPath(io) << endl;
+    Pout<< "Writing:" << fileHandler().objectPath(io, io.name()) << endl;
     write(io, sz);
 
-    autoPtr<fileOperation> readHandler(fileOperation::New(readType));
+    autoPtr<fileOperation> readHandler(fileOperation::New(readType, true));
     fileHandler(readHandler);
 
     // Read
     IOobject readIO(io);
     readIO.readOpt() = readOpt;
-    Pout<< "Reading:" << fileHandler().filePath(readIO.objectPath()) << endl;
+    Pout<< "Reading:"
+        << fileHandler().filePath(readIO.objectPath()) << endl;
     read(readIO, sz);
 
     Pout<< "** Done writing:" << writeType
-        << " Reading:" << readType << endl << endl << endl;
+        << " Reading:" << readType << nl << nl << endl;
 }
 
 
@@ -108,7 +109,7 @@ void readIfPresent
     const word& readType
 )
 {
-    autoPtr<fileOperation> readHandler(fileOperation::New(readType));
+    autoPtr<fileOperation> readHandler(fileOperation::New(readType, true));
     fileHandler(readHandler);
 
     // Read

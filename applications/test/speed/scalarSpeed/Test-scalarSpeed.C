@@ -15,7 +15,7 @@ int main()
     const label rndAddrSkip = 40;
     const label redFac = 6;
     const label redSize = size/redFac;
-    Random genAddr(100);
+    Random rndGen(100);
 
     double* f1 = new double[size];
     double* f2 = new double[size];
@@ -38,7 +38,7 @@ int main()
 
     for (label i=0; i<size; i+=rndAddrSkip)
     {
-        addr[i] = genAddr.integer(0, size-1);
+        addr[i] = rndGen.position<label>(0, size-1);
     }
 
     for (label i=0; i<redSize; i++)

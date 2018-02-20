@@ -121,6 +121,10 @@ public:
         std::ostream(static_cast<countstreambuf*>(this))
     {}
 
+
+    //- \return The number of bytes counted
+    using countstreambuf::size;
+
     //- Rewind the stream, reset the count
     void rewind()
     {

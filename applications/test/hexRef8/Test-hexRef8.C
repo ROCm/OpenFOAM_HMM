@@ -194,9 +194,7 @@ int main(int argc, char *argv[])
         mesh.moving(false);
         mesh.topoChanging(false);
 
-
-        label action = rndGen.integer(0, 5);
-
+        label action = rndGen.position<label>(0, 5);
 
         if (action == 0)
         {
@@ -216,7 +214,10 @@ int main(int argc, char *argv[])
 
                 for (label i=0; i<nRefine; i++)
                 {
-                    refineCandidates.append(rndGen.integer(0, mesh.nCells()-1));
+                    refineCandidates.append
+                    (
+                        rndGen.position<label>(0, mesh.nCells()-1)
+                    );
                 }
 
                 labelList cellsToRefine
@@ -245,7 +246,9 @@ int main(int argc, char *argv[])
 
                 for (label i=0; i<nUnrefine; i++)
                 {
-                    label index = rndGen.integer(0, allSplitPoints.size()-1);
+                    const label index =
+                        rndGen.position<label>(0, allSplitPoints.size()-1);
+
                     candidates.insert(allSplitPoints[index]);
                 }
 

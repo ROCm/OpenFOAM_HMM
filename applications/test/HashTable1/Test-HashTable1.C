@@ -99,7 +99,7 @@ int main()
 
 
     HashTable<scalar> table2(table1);
-    HashTable<scalar> table3(table1.xfer());
+    HashTable<scalar> table3(std::move(table1));
 
     Info<< "\ncopy table1 -> table2" << nl
         << "transfer table1 -> table3 via the xfer() method" << nl;
