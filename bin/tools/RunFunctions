@@ -3,7 +3,7 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM, licensed under GNU General Public License
@@ -24,7 +24,7 @@
 #------------------------------------------------------------------------------
 
 #
-# Look for '-parallel' in the argument list.
+# Check presence of '-parallel' in the argument list.
 #
 isParallel()
 {
@@ -34,12 +34,21 @@ isParallel()
 
 
 #
-# Look for '-test' in the argument list.
+# Check presence of '-test' in the argument list.
 #
 isTest()
 {
     for i; do [ "$i" = "-test" ] && return 0; done
     return 1
+}
+
+#
+# Check absence of '-test' in the argument list.
+#
+notTest()
+{
+    for i; do [ "$i" = "-test" ] && return 1; done
+    return 0
 }
 
 

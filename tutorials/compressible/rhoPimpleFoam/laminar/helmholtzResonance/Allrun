@@ -29,7 +29,7 @@ run resolved
 # Run with the plenum modelled by a boundary condition
 run modelled
 
-if ! isTest $@
+if notTest $@
 then
     # Plot a comparison of the pressure in the neck
     cat << EOF | gnuplot -persist

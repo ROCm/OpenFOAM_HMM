@@ -20,7 +20,7 @@ setCombustionProperties()
 # Do moriyoshiHomogeneous
 ( cd moriyoshiHomogeneous && foamRunTutorials )
 
-if ! isTest $@
+if notTest $@
 then
     # Clone case for second phase
     cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2

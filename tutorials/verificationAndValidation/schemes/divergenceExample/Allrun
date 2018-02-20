@@ -18,7 +18,7 @@ do
 
     runApplication -s ${schemeTag} scalarTransportFoam
 
-    if ! isTest $params
+    if notTest $params
     then
         # Save the line plot
         mv postProcessing/sample1/100/line1_T.xy line1_T_${schemeTag}.xy

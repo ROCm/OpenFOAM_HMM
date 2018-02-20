@@ -75,7 +75,7 @@ copyParallelPointDisplacement()
 # Do steady-state case
 (cd steady && foamRunTutorials)
 
-if ! isTest $@
+if notTest $@
 then
     latestTime=$(cd steady && foamListTimes -noZero -latestTime -processor)
 

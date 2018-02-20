@@ -32,7 +32,7 @@ do
     rm -rf logs
 done
 
-if ! isTest $@
+if notTest $@
 then
     # create validation plot
     # Test if gnuplot exists on the system

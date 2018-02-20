@@ -9,7 +9,7 @@ runApplication chemkinToFoam \
 
 runApplication $(getApplication)
 
-if ! isTest $@
+if notTest $@
 then
     (cd validation && ./Allrun $*)
 fi

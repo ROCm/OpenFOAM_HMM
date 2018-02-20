@@ -15,7 +15,7 @@ runParallel $(getApplication)
 
 # Run noise tool for both point and surface
 
-if ! isTest $@
+if notTest $@
 then
     runParallel -s point noise -dict system/noiseDict-point
 
