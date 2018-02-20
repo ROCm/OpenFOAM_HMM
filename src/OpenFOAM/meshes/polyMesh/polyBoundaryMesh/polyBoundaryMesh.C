@@ -167,10 +167,6 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::polyBoundaryMesh::~polyBoundaryMesh()
-{}
-
-
 void Foam::polyBoundaryMesh::clearGeom()
 {
     forAll(*this, patchi)
@@ -502,6 +498,28 @@ void Foam::polyBoundaryMesh::setGroup
             }
         }
     }
+}
+
+
+Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
+{
+    const polyPatchList& patches = *this;
+
+    label nonProc = 0;
+
+    for (const polyPatch& p : patches)
+    {
+        if (isA<processorPolyPatch>(p))
+        {
+            break;
+        }
+        else
+        {
+            ++nonProc;
+        }
+    }
+
+    return nonProc;
 }
 
 
@@ -855,7 +873,6 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
     {
         return false;
     }
-
 
     const polyBoundaryMesh& bm = *this;
 

@@ -82,10 +82,10 @@ class polyBoundaryMesh
         void calcGeometry();
 
         //- Disallow construct as copy
-        polyBoundaryMesh(const polyBoundaryMesh&);
+        polyBoundaryMesh(const polyBoundaryMesh&) = delete;
 
         //- Disallow assignment
-        void operator=(const polyBoundaryMesh&);
+        void operator=(const polyBoundaryMesh&) = delete;
 
 
 public:
@@ -126,7 +126,7 @@ public:
 
 
     //- Destructor
-    ~polyBoundaryMesh();
+    ~polyBoundaryMesh() = default;
 
         //- Clear geometry at this level and at patches
         void clearGeom();
@@ -150,6 +150,9 @@ public:
         //  (where coupling is by local patch face index).
         //  Only valid for singly connected polyBoundaryMesh and not parallel
         const List<labelPairList>& neighbourEdges() const;
+
+        //- Return the number of non-processor patches
+        label nNonProcessor() const;
 
         //- Return a list of patch names
         wordList names() const;
