@@ -37,21 +37,23 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
     patchData_(cloud.mesh(), this->coeffDict()),
     nEscape_(patchData_.size()),
-    massEscape_(patchData_.size()),
-    nStick_(patchData_.size()),
-    massStick_(patchData_.size()),
+    massEscape_(nEscape_.size()),
+    nStick_(nEscape_.size()),
+    massStick_(nEscape_.size()),
     writeFields_(this->coeffDict().lookupOrDefault("writeFields", false)),
-    outputByInjectorId_(this->coeffDict().lookupOrDefault("outputByInjectorId", false)),
-    injIdToIndex_(cloud.injectors().size()),
+    injIdToIndex_(),
     massEscapePtr_(nullptr),
     massStickPtr_(nullptr)
 {
+    const bool outputByInjectorId
+        = this->coeffDict().lookupOrDefault("outputByInjectorId", false);
+
     if (writeFields_)
     {
-        word massEscapeName(this->owner().name() + ":massEscape");
-        word massStickName(this->owner().name() + ":massStick");
-        Info<< "    Interaction fields will be written to " << massEscapeName
-            << " and " << massStickName << endl;
+        Info<< "    Interaction fields will be written to "
+            << this->owner().name() << ":massEscape"
+            << " and "
+            << this->owner().name() << ":massStick" << endl;
 
         (void)massEscape();
         (void)massStick();
@@ -61,7 +63,23 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
         Info<< "    Interaction fields will not be written" << endl;
     }
 
-    // check that interactions are valid/specified
+    // Determine the number of injectors and the injector mapping
+    label nInjectors = 0;
+    if (outputByInjectorId)
+    {
+        for (const auto& inj : cloud.injectors())
+        {
+            injIdToIndex_.insert(inj.injectorID(), nInjectors++);
+        }
+    }
+
+    // The normal case, and safety if injector mapping was somehow null.
+    if (!nInjectors)
+    {
+        nInjectors = 1;
+    }
+
+    // Check that interactions are valid/specified
     forAll(patchData_, patchi)
     {
         const word& interactionTypeName =
@@ -80,20 +98,10 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
                 << nl << exit(FatalError);
         }
 
-        label nInjectors(1);
-        if (outputByInjectorId_)
-        {
-            nInjectors = cloud.injectors().size();
-            for (label i=0; i<nInjectors; i++)
-            {
-                injIdToIndex_.insert(cloud.injectors()[i].injectorID(), i);
-            }
-        }
-
-        nEscape_[patchi].setSize(nInjectors, 0);
-        massEscape_[patchi].setSize(nInjectors, 0.0);
-        nStick_[patchi].setSize(nInjectors, 0);
-        massStick_[patchi].setSize(nInjectors, 0.0);
+        nEscape_[patchi].setSize(nInjectors, Zero);
+        massEscape_[patchi].setSize(nInjectors, Zero);
+        nStick_[patchi].setSize(nInjectors, Zero);
+        massStick_[patchi].setSize(nInjectors, Zero);
     }
 }
 
@@ -111,17 +119,9 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     nStick_(pim.nStick_),
     massStick_(pim.massStick_),
     writeFields_(pim.writeFields_),
-    outputByInjectorId_(pim.outputByInjectorId_),
     injIdToIndex_(pim.injIdToIndex_),
     massEscapePtr_(nullptr),
     massStickPtr_(nullptr)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::LocalInteraction<CloudType>::~LocalInteraction()
 {}
 
 
@@ -193,11 +193,19 @@ bool Foam::LocalInteraction<CloudType>::correct
     bool& keepParticle
 )
 {
-    label patchi = patchData_.applyToPatch(pp.index());
+    const label patchi = patchData_.applyToPatch(pp.index());
 
     if (patchi >= 0)
     {
         vector& U = p.U();
+
+        // Location for storing the stats.
+        const label idx =
+        (
+            injIdToIndex_.size()
+          ? injIdToIndex_.lookup(p.typeId(), 0)
+          : 0
+        );
 
         typename PatchInteractionModel<CloudType>::interactionType it =
             this->wordToInteractionType
@@ -213,50 +221,38 @@ bool Foam::LocalInteraction<CloudType>::correct
             }
             case PatchInteractionModel<CloudType>::itEscape:
             {
-                scalar dm = p.mass()*p.nParticle();
-
                 keepParticle = false;
                 p.active(false);
                 U = Zero;
-                if (outputByInjectorId_)
-                {
-                    nEscape_[patchi][injIdToIndex_[p.typeId()]]++;
-                    massEscape_[patchi][injIdToIndex_[p.typeId()]] += dm;
-                }
-                else
-                {
-                    nEscape_[patchi][0]++;
-                    massEscape_[patchi][0] += dm;
-                }
+
+                const scalar dm = p.mass()*p.nParticle();
+
+                nEscape_[patchi][idx]++;
+                massEscape_[patchi][idx] += dm;
+
                 if (writeFields_)
                 {
-                    label pI = pp.index();
-                    label fI = pp.whichFace(p.face());
+                    const label pI = pp.index();
+                    const label fI = pp.whichFace(p.face());
                     massEscape().boundaryFieldRef()[pI][fI] += dm;
                 }
                 break;
             }
             case PatchInteractionModel<CloudType>::itStick:
             {
-                scalar dm = p.mass()*p.nParticle();
-
                 keepParticle = true;
                 p.active(false);
                 U = Zero;
-                if (outputByInjectorId_)
-                {
-                    nStick_[patchi][injIdToIndex_[p.typeId()]]++;
-                    massStick_[patchi][injIdToIndex_[p.typeId()]] += dm;
-                }
-                else
-                {
-                    nStick_[patchi][0]++;
-                    massStick_[patchi][0] += dm;
-                }
+
+                const scalar dm = p.mass()*p.nParticle();
+
+                nStick_[patchi][idx]++;
+                massStick_[patchi][idx] += dm;
+
                 if (writeFields_)
                 {
-                    label pI = pp.index();
-                    label fI = pp.whichFace(p.face());
+                    const label pI = pp.index();
+                    const label fI = pp.whichFace(p.face());
                     massStick().boundaryFieldRef()[pI][fI] += dm;
                 }
                 break;
@@ -355,21 +351,28 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
         mps[i] = mps[i] + mps0[i];
     }
 
-
-    if (outputByInjectorId_)
+    if (injIdToIndex_.size())
     {
+        // Since injIdToIndex_ is a one-to-one mapping (starting as zero),
+        // can simply invert it.
+        labelList indexToInjector(injIdToIndex_.size());
+        forAllConstIters(injIdToIndex_, iter)
+        {
+            indexToInjector[iter.object()] = iter.key();
+        }
+
         forAll(patchData_, i)
         {
-            forAll (mpe[i], injId)
+            forAll(mpe[i], idx)
             {
                 os  << "    Parcel fate: patch " <<  patchData_[i].patchName()
                     << " (number, mass)" << nl
-                    << "      - escape  (injector " << injIdToIndex_.toc()[injId]
-                    << " )  = " << npe[i][injId]
-                    << ", " << mpe[i][injId] << nl
-                    << "      - stick   (injector " << injIdToIndex_.toc()[injId]
-                    << " )  = " << nps[i][injId]
-                    << ", " << mps[i][injId] << nl;
+                    << "      - escape  (injector " << indexToInjector[idx]
+                    << " )  = " << npe[i][idx]
+                    << ", " << mpe[i][idx] << nl
+                    << "      - stick   (injector " << indexToInjector[idx]
+                    << " )  = " << nps[i][idx]
+                    << ", " << mps[i][idx] << nl;
             }
         }
     }
@@ -379,25 +382,23 @@ void Foam::LocalInteraction<CloudType>::info(Ostream& os)
         {
             os  << "    Parcel fate: patch " <<  patchData_[i].patchName()
                 << " (number, mass)" << nl
-                << "      - escape                      = " << npe[i][0]
-                << ", " << mpe[i][0] << nl
-                << "      - stick                       = " << nps[i][0]
-                << ", " << mps[i][0] << nl;
+                << "      - escape                      = "
+                << npe[i][0] << ", " << mpe[i][0] << nl
+                << "      - stick                       = "
+                << nps[i][0] << ", " << mps[i][0] << nl;
         }
     }
 
     if (this->writeTime())
     {
         this->setModelProperty("nEscape", npe);
-        nEscape_ = Zero;
-
         this->setModelProperty("massEscape", mpe);
-        massEscape_ = Zero;
-
         this->setModelProperty("nStick", nps);
-        nStick_ = Zero;
-
         this->setModelProperty("massStick", mps);
+
+        nEscape_ = Zero;
+        massEscape_ = Zero;
+        nStick_ = Zero;
         massStick_ = Zero;
     }
 }

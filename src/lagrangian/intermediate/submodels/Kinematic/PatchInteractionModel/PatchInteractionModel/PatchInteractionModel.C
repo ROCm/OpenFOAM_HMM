@@ -151,13 +151,6 @@ Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PatchInteractionModel<CloudType>::~PatchInteractionModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

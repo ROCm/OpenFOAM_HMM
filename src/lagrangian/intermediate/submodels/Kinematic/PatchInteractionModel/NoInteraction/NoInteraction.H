@@ -76,7 +76,7 @@ public:
 
 
     //- Destructor
-    virtual ~NoInteraction();
+    virtual ~NoInteraction() = default;
 
 
     // Member Functions
