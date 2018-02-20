@@ -4,18 +4,21 @@ cd ${0%/*} || exit 1                        # Run from this directory
 
 setControlDict()
 {
-    foamDictionary -entry "deltaT" -set "1e-05" system/controlDict
-    foamDictionary -entry "endTime" -set "0.015" system/controlDict
-    foamDictionary -entry "writeInterval" -set "50" system/controlDict
+    local dict=system/controlDict
+
+    foamDictionary $dict -entry deltaT -set 1e-05
+    foamDictionary $dict -entry endTime -set 0.015
+    foamDictionary $dict -entry writeInterval -set 50
 }
 
 setCombustionProperties()
 {
-    foamDictionary -entry "laminarFlameSpeedCorrelation" \
-        -set "RaviPetersen" constant/combustionProperties
-    foamDictionary -entry "fuel" \
-        -set "HydrogenInAir" constant/combustionProperties
+    local dict=constant/combustionProperties
+
+    foamDictionary $dict -entry laminarFlameSpeedCorrelation -set RaviPetersen
+    foamDictionary $dict -entry fuel -set HydrogenInAir
 }
+
 
 # Do moriyoshiHomogeneous
 ( cd moriyoshiHomogeneous && foamRunTutorials )
