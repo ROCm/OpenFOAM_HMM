@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "StandardWallInteraction.H"
-#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -43,11 +42,14 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     ),
     e_(0.0),
     mu_(0.0),
-    nEscape_(0),
-    massEscape_(0),
-    nStick_(0),
-    massStick_(0),
-    outputByInjectorId_(this->coeffDict().lookupOrDefault("outputByInjectorId", false)),
+    nEscape_(mesh_.boundaryMesh().nNonProcessor()),
+    massEscape_(nEscape_.size()),
+    nStick_(nEscape_.size()),
+    massStick_(nEscape_.size()),
+    outputByInjectorId_
+    (
+        this->coeffDict().lookupOrDefault("outputByInjectorId", false)
+    ),
     injIdToIndex_(cloud.injectors().size())
 {
     switch (interactionType_)
@@ -73,19 +75,6 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
         default:
         {}
     }
-
-    label nPatches = 0;
-    forAll(mesh_.boundaryMesh(), patchi)
-    {
-        if (!isA<processorPolyPatch>(mesh_.boundaryMesh()[patchi]))
-        {
-            nPatches++;
-        }
-    }
-    nEscape_.setSize(nPatches);
-    massEscape_.setSize(nPatches);
-    nStick_.setSize(nPatches);
-    massStick_.setSize(nPatches);
 
     forAll(nEscape_, patchi)
     {
@@ -124,13 +113,6 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     massStick_(pim.massStick_),
     outputByInjectorId_(pim.outputByInjectorId_),
     injIdToIndex_(pim.injIdToIndex_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
 {}
 
 

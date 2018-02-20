@@ -85,7 +85,7 @@ protected:
 
         // Counters for particle fates
 
-             //- Number of parcels escaped
+            //- Number of parcels escaped
             List<List<label>> nEscape_;
 
             //- Mass of parcels escaped
@@ -98,7 +98,7 @@ protected:
             List<List<scalar>> massStick_;
 
             //- Flag to output escaped/mass particles sorted by injectorID
-            Switch outputByInjectorId_;
+            bool outputByInjectorId_;
 
             //- InjectorId to index map
             Map<label> injIdToIndex_;
@@ -129,7 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~StandardWallInteraction();
+    virtual ~StandardWallInteraction() = default;
 
 
     // Member Functions
