@@ -2120,7 +2120,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
         // Initialize all addressing into current mesh
         constructCellMap[Pstream::myProcNo()] = identity(mesh_.nCells());
-        constructFaceMap[Pstream::myProcNo()] = identity(mesh_.nFaces()) + 1;
+        constructFaceMap[Pstream::myProcNo()] = identity(mesh_.nFaces(), 1);
         constructPointMap[Pstream::myProcNo()] = identity(mesh_.nPoints());
         constructPatchMap[Pstream::myProcNo()] = identity(patches.size());
 
@@ -2407,7 +2407,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
 
             constructCellMap[sendProc] = identity(domainMesh.nCells());
-            constructFaceMap[sendProc] = identity(domainMesh.nFaces()) + 1;
+            constructFaceMap[sendProc] = identity(domainMesh.nFaces(), 1);
             constructPointMap[sendProc] = identity(domainMesh.nPoints());
             constructPatchMap[sendProc] =
                 identity(domainMesh.boundaryMesh().size());

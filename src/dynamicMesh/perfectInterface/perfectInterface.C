@@ -455,14 +455,14 @@ void Foam::perfectInterface::setRefinement(polyTopoChange& ref) const
         const polyPatch& patch1 = patches[slavePatchID_.index()];
 
 
-        labelList pp0Labels(identity(patch0.size())+patch0.start());
+        labelList pp0Labels(identity(patch0.size(), patch0.start()));
         indirectPrimitivePatch pp0
         (
             IndirectList<face>(mesh.faces(), pp0Labels),
             mesh.points()
         );
 
-        labelList pp1Labels(identity(patch1.size())+patch1.start());
+        labelList pp1Labels(identity(patch1.size(), patch1.start()));
         indirectPrimitivePatch pp1
         (
             IndirectList<face>(mesh.faces(), pp1Labels),

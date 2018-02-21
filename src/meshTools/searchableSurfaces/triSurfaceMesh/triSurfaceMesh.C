@@ -564,12 +564,7 @@ Foam::triSurfaceMesh::edgeTree() const
         // Boundary edges
         labelList bEdges
         (
-            identity
-            (
-                nEdges()
-               -nInternalEdges()
-            )
-          + nInternalEdges()
+            identity(nEdges() - nInternalEdges(), nInternalEdges())
         );
 
         treeBoundBox bb(Zero, Zero);

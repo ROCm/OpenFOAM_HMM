@@ -1034,20 +1034,20 @@ Foam::extendedEdgeMesh::edgeTreesByType() const
 
         // External edges
         sliceEdges[0] =
-            identity(internalStart_ - externalStart_) + externalStart_;
+            identity((internalStart_ - externalStart_), externalStart_);
 
         // Internal edges
-        sliceEdges[1] = identity(flatStart_ - internalStart_) + internalStart_;
+        sliceEdges[1] = identity((flatStart_ - internalStart_), internalStart_);
 
         // Flat edges
-        sliceEdges[2] = identity(openStart_ - flatStart_) + flatStart_;
+        sliceEdges[2] = identity((openStart_ - flatStart_), flatStart_);
 
         // Open edges
-        sliceEdges[3] = identity(multipleStart_ - openStart_) + openStart_;
+        sliceEdges[3] = identity((multipleStart_ - openStart_), openStart_);
 
         // Multiple edges
         sliceEdges[4] =
-            identity(edges().size() - multipleStart_) + multipleStart_;
+            identity((edges().size() - multipleStart_), multipleStart_);
 
         forAll(edgeTreesByType_, i)
         {

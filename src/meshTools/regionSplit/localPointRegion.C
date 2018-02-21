@@ -626,8 +626,7 @@ Foam::List<Foam::labelPair> Foam::localPointRegion::findDuplicateFacePairs
     // Faces to test: all boundary faces
     labelList testFaces
     (
-        identity(mesh.nFaces()-mesh.nInternalFaces())
-      + mesh.nInternalFaces()
+        identity(mesh.nFaces()-mesh.nInternalFaces(), mesh.nInternalFaces())
     );
 
     // Find correspondencing baffle face (or -1)

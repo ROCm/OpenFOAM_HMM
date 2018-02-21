@@ -54,7 +54,7 @@ namespace Foam
     labelList findMatchingStrings
     (
         const UnaryMatchPredicate& matcher,
-        const UList<StringType>& lst,
+        const UList<StringType>& input,
         const bool invert=false
     );
 
@@ -65,11 +65,11 @@ namespace Foam
     labelList findStrings
     (
         const regExp& matcher,
-        const UList<StringType>& lst,
+        const UList<StringType>& input,
         const bool invert=false
     )
     {
-        return findMatchingStrings(matcher, lst, invert);
+        return findMatchingStrings(matcher, input, invert);
     }
 
 
@@ -79,11 +79,11 @@ namespace Foam
     labelList findStrings
     (
         const char* re,
-        const UList<StringType>& lst,
+        const UList<StringType>& input,
         const bool invert=false
     )
     {
-        return findMatchingStrings(regExp(re), lst, invert);
+        return findMatchingStrings(regExp(re), input, invert);
     }
 
 
@@ -93,11 +93,11 @@ namespace Foam
     labelList findStrings
     (
         const std::string& re,
-        const UList<StringType>& lst,
+        const UList<StringType>& input,
         const bool invert=false
     )
     {
-        return findMatchingStrings(regExp(re), lst, invert);
+        return findMatchingStrings(regExp(re), input, invert);
     }
 
 
@@ -107,11 +107,11 @@ namespace Foam
     labelList findStrings
     (
         const wordRe& matcher,
-        const UList<StringType>& lst,
+        const UList<StringType>& input,
         const bool invert=false
     )
     {
-        return findMatchingStrings(matcher, lst, invert);
+        return findMatchingStrings(matcher, input, invert);
     }
 
 
@@ -121,11 +121,11 @@ namespace Foam
     labelList findStrings
     (
         const wordRes& matcher,
-        const UList<StringType>& lst,
+        const UList<StringType>& input,
         const bool invert=false
     )
     {
-        return findMatchingStrings(matcher, lst, invert);
+        return findMatchingStrings(matcher, input, invert);
     }
 
     //- Return list indices for strings matching one of the regular expression
@@ -148,13 +148,13 @@ namespace Foam
     //  optionally invert the match
     //  eg, to extract all selected elements:
     //  \code
-    //    subsetMatchingStrings<regExp, stringList>(myRegExp, lst);
+    //    subsetMatchingStrings<regExp, stringList>(myRegExp, list);
     //  \endcode
     template<class UnaryMatchPredicate, class StringListType>
     StringListType subsetMatchingStrings
     (
         const UnaryMatchPredicate& matcher,
-        const StringListType& lst,
+        const StringListType& input,
         const bool invert=false
     );
 
@@ -165,11 +165,11 @@ namespace Foam
     StringListType subsetStrings
     (
         const regExp& matcher,
-        const StringListType& lst,
+        const StringListType& input,
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(matcher, lst, invert);
+        return subsetMatchingStrings(matcher, input, invert);
     }
 
 
@@ -179,11 +179,11 @@ namespace Foam
     StringListType subsetStrings
     (
         const char* re,
-        const StringListType& lst,
+        const StringListType& input,
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(regExp(re), lst, invert);
+        return subsetMatchingStrings(regExp(re), input, invert);
     }
 
     //- Extract elements of StringList when regular expression matches
@@ -192,11 +192,11 @@ namespace Foam
     StringListType subsetStrings
     (
         const std::string& re,
-        const StringListType& lst,
+        const StringListType& input,
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(regExp(re), lst, invert);
+        return subsetMatchingStrings(regExp(re), input, invert);
     }
 
     //- Extract elements of StringList when regular expression matches
@@ -205,11 +205,11 @@ namespace Foam
     StringListType subsetStrings
     (
         const wordRe& matcher,
-        const StringListType& lst,
+        const StringListType& input,
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(matcher, lst, invert);
+        return subsetMatchingStrings(matcher, input, invert);
     }
 
     //- Extract elements of StringList when regular expression matches
@@ -218,11 +218,11 @@ namespace Foam
     StringListType subsetStrings
     (
         const wordRes& matcher,
-        const StringListType& lst,
+        const StringListType& input,
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(matcher, lst, invert);
+        return subsetMatchingStrings(matcher, input, invert);
     }
 
 
@@ -248,7 +248,7 @@ namespace Foam
     void inplaceSubsetMatchingStrings
     (
         const UnaryMatchPredicate& matcher,
-        StringListType& lst,
+        StringListType& input,
         const bool invert=false
     );
 
@@ -258,11 +258,11 @@ namespace Foam
     void inplaceSubsetStrings
     (
         const regExp& matcher,
-        StringListType& lst,
+        StringListType& input,
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(matcher, lst, invert);
+        inplaceSubsetMatchingStrings(matcher, input, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches
@@ -271,11 +271,11 @@ namespace Foam
     void inplaceSubsetStrings
     (
         const char* re,
-        StringListType& lst,
+        StringListType& input,
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(regExp(re), lst, invert);
+        inplaceSubsetMatchingStrings(regExp(re), input, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches
@@ -284,11 +284,11 @@ namespace Foam
     void inplaceSubsetStrings
     (
         const std::string& re,
-        StringListType& lst,
+        StringListType& input,
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(regExp(re), lst, invert);
+        inplaceSubsetMatchingStrings(regExp(re), input, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches
@@ -297,11 +297,11 @@ namespace Foam
     void inplaceSubsetStrings
     (
         const wordRe& matcher,
-        StringListType& lst,
+        StringListType& input,
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(matcher, lst, invert);
+        inplaceSubsetMatchingStrings(matcher, input, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches
@@ -310,11 +310,11 @@ namespace Foam
     void inplaceSubsetStrings
     (
         const wordRes& matcher,
-        StringListType& lst,
+        StringListType& input,
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(matcher, lst, invert);
+        inplaceSubsetMatchingStrings(matcher, input, invert);
     }
 
     //- Inplace extract elements of StringList when regular expression matches

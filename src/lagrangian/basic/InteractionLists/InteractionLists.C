@@ -324,7 +324,10 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
 
         if (isA<wallPolyPatch>(patch))
         {
-            localWallFaces.append(identity(patch.size()) + patch.start());
+            localWallFaces.append
+            (
+                identity(patch.size(), patch.start())
+            );
         }
     }
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,12 +59,12 @@ static const List<Type>& emptyList()
 //- Renumber the values (not the indices) of a list.
 //  Negative ListType elements are left untouched.
 template<class ListType>
-ListType renumber(const labelUList& oldToNew, const ListType& lst);
+ListType renumber(const labelUList& oldToNew, const ListType& input);
 
 //- Inplace renumber the values (not the indices) of a list.
 //  Negative ListType elements are left untouched.
 template<class ListType>
-void inplaceRenumber(const labelUList& oldToNew, ListType& lst);
+void inplaceRenumber(const labelUList& oldToNew, ListType& input);
 
 
 //- Reorder the elements of a list.
@@ -76,7 +76,7 @@ template<class ListType>
 ListType reorder
 (
     const labelUList& oldToNew,
-    const ListType& lst,
+    const ListType& input,
     const bool prune = false
 );
 
@@ -89,7 +89,7 @@ template<class ListType>
 void inplaceReorder
 (
     const labelUList& oldToNew,
-    ListType& lst,
+    ListType& input,
     const bool prune = false
 );
 
@@ -99,22 +99,22 @@ void inplaceReorder
 
 //- Map values. Do not map negative values.
 template<class Container>
-void inplaceMapValue(const labelUList& oldToNew, Container& lst);
+void inplaceMapValue(const labelUList& oldToNew, Container& input);
 
 //- Recreate with mapped keys. Do not map elements with negative key.
 template<class Container>
-void inplaceMapKey(const labelUList& oldToNew, Container& lst);
+void inplaceMapKey(const labelUList& oldToNew, Container& input);
 
 
 //- Generate the (stable) sort order for the list
 template<class T>
-void sortedOrder(const UList<T>& lst, labelList& order);
+void sortedOrder(const UList<T>& input, labelList& order);
 
 //- Sort using specified list compare predicate
 template<class T, class ListComparePredicate>
 void sortedOrder
 (
-    const UList<T>& lst,
+    const UList<T>& input,
     labelList& order,
     const ListComparePredicate& comp
 );
@@ -122,14 +122,14 @@ void sortedOrder
 
 //- Generate (sorted) indices corresponding to duplicate list values
 template<class T>
-void duplicateOrder(const UList<T>& lst, labelList& order);
+void duplicateOrder(const UList<T>& input, labelList& order);
 
 //- Generate (sorted) indices corresponding to duplicate list values
 //  sort using specified list compare predicate
 template<class T, class ListComparePredicate>
 void duplicateOrder
 (
-    const UList<T>& lst,
+    const UList<T>& input,
     labelList& order,
     const ListComparePredicate& comp
 );
@@ -137,14 +137,14 @@ void duplicateOrder
 
 //- Generate (sorted) indices corresponding to unique list values
 template<class T>
-void uniqueOrder(const UList<T>& lst, labelList& order);
+void uniqueOrder(const UList<T>& input, labelList& order);
 
 //- Generate (sorted) indices corresponding to unique list values
 //  sort using specified list compare predicate
 template<class T, class ListComparePredicate>
 void uniqueOrder
 (
-    const UList<T>& lst,
+    const UList<T>& input,
     labelList& order,
     const ListComparePredicate& comp
 );
@@ -153,14 +153,14 @@ void uniqueOrder
 //- Inplace sorting and removal of duplicates.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class ListType>
-void inplaceUniqueSort(ListType& lst);
+void inplaceUniqueSort(ListType& input);
 
 //- Inplace sorting and removal of duplicates.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class ListType, class ListComparePredicate>
 void inplaceUniqueSort
 (
-    ListType& lst,
+    ListType& input,
     const ListComparePredicate& comp
 );
 
@@ -178,19 +178,19 @@ void inplaceSubset(const UList<T>& select, const T& value, ListType&);
 
 //- Extract elements of List when select is true
 //  eg, to extract all selected elements:
-//    subset<boolList, labelList>(selectedElems, lst);
+//    subset<boolList, labelList>(selectedElems, list);
 //  Note a labelHashSet can also be used as the bool-list.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class BoolListType, class ListType>
-ListType subset(const BoolListType& select, const ListType& lst);
+ListType subset(const BoolListType& select, const ListType& input);
 
 //- Inplace extract elements of List when select is true
 //  eg, to extract all selected elements:
-//    inplaceSubset<boolList, labelList>(selectedElems, lst);
+//    inplaceSubset<boolList, labelList>(selectedElems, list);
 //  Note a labelHashSet can also be used as the bool-list.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class BoolListType, class ListType>
-void inplaceSubset(const BoolListType& select, ListType& lst);
+void inplaceSubset(const BoolListType& select, ListType& input);
 
 
 //- Copy a subset of the input list when predicate is true.
@@ -199,7 +199,8 @@ template<class ListType, class UnaryPredicate>
 ListType subsetList
 (
     const ListType& input,
-    const UnaryPredicate& pred
+    const UnaryPredicate& pred,
+    const bool invert=false
 );
 
 //- Inplace subset of the list when predicate is true.
@@ -208,7 +209,8 @@ template<class ListType, class UnaryPredicate>
 void inplaceSubsetList
 (
     ListType& input,
-    const UnaryPredicate& pred
+    const UnaryPredicate& pred,
+    const bool invert=false
 );
 
 
@@ -242,7 +244,8 @@ List<OutputIntListType> invertManyToMany
 }
 
 //- Create identity map of the given length with (map[i] == i)
-labelList identity(const label len);
+//  Optionally with an alternative start index, so that (map[i] == i+start)
+labelList identity(const label len, const label start=0);
 
 //- Find first occurence of given element and return index,
 //  return -1 if not found. Linear search.
@@ -265,23 +268,23 @@ labelList findIndices
 (
     const ListType& input,
     typename ListType::const_reference val,
-    const label start=0
+    label start=0
 );
 
 //- Opposite of findIndices: set values at indices to given value
 template<class ListType>
 void setValues
 (
-    ListType& l,
+    ListType& input,
     const labelUList& indices,
-    typename ListType::const_reference t
+    typename ListType::const_reference val
 );
 
 //- Opposite of findIndices: set values at indices to given value
 template<class ListType>
 ListType createWithValues
 (
-    const label sz,
+    const label len,
     typename ListType::const_reference initValue,
     const labelUList& indices,
     typename ListType::const_reference setValue
@@ -290,13 +293,13 @@ ListType createWithValues
 //- Find index of max element (and larger than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
-label findMax(const ListType& l, const label start=0);
+label findMax(const ListType& input, const label start=0);
 
 
 //- Find index of min element (and less than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
-label findMin(const ListType& l, const label start=0);
+label findMin(const ListType& input, const label start=0);
 
 
 //- Find first occurrence of given element in sorted list and return index,
@@ -304,21 +307,21 @@ label findMin(const ListType& l, const label start=0);
 template<class ListType>
 label findSortedIndex
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
 );
 
 
 //- Find last element < given value in sorted list and return index,
 //  return -1 if not found. Binary search.
-template<class ListType, class BinaryOp>
+template<class ListType, class BinaryPredicate>
 label findLower
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start,
-    const BinaryOp& bop
+    const BinaryPredicate& pred
 );
 
 
@@ -327,8 +330,8 @@ label findLower
 template<class ListType>
 label findLower
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
 );
 
@@ -369,12 +372,12 @@ public:
 
 //- Reverse a list. First element becomes last element etc.
 template<class ListType>
-ListType reverseList(const ListType& list);
+ListType reverseList(const ListType& input);
 
 
 //- Inplace reversal of a list using Swap.
 template<class ListType>
-void inplaceReverseList(ListType& list);
+void inplaceReverseList(ListType& input);
 
 
 //- Rotate a list by n places. If n is positive rotate clockwise/right/down.

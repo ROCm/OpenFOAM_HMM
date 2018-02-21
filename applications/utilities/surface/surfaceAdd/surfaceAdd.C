@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
                 << " by this amount" << nl << endl;
 
             patch1Map = identity(surface1.patches().size());
-            patch2Map = identity(surface2.patches().size()) + patch1Map.size();
+            patch2Map = identity(surface2.patches().size(), patch1Map.size());
 
             nNewPatches = surface1.patches().size()+surface2.patches().size();
         }

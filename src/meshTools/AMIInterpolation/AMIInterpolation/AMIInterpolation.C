@@ -372,8 +372,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 
         // Local constructMap is just identity
         {
-            tgtConstructMap[Pstream::myProcNo()] =
-                identity(targetCoarseSize);
+            tgtConstructMap[Pstream::myProcNo()] = identity(targetCoarseSize);
         }
 
         labelList tgtCompactMap(map.constructSize());
@@ -1134,13 +1133,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
             {
                 mapMap.append
                 (
-                    identity(srcConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        srcConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
                 newMapMap.append
                 (
-                    identity(newSrcConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        newSrcConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
             }
 
@@ -1188,13 +1193,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
             {
                 mapMap.append
                 (
-                    identity(tgtConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        tgtConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
                 newMapMap.append
                 (
-                    identity(newTgtConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        newTgtConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
             }
 

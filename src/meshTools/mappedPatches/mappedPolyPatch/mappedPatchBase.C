@@ -281,7 +281,7 @@ void Foam::mappedPatchBase::findSamples
             else
             {
                 // patch faces
-                const labelList patchFaces(identity(pp.size()) + pp.start());
+                const labelList patchFaces(identity(pp.size(), pp.start()));
 
                 treeBoundBox patchBb
                 (

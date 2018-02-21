@@ -165,10 +165,10 @@ void createBoundaryEdgeTrees
 
         // Boundary edges
         treeBoundaryEdges[surfI] =
-            labelList
+            identity
             (
-                identity(surf.nEdges() - surf.nInternalEdges())
-              + surf.nInternalEdges()
+                surf.nEdges() - surf.nInternalEdges(),
+                surf.nInternalEdges()
             );
 
         Random rndGen(17301893);

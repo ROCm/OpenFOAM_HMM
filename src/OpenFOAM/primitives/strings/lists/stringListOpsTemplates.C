@@ -29,21 +29,24 @@ template<class UnaryMatchPredicate, class StringType>
 Foam::labelList Foam::findMatchingStrings
 (
     const UnaryMatchPredicate& matcher,
-    const UList<StringType>& lst,
+    const UList<StringType>& input,
     const bool invert
 )
 {
-    labelList indices(lst.size());
+    const label len = input.size();
+
+    labelList indices(len);
 
     label count = 0;
-    forAll(lst, elemi)
+    for (label i=0; i < len; ++i)
     {
-        if (matcher(lst[elemi]) ? !invert : invert)
+        if (matcher(input[i]) ? !invert : invert)
         {
-            indices[count++] = elemi;
+            indices[count] = i;
+            ++count;
         }
     }
-    indices.setSize(count);
+    indices.resize(count);
 
     return indices;
 }
@@ -53,24 +56,27 @@ template<class UnaryMatchPredicate, class StringListType>
 StringListType Foam::subsetMatchingStrings
 (
     const UnaryMatchPredicate& matcher,
-    const StringListType& lst,
+    const StringListType& input,
     const bool invert
 )
 {
-    StringListType newLst(lst.size());
-    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
+    const label len = input.size();
+
+    StringListType output(len);
+    output.resize(len);   // Consistent sizing (eg, DynamicList)
 
     label count = 0;
-    forAll(lst, elemi)
+    for (label i=0; i < len; ++i)
     {
-        if (matcher(lst[elemi]) ? !invert : invert)
+        if (matcher(input[i]) ? !invert : invert)
         {
-            newLst[count++] = lst[elemi];
+            output[count] = input[i];
+            ++count;
         }
     }
-    newLst.setSize(count);
+    output.resize(count);
 
-    return newLst;
+    return output;
 }
 
 
@@ -78,23 +84,25 @@ template<class UnaryMatchPredicate, class StringListType>
 void Foam::inplaceSubsetMatchingStrings
 (
     const UnaryMatchPredicate& matcher,
-    StringListType& lst,
+    StringListType& input,
     const bool invert
 )
 {
+    const label len = input.size();
+
     label count = 0;
-    forAll(lst, elemi)
+    for (label i=0; i < len; ++i)
     {
-        if (matcher(lst[elemi]) ? !invert : invert)
+        if (matcher(input[i]) ? !invert : invert)
         {
-            if (count != elemi)
+            if (count != i)
             {
-                lst[count] = lst[elemi];
+                input[count] = std::move(input[i]);
             }
             ++count;
         }
     }
-    lst.setSize(count);
+    input.resize(count);
 }
 
 

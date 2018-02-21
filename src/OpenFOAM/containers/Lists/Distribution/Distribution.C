@@ -84,14 +84,7 @@ Foam::scalar Foam::Distribution<Type>::totalWeight(direction cmpt) const
 template<class Type>
 Foam::List<Foam::label> Foam::Distribution<Type>::keys(direction cmpt) const
 {
-    List<label> keys = identity((*this)[cmpt].size());
-
-    forAll(keys, k)
-    {
-        keys[k] += listStarts_[cmpt];
-    }
-
-    return keys;
+    return identity((*this)[cmpt].size(), listStarts_[cmpt]);
 }
 
 
