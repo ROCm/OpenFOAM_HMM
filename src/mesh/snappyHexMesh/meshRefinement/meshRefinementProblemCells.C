@@ -818,7 +818,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                 }
             }
         }
-        else if (nBoundaryAnchors == 7)
+        else if (nBoundaryAnchors == 7 && nonBoundaryAnchor != -1)
         {
             // Mark the cell. Store the (single!) non-boundary anchor point.
             hasSevenBoundaryAnchorPoints.set(celli, 1u);

@@ -2278,14 +2278,12 @@ void Foam::snappyRefineDriver::doRefine
         10      // maxIter
     );
 
-    // Directional refinement
-//XXXXX
+    // Directional shell refinement
     directionalShellRefine
     (
         refineParams,
         100    // maxIter
     );
-//XXXXX
 
     // Introduce baffles at surface intersections. Remove sections unreachable
     // from keepPoint.
