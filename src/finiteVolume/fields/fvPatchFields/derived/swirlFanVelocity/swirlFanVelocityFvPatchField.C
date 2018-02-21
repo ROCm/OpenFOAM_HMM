@@ -145,7 +145,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
         dict.lookupOrDefault
         (
             "origin",
-            patch().size()
+            returnReduce(patch().size(), maxOp<label>())
           ? gSum(patch().Cf()*patch().magSf())/gSum(patch().magSf())
           : Zero
         )
