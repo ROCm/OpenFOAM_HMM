@@ -197,7 +197,7 @@ void Foam::faPatch::calcPointEdges() const
 
         forAll(curPoints, pointI)
         {
-            label localPointIndex = findIndex(points, curPoints[pointI]);
+            const label localPointIndex = points.find(curPoints[pointI]);
 
             pointEdgs[localPointIndex].append(edgeI);
         }

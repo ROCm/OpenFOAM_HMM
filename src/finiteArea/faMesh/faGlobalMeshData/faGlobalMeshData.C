@@ -90,8 +90,8 @@ void Foam::faGlobalMeshData::updateMesh()
                 label polyMeshPoint =
                     mesh_.patch().meshPoints()[localPointLabels[pointI]];
 
-                label sharedPolyMeshPoint =
-                    findIndex(polyMeshSharedPointLabels, polyMeshPoint);
+                const label sharedPolyMeshPoint =
+                    polyMeshSharedPointLabels.find(polyMeshPoint);
 
                 if
                 (
@@ -124,11 +124,11 @@ void Foam::faGlobalMeshData::updateMesh()
     sharedPointAddr_.setSize(sharedPointLabels_.size());
     forAll(sharedPointAddr_, pointI)
     {
-        label polyMeshSharedPointIndex = findIndex
-        (
-            polyMeshSharedPointLabels,
-            mesh_.patch().meshPoints()[sharedPointLabels_[pointI]]
-        );
+        const label polyMeshSharedPointIndex =
+            polyMeshSharedPointLabels.find
+            (
+                mesh_.patch().meshPoints()[sharedPointLabels_[pointI]]
+            );
 
         sharedPointAddr_[pointI] =
             globalList[polyMeshSharedPointAddr[polyMeshSharedPointIndex]]

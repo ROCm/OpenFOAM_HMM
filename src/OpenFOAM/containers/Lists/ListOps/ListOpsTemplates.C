@@ -566,29 +566,6 @@ void Foam::invertManyToMany
 
 
 template<class ListType>
-Foam::label Foam::findIndex
-(
-    const ListType& l,
-    typename ListType::const_reference t,
-    const label start
-)
-{
-    label index = -1;
-
-    for (label i = start; i < l.size(); i++)
-    {
-        if (l[i] == t)
-        {
-            index = i;
-            break;
-        }
-    }
-
-    return index;
-}
-
-
-template<class ListType>
 Foam::labelList Foam::findIndices
 (
     const ListType& l,

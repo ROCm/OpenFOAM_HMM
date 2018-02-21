@@ -560,7 +560,7 @@ Foam::faMesh::faMesh
             {
                 label curFace = edgeFaces[curPMeshEdge][faceI];
 
-                if (findIndex(faceLabels_, curFace) == -1)
+                if (faceLabels_.found(curFace))
                 {
                     label polyPatchID = pbm.whichPatch(curFace);
 

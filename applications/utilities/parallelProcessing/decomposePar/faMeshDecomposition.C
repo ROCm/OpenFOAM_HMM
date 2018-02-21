@@ -1253,12 +1253,11 @@ bool Foam::faMeshDecomposition::writeDecomposition()
         {
             const labelList& curEdgeLabels = curPatchEdgeLabels[nPatches];
 
-            label ngbPolyPatchIndex =
-                findIndex
+            const label ngbPolyPatchIndex =
+                fvBoundaryProcAddressing.find
                 (
-                    fvBoundaryProcAddressing,
                     meshPatches[curBoundaryAddressing[patchi]]
-                   .ngbPolyPatchIndex()
+                    .ngbPolyPatchIndex()
                 );
 
             procPatches[nPatches] =

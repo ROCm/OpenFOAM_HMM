@@ -1647,7 +1647,7 @@ void Foam::faMesh::calcPointAreaNormalsByQuadricsFit() const
         {
             List<List<vector>> procLsPoints(Pstream::nProcs());
 
-            label curSharedPointIndex = findIndex(addr, k);
+            const label curSharedPointIndex = addr.find(k);
 
             scalar tol = 0.0;
 

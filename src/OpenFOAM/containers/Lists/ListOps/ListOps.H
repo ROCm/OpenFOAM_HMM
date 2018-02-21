@@ -250,17 +250,21 @@ labelList identity(const label len);
 template<class ListType>
 label findIndex
 (
-    const ListType&,
-    typename ListType::const_reference,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
-);
+)
+{
+    return input.find(val, start);
+}
+
 
 //- Find all occurences of given element. Linear search.
 template<class ListType>
 labelList findIndices
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
 );
 

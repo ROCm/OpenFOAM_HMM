@@ -269,8 +269,7 @@ void Foam::processorFaPatch::initUpdateMesh()
 
             const edge& e = patchEdges[edgeI];
 
-            indexInEdge[patchPointI] =
-                findIndex(e, pointLabels()[patchPointI]);
+            indexInEdge[patchPointI] = e.find(pointLabels()[patchPointI]);
         }
 
         OPstream toNeighbProc
@@ -326,9 +325,9 @@ void Foam::processorFaPatch::updateMesh()
                 // Find edge and index in edge on this side.
                 const edge& e = patchEdges[nbrPatchEdge[nbrPointI]];
 
-                label index =  1 - nbrIndexInEdge[nbrPointI];
+                const label index = 1 - nbrIndexInEdge[nbrPointI];
 
-                label patchPointI = findIndex(pointLabels(), e[index]);
+                const label patchPointI = pointLabels().find(e[index]);
 
                 neighbPoints[patchPointI] = nbrPointI;
             }
