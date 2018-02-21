@@ -33,15 +33,9 @@ Foam::pointFeatureEdgesTypes::pointFeatureEdgesTypes
     const label pointLabel
 )
 :
-    HashTable<label, extendedFeatureEdgeMesh::edgeStatus>(),
+    HashTable<label, extendedFeatureEdgeMesh::edgeStatus, Hash<label>>(),
     feMesh_(feMesh),
     pointLabel_(pointLabel)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointFeatureEdgesTypes::~pointFeatureEdgesTypes()
 {}
 
 
@@ -79,18 +73,12 @@ Foam::Ostream& Foam::operator<<
 {
     os  << "Point = " << p.pointLabel_ << endl;
 
-    for
-    (
-        HashTable<label, extendedFeatureEdgeMesh::edgeStatus>
-            ::const_iterator iter = p.cbegin();
-        iter != p.cend();
-        ++iter
-    )
+    forAllConstIters(p, iter)
     {
         os  << "    "
             << extendedFeatureEdgeMesh::edgeStatusNames_[iter.key()]
             << " = "
-            << iter()
+            << iter.object()
             << endl;
     }
 

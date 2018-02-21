@@ -203,7 +203,7 @@ public:
 
 
     //- Destructor
-    ~vtuSizing();
+    ~vtuSizing() = default;
 
 
     // Member Functions

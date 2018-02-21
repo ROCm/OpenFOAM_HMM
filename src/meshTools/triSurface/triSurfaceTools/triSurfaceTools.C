@@ -451,8 +451,8 @@ void Foam::triSurfaceTools::getMergedEdges
     const triSurface& surf,
     const label edgeI,
     const labelHashSet& collapsedFaces,
-    HashTable<label, label, Hash<label>>& edgeToEdge,
-    HashTable<label, label, Hash<label>>& edgeToFace
+    Map<label>& edgeToEdge,
+    Map<label>& edgeToFace
 )
 {
     const edge& e = surf.edges()[edgeI];
@@ -534,8 +534,8 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
     const label v1,
     const point& pt,
     const labelHashSet& collapsedFaces,
-    const HashTable<label, label, Hash<label>>& edgeToEdge,
-    const HashTable<label, label, Hash<label>>& edgeToFace,
+    const Map<label>& edgeToEdge,
+    const Map<label>& edgeToFace,
     const label facei,
     const label edgeI
 )
@@ -630,8 +630,8 @@ Foam::scalar Foam::triSurfaceTools::collapseMinCosAngle
     const label v1,
     const point& pt,
     const labelHashSet& collapsedFaces,
-    const HashTable<label, label, Hash<label>>& edgeToEdge,
-    const HashTable<label, label, Hash<label>>& edgeToFace
+    const Map<label>& edgeToEdge,
+    const Map<label>& edgeToFace
 )
 {
     const labelList& v1Faces = surf.pointFaces()[v1];
@@ -684,8 +684,8 @@ bool Foam::triSurfaceTools::collapseCreatesFold
     const label v1,
     const point& pt,
     const labelHashSet& collapsedFaces,
-    const HashTable<label, label, Hash<label>>& edgeToEdge,
-    const HashTable<label, label, Hash<label>>& edgeToFace,
+    const Map<label>& edgeToEdge,
+    const Map<label>& edgeToFace,
     const scalar minCos
 )
 {
@@ -749,7 +749,7 @@ bool Foam::triSurfaceTools::collapseCreatesFold
 //    // neighbours actually contains the
 //    // edge with which triangle connects to collapsedFaces.
 //
-//    HashTable<label, label, Hash<label>> neighbours;
+//    Map<label> neighbours;
 //
 //    labelList collapsed = collapsedFaces.toc();
 //

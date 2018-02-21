@@ -33,6 +33,19 @@ License
 // Truncate error message for readability
 static const unsigned errLen = 80;
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace
+{
+
+// Convert a single character to a word with length 1
+inline static Foam::word charToWord(char c)
+{
+    return Foam::word(std::string(1, c), false);
+}
+
+} // End anonymous namespace
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -210,7 +223,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
             if (read(nextC).bad())
             {
                 // Return lone '#' as word
-                t = token(word(c));
+                t = charToWord(c);
             }
             else if (nextC == token::BEGIN_BLOCK)
             {
@@ -246,7 +259,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
             if (read(nextC).bad())
             {
                 // Return lone '$' as word
-                t = token(word(c));
+                t = charToWord(c);
             }
             else if (nextC == token::BEGIN_BLOCK)
             {

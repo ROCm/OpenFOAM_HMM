@@ -730,7 +730,7 @@ void Foam::globalPoints::remove
     // those points where the equivalence list is only me and my (face)neighbour
 
     // Save old ones.
-    Map<label> oldMeshToProcPoint(meshToProcPoint_.xfer());
+    Map<label> oldMeshToProcPoint(std::move(meshToProcPoint_));
     meshToProcPoint_.resize(oldMeshToProcPoint.size());
     DynamicList<labelPairList> oldProcPoints(procPoints_.xfer());
     procPoints_.setCapacity(oldProcPoints.size());

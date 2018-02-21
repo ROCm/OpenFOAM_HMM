@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,11 @@ Class
     Foam::meshStructure
 
 Description
-    Detect extruded mesh structure given a set of patch faces.
+    Detect extruded mesh structure given a set of faces
+    (uindirectPrimitivePatch).
+
+    All indices to originating set are in terms of global faces,
+    global edges, global points.
 
 SourceFiles
     meshStructure.C
@@ -46,7 +50,7 @@ namespace Foam
 
 // Forward declaration of classes
 class polyMesh;
-
+class globalIndex;
 
 /*---------------------------------------------------------------------------*\
                          Class meshStructure Declaration
@@ -95,7 +99,10 @@ class meshStructure
         void correct
         (
             const polyMesh& mesh,
-            const uindirectPrimitivePatch& pp
+            const uindirectPrimitivePatch& pp,
+            const globalIndex& globalFaces,
+            const globalIndex& globalEdges,
+            const globalIndex& globalPoints
         );
 
 
@@ -106,8 +113,19 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct from mesh and faces in mesh. Any addressing to
+        //  faces/edges/points on patch are global indices
         meshStructure(const polyMesh& mesh, const uindirectPrimitivePatch&);
+
+        //- Construct from mesh and faces in mesh and global indexing
+        meshStructure
+        (
+            const polyMesh& mesh,
+            const uindirectPrimitivePatch&,
+            const globalIndex& globalFaces,
+            const globalIndex& globalEdges,
+            const globalIndex& globalPoints
+        );
 
 
     // Member Functions
@@ -115,10 +133,10 @@ public:
         //- Is mesh structured?
         inline bool structured() const;
 
-        //- Cell to patch face
+        //- Cell to (global) patch face
         inline const labelList& cellToPatchFaceAddressing() const;
 
-        //- Cell to patch face
+        //- Cell to (global) patch face
         inline labelList& cellToPatchFaceAddressing();
 
         //- Cell to layer
@@ -127,16 +145,16 @@ public:
         //- Cell to layer
         inline labelList& cellLayer();
 
-        //- Face to patch face
+        //- Face to (global) patch face
         inline const labelList& faceToPatchFaceAddressing() const;
 
-        //- Face to patch face
+        //- Face to (global) patch face
         inline labelList& faceToPatchFaceAddressing();
 
-        //- Face to patch edge
+        //- Face to (global) patch edge
         inline const labelList& faceToPatchEdgeAddressing() const;
 
-        //- Face to patch edge
+        //- Face to (global) patch edge
         inline labelList& faceToPatchEdgeAddressing();
 
         //- Face to layer
@@ -145,10 +163,10 @@ public:
         //- Face to layer
         inline labelList& faceLayer();
 
-        //- Point to patch point
+        //- Point to (global) patch point
         inline const labelList& pointToPatchPointAddressing() const;
 
-        //- Point to patch point
+        //- Point to (global) patch point
         inline labelList& pointToPatchPointAddressing();
 
         //- Point to layer
@@ -156,7 +174,6 @@ public:
 
         //- Point to layer
         inline labelList& pointLayer();
-
 };
 
 

@@ -23,7 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 inline std::string::size_type Foam::string::find_ext(const std::string& str)
@@ -68,6 +67,8 @@ inline bool Foam::string::removeExt()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::string::string()
+:
+    std::string()
 {}
 
 
@@ -253,7 +254,7 @@ inline bool Foam::string::operator()(const std::string& text) const
 
 inline unsigned Foam::string::hash::operator()
 (
-    const string& str,
+    const std::string& str,
     unsigned seed
 ) const
 {

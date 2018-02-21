@@ -38,7 +38,7 @@ Note
     The HashSet iterator dereferences to the key, so the following
     range-for works as expected:
     \code
-        HashSet<label> someLabels{10, 20, 30, 40, ...};
+        labelHashSet someLabels{10, 20, 30, 40, ...};
         for (const label i : someLabels)
         {
             Info<< "val:" << i << nl;
@@ -55,7 +55,7 @@ Typedef
     Foam::labelHashSet
 
 Description
-    A HashSet with label keys.
+    A HashSet with label keys and label hasher.
 
 \*---------------------------------------------------------------------------*/
 
@@ -160,18 +160,6 @@ public:
         HashSet(this_type&& hs)
         :
             parent_type(std::move(hs))
-        {}
-
-        //- Construct by transferring the parameter contents
-        HashSet(const Xfer<this_type>& hs)
-        :
-            parent_type(hs)
-        {}
-
-        //- Construct by transferring the parameter contents
-        HashSet(const Xfer<parent_type>& hs)
-        :
-            parent_type(hs)
         {}
 
         //- Construct from the keys of another HashTable,
@@ -427,7 +415,7 @@ HashSet<Key,Hash> operator^
 //- A HashSet with word keys.
 typedef HashSet<> wordHashSet;
 
-//- A HashSet with label keys.
+//- A HashSet with label keys and label hasher.
 typedef HashSet<label, Hash<label>> labelHashSet;
 
 

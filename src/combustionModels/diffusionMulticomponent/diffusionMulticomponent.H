@@ -177,7 +177,7 @@ public:
 
 
     //- Destructor
-    virtual ~diffusionMulticomponent();
+    virtual ~diffusionMulticomponent() = default;
 
 
     // Member Functions

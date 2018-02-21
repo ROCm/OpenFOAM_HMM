@@ -74,30 +74,16 @@ public:
     {
     public:
 
-        class symmHash
-        :
-            public Hash<interfacePair>
+        struct symmHash
         {
-        public:
-
-            symmHash()
-            {}
-
             label operator()(const interfacePair& key) const
             {
                 return word::hash()(key.first()) + word::hash()(key.second());
             }
         };
 
-        class hash
-        :
-            public Hash<interfacePair>
+        struct hash
         {
-        public:
-
-            hash()
-            {}
-
             label operator()(const interfacePair& key) const
             {
                 return word::hash()(key.first(), word::hash()(key.second()));
@@ -107,8 +93,7 @@ public:
 
         // Constructors
 
-            interfacePair()
-            {}
+            interfacePair() {} // = default
 
             interfacePair(const word& alpha1Name, const word& alpha2Name)
             :
@@ -233,8 +218,7 @@ public:
 
 
     //- Destructor
-    virtual ~multiphaseSystem()
-    {}
+    virtual ~multiphaseSystem() = default;
 
 
     // Member Functions

@@ -83,7 +83,6 @@ SourceFiles
 
 #include "word.H"
 #include "zero.H"
-#include "Xfer.H"
 #include "Hash.H"
 #include "HashTableCore.H"
 
@@ -343,9 +342,6 @@ public:
         //- Move construct
         HashTable(this_type&& ht);
 
-        //- Construct by transferring the parameter contents
-        HashTable(const Xfer<this_type>& ht);
-
         //- Construct from an initializer list
         HashTable(std::initializer_list<std::pair<Key, T>> lst);
 
@@ -602,9 +598,6 @@ public:
         //  and annul the argument table.
         void transfer(HashTable<T, Key, Hash>& ht);
 
-        //- Transfer contents to the Xfer container
-        inline Xfer<HashTable<T, Key, Hash>> xfer();
-
 
     // Member Operators
 
@@ -621,9 +614,6 @@ public:
 
         //- Return existing entry or insert a new entry.
         inline T& operator()(const Key& key, const T& deflt);
-
-        //- Return hashed entry if it exists, or return the given default
-        inline const T& operator()(const Key& key, const T& deflt) const;
 
         //- Assignment
         void operator=(const HashTable<T, Key, Hash>& rhs);

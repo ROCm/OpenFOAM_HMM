@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,17 +35,76 @@ License
 
 #include <utility>
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+template<class T2, class UnaryOperation>
+Foam::List<T> Foam::List<T>::createList
+(
+    const UList<T2>& input,
+    const UnaryOperation& op
+)
+{
+    const label len = input.size();
+
+    List<T> output(len);
+
+    if (len)
+    {
+        List_ACCESS(T, output, out);
+        List_CONST_ACCESS(T2, input, in);
+
+        for (label i = 0; i < len; ++i)
+        {
+            out[i] = op(in[i]);
+        }
+    }
+
+    return output;
+}
+
+
+template<class T>
+template<class InputIterator, class UnaryOperation>
+Foam::List<T> Foam::List<T>::createList
+(
+    InputIterator begIter,
+    InputIterator endIter,
+    const UnaryOperation& op
+)
+{
+    const label len = std::distance(begIter, endIter);
+
+    List<T> output(len);
+
+    if (len)
+    {
+        List_ACCESS(T, output, out);
+
+        InputIterator iter = begIter;
+
+        for (label i = 0; i < len; ++i)
+        {
+            out[i] = op(*iter);
+            ++iter;
+        }
+    }
+
+    return output;
+}
+
+
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::List<T>::List(const label s)
+Foam::List<T>::List(const label len)
 :
-    UList<T>(nullptr, s)
+    UList<T>(nullptr, len)
 {
-    if (this->size_ < 0)
+    if (len < 0)
     {
         FatalErrorInFunction
-            << "bad size " << this->size_
+            << "bad size " << len
             << abort(FatalError);
     }
 
@@ -54,23 +113,23 @@ Foam::List<T>::List(const label s)
 
 
 template<class T>
-Foam::List<T>::List(const label s, const T& val)
+Foam::List<T>::List(const label len, const T& val)
 :
-    UList<T>(nullptr, s)
+    UList<T>(nullptr, len)
 {
-    if (this->size_ < 0)
+    if (len < 0)
     {
         FatalErrorInFunction
-            << "bad size " << this->size_
+            << "bad size " << len
             << abort(FatalError);
     }
 
-    alloc();
-
-    if (this->size_)
+    if (len)
     {
+        alloc();
+
         List_ACCESS(T, (*this), vp);
-        List_FOR_ALL((*this), i)
+        for (label i=0; i < len; ++i)
         {
             vp[i] = val;
         }
@@ -79,25 +138,53 @@ Foam::List<T>::List(const label s, const T& val)
 
 
 template<class T>
-Foam::List<T>::List(const label s, const zero)
+Foam::List<T>::List(const label len, const zero)
 :
-    UList<T>(nullptr, s)
+    UList<T>(nullptr, len)
 {
-    if (this->size_ < 0)
+    if (len < 0)
     {
         FatalErrorInFunction
-            << "bad size " << this->size_
+            << "bad size " << len
             << abort(FatalError);
     }
 
-    alloc();
-
-    if (this->size_)
+    if (len)
     {
+        alloc();
+
         List_ACCESS(T, (*this), vp);
-        List_FOR_ALL((*this), i)
+        for (label i=0; i < len; ++i)
         {
             vp[i] = Zero;
+        }
+    }
+}
+
+
+template<class T>
+Foam::List<T>::List(const UList<T>& a)
+:
+    UList<T>(nullptr, a.size_)
+{
+    if (this->size_)
+    {
+        alloc();
+
+        #ifdef USEMEMCPY
+        if (contiguous<T>())
+        {
+            memcpy(this->v_, a.v_, this->byteSize());
+        }
+        else
+        #endif
+        {
+            List_ACCESS(T, (*this), vp);
+            List_CONST_ACCESS(T, a, ap);
+            List_FOR_ALL((*this), i)
+            {
+                vp[i] = ap[i];
+            }
         }
     }
 }
@@ -126,26 +213,6 @@ Foam::List<T>::List(const List<T>& a)
             {
                 vp[i] = ap[i];
             }
-        }
-    }
-}
-
-
-template<class T>
-template<class T2>
-Foam::List<T>::List(const List<T2>& a)
-:
-    UList<T>(nullptr, a.size())
-{
-    if (this->size_)
-    {
-        alloc();
-
-        List_ACCESS(T, (*this), vp);
-        List_CONST_ACCESS(T2, a, ap);
-        List_FOR_ALL((*this), i)
-        {
-            vp[i] = T(ap[i]);
         }
     }
 }
@@ -191,13 +258,14 @@ Foam::List<T>::List(const UList<T>& lst, const labelUList& mapAddressing)
 :
     UList<T>(nullptr, mapAddressing.size())
 {
-    if (this->size_)
+    const label len = mapAddressing.size();
+
+    if (len)
     {
         alloc();
 
         List_ACCESS(T, (*this), vp);
 
-        const label len = (*this).size();
         for (label i=0; i < len; ++i)
         {
             vp[i] = lst[mapAddressing[i]];
@@ -220,7 +288,8 @@ Foam::List<T>::List(const FixedList<T, Size>& lst)
 :
     UList<T>(nullptr, Size)
 {
-    allocCopyList(lst);
+    alloc();
+    copyList(lst);
 }
 
 
@@ -229,7 +298,8 @@ Foam::List<T>::List(const PtrList<T>& lst)
 :
     UList<T>(nullptr, lst.size())
 {
-    allocCopyList(lst);
+    alloc();
+    copyList(lst);
 }
 
 
@@ -245,7 +315,8 @@ Foam::List<T>::List(const UIndirectList<T>& lst)
 :
     UList<T>(nullptr, lst.size())
 {
-    allocCopyList(lst);
+    alloc();
+    copyList(lst);
 }
 
 
@@ -254,7 +325,8 @@ Foam::List<T>::List(const BiIndirectList<T>& lst)
 :
     UList<T>(nullptr, lst.size())
 {
-    allocCopyList(lst);
+    alloc();
+    copyList(lst);
 }
 
 
@@ -329,7 +401,7 @@ void Foam::List<T>::setSize(const label newSize)
     {
         if (newSize > 0)
         {
-            T* nv = new T[label(newSize)];
+            T* nv = new T[newSize];
 
             const label overlap = min(this->size_, newSize);
 
@@ -367,7 +439,7 @@ void Foam::List<T>::setSize(const label newSize)
 template<class T>
 void Foam::List<T>::setSize(const label newSize, const T& val)
 {
-    const label oldSize = label(this->size_);
+    const label oldSize = this->size_;
     this->setSize(newSize);
 
     List_ACCESS(T, *this, vp);
@@ -474,28 +546,58 @@ void Foam::List<T>::operator=(const SLList<T>& lst)
 template<class T>
 void Foam::List<T>::operator=(const UIndirectList<T>& lst)
 {
-    reAlloc(lst.size());
-    copyList(lst);
+    const label len = lst.size();
+
+    reAlloc(len);
+
+    if (len)
+    {
+        List_ACCESS(T, (*this), vp);
+
+        for (label i=0; i<len; ++i)
+        {
+            vp[i] = lst[i];
+        }
+    }
 }
 
 
 template<class T>
 void Foam::List<T>::operator=(const BiIndirectList<T>& lst)
 {
-    reAlloc(lst.size());
-    copyList(lst);
+    const label len = lst.size();
+
+    reAlloc(len);
+
+    if (len)
+    {
+        List_ACCESS(T, (*this), vp);
+
+        for (label i=0; i<len; ++i)
+        {
+            vp[i] = lst[i];
+        }
+    }
 }
 
 
 template<class T>
 void Foam::List<T>::operator=(std::initializer_list<T> lst)
 {
-    reAlloc(lst.size());
+    const label len = lst.size();
 
-    label i = 0;
-    for (const auto& val : lst)
+    reAlloc(len);
+
+    if (len)
     {
-        this->operator[](i++) = val;
+        List_ACCESS(T, (*this), vp);
+
+        label i = 0;
+        for (const auto& val : lst)
+        {
+            vp[i] = val;
+            ++i;
+        }
     }
 }
 

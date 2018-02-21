@@ -141,10 +141,10 @@ void Foam::Time::readDict()
         )
         {
             // Remove the old watches since destroying the file
-            fileNameList oldWatchedFiles(controlDict_.watchIndices());
+            fileNameList oldWatchedFiles(controlDict_.watchIndices().size());
             forAllReverse(controlDict_.watchIndices(), i)
             {
-                label watchi = controlDict_.watchIndices()[i];
+                const label watchi = controlDict_.watchIndices()[i];
                 oldWatchedFiles[i] = fileHandler().getFile(watchi);
                 fileHandler().removeWatch(watchi);
             }

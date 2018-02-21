@@ -457,7 +457,7 @@ Foam::string Foam::stringOps::expand
         }
         else
         {
-            out.append(string(s[index]));
+            out.append(1, s[index]);  // append char
         }
         ++index;
     }

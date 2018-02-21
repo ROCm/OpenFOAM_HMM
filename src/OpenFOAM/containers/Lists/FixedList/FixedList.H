@@ -101,12 +101,8 @@ public:
     //- Hashing function class.
     //  Use Hasher directly for contiguous data. Otherwise hash incrementally.
     template<class HashT=Hash<T>>
-    class Hash
+    struct Hash
     {
-    public:
-        Hash()
-        {}
-
         inline unsigned operator()
         (
             const FixedList<T, Size>&,

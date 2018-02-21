@@ -111,18 +111,6 @@ Foam::HashTable<T, Key, Hash>::HashTable(HashTable<T, Key, Hash>&& ht)
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable
 (
-    const Xfer<HashTable<T, Key, Hash>>& ht
-)
-:
-    HashTable<T, Key, Hash>(0)
-{
-    transfer(ht());
-}
-
-
-template<class T, class Key, class Hash>
-Foam::HashTable<T, Key, Hash>::HashTable
-(
     std::initializer_list<std::pair<Key, T>> lst
 )
 :

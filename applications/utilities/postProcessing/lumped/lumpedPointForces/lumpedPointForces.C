@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
             if (withVTK && Pstream::master())
             {
                 const word outputName =
-                    Foam::name("forces_%06d.vtp", runTime.timeIndex());
+                    word::printf("forces_%06d.vtp", runTime.timeIndex());
 
                 Info<<"    " << outputName << endl;
 

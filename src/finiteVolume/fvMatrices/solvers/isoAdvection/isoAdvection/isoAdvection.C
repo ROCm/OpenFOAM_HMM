@@ -1100,9 +1100,9 @@ void Foam::isoAdvection::writeIsoFaces
             mesh_.time().path()/".."/"isoFaces"
           : mesh_.time().path()/"isoFaces"
     );
-    const string fName
+    const word fName
     (
-        "isoFaces_" + Foam::name("%012d", mesh_.time().timeIndex())
+        word::printf("isoFaces_%012d", mesh_.time().timeIndex())
     );
 
     if (Pstream::parRun())

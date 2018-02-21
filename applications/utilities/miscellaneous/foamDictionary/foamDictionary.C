@@ -113,6 +113,14 @@ Usage
         dictionary with keyword 'entryDDD' where DDD is the position
         in the dictionary (after ignoring the FoamFile entry).
 
+    Notes:
+        - the use of '.' as the scoping symbol might conflict with
+        e.g. file extensions ('.' is not really considered
+        to be a valid word character). Instead use the '/' as a scoping
+        character e.g.
+          foamDictionary system/snappyHexMeshDict \
+            -entry /geometry/motorBike.obj -remove
+
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"

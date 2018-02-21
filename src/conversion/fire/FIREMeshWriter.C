@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ License
 
 #include "FIREMeshWriter.H"
 #include "Time.H"
-#include "HashTable.H"
+#include "Map.H"
 #include "OFstream.H"
 #include "processorPolyPatch.H"
 
@@ -117,8 +117,8 @@ bool Foam::fileFormats::FIREMeshWriter::writeSelections(OSstream& os) const
 
     // remap name between patches and cell-zones conflicts!
 
-    HashTable<word, label> patchNames;
-    HashTable<word, label> zoneNames;
+    Map<word> patchNames;
+    Map<word> zoneNames;
 
     wordHashSet usedPatchNames;
     wordHashSet usedZoneNames;
@@ -242,12 +242,6 @@ Foam::fileFormats::FIREMeshWriter::FIREMeshWriter
 )
 :
     meshWriter(mesh, scaleFactor)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileFormats::FIREMeshWriter::~FIREMeshWriter()
 {}
 
 

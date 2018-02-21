@@ -312,7 +312,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 patchi,
                 (
                     patches[patchi].name().empty()
-                  ? Foam::name("patch%d", patchi)
+                  ? word::printf("patch%d", patchi)
                   : patches[patchi].name()
                 )
             );
@@ -345,7 +345,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                     zoneNames.set
                     (
                         regionid,
-                        Foam::name("patch%d", regionid)
+                        word::printf("patch%d", regionid)
                     );
                 }
 
@@ -393,7 +393,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         }
         if (name.empty())
         {
-            name = ::Foam::name("patch%d", regionid);
+            name = word::printf("patch%d", regionid);
         }
 
         zoneLst[zoneI] = surfZone

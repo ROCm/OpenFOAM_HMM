@@ -63,16 +63,6 @@ inline word name(const int64_t val)
 }
 
 
-//- Return a word representation of an int64, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const char* fmt, const int64_t);
-
-
-//- Return a word representation of an int64, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const std::string& fmt, const int64_t);
-
-
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 //- Read int64_t from stream
