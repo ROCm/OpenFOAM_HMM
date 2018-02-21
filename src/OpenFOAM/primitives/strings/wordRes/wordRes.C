@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,48 +28,47 @@ License
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::wordReList Foam::wordRes::uniq(const UList<wordRe>& input)
+Foam::wordRes Foam::wordRes::uniq(const UList<wordRe>& input)
 {
-    wordReList retain(input.size());
+    wordRes output(input.size());
     wordHashSet uniqWord;
 
     label count = 0;
-    forAll(input, i)
+    for (const wordRe& select : input)
     {
-        const auto& select = input[i];
-
         if (select.isPattern() || uniqWord.insert(select))
         {
-            retain[count] = select;
+            output[count] = select;
             ++count;
         }
     }
 
-    retain.setSize(count);
-    return retain;
+    output.resize(count);
+    return output;
 }
 
 
-void Foam::wordRes::inplaceUniq(wordReList& input)
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::wordRes::uniq()
 {
     wordHashSet uniqWord;
 
-    label count = 0;
-    forAll(input, i)
+    label i = 0, count = 0;
+    for (wordRe& select : *this)
     {
-        const auto& select = input[i];
-
         if (select.isPattern() || uniqWord.insert(select))
         {
             if (count != i)
             {
-                input[count] = input[i];
+                (*this)[count] = std::move(select);
             }
             ++count;
         }
+        ++i;
     }
 
-    input.setSize(count);
+    resize(count);
 }
 
 

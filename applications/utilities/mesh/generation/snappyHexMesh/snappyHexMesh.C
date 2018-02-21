@@ -1666,7 +1666,7 @@ int main(int argc, char *argv[])
         {
             includePatches = bMesh.patchSet
             (
-                wordReList(args.lookup("patches")())
+                args.readList<wordRe>("patches")
             );
         }
         else

@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class sixDoFRigidBodyMotionSolver Declaration
+                 Class sixDoFRigidBodyMotionSolver Declaration
 \*---------------------------------------------------------------------------*/
 
 class sixDoFRigidBodyMotionSolver
@@ -62,7 +62,7 @@ class sixDoFRigidBodyMotionSolver
         //- Six DoF motion object
         sixDoFRigidBodyMotion motion_;
 
-        wordReList patches_;
+        wordRes patches_;
 
         //- Patches to integrate forces
         const labelHashSet patchSet_;
@@ -73,9 +73,8 @@ class sixDoFRigidBodyMotionSolver
         //- Outer morphing distance (limit of linear interpolation region)
         const scalar do_;
 
-        //- Switch for test-mode in which only the
-        //  gravitational body-force is applied
-        Switch test_;
+        //- Test-mode in which only the gravitational body-force is applied
+        bool test_;
 
         //- Reference density required by the forces object for
         //  incompressible calculations, required if rho == rhoInf
@@ -122,7 +121,7 @@ public:
 
 
     //- Destructor
-    ~sixDoFRigidBodyMotionSolver();
+    ~sixDoFRigidBodyMotionSolver() = default;
 
 
     // Member Functions

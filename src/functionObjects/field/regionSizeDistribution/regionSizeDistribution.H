@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,7 +144,7 @@ SourceFiles
 #include "writer.H"
 #include "Map.H"
 #include "volFieldsFwd.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "coordinateSystem.H"
 #include "Switch.H"
 
@@ -174,7 +174,7 @@ class regionSizeDistribution
         word alphaName_;
 
         //- Patches to walk from
-        wordReList patchNames_;
+        wordRes patchNames_;
 
         //- Switch to send output to Info as well as to file
         Switch log_;
@@ -192,7 +192,7 @@ class regionSizeDistribution
         label nBins_;
 
         //- Names of fields to sample on regions
-        wordReList fields_;
+        wordRes fields_;
 
         //- Output formatter to write
         autoPtr<writer<scalar>> formatterPtr_;

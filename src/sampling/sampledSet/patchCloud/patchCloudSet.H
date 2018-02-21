@@ -112,7 +112,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchCloudSet();
+    virtual ~patchCloudSet() = default;
 };
 
 

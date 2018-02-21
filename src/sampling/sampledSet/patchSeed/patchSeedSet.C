@@ -364,10 +364,4 @@ Foam::patchSeedSet::patchSeedSet
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchSeedSet::~patchSeedSet()
-{}
-
-
 // ************************************************************************* //

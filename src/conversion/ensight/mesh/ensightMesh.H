@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,7 +46,7 @@ SourceFiles
 #include "HashTable.H"
 #include "Map.H"
 #include "scalarField.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "globalIndex.H"
 
 
@@ -367,10 +367,10 @@ class ensightMesh::options
     bool noPatches_;
 
     //- Output selected patches only
-    autoPtr<wordReList> patchPatterns_;
+    autoPtr<wordRes> patchPatterns_;
 
     //- Output selected faceZones
-    autoPtr<wordReList> faceZonePatterns_;
+    autoPtr<wordRes> faceZonePatterns_;
 
 public:
 
@@ -403,10 +403,10 @@ public:
         bool usePatchSelection() const;
 
         //- Selection of patches - null reference if not available
-        const wordReList& patchSelection() const;
+        const wordRes& patchSelection() const;
 
         //- Selection of faceZones - null reference if not available
-        const wordReList& faceZoneSelection() const;
+        const wordRes& faceZoneSelection() const;
 
 
     // Edit
@@ -421,10 +421,10 @@ public:
         void noPatches(const bool);
 
         //- Define patch selection matcher
-        void patchSelection(const wordReList&);
+        void patchSelection(const UList<wordRe>& patterns);
 
         //- Define faceZone selection matcher
-        void faceZoneSelection(const wordReList&);
+        void faceZoneSelection(const UList<wordRe>& patterns);
 };
 
 

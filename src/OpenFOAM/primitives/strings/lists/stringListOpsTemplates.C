@@ -57,11 +57,8 @@ StringListType Foam::subsetMatchingStrings
     const bool invert
 )
 {
-    // Create as a copy
     StringListType newLst(lst.size());
-
-    // Ensure consistent addressable size (eg, DynamicList)
-    newLst.setSize(lst.size());
+    newLst.setSize(lst.size()); // Consistent sizing (eg, DynamicList)
 
     label count = 0;
     forAll(lst, elemi)

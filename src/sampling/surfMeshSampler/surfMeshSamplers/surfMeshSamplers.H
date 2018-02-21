@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,7 +82,7 @@ SourceFiles
 #include "surfMeshSampler.H"
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "IOobjectList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -119,7 +119,7 @@ class surfMeshSamplers
       // Read from dictonary
 
         //- Names of fields to sample
-        wordReList fieldSelection_;
+        wordRes fieldSelection_;
 
         //- Names of derived fields to create and sample
         wordList derivedNames_;
@@ -183,7 +183,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfMeshSamplers();
+    virtual ~surfMeshSamplers() = default;
 
 
     // Member Functions

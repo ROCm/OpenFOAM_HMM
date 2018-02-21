@@ -156,12 +156,6 @@ Foam::functionObjects::mapFields::mapFields
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::mapFields::~mapFields()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::mapFields::read(const dictionary& dict)

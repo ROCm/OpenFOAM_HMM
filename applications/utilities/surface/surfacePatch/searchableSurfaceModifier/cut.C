@@ -277,12 +277,6 @@ Foam::searchableSurfaceModifiers::cut::cut
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableSurfaceModifiers::cut::~cut()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::searchableSurfaceModifiers::cut::modify
@@ -296,14 +290,12 @@ bool Foam::searchableSurfaceModifiers::cut::modify
     bool changed = false;
 
     // Find the surfaces to cut with
-    forAll(cutterNames_, cutNameI)
+    for (const wordRe& cutterName : cutterNames_)
     {
-        labelList geomIDs =
-            findStrings(cutterNames_[cutNameI], geometry_.names());
+        labelList geomIDs = findStrings(cutterName, geometry_.names());
 
-        forAll(geomIDs, j)
+        for (const label geomI : geomIDs)
         {
-            label geomI = geomIDs[j];
             const searchableSurface& cutter = geometry_[geomI];
 
             // Triangulate

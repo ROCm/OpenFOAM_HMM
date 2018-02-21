@@ -26,12 +26,11 @@ License
 #include "cellTable.H"
 #include "IOMap.H"
 #include "OFstream.H"
-#include "wordList.H"
-#include "stringOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const char* const Foam::cellTable::defaultMaterial_ = "fluid";
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -119,12 +118,6 @@ Foam::cellTable::cellTable
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellTable::~cellTable()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::label Foam::cellTable::append(const dictionary& dict)
@@ -166,20 +159,20 @@ Foam::Map<Foam::word> Foam::cellTable::names() const
 
 Foam::Map<Foam::word> Foam::cellTable::names
 (
-    const UList<wordRe>& patterns
+    const wordRes& patterns
 ) const
 {
     Map<word> lookup;
 
     forAllConstIter(Map<dictionary>, *this, iter)
     {
-        word lookupName = iter().lookupOrDefault<word>
+        const word lookupName = iter().lookupOrDefault<word>
         (
             "Label",
             "cellTable_" + Foam::name(iter.key())
         );
 
-        if (stringOps::match(patterns, lookupName))
+        if (patterns.match(lookupName))
         {
             lookup.insert(iter.key(), lookupName);
         }
@@ -517,13 +510,13 @@ void Foam::cellTable::combine(const dictionary& mapDict, labelList& tableIds)
     bool remap = false;
     forAllConstIter(dictionary, mapDict, iter)
     {
-        wordReList patterns(iter().stream());
+        wordRes patterns(iter().stream());
 
         // find all matches
         Map<word> matches;
         forAllConstIter(Map<word>, origNames, namesIter)
         {
-            if (stringOps::match(patterns, namesIter()))
+            if (patterns.match(namesIter()))
             {
                 matches.insert(namesIter.key(), namesIter());
             }

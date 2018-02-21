@@ -31,7 +31,6 @@ Description
 #include "List.H"
 #include "Tuple2.H"
 #include "keyType.H"
-#include "wordRe.H"
 #include "wordRes.H"
 #include "predicates.H"
 
@@ -108,7 +107,7 @@ int main(int argc, char *argv[])
 
     wordRes wrelist(wordrelist);
 
-    Info<< "re-list:" << wrelist() << endl;
+    Info<< "re-list:" << wrelist << endl;
     Info<< "match this: " << wrelist("this") << endl;
     Info<< "match xyz: "  << wrelist("xyz") << endl;
     Info<< "match zyx: "  << wrelist("zyx") << endl;

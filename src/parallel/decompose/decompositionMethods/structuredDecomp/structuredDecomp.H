@@ -36,6 +36,7 @@ SourceFiles
 #define structuredDecomp_H
 
 #include "decompositionMethod.H"
+#include "wordRes.H"
 
 namespace Foam
 {
@@ -52,7 +53,7 @@ class structuredDecomp
 
         dictionary methodDict_;
 
-        wordReList patches_;
+        wordRes patches_;
 
         autoPtr<decompositionMethod> method_;
 
@@ -77,8 +78,7 @@ public:
 
 
     //- Destructor
-    virtual ~structuredDecomp()
-    {}
+    virtual ~structuredDecomp() = default;
 
 
     // Member Functions

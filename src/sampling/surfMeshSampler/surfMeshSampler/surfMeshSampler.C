@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,12 +121,6 @@ Foam::surfMeshSampler::surfMeshSampler
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfMeshSampler::~surfMeshSampler()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::surfMeshSampler::create() const
@@ -177,13 +171,13 @@ const Foam::surfMesh& Foam::surfMeshSampler::surface() const
 
 Foam::label Foam::surfMeshSampler::sample
 (
-    const UList<word>& fields
+    const UList<word>& fieldNames
 ) const
 {
     label count = 0;
-    forAll(fields, fieldi)
+    for (const word& fieldName : fieldNames)
     {
-        if (sample(fields[fieldi]))
+        if (sample(fieldName))
         {
             ++count;
         }
@@ -193,7 +187,7 @@ Foam::label Foam::surfMeshSampler::sample
 }
 
 
-Foam::label Foam::surfMeshSampler::write(const wordReList& select) const
+Foam::label Foam::surfMeshSampler::write(const wordRes& select) const
 {
     label count =
     (

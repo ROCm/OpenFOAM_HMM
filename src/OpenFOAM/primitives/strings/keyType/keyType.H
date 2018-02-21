@@ -141,7 +141,8 @@ public:
 
     // Member operators
 
-        //- Perform smart match on text
+        //- Perform smart match on text, as per match()
+        //  Allows use as a predicate.
         inline bool operator()(const std::string& text) const;
 
 

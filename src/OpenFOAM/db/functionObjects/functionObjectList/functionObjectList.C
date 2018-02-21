@@ -29,10 +29,8 @@ License
 #include "profiling.H"
 #include "argList.H"
 #include "timeControlFunctionObject.H"
-//#include "IFstream.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
-#include "wordRes.H"
 #include "Tuple2.H"
 #include "etcFiles.H"
 #include "IOdictionary.H"
@@ -468,12 +466,6 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjectList::~functionObjectList()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::functionObjectList::resetState()
@@ -623,7 +615,7 @@ bool Foam::functionObjectList::execute(const label subIndex)
 
 bool Foam::functionObjectList::execute
 (
-    const wordRes& functionNames,
+    const UList<wordRe>& functionNames,
     const label subIndex
 )
 {
@@ -635,7 +627,7 @@ bool Foam::functionObjectList::execute
         {
             functionObject& funcObj = operator[](obji);
 
-            if (functionNames.match(funcObj.name()))
+            if (stringOps::match(functionNames, funcObj.name()))
             {
                 ok = funcObj.execute(subIndex) && ok;
             }

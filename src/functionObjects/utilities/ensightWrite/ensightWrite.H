@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,6 @@ SourceFiles
 #include "ensightCase.H"
 #include "ensightMesh.H"
 
-#include "wordReList.H"
 #include "interpolation.H"
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -121,7 +120,7 @@ class ensightWrite
         ensightCase::options caseOpts_;
 
         //- Name of fields to process
-        wordReList selectFields_;
+        wordRes selectFields_;
 
         //- Output directory name
         fileName dirName_;

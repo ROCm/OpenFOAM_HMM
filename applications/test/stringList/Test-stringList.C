@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         "okkkey",
     };
 
-    wordReList reLst(IStringStream("( okey \"[hy]e+.*\" )")());
+    wordRes reLst(IStringStream("( okey \"[hy]e+.*\" )")());
 
     Info<< "stringList " << strLst << nl;
 

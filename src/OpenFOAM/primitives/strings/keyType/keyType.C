@@ -21,9 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
-Description
-    Istream constructor and IOstream operators for keyType.
-
 \*---------------------------------------------------------------------------*/
 
 #include "keyType.H"
@@ -52,12 +49,10 @@ bool Foam::keyType::match(const std::string& text, bool literal) const
 {
     if (literal || !isPattern_)
     {
-        return !compare(text);  // Compare as literal string
+        return !compare(text);          // Compare as literal string
     }
-    else
-    {
-        return regExp(*this).match(text);  // Match as regex
-    }
+
+    return regExp(*this).match(text);   // Match as regex
 }
 
 

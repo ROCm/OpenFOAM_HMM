@@ -213,7 +213,8 @@ public:
             const char quote = '\\'
         );
 
-        //- True when strings match literally
+        //- Test for equality.
+        //  \return True when strings match literally.
         inline bool match(const std::string& text) const;
 
         //- Avoid masking the normal std::string replace
@@ -289,7 +290,7 @@ public:
 
     // Member Operators
 
-        //- Match text
+        //- Test for equality. Allows use as a predicate.
         //  \return True when strings match literally.
         inline bool operator()(const std::string& text) const;
 

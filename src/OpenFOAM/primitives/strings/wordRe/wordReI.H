@@ -229,10 +229,8 @@ inline bool Foam::wordRe::match(const std::string& text, bool literal) const
     {
         return !compare(text);  // Compare as literal string
     }
-    else
-    {
-        return re_.match(text); // Match as regex
-    }
+
+    return re_.match(text);     // Match as regex
 }
 
 

@@ -79,8 +79,7 @@ Usage
 #include "tensorIOField.H"
 #include "passiveParticleCloud.H"
 #include "faceSet.H"
-#include "stringOps.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 #include "meshSubsetHelper.H"
 #include "readFields.H"
@@ -117,7 +116,7 @@ void print(Ostream& os, const wordList& flds)
 labelList getSelectedPatches
 (
     const polyBoundaryMesh& patches,
-    const List<wordRe>& excludePatches  //HashSet<word>& excludePatches
+    const wordRes& excludePatches
 )
 {
     DynamicList<label> patchIDs(patches.size());
@@ -137,7 +136,7 @@ labelList getSelectedPatches
             Info<< "    discarding empty/processor patch " << patchi
                 << " " << pp.name() << endl;
         }
-        else if (stringOps::match(excludePatches, pp.name()))
+        else if (excludePatches.match(pp.name()))
         {
             Info<< "    excluding patch " << patchi
                 << " " << pp.name() << endl;
@@ -227,11 +226,9 @@ int main(int argc, char *argv[])
             << "Outputting cell values only" << nl << endl;
     }
 
-    List<wordRe> excludePatches;
-    if (args.found("excludePatches"))
+    wordRes excludePatches;
+    if (args.readListIfPresent<wordRe>("excludePatches", excludePatches))
     {
-        args.lookup("excludePatches")() >> excludePatches;
-
         Info<< "Not including patches " << excludePatches << nl << endl;
     }
 

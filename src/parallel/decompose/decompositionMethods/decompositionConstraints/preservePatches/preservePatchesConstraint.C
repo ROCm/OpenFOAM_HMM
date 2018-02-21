@@ -69,7 +69,7 @@ preservePatchesConstraint
 Foam::decompositionConstraints::preservePatchesConstraint::
 preservePatchesConstraint
 (
-    const wordReList& patches
+    const UList<wordRe>& patches
 )
 :
     decompositionConstraint(dictionary(), typeName),

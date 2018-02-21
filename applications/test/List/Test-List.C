@@ -34,7 +34,7 @@ See also
 
 #include "OSspecific.H"
 #include "argList.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 #include "IOstreams.H"
 #include "StringStream.H"
@@ -446,20 +446,11 @@ int main(int argc, char *argv[])
         Info<<"read float " << xxx << endl;
     }
 
-    if (args.found("reList"))
-    {
-        reLst = args.readList<wordRe>("reList");
-    }
+    args.readListIfPresent<wordRe>("reList", reLst);
+    args.readListIfPresent<word>("wordList", wLst);
 
-    if (args.found("wordList"))
+    if (args.readListIfPresent<string>("stringList", sLst))
     {
-        wLst = args.readList<word>("wordList");
-    }
-
-    if (args.found("stringList"))
-    {
-        sLst = args.readList<string>("stringList");
-
         printMyString(sLst);
     }
 

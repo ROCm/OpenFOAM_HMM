@@ -78,7 +78,7 @@ SourceFiles
 
 #include "subLoopTime.H"
 #include "dictionary.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,14 +124,14 @@ protected:
         dictionary convergenceDict_;
 
         //- Function object names to fire during the loop (at executeInterval)
-        List<wordRe> onLoop_;
+        wordRes onLoop_;
 
         //- Function object names to fire on convergence
-        List<wordRe> onConverged_;
+        wordRes onConverged_;
 
         //- Function object names to fire when the loop exits without
         //- convergence
-        List<wordRe> onEnd_;
+        wordRes onEnd_;
 
         //- Convergence tests passed
         bool converged_;

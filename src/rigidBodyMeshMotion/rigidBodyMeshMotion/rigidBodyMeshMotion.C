@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ Foam::rigidBodyMeshMotion::bodyMesh::bodyMesh
 :
     name_(name),
     bodyID_(bodyID),
-    patches_(wordReList(dict.lookup("patches"))),
+    patches_(dict.lookup("patches")),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
     di_(readScalar(dict.lookup("innerDistance"))),
     do_(readScalar(dict.lookup("outerDistance"))),
@@ -113,7 +113,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
         )
       : coeffDict()
     ),
-    test_(coeffDict().lookupOrDefault<Switch>("test", false)),
+    test_(coeffDict().lookupOrDefault("test", false)),
     rhoInf_(1.0),
     rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
     ramp_(nullptr),
@@ -206,12 +206,6 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
         //scale.write();
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::rigidBodyMeshMotion::~rigidBodyMeshMotion()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -202,7 +202,7 @@ public:
 
         //- Smart match as regular expression or as a string.
         //  Optionally force a literal match only
-        inline bool match(const std::string& text, bool literal = false) const;
+        inline bool match(const std::string& text, bool literal=false) const;
 
 
       // Miscellaneous
@@ -217,6 +217,7 @@ public:
     // Member operators
 
         //- Perform smart match on text, as per match()
+        //  Allows use as a predicate.
         inline bool operator()(const std::string& text) const;
 
 

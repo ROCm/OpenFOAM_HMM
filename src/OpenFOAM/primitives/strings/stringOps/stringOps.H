@@ -63,12 +63,10 @@ namespace stringOps
     std::string::size_type count(const char* str, const char c);
 
     //- Return true if text matches one of the regular expressions.
-    //  Simply forwards a wordReList to a wordRes for the matching.
-    inline bool match(const wordReList& patterns, const std::string& text)
+    inline bool match(const UList<wordRe>& patterns, const std::string& text)
     {
-        return wordRes(patterns).match(text);
+        return wordRes::matcher(patterns)(text);
     }
-
 
     //- Expand occurences of variables according to the mapping
     //  Expansion includes:

@@ -56,8 +56,8 @@ Foam::structuredRenumber::structuredRenumber
     patches_(methodDict_.lookup("patches")),
     nLayers_(methodDict_.lookupOrDefault<label>("nLayers", labelMax)),
     depthFirst_(methodDict_.lookup("depthFirst")),
-    method_(renumberMethod::New(methodDict_)),
-    reverse_(methodDict_.lookup("reverse"))
+    reverse_(methodDict_.lookup("reverse")),
+    method_(renumberMethod::New(methodDict_))
 {}
 
 

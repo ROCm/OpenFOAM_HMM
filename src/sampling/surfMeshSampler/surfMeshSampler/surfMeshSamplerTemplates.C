@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -106,19 +106,19 @@ Foam::surfMeshSampler::getOrCreateSurfField
 template<class Type>
 Foam::label Foam::surfMeshSampler::writeFields
 (
-    const wordReList& select
+    const wordRes& select
 ) const
 {
     typedef DimensionedField<Type, surfGeoMesh> SurfFieldType;
     const surfMesh& s = surface();
 
-    wordList names = s.sortedNames<SurfFieldType>(select);
-    forAll(names, namei)
+    const wordList fieldNames = s.sortedNames<SurfFieldType>(select);
+    for (const word& fieldName : fieldNames)
     {
-        s.lookupObject<SurfFieldType>(names[namei]).write();
+        s.lookupObject<SurfFieldType>(fieldName).write();
     }
 
-    return names.size();
+    return fieldNames.size();
 }
 
 

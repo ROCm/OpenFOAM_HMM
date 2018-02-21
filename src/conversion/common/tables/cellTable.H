@@ -64,7 +64,8 @@ SourceFiles
 #include "Map.H"
 #include "dictionary.H"
 #include "labelList.H"
-#include "wordReList.H"
+#include "wordList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,7 +91,7 @@ class cellTable
         Map<label> zoneMap() const;
 
         //- A contiguous list of cellTable names
-        List<word> namesList() const;
+        wordList namesList() const;
 
         //- Add required entries - MaterialType
         void addDefaults();
@@ -98,7 +99,7 @@ class cellTable
         void setEntry(const label id, const word& keyWord, const word& value);
 
         //- Disallow default bitwise copy construct
-        cellTable(const cellTable&);
+        cellTable(const cellTable&) = delete;
 
 
 public:
@@ -118,7 +119,7 @@ public:
 
 
     //- Destructor
-    ~cellTable();
+    ~cellTable() = default;
 
 
     // Member Functions
@@ -138,7 +139,7 @@ public:
         Map<word> names() const;
 
         //- Return a Map of (id => names) selected by patterns
-        Map<word> names(const UList<wordRe>& patterns) const;
+        Map<word> names(const wordRes& patterns) const;
 
         //- Return a Map of (id => name) for materialType
         //  (fluid | solid | shell)
@@ -201,7 +202,7 @@ public:
 
         //- Combine tableIds together
         //  each dictionary entry is a wordList
-        void combine(const dictionary&, labelList& tableIds);
+        void combine(const dictionary& mapDict, labelList& tableIds);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

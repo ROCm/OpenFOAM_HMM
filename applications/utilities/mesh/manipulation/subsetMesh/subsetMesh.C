@@ -414,7 +414,7 @@ int main(int argc, char *argv[])
     }
     else if (args.found("patches"))
     {
-        const wordReList patchNames(args.opt<wordReList>("patches"));
+        const wordRes patchNames(args.readList<wordRe>("patches"));
 
         exposedPatchIDs = mesh.boundaryMesh().patchSet(patchNames).sortedToc();
 

@@ -200,17 +200,15 @@ int main(int argc, char *argv[])
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
     word sourceRegion = fvMesh::defaultRegion;
-    if (args.found("sourceRegion"))
+    if (args.readIfPresent("sourceRegion", sourceRegion))
     {
-        sourceRegion = args["sourceRegion"];
         Info<< "Source region: " << sourceRegion << endl;
     }
 
     Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
     word targetRegion = fvMesh::defaultRegion;
-    if (args.found("targetRegion"))
+    if (args.readIfPresent("targetRegion", targetRegion))
     {
-        targetRegion = args["targetRegion"];
         Info<< "Target region: " << targetRegion << endl;
     }
 
@@ -242,10 +240,8 @@ int main(int argc, char *argv[])
     }
 
     // Optionally override
-    if (args.found("patchMapMethod"))
+    if (args.readIfPresent("patchMapMethod", patchMapMethod))
     {
-        patchMapMethod = args["patchMapMethod"];
-
         Info<< "Patch mapping method: " << patchMapMethod << endl;
     }
 
@@ -265,10 +261,7 @@ int main(int argc, char *argv[])
     }
 
     HashSet<word> selectedFields;
-    if (args.found("fields"))
-    {
-        args.lookup("fields")() >> selectedFields;
-    }
+    args.readIfPresent("fields", selectedFields);
 
     const bool noLagrangian = args.found("noLagrangian");
 

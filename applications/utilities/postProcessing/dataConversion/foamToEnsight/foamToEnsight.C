@@ -127,20 +127,20 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "patches",
-        "wordReList",
+        "wordRes",
         "specify particular patches to write - eg '(outlet \"inlet.*\")'. "
         "An empty list suppresses writing the internalMesh."
     );
     argList::addOption
     (
         "faceZones",
-        "wordReList",
+        "wordRes",
         "specify faceZones to write - eg '( slice \"mfp-.*\" )'."
     );
     argList::addOption
     (
         "fields",
-        "wordReList",
+        "wordRes",
         "specify fields to export (all by default) - eg '( \"U.*\" )'."
     );
     argList::addOption
@@ -249,11 +249,8 @@ int main(int argc, char *argv[])
     //
     const bool noLagrangian = args.found("noLagrangian");
 
-    wordReList fieldPatterns;
-    if (args.found("fields"))
-    {
-        fieldPatterns = args.readList<wordRe>("fields");
-    }
+    wordRes fieldPatterns;
+    args.readListIfPresent<wordRe>("fields", fieldPatterns);
 
     word cellZoneName;
     if (args.readIfPresent("cellZone", cellZoneName))

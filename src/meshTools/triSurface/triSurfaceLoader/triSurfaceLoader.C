@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,12 +65,6 @@ Foam::triSurfaceLoader::triSurfaceLoader(const Time& runTime)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::triSurfaceLoader::~triSurfaceLoader()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::triSurfaceLoader::readDir()
@@ -85,9 +79,8 @@ Foam::label Foam::triSurfaceLoader::readDir()
     // (eg, files with/without .gz)
     wordHashSet names(2*files.size());
 
-    forAll(files, filei)
+    for (const fileName& f : files)
     {
-        const fileName& f = files[filei];
         if (triSurface::canRead(f))
         {
             names.insert(f.name());
@@ -151,7 +144,7 @@ Foam::label Foam::triSurfaceLoader::select(const wordRe& mat)
 }
 
 
-Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
+Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
 {
     // Need to be more careful when select.
     // - preserve same order as the input matcher itself
@@ -167,18 +160,15 @@ Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
     wordHashSet hashedMissing(2*matcher.size());
 
     // Exact matches must exist
-    forAll(matcher, i)
+    for (const wordRe& mat : matcher)
     {
-        const wordRe& mat = matcher[i];
-
         if (mat.isPattern())
         {
             labelList indices = findMatchingStrings(mat, available_);
             sort(indices);
 
-            forAll(indices, j)
+            for (const label idx : indices)
             {
-                const label idx = indices[j];
                 if (hashedFound.insert(idx))
                 {
                     foundIds.append(idx);

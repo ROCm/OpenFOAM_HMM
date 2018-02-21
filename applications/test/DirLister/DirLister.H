@@ -55,7 +55,7 @@ Description
     items:
     \code
     {
-        wordReList matchProcs
+        wordRes matchProcs
         {
             wordRe("processors"),
             wordRe("processor\\d+", wordRe::REGEX)
@@ -64,7 +64,7 @@ Description
         for
         (
             const word& item
-          : DirLister::dirs(".").where(wordRes(matchProcs))
+          : DirLister::dirs(".").where(matchProcs)
         )
         {
            Info<< "processor dir: " << item << nl;
@@ -75,7 +75,7 @@ Description
     methods:
     \code
     {
-        wordReList matchProcs
+        wordRes matchProcs
         {
             wordRe("processor[0-9][0-9]*", wordRe::REGEX),
             wordRe("processors")
@@ -83,7 +83,7 @@ Description
 
         fileNameList procDirs
         (
-            DirLister::dirs(".").sorted<fileName>(wordRes(matchProcs))
+            DirLister::dirs(".").sorted<fileName>(matchProcs)
         );
     }
     \endcode

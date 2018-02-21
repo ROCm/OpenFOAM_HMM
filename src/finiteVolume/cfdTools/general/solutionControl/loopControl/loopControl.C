@@ -25,7 +25,6 @@ License
 
 #include "loopControl.H"
 #include "fvSolution.H"
-#include "wordRes.H"
 #include "solutionControl.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

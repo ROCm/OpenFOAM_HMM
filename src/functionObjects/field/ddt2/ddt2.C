@@ -71,10 +71,8 @@ bool Foam::functionObjects::ddt2::checkFormatName(const word& str)
 
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -116,16 +114,10 @@ Foam::functionObjects::ddt2::ddt2
     resultName_(word::null),
     blacklist_(),
     results_(),
-    mag_(dict.lookupOrDefault<Switch>("mag", false))
+    mag_(dict.lookupOrDefault("mag", false))
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::ddt2::~ddt2()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -142,10 +134,9 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
         return false;
     }
 
-    selectFields_ = wordRes::uniq
-    (
-        wordReList(dict.lookup("fields"))
-    );
+    dict.lookup("fields") >> selectFields_;
+    selectFields_.uniq();
+
     Info<< type() << " fields: " << selectFields_ << nl;
 
     resultName_ = dict.lookupOrDefault<word>
@@ -166,11 +157,9 @@ bool Foam::functionObjects::ddt2::read(const dictionary& dict)
 
         return true;
     }
-    else
-    {
-        blacklist_.clear();
-        return false;
-    }
+
+    blacklist_.clear();
+    return false;
 }
 
 
@@ -182,10 +171,9 @@ bool Foam::functionObjects::ddt2::execute()
     DynamicList<word> missing(selectFields_.size());
     DynamicList<word> ignored(selectFields_.size());
 
-    // check exact matches first
-    forAll(selectFields_, i)
+    // Check exact matches first
+    for (const wordRe& select : selectFields_)
     {
-        const wordRe& select = selectFields_[i];
         if (!select.isPattern())
         {
             const word& fieldName = static_cast<const word&>(select);
@@ -201,9 +189,9 @@ bool Foam::functionObjects::ddt2::execute()
         }
     }
 
-    forAllConstIter(wordHashSet, candidates, iter)
+    for (const word& fieldName : candidates)
     {
-        process(iter.key());
+        process(fieldName);
     }
 
     if (missing.size())
@@ -230,10 +218,8 @@ bool Foam::functionObjects::ddt2::write()
 
     // Consistent output order
     const wordList outputList = results_.sortedToc();
-    forAll(outputList, i)
+    for (const word& fieldName : outputList)
     {
-        const word& fieldName = outputList[i];
-
         if (foundObject<regIOobject>(fieldName))
         {
             const regIOobject& io = lookupObject<regIOobject>(fieldName);

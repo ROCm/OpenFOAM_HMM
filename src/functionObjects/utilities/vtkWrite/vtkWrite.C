@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -106,7 +106,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     // output fields
     //
     dict.lookup("fields") >> selectFields_;
-    wordRes::inplaceUniq(selectFields_);
+    selectFields_.uniq();
 
     return true;
 }
@@ -137,7 +137,7 @@ bool Foam::functionObjects::vtkWrite::write()
     if (Pstream::parRun())
     {
         // Strip off leading casename, leaving just processor_DDD ending.
-        string::size_type i = vtkName.rfind("processor");
+        const auto i = vtkName.rfind("processor");
 
         if (i != string::npos)
         {

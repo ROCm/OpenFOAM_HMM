@@ -81,12 +81,11 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     // Find set of patches from the list of regular expressions provided
-    const wordReList patches((IStringStream(args[1])()));
-    const labelHashSet patchSet(mesh.boundaryMesh().patchSet(patches));
-
+    const wordRes patches(args.readList<wordRe>(1));
     const scalar weight  = args.read<scalar>(2);
     const bool overwrite = args.found("overwrite");
 
+    const labelHashSet patchSet(mesh.boundaryMesh().patchSet(patches));
     if (!patchSet.size())
     {
         FatalErrorInFunction

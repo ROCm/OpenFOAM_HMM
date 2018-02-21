@@ -135,8 +135,9 @@ Foam::heatTransferCoeffModel::heatTransferCoeffModel
 
 bool Foam::heatTransferCoeffModel::read(const dictionary& dict)
 {
-    const wordReList patchNames(dict.lookup("patches"));
-    patchSet_ = mesh_.boundaryMesh().patchSet(patchNames);
+    patchSet_ =
+        mesh_.boundaryMesh().patchSet(wordReList(dict.lookup("patches")));
+
     dict.readIfPresent("qr", qrName_);
 
     return true;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -141,7 +141,7 @@ void Foam::ensightMesh::correct()
         labelList matched;
 
         bool useAll = true;
-        const wordReList& matcher = option().patchSelection();
+        const wordRes& matcher = option().patchSelection();
         if (notNull(matcher))
         {
             nParts = 0; // no internalMesh
@@ -151,7 +151,7 @@ void Foam::ensightMesh::correct()
                 useAll = false;
                 matched = findMatchingStrings
                 (
-                    wordRes(matcher),
+                    matcher,
                     patchNames
                 );
             }
@@ -245,12 +245,12 @@ void Foam::ensightMesh::correct()
             }
         }
 
-        const wordReList& matcher = option().faceZoneSelection();
+        const wordRes& matcher = option().faceZoneSelection();
 
         wordList selectZones = mesh_.faceZones().names();
         inplaceSubsetMatchingStrings
         (
-            wordRes(matcher),
+            matcher,
             selectZones
         );
 

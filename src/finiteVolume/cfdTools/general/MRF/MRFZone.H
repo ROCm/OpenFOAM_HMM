@@ -85,7 +85,7 @@ class MRFZone
         //- Cell zone ID
         label cellZoneID_;
 
-        const wordReList excludedPatchNames_;
+        const wordRes excludedPatchNames_;
 
         labelList excludedPatchLabels_;
 

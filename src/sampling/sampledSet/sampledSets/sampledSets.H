@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,7 +43,7 @@ SourceFiles
 #include "interpolation.H"
 #include "coordSet.H"
 #include "writer.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -175,7 +175,7 @@ class sampledSets
       // Read from dictonary
 
         //- Names of fields to sample
-        wordReList fieldSelection_;
+        wordRes fieldSelection_;
 
         //- Interpolation scheme to use
         word interpolationScheme_;
@@ -273,7 +273,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledSets();
+    virtual ~sampledSets() = default;
 
 
     // Member Functions

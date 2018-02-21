@@ -55,7 +55,7 @@ namespace Foam
 // Forward declarations
 class argList;
 class mapPolyMesh;
-class wordRes;
+class wordRe;
 
 /*---------------------------------------------------------------------------*\
                      Class functionObjectList Declaration
@@ -160,7 +160,7 @@ public:
 
 
     //- Destructor
-    ~functionObjectList();
+    ~functionObjectList() = default;
 
 
     // Member Functions
@@ -270,7 +270,7 @@ public:
         //      execute
         //  \param subIndex an execution sub-index corresponding to a
         //      sub-cycle or something similar
-        bool execute(const wordRes& functionNames, const label subIndex);
+        bool execute(const UList<wordRe>& functionNames, const label subIndex);
 
         //- Called when Time::run() determines that the time-loop exits
         bool end();

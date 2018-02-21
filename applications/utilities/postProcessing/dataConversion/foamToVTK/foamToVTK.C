@@ -156,7 +156,7 @@ Note
 #include "faceZoneMesh.H"
 #include "Cloud.H"
 #include "passiveParticle.H"
-#include "stringOps.H"
+#include "wordRes.H"
 #include "areaFields.H"
 #include "meshSubsetHelper.H"
 #include "readFields.H"
@@ -412,7 +412,7 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "excludePatches",
-        "wordReList",
+        "wordRes",
         "a list of patches to exclude - eg '( inlet \".*Wall\" )' "
     );
     argList::addBoolOption
@@ -474,11 +474,9 @@ int main(int argc, char *argv[])
 
     const bool allPatches = args.found("allPatches");
 
-    wordReList excludePatches;
-    if (args.found("excludePatches"))
+    wordRes excludePatches;
+    if (args.readListIfPresent<wordRe>("excludePatches", excludePatches))
     {
-        args.lookup("excludePatches")() >> excludePatches;
-
         Info<< "Not including patches " << excludePatches << nl << endl;
     }
 
@@ -499,7 +497,7 @@ int main(int argc, char *argv[])
     else if (Pstream::parRun())
     {
         // Strip off leading casename, leaving just processor_DDD ending.
-        string::size_type i = vtkName.rfind("processor");
+        const auto i = vtkName.rfind("processor");
 
         if (i != string::npos)
         {
@@ -1284,7 +1282,7 @@ int main(int argc, char *argv[])
             {
                 const polyPatch& pp = patches[patchi];
 
-                if (stringOps::match(excludePatches, pp.name()))
+                if (excludePatches.match(pp.name()))
                 {
                     // Skip excluded patch
                     continue;

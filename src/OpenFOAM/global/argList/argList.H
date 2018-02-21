@@ -160,6 +160,11 @@ class argList
             const string& str
         );
 
+        //- Read a List of values from ITstream,
+        //- treating a single entry like a list of size 1.
+        template<class T>
+        static inline void readList(ITstream& is, List<T>& list);
+
         //- Get rootPath_ / globalCase_ from one of the following forms
         //   * [-case dir]
         //   * cwd
@@ -307,6 +312,11 @@ public:
         template<class T>
         inline T read(const label index) const;
 
+        //- Read a value from the argument at index.
+        //  Index 1 is the first non-option argument.
+        template<class T>
+        inline List<T> readList(const label index) const;
+
         //- Return true if the named option is found
         inline bool found(const word& optName) const;
 
@@ -353,6 +363,12 @@ public:
         //- treating a single entry like a list of size 1.
         template<class T>
         inline List<T> readList(const word& optName) const;
+
+        //- If named option is present, read a List of values
+        //- treating a single entry like a list of size 1.
+        //  \return true if the named option was found.
+        template<class T>
+        inline bool readListIfPresent(const word& optName, List<T>& list) const;
 
 
     // Older style access (including 1712 release)

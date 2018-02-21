@@ -43,26 +43,26 @@ Foam::label Foam::caseInfo::findPatchConditionID
     // Assign condition according to last condition applied, wins
     forAllReverse(conditionNames_, conditionI)
     {
-        const wordReList& patchNames = patchNames_[conditionI];
+        const wordRes& patchNames = patchNames_[conditionI];
 
-        forAll(patchNames, nameI)
+        for (const wordRe& select : patchNames)
         {
-            if (patchNames[nameI] == patchName)
+            if (select == patchName)
             {
-                // Check for explicit match
+                // Literal match
                 return conditionI;
             }
-            else if (patchNames[nameI].match(patchName))
+            else if (select.match(patchName))
             {
-                // Check wildcards
+                // Regex match
                 return conditionI;
             }
             else
             {
                 // Check for group match
-                forAll(patchGroups, groupI)
+                for (const word& groupName : patchGroups)
                 {
-                    if (patchNames[nameI] == patchGroups[groupI])
+                    if (select == groupName)
                     {
                         return conditionI;
                     }
@@ -160,7 +160,7 @@ void Foam::caseInfo::checkPatches
 }
 
 
-const Foam::List<Foam::wordReList>& Foam::caseInfo::patchNames() const
+const Foam::List<Foam::wordRes>& Foam::caseInfo::patchNames() const
 {
     return patchNames_;
 }

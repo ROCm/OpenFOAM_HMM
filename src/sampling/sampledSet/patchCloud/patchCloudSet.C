@@ -314,10 +314,4 @@ Foam::patchCloudSet::patchCloudSet
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchCloudSet::~patchCloudSet()
-{}
-
-
 // ************************************************************************* //

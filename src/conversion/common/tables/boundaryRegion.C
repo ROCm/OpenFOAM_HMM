@@ -26,7 +26,6 @@ License
 #include "boundaryRegion.H"
 #include "IOMap.H"
 #include "OFstream.H"
-#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -47,12 +46,6 @@ Foam::boundaryRegion::boundaryRegion
 {
     readDict(registry, name, instance);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::boundaryRegion::~boundaryRegion()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
@@ -96,20 +89,20 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names() const
 
 Foam::Map<Foam::word> Foam::boundaryRegion::names
 (
-    const UList<wordRe>& patterns
+    const wordRes& patterns
 ) const
 {
     Map<word> lookup;
 
     forAllConstIter(Map<dictionary>, *this, iter)
     {
-        word lookupName = iter().lookupOrDefault<word>
+        const word lookupName = iter().lookupOrDefault<word>
         (
             "Label",
             "boundaryRegion_" + Foam::name(iter.key())
         );
 
-        if (stringOps::match(patterns, lookupName))
+        if (patterns.match(lookupName))
         {
             lookup.insert(iter.key(), lookupName);
         }

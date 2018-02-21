@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
     forAll(times, timei)
     {
         word instance;
-        if (args.found("instance"))
+        if (args.readIfPresent("instance", instance))
         {
             if (times.size() > 1)
             {
@@ -454,8 +454,6 @@ int main(int argc, char *argv[])
                     << "Multiple times selected with 'instance' option"
                     << exit(FatalError);
             }
-
-            args.lookup("instance")() >> instance;
         }
         else
         {

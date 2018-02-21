@@ -36,6 +36,7 @@ SourceFiles
 #define inversePointDistanceDiffusivity_H
 
 #include "uniformDiffusivity.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class inversePointDistanceDiffusivity Declaration
+               Class inversePointDistanceDiffusivity Declaration
 \*---------------------------------------------------------------------------*/
 
 class inversePointDistanceDiffusivity
@@ -53,7 +54,7 @@ class inversePointDistanceDiffusivity
     // Private data
 
         //- Patches selected to base the distance on
-        wordReList patchNames_;
+        wordRes patchNames_;
 
 
     // Private Member Functions
@@ -78,7 +79,7 @@ public:
 
 
     //- Destructor
-    virtual ~inversePointDistanceDiffusivity();
+    virtual ~inversePointDistanceDiffusivity() = default;
 
 
     // Member Functions

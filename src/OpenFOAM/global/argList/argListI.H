@@ -25,6 +25,25 @@ License
 
 #include "argList.H"
 
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+inline void Foam::argList::readList(ITstream& is, List<T>& list)
+{
+    if (is.size() == 1)
+    {
+        // Single token - treat like List with one entry
+        list.setSize(1);
+        is >> list[0];
+    }
+    else
+    {
+        is >> list;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::word& Foam::argList::executable() const
@@ -277,25 +296,45 @@ inline T Foam::argList::lookupOrDefault
 
 
 template<class T>
-inline Foam::List<T> Foam::argList::readList(const word& optName) const
+inline Foam::List<T> Foam::argList::readList(const label index) const
 {
+    ITstream is(Foam::name(index), args_[index]);
+
     List<T> list;
-
-    ITstream is(optName, options_[optName]);
-
-    if (is.size() == 1)
-    {
-        // Single token - treated like list with one entry
-        list.setSize(1);
-
-        is >> list[0];
-    }
-    else
-    {
-        is >> list;
-    }
+    readList(is, list);
 
     return list;
+}
+
+
+template<class T>
+inline Foam::List<T> Foam::argList::readList(const word& optName) const
+{
+    ITstream is(optName, options_[optName]);
+
+    List<T> list;
+    readList(is, list);
+
+    return list;
+}
+
+
+template<class T>
+inline bool Foam::argList::readListIfPresent
+(
+    const word& optName,
+    List<T>& list
+) const
+{
+    if (found(optName))
+    {
+        ITstream is(optName, options_[optName]);
+        readList(is, list);
+
+        return true;
+    }
+
+    return false;
 }
 
 

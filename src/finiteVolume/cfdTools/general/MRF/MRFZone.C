@@ -249,7 +249,7 @@ Foam::MRFZone::MRFZone
     cellZoneID_(),
     excludedPatchNames_
     (
-        wordReList(coeffs_.lookupOrDefault("nonRotatingPatches", wordReList()))
+        coeffs_.lookupOrDefault<wordRes>("nonRotatingPatches", wordRes())
     ),
     origin_(coeffs_.lookup("origin")),
     axis_(coeffs_.lookup("axis")),

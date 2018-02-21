@@ -235,10 +235,10 @@ int main(int argc, char *argv[])
         points = transform(quat, points);
     }
 
-    if (args.found("scale"))
+    List<scalar> scaling;
+    if (args.readListIfPresent("scale", scaling))
     {
-        // Use readList to handle single or multiple values
-        const List<scalar> scaling = args.readList<scalar>("scale");
+        // readList handles single or multiple values
 
         if (scaling.size() == 1)
         {

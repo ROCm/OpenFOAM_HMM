@@ -64,10 +64,4 @@ Foam::functionObjects::fvMeshFunctionObject::fvMeshFunctionObject
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::fvMeshFunctionObject::~fvMeshFunctionObject()
-{}
-
-
 // ************************************************************************* //

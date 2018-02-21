@@ -103,7 +103,7 @@ public:
 
 
     //- Destructor
-    virtual ~patchSeedSet();
+    virtual ~patchSeedSet() = default;
 };
 
 

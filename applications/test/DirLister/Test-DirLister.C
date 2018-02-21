@@ -144,16 +144,15 @@ int main(int argc, char *argv[])
             << "List files - filtered" << nl
             << "~~~~~~~~~~" << nl;
 
-        wordReList relist
-        {
+        wordRes relist
+        ({
             wordRe("processors"),
             wordRe("processor[0-9][0-9]*", wordRe::REGEX)
-        };
-        wordRes matcher(relist);
+        });
 
-        Info<<"matcher: " << flatOutput(matcher) << endl;
+        Info<<"matcher: " << flatOutput(relist) << endl;
 
-        for (const word& item : DirLister::dirs(".").where(wordRes(relist)))
+        for (const word& item : DirLister::dirs(".").where(relist))
         {
             Info<< "=>    " << item << nl;
         }
@@ -161,7 +160,7 @@ int main(int argc, char *argv[])
         Info<< "dirList: "
             << flatOutput
                (
-                   DirLister::dirs(".").sorted<fileName>(wordRes(relist))
+                   DirLister::dirs(".").sorted<fileName>(relist)
                ) << nl;
     }
 

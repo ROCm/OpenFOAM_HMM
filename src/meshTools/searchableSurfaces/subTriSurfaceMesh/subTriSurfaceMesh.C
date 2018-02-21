@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ Foam::wordList Foam::subTriSurfaceMesh::patchNames(const triSurface& s)
 Foam::labelList Foam::subTriSurfaceMesh::selectedRegions
 (
     const triSurface& s,
-    const wordReList& regionNames
+    const UList<wordRe>& regionNames
 )
 {
     const wordList names(patchNames(s));
@@ -92,7 +92,7 @@ Foam::triSurface Foam::subTriSurfaceMesh::subset
     const triSurfaceMesh& s =
         io.db().lookupObject<triSurfaceMesh>(subGeomName);
 
-    const wordReList regionNames(dict.lookup("patches"));
+    const wordRes regionNames(dict.lookup("patches"));
 
     labelList regionMap(selectedRegions(s, regionNames));
 
@@ -134,12 +134,6 @@ Foam::subTriSurfaceMesh::subTriSurfaceMesh
 )
 :
     triSurfaceMesh(io, subset(io, dict))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::subTriSurfaceMesh::~subTriSurfaceMesh()
 {}
 
 
