@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "StandardWallInteraction.H"
+#include "processorPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -42,10 +43,10 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
     ),
     e_(0.0),
     mu_(0.0),
-    nEscape_(cloud.mesh().boundary().size()),
-    massEscape_(nEscape_.size()),
-    nStick_(nEscape_.size()),
-    massStick_(nEscape_.size()),
+    nEscape_(0),
+    massEscape_(0),
+    nStick_(0),
+    massStick_(0),
     outputByInjectorId_(this->coeffDict().lookupOrDefault("outputByInjectorId", false)),
     injIdToIndex_(cloud.injectors().size())
 {
@@ -72,6 +73,19 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
         default:
         {}
     }
+
+    label nPatches = 0;
+    forAll(mesh_.boundaryMesh(), patchi)
+    {
+        if (!isA<processorPolyPatch>(mesh_.boundaryMesh()[patchi]))
+        {
+            nPatches++;
+        }
+    }
+    nEscape_.setSize(nPatches);
+    massEscape_.setSize(nPatches);
+    nStick_.setSize(nPatches);
+    massStick_.setSize(nPatches);
 
     forAll(nEscape_, patchi)
     {
@@ -240,6 +254,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
 
     // accumulate current data
     labelListList npe(nEscape_);
+
     forAll(npe, i)
     {
         Pstream::listCombineGather(npe[i], plusEqOp<label>());
@@ -288,12 +303,14 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
     {
         forAll(npe, i)
         {
-            os  << "    Parcel fate: walls (number, mass) "
+
+            os  << "    Parcel fate: patch (number, mass) "
                 << mesh_.boundary()[i].name() << nl
                 << "      - escape                      = "
                 << npe[i][0] << ", " << mpe[i][0] << nl
                 << "      - stick                       = "
                 << nps[i][0] << ", " << mps[i][0] << nl;
+
         }
     }
 
@@ -308,6 +325,7 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
         this->setModelProperty("massStick", mps);
         massStick_ = Zero;
     }
+
 }
 
 
