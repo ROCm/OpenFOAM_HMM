@@ -165,17 +165,6 @@ void inplaceUniqueSort
 );
 
 
-//- Extract elements of List when select is a certain value.
-//  \deprecated use subsetList instead (deprecated Mar 2017)
-template<class T, class ListType>
-ListType subset(const UList<T>& select, const T& value, const ListType&);
-
-//- Inplace extract elements of List when select is a certain value.
-//  \deprecated use inplaceSubsetList instead (deprecated Mar 2017)
-template<class T, class ListType>
-void inplaceSubset(const UList<T>& select, const T& value, ListType&);
-
-
 //- Extract elements of List when select is true
 //  eg, to extract all selected elements:
 //    subset<boolList, labelList>(selectedElems, list);
@@ -334,22 +323,6 @@ label findLower
     typename ListType::const_reference val,
     const label start=0
 );
-
-
-//- To construct a List from a C array. Has extra Container type
-//  to initialise e.g. wordList from arrays of char*.
-//
-//  \deprecated can often use initializer_list instead (deprecated Mar 2017)
-template<class Container, class T, int mRows>
-List<Container> initList(const T[mRows]);
-
-
-//- To construct a (square) ListList from a C array. Has extra Container type
-//  to initialise e.g. faceList from arrays of labels.
-//
-//  \deprecated can often use initializer_list instead (deprecated Mar 2017)
-template<class Container, class T, int mRows, int nColumns>
-List<Container> initListList(const T[mRows][nColumns]);
 
 
 //- Helper class for list to append y onto the end of x

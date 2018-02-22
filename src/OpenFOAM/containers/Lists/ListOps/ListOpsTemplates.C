@@ -359,79 +359,6 @@ void Foam::inplaceUniqueSort
 }
 
 
-template<class T, class ListType>
-ListType Foam::subset
-(
-    const UList<T>& select,
-    const T& value,
-    const ListType& input
-)
-{
-    const label len = input.size();
-
-    // select must at least cover the list range
-    if (select.size() < len)
-    {
-        FatalErrorInFunction
-            << "select is of size " << select.size()
-            << "; but it must index a list of size " << len
-            << abort(FatalError);
-    }
-
-    ListType output(len);
-    output.resize(len);     // Consistent sizing (eg, DynamicList)
-
-    label count = 0;
-    for (label i=0; i < len; ++i)
-    {
-        if (select[i] == value)
-        {
-            output[count] = input[i];
-            ++count;
-        }
-    }
-    output.resize(count);
-
-    return output;
-}
-
-
-template<class T, class ListType>
-void Foam::inplaceSubset
-(
-    const UList<T>& select,
-    const T& value,
-    ListType& input
-)
-{
-    const label len = input.size();
-
-    // select must at least cover the list range
-    if (select.size() < len)
-    {
-        FatalErrorInFunction
-            << "select is of size " << select.size()
-            << "; but it must index a list of size " << len
-            << abort(FatalError);
-    }
-
-    label count = 0;
-    for (label i=0; i < len; ++i)
-    {
-        if (select[i] == value)
-        {
-            if (count != i)
-            {
-                input[count] = std::move(input[i]);
-            }
-            ++count;
-        }
-    }
-
-    input.resize(count);
-}
-
-
 template<class BoolListType, class ListType>
 ListType Foam::subset
 (
@@ -806,37 +733,6 @@ Foam::label Foam::findLower
         start,
         lessOp<typename ListType::value_type>()
     );
-}
-
-
-template<class Container, class T, int mRows>
-Foam::List<Container> Foam::initList(const T elems[mRows])
-{
-    List<Container> lst(mRows);
-
-    forAll(lst, rowI)
-    {
-        lst[rowI] = Container(elems[rowI]);
-    }
-    return lst;
-}
-
-
-template<class Container, class T, int mRows, int nColumns>
-Foam::List<Container> Foam::initListList(const T elems[mRows][nColumns])
-{
-    List<Container> lst(mRows);
-
-    Container cols(nColumns);
-    forAll(lst, rowI)
-    {
-        forAll(cols, colI)
-        {
-            cols[colI] = elems[rowI][colI];
-        }
-        lst[rowI] = cols;
-    }
-    return lst;
 }
 
 
