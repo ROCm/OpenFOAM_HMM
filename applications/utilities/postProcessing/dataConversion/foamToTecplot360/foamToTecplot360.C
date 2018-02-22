@@ -321,11 +321,8 @@ int main(int argc, char *argv[])
         // Search for list of objects for this time
         IOobjectList objects(mesh, runTime.timeName());
 
-        HashSet<word> selectedFields;
-        if (args.found("fields"))
-        {
-            args.lookup("fields")() >> selectedFields;
-        }
+        wordHashSet selectedFields;
+        args.readIfPresent("fields", selectedFields);
 
         // Construct the vol fields (on the original mesh if subsetted)
 

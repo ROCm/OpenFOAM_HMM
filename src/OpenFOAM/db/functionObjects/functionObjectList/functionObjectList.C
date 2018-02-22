@@ -98,7 +98,7 @@ Foam::functionObject* Foam::functionObjectList::remove
 void Foam::functionObjectList::listDir
 (
     const fileName& dir,
-    HashSet<word>& foMap
+    wordHashSet& foMap
 )
 {
     // Search specified directory for functionObject configuration files
@@ -126,7 +126,7 @@ void Foam::functionObjectList::listDir
 
 void Foam::functionObjectList::list()
 {
-    HashSet<word> foMap;
+    wordHashSet foMap;
 
     fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
 

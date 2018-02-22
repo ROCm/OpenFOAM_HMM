@@ -103,7 +103,7 @@ DynamicList<label> cellGroupType;
 bool cubitFile = false;
 
 
-void uniquify(word& name, HashSet<word>& patchNames)
+void uniquify(word& name, wordHashSet& patchNames)
 {
     if (!patchNames.found(name))
     {
@@ -929,7 +929,7 @@ int main(int argc, char *argv[])
     // Foam patch type for Fluent zone type
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    HashSet<word> fluentGroupToFoamPatch;
+    wordHashSet fluentGroupToFoamPatch;
     fluentGroupToFoamPatch.insert("wall");
     fluentGroupToFoamPatch.insert("fan");
 
@@ -1040,7 +1040,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~
 
     List<polyPatch*> newPatches(patchIDs.size());
-    HashSet<word> patchNames;
+    wordHashSet patchNames;
 
     forAll(patchIDs, patchi)
     {
@@ -1138,7 +1138,7 @@ int main(int argc, char *argv[])
 
     // Cell zones
     mesh.cellZones().setSize(cellZoneIDs.size());
-    HashSet<word> cellZoneNames;
+    wordHashSet cellZoneNames;
 
     forAll(cellZoneIDs, cellZonei)
     {
@@ -1167,7 +1167,7 @@ int main(int argc, char *argv[])
 
     // Face zones
     mesh.faceZones().setSize(faceZoneIDs.size());
-    HashSet<word> faceZoneNames;
+    wordHashSet faceZoneNames;
 
     forAll(faceZoneIDs, faceZonei)
     {

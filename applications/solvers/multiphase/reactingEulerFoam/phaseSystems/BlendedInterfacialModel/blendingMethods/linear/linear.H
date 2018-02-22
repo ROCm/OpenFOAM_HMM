@@ -54,12 +54,10 @@ class linear
     // Private data
 
         //- Minimum fraction of phases which can be considered fully continuous
-        HashTable<dimensionedScalar, word, word::hash>
-            minFullyContinuousAlpha_;
+        HashTable<dimensionedScalar> minFullyContinuousAlpha_;
 
         //- Minimum fraction of phases which can be considered partly continuous
-        HashTable<dimensionedScalar, word, word::hash>
-            minPartlyContinuousAlpha_;
+        HashTable<dimensionedScalar> minPartlyContinuousAlpha_;
 
 
 public:

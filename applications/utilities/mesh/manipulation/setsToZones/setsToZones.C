@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 
     IOobjectList faceObjects(objects.lookupClass(faceSet::typeName));
 
-    HashSet<word> slaveCellSets;
+    wordHashSet slaveCellSets;
 
     //Pout<< "faceSets:" << faceObjects.names() << endl;
 

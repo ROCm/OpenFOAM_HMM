@@ -47,7 +47,7 @@ void mapConsistentMesh
     const word& mapMethod,
     const word& AMIMapMethod,
     const bool subtract,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     const bool noLagrangian
 )
 {
@@ -86,7 +86,7 @@ void mapSubMesh
     const word& mapMethod,
     const word& AMIMapMethod,
     const bool subtract,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     const bool noLagrangian
 )
 {
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
         Info<< "Subtracting mapped source field from target" << endl;
     }
 
-    HashSet<word> selectedFields;
+    wordHashSet selectedFields;
     args.readIfPresent("fields", selectedFields);
 
     const bool noLagrangian = args.found("noLagrangian");

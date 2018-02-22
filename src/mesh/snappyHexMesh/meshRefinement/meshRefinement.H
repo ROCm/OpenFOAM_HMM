@@ -186,13 +186,13 @@ private:
         wordList meshedPatches_;
 
         //- FaceZone to master patch name
-        HashTable<word, word> faceZoneToMasterPatch_;
+        HashTable<word> faceZoneToMasterPatch_;
 
         //- FaceZone to slave patch name
-        HashTable<word, word> faceZoneToSlavePatch_;
+        HashTable<word> faceZoneToSlavePatch_;
 
         //- FaceZone to method to handle faces
-        HashTable<surfaceZonesInfo::faceZoneType, word> faceZoneToType_;
+        HashTable<surfaceZonesInfo::faceZoneType> faceZoneToType_;
 
 
     // Private Member Functions

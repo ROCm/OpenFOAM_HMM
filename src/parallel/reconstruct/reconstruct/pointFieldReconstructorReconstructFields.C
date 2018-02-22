@@ -143,7 +143,7 @@ template<class Type>
 void Foam::pointFieldReconstructor::reconstructFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     word fieldClassName

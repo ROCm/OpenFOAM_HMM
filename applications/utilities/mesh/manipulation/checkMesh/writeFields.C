@@ -69,7 +69,7 @@ void minFaceToCell
 void Foam::writeFields
 (
     const fvMesh& mesh,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     if (selectedFields.empty())

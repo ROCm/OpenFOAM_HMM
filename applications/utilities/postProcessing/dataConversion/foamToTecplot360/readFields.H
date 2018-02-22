@@ -51,7 +51,7 @@ void readFields
     const meshSubsetHelper&,
     const typename GeoField::Mesh& mesh,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     PtrList<const GeoField>& fields
 );
 

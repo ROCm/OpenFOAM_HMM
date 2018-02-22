@@ -54,6 +54,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "triangle.H"
+#include "edgeHashes.H"
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
 #include "triSurfaceTools.H"
@@ -222,7 +223,7 @@ void syncEdges(const triSurface& p, labelHashSet& markedEdges)
     // See comment below about having duplicate edges
 
     const edgeList& edges = p.edges();
-    HashSet<edge, Hash<edge>> edgeSet(2*markedEdges.size());
+    edgeHashSet edgeSet(2*markedEdges.size());
 
     forAllConstIter(labelHashSet, markedEdges, iter)
     {
@@ -254,7 +255,7 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
         }
     }
 
-    HashSet<edge, Hash<edge>> edgeSet(2*n);
+    edgeHashSet edgeSet(2*n);
 
     forAll(isMarkedEdge, edgei)
     {

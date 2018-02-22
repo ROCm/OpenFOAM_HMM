@@ -28,7 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 #include "ListOps.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -323,7 +323,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
 void Foam::edgeMesh::mergeEdges()
 {
-    HashSet<edge, Hash<edge>> uniqEdges(2*edges_.size());
+    edgeHashSet uniqEdges(2*edges_.size());
     PackedBoolList pointIsUsed(points_.size());
 
     label nUniqEdges = 0;

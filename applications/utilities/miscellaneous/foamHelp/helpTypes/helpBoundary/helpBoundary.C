@@ -101,11 +101,11 @@ void Foam::helpTypes::helpBoundary::execute
     }
     else if (args.found("constraint"))
     {
-        HashSet<word> constraintTypes(fvPatch::constraintTypes());
+        wordHashSet constraintTypes(fvPatch::constraintTypes());
         Info<< "Constraint types:" << nl;
-        forAllConstIter(HashSet<word>, constraintTypes, iter)
+        for (const word& cType : constraintTypes)
         {
-            Info<< "    " << iter.key() << nl;
+            Info<< "    " << cType << nl;
         }
         Info<< endl;
     }

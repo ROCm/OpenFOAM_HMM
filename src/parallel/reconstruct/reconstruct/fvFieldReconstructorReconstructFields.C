@@ -601,7 +601,7 @@ template<class Type>
 void Foam::fvFieldReconstructor::reconstructFvVolumeInternalFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const word& fieldClassName = DimensionedField<Type, volMesh>::typeName;
@@ -636,7 +636,7 @@ template<class Type>
 void Foam::fvFieldReconstructor::reconstructFvVolumeFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const word& fieldClassName =
@@ -672,7 +672,7 @@ template<class Type>
 void Foam::fvFieldReconstructor::reconstructFvSurfaceFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const word& fieldClassName =

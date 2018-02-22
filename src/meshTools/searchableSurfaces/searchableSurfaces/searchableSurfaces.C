@@ -865,7 +865,7 @@ void Foam::searchableSurfaces::writeStats
 
         if (patchTypes.size() && patchTypes[surfI].size() >= 1)
         {
-            wordList unique(HashSet<word>(patchTypes[surfI]).sortedToc());
+            wordList unique(wordHashSet(patchTypes[surfI]).sortedToc());
             Info<< "        patches   : ";
             forAll(unique, i)
             {

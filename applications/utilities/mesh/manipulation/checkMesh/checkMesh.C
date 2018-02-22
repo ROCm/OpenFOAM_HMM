@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 
     word surfaceFormat;
     const bool writeSets = args.readIfPresent("writeSets", surfaceFormat);
-    HashSet<word> selectedFields;
+    wordHashSet selectedFields;
     bool writeFields = args.readIfPresent
     (
         "writeFields",

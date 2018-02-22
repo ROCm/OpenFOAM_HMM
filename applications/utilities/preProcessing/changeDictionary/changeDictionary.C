@@ -93,9 +93,9 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Extract groupPatch info from boundary file info
-HashTable<wordList, word> extractPatchGroups(const dictionary& boundaryDict)
+HashTable<wordList> extractPatchGroups(const dictionary& boundaryDict)
 {
-    HashTable<wordList, word> groupToPatch;
+    HashTable<wordList> groupToPatch;
 
     forAllConstIter(dictionary, boundaryDict, iter)
     {
@@ -107,11 +107,8 @@ HashTable<wordList, word> extractPatchGroups(const dictionary& boundaryDict)
         {
             forAll(groups, i)
             {
-                HashTable<wordList, word>::iterator fndGroup = groupToPatch.find
-                (
-                    groups[i]
-                );
-                if (fndGroup == groupToPatch.end())
+                auto fndGroup = groupToPatch.find(groups[i]);
+                if (!fndGroup.found())
                 {
                     groupToPatch.insert(groups[i], wordList(1, patchName));
                 }
@@ -132,7 +129,7 @@ bool merge
     dictionary&,
     const dictionary&,
     const bool,
-    const HashTable<wordList, word>&
+    const HashTable<wordList>&
 );
 
 
@@ -143,7 +140,7 @@ bool addEntry
     entry& thisEntry,
     const entry& mergeEntry,
     const bool literalRE,
-    const HashTable<wordList, word>& shortcuts
+    const HashTable<wordList>& shortcuts
 )
 {
     bool changed = false;
@@ -181,7 +178,7 @@ bool addEntry
 // List of indices into thisKeys
 labelList findMatches
 (
-    const HashTable<wordList, word>& shortcuts,
+    const HashTable<wordList>& shortcuts,
     const wordList& shortcutNames,
     const wordList& thisKeys,
     const keyType& key
@@ -228,7 +225,7 @@ bool merge
     dictionary& thisDict,
     const dictionary& mergeDict,
     const bool literalRE,
-    const HashTable<wordList, word>& shortcuts
+    const HashTable<wordList>& shortcuts
 )
 {
     const wordList shortcutNames(shortcuts.toc());
@@ -236,7 +233,7 @@ bool merge
     bool changed = false;
 
     // Save current (non-wildcard) keys before adding items.
-    HashSet<word> thisKeysSet;
+    wordHashSet thisKeysSet;
     {
         List<keyType> keys = thisDict.keys(false);
         forAll(keys, i)
@@ -378,8 +375,8 @@ bool merge
                             thisEntry,
                             mergeIter(),
                             literalRE,
-                            HashTable<wordList, word>(0)    // no shortcuts
-                                                            // at deeper levels
+                            HashTable<wordList>(0)    // no shortcuts
+                                                      // at deeper levels
                         )
                     )
                     {
@@ -575,7 +572,7 @@ int main(int argc, char *argv[])
 
         // Extract any patchGroups information (= shortcut for set of
         // patches)
-        HashTable<wordList, word> patchGroups;
+        HashTable<wordList> patchGroups;
         if (!disablePatchGroups)
         {
             patchGroups = extractPatchGroups(fieldDict);

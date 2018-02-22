@@ -225,7 +225,7 @@ Foam::wordList Foam::fvMeshDistribute::mergeWordList(const wordList& procNames)
     Pstream::gatherList(allNames);
     Pstream::scatterList(allNames);
 
-    HashSet<word> mergedNames;
+    wordHashSet mergedNames;
     forAll(allNames, proci)
     {
         forAll(allNames[proci], i)

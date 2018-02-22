@@ -1,7 +1,7 @@
 // check all time directories for the following:
 
 // Any cloud names:
-HashSet<word> allCloudDirs;
+wordHashSet allCloudDirs;
 
 if (timeDirs.size() && !noLagrangian)
 {

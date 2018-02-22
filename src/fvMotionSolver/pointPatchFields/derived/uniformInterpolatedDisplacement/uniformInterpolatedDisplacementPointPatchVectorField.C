@@ -187,7 +187,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
         );
         // Save old times so we now which ones have been loaded and need
         // 'correctBoundaryConditions'. Bit messy.
-        HashSet<word> oldTimes(fieldsCache.toc());
+        wordHashSet oldTimes(fieldsCache.toc());
 
         ReadFields<pointVectorField>
         (

@@ -60,7 +60,7 @@ void executeFunctionObjects
     const argList& args,
     const Time& runTime,
     fvMesh& mesh,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     functionObjectList& functions,
     bool lastTime
 )

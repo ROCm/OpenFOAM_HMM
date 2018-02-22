@@ -85,7 +85,7 @@ void reconstructLagrangianFields
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 );
 
 
@@ -96,7 +96,7 @@ void reconstructLagrangianFieldFields
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 );
 
 

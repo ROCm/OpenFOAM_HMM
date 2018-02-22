@@ -963,7 +963,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     bool hasError = false;
 
-    HashSet<word> patchNames(2*size());
+    wordHashSet patchNames(2*size());
 
     forAll(bm, patchi)
     {

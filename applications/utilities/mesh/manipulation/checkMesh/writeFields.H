@@ -4,7 +4,7 @@ namespace Foam
 {
     void writeFields
     (
-        const fvMesh&,
-        const HashSet<word>& selectedFields
+        const fvMesh& mesh,
+        const wordHashSet& selectedFields
     );
 }

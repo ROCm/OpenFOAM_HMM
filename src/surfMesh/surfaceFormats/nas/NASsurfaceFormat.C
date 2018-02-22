@@ -135,7 +135,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     word  ansaType, ansaName;
 
     // A single warning per unrecognized command
-    HashSet<word> unhandledCmd;
+    wordHashSet unhandledCmd;
 
     while (is.good())
     {

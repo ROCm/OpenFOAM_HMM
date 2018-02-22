@@ -192,7 +192,7 @@ void Foam::ReadFields
 {
     // Collect all times that are no longer used
     {
-        HashSet<word> usedTimes(timeNames);
+        wordHashSet usedTimes(timeNames);
 
         DynamicList<word> unusedTimes(fieldsCache.size());
 
@@ -316,7 +316,7 @@ void Foam::readFields
 (
     const typename GeoFieldType::Mesh& mesh,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     LIFOStack<regIOobject*>& storedObjects
 )
 {
@@ -369,7 +369,7 @@ template<class UniformFieldType>
 void Foam::readUniformFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     LIFOStack<regIOobject*>& storedObjects,
     const bool syncPar
 )
@@ -386,13 +386,13 @@ void Foam::readUniformFields
         const wordList localNames(masterNames);
         Pstream::scatter(masterNames);
 
-        HashSet<word> localNamesSet(localNames);
+        wordHashSet localNamesSet(localNames);
 
         forAll(masterNames, i)
         {
             const word& masterFld = masterNames[i];
 
-            HashSet<word>::iterator iter = localNamesSet.find(masterFld);
+            wordHashSet::iterator iter = localNamesSet.find(masterFld);
 
             if (iter == localNamesSet.end())
             {
@@ -408,7 +408,7 @@ void Foam::readUniformFields
             }
         }
 
-        forAllConstIter(HashSet<word>, localNamesSet, iter)
+        forAllConstIter(wordHashSet, localNamesSet, iter)
         {
             FatalErrorInFunction
                 << "Fields not synchronised across processors." << endl

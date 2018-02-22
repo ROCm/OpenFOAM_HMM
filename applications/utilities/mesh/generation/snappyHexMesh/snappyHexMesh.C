@@ -118,7 +118,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     List<Map<scalar>> regionAngle(surfi);
     List<Map<autoPtr<dictionary>>> regionPatchInfo(surfi);
 
-    HashSet<word> unmatchedKeys(surfacesDict.toc());
+    wordHashSet unmatchedKeys(surfacesDict.toc());
 
     surfi = 0;
     forAll(allGeometry.names(), geomi)
