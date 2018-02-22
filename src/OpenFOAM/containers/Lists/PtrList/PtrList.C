@@ -144,9 +144,10 @@ void Foam::PtrList<T>::setSize(const label newLen)
     }
 
     const label oldLen = this->size();
-    if (newLen < oldLen)
+
+    if (newLen != oldLen)
     {
-        // Truncate - free old pointers
+        // Truncation frees old pointers
         for (label i=newLen; i<oldLen; ++i)
         {
             if (this->ptrs_[i])
@@ -155,11 +156,7 @@ void Foam::PtrList<T>::setSize(const label newLen)
             }
         }
 
-        this->ptrs_.setSize(newLen);
-    }
-    else if (newLen > oldLen)
-    {
-        // Extend - new elements initialized to nullptr
+        // Any new elements are initialized to nullptr.
         this->ptrs_.setSize(newLen, reinterpret_cast<T*>(0));
     }
 }

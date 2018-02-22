@@ -137,7 +137,7 @@ inline void Foam::UPtrList<T>::setSize(const label newLen)
     const label oldLen = this->size();
     if (newLen != oldLen)
     {
-        // Truncate or extend (new elements initialized to nullptr)
+        // Truncate or extend. Any new elements are initialized to nullptr.
         ptrs_.setSize(newLen, reinterpret_cast<T*>(0));
     }
 }
