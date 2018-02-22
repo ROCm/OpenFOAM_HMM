@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,48 @@ namespace Foam
     defineTemplateTypeNameAndDebug(IOPtrList<coordinateSystem>, 0);
 }
 
+
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    // Templated implementation for names() - file-scope
+    template<class UnaryMatchPredicate>
+    static wordList namesImpl
+    (
+        const IOPtrList<coordinateSystem>& list,
+        const UnaryMatchPredicate& matcher,
+        const bool doSort
+    )
+    {
+        const label len = list.size();
+
+        wordList output(len);
+
+        label count = 0;
+        for (label i = 0; i < len; ++i)
+        {
+            const word& itemName = list[i].name();
+
+            if (matcher(itemName))
+            {
+                output[count++] = itemName;
+            }
+        }
+
+        output.resize(count);
+
+        if (doSort)
+        {
+            Foam::sort(output);
+        }
+
+        return output;
+    }
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::coordinateSystems::coordinateSystems(const IOobject& io)
@@ -66,33 +108,36 @@ Foam::coordinateSystems::coordinateSystems
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-// Read construct from registry, or return previously registered
 const Foam::coordinateSystems& Foam::coordinateSystems::New
 (
     const objectRegistry& obr
 )
 {
-    if (obr.foundObject<coordinateSystems>(typeName))
+    // Previously registered?
+
+    const coordinateSystems* ptr =
+        obr.lookupObjectPtr<coordinateSystems>(typeName);
+
+    if (ptr)
     {
-        return obr.lookupObject<coordinateSystems>(typeName);
+        return *ptr;
     }
-    else
-    {
-        return obr.store
+
+    // Read construct from registry
+    return obr.store
+    (
+        new coordinateSystems
         (
-            new coordinateSystems
+            IOobject
             (
-                IOobject
-                (
-                    typeName,
-                    obr.time().constant(),
-                    obr,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
-                )
+                typeName,
+                obr.time().constant(),
+                obr,
+                IOobject::READ_IF_PRESENT,
+                IOobject::NO_WRITE
             )
-        );
-    }
+        )
+    );
 }
 
 
@@ -107,7 +152,7 @@ Foam::labelList Foam::coordinateSystems::findIndices(const keyType& key) const
     }
     else if (key.isPattern())
     {
-        indices = findStrings(key, this->toc());
+        indices = findStrings(key, this->names());
     }
     else
     {
@@ -163,16 +208,39 @@ bool Foam::coordinateSystems::found(const keyType& key) const
 }
 
 
-Foam::wordList Foam::coordinateSystems::toc() const
+Foam::wordList Foam::coordinateSystems::names() const
 {
-    wordList keywords(size());
+    wordList output(size());
 
     forAll(*this, i)
     {
-        keywords[i] = operator[](i).name();
+        output[i] = operator[](i).name();
     }
 
-    return keywords;
+    return output;
+}
+
+
+Foam::wordList Foam::coordinateSystems::names(const keyType& matcher) const
+{
+    return
+    (
+        matcher.isPattern()
+      ? namesImpl(*this, regExp(matcher), false)
+      : namesImpl(*this, matcher, false)
+    );
+}
+
+
+Foam::wordList Foam::coordinateSystems::names(const wordRe& matcher) const
+{
+    return namesImpl(*this, matcher, false);
+}
+
+
+Foam::wordList Foam::coordinateSystems::names(const wordRes& matcher) const
+{
+    return namesImpl(*this, matcher, false);
 }
 
 

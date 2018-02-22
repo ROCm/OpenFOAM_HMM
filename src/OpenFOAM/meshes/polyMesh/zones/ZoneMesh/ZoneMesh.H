@@ -87,7 +87,7 @@ class ZoneMesh
         template<class UnaryMatchPredicate>
         static wordList namesImpl
         (
-            const PtrList<ZoneType>& zones,
+            const PtrList<ZoneType>& list,
             const UnaryMatchPredicate& matcher,
             const bool doSort
         );

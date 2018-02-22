@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,6 +59,7 @@ SourceFiles
 
 #include "coordinateSystem.H"
 #include "IOPtrList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,14 +74,13 @@ class coordinateSystems
 :
     public IOPtrList<coordinateSystem>
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        coordinateSystems(const coordinateSystems&);
+        coordinateSystems(const coordinateSystems&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const coordinateSystems&);
+        void operator=(const coordinateSystems&) = delete;
 
 
 public:
@@ -125,8 +125,23 @@ public:
         //- Search for given key
         bool found(const keyType& key) const;
 
-        //- Return the table of contents (list of all keywords)
-        wordList toc() const;
+        //- A list of the coordinate-system names
+        wordList names() const;
+
+        //- A list of the coordinate-system names satisfying the input matcher
+        wordList names(const keyType& matcher) const;
+
+        //- A list of the coordinate-system names satisfying the input matcher
+        wordList names(const wordRe& matcher) const;
+
+        //- A list of the coordinate-system names satisfying the input matcher
+        wordList names(const wordRes& matcher) const;
+
+        //- Identical to names()
+        inline wordList toc() const
+        {
+            return names();
+        }
 
         //- Write data
         bool writeData(Ostream&) const;

@@ -124,32 +124,34 @@ template<class ZoneType, class MeshType>
 template<class UnaryMatchPredicate>
 Foam::wordList Foam::ZoneMesh<ZoneType, MeshType>::namesImpl
 (
-    const PtrList<ZoneType>& zones,
+    const PtrList<ZoneType>& list,
     const UnaryMatchPredicate& matcher,
     const bool doSort
 )
 {
-    wordList lst(zones.size());
+    const label len = list.size();
+
+    wordList output(len);
 
     label count = 0;
-    forAll(zones, zonei)
+    for (label i = 0; i < len; ++i)
     {
-        const word& zname = zones[zonei].name();
+        const word& itemName = list[i].name();
 
-        if (matcher(zname))
+        if (matcher(itemName))
         {
-            lst[count++] = zname;
+            output[count++] = itemName;
         }
     }
 
-    lst.setSize(count);
+    output.resize(count);
 
     if (doSort)
     {
-        Foam::sort(lst);
+        Foam::sort(output);
     }
 
-    return lst;
+    return output;
 }
 
 
