@@ -120,12 +120,12 @@ Foam::label Foam::triSurfaceLoader::select(const wordRe& mat)
 
     if (mat.isPattern())
     {
-        foundIds = findMatchingStrings(mat, available_);
+        foundIds = findStrings(mat, available_);
         sort(foundIds);
     }
     else
     {
-        const word& plain = static_cast<const word&>(mat);
+        const word& plain = mat;
         if (available_.found(plain))
         {
             foundIds.append(available_[plain]);
@@ -164,7 +164,7 @@ Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
     {
         if (mat.isPattern())
         {
-            labelList indices = findMatchingStrings(mat, available_);
+            labelList indices = findStrings(mat, available_);
             sort(indices);
 
             for (const label idx : indices)
@@ -177,7 +177,7 @@ Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
         }
         else
         {
-            const word& plain = static_cast<const word&>(mat);
+            const word& plain = mat;
             if (available_.found(plain))
             {
                 const label idx = available_[plain];

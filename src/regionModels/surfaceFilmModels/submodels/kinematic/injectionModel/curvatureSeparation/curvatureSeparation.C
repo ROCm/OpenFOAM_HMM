@@ -249,7 +249,7 @@ curvatureSeparation::curvatureSeparation
 
     forAllReverse(prIn, i)
     {
-        labelList patchIDs = findStrings(prIn[i].first(), allPatchNames);
+        labelList patchIDs = findIndices(allPatchNames, prIn[i].first());
         forAll(patchIDs, j)
         {
             const label patchi = patchIDs[j];

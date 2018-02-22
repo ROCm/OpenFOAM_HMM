@@ -43,7 +43,7 @@ SourceFiles
 
 namespace Foam
 {
-    //- Extract list indices
+    //- Extract list indices for all matches.
     //  The unary match predicate has the following signature:
     //  \code
     //  bool operator()(const std::string& text);
@@ -78,26 +78,17 @@ namespace Foam
     template<class StringType>
     labelList findStrings
     (
-        const char* re,
+        const keyType& matcher,
         const UList<StringType>& input,
         const bool invert=false
     )
     {
-        return findMatchingStrings(regExp(re), input, invert);
-    }
-
-
-    //- Return list indices for strings matching the regular expression
-    //  Template partial specialization of findMatchingStrings
-    template<class StringType>
-    labelList findStrings
-    (
-        const std::string& re,
-        const UList<StringType>& input,
-        const bool invert=false
-    )
-    {
-        return findMatchingStrings(regExp(re), input, invert);
+        return
+        (
+            matcher.isPattern()
+          ? findMatchingStrings(regExp(matcher), input, invert)
+          : findMatchingStrings(matcher, input, invert)
+        );
     }
 
 
@@ -178,25 +169,17 @@ namespace Foam
     template<class StringListType>
     StringListType subsetStrings
     (
-        const char* re,
+        const keyType& matcher,
         const StringListType& input,
         const bool invert=false
     )
     {
-        return subsetMatchingStrings(regExp(re), input, invert);
-    }
-
-    //- Extract elements of StringList when regular expression matches
-    //  Template partial specialization of subsetMatchingStrings
-    template<class StringListType>
-    StringListType subsetStrings
-    (
-        const std::string& re,
-        const StringListType& input,
-        const bool invert=false
-    )
-    {
-        return subsetMatchingStrings(regExp(re), input, invert);
+        return
+        (
+            matcher.isPattern()
+          ? subsetMatchingStrings(regExp(matcher), input, invert)
+          : subsetMatchingStrings(matcher, input, invert)
+        );
     }
 
     //- Extract elements of StringList when regular expression matches
@@ -265,30 +248,22 @@ namespace Foam
         inplaceSubsetMatchingStrings(matcher, input, invert);
     }
 
-    //- Inplace extract elements of StringList when regular expression matches
-    //  Template partial specialization of inplaceSubsetMatchingStrings
+    //- Extract elements of StringList when regular expression matches
+    //  Template partial specialization of subsetMatchingStrings
     template<class StringListType>
     void inplaceSubsetStrings
     (
-        const char* re,
+        const keyType& matcher,
         StringListType& input,
         const bool invert=false
     )
     {
-        inplaceSubsetMatchingStrings(regExp(re), input, invert);
-    }
-
-    //- Inplace extract elements of StringList when regular expression matches
-    //  Template partial specialization of inplaceSubsetMatchingStrings
-    template<class StringListType>
-    void inplaceSubsetStrings
-    (
-        const std::string& re,
-        StringListType& input,
-        const bool invert=false
-    )
-    {
-        inplaceSubsetMatchingStrings(regExp(re), input, invert);
+        return
+        (
+            matcher.isPattern()
+          ? inplaceSubsetMatchingStrings(regExp(matcher), input, invert)
+          : inplaceSubsetMatchingStrings(matcher, input, invert)
+        );
     }
 
     //- Inplace extract elements of StringList when regular expression matches
@@ -329,6 +304,79 @@ namespace Foam
     {
         inplaceSubsetMatchingStrings(wordRes::matcher(regexs), input, invert);
     }
+
+
+    //- Find using C-string as a regex
+    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //      and lead to unintended results.
+    //      Use regExp, keyType, wordRe instead, or findMatchingStrings()
+    template<class StringType>
+    labelList findStrings
+    (
+        const char* disallowed,
+        const UList<StringType>& input,
+        const bool invert=false
+    ) = delete;
+
+    //- Find using string as a regex
+    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //      and lead to unintended results.
+    //      Use regExp, keyType, wordRe instead, or findMatchingStrings()
+    template<class StringType>
+    labelList findStrings
+    (
+        const std::string& disallowed,
+        const UList<StringType>& input,
+        const bool invert=false
+    ) = delete;
+
+    //- Subset using C-string as a regex
+    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //      and lead to unintended results.
+    //      Use regExp, keyType, wordRe instead, or subsetMatchingStrings()
+    template<class StringListType>
+    StringListType subsetStrings
+    (
+        const char* disallowed,
+        const StringListType& input,
+        const bool invert=false
+    ) = delete;
+
+    //- Subset using string as a regex
+    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //      and lead to unintended results.
+    //      Use regExp, keyType, wordRe instead, or subsetMatchingStrings()
+    template<class StringListType>
+    StringListType subsetStrings
+    (
+        const std::string& disallowed,
+        const StringListType& input,
+        const bool invert=false
+    ) = delete;
+
+    //- Subset using C-string as a regex
+    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //      and lead to unintended results.
+    //      Use regExp, keyType, wordRe instead, or inplaceSubsetMatchingStrings()
+    template<class StringListType>
+    void inplaceSubsetStrings
+    (
+        const char* disallowed,
+        StringListType& input,
+        const bool invert=false
+    ) = delete;
+
+    //- Subset using string as a regex
+    //  \deprecated (FEB-2018) Treating string as regex may be inefficient
+    //      and lead to unintended results.
+    //      Use keyType, wordRe instead, or inplaceSubsetMatchingStrings()
+    template<class StringListType>
+    void inplaceSubsetStrings
+    (
+        const std::string& disallowed,
+        StringListType& input,
+        const bool invert=false
+    ) = delete;
 
 }
 

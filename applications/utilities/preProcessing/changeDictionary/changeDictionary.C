@@ -178,7 +178,6 @@ bool addEntry
 }
 
 
-
 // List of indices into thisKeys
 labelList findMatches
 (
@@ -194,19 +193,19 @@ labelList findMatches
     {
         // Wildcard match
         matches = findStrings(key, thisKeys);
-
     }
     else if (shortcuts.size())
     {
         // See if patchGroups expand to valid thisKeys
         labelList indices = findStrings(key, shortcutNames);
-        forAll(indices, i)
+
+        for (const label idx : indices)
         {
-            const word& name = shortcutNames[indices[i]];
+            const word& name = shortcutNames[idx];
             const wordList& keys = shortcuts[name];
             forAll(keys, j)
             {
-                label index = thisKeys.find(keys[j]);
+                const label index = thisKeys.find(keys[j]);
                 if (index != -1)
                 {
                     matches.append(index);

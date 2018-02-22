@@ -149,11 +149,7 @@ void Foam::ensightMesh::correct()
             if (!matcher.empty())
             {
                 useAll = false;
-                matched = findMatchingStrings
-                (
-                    matcher,
-                    patchNames
-                );
+                matched = findStrings(matcher, patchNames);
             }
         }
 
@@ -248,11 +244,7 @@ void Foam::ensightMesh::correct()
         const wordRes& matcher = option().faceZoneSelection();
 
         wordList selectZones = mesh_.faceZones().names();
-        inplaceSubsetMatchingStrings
-        (
-            matcher,
-            selectZones
-        );
+        subsetMatchingStrings(matcher, selectZones);
 
         // have same order as later with sortedToc()
         Foam::sort(selectZones);

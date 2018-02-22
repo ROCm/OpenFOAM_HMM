@@ -342,25 +342,26 @@ Foam::labelList Foam::ZoneMesh<ZoneType, MeshType>::findIndices
 {
     labelList indices;
 
-    if (!key.empty())
+    if (key.empty())
     {
-        if (key.isPattern())
+        // no-op
+    }
+    else if (key.isPattern())
+    {
+        indices = findStrings(key, this->names());
+    }
+    else
+    {
+        indices.setSize(this->size());
+        label count = 0;
+        forAll(*this, i)
         {
-            indices = findStrings(key, this->names());
-        }
-        else
-        {
-            indices.setSize(this->size());
-            label count = 0;
-            forAll(*this, i)
+            if (key == operator[](i).name())
             {
-                if (key == operator[](i).name())
-                {
-                    indices[count++] = i;
-                }
+                indices[count++] = i;
             }
-            indices.setSize(count);
         }
+        indices.setSize(count);
     }
 
     return indices;
@@ -373,26 +374,26 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findIndex
     const keyType& key
 ) const
 {
-    if (!key.empty())
+    if (key.empty())
     {
-        if (key.isPattern())
-        {
-            labelList indices = this->findIndices(key);
+        // no-op
+    }
+    else if (key.isPattern())
+    {
+        labelList indices = this->findIndices(key);
 
-            // return first element
-            if (!indices.empty())
-            {
-                return indices[0];
-            }
-        }
-        else
+        if (!indices.empty())
         {
-            forAll(*this, i)
+            return indices.first();  // first match
+        }
+    }
+    else
+    {
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
             {
-                if (key == operator[](i).name())
-                {
-                    return i;
-                }
+                return i;
             }
         }
     }
@@ -412,7 +413,7 @@ Foam::label Foam::ZoneMesh<ZoneType, MeshType>::findZoneID
 
     forAll(zones, zonei)
     {
-        if (zones[zonei].name() == zoneName)
+        if (zoneName == zones[zonei].name())
         {
             return zonei;
         }

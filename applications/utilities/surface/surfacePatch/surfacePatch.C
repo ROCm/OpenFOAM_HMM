@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
 
                     labelList regionIDs =
                         findStrings(regionName, surf.regions());
+
                     if (modifier().modify(regionIDs, surf))
                     {
                         changed = true;

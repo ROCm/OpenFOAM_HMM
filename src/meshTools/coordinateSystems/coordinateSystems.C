@@ -101,22 +101,26 @@ const Foam::coordinateSystems& Foam::coordinateSystems::New
 Foam::labelList Foam::coordinateSystems::findIndices(const keyType& key) const
 {
     labelList indices;
-    if (key.isPattern())
+    if (key.empty())
     {
-        indices = findStrings(key, toc());
+        // no-op
+    }
+    else if (key.isPattern())
+    {
+        indices = findStrings(key, this->toc());
     }
     else
     {
-        indices.setSize(size());
-        label nFound = 0;
+        indices.setSize(this->size());
+        label count = 0;
         forAll(*this, i)
         {
             if (key == operator[](i).name())
             {
-                indices[nFound++] = i;
+                indices[count++] = i;
             }
         }
-        indices.setSize(nFound);
+        indices.setSize(count);
     }
 
     return indices;
@@ -125,13 +129,16 @@ Foam::labelList Foam::coordinateSystems::findIndices(const keyType& key) const
 
 Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
 {
-    if (key.isPattern())
+    if (key.empty())
+    {
+        // no-op
+    }
+    else if (key.isPattern())
     {
         labelList indices = findIndices(key);
-        // return first element
         if (!indices.empty())
         {
-            return indices[0];
+            return indices.first();  // first match
         }
     }
     else
@@ -145,6 +152,7 @@ Foam::label Foam::coordinateSystems::findIndex(const keyType& key) const
         }
     }
 
+    // Not found
     return -1;
 }
 

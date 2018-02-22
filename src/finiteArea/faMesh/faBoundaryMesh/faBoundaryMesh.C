@@ -194,25 +194,26 @@ Foam::labelList Foam::faBoundaryMesh::findIndices
 {
     DynamicList<label> indices;
 
-    if (!key.empty())
+    if (key.empty())
     {
-        if (key.isPattern())
-        {
-            indices = findStrings(key, this->names());
-        }
-        else
-        {
-            // Literal string. Special version of above to avoid
-            // unnecessary memory allocations
+        // no-op
+    }
+    else if (key.isPattern())
+    {
+        indices = findStrings(key, this->names());
+    }
+    else
+    {
+        // Literal string. Special version of above to avoid
+        // unnecessary memory allocations
 
-            indices.setCapacity(1);
-            forAll(*this, i)
+        indices.setCapacity(1);
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
             {
-                if (key == operator[](i).name())
-                {
-                    indices.append(i);
-                    break;
-                }
+                indices.append(i);
+                break;
             }
         }
     }

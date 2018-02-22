@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 
     Info<< "stringList " << strLst << nl;
 
-    labelList matches = findStrings(".*ee.*", strLst);
+    labelList matches = findStrings(regExp(".*ee.*"), strLst);
 
     Info<< "matches found for regexp .*ee.* :" << nl << matches << nl;
     forAll(matches, i)
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     }
     Info<< endl;
 
-    stringList subLst = subsetStrings(".*ee.*", strLst);
+    stringList subLst = subsetStrings(regExp(".*ee.*"), strLst);
     Info<< "subset stringList: " << subLst << nl;
 
     subLst = subsetStrings(reLst, strLst);
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     inplaceSubsetStrings(reLst, strLst);
     Info<< "subsetted stringList: " << strLst << nl;
 
-    inplaceSubsetStrings(".*l.*", strLst);
+    inplaceSubsetStrings(regExp(".*l.*"), strLst);
     Info<< "subsetted stringList: " << strLst << nl;
 
     Info<< "\nEnd\n" << endl;
