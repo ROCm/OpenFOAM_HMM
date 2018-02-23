@@ -144,18 +144,18 @@ int main(int argc, char *argv[])
     Info<< "\ntest Istream constructor\n";
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() << nl;
+    Info<< list4 << " indices: " << list4.used() << nl;
 
     Info<< "\nassign from labelList\n";
     list4 = labelList{0, 1, 2, 3, 12, 13, 14, 19, 20, 21};
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() << nl;
+    Info<< list4 << " indices: " << list4.used() << nl;
 
     // Not yet:
     // PackedBoolList list5{0, 1, 2, 3, 12, 13, 14, 19, 20, 21};
     // list5.printInfo(Info, true);
-    // Info<< list5 << " indices: " << list5.used()() << nl;
+    // Info<< list5 << " indices: " << list5.used() << nl;
 
     Info<< "\nassign from indices\n";
     list4.read
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() << nl;
+    Info<< list4 << " indices: " << list4.used() << nl;
 
     boolList bools(list4.size());
     forAll(list4, i)

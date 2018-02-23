@@ -1545,9 +1545,8 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
     }
 
 
-    boundaryCellsPtr_.reset(new labelList());
+    boundaryCellsPtr_.reset(new labelList(std::move(cellMap)));
     labelList& boundaryCells = boundaryCellsPtr_();
-    boundaryCells.transfer(cellMap.shrink());
 
 
     // Convert point-cells to global (boundary)cell numbers

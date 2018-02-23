@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,118 +24,73 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "hashedWordList.H"
+#include "CStringList.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::hashedWordList::hashedWordList
 (
-    const label count,
-    const char** lst,
-    const bool removeDuplicates
+    const label len,
+    const char** array,
+    bool unique
 )
 :
-    List<word>(count)
+    wordList(len)
 {
-    forAll(*this, i)
+    for (label i=0; i < len; ++i)
     {
-        List<word>::operator[](i) = lst[i];
+        wordList::operator[](i) = array[i];
     }
 
-    rehash(removeDuplicates);
+    rehash(unique);
 }
 
 
-Foam::hashedWordList::hashedWordList
-(
-    const char** lst,
-    const bool removeDuplicates
-)
-{
-    // Determine the number of entries
-    label count = 0;
-    for (unsigned i = 0; lst[i] && *(lst[i]); ++i)
-    {
-        ++count;
-    }
-
-    List<word>::setSize(count);
-    forAll(*this, i)
-    {
-        List<word>::operator[](i) = lst[i];
-    }
-
-    rehash(removeDuplicates);
-}
+Foam::hashedWordList::hashedWordList(const char** array, bool unique)
+:
+    hashedWordList(CStringList::count(array), array, unique)
+{}
 
 
-Foam::hashedWordList::hashedWordList(Istream& is)
-{
-    is  >> *this;
-}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-void Foam::hashedWordList::transfer
-(
-    List<word>& lst,
-    const bool removeDuplicates
-)
-{
-    List<word>::transfer(lst);
-    rehash(removeDuplicates);
-}
-
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::hashedWordList::rehash() const
 {
-    indices_.clear();
+    lookup_.clear();
 
-    forAll(*this, i)
+    const wordUList& list = *this;
+    const label len = list.size();
+
+    for (label i=0; i < len; ++i)
     {
-        indices_.insert(List<word>::operator[](i), i);
+        lookup_.insert(list[i], i);
     }
 }
 
 
 void Foam::hashedWordList::uniq()
 {
-    indices_.clear();
+    lookup_.clear();
 
-    label nElem = 0;
-    forAll(*this, i)
+    wordList& list = *this;
+    const label len = list.size();
+
+    label count = 0;
+    for (label i=0; i < len; ++i)
     {
-        const word& item = List<word>::operator[](i);
+        word& item = list[i];
 
-        if (indices_.insert(item, nElem))
+        if (lookup_.insert(item, i))
         {
-            if (nElem != i)
+            if (count != i)
             {
-                List<word>::operator[](nElem) = item;
+                list[count] = std::move(item);
             }
-            ++nElem;
+            ++count;
         }
     }
 
-    List<word>::setSize(nElem);
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, hashedWordList& lst)
-{
-    is  >> static_cast<List<word>&>(lst);
-    lst.rehash();
-
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const hashedWordList& lst)
-{
-    os  << static_cast<const UList<word>&>(lst);
-    return os;
+    list.resize(count);
 }
 
 

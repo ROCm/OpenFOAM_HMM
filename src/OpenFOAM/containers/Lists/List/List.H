@@ -43,6 +43,8 @@ SourceFiles
 #include "UList.H"
 #include "autoPtr.H"
 #include "Xfer.H"
+#include "SLListFwd.H"
+
 #include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,15 +59,9 @@ class Ostream;
 
 template<class T> class List;
 template<class T, unsigned Size> class FixedList;
-template<class T> class PtrList;
-
-class SLListBase;
-template<class LListBase, class T> class LList;
-template<class T>
-using SLList = LList<SLListBase, T>;
-
 template<class T, int SizeMin> class DynamicList;
 
+template<class T> class PtrList;
 template<class T> class SortableList;
 template<class T> class IndirectList;
 template<class T> class UIndirectList;
@@ -73,6 +69,7 @@ template<class T> class BiIndirectList;
 
 template<class T> Istream& operator>>(Istream& is, List<T>& L);
 
+// Commonly required list types
 typedef List<char> charList;
 
 
@@ -217,6 +214,9 @@ public:
         //- Move construct from SortableList
         List(SortableList<T>&& lst);
 
+        //- Move construct from SLList
+        List(SLList<T>&& lst);
+
         //- Construct from Istream
         List(Istream& is);
 
@@ -325,6 +325,9 @@ public:
 
         //- Move assignment. Takes constant time.
         void operator=(SortableList<T>&& lst);
+
+        //- Move assignment. Takes constant time
+        void operator=(SLList<T>&& lst);
 
 
     // Istream operator

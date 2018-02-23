@@ -40,6 +40,15 @@ Foam::LList<LListBase, T>::LList(const LList<LListBase, T>& lst)
 
 
 template<class LListBase, class T>
+Foam::LList<LListBase, T>::LList(LList<LListBase, T>&& lst)
+:
+    LListBase()
+{
+    LListBase::transfer(lst);
+}
+
+
+template<class LListBase, class T>
 Foam::LList<LListBase, T>::LList(std::initializer_list<T> lst)
 :
     LListBase()
@@ -50,6 +59,8 @@ Foam::LList<LListBase, T>::LList(std::initializer_list<T> lst)
     }
 }
 
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
 Foam::LList<LListBase, T>::~LList()
@@ -63,8 +74,8 @@ Foam::LList<LListBase, T>::~LList()
 template<class LListBase, class T>
 void Foam::LList<LListBase, T>::clear()
 {
-    label oldSize = this->size();
-    for (label i=0; i<oldSize; ++i)
+    const label len = this->size();
+    for (label i=0; i<len; ++i)
     {
         this->removeHead();
     }
@@ -96,6 +107,15 @@ void Foam::LList<LListBase, T>::operator=(const LList<LListBase, T>& lst)
 
 
 template<class LListBase, class T>
+void Foam::LList<LListBase, T>::operator=(LList<LListBase, T>&& lst)
+{
+    this->clear();
+
+    LListBase::transfer(lst);
+}
+
+
+template<class LListBase, class T>
 void Foam::LList<LListBase, T>::operator=(std::initializer_list<T> lst)
 {
     this->clear();
@@ -106,9 +126,5 @@ void Foam::LList<LListBase, T>::operator=(std::initializer_list<T> lst)
     }
 }
 
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-#include "LListIO.C"
 
 // ************************************************************************* //

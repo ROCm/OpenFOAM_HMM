@@ -41,10 +41,10 @@ Foam::List<T>::List(Istream& is)
 
 
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, List<T>& lst)
 {
     // Anull list
-    L.setSize(0);
+    lst.setSize(0);
 
     is.fatalCheck(FUNCTION_NAME);
 
@@ -52,22 +52,28 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
 
     is.fatalCheck(FUNCTION_NAME);
 
+    // Compound: simply transfer contents
     if (firstToken.isCompound())
     {
-        L.transfer
+        lst.transfer
         (
             dynamicCast<token::Compound<List<T>>>
             (
                 firstToken.transferCompoundToken(is)
             )
         );
+
+        return is;
     }
-    else if (firstToken.isLabel())
+
+
+    // Label: could be int(..), int{...} or just a plain '0'
+    if (firstToken.isLabel())
     {
-        const label sz = firstToken.labelToken();
+        const label len = firstToken.labelToken();
 
         // Set list length to that read
-        L.setSize(sz);
+        lst.setSize(len);
 
         // Read list contents depending on data format
 
@@ -76,13 +82,13 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
             // Read beginning of contents
             const char delimiter = is.readBeginList("List");
 
-            if (sz)
+            if (len)
             {
                 if (delimiter == token::BEGIN_LIST)
                 {
-                    for (label i=0; i<sz; ++i)
+                    for (label i=0; i<len; ++i)
                     {
-                        is >> L[i];
+                        is >> lst[i];
 
                         is.fatalCheck
                         (
@@ -103,9 +109,9 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                         "reading the single entry"
                     );
 
-                    for (label i=0; i<sz; ++i)
+                    for (label i=0; i<len; ++i)
                     {
-                        L[i] = element;
+                        lst[i] = element;  // Copy the value
                     }
                 }
             }
@@ -113,22 +119,24 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
             // Read end of contents
             is.readEndList("List");
         }
-        else
+        else if (len)
         {
-            // Contents are binary and contiguous
+            // Non-empty, binary, contiguous
 
-            if (sz)
-            {
-                is.read(reinterpret_cast<char*>(L.data()), sz*sizeof(T));
+            is.read(reinterpret_cast<char*>(lst.data()), len*sizeof(T));
 
-                is.fatalCheck
-                (
-                    "operator>>(Istream&, List<T>&) : reading the binary block"
-                );
-            }
+            is.fatalCheck
+            (
+                "operator>>(Istream&, List<T>&) : reading the binary block"
+            );
         }
+
+        return is;
     }
-    else if (firstToken.isPunctuation())
+
+
+    // "(...)" : read as SLList and transfer contents
+    if (firstToken.isPunctuation())
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
@@ -138,22 +146,21 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
                 << exit(FatalIOError);
         }
 
-        // Putback the opening bracket
-        is.putBack(firstToken);
+        is.putBack(firstToken); // Putback the opening bracket
 
-        // Read as a singly-linked list
-        SLList<T> sll(is);
+        SLList<T> sll(is);      // Read as singly-linked list
 
-        // Convert the singly-linked list to this list
-        L = sll;
+        // Reallocate and move assign list elements
+        lst = std::move(sll);
+
+        return is;
     }
-    else
-    {
-        FatalIOErrorInFunction(is)
-            << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
-            << exit(FatalIOError);
-    }
+
+
+    FatalIOErrorInFunction(is)
+        << "incorrect first token, expected <int> or '(', found "
+        << firstToken.info()
+        << exit(FatalIOError);
 
     return is;
 }

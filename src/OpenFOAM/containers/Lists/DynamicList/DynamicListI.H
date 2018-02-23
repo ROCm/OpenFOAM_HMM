@@ -418,11 +418,7 @@ inline void Foam::DynamicList<T, SizeMin>::swap
     const label oldSize2 = lst.expandStorage();
 
     // Swap storage
-    Foam::Swap
-    (
-        static_cast<UList<T>&>(cur),
-        static_cast<UList<T>&>(lst)
-    );
+    UList<T>::swap(lst);
 
     // Match capacity to the underlying allocated list size
     cur.setCapacity(cur.size());

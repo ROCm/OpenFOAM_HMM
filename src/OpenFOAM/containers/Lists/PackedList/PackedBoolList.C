@@ -265,26 +265,28 @@ Foam::label Foam::PackedBoolList::subset(const labelUIndList& indices)
 }
 
 
-Foam::Xfer<Foam::labelList> Foam::PackedBoolList::used() const
+Foam::labelList Foam::PackedBoolList::used() const
 {
-    labelList lst(this->count());
+    // Number of used (set) entries
+    const label cnt = this->count();
 
-    if (lst.size())
+    labelList lst(cnt);
+
+    if (cnt)
     {
-        label nElem = 0;
+        // The length of the input list
+        const label len = this->size();
 
-        forAll(*this, elemI)
+        for (label i=0, usedi=0; (i < len && usedi < cnt); ++i)
         {
-            if (get(elemI))
+            if (get(i))
             {
-                lst[nElem++] = elemI;
+                lst[usedi++] = i;
             }
         }
-
-        lst.setSize(nElem);
     }
 
-    return lst.xfer();
+    return lst;
 }
 
 

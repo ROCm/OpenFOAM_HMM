@@ -119,11 +119,17 @@ public:
         //- Construct given list of row-sizes
         CompactListList(const labelUList& rowSizes, const T&);
 
+        //- Copy construct
+        inline CompactListList(const CompactListList<T, Container>& lst);
+
+        //- Move construct
+        inline CompactListList(CompactListList<T, Container>&& lst);
+
         //- Construct by transferring the parameter contents
         explicit CompactListList(const Xfer<CompactListList<T, Container>>&);
 
         //- Construct as copy or re-use as specified.
-        CompactListList(CompactListList<T, Container>&, bool reuse);
+        inline CompactListList(CompactListList<T, Container>& lst, bool reuse);
 
         //- Construct from Istream.
         CompactListList(Istream&);
@@ -189,12 +195,16 @@ public:
             //- Return sizes (to be used e.g. for construction)
             labelList sizes() const;
 
+            //- Swap contents
+            void swap(CompactListList<T, Container>& lst);
+
             //- Transfer the contents of the argument CompactListList
             //  into this CompactListList and annul the argument list.
-            void transfer(CompactListList<T, Container>&);
+            void transfer(CompactListList<T, Container>& lst);
 
             //- Transfer the contents to the Xfer container
             inline Xfer<CompactListList<T, Container>> xfer();
+
 
         // Other
 
@@ -226,7 +236,13 @@ public:
         List<Container> operator()() const;
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T&);
+        inline void operator=(const T& val);
+
+        //- Copy assignment
+        inline void operator=(const CompactListList<T, Container>& lst);
+
+        //- Move assignment
+        inline void operator=(CompactListList<T, Container>&& lst);
 
 
     // Istream operator

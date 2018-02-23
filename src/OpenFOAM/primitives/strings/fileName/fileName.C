@@ -29,6 +29,7 @@ License
 #include "OSspecific.H"
 #include "wordRe.H"
 #include "fileOperation.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -463,28 +464,20 @@ bool Foam::fileName::hasExt(const wordRe& ending) const
 
 Foam::wordList Foam::fileName::components(const char delimiter) const
 {
-    DynamicList<word> wrdList(20);
+    const auto parsed = stringOps::split<string>(*this, delimiter);
 
-    size_type beg=0, end=0;
+    wordList words(parsed.size());
 
-    while ((end = find(delimiter, beg)) != npos)
+    label i = 0;
+    for (const auto& sub : parsed)
     {
-        // Avoid empty element (caused by doubled slashes)
-        if (beg < end)
-        {
-            wrdList.append(substr(beg, end-beg));
-        }
-        beg = end + 1;
+        // Could easily filter out '.' here too
+        words[i] = sub.str();
+        ++i;
     }
 
-    // Avoid empty trailing element
-    if (beg < size())
-    {
-        wrdList.append(substr(beg));
-    }
-
-    // Transfer to wordList
-    return wordList(wrdList.xfer());
+    // As a plain wordList
+    return words;
 }
 
 
@@ -494,7 +487,14 @@ Foam::word Foam::fileName::component
     const char delimiter
 ) const
 {
-    return components(delimiter)[cmpt];
+    const auto parsed = stringOps::split<string>(*this, delimiter);
+
+    if (cmpt < parsed.size())
+    {
+        return parsed[cmpt].str();
+    }
+
+    return word();
 }
 
 

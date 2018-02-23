@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,10 +27,7 @@ Class
 Description
     A FIFO stack based on a singly-linked list.
 
-    Operations are push(), pop(), top(), bottom() and empty().
-
-SourceFiles
-    FIFOStack.C
+    Stack operations are push(), pop(), top(), bottom().
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,7 +50,6 @@ class FIFOStack
 :
     public SLList<T>
 {
-
 public:
 
     // Constructors
@@ -64,34 +60,35 @@ public:
 
     // Member Functions
 
-        // Access
+        //- Return a copy of the top element
+        T top() const
+        {
+            return this->last();
+        }
 
-            //- Return a copy of the top element
-            T top() const
-            {
-                return this->last();
-            }
+        //- Return a copy of the bottom element
+        T bottom() const
+        {
+            return this->first();
+        }
 
-            //- Return a copy of the bottom element
-            T bottom() const
-            {
-                return this->first();
-            }
+        //- Push an element onto the back of the stack
+        void push(const T& element)
+        {
+            this->append(element);
+        }
 
+        //- Move an element onto the back of the stack
+        void push(T&& element)
+        {
+            this->append(std::move(element));
+        }
 
-        // Edit
-
-            //- Push an element onto the stack
-            void push(const T& a)
-            {
-                this->append(a);
-            }
-
-            //- Pop the bottom element off the stack
-            T pop()
-            {
-                return this->removeHead();
-            }
+        //- Pop the bottom element off the stack
+        T pop()
+        {
+            return this->removeHead();
+        }
 };
 
 

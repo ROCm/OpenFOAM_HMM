@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,31 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
-
 #include "IOstreams.H"
 #include "SLList.H"
+#include "List.H"
+#include "FlatOutput.H"
+#include "ListOps.H"
 
 using namespace Foam;
+
+template<class T>
+void printAddress(const UList<T>& list)
+{
+    Info<< "list addr: " << long(&list)
+        << " data addr: " << long(list.cdata()) << nl;
+}
+
+
+template<class T>
+void printAddresses(const SLList<List<T>>& sll)
+{
+    for (const auto& elem : sll)
+    {
+        printAddress(elem);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
@@ -50,33 +70,33 @@ int main(int argc, char *argv[])
     myList.append(100.3);
     myList.append(500.3);
 
-    Info<< nl << "And again using STL iterator: " << nl << endl;
+    Info<< "SLList<scalar>" << myList << nl;
+    Info<< nl << "flat-output: " << flatOutput(myList) << nl;
 
+    Info<< nl << "range-for:" << nl;
     for (const auto& val : myList)
     {
-        Info<< "element:" << val << endl;
+        Info<< "  " << val << nl;
     }
 
-    Info<< nl << "And again using STL const_iterator: " << nl << endl;
+    Info<< nl << "const_iterator:" << nl;
 
     const SLList<scalar>& const_myList = myList;
 
     forAllConstIters(const_myList, iter)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "  " << *iter << endl;
     }
+
+    Info<< nl << "Remove elements:" << nl;
 
     forAllIters(myList, iter)
     {
-        Info<< "Removing element:" << *iter << endl;
+        Info<< "  remove " << *iter;
         myList.remove(iter);
-    }
 
-    for (const auto& val : const_myList)
-    {
-        Info<< "element:" << val << endl;
+        Info<< " => " << flatOutput(myList) << nl;
     }
-
 
     for (int i = 0; i<10; i++)
     {
@@ -86,15 +106,72 @@ int main(int argc, char *argv[])
     myList.append(100.3);
     myList.append(500.3);
 
-    Info<< nl << "Testing transfer: " << nl << endl;
-    Info<< "original: " << myList << endl;
+    Info<< nl << "Transfer: " << nl;
+    Info<< "original: " << flatOutput(myList) << endl;
 
     SLList<scalar> newList;
     newList.transfer(myList);
 
-    Info<< nl << "source: " << myList << nl
-        << nl << "target: " << newList << endl;
+    Info<< nl
+        << "source: " << flatOutput(myList) << nl
+        << "target: " << flatOutput(newList) << nl;
 
+    Info<< nl << "Move Construct: " << nl;
+
+    SLList<scalar> list2(std::move(newList));
+
+    Info<< nl
+        << "in : " << flatOutput(newList) << nl
+        << "out: " << flatOutput(list2) << nl;
+
+    // Move back
+    Info<< nl << "Move Assignment: " << nl;
+
+    newList = std::move(list2);
+
+    Info<< nl
+        << "in : " << flatOutput(newList) << nl
+        << "out: " << flatOutput(list2) << nl;
+
+
+    // Try delete data recovery
+    {
+        SLList<List<label>> labList;
+
+        for (int i = 0; i<5; i++)
+        {
+            labList.append(identity(6));
+        }
+
+        Info<< nl
+            << "SLList<labelList> : " << labList << nl;
+
+        printAddresses(labList);
+
+        auto elem = labList.removeHead();
+
+        Info<< " removed head" << nl;
+        printAddress(elem);
+
+        elem = labList.removeHead();
+
+        Info<< " removed head" << nl;
+        printAddress(elem);
+
+        List<label> content1 = identity(10);
+
+        Info<< nl
+            << " move append ";
+        printAddress(content1);
+
+        labList.append(std::move(content1));
+
+        Info<< " content " << flatOutput(content1) << nl
+            << " list" << labList  << nl;
+
+        printAddresses(labList);
+        // labList.append(content1);
+    }
 
     Info<< nl << "Done." << endl;
     return 0;

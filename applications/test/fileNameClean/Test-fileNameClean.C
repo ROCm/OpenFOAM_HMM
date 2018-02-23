@@ -46,6 +46,9 @@ void printCleaning(fileName& pathName)
         << "  name() = " << pathName.name() << nl
         << "  joined = " << pathName.path()/pathName.name() << nl << nl;
 
+    Info<< "components  = " << flatOutput(pathName.components()) << nl;
+    Info<< "component 2 = " << pathName.component(2) << nl;
+
     pathName.clean();
 
     Info<< "cleaned  = " << pathName << nl

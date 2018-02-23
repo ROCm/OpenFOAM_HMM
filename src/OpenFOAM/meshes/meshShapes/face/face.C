@@ -606,23 +606,26 @@ Foam::face Foam::face::reverseFace() const
     // Reverse the label list and return
     // The starting points of the original and reverse face are identical.
 
-    const labelList& f = *this;
-    labelList newList(size());
+    const labelUList& origFace = *this;
+    const label len = origFace.size();
 
-    newList[0] = f[0];
-
-    for (label pointi = 1; pointi < newList.size(); pointi++)
+    face newFace(len);
+    if (len)
     {
-        newList[pointi] = f[size() - pointi];
+        newFace[0] = origFace[0];
+        for (label i=1; i < len; ++i)
+        {
+            newFace[i] = origFace[len - i];
+        }
     }
 
-    return face(xferMove(newList));
+    return newFace;
 }
 
 
 Foam::label Foam::face::which(const label globalIndex) const
 {
-    const labelList& f = *this;
+    const labelUList& f = *this;
 
     forAll(f, localIdx)
     {

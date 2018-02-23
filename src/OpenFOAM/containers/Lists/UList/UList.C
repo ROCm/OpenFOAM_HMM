@@ -63,9 +63,9 @@ Foam::labelRange Foam::UList<T>::validateRange
     auto iter = start_size.begin();
 
     const label beg = *(iter++);
-    const label sz  = *iter;
+    const label len = *iter;
 
-    return this->validateRange(labelRange(beg, sz));
+    return this->validateRange(labelRange(beg, len));
 }
 
 
@@ -122,31 +122,32 @@ void Foam::UList<T>::swapLast(const label i)
 
 
 template<class T>
-void Foam::UList<T>::deepCopy(const UList<T>& a)
+void Foam::UList<T>::deepCopy(const UList<T>& list)
 {
-    if (a.size_ != this->size_)
+    const label len = this->size_;
+
+    if (len != list.size_)
     {
         FatalErrorInFunction
             << "ULists have different sizes: "
-            << this->size_ << " " << a.size_
+            << len << " " << list.size_
             << abort(FatalError);
     }
-
-    if (this->size_)
+    else if (len)
     {
         #ifdef USEMEMCPY
         if (contiguous<T>())
         {
-            memcpy(this->v_, a.v_, this->byteSize());
+            memcpy(this->v_, list.v_, this->byteSize());
         }
         else
         #endif
         {
-            List_ACCESS(T, (*this), vp);
-            List_CONST_ACCESS(T, a, ap);
-            List_FOR_ALL((*this), i)
+            List_ACCESS(T, (*this), lhs);
+            List_CONST_ACCESS(T, list, rhs);
+            for (label i = 0; i < len; ++i)
             {
-                vp[i] = ap[i];
+                lhs[i] = rhs[i];
             }
         }
     }
@@ -228,8 +229,7 @@ std::streamsize Foam::UList<T>::byteSize() const
     if (!contiguous<T>())
     {
         FatalErrorInFunction
-            << "Cannot return the binary size of a list of "
-               "non-primitive elements"
+            << "Cannot return binary size of a list with non-primitive elements"
             << abort(FatalError);
     }
 
@@ -317,20 +317,22 @@ void Foam::shuffle(UList<T>& a)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-bool Foam::UList<T>::operator==(const UList<T>& a) const
+bool Foam::UList<T>::operator==(const UList<T>& list) const
 {
-    bool equal = (this->size_ == a.size_);
-    if (!equal)
+    const label len = this->size_;
+    if (len != list.size_)
     {
         return false;
     }
 
-    List_CONST_ACCESS(T, (*this), vp);
-    List_CONST_ACCESS(T, (a), ap);
+    bool equal = false;
 
-    List_FOR_ALL((*this), i)
+    List_CONST_ACCESS(T, (*this), lhs);
+    List_CONST_ACCESS(T, (list), rhs);
+
+    for (label i = 0; i < len; ++i)
     {
-        equal = (vp[i] == ap[i]);
+        equal = (lhs[i] == rhs[i]);
         if (!equal) break;
     }
 
@@ -339,55 +341,55 @@ bool Foam::UList<T>::operator==(const UList<T>& a) const
 
 
 template<class T>
-bool Foam::UList<T>::operator!=(const UList<T>& a) const
+bool Foam::UList<T>::operator!=(const UList<T>& list) const
 {
-    return !operator==(a);
+    return !operator==(list);
 }
 
 
 template<class T>
-bool Foam::UList<T>::operator<(const UList<T>& a) const
+bool Foam::UList<T>::operator<(const UList<T>& list) const
 {
     for
     (
-        const_iterator vi = begin(), ai = a.begin();
-        vi < end() && ai < a.end();
-        ++vi, ++ai
+        const_iterator lhs = begin(), rhs = list.begin();
+        lhs < end() && rhs < list.end();
+        ++lhs, ++rhs
     )
     {
-        if (*vi < *ai)
+        if (*lhs < *rhs)
         {
             return true;
         }
-        else if (*vi > *ai)
+        else if (*rhs < *lhs)
         {
             return false;
         }
     }
 
     // Contents look to be identical, or lists have different sizes
-    return (this->size_ < a.size_);
+    return (this->size_ < list.size_);
 }
 
 
 template<class T>
-bool Foam::UList<T>::operator>(const UList<T>& a) const
+bool Foam::UList<T>::operator>(const UList<T>& list) const
 {
-    return a.operator<(*this);
+    return list.operator<(*this);
 }
 
 
 template<class T>
-bool Foam::UList<T>::operator<=(const UList<T>& a) const
+bool Foam::UList<T>::operator<=(const UList<T>& list) const
 {
-    return !operator>(a);
+    return !list.operator<(*this);
 }
 
 
 template<class T>
-bool Foam::UList<T>::operator>=(const UList<T>& a) const
+bool Foam::UList<T>::operator>=(const UList<T>& list) const
 {
-    return !operator<(a);
+    return !operator<(list);
 }
 
 

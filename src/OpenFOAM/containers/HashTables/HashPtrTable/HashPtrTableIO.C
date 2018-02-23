@@ -33,7 +33,7 @@ License
 
 template<class T, class Key, class Hash>
 template<class INew>
-void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
+void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inew)
 {
     is.fatalCheck(FUNCTION_NAME);
 
@@ -47,25 +47,25 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
 
     if (firstToken.isLabel())
     {
-        const label s = firstToken.labelToken();
+        const label len = firstToken.labelToken();
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("HashPtrTable");
 
-        if (s)
+        if (len)
         {
-            if (2*s > this->capacity())
+            if (2*len > this->capacity())
             {
-                this->resize(2*s);
+                this->resize(2*len);
             }
 
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; ++i)
+                for (label i=0; i<len; ++i)
                 {
                     Key key;
                     is >> key;
-                    this->insert(key, inewt(key, is).ptr());
+                    this->insert(key, inew(key, is).ptr());
 
                     is.fatalCheck
                     (
@@ -110,7 +110,7 @@ void Foam::HashPtrTable<T, Key, Hash>::read(Istream& is, const INew& inewt)
             is.putBack(lastToken);
             Key key;
             is >> key;
-            this->insert(key, inewt(key, is).ptr());
+            this->insert(key, inew(key, is).ptr());
 
             is.fatalCheck
             (
@@ -140,14 +140,14 @@ template<class INew>
 void Foam::HashPtrTable<T, Key, Hash>::read
 (
     const dictionary& dict,
-    const INew& inewt
+    const INew& inew
 )
 {
     forAllConstIter(dictionary, dict, iter)
     {
         const word& k = iter().keyword();
 
-        this->insert(k, inewt(dict.subDict(k)).ptr());
+        this->insert(k, inew(dict.subDict(k)).ptr());
     }
 }
 
@@ -170,9 +170,9 @@ void Foam::HashPtrTable<T, Key, Hash>::write(Ostream& os) const
 
 template<class T, class Key, class Hash>
 template<class INew>
-Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is, const INew& inewt)
+Foam::HashPtrTable<T, Key, Hash>::HashPtrTable(Istream& is, const INew& inew)
 {
-    this->read(is, inewt);
+    this->read(is, inew);
 }
 
 
@@ -209,12 +209,12 @@ Foam::Ostream& Foam::operator<<
     const HashPtrTable<T, Key, Hash>& tbl
 )
 {
-    const label sz = tbl.size();
+    const label len = tbl.size();
 
-    if (sz)
+    if (len)
     {
         // Size and start list delimiter
-        os << nl << sz << nl << token::BEGIN_LIST << nl;
+        os << nl << len << nl << token::BEGIN_LIST << nl;
 
         // Contents
         for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
@@ -233,7 +233,7 @@ Foam::Ostream& Foam::operator<<
     else
     {
         // Empty hash table
-        os << sz << token::BEGIN_LIST << token::END_LIST;
+        os << len << token::BEGIN_LIST << token::END_LIST;
     }
 
     os.check(FUNCTION_NAME);

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,136 +28,65 @@ License
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::UPtrList<T>::UPtrList()
-:
-    ptrs_()
-{}
-
-
-template<class T>
-Foam::UPtrList<T>::UPtrList(const label s)
-:
-    ptrs_(s, reinterpret_cast<T*>(0))
-{}
-
-
-template<class T>
 Foam::UPtrList<T>::UPtrList(UList<T>& lst)
 :
     ptrs_(lst.size())
 {
-    forAll(lst, i)
+    const label len = lst.size();
+
+    for (label i=0; i<len; ++i)
     {
-        ptrs_[i] = &lst[i];
+        ptrs_[i] = &(lst[i]);
     }
 }
-
-
-template<class T>
-Foam::UPtrList<T>::UPtrList(PtrList<T>& lst)
-:
-    ptrs_(lst.size())
-{
-    forAll(lst, i)
-    {
-        ptrs_[i] = &lst[i];
-    }
-}
-
-
-template<class T>
-Foam::UPtrList<T>::UPtrList(const Xfer<UPtrList<T>>& lst)
-{
-    transfer(lst());
-}
-
-
-template<class T>
-Foam::UPtrList<T>::UPtrList(UPtrList<T>& a, bool reuse)
-:
-    ptrs_(a.ptrs_, reuse)
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::UPtrList<T>::setSize(const label newSize)
-{
-    label oldSize = size();
-
-    if (newSize <= 0)
-    {
-        clear();
-    }
-    else if (newSize < oldSize)
-    {
-        ptrs_.setSize(newSize);
-    }
-    else if (newSize > oldSize)
-    {
-        ptrs_.setSize(newSize);
-
-        // set new elements to nullptr
-        for (label i=oldSize; i<newSize; i++)
-        {
-            ptrs_[i] = nullptr;
-        }
-    }
-}
-
-
-template<class T>
-void Foam::UPtrList<T>::clear()
-{
-    ptrs_.clear();
-}
-
-
-template<class T>
-void Foam::UPtrList<T>::transfer(UPtrList<T>& a)
-{
-    ptrs_.transfer(a.ptrs_);
-}
-
-
-template<class T>
 void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
 {
-    if (oldToNew.size() != size())
+    const label len = this->size();
+
+    if (oldToNew.size() != len)
     {
         FatalErrorInFunction
             << "Size of map (" << oldToNew.size()
-            << ") not equal to list size (" << size()
-            << ")." << abort(FatalError);
+            << ") not equal to list size (" << len
+            << ") for type " << typeid(T).name() << nl
+            << abort(FatalError);
     }
 
-    List<T*> newPtrs_(ptrs_.size(), reinterpret_cast<T*>(0));
+    // New list of pointers
+    List<T*> ptrLst(len, reinterpret_cast<T*>(0));
 
-    forAll(*this, i)
+    for (label i=0; i<len; ++i)
     {
-        label newI = oldToNew[i];
+        const label idx = oldToNew[i];
 
-        if (newI < 0 || newI >= size())
+        if (idx < 0 || idx >= len)
         {
             FatalErrorInFunction
-                << "Illegal index " << newI << nl
-                << "Valid indices are 0.." << size()-1
+                << "Illegal index " << idx << nl
+                << "Valid indices are 0.." << len-1
+                << " for type " << typeid(T).name() << nl
                 << abort(FatalError);
         }
 
-        if (newPtrs_[newI])
+        if (ptrLst[idx])
         {
             FatalErrorInFunction
-                << "reorder map is not unique; element " << newI
-                << " already set." << abort(FatalError);
+                << "reorder map is not unique; element " << idx
+                << " already set for type " << typeid(T).name()
+                << abort(FatalError);
         }
-        newPtrs_[newI] = ptrs_[i];
+        ptrLst[idx] = ptrs_[i];
     }
 
-    forAll(newPtrs_, i)
+    // Verify that all pointers were set
+    for (label i=0; i<len; ++i)
     {
-        if (!newPtrs_[i])
+        if (!ptrLst[i])
         {
             FatalErrorInFunction
                 << "Element " << i << " not set after reordering." << nl
@@ -165,12 +94,8 @@ void Foam::UPtrList<T>::reorder(const labelUList& oldToNew)
         }
     }
 
-    ptrs_.transfer(newPtrs_);
+    ptrs_.swap(ptrLst);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "UPtrListIO.C"
 
 // ************************************************************************* //

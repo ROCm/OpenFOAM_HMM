@@ -70,12 +70,6 @@ inline Foam::face::face(std::initializer_list<label> lst)
 {}
 
 
-inline Foam::face::face(const Xfer<labelList>& lst)
-:
-    labelList(lst)
-{}
-
-
 inline Foam::face::face(labelList&& lst)
 :
     labelList(std::move(lst))

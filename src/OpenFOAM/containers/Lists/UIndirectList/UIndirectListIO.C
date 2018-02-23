@@ -39,16 +39,16 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
 {
     const UIndirectList<T>& L = *this;
 
-    const label sz = L.size();
+    const label len = L.size();
 
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
         // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (sz > 1 && contiguous<T>());
+        bool uniform = (len > 1 && contiguous<T>());
         if (uniform)
         {
-            for (label i=1; i < sz; ++i)
+            for (label i=1; i < len; ++i)
             {
                 if (L[i] != L[0])
                 {
@@ -61,7 +61,7 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
         if (uniform)
         {
             // Size and start delimiter
-            os << sz << token::BEGIN_BLOCK;
+            os << len << token::BEGIN_BLOCK;
 
             // Contents
             os << L[0];
@@ -71,15 +71,15 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
         }
         else if
         (
-            sz <= 1 || !shortListLen
-         || (sz <= shortListLen && contiguous<T>())
+            len <= 1 || !shortListLen
+         || (len <= shortListLen && contiguous<T>())
         )
         {
             // Size and start delimiter
-            os << sz << token::BEGIN_LIST;
+            os << len << token::BEGIN_LIST;
 
             // Contents
-            for (label i=0; i < sz; ++i)
+            for (label i=0; i < len; ++i)
             {
                 if (i) os << token::SPACE;
                 os << L[i];
@@ -91,10 +91,10 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
         else
         {
             // Size and start delimiter
-            os << nl << sz << nl << token::BEGIN_LIST << nl;
+            os << nl << len << nl << token::BEGIN_LIST << nl;
 
             // Contents
-            for (label i=0; i < sz; ++i)
+            for (label i=0; i < len; ++i)
             {
                 os << L[i] << nl;
             }
@@ -106,16 +106,16 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
     else
     {
         // Contents are binary and contiguous
-        os << nl << sz << nl;
+        os << nl << len << nl;
 
-        if (sz)
+        if (len)
         {
             // The TOTAL number of bytes to be written.
             // - possibly add start delimiter
-            os.beginRaw(sz*sizeof(T));
+            os.beginRaw(len*sizeof(T));
 
             // Contents
-            for (label i=0; i < sz; ++i)
+            for (label i=0; i < len; ++i)
             {
                 os.writeRaw
                 (

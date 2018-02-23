@@ -373,6 +373,15 @@ Foam::List<T>::List(SortableList<T>&& lst)
 }
 
 
+template<class T>
+Foam::List<T>::List(SLList<T>&& lst)
+:
+    UList<T>(nullptr, 0)
+{
+    operator=(std::move(lst));
+}
+
+
 // * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -530,9 +539,11 @@ void Foam::List<T>::operator=(const List<T>& lst)
 template<class T>
 void Foam::List<T>::operator=(const SLList<T>& lst)
 {
-    reAlloc(lst.size());
+    const label len = lst.size();
 
-    if (this->size_)
+    reAlloc(len);
+
+    if (len)
     {
         label i = 0;
         for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
@@ -628,6 +639,22 @@ template<class T>
 void Foam::List<T>::operator=(SortableList<T>&& lst)
 {
     transfer(lst);
+}
+
+
+template<class T>
+void Foam::List<T>::operator=(SLList<T>&& lst)
+{
+    const label len = lst.size();
+
+    reAlloc(len);
+
+    for (label i = 0; i < len; ++i)
+    {
+        this->operator[](i) = std::move(lst.removeHead());
+    }
+
+    lst.clear();
 }
 
 

@@ -100,11 +100,16 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 
 
 template<class T, class Key, class Hash>
-Foam::HashTable<T, Key, Hash>::HashTable(HashTable<T, Key, Hash>&& ht)
+Foam::HashTable<T, Key, Hash>::HashTable(HashTable<T, Key, Hash>&& rhs)
 :
-    HashTable<T, Key, Hash>(0)
+    HashTableCore(),
+    size_(rhs.size_),
+    capacity_(rhs.capacity_),
+    table_(rhs.table_)
 {
-    transfer(ht);
+    rhs.size_ = 0;
+    rhs.capacity_ = 0;
+    rhs.table_ = nullptr;
 }
 
 
@@ -116,9 +121,9 @@ Foam::HashTable<T, Key, Hash>::HashTable
 :
     HashTable<T, Key, Hash>(2*lst.size())
 {
-    for (const auto& pair : lst)
+    for (const auto& keyval : lst)
     {
-        insert(pair.first, pair.second);
+        insert(keyval.first, keyval.second);
     }
 }
 
@@ -141,25 +146,25 @@ Foam::HashTable<T, Key, Hash>::~HashTable()
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTable<T, Key, Hash>::toc() const
 {
-    List<Key> keyLst(size_);
+    List<Key> list(size_);
     label count = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
-        keyLst[count++] = iter.key();
+        list[count++] = iter.key();
     }
 
-    return keyLst;
+    return list;
 }
 
 
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTable<T, Key, Hash>::sortedToc() const
 {
-    List<Key> keyLst(this->toc());
-    Foam::sort(keyLst);
+    List<Key> list(this->toc());
+    Foam::sort(list);
 
-    return keyLst;
+    return list;
 }
 
 
@@ -170,10 +175,10 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::sortedToc
     const Compare& comp
 ) const
 {
-    List<Key> keyLst(this->toc());
-    Foam::sort(keyLst, comp);
+    List<Key> list(this->toc());
+    Foam::sort(list, comp);
 
-    return keyLst;
+    return list;
 }
 
 
@@ -185,21 +190,21 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocKeys
     const bool invert
 ) const
 {
-    List<Key> keyLst(size_);
+    List<Key> list(size_);
     label count = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if ((pred(iter.key()) ? !invert : invert))
         {
-            keyLst[count++] = iter.key();
+            list[count++] = iter.key();
         }
     }
 
-    keyLst.setSize(count);
-    Foam::sort(keyLst);
+    list.setSize(count);
+    Foam::sort(list);
 
-    return keyLst;
+    return list;
 }
 
 
@@ -211,21 +216,21 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocValues
     const bool invert
 ) const
 {
-    List<Key> keyLst(size_);
+    List<Key> list(size_);
     label count = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if ((pred(iter.object()) ? !invert : invert))
         {
-            keyLst[count++] = iter.key();
+            list[count++] = iter.key();
         }
     }
 
-    keyLst.setSize(count);
-    Foam::sort(keyLst);
+    list.setSize(count);
+    Foam::sort(list);
 
-    return keyLst;
+    return list;
 }
 
 
@@ -237,21 +242,21 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::tocEntries
     const bool invert
 ) const
 {
-    List<Key> keyLst(size_);
+    List<Key> list(size_);
     label count = 0;
 
     for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if ((pred(iter.key(), iter.object()) ? !invert : invert))
         {
-            keyLst[count++] = iter.key();
+            list[count++] = iter.key();
         }
     }
 
-    keyLst.setSize(count);
-    Foam::sort(keyLst);
+    list.setSize(count);
+    Foam::sort(list);
 
-    return keyLst;
+    return list;
 }
 
 
@@ -647,33 +652,19 @@ void Foam::HashTable<T, Key, Hash>::clearStorage()
 
 
 template<class T, class Key, class Hash>
-void Foam::HashTable<T, Key, Hash>::swap(HashTable<T, Key, Hash>& ht)
+void Foam::HashTable<T, Key, Hash>::swap(HashTable<T, Key, Hash>& rhs)
 {
-    Foam::Swap(size_, ht.size_);
-    Foam::Swap(capacity_, ht.capacity_);
-    Foam::Swap(table_, ht.table_);
+    Foam::Swap(size_, rhs.size_);
+    Foam::Swap(capacity_, rhs.capacity_);
+    Foam::Swap(table_, rhs.table_);
 }
 
 
 template<class T, class Key, class Hash>
-void Foam::HashTable<T, Key, Hash>::transfer(HashTable<T, Key, Hash>& ht)
+void Foam::HashTable<T, Key, Hash>::transfer(HashTable<T, Key, Hash>& rhs)
 {
-    // As per destructor
-    if (table_)
-    {
-        clear();
-        delete[] table_;
-    }
-
-    size_ = ht.size_;
-    ht.size_ = 0;
-
-    capacity_ = ht.capacity_;
-    ht.capacity_ = 0;
-
-    table_ = ht.table_;
-    ht.table_ = nullptr;
-
+    clear();
+    swap(rhs);
 }
 
 
@@ -794,22 +785,22 @@ void Foam::HashTable<T, Key, Hash>::operator=
 template<class T, class Key, class Hash>
 void Foam::HashTable<T, Key, Hash>::operator=
 (
-    std::initializer_list<std::pair<Key, T>> lst
+    std::initializer_list<std::pair<Key, T>> rhs
 )
 {
     // Could be zero-sized from a previous transfer()
     if (!capacity_)
     {
-        resize(2*lst.size());
+        resize(2*rhs.size());
     }
     else
     {
         clear();
     }
 
-    for (const auto& pair : lst)
+    for (const auto& keyval : rhs)
     {
-        insert(pair.first, pair.second);
+        insert(keyval.first, keyval.second);
     }
 }
 
