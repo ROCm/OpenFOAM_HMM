@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,7 +91,7 @@ public:
     // Constructors
 
         //- Construct null
-        inline PackedBoolList();
+        PackedBoolList() = default;
 
         //- Construct from Istream
         PackedBoolList(Istream& is);
@@ -102,17 +102,17 @@ public:
         //- Construct with given size and value for all elements
         inline PackedBoolList(const label size, const bool val);
 
-        //- Copy constructor
+        //- Copy construct
         inline PackedBoolList(const PackedBoolList& lst);
 
-        //- Copy constructor
+        //- Copy construct
         explicit inline PackedBoolList(const PackedList<1>& lst);
 
-        //- Construct by transferring the parameter contents
-        inline PackedBoolList(const Xfer<PackedBoolList>& lst);
+        //- Move construct
+        inline PackedBoolList(PackedBoolList&& lst);
 
-        //- Construct by transferring the parameter contents
-        inline PackedBoolList(const Xfer<PackedList<1>>& lst);
+        //- Move construct
+        inline PackedBoolList(PackedList<1>&& lst);
 
         //- Construct with given size and list of labels to set as true.
         inline PackedBoolList(const label size, const labelUList& indices);
@@ -137,7 +137,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         using PackedList<1>::set;
         using PackedList<1>::unset;
@@ -175,12 +175,11 @@ public:
         //  Return number of elements subsetted.
         label subset(const labelUIndList& indices);
 
-
         //- Return indices of the used (true) elements as a list of labels
-        Xfer<labelList> used() const;
+        labelList used() const;
 
 
-      // Edit
+    // Edit
 
         //- Transfer the contents of the argument list into this list
         //- and annul the argument list.
@@ -190,20 +189,23 @@ public:
         //- and annul the argument list.
         inline void transfer(PackedList<1>& lst);
 
-        //- Transfer contents to the Xfer container
-        inline Xfer<PackedBoolList> xfer();
-
 
     // Member Operators
 
         //- Assignment of all entries to the given value.
         inline void operator=(const bool val);
 
-        //- Assignment operator.
+        //- Copy assignment
         inline void operator=(const PackedBoolList& lst);
 
-        //- Assignment operator.
+        //- Copy assignment
         inline void operator=(const PackedList<1>& lst);
+
+        //- Move assignment
+        inline void operator=(PackedBoolList&& lst);
+
+        //- Move assignment
+        inline void operator=(PackedList<1>&& lst);
 
         //- Assignment operator.
         void operator=(const UList<bool>& lst);

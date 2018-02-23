@@ -28,20 +28,39 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
-
 #include "IOstreams.H"
 #include "DLList.H"
+#include "List.H"
+#include "FlatOutput.H"
+#include "ListOps.H"
 
 using namespace Foam;
+
+template<class T>
+void printAddress(const UList<T>& list)
+{
+    Info<< "list addr: " << long(&list)
+        << " data addr: " << long(list.cdata()) << nl;
+}
+
+
+template<class T>
+void printAddresses(const DLList<List<T>>& sll)
+{
+    for (const auto& elem : sll)
+    {
+        printAddress(elem);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
-    DLList<scalar> myList;
-
-    Info<< "DLList<scalar>" << nl;
+    DLList<scalar> myList{2.1, 3.4};
+    myList = {2.1, 3.4, 4.3};
 
     for (int i = 0; i<10; i++)
     {
@@ -51,58 +70,165 @@ int main(int argc, char *argv[])
     myList.append(100.3);
     myList.append(500.3);
 
-    forAllConstIters(myList, iter)
+    Info<< "DLList<scalar>" << nl;
+    Info<< nl << "flat-output: " << flatOutput(myList) << nl;
+
+    Info<< nl << "range-for:" << nl;
+    for (const auto& val : myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "  " << val << nl;
     }
 
-    Info<< nl << "And again using the same STL iterator: " << nl << endl;
+    Info<< nl << "const_iterator:" << nl;
+
+    forAllConstIters(myList, iter)
+    {
+        Info<< "  " << *iter << endl;
+    }
+
+    // Test bi-directional movement
+    {
+        const label n2 = myList.size()/2;
+
+        Info<< nl << "test movement through " << flatOutput(myList) << nl;
+
+        DLList<scalar>::const_iterator citer = myList.begin();
+
+        for (label i=0; i<n2; ++i)
+        {
+            Info<< "  forward " << i << " " << *citer << nl;
+            ++citer;
+        }
+
+        for (label i=0; i<n2; ++i)
+        {
+            Info<< "  backward " << i << " " << *citer << nl;
+            --citer;
+        }
+
+        // Verify - does not compile since it uses a delete method (good!)
+        DLList<scalar>::iterator iter = myList.begin();
+        ++iter;
+        ++iter;
+        ++iter;
+
+        Info<<" now with " << *iter << nl;
+        myList.remove(iter);
+        Info<<" after remove " << *iter << nl;
+        ++iter;
+        Info<<" after incr " << *iter << nl;
+        --iter;
+        --iter;
+
+        Info<<" after 2x decr " << *iter << nl;
+    }
+
+    Info<< nl << "const_reverse_iterator:" << nl;
+
+    forAllConstReverseIters(myList, iter)
+    {
+        Info<< "  " << *iter << endl;
+    }
+
+
+    Info<< nl << "Remove elements:" << nl;
 
     forAllIters(myList, iter)
     {
-        Info<< "Removing " << myList.remove(iter) << endl;
+        Info<< "  remove " << *iter;
+        myList.remove(iter);
+
+        Info<< " => " << flatOutput(myList) << nl;
     }
 
     myList.append(500.3);
     myList.append(200.3);
     myList.append(100.3);
 
-    Info<< nl << "Using range-based for: " << nl << endl;
-    for (auto val : myList)
+    Info<< nl << "Testing swapUp and swapDown:" << nl;
+    Info<< " => " << flatOutput(myList) << nl;
+
     {
-        Info<< "element:" << val << endl;
+        myList.swapUp(myList.DLListBase::first());
+        myList.swapUp(myList.DLListBase::last());
+
+        Info<< nl << "swapUp => " << flatOutput(myList) << nl;
     }
 
-    Info<< nl << "Testing swapUp and swapDown: " << endl;
-
-    Info<< nl << "swapUp" << endl;
-
-    myList.swapUp(myList.DLListBase::first());
-    myList.swapUp(myList.DLListBase::last());
-
-    for (auto val : myList)
     {
-        Info<< "element:" << val << endl;
+        myList.swapDown(myList.DLListBase::first());
+        myList.swapDown(myList.DLListBase::last());
+
+        Info<< nl << "swapDown => " << flatOutput(myList) << nl;
     }
 
-    Info<< nl << "swapDown" << endl;
 
-    myList.swapDown(myList.DLListBase::first());
-    myList.swapDown(myList.DLListBase::last());
-
-    for (auto val : myList)
-    {
-        Info<< "element:" << val << endl;
-    }
-
-    Info<< nl << "Testing transfer: " << nl << nl
-        << "original: " << myList << endl;
+    Info<< nl << "Transfer: " << nl;
+    Info<< "original: " << flatOutput(myList) << endl;
 
     DLList<scalar> newList;
     newList.transfer(myList);
 
-    Info<< nl << "source: " << myList << nl
-        << nl << "target: " << newList << endl;
+    Info<< nl
+        << "source: " << flatOutput(myList) << nl
+        << "target: " << flatOutput(newList) << nl;
+
+
+    Info<< nl << "Move Construct: " << nl;
+
+    DLList<scalar> list2(std::move(newList));
+
+    Info<< nl
+        << "in : " << flatOutput(newList) << nl
+        << "out: " << flatOutput(list2) << nl;
+
+    // Move back
+    Info<< nl << "Move Assignment: " << nl;
+
+    newList = std::move(list2);
+
+    Info<< nl
+        << "in : " << flatOutput(newList) << nl
+        << "out: " << flatOutput(list2) << nl;
+
+    // Try delete data recovery
+    {
+        DLList<List<label>> labList;
+
+        for (int i = 0; i<5; i++)
+        {
+            labList.append(identity(6));
+        }
+
+        Info<< nl
+            << "DLList<labelList> : " << labList << nl;
+
+        printAddresses(labList);
+
+        auto elem = labList.removeHead();
+
+        Info<< " removed head" << nl;
+        printAddress(elem);
+
+        elem = labList.removeHead();
+
+        Info<< " removed head" << nl;
+        printAddress(elem);
+
+        List<label> content1 = identity(10);
+
+        Info<< nl
+            << " move append ";
+        printAddress(content1);
+
+        labList.append(std::move(content1));
+
+        Info<< " content " << flatOutput(content1) << nl
+            << " list" << labList  << nl;
+
+        printAddresses(labList);
+        // labList.append(content1);
+    }
 
     Info<< nl << "Done." << endl;
 

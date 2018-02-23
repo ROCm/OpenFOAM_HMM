@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nullObject.H"
+#include <utility>
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
@@ -31,6 +32,15 @@ template<class T>
 inline const Foam::Xfer<T>& Foam::Xfer<T>::null()
 {
     return NullObjectRef<Xfer<T>>();
+}
+
+
+template<class T>
+template<class... Args>
+inline Foam::Xfer<T> Foam::Xfer<T>::New(Args&&... args)
+{
+    T* ptr = new T(std::forward<Args>(args)...);
+    return Foam::Xfer<T>(ptr);
 }
 
 
@@ -44,36 +54,35 @@ inline Foam::Xfer<T>::Xfer(T* p)
 
 
 template<class T>
-inline Foam::Xfer<T>::Xfer(T& t, bool allowTransfer)
+inline Foam::Xfer<T>::Xfer(const Xfer<T>& xf)
 :
     ptr_(new T)
 {
-    if (allowTransfer)
+    T* p = xf.get();
+
+    if (p && Foam::notNull(p))
     {
-        ptr_->transfer(t);
-    }
-    else
-    {
-        ptr_->operator=(t);
+        ptr_->transfer(*p);
     }
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class T>
-inline Foam::Xfer<T>::Xfer(const T& t)
-:
-    ptr_(new T)
+inline T* Foam::Xfer<T>::get() const
 {
-    ptr_->operator=(t);
+    return ptr_;
 }
 
 
 template<class T>
-inline Foam::Xfer<T>::Xfer(const Xfer<T>& t)
-:
-    ptr_(new T)
+inline void Foam::Xfer<T>::swap(Xfer<T>& other) noexcept
 {
-    ptr_->transfer(*(t.ptr_));
+    // Swap pointers
+    T* tmp = ptr_;
+    ptr_ = other.ptr;
+    other.ptr_ = tmp;
 }
 
 
@@ -82,36 +91,29 @@ inline Foam::Xfer<T>::Xfer(const Xfer<T>& t)
 template<class T>
 inline Foam::Xfer<T>::~Xfer()
 {
-    delete ptr_;
+    if (ptr_ && Foam::notNull(ptr_))
+    {
+        delete ptr_;
+    }
     ptr_ = nullptr;
 }
-
-
-// * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::Xfer<T>::operator=(T& t)
+inline void Foam::Xfer<T>::operator=(const Xfer<T>& xf)
 {
-    ptr_->transfer(t);
-}
-
-
-template<class T>
-inline void Foam::Xfer<T>::operator=(const Xfer<T>& t)
-{
-    // silently ignore attempted copy to self
-    if (this != &t)
+    // Silently ignore attempted copy to self
+    if (this != &xf)
     {
-        ptr_->transfer(*(t.ptr_));
+        ptr_->transfer(*xf);
     }
 }
 
 
 template<class T>
-inline T& Foam::Xfer<T>::operator()() const
+inline T& Foam::Xfer<T>::operator*() const
 {
     return *ptr_;
 }
@@ -124,45 +126,46 @@ inline T* Foam::Xfer<T>::operator->() const
 }
 
 
-// * * * * * * * * * * * * *  Helper Functions * * * * * * * * * * * * * * * //
+template<class T>
+inline T& Foam::Xfer<T>::operator()() const
+{
+    return *ptr_;
+}
+
+
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
+
+template<class T>
+inline Foam::Xfer<T> Foam::xferCopy(const T& obj)
+{
+    T* ptr = new T(obj);
+    return Foam::Xfer<T>(ptr);
+}
+
+
+template<class T, class From>
+inline Foam::Xfer<T> Foam::xferCopyTo(const From& obj)
+{
+    T* ptr = new T(obj);
+    return Foam::Xfer<T>(ptr);
+}
 
 
 template<class T>
-inline Foam::Xfer<T> Foam::xferCopy(const T& t)
+inline Foam::Xfer<T> Foam::xferMove(T& obj)
 {
-    return Foam::Xfer<T>(t);
+    T* ptr = new T;
+    ptr->transfer(obj);
+    return Foam::Xfer<T>(ptr);
 }
 
 
-template<class T>
-inline Foam::Xfer<T> Foam::xferMove(T& t)
+template<class T, class From>
+inline Foam::Xfer<T> Foam::xferMoveTo(From& obj)
 {
-    return Foam::Xfer<T>(t, true);
-}
-
-
-template<class T>
-inline Foam::Xfer<T> Foam::xferTmp(Foam::tmp<T>& tt)
-{
-    return Foam::Xfer<T>(tt(), tt.isTmp());
-}
-
-
-template<class To, class From>
-inline Foam::Xfer<To> Foam::xferCopyTo(const From& t)
-{
-    Foam::Xfer<To> xf;
-    xf() = t;
-    return xf;
-}
-
-
-template<class To, class From>
-inline Foam::Xfer<To> Foam::xferMoveTo(From& t)
-{
-    Foam::Xfer<To> xf;
-    xf().transfer(t);
-    return xf;
+    T* ptr = new T;
+    ptr->transfer(obj);
+    return Foam::Xfer<T>(ptr);
 }
 
 

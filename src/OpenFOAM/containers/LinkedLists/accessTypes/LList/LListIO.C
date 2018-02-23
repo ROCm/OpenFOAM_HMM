@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,39 +36,36 @@ Foam::LList<LListBase, T>::LList(Istream& is)
 }
 
 
-// * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& lst)
 {
     // Anull list
-    L.clear();
+    lst.clear();
 
     is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
-    is.fatalCheck
-    (
-        " operator>>(Istream&, LList<LListBase, T>&) : reading first token"
-    );
+    is.fatalCheck("LList::readList : reading first token");
 
     if (firstToken.isLabel())
     {
-        const label s = firstToken.labelToken();
+        const label len = firstToken.labelToken();
 
         // Read beginning of contents
-        const char delimiter = is.readBeginList("LList<LListBase, T>");
+        const char delimiter = is.readBeginList("LList");
 
-        if (s)
+        if (len)
         {
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; ++i)
+                for (label i=0; i<len; ++i)
                 {
                     T element;
                     is >> element;
-                    L.append(element);
+                    lst.append(element);
                 }
             }
             else
@@ -76,9 +73,9 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
                 T element;
                 is >> element;
 
-                for (label i=0; i<s; ++i)
+                for (label i=0; i<len; ++i)
                 {
-                    L.append(element);
+                    lst.append(element);
                 }
             }
         }
@@ -109,9 +106,10 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
         )
         {
             is.putBack(lastToken);
+
             T element;
             is >> element;
-            L.append(element);
+            lst.append(element);
 
             is >> lastToken;
             is.fatalCheck(FUNCTION_NAME);
@@ -125,35 +123,65 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
             << exit(FatalIOError);
     }
 
-    // Check state of IOstream
     is.fatalCheck(FUNCTION_NAME);
-
     return is;
 }
 
 
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+template<class LListBase, class T>
+Foam::Ostream& Foam::LList<LListBase, T>::writeList
+(
+    Ostream& os,
+    const label shortListLen
+) const
+{
+    const label len = this->size();
+
+    if
+    (
+        len <= 1 || !shortListLen
+     || (len <= shortListLen)
+    )
+    {
+        // Size and start delimiter
+        os << len << token::BEGIN_LIST;
+
+        // Contents
+        bool space = false;
+        for (const T& val : *this)
+        {
+            if (space) os << token::SPACE;
+            os << val;
+            space = true;
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
+    else
+    {
+        // Size and start delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
+
+        // Contents
+        for (const T& val : *this)
+        {
+            os << val << nl;
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
+
+    os.check(FUNCTION_NAME);
+    return os;
+}
+
 
 template<class LListBase, class T>
 Foam::Ostream& Foam::operator<<(Ostream& os, const LList<LListBase, T>& lst)
 {
-    // Write size
-    os << nl << lst.size();
-
-    // Write beginning of contents
-    os << nl << token::BEGIN_LIST << nl;
-
-    // Write contents
-    for (const T& val : lst)
-    {
-        os << val << nl;
-    }
-
-    // Write end of contents
-    os << token::END_LIST;
-
-    os.check(FUNCTION_NAME);
-    return os;
+    return lst.writeList(os, -1);  // always with line breaks
 }
 
 

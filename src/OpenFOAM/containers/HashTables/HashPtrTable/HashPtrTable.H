@@ -70,11 +70,11 @@ class HashPtrTable
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inewt);
+        void read(Istream& is, const INew& inew);
 
         //- Read from dictionary using given dictionary constructor class
         template<class INew>
-        void read(const dictionary& dict, const INew& inewt);
+        void read(const dictionary& dict, const INew& inew);
 
 
 public:
@@ -99,7 +99,7 @@ public:
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        HashPtrTable(Istream& is, const INew& inewt);
+        HashPtrTable(Istream& is, const INew& inew);
 
         //- Construct from Istream using default Istream constructor class
         HashPtrTable(Istream& is);

@@ -53,13 +53,6 @@ Foam::label Foam::FixedList<T, Size>::find
 
 
 template<class T, unsigned Size>
-void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& lst)
-{
-    Foam::Swap(v_, lst.v_);
-}
-
-
-template<class T, unsigned Size>
 void Foam::FixedList<T, Size>::moveFirst(const label i)
 {
     checkIndex(i);
@@ -112,72 +105,74 @@ void Foam::FixedList<T, Size>::swapLast(const label i)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
+bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& list) const
 {
-    bool equal = true;
+    List_CONST_ACCESS(T, *this, lhs);
+    List_CONST_ACCESS(T, (list), rhs);
 
-    List_CONST_ACCESS(T, (*this), vp);
-    List_CONST_ACCESS(T, (a), ap);
-
+    // List sizes are identical by definition (template parameter)
     for (unsigned i = 0; i < Size; ++i)
     {
-        equal = (vp[i] == ap[i]);
-        if (!equal) break;
-    }
-
-    return equal;
-}
-
-
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator!=(const FixedList<T, Size>& a) const
-{
-    return !operator==(a);
-}
-
-
-template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
-{
-    List_CONST_ACCESS(T, *this, ptr1);
-    List_CONST_ACCESS(T, a, ptr2);
-
-    for (unsigned i=0; i<Size; ++i)
-    {
-        if (ptr1[i] < ptr2[i])
-        {
-            return true;
-        }
-        else if (ptr1[i] > ptr2[i])
+        if (!(lhs[i] == rhs[i]))
         {
             return false;
         }
     }
 
-    // Contents look to be identical.
-    // The sizes are identical by definition (template parameter)
+    // Contents appear to be identical.
+    return true;
+}
+
+
+template<class T, unsigned Size>
+bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& list) const
+{
+    List_CONST_ACCESS(T, *this, lhs);
+    List_CONST_ACCESS(T, (list), rhs);
+
+    // List sizes are identical by definition (template parameter)
+    for (unsigned i=0; i<Size; ++i)
+    {
+        if (lhs[i] < rhs[i])
+        {
+            return true;
+        }
+        else if (rhs[i] < lhs[i])
+        {
+            return false;
+        }
+    }
+
+    // Contents appear to be identical.
     return false;
 }
 
 
 template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator>(const FixedList<T, Size>& a) const
+bool Foam::FixedList<T, Size>::operator!=(const FixedList<T, Size>& list) const
 {
-    return a.operator<(*this);
+    return !operator==(list);
 }
 
 
 template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator<=(const FixedList<T, Size>& a) const
+bool Foam::FixedList<T, Size>::operator>(const FixedList<T, Size>& list) const
 {
-    return !operator>(a);
+    return list.operator<(*this);
 }
 
 
 template<class T, unsigned Size>
-bool Foam::FixedList<T, Size>::operator>=(const FixedList<T, Size>& a) const
+bool Foam::FixedList<T, Size>::operator<=(const FixedList<T, Size>& list) const
 {
-    return !operator<(a);
+    return !list.operator<(*this);
+}
+
+
+template<class T, unsigned Size>
+bool Foam::FixedList<T, Size>::operator>=(const FixedList<T, Size>& list) const
+{
+    return !operator<(list);
 }
 
 

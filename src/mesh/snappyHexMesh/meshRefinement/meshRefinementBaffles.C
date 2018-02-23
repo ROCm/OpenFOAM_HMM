@@ -3495,7 +3495,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
     {
         // Make sure lowest number cellZone is master. Non-cellZone
         // areas are slave
-        bool swap =
+        const bool swap =
         (
             ownZone == -1
          || (neiZone != -1 && ownZone > neiZone)
@@ -3505,7 +3505,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
         labelPair key(ownZone, neiZone);
         if (swap)
         {
-            Swap(key.first(), key.second());
+            key.flip();
         }
 
         if (!zoneIDsToFaceZone.found(key))
@@ -3528,7 +3528,7 @@ void Foam::meshRefinement::allocateInterRegionFaceZone
             Pair<word> wordKey(ownZoneName, neiZoneName);
             if (swap)
             {
-                Swap(wordKey.first(), wordKey.second());
+                wordKey.flip();
             }
 
             word fzName = wordKey.first() + "_to_" + wordKey.second();
@@ -4549,7 +4549,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 label neiZone = cellToZone[mesh_.faceNeighbour()[faceI]];
                 if (ownZone != neiZone)
                 {
-                    bool swap =
+                    const bool swap =
                     (
                         ownZone == -1
                      || (neiZone != -1 && ownZone > neiZone)
@@ -4557,7 +4557,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     labelPair key(ownZone, neiZone);
                     if (swap)
                     {
-                        Swap(key.first(), key.second());
+                        key.flip();
                     }
                     faceToZone[faceI] = fZoneLookup[key];
                 }
@@ -4572,7 +4572,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                 label neiZone = neiCellZone[bFaceI];
                 if (ownZone != neiZone)
                 {
-                    bool swap =
+                    const bool swap =
                     (
                         ownZone == -1
                      || (neiZone != -1 && ownZone > neiZone)
@@ -4580,7 +4580,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     labelPair key(ownZone, neiZone);
                     if (swap)
                     {
-                        Swap(key.first(), key.second());
+                        key.flip();
                     }
                     faceToZone[faceI] = fZoneLookup[key];
                 }

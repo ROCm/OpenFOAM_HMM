@@ -336,11 +336,11 @@ public:
         //- Construct from Istream with default table capacity
         HashTable(Istream& is, const label size = 128);
 
-        //- Construct as copy
+        //- Copy construct
         HashTable(const this_type& ht);
 
         //- Move construct
-        HashTable(this_type&& ht);
+        HashTable(this_type&& rhs);
 
         //- Construct from an initializer list
         HashTable(std::initializer_list<std::pair<Key, T>> lst);
@@ -591,12 +591,11 @@ public:
         //  Equivalent to clear() followed by resize(0)
         void clearStorage();
 
-        //- Swap contents of the argument table into this table
-        void swap(HashTable<T, Key, Hash>& ht);
+        //- Swap contents into this table
+        void swap(HashTable<T, Key, Hash>& rhs);
 
-        //- Transfer the contents of the argument table into this table
-        //  and annul the argument table.
-        void transfer(HashTable<T, Key, Hash>& ht);
+        //- Transfer contents into this table.
+        void transfer(HashTable<T, Key, Hash>& rhs);
 
 
     // Member Operators
@@ -615,11 +614,11 @@ public:
         //- Return existing entry or insert a new entry.
         inline T& operator()(const Key& key, const T& deflt);
 
-        //- Assignment
+        //- Copy assignment
         void operator=(const HashTable<T, Key, Hash>& rhs);
 
-        //- Assignment from an initializer list
-        void operator=(std::initializer_list<std::pair<Key, T>> lst);
+        //- Copy assignment from an initializer list
+        void operator=(std::initializer_list<std::pair<Key, T>> rhs);
 
         //- Move assign
         void operator=(HashTable<T, Key, Hash>&& rhs);
@@ -971,17 +970,6 @@ public:
             const HashTable<T, Key, Hash>& tbl
         );
 };
-
-
-// Global Functions
-
-// Exchange contents of hash tables - see HashTable::swap().
-template<class T, class Key, class Hash>
-inline void Swap
-(
-    HashTable<T, Key, Hash>& a,
-    HashTable<T, Key, Hash>& b
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -43,17 +43,16 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
-
 template<class LListBase, class T> class ILList;
 
 template<class LListBase, class T> Istream& operator>>
 (
-    Istream&,
-    ILList<LListBase, T>&
+    Istream& is,
+    ILList<LListBase, T>& lst
 );
 
 
@@ -70,7 +69,7 @@ class ILList
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream&, const INew&);
+        void read(Istream& is, const INew& inew);
 
 
 public:
@@ -78,28 +77,30 @@ public:
     // Constructors
 
         //- Null construct
-        ILList()
-        {}
+        ILList() = default;
 
-        //- Construct given initial T
-        ILList(T* a)
+        //- Construct and insert the initial T item pointer
+        explicit ILList(T* item)
         :
-            UILList<LListBase, T>(a)
+            UILList<LListBase, T>(item)
         {}
 
         //- Construct from Istream
-        ILList(Istream&);
+        ILList(Istream& is);
 
-        //- Construct as copy
-        ILList(const ILList<LListBase, T>&);
+        //- Copy construct using the 'clone()' method for each element
+        ILList(const ILList<LListBase, T>& lst);
 
-        //- Copy constructor with additional argument for clone
+        //- Move construct
+        ILList(ILList<LListBase, T>&& lst);
+
+        //- Copy constructor with additional argument for clone 'clone()'
         template<class CloneArg>
         ILList(const ILList<LListBase, T>& lst, const CloneArg& cloneArg);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        ILList(Istream&, const INew&);
+        ILList(Istream& is, const INew& inew);
 
 
     //- Destructor
@@ -108,35 +109,36 @@ public:
 
     // Member Functions
 
-        // Edit
+        //- Remove the head element specified from the list and delete it
+        bool eraseHead();
 
-            //- Remove the head element specified from the list and delete it
-            bool eraseHead();
+        //- Remove the specified element from the list and delete it
+        bool erase(T* item);
 
-            //- Remove the specified element from the list and delete it
-            bool erase(T* p);
+        //- Clear the contents of the list
+        void clear();
 
-            //- Clear the contents of the list
-            void clear();
-
-            //- Transfer the contents of the argument into this List
-            //  and annul the argument list.
-            void transfer(ILList<LListBase, T>&);
+        //- Transfer the contents of the argument into this List
+        //- and annul the argument list.
+        void transfer(ILList<LListBase, T>& lst);
 
 
     // Member operators
 
-        //- Assignment operator
-        void operator=(const ILList<LListBase, T>&);
+        //- Copy assignment using the 'clone()' method for each element
+        void operator=(const ILList<LListBase, T>& lst);
+
+        //- Move assignment
+        void operator=(ILList<LListBase, T>&& lst);
 
 
     // Istream operator
 
-        //- Read List from Istream, discarding contents of existing List.
+        //- Read from Istream, discarding existing contents.
         friend Istream& operator>> <LListBase, T>
         (
-            Istream&,
-            ILList<LListBase, T>&
+            Istream& is,
+            ILList<LListBase, T>& lst
         );
 };
 
@@ -149,6 +151,7 @@ public:
 
 #ifdef NoRepository
     #include "ILList.C"
+    #include "ILListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

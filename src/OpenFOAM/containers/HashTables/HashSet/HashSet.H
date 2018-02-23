@@ -334,10 +334,10 @@ public:
 
         //- Assignment from a FixedList of keys
         template<unsigned Size>
-        void operator=(const FixedList<Key, Size>& lst);
+        void operator=(const FixedList<Key, Size>& rhs);
 
         //- Assignment from an initializer list of keys
-        void operator=(std::initializer_list<Key> lst);
+        void operator=(std::initializer_list<Key> rhs);
 
 
     // Logical and set operations
@@ -370,17 +370,6 @@ public:
         );
 
 };
-
-
-// Global Functions
-
-// Exchange contents of HashSets - see HashSet::swap().
-template<class Key, class Hash>
-inline void Swap
-(
-    HashSet<Key, Hash>& a,
-    HashSet<Key, Hash>& b
-);
 
 
 // Global Operators

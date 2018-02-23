@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +25,12 @@ Class
     Foam::PtrList
 
 Description
-    A templated 1D list of pointers to objects of type \<T\>, where the
-    size of the array is known and used for subscript bounds checking, etc.
+    A list of pointers to objects of type \<T\>, with allocation/deallocation
+    management of the pointers.
+    The operator[] returns a reference to the object, not the pointer.
 
-    The element operator [] returns a reference to the object rather than a
-    pointer.
+See Also
+    Foam::PtrList
 
 SourceFiles
     PtrListI.H
@@ -42,27 +43,20 @@ SourceFiles
 #define PtrList_H
 
 #include "UPtrList.H"
+#include "SLPtrListFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 
 template<class T> class autoPtr;
 template<class T> class tmp;
-
-class SLListBase;
-template<class LListBase, class T> class LPtrList;
-template<class T>
-using SLPtrList = LPtrList<SLListBase, T>;
-
-// Forward declaration of friend functions and operators
 template<class T> class PtrList;
 
-template<class T>
-Istream& operator>>(Istream&, PtrList<T>&);
+template<class T> Istream& operator>>(Istream& is, PtrList<T>& lst);
 
 
 /*---------------------------------------------------------------------------*\
@@ -81,103 +75,106 @@ protected:
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream&, const INew& inewt);
+        void read(Istream& is, const INew& inew);
 
 
 public:
 
     // Constructors
 
-        //- Null Constructor
-        PtrList();
+        //- Construct null
+        PtrList() = default;
 
-        //- Construct with size specified
-        explicit PtrList(const label);
+        //- Construct with specified size, each element initialized to nullptr
+        explicit inline PtrList(const label nElem);
 
-        //- Copy constructor
-        PtrList(const PtrList<T>&);
+        //- Copy construct using 'clone()' method on each element
+        PtrList(const PtrList<T>& lst);
 
-        //- Copy constructor with additional argument for clone
+        //- Move construct
+        inline PtrList(PtrList<T>&& lst);
+
+        //- Copy construct with additional argument for 'clone()'
         template<class CloneArg>
-        PtrList(const PtrList<T>&, const CloneArg&);
+        PtrList(const PtrList<T>& lst, const CloneArg& cloneArg);
 
         //- Construct by transferring the parameter contents
-        PtrList(const Xfer<PtrList<T>>&);
+        PtrList(const Xfer<PtrList<T>>& lst);
 
         //- Construct as copy or re-use as specified
-        PtrList(PtrList<T>&, bool reuse);
+        PtrList(PtrList<T>& lst, bool reuse);
 
         //- Construct as copy of SLPtrList<T>
-        explicit PtrList(const SLPtrList<T>&);
+        explicit PtrList(const SLPtrList<T>& lst);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        PtrList(Istream&, const INew&);
+        PtrList(Istream& is, const INew& inew);
 
         //- Construct from Istream using default Istream constructor class
-        PtrList(Istream&);
+        PtrList(Istream& is);
 
 
     //- Destructor
     ~PtrList();
 
 
-    // Member functions
+    // Member Functions
 
-        // Edit
+        //- Clear the PtrList. Set size to zero and delete allocated entries
+        void clear();
 
-            //- Reset size of PtrList. If extending the PtrList, new entries are
-            //  set to nullptr. If truncating the PtrList, removed entries are
-            //  deleted
-            void setSize(const label);
+        //- Reset size of PtrList.
+        //  New entries are initialized to nullptr, removed entries are deleted
+        void setSize(const label newLen);
 
-            //- Alias for setSize(const label)
-            inline void resize(const label);
+        //- Reset size of PtrList.
+        //  New entries are initialized to nullptr, removed entries are deleted
+        inline void resize(const label newLen);
 
-            //- Clear the PtrList, i.e. set size to zero deleting all the
-            //  allocated entries
-            void clear();
+        //- Append an element at the end of the list
+        using UPtrList<T>::append;
 
-            //- Append an element at the end of the list
-            inline void append(T*);
-            inline void append(const autoPtr<T>&);
-            inline void append(const tmp<T>&);
+        //- Append an element at the end of the list
+        inline void append(const autoPtr<T>& aptr);
 
-            //- Transfer the contents of the argument PtrList into this PtrList
-            //  and annul the argument list
-            void transfer(PtrList<T>&);
+        //- Append an element at the end of the list
+        inline void append(const tmp<T>& tptr);
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<PtrList<T>> xfer();
+        //- Transfer into this list and annul the argument list
+        inline void transfer(PtrList<T>& lst);
 
-            //- Is element set
-            inline bool set(const label) const;
+        //- Transfer contents to the Xfer container
+        inline Xfer<PtrList<T>> xfer();
 
-            //- Set element to given T* and return old element (can be nullptr)
-            inline autoPtr<T> set(const label, T*);
+        //- Return true if element is set (ie, not a nullptr)
+        inline bool set(const label i) const;
 
-            //- Set element to given autoPtr<T> and return old element
-            inline autoPtr<T> set(const label, const autoPtr<T>&);
+        //- Set element to given pointer and return old element (can be null)
+        inline autoPtr<T> set(const label i, T* ptr);
 
-            //- Set element to given tmp<T> and return old element
-            inline autoPtr<T> set(const label, const tmp<T>&);
+        //- Set element to given autoPtr and return old element
+        inline autoPtr<T> set(const label i, const autoPtr<T>& aptr);
 
-            //- Reorders elements. Ordering does not have to be done in
-            //  ascending or descending order. Reordering has to be unique.
-            //  (is shuffle)
-            void reorder(const labelUList&);
+        //- Set element to given tmp and return old element
+        inline autoPtr<T> set(const label i, const tmp<T>& tptr);
 
 
     // Member operators
 
-        //- Assignment
-        void operator=(const PtrList<T>&);
+        //- Copy assignment.
+        //  For existing list entries, values are copied from the list.
+        //  For new list entries, pointers are cloned from the list.
+        void operator=(const PtrList<T>& lst);
+
+        //- Move assignment
+        inline void operator=(PtrList<T>&& lst);
 
 
     // IOstream operator
 
         //- Read PtrList from Istream, discarding contents of existing PtrList
-        friend Istream& operator>> <T>(Istream&, PtrList<T>&);
+        friend Istream& operator>> <T>(Istream& is, PtrList<T>& lst);
 };
 
 
@@ -193,6 +190,7 @@ public:
 
 #ifdef NoRepository
     #include "PtrList.C"
+    #include "PtrListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -545,8 +545,6 @@ void Foam::polyDualMesh::splitFace
                 if (subFace.size() > 2)
                 {
                     // Enough vertices to create a face from.
-                    subFace.shrink();
-
                     dualFaces.append(face(subFace));
                     dualOwner.append(meshPointi);
                     dualNeighbour.append(-1);
@@ -559,8 +557,6 @@ void Foam::polyDualMesh::splitFace
             if (subFace.size() > 2)
             {
                 // Enough vertices to create a face from.
-                subFace.shrink();
-
                 dualFaces.append(face(subFace));
                 dualOwner.append(meshPointi);
                 dualNeighbour.append(-1);
@@ -1194,18 +1190,10 @@ void Foam::polyDualMesh::calcDual
 
     // Transfer face info to straight lists
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    faceList dualFaces(dynDualFaces.shrink(), true);
-    dynDualFaces.clear();
-
-    labelList dualOwner(dynDualOwner.shrink(), true);
-    dynDualOwner.clear();
-
-    labelList dualNeighbour(dynDualNeighbour.shrink(), true);
-    dynDualNeighbour.clear();
-
-    labelList dualRegion(dynDualRegion.shrink(), true);
-    dynDualRegion.clear();
-
+    faceList dualFaces(std::move(dynDualFaces));
+    labelList dualOwner(std::move(dynDualOwner));
+    labelList dualNeighbour(std::move(dynDualNeighbour));
+    labelList dualRegion(std::move(dynDualRegion));
 
 
     // Dump faces.

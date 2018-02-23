@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,158 +23,142 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "DLListBase.H"
-#include "IOstreams.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-Foam::DLListBase::iterator Foam::DLListBase::endIter_
-(
-    const_cast<DLListBase&>(static_cast<const DLListBase&>(DLListBase()))
-);
-
-Foam::DLListBase::const_iterator Foam::DLListBase::endConstIter_
-(
-    static_cast<const DLListBase&>(DLListBase()),
-    reinterpret_cast<const link*>(0)
-);
-
-Foam::DLListBase::const_reverse_iterator Foam::DLListBase::endConstRevIter_
-(
-    static_cast<const DLListBase&>(DLListBase()),
-    reinterpret_cast<const link*>(0)
-);
-
+#include "error.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::DLListBase::insert(DLListBase::link* a)
+void Foam::DLListBase::insert(DLListBase::link* item)
 {
-    nElmts_++;
+    if (!item)
+    {
+        return;
+    }
+
+    ++size_;
 
     if (!first_)
     {
-        a->prev_ = a;
-        a->next_ = a;
-        first_ = last_ = a;
+        item->prev_ = item;
+        item->next_ = item;
+        first_ = last_ = item;
     }
     else
     {
-        a->prev_ = a;
-        a->next_ = first_;
-        first_->prev_ = a;
-        first_ = a;
+        item->prev_ = item;
+        item->next_ = first_;
+        first_->prev_ = item;
+        first_ = item;
     }
 }
 
 
-void Foam::DLListBase::append(DLListBase::link* a)
+void Foam::DLListBase::append(DLListBase::link* item)
 {
-    nElmts_++;
+    if (!item)
+    {
+        return;
+    }
+
+    ++size_;
 
     if (!first_)
     {
-        a->prev_ = a;
-        a->next_ = a;
-        first_ = last_ = a;
+        item->prev_ = item;
+        item->next_ = item;
+        first_ = last_ = item;
     }
     else
     {
-        last_->next_ = a;
-        a->prev_ = last_;
-        a->next_ = a;
-        last_ = a;
+        last_->next_ = item;
+        item->prev_ = last_;
+        item->next_ = item;
+        last_ = item;
     }
 }
 
 
 bool Foam::DLListBase::swapUp(DLListBase::link* a)
 {
-    if (first_ != a)
-    {
-        link* ap = a->prev_;
-
-        if (ap == first_)
-        {
-            first_ = a;
-            ap->prev_ = a;
-        }
-        else
-        {
-            ap->prev_->next_ = a;
-        }
-
-        if (a == last_)
-        {
-            last_ = ap;
-            a->next_ = ap;
-        }
-        else
-        {
-            a->next_->prev_ = ap;
-        }
-
-        a->prev_ = ap->prev_;
-        ap->prev_ = a;
-
-        ap->next_ = a->next_;
-        a->next_ = ap;
-
-        return true;
-    }
-    else
+    if (first_ == a)
     {
         return false;
     }
+
+    DLListBase::link *ap = a->prev_;
+
+    if (ap == first_)
+    {
+        first_ = a;
+        ap->prev_ = a;
+    }
+    else
+    {
+        ap->prev_->next_ = a;
+    }
+
+    if (a == last_)
+    {
+        last_ = ap;
+        a->next_ = ap;
+    }
+    else
+    {
+        a->next_->prev_ = ap;
+    }
+
+    a->prev_ = ap->prev_;
+    ap->prev_ = a;
+
+    ap->next_ = a->next_;
+    a->next_ = ap;
+
+    return true;
 }
 
 
 bool Foam::DLListBase::swapDown(DLListBase::link* a)
 {
-    if (last_ != a)
-    {
-        link* an = a->next_;
-
-        if (a == first_)
-        {
-            first_ = an;
-            a->prev_ = an;
-        }
-        else
-        {
-            a->prev_->next_ = an;
-        }
-
-        if (an == last_)
-        {
-            last_ = a;
-            an->next_ = a;
-        }
-        else
-        {
-            an->next_->prev_ = a;
-        }
-
-        an->prev_ = a->prev_;
-        a->prev_ = an;
-
-        a->next_ = an->next_;
-        an->next_ = a;
-
-        return true;
-    }
-    else
+    if (last_ == a)
     {
         return false;
     }
+
+    DLListBase::link *an = a->next_;
+
+    if (a == first_)
+    {
+        first_ = an;
+        a->prev_ = an;
+    }
+    else
+    {
+        a->prev_->next_ = an;
+    }
+
+    if (an == last_)
+    {
+        last_ = a;
+        an->next_ = a;
+    }
+    else
+    {
+        an->next_->prev_ = a;
+    }
+
+    an->prev_ = a->prev_;
+    a->prev_ = an;
+
+    a->next_ = an->next_;
+    an->next_ = a;
+
+    return true;
 }
 
 
 Foam::DLListBase::link* Foam::DLListBase::removeHead()
 {
-    nElmts_--;
+    --size_;
 
     if (!first_)
     {
@@ -183,44 +167,44 @@ Foam::DLListBase::link* Foam::DLListBase::removeHead()
             << abort(FatalError);
     }
 
-    DLListBase::link* f = first_;
-    first_ = f->next_;
+    DLListBase::link *ret = first_;
+    first_ = first_->next_;
 
     if (!first_)
     {
         last_ = nullptr;
     }
 
-    f->deregister();
-    return f;
+    ret->deregister();
+    return ret;
 }
 
 
-Foam::DLListBase::link* Foam::DLListBase::remove(DLListBase::link* l)
+Foam::DLListBase::link* Foam::DLListBase::remove(DLListBase::link* item)
 {
-    nElmts_--;
+    --size_;
 
-    link* ret = l;
+    DLListBase::link *ret = item;
 
-    if (l == first_ && first_ == last_)
+    if (item == first_ && first_ == last_)
     {
         first_ = nullptr;
         last_ = nullptr;
     }
-    else if (l == first_)
+    else if (item == first_)
     {
         first_ = first_->next_;
         first_->prev_ = first_;
     }
-    else if (l == last_)
+    else if (item == last_)
     {
         last_ = last_->prev_;
         last_->next_ = last_;
     }
     else
     {
-        l->next_->prev_ = l->prev_;
-        l->prev_->next_ = l->next_;
+        item->next_->prev_ = item->prev_;
+        item->prev_->next_ = item->next_;
     }
 
     ret->deregister();
@@ -234,7 +218,7 @@ Foam::DLListBase::link* Foam::DLListBase::replace
     DLListBase::link* newLink
 )
 {
-    link* ret = oldLink;
+    DLListBase::link *ret = oldLink;
 
     newLink->prev_ = oldLink->prev_;
     newLink->next_ = oldLink->next_;

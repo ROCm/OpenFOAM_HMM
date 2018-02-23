@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,64 +23,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-inline void Foam::hashedWordList::rehash(const bool unique)
-{
-    if (unique)
-    {
-        uniq();
-    }
-    else
-    {
-        rehash();
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-inline Foam::hashedWordList::hashedWordList()
-:
-    List<word>()
-{}
-
 
 inline Foam::hashedWordList::hashedWordList(const hashedWordList& lst)
 :
-    List<word>(static_cast<const UList<word>&>(lst))
+    hashedWordList(static_cast<const wordUList&>(lst), false)
+{}
+
+
+inline Foam::hashedWordList::hashedWordList(hashedWordList&& lst)
+:
+    wordList(std::move(static_cast<wordList&>(lst))),
+    lookup_(std::move(lst.lookup_))
+{}
+
+
+inline Foam::hashedWordList::hashedWordList(const wordUList& lst)
+:
+    hashedWordList(lst, false)
+{}
+
+
+inline Foam::hashedWordList::hashedWordList(const wordUList& lst, bool unique)
+:
+    wordList(lst)
 {
-    rehash();
+    rehash(unique);
 }
 
 
-inline Foam::hashedWordList::hashedWordList
-(
-    const UList<word>& lst,
-    const bool removeDuplicates
-)
+inline Foam::hashedWordList::hashedWordList(wordList&& lst, bool unique)
 :
-    List<word>(lst)
+    wordList(std::move(lst))
 {
-    rehash(removeDuplicates);
-}
-
-
-inline Foam::hashedWordList::hashedWordList
-(
-    const Xfer<List<word>>& lst,
-    const bool removeDuplicates
-)
-:
-    List<word>(lst)
-{
-    rehash(removeDuplicates);
+    rehash(unique);
 }
 
 
 inline Foam::hashedWordList::hashedWordList(std::initializer_list<word> lst)
 :
-    List<word>(lst)
+    wordList(lst)
 {
     rehash();
 }
@@ -92,15 +74,23 @@ inline Foam::hashedWordList::hashedWordList
     const HashTable<AnyType, word, AnyHash>& tbl
 )
 :
-    List<word>(tbl.size())
+    wordList(tbl.size())
 {
+    wordList& list = *this;
+
     label count = 0;
     for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
-        List<word>::operator[](count++) = iter.key();
+        list[count++] = iter.key();
     }
 
     this->sort();
+}
+
+
+inline Foam::hashedWordList::hashedWordList(Istream& is)
+{
+    is  >> *this;
 }
 
 
@@ -108,21 +98,17 @@ inline Foam::hashedWordList::hashedWordList
 
 inline void Foam::hashedWordList::clear()
 {
-    List<word>::clear();
-    indices_.clear();
+    wordList::clear();
+    lookup_.clear();
 }
 
 
-inline void Foam::hashedWordList::append
-(
-    const word& name,
-    const bool avoidDuplicates
-)
+inline void Foam::hashedWordList::append(const word& name, bool unique)
 {
     // name is either unique or we don't care about duplicates
-    if (indices_.insert(name, size()) || !avoidDuplicates)
+    if (lookup_.insert(name, size()) || !unique)
     {
-        List<word>::append(name);
+        wordList::append(name);
     }
 }
 
@@ -130,19 +116,64 @@ inline void Foam::hashedWordList::append
 inline const Foam::HashTable<Foam::label>&
 Foam::hashedWordList::lookup() const
 {
-    return indices_;
+    const label lenList = wordList::size();
+    const label lenHash = lookup_.size();
+
+    if ((lenList < lenHash) || (lenList && !lenHash))
+    {
+        rehash();   // Was somehow out of sync
+    }
+
+    return lookup_;
 }
 
 
 inline bool Foam::hashedWordList::found(const word& name) const
 {
-    return indices_.found(name);
+    return lookup().found(name);
 }
 
 
 inline bool Foam::hashedWordList::contains(const word& name) const
 {
-    return indices_.found(name);
+    return lookup().found(name);
+}
+
+
+inline void Foam::hashedWordList::swap(hashedWordList& lst)
+{
+    wordList::swap(static_cast<wordList&>(lst));
+    lookup_.swap(lst.lookup_);
+}
+
+
+inline void Foam::hashedWordList::transfer
+(
+    hashedWordList& lst
+)
+{
+    wordList::transfer(static_cast<wordList&>(lst));
+    lookup_.transfer(lst.lookup_);
+}
+
+
+inline void Foam::hashedWordList::transfer(wordList& lst, bool unique)
+{
+    wordList::transfer(lst);
+    rehash(unique);
+}
+
+
+inline void Foam::hashedWordList::rehash(bool unique)
+{
+    if (unique)
+    {
+        uniq();
+    }
+    else
+    {
+        rehash();
+    }
 }
 
 
@@ -160,46 +191,65 @@ inline const Foam::word& Foam::hashedWordList::operator[]
     const label index
 ) const
 {
-    return List<word>::operator[](index);
+    return wordList::operator[](index);
 }
 
 
 inline Foam::label Foam::hashedWordList::operator[](const word& name) const
 {
-    auto iter = indices_.find(name);
-
-    if (iter.found())
-    {
-        return iter.object();
-    }
-
-    return -1;  // Not found (or not hashed?)
+    return lookup_.lookup(name, -1);  // -1 = not found or not hashed
 }
 
 
 inline bool Foam::hashedWordList::operator()(const word& name) const
 {
-    return indices_.found(name);
+    return lookup_.found(name);
 }
 
 
-inline void Foam::hashedWordList::operator=(const UList<word>& lst)
+inline void Foam::hashedWordList::operator=(const hashedWordList& lst)
 {
-    List<word>::operator=(lst);
+    wordList::operator=(lst);
+    rehash();
+}
+
+
+inline void Foam::hashedWordList::operator=(const wordUList& lst)
+{
+    wordList::operator=(lst);
     rehash();
 }
 
 
 inline void Foam::hashedWordList::operator=(std::initializer_list<word> lst)
 {
-    List<word>::operator=(lst);
+    wordList::operator=(lst);
     rehash();
 }
 
 
-inline void Foam::hashedWordList::operator=(const hashedWordList& lst)
+inline void Foam::hashedWordList::operator=(hashedWordList&& lst)
 {
-    operator=(static_cast<const UList<word>&>(lst));
+    wordList::operator=(std::move(static_cast<wordList&>(lst)));
+    lookup_ = std::move(lst.lookup_);
+}
+
+
+inline void Foam::hashedWordList::operator=(wordList&& lst)
+{
+    wordList::operator=(std::move(lst));
+    rehash();
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+inline Foam::Istream& Foam::operator>>(Istream& is, hashedWordList& lst)
+{
+    is  >> static_cast<wordList&>(lst);
+    lst.rehash();
+
+    return is;
 }
 
 

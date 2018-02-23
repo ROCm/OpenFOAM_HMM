@@ -41,9 +41,9 @@ inline Foam::cell::cell(const labelUList& lst)
 {}
 
 
-inline Foam::cell::cell(const Xfer<labelList>& lst)
+inline Foam::cell::cell(labelList&& lst)
 :
-    labelList(lst)
+    labelList(std::move(lst))
 {}
 
 

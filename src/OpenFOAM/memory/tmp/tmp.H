@@ -63,11 +63,11 @@ class tmp
             CONST_REF
         };
 
-        //- Type of object
-        type type_;
-
         //- Pointer to object
         mutable T* ptr_;
+
+        //- Type of object
+        type type_;
 
 
     // Private member operators

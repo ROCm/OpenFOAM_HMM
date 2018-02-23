@@ -25,8 +25,6 @@ License
 
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -45,9 +43,9 @@ inline Foam::Keyed<T>::Keyed(const T& item, const label key)
 
 
 template<class T>
-inline Foam::Keyed<T>::Keyed(const Xfer<T>& item, const label key)
+inline Foam::Keyed<T>::Keyed(T&& item, const label key)
 :
-    T(item),
+    T(std::move(item)),
     key_(key)
 {}
 
@@ -76,7 +74,7 @@ inline Foam::label& Foam::Keyed<T>::key()
 
 template<class T>
 inline Foam::List<Foam::Keyed<T>>
-Foam::Keyed<T>::createList(const List<T>& lst, const label key)
+Foam::Keyed<T>::createList(const UList<T>& lst, const label key)
 {
     List<Keyed<T>> newList(lst.size());
 
@@ -90,7 +88,7 @@ Foam::Keyed<T>::createList(const List<T>& lst, const label key)
 
 template<class T>
 inline Foam::List<Foam::Keyed<T>>
-Foam::Keyed<T>::createList(const List<T>& lst, const labelUList& keys)
+Foam::Keyed<T>::createList(const UList<T>& lst, const labelUList& keys)
 {
     if (lst.size() != keys.size())
     {
@@ -141,6 +139,5 @@ inline Foam::Ostream& Foam::operator<<(Ostream& os, const Keyed<T>& item)
     return os;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

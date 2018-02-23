@@ -32,18 +32,9 @@ Description
 #ifndef SLPtrList_H
 #define SLPtrList_H
 
-#include "LPtrList.H"
 #include "SLListBase.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    template<class T>
-    using SLPtrList = LPtrList<SLListBase, T>;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "LPtrList.H"
+#include "SLPtrListFwd.H"
 
 #endif
 

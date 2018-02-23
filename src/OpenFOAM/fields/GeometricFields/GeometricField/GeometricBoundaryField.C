@@ -89,8 +89,8 @@ readField
     {
         for
         (
-            IDLList<entry>::const_reverse_iterator iter = dict.rbegin();
-            iter != dict.rend();
+            IDLList<entry>::const_reverse_iterator iter = dict.crbegin();
+            iter != dict.crend();
             ++iter
         )
         {

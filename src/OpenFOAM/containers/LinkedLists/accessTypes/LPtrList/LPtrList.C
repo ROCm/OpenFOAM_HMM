@@ -32,10 +32,19 @@ Foam::LPtrList<LListBase, T>::LPtrList(const LPtrList<LListBase, T>& lst)
 :
     LList<LListBase, T*>()
 {
-    for (const_iterator iter = lst.begin(); iter != lst.end(); ++iter)
+    for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
     {
-        this->append(iter().clone().ptr());
+        this->append((*iter).clone().ptr());
     }
+}
+
+
+template<class LListBase, class T>
+Foam::LPtrList<LListBase, T>::LPtrList(LPtrList<LListBase, T>&& lst)
+:
+    LList<LListBase, T*>()
+{
+    LList<LListBase, T*>::transfer(lst);
 }
 
 
@@ -53,24 +62,23 @@ Foam::LPtrList<LListBase, T>::~LPtrList()
 template<class LListBase, class T>
 bool Foam::LPtrList<LListBase, T>::eraseHead()
 {
-    T* tPtr;
-    if ((tPtr = this->removeHead()))
+    T* p = this->removeHead();
+
+    if (p)
     {
-        delete tPtr;
+        delete p;
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
 template<class LListBase, class T>
 void Foam::LPtrList<LListBase, T>::clear()
 {
-    const label oldSize = this->size();
-    for (label i=0; i<oldSize; ++i)
+    const label len = this->size();
+    for (label i=0; i<len; ++i)
     {
         eraseHead();
     }
@@ -94,16 +102,18 @@ void Foam::LPtrList<LListBase, T>::operator=(const LPtrList<LListBase, T>& lst)
 {
     clear();
 
-    for (const_iterator iter = lst.begin(); iter != lst.end(); ++iter)
+    for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
     {
-        this->append(iter().clone().ptr());
+        this->append((*iter).clone().ptr());
     }
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-#include "LPtrListIO.C"
+template<class LListBase, class T>
+void Foam::LPtrList<LListBase, T>::operator=(LPtrList<LListBase, T>&& lst)
+{
+    transfer(lst);
+}
 
 
 // ************************************************************************* //

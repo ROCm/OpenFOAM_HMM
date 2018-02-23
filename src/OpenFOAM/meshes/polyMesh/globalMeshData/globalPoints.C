@@ -732,14 +732,14 @@ void Foam::globalPoints::remove
     // Save old ones.
     Map<label> oldMeshToProcPoint(std::move(meshToProcPoint_));
     meshToProcPoint_.resize(oldMeshToProcPoint.size());
-    DynamicList<labelPairList> oldProcPoints(procPoints_.xfer());
+    DynamicList<labelPairList> oldProcPoints(std::move(procPoints_));
     procPoints_.setCapacity(oldProcPoints.size());
 
     // Go through all equivalences
-    forAllConstIter(Map<label>, oldMeshToProcPoint, iter)
+    forAllConstIters(oldMeshToProcPoint, iter)
     {
-        label localPointi = iter.key();
-        const labelPairList& pointInfo = oldProcPoints[iter()];
+        const label localPointi = iter.key();
+        const labelPairList& pointInfo = oldProcPoints[iter.object()];
 
         if (pointInfo.size() == 2)
         {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,13 @@ Class
 Description
     Base for singly-linked lists.
 
+    The iterators associated with the list only have a core functionality
+    for navigation, with additional functionality to be added by inheriting
+    classes. The node iterators always have a node-pointer as the
+    first member data, which allows reinterpret_cast from anything else with
+    a nullptr as its first data member.
+    The nullObject is such an item (with a nullptr data member).
+
 SourceFiles
     SLListBaseI.H
     SLListBase.C
@@ -36,9 +43,9 @@ SourceFiles
 #ifndef SLListBase_H
 #define SLListBase_H
 
-#include "bool.H"
 #include "label.H"
 #include "uLabel.H"
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,33 +58,30 @@ namespace Foam
 
 class SLListBase
 {
-
 public:
 
-    //- Link structure
+    //- The structure for a singly-linked storage node
     struct link
     {
         //- Pointer to next entry in list
-        link* next_;
+        link* next_ = nullptr;
 
         //- Null construct
-        inline link();
-
-        //- Construct given pointer to another link
-        inline link(link* p);
+        link() = default;
     };
 
 
 private:
 
-    // Private data
+    // Private Member Data
 
-       //- last_ points to last element
+       //- A pointer to the last element.
        //  last_->next_ points to first element, i.e. circular storage
-       link* last_;
+       link* last_ = nullptr;
 
-       //- Number of elements in in list
-       label nElmts_;
+       //- Number of elements in the list
+       label size_ = 0;
+
 
     // Private Member Functions
 
@@ -88,9 +92,33 @@ private:
         void operator=(const SLListBase&) = delete;
 
 
+protected:
+
+    // Protected Member Functions
+
+        //- Factory method to return an iterator end
+        //  Simply reinterprets a NullObject as a SLListBase iterator.
+        template<class IteratorType>
+        inline static const IteratorType& iterator_end();
+
+        //- Factory method to return an iterator rend
+        //  Deleted for SLListBase
+        template<class IteratorType>
+        static const IteratorType& iterator_rend() = delete;
+
+        //- Return iterator to first item or end-iterator if list is empty
+        //  Removes constness which the caller promises to manage.
+        template<class IteratorType>
+        inline IteratorType iterator_first() const;
+
+        //- Return iterator to last item or end-iterator if list is empty
+        //  Removes constness which the caller promises to manage.
+        template<class IteratorType>
+        inline IteratorType iterator_last() const;
+
 public:
 
-    // Forward declaration of STL iterators
+    // Forward declaration of iterators
 
         class iterator;
         friend class iterator;
@@ -102,154 +130,166 @@ public:
     // Constructors
 
         //- Null construct
-        inline SLListBase();
-
-        //- Construct given initial entry
-        inline SLListBase(link*);
+        SLListBase() = default;
 
 
     //- Destructor
-    ~SLListBase();
+    ~SLListBase() = default;
 
 
     // Member Functions
 
-        // Access
+        //- Return number of elements in list
+        inline label size() const;
 
-            //- Return number of elements in list
-            inline label size() const;
+        //- Return true if the list is empty
+        inline bool empty() const;
 
-            //- Return true if the list is empty
-            inline bool empty() const;
+        //- Return first entry
+        inline link* first();
 
-            //- Return first entry
-            inline link* first();
+        //- Return const access to first entry
+        inline const link* first() const;
 
-            //- Return const access to first entry
-            inline const link* first() const;
+        //- Return last entry
+        inline link* last();
 
-            //- Return last entry
-            inline link* last();
-
-            //- Return const access to last entry
-            inline const link* last() const;
+        //- Return const access to last entry
+        inline const link* last() const;
 
 
-        // Edit
+        //- Add at head of list
+        void insert(link* item);
 
-            //- Add at head of list
-            void insert(link*);
+        //- Add at tail of list
+        void append(link* item);
 
-            //- Add at tail of list
-            void append(link*);
+        //- Remove and return head
+        link* removeHead();
 
-            //- Remove and return head
-            link* removeHead();
+        // Remove and return element
+        link* remove(link* item);
 
-            // Remove and return element
-            link* remove(link*);
+        // Remove and return element specified by iterator
+        inline link* remove(iterator& iter);
 
-            // Remove and return element specified by iterator
-            inline link* remove(iterator&);
+        //- Clear the list
+        inline void clear();
 
-            //- Clear the list
-            inline void clear();
+        //- Swap the contents of list
+        inline void swap(SLListBase& lst);
 
-            //- Transfer the contents of the argument into this List
-            //  and annul the argument list.
-            inline void transfer(SLListBase&);
+        //- Transfer the contents of the argument into this list
+        //- and annul the argument list.
+        inline void transfer(SLListBase& lst);
 
-    // STL iterator
 
-        //- An STL-conforming iterator
+    // iterator
+
+        //- A primitive non-const node iterator.
+        //  Must normally be extended by inheriting classes.
         class iterator
         {
             friend class SLListBase;
             friend class const_iterator;
 
-            //- Reference to the list this is an iterator for
-            SLListBase& curList_;
+            //- The selected node.
+            //  MUST be the first member for easy comparison between iterators
+            //  and for reinterpret_cast from nullObject
+            link* node_;
 
-            //- Current element
-            link* curElmt_;
+            //- The list being iterated on (as pointer for bitwise copy)
+            SLListBase* list_;
 
-            //- Copy of the link
-            link curLink_;
-
-            //- Construct for a given SLListBase with nullptr element and link.
-            //  Only used to create endIter
-            inline iterator(SLListBase&);
+            //- Copy of the node next pointer (to use after removal)
+            link copy_;
 
         public:
 
-            //- Construct for a given SLListBase and link
-            inline iterator(SLListBase&, link*);
+            //- Construct for a node on the list
+            inline iterator(SLListBase* list, link* item);
 
-            //- Currently pointing at a valid entry
+            //- The storage node
+            inline link* get_node() const;
+
+            //- Pointing at a valid storage node
             inline bool found() const;
+
+            //- Cannot move backward through list
+            inline void prev() = delete;
+
+            //- Move forward through list
+            inline void next();
 
             inline void operator=(const iterator& iter);
 
             inline bool operator==(const iterator& iter) const;
             inline bool operator!=(const iterator& iter) const;
-
-            inline link& operator*() const;
-
-            inline iterator& operator++();
-            inline iterator operator++(int);
         };
-
-        inline iterator begin();
-        inline const iterator& end();
 
 
     // STL const_iterator
 
-        //- An STL-conforming const_iterator
+        //- A primitive const node iterator.
+        //  Must normally be extended by inheriting classes.
         class const_iterator
         {
-            //- Reference to the list this is an iterator for
-            const SLListBase& curList_;
+            //- The selected node.
+            //  MUST be the first member for easy comparison between iterators
+            //  and for reinterpret_cast from nullObject
+            const link* node_;
 
-            //- Current element
-            const link* curElmt_;
+            //- The list being iterated on (as pointer for bitwise copy)
+            const SLListBase* list_;
 
         public:
 
-            //- Construct for a given SLListBase and link
-            inline const_iterator(const SLListBase&, const link*);
+            //- Construct for a node on the list
+            inline const_iterator(const SLListBase* list, const link* item);
 
             //- Construct from a non-const iterator
             inline const_iterator(const SLListBase::iterator& iter);
 
-            //- Currently pointing at a valid entry
+            //- Copy construct
+            const_iterator(const const_iterator&) = default;
+
+            //- The storage node
+            inline const link* get_node() const;
+
+            //- Pointing at a valid storage node
             inline bool found() const;
 
-            inline void operator=(const const_iterator& iter);
+            //- Cannot move backward through list
+            inline void prev() = delete;
+
+            //- Move forward through list
+            inline void next();
+
+            const_iterator& operator=(const const_iterator&) = default;
 
             inline bool operator==(const const_iterator& iter) const;
             inline bool operator!=(const const_iterator& iter) const;
-
-            inline const link& operator*() const;
-
-            inline const_iterator& operator++();
-            inline const_iterator operator++(int);
         };
 
+
+        //- Iterator to first item in list with non-const access
+        inline iterator begin();
+
+        //- Iterator to first item in list with const access
         inline const_iterator cbegin() const;
+
+        //- No reverse iteration
+        const_iterator crbegin() const = delete;
+
+        //- End of list for iterators
+        inline const iterator& end();
+
+        //- End of list for iterators
         inline const const_iterator& cend() const;
 
-        inline const_iterator begin() const;
-        inline const const_iterator& end() const;
+        //- No reverse iteration
+        const const_iterator& crend() const = delete;
 
-
-private:
-
-        //- Iterator returned by end()
-        static iterator endIter_;
-
-        //- const_iterator returned by end()
-        static const_iterator endConstIter_;
 };
 
 

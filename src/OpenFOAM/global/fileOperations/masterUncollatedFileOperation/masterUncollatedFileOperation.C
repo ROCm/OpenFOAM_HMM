@@ -1458,7 +1458,7 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
         }
         Pstream::scatter(times);
 
-        instantList* tPtr = new instantList(times.xfer());
+        instantList* tPtr = new instantList(std::move(times));
 
         times_.insert(directory, tPtr);
 
