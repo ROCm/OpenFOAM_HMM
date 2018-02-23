@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,6 +42,8 @@ timeVaryingMappedFixedValueFvPatchField
     fieldTableName_(iF.name()),
     setAverage_(false),
     perturb_(0),
+    pointsName_("points"),
+    mapMethod_("planarInterpolation"),
     mapperPtr_(nullptr),
     sampleTimes_(0),
     startSampleTime_(-1),
@@ -67,6 +69,7 @@ timeVaryingMappedFixedValueFvPatchField
     fieldTableName_(iF.name()),
     setAverage_(dict.lookupOrDefault("setAverage", false)),
     perturb_(dict.lookupOrDefault("perturb", 1e-5)),
+    pointsName_(dict.lookupOrDefault("points", "points")),
     mapMethod_
     (
         dict.lookupOrDefault<word>
@@ -132,6 +135,7 @@ timeVaryingMappedFixedValueFvPatchField
     fieldTableName_(ptf.fieldTableName_),
     setAverage_(ptf.setAverage_),
     perturb_(ptf.perturb_),
+    pointsName_(ptf.pointsName_),
     mapMethod_(ptf.mapMethod_),
     mapperPtr_(nullptr),
     sampleTimes_(0),
@@ -156,6 +160,7 @@ timeVaryingMappedFixedValueFvPatchField
     fieldTableName_(ptf.fieldTableName_),
     setAverage_(ptf.setAverage_),
     perturb_(ptf.perturb_),
+    pointsName_(ptf.pointsName_),
     mapMethod_(ptf.mapMethod_),
     mapperPtr_(nullptr),
     sampleTimes_(ptf.sampleTimes_),
@@ -181,6 +186,7 @@ timeVaryingMappedFixedValueFvPatchField
     fieldTableName_(ptf.fieldTableName_),
     setAverage_(ptf.setAverage_),
     perturb_(ptf.perturb_),
+    pointsName_(ptf.pointsName_),
     mapMethod_(ptf.mapMethod_),
     mapperPtr_(nullptr),
     sampleTimes_(ptf.sampleTimes_),
@@ -250,13 +256,12 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
            /this->db().time().caseConstant()
            /"boundaryData"
            /this->patch().name()
-           /"points"
+           /pointsName_
         );
 
         pointField samplePoints((IFstream(samplePointsFile)()));
 
         DebugInfo
-            << "timeVaryingMappedFixedValueFvPatchField :"
             << " Read " << samplePoints.size() << " sample points from "
             << samplePointsFile << endl;
 
@@ -285,7 +290,7 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
         sampleTimes_ = Time::findTimes(samplePointsDir);
 
         DebugInfo
-            << "timeVaryingMappedFixedValueFvPatchField : In directory "
+            << "In directory "
             << samplePointsDir << " found times "
             << pointToPointPlanarInterpolation::timeNames(sampleTimes_)
             << endl;
@@ -332,9 +337,9 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
             if (debug)
             {
                 Pout<< "checkTable : Setting startValues to (already read) "
-                    <<   "boundaryData"
-                        /this->patch().name()
-                        /sampleTimes_[startSampleTime_].name()
+                    << "boundaryData"
+                      /this->patch().name()
+                      /sampleTimes_[startSampleTime_].name()
                     << endl;
             }
             startSampledValues_ = endSampledValues_;
@@ -345,9 +350,9 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
             if (debug)
             {
                 Pout<< "checkTable : Reading startValues from "
-                    <<   "boundaryData"
-                        /this->patch().name()
-                        /sampleTimes_[lo].name()
+                    << "boundaryData"
+                      /this->patch().name()
+                      /sampleTimes_[lo].name()
                     << endl;
             }
 
@@ -407,9 +412,9 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::checkTable()
             if (debug)
             {
                 Pout<< "checkTable : Reading endValues from "
-                    <<   "boundaryData"
-                        /this->patch().name()
-                        /sampleTimes_[endSampleTime_].name()
+                    << "boundaryData"
+                      /this->patch().name()
+                      /sampleTimes_[endSampleTime_].name()
                     << endl;
             }
 
@@ -568,15 +573,18 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::write
 {
     fvPatchField<Type>::write(os);
 
-    os.writeEntryIfDifferent("setAverage", Switch(false), setAverage_);
-    os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
-
     os.writeEntryIfDifferent
     (
         "fieldTable",
         this->internalField().name(),
         fieldTableName_
     );
+
+    os.writeEntryIfDifferent("setAverage", Switch(false), setAverage_);
+
+    os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
+
+    os.writeEntryIfDifferent<word>("points", "points", pointsName_);
 
     os.writeEntryIfDifferent<word>
     (

@@ -49,8 +49,9 @@ Usage
     \table
         Property     | Description                | Required    | Default value
         setAverage   | Switch to activate setting of average value | no | false
-        perturb      | Perturb points for regular geometries | no | 1e-5
-        fieldTableName | Alternative field name to sample | no| this field name
+        perturb      | Perturb points for regular geometries    | no | 1e-5
+        points       | Name of points file        | no          | points
+        fieldTableName | Alternative field name to sample | no | this field name
         mapMethod    | Type of mapping            | no | planarInterpolation
         offset       | Offset to mapped values    | no | Zero
     \endtable
@@ -104,6 +105,9 @@ class timeVaryingMappedFixedValueFvPatchField
 
         //- Fraction of perturbation (fraction of bounding box) to add
         scalar perturb_;
+
+        //- Name of points file; default = "points"
+        word pointsName_;
 
         //- Interpolation scheme to use
         word mapMethod_;
