@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -54,12 +54,14 @@ Foam::functionObjects::turbulenceFields::compressibleFieldNames_
     { compressibleField::cfK, "k" },
     { compressibleField::cfEpsilon, "epsilon" },
     { compressibleField::cfOmega, "omega" },
+    { compressibleField::cfNuTilda, "nuTilda" },
     { compressibleField::cfMut, "mut" },
     { compressibleField::cfMuEff, "muEff" },
     { compressibleField::cfAlphat, "alphat" },
     { compressibleField::cfAlphaEff, "alphaEff" },
     { compressibleField::cfR, "R" },
     { compressibleField::cfDevRhoReff, "devRhoReff" },
+    { compressibleField::cfL, "L" }
 };
 
 
@@ -72,10 +74,12 @@ Foam::functionObjects::turbulenceFields::incompressibleFieldNames_
     { incompressibleField::ifK, "k" },
     { incompressibleField::ifEpsilon, "epsilon" },
     { incompressibleField::ifOmega, "omega" },
+    { incompressibleField::ifNuTilda, "nuTilda" },
     { incompressibleField::ifNut, "nut" },
     { incompressibleField::ifNuEff, "nuEff" },
     { incompressibleField::ifR, "R" },
     { incompressibleField::ifDevReff, "devReff" },
+    { incompressibleField::ifL, "L" },
 };
 
 
@@ -193,6 +197,11 @@ bool Foam::functionObjects::turbulenceFields::execute()
                     processField<scalar>(f, omega(model));
                     break;
                 }
+                case cfNuTilda:
+                {
+                    processField<scalar>(f, nuTilda(model));
+                    break;
+                }
                 case cfMut:
                 {
                     processField<scalar>(f, model.mut());
@@ -221,6 +230,11 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 case cfDevRhoReff:
                 {
                     processField<symmTensor>(f, model.devRhoReff());
+                    break;
+                }
+                case cfL:
+                {
+                    processField<scalar>(f, L(model));
                     break;
                 }
                 default:
@@ -256,6 +270,11 @@ bool Foam::functionObjects::turbulenceFields::execute()
                     processField<scalar>(f, omega(model));
                     break;
                 }
+                case ifNuTilda:
+                {
+                    processField<scalar>(f, nuTilda(model));
+                    break;
+                }
                 case ifNut:
                 {
                     processField<scalar>(f, model.nut());
@@ -274,6 +293,11 @@ bool Foam::functionObjects::turbulenceFields::execute()
                 case ifDevReff:
                 {
                     processField<symmTensor>(f, model.devReff());
+                    break;
+                }
+                case ifL:
+                {
+                    processField<scalar>(f, L(model));
                     break;
                 }
                 default:

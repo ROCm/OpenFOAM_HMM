@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,7 @@ Usage
         k           | turbulence kinetic energy
         epsilon     | turbulence kinetic energy dissipation rate
         omega       | turbulence specific dissipation rate
+        nuTilda     | turbulence modified viscosity
         nut         | turbulence viscosity (incompressible)
         nuEff       | effective turbulence viscosity (incompressible)
         mut         | turbulence viscosity (compressible)
@@ -74,6 +75,7 @@ Usage
         R           | Reynolds stress tensor
         devReff     | Deviatoric part of the effective Reynolds stress
         devRhoReff  | Divergence of the Reynolds stress
+        L           | turbulence length scale
     \endplaintable
 
 See also
@@ -116,12 +118,14 @@ public:
         cfK,
         cfEpsilon,
         cfOmega,
+        cfNuTilda,
         cfMut,
         cfMuEff,
         cfAlphat,
         cfAlphaEff,
         cfR,
-        cfDevRhoReff
+        cfDevRhoReff,
+        cfL
     };
     static const Enum<compressibleField> compressibleFieldNames_;
 
@@ -130,10 +134,12 @@ public:
         ifK,
         ifEpsilon,
         ifOmega,
+        ifNuTilda,
         ifNut,
         ifNuEff,
         ifR,
-        ifDevReff
+        ifDevReff,
+        ifL
     };
     static const Enum<incompressibleField> incompressibleFieldNames_;
 
@@ -164,6 +170,14 @@ protected:
         //- Return omega calculated from k and epsilon
         template<class Model>
         tmp<volScalarField> omega(const Model& model) const;
+
+        //- Return nuTilda calculated from k and omega
+        template<class Model>
+        tmp<volScalarField> nuTilda(const Model& model) const;
+
+        //- Return L calculated from k and epsilon
+        template<class Model>
+        tmp<volScalarField> L(const Model& model) const;
 
 
 private:

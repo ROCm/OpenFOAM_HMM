@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,12 +91,51 @@ Foam::functionObjects::turbulenceFields::omega
         (
             IOobject
             (
-                "omega",
+                "omega.tmp",
                 k.mesh().time().timeName(),
                 k.mesh()
             ),
             epsilon/(Cmu*k),
             epsilon.boundaryField().types()
+        )
+    );
+}
+
+
+template<class Model>
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::turbulenceFields::nuTilda
+(
+    const Model& model
+) const
+{
+    return tmp<volScalarField>
+    (
+        new volScalarField("nuTilda.tmp", model.k()/omega(model))
+    );
+}
+
+
+template<class Model>
+Foam::tmp<Foam::volScalarField>
+Foam::functionObjects::turbulenceFields::L
+(
+    const Model& model
+) const
+{
+    const scalar Cmu = 0.09;
+
+    // Assume k and epsilon are available
+    const volScalarField k(model.k());
+    const volScalarField epsilon(model.epsilon());
+    const dimensionedScalar eps0("eps0", epsilon.dimensions(), SMALL);
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            "L.tmp",
+            pow(Cmu, 0.75)*pow(k, 1.5)/(epsilon + eps0)
         )
     );
 }
