@@ -584,19 +584,20 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     }
 
 
-    autoPtr<mapPolyMesh> map;
+    autoPtr<mapPolyMesh> mapPtr;
     if (returnReduce(nBaffles, sumOp<label>()))
     {
         // Change the mesh (no inflation, parallel sync)
-        map = meshMod.changeMesh(mesh_, false, true);
+        mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh if in inflation mode
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
         else
         {
@@ -612,8 +613,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
         //  this changes also the cell centre positions.
         faceSet baffledFacesSet(mesh_, "baffledFacesSet", 2*nBaffles);
 
-        const labelList& reverseFaceMap = map().reverseFaceMap();
-        const labelList& faceMap = map().faceMap();
+        const labelList& reverseFaceMap = map.reverseFaceMap();
+        const labelList& faceMap = map.faceMap();
 
         // Pick up owner side of baffle
         forAll(ownPatch, oldFaceI)
@@ -650,7 +651,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
         updateMesh(map, baffledFacesSet.toc());
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -1154,7 +1155,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     const Map<label>& faceToPatch
 )
 {
-    autoPtr<mapPolyMesh> map;
+    autoPtr<mapPolyMesh> mapPtr;
 
     if (returnReduce(couples.size()+faceToPatch.size(), sumOp<label>()))
     {
@@ -1280,15 +1281,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 
 
         // Change the mesh (no inflation)
-        map = meshMod.changeMesh(mesh_, false, true);
+        mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh (since morphing does not do this)
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
         else
         {
@@ -1307,13 +1309,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 
         forAll(couples, i)
         {
-            label newFace0 = map().reverseFaceMap()[couples[i].first()];
+            const label newFace0 = map.reverseFaceMap()[couples[i].first()];
             if (newFace0 != -1)
             {
                 newExposedFaces[newI++] = newFace0;
             }
 
-            label newFace1 = map().reverseFaceMap()[couples[i].second()];
+            const label newFace1 = map.reverseFaceMap()[couples[i].second()];
             if (newFace1 != -1)
             {
                 newExposedFaces[newI++] = newFace1;
@@ -1323,7 +1325,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
         updateMesh(map, newExposedFaces);
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -4114,7 +4116,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints
         << ')' << endl;
 
 
-    autoPtr<mapPolyMesh> map;
+    autoPtr<mapPolyMesh> mapPtr;
 
     if (nNonManifPoints)
     {
@@ -4125,15 +4127,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints
         pointDuplicator.setRefinement(regionSide, meshMod);
 
         // Change the mesh (no inflation, parallel sync)
-        map = meshMod.changeMesh(mesh_, false, true);
+        mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh if in inflation mode
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
         else
         {
@@ -4146,10 +4149,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints
 
         // Update intersections. Is mapping only (no faces created, positions
         // stay same) so no need to recalculate intersections.
-        updateMesh(map, labelList(0));
+        updateMesh(map, labelList());
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -4177,7 +4180,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergePoints
         }
     }
 
-    autoPtr<mapPolyMesh> map;
+    autoPtr<mapPolyMesh> mapPtr;
 
     if (returnReduce(nPointPairs, sumOp<label>()))
     {
@@ -4199,15 +4202,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergePoints
         polyMeshAdder::mergePoints(mesh_, pointToMaster, meshMod);
 
         // Change the mesh (no inflation, parallel sync)
-        map = meshMod.changeMesh(mesh_, false, true);
+        mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh if in inflation mode
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
         else
         {
@@ -4220,10 +4224,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergePoints
 
         // Update intersections. Is mapping only (no faces created, positions
         // stay same) so no need to recalculate intersections.
-        updateMesh(map, labelList(0));
+        updateMesh(map, labelList());
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -4764,7 +4768,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh_.updateMesh(map());
 
     // Move mesh if in inflation mode
     if (map().hasMotionPoints())
@@ -4807,7 +4811,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
 
     // None of the faces has changed, only the zones. Still...
-    updateMesh(map, labelList());
+    updateMesh(map(), labelList());
 
     return map;
 }

@@ -128,16 +128,12 @@ Foam::HeatTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
         );
     }
 
-    forAllConstIter
-    (
-        heatTransferModelTable,
-        heatTransferModels_,
-        heatTransferModelIter
-    )
+    forAllConstIters(heatTransferModels_, heatTransferModelIter)
     {
-        const volScalarField K(heatTransferModelIter()->K());
+        const phasePair& pair =
+            *(this->phasePairs_[heatTransferModelIter.key()]);
 
-        const phasePair& pair(this->phasePairs_[heatTransferModelIter.key()]);
+        const volScalarField K(heatTransferModelIter()->K());
 
         const phaseModel* phase = &pair.phase1();
         const phaseModel* otherPhase = &pair.phase2();

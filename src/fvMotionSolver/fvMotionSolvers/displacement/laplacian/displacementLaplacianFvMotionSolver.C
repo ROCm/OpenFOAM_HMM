@@ -253,7 +253,8 @@ Foam::displacementLaplacianFvMotionSolver::diffusivity()
             coeffDict().lookup("diffusivity")
         );
     }
-    return diffusivityPtr_();
+
+    return *diffusivityPtr_;
 }
 
 

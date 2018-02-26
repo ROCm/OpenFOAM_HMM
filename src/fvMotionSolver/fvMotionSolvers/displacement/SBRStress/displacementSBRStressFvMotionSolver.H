@@ -130,7 +130,7 @@ public:
         //- Return diffusivity
         motionDiffusivity& diffusivity()
         {
-            return diffusivityPtr_();
+            return *diffusivityPtr_;
         }
 
         //- Return point location obtained from the current motion field

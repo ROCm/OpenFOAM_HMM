@@ -225,7 +225,7 @@ Foam::label Foam::checkTopology
             points.write();
             if (setWriter.valid())
             {
-                mergeAndWrite(setWriter, points);
+                mergeAndWrite(setWriter(), points);
             }
         }
     }
@@ -528,7 +528,7 @@ Foam::label Foam::checkTopology
                 points.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, points);
+                    mergeAndWrite(setWriter(), points);
                 }
             }
         }
@@ -639,7 +639,7 @@ Foam::label Foam::checkTopology
         points.write();
         if (setWriter.valid())
         {
-            mergeAndWrite(setWriter, points);
+            mergeAndWrite(setWriter(), points);
         }
     }
 

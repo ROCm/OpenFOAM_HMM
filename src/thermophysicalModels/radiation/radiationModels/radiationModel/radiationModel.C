@@ -275,7 +275,7 @@ Foam::radiation::radiationModel::absorptionEmission() const
             << "not activate" << abort(FatalError);
     }
 
-    return absorptionEmission_();
+    return *absorptionEmission_;
 }
 
 
@@ -289,7 +289,7 @@ Foam::radiation::radiationModel::soot() const
             << "not activate" << abort(FatalError);
     }
 
-    return soot_();
+    return *soot_;
 }
 
 
@@ -303,7 +303,7 @@ Foam::radiation::radiationModel::transmissivity() const
             << "not activate" << abort(FatalError);
     }
 
-    return transmissivity_();
+    return *transmissivity_;
 }
 
 

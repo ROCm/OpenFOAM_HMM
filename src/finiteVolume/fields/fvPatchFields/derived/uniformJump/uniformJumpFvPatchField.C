@@ -49,7 +49,7 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(ptf, p, iF, mapper),
-    jumpTable_(ptf.jumpTable_, false)
+    jumpTable_(ptf.jumpTable_.clone())
 {}
 
 
@@ -90,7 +90,7 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(ptf),
-    jumpTable_(ptf.jumpTable_, false)
+    jumpTable_(ptf.jumpTable_.clone())
 {}
 
 
@@ -102,7 +102,7 @@ Foam::uniformJumpFvPatchField<Type>::uniformJumpFvPatchField
 )
 :
     fixedJumpFvPatchField<Type>(ptf, iF),
-    jumpTable_(ptf.jumpTable_, false)
+    jumpTable_(ptf.jumpTable_.clone())
 {}
 
 

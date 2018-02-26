@@ -42,14 +42,14 @@ Foam::fv::interRegionHeatTransferModel::meshInterp() const
             << abort(FatalError);
     }
 
-    return meshInterpPtr_();
+    return *meshInterpPtr_;
 }
 
 
 inline const Foam::volScalarField&
 Foam::fv::interRegionHeatTransferModel::htc() const
 {
-    return  htc_;
+    return htc_;
 }
 
 

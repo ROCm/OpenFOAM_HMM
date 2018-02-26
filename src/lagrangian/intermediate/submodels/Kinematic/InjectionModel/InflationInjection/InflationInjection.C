@@ -140,7 +140,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     fraction_(im.fraction_),
     selfSeed_(im.selfSeed_),
     dSeed_(im.dSeed_),
-    sizeDistribution_(im.sizeDistribution_, false)
+    sizeDistribution_(im.sizeDistribution_.clone())
 {}
 
 

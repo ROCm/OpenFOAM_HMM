@@ -68,7 +68,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::KinematicParcel<ParcelType>::trackingData::rhoInterp() const
 {
-    return rhoInterp_();
+    return *rhoInterp_;
 }
 
 
@@ -76,7 +76,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::vector>&
 Foam::KinematicParcel<ParcelType>::trackingData::UInterp() const
 {
-    return UInterp_();
+    return *UInterp_;
 }
 
 
@@ -84,7 +84,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::KinematicParcel<ParcelType>::trackingData::muInterp() const
 {
-    return muInterp_();
+    return *muInterp_;
 }
 
 

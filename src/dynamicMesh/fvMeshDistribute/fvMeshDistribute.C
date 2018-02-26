@@ -632,7 +632,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
     // shared points (see mergeSharedPoints below). So temporarily points
     // and edges do not match!
 
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields. No inflation, parallel sync.
     mesh_.updateMesh(map);
@@ -647,16 +648,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
 
 
     // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
+    if (map.hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh_.movePoints(map.preMotionPoints());
     }
 
     // Adapt constructMaps.
 
     if (debug)
     {
-        label index = map().reverseFaceMap().find(-1);
+        label index = map.reverseFaceMap().find(-1);
 
         if (index != -1)
         {
@@ -672,14 +673,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::repatch
     {
         inplaceRenumberWithFlip
         (
-            map().reverseFaceMap(),
+            map.reverseFaceMap(),
             false,
             true,
             constructFaceMap[proci]
         );
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -706,7 +707,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
 
     if (returnReduce(pointToMaster.size(), sumOp<label>()) == 0)
     {
-        return autoPtr<mapPolyMesh>(nullptr);
+        return autoPtr<mapPolyMesh>();
     }
 
     polyTopoChange meshMod(mesh_);
@@ -714,7 +715,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
     fvMeshAdder::mergePoints(mesh_, pointToMaster, meshMod);
 
     // Change the mesh (no inflation). Note: parallel comms allowed.
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields. No inflation, parallel sync.
     mesh_.updateMesh(map);
@@ -728,7 +730,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
         {
             label oldPointi = constructMap[i];
 
-            label newPointi = map().reversePointMap()[oldPointi];
+            label newPointi = map.reversePointMap()[oldPointi];
 
             if (newPointi < -1)
             {
@@ -746,7 +748,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::mergeSharedPoints
             }
         }
     }
-    return map;
+
+    return mapPtr;
 }
 
 
@@ -1124,7 +1127,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::fvMeshDistribute::doRemoveCells
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, false);
 
     // Update fields
-    mesh_.updateMesh(map);
+    mesh_.updateMesh(map());
 
 
     // Any exposed faces in a surfaceField will not be mapped. Map the value

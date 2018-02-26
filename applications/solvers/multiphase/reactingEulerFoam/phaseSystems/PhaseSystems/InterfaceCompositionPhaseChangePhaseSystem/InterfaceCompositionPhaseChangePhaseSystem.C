@@ -86,14 +86,9 @@ massTransfer() const
     }
 
     // Reset the interfacial mass flow rates
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -108,22 +103,18 @@ massTransfer() const
     }
 
     // Sum up the contribution from each interface composition model
-    forAllConstIter
+    forAllConstIters
     (
-        interfaceCompositionModelTable,
         interfaceCompositionModels_,
         interfaceCompositionModelIter
     )
     {
-        const interfaceCompositionModel& compositionModel
-        (
-            interfaceCompositionModelIter()
-        );
+        const phasePair& pair =
+            *(this->phasePairs_[interfaceCompositionModelIter.key()]);
 
-        const phasePair& pair
-        (
-            this->phasePairs_[interfaceCompositionModelIter.key()]
-        );
+        const interfaceCompositionModel& compositionModel =
+            *(interfaceCompositionModelIter.object());
+
         const phaseModel& phase = pair.phase1();
         const phaseModel& otherPhase = pair.phase2();
         const phasePairKey key(phase.name(), otherPhase.name());
@@ -209,14 +200,9 @@ correctThermo()
     // Yfi is likely to be a strong non-linear (typically exponential) function
     // of Tf, so the solution for the temperature is newton-accelerated
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {

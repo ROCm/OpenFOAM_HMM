@@ -120,7 +120,7 @@ public:
         //- Return coordinate system
         const coordinateSystem& cs() const
         {
-            return csPtr_();
+            return *csPtr_;
         }
 
         //- Return ID of piston patch

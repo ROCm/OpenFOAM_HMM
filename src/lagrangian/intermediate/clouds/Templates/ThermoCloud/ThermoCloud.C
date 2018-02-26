@@ -346,13 +346,6 @@ Foam::ThermoCloud<CloudType>::ThermoCloud
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ThermoCloud<CloudType>::~ThermoCloud()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

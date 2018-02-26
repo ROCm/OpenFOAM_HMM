@@ -575,7 +575,7 @@ public:
                 {
                     calcFaceCuts();
                 }
-                return faceCutsPtr_();
+                return *faceCutsPtr_;
             }
 
             //- Gives for split face the two cuts that split the face into two.

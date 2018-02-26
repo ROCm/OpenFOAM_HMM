@@ -452,7 +452,7 @@ void Foam::multiDirRefinement::refineFromDict
     // How to walk cell circumference.
     Switch pureGeomCut(dict.lookup("geometricCut"));
 
-    autoPtr<cellLooper> cellWalker(nullptr);
+    autoPtr<cellLooper> cellWalker;
     if (pureGeomCut)
     {
         cellWalker.reset(new geomCellLooper(mesh));

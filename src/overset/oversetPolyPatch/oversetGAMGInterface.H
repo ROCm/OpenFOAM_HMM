@@ -152,7 +152,7 @@ public:
             //- Map for obtaining data in stencil order
             virtual const mapDistribute& cellInterpolationMap() const
             {
-                return mapPtr_();
+                return *mapPtr_;
             }
 
             //- Weights in stencil order

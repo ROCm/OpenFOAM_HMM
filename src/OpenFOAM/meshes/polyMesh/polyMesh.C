@@ -151,10 +151,8 @@ Foam::autoPtr<Foam::labelIOList> Foam::polyMesh::readTetBasePtIs() const
     {
         return autoPtr<labelIOList>(new labelIOList(io));
     }
-    else
-    {
-        return autoPtr<labelIOList>(nullptr);
-    }
+
+    return autoPtr<labelIOList>();
 }
 
 
@@ -873,7 +871,7 @@ const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
         );
     }
 
-    return tetBasePtIsPtr_();
+    return *tetBasePtIsPtr_;
 }
 
 
@@ -1078,7 +1076,7 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
         curMotionTimeIndex_ = time().timeIndex();
     }
 
-    return oldPointsPtr_();
+    return *oldPointsPtr_;
 }
 
 
@@ -1231,7 +1229,7 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
         globalMeshDataPtr_.reset(new globalMeshData(*this));
     }
 
-    return globalMeshDataPtr_();
+    return *globalMeshDataPtr_;
 }
 
 

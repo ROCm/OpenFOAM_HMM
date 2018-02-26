@@ -111,8 +111,8 @@ class sixDoFRigidBodyMotion
         //- Acceleration damping coefficient (for steady-state simulations)
         scalar aDamp_;
 
-        //- Switch to turn reporting of motion data on and off
-        Switch report_;
+        //- Reporting of motion data (on or off)
+        bool report_;
 
         //- Motion solver
         autoPtr<sixDoFSolver> solver_;

@@ -220,7 +220,7 @@ Foam::dynamicIndexedOctree<Type>::divide
         {
             if (!replaced)
             {
-                contents_[contentI]().transfer(subIndices());
+                contents_[contentI]->transfer(subIndices());
                 nod.subNodes_[octant] = contentPlusOctant(contentI, octant);
 
                 replaced = true;
@@ -239,7 +239,7 @@ Foam::dynamicIndexedOctree<Type>::divide
                     )
                 );
 
-                contents_[sz]().transfer(subIndices());
+                contents_[sz]->transfer(subIndices());
 
                 nod.subNodes_[octant] = contentPlusOctant(sz, octant);
             }
@@ -280,7 +280,7 @@ void Foam::dynamicIndexedOctree<Type>::recursiveSubDivision
 {
     if
     (
-        contents_[contentI]().size() > minSize_
+        contents_[contentI]->size() > minSize_
      && nLevels < maxLevels_
     )
     {
@@ -524,7 +524,7 @@ void Foam::dynamicIndexedOctree<Type>::findNearest
             {
                 shapes_.findNearest
                 (
-                    contents_[getContent(index)],
+                    *(contents_[getContent(index)]),
                     sample,
 
                     nearestDistSqr,
@@ -589,7 +589,7 @@ void Foam::dynamicIndexedOctree<Type>::findNearest
             {
                 shapes_.findNearest
                 (
-                    contents_[getContent(index)],
+                    *(contents_[getContent(index)]),
                     ln,
 
                     tightest,
@@ -1341,7 +1341,7 @@ void Foam::dynamicIndexedOctree<Type>::traverseNode
 
     if (isContent(index))
     {
-        const labelList& indices = contents_[getContent(index)];
+        const labelList& indices = *(contents_[getContent(index)]);
 
         if (indices.size())
         {
@@ -1755,7 +1755,7 @@ void Foam::dynamicIndexedOctree<Type>::findBox
 
             if (subBb.overlaps(searchBox))
             {
-                const labelList& indices = contents_[getContent(index)];
+                const labelList& indices = *(contents_[getContent(index)]);
 
                 forAll(indices, i)
                 {
@@ -1803,7 +1803,7 @@ void Foam::dynamicIndexedOctree<Type>::findSphere
 
             if (subBb.overlaps(centre, radiusSqr))
             {
-                const labelList& indices = contents_[getContent(index)];
+                const labelList& indices = *(contents_[getContent(index)]);
 
                 forAll(indices, i)
                 {
@@ -2016,7 +2016,7 @@ Foam::label Foam::dynamicIndexedOctree<Type>::countElements
     }
     else if (isContent(index))
     {
-        nElems += contents_[getContent(index)]().size();
+        nElems += contents_[getContent(index)]->size();
     }
     else
     {
@@ -2302,7 +2302,7 @@ Foam::label Foam::dynamicIndexedOctree<Type>::findInside
     // Need to check for the presence of content, in-case the node is empty
     if (isContent(contentIndex))
     {
-        labelList indices = contents_[getContent(contentIndex)];
+        const labelList& indices = *(contents_[getContent(contentIndex)]);
 
         forAll(indices, elemI)
         {
@@ -2334,12 +2334,10 @@ const Foam::labelList& Foam::dynamicIndexedOctree<Type>::findIndices
     // Need to check for the presence of content, in-case the node is empty
     if (isContent(contentIndex))
     {
-        return contents_[getContent(contentIndex)];
+        return *(contents_[getContent(contentIndex)]);
     }
-    else
-    {
-        return emptyList<label>();
-    }
+
+    return emptyList<label>();
 }
 
 
@@ -2454,7 +2452,7 @@ bool Foam::dynamicIndexedOctree<Type>::insert(label startIndex, label endIndex)
             )
         );
 
-        contents_[0]().append(0);
+        contents_[0]->append(0);
 
         // Create topnode.
         node topNode = divide(bb_, 0, -1, 0);
@@ -2518,7 +2516,7 @@ bool Foam::dynamicIndexedOctree<Type>::insertIndex
             {
                 const label contentI = getContent(subNodeLabel);
 
-                contents_[contentI]().append(index);
+                contents_[contentI]->append(index);
 
                 recursiveSubDivision
                 (
@@ -2545,7 +2543,7 @@ bool Foam::dynamicIndexedOctree<Type>::insertIndex
                     autoPtr<DynamicList<label>>(new DynamicList<label>(1))
                 );
 
-                contents_[sz]().append(index);
+                contents_[sz]->append(index);
 
                 nodes_[nodIndex].subNodes_[octant]
                     = contentPlusOctant(sz, octant);
@@ -2618,7 +2616,7 @@ Foam::label Foam::dynamicIndexedOctree<Type>::removeIndex
 
             if (shapes().overlaps(index, subBb))
             {
-                DynamicList<label>& contentList = contents_[contentI]();
+                DynamicList<label>& contentList = *(contents_[contentI]);
 
                 DynamicList<label> newContent(contentList.size());
 
@@ -2644,7 +2642,7 @@ Foam::label Foam::dynamicIndexedOctree<Type>::removeIndex
                 contentList.transfer(newContent);
             }
 
-            totalContents += contents_[contentI]().size();
+            totalContents += contents_[contentI]->size();
         }
         else
         {
@@ -2695,7 +2693,7 @@ void Foam::dynamicIndexedOctree<Type>::print
         }
         else if (isContent(index))
         {
-            const labelList& indices = contents_[getContent(index)];
+            const labelList& indices = *(contents_[getContent(index)]);
 
             if (false) //debug)
             {
@@ -2735,7 +2733,7 @@ void Foam::dynamicIndexedOctree<Type>::writeTreeInfo() const
     label nEntries = 0;
     forAll(contents_, i)
     {
-        nEntries += contents_[i]().size();
+        nEntries += contents_[i]->size();
     }
 
     Pout<< "indexedOctree<Type>::indexedOctree"

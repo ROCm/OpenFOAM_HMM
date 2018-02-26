@@ -143,9 +143,13 @@ public:
     :
         public refCount
     {
-        // Private data
+        bool empty_;
 
-            bool empty_;
+        //- No default copy construct
+        compound(const compound&) = delete;
+
+        //- No default assign operator
+        compound& operator=(const compound&) = delete;
 
     public:
 
@@ -171,24 +175,21 @@ public:
                 empty_(false)
             {}
 
-            //- No default copy construct
-            compound(const compound&) = delete;
-
 
         // Selectors
 
             //- Select null constructed
             static autoPtr<compound> New(const word& type, Istream& is);
 
+            //- Return true if name is a known (registered) compound type
+            static bool isCompound(const word& name);
+
 
         //- Destructor
-        virtual ~compound();
+        virtual ~compound() = default;
 
 
         // Member Functions
-
-            //- Return true if name is a known compound type
-            static bool isCompound(const word& name);
 
             bool empty() const
             {
@@ -206,9 +207,6 @@ public:
 
 
         // Operators
-
-            //- No default assign operator
-            compound& operator=(const compound&) = delete;
 
             //- Output operator
             friend Ostream& operator<<(Ostream& os, const compound& ct);

@@ -89,22 +89,22 @@ public:
 
         const rhoThermo& thermo1() const
         {
-            return thermo1_();
+            return *thermo1_;
         }
 
         const rhoThermo& thermo2() const
         {
-            return thermo2_();
+            return *thermo2_;
         }
 
         rhoThermo& thermo1()
         {
-            return thermo1_();
+            return *thermo1_;
         }
 
         rhoThermo& thermo2()
         {
-            return thermo2_();
+            return *thermo2_;
         }
 
         //- Correct the thermodynamics of each phase

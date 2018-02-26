@@ -104,7 +104,7 @@ public:
         //- Return the hmax delta field
         const volScalarField& hmax() const
         {
-            return hmaxPtr_();
+            return *hmaxPtr_;
         }
 
         // Correct values

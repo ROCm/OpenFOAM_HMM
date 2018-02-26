@@ -101,7 +101,7 @@ Foam::porosityModel::porosityModel
     active_(true),
     zoneName_(cellZoneName),
     cellZoneIDs_(),
-    coordSys_(coordinateSystem::New(mesh, coeffs_))
+    coordSys_(*(coordinateSystem::New(mesh, coeffs_)))
 {
     if (zoneName_ == word::null)
     {

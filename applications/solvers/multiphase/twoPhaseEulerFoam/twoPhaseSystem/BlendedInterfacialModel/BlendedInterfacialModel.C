@@ -451,9 +451,11 @@ bool Foam::BlendedInterfacialModel<modelType>::hasModel
 ) const
 {
     return
-       &phase == &(pair_.phase1())
+    (
+        &phase == &(pair_.phase1())
       ? model1In2_.valid()
-      : model2In1_.valid();
+      : model2In1_.valid()
+    );
 }
 
 
@@ -463,7 +465,7 @@ const modelType& Foam::BlendedInterfacialModel<modelType>::phaseModel
     const class phaseModel& phase
 ) const
 {
-    return &phase == &(pair_.phase1()) ? model1In2_ : model2In1_;
+    return &phase == &(pair_.phase1()) ? *model1In2_ : *model2In1_;
 }
 
 

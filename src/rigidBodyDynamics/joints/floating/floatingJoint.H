@@ -68,7 +68,7 @@ class floating
     // Private member functions
 
         //- Return a list of joints needed to emulate a floating body
-        static autoPtr<composite> sixDoF();
+        static composite sixDoF();
 
 
 public:
@@ -90,7 +90,7 @@ public:
 
 
     //- Destructor
-    virtual ~floating();
+    virtual ~floating() = default;
 
 
     // Member Functions

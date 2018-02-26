@@ -130,7 +130,7 @@ public:
 
 
     //- Destructor
-    virtual ~AveragingMethod();
+    virtual ~AveragingMethod() = default;
 
 
     //- Member Functions

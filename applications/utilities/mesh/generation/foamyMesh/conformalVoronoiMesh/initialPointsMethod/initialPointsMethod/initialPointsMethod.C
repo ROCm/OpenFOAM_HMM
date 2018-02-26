@@ -113,10 +113,4 @@ Foam::autoPtr<Foam::initialPointsMethod> Foam::initialPointsMethod::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::initialPointsMethod::~initialPointsMethod()
-{}
-
-
 // ************************************************************************* //

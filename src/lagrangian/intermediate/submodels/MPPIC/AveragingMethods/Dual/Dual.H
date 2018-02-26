@@ -94,13 +94,11 @@ private:
         Field<Type>& dataDual_;
 
 
-    //- Private static member functions
+    //- Private Member Functions
 
-        //- Return the size of the FieldField parts
-        static autoPtr<labelList> size(const fvMesh &mesh);
+        //- The sizing for the FieldField parts
+        static labelList sizing(const fvMesh& mesh);
 
-
-    //- Private member functions
 
         //- Sync point data over processor boundaries
         void syncDualData();
@@ -119,7 +117,7 @@ public:
         (
             const IOobject& io,
             const dictionary& dict,
-            const fvMesh &mesh
+            const fvMesh& mesh
         );
 
         //- Construct a copy
@@ -136,7 +134,7 @@ public:
 
 
     //- Destructor
-    virtual ~Dual();
+    virtual ~Dual() = default;
 
 
     //- Member Functions

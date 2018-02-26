@@ -1473,7 +1473,7 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
     {
         globalTris_.reset(new globalIndex(triSurface::size()));
     }
-    return globalTris_;
+    return *globalTris_;
 }
 
 

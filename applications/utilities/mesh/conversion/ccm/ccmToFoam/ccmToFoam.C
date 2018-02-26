@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
         Info<< nl << "Bounding box size: " << mesh().bounds().span() << nl;
 
         // check number of regions
-        regionSplit rs(mesh);
+        regionSplit rs(mesh());
 
         Info<< "Number of regions: " << rs.nRegions();
         if (rs.nRegions() == 1)
@@ -281,7 +281,7 @@ int main(int argc, char *argv[])
                 << "**************************************************" << nl;
         }
         Info<< endl;
-        reader.writeMesh(mesh, format);
+        reader.writeMesh(mesh(), format);
 
         // exportName only has a size when export is in effect
         if (exportName.size())

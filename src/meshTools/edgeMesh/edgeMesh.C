@@ -202,7 +202,7 @@ void Foam::edgeMesh::transfer(edgeMesh& mesh)
 {
     points_.transfer(mesh.points_);
     edges_.transfer(mesh.edges_);
-    pointEdgesPtr_ = mesh.pointEdgesPtr_;
+    pointEdgesPtr_ = std::move(mesh.pointEdgesPtr_);
 }
 
 

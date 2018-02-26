@@ -75,7 +75,7 @@ Foam::functionObjects::streamLineBase::sampledSetPoints() const
         sampledSetAxis_ = sampledSetPtr_->axis();
     }
 
-    return sampledSetPtr_();
+    return *sampledSetPtr_;
 }
 
 

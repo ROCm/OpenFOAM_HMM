@@ -48,8 +48,8 @@ void Foam::phaseSystem::createSubModels
             key,
             modelType::New
             (
-               *iter,
-                phasePairs_[key]
+                iter.object(),
+                phasePairs_[key]()
             )
         );
     }
@@ -98,11 +98,11 @@ void Foam::phaseSystem::generatePairsAndSubModels
     const blendingMethod& blending
     (
         blendingMethods_.found(modelName)
-      ? blendingMethods_[modelName]
-      : blendingMethods_["default"]
+      ? *(blendingMethods_[modelName])
+      : *(blendingMethods_["default"])
     );
 
-    autoPtr<modelType> noModel(nullptr);
+    autoPtr<modelType> noModel;
 
     forAllConstIter(typename modelTypeTable, tempModels, iter)
     {

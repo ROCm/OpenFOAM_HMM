@@ -645,7 +645,7 @@ public:
 
                 const scalarField& oldCellVolumes() const
                 {
-                    return oldCellVolumesPtr_();
+                    return *oldCellVolumesPtr_;
                 }
 
 };

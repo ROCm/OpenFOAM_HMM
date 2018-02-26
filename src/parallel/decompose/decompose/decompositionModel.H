@@ -123,7 +123,7 @@ public:
                         this->mesh().name()  // Name of mesh region
                     );
             }
-            return decomposerPtr_();
+            return *decomposerPtr_;
         }
 
         //- Helper: return IOobject with optionally absolute path provided

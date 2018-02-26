@@ -79,7 +79,7 @@ Foam::displacementMeshMoverMotionSolver::meshMover() const
             pointDisplacement_
         );
     }
-    return meshMoverPtr_();
+    return *meshMoverPtr_;
 }
 
 

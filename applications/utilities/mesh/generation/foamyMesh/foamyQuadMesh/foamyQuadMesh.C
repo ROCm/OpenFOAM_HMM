@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
             autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(pMesh, false);
 
-            pMesh.updateMesh(morphMap);
+            pMesh.updateMesh(morphMap());
         }
     }
 

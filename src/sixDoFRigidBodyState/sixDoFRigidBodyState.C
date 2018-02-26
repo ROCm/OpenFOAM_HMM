@@ -57,7 +57,6 @@ Foam::functionObjects::sixDoFRigidBodyState::angleTypeNames_
 };
 
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void Foam::functionObjects::sixDoFRigidBodyState::writeFileHeader(Ostream& os)
@@ -91,12 +90,6 @@ Foam::functionObjects::sixDoFRigidBodyState::sixDoFRigidBodyState
     read(dict);
     writeFileHeader(file());
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::sixDoFRigidBodyState::~sixDoFRigidBodyState()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -965,7 +965,7 @@ Foam::extendedEdgeMesh::pointTree() const
         );
     }
 
-    return pointTree_();
+    return *pointTree_;
 }
 
 
@@ -1007,7 +1007,7 @@ Foam::extendedEdgeMesh::edgeTree() const
         );
     }
 
-    return edgeTree_();
+    return *edgeTree_;
 }
 
 
@@ -1095,8 +1095,8 @@ void Foam::extendedEdgeMesh::transfer(extendedEdgeMesh& mesh)
     featurePointNormals_.transfer(mesh.featurePointNormals_);
     featurePointEdges_.transfer(mesh.featurePointEdges_);
     regionEdges_.transfer(mesh.regionEdges_);
-    pointTree_ = mesh.pointTree_;
-    edgeTree_ = mesh.edgeTree_;
+    pointTree_ = std::move(mesh.pointTree_);
+    edgeTree_ = std::move(mesh.edgeTree_);
     edgeTreesByType_.transfer(mesh.edgeTreesByType_);
 }
 

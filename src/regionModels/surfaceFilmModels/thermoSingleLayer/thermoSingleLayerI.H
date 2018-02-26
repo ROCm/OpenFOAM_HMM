@@ -133,25 +133,25 @@ inline const PtrList<volScalarField>& thermoSingleLayer::YPrimary() const
 
 inline const heatTransferModel& thermoSingleLayer::htcs() const
 {
-    return htcs_();
+    return *htcs_;
 }
 
 
 inline const heatTransferModel& thermoSingleLayer::htcw() const
 {
-    return htcw_();
+    return *htcw_;
 }
 
 
 inline const phaseChangeModel& thermoSingleLayer::phaseChange() const
 {
-    return phaseChange_();
+    return *phaseChange_;
 }
 
 
 inline const filmRadiationModel& thermoSingleLayer::radiation() const
 {
-    return radiation_();
+    return *radiation_;
 }
 
 

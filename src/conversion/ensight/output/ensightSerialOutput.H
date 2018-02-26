@@ -112,7 +112,7 @@ public:
         autoPtr<ensightFile>& output
     )
     {
-        return writeField(vf, part, output.rawRef());
+        return writeField(vf, part, output.ref());
     }
 
 
@@ -125,7 +125,7 @@ public:
         autoPtr<ensightFile>& output
     )
     {
-        return writeField(vf, list, output.rawRef());
+        return writeField(vf, list, output.ref());
     }
 
 };

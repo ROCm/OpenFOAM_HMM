@@ -320,10 +320,9 @@ CrankNicolsonDdtScheme<Type>::CrankNicolsonDdtScheme
                 << exit(FatalIOError);
         }
 
-        ocCoeff_ = new Function1Types::Constant<scalar>
+        ocCoeff_.reset
         (
-            "ocCoeff",
-            ocCoeff
+            new Function1Types::Constant<scalar>("ocCoeff", ocCoeff)
         );
     }
     else

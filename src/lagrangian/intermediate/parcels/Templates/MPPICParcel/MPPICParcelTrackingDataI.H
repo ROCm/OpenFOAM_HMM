@@ -186,8 +186,8 @@ inline void Foam::MPPICParcel<ParcelType>::trackingData::updateAverages
     }
     volumeAverage_->average();
     massAverage_->average();
-    rhoAverage_->average(massAverage_);
-    uAverage_->average(massAverage_);
+    rhoAverage_->average(*massAverage_);
+    uAverage_->average(*massAverage_);
 
     // squared velocity deviation
     forAllConstIter(typename TrackCloudType, cloud, iter)
@@ -204,7 +204,7 @@ inline void Foam::MPPICParcel<ParcelType>::trackingData::updateAverages
             p.nParticle()*p.mass()*magSqr(p.U() - u)
         );
     }
-    uSqrAverage_->average(massAverage_);
+    uSqrAverage_->average(*massAverage_);
 
     // sauter mean radius
     radiusAverage_() = volumeAverage_();

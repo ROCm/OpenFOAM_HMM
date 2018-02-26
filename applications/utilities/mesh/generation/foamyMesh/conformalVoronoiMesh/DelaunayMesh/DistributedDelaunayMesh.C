@@ -142,13 +142,6 @@ Foam::DistributedDelaunayMesh<Triangulation>::DistributedDelaunayMesh
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Triangulation>
-Foam::DistributedDelaunayMesh<Triangulation>::~DistributedDelaunayMesh()
-{}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Triangulation>
@@ -491,7 +484,8 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
 
     const label preDistributionSize = parallelVertices.size();
 
-    mapDistribute pointMap = buildMap(targetProcessor);
+    autoPtr<mapDistribute> pointMapPtr = buildMap(targetProcessor);
+    mapDistribute& pointMap = *pointMapPtr;
 
     // Make a copy of the original list.
     DynamicList<Vb> originalParallelVertices(parallelVertices);

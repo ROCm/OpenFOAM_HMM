@@ -1089,7 +1089,7 @@ int main(int argc, char *argv[])
 
 
     // Update fields
-    mesh.updateMesh(map);
+    mesh.updateMesh(map());
 
     // Update proc maps
     if (cellProcAddressing.headerOk())

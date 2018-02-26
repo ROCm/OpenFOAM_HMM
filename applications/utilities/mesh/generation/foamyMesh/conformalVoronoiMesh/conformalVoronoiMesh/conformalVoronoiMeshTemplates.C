@@ -132,7 +132,7 @@ bool Foam::conformalVoronoiMesh::distributeBackground(const Triangulation& mesh)
             cellWeights
         );
 
-        cellShapeControl_.shapeControlMesh().distribute(decomposition_);
+        cellShapeControl_.shapeControlMesh().distribute(decomposition_());
 
         distribute();
 

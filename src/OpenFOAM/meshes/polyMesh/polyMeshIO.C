@@ -452,7 +452,7 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         autoPtr<labelIOList> newTetBasePtIsPtr = readTetBasePtIs();
         if (newTetBasePtIsPtr.valid())
         {
-            tetBasePtIsPtr_ = newTetBasePtIsPtr;
+            tetBasePtIsPtr_ = std::move(newTetBasePtIsPtr);
         }
 
         // Calculate the geometry for the patches (transformation tensors etc.)

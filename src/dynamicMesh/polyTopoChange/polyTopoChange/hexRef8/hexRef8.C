@@ -5110,7 +5110,7 @@ const Foam::cellShapeList& Foam::hexRef8::cellShapes() const
                 << endl;
         }
     }
-    return cellShapesPtr_();
+    return *cellShapesPtr_;
 }
 
 

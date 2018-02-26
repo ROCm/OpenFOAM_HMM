@@ -254,7 +254,7 @@ public:
         autoPtr<topoSet> clone() const
         {
             NotImplemented;
-            return autoPtr<topoSet>(nullptr);
+            return autoPtr<topoSet>();
         }
 
 

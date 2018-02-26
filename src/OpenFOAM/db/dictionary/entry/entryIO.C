@@ -437,7 +437,7 @@ Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    autoPtr<entry> ptr(nullptr);
+    autoPtr<entry> ptr;
 
     // Get the next keyword and if invalid return false
     keyType keyword;

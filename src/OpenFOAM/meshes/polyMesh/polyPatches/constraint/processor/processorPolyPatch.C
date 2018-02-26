@@ -511,7 +511,7 @@ const Foam::labelList& Foam::processorPolyPatch::neighbPoints() const
             << "No extended addressing calculated for patch " << name()
             << abort(FatalError);
     }
-    return neighbPointsPtr_();
+    return *neighbPointsPtr_;
 }
 
 
@@ -523,7 +523,7 @@ const Foam::labelList& Foam::processorPolyPatch::neighbEdges() const
             << "No extended addressing calculated for patch " << name()
             << abort(FatalError);
     }
-    return neighbEdgesPtr_();
+    return *neighbEdgesPtr_;
 }
 
 

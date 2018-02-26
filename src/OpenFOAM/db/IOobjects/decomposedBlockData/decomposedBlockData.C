@@ -262,12 +262,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
         is.fatalCheck("read(Istream&) : reading entry");
 
         string buf(data.begin(), data.size());
-        realIsPtr = new IStringStream
+        realIsPtr.reset
         (
-            buf,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            is.name()
+            new IStringStream
+            (
+                buf,
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                is.name()
+            )
         );
 
         // Read header
@@ -314,12 +317,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlock
             is.fatalCheck("read(Istream&) : reading entry");
         }
         string buf(data.begin(), data.size());
-        realIsPtr = new IStringStream
+        realIsPtr.reset
         (
-            buf,
-            IOstream::ASCII,
-            IOstream::currentVersion,
-            is.name()
+            new IStringStream
+            (
+                buf,
+                IOstream::ASCII,
+                IOstream::currentVersion,
+                is.name()
+            )
         );
 
         // Apply master stream settings to realIsPtr
@@ -484,12 +490,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
                 is.fatalCheck("read(Istream&) : reading entry");
 
                 string buf(data.begin(), data.size());
-                realIsPtr = new IStringStream
+                realIsPtr.reset
                 (
-                    buf,
-                    IOstream::ASCII,
-                    IOstream::currentVersion,
-                    fName
+                    new IStringStream
+                    (
+                        buf,
+                        IOstream::ASCII,
+                        IOstream::currentVersion,
+                        fName
+                    )
                 );
 
                 // Read header
@@ -538,12 +547,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             is >> data;
 
             string buf(data.begin(), data.size());
-            realIsPtr = new IStringStream
+            realIsPtr.reset
             (
-                buf,
-                IOstream::ASCII,
-                IOstream::currentVersion,
-                fName
+                new IStringStream
+                (
+                    buf,
+                    IOstream::ASCII,
+                    IOstream::currentVersion,
+                    fName
+                )
             );
         }
     }
@@ -567,12 +579,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
                 is.fatalCheck("read(Istream&) : reading entry");
 
                 string buf(data.begin(), data.size());
-                realIsPtr = new IStringStream
+                realIsPtr.reset
                 (
-                    buf,
-                    IOstream::ASCII,
-                    IOstream::currentVersion,
-                    fName
+                    new IStringStream
+                    (
+                        buf,
+                        IOstream::ASCII,
+                        IOstream::currentVersion,
+                        fName
+                    )
                 );
 
                 // Read header
@@ -611,12 +626,15 @@ Foam::autoPtr<Foam::ISstream> Foam::decomposedBlockData::readBlocks
             is >> data;
 
             string buf(data.begin(), data.size());
-            realIsPtr = new IStringStream
+            realIsPtr.reset
             (
-                buf,
-                IOstream::ASCII,
-                IOstream::currentVersion,
-                fName
+                new IStringStream
+                (
+                    buf,
+                    IOstream::ASCII,
+                    IOstream::currentVersion,
+                    fName
+                )
             );
         }
     }

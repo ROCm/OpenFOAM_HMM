@@ -143,7 +143,7 @@ Foam::fv::option& Foam::fv::CodedSource<Type>::redirectFvOption() const
             mesh_
         );
     }
-    return redirectFvOptionPtr_();
+    return *redirectFvOptionPtr_;
 }
 
 

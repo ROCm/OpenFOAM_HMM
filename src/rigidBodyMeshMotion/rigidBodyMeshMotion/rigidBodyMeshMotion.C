@@ -130,7 +130,7 @@ Foam::rigidBodyMeshMotion::rigidBodyMeshMotion
     }
     else
     {
-        ramp_ = new Function1Types::OneConstant<scalar>("ramp");
+        ramp_.reset(new Function1Types::OneConstant<scalar>("ramp"));
     }
 
     const dictionary& bodiesDict = coeffDict().subDict("bodies");

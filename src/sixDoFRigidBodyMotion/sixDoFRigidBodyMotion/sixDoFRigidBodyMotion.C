@@ -123,7 +123,7 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     momentOfInertia_(dict.lookup("momentOfInertia")),
     aRelax_(dict.lookupOrDefault<scalar>("accelerationRelaxation", 1.0)),
     aDamp_(dict.lookupOrDefault<scalar>("accelerationDamping", 1.0)),
-    report_(dict.lookupOrDefault<Switch>("report", false)),
+    report_(dict.lookupOrDefault("report", false)),
     solver_(sixDoFSolver::New(dict.subDict("solver"), *this))
 {
     addRestraints(dict);
@@ -171,14 +171,14 @@ Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
     aRelax_(sDoFRBM.aRelax_),
     aDamp_(sDoFRBM.aDamp_),
     report_(sDoFRBM.report_),
-    solver_(sDoFRBM.solver_, false)
+    solver_(sDoFRBM.solver_.clone())
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::sixDoFRigidBodyMotion::~sixDoFRigidBodyMotion()
-{}
+{} // Define here (incomplete type in header)
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

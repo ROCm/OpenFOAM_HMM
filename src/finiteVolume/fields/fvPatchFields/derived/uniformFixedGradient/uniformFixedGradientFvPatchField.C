@@ -78,7 +78,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf, p, iF, mapper),
-    uniformGradient_(ptf.uniformGradient_, false)
+    uniformGradient_(ptf.uniformGradient_.clone())
 {}
 
 
@@ -89,7 +89,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf),
-    uniformGradient_(ptf.uniformGradient_, false)
+    uniformGradient_(ptf.uniformGradient_.clone())
 {}
 
 
@@ -101,7 +101,7 @@ Foam::uniformFixedGradientFvPatchField<Type>::uniformFixedGradientFvPatchField
 )
 :
     fixedGradientFvPatchField<Type>(ptf, iF),
-    uniformGradient_(ptf.uniformGradient_, false)
+    uniformGradient_(ptf.uniformGradient_.clone())
 {
     // Evaluate the profile if defined
     if (ptf.uniformGradient_.valid())

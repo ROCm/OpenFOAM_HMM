@@ -27,13 +27,13 @@ License
 
 inline Foam::psiReactionThermo& Foam::psiChemistryModel::thermo()
 {
-    return thermo_();
+    return *thermo_;
 }
 
 
 inline const Foam::psiReactionThermo& Foam::psiChemistryModel::thermo() const
 {
-    return thermo_();
+    return *thermo_;
 }
 
 

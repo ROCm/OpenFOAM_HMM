@@ -107,7 +107,7 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    flowRate_(ptf.flowRate_, false),
+    flowRate_(ptf.flowRate_.clone()),
     volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
@@ -122,7 +122,7 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    flowRate_(ptf.flowRate_, false),
+    flowRate_(ptf.flowRate_.clone()),
     volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),
@@ -138,7 +138,7 @@ flowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    flowRate_(ptf.flowRate_, false),
+    flowRate_(ptf.flowRate_.clone()),
     volumetric_(ptf.volumetric_),
     rhoName_(ptf.rhoName_),
     rhoInlet_(ptf.rhoInlet_),

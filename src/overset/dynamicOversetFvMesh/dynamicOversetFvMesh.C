@@ -253,7 +253,7 @@ const Foam::lduAddressing& Foam::dynamicOversetFvMesh::lduAddr() const
         // Build extended addressing
         updateAddressing();
     }
-    return lduPtr_();
+    return *lduPtr_;
 }
 
 
@@ -266,7 +266,7 @@ Foam::dynamicOversetFvMesh::primitiveLduAddr() const
             << "Extended addressing not allocated" << abort(FatalError);
     }
 
-    return lduPtr_();
+    return *lduPtr_;
 }
 
 

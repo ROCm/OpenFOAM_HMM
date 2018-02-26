@@ -450,7 +450,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())
@@ -520,7 +520,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())

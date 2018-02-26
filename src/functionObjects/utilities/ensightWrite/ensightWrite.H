@@ -140,13 +140,13 @@ class ensightWrite
         //- Ensight case handler
         ensightCase& ensCase()
         {
-            return ensCase_();
+            return *ensCase_;
         }
 
         //- Ensight mesh handler
         ensightMesh& ensMesh()
         {
-            return ensMesh_();
+            return *ensMesh_;
         }
 
 

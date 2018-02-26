@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,6 +48,24 @@ Foam::coordinateSystem::coordinateSystem()
 {}
 
 
+Foam::coordinateSystem::coordinateSystem(const coordinateSystem& cs)
+:
+    name_(cs.name_),
+    note_(cs.note_),
+    origin_(cs.origin_),
+    R_(cs.R_.clone())
+{}
+
+
+Foam::coordinateSystem::coordinateSystem(coordinateSystem&& cs)
+:
+    name_(std::move(cs.name_)),
+    note_(std::move(cs.note_)),
+    origin_(std::move(cs.origin_)),
+    R_(std::move(cs.R_))
+{}
+
+
 Foam::coordinateSystem::coordinateSystem
 (
     const word& name,
@@ -55,9 +73,9 @@ Foam::coordinateSystem::coordinateSystem
 )
 :
     name_(name),
-    note_(),
+    note_(cs.note_),
     origin_(cs.origin_),
-    R_(cs.R().clone())
+    R_(cs.R_.clone())
 {}
 
 
@@ -176,12 +194,6 @@ Foam::coordinateSystem::coordinateSystem(Istream& is)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::coordinateSystem::~coordinateSystem()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::dictionary Foam::coordinateSystem::dict(bool ignoreType) const
@@ -220,10 +232,8 @@ Foam::vector Foam::coordinateSystem::localToGlobal
     {
         return (R_->transform(local)) + origin_;
     }
-    else
-    {
-        return R_->transform(local);
-    }
+
+    return R_->transform(local);
 }
 
 
@@ -237,10 +247,8 @@ Foam::tmp<Foam::vectorField> Foam::coordinateSystem::localToGlobal
     {
         return (R_->transform(local)) + origin_;
     }
-    else
-    {
-        return R_->transform(local);
-    }
+
+    return R_->transform(local);
 }
 
 
@@ -254,10 +262,8 @@ Foam::vector Foam::coordinateSystem::globalToLocal
     {
         return R_->invTransform(global - origin_);
     }
-    else
-    {
-        return R_->invTransform(global);
-    }
+
+    return R_->invTransform(global);
 }
 
 
@@ -271,10 +277,8 @@ Foam::tmp<Foam::vectorField> Foam::coordinateSystem::globalToLocal
     {
         return R_->invTransform(global - origin_);
     }
-    else
-    {
-        return R_->invTransform(global);
-    }
+
+    return R_->invTransform(global);
 }
 
 
@@ -283,6 +287,17 @@ void Foam::coordinateSystem::clear()
     note_.clear();
     origin_ = Zero;
     R_->clear();
+}
+
+
+void Foam::coordinateSystem::transfer(coordinateSystem& cs)
+{
+    name_ = std::move(cs.name_);
+    note_ = std::move(cs.note_);
+    origin_ = std::move(cs.origin_);
+    R_ = std::move(cs.R_);
+
+    cs.clear();
 }
 
 
@@ -304,7 +319,7 @@ void Foam::coordinateSystem::writeDict(Ostream& os, bool subDict) const
 
     if (note_.size())
     {
-        // note is optional
+        // The 'note' is optional
         os.writeEntry("note", note_);
     }
 
@@ -320,12 +335,26 @@ void Foam::coordinateSystem::writeDict(Ostream& os, bool subDict) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
+void Foam::coordinateSystem::operator=(const coordinateSystem& cs)
+{
+    name_ = cs.name_;
+    note_ = cs.note_;
+    origin_ = cs.origin_;
+    R_ = cs.R_.clone();
+}
+
+void Foam::coordinateSystem::operator=(coordinateSystem&& cs)
+{
+    transfer(cs);
+}
+
+
 void Foam::coordinateSystem::init(const dictionary& rhs)
 {
     rhs.lookup("origin") >> origin_;
     note_.clear();
     rhs.readIfPresent("note", note_);
-    R_.reset(coordinateRotation::New(rhs.subDict("coordinateRotation")).ptr());
+    R_ = coordinateRotation::New(rhs.subDict("coordinateRotation"));
 }
 
 
@@ -347,14 +376,11 @@ void Foam::coordinateSystem::init
 
     rhs.lookup("origin") >> origin_;
 
-    // The note entry is optional
+    // The 'note' entry is optional
     note_.clear();
     rhs.readIfPresent("note", note_);
 
-    R_.reset
-    (
-        coordinateRotation::New(rhs.subDict("coordinateRotation"), obr).ptr()
-    );
+    R_ = coordinateRotation::New(rhs.subDict("coordinateRotation"), obr);
 }
 
 
@@ -365,8 +391,8 @@ bool Foam::operator!=(const coordinateSystem& a, const coordinateSystem& b)
     return
     (
         a.origin() != b.origin()
-     || a.R().R() != b.R().R()
      || a.type() != b.type()
+     || a.R().R() != b.R().R()
     );
 }
 

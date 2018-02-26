@@ -174,10 +174,10 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
     // Update fields
-    mesh.updateMesh(map);
+    mesh.updateMesh(map());
 
     // Update numbering of cells/vertices.
-    meshCutter.updateMesh(map);
+    meshCutter.updateMesh(map());
 
     // Optionally inflate mesh
     if (map().hasMotionPoints())

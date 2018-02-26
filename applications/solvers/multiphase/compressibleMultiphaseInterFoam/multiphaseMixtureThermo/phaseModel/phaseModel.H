@@ -120,13 +120,13 @@ public:
         //- Return const-access to phase rhoThermo
         const rhoThermo& thermo() const
         {
-            return thermo_();
+            return *thermo_;
         }
 
         //- Return access to phase rhoThermo
         rhoThermo& thermo()
         {
-            return thermo_();
+            return *thermo_;
         }
 
         //- Return const-access to phase divergence

@@ -94,7 +94,7 @@ void Foam::cylindrical::init
 
 Foam::cylindrical::cylindrical(const cylindrical& r)
 :
-    Rptr_(r.Rptr_, false),  // clone
+    Rptr_(r.Rptr_.clone()),
     origin_(r.origin_),
     e3_(r.e3_)
 {}
@@ -177,15 +177,11 @@ Foam::cylindrical::cylindrical
 }
 
 
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::cylindrical::clear()
 {
-    if (!Rptr_.empty())
-    {
-        Rptr_.clear();
-    }
+    Rptr_.clear();
 }
 
 

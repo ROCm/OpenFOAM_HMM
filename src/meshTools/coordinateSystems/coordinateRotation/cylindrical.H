@@ -181,7 +181,7 @@ public:
 
         virtual const tensorField& Tr() const
         {
-            return Rptr_();
+            return *Rptr_;
         }
 
         //- Transform vectorField using transformation tensor field

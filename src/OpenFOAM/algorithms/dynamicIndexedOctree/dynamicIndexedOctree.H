@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-typedef DynamicList<autoPtr<DynamicList<label >>> contentListList;
+typedef DynamicList<autoPtr<DynamicList<label>>> contentListList;
 
 // Forward declaration of classes
 template<class Type> class dynamicIndexedOctree;

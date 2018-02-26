@@ -251,7 +251,7 @@ int main(int argc, char *argv[])
     // Create a mesh from topo changes.
     autoPtr<mapPolyMesh> morphMap = meshMod().changeMesh(mesh(), false);
 
-    mesh().updateMesh(morphMap);
+    mesh().updateMesh(morphMap());
 
     {
         edgeCollapser collapser(mesh());
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> morphMap
             = meshModCollapse.changeMesh(mesh(), false);
 
-        mesh().updateMesh(morphMap);
+        mesh().updateMesh(morphMap());
     }
 
     if (!overwrite)

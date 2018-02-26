@@ -3361,7 +3361,7 @@ void Foam::snappyLayerDriver::addLayers
             (
                 numLayers,              // per patch the num layers
                 patchIDs,               // patches that are being moved
-                pp,                     // indirectpatch for all faces moving
+                *pp,                    // indirectpatch for all faces moving
 
                 patchDisp,
                 patchNLayers,
@@ -3373,7 +3373,7 @@ void Foam::snappyLayerDriver::addLayers
             // of the patchDisp here.
             syncPatchDisplacement
             (
-                pp,
+                *pp,
                 scalarField(patchDisp.size(), 0.0), //minThickness,
                 patchDisp,
                 patchNLayers,
@@ -3555,7 +3555,7 @@ void Foam::snappyLayerDriver::addLayers
         (
             mesh,
             globalFaces,
-            pp
+            *pp
         )
     );
 
@@ -3570,7 +3570,7 @@ void Foam::snappyLayerDriver::addLayers
     (
         globalFaces,
         edgeGlobalFaces,
-        pp,
+        *pp,
 
         edgePatchID,
         edgeZoneID,
@@ -3605,7 +3605,7 @@ void Foam::snappyLayerDriver::addLayers
         (
             numLayers,                  // per patch the num layers
             patchIDs,                   // patches that are being moved
-            pp,                         // indirectpatch for all faces moving
+            *pp,                        // indirectpatch for all faces moving
 
             patchDisp,
             patchNLayers,
@@ -3622,7 +3622,7 @@ void Foam::snappyLayerDriver::addLayers
 
         handleNonStringConnected
         (
-            pp,
+            *pp,
             patchDisp,
             patchNLayers,
             extrudeStatus
@@ -3634,7 +3634,7 @@ void Foam::snappyLayerDriver::addLayers
 
         handleNonManifolds
         (
-            pp,
+            *pp,
             meshEdges,
             edgeGlobalFaces,
 
@@ -3648,7 +3648,7 @@ void Foam::snappyLayerDriver::addLayers
 
         handleFeatureAngle
         (
-            pp,
+            *pp,
             meshEdges,
             layerParams.featureAngle(),
 
@@ -3670,7 +3670,7 @@ void Foam::snappyLayerDriver::addLayers
 
             handleWarpedFaces
             (
-                pp,
+                *pp,
                 layerParams.maxFaceThicknessRatio(),
                 edge0Len,
                 cellLevel,
@@ -3686,7 +3686,7 @@ void Foam::snappyLayerDriver::addLayers
         //
         //handleMultiplePatchFaces
         //(
-        //    pp,
+        //    *pp,
         //
         //    patchDisp,
         //    patchNLayers,
@@ -3700,7 +3700,7 @@ void Foam::snappyLayerDriver::addLayers
         {
             growNoExtrusion
             (
-                pp,
+                *pp,
                 patchDisp,
                 patchNLayers,
                 extrudeStatus
@@ -3730,7 +3730,7 @@ void Foam::snappyLayerDriver::addLayers
     scalarField expansionRatio(pp().nPoints());
     calculateLayerThickness
     (
-        pp,
+        *pp,
         patchIDs,
         layerParams,
         cellLevel,
@@ -3754,8 +3754,8 @@ void Foam::snappyLayerDriver::addLayers
     // Per face wanted overall layer thickness
     scalarField faceWantedThickness(mesh.nFaces(), 0.0);
     {
-        UIndirectList<scalar>(faceWantedThickness, pp().addressing()) =
-            avgPointData(pp, thickness);
+        UIndirectList<scalar>(faceWantedThickness, pp->addressing()) =
+            avgPointData(*pp, thickness);
     }
 
 
@@ -3838,7 +3838,7 @@ void Foam::snappyLayerDriver::addLayers
             // that.
             syncPatchDisplacement
             (
-                pp,
+                *pp,
                 minThickness,
                 patchDisp,
                 patchNLayers,
@@ -3848,7 +3848,7 @@ void Foam::snappyLayerDriver::addLayers
             // Displacement acc. to pointnormals
             getPatchDisplacement
             (
-                pp,
+                *pp,
                 thickness,
                 minThickness,
                 patchDisp,
@@ -3872,7 +3872,7 @@ void Foam::snappyLayerDriver::addLayers
                 motionSmootherAlgo::setDisplacement
                 (
                     patchIDs,
-                    pp,
+                    *pp,
                     patchDisp,
                     displacement
                 );
@@ -3912,7 +3912,7 @@ void Foam::snappyLayerDriver::addLayers
             (
                 globalFaces,
                 edgeGlobalFaces,
-                pp,
+                *pp,
                 minThickness,
                 dummySet,
                 patchDisp,
@@ -3966,7 +3966,7 @@ void Foam::snappyLayerDriver::addLayers
             labelList nPatchFaceLayers(pp().size(), -1);
             setupLayerInfoTruncation
             (
-                pp,
+                *pp,
                 patchNLayers,
                 extrudeStatus,
                 layerParams.nBufferCellsNoExtrude(),
@@ -4027,7 +4027,7 @@ void Foam::snappyLayerDriver::addLayers
             // undo if neccesary.
 
             autoPtr<fvMesh> newMeshPtr;
-            autoPtr<mapPolyMesh> map = meshMod.makeMesh
+            autoPtr<mapPolyMesh> mapPtr = meshMod.makeMesh
             (
                 newMeshPtr,
                 IOobject
@@ -4042,7 +4042,8 @@ void Foam::snappyLayerDriver::addLayers
                 mesh,           // original mesh
                 true            // parallel sync
             );
-            fvMesh& newMesh = newMeshPtr();
+            fvMesh& newMesh = *newMeshPtr;
+            mapPolyMesh& map = *mapPtr;
 
             // Get timing, but more importantly get memory information
             addProfiling(grow, "snappyHexMesh::layers::updateMesh");
@@ -4067,7 +4068,7 @@ void Foam::snappyLayerDriver::addLayers
             (
                 newMesh,
                 addLayer,
-                avgPointData(pp, mag(patchDisp))(), // current thickness
+                avgPointData(*pp, mag(patchDisp))(), // current thickness
 
                 cellNLayers,
                 faceRealThickness
@@ -4113,7 +4114,7 @@ void Foam::snappyLayerDriver::addLayers
                     facei++
                 )
                 {
-                    label newMeshFacei = map().faceMap()[facei];
+                    label newMeshFacei = map.faceMap()[facei];
                     if (newMeshFacei != -1)
                     {
                         meshToNewMesh[newMeshFacei] = facei;
@@ -4164,7 +4165,7 @@ void Foam::snappyLayerDriver::addLayers
                 extrudeStatus
             );
 
-            label nTotExtruded = countExtrusion(pp, extrudeStatus);
+            label nTotExtruded = countExtrusion(*pp, extrudeStatus);
             label nTotFaces = returnReduce(pp().size(), sumOp<label>());
             label nTotAddedCells = returnReduce(nAddedCells, sumOp<label>());
 
@@ -4193,7 +4194,7 @@ void Foam::snappyLayerDriver::addLayers
             {
                 growNoExtrusion
                 (
-                    pp,
+                    *pp,
                     patchDisp,
                     patchNLayers,
                     extrudeStatus
@@ -4211,7 +4212,8 @@ void Foam::snappyLayerDriver::addLayers
 
     {
         // Apply the stored topo changes to the current mesh.
-        autoPtr<mapPolyMesh> map = savedMeshMod.changeMesh(mesh, false);
+        autoPtr<mapPolyMesh> mapPtr = savedMeshMod.changeMesh(mesh, false);
+        mapPolyMesh& map = *mapPtr;
 
         // Hack to remove meshPhi - mapped incorrectly. TBD.
         mesh.clearOut();
@@ -4220,9 +4222,9 @@ void Foam::snappyLayerDriver::addLayers
         mesh.updateMesh(map);
 
         // Move mesh (since morphing does not do this)
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh.movePoints(map().preMotionPoints());
+            mesh.movePoints(map.preMotionPoints());
         }
         else
         {
@@ -4238,7 +4240,7 @@ void Foam::snappyLayerDriver::addLayers
         // Update numbering of faceWantedThickness
         meshRefinement::updateList
         (
-            map().faceMap(),
+            map.faceMap(),
             scalar(0),
             faceWantedThickness
         );
@@ -4283,7 +4285,7 @@ void Foam::snappyLayerDriver::addLayers
             DynamicList<label> candidates(baffles.size()*4);
 
             // Mark whether old face was on baffle
-            PackedBoolList oldBaffleFace(map().nOldFaces());
+            PackedBoolList oldBaffleFace(map.nOldFaces());
             forAll(baffles, i)
             {
                 const labelPair& baffle = baffles[i];
@@ -4301,14 +4303,14 @@ void Foam::snappyLayerDriver::addLayers
                 facei++
             )
             {
-                label oldFacei = map().faceMap()[facei];
+                label oldFacei = map.faceMap()[facei];
                 if (oldFacei != -1 && oldBaffleFace[oldFacei])
                 {
                     const face& f = mesh.faces()[facei];
                     forAll(f, fp)
                     {
                         label pointi = f[fp];
-                        label oldPointi = map().pointMap()[pointi];
+                        label oldPointi = map.pointMap()[pointi];
 
                         if (pointToMaster[oldPointi] != -1)
                         {

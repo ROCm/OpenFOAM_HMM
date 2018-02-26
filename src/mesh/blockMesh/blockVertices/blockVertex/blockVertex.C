@@ -45,7 +45,7 @@ Foam::blockVertex::blockVertex()
 Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::clone() const
 {
     NotImplemented;
-    return autoPtr<blockVertex>(nullptr);
+    return autoPtr<blockVertex>();
 }
 
 
@@ -99,7 +99,7 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
             << firstToken.info()
             << exit(FatalIOError);
 
-        return autoPtr<blockVertex>(nullptr);
+        return autoPtr<blockVertex>();
     }
 }
 

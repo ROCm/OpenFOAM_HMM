@@ -544,7 +544,7 @@ Foam::label Foam::checkGeometry
                 nonAlignedPoints.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, nonAlignedPoints);
+                    mergeAndWrite(setWriter(), nonAlignedPoints);
                 }
             }
         }
@@ -786,7 +786,7 @@ Foam::label Foam::checkGeometry
                 points.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, points);
+                    mergeAndWrite(setWriter(), points);
                 }
             }
         }
@@ -809,7 +809,7 @@ Foam::label Foam::checkGeometry
                 nearPoints.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, nearPoints);
+                    mergeAndWrite(setWriter(), nearPoints);
                 }
             }
         }

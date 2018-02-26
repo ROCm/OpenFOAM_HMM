@@ -84,7 +84,7 @@ Foam::PatchInjection<CloudType>::PatchInjection
     parcelsPerSecond_(im.parcelsPerSecond_),
     U0_(im.U0_),
     flowRateProfile_(im.flowRateProfile_),
-    sizeDistribution_(im.sizeDistribution_, false)
+    sizeDistribution_(im.sizeDistribution_.clone())
 {}
 
 

@@ -148,7 +148,7 @@ inline const Foam::mapDistribute& Foam::mappedPatchBase::map() const
         calcMapping();
     }
 
-    return mapPtr_();
+    return *mapPtr_;
 }
 
 
@@ -162,7 +162,7 @@ inline const Foam::AMIPatchToPatchInterpolation& Foam::mappedPatchBase::AMI
         calcAMI();
     }
 
-    return AMIPtr_();
+    return *AMIPtr_;
 }
 
 

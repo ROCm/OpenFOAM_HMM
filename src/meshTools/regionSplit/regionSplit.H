@@ -189,7 +189,7 @@ public:
         //- Return global region numbering
         const globalIndex& globalNumbering() const
         {
-            return globalNumberingPtr_();
+            return *globalNumberingPtr_;
         }
 
         //- Return local number of regions

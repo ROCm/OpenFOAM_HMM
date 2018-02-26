@@ -50,7 +50,7 @@ inline Foam::autoPtr<Foam::RBD::subBody> Foam::RBD::subBody::clone() const
 
 inline const Foam::RBD::rigidBody& Foam::RBD::subBody::body() const
 {
-    return body_();
+    return *body_;
 }
 
 

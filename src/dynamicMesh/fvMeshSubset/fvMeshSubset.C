@@ -1488,7 +1488,7 @@ const fvMesh& Foam::fvMeshSubset::subMesh() const
 {
     checkCellSubset();
 
-    return fvMeshSubsetPtr_();
+    return *fvMeshSubsetPtr_;
 }
 
 
@@ -1496,7 +1496,7 @@ fvMesh& Foam::fvMeshSubset::subMesh()
 {
     checkCellSubset();
 
-    return fvMeshSubsetPtr_();
+    return *fvMeshSubsetPtr_;
 }
 
 
@@ -1550,7 +1550,7 @@ const labelList& Foam::fvMeshSubset::faceFlipMap() const
         }
     }
 
-    return faceFlipMapPtr_();
+    return *faceFlipMapPtr_;
 }
 
 

@@ -183,7 +183,7 @@ const Foam::List<Foam::labelPair>& Foam::mapDistributeBase::schedule() const
             )
         );
     }
-    return schedulePtr_();
+    return *schedulePtr_;
 }
 
 

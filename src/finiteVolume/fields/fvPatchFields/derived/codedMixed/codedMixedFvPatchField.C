@@ -291,7 +291,7 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
             )
         );
     }
-    return redirectPatchFieldPtr_();
+    return *redirectPatchFieldPtr_;
 }
 
 

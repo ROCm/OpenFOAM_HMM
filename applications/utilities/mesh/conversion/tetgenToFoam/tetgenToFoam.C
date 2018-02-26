@@ -338,7 +338,7 @@ int main(int argc, char *argv[])
             wordList(0)
         )
     );
-    const polyMesh& mesh = meshPtr;
+    const polyMesh& mesh = *meshPtr;
 
 
     if (readFaceFile)

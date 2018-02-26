@@ -1810,18 +1810,20 @@ void reconstructLagrangian
             );
         }
         const parLagrangianRedistributor& lagrangianReconstructor =
-            lagrangianReconstructorPtr();
+            *lagrangianReconstructorPtr;
 
         for (const word& cloudName : cloudNames)
         {
             Info<< "Reconstructing lagrangian fields for cloud "
                 << cloudName << nl << endl;
 
-            autoPtr<mapDistributeBase> lagrangianMap =
+            autoPtr<mapDistributeBase> lagrangianMapPtr =
             lagrangianReconstructor.redistributeLagrangianPositions
             (
                 cloudName
             );
+            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
+
             IOobjectList sprayObjs
             (
                 mesh,
@@ -2129,8 +2131,9 @@ void redistributeLagrangian
 
         forAll(clouds, i)
         {
-            autoPtr<mapDistributeBase> lagrangianMap =
-            distributor.redistributeLagrangianPositions(clouds[i]);
+            autoPtr<mapDistributeBase> lagrangianMapPtr =
+                distributor.redistributeLagrangianPositions(clouds[i]);
+            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
 
             distributor.redistributeStoredLagrangianFields
             <IOField<label>>
@@ -2694,7 +2697,7 @@ int main(int argc, char *argv[])
             (
                 baseMeshPtr(),
                 mesh,
-                distMap,
+                distMap(),
                 Pstream::master()       // do I need to write?
             )
         );
@@ -2778,7 +2781,7 @@ int main(int argc, char *argv[])
                     (
                         baseMeshPtr(),
                         mesh,
-                        distMap,
+                        distMap(),
                         Pstream::master()
                     )
                 );
@@ -2804,7 +2807,7 @@ int main(int argc, char *argv[])
                 lagrangianReconstructorPtr,
                 baseMeshPtr(),
                 mesh,
-                distMap,
+                distMap(),
                 selectedLagrangianFields
             );
 
@@ -3012,7 +3015,7 @@ int main(int argc, char *argv[])
             lagrangianReconstructorPtr,
             mesh,
             nOldCells,
-            distMap,
+            distMap(),
             clouds
         );
 

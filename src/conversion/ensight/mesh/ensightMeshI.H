@@ -77,7 +77,7 @@ Foam::ensightMesh::faceZoneFaces() const
 
 inline void Foam::ensightMesh::write(autoPtr<ensightGeoFile>& os) const
 {
-    write(os.rawRef());
+    write(os.ref());
 }
 
 

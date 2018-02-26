@@ -74,7 +74,7 @@ Foam::fileMonitor& Foam::fileOperation::monitor() const
             )
         );
     }
-    return monitorPtr_();
+    return *monitorPtr_;
 }
 
 
@@ -597,7 +597,8 @@ const Foam::fileOperation& Foam::fileHandler()
 
         fileOperation::fileHandlerPtr_ = fileOperation::New(handler, true);
     }
-    return fileOperation::fileHandlerPtr_();
+
+    return *fileOperation::fileHandlerPtr_;
 }
 
 
@@ -618,7 +619,7 @@ void Foam::fileHandler(autoPtr<fileOperation>& newHandlerPtr)
 
     if (newHandlerPtr.valid())
     {
-        fileOperation::fileHandlerPtr_ = newHandlerPtr;
+        fileOperation::fileHandlerPtr_ = std::move(newHandlerPtr);
     }
 }
 

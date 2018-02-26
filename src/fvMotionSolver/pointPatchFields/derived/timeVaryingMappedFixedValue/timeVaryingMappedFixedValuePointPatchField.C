@@ -146,7 +146,7 @@ timeVaryingMappedFixedValuePointPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_(ptf.offset_, false)
+    offset_(ptf.offset_.clone())
 {}
 
 
@@ -170,7 +170,7 @@ timeVaryingMappedFixedValuePointPatchField
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
     endAverage_(ptf.endAverage_),
-    offset_(ptf.offset_, false)
+    offset_(ptf.offset_.clone())
 {}
 
 
@@ -195,7 +195,7 @@ timeVaryingMappedFixedValuePointPatchField
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
     endAverage_(ptf.endAverage_),
-    offset_(ptf.offset_, false)
+    offset_(ptf.offset_.clone())
 {}
 
 

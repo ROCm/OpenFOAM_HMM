@@ -82,7 +82,7 @@ class cyclicAMIPointPatchField
                 );
             }
 
-            return ppiPtr_();
+            return *ppiPtr_;
         }
 
         //- Neighbour side patch interpolation
@@ -99,7 +99,7 @@ class cyclicAMIPointPatchField
                 );
             }
 
-            return nbrPpiPtr_();
+            return *nbrPpiPtr_;
         }
 
 

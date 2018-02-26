@@ -92,7 +92,7 @@ Foam::motionSolver::motionSolver
 Foam::autoPtr<Foam::motionSolver> Foam::motionSolver::clone() const
 {
     NotImplemented;
-    return autoPtr<motionSolver>(nullptr);
+    return autoPtr<motionSolver>();
 }
 
 

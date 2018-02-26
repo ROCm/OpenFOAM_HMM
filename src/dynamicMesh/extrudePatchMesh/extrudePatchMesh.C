@@ -145,7 +145,6 @@ extrudePatchMesh::extrudePatchMesh
     }
 
     extrudeMesh(regionPatches);
-
 }
 
 
@@ -341,21 +340,12 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
         );
 
         // Update numbering on extruder.
-        extruder.updateMesh(map);
+        extruder.updateMesh(map());
 
         this->setInstance(this->thisDb().time().constant());
         this->write();
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-extrudePatchMesh::~extrudePatchMesh()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -250,7 +250,7 @@ Foam::triSurfaceSearch::tree() const
         indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
     }
 
-    return treePtr_();
+    return *treePtr_;
 }
 
 

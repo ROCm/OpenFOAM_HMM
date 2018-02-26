@@ -83,7 +83,7 @@ bool Foam::ensightSerialCloud::writeCloudField
 )
 {
     IOField<Type> field(fieldObject);
-    return writeCloudField(field, output.rawRef());
+    return writeCloudField(field, output.ref());
 }
 
 

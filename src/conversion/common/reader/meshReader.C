@@ -91,7 +91,7 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
     createPolyBoundary();
     clearExtraStorage();
 
-    autoPtr<polyMesh> mesh
+    autoPtr<polyMesh> meshPtr
     (
         new polyMesh
         (
@@ -106,16 +106,17 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
             xferMove(cellPolys_)
         )
     );
+    polyMesh& mesh = meshPtr();
 
-    // adding patches also checks the mesh
-    mesh().addPatches(polyBoundaryPatches(mesh));
+    // Adding patches also checks the mesh
+    mesh.addPatches(polyBoundaryPatches(mesh));
 
-    warnDuplicates("boundaries", mesh().boundaryMesh().names());
+    warnDuplicates("boundaries", mesh.boundaryMesh().names());
 
-    addCellZones(mesh());
-    addFaceZones(mesh());
+    addCellZones(mesh);
+    addFaceZones(mesh);
 
-    return mesh;
+    return meshPtr;
 }
 
 

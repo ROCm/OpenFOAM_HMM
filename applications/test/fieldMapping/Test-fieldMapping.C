@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, inflate);
 
         Info<< "Mapping fields" << nl << endl;
-        mesh.updateMesh(morphMap);
+        mesh.updateMesh(morphMap());
 
         // Move mesh (since morphing does not do this)
         if (morphMap().hasMotionPoints())
@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
         }
 
         // Update numbering of cells/vertices.
-        faceRemover.updateMesh(morphMap);
+        faceRemover.updateMesh(morphMap());
 
 
         Info<< "Writing fields" << nl << endl;

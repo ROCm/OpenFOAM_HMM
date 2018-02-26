@@ -325,7 +325,7 @@ public:
 
 
     //- Destructor
-    virtual ~KinematicCloud();
+    virtual ~KinematicCloud() = default;
 
 
     // Member Functions

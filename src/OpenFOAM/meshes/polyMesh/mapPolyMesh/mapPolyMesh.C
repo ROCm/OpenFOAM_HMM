@@ -174,8 +174,18 @@ Foam::mapPolyMesh::mapPolyMesh
     oldPatchSizes_(oldPatchStarts.size()),
     oldPatchStarts_(oldPatchStarts, reuse),
     oldPatchNMeshPoints_(oldPatchNMeshPoints, reuse),
-    oldCellVolumesPtr_(oldCellVolumesPtr, reuse)
+    oldCellVolumesPtr_()
 {
+    // Reuse old content or clone
+    if (reuse)
+    {
+        oldCellVolumesPtr_ = std::move(oldCellVolumesPtr);
+    }
+    else
+    {
+        oldCellVolumesPtr_ = oldCellVolumesPtr.clone();
+    }
+
     if (oldPatchStarts_.size() > 0)
     {
         // Calculate old patch sizes

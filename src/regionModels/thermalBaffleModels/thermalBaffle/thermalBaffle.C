@@ -348,7 +348,7 @@ const volScalarField& thermalBaffle::T() const
 
 const solidThermo& thermalBaffle::thermo() const
 {
-    return thermo_;
+    return *thermo_;
 }
 
 

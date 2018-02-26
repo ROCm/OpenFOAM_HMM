@@ -296,7 +296,7 @@ public:
             //- Return coordinateSystem
             const coordinateSystem& coord()
             {
-                return coord_();
+                return *coord_;
             }
 
             //- Return sunTrackingUpdateInterval

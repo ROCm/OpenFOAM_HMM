@@ -591,7 +591,7 @@ Foam::meshSearch::boundaryTree() const
         );
     }
 
-    return boundaryTreePtr_();
+    return *boundaryTreePtr_;
 }
 
 
@@ -637,7 +637,7 @@ Foam::meshSearch::cellTree() const
         );
     }
 
-    return cellTreePtr_();
+    return *cellTreePtr_;
 }
 
 

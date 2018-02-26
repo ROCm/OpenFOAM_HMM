@@ -235,7 +235,7 @@ Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
         );
     }
 
-    return mapperPtr_();
+    return *mapperPtr_;
 }
 
 

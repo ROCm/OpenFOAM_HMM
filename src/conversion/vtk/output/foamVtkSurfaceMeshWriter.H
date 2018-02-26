@@ -122,7 +122,7 @@ public:
 
         inline vtk::formatter& format()
         {
-            return format_();
+            return *format_;
         }
 
         //- Open write for CellData of count fields.
