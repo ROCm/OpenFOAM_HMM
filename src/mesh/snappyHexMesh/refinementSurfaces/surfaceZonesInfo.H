@@ -137,7 +137,7 @@ public:
         //- Return clone
         autoPtr<surfaceZonesInfo> clone() const
         {
-            return autoPtr<surfaceZonesInfo>(new surfaceZonesInfo(*this));
+            return autoPtr<surfaceZonesInfo>::New(*this);
         }
 
 

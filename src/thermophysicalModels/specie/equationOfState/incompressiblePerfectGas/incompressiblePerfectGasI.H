@@ -55,10 +55,7 @@ template<class Specie>
 inline Foam::autoPtr<Foam::incompressiblePerfectGas<Specie>>
 Foam::incompressiblePerfectGas<Specie>::clone() const
 {
-    return autoPtr<incompressiblePerfectGas<Specie>>
-    (
-        new incompressiblePerfectGas<Specie>(*this)
-    );
+    return autoPtr<incompressiblePerfectGas<Specie>>::New(*this);
 }
 
 
@@ -69,10 +66,7 @@ Foam::incompressiblePerfectGas<Specie>::New
     const dictionary& dict
 )
 {
-    return autoPtr<incompressiblePerfectGas<Specie>>
-    (
-        new incompressiblePerfectGas<Specie>(dict)
-    );
+    return autoPtr<incompressiblePerfectGas<Specie>>::New(dict);
 }
 
 

@@ -149,7 +149,7 @@ Foam::autoPtr<Foam::labelIOList> Foam::polyMesh::readTetBasePtIs() const
 
     if (io.typeHeaderOk<labelIOList>(true))
     {
-        return autoPtr<labelIOList>(new labelIOList(io));
+        return autoPtr<labelIOList>::New(io);
     }
 
     return autoPtr<labelIOList>();

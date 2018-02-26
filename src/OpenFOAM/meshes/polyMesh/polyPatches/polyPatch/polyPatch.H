@@ -231,7 +231,7 @@ public:
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
-            return autoPtr<polyPatch>(new polyPatch(*this, bm));
+            return autoPtr<polyPatch>::New(*this, bm);
         }
 
         //- Construct and return a clone, resetting the face list
@@ -244,10 +244,7 @@ public:
             const label newStart
         ) const
         {
-            return autoPtr<polyPatch>
-            (
-                new polyPatch(*this, bm, index, newSize, newStart)
-            );
+            return autoPtr<polyPatch>::New(*this, bm, index, newSize, newStart);
         }
 
         //- Construct and return a clone, resetting the face list
@@ -260,10 +257,8 @@ public:
             const label newStart
         ) const
         {
-            return autoPtr<polyPatch>
-            (
-                new polyPatch(*this, bm, index, mapAddressing, newStart)
-            );
+            return autoPtr<polyPatch>::New
+                (*this, bm, index, mapAddressing, newStart);
         }
 
 

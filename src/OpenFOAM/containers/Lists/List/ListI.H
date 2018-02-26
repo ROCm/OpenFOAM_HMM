@@ -95,7 +95,7 @@ inline constexpr Foam::List<T>::List() noexcept
 template<class T>
 inline Foam::autoPtr<Foam::List<T>> Foam::List<T>::clone() const
 {
-    return autoPtr<List<T>>(new List<T>(*this));
+    return autoPtr<List<T>>::New(*this);
 }
 
 

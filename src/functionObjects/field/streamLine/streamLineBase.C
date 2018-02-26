@@ -111,17 +111,14 @@ Foam::functionObjects::streamLineBase::wallPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>
+    return autoPtr<indirectPrimitivePatch>::New
     (
-        new indirectPrimitivePatch
+        IndirectList<face>
         (
-            IndirectList<face>
-            (
-                mesh_.faces(),
-                addressing
-            ),
-            mesh_.points()
-        )
+            mesh_.faces(),
+            addressing
+        ),
+        mesh_.points()
     );
 }
 

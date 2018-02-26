@@ -98,7 +98,7 @@ public:
 
         static autoPtr<procLduInterface> New(Istream& is)
         {
-            return autoPtr<procLduInterface>(new procLduInterface(is));
+            return autoPtr<procLduInterface>::New(is);
         }
 
 

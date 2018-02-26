@@ -432,10 +432,7 @@ public:
         //- Clone
         autoPtr<indexedOctree<Type>> clone() const
         {
-            return autoPtr<indexedOctree<Type>>
-            (
-                new indexedOctree<Type>(*this)
-            );
+            return autoPtr<indexedOctree<Type>>::New(*this);
         }
 
     // Member Functions

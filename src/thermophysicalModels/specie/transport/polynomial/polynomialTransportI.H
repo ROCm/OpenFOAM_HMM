@@ -58,10 +58,7 @@ template<class Thermo, int PolySize>
 inline Foam::autoPtr<Foam::polynomialTransport<Thermo, PolySize>>
 Foam::polynomialTransport<Thermo, PolySize>::clone() const
 {
-    return autoPtr<polynomialTransport<Thermo, PolySize>>
-    (
-        new polynomialTransport<Thermo, PolySize>(*this)
-    );
+    return autoPtr<polynomialTransport<Thermo, PolySize>>::New(*this);
 }
 
 
@@ -69,10 +66,7 @@ template<class Thermo, int PolySize>
 inline Foam::autoPtr<Foam::polynomialTransport<Thermo, PolySize>>
 Foam::polynomialTransport<Thermo, PolySize>::New(const dictionary& dict)
 {
-    return autoPtr<polynomialTransport<Thermo, PolySize>>
-    (
-        new polynomialTransport<Thermo, PolySize>(dict)
-    );
+    return autoPtr<polynomialTransport<Thermo, PolySize>>::New(dict);
 }
 
 

@@ -120,7 +120,7 @@ Foam::dynamicAlphaContactAngleFvPatchScalarField::theta
 {
     if (uTheta_ < SMALL)
     {
-        return tmp<scalarField>(new scalarField(size(), theta0_));
+        return tmp<scalarField>::New(size(), theta0_);
     }
 
     const vectorField nf(patch().nf());

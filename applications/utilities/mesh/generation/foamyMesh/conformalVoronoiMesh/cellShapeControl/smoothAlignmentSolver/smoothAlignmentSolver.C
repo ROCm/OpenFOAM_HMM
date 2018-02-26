@@ -93,14 +93,11 @@ Foam::autoPtr<Foam::mapDistribute> Foam::smoothAlignmentSolver::buildReferredMap
     indices.transfer(dynIndices);
 
     List<Map<label>> compactMap;
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            globalIndexing,
-            indices,
-            compactMap
-        )
+        globalIndexing,
+        indices,
+        compactMap
     );
 }
 
@@ -157,14 +154,11 @@ Foam::autoPtr<Foam::mapDistribute> Foam::smoothAlignmentSolver::buildMap
     }
 
     List<Map<label>> compactMap;
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            globalIndexing,
-            pointPoints,
-            compactMap
-        )
+        globalIndexing,
+        pointPoints,
+        compactMap
     );
 }
 

@@ -267,7 +267,7 @@ template<unsigned nBits>
 inline Foam::autoPtr<Foam::PackedList<nBits>>
 Foam::PackedList<nBits>::clone() const
 {
-    return autoPtr<PackedList<nBits>>(new PackedList<nBits>(*this));
+    return autoPtr<PackedList<nBits>>::New(*this);
 }
 
 

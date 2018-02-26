@@ -54,7 +54,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::rho(const label patchi) const
     if (rhoName_ == "rhoInf")
     {
         const label n = mesh_.boundary()[patchi].size();
-        return tmp<Field<scalar>>(new Field<scalar>(n, rhoRef_));
+        return tmp<Field<scalar>>::New(n, rhoRef_);
     }
     else if (mesh_.foundObject<volScalarField>(rhoName_, false))
     {
@@ -77,7 +77,7 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cp(const label patchi) const
     if (CpName_ == "CpInf")
     {
         const label n = mesh_.boundary()[patchi].size();
-        return tmp<Field<scalar>>(new Field<scalar>(n, CpRef_));
+        return tmp<Field<scalar>>::New(n, CpRef_);
     }
     else if (mesh_.foundObject<fluidThermo>(fluidThermo::typeName))
     {

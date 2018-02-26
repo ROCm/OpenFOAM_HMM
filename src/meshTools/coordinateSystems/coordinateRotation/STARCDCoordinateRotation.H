@@ -131,13 +131,9 @@ public:
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<coordinateRotation>
-            (
-                new STARCDCoordinateRotation
-                (
-                    *this
-                )
-            );
+            return
+                autoPtr<coordinateRotation>::NewFrom
+                <STARCDCoordinateRotation>(*this);
         }
 
 

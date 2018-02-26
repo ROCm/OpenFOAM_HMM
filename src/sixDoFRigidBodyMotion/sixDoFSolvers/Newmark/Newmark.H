@@ -99,10 +99,7 @@ public:
         //- Construct and return a clone
         virtual autoPtr<sixDoFSolver> clone() const
         {
-            return autoPtr<sixDoFSolver>
-            (
-                new Newmark(dict_, body_)
-            );
+            return autoPtr<sixDoFSolver>::NewFrom<Newmark>(dict_, body_);
         }
 
 

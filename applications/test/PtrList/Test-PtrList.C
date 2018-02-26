@@ -60,7 +60,7 @@ public:
 
     autoPtr<Scalar> clone() const
     {
-        return autoPtr<Scalar>(new Scalar(data_));
+        return autoPtr<Scalar>::New(data_);
     }
 
     friend Ostream& operator<<(Ostream& os, const Scalar& val)

@@ -150,7 +150,7 @@ Foam::dictionary::dictionary
 
 Foam::autoPtr<Foam::dictionary> Foam::dictionary::clone() const
 {
-    return autoPtr<dictionary>(new dictionary(*this));
+    return autoPtr<dictionary>::New(*this);
 }
 
 

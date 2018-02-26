@@ -419,7 +419,7 @@ public:
         //- Construct a clone
         virtual autoPtr<particle> clone() const
         {
-            return autoPtr<particle>(new particle(*this));
+            return autoPtr<particle>::New(*this);
         }
 
         //- Factory class to read-construct particles used for
@@ -437,7 +437,7 @@ public:
 
             autoPtr<particle> operator()(Istream& is) const
             {
-                return autoPtr<particle>(new particle(mesh_, is, true));
+                return autoPtr<particle>::New(mesh_, is, true);
             }
         };
 

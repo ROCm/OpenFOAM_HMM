@@ -40,7 +40,7 @@ template<class Form, class Type>
 inline Foam::autoPtr<Foam::Matrix<Form, Type>> Foam::Matrix<Form, Type>::
 clone() const
 {
-    return autoPtr<Matrix<Form, Type>>(new Matrix<Form, Type>(*this));
+    return autoPtr<Matrix<Form, Type>>::New(*this);
 }
 
 

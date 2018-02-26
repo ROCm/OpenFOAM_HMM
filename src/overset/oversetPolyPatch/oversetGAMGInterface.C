@@ -257,7 +257,7 @@ Foam::tmp<Foam::labelField> Foam::oversetGAMGInterface::internalFieldTransfer
         restrictMap_ = restrictMap;
     }
 
-    return tmp<labelField>(new labelField(restrictMap, faceCells()));
+    return tmp<labelField>::New(restrictMap, faceCells());
 }
 
 

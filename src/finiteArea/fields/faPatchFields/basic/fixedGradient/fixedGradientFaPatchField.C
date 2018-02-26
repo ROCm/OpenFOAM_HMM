@@ -146,7 +146,7 @@ Foam::fixedGradientFaPatchField<Type>::valueInternalCoeffs
     const tmp<scalarField>&
 ) const
 {
-    return tmp<Field<Type>>(new Field<Type>(this->size(), pTraits<Type>::one));
+    return tmp<Field<Type>>::New(this->size(), pTraits<Type>::one);
 }
 
 
@@ -165,10 +165,7 @@ template<class Type>
 Foam::tmp<Foam::Field<Type>>
 Foam::fixedGradientFaPatchField<Type>::gradientInternalCoeffs() const
 {
-    return tmp<Field<Type>>
-    (
-        new Field<Type>(this->size(), pTraits<Type>::zero)
-    );
+    return tmp<Field<Type>>::New(this->size(), pTraits<Type>::zero);
 }
 
 

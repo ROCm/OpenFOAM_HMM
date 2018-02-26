@@ -447,7 +447,7 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
         }
     }
 
-    return tmp<fvVectorMatrix>(new fvVectorMatrix(U, dimForce));
+    return tmp<fvVectorMatrix>::New(U, dimForce);
 }
 
 

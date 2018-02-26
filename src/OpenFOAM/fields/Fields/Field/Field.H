@@ -241,7 +241,7 @@ public:
         template<class Type2>
         static tmp<Field<Type>> NewCalculatedType(const Field<Type2>& f)
         {
-            return tmp<Field<Type>>(new Field<Type>(f.size()));
+            return tmp<Field<Type>>::New(f.size());
         }
 
 

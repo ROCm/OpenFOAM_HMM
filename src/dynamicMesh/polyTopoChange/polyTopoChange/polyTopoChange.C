@@ -3204,51 +3204,48 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
     labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
 
-    return autoPtr<mapPolyMesh>
+    return autoPtr<mapPolyMesh>::New
     (
-        new mapPolyMesh
-        (
-            mesh,
-            nOldPoints,
-            nOldFaces,
-            nOldCells,
+        mesh,
+        nOldPoints,
+        nOldFaces,
+        nOldCells,
 
-            pointMap_,
-            pointsFromPoints,
+        pointMap_,
+        pointsFromPoints,
 
-            faceMap_,
-            facesFromPoints,
-            facesFromEdges,
-            facesFromFaces,
+        faceMap_,
+        facesFromPoints,
+        facesFromEdges,
+        facesFromFaces,
 
-            cellMap_,
-            cellsFromPoints,
-            cellsFromEdges,
-            cellsFromFaces,
-            cellsFromCells,
+        cellMap_,
+        cellsFromPoints,
+        cellsFromEdges,
+        cellsFromFaces,
+        cellsFromCells,
 
-            reversePointMap_,
-            reverseFaceMap_,
-            reverseCellMap_,
+        reversePointMap_,
+        reverseFaceMap_,
+        reverseCellMap_,
 
-            flipFaceFluxSet,
+        flipFaceFluxSet,
 
-            patchPointMap,
+        patchPointMap,
 
-            pointZoneMap,
+        pointZoneMap,
 
-            faceZonePointMap,
-            faceZoneFaceMap,
-            cellZoneMap,
+        faceZonePointMap,
+        faceZoneFaceMap,
+        cellZoneMap,
 
-            newPoints,          // if empty signals no inflation.
-            oldPatchStarts,
-            oldPatchNMeshPoints,
+        newPoints,          // if empty signals no inflation.
+        oldPatchStarts,
+        oldPatchNMeshPoints,
 
-            oldCellVolumes,
+        oldCellVolumes,
 
-            true                // steal storage.
-        )
+        true                // steal storage.
     );
 
     // At this point all member DynamicList (pointMap_, cellMap_ etc.) will
@@ -3498,49 +3495,46 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
 
-    return autoPtr<mapPolyMesh>
+    return autoPtr<mapPolyMesh>::New
     (
-        new mapPolyMesh
-        (
-            newMesh,
-            nOldPoints,
-            nOldFaces,
-            nOldCells,
+        newMesh,
+        nOldPoints,
+        nOldFaces,
+        nOldCells,
 
-            pointMap_,
-            pointsFromPoints,
+        pointMap_,
+        pointsFromPoints,
 
-            faceMap_,
-            facesFromPoints,
-            facesFromEdges,
-            facesFromFaces,
+        faceMap_,
+        facesFromPoints,
+        facesFromEdges,
+        facesFromFaces,
 
-            cellMap_,
-            cellsFromPoints,
-            cellsFromEdges,
-            cellsFromFaces,
-            cellsFromCells,
+        cellMap_,
+        cellsFromPoints,
+        cellsFromEdges,
+        cellsFromFaces,
+        cellsFromCells,
 
-            reversePointMap_,
-            reverseFaceMap_,
-            reverseCellMap_,
+        reversePointMap_,
+        reverseFaceMap_,
+        reverseCellMap_,
 
-            flipFaceFluxSet,
+        flipFaceFluxSet,
 
-            patchPointMap,
+        patchPointMap,
 
-            pointZoneMap,
+        pointZoneMap,
 
-            faceZonePointMap,
-            faceZoneFaceMap,
-            cellZoneMap,
+        faceZonePointMap,
+        faceZoneFaceMap,
+        cellZoneMap,
 
-            newPoints,          // if empty signals no inflation.
-            oldPatchStarts,
-            oldPatchNMeshPoints,
-            oldCellVolumes,
-            true                // steal storage.
-        )
+        newPoints,          // if empty signals no inflation.
+        oldPatchStarts,
+        oldPatchNMeshPoints,
+        oldCellVolumes,
+        true                // steal storage.
     );
 
     // At this point all member DynamicList (pointMap_, cellMap_ etc.) will

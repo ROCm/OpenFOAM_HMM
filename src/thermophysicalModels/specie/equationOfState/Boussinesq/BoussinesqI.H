@@ -59,10 +59,7 @@ template<class Specie>
 inline Foam::autoPtr<Foam::Boussinesq<Specie>>
 Foam::Boussinesq<Specie>::clone() const
 {
-    return autoPtr<Boussinesq<Specie>>
-    (
-        new Boussinesq<Specie>(*this)
-    );
+    return autoPtr<Boussinesq<Specie>>::New(*this);
 }
 
 
@@ -73,10 +70,7 @@ Foam::Boussinesq<Specie>::New
     const dictionary& dict
 )
 {
-    return autoPtr<Boussinesq<Specie>>
-    (
-        new Boussinesq<Specie>(dict)
-    );
+    return autoPtr<Boussinesq<Specie>>::New(dict);
 }
 
 

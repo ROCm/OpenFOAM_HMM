@@ -222,17 +222,14 @@ Foam::cellToFaceStencil::allCoupledFacesPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>
+    return autoPtr<indirectPrimitivePatch>::New
     (
-        new indirectPrimitivePatch
+        IndirectList<face>
         (
-            IndirectList<face>
-            (
-                mesh().faces(),
-                coupledFaces
-            ),
-            mesh().points()
-        )
+            mesh().faces(),
+            coupledFaces
+        ),
+        mesh().points()
     );
 }
 

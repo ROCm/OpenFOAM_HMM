@@ -301,7 +301,7 @@ public:
 
             autoPtr<molecule> operator()(Istream& is) const
             {
-                return autoPtr<molecule>(new molecule(mesh_, is, true));
+                return autoPtr<molecule>::New(mesh_, is, true);
             }
         };
 

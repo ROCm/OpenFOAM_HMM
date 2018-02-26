@@ -74,16 +74,14 @@ public:
         //- Read file and return surface
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>
-            (
-                new extendedFeatureEdgeMeshFormat(name)
-            );
+            return
+                autoPtr<edgeMesh>::NewFrom
+                <extendedFeatureEdgeMeshFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~extendedFeatureEdgeMeshFormat()
-    {}
+    virtual ~extendedFeatureEdgeMeshFormat() = default;
 
 
     // Member Functions

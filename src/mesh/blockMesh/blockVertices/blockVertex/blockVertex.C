@@ -92,15 +92,13 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 
         return autoPtr<blockVertex>(cstrIter()(dict, index, geometry, is));
     }
-    else
-    {
-        FatalIOErrorInFunction(is)
-            << "incorrect first token, expected <word> or '(', found "
-            << firstToken.info()
-            << exit(FatalIOError);
 
-        return autoPtr<blockVertex>();
-    }
+    FatalIOErrorInFunction(is)
+        << "incorrect first token, expected <word> or '(', found "
+        << firstToken.info()
+        << exit(FatalIOError);
+
+    return autoPtr<blockVertex>();
 }
 
 

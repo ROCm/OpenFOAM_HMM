@@ -100,7 +100,7 @@ public:
 
             autoPtr<phaseModel> operator()(Istream& is) const
             {
-                return autoPtr<phaseModel>(new phaseModel(is, p_, T_));
+                return autoPtr<phaseModel>::New(is, p_, T_);
             }
         };
 

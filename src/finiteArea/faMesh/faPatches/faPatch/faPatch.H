@@ -196,10 +196,9 @@ public:
             const label ngbPolyPatchIndex
         ) const
         {
-            return autoPtr<faPatch>
-            (
-                new faPatch(name(), edgeLabels, index, bm, ngbPolyPatchIndex)
-            );
+            return
+                autoPtr<faPatch>::New
+                (name(), edgeLabels, index, bm, ngbPolyPatchIndex);
         }
 
 

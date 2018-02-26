@@ -441,10 +441,7 @@ Foam::tmp<Foam::vectorField> Foam::fv::rotorDiskSource::inflowVelocity
         case ifFixed:
         case ifSurfaceNormal:
         {
-            return tmp<vectorField>
-            (
-                new vectorField(mesh_.nCells(), inletVelocity_)
-            );
+            return tmp<vectorField>::New(mesh_.nCells(), inletVelocity_);
 
             break;
         }
@@ -461,7 +458,7 @@ Foam::tmp<Foam::vectorField> Foam::fv::rotorDiskSource::inflowVelocity
         }
     }
 
-    return tmp<vectorField>(new vectorField(mesh_.nCells(), Zero));
+    return tmp<vectorField>::New(mesh_.nCells(), Zero);
 }
 
 

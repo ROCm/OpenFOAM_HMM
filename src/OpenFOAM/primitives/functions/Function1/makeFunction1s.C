@@ -75,7 +75,7 @@ Foam::Function1Types::Constant<Foam::label>::integrate
 ) const
 {
     NotImplemented;
-    return tmp<Field<label>>(new Field<label>(x1.size()));
+    return tmp<Field<label>>::New(x1.size());
 }
 
 

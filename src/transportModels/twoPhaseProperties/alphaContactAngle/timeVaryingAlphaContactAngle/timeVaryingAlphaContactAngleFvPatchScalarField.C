@@ -121,7 +121,7 @@ Foam::timeVaryingAlphaContactAngleFvPatchScalarField::theta
         theta0 = thetaT0_ + (t - t0_)*(thetaTe_ - thetaT0_)/(te_ - t0_);
     }
 
-    return tmp<scalarField>(new scalarField(size(), theta0));
+    return tmp<scalarField>::New(size(), theta0);
 }
 
 

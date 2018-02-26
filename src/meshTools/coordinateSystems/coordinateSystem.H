@@ -199,7 +199,7 @@ public:
     //- Return clone
     autoPtr<coordinateSystem> clone() const
     {
-        return autoPtr<coordinateSystem>(new coordinateSystem(*this));
+        return autoPtr<coordinateSystem>::New(*this);
     }
 
 

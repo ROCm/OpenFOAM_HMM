@@ -78,10 +78,7 @@ public:
         //- Read file and return surface
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>
-            (
-                new OBJedgeFormat(name)
-            );
+            return autoPtr<edgeMesh>::NewFrom<OBJedgeFormat>(name);
         }
 
 

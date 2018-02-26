@@ -177,7 +177,7 @@ FieldField<Field, Type>::FieldField(Istream& is)
 template<template<class> class Field, class Type>
 tmp<FieldField<Field, Type>> FieldField<Field, Type>::clone() const
 {
-    return tmp<FieldField<Field, Type>>(new FieldField<Field, Type>(*this));
+    return tmp<FieldField<Field, Type>>::New(*this);
 }
 
 

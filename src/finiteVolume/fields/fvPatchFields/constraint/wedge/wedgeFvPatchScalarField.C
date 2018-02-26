@@ -36,7 +36,7 @@ namespace Foam
 template<>
 tmp<scalarField> wedgeFvPatchField<scalar>::snGrad() const
 {
-    return tmp<scalarField >(new scalarField(size(), 0.0));
+    return tmp<scalarField>::New(size(), 0.0);
 }
 
 

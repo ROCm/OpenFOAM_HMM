@@ -118,7 +118,7 @@ public:
         template<class Type>
         tmp<Field<Type>> operator()(const Field<Type>& f) const
         {
-            return tmp<Field<Type>>(new Field<Type>(f, *this));
+            return tmp<Field<Type>>::New(f, *this);
         }
 };
 

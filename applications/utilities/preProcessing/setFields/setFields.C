@@ -141,7 +141,7 @@ public:
 
     autoPtr<setCellField> clone() const
     {
-        return autoPtr<setCellField>(new setCellField());
+        return autoPtr<setCellField>::New();
     }
 
     class iNew
@@ -182,7 +182,7 @@ public:
                     << endl;
             }
 
-            return autoPtr<setCellField>(new setCellField());
+            return autoPtr<setCellField>::New();
         }
     };
 };
@@ -332,7 +332,7 @@ public:
 
     autoPtr<setFaceField> clone() const
     {
-        return autoPtr<setFaceField>(new setFaceField());
+        return autoPtr<setFaceField>::New();
     }
 
     class iNew
@@ -373,7 +373,7 @@ public:
                     << endl;
             }
 
-            return autoPtr<setFaceField>(new setFaceField());
+            return autoPtr<setFaceField>::New();
         }
     };
 };

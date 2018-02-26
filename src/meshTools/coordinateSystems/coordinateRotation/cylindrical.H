@@ -128,13 +128,12 @@ public:
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<coordinateRotation>(new cylindrical(*this));
+            return autoPtr<coordinateRotation>::NewFrom<cylindrical>(*this);
         }
 
 
     //- Destructor
-    virtual ~cylindrical()
-    {}
+    virtual ~cylindrical() = default;
 
 
     // Member Functions

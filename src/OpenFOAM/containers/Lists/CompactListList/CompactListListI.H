@@ -101,10 +101,7 @@ template<class T, class Container>
 inline Foam::autoPtr<Foam::CompactListList<T, Container>>
 Foam::CompactListList<T, Container>::clone() const
 {
-    return autoPtr<CompactListList<T, Container>>
-    (
-        new CompactListList<T, Container>(*this)
-    );
+    return autoPtr<CompactListList<T, Container>>::New(*this);
 }
 
 

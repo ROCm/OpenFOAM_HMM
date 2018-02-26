@@ -149,7 +149,7 @@ inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
         }
     }
 
-    return tmp<fvScalarMatrix>(new fvScalarMatrix(Yi, dimMass/dimTime));
+    return tmp<fvScalarMatrix>::New(Yi, dimMass/dimTime);
 }
 
 
@@ -285,7 +285,7 @@ Foam::ReactingCloud<CloudType>::Srho(volScalarField& rho) const
         }
     }
 
-    return tmp<fvScalarMatrix>(new fvScalarMatrix(rho, dimMass/dimTime));
+    return tmp<fvScalarMatrix>::New(rho, dimMass/dimTime);
 }
 
 

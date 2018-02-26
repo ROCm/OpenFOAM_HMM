@@ -136,7 +136,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::getFieldValues
             << abort(FatalError);
     }
 
-    return tmp<Field<Type>>(new Field<Type>(0));
+    return tmp<Field<Type>>::New();
 }
 
 

@@ -53,21 +53,18 @@ Foam::lumpedPointIOMovement::New
     label ownerId
 )
 {
-    return autoPtr<lumpedPointIOMovement>
+    return autoPtr<lumpedPointIOMovement>::New
     (
-        new lumpedPointIOMovement
+        IOobject
         (
-            IOobject
-            (
-                lumpedPointMovement::dictionaryName,
-                obr.time().caseSystem(),
-                obr,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                true // register object
-            ),
-            ownerId  // tag this patch as owner too
-        )
+            lumpedPointMovement::dictionaryName,
+            obr.time().caseSystem(),
+            obr,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            true // register object
+        ),
+        ownerId  // tag this patch as owner too
     );
 }
 

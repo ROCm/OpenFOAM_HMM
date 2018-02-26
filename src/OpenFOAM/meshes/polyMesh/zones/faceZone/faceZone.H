@@ -228,10 +228,7 @@ public:
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<faceZone> clone(const faceZoneMesh& zm) const
         {
-            return autoPtr<faceZone>
-            (
-                new faceZone(*this, *this, flipMap(), index(), zm)
-            );
+            return autoPtr<faceZone>::New(*this, *this, flipMap(), index(), zm);
         }
 
         //- Construct and return a clone,
@@ -244,10 +241,7 @@ public:
             const faceZoneMesh& zm
         ) const
         {
-            return autoPtr<faceZone>
-            (
-                new faceZone(*this, addr, fm, index, zm)
-            );
+            return autoPtr<faceZone>::New(*this, addr, fm, index, zm);
         }
 
 

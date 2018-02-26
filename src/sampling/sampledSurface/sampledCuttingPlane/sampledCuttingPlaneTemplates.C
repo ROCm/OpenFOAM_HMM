@@ -37,7 +37,7 @@ Foam::sampledCuttingPlane::sampleField
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
-    return tmp<Field<Type>>(new Field<Type>(vField, surface().meshCells()));
+    return tmp<Field<Type>>::New(vField, surface().meshCells());
 }
 
 

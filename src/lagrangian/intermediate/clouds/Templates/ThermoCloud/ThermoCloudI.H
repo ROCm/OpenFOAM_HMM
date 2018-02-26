@@ -255,7 +255,7 @@ Foam::ThermoCloud<CloudType>::Sh(volScalarField& hs) const
         }
     }
 
-    return tmp<fvScalarMatrix>(new fvScalarMatrix(hs, dimEnergy/dimTime));
+    return tmp<fvScalarMatrix>::New(hs, dimEnergy/dimTime);
 }
 
 

@@ -80,16 +80,13 @@ Foam::surfaceFeaturesExtraction::extractFromSurface::features
         << "Selecting edges based purely on geometric tests: "
         << geometricTestOnly().c_str() << endl;
 
-    return autoPtr<surfaceFeatures>
+    return autoPtr<surfaceFeatures>::New
     (
-        new surfaceFeatures
-        (
-            surf,
-            includedAngle(),
-            0,  // minLen
-            0,  // minElems
-            geometricTestOnly()
-        )
+        surf,
+        includedAngle(),
+        0,  // minLen
+        0,  // minElems
+        geometricTestOnly()
     );
 }
 

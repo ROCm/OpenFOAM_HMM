@@ -70,10 +70,7 @@ template<class Specie>
 inline Foam::autoPtr<Foam::PengRobinsonGas <Specie>>
 Foam::PengRobinsonGas<Specie>::clone() const
 {
-    return autoPtr<PengRobinsonGas<Specie>>
-    (
-        new PengRobinsonGas<Specie>(*this)
-    );
+    return autoPtr<PengRobinsonGas<Specie>>::New(*this);
 }
 
 
@@ -84,10 +81,7 @@ Foam::PengRobinsonGas<Specie>::New
     const dictionary& dict
 )
 {
-    return autoPtr<PengRobinsonGas<Specie>>
-    (
-        new PengRobinsonGas<Specie>(dict)
-    );
+    return autoPtr<PengRobinsonGas<Specie>>::New(dict);
 }
 
 

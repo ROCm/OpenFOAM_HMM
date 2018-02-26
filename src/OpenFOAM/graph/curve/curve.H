@@ -145,7 +145,7 @@ public:
 
         autoPtr<curve> clone() const
         {
-            return autoPtr<curve>(new curve(*this));
+            return autoPtr<curve>::New(*this);
         }
 
 

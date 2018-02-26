@@ -183,10 +183,7 @@ public:
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<pointZone> clone(const pointZoneMesh& zm) const
         {
-            return autoPtr<pointZone>
-            (
-                new pointZone(*this, *this, index(), zm)
-            );
+            return autoPtr<pointZone>::New(*this, *this, index(), zm);
         }
 
         //- Construct and return a clone, resetting the point list
@@ -198,10 +195,7 @@ public:
             const labelUList& addr
         ) const
         {
-            return autoPtr<pointZone>
-            (
-                new pointZone(*this, addr, index, zm)
-            );
+            return autoPtr<pointZone>::New(*this, addr, index, zm);
         }
 
 

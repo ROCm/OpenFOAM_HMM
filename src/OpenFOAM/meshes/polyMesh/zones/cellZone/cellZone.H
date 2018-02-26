@@ -182,10 +182,7 @@ public:
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<cellZone> clone(const cellZoneMesh& zm) const
         {
-            return autoPtr<cellZone>
-            (
-                new cellZone(*this, *this, index(), zm)
-            );
+            return autoPtr<cellZone>::New(*this, *this, index(), zm);
         }
 
         //- Construct and return a clone,
@@ -197,10 +194,7 @@ public:
             const cellZoneMesh& zm
         ) const
         {
-            return autoPtr<cellZone>
-            (
-                new cellZone(*this, addr, index, zm)
-            );
+            return autoPtr<cellZone>::New(*this, addr, index, zm);
         }
 
 

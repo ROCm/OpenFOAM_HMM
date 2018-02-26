@@ -125,7 +125,7 @@ inline Foam::PackedBoolList::PackedBoolList
 inline Foam::autoPtr<Foam::PackedBoolList>
 Foam::PackedBoolList::clone() const
 {
-    return autoPtr<PackedBoolList>(new PackedBoolList(*this));
+    return autoPtr<PackedBoolList>::New(*this);
 }
 
 

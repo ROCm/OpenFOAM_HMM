@@ -62,7 +62,7 @@ Foam::motionInterpolation::motionInterpolation
 Foam::autoPtr<Foam::motionInterpolation>
 Foam::motionInterpolation::New(const fvMesh& mesh)
 {
-    return autoPtr<motionInterpolation>(new motionInterpolation(mesh));
+    return autoPtr<motionInterpolation>::New(mesh);
 }
 
 

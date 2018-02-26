@@ -498,7 +498,7 @@ Foam::mapDistribute::mapDistribute(Istream& is)
 
 Foam::autoPtr<Foam::mapDistribute> Foam::mapDistribute::clone() const
 {
-    return autoPtr<mapDistribute>(new mapDistribute(*this));
+    return autoPtr<mapDistribute>::New(*this);
 }
 
 

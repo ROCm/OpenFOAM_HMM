@@ -123,7 +123,7 @@ public:
             word name(is);
             dictionary dict(is);
 
-            return autoPtr<surfZone>(new surfZone(name, dict, 0));
+            return autoPtr<surfZone>::New(name, dict, 0);
         }
 
 

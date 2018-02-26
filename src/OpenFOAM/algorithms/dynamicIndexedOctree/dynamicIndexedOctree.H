@@ -418,10 +418,7 @@ public:
         //- Clone
         autoPtr<dynamicIndexedOctree<Type>> clone() const
         {
-            return autoPtr<dynamicIndexedOctree<Type>>
-            (
-                new dynamicIndexedOctree<Type>(*this)
-            );
+            return autoPtr<dynamicIndexedOctree<Type>>::New(*this);
         }
 
 

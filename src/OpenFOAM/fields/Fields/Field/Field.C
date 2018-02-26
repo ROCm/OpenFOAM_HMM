@@ -348,7 +348,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::clone() const
 {
-    return tmp<Field<Type>>(new Field<Type>(*this));
+    return tmp<Field<Type>>::New(*this);
 }
 
 

@@ -212,10 +212,7 @@ public:
         //- Construct and return a clone
         virtual autoPtr<Reaction<ReactionThermo>> clone() const //
         {
-            return autoPtr<Reaction<ReactionThermo>>
-            (
-                new Reaction<ReactionThermo>(*this)
-            );
+            return autoPtr<Reaction<ReactionThermo>>::New(*this);
         }
 
         //- Construct and return a clone with new speciesTable
@@ -224,10 +221,7 @@ public:
             const speciesTable& species
         ) const
         {
-            return autoPtr<Reaction<ReactionThermo>>
-            (
-                new Reaction<ReactionThermo>(*this, species)
-            );
+            return autoPtr<Reaction<ReactionThermo>>::New(*this, species);
         }
 
 
@@ -243,8 +237,7 @@ public:
 
 
     //- Destructor
-    virtual ~Reaction()
-    {}
+    virtual ~Reaction() = default;
 
 
     // Member Functions
