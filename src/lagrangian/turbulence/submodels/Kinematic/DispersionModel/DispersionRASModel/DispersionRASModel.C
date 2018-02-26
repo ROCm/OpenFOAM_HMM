@@ -47,15 +47,13 @@ Foam::DispersionRASModel<CloudType>::kModel() const
             obr.lookupObject<turbulenceModel>(turbName);
         return model.k();
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Turbulence model not found in mesh database" << nl
-            << "Database objects include: " << obr.sortedToc()
-            << abort(FatalError);
 
-        return tmp<volScalarField>(nullptr);
-    }
+    FatalErrorInFunction
+        << "Turbulence model not found in mesh database" << nl
+        << "Database objects include: " << obr.sortedToc()
+        << abort(FatalError);
+
+    return tmp<volScalarField>();
 }
 
 
@@ -77,15 +75,13 @@ Foam::DispersionRASModel<CloudType>::epsilonModel() const
             obr.lookupObject<turbulenceModel>(turbName);
         return model.epsilon();
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Turbulence model not found in mesh database" << nl
-            << "Database objects include: " << obr.sortedToc()
-            << abort(FatalError);
 
-        return tmp<volScalarField>(nullptr);
-    }
+    FatalErrorInFunction
+        << "Turbulence model not found in mesh database" << nl
+        << "Database objects include: " << obr.sortedToc()
+        << abort(FatalError);
+
+    return tmp<volScalarField>();
 }
 
 

@@ -44,17 +44,15 @@ tmp<Field<TypeR>> New
     {
         return tf1;
     }
-    else
+
+    tmp<Field<TypeR>> rtf(new Field<TypeR>(tf1().size()));
+
+    if (initRet)
     {
-        tmp<Field<TypeR>> rtf(new Field<TypeR>(tf1().size()));
-
-        if (initRet)
-        {
-            rtf.ref() = tf1();
-        }
-
-        return rtf;
+        rtf.ref() = tf1();
     }
+
+    return rtf;
 }
 
 
@@ -81,10 +79,8 @@ public:
         {
             return tf1;
         }
-        else
-        {
-            return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
-        }
+
+        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
     }
 };
 
@@ -120,10 +116,8 @@ public:
         {
             return tf2;
         }
-        else
-        {
-            return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
-        }
+
+        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
     }
 };
 
@@ -143,10 +137,8 @@ public:
         {
             return tf1;
         }
-        else
-        {
-            return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
-        }
+
+        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
     }
 };
 
@@ -170,10 +162,8 @@ public:
         {
             return tf2;
         }
-        else
-        {
-            return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
-        }
+
+        return tmp<Field<TypeR>>(new Field<TypeR>(tf1().size()));
     }
 };
 

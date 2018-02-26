@@ -256,7 +256,7 @@ Foam::Field<Type>::Field(const UIndirectList<Type>& list)
 template<class Type>
 Foam::Field<Type>::Field(const tmp<Field<Type>>& tf)
 :
-    List<Type>(const_cast<Field<Type>&>(tf()), tf.isTmp())
+    List<Type>(tf.constCast(), tf.movable())
 {
     tf.clear();
 }

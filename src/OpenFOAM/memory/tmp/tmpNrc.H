@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
      \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
@@ -22,27 +22,21 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Class
-    Foam::tmp
+    Foam::tmpNrc
 
 Description
-    A class for managing temporary objects.
-
-    This is a combination of std::shared_ptr (with intrusive ref-counting)
-    and a shared_ptr without ref-counting and null deleter.
-    This allows the tmp to double as a pointer management and an indirect
-    pointer to externally allocated objects.
+    A class for managing temporary objects without reference counting.
 
 SourceFiles
-    tmpI.H
+    tmpNrcI.H
 
 See also
     Foam::autoPtr
-    Foam::refCount
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tmp_H
-#define tmp_H
+#ifndef tmpNrc_H
+#define tmpNrc_H
 
 #include "refCount.H"
 #include "word.H"
@@ -54,18 +48,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                             Class tmp Declaration
+                             Class tmpNrc Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
-class tmp
+class tmpNrc
 {
     // Private data
 
         //- Object types
         enum refType
         {
-            PTR,    //!< Managing a (ref-counted) pointer
+            PTR,    //!< Managing a pointer (not ref-counted)
             CREF    //!< Using a const-reference to an object
         };
 
@@ -73,83 +67,47 @@ class tmp
         mutable T* ptr_;
 
         //- The type (managed pointer | const-reference object)
-        mutable refType type_;
-
-
-    // Private Member Operators
-
-        //- Increment the ref-count for a managed pointer
-        inline void operator++();
+        refType type_;
 
 
 public:
 
     // STL type definitions
 
-        //- Type of object being managed or referenced
+        //- Type of object being managed
         typedef T element_type;
 
-        //- Pointer to type of object being managed or referenced
+        //- Pointer to type of object being managed
         typedef T* pointer;
 
 
-    //- Reference counter class
-    typedef Foam::refCount refCount;
-
-
-    // Factory Methods
-
-        //- Construct tmp of T with forwarding arguments
-        //  \param args list of arguments with which an instance of T
-        //      will be constructed.
-        //
-        //  \note Similar to std::make_shared, but the overload for
-        //      array types is not disabled.
-        template<class... Args>
-        inline static tmp<T> New(Args&&... args);
-
-        //- Construct tmp from derived type with forwarding arguments
-        //  \param args list of arguments with which an instance of U
-        //      will be constructed.
-        //
-        //  \note Similar to New but for derived types
-        template<class U, class... Args>
-        inline static tmp<T> NewFrom(Args&&... args);
+    //- Null reference counter class
+    typedef Foam::refCount::zero refCount;
 
 
     // Constructors
 
         //- Construct with no managed pointer.
-        inline constexpr tmp() noexcept;
+        inline constexpr tmpNrc() noexcept;
 
         //- Construct with no managed pointer.
-        inline constexpr tmp(std::nullptr_t) noexcept;
+        inline constexpr tmpNrc(std::nullptr_t) noexcept;
 
         //- Construct, taking ownership of the pointer.
-        inline explicit tmp(T* p);
+        inline explicit tmpNrc(T* p) noexcept;
 
         //- Construct for a const reference to an object.
-        inline tmp(const T& obj) noexcept;
+        inline tmpNrc(const T& obj) noexcept;
 
-        //- Move construct, transferring ownership.
-        //  Does not affect ref-count
-        inline tmp(tmp<T>&& t) noexcept;
+        //- Copy construct
+        inline tmpNrc(const tmpNrc<T>& t);
 
-        //- Move construct, transferring ownership.
-        //  Does not affect ref-count
-        //  \note Non-standard definition - should be non-const
-        inline tmp(const tmp<T>&& t) noexcept;
-
-        //- Copy construct, incrementing ref-count of managed pointer.
-        //  \note Non-standard definition - should be non-const
-        inline tmp(const tmp<T>& t);
-
-        //- Copy construct. Optionally reusing ref-counted pointer.
-        inline tmp(const tmp<T>& t, bool reuse);
+        //- Construct copy, transferring content of temporary if required
+        inline tmpNrc(const tmpNrc<T>& t, bool reuse);
 
 
-    //- Destructor: deletes managed pointer when the ref-count is 0
-    inline ~tmp();
+    //- Destructor: deletes managed pointer
+    inline ~tmpNrc();
 
 
     // Member Functions
@@ -202,16 +160,6 @@ public:
         //- delete object and set pointer to nullptr
         inline void clear() const;
 
-        //- Release ownership of managed temporary object.
-        //  After this call no object is managed.
-        inline void reset();
-
-        //- Delete managed temporary object and set to new given pointer
-        inline void reset(T* p);
-
-        //- Swaps the managed object with other tmp.
-        inline void swap(tmp<T>& other) noexcept;
-
 
     // Member operators
 
@@ -236,14 +184,7 @@ public:
 
         //- Transfer ownership of the managed pointer.
         //  Fatal for a null managed pointer or if the object is const.
-        inline void operator=(const tmp<T>& t);
-
-
-    // Housekeeping
-
-        //- Disallow assignment from literal nullptr.
-        //  Consistent with run-time check for nullptr on assignment.
-        void operator=(std::nullptr_t) = delete;
+        inline void operator=(const tmpNrc<T>& t);
 };
 
 
@@ -252,7 +193,7 @@ public:
 //- Specializes the Swap algorithm for tmp.
 //  Swaps the pointers and types of lhs and rhs. Calls \c lhs.swap(rhs)
 template<class T>
-void Swap(tmp<T>& lhs, tmp<T>& rhs)
+void Swap(tmpNrc<T>& lhs, tmpNrc<T>& rhs)
 {
     lhs.swap(rhs);
 }
@@ -264,7 +205,7 @@ void Swap(tmp<T>& lhs, tmp<T>& rhs)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "tmpI.H"
+#include "tmpNrcI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

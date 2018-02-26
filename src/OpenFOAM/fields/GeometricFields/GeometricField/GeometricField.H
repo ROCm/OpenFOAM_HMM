@@ -125,16 +125,16 @@ public:
         // Constructors
 
             //- Construct from a BoundaryMesh
-            Boundary(const BoundaryMesh&);
+            Boundary(const BoundaryMesh& bmesh);
 
             //- Construct from a BoundaryMesh,
             //  reference to the internal field
             //  and a patch type
             Boundary
             (
-                const BoundaryMesh&,
-                const Internal&,
-                const word&
+                const BoundaryMesh& bmesh,
+                const Internal& field,
+                const word& patchFieldType
             );
 
             //- Construct from a BoundaryMesh,
@@ -143,8 +143,8 @@ public:
             //  types (to override constraint patches)
             Boundary
             (
-                const BoundaryMesh&,
-                const Internal&,
+                const BoundaryMesh& bmesh,
+                const Internal& field,
                 const wordList& wantedPatchTypes,
                 const wordList& actualPatchTypes = wordList()
             );
@@ -154,16 +154,16 @@ public:
             //  and a PtrList<PatchField<Type>>
             Boundary
             (
-                const BoundaryMesh&,
-                const Internal&,
+                const BoundaryMesh& bmesh,
+                const Internal& field,
                 const PtrList<PatchField<Type>>&
             );
 
             //- Construct as copy setting the reference to the internal field
             Boundary
             (
-                const Internal&,
-                const Boundary&
+                const Internal& field,
+                const Boundary& btf
             );
 
             //- Construct as copy
@@ -173,14 +173,14 @@ public:
             //  BoundaryField for which such operations are unavailable.
             Boundary
             (
-                const Boundary&
+                const Boundary& btf
             );
 
             //- Construct from dictionary
             Boundary
             (
-                const BoundaryMesh&,
-                const Internal&,
+                const BoundaryMesh& bmesh,
+                const Internal& field,
                 const dictionary&
             );
 

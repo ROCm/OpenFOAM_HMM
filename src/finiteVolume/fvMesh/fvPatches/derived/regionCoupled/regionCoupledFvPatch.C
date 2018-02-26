@@ -56,13 +56,8 @@ Foam::tmp<Foam::labelField> Foam::regionCoupledFvPatch::internalFieldTransfer
     {
         return neighbFvPatch().patchInternalField(iF);
     }
-    else
-    {
-        return tmp<labelField>(new labelField(iF.size(), 0));
 
-    }
-
-    return tmp<labelField>(nullptr);
+    return tmp<labelField>(new labelField(iF.size(), 0));
 }
 
 

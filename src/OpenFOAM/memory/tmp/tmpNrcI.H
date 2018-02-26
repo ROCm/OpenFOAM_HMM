@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,32 +29,48 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(T* tPtr)
+inline constexpr Foam::tmpNrc<T>::tmpNrc() noexcept
 :
-    type_(TMP),
-    ptr_(tPtr)
+    ptr_(nullptr),
+    type_(PTR)
 {}
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(const T& tRef)
+inline constexpr Foam::tmpNrc<T>::tmpNrc(std::nullptr_t) noexcept
 :
-    type_(CONST_REF),
-    ptr_(const_cast<T*>(&tRef))
+    ptr_(nullptr),
+    type_(PTR)
+{}
+
+
+template<class T>
+inline Foam::tmpNrc<T>::tmpNrc(T* p) noexcept
+:
+    ptr_(p),
+    type_(PTR)
+{}
+
+
+template<class T>
+inline Foam::tmpNrc<T>::tmpNrc(const T& obj) noexcept
+:
+    ptr_(const_cast<T*>(&obj)),
+    type_(CREF)
 {}
 
 
 template<class T>
 inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t)
 :
-    type_(t.type_),
-    ptr_(t.ptr_)
+    ptr_(t.ptr_),
+    type_(t.type_)
 {
     if (isTmp())
     {
         if (ptr_)
         {
-            t.type_ = CONST_REF;
+            t.type_ = CREF;
         }
         else
         {
@@ -67,22 +83,22 @@ inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t)
 
 
 template<class T>
-inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t, bool allowTransfer)
+inline Foam::tmpNrc<T>::tmpNrc(const tmpNrc<T>& t, bool reuse)
 :
-    type_(t.type_),
-    ptr_(t.ptr_)
+    ptr_(t.ptr_),
+    type_(t.type_)
 {
     if (isTmp())
     {
         if (ptr_)
         {
-            if (allowTransfer)
+            if (reuse)
             {
-                t.ptr_ = nullptr;
+                t.ptr_ = nullptr; // t.type_ already set as PTR
             }
             else
             {
-                t.type_ = CONST_REF;
+                t.type_ = CREF;
             }
         }
         else
@@ -107,21 +123,28 @@ inline Foam::tmpNrc<T>::~tmpNrc()
 template<class T>
 inline bool Foam::tmpNrc<T>::isTmp() const
 {
-    return type_ == TMP;
+    return type_ == PTR;
 }
 
 
 template<class T>
 inline bool Foam::tmpNrc<T>::empty() const
 {
-    return (isTmp() && !ptr_);
+    return (!ptr_ && isTmp());
 }
 
 
 template<class T>
 inline bool Foam::tmpNrc<T>::valid() const
 {
-    return (!isTmp() || (isTmp() && ptr_));
+    return (ptr_ || type_ == CREF);
+}
+
+
+template<class T>
+inline bool Foam::tmpNrc<T>::movable() const
+{
+    return (type_ == PTR && ptr_);
 }
 
 
@@ -133,7 +156,24 @@ inline Foam::word Foam::tmpNrc<T>::typeName() const
 
 
 template<class T>
-inline T& Foam::tmpNrc<T>::ref()
+inline const T& Foam::tmpNrc<T>::cref() const
+{
+    if (isTmp())
+    {
+        if (!ptr_)
+        {
+            FatalErrorInFunction
+                << typeName() << " deallocated"
+                << abort(FatalError);
+        }
+    }
+
+    return *ptr_; // const reference
+}
+
+
+template<class T>
+inline T& Foam::tmpNrc<T>::ref() const
 {
     if (isTmp())
     {
@@ -147,12 +187,26 @@ inline T& Foam::tmpNrc<T>::ref()
     else
     {
         FatalErrorInFunction
-            << "Attempt to acquire non-const reference to const object"
-            << " from a " << typeName()
+            << "Attempted non-const reference to const object from a "
+            << typeName()
             << abort(FatalError);
     }
 
-    return *ptr_;
+    return *ptr_; // non-const reference
+}
+
+
+template<class T>
+inline T& Foam::tmpNrc<T>::constCast() const
+{
+    if (isTmp() && !ptr_)
+    {
+        FatalErrorInFunction
+            << typeName() << " deallocated"
+            << abort(FatalError);
+    }
+
+    return const_cast<T&>(*ptr_);
 }
 
 
@@ -173,10 +227,8 @@ inline T* Foam::tmpNrc<T>::ptr() const
 
         return ptr;
     }
-    else
-    {
-        return ptr_->clone().ptr();
-    }
+
+    return ptr_->clone().ptr();
 }
 
 
@@ -191,30 +243,47 @@ inline void Foam::tmpNrc<T>::clear() const
 }
 
 
+template<class T>
+inline void Foam::tmpNrc<T>::swap(tmpNrc<T>& other) noexcept
+{
+    // Copy/assign for pointer types
+    T* p = ptr_;
+    ptr_ = other.ptr_;
+    other.ptr_ = p;
+
+    refType t = type_;
+    type_ = other.type_;
+    other.type_ = t;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
 inline const T& Foam::tmpNrc<T>::operator()() const
 {
-    if (isTmp())
-    {
-        if (!ptr_)
-        {
-            FatalErrorInFunction
-                << typeName() << " deallocated"
-                << abort(FatalError);
-        }
-    }
-
-    // Return const reference
-    return *ptr_;
+    return cref();
 }
 
 
 template<class T>
 inline Foam::tmpNrc<T>::operator const T&() const
 {
-    return operator()();
+    return cref();
+}
+
+
+template<class T>
+inline const T* Foam::tmpNrc<T>::operator->() const
+{
+    if (!ptr_ && isTmp())
+    {
+        FatalErrorInFunction
+            << typeName() << " deallocated"
+            << abort(FatalError);
+    }
+
+    return ptr_;
 }
 
 
@@ -242,33 +311,19 @@ inline T* Foam::tmpNrc<T>::operator->()
 
 
 template<class T>
-inline const T* Foam::tmpNrc<T>::operator->() const
-{
-    if (isTmp() && !ptr_)
-    {
-        FatalErrorInFunction
-            << typeName() << " deallocated"
-            << abort(FatalError);
-    }
-
-    return ptr_;
-}
-
-
-template<class T>
-inline void Foam::tmpNrc<T>::operator=(T* tPtr)
+inline void Foam::tmpNrc<T>::operator=(T* p)
 {
     clear();
 
-    if (!tPtr)
+    if (!p)
     {
         FatalErrorInFunction
             << "Attempted copy of a deallocated " << typeName()
             << abort(FatalError);
     }
 
-    type_ = TMP;
-    ptr_ = tPtr;
+    ptr_ = p;
+    type_ = PTR;
 }
 
 
@@ -279,17 +334,16 @@ inline void Foam::tmpNrc<T>::operator=(const tmpNrc<T>& t)
 
     if (t.isTmp())
     {
-        type_ = TMP;
+        ptr_ = t.ptr_;
+        type_ = PTR;
+        t.ptr_ = nullptr;
 
-        if (!t.ptr_)
+        if (!ptr_)
         {
             FatalErrorInFunction
                 << "Attempted assignment to a deallocated " << typeName()
                 << abort(FatalError);
         }
-
-        ptr_ = t.ptr_;
-        t.ptr_ = nullptr;
     }
     else
     {

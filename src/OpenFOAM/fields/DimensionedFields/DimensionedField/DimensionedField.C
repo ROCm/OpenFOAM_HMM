@@ -217,12 +217,8 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
 :
-    regIOobject(tdf(), tdf.isTmp()),
-    Field<Type>
-    (
-        const_cast<DimensionedField<Type, GeoMesh>&>(tdf()),
-        tdf.isTmp()
-    ),
+    regIOobject(tdf.constCast(), tdf.movable()),
+    Field<Type>(tdf.constCast(), tdf.movable()),
     mesh_(tdf().mesh_),
     dimensions_(tdf().dimensions_),
     oriented_(tdf().oriented_)
@@ -318,11 +314,7 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 )
 :
     regIOobject(newName, tdf(), true),
-    Field<Type>
-    (
-        const_cast<DimensionedField<Type, GeoMesh>&>(tdf()),
-        tdf.isTmp()
-    ),
+    Field<Type>(tdf.constCast(), tdf.movable()),
     mesh_(tdf().mesh_),
     dimensions_(tdf().dimensions_),
     oriented_(tdf().oriented_)
@@ -511,7 +503,7 @@ void DimensionedField<Type, GeoMesh>::operator=
     const tmp<DimensionedField<Type, GeoMesh>>& tdf
 )
 {
-    const DimensionedField<Type, GeoMesh>& df = tdf();
+    auto& df = tdf.constCast();
 
     // Check for assignment to self
     if (this == &df)
@@ -525,7 +517,7 @@ void DimensionedField<Type, GeoMesh>::operator=
 
     dimensions_ = df.dimensions();
     oriented_ = df.oriented();
-    this->transfer(const_cast<DimensionedField<Type, GeoMesh>&>(df));
+    this->transfer(df);
     tdf.clear();
 }
 

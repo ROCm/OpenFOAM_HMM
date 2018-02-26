@@ -98,15 +98,13 @@ Foam::lduMatrix::faceH(const Field<Type>& psi) const
 
         return tfaceHpsi;
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Cannot calculate faceH"
-               " the matrix does not have any off-diagonal coefficients."
-            << exit(FatalError);
 
-        return tmp<Field<Type>>(nullptr);
-    }
+    FatalErrorInFunction
+        << "Cannot calculate faceH"
+           " the matrix does not have any off-diagonal coefficients."
+        << exit(FatalError);
+
+    return tmp<Field<Type>>();
 }
 
 

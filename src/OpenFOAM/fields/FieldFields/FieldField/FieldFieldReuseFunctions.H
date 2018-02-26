@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,20 +44,18 @@ tmp<FieldField<Field, TypeR>> New
     {
         return tf1;
     }
-    else
+
+    tmp<FieldField<Field, TypeR>> rtf
+    (
+        FieldField<Field, TypeR>::NewCalculatedType(tf1())
+    );
+
+    if (initRet)
     {
-        tmp<FieldField<Field, TypeR>> rtf
-        (
-            FieldField<Field, TypeR>::NewCalculatedType(tf1())
-        );
-
-        if (initRet)
-        {
-            rtf.ref() = tf1();
-        }
-
-        return rtf;
+        rtf.ref() = tf1();
     }
+
+    return rtf;
 }
 
 
@@ -93,13 +91,11 @@ public:
         {
             return tf1;
         }
-        else
-        {
-            return tmp<FieldField<Field, TypeR>>
-            (
-                FieldField<Field, TypeR>::NewCalculatedType(tf1())
-            );
-        }
+
+        return tmp<FieldField<Field, TypeR>>
+        (
+            FieldField<Field, TypeR>::NewCalculatedType(tf1())
+        );
     }
 };
 
@@ -145,13 +141,11 @@ public:
         {
             return tf2;
         }
-        else
-        {
-            return tmp<FieldField<Field, TypeR>>
-            (
-                FieldField<Field, TypeR>::NewCalculatedType(tf1())
-            );
-        }
+
+        return tmp<FieldField<Field, TypeR>>
+        (
+            FieldField<Field, TypeR>::NewCalculatedType(tf1())
+        );
     }
 };
 
@@ -171,13 +165,11 @@ public:
         {
             return tf1;
         }
-        else
-        {
-            return tmp<FieldField<Field, TypeR>>
-            (
-                FieldField<Field, TypeR>::NewCalculatedType(tf1())
-            );
-        }
+
+        return tmp<FieldField<Field, TypeR>>
+        (
+            FieldField<Field, TypeR>::NewCalculatedType(tf1())
+        );
     }
 };
 
@@ -201,13 +193,11 @@ public:
         {
             return tf2;
         }
-        else
-        {
-            return tmp<FieldField<Field, TypeR>>
-            (
-                FieldField<Field, TypeR>::NewCalculatedType(tf1())
-            );
-        }
+
+        return tmp<FieldField<Field, TypeR>>
+        (
+            FieldField<Field, TypeR>::NewCalculatedType(tf1())
+        );
     }
 };
 

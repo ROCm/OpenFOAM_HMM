@@ -119,7 +119,7 @@ Foam::fv::solidificationMeltingSource::Cp() const
         }
     }
 
-    return tmp<volScalarField>(nullptr);
+    return tmp<volScalarField>();
 }
 
 

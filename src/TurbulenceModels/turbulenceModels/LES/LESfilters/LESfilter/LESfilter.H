@@ -79,7 +79,7 @@ protected:
     template<class GeoFieldType>
     void correctBoundaryConditions(const tmp<GeoFieldType>& tgf) const
     {
-        const_cast<GeoFieldType&>(tgf()).correctBoundaryConditions();
+        tgf.constCast().correctBoundaryConditions();
     }
 
 

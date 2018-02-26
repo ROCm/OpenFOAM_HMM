@@ -62,14 +62,12 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::rho(const label patchi) const
             mesh_.lookupObject<volScalarField>(rhoName_);
         return rho.boundaryField()[patchi];
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Unable to set rho for patch " << patchi
-            << exit(FatalError);
-    }
 
-    return tmp<Field<scalar>>(nullptr);
+    FatalErrorInFunction
+        << "Unable to set rho for patch " << patchi
+        << exit(FatalError);
+
+    return tmp<Field<scalar>>();
 }
 
 
@@ -91,14 +89,12 @@ Foam::heatTransferCoeffModels::ReynoldsAnalogy::Cp(const label patchi) const
 
         return thermo.Cp(pp, Tp, patchi);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Unable to set Cp for patch " << patchi
-            << exit(FatalError);
-    }
 
-    return tmp<Field<scalar>>(nullptr);
+    FatalErrorInFunction
+        << "Unable to set Cp for patch " << patchi
+        << exit(FatalError);
+
+    return tmp<Field<scalar>>();
 }
 
 
