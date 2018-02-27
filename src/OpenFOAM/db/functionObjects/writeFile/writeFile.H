@@ -117,9 +117,6 @@ private:
 
 public:
 
-    //- Directory prefix
-    static const word outputPrefix;
-
     //- Additional characters for writing
     static label addChars;
 

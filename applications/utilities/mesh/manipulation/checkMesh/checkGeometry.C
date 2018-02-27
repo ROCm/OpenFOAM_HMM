@@ -10,6 +10,7 @@
 #include "polyMeshTetDecomposition.H"
 #include "surfaceWriter.H"
 #include "checkTools.H"
+#include "functionObject.H"
 
 #include "vtkSurfaceWriter.H"
 #include "writer.H"
@@ -1020,7 +1021,7 @@ Foam::label Foam::checkGeometry
                         {
                             wr.write
                             (
-                                "postProcessing",
+                                functionObject::outputPrefix,
                                 "src_" + tmName,
                                 meshedSurfRef
                                 (
@@ -1074,7 +1075,7 @@ Foam::label Foam::checkGeometry
                         {
                             wr.write
                             (
-                                "postProcessing",
+                                functionObject::outputPrefix,
                                 "tgt_" + tmName,
                                 meshedSurfRef
                                 (

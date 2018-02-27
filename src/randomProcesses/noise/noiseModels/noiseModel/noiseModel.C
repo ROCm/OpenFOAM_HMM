@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "noiseModel.H"
+#include "functionObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -143,7 +144,7 @@ Foam::fileName Foam::noiseModel::baseFileDir(const label dataseti) const
     word datasetName("input" + Foam::name(dataseti));
     baseDir =
         baseDir.expand()
-       /"postProcessing"
+       /functionObject::outputPrefix
        /"noise"
        /outputPrefix_
        /type()

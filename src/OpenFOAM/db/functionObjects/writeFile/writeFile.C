@@ -27,13 +27,9 @@ License
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
+#include "functionObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::word Foam::functionObjects::writeFile::outputPrefix
-(
-    "postProcessing"
-);
 
 Foam::label Foam::functionObjects::writeFile::addChars = 8;
 
@@ -56,11 +52,11 @@ Foam::fileName Foam::functionObjects::writeFile::baseFileDir() const
     {
         // Put in undecomposed case (Note: gives problems for
         // distributed data running)
-        baseDir = baseDir/".."/outputPrefix;
+        baseDir = baseDir/".."/functionObject::outputPrefix;
     }
     else
     {
-        baseDir = baseDir/outputPrefix;
+        baseDir = baseDir/functionObject::outputPrefix;
     }
 
     // Append mesh name if not default region

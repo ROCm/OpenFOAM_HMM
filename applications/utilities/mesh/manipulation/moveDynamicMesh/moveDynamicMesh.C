@@ -39,6 +39,7 @@ Description
 #include "vtkSurfaceWriter.H"
 #include "cyclicAMIPolyPatch.H"
 #include "PatchTools.H"
+#include "functionObject.H"
 
 using namespace Foam;
 
@@ -139,7 +140,7 @@ void writeWeights(const polyMesh& mesh)
                     mesh,
                     ami.tgtWeightsSum(),
                     cpp.neighbPatch(),
-                    "postProcessing",
+                    functionObject::outputPrefix,
                     "tgt",
                     tmName
                 );
@@ -148,7 +149,7 @@ void writeWeights(const polyMesh& mesh)
                     mesh,
                     ami.srcWeightsSum(),
                     cpp,
-                    "postProcessing",
+                    functionObject::outputPrefix,
                     "src",
                     tmName
                 );

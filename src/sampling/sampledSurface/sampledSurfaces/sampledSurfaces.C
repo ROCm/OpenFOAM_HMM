@@ -138,14 +138,17 @@ Foam::sampledSurfaces::sampledSurfaces
     changedGeom_(),
     formatter_(nullptr)
 {
+    const fileName relPath(functionObject::outputPrefix/name);
+
     if (Pstream::parRun())
     {
-        outputPath_ = mesh_.time().path()/".."/"postProcessing"/name;
+        outputPath_ = mesh_.time().path()/".."/relPath;
     }
     else
     {
-        outputPath_ = mesh_.time().path()/"postProcessing"/name;
+        outputPath_ = mesh_.time().path()/relPath;
     }
+
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
@@ -174,14 +177,17 @@ Foam::sampledSurfaces::sampledSurfaces
 {
     read(dict);
 
+    const fileName relPath(functionObject::outputPrefix/name);
+
     if (Pstream::parRun())
     {
-        outputPath_ = time_.path()/".."/"postProcessing"/name;
+        outputPath_ = time_.path()/".."/relPath;
     }
     else
     {
-        outputPath_ = time_.path()/"postProcessing"/name;
+        outputPath_ = time_.path()/relPath;
     }
+
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);

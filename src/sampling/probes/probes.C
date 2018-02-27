@@ -202,7 +202,8 @@ Foam::label Foam::probes::prepare()
         {
             probeSubDir = probeSubDir/mesh_.name();
         }
-        probeSubDir = "postProcessing"/probeSubDir/mesh_.time().timeName();
+        probeSubDir =
+            functionObject::outputPrefix/probeSubDir/mesh_.time().timeName();
 
         if (Pstream::parRun())
         {

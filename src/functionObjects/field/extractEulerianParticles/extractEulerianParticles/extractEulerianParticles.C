@@ -63,11 +63,11 @@ Foam::functionObjects::extractEulerianParticles::dictBaseFileDir() const
     {
         // Put in undecomposed case (Note: gives problems for
         // distributed data running)
-        baseDir = baseDir/".."/"postProcessing";
+        baseDir = baseDir/".."/functionObject::outputPrefix;
     }
     else
     {
-        baseDir = baseDir/"postProcessing";
+        baseDir = baseDir/functionObject::outputPrefix;
     }
 
     return baseDir;

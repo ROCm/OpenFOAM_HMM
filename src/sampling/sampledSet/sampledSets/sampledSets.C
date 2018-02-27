@@ -97,18 +97,22 @@ Foam::sampledSets::sampledSets
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
+    const fileName relPath(functionObject::outputPrefix/name);
+
     if (Pstream::parRun())
     {
-        outputPath_ = mesh_.time().path()/".."/"postProcessing"/name;
+        outputPath_ = mesh_.time().path()/".."/relPath;
     }
     else
     {
-        outputPath_ = mesh_.time().path()/"postProcessing"/name;
+        outputPath_ = mesh_.time().path()/relPath;
     }
+
     if (mesh_.name() != fvMesh::defaultRegion)
     {
         outputPath_ = outputPath_/mesh_.name();
     }
+
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);
@@ -132,18 +136,22 @@ Foam::sampledSets::sampledSets
     interpolationScheme_(word::null),
     writeFormat_(word::null)
 {
+    const fileName relPath(functionObject::outputPrefix/name);
+
     if (Pstream::parRun())
     {
-        outputPath_ = mesh_.time().path()/".."/"postProcessing"/name;
+        outputPath_ = mesh_.time().path()/".."/relPath;
     }
     else
     {
-        outputPath_ = mesh_.time().path()/"postProcessing"/name;
+        outputPath_ = mesh_.time().path()/relPath;
     }
+
     if (mesh_.name() != fvMesh::defaultRegion)
     {
         outputPath_ = outputPath_/mesh_.name();
     }
+
     outputPath_.clean();  // Remove unneeded ".."
 
     read(dict);

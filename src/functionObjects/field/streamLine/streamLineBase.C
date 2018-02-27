@@ -647,8 +647,8 @@ bool Foam::functionObjects::streamLineBase::writeToFile()
         fileName vtkPath
         (
             Pstream::parRun()
-          ? time_.path()/".."/"postProcessing"/"sets"/name()
-          : time_.path()/"postProcessing"/"sets"/name()
+          ? time_.path()/".."/functionObject::outputPrefix/"sets"/name()
+          : time_.path()/functionObject::outputPrefix/"sets"/name()
         );
         if (mesh_.name() != fvMesh::defaultRegion)
         {

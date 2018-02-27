@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "CloudFunctionObject.H"
+#include "functionObject.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -56,8 +57,13 @@ Foam::CloudFunctionObject<CloudType>::CloudFunctionObject
     CloudSubModelBase<CloudType>(modelName, owner, dict, typeName, objectType),
     outputDir_(owner.mesh().time().path())
 {
-    const fileName relPath =
-        "postProcessing"/cloud::prefix/owner.name()/this->modelName();
+    const fileName relPath
+    (
+        functionObject::outputPrefix
+       /cloud::prefix
+       /owner.name()
+       /this->modelName()
+    );
 
 
     if (Pstream::parRun())

@@ -41,6 +41,7 @@ License
 #include "syncTools.H"
 #include "globalIndex.H"
 #include "PatchTools.H"
+#include "functionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -285,7 +286,7 @@ void Foam::mergeAndWrite
     (
         set.time().path()
       / (Pstream::parRun() ? ".." : "")
-      / "postProcessing"
+      / functionObject::outputPrefix
       / mesh.pointsInstance()
       / set.name()
     );
@@ -379,7 +380,7 @@ void Foam::mergeAndWrite
     (
         set.time().path()
       / (Pstream::parRun() ? ".." : "")
-      / "postProcessing"
+      / functionObject::outputPrefix
       / mesh.pointsInstance()
       / set.name()
     );
@@ -483,7 +484,7 @@ void Foam::mergeAndWrite
         (
             set.time().path()
           / (Pstream::parRun() ? ".." : "")
-          / "postProcessing"
+          / functionObject::outputPrefix
           / mesh.pointsInstance()
           // set.name()
         );

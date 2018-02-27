@@ -44,6 +44,7 @@ Description
 #include "stringOps.H"
 #include "timeSelector.H"
 #include "IOobjectList.H"
+#include "functionObject.H"
 
 using namespace Foam;
 
@@ -149,7 +150,7 @@ int main(int argc, char *argv[])
         // Name/location for the output summary
         const fileName outputName
         {
-            "postProcessing",
+            functionObject::outputPrefix,
             "profiling",
             runTime.timeName(),
             profilingFileName
