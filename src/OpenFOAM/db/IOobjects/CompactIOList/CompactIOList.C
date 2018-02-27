@@ -179,29 +179,26 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
     const bool valid
 ) const
 {
+    bool nonCompact = false;
+
     if (fmt == IOstream::ASCII)
     {
-        // Change type to be non-compact format type
-        const word oldTypeName = typeName;
-
-        const_cast<word&>(typeName) = IOList<T>::typeName;
-
-        bool good = regIOobject::writeObject(fmt, ver, cmp, valid);
-
-        // Change type back
-        const_cast<word&>(typeName) = oldTypeName;
-
-        return good;
+        nonCompact = true;
     }
     else if (overflows())
     {
+        nonCompact = true;
+
         WarningInFunction
             << "Overall number of elements of CompactIOList of size "
             << this->size() << " overflows the representation of a label"
-            << endl << "    Switching to ascii writing" << endl;
+            << nl << "    Switching to ascii writing" << endl;
+    }
 
-        // Change type to be non-compact format type
-        const word oldTypeName = typeName;
+    if (nonCompact)
+    {
+        // Change to non-compact type
+        const word oldTypeName(typeName);
 
         const_cast<word&>(typeName) = IOList<T>::typeName;
 
@@ -212,29 +209,8 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
 
         return good;
     }
-    else if (overflows())
-    {
-        WarningInFunction
-            << "Overall number of elements of CompactIOList of size "
-            << this->size() << " overflows the representation of a label"
-            << endl << "    Switching to ascii writing" << endl;
 
-        // Change type to be non-compact format type
-        const word oldTypeName = typeName;
-
-        const_cast<word&>(typeName) = IOList<T>::typeName;
-
-        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
-
-        // Change type back
-        const_cast<word&>(typeName) = oldTypeName;
-
-        return good;
-    }
-    else
-    {
-        return regIOobject::writeObject(fmt, ver, cmp, valid);
-    }
+    return regIOobject::writeObject(fmt, ver, cmp, valid);
 }
 
 
