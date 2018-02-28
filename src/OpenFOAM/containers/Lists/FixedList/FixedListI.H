@@ -195,8 +195,9 @@ inline void Foam::FixedList<T, Size>::checkStart(const label start) const
 {
     if (start < 0 || (start && unsigned(start) >= Size))
     {
+        // Note: always accept start=0, even for zero-sized lists
         FatalErrorInFunction
-            << "start " << start << " out of range 0 ... " << (Size-1)
+            << "start " << start << " out of range [0," << Size << ")"
             << abort(FatalError);
     }
 }
@@ -220,7 +221,7 @@ inline void Foam::FixedList<T, Size>::checkIndex(const label i) const
     if (i < 0 || unsigned(i) >= Size)
     {
         FatalErrorInFunction
-            << "index " << i << " out of range 0 ... " << (Size-1)
+            << "index " << i << " out of range [0," << Size << ")"
             << abort(FatalError);
     }
 }

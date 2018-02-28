@@ -101,8 +101,9 @@ inline void Foam::UList<T>::checkStart(const label start) const
 {
     if (start < 0 || (start && start >= size_))
     {
+        // Note: accept start=0 for zero-sized lists
         FatalErrorInFunction
-            << "start " << start << " out of range 0 ... " << max(size_-1, 0)
+            << "start " << start << " out of range [0," << size_ << ")"
             << abort(FatalError);
     }
 }
@@ -114,7 +115,7 @@ inline void Foam::UList<T>::checkSize(const label size) const
     if (size < 0 || size > size_)
     {
         FatalErrorInFunction
-            << "size " << size << " out of range 0 ... " << size_
+            << "size " << size << " out of range [0," << size_ << "]"
             << abort(FatalError);
     }
 }
@@ -129,10 +130,10 @@ inline void Foam::UList<T>::checkIndex(const label i) const
             << "attempt to access element " << i << " from zero sized list"
             << abort(FatalError);
     }
-    else if (i<0 || i>=size_)
+    else if (i < 0 || i >= size_)
     {
         FatalErrorInFunction
-            << "index " << i << " out of range 0 ... " << size_-1
+            << "index " << i << " out of range [0," << size_ << ")"
             << abort(FatalError);
     }
 }
@@ -206,14 +207,15 @@ inline T& Foam::UList<T>::operator[](const label i)
     return v_[i];
 }
 
+
 namespace Foam
 {
     // Template specialization for bool
     template<>
     inline const bool& Foam::UList<bool>::operator[](const label i) const
     {
-        // lazy evaluation - return false for out-of-range
-        if (i < size_)
+        // Lazy evaluation - return false for out-of-range
+        if (i >= 0 && i < size_)
         {
             return v_[i];
         }
@@ -221,6 +223,7 @@ namespace Foam
         return Foam::pTraits<bool>::zero;
     }
 }
+
 
 template<class T>
 inline const T& Foam::UList<T>::operator[](const label i) const

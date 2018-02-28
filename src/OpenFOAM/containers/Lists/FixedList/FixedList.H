@@ -240,13 +240,13 @@ public:
 
         // Check
 
-            //- Check start is within valid range (0 ... size-1)
+            //- Check start is within valid range [0,size)
             inline void checkStart(const label start) const;
 
-            //- Check size is within valid range (0 ... size)
+            //- Check size is identical to Size template parameter
             inline void checkSize(const label size) const;
 
-            //- Check index i is within valid range (0 ... size-1)
+            //- Check index is within valid range [0,size)
             inline void checkIndex(const label i) const;
 
 
