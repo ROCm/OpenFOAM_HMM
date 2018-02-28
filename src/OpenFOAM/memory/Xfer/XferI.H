@@ -39,8 +39,7 @@ template<class T>
 template<class... Args>
 inline Foam::Xfer<T> Foam::Xfer<T>::New(Args&&... args)
 {
-    T* ptr = new T(std::forward<Args>(args)...);
-    return Foam::Xfer<T>(ptr);
+    return Xfer<T>(new T(std::forward<Args>(args)...));
 }
 
 
@@ -70,6 +69,13 @@ inline Foam::Xfer<T>::Xfer(const Xfer<T>& xf)
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline bool Foam::Xfer<T>::valid() const
+{
+    return (ptr_ && Foam::notNull(ptr_));
+}
+
+
+template<class T>
 inline T* Foam::Xfer<T>::get() const
 {
     return ptr_;
@@ -77,12 +83,20 @@ inline T* Foam::Xfer<T>::get() const
 
 
 template<class T>
+inline T&& Foam::Xfer<T>::rvalue() const
+{
+    // Need check for valid() ?
+    return std::move(*ptr_);
+}
+
+
+template<class T>
 inline void Foam::Xfer<T>::swap(Xfer<T>& other) noexcept
 {
     // Swap pointers
-    T* tmp = ptr_;
+    T* p = ptr_;
     ptr_ = other.ptr;
-    other.ptr_ = tmp;
+    other.ptr_ = p;
 }
 
 

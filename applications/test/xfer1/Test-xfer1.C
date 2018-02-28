@@ -39,6 +39,16 @@ Description
 using namespace Foam;
 
 
+template<class Type>
+void printInfo(const Xfer<Type>& xf)
+{
+    Info<<"    address:" << long(xf.get()) << nl
+        <<"    isNull  = " << isNull(xf) << nl
+        <<"    notNull = " << notNull(xf) << nl
+        <<"    valid() = " << xf.valid() << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
@@ -53,6 +63,18 @@ int main(int argc, char *argv[])
     forAll(lstA, i)
     {
         lstA[i] = 5 - i;
+    }
+
+    // Information about null-object
+
+    Info<<"nullObject:" << nl;
+    printInfo(Xfer<labelList>::null());
+    {
+        // This probably needs more work...
+        Xfer<labelList> xf = Xfer<labelList>::null();
+
+        Info<<"copy of nullObject:" << nl;
+        printInfo(xf);
     }
 
     Info<< "lstA: " << lstA << nl

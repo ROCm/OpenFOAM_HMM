@@ -79,7 +79,11 @@ class Xfer
 
 public:
 
-    typedef T Type;
+    // STL type definition similar to std::shared_ptr
+
+        //- Type of object being managed
+        typedef T element_type;
+
 
     // Constructors
 
@@ -107,11 +111,17 @@ public:
 
     // Member Functions
 
-        //- Pointer to the underlying object
+        //- Test for valid pointer and not a nullObject reference.
+        inline bool valid() const;
+
+        //- Pointer to the underlying object.
         inline T* get() const;
 
+        //- Rvalue reference to the underlying object.
+        inline T&& rvalue() const;
+
         //- Swaps the managed objects
-        void swap(Xfer<T>& other) noexcept;
+        inline void swap(Xfer<T>& other) noexcept;
 
 
     // Member Operators
