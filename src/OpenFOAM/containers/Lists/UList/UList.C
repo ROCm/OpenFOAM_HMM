@@ -325,7 +325,7 @@ bool Foam::UList<T>::operator==(const UList<T>& list) const
         return false;
     }
 
-    bool equal = false;
+    bool equal = true;
 
     List_CONST_ACCESS(T, (*this), lhs);
     List_CONST_ACCESS(T, (list), rhs);
