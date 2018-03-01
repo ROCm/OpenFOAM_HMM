@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,11 +97,14 @@ void printMyString(const UList<string>& lst)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::noFunctionObjects();
+
     argList::addOption("reList", "reList");
     argList::addOption("wordList", "wordList");
     argList::addOption("stringList", "stringList");
     argList::addOption("float", "xx");
-    argList::addBoolOption("transform", "Test List::createList functionality");
+    argList::addBoolOption("create", "Test ListOps::create functionality");
+    argList::addBoolOption("ListList", "Test list of list functionality");
     argList::addBoolOption("flag");
 
     #include "setRootCase.H"
@@ -332,11 +335,11 @@ int main(int argc, char *argv[])
         List<scalar> sident(range.begin(), range.end());
         Info<<"range-list (scalar)=" << sident << nl;
 
-        // Sub-ranges also work
-        List<scalar> sident2(range(3), range(10));
-        Info<<"range-list (scalar)=" << sident2 << nl;
+//        // Sub-ranges also work
+//        List<scalar> sident2(range.at(3), range.at(10));
+//        Info<<"subrange-list (scalar)=" << sident2 << nl;
 
-        // VERY BAD IDEA: List<scalar> sident3(range(10), range(3));
+        // VERY BAD IDEA: List<scalar> sident3(range.at(10), range.at(3));
 
         // This doesn't work, and don't know what it should do anyhow
         // List<vector> vident(range.begin(), range.end());
@@ -362,15 +365,15 @@ int main(int argc, char *argv[])
         Info<<"-flag:" << args["flag"] << endl;
     }
 
-    if (args.found("transform"))
+    if (args.found("create"))
     {
-        Info<< nl << "Test List::createList functionality" << nl;
+        Info<< nl << "Test ListOps::create functionality" << nl;
 
         const auto labels = identity(15);
         Info<< "labels: " << flatOutput(labels) << endl;
 
         {
-            auto scalars = List<scalar>::createList
+            auto scalars = ListOps::create<scalar>
             (
                 labels,
                 [](const label& val){ return scalar(1.5*val); }
@@ -379,7 +382,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            auto vectors = List<vector>::createList
+            auto vectors = ListOps::create<vector>
             (
                 labels,
                 [](const label& val){ return vector(1.2*val, -1.2*val, 0); }
@@ -388,7 +391,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            auto longs = List<long>::createList
+            auto longs = ListOps::create<long>
             (
                 labels,
                 [](const label& val){ return val; }
@@ -396,7 +399,7 @@ int main(int argc, char *argv[])
             Info<< "longs: " << flatOutput(longs) << endl;
         }
         {
-            auto negs = List<label>::createList
+            auto negs = ListOps::create<label>
             (
                 labels,
                 std::negate<label>()
@@ -405,7 +408,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            auto scalars = List<scalar>::createList
+            auto scalars = ListOps::create<scalar>
             (
                 labelRange::null.cbegin(),
                 labelRange::identity(15).cend(),
@@ -417,9 +420,9 @@ int main(int argc, char *argv[])
         #if WM_LABEL_SIZE == 32
         {
             List<int64_t> input(10);
-            std::iota(input.begin(), input.end(), 0);
+            std::iota(input.begin(), input.end(), 50);
 
-            auto output = List<label>::createList
+            auto output = ListOps::create<label>
             (
                 input,
                 toLabel<int64_t>()
@@ -429,9 +432,9 @@ int main(int argc, char *argv[])
         #elif WM_LABEL_SIZE == 64
         {
             List<int32_t> input(10);
-            std::iota(input.begin(), input.end(), 0);
+            std::iota(input.begin(), input.end(), 50);
 
-            auto output = List<label>::createList
+            auto output = ListOps::create<label>
             (
                 input,
                 toLabel<int32_t>()
@@ -439,6 +442,157 @@ int main(int argc, char *argv[])
             Info<< "label (from int32): " << flatOutput(output) << endl;
         }
         #endif
+
+
+        labelHashSet locations{ -15, 5, 10, 15, 25, 35 };
+        Info<< nl << "Test for createWithValue with locations :"
+            << flatOutput(locations.sortedToc()) << nl;
+
+        {
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                locations.toc(),  // Any order
+                100,
+                -1  // default value
+            );
+            Info<< "with labelUList: " << flatOutput(output)
+                << " selector: " << flatOutput(locations.sortedToc()) << nl;
+        }
+
+        {
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                locations,
+                100,
+                -1  // default value
+            );
+            Info<< "with labelHashSet: " << flatOutput(output)
+                << " selector: " << flatOutput(locations) << nl;
+        }
+
+        {
+            PackedBoolList select(locations.toc());
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with PackedBoolList: " << flatOutput(output)
+                << " selector: " << flatOutput(select.used()) << nl;
+        }
+
+        {
+            // Fairly really inconvenient way to set true/false
+            labelList toc(locations.sortedToc());
+
+            List<bool> select = ListOps::createWithValue<bool>
+            (
+                toc.last() + 1,
+                toc,
+                true,
+                false  // default value
+            );
+
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with boolList: " << flatOutput(output)
+                << " selector: " << flatOutput(select) << nl;
+        }
+
+        // Repeat with a shorter selector
+        locations = { -15, 5, 10 };
+
+        {
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                locations,
+                100,
+                -1  // default value
+            );
+            Info<< "with labelHashSet: " << flatOutput(output)
+                << " selector: " << flatOutput(locations) << nl;
+        }
+
+        {
+            PackedBoolList select(locations.toc());
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with PackedBoolList: " << flatOutput(output)
+                << " selector: " << flatOutput(select.used()) << nl;
+        }
+
+        {
+            // Fairly really inconvenient way to set true/false
+            labelList toc(locations.sortedToc());
+
+            List<bool> select = ListOps::createWithValue<bool>
+            (
+                toc.last() + 1,
+                toc,
+                true,
+                false  // default value
+            );
+
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with boolList: " << flatOutput(output)
+                << " selector: " << flatOutput(select) << nl;
+        }
+    }
+
+    if (args.found("ListList"))
+    {
+        {
+            labelListList listlist(5, identity(5));
+            Info<<"list-list with length/val:" << listlist << nl;
+        }
+
+        {
+            labelListList listlist(one(), identity(5));
+            Info<<"list-list 1/val:" << listlist << nl;
+        }
+
+        {
+            labelList content = identity(5);
+
+            labelListList listlist(one(), content);
+            Info<<"list-list 1/copy val:" << listlist
+                <<" - from " << content << nl;
+        }
+
+        {
+            labelList content = identity(5);
+
+            labelListList listlist(one(), std::move(content));
+            Info<<"list-list 1/move val:" << listlist
+                <<" - from " << content << nl;
+        }
+
+        {
+            labelListList listlist(one(), Zero);
+            Info<<"list-list 1/move val:" << listlist
+                << nl;
+        }
     }
 
     if (args.readIfPresent<scalar>("float", xxx))

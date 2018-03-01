@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -93,12 +93,10 @@ SourceFiles
 namespace Foam
 {
 
-// Dummy access operator for ListListOps::combine()
+//- Dummy access operator for ListListOps::combine()
 template<class T>
-class accessOp
+struct accessOp
 {
-public:
-
     const T& operator()(const T& x) const
     {
         return x;
@@ -106,53 +104,56 @@ public:
 };
 
 
-// Offset operator for ListListOps::combineOffset()
+//- Offset operator for ListListOps::combineOffset()
 template<class T>
-class offsetOp
+struct offsetOp
 {
-public:
-
     T operator()(const T& x, const label offset) const
     {
         return x + offset;
     }
 };
 
+
 /*---------------------------------------------------------------------------*\
-                           Class ListListOps Declaration
+                       Namespace ListListOps Declaration
 \*---------------------------------------------------------------------------*/
 
 namespace ListListOps
 {
-
-    //- Combines sublists into one big list
-    template<class AccessType, class T, class AccessOp>
-    AccessType combine(const List<T>&, AccessOp aop = accessOp<T>());
-
-    //- Gets sizes of sublists
+    //- Return the sizes of the sub-lists
     template<class T, class AccessOp>
-    labelList subSizes(const List<T>&, AccessOp aop = accessOp<T>());
+    labelList subSizes(const UList<T>& lists, AccessOp aop = accessOp<T>());
+
+    //- The total size of all sub-lists
+    template<class T, class AccessOp>
+    label sumSizes(const UList<T>& lists, AccessOp aop = accessOp<T>());
+
+    //- Combines sub-lists into a single list
+    template<class AccessType, class T, class AccessOp>
+    AccessType combine(const UList<T>& lists, AccessOp aop = accessOp<T>());
 
     //- Like combine but also offsets sublists based on passed sizes
     template<class AccessType, class T, class AccessOp, class OffsetOp>
     AccessType combineOffset
     (
-        const List<T>&,
-        const labelList& sizes,
+        const UList<T>& lists,
+        const labelUList& offsets,
         AccessOp aop,
         OffsetOp oop = offsetOp<T>()
     );
-};
+
+} // End namespace ListListOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
     #include "ListListOps.C"
 #endif
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

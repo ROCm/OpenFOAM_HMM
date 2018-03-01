@@ -88,13 +88,13 @@ inline Foam::PackedBoolList::PackedBoolList(const UList<bool>& lst)
 
 inline Foam::PackedBoolList::PackedBoolList(const labelUList& indices)
 :
-    PackedBoolList(indices.size(), indices)
+    PackedBoolList((indices.size() ? indices.last() : 0), indices)
 {}
 
 
 inline Foam::PackedBoolList::PackedBoolList(const labelUIndList& indices)
 :
-    PackedBoolList(indices.size(), indices)
+    PackedBoolList((indices.size() ? indices.last() : 0), indices)
 {}
 
 

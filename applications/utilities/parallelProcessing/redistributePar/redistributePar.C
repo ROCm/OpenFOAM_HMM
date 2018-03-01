@@ -2357,7 +2357,7 @@ int main(int argc, char *argv[])
     bool nfs = true;
     {
         List<fileName> roots(1, args.rootPath());
-        combineReduce(roots, ListUniqueEqOp<fileName>());
+        combineReduce(roots, ListOps::uniqueEqOp<fileName>());
         nfs = (roots.size() == 1);
     }
 

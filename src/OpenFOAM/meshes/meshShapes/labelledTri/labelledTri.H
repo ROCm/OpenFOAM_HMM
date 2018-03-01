@@ -128,13 +128,10 @@ template<>
 inline bool contiguous<labelledTri>()  {return true;}
 
 
-//- Hash specialization to offset faces in ListListOps::combineOffset
+//- Specialization to offset faces, used in ListListOps::combineOffset
 template<>
-class offsetOp<labelledTri>
+struct offsetOp<labelledTri>
 {
-
-public:
-
     inline labelledTri operator()
     (
         const labelledTri& x,

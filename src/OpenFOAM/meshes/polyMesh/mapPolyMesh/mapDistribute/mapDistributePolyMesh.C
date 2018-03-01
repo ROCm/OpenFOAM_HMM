@@ -205,13 +205,7 @@ void Foam::mapDistributePolyMesh::distributePointIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
-        (
-            nOldPoints(),
-            false,
-            lst,
-            true
-        )
+        ListOps::createWithValue<bool>(nOldPoints(), lst, true, false)
     );
 
     // Distribute
@@ -227,13 +221,7 @@ void Foam::mapDistributePolyMesh::distributeFaceIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
-        (
-            nOldFaces(),
-            false,
-            lst,
-            true
-        )
+        ListOps::createWithValue<bool>(nOldFaces(), lst, true, false)
     );
 
     // Distribute
@@ -249,13 +237,7 @@ void Foam::mapDistributePolyMesh::distributeCellIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
-        (
-            nOldCells(),
-            false,
-            lst,
-            true
-        )
+        ListOps::createWithValue<bool>(nOldCells(), lst, true, false)
     );
 
     // Distribute
@@ -271,12 +253,12 @@ void Foam::mapDistributePolyMesh::distributePatchIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
+        ListOps::createWithValue<bool>
         (
-            oldPatchStarts().size(),    // nOldPatches
-            false,
+            oldPatchStarts().size(), // nOldPatches
             lst,
-            true
+            true, // set value
+            false // default value
         )
     );
 

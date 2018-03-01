@@ -1007,7 +1007,7 @@ Foam::label Foam::checkGeometry
                         globalFaces().gather
                         (
                             UPstream::worldComm,
-                            labelList::createList
+                            ListOps::create<label>
                             (
                                 UPstream::procID(UPstream::worldComm),
                                 toLabel<int>()  // int -> label
@@ -1061,7 +1061,7 @@ Foam::label Foam::checkGeometry
                         globalFaces().gather
                         (
                             UPstream::worldComm,
-                            labelList::createList
+                            ListOps::create<label>
                             (
                                 UPstream::procID(UPstream::worldComm),
                                 toLabel<int>()  // int -> label

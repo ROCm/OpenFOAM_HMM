@@ -394,13 +394,10 @@ public:
 };
 
 
-//- Hash specialization to offset faces in ListListOps::combineOffset
+//- Specialization to offset faces, used in ListListOps::combineOffset
 template<>
-class offsetOp<face>
+struct offsetOp<face>
 {
-
-public:
-
     inline face operator()
     (
         const face& x,

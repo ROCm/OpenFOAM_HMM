@@ -384,7 +384,7 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
 
-      // Member operators
+      // Member Operators
 
         //- Append a value at the end of the list
         inline PackedList<nBits>& append(const unsigned int val);
@@ -438,7 +438,20 @@ public:
                 label index_;
 
 
+            // Constructors
+
+                //- Construct null - an end iterator
+                inline iteratorBase();
+
+                //- Construct from base list and position index
+                inline iteratorBase(const PackedList* lst, const label i);
+
+
             // Protected Member Functions
+
+                //- Limit index to the list size - avoid going past end()
+                //  Eg, iter = iterator(list, Inf)
+                inline void bound();
 
                 //- Get value as unsigned, no range-checking
                 inline unsigned int get() const;
@@ -446,14 +459,11 @@ public:
                 //- Set value, returning true if changed, no range-checking
                 inline bool set(unsigned int val);
 
+                //- Move backward through list
+                inline void prev();
 
-            // Constructors
-
-                //- Construct null
-                inline iteratorBase();
-
-                //- Construct from base list and position index
-                inline iteratorBase(const PackedList* lst, const label i);
+                //- Move forward through list
+                inline void next();
 
 
         public:
@@ -534,14 +544,8 @@ public:
                 //- Return value
                 inline unsigned int operator*() const;
 
-                //- Return value
-                inline unsigned int operator()() const;
-
                 //- Return iteratorBase for assigning values
                 inline iteratorBase& operator*();
-
-                //- Return iteratorBase for assigning values
-                inline iteratorBase& operator()();
 
                 inline iterator& operator++();
                 inline iterator operator++(int);
@@ -594,9 +598,6 @@ public:
 
                 //- Return referenced value directly
                 inline unsigned int operator*() const;
-
-                //- Return referenced value directly
-                inline unsigned int operator()() const;
 
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);

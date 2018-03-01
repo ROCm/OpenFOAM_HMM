@@ -88,7 +88,7 @@ inline Foam::List<T>::List
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::List<T>::List()
+inline constexpr Foam::List<T>::List() noexcept
 {}
 
 

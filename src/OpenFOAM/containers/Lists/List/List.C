@@ -35,65 +35,6 @@ License
 
 #include <utility>
 
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-template<class T>
-template<class T2, class UnaryOperation>
-Foam::List<T> Foam::List<T>::createList
-(
-    const UList<T2>& input,
-    const UnaryOperation& op
-)
-{
-    const label len = input.size();
-
-    List<T> output(len);
-
-    if (len)
-    {
-        List_ACCESS(T, output, out);
-        List_CONST_ACCESS(T2, input, in);
-
-        for (label i = 0; i < len; ++i)
-        {
-            out[i] = op(in[i]);
-        }
-    }
-
-    return output;
-}
-
-
-template<class T>
-template<class InputIterator, class UnaryOperation>
-Foam::List<T> Foam::List<T>::createList
-(
-    InputIterator begIter,
-    InputIterator endIter,
-    const UnaryOperation& op
-)
-{
-    const label len = std::distance(begIter, endIter);
-
-    List<T> output(len);
-
-    if (len)
-    {
-        List_ACCESS(T, output, out);
-
-        InputIterator iter = begIter;
-
-        for (label i = 0; i < len; ++i)
-        {
-            out[i] = op(*iter);
-            ++iter;
-        }
-    }
-
-    return output;
-}
-
-
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
@@ -159,6 +100,33 @@ Foam::List<T>::List(const label len, const zero)
             vp[i] = Zero;
         }
     }
+}
+
+
+template<class T>
+Foam::List<T>::List(const one, const T& val)
+:
+    UList<T>(new T[1], 1)
+{
+    this->v_[0] = val;
+}
+
+
+template<class T>
+Foam::List<T>::List(const one, T&& val)
+:
+    UList<T>(new T[1], 1)
+{
+    this->v_[0] = std::move(val);
+}
+
+
+template<class T>
+Foam::List<T>::List(const one, const zero)
+:
+    UList<T>(new T[1], 1)
+{
+    this->v_[0] = Zero;
 }
 
 

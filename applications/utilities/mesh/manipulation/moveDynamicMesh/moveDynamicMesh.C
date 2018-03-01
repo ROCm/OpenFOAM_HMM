@@ -84,7 +84,7 @@ void writeWeights
     globalFaces().gather
     (
         UPstream::worldComm,
-        labelList::createList
+        ListOps::create<label>
         (
             UPstream::procID(UPstream::worldComm),
             toLabel<int>()  // int -> label

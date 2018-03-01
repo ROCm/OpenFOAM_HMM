@@ -44,7 +44,7 @@ Foam::wordList Foam::parLagrangianRedistributor::filterObjects
 
     // Parallel synchronise
     wordList fieldNames(objects.names(fieldClassName));
-    Pstream::combineGather(fieldNames, ListUniqueEqOp<word>());
+    Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(fieldNames);
 
     if (!selectedFields.empty())

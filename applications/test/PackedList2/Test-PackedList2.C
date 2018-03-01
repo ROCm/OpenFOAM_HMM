@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
-        forAllIter(PackedBoolList, packed, it)
+        forAllIters(packed, it)
         {
             sum += it;
         }
@@ -244,9 +244,9 @@ int main(int argc, char *argv[])
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
     {
-        forAllConstIter(PackedBoolList, packed, cit)
+        forAllConstIters(packed, cit)
         {
-            sum += cit();
+            sum += *cit;
         }
     }
     std::cout
@@ -370,9 +370,9 @@ int main(int argc, char *argv[])
     // Write packed
     for (label iter = 0; iter < nIters; ++iter)
     {
-        forAllIter(PackedBoolList, packed, it)
+        forAllIters(packed, it)
         {
-            it() = 1;
+            *it = 1;
         }
     }
     Info<< "Writing packed using iterator:" << timer.cpuTimeIncrement()
