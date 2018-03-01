@@ -1619,7 +1619,7 @@ Foam::label Foam::snappyRefineDriver::directionalShellRefine
     {
         Info<< nl
             << "Directional shell refinement iteration " << iter << nl
-            << "--------------------------------------" << nl
+            << "----------------------------------------" << nl
             << endl;
 
         label nAllRefine = 0;
