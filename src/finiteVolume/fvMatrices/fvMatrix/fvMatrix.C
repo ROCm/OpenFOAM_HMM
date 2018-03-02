@@ -522,7 +522,32 @@ void Foam::fvMatrix<Type>::setReference
 template<class Type>
 void Foam::fvMatrix<Type>::setReferences
 (
-    const labelList& cellLabels,
+    const labelUList& cellLabels,
+    const Type& value,
+    const bool forceReference
+)
+{
+    const bool needRef = (forceReference || psi_.needReference());
+
+    if (needRef)
+    {
+        forAll(cellLabels, celli)
+        {
+            const label cellId = cellLabels[celli];
+            if (cellId >= 0)
+            {
+                source()[cellId] += diag()[cellId]*value;
+                diag()[cellId] += diag()[cellId];
+            }
+        }
+    }
+}
+
+
+template<class Type>
+void Foam::fvMatrix<Type>::setReferences
+(
+    const labelUList& cellLabels,
     const UList<Type>& values,
     const bool forceReference
 )
@@ -542,7 +567,6 @@ void Foam::fvMatrix<Type>::setReferences
         }
     }
 }
-
 
 
 template<class Type>
