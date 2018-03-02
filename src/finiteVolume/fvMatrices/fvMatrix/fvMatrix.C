@@ -527,14 +527,14 @@ void Foam::fvMatrix<Type>::setReferences
     const bool forceReference
 )
 {
-    bool needRef = (forceReference || psi_.needReference());
+    const bool needRef = (forceReference || psi_.needReference());
 
     if (needRef)
     {
         forAll(cellLabels, celli)
         {
-            label cellId = cellLabels[celli];
-            if (celli >= 0)
+            const label cellId = cellLabels[celli];
+            if (cellId >= 0)
             {
                 source()[cellId] += diag()[cellId]*values[celli];
                 diag()[cellId] += diag()[cellId];
