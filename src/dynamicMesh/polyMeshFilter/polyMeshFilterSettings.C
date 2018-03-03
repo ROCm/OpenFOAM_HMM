@@ -111,7 +111,7 @@ void Foam::polyMeshFilterSettings::writeSettings(Ostream& os) const
             << endl;
     }
 
-    os  << "Control mesh quality = " << controlMeshQuality().asText() << endl;
+    os  << "Control mesh quality = " << controlMeshQuality().c_str() << endl;
 
     if (controlMeshQuality())
     {

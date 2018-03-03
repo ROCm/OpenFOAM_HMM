@@ -24,6 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "bool.H"
+#include "Switch.H"
+#include "error.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,5 +46,35 @@ Foam::pTraits<bool>::pTraits(Istream& is)
 {
     is >> p_;
 }
+
+
+Foam::Istream& Foam::operator>>(Istream& is, bool& b)
+{
+    if (is.good())
+    {
+        b = Switch(is);
+    }
+
+    return is;
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const bool b)
+{
+    // Emit as label (not byte etc) for proper send/receive in parallel
+    os.write(label(b));
+    os.check(FUNCTION_NAME);
+    return os;
+}
+
+
+bool Foam::readBool(Istream& is)
+{
+    bool b;
+    is  >> b;
+
+    return b;
+}
+
 
 // ************************************************************************* //

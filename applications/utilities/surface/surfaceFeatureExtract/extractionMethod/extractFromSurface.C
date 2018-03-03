@@ -78,7 +78,7 @@ Foam::surfaceFeaturesExtraction::extractFromSurface::features
     Info<< nl << "Constructing feature set from included angle "
         << includedAngle() << nl
         << "Selecting edges based purely on geometric tests: "
-        << geometricTestOnly().asText() << endl;
+        << geometricTestOnly().c_str() << endl;
 
     return autoPtr<surfaceFeatures>
     (

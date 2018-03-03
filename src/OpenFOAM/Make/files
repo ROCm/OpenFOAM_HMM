@@ -19,9 +19,7 @@ $(fileOps)/collatedFileOperation/OFstreamCollator.C
 
 bools = primitives/bools
 $(bools)/bool/bool.C
-$(bools)/bool/boolIO.C
 $(bools)/Switch/Switch.C
-$(bools)/Switch/SwitchIO.C
 $(bools)/lists/boolList.C
 
 chars = primitives/chars

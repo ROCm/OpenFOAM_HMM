@@ -84,7 +84,7 @@ Foam::surfaceFeaturesExtraction::extractFromFile::features
     Info<< nl << "Reading existing feature edges from file "
         << featureEdgeFile_ << nl
         << "Selecting edges based purely on geometric tests: "
-        << geometricTestOnly().asText() << endl;
+        << geometricTestOnly().c_str() << endl;
 
     return autoPtr<surfaceFeatures>
     (
