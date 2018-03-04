@@ -26,7 +26,6 @@ License
 #include "labelRange.H"
 #include "token.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -50,23 +49,19 @@ Foam::labelRange::labelRange(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::labelRange::adjust()
+void Foam::labelRange::adjust() noexcept
 {
     if (start_ < 0)
     {
-        if (size_ <= 0)
-        {
-            size_ = 0;
-        }
-        else
+        if (size_ > 0)  // Second check needed to avoid (negative) overflow
         {
             size_ += start_;
         }
         start_ = 0;
     }
-    else if (size_ < 0)
+    if (size_ < 0)
     {
-        size_ = 0;
+        size_ = 0;  // No negative sizes
     }
 }
 
@@ -96,7 +91,7 @@ bool Foam::labelRange::overlaps(const labelRange& range, bool touches) const
 
 Foam::labelRange Foam::labelRange::join(const labelRange& range) const
 {
-    // trivial cases first
+    // Trivial cases first
     if (!size_)
     {
         return *this;
@@ -128,10 +123,8 @@ Foam::labelRange Foam::labelRange::subset(const labelRange& range) const
     {
         return labelRange(lower, total);
     }
-    else
-    {
-        return labelRange();
-    }
+
+    return labelRange();
 }
 
 
@@ -151,10 +144,8 @@ Foam::labelRange Foam::labelRange::subset
     {
         return labelRange(lower, total);
     }
-    else
-    {
-        return labelRange();
-    }
+
+    return labelRange();
 }
 
 
@@ -170,10 +161,8 @@ Foam::labelRange Foam::labelRange::subset0(const label size) const
     {
         return labelRange(lower, total);
     }
-    else
-    {
-        return labelRange();
-    }
+
+    return labelRange();
 }
 
 
@@ -185,21 +174,19 @@ Foam::Istream& Foam::operator>>(Istream& is, labelRange& range)
     is  >> range.start_ >> range.size_;
     is.readEnd("labelRange");
 
-    is.check(FUNCTION_NAME);
-
-    // Disallow invalid sizes
     if (range.size_ < 0)
     {
-        range.size_ = 0;
+        range.size_ = 0;  // No negative sizes
     }
 
+    is.check(FUNCTION_NAME);
     return is;
 }
 
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const labelRange& range)
 {
-    // Write ASCII only for now
+    // Only write as ASCII for now
     os  << token::BEGIN_LIST
         << range.start() << token::SPACE << range.size()
         << token::END_LIST;

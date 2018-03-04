@@ -315,6 +315,12 @@ public:
             return start_;
         }
 
+        //- Return start/size range of this patch
+        labelRange range() const
+        {
+            return labelRange(start_, this->size());
+        }
+
         //- Return boundaryMesh reference
         const polyBoundaryMesh& boundaryMesh() const;
 
@@ -420,6 +426,19 @@ public:
     // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const polyPatch&);
+};
+
+
+// Global Functions
+
+//- Get the labelRange for a polyPatch
+template<>
+struct toLabelRange<polyPatch>
+{
+    labelRange operator()(const polyPatch& pp) const
+    {
+        return pp.range();
+    }
 };
 
 

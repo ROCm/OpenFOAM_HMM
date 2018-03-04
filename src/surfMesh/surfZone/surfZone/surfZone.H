@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,6 +41,7 @@ SourceFiles
 #include "label.H"
 #include "className.H"
 #include "surfZoneIdentifier.H"
+#include "labelRange.H"
 #include "autoPtr.H"
 #include "dictionary.H"
 
@@ -49,8 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class surfZone;
 
 Istream& operator>>(Istream&, surfZone&);
@@ -153,6 +153,12 @@ public:
             return size_;
         }
 
+        //- Return start/size range of this zone
+        labelRange range() const
+        {
+            return labelRange(start_, size_);
+        }
+
         //- Write
         void write(Ostream&) const;
 
@@ -172,6 +178,19 @@ public:
 
         friend Istream& operator>>(Istream&, surfZone&);
         friend Ostream& operator<<(Ostream&, const surfZone&);
+};
+
+
+// Global Functions
+
+//- Get the labelRange for a surfZone
+template<>
+struct toLabelRange<surfZone>
+{
+    labelRange operator()(const surfZone& zone) const
+    {
+        return zone.range();
+    }
 };
 
 
