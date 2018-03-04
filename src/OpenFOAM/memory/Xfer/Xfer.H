@@ -30,34 +30,23 @@ Description
     The wrapped object of type \<T\> must implement a transfer() method and
     an operator=() copy method.
 
-    Since it is decided upon construction of the Xfer object whether the
-    parameter is to be copied or transferred, the contents of the resulting
-    Xfer object can be transferred unconditionally. This greatly simplifies
-    defining constructors or methods in other classes with mixed
-    transfer/copy semantics without requiring 2^N different versions.
+\deprecated This class is an artifact from pre-C++11 code (MAR-2018).
 
-    When transferring between dissimilar types, the xferCopyTo() and
-    xferMoveTo() functions can prove useful. An example is transferring
-    from a DynamicList to a List.
-
-    \code
-        List<label> list1;
-        DynamicList<label> list2;
-        ...
-
-        SomeClass obj(xferCopy(list1), xferMoveTo<labelList>(list1));
-    \endcode
+Note
+    This class is an artifact from pre-C++11 code, where it was used
+    as a workaround for the lack of movable references (rvalue).
+    The interfaces previously using Xfer to reclaim memory now use
+    movable references directly or, in the rare case, an autoPtr.
 
 See also
     xferCopy, xferCopyTo, xferMove, xferMoveTo
-
-SourceFiles
-    XferI.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef Xfer_H
 #define Xfer_H
+
+#include "nullObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -87,57 +76,81 @@ public:
 
     // Constructors
 
+        //- Construct with no managed object.
+        inline constexpr Xfer() noexcept : ptr_(nullptr)
+        {}
+
         //- Store object pointer and manage its deletion
         //  Can also be used later to transfer by assignment
-        inline explicit Xfer(T* p = nullptr);
+        inline explicit Xfer(T* p) noexcept : ptr_(p)
+        {}
 
-        //- Construct, transferring its contents
-        inline Xfer(const Xfer<T>& xf);
+        //- Move construct, transferring ownership
+        inline Xfer(const Xfer<T>& xf) noexcept : ptr_(xf.ptr_)
+        {
+            xf.ptr_ = nullptr;
+        }
 
 
     //- Destructor
-    inline ~Xfer();
+    inline ~Xfer() noexcept
+    {
+        delete ptr_;
+        ptr_ = nullptr;
+    }
 
 
     // Static Member Functions
 
         //- Return a null object reference
-        inline static const Xfer<T>& null();
-
-        //- Construct new Xfer container with forwarding arguments to T
-        template<class... Args>
-        inline static Xfer<T> New(Args&&... args);
+        inline static const Xfer<T>& null()
+        {
+            return NullObjectRef<Xfer<T>>();
+        }
 
 
     // Member Functions
 
-        //- Test for valid pointer and not a nullObject reference.
-        inline bool valid() const;
+        //- Test for valid pointer
+        inline bool valid() const noexcept { return ptr_; }
 
         //- Pointer to the underlying object.
-        inline T* get() const;
+        inline T* get() const noexcept { return ptr_; }
 
         //- Rvalue reference to the underlying object.
-        inline T&& rvalue() const;
+        inline T&& rvalue() const { return std::move(*ptr_); }
 
         //- Swaps the managed objects
-        inline void swap(Xfer<T>& other) noexcept;
+        inline void swap(Xfer<T>& other) noexcept
+        {
+            T* p = ptr_;
+            ptr_ = other.ptr_;
+            other.ptr_ = p;
+        }
 
 
     // Member Operators
 
-        //- Transfer contents into the object
-        inline void operator=(const Xfer<T>& xf);
-
         //- Reference to the underlying object
-        inline T& operator*() const;
+        inline T& operator*() const { return *ptr_; }
 
         //- Pointer to the underlying object
-        inline T* operator->() const;
+        inline T* operator->() const { return ptr_; }
 
         //- Reference to the underlying object
-        inline T& operator()() const;
+        inline T& operator()() const { return *ptr_; }
 
+        //- Move assignment, transferring ownership
+        inline void operator=(const Xfer<T>& rhs) noexcept
+        {
+            if (this != &rhs)
+            {
+                // clear and swap
+                delete ptr_;
+                ptr_ = rhs.ptr_;
+                rhs.ptr_ = nullptr;
+            }
+        }
 };
 
 
@@ -145,26 +158,41 @@ public:
 
 
 //- Copy construct contents of the \a obj
-//
+//  \deprecated - Xfer should not be used in new code
 //  \sa xferCopyTo, xferMove, xferMoveTo and Foam::Xfer
 template<class T>
-inline Xfer<T> xferCopy(const T& obj);
+inline Xfer<T> xferCopy(const T& obj)
+{
+    return Foam::Xfer<T>(new T(obj));
+}
+
 
 //- Transfer construct contents of the \a obj
+//  \deprecated - Xfer should not be used in new code
 //
 //  \sa xferCopy, xferCopyTo, xferMoveTo and Foam::Xfer
 template<class T>
-inline Xfer<T> xferMove(T& obj);
+inline Xfer<T> xferMove(T& obj)
+{
+    T* ptr = new T;
+    ptr->transfer(obj);
+    return Foam::Xfer<T>(ptr);
+}
 
 
 //- Copy construct contents of the \a obj from dissimilar type
+//  \deprecated - Xfer should not be used in new code
 //
 //  \sa xferCopy, xferMove, xferMoveTo and Foam::Xfer
 template<class T, class From>
-inline Xfer<T> xferCopyTo(const From& obj);
+inline Xfer<T> xferCopyTo(const From& obj)
+{
+    return Foam::Xfer<T>(new T(obj));
+}
 
 
 //- Transfer construct contents of the \a obj from dissimilar type
+//  \deprecated - Xfer should not be used in new code
 //
 //  \par Example Use
 //  \code
@@ -175,16 +203,17 @@ inline Xfer<T> xferCopyTo(const From& obj);
 //
 //  \sa xferCopy, xferCopyTo, xferMove and Foam::Xfer
 template<class T, class From>
-inline Xfer<T> xferMoveTo(From& obj);
+inline Xfer<T> xferMoveTo(From& obj)
+{
+    T* ptr = new T;
+    ptr->transfer(obj);
+    return Foam::Xfer<T>(ptr);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "XferI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
