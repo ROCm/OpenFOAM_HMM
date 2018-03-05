@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,9 +90,11 @@ class MeshedSurface
     public PrimitivePatch<Face, ::Foam::List, pointField, point>,
     public fileFormats::surfaceFormatsCore
 {
-    // friends - despite different face representations
+    // Friends, regardless of face representations
     template<class Face2> friend class MeshedSurface;
     template<class Face2> friend class UnsortedMeshedSurface;
+
+    // Friendship with surfMesh is needed for transferring
     friend class surfMesh;
 
 
@@ -117,7 +119,7 @@ private:
 
         //- Zone information
         // (face ordering nFaces/startFace only used during reading/writing)
-        List<surfZone> zones_;
+        surfZoneList zones_;
 
 
     // Private Member functions
@@ -163,8 +165,8 @@ protected:
         //- Sort faces by zones and store sorted faces
         void sortFacesAndStore
         (
-            const Xfer<List<Face>>& unsortedFaces,
-            const Xfer<List<label>>& zoneIds,
+            DynamicList<Face>& unsortedFaces,
+            DynamicList<label>& zoneIds,
             const bool sorted
         );
 
@@ -186,13 +188,13 @@ public:
     // Static
 
         //- Can we read this file format?
-        static bool canRead(const fileName&, const bool verbose=false);
+        static bool canRead(const fileName& name, bool verbose=false);
 
         //- Can we read this file format?
-        static bool canReadType(const word& ext, const bool verbose=false);
+        static bool canReadType(const word& ext, bool verbose=false);
 
         //- Can we write this file format?
-        static bool canWriteType(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& ext, bool verbose=false);
 
         //- Known readable file-types
         static wordHashSet readTypes();
@@ -203,26 +205,8 @@ public:
 
     // Constructors
 
-        //- Construct null
+        //- Construct null, an empty surface
         MeshedSurface();
-
-        //- Construct by transferring components (points, faces, zones).
-        MeshedSurface
-        (
-            const Xfer<pointField>& pointLst,
-            const Xfer<List<Face>>& faceLst,
-            const Xfer<surfZoneList>& zoneLst
-        );
-
-        //- Construct by transferring components (points, faces).
-        //  Use zone information if available
-        MeshedSurface
-        (
-            const Xfer<pointField>& pointLst,
-            const Xfer<List<Face>>& faceLst,
-            const labelUList& zoneSizes = labelUList(),
-            const UList<word>& zoneNames = UList<word>()
-        );
 
         //- Copy construct
         MeshedSurface(const MeshedSurface& surf);
@@ -230,21 +214,58 @@ public:
         //- Copy construct from an UnsortedMeshedSurface
         MeshedSurface(const UnsortedMeshedSurface<Face>& surf);
 
+        //- Move construct
+        MeshedSurface(MeshedSurface&& surf);
+
+        //- Move construct from an UnsortedMeshedSurface
+        MeshedSurface(UnsortedMeshedSurface<Face>&& surf);
+
+        //- Copy construct from components (points, faces, zones).
+        MeshedSurface
+        (
+            const pointField& pointLst,
+            const UList<Face>& faceLst,
+            const UList<surfZone>& zoneLst
+        );
+
+        //- Move construct from components (points, faces).
+        //  Zone information is fairly lightweight and is copied.
+        MeshedSurface
+        (
+            pointField&& pointLst,
+            List<Face>&& faceLst,
+            const UList<surfZone>& zoneLst
+        );
+
+        //- Copy construct from components (points, faces).
+        //  Use zone information if available
+        MeshedSurface
+        (
+            const pointField& pointLst,
+            const UList<Face>& faceLst,
+            const labelUList& zoneSizes = labelUList(),
+            const UList<word>& zoneNames = UList<word>()
+        );
+
+        //- Move construct from components (points, faces).
+        //  Use zone information if available
+        MeshedSurface
+        (
+            pointField&& pointLst,
+            List<Face>&& faceLst,
+            const labelUList& zoneSizes = labelUList(),
+            const UList<word>& zoneNames = UList<word>()
+        );
+
         //- Construct from a boundary mesh with local points/faces
         MeshedSurface
         (
             const polyBoundaryMesh& bMesh,
-            const bool globalPoints=false
+            const bool globalPoints = false
         );
 
         //- Construct from a surfMesh
         MeshedSurface(const surfMesh& mesh);
-
-        //- Construct by transferring the contents from a MeshedSurface
-        MeshedSurface(const Xfer<MeshedSurface<Face>>& surf);
-
-        //- Construct by transferring the contents from a UnsortedMeshedSurface
-        MeshedSurface(const Xfer<UnsortedMeshedSurface<Face>>& surf);
 
         //- Construct from file name (uses extension to determine type)
         MeshedSurface(const fileName& name);
@@ -256,11 +277,7 @@ public:
         MeshedSurface(Istream& is);
 
         //- Construct from database
-        MeshedSurface
-        (
-            const Time& t,
-            const word& surfName = word::null
-        );
+        MeshedSurface(const Time& runTime, const word& surfName = word::null);
 
 
     // Declare run-time constructor selection table
@@ -330,212 +347,196 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- The surface size is the number of faces
-            label size() const
-            {
-                return ParentType::size();
-            }
+        //- The surface size is the number of faces
+        label size() const
+        {
+            return ParentType::size();
+        }
 
-            //- Return const access to the faces
-            inline const List<Face>& surfFaces() const
-            {
-                return static_cast<const List<Face>&>(*this);
-            }
+        //- Return const access to the faces
+        inline const List<Face>& surfFaces() const
+        {
+            return static_cast<const List<Face>&>(*this);
+        }
 
-            //- Const access to the surface zones.
-            //  If zones are defined, they must be contiguous and cover the
-            //  entire surface
-            const List<surfZone>& surfZones() const
-            {
-                return zones_;
-            }
+        //- Const access to the surface zones.
+        //  If zones are defined, they must be contiguous and cover the
+        //  entire surface
+        const surfZoneList& surfZones() const
+        {
+            return zones_;
+        }
 
-            //- Face area vectors (normals)
-            inline const vectorField& Sf() const
-            {
-                return ParentType::faceAreas();
-            }
+        //- Face area vectors (normals)
+        inline const vectorField& Sf() const
+        {
+            return ParentType::faceAreas();
+        }
 
-            //- Face area magnitudes
-            inline const scalarField& magSf() const
-            {
-                return ParentType::magFaceAreas();
-            }
+        //- Face area magnitudes
+        inline const scalarField& magSf() const
+        {
+            return ParentType::magFaceAreas();
+        }
 
-            //- Face centres
-            inline const vectorField& Cf() const
-            {
-                return ParentType::faceCentres();
-            }
-
-
-        // Edit
-
-            //- Clear all storage
-            virtual void clear();
+        //- Face centres
+        inline const vectorField& Cf() const
+        {
+            return ParentType::faceCentres();
+        }
 
 
-            //- Add surface zones
-            virtual void addZones
-            (
-                const UList<surfZone>&,
-                const bool cullEmpty=false
-            );
+    // Edit
 
-            //- Add surface zones
-            virtual void addZones
-            (
-                const labelUList& sizes,
-                const UList<word>& names,
-                const bool cullEmpty=false
-            );
-
-            //- Add surface zones
-            virtual void addZones
-            (
-                const labelUList& sizes,
-                const bool cullEmpty=false
-            );
-
-            //- Propagate zone information on face regions.
-            //  Normally a no-op, only used by the labelledTri specialization.
-            //  Specializations return true, others return false.
-            bool addZonesToFaces();
+        //- Clear all storage
+        virtual void clear();
 
 
-            //- Remove surface zones
-            virtual void removeZones();
+        //- Add surface zones
+        virtual void addZones
+        (
+            const UList<surfZone>&,
+            const bool cullEmpty=false
+        );
+
+        //- Add surface zones
+        virtual void addZones
+        (
+            const labelUList& sizes,
+            const UList<word>& names,
+            const bool cullEmpty=false
+        );
+
+        //- Add surface zones
+        virtual void addZones
+        (
+            const labelUList& sizes,
+            const bool cullEmpty=false
+        );
+
+        //- Propagate zone information on face regions.
+        //  Normally a no-op, only used by the labelledTri specialization.
+        //  Specializations return true, others return false.
+        bool addZonesToFaces();
 
 
-            //- Move points
-            virtual void movePoints(const pointField& newPoints);
-
-            //- Scale points. A non-positive factor is ignored
-            virtual void scalePoints(const scalar scaleFactor);
-
-            //- Reset by transferring contents of the argument and annul it
-            virtual void reset
-            (
-                const Xfer<MeshedSurface<Face>>& surf
-            );
-
-            //- Reset primitive data (points, faces and zones)
-            //  Note, optimized to avoid overwriting data (with Xfer::null)
-            virtual void reset
-            (
-                const Xfer<pointField>& points,
-                const Xfer<List<Face>>& faces,
-                const Xfer<surfZoneList>& zones
-            );
-
-            //- Reset primitive data (points, faces and zones)
-            //  Note, optimized to avoid overwriting data (with Xfer::null)
-            virtual void reset
-            (
-                const Xfer<List<point>>& points,
-                const Xfer<List<Face>>& faces,
-                const Xfer<surfZoneList>& zones
-            );
-
-            //- Remove invalid faces
-            virtual void cleanup(const bool verbose);
-
-            virtual bool stitchFaces
-            (
-                const scalar tol=SMALL,
-                const bool verbose=false
-            );
-
-            virtual bool checkFaces
-            (
-                const bool verbose=false
-            );
-
-            //- Count number of triangles.
-            virtual label nTriangles() const;
-
-            //- Count number of triangles, returning a face map of original ids.
-            //  The faceMap is zero-sized when no triangulation would be needed.
-            virtual label nTriangles(List<label>& faceMap) const;
-
-            //- Triangulate in-place, returning the number of triangles added.
-            virtual label triangulate();
-
-            //- Triangulate in-place, returning the number of triangles added
-            //  and setting a map of original face Ids.
-            //  The faceMap is zero-sized when no triangulation was done.
-            virtual label triangulate(List<label>& faceMap);
-
-            //- Return new surface.
-            //  Returns return pointMap, faceMap from subsetMeshMap
-            MeshedSurface subsetMesh
-            (
-                const labelHashSet& include,
-                labelList& pointMap,
-                labelList& faceMap
-            ) const;
-
-            //- Return new surface.
-            MeshedSurface subsetMesh
-            (
-                const labelHashSet& include
-            ) const;
-
-            //- Transfer the contents of the argument and annul the argument
-            void transfer(MeshedSurface<Face>&);
-
-            //- Transfer the contents of the argument and annul the argument
-            void transfer(UnsortedMeshedSurface<Face>&);
-
-            //- Transfer contents to the Xfer container
-            Xfer<MeshedSurface<Face>> xfer();
-
-            //- Transfer stored faces to an Xfer container
-            Xfer<List<Face>> xferFaces();
-
-            //- Transfer stored points to an Xfer container
-            Xfer<List<point>> xferPoints();
-
-            //- Transfer stored zones to an Xfer container
-            Xfer<surfZoneList> xferZones();
+        //- Remove surface zones
+        virtual void removeZones();
 
 
-        // Read
+        //- Move points
+        virtual void movePoints(const pointField& newPoints);
 
-            //- Read from file. Chooses reader based on explicit extension
-            bool read(const fileName& name, const word& ext);
+        //- Scale points. A non-positive factor is ignored
+        virtual void scalePoints(const scalar scaleFactor);
 
-            //- Read from file. Chooses reader based on detected extension
-            virtual bool read(const fileName& name);
+        //- Remove invalid faces
+        virtual void cleanup(const bool verbose);
+
+        virtual bool stitchFaces
+        (
+            const scalar tol=SMALL,
+            const bool verbose=false
+        );
+
+        virtual bool checkFaces
+        (
+            const bool verbose=false
+        );
+
+        //- Count number of triangles.
+        virtual label nTriangles() const;
+
+        //- Count number of triangles, returning a face map of original ids.
+        //  The faceMap is zero-sized when no triangulation would be needed.
+        virtual label nTriangles(List<label>& faceMap) const;
+
+        //- Triangulate in-place, returning the number of triangles added.
+        virtual label triangulate();
+
+        //- Triangulate in-place, returning the number of triangles added
+        //  and setting a map of original face Ids.
+        //  The faceMap is zero-sized when no triangulation was done.
+        virtual label triangulate(List<label>& faceMap);
+
+        //- Return new surface.
+        //  Returns return pointMap, faceMap from subsetMeshMap
+        MeshedSurface subsetMesh
+        (
+            const labelHashSet& include,
+            labelList& pointMap,
+            labelList& faceMap
+        ) const;
+
+        //- Return new surface.
+        MeshedSurface subsetMesh
+        (
+            const labelHashSet& include
+        ) const;
 
 
-        // Write
+        //- Swap contents
+        void swap(MeshedSurface<Face>& surf);
 
-            void writeStats(Ostream& os) const;
+        //- Transfer the contents of the argument and annul the argument
+        void transfer(MeshedSurface<Face>& surf);
 
-            //- Generic write routine. Chooses writer based on extension.
-            virtual void write
-            (
-                const fileName& name,
-                const dictionary& options = dictionary::null
-            ) const
-            {
-                write(name, *this, options);
-            }
+        //- Transfer the contents of the argument and annul the argument
+        void transfer(UnsortedMeshedSurface<Face>& surf);
 
-            //- Write to database
-            void write
-            (
-                const Time& t,
-                const word& surfName = word::null
-            ) const;
+        //- Release (clear) geometry and return for reuse
+        autoPtr<MeshedSurface<Face>> releaseGeom();
+
+        //- Swap the stored faces
+        void swapFaces(List<Face>& faces);
+
+        //- Swap the stored points
+        void swapPoints(pointField& points);
+
+        //- Swap the stored zones
+        void swapZones(surfZoneList& zones);
+
+
+    // Read
+
+        //- Read from file. Chooses reader based on explicit extension
+        bool read(const fileName& name, const word& ext);
+
+        //- Read from file. Chooses reader based on detected extension
+        virtual bool read(const fileName& name);
+
+
+    // Write
+
+        void writeStats(Ostream& os) const;
+
+        //- Generic write routine. Chooses writer based on extension.
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
+        {
+            write(name, *this, options);
+        }
+
+        //- Write to database
+        void write
+        (
+            const Time& t,
+            const word& surfName = word::null
+        ) const;
 
 
     // Member operators
 
-        void operator=(const MeshedSurface<Face>&);
+        //- Copy assignment
+        void operator=(const MeshedSurface<Face>& surf);
+
+        //- Move assignment
+        void operator=(MeshedSurface<Face>&& surf);
 
         //- Conversion operator to MeshedSurfaceProxy
         operator MeshedSurfaceProxy<Face>() const;
@@ -547,8 +548,8 @@ public:
         //  Avoid using to read/write file content (fragile).
         friend Istream& operator>> <Face>
         (
-            Istream&,
-            MeshedSurface<Face>&
+            Istream& is,
+            MeshedSurface<Face>& surf
         );
 
 
@@ -556,8 +557,8 @@ public:
         //  Avoid using to read/write file content (fragile).
         friend Ostream& operator<< <Face>
         (
-            Ostream&,
-            const MeshedSurface<Face>&
+            Ostream& os,
+            const MeshedSurface<Face>& surf
         );
 
 };
@@ -568,7 +569,6 @@ public:
 //- Specialization for labelledTri.
 template<>
 bool MeshedSurface<labelledTri>::addZonesToFaces();
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

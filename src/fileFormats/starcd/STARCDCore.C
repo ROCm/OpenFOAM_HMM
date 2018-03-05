@@ -184,8 +184,8 @@ Foam::label Foam::fileFormats::STARCDCore::readPoints
     readHeader(is, HEADER_VRT);
 
     // reuse memory if possible
-    DynamicList<point> dynPoints(points.xfer());
-    DynamicList<label> dynPointId(ids.xfer());    // STAR-CD index of points
+    DynamicList<point> dynPoints(std::move(points));
+    DynamicList<label> dynPointId(std::move(ids)); // STAR-CD index of points
 
     dynPoints.clear();
     dynPointId.clear();

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,23 +52,18 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
+class FieldMapper;
+class dictionary;
 
-template<class Type>
-class Field;
-
-//- Pre-declare related SubField type
-template<class Type>
-class SubField;
+template<class Type> class Field;
+template<class Type> class SubField;
 
 template<class Type>
 Ostream& operator<<(Ostream&, const Field<Type>&);
 
 template<class Type>
 Ostream& operator<<(Ostream&, const tmp<Field<Type>>&);
-
-class FieldMapper;
-class dictionary;
 
 /*---------------------------------------------------------------------------*\
                            Class Field Declaration
@@ -97,7 +92,7 @@ public:
 
     // Static Member Functions
 
-        //- Return a null field
+        //- Return nullObject reference field
         inline static const Field<Type>& null()
         {
             return NullObjectRef<Field<Type>>();
@@ -107,27 +102,37 @@ public:
     // Constructors
 
         //- Construct null
-        //  Used for temporary fields which are initialised after construction
+        //  For temporary fields that are initialised after construction
         Field();
 
         //- Construct given size
-        //  Used for temporary fields which are initialised after construction
-        explicit Field(const label);
+        //  For temporary fields that are initialised after construction
+        explicit Field(const label len);
 
         //- Construct given size and initial value
-        Field(const label, const Type&);
+        Field(const label len, const Type& val);
 
-        //- Construct given size and initialed to zero
-        Field(const label, const zero);
+        //- Construct given size and initial values of zero
+        Field(const label len, const zero);
 
-        //- Construct as copy of a UList\<Type\>
-        explicit Field(const UList<Type>&);
+        //- Copy construct
+        Field(const Field<Type>& fld);
 
-        //- Construct as copy of a UIndirectList\<Type\>
-        explicit Field(const UIndirectList<Type>&);
+        //- Copy construct from UList\<Type\>
+        explicit Field(const UList<Type>& list);
 
-        //- Construct by transferring the List contents
-        explicit Field(const Xfer<List<Type>>&);
+        //- Copy construct from UIndirectList\<Type\>
+        explicit Field(const UIndirectList<Type>& list);
+
+        //- Move construct from Field
+        Field(Field<Type>&& fld);
+
+        //- Move construct from List
+        Field(List<Type>&& list);
+
+        //- Move construct from DynamicList
+        template<int SizeMin>
+        Field(DynamicList<Type, SizeMin>&& list);
 
         //- Construct by 1 to 1 mapping from the given field
         Field
@@ -213,25 +218,19 @@ public:
             const bool applyFlip = true
         );
 
-        //- Construct as copy
-        Field(const Field<Type>&);
+        //- Copy construct or re-use as specified.
+        Field(Field<Type>& fld, bool reuse);
 
-        //- Construct as copy or re-use as specified.
-        Field(Field<Type>&, bool reuse);
-
-        //- Construct by transferring the Field contents
-        Field(const Xfer<Field<Type>>&);
-
-        //- Construct as copy of tmp<Field>
+        //- Copy or move construct from tmp
         #ifndef NoConstructFromTmp
-        Field(const tmp<Field<Type>>&);
+        Field(const tmp<Field<Type>>& tfld);
         #endif
 
         //- Construct from Istream
-        Field(Istream&);
+        Field(Istream& is);
 
         //- Construct from a dictionary entry
-        Field(const word& keyword, const dictionary&, const label size);
+        Field(const word& keyword, const dictionary& dict, const label len);
 
         //- Clone
         tmp<Field<Type>> clone() const;
@@ -357,10 +356,21 @@ public:
 
     // Member operators
 
+        //- Copy assignment
         void operator=(const Field<Type>&);
         void operator=(const UList<Type>&);
         void operator=(const SubField<Type>&);
         void operator=(const tmp<Field<Type>>&);
+
+        //- Move assignment
+        void operator=(Field<Type>&& rhs);
+        void operator=(List<Type>&& rhs);
+
+        template<int SizeMin>
+        void operator=(DynamicList<Type, SizeMin>&& rhs);
+
+
+        //- Value assignment
         void operator=(const Type&);
         void operator=(const zero);
 

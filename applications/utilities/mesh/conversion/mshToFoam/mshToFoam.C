@@ -144,14 +144,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cells,
-        faceListList(0),
-        wordList(0),
-        wordList(0),
+        faceListList(),
+        wordList(),
+        wordList(),
         "defaultFaces",
         polyPatch::typeName,
-        wordList(0)
+        wordList()
     );
 
     // Set the precision of the points data to 10

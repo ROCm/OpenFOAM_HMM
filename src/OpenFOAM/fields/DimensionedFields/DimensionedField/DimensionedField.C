@@ -93,29 +93,11 @@ DimensionedField<Type, GeoMesh>::DimensionedField
     const IOobject& io,
     const Mesh& mesh,
     const dimensionSet& dims,
-    const Xfer<Field<Type>>& field
+    List<Type>&& field
 )
 :
     regIOobject(io),
-    Field<Type>(field),
-    mesh_(mesh),
-    dimensions_(dims)
-{
-    checkFieldSize();
-}
-
-
-template<class Type, class GeoMesh>
-DimensionedField<Type, GeoMesh>::DimensionedField
-(
-    const IOobject& io,
-    const Mesh& mesh,
-    const dimensionSet& dims,
-    const Xfer<List<Type>>& field
-)
-:
-    regIOobject(io),
-    Field<Type>(field),
+    Field<Type>(std::move(field)),
     mesh_(mesh),
     dimensions_(dims)
 {
@@ -199,14 +181,14 @@ DimensionedField<Type, GeoMesh>::DimensionedField
 template<class Type, class GeoMesh>
 DimensionedField<Type, GeoMesh>::DimensionedField
 (
-    const Xfer<DimensionedField<Type, GeoMesh>>& df
+    DimensionedField<Type, GeoMesh>&& df
 )
 :
-    regIOobject(df(), true),
-    Field<Type>(df),
-    mesh_(df->mesh_),
-    dimensions_(df->dimensions_),
-    oriented_(df->oriented_)
+    regIOobject(df, true),
+    Field<Type>(std::move(df)),
+    mesh_(df.mesh_),
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 
@@ -294,14 +276,14 @@ template<class Type, class GeoMesh>
 DimensionedField<Type, GeoMesh>::DimensionedField
 (
     const word& newName,
-    const Xfer<DimensionedField<Type, GeoMesh>>& df
+    DimensionedField<Type, GeoMesh>&& df
 )
 :
     regIOobject(newName, df, true),
-    Field<Type>(df),
-    mesh_(df->mesh_),
-    dimensions_(df->dimensions_),
-    oriented_(df->oriented_)
+    Field<Type>(std::move(df)),
+    mesh_(df.mesh_),
+    dimensions_(df.dimensions_),
+    oriented_(df.oriented_)
 {}
 
 

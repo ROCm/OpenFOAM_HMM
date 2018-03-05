@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD-2017 Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,6 +47,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 template<class Face> class MeshedSurface;
 
 /*---------------------------------------------------------------------------*\
@@ -59,10 +60,6 @@ class surfMesh
     private MeshedSurfaceIOAllocator,
     public  PrimitivePatch<face, ::Foam::UList, ::Foam::SubField<point>, point>
 {
-    // friends
-    template<class Face> friend class MeshedSurface;
-    template<class Face> friend class UnsortedMeshedSurface;
-
 public:
 
     // Public data types
@@ -81,7 +78,7 @@ public:
 
 private:
 
-    // Private typedefs
+    // Private Typedefs
 
         typedef MeshedSurfaceIOAllocator Allocator;
 
@@ -97,10 +94,10 @@ private:
 
     // Private Member Functions
 
-        //- Disallow construct as copy
+        //- Disallow copy construct
         surfMesh(const surfMesh&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- Disallow copy assignment
         void operator=(const surfMesh&) = delete;
 
 
@@ -135,11 +132,15 @@ protected:
         //- Update references to storedPoints/storedFaces
         virtual void updateRefs();
 
+        //- Update with new contents
+        void copyContents(const MeshedSurface<face>& surf, bool validate=false);
+
 
 public:
 
     // Public typedefs
 
+    //- Typedef required for GeoMesh
     typedef surfMesh Mesh;
 
     //- Placeholder only, but do not remove - it is needed for GeoMesh
@@ -152,30 +153,32 @@ public:
     //- Return the mesh sub-directory name (normally "surfMesh")
     static word meshSubDir;
 
+
     // Constructors
 
-        //- Construct from IOobject, with alternative surface name
-        explicit surfMesh
-        (
-            const IOobject& io,
-            const word& surfName = word::null
-        );
+        //- Read construct from IOobject
+        explicit surfMesh(const IOobject& io);
 
-        //- Construct by transferring components (points, faces) without zones.
-        //  surfZones are added using addZones() member function
+        //- Read construct from IOobject, with alternative surface name
         surfMesh
         (
             const IOobject& io,
-            const Xfer<pointField>& pointLst,
-            const Xfer<faceList>& faceLst,
-            const word& surfName = word::null
+            const word& surfName
         );
 
-        //- Construct copy/move from MeshedSurface
+        //- Copy construct from MeshedSurface<face>
         surfMesh
         (
             const IOobject& io,
-            const Xfer<MeshedSurface<face>>& surf,
+            const MeshedSurface<face>& surf,
+            const word& surfName = word::null
+        );
+
+        //- Move construct from MeshedSurface<face>
+        surfMesh
+        (
+            const IOobject& io,
+            MeshedSurface<face>&& surf,
             const word& surfName = word::null
         );
 
@@ -186,118 +189,103 @@ public:
 
     // Member Functions
 
-      // Database
+    // Database
 
-            //- Return the local mesh directory (dbDir()/meshSubDir)
-            fileName meshDir() const;
+        //- Return the local mesh directory (dbDir()/meshSubDir)
+        fileName meshDir() const;
 
-            //- Return the current instance directory for points
-            //  Used in the construction of geometric mesh data dependent
-            //  on points
-            const fileName& pointsInstance() const;
+        //- Return the current instance directory for points
+        //  Used when constructing geometric mesh data dependent on points
+        const fileName& pointsInstance() const;
 
-            //- Return the current instance directory for faces
-            const fileName& facesInstance() const;
+        //- Return the current instance directory for faces
+        const fileName& facesInstance() const;
 
-            //- Set the instance for mesh files
-            void setInstance
-            (
-                const fileName&,
-                IOobject::writeOption = IOobject::AUTO_WRITE
-            );
+        //- Set the instance for mesh files
+        void setInstance
+        (
+            const fileName& inst,
+            IOobject::writeOption wOpt = IOobject::AUTO_WRITE
+        );
 
-            //- Adjust the write option for all components
-            void setWriteOption(IOobject::writeOption);
-
-
-      // Access
-
-            //- Return the number of raw points
-            virtual label nPoints() const;
-
-            //- Return the number of raw faces
-            virtual label nFaces() const;
-
-            //- Return number of faces
-            virtual label size() const
-            {
-                return nFaces();
-            }
+        //- Adjust the write option for all components
+        void setWriteOption(IOobject::writeOption wOpt);
 
 
-            //- Return points
-            virtual const pointField& points() const;
+    // Access
 
-            //- Return faces
-            virtual const faceList& faces() const;
+        //- Return the number of raw points
+        virtual label nPoints() const;
 
-            //- Return surface zones
-            virtual const surfZoneList& surfZones() const
-            {
-                return Allocator::storedIOZones();
-            }
+        //- Return the number of raw faces
+        virtual label nFaces() const;
 
-            //- Check the surface zone definitions
-            void checkZones();
-
-
-            //- Return face area vectors (normals)
-            inline const vectorField& Sf() const
-            {
-                return MeshReference::faceAreas();
-            }
-
-            //- Return face area magnitudes
-            inline const scalarField& magSf() const
-            {
-                return MeshReference::magFaceAreas();
-            }
-
-            //- Face centres
-            inline const vectorField& Cf() const
-            {
-                return MeshReference::faceCentres();
-            }
-
-            //- Add surface zones
-            void addZones
-            (
-                const surfZoneList& srfZones,
-                const bool validate = true
-            );
-
-            //- Update the mesh based on the mesh files saved in
-            //  time directories
-            virtual readUpdateState readUpdate();
+        //- Return number of faces
+        virtual label size() const
+        {
+            return nFaces();
+        }
 
 
-            //- Remove surface zones
-            void removeZones();
+        //- Return points
+        virtual const pointField& points() const;
 
-            //- Reset mesh primitive data.
-            void resetPrimitives
-            (
-                const Xfer<pointField>& points,
-                const Xfer<faceList>& faces,
-                const Xfer<surfZoneList>& zones,
-                const bool validate = true
-            );
+        //- Return faces
+        virtual const faceList& faces() const;
 
-            //- Reset mesh primitive data.
-            void resetPrimitives
-            (
-                const Xfer<List<point>>& points,
-                const Xfer<faceList>& faces,
-                const Xfer<surfZoneList>& zones,
-                const bool validate = true
-            );
+        //- Return surface zones
+        virtual const surfZoneList& surfZones() const
+        {
+            return Allocator::storedIOZones();
+        }
 
 
-            //- Transfer the contents of the argument and annul the argument
-            void transfer(MeshedSurface<face>& surf);
+        //- Return face area vectors (normals)
+        inline const vectorField& Sf() const
+        {
+            return MeshReference::faceAreas();
+        }
+
+        //- Return face area magnitudes
+        inline const scalarField& magSf() const
+        {
+            return MeshReference::magFaceAreas();
+        }
+
+        //- Face centres
+        inline const vectorField& Cf() const
+        {
+            return MeshReference::faceCentres();
+        }
 
 
-      // Writing
+    // Zones
+
+        //- Add surface zones, optionally validating the zone coverage
+        void addZones
+        (
+            const surfZoneList& srfZones,
+            bool validate = true
+        );
+
+        //- Remove surface zones
+        void removeZones();
+
+        //- Check the surface zone definitions
+        void checkZones();
+
+
+    // Modification
+
+        //- Transfer the contents of the argument and annul the argument
+        //  Optionally validate the zone coverage.
+        void transfer(MeshedSurface<face>& surf, bool validate=false);
+
+        //- Update mesh based on the files saved in time directories
+        virtual readUpdateState readUpdate();
+
+
+    // Writing
 
         //- Avoid masking the normal objectRegistry write
         using surfaceRegistry::write;
@@ -330,28 +318,28 @@ public:
         ) const;
 
 
-      // Storage management
+    // Storage management
 
-            //- Transfer contents to the Xfer container as a MeshedSurface
-            Xfer<MeshedSurface<face>> xfer();
+        //- Release the geometry and return as a MeshedSurface<face>.
+        autoPtr<MeshedSurface<face>> releaseGeom();
 
-            //- Clear geometry
-            void clearGeom();
+        //- Clear geometry
+        void clearGeom();
 
-            //- Clear addressing
-            void clearAddressing();
+        //- Clear addressing
+        void clearAddressing();
 
-            //- Clear all geometry and addressing unnecessary for CFD
-            void clearOut();
+        //- Clear all geometry and addressing unnecessary for CFD
+        void clearOut();
 
-            //- Clear primitive data (points, faces and cells)
-            void clearPrimitives();
+        //- Clear primitive data (points, faces and cells)
+        void clearPrimitives();
 
-            //- Remove all files from mesh instance
-            void removeFiles(const fileName& instanceDir) const;
+        //- Remove all files from mesh instance
+        void removeFiles(const fileName& instanceDir) const;
 
-            //- Remove all files from mesh instance()
-            void removeFiles() const;
+        //- Remove all files from mesh instance()
+        void removeFiles() const;
 
 };
 

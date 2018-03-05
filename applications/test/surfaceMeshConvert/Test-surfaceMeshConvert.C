@@ -413,9 +413,9 @@ int main(int argc, char *argv[])
             surf.writeStats(Info);
             Info<< endl;
 
-            ModifiableMeshedSurface<face> tsurf(surf.xfer());
-            // ModifiableMeshedSurface<face> tsurf;
-            // tsurf.reset(surf.xfer());
+            ModifiableMeshedSurface<face> tsurf(std::move(surf));
+            // ModifiableMeshedSurface<face> xtsurf;
+            // xtsurf.transfer(surf);
 
             Info<< "in-progress" << nl;
             surf.writeStats(Info);
@@ -515,7 +515,7 @@ int main(int argc, char *argv[])
                     IOobject::NO_WRITE,
                     false
                 ),
-                surf.xfer()
+                std::move(surf)
             );
 
             Info<< "writing surfMesh as well: " << surfOut.objectPath() << endl;
@@ -544,7 +544,6 @@ int main(int argc, char *argv[])
             // advance time to 1
             runTime.setTime(instant(1), 1);
             surfOut.setInstance(runTime.timeName());
-
 
 
             Info<< "writing surfMesh again well: " << surfOut.objectPath()

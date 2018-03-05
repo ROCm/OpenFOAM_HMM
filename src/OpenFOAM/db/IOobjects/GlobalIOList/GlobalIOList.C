@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -55,7 +55,11 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const label size)
 
 
 template<class Type>
-Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const List<Type>& f)
+Foam::GlobalIOList<Type>::GlobalIOList
+(
+    const IOobject& io,
+    const UList<Type>& content
+)
 :
     regIOobject(io)
 {
@@ -64,7 +68,7 @@ Foam::GlobalIOList<Type>::GlobalIOList(const IOobject& io, const List<Type>& f)
 
     if (!readHeaderOk(IOstream::BINARY, typeName))
     {
-        List<Type>::operator=(f);
+        List<Type>::operator=(content);
     }
 }
 
@@ -73,7 +77,7 @@ template<class Type>
 Foam::GlobalIOList<Type>::GlobalIOList
 (
     const IOobject& io,
-    const Xfer<List<Type>>& f
+    List<Type>&& content
 )
 :
     regIOobject(io)
@@ -81,17 +85,10 @@ Foam::GlobalIOList<Type>::GlobalIOList
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<GlobalIOList<Type>>();
 
-    List<Type>::transfer(f());
+    List<Type>::transfer(content);
 
     readHeaderOk(IOstream::BINARY, typeName);
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::GlobalIOList<Type>::~GlobalIOList()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -115,13 +112,6 @@ bool Foam::GlobalIOList<Type>::writeData(Ostream& os) const
 
 template<class Type>
 void Foam::GlobalIOList<Type>::operator=(const GlobalIOList<Type>& rhs)
-{
-    List<Type>::operator=(rhs);
-}
-
-
-template<class Type>
-void Foam::GlobalIOList<Type>::operator=(const List<Type>& rhs)
 {
     List<Type>::operator=(rhs);
 }

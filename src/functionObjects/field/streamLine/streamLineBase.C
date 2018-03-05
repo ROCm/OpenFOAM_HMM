@@ -655,8 +655,8 @@ bool Foam::functionObjects::streamLineBase::write()
         const mapDistribute distMap
         (
             globalTrackIDs.size(),
-            sendMap.xfer(),
-            recvMap.xfer()
+            std::move(sendMap),
+            std::move(recvMap)
         );
 
 

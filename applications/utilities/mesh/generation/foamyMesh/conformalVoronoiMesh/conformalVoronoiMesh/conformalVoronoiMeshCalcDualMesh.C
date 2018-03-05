@@ -727,23 +727,20 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     labelList cellToDelaunayVertex(removeUnusedCells(owner, neighbour));
     cellCentres = pointField(cellCentres, cellToDelaunayVertex);
 
-    autoPtr<polyMesh> meshPtr
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                "foamyHexMesh_temporary",
-                runTime_.timeName(),
-                runTime_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferCopy(pts),
-            xferMove(faces),
-            xferMove(owner),
-            xferMove(neighbour)
-        )
+            "foamyHexMesh_temporary",
+            runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        pointField(pts),  // Copy of points
+        std::move(faces),
+        std::move(owner),
+        std::move(neighbour)
     );
 
     polyMesh& pMesh = meshPtr();

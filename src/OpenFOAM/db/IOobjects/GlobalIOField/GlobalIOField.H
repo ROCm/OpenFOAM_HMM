@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,24 +61,30 @@ public:
 
     // Constructors
 
+        //- Default copy construct
+        GlobalIOField(const GlobalIOField&) = default;
+
         //- Construct from IOobject
-        GlobalIOField(const IOobject&);
+        explicit GlobalIOField(const IOobject& io);
 
         //- Construct from IOobject and size (does not set values)
-        GlobalIOField(const IOobject&, const label size);
+        GlobalIOField(const IOobject& io, const label size);
 
-        //- Construct from components
-        GlobalIOField(const IOobject&, const Field<Type>&);
+        //- Construct from IOobject and a List/Field content
+        GlobalIOField(const IOobject& io, const UList<Type>& content);
 
-        //- Construct by transferring the Field contents
-        GlobalIOField(const IOobject&, const Xfer<Field<Type>>&);
+        //- Construct by transferring the Field content
+        GlobalIOField(const IOobject& io, Field<Type>&& content);
+
+        //- Construct by copying/moving tmp content
+        GlobalIOField(const IOobject& io, const tmp<Field<Type>>& tf);
 
 
     //- Destructor
-    virtual ~GlobalIOField();
+    virtual ~GlobalIOField() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Is object global
         virtual bool global() const
@@ -87,24 +93,27 @@ public:
         }
 
         //- Return complete path + object name if the file exists
-        //  either in the case/processor or case otherwise null
+        //- either in the case/processor or case, otherwise null
         virtual fileName filePath() const
         {
             return globalFilePath(type());
         }
 
-        //- ReadData function required for regIOobject read operation
-        virtual bool readData(Istream&);
+        //- The readData method for regIOobject read operation
+        virtual bool readData(Istream& is);
 
-        //- WriteData function required for regIOobject write operation
-        bool writeData(Ostream&) const;
+        //- The writeData method for regIOobject write operation
+        bool writeData(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const GlobalIOField<Type>&);
+        //- Copy assignment of entries
+        void operator=(const GlobalIOField<Type>& rhs);
 
-        void operator=(const Field<Type>&);
+        //- Copy or move assignment of entries
+        using Field<Type>::operator=;
+
 };
 
 

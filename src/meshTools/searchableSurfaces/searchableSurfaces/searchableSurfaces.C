@@ -669,7 +669,6 @@ bool Foam::searchableSurfaces::checkIntersection
                             << " locations."
                             << endl;
 
-                        //vtkSetWriter<scalar> setWriter;
                         if (setWriter.valid())
                         {
                             scalarField dist(mag(intersections));
@@ -677,8 +676,8 @@ bool Foam::searchableSurfaces::checkIntersection
                             (
                                 names()[i] + '_' + names()[j],
                                 "xyz",
-                                intersections.xfer(),
-                                dist
+                                std::move(intersections),
+                                std::move(dist)
                             );
                             wordList valueSetNames(1, "edgeIndex");
                             List<const scalarField*> valueSets

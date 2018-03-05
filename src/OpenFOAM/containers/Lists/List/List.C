@@ -306,13 +306,6 @@ Foam::List<T>::List(std::initializer_list<T> lst)
 
 
 template<class T>
-Foam::List<T>::List(const Xfer<List<T>>& lst)
-{
-    transfer(lst());
-}
-
-
-template<class T>
 Foam::List<T>::List(List<T>&& lst)
 :
     UList<T>(nullptr, 0)
@@ -513,10 +506,13 @@ void Foam::List<T>::operator=(const SLList<T>& lst)
 
     if (len)
     {
+        List_ACCESS(T, (*this), vp);
+
         label i = 0;
         for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
         {
-            this->operator[](i++) = *iter;
+            vp[i] = *iter;
+            ++i;
         }
     }
 }
@@ -617,9 +613,14 @@ void Foam::List<T>::operator=(SLList<T>&& lst)
 
     reAlloc(len);
 
-    for (label i = 0; i < len; ++i)
+    if (len)
     {
-        this->operator[](i) = std::move(lst.removeHead());
+        List_ACCESS(T, (*this), vp);
+
+        for (label i = 0; i < len; ++i)
+        {
+            vp[i] = std::move(lst.removeHead());
+        }
     }
 
     lst.clear();

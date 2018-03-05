@@ -105,14 +105,11 @@ Foam::DistributedDelaunayMesh<Triangulation>::buildMap
         }
     }
 
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            constructSize,
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        constructSize,
+        std::move(sendMap),
+        std::move(constructMap)
     );
 }
 

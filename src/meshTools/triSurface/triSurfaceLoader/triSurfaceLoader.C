@@ -262,10 +262,13 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
 
     forAll(selected_, surfi)
     {
+        List<labelledTri> addfaces;
+        pointField addpoints;
+
         triSurface addsurf(directory_/selected_[surfi]);
 
-        List<labelledTri> addfaces(addsurf.xferFaces());
-        List<point> addpoints(addsurf.xferPoints());
+        addsurf.swapFaces(addfaces);
+        addsurf.swapPoints(addpoints);
 
         // Offset the points for all additional surfaces
         if (surfi)

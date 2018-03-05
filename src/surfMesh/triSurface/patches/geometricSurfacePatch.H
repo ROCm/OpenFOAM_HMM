@@ -57,7 +57,7 @@ Ostream& operator<<(Ostream& os, const geometricSurfacePatch& p);
 
 class geometricSurfacePatch
 {
-    // Private data
+    // Private Data
 
         //- Type name of patch
         word geometricType_;
@@ -70,10 +70,20 @@ class geometricSurfacePatch
 
 public:
 
-    // Public data
+    // Public Data
 
         //- The name for an 'empty' type
         static const word emptyType;
+
+        //- Helper to convert identifier types as an operation
+        struct fromIdentifier
+        {
+            geometricSurfacePatch operator()(const surfZoneIdentifier& ident)
+            const
+            {
+                return geometricSurfacePatch(ident);
+            }
+        };
 
 
     //- Runtime type information

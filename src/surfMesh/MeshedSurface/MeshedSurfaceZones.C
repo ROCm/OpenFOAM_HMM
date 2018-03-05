@@ -65,13 +65,13 @@ void Foam::MeshedSurface<Face>::checkZones()
 template<class Face>
 void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
-    const Xfer<List<Face>>& unsortedFaces,
-    const Xfer<List<label>>& zoneIds,
+    DynamicList<Face>& unsortedFaces,
+    DynamicList<label>& zoneIds,
     const bool sorted
 )
 {
-    List<Face>  oldFaces(unsortedFaces);
-    List<label> zones(zoneIds);
+    List<Face>  oldFaces(std::move(unsortedFaces));
+    List<label> zones(std::move(zoneIds));
 
     if (sorted)
     {

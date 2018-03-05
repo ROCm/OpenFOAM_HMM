@@ -461,10 +461,10 @@ autoPtr<mapPolyMesh> reorderMesh
 
     mesh.resetPrimitives
     (
-        Xfer<pointField>::null(),
-        xferMove(newFaces),
-        xferMove(newOwner),
-        xferMove(newNeighbour),
+        autoPtr<pointField>(),  // <- null: leaves points untouched
+        autoPtr<faceList>::New(std::move(newFaces)),
+        autoPtr<labelList>::New(std::move(newOwner)),
+        autoPtr<labelList>::New(std::move(newNeighbour)),
         patchSizes,
         patchStarts,
         true

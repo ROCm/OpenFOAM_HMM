@@ -1480,25 +1480,22 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshDistribute::receiveMesh
         >> domainSourceNewNbrProc;
 
     // Construct fvMesh
-    autoPtr<fvMesh> domainMeshPtr
+    auto domainMeshPtr = autoPtr<fvMesh>::New
     (
-        new fvMesh
+        IOobject
         (
-            IOobject
-            (
-                fvMesh::defaultRegion,
-                runTime.timeName(),
-                runTime,
-                IOobject::NO_READ
-            ),
-            xferMove(domainPoints),
-            xferMove(domainFaces),
-            xferMove(domainAllOwner),
-            xferMove(domainAllNeighbour),
-            false                   // no parallel comms
-        )
+            fvMesh::defaultRegion,
+            runTime.timeName(),
+            runTime,
+            IOobject::NO_READ
+        ),
+        std::move(domainPoints),
+        std::move(domainFaces),
+        std::move(domainAllOwner),
+        std::move(domainAllNeighbour),
+        false                   // no parallel comms
     );
-    fvMesh& domainMesh = domainMeshPtr();
+    fvMesh& domainMesh = *domainMeshPtr;
 
     List<polyPatch*> patches(patchEntries.size());
 
@@ -1641,28 +1638,25 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     if (!Pstream::parRun())
     {
         // Collect all maps and return
-        return autoPtr<mapDistributePolyMesh>
+        return autoPtr<mapDistributePolyMesh>::New
         (
-            new mapDistributePolyMesh
-            (
-                mesh_,
+            mesh_,
 
-                nOldPoints,
-                nOldFaces,
-                nOldCells,
-                oldPatchStarts.xfer(),
-                oldPatchNMeshPoints.xfer(),
+            nOldPoints,
+            nOldFaces,
+            nOldCells,
+            std::move(oldPatchStarts),
+            std::move(oldPatchNMeshPoints),
 
-                labelListList(1, identity(mesh_.nPoints())).xfer(),//subPointMap
-                labelListList(1, identity(mesh_.nFaces())).xfer(), //subFaceMap
-                labelListList(1, identity(mesh_.nCells())).xfer(), //subCellMap
-                labelListList(1, identity(patches.size())).xfer(), //subPatchMap
+            labelListList(one(), identity(mesh_.nPoints())), //subPointMap
+            labelListList(one(), identity(mesh_.nFaces())),  //subFaceMap
+            labelListList(one(), identity(mesh_.nCells())),  //subCellMap
+            labelListList(one(), identity(patches.size())),  //subPatchMap
 
-                labelListList(1, identity(mesh_.nPoints())).xfer(),//pointMap
-                labelListList(1, identity(mesh_.nFaces())).xfer(), //faceMap
-                labelListList(1, identity(mesh_.nCells())).xfer(), //cellMap
-                labelListList(1, identity(patches.size())).xfer()  //patchMap
-            )
+            labelListList(one(), identity(mesh_.nPoints())), //pointMap
+            labelListList(one(), identity(mesh_.nFaces())),  //faceMap
+            labelListList(one(), identity(mesh_.nCells())),  //cellMap
+            labelListList(one(), identity(patches.size()))   //patchMap
         );
     }
 
@@ -1859,8 +1853,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     labelListList constructFaceMap(Pstream::nProcs());
     labelListList constructPointMap(Pstream::nProcs());
     labelListList constructPatchMap(Pstream::nProcs());
-
-
 
 
     // Find out schedule
@@ -2723,31 +2715,28 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
     }
 
     // Collect all maps and return
-    return autoPtr<mapDistributePolyMesh>
+    return autoPtr<mapDistributePolyMesh>::New
     (
-        new mapDistributePolyMesh
-        (
-            mesh_,
+        mesh_,
 
-            nOldPoints,
-            nOldFaces,
-            nOldCells,
-            oldPatchStarts.xfer(),
-            oldPatchNMeshPoints.xfer(),
+        nOldPoints,
+        nOldFaces,
+        nOldCells,
+        std::move(oldPatchStarts),
+        std::move(oldPatchNMeshPoints),
 
-            subPointMap.xfer(),
-            subFaceMap.xfer(),
-            subCellMap.xfer(),
-            subPatchMap.xfer(),
+        std::move(subPointMap),
+        std::move(subFaceMap),
+        std::move(subCellMap),
+        std::move(subPatchMap),
 
-            constructPointMap.xfer(),
-            constructFaceMap.xfer(),
-            constructCellMap.xfer(),
-            constructPatchMap.xfer(),
+        std::move(constructPointMap),
+        std::move(constructFaceMap),
+        std::move(constructCellMap),
+        std::move(constructPatchMap),
 
-            true,           // subFaceMap has flip
-            true            // constructFaceMap has flip
-        )
+        true,           // subFaceMap has flip
+        true            // constructFaceMap has flip
     );
 }
 

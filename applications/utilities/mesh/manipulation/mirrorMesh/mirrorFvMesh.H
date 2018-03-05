@@ -55,20 +55,19 @@ class mirrorFvMesh
         IOdictionary mirrorMeshDict_;
 
         //- Mirrored mesh
-        fvMesh* mirrorMeshPtr_;
+        autoPtr<fvMesh> mirrorMeshPtr_;
 
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        mirrorFvMesh(const mirrorFvMesh&);
+        //- Disallow copy construct
+        mirrorFvMesh(const mirrorFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const mirrorFvMesh&);
+        //- Disallow copy assignment
+        void operator=(const mirrorFvMesh&) = delete;
 
 
 public:
-
 
     // Constructors
 
@@ -77,7 +76,7 @@ public:
 
 
     //- Destructor
-    ~mirrorFvMesh();
+    ~mirrorFvMesh() = default;
 
 
     // Member Functions

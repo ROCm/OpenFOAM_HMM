@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
                 runTime,
                 Foam::IOobject::NO_READ
             ),
-            Xfer<pointField>(points),
+            std::move(points),
             shapes,
             boundaryFaces,
             boundaryPatchNames,

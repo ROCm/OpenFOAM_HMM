@@ -532,18 +532,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::fvMeshTools::newMesh
         regIOobject::fileModificationChecking;
     regIOobject::fileModificationChecking = regIOobject::timeStamp;
 
-    autoPtr<fvMesh> meshPtr
-    (
-        new fvMesh
-        (
-            meshIO,
-            xferCopy(pointField()),
-            xferCopy(faceList()),
-            xferCopy(labelList()),
-            xferCopy(labelList())
-        )
-    );
-    fvMesh& mesh = meshPtr();
+    auto meshPtr = autoPtr<fvMesh>::New(meshIO, Zero);
+    fvMesh& mesh = *meshPtr;
 
     regIOobject::fileModificationChecking = oldCheckType;
 

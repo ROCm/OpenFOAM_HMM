@@ -63,10 +63,7 @@ extrudePatchMesh::extrudePatchMesh
             IOobject::NO_WRITE,
             true
         ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(labelList()),
-        xferCopy(labelList()),
+        Zero,
         false
     ),
     extrudedPatch_(patch.patch()),
@@ -95,16 +92,12 @@ extrudePatchMesh::extrudePatchMesh
             IOobject::NO_WRITE,
             true
         ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(labelList()),
-        xferCopy(labelList()),
+        Zero,
         false
     ),
     extrudedPatch_(patch.patch()),
     dict_(dict)
 {
-
     List<polyPatch*> regionPatches(3);
     List<word> patchNames(regionPatches.size());
     List<word> patchTypes(regionPatches.size());

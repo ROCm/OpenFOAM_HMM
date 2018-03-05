@@ -59,7 +59,7 @@ internalFieldTransfer
         return neighbFvPatch().patchInternalField(iF);
     }
 
-    return tmp<labelField>::New(iF.size(), 0);
+    return tmp<labelField>::New(iF.size(), Zero);
 }
 
 

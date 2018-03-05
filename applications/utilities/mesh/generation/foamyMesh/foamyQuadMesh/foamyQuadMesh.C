@@ -152,10 +152,10 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE,
             false
         ),
-        xferMove(poly2DMesh.points()),
-        xferMove(poly2DMesh.faces()),
-        xferMove(poly2DMesh.owner()),
-        xferMove(poly2DMesh.neighbour())
+        std::move(poly2DMesh.points()),
+        std::move(poly2DMesh.faces()),
+        std::move(poly2DMesh.owner()),
+        std::move(poly2DMesh.neighbour())
     );
 
     Info<< "Constructing patches." << endl;

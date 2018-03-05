@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferCopy(blocks.points()),           // could we re-use space?
+        pointField(blocks.points()),  // Copy, could we re-use space?
         blocks.cells(),
         blocks.patches(),
         blocks.patchNames(),

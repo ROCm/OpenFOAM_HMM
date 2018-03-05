@@ -121,9 +121,9 @@ Foam::extendedFeatureEdgeMesh::extendedFeatureEdgeMesh
 (
     const IOobject& io,
     const PrimitivePatch<face, List, pointField, point>& surf,
-    const labelList& featureEdges,
-    const labelList& regionFeatureEdges,
-    const labelList& featurePoints
+    const labelUList& featureEdges,
+    const labelUList& regionFeatureEdges,
+    const labelUList& featurePoints
 )
 :
     regIOobject(io),
@@ -183,9 +183,6 @@ Foam::extendedFeatureEdgeMesh::~extendedFeatureEdgeMesh()
 {}
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 bool Foam::extendedFeatureEdgeMesh::readData(Istream& is)
@@ -198,7 +195,6 @@ bool Foam::extendedFeatureEdgeMesh::readData(Istream& is)
 bool Foam::extendedFeatureEdgeMesh::writeData(Ostream& os) const
 {
     os << *this;
-
     return os.good();
 }
 
@@ -265,6 +261,6 @@ bool Foam::extendedFeatureEdgeMesh::writeData(Ostream& os) const
 //
 //    return os;
 //}
-//
+
 
 // ************************************************************************* //

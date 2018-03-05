@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,7 +58,7 @@ template<class Type>
 Foam::GlobalIOField<Type>::GlobalIOField
 (
     const IOobject& io,
-    const Field<Type>& f
+    const UList<Type>& content
 )
 :
     regIOobject(io)
@@ -68,7 +68,7 @@ Foam::GlobalIOField<Type>::GlobalIOField
 
     if (!readHeaderOk(IOstream::BINARY, typeName))
     {
-        Field<Type>::operator=(f);
+        Field<Type>::operator=(content);
     }
 }
 
@@ -77,7 +77,7 @@ template<class Type>
 Foam::GlobalIOField<Type>::GlobalIOField
 (
     const IOobject& io,
-    const Xfer<Field<Type>>& f
+    Field<Type>&& content
 )
 :
     regIOobject(io)
@@ -85,17 +85,38 @@ Foam::GlobalIOField<Type>::GlobalIOField
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<GlobalIOField<Type>>();
 
-    Field<Type>::transfer(f());
+    Field<Type>::transfer(content);
 
     readHeaderOk(IOstream::BINARY, typeName);
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
 template<class Type>
-Foam::GlobalIOField<Type>::~GlobalIOField()
-{}
+Foam::GlobalIOField<Type>::GlobalIOField
+(
+    const IOobject& io,
+    const tmp<Field<Type>>& tfld
+)
+:
+    regIOobject(io)
+{
+    // Check for MUST_READ_IF_MODIFIED
+    warnNoRereading<GlobalIOField<Type>>();
+
+    const bool reuse = tfld.movable();
+
+    if (reuse)
+    {
+        Field<Type>::transfer(tfld.ref());
+    }
+
+    if (!readHeaderOk(IOstream::BINARY, typeName))
+    {
+        Field<Type>::operator=(tfld());
+    }
+
+    tfld.clear();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -119,13 +140,6 @@ bool Foam::GlobalIOField<Type>::writeData(Ostream& os) const
 
 template<class Type>
 void Foam::GlobalIOField<Type>::operator=(const GlobalIOField<Type>& rhs)
-{
-    Field<Type>::operator=(rhs);
-}
-
-
-template<class Type>
-void Foam::GlobalIOField<Type>::operator=(const Field<Type>& rhs)
 {
     Field<Type>::operator=(rhs);
 }

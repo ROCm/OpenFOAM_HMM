@@ -521,7 +521,7 @@ int main(int argc, char *argv[])
             (
                 cutZoneName,
                 true // verbose
-            ).resetAddressing(faceIds.xfer(), false);
+            ).resetAddressing(std::move(faceIds), false);
 
 
             // Add the perfect interface mesh modifier
@@ -551,7 +551,7 @@ int main(int argc, char *argv[])
             (
                 mergePatchName + "MasterZone",
                 true // verbose
-            ).resetAddressing(faceIds.xfer(), false);
+            ).resetAddressing(std::move(faceIds), false);
 
             // Markup slave face ids
             faceIds.setSize(slavePatch.size());
@@ -561,7 +561,7 @@ int main(int argc, char *argv[])
             (
                 mergePatchName + "SlaveZone",
                 true // verbose
-            ).resetAddressing(faceIds.xfer(), false);
+            ).resetAddressing(std::move(faceIds), false);
 
             // Add empty zone for cut faces
             mesh.faceZones()

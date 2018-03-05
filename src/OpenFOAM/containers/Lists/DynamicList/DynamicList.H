@@ -152,9 +152,6 @@ public:
         //- Construct from UIndirectList. Size set to UIndirectList size.
         explicit inline DynamicList(const UIndirectList<T>& lst);
 
-        //- Transfer (move) construct
-        explicit inline DynamicList(const Xfer<List<T>>& lst);
-
         //- Move construct.
         inline DynamicList(DynamicList<T, SizeMin>&& lst);
 
@@ -241,10 +238,6 @@ public:
 
             //- Transfer contents  of the argument SortableList into this.
             inline void transfer(SortableList<T>& lst);
-
-            //- Transfer contents to the Xfer container as a plain List
-            inline Xfer<List<T>> xfer();
-
 
             //- Append an element to the end of this list.
             inline DynamicList<T, SizeMin>& append(const T& val);
@@ -375,6 +368,7 @@ public:
                 Istream& is,
                 DynamicList<T, SizeMin>& lst
             );
+
 };
 
 

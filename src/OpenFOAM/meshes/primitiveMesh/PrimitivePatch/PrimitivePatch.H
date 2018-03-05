@@ -252,11 +252,11 @@ public:
             const Field<PointType>& points
         );
 
-        //- Construct from components
+        //- Construct from components, transferring faces
         PrimitivePatch
         (
-            const Xfer<FaceList<Face>>& faces,
-            const Xfer<List<PointType>>& points
+            FaceList<Face>&& faces,
+            const Field<PointType>& points
         );
 
         //- Construct from components, reuse storage

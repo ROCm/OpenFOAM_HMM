@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -77,7 +77,7 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const label size)
 
 
 template<class T>
-Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& map)
+Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& content)
 :
     regIOobject(io)
 {
@@ -98,17 +98,17 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& map)
     }
     else
     {
-        Map<T>::operator=(map);
+        Map<T>::operator=(content);
     }
 }
 
 
 template<class T>
-Foam::IOMap<T>::IOMap(const IOobject& io, const Xfer<Map<T>>& map)
+Foam::IOMap<T>::IOMap(const IOobject& io, Map<T>&& content)
 :
     regIOobject(io)
 {
-    Map<T>::transfer(map());
+    Map<T>::transfer(content);
 
     if
     (
@@ -128,13 +128,6 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const Xfer<Map<T>>& map)
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T>
-Foam::IOMap<T>::~IOMap()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -148,13 +141,6 @@ bool Foam::IOMap<T>::writeData(Ostream& os) const
 
 template<class T>
 void Foam::IOMap<T>::operator=(const IOMap<T>& rhs)
-{
-    Map<T>::operator=(rhs);
-}
-
-
-template<class T>
-void Foam::IOMap<T>::operator=(const Map<T>& rhs)
 {
     Map<T>::operator=(rhs);
 }

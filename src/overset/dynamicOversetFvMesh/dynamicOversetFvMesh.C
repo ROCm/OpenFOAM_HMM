@@ -178,8 +178,8 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
         new fvMeshPrimitiveLduAddressing
         (
             nCells(),
-            lowerAddr.xfer(),
-            upperAddr.xfer(),
+            std::move(lowerAddr),
+            std::move(upperAddr),
             patchAddr,
             ps
         )

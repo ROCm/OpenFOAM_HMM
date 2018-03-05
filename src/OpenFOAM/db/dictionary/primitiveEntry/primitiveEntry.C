@@ -106,7 +106,7 @@ bool Foam::primitiveEntry::expandVariable
     {
         // Found dictionary entry
 
-        tokenList toks(eptr->dict().tokens().xfer());
+        tokenList toks(eptr->dict().tokens());
 
         appendTokenList(std::move(toks));
     }
@@ -152,11 +152,11 @@ Foam::primitiveEntry::primitiveEntry
 Foam::primitiveEntry::primitiveEntry
 (
     const keyType& key,
-    const Xfer<List<token>>& tokens
+    List<token>&& tokens
 )
 :
     entry(key),
-    ITstream(key, tokens)
+    ITstream(key, std::move(tokens))
 {}
 
 

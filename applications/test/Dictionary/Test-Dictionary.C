@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     {
         std::cout<< "iter: " << typeid(*iter).name() << '\n';
 
-        Info<< "elem = " << *(*iter) << endl;
+        // Info<< "elem = " << *(*iter) << endl;
     }
 
     std::cout<< "iter type: "

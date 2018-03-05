@@ -51,11 +51,8 @@ Foam::UnsortedMeshedSurface<Face>::New
         if (delegate.found(ext))
         {
             // Create indirectly
-            autoPtr<UnsortedMeshedSurface<Face>> surf
-            (
-                new UnsortedMeshedSurface<Face>
-            );
-            surf().transfer(ParentType::New(name, ext)());
+            auto surf = autoPtr<UnsortedMeshedSurface<Face>>::New();
+            surf().transfer(*(ParentType::New(name, ext)));
 
             return surf;
         }

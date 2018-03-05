@@ -853,7 +853,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cells,
         boundary,
         patchNames,

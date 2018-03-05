@@ -446,27 +446,23 @@ int main(int argc, char *argv[])
     const word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
 
-    // Create dummy mesh just to find out what are internal/external
-    // faces
-    autoPtr<polyMesh> dummyMesh
+    // Create dummy mesh just to find out what are internal/external faces
+    auto dummyMesh = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                "dummyMesh",
-                runTime.constant(),
-                runTime
-            ),
-            xferCopy(points),
-            cellShapes,
-            faceListList(0),
-            wordList(0),
-            wordList(0),
-            defaultFacesName,
-            defaultFacesType,
-            wordList(0)
-        )
+            "dummyMesh",
+            runTime.constant(),
+            runTime
+        ),
+        pointField(points),  // copy
+        cellShapes,
+        faceListList(),
+        wordList(),
+        wordList(),
+        defaultFacesName,
+        defaultFacesType,
+        wordList()
     );
 
 
@@ -605,7 +601,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cellShapes,
         patchFaces,
         patchNames,
@@ -615,7 +611,7 @@ int main(int argc, char *argv[])
     );
 
 
-    if (cellTypes.size() > 0 || patchNames.size() > 0)
+    if (cellTypes.size() || patchNames.size())
     {
         DynamicList<pointZone*> pz;
         DynamicList<faceZone*> fz;

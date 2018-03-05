@@ -87,10 +87,32 @@ Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
+Foam::IOmapDistributePolyMesh::IOmapDistributePolyMesh
+(
+    const IOobject& io,
+    mapDistributePolyMesh&& map
+)
+:
+    regIOobject(io)
+{
+    // Warn for MUST_READ_IF_MODIFIED
+    warnNoRereading<IOmapDistributePolyMesh>();
 
-Foam::IOmapDistributePolyMesh::~IOmapDistributePolyMesh()
-{}
+    mapDistributePolyMesh::transfer(map);
+
+    if
+    (
+        (
+            io.readOpt() == IOobject::MUST_READ
+         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

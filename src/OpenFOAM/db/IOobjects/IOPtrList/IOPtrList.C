@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,10 +75,10 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io)
 
 
 template<class T>
-Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const label s)
+Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const label len)
 :
     regIOobject(io),
-    PtrList<T>(s)
+    PtrList<T>(len)
 {
     if (io.readOpt() != IOobject::NO_READ)
     {
@@ -90,7 +90,7 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const label s)
 
 
 template<class T>
-Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& list)
+Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& content)
 :
     regIOobject(io)
 {
@@ -111,17 +111,17 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& list)
     }
     else
     {
-        PtrList<T>::operator=(list);
+        PtrList<T>::operator=(content);
     }
 }
 
 
 template<class T>
-Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const Xfer<PtrList<T>>& list)
+Foam::IOPtrList<T>::IOPtrList(const IOobject& io, PtrList<T>&& content)
 :
     regIOobject(io)
 {
-    PtrList<T>::transfer(list());
+    PtrList<T>::transfer(content);
 
     if
     (
@@ -141,13 +141,6 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const Xfer<PtrList<T>>& list)
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T>
-Foam::IOPtrList<T>::~IOPtrList()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -164,5 +157,6 @@ void Foam::IOPtrList<T>::operator=(const IOPtrList<T>& rhs)
 {
     PtrList<T>::operator=(rhs);
 }
+
 
 // ************************************************************************* //

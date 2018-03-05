@@ -118,14 +118,6 @@ public:
             const label index
         );
 
-        //- Move construct from components
-        zone
-        (
-            const word& name,
-            const Xfer<labelList>& addr,
-            const label index
-        );
-
         //- Construct from dictionary
         zone
         (
@@ -150,15 +142,6 @@ public:
         (
             const zone& origZone,
             labelList&& addr,
-            const label index
-        );
-
-        //- Construct given the name of the original zone (name is used)
-        //- and (move) resetting addressing and index.
-        zone
-        (
-            const zone& zn,
-            const Xfer<labelList>& addr,
             const label index
         );
 

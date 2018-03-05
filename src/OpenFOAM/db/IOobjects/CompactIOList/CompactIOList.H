@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -47,10 +47,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
 template<class T, class BaseType> class CompactIOList;
 
 template<class T, class BaseType> Istream& operator>>
@@ -90,25 +89,27 @@ public:
 
     // Constructors
 
+        //- Default copy construct
+        CompactIOList(const CompactIOList&) = default;
+
         //- Construct from IOobject
-        CompactIOList(const IOobject&);
+        explicit CompactIOList(const IOobject& io);
 
-        //- Construct from IOobject and size of CompactIOList
-        CompactIOList(const IOobject&, const label);
+        //- Construct from IOobject and default length of CompactIOList
+        CompactIOList(const IOobject& io, const label len);
 
-        //- Construct from IOobject and a List
-        CompactIOList(const IOobject&, const List<T>&);
+        //- Construct from IOobject and List content
+        CompactIOList(const IOobject& io, const UList<T>& content);
 
-        //- Construct by transferring the List contents
-        CompactIOList(const IOobject&, const Xfer<List<T>>&);
-
+        //- Construct by transferring the List content
+        CompactIOList(const IOobject& io, List<T>&& content);
 
     // Destructor
 
-        virtual ~CompactIOList();
+        virtual ~CompactIOList() = default;
 
 
-    // Member functions
+    // Member Functions
 
         virtual bool writeObject
         (
@@ -121,11 +122,13 @@ public:
         virtual bool writeData(Ostream&) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const CompactIOList<T, BaseType>&);
+        //- Copy assignment of entries
+        void operator=(const CompactIOList<T, BaseType>& rhs);
 
-        void operator=(const List<T>&);
+        //- Copy or move assignment of entries
+        using List<T>::operator=;
 
 
     // IOstream operators

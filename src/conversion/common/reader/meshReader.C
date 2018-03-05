@@ -91,22 +91,19 @@ Foam::autoPtr<Foam::polyMesh> Foam::meshReader::mesh
     createPolyBoundary();
     clearExtraStorage();
 
-    autoPtr<polyMesh> meshPtr
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                polyMesh::defaultRegion,
-                registry.time().constant(),
-                registry
-            ),
-            xferMove(points_),
-            xferMove(meshFaces_),
-            xferMove(cellPolys_)
-        )
+            polyMesh::defaultRegion,
+            registry.time().constant(),
+            registry
+        ),
+        std::move(points_),
+        std::move(meshFaces_),
+        std::move(cellPolys_)
     );
-    polyMesh& mesh = meshPtr();
+    polyMesh& mesh = *meshPtr;
 
     // Adding patches also checks the mesh
     mesh.addPatches(polyBoundaryPatches(mesh));

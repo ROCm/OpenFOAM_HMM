@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(newPoints),
+        std::move(newPoints),
         cellShapes,
         boundary,
         patchNames,

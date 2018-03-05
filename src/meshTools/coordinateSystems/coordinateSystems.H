@@ -91,20 +91,20 @@ public:
     // Constructors
 
         //- Read construct from IOobject
-        explicit coordinateSystems(const IOobject&);
+        explicit coordinateSystems(const IOobject& io);
 
         //- Construct from IOobject and a PtrList
         coordinateSystems
         (
-            const IOobject&,
-            const PtrList<coordinateSystem>&
+            const IOobject& io,
+            const PtrList<coordinateSystem>& content
         );
 
-        //- Construct from IOobject and transferring the PtrList contents
+        //- Construct from IOobject and transferring the PtrList content
         coordinateSystems
         (
-            const IOobject&,
-            const Xfer<PtrList<coordinateSystem>>&
+            const IOobject& io,
+            PtrList<coordinateSystem>&& content
         );
 
 

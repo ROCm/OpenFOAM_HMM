@@ -150,13 +150,6 @@ inline T& Foam::List<T>::newElmt(const label i)
 
 
 template<class T>
-inline Foam::Xfer<Foam::List<T>> Foam::List<T>::xfer()
-{
-    return xferMove(*this);
-}
-
-
-template<class T>
 inline void Foam::List<T>::append(const T& val)
 {
     setSize(this->size() + 1, val);  // copy element

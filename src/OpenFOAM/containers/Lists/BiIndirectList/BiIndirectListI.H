@@ -60,12 +60,12 @@ inline Foam::BiIndirectList<T>::BiIndirectList
 (
     const UList<T>& posList,
     const UList<T>& negList,
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 :
     posList_(const_cast<UList<T>&>(posList)),
     negList_(const_cast<UList<T>&>(negList)),
-    addressing_(addr)
+    addressing_(std::move(addr))
 {}
 
 
@@ -120,10 +120,10 @@ inline void Foam::BiIndirectList<T>::resetAddressing
 template<class T>
 inline void Foam::BiIndirectList<T>::resetAddressing
 (
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 {
-    addressing_.transfer(addr());
+    addressing_.transfer(addr);
 }
 
 

@@ -43,7 +43,6 @@ SourceFiles
 #include "UList.H"
 #include "autoPtr.H"
 #include "one.H"
-#include "Xfer.H"
 #include "SLListFwd.H"
 
 #include <initializer_list>
@@ -173,9 +172,6 @@ public:
         //- Construct from an initializer list
         List(std::initializer_list<T> lst);
 
-        //- Transfer (move) construct
-        List(const Xfer<List<T>>& lst);
-
         //- Move construct from List
         List(List<T>&& lst);
 
@@ -250,9 +246,6 @@ public:
             //- and annul the argument list
             void transfer(SortableList<T>& lst);
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<List<T>> xfer();
-
             //- Return subscript-checked element of UList and resizing the list
             //- if required.
             inline T& newElmt(const label i);
@@ -310,6 +303,7 @@ public:
             Istream& is,
             List<T>& L
         );
+
 };
 
 

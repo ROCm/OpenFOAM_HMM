@@ -247,7 +247,7 @@ void Foam::patchToPoly2DMesh::addPatchFacesToOwner()
             << nExternalEdges << endl;
     }
 
-    owner_ = newOwner.xfer();
+    owner_.transfer(newOwner);
 }
 
 

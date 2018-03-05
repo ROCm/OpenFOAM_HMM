@@ -122,7 +122,7 @@ Foam::decomposedBlockData::decomposedBlockData
 (
     const label comm,
     const IOobject& io,
-    const Xfer<List<char>>& list,
+    List<char>&& list,
     const UPstream::commsTypes commsType
 )
 :
@@ -140,7 +140,7 @@ Foam::decomposedBlockData::decomposedBlockData
             << endl;
     }
 
-    List<char>::transfer(list());
+    List<char>::transfer(list);
 
     if
     (

@@ -111,7 +111,7 @@ void testMapDistribute()
     }
 
     // Construct distribute map (destructively)
-    mapDistribute map(constructSize, sendMap.xfer(), recvMap.xfer());
+    mapDistribute map(constructSize, std::move(sendMap), std::move(recvMap));
 
     // Distribute complexData
     map.distribute(complexData);

@@ -339,14 +339,11 @@ Foam::distributedTriSurfaceMesh::distributeSegments
         }
     }
 
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmenti,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmenti, // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
 }
 
@@ -636,9 +633,9 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
     (
         new mapDistribute
         (
-            segmenti,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
+            segmenti, // size after construction
+            std::move(sendMap),
+            std::move(constructMap)
         )
     );
     const mapDistribute& map = mapPtr();
@@ -648,7 +645,6 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
     // ~~~~~~~~~~~~~~~~~
 
     map.distribute(triangleIndex);
-
 
     return mapPtr;
 }
@@ -785,16 +781,12 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         }
     }
 
-    autoPtr<mapDistribute> mapPtr
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmenti,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmenti, // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
-    return mapPtr;
 }
 
 
@@ -2301,8 +2293,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         new mapDistribute
         (
             allTris.size(),
-            faceSendMap.xfer(),
-            faceConstructMap.xfer()
+            std::move(faceSendMap),
+            std::move(faceConstructMap)
         )
     );
     pointMap.reset
@@ -2310,8 +2302,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         new mapDistribute
         (
             allPoints.size(),
-            pointSendMap.xfer(),
-            pointConstructMap.xfer()
+            std::move(pointSendMap),
+            std::move(pointConstructMap)
         )
     );
 

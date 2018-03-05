@@ -198,14 +198,6 @@ class OListStreamAllocator
             init_pbuffer(block_);
         }
 
-        //- Transfer (move) construct
-        dynbuf(const Xfer<List<char>>& buffer)
-        :
-            storage_(buffer)
-        {
-            init_pbuffer(block_);
-        }
-
 
     // Member Functions
 
@@ -237,14 +229,12 @@ class OListStreamAllocator
             pbump(cur);
         }
 
-        //- Transfer contents to the Xfer container as a plain List
-        inline Xfer<List<char>> xfer()
+        //- Transfer list contents to other list
+        inline void swap(List<char>& other)
         {
-            const auto cur = tellp();   // Addressed area
-            storage_.resize(cur);
-            auto lst = storage_.xfer();
+            storage_.resize(tellp());   // Addressed area
+            storage_.swap(other);
             sync_pbuffer();
-            return lst;
         }
     };
 
@@ -282,13 +272,6 @@ protected:
         OListStreamAllocator(DynamicList<char,SizeMin>&& buffer)
         :
             buf_(std::move(buffer)),
-            stream_(&buf_)
-        {}
-
-        //- Transfer (move) construct
-        OListStreamAllocator(const Xfer<List<char>>& buffer)
-        :
-            buf_(buffer),
             stream_(&buf_)
         {}
 
@@ -348,10 +331,10 @@ public:
             return buf_.setBlockSize(n);
         }
 
-        //- Transfer contents to the Xfer container as a plain List
-        inline Xfer<List<char>> xfer()
+        //- Transfer list contents to other list
+        inline void swap(List<char>& other)
         {
-            return buf_.xfer();
+            buf_.swap(other);
         }
 
         //- Shrink to addressed space, should not affect stream.
@@ -440,18 +423,6 @@ public:
         )
         :
             allocator_type(std::move(buffer)),
-            OSstream(stream_, "output", format, version)
-        {}
-
-        //- Transfer (move) construct
-        OListStream
-        (
-            const Xfer<List<char>>& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion
-        )
-        :
-            allocator_type(buffer),
             OSstream(stream_, "output", format, version)
         {}
 

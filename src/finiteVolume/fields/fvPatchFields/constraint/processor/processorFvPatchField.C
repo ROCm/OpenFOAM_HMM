@@ -150,12 +150,12 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
     processorLduInterfaceField(),
     coupledFvPatchField<Type>(ptf),
     procPatch_(refCast<const processorFvPatch>(ptf.patch())),
-    sendBuf_(ptf.sendBuf_.xfer()),
-    receiveBuf_(ptf.receiveBuf_.xfer()),
+    sendBuf_(std::move(ptf.sendBuf_)),
+    receiveBuf_(std::move(ptf.receiveBuf_)),
     outstandingSendRequest_(-1),
     outstandingRecvRequest_(-1),
-    scalarSendBuf_(ptf.scalarSendBuf_.xfer()),
-    scalarReceiveBuf_(ptf.scalarReceiveBuf_.xfer())
+    scalarSendBuf_(std::move(ptf.scalarSendBuf_)),
+    scalarReceiveBuf_(std::move(ptf.scalarReceiveBuf_))
 {
     if (debug && !ptf.ready())
     {
@@ -189,13 +189,6 @@ Foam::processorFvPatchField<Type>::processorFvPatchField
             << abort(FatalError);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::processorFvPatchField<Type>::~processorFvPatchField()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -127,7 +127,7 @@ template<class T, class BaseType>
 Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
-    const Field<T>& list
+    const UList<T>& content
 )
 :
     regIOobject(io)
@@ -142,7 +142,7 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
     }
     else
     {
-        Field<T>::operator=(list);
+        Field<T>::operator=(content);
     }
 }
 
@@ -151,12 +151,12 @@ template<class T, class BaseType>
 Foam::CompactIOField<T, BaseType>::CompactIOField
 (
     const IOobject& io,
-    const Xfer<Field<T>>& list
+    Field<T>&& content
 )
 :
     regIOobject(io)
 {
-    Field<T>::transfer(list());
+    Field<T>::transfer(content);
 
     if
     (
@@ -167,14 +167,6 @@ Foam::CompactIOField<T, BaseType>::CompactIOField
         readFromStream();
     }
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T, class BaseType>
-Foam::CompactIOField<T, BaseType>::~CompactIOField()
-{}
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -191,21 +183,19 @@ bool Foam::CompactIOField<T, BaseType>::writeObject
     if (fmt == IOstream::ASCII)
     {
         // Change type to be non-compact format type
-        const word oldTypeName = typeName;
+        const word oldTypeName(typeName);
 
         const_cast<word&>(typeName) = IOField<T>::typeName;
 
-        bool good = regIOobject::writeObject(fmt, ver, cmp, valid);
+        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
 
         // Change type back
         const_cast<word&>(typeName) = oldTypeName;
 
         return good;
     }
-    else
-    {
-        return regIOobject::writeObject(fmt, ver, cmp, valid);
-    }
+
+    return regIOobject::writeObject(fmt, ver, cmp, valid);
 }
 
 
@@ -223,13 +213,6 @@ void Foam::CompactIOField<T, BaseType>::operator=
 (
     const CompactIOField<T, BaseType>& rhs
 )
-{
-    Field<T>::operator=(rhs);
-}
-
-
-template<class T, class BaseType>
-void Foam::CompactIOField<T, BaseType>::operator=(const Field<T>& rhs)
 {
     Field<T>::operator=(rhs);
 }

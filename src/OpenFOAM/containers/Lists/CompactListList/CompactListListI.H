@@ -197,14 +197,6 @@ inline Foam::label Foam::CompactListList<T, Container>::whichColumn
 
 
 template<class T, class Container>
-inline Foam::Xfer<Foam::CompactListList<T, Container>>
-Foam::CompactListList<T, Container>::xfer()
-{
-    return xferMove(*this);
-}
-
-
-template<class T, class Container>
 inline void Foam::CompactListList<T, Container>::resize(const label mRows)
 {
     this->setSize(mRows);

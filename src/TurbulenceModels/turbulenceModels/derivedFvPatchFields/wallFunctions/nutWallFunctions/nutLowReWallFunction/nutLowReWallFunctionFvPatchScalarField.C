@@ -38,7 +38,7 @@ namespace Foam
 
 tmp<scalarField> nutLowReWallFunctionFvPatchScalarField::calcNut() const
 {
-    return tmp<scalarField>::New(patch().size(), 0.0);
+    return tmp<scalarField>::New(patch().size(), Zero);
 }
 
 

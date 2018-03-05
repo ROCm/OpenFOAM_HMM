@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,7 +57,7 @@ template<class Face>
 bool Foam::MeshedSurface<Face>::canReadType
 (
     const word& ext,
-    const bool verbose
+    bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
@@ -74,7 +74,7 @@ template<class Face>
 bool Foam::MeshedSurface<Face>::canWriteType
 (
     const word& ext,
-    const bool verbose
+    bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
@@ -91,7 +91,7 @@ template<class Face>
 bool Foam::MeshedSurface<Face>::canRead
 (
     const fileName& name,
-    const bool verbose
+    bool verbose
 )
 {
     word ext = name.ext();
@@ -169,47 +169,6 @@ Foam::MeshedSurface<Face>::MeshedSurface()
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const Xfer<surfZoneList>& zoneLst
-)
-:
-    MeshedSurface<Face>()
-{
-    reset(pointLst, faceLst, zoneLst);
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const labelUList& zoneSizes,
-    const UList<word>& zoneNames
-)
-:
-    MeshedSurface<Face>()
-{
-    reset(pointLst, faceLst, Xfer<surfZoneList>());
-
-    if (zoneSizes.size())
-    {
-        if (zoneNames.size())
-        {
-            addZones(zoneSizes, zoneNames);
-        }
-        else
-        {
-            addZones(zoneSizes);
-        }
-    }
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
     const MeshedSurface<Face>& surf
 )
 :
@@ -242,16 +201,118 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 
 template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    MeshedSurface<Face>&& surf
+)
+:
+    MeshedSurface<Face>()
+{
+    transfer(surf);
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    UnsortedMeshedSurface<Face>&& surf
+)
+:
+    MeshedSurface<Face>()
+{
+    transfer(surf);
+}
+
+
+template<class Face>
+    Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const pointField& pointLst,
+    const UList<Face>& faceLst,
+    const UList<surfZone>& zoneLst
+)
+:
+    ParentType(faceLst, pointLst), // Copy construct
+    zones_(zoneLst)
+{}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    pointField&& pointLst,
+    List<Face>&& faceLst,
+    const UList<surfZone>& zoneLst
+)
+:
+    ParentType(faceLst, pointLst, true), // Move construct
+    zones_(zoneLst)
+{}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const pointField& pointLst,
+    const UList<Face>& faceLst,
+    const labelUList& zoneSizes,
+    const UList<word>& zoneNames
+)
+:
+    ParentType(faceLst, pointLst), // Copy construct
+    zones_()
+{
+    if (zoneSizes.size())
+    {
+        if (zoneNames.size())
+        {
+            addZones(zoneSizes, zoneNames);
+        }
+        else
+        {
+            addZones(zoneSizes);
+        }
+    }
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    pointField&& pointLst,
+    List<Face>&& faceLst,
+    const labelUList& zoneSizes,
+    const UList<word>& zoneNames
+)
+:
+    ParentType(faceLst, pointLst, true), // Move construct
+    zones_()
+{
+    if (zoneSizes.size())
+    {
+        if (zoneNames.size())
+        {
+            addZones(zoneSizes, zoneNames);
+        }
+        else
+        {
+            addZones(zoneSizes);
+        }
+    }
+}
+
+
+template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface(const surfMesh& mesh)
 :
     MeshedSurface<Face>()
 {
-    // same face type as surfMesh
+    // Need same face type as surfMesh
     MeshedSurface<face> surf
     (
-        xferCopy(mesh.points()),
-        xferCopy(mesh.faces()),
-        xferCopy(mesh.surfZones())
+        mesh.points(),
+        mesh.faces(),
+        mesh.surfZones()
     );
 
     this->transcribe(surf);
@@ -300,10 +361,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
     label startFacei = 0;
     label nZone = 0;
-    forAll(bPatches, patchi)
+    for (const polyPatch& p : bPatches)
     {
-        const polyPatch& p = bPatches[patchi];
-
         if (p.size())
         {
             newZones[nZone] = surfZone
@@ -321,13 +380,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
     newZones.setSize(nZone);
 
-    // same face type as the polyBoundaryMesh
-    MeshedSurface<face> surf
-    (
-        xferCopy(bPoints),
-        xferCopy(bFaces),
-        xferMove(newZones)
-    );
+    // Face type as per polyBoundaryMesh
+    MeshedSurface<face> surf(bPoints, bFaces, newZones);
 
     this->transcribe(surf);
 }
@@ -363,7 +417,7 @@ Foam::MeshedSurface<Face>::MeshedSurface(Istream& is)
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Time& t,
+    const Time& runTime,
     const word& surfName
 )
 :
@@ -374,8 +428,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
         IOobject
         (
             "dummyName",
-            t.timeName(),
-            t,
+            runTime.timeName(),
+            runTime,
             IOobject::MUST_READ_IF_MODIFIED,
             IOobject::NO_WRITE,
             false
@@ -383,39 +437,13 @@ Foam::MeshedSurface<Face>::MeshedSurface
         surfName
     );
 
-    // same face type as surfMesh
+    // The geometry components, returned via autoPtr
     MeshedSurface<face> surf
     (
-        xferMove(mesh.storedPoints()),
-        xferMove(mesh.storedFaces()),
-        xferMove(mesh.storedZones())
+        std::move(*(mesh.releaseGeom()))
     );
 
     this->transcribe(surf);
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const Xfer<MeshedSurface<Face>>& surf
-)
-:
-    MeshedSurface<Face>()
-{
-    transfer(surf());
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const Xfer<UnsortedMeshedSurface<Face>>& surf
-)
-:
-    MeshedSurface<Face>()
-{
-    transfer(surf());
 }
 
 
@@ -482,7 +510,7 @@ void Foam::MeshedSurface<Face>::remapFaces
 template<class Face>
 void Foam::MeshedSurface<Face>::clear()
 {
-    ParentType::clearOut();
+    ParentType::clearOut();  // Topology changes
 
     storedPoints().clear();
     storedFaces().clear();
@@ -493,8 +521,7 @@ void Foam::MeshedSurface<Face>::clear()
 template<class Face>
 void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
 {
-    // Changes areas, normals etc.
-    ParentType::clearGeom();
+    ParentType::clearGeom();  // Changes areas, normals etc.
 
     // Adapt for new point position
     ParentType::movePoints(newPoints);
@@ -510,8 +537,7 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
     // Avoid bad scaling
     if (scaleFactor > 0 && scaleFactor != 1.0)
     {
-        // Changes areas, normals etc.
-        ParentType::clearGeom();
+        ParentType::clearGeom();  // Changes areas, normals etc.
 
         pointField newPoints(scaleFactor*this->points());
 
@@ -519,74 +545,6 @@ void Foam::MeshedSurface<Face>::scalePoints(const scalar scaleFactor)
         ParentType::movePoints(newPoints);
 
         storedPoints() = newPoints;
-    }
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::reset
-(
-    const Xfer<MeshedSurface<Face>>& surf
-)
-{
-    transfer(surf());
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::reset
-(
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const Xfer<surfZoneList>& zoneLst
-)
-{
-    ParentType::clearOut();
-
-    // Take over new primitive data.
-    // Optimized to avoid overwriting data at all
-    if (notNull(pointLst))
-    {
-        storedPoints().transfer(pointLst());
-    }
-
-    if (notNull(faceLst))
-    {
-        storedFaces().transfer(faceLst());
-    }
-
-    if (notNull(zoneLst))
-    {
-        storedZones().transfer(zoneLst());
-    }
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::reset
-(
-    const Xfer<List<point>>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const Xfer<surfZoneList>& zoneLst
-)
-{
-    ParentType::clearOut();
-
-    // Take over new primitive data.
-    // Optimized to avoid overwriting data at all
-    if (notNull(pointLst))
-    {
-        storedPoints().transfer(pointLst());
-    }
-
-    if (notNull(faceLst))
-    {
-        storedFaces().transfer(faceLst());
-    }
-
-    if (notNull(zoneLst))
-    {
-        storedZones().transfer(zoneLst());
     }
 }
 
@@ -678,8 +636,9 @@ bool Foam::MeshedSurface<Face>::stitchFaces
     }
     faceMap.clear();
 
-    // Merging points might have changed geometric factors
+    // Topology can change when points are merged, etc
     ParentType::clearOut();
+
     return true;
 }
 
@@ -1110,11 +1069,11 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 
 
     // construct a sub-surface
-    return MeshedSurface
+    return MeshedSurface<Face>
     (
-        xferMove(newPoints),
-        xferMove(newFaces),
-        xferMove(newZones)
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newZones)
     );
 }
 
@@ -1132,12 +1091,27 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
 
 
 template<class Face>
+void Foam::MeshedSurface<Face>::swap
+(
+    MeshedSurface<Face>& surf
+)
+{
+    ParentType::clearOut(); // Topology changes
+    surf.clearOut();        // Topology changes
+
+    this->storedPoints().swap(surf.storedPoints());
+    this->storedFaces().swap(surf.storedFaces());
+    this->storedZones().swap(surf.storedZones());
+}
+
+
+template<class Face>
 void Foam::MeshedSurface<Face>::transfer
 (
     MeshedSurface<Face>& surf
 )
 {
-    ParentType::clearOut();
+    ParentType::clearOut();  // Topology changes
 
     this->storedPoints().transfer(surf.storedPoints());
     this->storedFaces().transfer(surf.storedFaces());
@@ -1158,73 +1132,64 @@ void Foam::MeshedSurface<Face>::transfer
     labelList faceMap;
     surfZoneList zoneLst = surf.sortedZones(faceMap);
 
-    if (zoneLst.size() <= 1)
+    List<Face>& faceLst = surf.storedFaces();
+
+    if (zoneLst.size() > 1)
     {
-        reset
-        (
-            xferMove(surf.storedPoints()),
-            xferMove(surf.storedFaces()),
-            Xfer<surfZoneList>()
-        );
-    }
-    else
-    {
-        List<Face>& oldFaces = surf.storedFaces();
-        List<Face> newFaces(faceMap.size());
+        // Unknown if we really need to sort the faces
+        List<Face> sortedFaces(faceMap.size());
 
         forAll(faceMap, facei)
         {
-            newFaces[faceMap[facei]].transfer(oldFaces[facei]);
+            sortedFaces[faceMap[facei]].transfer(faceLst[facei]);
         }
 
-        reset
-        (
-            xferMove(surf.storedPoints()),
-            xferMove(newFaces),
-            xferMove(zoneLst)
-        );
+        faceLst.swap(sortedFaces);  // Replace with sorted faces
     }
 
-    faceMap.clear();
+    MeshedSurface<Face> newSurf
+    (
+        std::move(surf.storedPoints()),
+        std::move(faceLst),
+        std::move(zoneLst)
+    );
+
     surf.clear();
+
+    this->swap(newSurf);
 }
 
 
 template<class Face>
-Foam::Xfer<Foam::MeshedSurface<Face>>
-Foam::MeshedSurface<Face>::xfer()
+Foam::autoPtr<Foam::MeshedSurface<Face>>
+Foam::MeshedSurface<Face>::releaseGeom()
 {
-    return xferMove(*this);
+    return autoPtr<MeshedSurface<Face>>::New(std::move(*this));
 }
 
 
 template<class Face>
-Foam::Xfer<Foam::List<Face>>
-Foam::MeshedSurface<Face>::xferFaces()
+void Foam::MeshedSurface<Face>::swapFaces(List<Face>& faces)
 {
-    // Topology changed because of transfer
-    ParentType::clearOut();
+    ParentType::clearOut();  // Topology changes
 
-    return this->storedFaces().xfer();
+    this->storedFaces().swap(faces);
 }
 
 
 template<class Face>
-Foam::Xfer<Foam::List<Foam::point>>
-Foam::MeshedSurface<Face>::xferPoints()
+void Foam::MeshedSurface<Face>::swapPoints(pointField& points)
 {
-    // Topology changed because of transfer
-    ParentType::clearOut();
+    ParentType::clearOut();  // Topology changes
 
-    return this->storedPoints().xfer();
+    this->storedPoints().swap(points);
 }
 
 
 template<class Face>
-Foam::Xfer<Foam::surfZoneList>
-Foam::MeshedSurface<Face>::xferZones()
+void Foam::MeshedSurface<Face>::swapZones(surfZoneList& zones)
 {
-    return this->storedZones().xfer();
+    this->storedZones().swap(zones);
 }
 
 
@@ -1272,13 +1237,20 @@ void Foam::MeshedSurface<Face>::write
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Face>
-void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
+void Foam::MeshedSurface<Face>::operator=(const MeshedSurface<Face>& surf)
 {
     clear();
 
     this->storedPoints() = surf.points();
     this->storedFaces()  = surf.surfFaces();
     this->storedZones()  = surf.surfZones();
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::operator=(MeshedSurface<Face>&& surf)
+{
+    transfer(surf);
 }
 
 

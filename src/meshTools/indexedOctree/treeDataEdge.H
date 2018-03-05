@@ -159,7 +159,7 @@ public:
             const bool cacheBb,
             const edgeList& edges,
             const pointField& points,
-            const Xfer<labelList>& edgeLabels
+            labelList&& edgeLabels
         );
 
 

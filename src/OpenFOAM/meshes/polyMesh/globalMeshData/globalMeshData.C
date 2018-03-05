@@ -508,6 +508,7 @@ void Foam::globalMeshData::calcSharedEdges() const
         }
     }
 
+
     sharedEdgeLabelsPtr_.reset(new labelList());
     labelList& sharedEdgeLabels = sharedEdgeLabelsPtr_();
     sharedEdgeLabels.transfer(dynSharedEdgeLabels);
@@ -543,14 +544,14 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
     (
         new labelListList
         (
-            globalData.pointPoints().xfer()
+            std::move(globalData.pointPoints())
         )
     );
     globalPointTransformedSlavesPtr_.reset
     (
         new labelListList
         (
-            globalData.transformedPointPoints().xfer()
+            std::move(globalData.transformedPointPoints())
         )
     );
 
@@ -558,7 +559,7 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
     (
         new mapDistribute
         (
-            globalData.map().xfer()
+            std::move(globalData.map())
         )
     );
 }
@@ -1738,14 +1739,14 @@ void Foam::globalMeshData::calcGlobalCoPointSlaves() const
     (
         new labelListList
         (
-            globalData.pointPoints().xfer()
+            std::move(globalData.pointPoints())
         )
     );
     globalCoPointSlavesMapPtr_.reset
     (
         new mapDistribute
         (
-            globalData.map().xfer()
+            std::move(globalData.map())
         )
     );
 

@@ -58,13 +58,6 @@ Foam::PtrList<T>::PtrList(const PtrList<T>& lst, const CloneArg& cloneArg)
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(const Xfer<PtrList<T>>& lst)
-{
-    transfer(lst());
-}
-
-
-template<class T>
 Foam::PtrList<T>::PtrList(PtrList<T>& lst, bool reuse)
 :
     UPtrList<T>(lst, reuse)

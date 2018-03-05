@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -91,12 +91,9 @@ Foam::scalar Foam::extendedEdgeMesh::cosNormalAngleTol_ =
 
 Foam::label Foam::extendedEdgeMesh::convexStart_ = 0;
 
-
 Foam::label Foam::extendedEdgeMesh::externalStart_ = 0;
 
-
 Foam::label Foam::extendedEdgeMesh::nPointTypes = 4;
-
 
 Foam::label Foam::extendedEdgeMesh::nEdgeTypes = 5;
 
@@ -115,11 +112,7 @@ Foam::wordHashSet Foam::extendedEdgeMesh::writeTypes()
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-bool Foam::extendedEdgeMesh::canReadType
-(
-    const word& ext,
-    const bool verbose
-)
+bool Foam::extendedEdgeMesh::canReadType(const word& ext, bool verbose)
 {
     return edgeMeshFormatsCore::checkSupport
     (
@@ -131,11 +124,7 @@ bool Foam::extendedEdgeMesh::canReadType
 }
 
 
-bool Foam::extendedEdgeMesh::canWriteType
-(
-    const word& ext,
-    const bool verbose
-)
+bool Foam::extendedEdgeMesh::canWriteType(const word& ext, bool verbose)
 {
     return edgeMeshFormatsCore::checkSupport
     (
@@ -147,11 +136,7 @@ bool Foam::extendedEdgeMesh::canWriteType
 }
 
 
-bool Foam::extendedEdgeMesh::canRead
-(
-    const fileName& name,
-    const bool verbose
-)
+bool Foam::extendedEdgeMesh::canRead(const fileName& name, bool verbose)
 {
     word ext = name.ext();
     if (ext == "gz")
@@ -395,7 +380,7 @@ void Foam::extendedEdgeMesh::select
 
 Foam::extendedEdgeMesh::extendedEdgeMesh()
 :
-    edgeMesh(pointField(0), edgeList(0)),
+    edgeMesh(pointField(), edgeList()),
     concaveStart_(0),
     mixedStart_(0),
     nonFeatureStart_(0),
@@ -403,6 +388,30 @@ Foam::extendedEdgeMesh::extendedEdgeMesh()
     flatStart_(0),
     openStart_(0),
     multipleStart_(0),
+    normals_(0),
+    normalVolumeTypes_(0),
+    edgeDirections_(0),
+    normalDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    featurePointEdges_(0),
+    regionEdges_(0),
+    pointTree_(),
+    edgeTree_(),
+    edgeTreesByType_()
+{}
+
+
+Foam::extendedEdgeMesh::extendedEdgeMesh(class one::minus)
+:
+    edgeMesh(pointField(), edgeList()),
+    concaveStart_(-1),
+    mixedStart_(-1),
+    nonFeatureStart_(-1),
+    internalStart_(-1),
+    flatStart_(-1),
+    openStart_(-1),
+    multipleStart_(-1),
     normals_(0),
     normalVolumeTypes_(0),
     edgeDirections_(0),
@@ -453,54 +462,24 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const edgeList& edges
 )
 :
-    edgeMesh(points, edges),
-    concaveStart_(0),
-    mixedStart_(0),
-    nonFeatureStart_(0),
-    internalStart_(0),
-    flatStart_(0),
-    openStart_(0),
-    multipleStart_(0),
-    normals_(0),
-    normalVolumeTypes_(0),
-    edgeDirections_(0),
-    normalDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    featurePointEdges_(0),
-    regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
-    edgeTreesByType_()
-{}
+    extendedEdgeMesh()
+{
+    this->storedPoints() = points;
+    this->storedEdges()  = edges;
+}
 
 
 Foam::extendedEdgeMesh::extendedEdgeMesh
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<edgeList>& edgeLst
+    pointField&& points,
+    edgeList&& edges
 )
 :
-    edgeMesh(pointLst, edgeLst),
-    concaveStart_(0),
-    mixedStart_(0),
-    nonFeatureStart_(0),
-    internalStart_(0),
-    flatStart_(0),
-    openStart_(0),
-    multipleStart_(0),
-    normals_(0),
-    normalVolumeTypes_(0),
-    edgeDirections_(0),
-    normalDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    featurePointEdges_(0),
-    regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
-    edgeTreesByType_()
-{}
+    extendedEdgeMesh()
+{
+    this->storedPoints().transfer(points);
+    this->storedEdges().transfer(edges);
+}
 
 
 Foam::extendedEdgeMesh::extendedEdgeMesh
@@ -509,25 +488,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const boolList& surfBaffleRegions
 )
 :
-    edgeMesh(pointField(0), edgeList(0)),
-    concaveStart_(-1),
-    mixedStart_(-1),
-    nonFeatureStart_(-1),
-    internalStart_(-1),
-    flatStart_(-1),
-    openStart_(-1),
-    multipleStart_(-1),
-    normals_(0),
-    normalVolumeTypes_(0),
-    edgeDirections_(0),
-    normalDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    featurePointEdges_(0),
-    regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
-    edgeTreesByType_()
+    extendedEdgeMesh(one::minus())
 {
     // Extract and reorder the data from surfaceFeatures
     const triSurface& surf = sFeat.surface();
@@ -585,30 +546,12 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
 Foam::extendedEdgeMesh::extendedEdgeMesh
 (
     const PrimitivePatch<face, List, pointField, point>& surf,
-    const labelList& featureEdges,
-    const labelList& regionFeatureEdges,
-    const labelList& featurePoints
+    const labelUList& featureEdges,
+    const labelUList& regionFeatureEdges,
+    const labelUList& featurePoints
 )
 :
-    edgeMesh(pointField(0), edgeList(0)),
-    concaveStart_(-1),
-    mixedStart_(-1),
-    nonFeatureStart_(-1),
-    internalStart_(-1),
-    flatStart_(-1),
-    openStart_(-1),
-    multipleStart_(-1),
-    normals_(0),
-    normalVolumeTypes_(0),
-    edgeDirections_(0),
-    normalDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    featurePointEdges_(0),
-    regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
-    edgeTreesByType_()
+    extendedEdgeMesh(one::minus())
 {
     sortPointsAndEdges
     (
@@ -669,25 +612,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
     const word& ext
 )
 :
-    edgeMesh(pointField(0), edgeList(0)),
-    concaveStart_(0),
-    mixedStart_(0),
-    nonFeatureStart_(0),
-    internalStart_(0),
-    flatStart_(0),
-    openStart_(0),
-    multipleStart_(0),
-    normals_(0),
-    normalVolumeTypes_(0),
-    edgeDirections_(0),
-    normalDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    featurePointEdges_(0),
-    regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
-    edgeTreesByType_()
+    extendedEdgeMesh()
 {
     read(name, ext);
 }
@@ -695,25 +620,7 @@ Foam::extendedEdgeMesh::extendedEdgeMesh
 
 Foam::extendedEdgeMesh::extendedEdgeMesh(const fileName& name)
 :
-    edgeMesh(pointField(0), edgeList(0)),
-    concaveStart_(0),
-    mixedStart_(0),
-    nonFeatureStart_(0),
-    internalStart_(0),
-    flatStart_(0),
-    openStart_(0),
-    multipleStart_(0),
-    normals_(0),
-    normalVolumeTypes_(0),
-    edgeDirections_(0),
-    normalDirections_(0),
-    edgeNormals_(0),
-    featurePointNormals_(0),
-    featurePointEdges_(0),
-    regionEdges_(0),
-    pointTree_(),
-    edgeTree_(),
-    edgeTreesByType_()
+    extendedEdgeMesh()
 {
     read(name);
 }
@@ -735,10 +642,8 @@ bool Foam::extendedEdgeMesh::read(const fileName& name)
         fileName unzipName = name.lessExt();
         return read(unzipName, unzipName.ext());
     }
-    else
-    {
-        return read(name, ext);
-    }
+
+    return read(name, ext);
 }
 
 
@@ -1098,12 +1003,8 @@ void Foam::extendedEdgeMesh::transfer(extendedEdgeMesh& mesh)
     pointTree_ = std::move(mesh.pointTree_);
     edgeTree_ = std::move(mesh.edgeTree_);
     edgeTreesByType_.transfer(mesh.edgeTreesByType_);
-}
 
-
-Foam::Xfer<Foam::extendedEdgeMesh> Foam::extendedEdgeMesh::xfer()
-{
-    return xferMoveTo<extendedEdgeMesh, extendedEdgeMesh>(*this);
+    mesh.clear();
 }
 
 
@@ -1376,7 +1277,10 @@ void Foam::extendedEdgeMesh::add(const extendedEdgeMesh& fem)
     nonFeatureStart_ = newNonFeatureStart;
 
     // Reset points and edges
-    reset(xferMove(newPoints), newEdges.xfer());
+    {
+        edgeMesh newmesh(std::move(newPoints), std::move(newEdges));
+        edgeMesh::transfer(newmesh);
+    }
 
     // Transfer
     internalStart_ = newInternalStart;
@@ -1489,7 +1393,10 @@ void Foam::extendedEdgeMesh::flipNormals()
     concaveStart_ = newConcaveStart;
 
     // Reset points and edges
-    reset(xferMove(newPoints), newEdges.xfer());
+    {
+        edgeMesh newmesh(std::move(newPoints), std::move(newEdges));
+        edgeMesh::transfer(newmesh);
+    }
 
     // Transfer
     internalStart_ = newInternalStart;

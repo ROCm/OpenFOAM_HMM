@@ -91,9 +91,9 @@ public:
         (
             const IOobject&,
             const PrimitivePatch<face, List, pointField, point>& surf,
-            const labelList& featureEdges,
-            const labelList& regionFeatureEdges,
-            const labelList& featurePoints
+            const labelUList& featureEdges,
+            const labelUList& regionFeatureEdges,
+            const labelUList& featurePoints
         );
 
         //- Construct from all components

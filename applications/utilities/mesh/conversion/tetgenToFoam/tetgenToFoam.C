@@ -318,25 +318,22 @@ int main(int argc, char *argv[])
     // Construct mesh with default boundary only
     //
 
-    autoPtr<polyMesh> meshPtr
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                polyMesh::defaultRegion,
-                runTime.constant(),
-                runTime
-            ),
-            xferCopy(points),
-            cells,
-            faceListList(0),
-            wordList(0),    // boundaryPatchNames
-            wordList(0),    // boundaryPatchTypes
-            "defaultFaces",
-            polyPatch::typeName,
-            wordList(0)
-        )
+            polyMesh::defaultRegion,
+            runTime.constant(),
+            runTime
+        ),
+        pointField(points),  // Copy of points
+        cells,
+        faceListList(),
+        wordList(),          // boundaryPatchNames
+        wordList(),          // boundaryPatchTypes
+        "defaultFaces",
+        polyPatch::typeName,
+        wordList()
     );
     const polyMesh& mesh = *meshPtr;
 
@@ -531,7 +528,7 @@ int main(int argc, char *argv[])
                     runTime.constant(),
                     runTime
                 ),
-                xferMove(points),
+                std::move(points),
                 cells,
                 patchFaces,
                 patchNames,

@@ -180,17 +180,6 @@ inline Foam::DynamicList<T, SizeMin>::DynamicList
 template<class T, int SizeMin>
 inline Foam::DynamicList<T, SizeMin>::DynamicList
 (
-    const Xfer<List<T>>& lst
-)
-:
-    List<T>(lst),
-    capacity_(List<T>::size())
-{}
-
-
-template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>::DynamicList
-(
     DynamicList<T, SizeMin>&& lst
 )
 :
@@ -467,14 +456,6 @@ Foam::DynamicList<T, SizeMin>::transfer
     lst.shrink();  // Shrink away sort indices
     capacity_ = lst.size(); // Capacity after transfer == list size
     List<T>::transfer(lst);
-}
-
-
-template<class T, int SizeMin>
-inline Foam::Xfer<Foam::List<T>>
-Foam::DynamicList<T, SizeMin>::xfer()
-{
-    return xferMoveTo<List<T>>(*this);
 }
 
 

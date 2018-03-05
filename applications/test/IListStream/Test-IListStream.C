@@ -102,7 +102,14 @@ int main(int argc, char *argv[])
 
     Info<< "transfer contents to a List" << endl;
 
-    IListStream ibuf(obuf.xfer());
+    IListStream ibuf;
+
+    // Reclaim data storage from OListStream -> IListStream
+    {
+        List<char> data;
+        obuf.swap(data);
+        ibuf.swap(data);
+    }
 
     Info<< nl;
     Info<< nl << "input string:";

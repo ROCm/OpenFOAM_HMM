@@ -279,15 +279,11 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     }
 
 
-    // Construct map
-    return autoPtr<mapDistributeBase>
+    return autoPtr<mapDistributeBase>::New
     (
-        new mapDistributeBase
-        (
-            constructSize,
-            subMap.xfer(),
-            constructMap.xfer()
-        )
+        constructSize,
+        std::move(subMap),
+        std::move(constructMap)
     );
 }
 

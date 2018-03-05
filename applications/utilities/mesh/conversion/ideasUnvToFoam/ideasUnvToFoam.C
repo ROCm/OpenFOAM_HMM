@@ -1128,17 +1128,13 @@ int main(int argc, char *argv[])
             << nl << endl;
 
         // Create globally numbered surface
-        meshedSurface rawSurface
-        (
-            xferCopy(polyPoints),
-            xferCopyTo<faceList>(boundaryFaces)
-        );
+        meshedSurface rawSurface(polyPoints, boundaryFaces);
 
         // Write locally numbered surface
         meshedSurface
         (
-            xferCopy(rawSurface.localPoints()),
-            xferCopy(rawSurface.localFaces())
+            rawSurface.localPoints(),
+            rawSurface.localFaces()
         ).write(runTime.path()/"boundaryFaces.obj");
     }
 
@@ -1171,14 +1167,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(polyPoints),
+        std::move(polyPoints),
         cellVerts,
-        usedPatchFaceVerts,             // boundaryFaces,
-        usedPatchNames,                 // boundaryPatchNames,
+        usedPatchFaceVerts,     // boundaryFaces,
+        usedPatchNames,         // boundaryPatchNames,
         wordList(patchNames.size(), polyPatch::typeName), // boundaryPatchTypes,
-        "defaultFaces",             // defaultFacesName
-        polyPatch::typeName,        // defaultFacesType,
-        wordList(0)                 // boundaryPatchPhysicalTypes
+        "defaultFaces",         // defaultFacesName
+        polyPatch::typeName,    // defaultFacesType,
+        wordList()              // boundaryPatchPhysicalTypes
     );
 
     // Remove files now, to ensure all mesh files written are consistent.

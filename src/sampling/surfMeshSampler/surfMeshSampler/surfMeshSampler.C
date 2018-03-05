@@ -53,8 +53,7 @@ Foam::surfMeshSampler::getOrCreateSurfMesh() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            xferCopy(pointField()), // initially no points
-            xferCopy(faceList()),   // initially no faces
+            meshedSurface(),    // Create as empty surface
             name()
         );
         ptr->setWriteOption(IOobject::NO_WRITE);

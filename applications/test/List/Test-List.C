@@ -190,8 +190,8 @@ int main(int argc, char *argv[])
     list2.setSize(10, vector(1, 2, 3));
     Info<< "list2: " << list2 << endl;
 
-    List<vector> list3(list2.xfer());
-    Info<< "Transferred via the xfer() method" << endl;
+    List<vector> list3(std::move(list2));
+    Info<< "Move construct" << endl;
     Info<< "list2: " << list2 << nl
         << "list3: " << list3 << endl;
 

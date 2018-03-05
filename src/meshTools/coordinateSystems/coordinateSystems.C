@@ -89,20 +89,20 @@ Foam::coordinateSystems::coordinateSystems(const IOobject& io)
 Foam::coordinateSystems::coordinateSystems
 (
     const IOobject& io,
-    const PtrList<coordinateSystem>& lst
+    const PtrList<coordinateSystem>& content
 )
 :
-    IOPtrList<coordinateSystem>(io, lst)
+    IOPtrList<coordinateSystem>(io, content)
 {}
 
 
 Foam::coordinateSystems::coordinateSystems
 (
     const IOobject& io,
-    const Xfer<PtrList<coordinateSystem>>& lst
+    PtrList<coordinateSystem>&& content
 )
 :
-    IOPtrList<coordinateSystem>(io, lst)
+    IOPtrList<coordinateSystem>(io, std::move(content))
 {}
 
 

@@ -1328,10 +1328,10 @@ void Foam::polyDualMesh::calcDual
     // Assign to mesh.
     resetPrimitives
     (
-        xferMove(dualPoints),
-        xferMove(dualFaces),
-        xferMove(dualOwner),
-        xferMove(dualNeighbour),
+        autoPtr<pointField>::New(std::move(dualPoints)),
+        autoPtr<faceList>::New(std::move(dualFaces)),
+        autoPtr<labelList>::New(std::move(dualOwner)),
+        autoPtr<labelList>::New(std::move(dualNeighbour)),
         patchSizes,
         patchStarts
     );
@@ -1379,13 +1379,7 @@ Foam::polyDualMesh::polyDualMesh
     const labelList& featurePoints
 )
 :
-    polyMesh
-    (
-        mesh,
-        xferCopy(pointField()),// to prevent any warnings "points not allocated"
-        xferCopy(faceList()),  // to prevent any warnings "faces  not allocated"
-        xferCopy(cellList())
-    ),
+    polyMesh(mesh, Zero),
     cellPoint_
     (
         IOobject
@@ -1424,13 +1418,7 @@ Foam::polyDualMesh::polyDualMesh
     const scalar featureCos
 )
 :
-    polyMesh
-    (
-        mesh,
-        xferCopy(pointField()),// to prevent any warnings "points not allocated"
-        xferCopy(faceList()),  // to prevent any warnings "faces  not allocated"
-        xferCopy(cellList())
-    ),
+    polyMesh(mesh, Zero),
     cellPoint_
     (
         IOobject

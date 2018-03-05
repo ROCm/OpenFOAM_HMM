@@ -454,17 +454,12 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
         }
     }
 
-    autoPtr<mapDistribute> mapPtr
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmentI,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmentI, // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
-
-    return mapPtr;
 }
 
 

@@ -466,10 +466,10 @@ const Foam::meshedSurface& Foam::ensightSurfaceReader::geometry()
             }
         }
 
-        surfPtr_.reset(new meshedSurface(xferMove(points), faces.xfer()));
+        surfPtr_.reset(new meshedSurface(std::move(points), std::move(faces)));
     }
 
-    return surfPtr_();
+    return *surfPtr_;
 }
 
 

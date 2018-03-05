@@ -99,16 +99,6 @@ Foam::CompactListList<T, Container>::CompactListList
 }
 
 
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList
-(
-    const Xfer<CompactListList<T, Container>>& lst
-)
-{
-    transfer(lst());
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T, class Container>

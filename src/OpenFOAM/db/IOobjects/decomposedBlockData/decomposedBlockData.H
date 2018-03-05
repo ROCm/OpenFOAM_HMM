@@ -87,7 +87,7 @@ public:
         decomposedBlockData
         (
             const label comm,
-            const IOobject&,
+            const IOobject& io,
             const UPstream::commsTypes = UPstream::commsTypes::scheduled
         );
 
@@ -95,17 +95,17 @@ public:
         decomposedBlockData
         (
             const label comm,
-            const IOobject&,
-            const UList<char>&,
+            const IOobject& io,
+            const UList<char>& list,
             const UPstream::commsTypes = UPstream::commsTypes::scheduled
         );
 
-        //- Construct by transferring the IOList contents
+        //- Construct by transferring the List contents
         decomposedBlockData
         (
             const label comm,
-            const IOobject&,
-            const Xfer<List<char>>&,
+            const IOobject& io,
+            List<char>&& list,
             const UPstream::commsTypes = UPstream::commsTypes::scheduled
         );
 

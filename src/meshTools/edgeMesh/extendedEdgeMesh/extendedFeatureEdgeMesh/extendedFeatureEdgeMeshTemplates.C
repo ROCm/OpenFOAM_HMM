@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -361,7 +361,10 @@ void Foam::extendedFeatureEdgeMesh::sortPointsAndEdges
 
     // Reinitialise the edgeMesh with sorted feature points and
     // renumbered edges
-    reset(xferMove(pts), xferMove(eds));
+    {
+        edgeMesh newmesh(std::move(pts), std::move(eds));
+        edgeMesh::transfer(newmesh);
+    }
 
     // Generate the featurePointNormals
 

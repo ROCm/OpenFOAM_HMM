@@ -122,20 +122,6 @@ Foam::zone::zone
 Foam::zone::zone
 (
     const word& name,
-    const Xfer<labelList>& addr,
-    const label index
-)
-:
-    labelList(addr),
-    name_(name),
-    index_(index),
-    lookupMapPtr_(nullptr)
-{}
-
-
-Foam::zone::zone
-(
-    const word& name,
     const dictionary& dict,
     const word& labelsName,
     const label index
@@ -170,20 +156,6 @@ Foam::zone::zone
 )
 :
     labelList(std::move(addr)),
-    name_(origZone.name()),
-    index_(index),
-    lookupMapPtr_(nullptr)
-{}
-
-
-Foam::zone::zone
-(
-    const zone& origZone,
-    const Xfer<labelList>& addr,
-    const label index
-)
-:
-    labelList(addr),
     name_(origZone.name()),
     index_(index),
     lookupMapPtr_(nullptr)

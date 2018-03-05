@@ -80,7 +80,7 @@ void Foam::searchableSurfaceModifiers::cut::triangulate
             patchI
         );
     }
-    cutSurf = triSurface(tris.xfer(), patches, pts.xfer());
+    cutSurf = triSurface(tris, patches, pts, true);
 }
 
 
@@ -331,12 +331,12 @@ bool Foam::searchableSurfaceModifiers::cut::modify
             {
                 if (volTypes[i] == volumeType::INSIDE)
                 {
-                    nInside++;
+                    ++nInside;
                 }
             }
 
             // Add a patch for inside the box
-            if (nInside > 0 && surf3.patches().size() > 0)
+            if (nInside && surf3.patches().size() > 0)
             {
                 geometricSurfacePatchList newPatches(surf3.patches());
                 label sz = newPatches.size();
@@ -362,7 +362,7 @@ bool Foam::searchableSurfaceModifiers::cut::modify
                     }
                 }
                 pointField newPoints(surf3.points());
-                surf = triSurface(newTris.xfer(), newPatches, newPoints.xfer());
+                surf = triSurface(newTris, newPatches, newPoints, true);
 
                 changed = true;
             }

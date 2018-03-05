@@ -171,7 +171,7 @@ bool Foam::triSurface::read
         using proxyType = UnsortedMeshedSurface<labelledTri>;
         if (proxyType::readTypes().found(ext))
         {
-            reset(proxyType::New(name, ext)());
+            transfer(*(proxyType::New(name, ext)));
             return true;
         }
     }
@@ -181,7 +181,7 @@ bool Foam::triSurface::read
         using proxyType = MeshedSurface<labelledTri>;
         if (proxyType::readTypes().found(ext))
         {
-            reset(proxyType::New(name, ext)());
+            transfer(*(proxyType::New(name, ext)));
             return true;
         }
     }

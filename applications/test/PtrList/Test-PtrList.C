@@ -147,8 +147,8 @@ int main(int argc, char *argv[])
 
     Info<<"list1: " << list1 << endl;
 
-    PtrList<Scalar> list3(list1.xfer());
-    Info<< "Transferred via the xfer() method" << endl;
+    PtrList<Scalar> list3(std::move(list1));
+    Info<<"Move constructed" << endl;
 
     Info<<"list1: " << list1 << nl
         <<"list2: " << list2 << nl

@@ -417,21 +417,21 @@ public:
         //  reading entries until EOF, optionally keeping the header
         dictionary(Istream& is, bool keepHeader);
 
-        //- Construct as copy given the parent dictionary
+        //- Copy construct given the parent dictionary
         dictionary(const dictionary& parentDict, const dictionary& dict);
 
-        //- Construct top-level dictionary as copy
+        //- Copy construct top-level dictionary
         dictionary(const dictionary& dict);
 
         //- Construct top-level dictionary as copy from pointer to dictionary.
         //  A null pointer is treated like an empty dictionary.
         dictionary(const dictionary* dictPtr);
 
-        //- Construct by transferring parameter contents given parent dictionary
-        dictionary(const dictionary& parentDict, const Xfer<dictionary>& dict);
+        //- Move construct for given parent dictionary
+        dictionary(const dictionary& parentDict, dictionary&& dict);
 
-        //- Construct top-level dictionary by transferring parameter contents
-        dictionary(const Xfer<dictionary>& dict);
+        //- Move construct top-level dictionary
+        dictionary(dictionary&& dict);
 
         //- Construct and return clone
         autoPtr<dictionary> clone() const;
@@ -773,9 +773,6 @@ public:
 
         //- Transfer the contents of the argument and annul the argument.
         void transfer(dictionary& dict);
-
-        //- Transfer contents to the Xfer container
-        Xfer<dictionary> xfer();
 
 
       // Read

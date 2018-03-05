@@ -1,8 +1,5 @@
 Info<< "Constructing single cell mesh" << nl << endl;
 
-labelList owner(6, label(0));
-labelList neighbour(0);
-
 pointField points(8);
 points[0] = vector(0, 0, 0);
 points[1] = vector(1, 0, 0);
@@ -24,10 +21,10 @@ fvMesh mesh
         runTime,
         IOobject::READ_IF_PRESENT
     ),
-    xferMove<pointField>(points),
-    faces.xfer(),
-    owner.xfer(),
-    neighbour.xfer()
+    std::move(points),
+    std::move(faces),
+    labelList(6, Zero), // owner
+    labelList()         // neighbour
 );
 
 List<polyPatch*> patches(1);

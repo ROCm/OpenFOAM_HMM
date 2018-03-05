@@ -32,7 +32,7 @@ template<>
 Foam::tmp<Foam::scalarField>
 Foam::symmetryPlaneFvPatchField<Foam::scalar>::snGrad() const
 {
-    return tmp<scalarField>::New(size(), 0.0);
+    return tmp<scalarField>::New(size(), Zero);
 }
 
 

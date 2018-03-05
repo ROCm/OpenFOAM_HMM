@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
 
         // Gather all ZoneIDs
         List<labelList> gatheredZones(Pstream::nProcs());
-        gatheredZones[Pstream::myProcNo()] = compactZones.xfer();
+        gatheredZones[Pstream::myProcNo()].transfer(compactZones);
         Pstream::gatherList(gatheredZones);
 
         // On master combine all points, faces, zones
@@ -404,10 +404,10 @@ int main(int argc, char *argv[])
 
             UnsortedMeshedSurface<face> unsortedFace
             (
-                xferMove(allPoints),
-                xferMove(allFaces),
-                xferMove(allZones),
-                xferMove(surfZones)
+                std::move(allPoints),
+                std::move(allFaces),
+                std::move(allZones),
+                surfZones
             );
 
 

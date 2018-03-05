@@ -490,8 +490,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
             new mapDistribute
             (
                 compacti,
-                tgtSubMap.xfer(),
-                tgtConstructMap.xfer()
+                std::move(tgtSubMap),
+                std::move(tgtConstructMap)
             )
         );
     }
