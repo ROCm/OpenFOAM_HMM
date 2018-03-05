@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -790,10 +790,10 @@ void Foam::meshToMesh::constructFromCuttingPatches
     DynamicList<label> srcIDs(patchMap.size());
     DynamicList<label> tgtIDs(patchMap.size());
 
-    forAllConstIter(HashTable<word>, patchMap, iter)
+    forAllConstIters(patchMap, iter)
     {
         const word& tgtPatchName = iter.key();
-        const word& srcPatchName = iter();
+        const word& srcPatchName = iter.object();
 
         const polyPatch& srcPatch = srcBm[srcPatchName];
 

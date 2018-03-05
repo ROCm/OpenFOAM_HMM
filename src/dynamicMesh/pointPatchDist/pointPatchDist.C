@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,9 +70,8 @@ void Foam::pointPatchDist::correct()
 
     label nPoints = 0;
 
-    forAllConstIter(labelHashSet, patchIDs_, iter)
+    for (const label patchi : patchIDs_)
     {
-        label patchi = iter.key();
         nPoints += pbm[patchi].meshPoints().size();
     }
 
@@ -83,9 +82,8 @@ void Foam::pointPatchDist::correct()
     labelList wallPoints(nPoints);
     nPoints = 0;
 
-    forAllConstIter(labelHashSet, patchIDs_, iter)
+    for (const label patchi : patchIDs_)
     {
-        label patchi = iter.key();
         // Retrieve the patch now we have its index in patches.
 
         const labelList& mp = pbm[patchi].meshPoints();

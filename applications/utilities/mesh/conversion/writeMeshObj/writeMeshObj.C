@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -360,9 +360,9 @@ void writePointCells
 
     label vertI = 0;
 
-    forAllConstIter(labelHashSet, allEdges, iter)
+    for (const label edgei : allEdges)
     {
-        const edge& e = mesh.edges()[iter.key()];
+        const edge& e = mesh.edges()[edgei];
 
         meshTools::writeOBJ(pointStream, mesh.points()[e[0]]); vertI++;
         meshTools::writeOBJ(pointStream, mesh.points()[e[1]]); vertI++;

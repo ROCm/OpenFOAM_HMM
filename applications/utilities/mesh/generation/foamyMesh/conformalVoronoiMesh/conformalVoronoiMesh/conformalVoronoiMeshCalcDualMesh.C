@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -886,10 +886,10 @@ void Foam::conformalVoronoiMesh::checkCellSizing()
         labelHashSet cellsToResizeMap(pMesh.nFaces()/100);
 
         // Find cells that are attached to the faces in wrongFaces.
-        forAllConstIter(labelHashSet, wrongFaces, iter)
+        for (const label facei : wrongFaces)
         {
-            const label faceOwner = pMesh.faceOwner()[iter.key()];
-            const label faceNeighbour = pMesh.faceNeighbour()[iter.key()];
+            const label faceOwner = pMesh.faceOwner()[facei];
+            const label faceNeighbour = pMesh.faceNeighbour()[facei];
 
             if (!cellsToResizeMap.found(faceOwner))
             {
@@ -1105,9 +1105,9 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     bitSet ptToBeLimited(pts.size(), false);
 
-    forAllConstIter(labelHashSet, wrongFaces, iter)
+    for (const label facei : wrongFaces)
     {
-        const face f = pMesh.faces()[iter.key()];
+        const face f = pMesh.faces()[facei];
 
         ptToBeLimited.setMany(f);
     }
@@ -1118,9 +1118,9 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     // const labelListList& ptCells = pMesh.pointCells();
 
-    // forAllConstIter(labelHashSet, wrongFaces, iter)
+    // for (const label facei : wrongFaces)
     // {
-    //     const face f = pMesh.faces()[iter.key()];
+    //     const face f = pMesh.faces()[facei];
 
     //     forAll(f, fPtI)
     //     {
@@ -1132,10 +1132,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     // const labelListList& cellPts = pMesh.cellPoints();
 
-    // forAllConstIter(labelHashSet, limitCells, iter)
+    // for (const label celli : limitCells)
     // {
-    //     label celli = iter.key();
-
     //     const labelList& cP = cellPts[celli];
 
     //     ptToBeLimited.setMany(cP);

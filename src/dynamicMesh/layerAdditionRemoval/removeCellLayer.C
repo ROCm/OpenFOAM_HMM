@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -153,9 +153,9 @@ void Foam::layerAdditionRemoval::removeCellLayer
         }
     }
 
-    forAllConstIter(labelHashSet, facesToRemoveMap, iter)
+    for (const label facei : facesToRemoveMap)
     {
-        ref.setAction(polyRemoveFace(iter.key()));
+        ref.setAction(polyRemoveFace(facei));
     }
 
     // Remove all points that will be collapsed

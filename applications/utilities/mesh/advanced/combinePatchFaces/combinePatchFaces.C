@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -92,12 +92,12 @@ label mergePatchFaces
     {
         // Store the faces of the face sets
         List<faceList> allFaceSetsFaces(allFaceSets.size());
-        forAll(allFaceSets, setI)
+        forAll(allFaceSets, seti)
         {
-            allFaceSetsFaces[setI] = UIndirectList<face>
+            allFaceSetsFaces[seti] = UIndirectList<face>
             (
                 mesh.faces(),
-                allFaceSets[setI]
+                allFaceSets[seti]
             );
         }
 
@@ -146,13 +146,13 @@ label mergePatchFaces
         // Sets where the master is in error
         labelHashSet errorSets;
 
-        forAll(allFaceSets, setI)
+        forAll(allFaceSets, seti)
         {
-            label newMasterI = map().reverseFaceMap()[allFaceSets[setI][0]];
+            label newMasterI = map().reverseFaceMap()[allFaceSets[seti][0]];
 
             if (errorFaces.found(newMasterI))
             {
-                errorSets.insert(setI);
+                errorSets.insert(seti);
             }
         }
         label nErrorSets = returnReduce(errorSets.size(), sumOp<label>());
@@ -162,14 +162,12 @@ label mergePatchFaces
             << " These will be restored to their original faces."
             << endl;
 
-        if (nErrorSets > 0)
+        if (nErrorSets)
         {
             // Renumber stored faces to new vertex numbering.
-            forAllConstIter(labelHashSet, errorSets, iter)
+            for (const label seti : errorSets)
             {
-                label setI = iter.key();
-
-                faceList& setFaceVerts = allFaceSetsFaces[setI];
+                faceList& setFaceVerts = allFaceSetsFaces[seti];
 
                 forAll(setFaceVerts, i)
                 {
@@ -183,8 +181,8 @@ label mergePatchFaces
                         if (newVertI < 0)
                         {
                             FatalErrorInFunction
-                                << "In set:" << setI << " old face labels:"
-                                << allFaceSets[setI] << " new face vertices:"
+                                << "In set:" << seti << " old face labels:"
+                                << allFaceSets[seti] << " new face vertices:"
                                 << setFaceVerts[i] << " are unmapped vertices!"
                                 << abort(FatalError);
                         }
@@ -198,12 +196,10 @@ label mergePatchFaces
 
 
             // Restore faces
-            forAllConstIter(labelHashSet, errorSets, iter)
+            for (const label seti : errorSets)
             {
-                label setI = iter.key();
-
-                const labelList& setFaces = allFaceSets[setI];
-                const faceList& setFaceVerts = allFaceSetsFaces[setI];
+                const labelList& setFaces = allFaceSets[seti];
+                const faceList& setFaceVerts = allFaceSetsFaces[seti];
 
                 label newMasterI = map().reverseFaceMap()[setFaces[0]];
 
@@ -241,7 +237,7 @@ label mergePatchFaces
 
 
                 // Add the previously removed faces
-                for (label i = 1; i < setFaces.size(); i++)
+                for (label i = 1; i < setFaces.size(); ++i)
                 {
                     Pout<< "Restoring removed face " << setFaces[i]
                         << " with vertices " << setFaceVerts[i] << endl;

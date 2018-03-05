@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -309,10 +309,8 @@ Foam::labelListList Foam::combineFaces::getMergeSets
     DynamicList<label> storage;
 
     // On all cells regionise the faces
-    forAllConstIter(labelHashSet, boundaryCells, iter)
+    for (const label celli : boundaryCells)
     {
-        label celli = iter.key();
-
         const cell& cFaces = mesh_.cells()[celli];
 
         const labelList& cEdges = mesh_.cellEdges(celli, set, storage);

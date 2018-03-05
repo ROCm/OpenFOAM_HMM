@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -339,16 +339,17 @@ void subsetTopoSets
 
         // Map the data
         bitSet isSet(set.maxSize(mesh));
-        forAllConstIter(labelHashSet, set, iter)
+        for (const label id : set)
         {
-            isSet.set(iter.key());
+            isSet.set(id);
         }
+
         label nSet = 0;
-        forAll(map, i)
+        for (const label id : map)
         {
-            if (isSet[map[i]])
+            if (isSet.test(id))
             {
-                nSet++;
+                ++nSet;
             }
         }
 
@@ -358,9 +359,10 @@ void subsetTopoSets
             new TopoSet(subMesh, set.name(), nSet, IOobject::AUTO_WRITE)
         );
         TopoSet& subSet = subSets[i];
+
         forAll(map, i)
         {
-            if (isSet[map[i]])
+            if (isSet.test(map[i]))
             {
                 subSet.insert(i);
             }

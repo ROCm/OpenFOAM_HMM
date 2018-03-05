@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -593,31 +593,29 @@ const Foam::labelList& Foam::primitiveMesh::faceEdges
     {
         return faceEdges()[facei];
     }
-    else
+
+    const labelListList& pointEs = pointEdges();
+    const face& f = faces()[facei];
+
+    storage.clear();
+    if (f.size() > storage.capacity())
     {
-        const labelListList& pointEs = pointEdges();
-        const face& f = faces()[facei];
-
-        storage.clear();
-        if (f.size() > storage.capacity())
-        {
-            storage.setCapacity(f.size());
-        }
-
-        forAll(f, fp)
-        {
-            storage.append
-            (
-                findFirstCommonElementFromSortedLists
-                (
-                    pointEs[f[fp]],
-                    pointEs[f.nextLabel(fp)]
-                )
-            );
-        }
-
-        return storage;
+        storage.setCapacity(f.size());
     }
+
+    forAll(f, fp)
+    {
+        storage.append
+        (
+            findFirstCommonElementFromSortedLists
+            (
+                pointEs[f[fp]],
+                pointEs[f.nextLabel(fp)]
+            )
+        );
+    }
+
+    return storage;
 }
 
 
@@ -638,30 +636,28 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
     {
         return cellEdges()[celli];
     }
-    else
+
+    const labelList& cFaces = cells()[celli];
+
+    set.clear();
+
+    for (const label facei : cFaces)
     {
-        const labelList& cFaces = cells()[celli];
-
-        set.clear();
-
-        for (const label facei : cFaces)
-        {
-            set.insertMany(faceEdges(facei));
-        }
-
-        storage.clear();
-        if (set.size() > storage.capacity())
-        {
-            storage.setCapacity(set.size());
-        }
-
-        for (const label edgei : set)
-        {
-            storage.append(edgei);
-        }
-
-        return storage;
+        set.insertMany(faceEdges(facei));
     }
+
+    storage.clear();
+    if (set.size() > storage.capacity())
+    {
+        storage.setCapacity(set.size());
+    }
+
+    for (const label edgei : set)
+    {
+        storage.append(edgei);
+    }
+
+    return storage;
 }
 
 

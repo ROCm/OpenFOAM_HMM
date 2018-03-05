@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -360,10 +360,8 @@ void Foam::removePoints::setRefinement
     }
     label nSaved = 0;
 
-    forAllConstIter(labelHashSet, facesAffected, iter)
+    for (const label facei : facesAffected)
     {
-        label facei = iter.key();
-
         const face& f = mesh_.faces()[facei];
 
         face newFace(f.size());

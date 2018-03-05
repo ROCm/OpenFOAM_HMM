@@ -244,9 +244,9 @@ bool Foam::functionObjects::ensightWrite::write()
         }
     }
 
-    forAllConstIter(wordHashSet, candidates, iter)
+    for (const word& cand : candidates)
     {
-        process(iter.key());
+        process(cand);
     }
 
     Log << " )" << endl;

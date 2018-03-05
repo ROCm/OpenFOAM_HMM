@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ injectionModelList::injectionModelList
     wordHashSet models(activeModels);
 
     Info<< "    Selecting film injection models" << endl;
-    if (models.size() > 0)
+    if (models.size())
     {
         this->setSize(models.size());
 

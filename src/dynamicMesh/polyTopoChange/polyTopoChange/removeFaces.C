@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -170,9 +170,9 @@ Foam::boolList Foam::removeFaces::getFacesAffected
     }
 
     //  Mark faces affected by removal of edges
-    forAllConstIter(labelHashSet, edgesToRemove, iter)
+    for (const label edgei : edgesToRemove)
     {
-        const labelList& eFaces = mesh_.edgeFaces(iter.key());
+        const labelList& eFaces = mesh_.edgeFaces(edgei);
 
         forAll(eFaces, eFacei)
         {
@@ -181,10 +181,8 @@ Foam::boolList Foam::removeFaces::getFacesAffected
     }
 
     // Mark faces affected by removal of points
-    forAllConstIter(labelHashSet, pointsToRemove, iter)
+    for (const label pointi : pointsToRemove)
     {
-        label pointi = iter.key();
-
         const labelList& pFaces = mesh_.pointFaces()[pointi];
 
         forAll(pFaces, pFacei)
@@ -1100,10 +1098,10 @@ void Foam::removeFaces::setRefinement
             Pout<< "Dumping edgesToRemove to " << str.name() << endl;
             label vertI = 0;
 
-            forAllConstIter(labelHashSet, edgesToRemove, iter)
+            for (const label edgei : edgesToRemove)
             {
                 // Edge will get removed.
-                const edge& e = mesh_.edges()[iter.key()];
+                const edge& e = mesh_.edges()[edgei];
 
                 meshTools::writeOBJ(str, mesh_.points()[e[0]]);
                 vertI++;
@@ -1260,10 +1258,10 @@ void Foam::removeFaces::setRefinement
             nEdgesPerPoint[pointi] = pointEdges[pointi].size();
         }
 
-        forAllConstIter(labelHashSet, edgesToRemove, iter)
+        for (const label edgei : edgesToRemove)
         {
             // Edge will get removed.
-            const edge& e = mesh_.edges()[iter.key()];
+            const edge& e = mesh_.edges()[edgei];
 
             forAll(e, i)
             {
@@ -1318,9 +1316,9 @@ void Foam::removeFaces::setRefinement
         OFstream str(mesh_.time().path()/"pointsToRemove.obj");
         Pout<< "Dumping pointsToRemove to " << str.name() << endl;
 
-        forAllConstIter(labelHashSet, pointsToRemove, iter)
+        for (const label pointi : pointsToRemove)
         {
-            meshTools::writeOBJ(str, mesh_.points()[iter.key()]);
+            meshTools::writeOBJ(str, mesh_.points()[pointi]);
         }
     }
 
@@ -1374,10 +1372,8 @@ void Foam::removeFaces::setRefinement
 
 
     // Remove points.
-    forAllConstIter(labelHashSet, pointsToRemove, iter)
+    for (const label pointi : pointsToRemove)
     {
-        label pointi = iter.key();
-
         meshMod.setAction(polyRemovePoint(pointi, -1));
     }
 

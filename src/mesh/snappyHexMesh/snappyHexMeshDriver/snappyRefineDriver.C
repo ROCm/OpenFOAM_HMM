@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1074,7 +1074,7 @@ Foam::label Foam::snappyRefineDriver::refinementInterfaceRefine
 
                 //forAllConstIter(cellSet, transitionCells, iter)
                 //{
-                //    label celli = iter.key();
+                //    const label celli : iter.key();
                 //    const cell& cFaces = cells[celli];
                 //    const point& cc = cellCentres[celli];
                 //    const scalar rCVol = pow(cellVolumes[celli], -5.0/3.0);
@@ -1859,10 +1859,10 @@ void Foam::snappyRefineDriver::addFaceZones
         const polyMesh& mesh = meshRefiner.mesh();
 
         // Add patches for added inter-region faceZones
-        forAllConstIter(HashTable<Pair<word>>, faceZoneToPatches, iter)
+        forAllConstIters(faceZoneToPatches, iter)
         {
             const word& fzName = iter.key();
-            const Pair<word>& patchNames = iter();
+            const Pair<word>& patchNames = iter.object();
 
             // Get any user-defined faceZone data
             surfaceZonesInfo::faceZoneType fzType;

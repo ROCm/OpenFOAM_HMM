@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -424,10 +424,8 @@ Foam::labelList Foam::globalIndexAndTransform::transformIndicesForPatches
         return selectedTransformIs;
     }
 
-    forAllConstIter(labelHashSet, patchis, iter)
+    for (const label patchi : patchis)
     {
-        label patchi = iter.key();
-
         const labelPair& transSign = patchTransformSign_[patchi];
 
         label matchTransI = transSign.first();

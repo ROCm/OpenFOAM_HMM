@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,9 +58,8 @@ void Foam::wallDist::constructn() const
 
     volVectorField::Boundary& nbf = n_.ref().boundaryFieldRef();
 
-    forAllConstIter(labelHashSet, patchIDs_, iter)
+    for (const label patchi : patchIDs_)
     {
-        label patchi = iter.key();
         nbf[patchi] == patches[patchi].nf();
     }
 }

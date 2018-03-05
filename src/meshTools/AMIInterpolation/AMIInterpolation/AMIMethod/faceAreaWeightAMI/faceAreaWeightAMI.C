@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -425,10 +425,9 @@ restartUncoveredSourceFace
         // list of faces currently visited for srcFacei to avoid multiple hits
         DynamicList<label> visitedFaces(10);
 
-        forAllConstIter(labelHashSet, lowWeightFaces, iter)
+        for (const label srcFacei : lowWeightFaces)
         {
-            label srcFacei = iter.key();
-            label tgtFacei = this->findTargetFace(srcFacei);
+            const label tgtFacei = this->findTargetFace(srcFacei);
             if (tgtFacei != -1)
             {
                 //bool faceProcessed =

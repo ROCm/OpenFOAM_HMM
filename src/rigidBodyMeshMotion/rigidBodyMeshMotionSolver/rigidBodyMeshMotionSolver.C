@@ -247,10 +247,8 @@ void Foam::rigidBodyMeshMotionSolver::solve()
     // Update the displacements
     forAll(bodyMeshes_, bi)
     {
-        forAllConstIter(labelHashSet, bodyMeshes_[bi].patchSet_, iter)
+        for (const label patchi : bodyMeshes_[bi].patchSet_)
         {
-            label patchi = iter.key();
-
             pointField patchPoints0
             (
                 meshSolver_.pointDisplacement().boundaryField()[patchi]

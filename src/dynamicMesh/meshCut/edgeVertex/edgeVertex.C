@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 
 
 // * * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * //
-
 
 // Update stored refine list using map
 void Foam::edgeVertex::updateLabels
@@ -131,11 +130,11 @@ void Foam::edgeVertex::updateLabels
     // Iterate over map to see if anything changed
     bool changed = false;
 
-    forAllConstIter(labelHashSet, cells, iter)
+    for (const label celli : cells)
     {
-        const label newCelli = map[iter.key()];
+        const label newCelli = map[celli];
 
-        if (newCelli != iter.key())
+        if (newCelli != celli)
         {
             changed = true;
 
@@ -148,9 +147,9 @@ void Foam::edgeVertex::updateLabels
     {
         labelHashSet newCells(2*cells.size());
 
-        forAllConstIter(labelHashSet, cells, iter)
+        for (const label celli : cells)
         {
-            const label newCelli = map[iter.key()];
+            const label newCelli = map[celli];
 
             if (newCelli != -1)
             {

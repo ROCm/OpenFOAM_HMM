@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -136,23 +136,24 @@ void Foam::topoSet::updateLabels(const labelList& map)
     // Iterate over map to see if anything changed
     bool changed = false;
 
-    forAllConstIter(labelHashSet, *this, iter)
+    const labelHashSet& labels = *this;
+
+    for (const label oldId : labels)
     {
-        if ((iter.key() < 0) || (iter.key() > map.size()))
+        if (oldId < 0 || oldId > map.size())
         {
             FatalErrorInFunction
-                << "Illegal content " << iter.key() << " of set:" << name()
+                << "Illegal content " << oldId << " of set:" << name()
                 << " of type " << type() << endl
-                << "Value should be between 0 and " << map.size()-1
+                << "Value should be between [0," << map.size() << ')'
                 << abort(FatalError);
         }
 
-        const label newCelli = map[iter.key()];
+        const label newId = map[oldId];
 
-        if (newCelli != iter.key())
+        if (newId != oldId)
         {
             changed = true;
-
             break;
         }
     }
@@ -162,13 +163,13 @@ void Foam::topoSet::updateLabels(const labelList& map)
     {
         labelHashSet newSet(2*size());
 
-        forAllConstIter(labelHashSet, *this, iter)
+        for (const label oldId : labels)
         {
-            const label newCelli = map[iter.key()];
+            const label newId = map[oldId];
 
-            if (newCelli >= 0)
+            if (newId >= 0)
             {
-                newSet.insert(newCelli);
+                newSet.insert(newId);
             }
         }
 
@@ -179,14 +180,16 @@ void Foam::topoSet::updateLabels(const labelList& map)
 
 void Foam::topoSet::check(const label maxLabel)
 {
-    forAllConstIter(topoSet, *this, iter)
+    const labelHashSet& labels = *this;
+
+    for (const label oldId : labels)
     {
-        if ((iter.key() < 0) || (iter.key() > maxLabel))
+        if (oldId < 0 || oldId > maxLabel)
         {
             FatalErrorInFunction
-                << "Illegal content " << iter.key() << " of set:" << name()
-                << " of type " << type() << endl
-                << "Value should be between 0 and " << maxLabel
+                << "Illegal content " << oldId << " of set:" << name()
+                << " of type " << type() << nl
+                << "Value should be between [0," << maxLabel << ']'
                 << abort(FatalError);
         }
     }
@@ -206,14 +209,14 @@ void Foam::topoSet::writeDebug
 
     for (; (iter != end()) && (n < maxElem); ++iter)
     {
-        if ((n != 0) && ((n % 10) == 0))
+        if (n && ((n % 10) == 0))
         {
             os << endl;
         }
         os << iter.key() << ' ';
 
-        n++;
-        elemI++;
+        ++n;
+        ++elemI;
     }
 }
 
@@ -232,14 +235,14 @@ void Foam::topoSet::writeDebug
 
     for (; (iter != end()) && (n < maxElem); ++iter)
     {
-        if ((n != 0) && ((n % 3) == 0))
+        if (n && ((n % 3) == 0))
         {
             os << endl;
         }
         os << iter.key() << coords[iter.key()] << ' ';
 
-        n++;
-        elemI++;
+        ++n;
+        ++elemI;
     }
 }
 
@@ -488,12 +491,12 @@ void Foam::topoSet::subset(const topoSet& set)
     clear();
     resize(2*min(currentSet.size(), set.size()));
 
-    forAllConstIter(labelHashSet, currentSet, iter)
+    for (const label currId : currentSet)
     {
-        if (set.found(iter.key()))
+        if (set.found(currId))
         {
             // element present in both currentSet and set.
-            insert(iter.key());
+            insert(currId);
         }
     }
 }
@@ -501,18 +504,20 @@ void Foam::topoSet::subset(const topoSet& set)
 
 void Foam::topoSet::addSet(const topoSet& set)
 {
-    forAllConstIter(topoSet, set, iter)
+    const labelHashSet& labels = set;
+    for (const label id : labels)
     {
-        insert(iter.key());
+        insert(id);
     }
 }
 
 
 void Foam::topoSet::deleteSet(const topoSet& set)
 {
-    forAllConstIter(topoSet, set, iter)
+    const labelHashSet& labels = set;
+    for (const label id : labels)
     {
-        erase(iter.key());
+        erase(id);
     }
 }
 

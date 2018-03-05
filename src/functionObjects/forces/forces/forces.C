@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -222,9 +222,8 @@ void Foam::functionObjects::forces::initialiseBins()
         // Determine extents of patches
         binMin_ = GREAT;
         scalar binMax = -GREAT;
-        forAllConstIter(labelHashSet, patchSet_, iter)
+        for (const label patchi : patchSet_)
         {
-            label patchi = iter.key();
             const polyPatch& pp = pbm[patchi];
             scalarField d(pp.faceCentres() & binDir_);
             binMin_ = min(min(d), binMin_);
@@ -244,9 +243,8 @@ void Foam::functionObjects::forces::initialiseBins()
                 const porosityModel& pm = *iter();
                 const labelList& cellZoneIDs = pm.cellZoneIDs();
 
-                forAll(cellZoneIDs, i)
+                for (const label zonei : cellZoneIDs)
                 {
-                    label zonei = cellZoneIDs[i];
                     const cellZone& cZone = mesh_.cellZones()[zonei];
                     const scalarField d(dd, cZone);
                     binMin_ = min(min(d), binMin_);
@@ -982,10 +980,8 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
         const surfaceVectorField::Boundary& Sfb = mesh_.Sf().boundaryField();
 
-        forAllConstIter(labelHashSet, patchSet_, iter)
+        for (const label patchi : patchSet_)
         {
-            label patchi = iter.key();
-
             vectorField Md
             (
                 mesh_.C().boundaryField()[patchi] - coordSys_.origin()
@@ -1026,10 +1022,8 @@ void Foam::functionObjects::forces::calcForcesMoment()
         // Scale pRef by density for incompressible simulations
         scalar pRef = pRef_/rho(p);
 
-        forAllConstIter(labelHashSet, patchSet_, iter)
+        for (const label patchi : patchSet_)
         {
-            label patchi = iter.key();
-
             vectorField Md
             (
                 mesh_.C().boundaryField()[patchi] - coordSys_.origin()
@@ -1076,9 +1070,8 @@ void Foam::functionObjects::forces::calcForcesMoment()
 
             const labelList& cellZoneIDs = pm.cellZoneIDs();
 
-            forAll(cellZoneIDs, i)
+            for (const label zonei : cellZoneIDs)
             {
-                label zonei = cellZoneIDs[i];
                 const cellZone& cZone = mesh_.cellZones()[zonei];
 
                 const vectorField d(mesh_.C(), cZone);

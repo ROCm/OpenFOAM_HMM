@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -267,9 +267,8 @@ Foam::MGridGenGAMGAgglomeration::MGridGenGAMGAgglomeration
             //        Should not be. fluke?
             //scalarField weights(*faceWeightsPtr);
             scalarField weights = *magSfPtr;
-            forAllConstIter(labelHashSet, sharedFaces, iter)
+            for (const label facei : sharedFaces)
             {
-                label facei= iter.key();
                 weights[facei] *= 2.0;
             }
 

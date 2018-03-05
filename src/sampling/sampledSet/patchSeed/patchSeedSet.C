@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,9 +60,9 @@ void Foam::patchSeedSet::calcSamples
 
     // Construct search tree for all patch faces.
     label sz = 0;
-    forAllConstIter(labelHashSet, patchSet_, iter)
+    for (const label patchi : patchSet_)
     {
-        const polyPatch& pp = mesh().boundaryMesh()[iter.key()];
+        const polyPatch& pp = mesh().boundaryMesh()[patchi];
 
         sz += pp.size();
 
@@ -74,9 +74,9 @@ void Foam::patchSeedSet::calcSamples
 
     labelList patchFaces(sz);
     sz = 0;
-    forAllConstIter(labelHashSet, patchSet_, iter)
+    for (const label patchi : patchSet_)
     {
-        const polyPatch& pp = mesh().boundaryMesh()[iter.key()];
+        const polyPatch& pp = mesh().boundaryMesh()[patchi];
         forAll(pp, i)
         {
             patchFaces[sz++] = pp.start()+i;

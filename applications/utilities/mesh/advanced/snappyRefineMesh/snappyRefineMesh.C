@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -300,9 +300,8 @@ void addCutNeighbours
 
     labelHashSet addCutFaces(cutCells.size());
 
-    forAllConstIter(labelHashSet, cutCells, iter)
+    for (const label celli : cutCells)
     {
-        const label celli = iter.key();
         const labelList& cFaces = mesh.cells()[celli];
 
         forAll(cFaces, i)
@@ -333,9 +332,9 @@ void addCutNeighbours
     Info<< "    Selected an additional " << addCutFaces.size()
         << " neighbours of cutCells to refine" << endl;
 
-    forAllConstIter(labelHashSet, addCutFaces, iter)
+    for (const label facei : addCutFaces)
     {
-        cutCells.insert(iter.key());
+        cutCells.insert(facei);
     }
 }
 
@@ -383,10 +382,9 @@ bool limitRefinementLevel
 
     labelHashSet addCutCells(cutCells.size());
 
-    forAllConstIter(labelHashSet, cutCells, iter)
+    for (const label celli : cutCells)
     {
-        // cellI will be refined.
-        const label celli = iter.key();
+        // celli will be refined.
         const labelList& cCells = mesh.cellCells()[celli];
 
         forAll(cCells, i)
@@ -411,9 +409,9 @@ bool limitRefinementLevel
             << " to satisfy 1:" << limitDiff << " refinement level"
             << endl;
 
-        forAllConstIter(labelHashSet, addCutCells, iter)
+        for (const label celli : addCutCells)
         {
-            cutCells.insert(iter.key());
+            cutCells.insert(celli);
         }
         return true;
     }

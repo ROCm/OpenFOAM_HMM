@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -699,9 +699,9 @@ int main(int argc, char *argv[])
             );
 
             // Repatch faces of the patches.
-            forAllConstIter(labelHashSet, patchSources, iter)
+            for (const label patchi : patchSources)
             {
-                const polyPatch& pp = patches[iter.key()];
+                const polyPatch& pp = patches[patchi];
 
                 Info<< "Moving faces from patch " << pp.name()
                     << " to patch " << destPatchi << endl;

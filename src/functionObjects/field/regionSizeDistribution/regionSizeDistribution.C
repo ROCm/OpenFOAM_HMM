@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -169,25 +169,25 @@ Foam::functionObjects::regionSizeDistribution::findPatchRegions
     const labelHashSet patchIDs(mesh_.boundaryMesh().patchSet(patchNames_));
 
     label nPatchFaces = 0;
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchi : patchIDs)
     {
-        nPatchFaces += mesh_.boundaryMesh()[iter.key()].size();
+        nPatchFaces += mesh_.boundaryMesh()[patchi].size();
     }
 
 
     Map<label> patchRegions(nPatchFaces);
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchi : patchIDs)
     {
-        const polyPatch& pp = mesh_.boundaryMesh()[iter.key()];
+        const polyPatch& pp = mesh_.boundaryMesh()[patchi];
 
         // Collect all regions on the patch
         const labelList& faceCells = pp.faceCells();
 
-        forAll(faceCells, i)
+        for (const label celli : faceCells)
         {
             patchRegions.insert
             (
-                regions[faceCells[i]],
+                regions[celli],
                 Pstream::myProcNo()     // dummy value
             );
         }
@@ -581,10 +581,9 @@ bool Foam::functionObjects::regionSizeDistribution::write()
             << token::TAB << "Volume(mesh)"
             << token::TAB << "Volume(" << alpha.name() << "):"
             << endl;
-        forAllConstIter(Map<label>, patchRegions, iter)
+        for (const label regioni : patchRegions)
         {
-            label regioni = iter.key();
-            Info<< "    " << token::TAB << iter.key()
+            Info<< "    " << token::TAB << regioni
                 << token::TAB << allRegionVolume[regioni]
                 << token::TAB << allRegionAlphaVolume[regioni] << endl;
 

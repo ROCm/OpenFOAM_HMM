@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -98,9 +98,8 @@ void Foam::radiation::solarLoad::updateAbsorptivity
     const boundaryRadiationProperties& boundaryRadiation =
         boundaryRadiationProperties::New(mesh_);
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchID : includePatches)
     {
-        const label patchID = iter.key();
         absorptivity_[patchID].setSize(nBands_);
         for (label bandI = 0; bandI < nBands_; bandI++)
         {
@@ -174,9 +173,8 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
         case solarCalculator::mSunLoadFairWeatherConditions:
         case solarCalculator::mSunLoadTheoreticalMaximum:
         {
-            forAllConstIter(labelHashSet, includePatches, iter)
+            for (const label patchID : includePatches)
             {
-                const label patchID = iter.key();
                 const polyPatch& pp = patches[patchID];
                 const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
@@ -255,9 +253,8 @@ void Foam::radiation::solarLoad::updateSkyDiffusiveRadiation
 
         case solarCalculator::mSunLoadConstant:
         {
-            forAllConstIter(labelHashSet, includePatches, iter)
+            for (const label patchID : includePatches)
             {
-                const label patchID = iter.key();
                 const polyPatch& pp = patches[patchID];
                 const scalarField& sf = mesh_.magSf().boundaryField()[patchID];
 
@@ -589,9 +586,8 @@ void Foam::radiation::solarLoad::calculateQdiff
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     volScalarField::Boundary& qrBf = qr_.boundaryFieldRef();
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchID : includePatches)
     {
-        const label patchID = iter.key();
         const scalarField& qSecond = qsecondRad_.boundaryField()[patchID];
         if (includeMappedPatchBasePatches[patchID])
         {

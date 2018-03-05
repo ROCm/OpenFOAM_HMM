@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1131,9 +1131,8 @@ int main(int argc, char *argv[])
 
             // Detect any flips.
             const labelHashSet& fff = map().flipFaceFlux();
-            forAllConstIter(labelHashSet, fff, iter)
+            for (const label facei : fff)
             {
-                label facei = iter.key();
                 label masterFacei = faceProcAddressing[facei];
 
                 faceProcAddressing[facei] = -masterFacei;

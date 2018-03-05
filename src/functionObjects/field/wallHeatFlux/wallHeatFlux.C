@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2016-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -171,9 +171,8 @@ bool Foam::functionObjects::wallHeatFlux::read(const dictionary& dict)
     {
         Info<< "    processing wall patches: " << nl;
         labelHashSet filteredPatchSet;
-        forAllConstIter(labelHashSet, patchSet_, iter)
+        for (const label patchi : patchSet_)
         {
-            label patchi = iter.key();
             if (isA<wallPolyPatch>(pbm[patchi]))
             {
                 filteredPatchSet.insert(patchi);
@@ -265,9 +264,8 @@ bool Foam::functionObjects::wallHeatFlux::write()
     const surfaceScalarField::Boundary& magSf =
         mesh_.magSf().boundaryField();
 
-    forAllConstIter(labelHashSet, patchSet_, iter)
+    for (const label patchi : patchSet_)
     {
-        label patchi = iter.key();
         const fvPatch& pp = patches[patchi];
 
         const scalarField& hfp = wallHeatFlux.boundaryField()[patchi];

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -210,7 +210,6 @@ int main(int argc, char *argv[])
                         << "Cannot find any faceZone name matching "
                         << zoneName << endl;
                 }
-
             }
             Info<< "Additionally triangulating faceZones "
                 <<  UIndirectList<word>
@@ -234,17 +233,17 @@ int main(int argc, char *argv[])
             //  processor patches)
             HashTable<label> patchSize(1024);
             label nFaces = 0;
-            forAllConstIter(labelHashSet, includePatches, iter)
+            for (const label patchi : includePatches)
             {
-                const polyPatch& pp = bMesh[iter.key()];
+                const polyPatch& pp = bMesh[patchi];
                 patchSize.insert(pp.name(), pp.size());
                 nFaces += pp.size();
             }
 
             HashTable<label> zoneSize(1024);
-            forAllConstIter(labelHashSet, includeFaceZones, iter)
+            for (const label zonei : includeFaceZones)
             {
-                const faceZone& pp = fzm[iter.key()];
+                const faceZone& pp = fzm[zonei];
                 zoneSize.insert(pp.name(), pp.size());
                 nFaces += pp.size();
             }
@@ -295,9 +294,9 @@ int main(int argc, char *argv[])
             compactZones.setCapacity(nFaces);
 
             // Collect faces on patches
-            forAllConstIter(labelHashSet, includePatches, iter)
+            for (const label patchi : includePatches)
             {
-                const polyPatch& pp = bMesh[iter.key()];
+                const polyPatch& pp = bMesh[patchi];
                 forAll(pp, i)
                 {
                     faceLabels.append(pp.start()+i);
@@ -305,9 +304,9 @@ int main(int argc, char *argv[])
                 }
             }
             // Collect faces on faceZones
-            forAllConstIter(labelHashSet, includeFaceZones, iter)
+            for (const label zonei : includeFaceZones)
             {
-                const faceZone& pp = fzm[iter.key()];
+                const faceZone& pp = fzm[zonei];
                 forAll(pp, i)
                 {
                     faceLabels.append(pp[i]);

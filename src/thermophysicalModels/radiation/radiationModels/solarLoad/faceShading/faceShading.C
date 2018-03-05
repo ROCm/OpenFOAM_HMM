@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,25 +87,17 @@ Foam::triSurface Foam::faceShading::triangulate
 
     label newPatchI = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchI : includePatches)
     {
-        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
         const pointField& points = patch.points();
 
         label nTriTotal = 0;
 
-        if (includeAllFacesPerPatch[patchI].size() > 0)
+        if (includeAllFacesPerPatch[patchI].size())
         {
-            forAllConstIter
-            (
-                labelHashSet,
-                includeAllFacesPerPatch[patchI],
-                iter1
-            )
+            for (const label patchFaceI : includeAllFacesPerPatch[patchI])
             {
-                const label patchFaceI = iter1.key();
-
                 const face& f = patch[patchFaceI];
 
                 faceList triFaces(f.nTriangles(points));
@@ -146,12 +138,11 @@ Foam::triSurface Foam::faceShading::triangulate
 
     newPatchI = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchI : includePatches)
     {
-        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
 
-        if (includeAllFacesPerPatch[patchI].size() > 0)
+        if (includeAllFacesPerPatch[patchI].size())
         {
             surface.patches()[newPatchI].name() = patch.name();
             surface.patches()[newPatchI].geometricType() = patch.type();

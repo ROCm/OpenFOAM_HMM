@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,9 +61,8 @@ void contactAngleForce::initialise()
 
         labelHashSet patchIDs = pbm.patchSet(zeroForcePatches);
 
-        forAllConstIter(labelHashSet, patchIDs, iter)
+        for (const label patchi : patchIDs)
         {
-            label patchi = iter.key();
             Info<< "            " << pbm[patchi].name() << endl;
         }
 

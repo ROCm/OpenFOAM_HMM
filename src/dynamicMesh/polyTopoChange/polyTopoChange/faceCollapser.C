@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -495,9 +495,9 @@ void Foam::faceCollapser::setRefinement
     // Modify faces affected (but not removed)
     //
 
-    forAllConstIter(labelHashSet, affectedFaces, iter)
+    for (const label facei : affectedFaces)
     {
-        filterFace(splitEdges, iter.key(), meshMod);
+        filterFace(splitEdges, facei, meshMod);
     }
 }
 

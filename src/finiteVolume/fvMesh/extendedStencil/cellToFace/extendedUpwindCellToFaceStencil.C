@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -159,11 +159,11 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencil
         transportedStencil[n++] = globalOwn;
         transportedStencil[n++] = globalNei;
 
-        forAllConstIter(labelHashSet, faceStencilSet, iter)
+        for (const label stencili : faceStencilSet)
         {
-            if (iter.key() != globalOwn && iter.key() != globalNei)
+            if (stencili != globalOwn && stencili != globalNei)
             {
-                transportedStencil[n++] = iter.key();
+                transportedStencil[n++] = stencili;
             }
         }
         if (n != transportedStencil.size())
@@ -179,11 +179,11 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencil
         label n = 0;
         transportedStencil[n++] = globalOwn;
 
-        forAllConstIter(labelHashSet, faceStencilSet, iter)
+        for (const label stencili : faceStencilSet)
         {
-            if (iter.key() != globalOwn)
+            if (stencili != globalOwn)
             {
-                transportedStencil[n++] = iter.key();
+                transportedStencil[n++] = stencili;
             }
         }
         if (n != transportedStencil.size())

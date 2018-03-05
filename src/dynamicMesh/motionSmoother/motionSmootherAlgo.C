@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -257,11 +257,11 @@ void Foam::motionSmootherAlgo::subtractField
     pointScalarField& fld
 ) const
 {
-    forAllConstIter(labelHashSet, pointLabels, iter)
+    for (const label pointi : pointLabels)
     {
-        if (isInternalPoint(iter.key()))
+        if (isInternalPoint(pointi))
         {
-            fld[iter.key()] = max(0.0, fld[iter.key()]-f);
+            fld[pointi] = max(0.0, fld[pointi]-f);
         }
     }
 
@@ -306,7 +306,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
     bitSet& isAffectedPoint
 ) const
 {
-    isAffectedPoint.setSize(mesh_.nPoints());
+    isAffectedPoint.resize(mesh_.nPoints());
     isAffectedPoint = false;
 
     faceSet nbrFaces(mesh_, "checkFaces", wrongFaces);
@@ -320,9 +320,9 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
     {
         pointSet nbrPoints(mesh_, "grownPoints", getPoints(nbrFaces.toc()));
 
-        forAllConstIter(pointSet, nbrPoints, iter)
+        for (const label pointi : nbrPoints)
         {
-            const labelList& pCells = mesh_.pointCells(iter.key());
+            const labelList& pCells = mesh_.pointCells(pointi);
 
             forAll(pCells, pCelli)
             {
@@ -335,9 +335,9 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
 
         if (i == nPointIter - 2)
         {
-            forAllConstIter(faceSet, nbrFaces, iter)
+            for (const label facei : nbrFaces)
             {
-                const face& f = mesh_.faces()[iter.key()];
+                const face& f = mesh_.faces()[facei];
                 isAffectedPoint.setMany(f);
             }
         }
@@ -939,16 +939,16 @@ bool Foam::motionSmootherAlgo::scaleMesh
         if (mag(errorReduction) < SMALL)
         {
             labelHashSet newWrongFaces(wrongFaces);
-            forAllConstIter(labelHashSet, wrongFaces, iter)
+            for (const label facei : wrongFaces)
             {
-                label own = mesh_.faceOwner()[iter.key()];
+                const label own = mesh_.faceOwner()[facei];
                 const cell& ownFaces = mesh_.cells()[own];
 
                 newWrongFaces.insertMany(ownFaces);
 
-                if (iter.key() < mesh_.nInternalFaces())
+                if (facei < mesh_.nInternalFaces())
                 {
-                    label nei = mesh_.faceNeighbour()[iter.key()];
+                    const label nei = mesh_.faceNeighbour()[facei];
                     const cell& neiFaces = mesh_.cells()[nei];
 
                     newWrongFaces.insertMany(neiFaces);

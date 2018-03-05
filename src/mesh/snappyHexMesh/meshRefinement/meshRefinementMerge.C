@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,11 +51,9 @@ Foam::label Foam::meshRefinement::mergePatchFaces
     // Pick up all candidate cells on boundary
     labelHashSet boundaryCells(mesh_.nFaces()-mesh_.nInternalFaces());
 
-    forAll(patchIDs, i)
+    for (const label patchi : patchIDs)
     {
-        label patchI = patchIDs[i];
-
-        const polyPatch& patch = patches[patchI];
+        const polyPatch& patch = patches[patchi];
 
         if (!patch.coupled())
         {
@@ -221,17 +219,17 @@ Foam::label Foam::meshRefinement::mergePatchFaces
 //
 //        const cellList& cells = mesh_.cells();
 //
-//        forAllConstIter(labelHashSet, retestOldFaces, iter)
+//        for (const label oldFacei : retestOldFaces)
 //        {
-//            label faceI = map().reverseFaceMap()[iter.key()];
+//            const label facei = map().reverseFaceMap()[oldFacei];
 //
-//            const cell& ownFaces = cells[mesh_.faceOwner()[faceI]];
+//            const cell& ownFaces = cells[mesh_.faceOwner()[facei]];
 //
 //            retestFaces.insertMany(ownFaces);
 //
-//            if (mesh_.isInternalFace(faceI))
+//            if (mesh_.isInternalFace(facei))
 //            {
-//                const cell& neiFaces = cells[mesh_.faceNeighbour()[faceI]];
+//                const cell& neiFaces = cells[mesh_.faceNeighbour()[facei]];
 //
 //                retestFaces.insertMany(neiFaces);
 //            }
@@ -579,7 +577,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             // (unless the faces are absolutely planar)
             labelHashSet retestFaces(2*restoredFaces.size());
 
-            forAllConstIter(Map<label>, restoredFaces, iter)
+            forAllConstIters(restoredFaces, iter)
             {
                 retestFaces.insert(iter.key());
             }
@@ -656,12 +654,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemovePoints
 
     // Retest all affected faces and all the cells using them
     labelHashSet retestFaces(pointRemover.savedFaceLabels().size());
-    forAll(pointRemover.savedFaceLabels(), i)
+    for (const label facei : pointRemover.savedFaceLabels())
     {
-        label faceI = pointRemover.savedFaceLabels()[i];
-        if (faceI >= 0)
+        if (facei >= 0)
         {
-            retestFaces.insert(faceI);
+            retestFaces.insert(facei);
         }
     }
     updateMesh(map, growFaceCellFace(retestFaces));
@@ -761,13 +758,11 @@ Foam::labelList Foam::meshRefinement::collectFaces
     // Has face been selected?
     boolList selected(mesh_.nFaces(), false);
 
-    forAll(candidateFaces, i)
+    for (const label facei : candidateFaces)
     {
-        label faceI = candidateFaces[i];
-
-        if (set.found(faceI))
+        if (set.found(facei))
         {
-            selected[faceI] = true;
+            selected[facei] = true;
         }
     }
     syncTools::syncFaceList
@@ -797,9 +792,9 @@ namespace Foam
         const label own = pMesh.faceOwner()[faceI];
 
         const cell& ownFaces = pMesh.cells()[own];
-        forAll(ownFaces, ownFaceI)
+        for (const label facei : ownFaces)
         {
-            selected[ownFaces[ownFaceI]] = true;
+            selected[facei] = true;
         }
 
         if (pMesh.isInternalFace(faceI))
@@ -824,9 +819,9 @@ Foam::labelList Foam::meshRefinement::growFaceCellFace
 {
     boolList selected(mesh_.nFaces(), false);
 
-    for (auto faceI : set)
+    for (const label facei : set)
     {
-        markGrowFaceCellFace(mesh_, faceI, selected);
+        markGrowFaceCellFace(mesh_, facei, selected);
     }
 
     syncTools::syncFaceList
@@ -847,10 +842,9 @@ Foam::labelList Foam::meshRefinement::growFaceCellFace
 {
     boolList selected(mesh_.nFaces(), false);
 
-    forAllConstIter(labelHashSet, set, iter)
+    for (const label facei : set)
     {
-        const label faceI = iter.key();
-        markGrowFaceCellFace(mesh_, faceI, selected);
+        markGrowFaceCellFace(mesh_, facei, selected);
     }
 
     syncTools::syncFaceList

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,10 +66,8 @@ void Foam::cellToFaceStencil::merge
     // For all in listA see if they are present
     label nInsert = 0;
 
-    forAll(listA, i)
+    for (const label elem : listA)
     {
-        label elem = listA[i];
-
         if (elem != global0 && elem != global1)
         {
             if (findSortedIndex(listB, elem) == -1)
@@ -96,10 +94,8 @@ void Foam::cellToFaceStencil::merge
 
 
     // Insert listB
-    forAll(listB, i)
+    for (const label elem : listB)
     {
-        label elem = listB[i];
-
         if (elem != global0 && elem != global1)
         {
             result[resultI++] = elem;
@@ -108,10 +104,8 @@ void Foam::cellToFaceStencil::merge
 
 
     // Insert listA
-    forAll(listA, i)
+    for (const label elem : listA)
     {
-        label elem = listA[i];
-
         if (elem != global0 && elem != global1)
         {
             if (findSortedIndex(listB, elem) == -1)
@@ -159,9 +153,9 @@ void Foam::cellToFaceStencil::merge
     label n = 0;
     cCells[n++] = globalI;
 
-    forAllConstIter(labelHashSet, set, iter)
+    for (const label seti : set)
     {
-        cCells[n++] = iter.key();
+        cCells[n++] = seti;
     }
 }
 
@@ -399,11 +393,11 @@ void Foam::cellToFaceStencil::calcFaceStencil
         label n = 0;
         faceStencil[facei][n++] = globalOwn;
         faceStencil[facei][n++] = globalNei;
-        forAllConstIter(labelHashSet, faceStencilSet, iter)
+        for (const label stencili : faceStencilSet)
         {
-            if (iter.key() != globalOwn && iter.key() != globalNei)
+            if (stencili != globalOwn && stencili != globalNei)
             {
-                faceStencil[facei][n++] = iter.key();
+                faceStencil[facei][n++] = stencili;
             }
         }
         //Pout<< "internalface:" << facei << " toc:" << faceStencilSet.toc()
@@ -435,11 +429,11 @@ void Foam::cellToFaceStencil::calcFaceStencil
                 label n = 0;
                 faceStencil[facei][n++] = globalOwn;
                 faceStencil[facei][n++] = globalNei;
-                forAllConstIter(labelHashSet, faceStencilSet, iter)
+                for (const label stencili : faceStencilSet)
                 {
-                    if (iter.key() != globalOwn && iter.key() != globalNei)
+                    if (stencili != globalOwn && stencili != globalNei)
                     {
-                        faceStencil[facei][n++] = iter.key();
+                        faceStencil[facei][n++] = stencili;
                     }
                 }
 
@@ -464,11 +458,11 @@ void Foam::cellToFaceStencil::calcFaceStencil
                 faceStencil[facei].setSize(faceStencilSet.size());
                 label n = 0;
                 faceStencil[facei][n++] = globalOwn;
-                forAllConstIter(labelHashSet, faceStencilSet, iter)
+                for (const label stencili : faceStencilSet)
                 {
-                    if (iter.key() != globalOwn)
+                    if (stencili != globalOwn)
                     {
-                        faceStencil[facei][n++] = iter.key();
+                        faceStencil[facei][n++] = stencili;
                     }
                 }
 

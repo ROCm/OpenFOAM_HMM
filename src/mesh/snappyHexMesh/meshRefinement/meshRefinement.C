@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -234,12 +234,12 @@ void Foam::meshRefinement::calcCellCellRays
 
     forAll(testFaces, i)
     {
-        label facei = testFaces[i];
-        label own = mesh_.faceOwner()[facei];
+        const label facei = testFaces[i];
+        const label own = mesh_.faceOwner()[facei];
 
         if (mesh_.isInternalFace(facei))
         {
-            label nei = mesh_.faceNeighbour()[facei];
+            const label nei = mesh_.faceNeighbour()[facei];
 
             start[i] = cellCentres[own];
             end[i] = cellCentres[nei];
@@ -247,7 +247,7 @@ void Foam::meshRefinement::calcCellCellRays
         }
         else
         {
-            label bFacei = facei - mesh_.nInternalFaces();
+            const label bFacei = facei - mesh_.nInternalFaces();
 
             start[i] = cellCentres[own];
             end[i] = neiCc[bFacei];
@@ -2541,13 +2541,13 @@ void Foam::meshRefinement::updateMesh
     // Update faceToCoupledPatch_
     {
         Map<label> newFaceToPatch(faceToCoupledPatch_.size());
-        forAllConstIter(Map<label>, faceToCoupledPatch_, iter)
+        forAllConstIters(faceToCoupledPatch_, iter)
         {
-            label newFacei = map.reverseFaceMap()[iter.key()];
+            const label newFacei = map.reverseFaceMap()[iter.key()];
 
             if (newFacei >= 0)
             {
-                newFaceToPatch.insert(newFacei, iter());
+                newFaceToPatch.insert(newFacei, iter.object());
             }
         }
         faceToCoupledPatch_.transfer(newFaceToPatch);

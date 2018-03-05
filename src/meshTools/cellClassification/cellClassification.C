@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -805,7 +805,7 @@ Foam::label Foam::cellClassification::fillRegionPoints
 {
     label nTotChanged = 0;
 
-    for (label iter = 0; iter < maxIter; iter++)
+    for (label iter = 0; iter < maxIter; ++iter)
     {
         // Get interface between meshType cells and non-meshType cells as a list
         // of faces and for each face the cell which is the meshType.
@@ -826,26 +826,25 @@ Foam::label Foam::cellClassification::fillRegionPoints
 
         label nChanged = 0;
 
-        forAllConstIter(labelHashSet, nonManifoldPoints, iter)
+        for (const label nonManPti : nonManifoldPoints)
         {
             // Find a face on fp using point and remove it.
-            const label patchPointi = meshPointMap[iter.key()];
+            const label patchPointi = meshPointMap[nonManPti];
 
             const labelList& pFaces = fp.pointFaces()[patchPointi];
 
             // Remove any face using conflicting point. Does first face which
             // has not yet been done. Could be more intelligent and decide which
             // one would be best to remove.
-            forAll(pFaces, i)
+            for (const label patchFacei : pFaces)
             {
-                const label patchFacei = pFaces[i];
                 const label ownerCell  = outsideOwner[patchFacei];
 
                 if (operator[](ownerCell) == meshType)
                 {
                     operator[](ownerCell) = fillType;
 
-                    nChanged++;
+                    ++nChanged;
                     break;
                 }
             }

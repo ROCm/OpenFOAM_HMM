@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2102,10 +2102,9 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             faceMap[faceI] += 1;
         }
         const labelHashSet& flip = subMap().flipFaceFlux();
-        forAllConstIter(labelHashSet, flip, iter)
+        for (const label facei : flip)
         {
-            label faceI = iter.key();
-            faceMap[faceI] = -faceMap[faceI];
+            faceMap[facei] = -faceMap[facei];
         }
         subPointMap[Pstream::myProcNo()] = subMap().pointMap();
         subPatchMap[Pstream::myProcNo()] = identity(patches.size());
@@ -2567,9 +2566,8 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             // Added processor
             inplaceRenumber(map().addedCellMap(), constructCellMap[sendProc]);
             // Add flip
-            forAllConstIter(labelHashSet, flippedAddedFaces, iter)
+            for (const label domainFaceI : flippedAddedFaces)
             {
-                label domainFaceI = iter.key();
                 label& val = constructFaceMap[sendProc][domainFaceI];
                 val = -val;
             }

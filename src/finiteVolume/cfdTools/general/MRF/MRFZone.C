@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -278,9 +278,9 @@ Foam::MRFZone::MRFZone
         excludedPatchLabels_.setSize(excludedPatchSet.size());
 
         label i = 0;
-        forAllConstIter(labelHashSet, excludedPatchSet, iter)
+        for (const label patchi : excludedPatchSet)
         {
-            excludedPatchLabels_[i++] = iter.key();
+            excludedPatchLabels_[i++] = patchi;
         }
 
         bool cellZoneFound = (cellZoneID_ != -1);

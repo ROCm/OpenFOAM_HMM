@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,9 +90,8 @@ triSurface triangulate
     label newPatchI = 0;
     label localTriFaceI = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchI : includePatches)
     {
-        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
         const pointField& points = patch.points();
 
@@ -147,9 +146,8 @@ triSurface triangulate
 
     newPatchI = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchI : includePatches)
     {
-        const label patchI = iter.key();
         const polyPatch& patch = bMesh[patchI];
 
         surface.patches()[newPatchI].index() = patchI;

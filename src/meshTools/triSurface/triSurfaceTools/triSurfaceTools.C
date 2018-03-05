@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -2294,31 +2294,26 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
     label newPatchi = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchi : includePatches)
     {
-        const label patchi = iter.key();
         const polyPatch& patch = bMesh[patchi];
         const pointField& points = patch.points();
 
         label nTriTotal = 0;
 
-        forAll(patch, patchFacei)
+        for (const face& f :  patch)
         {
-            const face& f = patch[patchFacei];
-
             faceList triFaces(f.nTriangles(points));
 
             label nTri = 0;
 
             f.triangles(points, nTri, triFaces);
 
-            forAll(triFaces, triFacei)
+            for (const face& f :  triFaces)
             {
-                const face& f = triFaces[triFacei];
-
                 triangles.append(labelledTri(f[0], f[1], f[2], newPatchi));
 
-                nTriTotal++;
+                ++nTriTotal;
             }
         }
 
@@ -2348,9 +2343,8 @@ Foam::triSurface Foam::triSurfaceTools::triangulate
 
     newPatchi = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchi : includePatches)
     {
-        const label patchi = iter.key();
         const polyPatch& patch = bMesh[patchi];
 
         surface.patches()[newPatchi].name() = patch.name();
@@ -2399,9 +2393,8 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
 
     label newPatchi = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchi : includePatches)
     {
-        const label patchi = iter.key();
         const polyPatch& patch = bMesh[patchi];
 
         label nTriTotal = 0;
@@ -2451,9 +2444,8 @@ Foam::triSurface Foam::triSurfaceTools::triangulateFaceCentre
 
     newPatchi = 0;
 
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchi : includePatches)
     {
-        const label patchi = iter.key();
         const polyPatch& patch = bMesh[patchi];
 
         surface.patches()[newPatchi].name() = patch.name();

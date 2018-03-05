@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,10 +65,8 @@ void Foam::functionObjects::wallShearStress::calcShearStress
 {
     shearStress.dimensions().reset(Reff.dimensions());
 
-    forAllConstIter(labelHashSet, patchSet_, iter)
+    for (const label patchi : patchSet_)
     {
-        label patchi = iter.key();
-
         vectorField& ssp = shearStress.boundaryFieldRef()[patchi];
         const vectorField& Sfp = mesh_.Sf().boundaryField()[patchi];
         const scalarField& magSfp = mesh_.magSf().boundaryField()[patchi];
@@ -156,9 +154,8 @@ bool Foam::functionObjects::wallShearStress::read(const dictionary& dict)
     {
         Info<< "    processing wall patches: " << nl;
         labelHashSet filteredPatchSet;
-        forAllConstIter(labelHashSet, patchSet_, iter)
+        for (const label patchi : patchSet_)
         {
-            label patchi = iter.key();
             if (isA<wallPolyPatch>(pbm[patchi]))
             {
                 filteredPatchSet.insert(patchi);
@@ -223,9 +220,8 @@ bool Foam::functionObjects::wallShearStress::write()
 
     const fvPatchList& patches = mesh_.boundary();
 
-    forAllConstIter(labelHashSet, patchSet_, iter)
+    for (const label patchi : patchSet_)
     {
-        label patchi = iter.key();
         const fvPatch& pp = patches[patchi];
 
         const vectorField& ssp = wallShearStress.boundaryField()[patchi];

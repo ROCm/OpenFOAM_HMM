@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -121,18 +121,16 @@ License
 //    // Snap outside points to surface
 //    pointField newPoints(points);
 //
-//    forAllConstIter(labelHashSet, flatCandidates, iter)
+//    for (const label celli : flatCandidates)
 //    {
-//        const cell& cFaces = cells[iter.key()];
+//        const cell& cFaces = cells[celli];
 //
-//        forAll(cFaces, cFacei)
+//        for (const label facei : cFaces)
 //        {
-//            const face& f = faces[cFaces[cFacei]];
+//            const face& f = faces[facei];
 //
-//            forAll(f, fp)
+//            for (const label pointi : f)
 //            {
-//                label pointi = f[fp];
-//
 //                if (outsidePoints.insert(pointi))
 //                {
 //                    // Calculate new position for this outside point
@@ -147,10 +145,8 @@ License
 //
 //    // Calculate new volume for mixed cells
 //    label nRemoved = 0;
-//    forAllConstIter(labelHashSet, flatCandidates, iter)
+//    for (const label celli : flatCandidates)
 //    {
-//        label celli = iter.key();
-//
 //        const cell& cll = cells[celli];
 //
 //        scalar newVol = cll.mag(newPoints, faces);
@@ -374,20 +370,19 @@ Foam::labelHashSet Foam::surfaceSets::getHangingCells
 
     labelHashSet mixedOnlyCells(internalCells.size());
 
-    forAllConstIter(labelHashSet, internalCells, iter)
+    for (const label celli : internalCells)
     {
-        const label celli = iter.key();
         const cell& cFaces = cells[celli];
 
         label usesMixedOnly = true;
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            const face& f = faces[cFaces[i]];
+            const face& f = faces[facei];
 
-            forAll(f, fp)
+            for (const label pointi : f)
             {
-                if (pointSide[f[fp]] != MIXED)
+                if (pointSide[pointi] != MIXED)
                 {
                     usesMixedOnly = false;
                     break;

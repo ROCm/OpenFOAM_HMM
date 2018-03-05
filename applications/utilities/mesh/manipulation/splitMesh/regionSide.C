@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -296,9 +296,8 @@ void Foam::regionSide::walkAllPointConnectedFaces
     //
     labelHashSet regionEdges(4*regionFaces.size());
 
-    forAllConstIter(labelHashSet, regionFaces, iter)
+    for (const label facei : regionFaces)
     {
-        const label facei = iter.key();
         const labelList& fEdges = mesh.faceEdges()[facei];
 
         regionEdges.insertMany(fEdges);
@@ -313,9 +312,9 @@ void Foam::regionSide::walkAllPointConnectedFaces
     labelHashSet visitedPoint(4*regionFaces.size());
 
     // Insert fence points so we don't visit them
-    forAllConstIter(labelHashSet, fencePoints, iter)
+    for (const label pointi : fencePoints)
     {
-        visitedPoint.insert(iter.key());
+        visitedPoint.insert(pointi);
     }
 
     labelHashSet visitedEdges(2*fencePoints.size());
@@ -326,10 +325,8 @@ void Foam::regionSide::walkAllPointConnectedFaces
         Info<< "Excluding visit of points:" << visitedPoint << endl;
     }
 
-    forAllConstIter(labelHashSet, regionFaces, iter)
+    for (const label facei : regionFaces)
     {
-        const label facei = iter.key();
-
         // Get side of face.
         label celli;
 
@@ -436,9 +433,9 @@ Foam::regionSide::regionSide
 
     labelHashSet fencePoints(fenceEdges.size());
 
-    forAllConstIter(labelHashSet, fenceEdges, iter)
+    for (const label edgei : fenceEdges)
     {
-        const edge& e = mesh.edges()[iter.key()];
+        const edge& e = mesh.edges()[edgei];
 
         fencePoints.insert(e.start());
         fencePoints.insert(e.end());

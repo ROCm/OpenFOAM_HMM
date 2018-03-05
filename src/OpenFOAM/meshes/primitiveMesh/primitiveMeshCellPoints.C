@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -66,31 +66,29 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints
     {
         return cellPoints()[celli];
     }
-    else
+
+    const faceList& fcs = faces();
+    const labelList& cFaces = cells()[celli];
+
+    set.clear();
+
+    for (const label facei : cFaces)
     {
-        const faceList& fcs = faces();
-        const labelList& cFaces = cells()[celli];
-
-        set.clear();
-
-        for (const label facei : cFaces)
-        {
-            set.insertMany(fcs[facei]);
-        }
-
-        storage.clear();
-        if (set.size() > storage.capacity())
-        {
-            storage.setCapacity(set.size());
-        }
-
-        for (const label pointi : set)
-        {
-            storage.append(pointi);
-        }
-
-        return storage;
+        set.insertMany(fcs[facei]);
     }
+
+    storage.clear();
+    if (set.size() > storage.capacity())
+    {
+        storage.setCapacity(set.size());
+    }
+
+    for (const label pointi : set)
+    {
+        storage.append(pointi);
+    }
+
+    return storage;
 }
 
 

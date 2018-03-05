@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,9 +36,9 @@ void Foam::functionObjects::surfaceInterpolate::interpolateFields()
 
     // Convert field to map
     HashTable<word> fieldMap(2*fieldSet_.size());
-    forAll(fieldSet_, i)
+    for (const auto& namePair : fieldSet_)
     {
-        fieldMap.insert(fieldSet_[i].first(), fieldSet_[i].second());
+        fieldMap.insert(namePair.first(), namePair.second());
     }
 
 

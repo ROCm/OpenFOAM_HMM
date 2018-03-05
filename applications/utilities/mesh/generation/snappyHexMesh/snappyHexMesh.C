@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -394,9 +394,9 @@ void extractSurface
     //  processor patches)
     HashTable<label> patchSize(1024);
     label nFaces = 0;
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchi : includePatches)
     {
-        const polyPatch& pp = bMesh[iter.key()];
+        const polyPatch& pp = bMesh[patchi];
         patchSize.insert(pp.name(), pp.size());
         nFaces += pp.size();
     }
@@ -427,9 +427,9 @@ void extractSurface
     // Collect faces on zones
     DynamicList<label> faceLabels(nFaces);
     DynamicList<label> compactZones(nFaces);
-    forAllConstIter(labelHashSet, includePatches, iter)
+    for (const label patchi : includePatches)
     {
-        const polyPatch& pp = bMesh[iter.key()];
+        const polyPatch& pp = bMesh[patchi];
         forAll(pp, i)
         {
             faceLabels.append(pp.start()+i);

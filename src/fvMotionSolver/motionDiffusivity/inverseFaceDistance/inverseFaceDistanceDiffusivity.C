@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,14 +75,14 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
 
     label nPatchFaces = 0;
 
-    forAll(patchNames_, i)
+    for (const word& patchName : patchNames_)
     {
-        const label pID = bdry.findPatchID(patchNames_[i]);
+        const label patchi = bdry.findPatchID(patchName);
 
-        if (pID > -1)
+        if (patchi >= 0)
         {
-            patchSet.insert(pID);
-            nPatchFaces += bdry[pID].size();
+            patchSet.insert(patchi);
+            nPatchFaces += bdry[patchi].size();
         }
     }
 
@@ -91,9 +91,9 @@ void Foam::inverseFaceDistanceDiffusivity::correct()
 
     nPatchFaces = 0;
 
-    forAllConstIter(labelHashSet, patchSet, iter)
+    for (const label patchi : patchSet)
     {
-        const polyPatch& patch = bdry[iter.key()];
+        const polyPatch& patch = bdry[patchi];
 
         const vectorField::subField fc(patch.faceCentres());
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -280,10 +280,8 @@ Foam::layerParameters::layerParameters
             {
                 const dictionary& layerDict = iter().dict();
 
-                forAllConstIter(labelHashSet, patchIDs, patchiter)
+                for (const label patchi : patchIDs)
                 {
-                    label patchi = patchiter.key();
-
                     numLayers_[patchi] =
                         readLabel(layerDict.lookup("nSurfaceLayers"));
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -138,19 +138,19 @@ void Foam::cellToCellStencil::merge
 )
 {
     labelHashSet set;
-    forAll(cCells, i)
+    for (const label celli : cCells)
     {
-        if (cCells[i] != globalI)
+        if (celli != globalI)
         {
-            set.insert(cCells[i]);
+            set.insert(celli);
         }
     }
 
-    forAll(pGlobals, i)
+    for (const label celli : pGlobals)
     {
-        if (pGlobals[i] != globalI)
+        if (celli != globalI)
         {
-            set.insert(pGlobals[i]);
+            set.insert(celli);
         }
     }
 
@@ -158,9 +158,9 @@ void Foam::cellToCellStencil::merge
     label n = 0;
     cCells[n++] = globalI;
 
-    forAllConstIter(labelHashSet, set, iter)
+    for (const label seti : set)
     {
-        cCells[n++] = iter.key();
+        cCells[n++] = seti;
     }
 }
 
@@ -171,10 +171,8 @@ void Foam::cellToCellStencil::validBoundaryFaces(boolList& isValidBFace) const
 
     isValidBFace.setSize(mesh().nFaces()-mesh().nInternalFaces(), true);
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled() || isA<emptyPolyPatch>(pp))
         {
             label bFacei = pp.start()-mesh().nInternalFaces();
@@ -194,10 +192,8 @@ Foam::cellToCellStencil::allCoupledFacesPatch() const
 
     label nCoupled = 0;
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             nCoupled += pp.size();
@@ -206,10 +202,8 @@ Foam::cellToCellStencil::allCoupledFacesPatch() const
     labelList coupledFaces(nCoupled);
     nCoupled = 0;
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        const polyPatch& pp = patches[patchi];
-
         if (pp.coupled())
         {
             label facei = pp.start();

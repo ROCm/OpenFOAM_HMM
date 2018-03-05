@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,9 +40,9 @@ Foam::wordList Foam::patchDistMethod::patchTypes
         zeroGradientFvPatchField<Type>::typeName
     );
 
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchi : patchIDs)
     {
-        yTypes[iter.key()] = fixedValueFvPatchField<Type>::typeName;
+        yTypes[patchi] = fixedValueFvPatchField<Type>::typeName;
     }
 
     return yTypes;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -70,7 +70,7 @@ Foam::wordList Foam::fieldNames
             }
         }
 
-        forAllConstIter(wordHashSet, localNamesSet, iter)
+        if (localNamesSet.size())
         {
             FatalErrorInFunction
                 << "Fields not synchronised across processors." << endl

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -183,10 +183,8 @@ Foam::label Foam::checkFireEdges
             << "edge points" << nl
             << "~~~~~~~~~~~" << endl;
 
-
-        forAllConstIter(edgeHashSet, failedEdges, citer)
+        for (edge thisEdge : failedEdges)  // Use copy of edge
         {
-            edge thisEdge = citer.key();
             if (thisEdge.start() > thisEdge.end())
             {
                 thisEdge.flip();
@@ -262,9 +260,8 @@ Foam::label Foam::checkFireEdges
     else
     {
         // get the max point addressed
-        forAll(faces, faceI)
+        for (const face& f : faces)
         {
-            const face& f = faces[faceI];
             forAll(f, fp)
             {
                 if (nPoints < f[fp])

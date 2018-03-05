@@ -312,10 +312,9 @@ void Foam::fileOperation::addWatches
     DynamicList<label> newWatchIndices;
     labelHashSet removedWatches(watchIndices);
 
-    forAll(files, i)
+    for (const fileName& f : files)
     {
-        const fileName& f = files[i];
-        label index = findWatch(watchIndices, f);
+        const label index = findWatch(watchIndices, f);
 
         if (index == -1)
         {
@@ -330,9 +329,9 @@ void Foam::fileOperation::addWatches
     }
 
     // Remove any unused watches
-    forAllConstIter(labelHashSet, removedWatches, iter)
+    for (const label index : removedWatches)
     {
-        removeWatch(watchIndices[iter.key()]);
+        removeWatch(watchIndices[index]);
     }
 
     rio.watchIndices() = newWatchIndices;
