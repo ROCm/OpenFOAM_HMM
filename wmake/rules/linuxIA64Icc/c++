@@ -1,6 +1,6 @@
 SUFFIXES += .C .cc .cpp .cxx
 
-c++WARN     = -Wall -Wextra -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
+c++WARN     = -Wall -Wextra -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof -Wno-unknown-pragmas \
               -diag-disable 2304,1292
 
 # Suppress some warnings for flex++ and CGAL
