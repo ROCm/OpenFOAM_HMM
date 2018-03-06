@@ -43,6 +43,7 @@ See also
 
 #include "labelRange.H"
 #include "scalarList.H"
+#include "HashOps.H"
 #include "ListOps.H"
 #include "SubList.H"
 
@@ -473,7 +474,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            PackedBoolList select(locations.toc());
+            PackedBoolList select = HashSetOps::bitset(locations);
             auto output = ListOps::createWithValue<label>
             (
                 30,
@@ -486,16 +487,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            // Fairly really inconvenient way to set true/false
-            labelList toc(locations.sortedToc());
-
-            List<bool> select = ListOps::createWithValue<bool>
-            (
-                toc.last() + 1,
-                toc,
-                true,
-                false  // default value
-            );
+            List<bool> select = HashSetOps::bools(locations);
 
             auto output = ListOps::createWithValue<label>
             (
@@ -524,7 +516,7 @@ int main(int argc, char *argv[])
         }
 
         {
-            PackedBoolList select(locations.toc());
+            PackedBoolList select = HashSetOps::bitset(locations);
             auto output = ListOps::createWithValue<label>
             (
                 30,
@@ -533,20 +525,12 @@ int main(int argc, char *argv[])
                 -1  // default value
             );
             Info<< "with PackedBoolList: " << flatOutput(output)
-                << " selector: " << flatOutput(select.used()) << nl;
+                << " selector: " << flatOutput(HashSetOps::used(select))
+                << nl;
         }
 
         {
-            // Fairly really inconvenient way to set true/false
-            labelList toc(locations.sortedToc());
-
-            List<bool> select = ListOps::createWithValue<bool>
-            (
-                toc.last() + 1,
-                toc,
-                true,
-                false  // default value
-            );
+            List<bool> select = HashSetOps::bools(locations);
 
             auto output = ListOps::createWithValue<label>
             (
@@ -556,7 +540,8 @@ int main(int argc, char *argv[])
                 -1  // default value
             );
             Info<< "with boolList: " << flatOutput(output)
-                << " selector: " << flatOutput(select) << nl;
+                << " selector: " << flatOutput(HashSetOps::used(select))
+                << nl;
         }
     }
 

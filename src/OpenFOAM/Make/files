@@ -145,6 +145,7 @@ primitives/polynomialEqns/quadraticEqn/quadraticEqn.C
 primitives/Barycentric/barycentric/barycentric.C
 primitives/Barycentric2D/barycentric2D/barycentric2D.C
 
+containers/HashTables/HashOps/HashOps.C
 containers/HashTables/HashTable/HashTableCore.C
 containers/Lists/SortableList/ParSortableListName.C
 containers/Lists/PackedList/PackedListCore.C

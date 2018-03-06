@@ -73,7 +73,7 @@ Note
 #include "IOmanip.H"
 #include "OFstream.H"
 #include "PstreamCombineReduceOps.H"
-#include "HashTableOps.H"
+#include "HashOps.H"
 
 #include "fvc.H"
 #include "volFields.H"

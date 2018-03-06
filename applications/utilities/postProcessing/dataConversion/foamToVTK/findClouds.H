@@ -53,7 +53,7 @@ if (timeDirs.size() && !noLagrangian)
 
     if (Pstream::parRun())
     {
-        Pstream::combineGather(allCloudDirs, HashSetPlusEqOp<word>());
+        Pstream::combineGather(allCloudDirs, HashSetOps::plusEqOp<word>());
         Pstream::combineScatter(allCloudDirs);
     }
 }
