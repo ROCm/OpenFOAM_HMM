@@ -126,7 +126,7 @@ public:
         primitiveEntry(const keyType& key, const UList<token>& tokens);
 
         //- Construct from keyword and by transferring a list of tokens
-        primitiveEntry(const keyType& key, const Xfer<List<token>>& tokens);
+        primitiveEntry(const keyType& key, List<token>&& tokens);
 
         //- Construct from keyword and a T
         template<class T>

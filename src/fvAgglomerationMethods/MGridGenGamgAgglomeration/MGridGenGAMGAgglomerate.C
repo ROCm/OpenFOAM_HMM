@@ -170,7 +170,7 @@ Foam::tmp<Foam::labelField> Foam::MGridGenGAMGAgglomeration::agglomerate
         }
     }
 
-    return tmp<labelField>(new labelField(finalAgglom));
+    return tmp<labelField>::New(finalAgglom);
 }
 
 

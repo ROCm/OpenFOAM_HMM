@@ -36,7 +36,7 @@ Foam::LiftForce<CloudType>::curlUcInterp() const
             << abort(FatalError);
     }
 
-    return curlUcInterpPtr_();
+    return *curlUcInterpPtr_;
 }
 
 

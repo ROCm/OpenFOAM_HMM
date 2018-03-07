@@ -75,7 +75,7 @@ Foam::functionObjects::streamLineBase::sampledSetPoints() const
         sampledSetAxis_ = sampledSetPtr_->axis();
     }
 
-    return sampledSetPtr_();
+    return *sampledSetPtr_;
 }
 
 
@@ -111,17 +111,14 @@ Foam::functionObjects::streamLineBase::wallPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>
+    return autoPtr<indirectPrimitivePatch>::New
     (
-        new indirectPrimitivePatch
+        IndirectList<face>
         (
-            IndirectList<face>
-            (
-                mesh_.faces(),
-                addressing
-            ),
-            mesh_.points()
-        )
+            mesh_.faces(),
+            addressing
+        ),
+        mesh_.points()
     );
 }
 
@@ -658,8 +655,8 @@ bool Foam::functionObjects::streamLineBase::write()
         const mapDistribute distMap
         (
             globalTrackIDs.size(),
-            sendMap.xfer(),
-            recvMap.xfer()
+            std::move(sendMap),
+            std::move(recvMap)
         );
 
 

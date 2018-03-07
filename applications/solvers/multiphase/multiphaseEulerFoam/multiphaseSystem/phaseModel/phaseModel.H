@@ -190,12 +190,12 @@ public:
 
         const surfaceScalarField& phi() const
         {
-            return phiPtr_();
+            return *phiPtr_;
         }
 
         surfaceScalarField& phi()
         {
-            return phiPtr_();
+            return *phiPtr_;
         }
 
         const surfaceScalarField& alphaPhi() const

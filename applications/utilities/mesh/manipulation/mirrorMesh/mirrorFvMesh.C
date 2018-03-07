@@ -353,12 +353,12 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     Info<< "Mirroring cell shapes." << endl;
 
     Info<< nl << "Creating new mesh" << endl;
-    mirrorMeshPtr_ = new fvMesh
+    mirrorMeshPtr_ = autoPtr<fvMesh>::New
     (
         io,
-        xferMove(newPoints),
-        xferMove(newFaces),
-        xferMove(newCells)
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newCells)
     );
 
     fvMesh& pMesh = *mirrorMeshPtr_;
@@ -379,12 +379,6 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
 
     pMesh.addPatches(p);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::mirrorFvMesh::~mirrorFvMesh()
-{}
 
 
 // ************************************************************************* //

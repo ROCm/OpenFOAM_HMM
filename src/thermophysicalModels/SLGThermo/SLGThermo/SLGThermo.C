@@ -127,7 +127,7 @@ const Foam::liquidMixtureProperties& Foam::SLGThermo::liquids() const
             << abort(FatalError);
     }
 
-    return liquids_();
+    return *liquids_;
 }
 
 
@@ -140,7 +140,7 @@ const Foam::solidMixtureProperties& Foam::SLGThermo::solids() const
             << abort(FatalError);
     }
 
-    return solids_();
+    return *solids_;
 }
 
 

@@ -231,7 +231,7 @@ public:
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
-            return autoPtr<polyPatch>(new polyPatch(*this, bm));
+            return autoPtr<polyPatch>::New(*this, bm);
         }
 
         //- Construct and return a clone, resetting the face list
@@ -244,10 +244,7 @@ public:
             const label newStart
         ) const
         {
-            return autoPtr<polyPatch>
-            (
-                new polyPatch(*this, bm, index, newSize, newStart)
-            );
+            return autoPtr<polyPatch>::New(*this, bm, index, newSize, newStart);
         }
 
         //- Construct and return a clone, resetting the face list
@@ -260,10 +257,8 @@ public:
             const label newStart
         ) const
         {
-            return autoPtr<polyPatch>
-            (
-                new polyPatch(*this, bm, index, mapAddressing, newStart)
-            );
+            return autoPtr<polyPatch>::New
+                (*this, bm, index, mapAddressing, newStart);
         }
 
 
@@ -313,6 +308,12 @@ public:
         label start() const
         {
             return start_;
+        }
+
+        //- Return start/size range of this patch
+        labelRange range() const
+        {
+            return labelRange(start_, this->size());
         }
 
         //- Return boundaryMesh reference
@@ -420,6 +421,19 @@ public:
     // Ostream Operator
 
         friend Ostream& operator<<(Ostream&, const polyPatch&);
+};
+
+
+// Global Functions
+
+//- Get the labelRange for a polyPatch
+template<>
+struct toLabelRange<polyPatch>
+{
+    labelRange operator()(const polyPatch& pp) const
+    {
+        return pp.range();
+    }
 };
 
 

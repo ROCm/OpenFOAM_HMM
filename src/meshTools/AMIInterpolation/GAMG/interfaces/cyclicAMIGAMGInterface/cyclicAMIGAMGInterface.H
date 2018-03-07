@@ -132,7 +132,7 @@ public:
 
             virtual const AMIPatchToPatchInterpolation& AMI() const
             {
-                return amiPtr_();
+                return *amiPtr_;
             }
 
             //- Return face transformation tensor

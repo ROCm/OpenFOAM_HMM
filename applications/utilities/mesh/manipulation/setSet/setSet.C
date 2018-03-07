@@ -472,7 +472,7 @@ bool doCommand
                         setSource().applyToSet(topoSetSource::NEW, currentSet);
 
                         // Combine new value of currentSet with old one.
-                        currentSet.subset(oldSet);
+                        currentSet.subset(oldSet());
                     }
                     break;
                 }
@@ -814,7 +814,7 @@ int main(int argc, char *argv[])
         // Main command read & execute loop
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        autoPtr<IFstream> fileStreamPtr(nullptr);
+        autoPtr<IFstream> fileStreamPtr;
 
         if (batch)
         {

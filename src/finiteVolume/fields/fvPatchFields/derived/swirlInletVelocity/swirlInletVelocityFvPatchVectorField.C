@@ -56,9 +56,9 @@ swirlInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    axialVelocity_(ptf.axialVelocity_, false),
-    radialVelocity_(ptf.radialVelocity_, false),
-    tangentialVelocity_(ptf.tangentialVelocity_, false)
+    axialVelocity_(ptf.axialVelocity_.clone()),
+    radialVelocity_(ptf.radialVelocity_.clone()),
+    tangentialVelocity_(ptf.tangentialVelocity_.clone())
 {}
 
 
@@ -88,9 +88,9 @@ swirlInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    axialVelocity_(ptf.axialVelocity_, false),
-    radialVelocity_(ptf.radialVelocity_, false),
-    tangentialVelocity_(ptf.tangentialVelocity_, false)
+    axialVelocity_(ptf.axialVelocity_.clone()),
+    radialVelocity_(ptf.radialVelocity_.clone()),
+    tangentialVelocity_(ptf.tangentialVelocity_.clone())
 {}
 
 
@@ -104,9 +104,9 @@ swirlInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, iF),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    axialVelocity_(ptf.axialVelocity_, false),
-    radialVelocity_(ptf.radialVelocity_, false),
-    tangentialVelocity_(ptf.tangentialVelocity_, false)
+    axialVelocity_(ptf.axialVelocity_.clone()),
+    radialVelocity_(ptf.radialVelocity_.clone()),
+    tangentialVelocity_(ptf.tangentialVelocity_.clone())
 {}
 
 

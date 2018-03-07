@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -228,9 +228,9 @@ public:
                 List<List<Type>>& flds
             ) const
             {
-                forAll(flds, i)
+                for (List<Type>& fld : flds)
                 {
-                    operator()(vt, forward, flds[i]);
+                    operator()(vt, forward, fld);
                 }
             }
 
@@ -268,7 +268,7 @@ public:
                 List<point>& fld
             ) const
             {
-                pointField pfld(fld.xfer());
+                pointField pfld(std::move(fld));
                 if (forward)
                 {
                     fld = vt.transformPosition(pfld);
@@ -324,41 +324,49 @@ public:
         //- Construct null
         mapDistribute();
 
-        //- Construct from components
+        //- Copy construct
+        mapDistribute(const mapDistribute& map);
+
+        //- Move construct
+        mapDistribute(mapDistribute&& map);
+
+        //- Move construct from components
         mapDistribute
         (
             const label constructSize,
-            const Xfer<labelListList>& subMap,
-            const Xfer<labelListList>& constructMap,
+            labelListList&& subMap,
+            labelListList&& constructMap,
             const bool subHasFlip = false,
             const bool constructHasFlip = false
         );
 
-        //- Construct from components
+        //- Move construct from components
         mapDistribute
         (
             const label constructSize,
-            const Xfer<labelListList>& subMap,
-            const Xfer<labelListList>& constructMap,
-            const Xfer<labelListList>& transformElements,
-            const Xfer<labelList>& transformStart,
+            labelListList&& subMap,
+            labelListList&& constructMap,
+            labelListList&& transformElements,
+            labelList&& transformStart,
             const bool subHasFlip = false,
             const bool constructHasFlip = false
         );
 
         //- Construct from reverse addressing: per data item the send
-        //  processor and the receive processor. (note: data is not stored
-        //  sorted per processor so cannot use printLayout).
+        //- processor and the receive processor.
+        //
+        //  \note data are not stored per processor so cannot use printLayout.
         mapDistribute
         (
-            const labelList& sendProcs,
-            const labelList& recvProcs
+            const labelUList& sendProcs,
+            const labelUList& recvProcs
         );
 
         //- Construct from list of (possibly) remote elements in globalIndex
-        //  numbering (or -1). Determines compact numbering (see above) and
-        //  distribute map to get data into this ordering and renumbers the
-        //  elements to be in compact numbering.
+        //- numbering (or -1).
+        //  Determines compact numbering (see above) and distribute map to
+        //  get data into this ordering and renumbers the elements to be in
+        //  compact numbering.
         mapDistribute
         (
             const globalIndex&,
@@ -368,8 +376,9 @@ public:
         );
 
         //- Special variant that works with the info sorted into bins
-        //  according to local indices. E.g. think cellCells where
-        //  cellCells[localCelli] is a list of global cells
+        //- according to local indices.
+        //  For example, cellCells where cellCells[localCelli] is a list of
+        //  global cells.
         mapDistribute
         (
             const globalIndex&,
@@ -379,8 +388,8 @@ public:
         );
 
         //- Construct from list of (possibly remote) untransformed elements
-        //  in globalIndex numbering (or -1) and (possibly remote)
-        //  transformded elements in globalIndexAndTransform numbering.
+        //- in globalIndex numbering (or -1) and (possibly remote)
+        //- transformed elements in globalIndexAndTransform numbering.
         //  Determines compact numbering (see above) and
         //  distribute map to get data into this ordering and renumbers the
         //  elements to be in compact numbering.
@@ -407,22 +416,15 @@ public:
             const int tag = Pstream::msgType()
         );
 
-        //- Construct by transferring parameter content
-        mapDistribute(const Xfer<mapDistribute>&);
-
-        //- Construct copy
-        mapDistribute(const mapDistribute&);
-
         //- Construct from Istream
-        mapDistribute(Istream&);
+        mapDistribute(Istream& is);
 
         //- Clone
         autoPtr<mapDistribute> clone() const;
 
 
     //- Destructor
-    virtual ~mapDistribute()
-    {}
+    virtual ~mapDistribute() = default;
 
 
     // Member Functions
@@ -449,10 +451,7 @@ public:
         // Other
 
             //- Transfer the contents of the argument and annul the argument.
-            void transfer(mapDistribute&);
-
-            //- Transfer contents to the Xfer container
-            Xfer<mapDistribute> xfer();
+            void transfer(mapDistribute& map);
 
             //- Distribute data using default commsType.
             template<class T>
@@ -550,7 +549,12 @@ public:
 
     // Member Operators
 
-        void operator=(const mapDistribute&);
+        //- Copy assignment
+        void operator=(const mapDistribute& rhs);
+
+        //- Move assignment
+        void operator=(mapDistribute&& rhs);
+
 
     // IOstream operators
 
@@ -559,6 +563,7 @@ public:
 
         //- Write dictionary to Ostream
         friend Ostream& operator<<(Ostream&, const mapDistribute&);
+
 };
 
 

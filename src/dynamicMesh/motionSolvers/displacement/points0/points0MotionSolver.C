@@ -111,7 +111,7 @@ Foam::points0MotionSolver::points0MotionSolver
 )
 :
     motionSolver(mesh, dict, type),
-    points0_(pointIOField(points0IO(mesh)))
+    points0_(points0IO(mesh))
 {
     if (points0_.size() != mesh.nPoints())
     {

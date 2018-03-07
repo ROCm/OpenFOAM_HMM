@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,24 +45,73 @@ Foam::Field<Type>::Field()
 
 
 template<class Type>
-Foam::Field<Type>::Field(const label size)
+Foam::Field<Type>::Field(const label len)
 :
-    List<Type>(size)
+    List<Type>(len)
 {}
 
 
 template<class Type>
-Foam::Field<Type>::Field(const label size, const Type& t)
+Foam::Field<Type>::Field(const label len, const Type& val)
 :
-    List<Type>(size, t)
+    List<Type>(len, val)
 {}
 
 
 template<class Type>
-Foam::Field<Type>::Field(const label size, const zero)
+Foam::Field<Type>::Field(const label len, const zero)
 :
-    List<Type>(size, Zero)
+    List<Type>(len, Zero)
 {}
+
+
+template<class Type>
+Foam::Field<Type>::Field(const Field<Type>& fld)
+:
+    List<Type>(fld)
+{}
+
+
+template<class Type>
+Foam::Field<Type>::Field(const UList<Type>& list)
+:
+    List<Type>(list)
+{}
+
+
+template<class Type>
+Foam::Field<Type>::Field(const UIndirectList<Type>& list)
+:
+    List<Type>(list)
+{}
+
+
+template<class Type>
+Foam::Field<Type>::Field(Field<Type>&& fld)
+:
+    List<Type>()
+{
+    List<Type>::transfer(fld);
+}
+
+
+template<class Type>
+Foam::Field<Type>::Field(List<Type>&& list)
+:
+    List<Type>()
+{
+    List<Type>::transfer(list);
+}
+
+
+template<class Type>
+template<int SizeMin>
+Foam::Field<Type>::Field(DynamicList<Type, SizeMin>&& list)
+:
+    List<Type>()
+{
+    List<Type>::transfer(list);
+}
 
 
 template<class Type>
@@ -208,57 +257,19 @@ Foam::Field<Type>::Field
 
 
 template<class Type>
-Foam::Field<Type>::Field(const Field<Type>& f)
+Foam::Field<Type>::Field(Field<Type>& fld, bool reuse)
 :
-    tmp<Field<Type>>::refCount(),
-    List<Type>(f)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(Field<Type>& f, bool reuse)
-:
-    List<Type>(f, reuse)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const Xfer<List<Type>>& f)
-:
-    List<Type>(f)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const Xfer<Field<Type>>& f)
-:
-    List<Type>()
-{
-    List<Type>::transfer(f());
-}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const UList<Type>& list)
-:
-    List<Type>(list)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const UIndirectList<Type>& list)
-:
-    List<Type>(list)
+    List<Type>(fld, reuse)
 {}
 
 
 #ifndef NoConstructFromTmp
 template<class Type>
-Foam::Field<Type>::Field(const tmp<Field<Type>>& tf)
+Foam::Field<Type>::Field(const tmp<Field<Type>>& tfld)
 :
-    List<Type>(const_cast<Field<Type>&>(tf()), tf.isTmp())
+    List<Type>(tfld.constCast(), tfld.movable())
 {
-    tf.clear();
+    tfld.clear();
 }
 #endif
 
@@ -275,10 +286,10 @@ Foam::Field<Type>::Field
 (
     const word& keyword,
     const dictionary& dict,
-    const label s
+    const label len
 )
 {
-    if (s)
+    if (len)
     {
         ITstream& is = dict.lookup(keyword);
 
@@ -289,19 +300,19 @@ Foam::Field<Type>::Field
         {
             if (firstToken.wordToken() == "uniform")
             {
-                this->setSize(s);
+                this->setSize(len);
                 operator=(pTraits<Type>(is));
             }
             else if (firstToken.wordToken() == "nonuniform")
             {
                 is >> static_cast<List<Type>&>(*this);
-                if (this->size() != s)
+                if (this->size() != len)
                 {
                     FatalIOErrorInFunction
                     (
                         dict
                     )   << "size " << this->size()
-                        << " is not equal to the given value of " << s
+                        << " is not equal to the given value of " << len
                         << exit(FatalIOError);
                 }
             }
@@ -326,7 +337,7 @@ Foam::Field<Type>::Field
                        "assuming deprecated Field format from "
                        "Foam version 2.0." << endl;
 
-                this->setSize(s);
+                this->setSize(len);
 
                 is.putBack(firstToken);
                 operator=(pTraits<Type>(is));
@@ -348,7 +359,7 @@ Foam::Field<Type>::Field
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::clone() const
 {
-    return tmp<Field<Type>>(new Field<Type>(*this));
+    return tmp<Field<Type>>::New(*this);
 }
 
 
@@ -372,7 +383,7 @@ void Foam::Field<Type>::map
     {
         forAll(f, i)
         {
-            label mapI = mapAddressing[i];
+            const label mapI = mapAddressing[i];
 
             if (mapI >= 0)
             {
@@ -773,14 +784,14 @@ void Foam::Field<Type>::operator=(const Field<Type>& rhs)
 
 
 template<class Type>
-void Foam::Field<Type>::operator=(const SubField<Type>& rhs)
+void Foam::Field<Type>::operator=(const UList<Type>& rhs)
 {
     List<Type>::operator=(rhs);
 }
 
 
 template<class Type>
-void Foam::Field<Type>::operator=(const UList<Type>& rhs)
+void Foam::Field<Type>::operator=(const SubField<Type>& rhs)
 {
     List<Type>::operator=(rhs);
 }
@@ -801,9 +812,31 @@ void Foam::Field<Type>::operator=(const tmp<Field>& rhs)
 
 
 template<class Type>
-void Foam::Field<Type>::operator=(const Type& t)
+void Foam::Field<Type>::operator=(Field<Type>&& rhs)
 {
-    List<Type>::operator=(t);
+    List<Type>::transfer(rhs);
+}
+
+
+template<class Type>
+void Foam::Field<Type>::operator=(List<Type>&& rhs)
+{
+    List<Type>::transfer(rhs);
+}
+
+
+template<class Type>
+template<int SizeMin>
+void Foam::Field<Type>::operator=(DynamicList<Type, SizeMin>&& rhs)
+{
+    List<Type>::transfer(rhs);
+}
+
+
+template<class Type>
+void Foam::Field<Type>::operator=(const Type& val)
+{
+    List<Type>::operator=(val);
 }
 
 

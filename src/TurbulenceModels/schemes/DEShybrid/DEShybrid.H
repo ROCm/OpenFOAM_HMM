@@ -417,15 +417,13 @@ public:
                     vf, model.muEff()/model.rho(), model.U(), delta
                 );
             }
-            else
-            {
-                FatalErrorInFunction
-                    << "Scheme requires a turbulence model to be present. "
-                    << "Unable to retrieve turbulence model from the mesh "
-                    << "database" << exit(FatalError);
 
-                return tmp<surfaceScalarField>(nullptr);
-            }
+            FatalErrorInFunction
+                << "Scheme requires a turbulence model to be present. "
+                << "Unable to retrieve turbulence model from the mesh "
+                << "database" << exit(FatalError);
+
+            return tmp<surfaceScalarField>();
         }
 
 
@@ -501,13 +499,8 @@ public:
             {
                 return (bf*tScheme2_().correction(vf));
             }
-            else
-            {
-                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>
-                (
-                    nullptr
-                );
-            }
+
+            return tmp<GeometricField<Type, fvsPatchField, surfaceMesh>>();
         }
 };
 

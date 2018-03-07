@@ -66,7 +66,7 @@ pointFile::pointFile
         readScalar(detailsDict().lookup("randomPerturbationCoeff"))
     )
 {
-    Info<< "    Inside/Outside check is " << insideOutsideCheck_.asText()
+    Info<< "    Inside/Outside check is " << insideOutsideCheck_.c_str()
         << endl;
 }
 

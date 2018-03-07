@@ -148,7 +148,7 @@ public:
 
 
     //- Destructor
-    virtual ~extrudePatchMesh();
+    virtual ~extrudePatchMesh() = default;
 
 
     // Member functions

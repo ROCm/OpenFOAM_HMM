@@ -219,7 +219,7 @@ public:
         //- Construct and return a clone
         virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type>>(new fvPatchField<Type>(*this));
+            return tmp<fvPatchField<Type>>::New(*this);
         }
 
         //- Construct as copy setting internal field reference
@@ -235,7 +235,7 @@ public:
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type>>(new fvPatchField<Type>(*this, iF));
+            return tmp<fvPatchField<Type>>::New(*this, iF);
         }
 
 

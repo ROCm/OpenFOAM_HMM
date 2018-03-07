@@ -79,10 +79,7 @@ Foam::autoPtr<Foam::solidMixtureProperties> Foam::solidMixtureProperties::New
     const dictionary& thermophysicalProperties
 )
 {
-    return autoPtr<solidMixtureProperties>
-    (
-        new solidMixtureProperties(thermophysicalProperties)
-    );
+    return autoPtr<solidMixtureProperties>::New(thermophysicalProperties);
 }
 
 

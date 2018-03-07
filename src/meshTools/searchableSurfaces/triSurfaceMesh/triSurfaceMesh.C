@@ -613,7 +613,8 @@ Foam::triSurfaceMesh::edgeTree() const
 
         indexedOctree<treeDataEdge>::perturbTol() = oldTol;
     }
-    return edgeTree_();
+
+    return *edgeTree_;
 }
 
 

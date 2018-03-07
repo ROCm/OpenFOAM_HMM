@@ -75,7 +75,7 @@ void Foam::radiation::fvDOM::initialise()
                         deltaPhi,
                         deltaTheta,
                         nLambda_,
-                        absorptionEmission_,
+                        *absorptionEmission_,
                         blackBody_,
                         i
                     )
@@ -108,7 +108,7 @@ void Foam::radiation::fvDOM::initialise()
                     deltaPhi,
                     deltaTheta,
                     nLambda_,
-                    absorptionEmission_,
+                    *absorptionEmission_,
                     blackBody_,
                     i
                 )
@@ -140,7 +140,7 @@ void Foam::radiation::fvDOM::initialise()
                     deltaPhi,
                     deltaTheta,
                     nLambda_,
-                    absorptionEmission_,
+                    *absorptionEmission_,
                     blackBody_,
                     i
                 )

@@ -48,12 +48,6 @@ void Foam::token::parseError(const char* expected) const
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::token::compound::~compound()
-{}
-
-
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::token::compound> Foam::token::compound::New

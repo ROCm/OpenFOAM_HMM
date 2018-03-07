@@ -235,7 +235,7 @@ Foam::turbulentDFSEMInletFvPatchVectorField::patchMapper() const
         );
     }
 
-    return mapperPtr_();
+    return *mapperPtr_;
 }
 
 
@@ -683,7 +683,7 @@ void Foam::turbulentDFSEMInletFvPatchVectorField::calcOverlappingProcEddies
         }
     }
 
-    mapDistribute map(segmentI, sendMap.xfer(), constructMap.xfer());
+    mapDistribute map(segmentI, std::move(sendMap), std::move(constructMap));
 
     PstreamBuffers pBufs(Pstream::commsTypes::nonBlocking);
 

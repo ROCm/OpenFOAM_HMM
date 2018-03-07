@@ -160,11 +160,7 @@ FieldField<Field, Type>::FieldField(const PtrList<Field<Type>>& tl)
 template<template<class> class Field, class Type>
 FieldField<Field, Type>::FieldField(const tmp<FieldField<Field, Type>>& tf)
 :
-    PtrList<Field<Type>>
-    (
-        const_cast<FieldField<Field, Type>&>(tf()),
-        tf.isTmp()
-    )
+    PtrList<Field<Type>>(tf.constCast(), tf.movable())
 {
     tf.clear();
 }
@@ -181,7 +177,7 @@ FieldField<Field, Type>::FieldField(Istream& is)
 template<template<class> class Field, class Type>
 tmp<FieldField<Field, Type>> FieldField<Field, Type>::clone() const
 {
-    return tmp<FieldField<Field, Type>>(new FieldField<Field, Type>(*this));
+    return tmp<FieldField<Field, Type>>::New(*this);
 }
 
 

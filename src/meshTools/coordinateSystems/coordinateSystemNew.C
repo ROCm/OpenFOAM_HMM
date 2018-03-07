@@ -62,7 +62,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
 {
     const dictionary& coordDict = dict.subDict(typeName_());
 
-    return autoPtr<coordinateSystem>(new coordinateSystem(coordDict));
+    return autoPtr<coordinateSystem>::New(coordDict);
 }
 
 
@@ -74,7 +74,7 @@ Foam::autoPtr<Foam::coordinateSystem> Foam::coordinateSystem::New
     const word name(is);
     const dictionary dict(is);
 
-    return autoPtr<coordinateSystem>(new coordinateSystem(name, dict));
+    return autoPtr<coordinateSystem>::New(name, dict);
 }
 
 

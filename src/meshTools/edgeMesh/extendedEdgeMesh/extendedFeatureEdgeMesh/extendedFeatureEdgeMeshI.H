@@ -125,16 +125,14 @@ inline Foam::vector Foam::extendedFeatureEdgeMesh::edgeDirection
     {
         return -edgeDirections()[edgeI];
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Requested ptI " << ptI << " is not a point on the requested "
-            << "edgeI " << edgeI << ". edgeI start and end: "
-            << e.start() << " " << e.end()
-            << exit(FatalError);
 
-        return Zero;
-    }
+    FatalErrorInFunction
+        << "Requested ptI " << ptI << " is not a point on the requested "
+        << "edgeI " << edgeI << ". edgeI start and end: "
+        << e.start() << " " << e.end()
+        << exit(FatalError);
+
+    return Zero;
 }
 
 

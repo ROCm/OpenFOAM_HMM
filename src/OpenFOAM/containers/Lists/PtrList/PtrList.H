@@ -98,9 +98,6 @@ public:
         template<class CloneArg>
         PtrList(const PtrList<T>& lst, const CloneArg& cloneArg);
 
-        //- Construct by transferring the parameter contents
-        PtrList(const Xfer<PtrList<T>>& lst);
-
         //- Construct as copy or re-use as specified
         PtrList(PtrList<T>& lst, bool reuse);
 
@@ -144,9 +141,6 @@ public:
         //- Transfer into this list and annul the argument list
         inline void transfer(PtrList<T>& lst);
 
-        //- Transfer contents to the Xfer container
-        inline Xfer<PtrList<T>> xfer();
-
         //- Return true if element is set (ie, not a nullptr)
         inline bool set(const label i) const;
 
@@ -175,6 +169,7 @@ public:
 
         //- Read PtrList from Istream, discarding contents of existing PtrList
         friend Istream& operator>> <T>(Istream& is, PtrList<T>& lst);
+
 };
 
 

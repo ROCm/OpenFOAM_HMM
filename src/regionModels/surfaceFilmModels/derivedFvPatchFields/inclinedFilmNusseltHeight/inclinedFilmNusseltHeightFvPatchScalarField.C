@@ -56,9 +56,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     filmRegionName_(ptf.filmRegionName_),
-    GammaMean_(ptf.GammaMean_, false),
-    a_(ptf.a_, false),
-    omega_(ptf.omega_, false)
+    GammaMean_(ptf.GammaMean_.clone()),
+    a_(ptf.a_.clone()),
+    omega_(ptf.omega_.clone())
 {}
 
 
@@ -89,9 +89,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wmfrhpsf),
     filmRegionName_(wmfrhpsf.filmRegionName_),
-    GammaMean_(wmfrhpsf.GammaMean_, false),
-    a_(wmfrhpsf.a_, false),
-    omega_(wmfrhpsf.omega_, false)
+    GammaMean_(wmfrhpsf.GammaMean_.clone()),
+    a_(wmfrhpsf.a_.clone()),
+    omega_(wmfrhpsf.omega_.clone())
 {}
 
 
@@ -104,9 +104,9 @@ inclinedFilmNusseltHeightFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wmfrhpsf, iF),
     filmRegionName_(wmfrhpsf.filmRegionName_),
-    GammaMean_(wmfrhpsf.GammaMean_, false),
-    a_(wmfrhpsf.a_, false),
-    omega_(wmfrhpsf.omega_, false)
+    GammaMean_(wmfrhpsf.GammaMean_.clone()),
+    a_(wmfrhpsf.a_.clone()),
+    omega_(wmfrhpsf.omega_.clone())
 {}
 
 

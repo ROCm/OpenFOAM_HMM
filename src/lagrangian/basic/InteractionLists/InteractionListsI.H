@@ -38,7 +38,7 @@ template<class ParticleType>
 const Foam::mapDistribute&
 Foam::InteractionLists<ParticleType>::cellMap() const
 {
-    return cellMapPtr_();
+    return *cellMapPtr_;
 }
 
 
@@ -46,7 +46,7 @@ template<class ParticleType>
 const Foam::mapDistribute&
 Foam::InteractionLists<ParticleType>::wallFaceMap() const
 {
-    return wallFaceMapPtr_();
+    return *wallFaceMapPtr_;
 }
 
 

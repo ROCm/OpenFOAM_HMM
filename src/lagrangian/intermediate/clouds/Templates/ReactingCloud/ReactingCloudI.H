@@ -29,7 +29,7 @@ template<class CloudType>
 inline const Foam::ReactingCloud<CloudType>&
 Foam::ReactingCloud<CloudType>::cloudCopy() const
 {
-    return cloudCopyPtr_();
+    return *cloudCopyPtr_;
 }
 
 
@@ -53,7 +53,7 @@ template<class CloudType>
 inline const Foam::CompositionModel<Foam::ReactingCloud<CloudType>>&
 Foam::ReactingCloud<CloudType>::composition() const
 {
-    return compositionModel_;
+    return *compositionModel_;
 }
 
 
@@ -61,7 +61,7 @@ template<class CloudType>
 inline const Foam::PhaseChangeModel<Foam::ReactingCloud<CloudType>>&
 Foam::ReactingCloud<CloudType>::phaseChange() const
 {
-    return phaseChangeModel_;
+    return *phaseChangeModel_;
 }
 
 
@@ -69,7 +69,7 @@ template<class CloudType>
 inline Foam::PhaseChangeModel<Foam::ReactingCloud<CloudType>>&
 Foam::ReactingCloud<CloudType>::phaseChange()
 {
-    return phaseChangeModel_();
+    return *phaseChangeModel_;
 }
 
 
@@ -149,7 +149,7 @@ inline Foam::tmp<Foam::fvScalarMatrix> Foam::ReactingCloud<CloudType>::SYi
         }
     }
 
-    return tmp<fvScalarMatrix>(new fvScalarMatrix(Yi, dimMass/dimTime));
+    return tmp<fvScalarMatrix>::New(Yi, dimMass/dimTime);
 }
 
 
@@ -285,7 +285,7 @@ Foam::ReactingCloud<CloudType>::Srho(volScalarField& rho) const
         }
     }
 
-    return tmp<fvScalarMatrix>(new fvScalarMatrix(rho, dimMass/dimTime));
+    return tmp<fvScalarMatrix>::New(rho, dimMass/dimTime);
 }
 
 

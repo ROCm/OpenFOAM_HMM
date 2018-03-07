@@ -593,23 +593,20 @@ Foam::DelaunayMesh<Triangulation>::createMesh
 
     Info<< "Creating mesh" << endl;
 
-    autoPtr<polyMesh> meshPtr
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                name,
-                time().timeName(),
-                time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferMove(points),
-            xferMove(faces),
-            xferMove(owner),
-            xferMove(neighbour)
-        )
+            name,
+            time().timeName(),
+            time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        std::move(points),
+        std::move(faces),
+        std::move(owner),
+        std::move(neighbour)
     );
 
     Info<< "Adding patches" << endl;

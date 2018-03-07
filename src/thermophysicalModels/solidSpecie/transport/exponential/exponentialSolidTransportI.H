@@ -62,10 +62,7 @@ Foam::exponentialSolidTransport<Thermo>::New
     const dictionary& dict
 )
 {
-    return autoPtr<exponentialSolidTransport<Thermo>>
-    (
-        new exponentialSolidTransport<Thermo>(dict)
-    );
+    return autoPtr<exponentialSolidTransport<Thermo>>::New(dict);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

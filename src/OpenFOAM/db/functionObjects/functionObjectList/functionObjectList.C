@@ -483,7 +483,7 @@ Foam::IOdictionary& Foam::functionObjectList::stateDict()
         createStateDict();
     }
 
-    return stateDictPtr_();
+    return *stateDictPtr_;
 }
 
 
@@ -494,7 +494,7 @@ const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
         createStateDict();
     }
 
-    return stateDictPtr_();
+    return *stateDictPtr_;
 }
 
 

@@ -252,7 +252,7 @@ Foam::GAMGAgglomeration::GAMGAgglomeration
             *this,
             controlDict
         )
-      : autoPtr<GAMGProcAgglomeration>(nullptr)
+      : autoPtr<GAMGProcAgglomeration>()
     ),
 
     nCells_(maxLevels_),

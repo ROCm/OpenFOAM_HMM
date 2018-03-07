@@ -88,13 +88,13 @@ inline Foam::PackedBoolList::PackedBoolList(const UList<bool>& lst)
 
 inline Foam::PackedBoolList::PackedBoolList(const labelUList& indices)
 :
-    PackedBoolList(indices.size(), indices)
+    PackedBoolList((indices.size() ? indices.last() : 0), indices)
 {}
 
 
 inline Foam::PackedBoolList::PackedBoolList(const labelUIndList& indices)
 :
-    PackedBoolList(indices.size(), indices)
+    PackedBoolList((indices.size() ? indices.last() : 0), indices)
 {}
 
 
@@ -125,7 +125,7 @@ inline Foam::PackedBoolList::PackedBoolList
 inline Foam::autoPtr<Foam::PackedBoolList>
 Foam::PackedBoolList::clone() const
 {
-    return autoPtr<PackedBoolList>(new PackedBoolList(*this));
+    return autoPtr<PackedBoolList>::New(*this);
 }
 
 

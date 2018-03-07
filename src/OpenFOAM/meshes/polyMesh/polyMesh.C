@@ -149,12 +149,10 @@ Foam::autoPtr<Foam::labelIOList> Foam::polyMesh::readTetBasePtIs() const
 
     if (io.typeHeaderOk<labelIOList>(true))
     {
-        return autoPtr<labelIOList>(new labelIOList(io));
+        return autoPtr<labelIOList>::New(io);
     }
-    else
-    {
-        return autoPtr<labelIOList>(nullptr);
-    }
+
+    return autoPtr<labelIOList>();
 }
 
 
@@ -350,10 +348,10 @@ Foam::polyMesh::polyMesh(const IOobject& io)
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<labelList>& owner,
-    const Xfer<labelList>& neighbour,
+    pointField&& points,
+    faceList&& faces,
+    labelList&& owner,
+    labelList&& neighbour,
     const bool syncPar
 )
 :
@@ -370,7 +368,7 @@ Foam::polyMesh::polyMesh
             io.readOpt(),
             IOobject::AUTO_WRITE
         ),
-        points
+        std::move(points)
     ),
     faces_
     (
@@ -383,7 +381,7 @@ Foam::polyMesh::polyMesh
             io.readOpt(),
             IOobject::AUTO_WRITE
         ),
-        faces
+        std::move(faces)
     ),
     owner_
     (
@@ -396,7 +394,7 @@ Foam::polyMesh::polyMesh
             io.readOpt(),
             IOobject::AUTO_WRITE
         ),
-        owner
+        std::move(owner)
     ),
     neighbour_
     (
@@ -409,7 +407,7 @@ Foam::polyMesh::polyMesh
             io.readOpt(),
             IOobject::AUTO_WRITE
         ),
-        neighbour
+        std::move(neighbour)
     ),
     clearedPrimitives_(false),
     boundary_
@@ -502,9 +500,9 @@ Foam::polyMesh::polyMesh
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<cellList>& cells,
+    pointField&& points,
+    faceList&& faces,
+    cellList&& cells,
     const bool syncPar
 )
 :
@@ -521,7 +519,7 @@ Foam::polyMesh::polyMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        points
+        std::move(points)
     ),
     faces_
     (
@@ -534,7 +532,7 @@ Foam::polyMesh::polyMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        faces
+        std::move(faces)
     ),
     owner_
     (
@@ -645,8 +643,8 @@ Foam::polyMesh::polyMesh
         }
     }
 
-    // transfer in cell list
-    cellList cLst(cells);
+    // Transfer in cell list
+    cellList cLst(std::move(cells));
 
     // Check if cells are valid
     forAll(cLst, celli)
@@ -667,14 +665,20 @@ Foam::polyMesh::polyMesh
 }
 
 
+Foam::polyMesh::polyMesh(const IOobject& io, const zero, const bool syncPar)
+:
+    polyMesh(io, pointField(), faceList(), labelList(), labelList(), syncPar)
+{}
+
+
 void Foam::polyMesh::resetPrimitives
 (
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<labelList>& owner,
-    const Xfer<labelList>& neighbour,
-    const labelList& patchSizes,
-    const labelList& patchStarts,
+    autoPtr<pointField>&& points,
+    autoPtr<faceList>&& faces,
+    autoPtr<labelList>&& owner,
+    autoPtr<labelList>&& neighbour,
+    const labelUList& patchSizes,
+    const labelUList& patchStarts,
     const bool validBoundary
 )
 {
@@ -683,23 +687,23 @@ void Foam::polyMesh::resetPrimitives
 
     // Take over new primitive data.
     // Optimized to avoid overwriting data at all
-    if (notNull(points))
+    if (points.valid())
     {
         points_.transfer(points());
         bounds_ = boundBox(points_, validBoundary);
     }
 
-    if (notNull(faces))
+    if (faces.valid())
     {
         faces_.transfer(faces());
     }
 
-    if (notNull(owner))
+    if (owner.valid())
     {
         owner_.transfer(owner());
     }
 
-    if (notNull(neighbour))
+    if (neighbour.valid())
     {
         neighbour_.transfer(neighbour());
     }
@@ -873,7 +877,7 @@ const Foam::labelIOList& Foam::polyMesh::tetBasePtIs() const
         );
     }
 
-    return tetBasePtIsPtr_();
+    return *tetBasePtIsPtr_;
 }
 
 
@@ -1078,7 +1082,7 @@ const Foam::pointField& Foam::polyMesh::oldPoints() const
         curMotionTimeIndex_ = time().timeIndex();
     }
 
-    return oldPointsPtr_();
+    return *oldPointsPtr_;
 }
 
 
@@ -1231,7 +1235,7 @@ const Foam::globalMeshData& Foam::polyMesh::globalData() const
         globalMeshDataPtr_.reset(new globalMeshData(*this));
     }
 
-    return globalMeshDataPtr_();
+    return *globalMeshDataPtr_;
 }
 
 

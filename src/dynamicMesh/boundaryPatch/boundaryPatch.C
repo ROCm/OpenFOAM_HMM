@@ -75,7 +75,7 @@ Foam::boundaryPatch::boundaryPatch(const boundaryPatch& p, const label index)
 
 Foam::autoPtr<Foam::boundaryPatch> Foam::boundaryPatch::clone() const
 {
-    return autoPtr<boundaryPatch>(new boundaryPatch(*this));
+    return autoPtr<boundaryPatch>::New(*this);
 }
 
 

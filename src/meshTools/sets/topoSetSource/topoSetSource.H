@@ -243,7 +243,7 @@ public:
         autoPtr<topoSetSource> clone() const
         {
             NotImplemented;
-            return autoPtr<topoSetSource>(nullptr);
+            return autoPtr<topoSetSource>();
         }
 
 

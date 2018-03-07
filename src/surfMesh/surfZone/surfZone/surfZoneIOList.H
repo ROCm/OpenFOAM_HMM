@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class surfZoneIOList;
 
@@ -58,18 +58,9 @@ Ostream& operator<<(Ostream&, const surfZoneIOList&);
 
 class surfZoneIOList
 :
-    public surfZoneList,
-    public regIOobject
+    public regIOobject,
+    public surfZoneList
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        surfZoneIOList(const surfZoneIOList&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const surfZoneIOList&);
-
-
 public:
 
     //- Runtime type information
@@ -79,28 +70,37 @@ public:
     // Constructors
 
         //- Construct from IOobject
-        explicit surfZoneIOList(const IOobject&);
+        explicit surfZoneIOList(const IOobject& io);
 
-        //- Construct from IOobject and surfZoneList
-        surfZoneIOList(const IOobject&, const surfZoneList&);
+        //- Construct from IOobject and surfZoneList content
+        surfZoneIOList(const IOobject& io, const UList<surfZone>& content);
 
-        //- Construct from IOobject and surfZoneList
-        surfZoneIOList(const IOobject&, const Xfer<surfZoneList>&);
+        //- Construct from IOobject and transferring surfZoneList content
+        surfZoneIOList(const IOobject& io, surfZoneList&& content);
 
 
     //- Destructor
-    ~surfZoneIOList();
+    virtual ~surfZoneIOList() = default;
 
 
     // Member Functions
 
-        //- writeData member function required by regIOobject
-        bool writeData(Ostream&) const;
+        //- The writeData function for regIOobject
+        bool writeData(Ostream& os) const;
+
+
+    // Member Operators
+
+        //- Copy assignment of entries
+        void operator=(const surfZoneIOList& rhs);
+
+        //- Copy or move assignment of entries
+        using surfZoneList::operator=;
 
 
     // IOstream Operators
 
-        friend Ostream& operator<<(Ostream&, const surfZoneIOList&);
+        friend Ostream& operator<<(Ostream& os, const surfZoneIOList& list);
 };
 
 

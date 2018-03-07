@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ bool Foam::CompactIOList<T, BaseType>::overflows() const
     label size = 0;
     forAll(*this, i)
     {
-        label oldSize = size;
+        const label oldSize = size;
         size += this->operator[](i).size();
         if (size < oldSize)
         {
@@ -94,7 +94,7 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
-    const label size
+    const label len
 )
 :
     regIOobject(io)
@@ -109,7 +109,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
     }
     else
     {
-        List<T>::setSize(size);
+        List<T>::setSize(len);
     }
 }
 
@@ -118,7 +118,7 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
-    const List<T>& list
+    const UList<T>& content
 )
 :
     regIOobject(io)
@@ -133,7 +133,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
     }
     else
     {
-        List<T>::operator=(list);
+        List<T>::operator=(content);
     }
 }
 
@@ -142,12 +142,12 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
-    const Xfer<List<T>>& list
+    List<T>&& content
 )
 :
     regIOobject(io)
 {
-    List<T>::transfer(list());
+    List<T>::transfer(content);
 
     if
     (
@@ -158,14 +158,6 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
         readFromStream();
     }
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T, class BaseType>
-Foam::CompactIOList<T, BaseType>::~CompactIOList()
-{}
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -233,13 +225,6 @@ void Foam::CompactIOList<T, BaseType>::operator=
 }
 
 
-template<class T, class BaseType>
-void Foam::CompactIOList<T, BaseType>::operator=(const List<T>& rhs)
-{
-    List<T>::operator=(rhs);
-}
-
-
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 template<class T, class BaseType>
@@ -293,7 +278,7 @@ Foam::Ostream& Foam::operator<<
         start[0] = 0;
         for (label i = 1; i < start.size(); i++)
         {
-            label prev = start[i-1];
+            const label prev = start[i-1];
             start[i] = prev+L[i-1].size();
 
             if (start[i] < prev)

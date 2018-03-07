@@ -94,7 +94,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, false)
+    p0_(ptf.p0_.clone())
 {
     patchType() = ptf.patchType();
 
@@ -117,7 +117,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, false)
+    p0_(ptf.p0_.clone())
 {}
 
 
@@ -134,7 +134,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, false)
+    p0_(ptf.p0_.clone())
 {}
 
 

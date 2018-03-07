@@ -204,7 +204,7 @@ Foam::CellZoneInjection<CloudType>::CellZoneInjection
     injectorTetPts_(im.injectorTetPts_),
     diameters_(im.diameters_),
     U0_(im.U0_),
-    sizeDistribution_(im.sizeDistribution_, false)
+    sizeDistribution_(im.sizeDistribution_.clone())
 {}
 
 

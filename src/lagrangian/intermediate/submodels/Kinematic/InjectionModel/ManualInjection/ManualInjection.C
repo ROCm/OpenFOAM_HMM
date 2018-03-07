@@ -97,7 +97,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     injectorTetFaces_(im.injectorTetFaces_),
     injectorTetPts_(im.injectorTetPts_),
     U0_(im.U0_),
-    sizeDistribution_(im.sizeDistribution_, false),
+    sizeDistribution_(im.sizeDistribution_.clone()),
     ignoreOutOfBounds_(im.ignoreOutOfBounds_)
 {}
 

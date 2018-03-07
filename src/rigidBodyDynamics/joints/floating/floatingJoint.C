@@ -54,8 +54,7 @@ namespace joints
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::RBD::joints::composite>
-Foam::RBD::joints::floating::sixDoF()
+Foam::RBD::joints::composite Foam::RBD::joints::floating::sixDoF()
 {
     PtrList<joint> cj(2);
     cj.set(0, new joints::Pxyz());
@@ -67,7 +66,7 @@ Foam::RBD::joints::floating::sixDoF()
     // Alternatively the Euler-angle joint can be used
     cj.set(1, new joints::Rzyx());
 
-    return autoPtr<composite>(new composite(cj));
+    return composite(cj);
 }
 
 
@@ -81,7 +80,7 @@ Foam::RBD::joints::floating::floating()
 
 Foam::RBD::joints::floating::floating(const dictionary& dict)
 :
-    composite(sixDoF())
+    floating()
 {}
 
 
@@ -89,12 +88,6 @@ Foam::autoPtr<Foam::RBD::joint> Foam::RBD::joints::floating::clone() const
 {
     return autoPtr<joint>(new floating(*this));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::RBD::joints::floating::~floating()
-{}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

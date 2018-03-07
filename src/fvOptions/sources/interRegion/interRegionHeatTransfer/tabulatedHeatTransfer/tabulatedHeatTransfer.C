@@ -53,7 +53,7 @@ Foam::fv::tabulatedHeatTransfer::hTable()
         hTable_.reset(new interpolation2DTable<scalar>(coeffs_));
     }
 
-    return hTable_();
+    return *hTable_;
 }
 
 
@@ -78,7 +78,7 @@ const Foam::volScalarField& Foam::fv::tabulatedHeatTransfer::AoV()
         );
     }
 
-    return AoV_();
+    return *AoV_;
 }
 
 

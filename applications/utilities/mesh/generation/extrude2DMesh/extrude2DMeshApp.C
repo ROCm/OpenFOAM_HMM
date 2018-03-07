@@ -184,24 +184,21 @@ int main(int argc, char *argv[])
 
         poly2DMesh.createMesh();
 
-        mesh.reset
+        mesh = autoPtr<polyMesh>::New
         (
-            new polyMesh
+            IOobject
             (
-                IOobject
-                (
-                    polyMesh::defaultRegion,
-                    runTimeExtruded.constant(),
-                    runTimeExtruded,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                xferMove(poly2DMesh.points()),
-                xferMove(poly2DMesh.faces()),
-                xferMove(poly2DMesh.owner()),
-                xferMove(poly2DMesh.neighbour())
-            )
+                polyMesh::defaultRegion,
+                runTimeExtruded.constant(),
+                runTimeExtruded,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            std::move(poly2DMesh.points()),
+            std::move(poly2DMesh.faces()),
+            std::move(poly2DMesh.owner()),
+            std::move(poly2DMesh.neighbour())
         );
 
         Info<< "Constructing patches." << endl;
@@ -224,17 +221,14 @@ int main(int argc, char *argv[])
     }
     else if (surfaceFormat == POLYMESH2D)
     {
-        mesh.reset
+        mesh = autoPtr<polyMesh>::New
         (
-            new polyMesh
+            Foam::IOobject
             (
-                Foam::IOobject
-                (
-                    Foam::polyMesh::defaultRegion,
-                    runTimeExtruded.timeName(),
-                    runTimeExtruded,
-                    Foam::IOobject::MUST_READ
-                )
+                Foam::polyMesh::defaultRegion,
+                runTimeExtruded.timeName(),
+                runTimeExtruded,
+                Foam::IOobject::MUST_READ
             )
         );
     }
@@ -251,7 +245,7 @@ int main(int argc, char *argv[])
     // Create a mesh from topo changes.
     autoPtr<mapPolyMesh> morphMap = meshMod().changeMesh(mesh(), false);
 
-    mesh().updateMesh(morphMap);
+    mesh().updateMesh(morphMap());
 
     {
         edgeCollapser collapser(mesh());
@@ -302,7 +296,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> morphMap
             = meshModCollapse.changeMesh(mesh(), false);
 
-        mesh().updateMesh(morphMap);
+        mesh().updateMesh(morphMap());
     }
 
     if (!overwrite)

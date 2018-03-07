@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -44,7 +44,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<class T, int SizeMin> class DynamicField;
 
@@ -93,7 +93,7 @@ public:
         //- Return a null field
         inline static const DynamicField<T, SizeMin>& null()
         {
-            return *reinterpret_cast<DynamicField<T, SizeMin>*>(0);
+            return NullObjectRef<DynamicField<T, SizeMin>>();
         }
 
 
@@ -102,24 +102,30 @@ public:
         //- Construct null
         inline DynamicField();
 
-        //- Construct given size.
-        explicit inline DynamicField(const label nElem);
+        //- Construct with given capacity.
+        explicit inline DynamicField(const label len);
 
-        //- Construct from UList. Size set to UList size.
+        //- Copy construct
+        inline DynamicField(const DynamicField<T, SizeMin>& lst);
+
+        //- Copy construct from UList. Size set to UList size.
         //  Also constructs from DynamicField with different sizing parameters.
         explicit inline DynamicField(const UList<T>& lst);
 
-        //- Construct by transferring the parameter contents
-        explicit inline DynamicField(const Xfer<List<T>>& lst);
+        //- Copy construct from UIndirectList
+        explicit inline DynamicField(const UIndirectList<T>& list);
 
-        //- Construct by transferring the parameter contents
-        explicit inline DynamicField(const Xfer<Field<T>>& lst);
+        //- Move construct from List contents
+        explicit inline DynamicField(List<T>&& content);
+
+        //- Move construct from Field contents
+        inline DynamicField(DynamicField<T, SizeMin>&& content);
 
         //- Construct by 1 to 1 mapping from the given field
         inline DynamicField
         (
             const UList<T>& mapF,
-            const labelList& mapAddressing
+            const labelUList& mapAddressing
         );
 
         //- Construct by interpolative mapping from the given field
@@ -135,15 +141,6 @@ public:
         (
             const UList<T>& mapF,
             const FieldMapper& map
-        );
-
-        //- Construct copy
-        inline DynamicField(const DynamicField<T, SizeMin>& lst);
-
-        //- Construct by transferring the Field contents
-        inline DynamicField
-        (
-            const Xfer<DynamicField<T, SizeMin>>& lst
         );
 
         //- Construct from Istream. Size set to size of list read.
@@ -207,9 +204,6 @@ public:
             //  Returns a reference to the DynamicField.
             inline DynamicField<T, SizeMin>& shrink();
 
-            //- Transfer contents to the Xfer container as a plain List
-            inline Xfer<List<T>> xfer();
-
 
         // Member Operators
 
@@ -239,6 +233,7 @@ public:
 
             //- Assignment to UList
             inline void operator=(const UList<T>& lst);
+
 };
 
 

@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     inplaceReverseList(addresses);
 
-    idl1.resetAddressing(addresses.xfer());
+    idl1.resetAddressing(std::move(addresses));
 
     printInfo(idl1);
 

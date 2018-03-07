@@ -473,17 +473,6 @@ public:
         );
 
 
-        //- Reset this primitiveMesh given the primitive array sizes and cells
-        void reset
-        (
-            const label nPoints,
-            const label nInternalFaces,
-            const label nFaces,
-            const label nCells,
-            const Xfer<cellList>& cells
-        );
-
-
         // Access
 
             // Mesh size parameters

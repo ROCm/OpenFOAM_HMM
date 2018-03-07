@@ -81,7 +81,7 @@ void Foam::parLagrangianRedistributor::findClouds
     }
 
     // Synchronise cloud names
-    Pstream::combineGather(cloudNames, ListUniqueEqOp<word>());
+    Pstream::combineGather(cloudNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(cloudNames);
 
     objectNames.setSize(cloudNames.size());
@@ -117,10 +117,10 @@ void Foam::parLagrangianRedistributor::findClouds
     }
 
     // Synchronise objectNames
-    forAll(objectNames, cloudI)
+    forAll(objectNames, i)
     {
-        Pstream::combineGather(objectNames[cloudI], ListUniqueEqOp<word>());
-        Pstream::combineScatter(objectNames[cloudI]);
+        Pstream::combineGather(objectNames[i], ListOps::uniqueEqOp<word>());
+        Pstream::combineScatter(objectNames[i]);
     }
 }
 
@@ -279,15 +279,11 @@ Foam::parLagrangianRedistributor::redistributeLagrangianPositions
     }
 
 
-    // Construct map
-    return autoPtr<mapDistributeBase>
+    return autoPtr<mapDistributeBase>::New
     (
-        new mapDistributeBase
-        (
-            constructSize,
-            subMap.xfer(),
-            constructMap.xfer()
-        )
+        constructSize,
+        std::move(subMap),
+        std::move(constructMap)
     );
 }
 

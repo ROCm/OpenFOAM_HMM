@@ -810,7 +810,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
         resetAMI(AMIMethod_);
     }
 
-    return AMIPtr_();
+    return *AMIPtr_;
 }
 
 

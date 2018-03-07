@@ -139,7 +139,7 @@ protected:
         void calcCompactAddressing
         (
             const globalIndex& globalNumbering,
-            const labelList& elements,
+            const labelUList& elements,
             List<Map<label>>& compactMap
         ) const;
 
@@ -198,12 +198,18 @@ public:
         //- Construct null
         mapDistributeBase();
 
+        //- Copy construct
+        mapDistributeBase(const mapDistributeBase& map);
+
+        //- Move construct
+        mapDistributeBase(mapDistributeBase&& map);
+
         //- Construct from components
         mapDistributeBase
         (
             const label constructSize,
-            const Xfer<labelListList>& subMap,
-            const Xfer<labelListList>& constructMap,
+            labelListList&& subMap,
+            labelListList&& constructMap,
             const bool subHasFlip = false,
             const bool constructHasFlip = false
         );
@@ -213,8 +219,8 @@ public:
         //  sorted per processor so cannot use printLayout).
         mapDistributeBase
         (
-            const labelList& sendProcs,
-            const labelList& recvProcs
+            const labelUList& sendProcs,
+            const labelUList& recvProcs
         );
 
         //- Construct from list of (possibly) remote elements in globalIndex
@@ -240,14 +246,8 @@ public:
             const int tag = Pstream::msgType()
         );
 
-        //- Construct by transferring parameter content
-        mapDistributeBase(const Xfer<mapDistributeBase>&);
-
-        //- Construct copy
-        mapDistributeBase(const mapDistributeBase&);
-
         //- Construct from Istream
-        mapDistributeBase(Istream&);
+        mapDistributeBase(Istream& is);
 
 
     // Member Functions
@@ -329,10 +329,7 @@ public:
         // Other
 
             //- Transfer the contents of the argument and annul the argument.
-            void transfer(mapDistributeBase&);
-
-            //- Transfer contents to the Xfer container
-            Xfer<mapDistributeBase> xfer();
+            void transfer(mapDistributeBase& rhs);
 
             //- Helper for construct from globalIndex. Renumbers element
             //  (in globalIndex numbering) into compact indices.
@@ -464,9 +461,15 @@ public:
                 NotImplemented;
             }
 
+
     // Member Operators
 
-        void operator=(const mapDistributeBase&);
+        //- Copy assigment
+        void operator=(const mapDistributeBase& rhs);
+
+        //- Move assigment
+        void operator=(mapDistributeBase&& rhs);
+
 
     // IOstream operators
 

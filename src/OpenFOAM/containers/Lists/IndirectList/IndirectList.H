@@ -76,7 +76,7 @@ protected:
         explicit inline IndirectListAddressing(const labelUList& addr);
 
         //- Construct by transferring addressing array
-        explicit inline IndirectListAddressing(const Xfer<List<label>>& addr);
+        explicit inline IndirectListAddressing(List<label>&& addr);
 
 
     // Member Functions
@@ -84,9 +84,11 @@ protected:
         //- Return the list addressing
         inline const List<label>& addressing() const;
 
-        //- Reset addressing
+        //- Copy reset addressing
         inline void resetAddressing(const labelUList& addr);
-        inline void resetAddressing(const Xfer<List<label>>& addr);
+
+        //- Move reset addressing
+        inline void resetAddressing(List<label>&& addr);
 
 };
 
@@ -125,7 +127,7 @@ public:
         inline IndirectList
         (
             const UList<T>& completeList,
-            const Xfer<List<label>>& addr
+            List<label>&& addr
         );
 
         //- Copy constructor

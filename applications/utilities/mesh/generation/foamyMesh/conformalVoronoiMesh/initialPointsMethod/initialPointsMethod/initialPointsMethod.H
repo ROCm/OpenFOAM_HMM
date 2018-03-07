@@ -156,7 +156,7 @@ public:
 
 
     //- Destructor
-    virtual ~initialPointsMethod();
+    virtual ~initialPointsMethod() = default;
 
 
     // Member Functions
@@ -185,7 +185,7 @@ public:
 
             const backgroundMeshDecomposition& decomposition() const
             {
-                return decomposition_;
+                return *decomposition_;
             }
 
             //- Const access to the details dictionary

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -75,26 +75,37 @@ Foam::mapDistributePolyMesh::mapDistributePolyMesh()
 
 Foam::mapDistributePolyMesh::mapDistributePolyMesh
 (
+    mapDistributePolyMesh&& map
+)
+:
+    mapDistributePolyMesh()
+{
+    transfer(map);
+}
+
+
+Foam::mapDistributePolyMesh::mapDistributePolyMesh
+(
     const polyMesh& mesh,
 
     // mesh before changes
     const label nOldPoints,
     const label nOldFaces,
     const label nOldCells,
-    const Xfer<labelList>& oldPatchStarts,
-    const Xfer<labelList>& oldPatchNMeshPoints,
+    labelList&& oldPatchStarts,
+    labelList&& oldPatchNMeshPoints,
 
     // how to subset pieces of mesh to send across
-    const Xfer<labelListList>& subPointMap,
-    const Xfer<labelListList>& subFaceMap,
-    const Xfer<labelListList>& subCellMap,
-    const Xfer<labelListList>& subPatchMap,
+    labelListList&& subPointMap,
+    labelListList&& subFaceMap,
+    labelListList&& subCellMap,
+    labelListList&& subPatchMap,
 
     // how to reconstruct received mesh
-    const Xfer<labelListList>& constructPointMap,
-    const Xfer<labelListList>& constructFaceMap,
-    const Xfer<labelListList>& constructCellMap,
-    const Xfer<labelListList>& constructPatchMap,
+    labelListList&& constructPointMap,
+    labelListList&& constructFaceMap,
+    labelListList&& constructCellMap,
+    labelListList&& constructPatchMap,
 
     const bool subFaceHasFlip,
     const bool constructFaceHasFlip
@@ -103,20 +114,35 @@ Foam::mapDistributePolyMesh::mapDistributePolyMesh
     nOldPoints_(nOldPoints),
     nOldFaces_(nOldFaces),
     nOldCells_(nOldCells),
-    oldPatchSizes_(oldPatchStarts().size()),
-    oldPatchStarts_(oldPatchStarts),
-    oldPatchNMeshPoints_(oldPatchNMeshPoints),
-    pointMap_(mesh.nPoints(), subPointMap, constructPointMap),
+    oldPatchSizes_(oldPatchStarts.size()),
+    oldPatchStarts_(std::move(oldPatchStarts)),
+    oldPatchNMeshPoints_(std::move(oldPatchNMeshPoints)),
+    pointMap_
+    (
+        mesh.nPoints(),
+        std::move(subPointMap),
+        std::move(constructPointMap)
+    ),
     faceMap_
     (
         mesh.nFaces(),
-        subFaceMap,
-        constructFaceMap,
+        std::move(subFaceMap),
+        std::move(constructFaceMap),
         subFaceHasFlip,
         constructFaceHasFlip
     ),
-    cellMap_(mesh.nCells(), subCellMap, constructCellMap),
-    patchMap_(mesh.boundaryMesh().size(), subPatchMap, constructPatchMap)
+    cellMap_
+    (
+        mesh.nCells(),
+        std::move(subCellMap),
+        std::move(constructCellMap)
+    ),
+    patchMap_
+    (
+        mesh.boundaryMesh().size(),
+        std::move(subPatchMap),
+        std::move(constructPatchMap)
+    )
 {
     calcPatchSizes();
 }
@@ -128,47 +154,29 @@ Foam::mapDistributePolyMesh::mapDistributePolyMesh
     const label nOldPoints,
     const label nOldFaces,
     const label nOldCells,
-    const Xfer<labelList>& oldPatchStarts,
-    const Xfer<labelList>& oldPatchNMeshPoints,
+    labelList&& oldPatchStarts,
+    labelList&& oldPatchNMeshPoints,
 
     // how to transfer pieces of mesh
-    const Xfer<mapDistribute>& pointMap,
-    const Xfer<mapDistribute>& faceMap,
-    const Xfer<mapDistribute>& cellMap,
-    const Xfer<mapDistribute>& patchMap
+    mapDistribute&& pointMap,
+    mapDistribute&& faceMap,
+    mapDistribute&& cellMap,
+    mapDistribute&& patchMap
 )
 :
     nOldPoints_(nOldPoints),
     nOldFaces_(nOldFaces),
     nOldCells_(nOldCells),
-    oldPatchSizes_(oldPatchStarts().size()),
-    oldPatchStarts_(oldPatchStarts),
-    oldPatchNMeshPoints_(oldPatchNMeshPoints),
-    pointMap_(pointMap),
-    faceMap_(faceMap),
-    cellMap_(cellMap),
-    patchMap_(patchMap)
+    oldPatchSizes_(oldPatchStarts.size()),
+    oldPatchStarts_(std::move(oldPatchStarts)),
+    oldPatchNMeshPoints_(std::move(oldPatchNMeshPoints)),
+    pointMap_(std::move(pointMap)),
+    faceMap_(std::move(faceMap)),
+    cellMap_(std::move(cellMap)),
+    patchMap_(std::move(patchMap))
 {
     calcPatchSizes();
 }
-
-
-Foam::mapDistributePolyMesh::mapDistributePolyMesh
-(
-    const Xfer<mapDistributePolyMesh>& map
-)
-:
-    nOldPoints_(map().nOldPoints_),
-    nOldFaces_(map().nOldFaces_),
-    nOldCells_(map().nOldCells_),
-    oldPatchSizes_(map().oldPatchSizes_.xfer()),
-    oldPatchStarts_(map().oldPatchStarts_.xfer()),
-    oldPatchNMeshPoints_(map().oldPatchNMeshPoints_.xfer()),
-    pointMap_(map().pointMap_.xfer()),
-    faceMap_(map().faceMap_.xfer()),
-    cellMap_(map().cellMap_.xfer()),
-    patchMap_(map().patchMap_.xfer())
-{}
 
 
 Foam::mapDistributePolyMesh::mapDistributePolyMesh(Istream& is)
@@ -191,12 +199,10 @@ void Foam::mapDistributePolyMesh::transfer(mapDistributePolyMesh& rhs)
     faceMap_.transfer(rhs.faceMap_);
     cellMap_.transfer(rhs.cellMap_);
     patchMap_.transfer(rhs.patchMap_);
-}
 
-
-Foam::Xfer<Foam::mapDistributePolyMesh> Foam::mapDistributePolyMesh::xfer()
-{
-    return xferMove(*this);
+    rhs.nOldPoints_ = 0;
+    rhs.nOldFaces_ = 0;
+    rhs.nOldCells_ = 0;
 }
 
 
@@ -205,13 +211,7 @@ void Foam::mapDistributePolyMesh::distributePointIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
-        (
-            nOldPoints(),
-            false,
-            lst,
-            true
-        )
+        ListOps::createWithValue<bool>(nOldPoints(), lst, true, false)
     );
 
     // Distribute
@@ -227,13 +227,7 @@ void Foam::mapDistributePolyMesh::distributeFaceIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
-        (
-            nOldFaces(),
-            false,
-            lst,
-            true
-        )
+        ListOps::createWithValue<bool>(nOldFaces(), lst, true, false)
     );
 
     // Distribute
@@ -249,13 +243,7 @@ void Foam::mapDistributePolyMesh::distributeCellIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
-        (
-            nOldCells(),
-            false,
-            lst,
-            true
-        )
+        ListOps::createWithValue<bool>(nOldCells(), lst, true, false)
     );
 
     // Distribute
@@ -271,12 +259,12 @@ void Foam::mapDistributePolyMesh::distributePatchIndices(labelList& lst) const
     // Construct boolList from selected elements
     boolList isSelected
     (
-        createWithValues<boolList>
+        ListOps::createWithValue<bool>
         (
-            oldPatchStarts().size(),    // nOldPatches
-            false,
+            oldPatchStarts().size(), // nOldPatches
             lst,
-            true
+            true, // set value
+            false // default value
         )
     );
 
@@ -302,6 +290,12 @@ void Foam::mapDistributePolyMesh::operator=(const mapDistributePolyMesh& rhs)
     faceMap_ = rhs.faceMap_;
     cellMap_ = rhs.cellMap_;
     patchMap_ = rhs.patchMap_;
+}
+
+
+void Foam::mapDistributePolyMesh::operator=(mapDistributePolyMesh&& rhs)
+{
+    transfer(rhs);
 }
 
 

@@ -61,7 +61,7 @@ template<class Specie>
 inline Foam::autoPtr<Foam::perfectFluid<Specie>>
 Foam::perfectFluid<Specie>::clone() const
 {
-    return autoPtr<perfectFluid<Specie>>(new perfectFluid<Specie>(*this));
+    return autoPtr<perfectFluid<Specie>>::New(*this);
 }
 
 
@@ -72,7 +72,7 @@ Foam::perfectFluid<Specie>::New
     const dictionary& dict
 )
 {
-    return autoPtr<perfectFluid<Specie>>(new perfectFluid<Specie>(dict));
+    return autoPtr<perfectFluid<Specie>>::New(dict);
 }
 
 

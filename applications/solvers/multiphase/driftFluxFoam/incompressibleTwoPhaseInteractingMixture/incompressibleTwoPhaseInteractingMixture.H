@@ -106,13 +106,13 @@ public:
         //- Return const-access to the mixture viscosityModel
         const mixtureViscosityModel& muModel() const
         {
-            return muModel_();
+            return *muModel_;
         }
 
         //- Return const-access to the continuous-phase viscosityModel
         const viscosityModel& nucModel() const
         {
-            return nucModel_();
+            return *nucModel_;
         }
 
         //- Return const-access to the dispersed-phase density

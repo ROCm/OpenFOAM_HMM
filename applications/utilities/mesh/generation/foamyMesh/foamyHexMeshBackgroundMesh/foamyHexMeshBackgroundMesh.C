@@ -282,20 +282,17 @@ autoPtr<polyMesh> generateHexMesh
     word defaultFacesType = polyPatch::typeName;
     wordList patchPhysicalTypes(0);
 
-    return autoPtr<polyMesh>
+    return autoPtr<polyMesh>::New
     (
-        new polyMesh
-        (
-            io,
-            xferMoveTo<pointField>(points),
-            cellShapes,
-            boundary,
-            patchNames,
-            patchTypes,
-            defaultFacesName,
-            defaultFacesType,
-            patchPhysicalTypes
-        )
+        io,
+        std::move(points),
+        cellShapes,
+        boundary,
+        patchNames,
+        patchTypes,
+        defaultFacesName,
+        defaultFacesType,
+        patchPhysicalTypes
     );
 }
 

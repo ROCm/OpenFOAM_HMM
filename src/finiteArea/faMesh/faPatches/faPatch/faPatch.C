@@ -337,7 +337,7 @@ Foam::tmp<Foam::vectorField> Foam::faPatch::ngbPolyPatchPointNormals() const
 {
     if (ngbPolyPatchIndex() == -1)
     {
-        return tmp<vectorField>(new vectorField());
+        return tmp<vectorField>::New();
     }
 
     const labelListList& pntEdges = pointEdges();

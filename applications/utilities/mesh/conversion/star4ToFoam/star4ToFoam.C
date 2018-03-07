@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 
 
     autoPtr<polyMesh> mesh = reader.mesh(runTime);
-    reader.writeMesh(mesh, format);
+    reader.writeMesh(mesh(), format);
 
 
     Info<< "\nEnd\n" << endl;

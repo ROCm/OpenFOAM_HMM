@@ -347,13 +347,13 @@ public:
             //- Corresponding map
             const mapDistribute& map() const
             {
-                return map_();
+                return *map_;
             }
 
             //- Corresponding map
             mapDistribute& map()
             {
-                return map_();
+                return *map_;
             }
 
             //- From (mesh or patch) point to index in procPoints

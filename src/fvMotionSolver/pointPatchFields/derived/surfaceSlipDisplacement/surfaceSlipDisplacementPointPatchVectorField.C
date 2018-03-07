@@ -397,7 +397,8 @@ Foam::surfaceSlipDisplacementPointPatchVectorField::surfaces() const
             )
         );
     }
-    return surfacesPtr_();
+
+    return *surfacesPtr_;
 }
 
 

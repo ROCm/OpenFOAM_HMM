@@ -56,10 +56,7 @@ Foam::constIsoSolidTransport<Thermo>::New
     const dictionary& dict
 )
 {
-    return autoPtr<constIsoSolidTransport<Thermo>>
-    (
-        new constIsoSolidTransport<Thermo>(dict)
-    );
+    return autoPtr<constIsoSolidTransport<Thermo>>::New(dict);
 }
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

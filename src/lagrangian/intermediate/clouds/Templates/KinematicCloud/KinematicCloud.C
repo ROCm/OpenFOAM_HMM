@@ -539,13 +539,6 @@ Foam::KinematicCloud<CloudType>::KinematicCloud
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::KinematicCloud<CloudType>::~KinematicCloud()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

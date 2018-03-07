@@ -469,10 +469,10 @@ void Foam::meshToMesh::calculate(const word& methodName, const bool normalise)
                 tgtRegion_.time(),
                 IOobject::NO_READ
             ),
-            xferMove(newTgtPoints),
-            xferMove(newTgtFaces),
-            xferMove(newTgtFaceOwners),
-            xferMove(newTgtFaceNeighbours),
+            std::move(newTgtPoints),
+            std::move(newTgtFaces),
+            std::move(newTgtFaceOwners),
+            std::move(newTgtFaceNeighbours),
             false                                   // no parallel comms
         );
 

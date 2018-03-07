@@ -531,7 +531,7 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
     // Update fields
-    mesh.updateMesh(map);
+    mesh.updateMesh(map());
 
     // Optionally inflate mesh
     if (map().hasMotionPoints())

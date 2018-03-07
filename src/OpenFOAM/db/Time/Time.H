@@ -466,7 +466,7 @@ public:
             //- Return previous TimeState if time is being sub-cycled
             const TimeState& prevTimeState() const
             {
-                return prevTimeState_();
+                return *prevTimeState_;
             }
 
 

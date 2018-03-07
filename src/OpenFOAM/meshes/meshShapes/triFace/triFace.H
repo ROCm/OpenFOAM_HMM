@@ -246,8 +246,8 @@ inline bool operator==(const triFace& a, const triFace& b);
 inline bool operator!=(const triFace& a, const triFace& b);
 
 
-//- Hash specialization for hashing triFace - a commutative hash value.
-//  Hash incrementally.
+//- Hash specialization for triFace as a commutative hash value.
+//  Hashes incrementally.
 template<>
 inline unsigned Hash<triFace>::operator()(const triFace& t, unsigned seed) const
 {
@@ -262,7 +262,7 @@ inline unsigned Hash<triFace>::operator()(const triFace& t, unsigned seed) const
 }
 
 
-//- Hash specialization for hashing triFace - a commutative hash value.
+//- Hash specialization for triFace as a commutative hash value.
 template<>
 inline unsigned Hash<triFace>::operator()(const triFace& t) const
 {
@@ -270,13 +270,10 @@ inline unsigned Hash<triFace>::operator()(const triFace& t) const
 }
 
 
-//- Hash specialization to offset faces in ListListOps::combineOffset
+//- Specialization to offset faces, used in ListListOps::combineOffset
 template<>
-class offsetOp<triFace>
+struct offsetOp<triFace>
 {
-
-public:
-
     inline triFace operator()
     (
         const triFace& x,

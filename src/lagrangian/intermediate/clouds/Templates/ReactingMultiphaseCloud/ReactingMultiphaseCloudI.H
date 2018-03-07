@@ -29,7 +29,7 @@ template<class CloudType>
 inline const Foam::ReactingMultiphaseCloud<CloudType>&
 Foam::ReactingMultiphaseCloud<CloudType>::cloudCopy() const
 {
-    return cloudCopyPtr_();
+    return *cloudCopyPtr_;
 }
 
 
@@ -67,7 +67,7 @@ inline Foam::DevolatilisationModel
 >&
 Foam::ReactingMultiphaseCloud<CloudType>::devolatilisation()
 {
-    return devolatilisationModel_();
+    return *devolatilisationModel_;
 }
 
 
@@ -89,7 +89,7 @@ inline Foam::SurfaceReactionModel
 >&
 Foam::ReactingMultiphaseCloud<CloudType>::surfaceReaction()
 {
-    return surfaceReactionModel_();
+    return *surfaceReactionModel_;
 }
 
 

@@ -65,6 +65,9 @@ ThirdParty)
     Gcc72)
         gcc_version=gcc-7.2.0
         ;;
+    Gcc73)
+        gcc_version=gcc-7.3.0
+        ;;
     Clang)
         clang_version=llvm-3.7.1
         ;;

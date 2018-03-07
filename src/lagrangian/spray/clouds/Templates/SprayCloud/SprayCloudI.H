@@ -29,7 +29,7 @@ template<class CloudType>
 inline const Foam::SprayCloud<CloudType>&
 Foam::SprayCloud<CloudType>::cloudCopy() const
 {
-    return cloudCopyPtr_();
+    return *cloudCopyPtr_;
 }
 
 
@@ -45,7 +45,7 @@ template<class CloudType>
 inline Foam::AtomizationModel<Foam::SprayCloud<CloudType>>&
 Foam::SprayCloud<CloudType>::atomization()
 {
-    return atomizationModel_();
+    return *atomizationModel_;
 }
 
 
@@ -61,7 +61,7 @@ template<class CloudType>
 inline Foam::BreakupModel<Foam::SprayCloud<CloudType>>&
 Foam::SprayCloud<CloudType>::breakup()
 {
-    return breakupModel_();
+    return *breakupModel_;
 }
 
 

@@ -75,11 +75,11 @@ template
 Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 PrimitivePatch
 (
-    const Xfer<FaceList<Face>>& faces,
-    const Xfer<List<PointType>>& points
+    FaceList<Face>&& faces,
+    const Field<PointType>& points
 )
 :
-    FaceList<Face>(faces),
+    FaceList<Face>(std::move(faces)),
     points_(points),
     edgesPtr_(nullptr),
     nInternalEdges_(-1),

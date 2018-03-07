@@ -1291,7 +1291,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
 {
     Info<< typeName << " : Smoothing using Medial Axis ..." << endl;
 
-    const indirectPrimitivePatch& pp = adaptPatchPtr_;
+    const indirectPrimitivePatch& pp = *adaptPatchPtr_;
     const labelList& meshPoints = pp.meshPoints();
 
 
@@ -1336,7 +1336,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     );
 
     //- Use strict extrusionIsland detection
-    const Switch detectExtrusionIsland = coeffDict.lookupOrDefault<Switch>
+    const bool detectExtrusionIsland = coeffDict.lookupOrDefault
     (
         "detectExtrusionIsland",
         false

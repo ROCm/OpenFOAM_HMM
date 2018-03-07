@@ -365,7 +365,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
         }
     }
 
-    return neighbourEdgesPtr_();
+    return *neighbourEdgesPtr_;
 }
 
 
@@ -394,7 +394,8 @@ const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
             }
         }
     }
-    return patchIDPtr_();
+
+    return *patchIDPtr_;
 }
 
 
@@ -446,7 +447,7 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
         }
     }
 
-    return groupPatchIDsPtr_();
+    return *groupPatchIDsPtr_;
 }
 
 

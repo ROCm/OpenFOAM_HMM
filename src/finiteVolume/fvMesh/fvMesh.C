@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -336,14 +336,22 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 Foam::fvMesh::fvMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<labelList>& allOwner,
-    const Xfer<labelList>& allNeighbour,
+    pointField&& points,
+    faceList&& faces,
+    labelList&& allOwner,
+    labelList&& allNeighbour,
     const bool syncPar
 )
 :
-    polyMesh(io, points, faces, allOwner, allNeighbour, syncPar),
+    polyMesh
+    (
+        io,
+        std::move(points),
+        std::move(faces),
+        std::move(allOwner),
+        std::move(allNeighbour),
+        syncPar
+    ),
     surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
     fvSolution(static_cast<const objectRegistry&>(*this)),
@@ -370,13 +378,20 @@ Foam::fvMesh::fvMesh
 Foam::fvMesh::fvMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<cellList>& cells,
+    pointField&& points,
+    faceList&& faces,
+    cellList&& cells,
     const bool syncPar
 )
 :
-    polyMesh(io, points, faces, cells, syncPar),
+    polyMesh
+    (
+        io,
+        std::move(points),
+        std::move(faces),
+        std::move(cells),
+        syncPar
+    ),
     surfaceInterpolation(*this),
     fvSchemes(static_cast<const objectRegistry&>(*this)),
     fvSolution(static_cast<const objectRegistry&>(*this)),
@@ -398,6 +413,12 @@ Foam::fvMesh::fvMesh
         InfoInFunction << "Constructing fvMesh from components" << endl;
     }
 }
+
+
+Foam::fvMesh::fvMesh(const IOobject& io, const zero, const bool syncPar)
+:
+    fvMesh(io, pointField(), faceList(), labelList(), labelList(), syncPar)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -456,7 +477,7 @@ Foam::SolverPerformance<Foam::tensor> Foam::fvMesh::solve
 
 void Foam::fvMesh::addFvPatches
 (
-    const List<polyPatch*> & p,
+    const List<polyPatch*>& p,
     const bool validBoundary
 )
 {
@@ -896,15 +917,15 @@ Foam::fvMesh::validComponents<Foam::sphericalTensor>() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-bool Foam::fvMesh::operator!=(const fvMesh& bm) const
+bool Foam::fvMesh::operator!=(const fvMesh& rhs) const
 {
-    return &bm != this;
+    return &rhs != this;
 }
 
 
-bool Foam::fvMesh::operator==(const fvMesh& bm) const
+bool Foam::fvMesh::operator==(const fvMesh& rhs) const
 {
-    return &bm == this;
+    return &rhs == this;
 }
 
 

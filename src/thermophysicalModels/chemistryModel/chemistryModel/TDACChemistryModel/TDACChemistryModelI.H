@@ -46,13 +46,7 @@ inline Foam::autoPtr<Foam::OFstream>
 Foam::TDACChemistryModel<CompType, ThermoType>::logFile(const word& name) const
 {
     mkDir(this->mesh().time().path()/"TDAC");
-    return autoPtr<OFstream>
-    (
-        new OFstream
-        (
-            this->mesh().time().path()/"TDAC"/name
-        )
-    );
+    return autoPtr<OFstream>::New(this->mesh().time().path()/"TDAC"/name);
 }
 
 

@@ -142,7 +142,7 @@ public:
             //- Return the fluctuation scale
             const solidBodyMotionFunction& motion() const
             {
-                return SBMFPtr_();
+                return *SBMFPtr_;
             }
 
             const pointField& localPoints0() const;

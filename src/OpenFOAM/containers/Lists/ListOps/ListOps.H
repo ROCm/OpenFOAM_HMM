@@ -27,6 +27,12 @@ InNamspace
 Description
     Various functions to operate on Lists.
 
+Namespace
+    Foam::ListOps
+
+Description
+    Various utility functions to work on Lists.
+
 SourceFiles
     ListOps.C
     ListOpsTemplates.C
@@ -38,6 +44,8 @@ SourceFiles
 
 #include "FlatOutput.H"
 #include "labelList.H"
+#include "HashSet.H"
+#include "PackedBoolList.H"
 #include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -260,25 +268,6 @@ labelList findIndices
     label start=0
 );
 
-//- Opposite of findIndices: set values at indices to given value
-template<class ListType>
-void setValues
-(
-    ListType& input,
-    const labelUList& indices,
-    typename ListType::const_reference val
-);
-
-//- Opposite of findIndices: set values at indices to given value
-template<class ListType>
-ListType createWithValues
-(
-    const label len,
-    typename ListType::const_reference initValue,
-    const labelUList& indices,
-    typename ListType::const_reference setValue
-);
-
 //- Find index of max element (and larger than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
@@ -325,24 +314,6 @@ label findLower
 );
 
 
-//- Helper class for list to append y onto the end of x
-template<class T>
-class ListAppendEqOp
-{
-public:
-    void operator()(List<T>& x, const List<T>& y) const;
-};
-
-
-//- Helper class for list to append unique elements of y onto the end of x
-template<class T>
-class ListUniqueEqOp
-{
-public:
-    void operator()(List<T>& x, const List<T>& y) const;
-};
-
-
 //- Reverse a list. First element becomes last element etc.
 template<class ListType>
 ListType reverseList(const ListType& input);
@@ -363,6 +334,271 @@ ListType rotateList(const ListType& list, const label n);
 template<template<typename> class ListType, class DataType>
 void inplaceRotateList(ListType<DataType>& list, label n);
 
+
+/*---------------------------------------------------------------------------*\
+                         Namespace ListOps Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace ListOps
+{
+
+//- List helper to append y elements onto the end of x
+template<class T>
+struct appendEqOp
+{
+    void operator()(List<T>& x, const List<T>& y) const;
+};
+
+//- List helper to append y unique elements onto the end of x
+template<class T>
+struct uniqueEqOp
+{
+    void operator()(List<T>& x, const List<T>& y) const;
+};
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const labelUList& locations,
+    const T& val
+);
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const labelHashSet& locations,
+    const T& val
+);
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const UList<bool>& locations,
+    const T& val
+);
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const PackedBoolList& locations,
+    const T& val
+);
+
+
+//- Create a List from a List of a dissimilar type, using the entire list.
+//  For example, convert a list of ints to floats, vectors etc.
+//
+//  \param input the list input values.
+//  \param op the unary conversion operator, which can be used to convert
+//      to other types.
+//
+//  \code
+//  auto neg = ListOps::create<label>
+//  (
+//      ints,
+//      std::negate<label>()
+//  );
+//
+//  auto labels = ListOps::create<label>
+//  (
+//      ints,
+//      toLabel<int>()
+//  );
+//
+//  auto vectors = ListOps::create<vector>
+//  (
+//      ints,
+//      [](const int& val){ return vector(1.5*val, 0, 0); }
+//  );
+//
+//  \endcode
+template<class T, class T2, class UnaryOperation>
+List<T> create
+(
+    const UList<T2>& input,
+    const UnaryOperation& op
+);
+
+
+//- Create a List from an iterator range [first,last) of a dissimilar type.
+//  Uses std::distance for the size.
+//
+//  \param first the begin of the iterator range
+//  \param last the end of the iterator range
+//  \param op the unary conversion operator, which can be used to convert
+//      to other types.
+template<class T, class InputIterator, class UnaryOperation>
+List<T> create
+(
+    InputIterator first,
+    InputIterator last,
+    const UnaryOperation& op
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const labelUList& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const labelHashSet& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const UList<bool>& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const PackedBoolList& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and one specified value,
+//- which is copy assigned at the specified index
+//
+//  \param len the length of the list
+//  \param index where to apply the specified value.
+//       An out-of-range index is silently ignored.
+//  \param val the value to copy assign at the specified index
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const label index,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and one specified value,
+//- which is move assigned at the specified index
+//
+//  \param len the length of the list
+//  \param index where to apply the specified value.
+//       An out-of-range index is silently ignored.
+//  \param val the value to move assign at the specified index
+//  \param deflt the initialization default value
+//
+//  For example,
+//  \code
+//  // Gather all unique points on master
+//
+//  List<pointField> gatheredPoints(Pstream::nProcs());
+//  gatheredPoints[Pstream::myProcNo()] = pointField
+//  (
+//      mesh.points(),
+//      uniqueMeshPoints
+//  );
+//  ...
+//
+//  // Or else
+//  auto gatheredPoints = ListOps::createWithValue<pointField>
+//  (
+//      Pstream::nProcs(),
+//      Pstream::myProcNo(),
+//      pointField(mesh.points(), uniqueMeshPoints)
+//  );
+//  ...
+//
+//  \endcode
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const label index,
+    T&& val,
+    const T& deflt = T()
+);
+
+} // End namespace ListOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -28,7 +28,7 @@ Description
     System bool
 
 SourceFiles
-    boolIO.C
+    bool.C
 
 \*---------------------------------------------------------------------------*/
 

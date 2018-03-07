@@ -945,10 +945,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(labelList()),
-        xferCopy(labelList())
+        Zero
     );
 
 

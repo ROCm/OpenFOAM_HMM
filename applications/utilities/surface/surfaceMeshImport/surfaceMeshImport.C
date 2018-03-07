@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        surf.xfer()
+        std::move(surf)
     );
 
 

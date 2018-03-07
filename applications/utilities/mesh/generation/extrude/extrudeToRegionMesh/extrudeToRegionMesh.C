@@ -1880,7 +1880,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    const primitiveFacePatch extrudePatch(zoneFaces.xfer(), mesh.points());
+    const primitiveFacePatch extrudePatch(std::move(zoneFaces), mesh.points());
 
 
     Pstream::listCombineGather(isInternal, orEqOp<bool>());
@@ -2405,10 +2405,7 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE,
             false
         ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(labelList()),
-        xferCopy(labelList()),
+        Zero,
         false
     );
 
@@ -2470,7 +2467,7 @@ int main(int argc, char *argv[])
 
 
     // Update numbering on extruder.
-    extruder.updateMesh(shellMap);
+    extruder.updateMesh(shellMap());
 
 
     // Calculate offsets from shell mesh back to original mesh
@@ -2818,7 +2815,7 @@ int main(int argc, char *argv[])
         addBafflesMap = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(addBafflesMap);
+        mesh.updateMesh(addBafflesMap());
 
 
 //XXXXXX

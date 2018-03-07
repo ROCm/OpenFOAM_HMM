@@ -108,7 +108,7 @@ public:
         //- Return coordinate system
         const coordinateSystem& cs() const
         {
-            return csPtr_();
+            return *csPtr_;
         }
 
         //- Update the mesh for both mesh motion and topology change

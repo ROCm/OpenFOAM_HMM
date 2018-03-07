@@ -158,7 +158,7 @@ Foam::sampledTriSurfaceMesh::nonCoupledboundaryTree() const
         );
     }
 
-    return boundaryTreePtr_();
+    return *boundaryTreePtr_;
 }
 
 

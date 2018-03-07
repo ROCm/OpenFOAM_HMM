@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,12 +27,49 @@ Description
 
 #include "hashedWordList.H"
 #include "nil.H"
+#include "HashOps.H"
 #include "HashSet.H"
 #include "Map.H"
 #include "labelPairHashes.H"
 #include "FlatOutput.H"
 
+#include <algorithm>
+
 using namespace Foam;
+
+template<class Iter>
+void printIf(const Iter& iter)
+{
+    if (iter.found())
+    {
+        Info<< *iter;
+    }
+    else
+    {
+        Info<<"(null)";
+    }
+}
+
+
+template<class Key, class Hash>
+void printMinMax(const HashSet<Key, Hash>& set)
+{
+    const auto first = set.cbegin();
+    const auto last  = set.cend();
+
+    const auto min = std::min_element(first, last);
+    const auto max = std::max_element(first, last);
+
+    Info<< "set: " << flatOutput(set) << nl;
+    Info<< "    min=";
+    printIf(min);
+    Info<< nl;
+
+    Info<< "    max=";
+    printIf(max);
+    Info<< nl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -131,9 +168,14 @@ int main(int argc, char *argv[])
     Info<< "create from Map<label>: ";
     Info<< labelHashSet(mapA) << endl;
 
-    Info<<"combined toc: "
-        << (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB))
-        << nl;
+    {
+        auto allToc =
+            (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB));
+
+        Info<<"combined toc: " << flatOutput(allToc) << nl;
+
+        printMinMax(allToc);
+    }
 
     labelHashSet setB
     {
@@ -225,6 +267,12 @@ int main(int argc, char *argv[])
     {
         Info << i << endl;
     }
+
+    printMinMax(setD);
+    Info<< nl;
+
+    printMinMax(labelHashSet());
+    Info<< nl;
 
     Info<< nl << "Test swapping, moving etc." << nl;
     setA.insert({ "some", "more", "entries" });

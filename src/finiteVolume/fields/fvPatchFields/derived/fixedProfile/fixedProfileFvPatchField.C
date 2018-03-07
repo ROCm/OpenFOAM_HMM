@@ -94,7 +94,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),  // Don't map
-    profile_(ptf.profile_, false),
+    profile_(ptf.profile_.clone()),
     dir_(ptf.dir_),
     origin_(ptf.origin_)
 {
@@ -110,7 +110,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    profile_(ptf.profile_, false),
+    profile_(ptf.profile_.clone()),
     dir_(ptf.dir_),
     origin_(ptf.origin_)
 {}
@@ -124,7 +124,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    profile_(ptf.profile_, false),
+    profile_(ptf.profile_.clone()),
     dir_(ptf.dir_),
     origin_(ptf.origin_)
 {

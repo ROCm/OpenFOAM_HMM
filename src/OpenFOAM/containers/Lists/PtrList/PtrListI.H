@@ -111,13 +111,6 @@ inline void Foam::PtrList<T>::transfer(PtrList<T>& lst)
 }
 
 
-template<class T>
-inline Foam::Xfer<Foam::PtrList<T>> Foam::PtrList<T>::xfer()
-{
-    return xferMove(*this);
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>

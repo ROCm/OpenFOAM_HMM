@@ -207,7 +207,7 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Placeholder only, but do not remove - it is needed for GeoMesh
         typedef bool BoundaryMesh;
@@ -253,7 +253,7 @@ public:
         (
             const List<labelledTri>& triangles,
             const geometricSurfacePatchList& patches,
-            const pointField& points
+            const pointField& pts
         );
 
         //- Construct from triangles, patches, points. Reuse storage.
@@ -261,31 +261,24 @@ public:
         (
             List<labelledTri>& triangles,
             const geometricSurfacePatchList& patches,
-            pointField& points,
+            pointField& pts,
             const bool reuse
         );
 
-        //- Construct by transferring (triangles, points) components.
-        triSurface
-        (
-            const Xfer<List<labelledTri>>& triangles,
-            const geometricSurfacePatchList& patches,
-            const Xfer<List<point>>& points
-        );
-
-        //- Construct from triangles, points. Set patch names to default.
+        //- Construct from triangles, points.
+        //- Set patch names to default.
         triSurface
         (
             const List<labelledTri>& triangles,
-            const pointField& points
+            const pointField& pts
         );
 
-        //- Construct from triangles, points Set region to 0 and default
-        //- patchName.
+        //- Construct from triangles, points.
+        //- Set region to 0 and default patchName.
         triSurface
         (
             const triFaceList& triangles,
-            const pointField& points
+            const pointField& pts
         );
 
         //- Construct from file name (uses extension to determine type).
@@ -314,7 +307,7 @@ public:
         void swap(triSurface& surf);
 
 
-      // Access
+    // Access
 
         const geometricSurfacePatchList& patches() const
         {
@@ -364,7 +357,7 @@ public:
         }
 
 
-      // Interoperability with other surface mesh classes
+    // Interoperability with other surface mesh classes
 
         //- Sort faces according to zoneIds
         //  Returns a surfZoneList and sets faceMap to index within faces()
@@ -375,10 +368,13 @@ public:
         void triFaceFaces(List<face>& plainFaceList) const;
 
 
-      // Edit
+    // Edit
 
         //- Move points
-        virtual void movePoints(const pointField& newPoints);
+        virtual void movePoints(const pointField& pts);
+
+        //- Swap points. Similar to movePoints, but returns the old points
+        virtual void swapPoints(pointField& pts);
 
         //- Scale points. A non-positive factor is ignored.
         virtual void scalePoints(const scalar scaleFactor);
@@ -433,27 +429,19 @@ public:
         ) const;
 
 
-        //- Transfer stored faces to an Xfer container
-        Xfer<List<labelledTri>> xferFaces();
-
-        //- Transfer stored points to an Xfer container
-        Xfer<List<point>> xferPoints();
+        //- Swap the list of faces being addressed
+        void swapFaces(List<labelledTri>& faceLst);
 
         //- Alter contents by transferring (triangles, points) components.
         //  Patch information is small and therefore just copied.
-        void reset
-        (
-            const Xfer<List<labelledTri>>& triangles,
-            const geometricSurfacePatchList& patches,
-            const Xfer<List<point>>& points
-        );
+        void transfer(triSurface& surf);
 
         //- Alter contents by transferring (triangles, points) components.
         //  Patch information is small and therefore just copied.
-        void reset(MeshedSurface<labelledTri>& input);
+        void transfer(MeshedSurface<labelledTri>& surf);
 
 
-      // Write
+    // Write
 
         //- Write to Ostream in simple FOAM format
         void write(Ostream& os) const;
@@ -475,6 +463,9 @@ public:
 
         //- Move assignment
         void operator=(triSurface&& surf);
+
+        //- Move assignment
+        void operator=(MeshedSurface<labelledTri>&& surf);
 
 
     // IOstream Operators

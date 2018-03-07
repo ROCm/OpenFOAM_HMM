@@ -132,8 +132,10 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
         }
     }
 
-    // transfer to normal lists, no zone information
-    this->reset(pointLst.xfer(), dynFaces.xfer(), Xfer<surfZoneList>());
+    // Transfer to normal lists, no zone information
+    MeshedSurface<Face> surf(std::move(pointLst), std::move(dynFaces));
+
+    this->swap(surf);
 
     return true;
 }

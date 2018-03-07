@@ -71,7 +71,7 @@ Foam::dictionary::dictionary(Istream& is, bool keepHeader)
 
 Foam::autoPtr<Foam::dictionary> Foam::dictionary::New(Istream& is)
 {
-    return autoPtr<dictionary>(new dictionary(is));
+    return autoPtr<dictionary>::New(is);
 }
 
 

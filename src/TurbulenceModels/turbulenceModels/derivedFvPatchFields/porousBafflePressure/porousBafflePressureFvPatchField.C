@@ -59,7 +59,7 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     D_(Function1<scalar>::New("D", dict)),
     I_(Function1<scalar>::New("I", dict)),
     length_(readScalar(dict.lookup("length"))),
-    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false))
+    uniformJump_(dict.lookupOrDefault("uniformJump", false))
 {
     fvPatchField<scalar>::operator=
     (
@@ -79,8 +79,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_, false),
-    I_(ptf.I_, false),
+    D_(ptf.D_.clone()),
+    I_(ptf.I_.clone()),
     length_(ptf.length_),
     uniformJump_(ptf.uniformJump_)
 {}
@@ -95,8 +95,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_, false),
-    I_(ptf.I_, false),
+    D_(ptf.D_.clone()),
+    I_(ptf.I_.clone()),
     length_(ptf.length_),
     uniformJump_(ptf.uniformJump_)
 {}
@@ -111,8 +111,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf, iF),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_, false),
-    I_(ptf.I_, false),
+    D_(ptf.D_.clone()),
+    I_(ptf.I_.clone()),
     length_(ptf.length_),
     uniformJump_(ptf.uniformJump_)
 {}

@@ -87,7 +87,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(p, iF),  // Don't map
     phiName_(ptf.phiName_),
-    uniformInletValue_(ptf.uniformInletValue_, false)
+    uniformInletValue_(ptf.uniformInletValue_.clone())
 {
     this->patchType() = ptf.patchType();
 
@@ -113,7 +113,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(ptf),
     phiName_(ptf.phiName_),
-    uniformInletValue_(ptf.uniformInletValue_, false)
+    uniformInletValue_(ptf.uniformInletValue_.clone())
 {}
 
 
@@ -126,7 +126,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(ptf, iF),
     phiName_(ptf.phiName_),
-    uniformInletValue_(ptf.uniformInletValue_, false)
+    uniformInletValue_(ptf.uniformInletValue_.clone())
 {}
 
 

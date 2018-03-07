@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2013 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,93 +23,109 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class T, class AccessOp>
+Foam::labelList Foam::ListListOps::subSizes
+(
+    const UList<T>& lists,
+    AccessOp aop
+)
 {
+    labelList output(lists.size());
+    auto out = output.begin();
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class AccessType, class T, class AccessOp>
-AccessType ListListOps::combine(const List<T>& lst, AccessOp aop)
-{
-    label sum = 0;
-
-    forAll(lst, lstI)
+    for (const T& sub : lists)
     {
-        sum += aop(lst[lstI]).size();
+        *out = aop(sub).size();
+        ++out;
     }
 
-    AccessType result(sum);
-
-    label globalElemI = 0;
-
-    forAll(lst, lstI)
-    {
-        const T& sub = lst[lstI];
-
-        forAll(aop(sub), elemI)
-        {
-            result[globalElemI++] = aop(sub)[elemI];
-        }
-    }
-    return result;
+    return output;
 }
 
 
 template<class T, class AccessOp>
-labelList ListListOps::subSizes(const List<T>& lst, AccessOp aop)
+Foam::label Foam::ListListOps::sumSizes
+(
+    const UList<T>& lists,
+    AccessOp aop
+)
 {
-    labelList sizes(lst.size());
+    label len = 0;
 
-    forAll(lst, lstI)
+    for (const T& sub : lists)
     {
-        sizes[lstI] = aop(lst[lstI]).size();
+        len += aop(sub).size();
     }
-    return sizes;
+
+    return len;
+}
+
+
+template<class AccessType, class T, class AccessOp>
+AccessType Foam::ListListOps::combine
+(
+    const UList<T>& lists,
+    AccessOp aop
+)
+{
+    label len = 0;
+
+    for (const T& sub : lists)
+    {
+        len += aop(sub).size();
+    }
+
+    AccessType output(len);
+    auto out = output.begin();
+
+    for (const T& sub : lists)
+    {
+        for (const auto& item : aop(sub))
+        {
+            *out = item;
+            ++out;
+        }
+    }
+
+    return output;
 }
 
 
 template<class AccessType, class T, class AccessOp, class OffsetOp>
-AccessType ListListOps::combineOffset
+AccessType Foam::ListListOps::combineOffset
 (
-    const List<T>& lst,
-    const labelList& sizes,
+    const UList<T>& lists,
+    const labelUList& offsets,
     AccessOp aop,
     OffsetOp oop
 )
 {
-    label sum = 0;
+    label len = 0;
 
-    forAll(lst, lstI)
+    for (const T& sub : lists)
     {
-        sum += aop(lst[lstI]).size();
+        len += aop(sub).size();
     }
 
-    AccessType result(sum);
-
-    label globalElemI = 0;
+    AccessType output(len);
+    auto out = output.begin();
+    auto off = offsets.begin();
 
     label offset = 0;
-
-    forAll(lst, lstI)
+    for (const T& sub : lists)
     {
-        const T& sub = lst[lstI];
-
-        forAll(aop(sub), elemI)
+        for (const auto& item : aop(sub))
         {
-            result[globalElemI++] = oop(aop(sub)[elemI], offset);
+            *out = oop(item, offset);
+            ++out;
         }
 
-        offset += sizes[lstI];
+        offset += *off;
+        ++off;
     }
-    return result;
+
+    return output;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 
 // ************************************************************************* //

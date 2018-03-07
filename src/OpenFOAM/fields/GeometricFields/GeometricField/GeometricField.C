@@ -455,11 +455,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 :
-    Internal
-    (
-        const_cast<GeometricField<Type, PatchField, GeoMesh>&>(tgf()),
-        tgf.isTmp()
-    ),
+    Internal(tgf.constCast(), tgf.movable()),
     timeIndex_(tgf().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -517,12 +513,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 :
-    Internal
-    (
-        io,
-        const_cast<GeometricField<Type, PatchField, GeoMesh>&>(tgf()),
-        tgf.isTmp()
-    ),
+    Internal(io, tgf.constCast(), tgf.movable()),
     timeIndex_(tgf().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -581,12 +572,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
 )
 :
-    Internal
-    (
-        newName,
-        const_cast<GeometricField<Type, PatchField, GeoMesh>&>(tgf()),
-        tgf.isTmp()
-    ),
+    Internal(newName, tgf.constCast(), tgf.movable()),
     timeIndex_(tgf().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -690,12 +676,7 @@ Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricField
     const wordList& actualPatchTypes
 )
 :
-    Internal
-    (
-        io,
-        const_cast<GeometricField<Type, PatchField, GeoMesh>&>(tgf()),
-        tgf.isTmp()
-    ),
+    Internal(io, tgf.constCast(), tgf.movable()),
     timeIndex_(tgf().timeIndex()),
     field0Ptr_(nullptr),
     fieldPrevIterPtr_(nullptr),
@@ -1221,7 +1202,7 @@ void Foam::GeometricField<Type, PatchField, GeoMesh>::operator=
     this->dimensions() = gf.dimensions();
     this->oriented() = gf.oriented();
 
-    if (tgf.isTmp())
+    if (tgf.movable())
     {
         // Transfer the storage from the tmp
         primitiveFieldRef().transfer

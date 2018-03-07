@@ -88,14 +88,14 @@ inline Foam::List<T>::List
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::List<T>::List()
+inline constexpr Foam::List<T>::List() noexcept
 {}
 
 
 template<class T>
 inline Foam::autoPtr<Foam::List<T>> Foam::List<T>::clone() const
 {
-    return autoPtr<List<T>>(new List<T>(*this));
+    return autoPtr<List<T>>::New(*this);
 }
 
 
@@ -146,13 +146,6 @@ inline T& Foam::List<T>::newElmt(const label i)
     }
 
     return UList<T>::operator[](i);
-}
-
-
-template<class T>
-inline Foam::Xfer<Foam::List<T>> Foam::List<T>::xfer()
-{
-    return xferMove(*this);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,10 +54,10 @@ class ModifiableMeshedSurface
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- Disallow copy construct
         ModifiableMeshedSurface(const ModifiableMeshedSurface<Face>&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- Disallow copy assignment
         void operator=(const ModifiableMeshedSurface<Face>&) = delete;
 
 
@@ -65,7 +65,7 @@ public:
 
     // Constructors
 
-        //- Construct null, use reset/transfer to adjust contents
+        //- Construct null. Use swap or transfer to manage content
         ModifiableMeshedSurface()
         :
             MeshedSurface<Face>()
@@ -73,12 +73,9 @@ public:
 
 
         //- Construct by transferring the contents from a MeshedSurface
-        explicit ModifiableMeshedSurface
-        (
-            const Xfer<MeshedSurface<Face>>& surf
-        )
+        explicit ModifiableMeshedSurface(MeshedSurface<Face>&& surf)
         :
-            MeshedSurface<Face>(surf)
+            MeshedSurface<Face>(std::move(surf))
         {}
 
 
@@ -88,12 +85,13 @@ public:
 
     // Member Functions
 
-        // Edit
+        // Expose various protected methods
+        using MeshedSurface<Face>::storedFaces;
+        using MeshedSurface<Face>::storedPoints;
+        using MeshedSurface<Face>::storedZones;
 
-            // Expose protected methods
-            using MeshedSurface<Face>::storedFaces;
-            using MeshedSurface<Face>::storedPoints;
-            using MeshedSurface<Face>::storedZones;
+        //- Copy and Move assignments
+        using MeshedSurface<Face>::operator=;
 
 };
 

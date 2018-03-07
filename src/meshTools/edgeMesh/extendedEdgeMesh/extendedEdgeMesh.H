@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,11 +67,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class surfaceFeatures;
 class searchableSurface;
-
-// Forward declaration of friend functions and operators
-
 class extendedEdgeMesh;
 
 Istream& operator>>(Istream&, extendedEdgeMesh&);
@@ -86,7 +85,6 @@ class extendedEdgeMesh
 :
     public edgeMesh
 {
-
 public:
 
     //- Runtime type information
@@ -202,6 +200,12 @@ protected:
         mutable PtrList<indexedOctree<treeDataEdge>> edgeTreesByType_;
 
 
+    // Protected Constructors
+
+        //- Construct null, initializing start indices with -1
+        explicit extendedEdgeMesh(class one::minus);
+
+
     // Protected Member Functions
 
         //- Classify the type of feature point. Requires valid stored member
@@ -233,9 +237,9 @@ protected:
         void sortPointsAndEdges
         (
             const Patch&,
-            const labelList& featureEdges,
-            const labelList& regionFeatureEdges,
-            const labelList& feaurePoints
+            const labelUList& featureEdges,
+            const labelUList& regionFeatureEdges,
+            const labelUList& feaurePoints
         );
 
 public:
@@ -249,13 +253,13 @@ public:
         static label nEdgeTypes;
 
         //- Can we read this file format?
-        static bool canRead(const fileName& name, const bool verbose=false);
+        static bool canRead(const fileName& name, bool verbose=false);
 
         //- Can we read this file format?
-        static bool canReadType(const word& ext, const bool verbose=false);
+        static bool canReadType(const word& ext, bool verbose=false);
 
         //- Can we write this file format type?
-        static bool canWriteType(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& ext, bool verbose=false);
 
         static wordHashSet readTypes();
         static wordHashSet writeTypes();
@@ -278,15 +282,11 @@ public:
         //- Construct from Istream
         extendedEdgeMesh(Istream& is);
 
-        //- Construct from components
+        //- Copy construct from components
         extendedEdgeMesh(const pointField& points, const edgeList& edges);
 
-        //- Construct by transferring components (points, edges)
-        extendedEdgeMesh
-        (
-            const Xfer<pointField>& pointLst,
-            const Xfer<edgeList>& edgeLst
-        );
+        //- Move construct from components
+        extendedEdgeMesh(pointField&& points, edgeList&& edges);
 
         //- Construct given a surface with selected edges,points
         //  (surfaceFeatures)
@@ -301,9 +301,9 @@ public:
         extendedEdgeMesh
         (
             const PrimitivePatch<face, List, pointField, point>& surf,
-            const labelList& featureEdges,
-            const labelList& regionFeatureEdges,
-            const labelList& featurePoints
+            const labelUList& featureEdges,
+            const labelUList& regionFeatureEdges,
+            const labelUList& featurePoints
         );
 
         //- Construct from all components
@@ -513,9 +513,6 @@ public:
             //- Transfer the contents of the argument and annul the argument
             void transfer(extendedEdgeMesh& mesh);
 
-            //- Transfer contents to the Xfer container
-            Xfer<extendedEdgeMesh> xfer();
-
             //- Clear all storage
             virtual void clear();
 
@@ -613,10 +610,10 @@ public:
         );
 
 
-        // Ostream Operator
+    // Ostream Operator
 
-            friend Ostream& operator<<(Ostream&, const extendedEdgeMesh&);
-            friend Istream& operator>>(Istream&, extendedEdgeMesh&);
+        friend Ostream& operator<<(Ostream&, const extendedEdgeMesh&);
+        friend Istream& operator>>(Istream&, extendedEdgeMesh&);
 };
 
 

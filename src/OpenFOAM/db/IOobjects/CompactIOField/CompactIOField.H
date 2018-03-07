@@ -47,7 +47,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 template<class T, class BaseType> class CompactIOField;
 
 template<class T, class BaseType> Istream& operator>>
@@ -85,28 +85,30 @@ public:
 
     // Constructors
 
+        //- Default copy construct
+        CompactIOField(const CompactIOField&) = default;
+
         //- Construct from IOobject
-        CompactIOField(const IOobject&);
+        explicit CompactIOField(const IOobject& io);
 
         //- Construct from IOobject; does local processor require reading?
-        CompactIOField(const IOobject&, const bool valid);
+        CompactIOField(const IOobject& io, const bool valid);
 
         //- Construct from IOobject and size
-        CompactIOField(const IOobject&, const label);
+        CompactIOField(const IOobject& io, const label size);
 
-        //- Construct from IOobject and a Field
-        CompactIOField(const IOobject&, const Field<T>&);
+        //- Construct from IOobject and a List/Field content
+        CompactIOField(const IOobject& io, const UList<T>& content);
 
         //- Construct by transferring the Field contents
-        CompactIOField(const IOobject&, const Xfer<Field<T>>&);
+        CompactIOField(const IOobject& io, Field<T>&& content);
 
 
-    // Destructor
+    //- Destructor
+    virtual ~CompactIOField() = default;
 
-        virtual ~CompactIOField();
 
-
-    // Member functions
+    // Member Functions
 
         virtual bool writeObject
         (
@@ -116,14 +118,16 @@ public:
             const bool valid
         ) const;
 
-        virtual bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const CompactIOField<T, BaseType>&);
+        //- Copy assignment of entries
+        void operator=(const CompactIOField<T, BaseType>& rhs);
 
-        void operator=(const Field<T>&);
+        //- Copy or move assignment of entries
+        using Field<T>::operator=;
 };
 
 

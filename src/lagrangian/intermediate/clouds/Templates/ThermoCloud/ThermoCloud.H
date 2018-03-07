@@ -214,7 +214,7 @@ public:
 
 
     //- Destructor
-    virtual ~ThermoCloud();
+    virtual ~ThermoCloud() = default;
 
 
     // Member Functions

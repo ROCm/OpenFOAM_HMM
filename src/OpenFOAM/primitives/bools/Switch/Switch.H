@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,7 +30,6 @@ Description
 
 SourceFiles
     Switch.C
-    SwitchIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,19 +39,28 @@ SourceFiles
 #include "bool.H"
 #include "word.H"
 
+// Avoid any pre-processor conflicts with enum names
+#undef FALSE
+#undef TRUE
+#undef NO
+#undef YES
+#undef OFF
+#undef ON
+#undef NONE
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class Switch;
 class dictionary;
 
-Istream& operator>>(Istream& is, Switch& s);
-Ostream& operator<<(Ostream& is, const Switch& s);
-
+// IOstream Operators
+Istream& operator>>(Istream& is, Switch& sw);
+Ostream& operator<<(Ostream& is, const Switch& sw);
 
 /*---------------------------------------------------------------------------*\
                            Class Switch Declaration
@@ -60,80 +68,63 @@ Ostream& operator<<(Ostream& is, const Switch& s);
 
 class Switch
 {
-    // Private data
-
-        //- The logic and enumerated text representation stored as a single byte
-        unsigned char switch_;
-
 public:
 
-    // Public data types
-
-        // Avoid issues with possible pre-processor defines
-        #undef FALSE
-        #undef TRUE
-        #undef NO
-        #undef YES
-        #undef OFF
-        #undef ON
-        #undef NONE
-        #undef PLACEHOLDER
-        #undef INVALID
-
-        //- The various text representations for a switch value.
-        //  These also correspond to the entries in names.
-        enum switchType
-        {
-            FALSE   = 0,  TRUE   = 1,
-            NO      = 2,  YES    = 3,
-            OFF     = 4,  ON     = 5,
-            NONE    = 6,  PLACEHOLDER = 7,
-            INVALID
-        };
-
-    // Static data members
-
-        //- The set of names corresponding to the switchType enumeration
-        //  Includes an extra entry for "invalid".
-        static const char* names[INVALID+1];
+    //- Switch enumerations corresponding to common text representations.
+    //  \note the values specified here are critical for its proper behaviour.
+    //  The lower bit is tested for the true/false condition.
+    //  The values correspond to an index into the predefined output names
+    //  for the c_str() method.
+    enum switchType
+    {
+        FALSE   = 0 /*!< "false" */, TRUE = 1 /*!< "true" */,
+        NO      = 2 /*!< "no" */,    YES  = 3 /*!< "yes" */,
+        OFF     = 4 /*!< "off" */,   ON   = 5 /*!< "on" */,
+        NONE    = 6 /*!< "none" */,
+        INVALID = 8 /*!< "invalid" */
+    };
 
 
 private:
 
+    // Private Data
+
+        //- The logic and enumerated text representation stored in a byte
+        unsigned char switch_;
+
+        //- The set of names corresponding to the switchType enumeration.
+        //  Includes extra entries for "invalid".
+        static const char* names[9];
+
     // Static Member Functions
 
-        //- Return a switchType representation of an input string
-        static switchType asEnum
-        (
-            const std::string& str,
-            const bool allowInvalid
-        );
-
+        //- Return enum value for input string
+        static switchType parse(const std::string& str, bool allowBad);
 
 public:
 
     // Constructors
 
-        //- Construct null as false
-        Switch()
+        //- Null constructible as false
+        constexpr Switch() noexcept
         :
             switch_(switchType::FALSE)
         {}
 
         //- Construct from enumerated value
-        Switch(const switchType sw)
+        constexpr Switch(const switchType sw) noexcept
         :
             switch_(sw)
         {}
 
         //- Construct from bool
-        Switch(const bool b)
+        constexpr Switch(const bool b) noexcept
         :
             switch_(b ? switchType::TRUE : switchType::FALSE)
         {}
 
         //- Construct from integer values (treats integer as bool value)
-        Switch(const int i)
+        constexpr Switch(const int i) noexcept
         :
             switch_(i ? switchType::TRUE : switchType::FALSE)
         {}
@@ -141,31 +132,34 @@ public:
         //- Construct from string - catches bad input.
         explicit Switch(const std::string& str)
         :
-            switch_(asEnum(str, false))
+            switch_(parse(str, false))
         {}
 
         //- Construct from character array - catches bad input.
         explicit Switch(const char* str)
         :
-            switch_(asEnum(std::string(str), false))
+            switch_(parse(str, false))
         {}
 
         //- Construct from string.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const std::string& str, const bool allowInvalid)
+        Switch(const std::string& str, const bool allowBad)
         :
-            switch_(asEnum(str, allowInvalid))
+            switch_(parse(str, allowBad))
         {}
 
         //- Construct from character array.
         //  Optionally allow bad words, and catch the error elsewhere
-        Switch(const char* str, const bool allowInvalid)
+        Switch(const char* str, const bool allowBad)
         :
-            switch_(asEnum(std::string(str), allowInvalid))
+            switch_(parse(str, allowBad))
         {}
 
         //- Construct from Istream
         Switch(Istream& is);
+
+
+    // Helpers
 
         //- Construct from dictionary, supplying default value so that if the
         //  value is not found, it is added into the dictionary.
@@ -180,10 +174,13 @@ public:
     // Member Functions
 
         //- Return true if the Switch has a valid value
-        bool valid() const;
+        bool valid() const noexcept;
 
-        //- Return a text representation of the Switch
-        const char* asText() const;
+        //- A string representation of the Switch value
+        const char* c_str() const noexcept;
+
+        //- A string representation of the Switch value
+        std::string str() const;
 
         //- Update the value of the Switch if it is found in the dictionary
         bool readIfPresent(const word& name, const dictionary& dict);
@@ -192,28 +189,29 @@ public:
     // Member Operators
 
         //- Conversion to bool
-        operator bool() const
+        operator bool() const noexcept
         {
             return (switch_ & 0x1);
         }
 
-        //- Assignment to enumerated value
-        void operator=(const switchType sw)
+        //- Assignment from enumerated value
+        void operator=(const switchType sw) noexcept
         {
             switch_ = sw;
         }
 
-        //- Assignment to bool
-        void operator=(const bool b)
+        //- Assignment from bool
+        void operator=(const bool b) noexcept
         {
             switch_ = (b ? Switch::TRUE : Switch::FALSE);
         }
 
 
-    // IOstream Operators
+    // Housekeeping
 
-        friend Istream& operator>>(Istream& is, Switch& s);
-        friend Ostream& operator<<(Ostream& os, const Switch& s);
+        //- A text representation of the Switch value
+        //  \deprecated - use c_str() instead (MAR-2018)
+        inline const char* asText() const { return c_str(); };
 };
 
 

@@ -133,7 +133,7 @@ public:
 
         inline vtk::formatter& format()
         {
-            return format_();
+            return *format_;
         }
 
         inline label nPoints() const

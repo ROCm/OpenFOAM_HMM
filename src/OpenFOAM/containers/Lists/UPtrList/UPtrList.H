@@ -99,7 +99,7 @@ public:
         UPtrList() = default;
 
         //- Construct with specified size, each element initialized to nullptr
-        explicit inline UPtrList(const label nElem);
+        explicit inline UPtrList(const label len);
 
         //- Construct from PtrList, copying addresses of each list element.
         //  The argument is non-const access since this UPtrList can be used
@@ -108,9 +108,6 @@ public:
 
         //- Construct from UList, taking addresses of each list element
         explicit UPtrList(UList<T>& lst);
-
-        //- Construct by transferring the parameter contents
-        inline UPtrList(const Xfer<UPtrList<T>>& lst);
 
         //- Construct as copy or re-use as specified
         inline UPtrList(UPtrList<T>& lst, bool reuse);
@@ -166,9 +163,6 @@ public:
 
         //- Transfer contents into this list and annul the argument
         inline void transfer(UPtrList<T>& lst);
-
-        //- Transfer contents to the Xfer container
-        inline Xfer<UPtrList<T>> xfer();
 
         //- Return true if element is set (ie, not a nullptr)
         inline bool set(const label i) const;
@@ -326,6 +320,7 @@ public:
 
         //- Write UPtrList to Ostream
         friend Ostream& operator<< <T>(Ostream& os, const UPtrList<T>& lst);
+
 };
 
 

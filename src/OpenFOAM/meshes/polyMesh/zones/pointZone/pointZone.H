@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -131,15 +131,6 @@ public:
             const pointZoneMesh& zm
         );
 
-        //- Construct from components, transferring contents
-        pointZone
-        (
-            const word& name,
-            const Xfer<labelList>& addr,
-            const label index,
-            const pointZoneMesh& zm
-        );
-
         //- Construct from dictionary
         pointZone
         (
@@ -169,24 +160,11 @@ public:
             const pointZoneMesh& zm
         );
 
-        //- Construct with a new index and zone mesh information from
-        //- an original zone, (move) resetting the point list.
-        pointZone
-        (
-            const pointZone& origZone,
-            const Xfer<labelList>& addr,
-            const label index,
-            const pointZoneMesh& zm
-        );
-
 
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<pointZone> clone(const pointZoneMesh& zm) const
         {
-            return autoPtr<pointZone>
-            (
-                new pointZone(*this, *this, index(), zm)
-            );
+            return autoPtr<pointZone>::New(*this, *this, index(), zm);
         }
 
         //- Construct and return a clone, resetting the point list
@@ -198,10 +176,7 @@ public:
             const labelUList& addr
         ) const
         {
-            return autoPtr<pointZone>
-            (
-                new pointZone(*this, addr, index, zm)
-            );
+            return autoPtr<pointZone>::New(*this, addr, index, zm);
         }
 
 
@@ -219,7 +194,7 @@ public:
 
 
     //- Destructor
-    virtual ~pointZone();
+    virtual ~pointZone() = default;
 
 
     // Member Functions
@@ -254,7 +229,7 @@ public:
         void operator=(const labelUList& addr);
 
         //- Assign addressing, clearing demand-driven data
-        void operator=(const Xfer<labelList>& addr);
+        void operator=(labelList&& addr);
 
 
     // I-O

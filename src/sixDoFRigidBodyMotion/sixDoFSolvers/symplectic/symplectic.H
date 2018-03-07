@@ -98,10 +98,7 @@ public:
         //- Construct and return a clone
         virtual autoPtr<sixDoFSolver> clone() const
         {
-            return autoPtr<sixDoFSolver>
-            (
-                new symplectic(dict_, body_)
-            );
+            return autoPtr<sixDoFSolver>::NewFrom<symplectic>(dict_, body_);
         }
 
 

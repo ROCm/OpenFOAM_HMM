@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -86,19 +86,6 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const word& name,
-    const Xfer<labelList>& addr,
-    const label index,
-    const pointZoneMesh& zm
-)
-:
-    zone(name, addr, index),
-    zoneMesh_(zm)
-{}
-
-
-Foam::pointZone::pointZone
-(
-    const word& name,
     const dictionary& dict,
     const label index,
     const pointZoneMesh& zm
@@ -132,25 +119,6 @@ Foam::pointZone::pointZone
 :
     zone(origZone, std::move(addr), index),
     zoneMesh_(zm)
-{}
-
-
-Foam::pointZone::pointZone
-(
-    const pointZone& origZone,
-    const Xfer<labelList>& addr,
-    const label index,
-    const pointZoneMesh& zm
-)
-:
-    zone(origZone, addr, index),
-    zoneMesh_(zm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointZone::~pointZone()
 {}
 
 
@@ -254,10 +222,10 @@ void Foam::pointZone::operator=(const labelUList& addr)
 }
 
 
-void Foam::pointZone::operator=(const Xfer<labelList>& addr)
+void Foam::pointZone::operator=(labelList&& addr)
 {
     clearAddressing();
-    labelList::operator=(addr);
+    labelList::transfer(addr);
 }
 
 

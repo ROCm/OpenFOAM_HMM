@@ -340,38 +340,32 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                 curPointLabels
             );
 
-            procMeshPtr.reset
+            procMeshPtr = autoPtr<polyMesh>::New
             (
-                new polyMesh
+                IOobject
                 (
-                    IOobject
-                    (
-                        this->polyMesh::name(), // region of undecomposed mesh
-                        facesInstance(),
-                        processorDb
-                    ),
-                    xferMove(facesInstancePoints),
-                    xferMove(procFaces),
-                    xferMove(procCells)
-                )
+                    this->polyMesh::name(), // region of undecomposed mesh
+                    facesInstance(),
+                    processorDb
+                ),
+                std::move(facesInstancePoints),
+                std::move(procFaces),
+                std::move(procCells)
             );
         }
         else
         {
-            procMeshPtr.reset
+            procMeshPtr = autoPtr<polyMesh>::New
             (
-                new polyMesh
+                IOobject
                 (
-                    IOobject
-                    (
-                        this->polyMesh::name(), // region of undecomposed mesh
-                        facesInstance(),
-                        processorDb
-                    ),
-                    xferMove(procPoints),
-                    xferMove(procFaces),
-                    xferMove(procCells)
-                )
+                    this->polyMesh::name(), // region of undecomposed mesh
+                    facesInstance(),
+                    processorDb
+                ),
+                std::move(procPoints),
+                std::move(procFaces),
+                std::move(procCells)
             );
         }
         polyMesh& procMesh = procMeshPtr();
@@ -751,7 +745,7 @@ bool Foam::domainDecomposition::writeDecomposition(const bool decomposeSets)
                     IOobject::NO_WRITE,
                     false
                 ),
-                xferMove(procPoints)
+                std::move(procPoints)
             );
             pointsInstancePoints.write();
         }

@@ -83,13 +83,6 @@ protected:
             UIListStreamAllocator(List<char>::data(), List<char>::size())
         {}
 
-        //- Transfer (move) construct
-        IListStreamAllocator(const Xfer<List<char>>& buffer)
-        :
-            List<char>(buffer),
-            UIListStreamAllocator(List<char>::data(), List<char>::size())
-        {}
-
 
     // Protected Member Functions
 
@@ -110,12 +103,6 @@ public:
         //- The current get position in the buffer
         using UIListStreamAllocator::size;
 
-        inline void swap(List<char>& list)
-        {
-            List<char>::swap(list);
-            reset_gbuffer();
-        }
-
         //- Clear storage
         inline void clearStorage()
         {
@@ -123,12 +110,11 @@ public:
             reset_gbuffer();
         }
 
-        //- Transfer contents to the Xfer container as a plain List
-        inline Xfer<List<char>> xfer()
+        //- Transfer contents to other list
+        inline void swap(List<char>& list)
         {
-            Xfer<List<char>> moved = List<char>::xfer();
+            List<char>::swap(list);
             reset_gbuffer();
-            return moved;
         }
 };
 
@@ -187,20 +173,6 @@ public:
         )
         :
             allocator_type(std::move(buffer)),
-            ISstream(stream_, name, format, version)
-        {}
-
-
-        //- Transfer (move) construct
-        IListStream
-        (
-            const Xfer<List<char>>& buffer,
-            streamFormat format=ASCII,
-            versionNumber version=currentVersion,
-            const Foam::string& name="input"
-        )
-        :
-            allocator_type(buffer),
             ISstream(stream_, name, format, version)
         {}
 

@@ -129,7 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~sixDoFRigidBodyState();
+    virtual ~sixDoFRigidBodyState() = default;
 
 
     // Member Functions

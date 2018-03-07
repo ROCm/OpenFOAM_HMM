@@ -115,7 +115,7 @@ public:
         //- Construct and return clone
         virtual autoPtr<liquidProperties> clone() const
         {
-            return autoPtr<liquidProperties>(new C2H5OH(*this));
+            return autoPtr<liquidProperties>::NewFrom<C2H5OH>(*this);
         }
 
 

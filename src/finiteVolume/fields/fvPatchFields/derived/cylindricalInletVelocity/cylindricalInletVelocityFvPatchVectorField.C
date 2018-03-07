@@ -60,9 +60,9 @@ cylindricalInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
     centre_(ptf.centre_),
     axis_(ptf.axis_),
-    axialVelocity_(ptf.axialVelocity_, false),
-    radialVelocity_(ptf.radialVelocity_, false),
-    rpm_(ptf.rpm_, false)
+    axialVelocity_(ptf.axialVelocity_.clone()),
+    radialVelocity_(ptf.radialVelocity_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -92,9 +92,9 @@ cylindricalInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf),
     centre_(ptf.centre_),
     axis_(ptf.axis_),
-    axialVelocity_(ptf.axialVelocity_, false),
-    radialVelocity_(ptf.radialVelocity_, false),
-    rpm_(ptf.rpm_, false)
+    axialVelocity_(ptf.axialVelocity_.clone()),
+    radialVelocity_(ptf.radialVelocity_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -108,9 +108,9 @@ cylindricalInletVelocityFvPatchVectorField
     fixedValueFvPatchField<vector>(ptf, iF),
     centre_(ptf.centre_),
     axis_(ptf.axis_),
-    axialVelocity_(ptf.axialVelocity_, false),
-    radialVelocity_(ptf.radialVelocity_, false),
-    rpm_(ptf.rpm_, false)
+    axialVelocity_(ptf.axialVelocity_.clone()),
+    radialVelocity_(ptf.radialVelocity_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 

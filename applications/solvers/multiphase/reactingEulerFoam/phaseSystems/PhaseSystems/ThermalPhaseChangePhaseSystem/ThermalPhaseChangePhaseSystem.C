@@ -42,14 +42,9 @@ ThermalPhaseChangePhaseSystem
     massTransfer_(this->lookup("massTransfer"))
 {
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -92,7 +87,7 @@ template<class BasePhaseSystem>
 const Foam::saturationModel&
 Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::saturation() const
 {
-    return saturationModel_();
+    return *saturationModel_;
 }
 
 
@@ -109,14 +104,9 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::heatTransfer() const
     phaseSystem::heatTransferTable& eqns = eqnsPtr();
 
     // Accumulate mDotL contributions from boundaries
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -219,19 +209,15 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::massTransfer() const
         }
     }
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
             continue;
         }
+
         const phaseModel& phase = pair.phase1();
         const phaseModel& otherPhase = pair.phase2();
 
@@ -292,14 +278,9 @@ Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::iDmdt
         )
     );
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -332,14 +313,9 @@ void Foam::ThermalPhaseChangePhaseSystem<BasePhaseSystem>::correctThermo()
 
     BasePhaseSystem::correctThermo();
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {

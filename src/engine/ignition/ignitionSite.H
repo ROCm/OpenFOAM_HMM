@@ -105,7 +105,7 @@ public:
 
             autoPtr<ignitionSite> operator()(Istream& is) const
             {
-                return autoPtr<ignitionSite>(new ignitionSite(is, db_, mesh_));
+                return autoPtr<ignitionSite>::New(is, db_, mesh_);
             }
         };
 
@@ -121,7 +121,7 @@ public:
         //- Clone
         autoPtr<ignitionSite> clone() const
         {
-            return autoPtr<ignitionSite>(new ignitionSite(*this));
+            return autoPtr<ignitionSite>::New(*this);
         }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,12 +53,12 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
+
+class edgeMesh;
 class Istream;
 class Ostream;
 
-// Forward declaration of friend functions and operators
-class edgeMesh;
 Istream& operator>>(Istream& is, edgeMesh& em);
 Ostream& operator<<(Ostream& os, const edgeMesh& em);
 
@@ -109,13 +109,13 @@ public:
     // Static
 
         //- Can we read this file format?
-        static bool canRead(const fileName& name, const bool verbose=false);
+        static bool canRead(const fileName& name, bool verbose=false);
 
         //- Can we read this file format?
-        static bool canReadType(const word& ext, const bool verbose=false);
+        static bool canReadType(const word& ext, bool verbose=false);
 
         //- Can we write this file format type?
-        static bool canWriteType(const word& ext, const bool verbose=false);
+        static bool canWriteType(const word& ext, bool verbose=false);
 
         static wordHashSet readTypes();
         static wordHashSet writeTypes();
@@ -124,20 +124,19 @@ public:
     // Constructors
 
         //- Construct null
-        edgeMesh();
+        inline edgeMesh();
 
-        //- Construct from components
-        edgeMesh(const pointField& points, const edgeList& edges);
+        //- Copy construct
+        inline edgeMesh(const edgeMesh& em);
 
-        //- Construct by transferring components (points, edges).
-        edgeMesh
-        (
-            const Xfer<pointField>& pointLst,
-            const Xfer<edgeList>& edgeLst
-        );
+        //- Move construct
+        inline edgeMesh(edgeMesh&& em);
 
-        //- Construct as copy
-        edgeMesh(const edgeMesh& em);
+        //- Copy construct from components
+        inline edgeMesh(const pointField& points, const edgeList& edges);
+
+        //- Move construct from components
+        inline edgeMesh(pointField&& pointLst, edgeList&& edgeLst);
 
         //- Construct from file name (uses extension to determine type)
         edgeMesh(const fileName& name);
@@ -174,7 +173,7 @@ public:
 
 
     //- Destructor
-    virtual ~edgeMesh();
+    virtual ~edgeMesh() = default;
 
 
     // Member Function Selectors
@@ -199,10 +198,8 @@ public:
     // Member Functions
 
         //- Transfer the contents of the argument and annul the argument
-        void transfer(edgeMesh&);
+        void transfer(edgeMesh& mesh);
 
-        //- Transfer contents to the Xfer container
-        Xfer<edgeMesh> xfer();
 
     // Read
 
@@ -234,14 +231,6 @@ public:
         //- Clear all storage
         virtual void clear();
 
-        //- Reset primitive data (points, edges)
-        //  Note, optimized to avoid overwriting data (with Xfer::null)
-        virtual void reset
-        (
-            const Xfer<pointField>& points,
-            const Xfer<edgeList>& edges
-        );
-
         //- Scale points. A non-positive factor is ignored
         virtual void scalePoints(const scalar scaleFactor);
 
@@ -266,12 +255,17 @@ public:
 
     // Member Operators
 
+        //- Copy assignment
         inline void operator=(const edgeMesh& rhs);
 
-        // Ostream Operator
+        //- Move assignment
+        inline void operator=(edgeMesh&& rhs);
 
-            friend Ostream& operator<<(Ostream& os, const edgeMesh& em);
-            friend Istream& operator>>(Istream& is, edgeMesh& em);
+
+    // Ostream Operator
+
+        friend Ostream& operator<<(Ostream& os, const edgeMesh& em);
+        friend Istream& operator>>(Istream& is, edgeMesh& em);
 
 };
 

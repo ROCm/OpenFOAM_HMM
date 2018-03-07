@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,7 +56,7 @@ inline void Foam::DynamicField<T, SizeMin>::assignDynField
 template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>::DynamicField()
 :
-    Field<T>(0),
+    Field<T>(),
     capacity_(Field<T>::size())
 {}
 
@@ -64,15 +64,26 @@ inline Foam::DynamicField<T, SizeMin>::DynamicField()
 template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>::DynamicField
 (
-    const label nElem
+    const label len
 )
 :
-    Field<T>(nElem),
+    Field<T>(len),
     capacity_(Field<T>::size())
 {
     // We could also enforce sizing granularity
     Field<T>::size(0);
 }
+
+
+template<class T, int SizeMin>
+inline Foam::DynamicField<T, SizeMin>::DynamicField
+(
+    const DynamicField<T, SizeMin>& lst
+)
+:
+    Field<T>(lst),
+    capacity_(lst.capacity())
+{}
 
 
 template<class T, int SizeMin>
@@ -89,7 +100,7 @@ inline Foam::DynamicField<T, SizeMin>::DynamicField
 template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>::DynamicField
 (
-    const Xfer<List<T>>& lst
+    const UIndirectList<T>& lst
 )
 :
     Field<T>(lst),
@@ -100,19 +111,32 @@ inline Foam::DynamicField<T, SizeMin>::DynamicField
 template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>::DynamicField
 (
-    const Xfer<Field<T>>& lst
+    List<T>&& content
 )
 :
-    Field<T>(lst),
+    Field<T>(std::move(content)),
     capacity_(Field<T>::size())
 {}
+
+
+template<class T, int SizeMin>
+inline Foam::DynamicField<T, SizeMin>::DynamicField
+(
+    DynamicField<T, SizeMin>&& content
+)
+:
+    Field<T>(std::move(content)),
+    capacity_(Field<T>::size())
+{
+    content.clear();
+}
 
 
 template<class T, int SizeMin>
 inline Foam::DynamicField<T, SizeMin>::DynamicField
 (
     const UList<T>& mapF,
-    const labelList& mapAddressing
+    const labelUList& mapAddressing
 )
 :
     Field<T>(mapF, mapAddressing),
@@ -142,28 +166,6 @@ inline Foam::DynamicField<T, SizeMin>::DynamicField
 )
 :
     Field<T>(mapF, map),
-    capacity_(Field<T>::size())
-{}
-
-
-template<class T, int SizeMin>
-inline Foam::DynamicField<T, SizeMin>::DynamicField
-(
-    const DynamicField<T, SizeMin>& lst
-)
-:
-    Field<T>(lst),
-    capacity_(lst.capacity())
-{}
-
-
-template<class T, int SizeMin>
-inline Foam::DynamicField<T, SizeMin>::DynamicField
-(
-    const Xfer<DynamicField<T, SizeMin>>& lst
-)
-:
-    Field<T>(lst),
     capacity_(Field<T>::size())
 {}
 
@@ -338,14 +340,6 @@ Foam::DynamicField<T, SizeMin>::shrink()
         Field<T>::size(nextFree);
     }
     return *this;
-}
-
-
-template<class T, int SizeMin>
-inline Foam::Xfer<Foam::List<T>>
-Foam::DynamicField<T, SizeMin>::xfer()
-{
-    return xferMoveTo<List<T>>(*this);
 }
 
 

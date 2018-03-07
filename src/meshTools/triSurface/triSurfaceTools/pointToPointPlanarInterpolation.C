@@ -374,17 +374,14 @@ Foam::pointToPointPlanarInterpolation::pointToPointPlanarInterpolation
 Foam::autoPtr<Foam::pointToPointPlanarInterpolation>
 Foam::pointToPointPlanarInterpolation::clone() const
 {
-    return autoPtr<pointToPointPlanarInterpolation>
+    return autoPtr<pointToPointPlanarInterpolation>::New
     (
-        new pointToPointPlanarInterpolation
-        (
-            perturb_,
-            nearestOnly_,
-            referenceCS_,
-            nPoints_,
-            nearestVertex_,
-            nearestVertexWeight_
-        )
+        perturb_,
+        nearestOnly_,
+        referenceCS_,
+        nPoints_,
+        nearestVertex_,
+        nearestVertexWeight_
     );
 }
 

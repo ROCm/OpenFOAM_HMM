@@ -56,9 +56,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
     filmRegionName_(ptf.filmRegionName_),
-    GammaMean_(ptf.GammaMean_, false),
-    a_(ptf.a_, false),
-    omega_(ptf.omega_, false)
+    GammaMean_(ptf.GammaMean_.clone()),
+    a_(ptf.a_.clone()),
+    omega_(ptf.omega_.clone())
 {}
 
 
@@ -89,9 +89,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fmfrpvf),
     filmRegionName_(fmfrpvf.filmRegionName_),
-    GammaMean_(fmfrpvf.GammaMean_, false),
-    a_(fmfrpvf.a_, false),
-    omega_(fmfrpvf.omega_, false)
+    GammaMean_(fmfrpvf.GammaMean_.clone()),
+    a_(fmfrpvf.a_.clone()),
+    omega_(fmfrpvf.omega_.clone())
 {}
 
 
@@ -104,9 +104,9 @@ inclinedFilmNusseltInletVelocityFvPatchVectorField
 :
     fixedValueFvPatchVectorField(fmfrpvf, iF),
     filmRegionName_(fmfrpvf.filmRegionName_),
-    GammaMean_(fmfrpvf.GammaMean_, false),
-    a_(fmfrpvf.a_, false),
-    omega_(fmfrpvf.omega_, false)
+    GammaMean_(fmfrpvf.GammaMean_.clone()),
+    a_(fmfrpvf.a_.clone()),
+    omega_(fmfrpvf.omega_.clone())
 {}
 
 

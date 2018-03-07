@@ -64,7 +64,6 @@ class treeDataFace
         static scalar tolSqr;
 
 
-
     // Private data
 
         const primitiveMesh& mesh_;
@@ -150,27 +149,28 @@ public:
 
     // Constructors
 
+        //- Construct from mesh, copying subset of faces
         //- Construct from mesh and subset of faces.
         treeDataFace
         (
             const bool cacheBb,
-            const primitiveMesh&,
-            const labelUList&
+            const primitiveMesh& mesh,
+            const labelUList& faceLabels
         );
 
-        //- Construct from mesh and subset of faces, transferring contents
+        //- Construct from mesh, moving subset of faces
         treeDataFace
         (
             const bool cacheBb,
-            const primitiveMesh&,
-            const Xfer<labelList>&
+            const primitiveMesh& mesh,
+            labelList&& faceLabels
         );
 
         //- Construct from mesh. Uses all faces in mesh.
-        treeDataFace(const bool cacheBb, const primitiveMesh&);
+        treeDataFace(const bool cacheBb, const primitiveMesh& mesh);
 
         //- Construct from mesh. Uses all faces in patch.
-        treeDataFace(const bool cacheBb, const polyPatch&);
+        treeDataFace(const bool cacheBb, const polyPatch& patch);
 
 
     // Member Functions

@@ -461,10 +461,10 @@ autoPtr<mapPolyMesh> reorderMesh
 
     mesh.resetPrimitives
     (
-        Xfer<pointField>::null(),
-        xferMove(newFaces),
-        xferMove(newOwner),
-        xferMove(newNeighbour),
+        autoPtr<pointField>(),  // <- null: leaves points untouched
+        autoPtr<faceList>::New(std::move(newFaces)),
+        autoPtr<labelList>::New(std::move(newOwner)),
+        autoPtr<labelList>::New(std::move(newNeighbour)),
         patchSizes,
         patchStarts,
         true
@@ -518,39 +518,36 @@ autoPtr<mapPolyMesh> reorderMesh
     }
 
 
-    return autoPtr<mapPolyMesh>
+    return autoPtr<mapPolyMesh>::New
     (
-        new mapPolyMesh
-        (
-            mesh,                       // const polyMesh& mesh,
-            mesh.nPoints(),             // nOldPoints,
-            mesh.nFaces(),              // nOldFaces,
-            mesh.nCells(),              // nOldCells,
-            identity(mesh.nPoints()),   // pointMap,
-            List<objectMap>(0),         // pointsFromPoints,
-            faceOrder,                  // faceMap,
-            List<objectMap>(0),         // facesFromPoints,
-            List<objectMap>(0),         // facesFromEdges,
-            List<objectMap>(0),         // facesFromFaces,
-            cellOrder,                  // cellMap,
-            List<objectMap>(0),         // cellsFromPoints,
-            List<objectMap>(0),         // cellsFromEdges,
-            List<objectMap>(0),         // cellsFromFaces,
-            List<objectMap>(0),         // cellsFromCells,
-            identity(mesh.nPoints()),   // reversePointMap,
-            reverseFaceOrder,           // reverseFaceMap,
-            reverseCellOrder,           // reverseCellMap,
-            flipFaceFlux,               // flipFaceFlux,
-            patchPointMap,              // patchPointMap,
-            labelListList(0),           // pointZoneMap,
-            labelListList(0),           // faceZonePointMap,
-            labelListList(0),           // faceZoneFaceMap,
-            labelListList(0),           // cellZoneMap,
-            pointField(0),              // preMotionPoints,
-            patchStarts,                // oldPatchStarts,
-            oldPatchNMeshPoints,        // oldPatchNMeshPoints
-            autoPtr<scalarField>()      // oldCellVolumes
-        )
+        mesh,                       // const polyMesh& mesh,
+        mesh.nPoints(),             // nOldPoints,
+        mesh.nFaces(),              // nOldFaces,
+        mesh.nCells(),              // nOldCells,
+        identity(mesh.nPoints()),   // pointMap,
+        List<objectMap>(),          // pointsFromPoints,
+        faceOrder,                  // faceMap,
+        List<objectMap>(),          // facesFromPoints,
+        List<objectMap>(),          // facesFromEdges,
+        List<objectMap>(),          // facesFromFaces,
+        cellOrder,                  // cellMap,
+        List<objectMap>(),          // cellsFromPoints,
+        List<objectMap>(),          // cellsFromEdges,
+        List<objectMap>(),          // cellsFromFaces,
+        List<objectMap>(),          // cellsFromCells,
+        identity(mesh.nPoints()),   // reversePointMap,
+        reverseFaceOrder,           // reverseFaceMap,
+        reverseCellOrder,           // reverseCellMap,
+        flipFaceFlux,               // flipFaceFlux,
+        patchPointMap,              // patchPointMap,
+        labelListList(),            // pointZoneMap,
+        labelListList(),            // faceZonePointMap,
+        labelListList(),            // faceZoneFaceMap,
+        labelListList(),            // cellZoneMap,
+        pointField(),               // preMotionPoints,
+        patchStarts,                // oldPatchStarts,
+        oldPatchNMeshPoints,        // oldPatchNMeshPoints
+        autoPtr<scalarField>()      // oldCellVolumes
     );
 }
 
@@ -1089,7 +1086,7 @@ int main(int argc, char *argv[])
 
 
     // Update fields
-    mesh.updateMesh(map);
+    mesh.updateMesh(map());
 
     // Update proc maps
     if (cellProcAddressing.headerOk())

@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(surfZone, 0);
+    defineTypeNameAndDebug(surfZone, 0);
 }
 
 

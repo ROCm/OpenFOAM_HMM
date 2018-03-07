@@ -32,7 +32,7 @@ template<class CloudType>
 inline const Foam::KinematicCloud<CloudType>&
 Foam::KinematicCloud<CloudType>::cloudCopy() const
 {
-    return cloudCopyPtr_();
+    return *cloudCopyPtr_;
 }
 
 
@@ -192,7 +192,7 @@ template<class CloudType>
 inline const Foam::DispersionModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::dispersion() const
 {
-    return dispersionModel_;
+    return *dispersionModel_;
 }
 
 
@@ -200,7 +200,7 @@ template<class CloudType>
 inline Foam::DispersionModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::dispersion()
 {
-    return dispersionModel_();
+    return *dispersionModel_;
 }
 
 
@@ -208,7 +208,7 @@ template<class CloudType>
 inline const Foam::PatchInteractionModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::patchInteraction() const
 {
-    return patchInteractionModel_;
+    return *patchInteractionModel_;
 }
 
 
@@ -216,7 +216,7 @@ template<class CloudType>
 inline Foam::PatchInteractionModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::patchInteraction()
 {
-    return patchInteractionModel_();
+    return *patchInteractionModel_;
 }
 
 
@@ -224,7 +224,7 @@ template<class CloudType>
 inline const Foam::StochasticCollisionModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::stochasticCollision() const
 {
-    return stochasticCollisionModel_();
+    return *stochasticCollisionModel_;
 }
 
 
@@ -232,7 +232,7 @@ template<class CloudType>
 inline Foam::StochasticCollisionModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::stochasticCollision()
 {
-    return stochasticCollisionModel_();
+    return *stochasticCollisionModel_;
 }
 
 
@@ -240,7 +240,7 @@ template<class CloudType>
 inline const Foam::SurfaceFilmModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::surfaceFilm() const
 {
-    return surfaceFilmModel_();
+    return *surfaceFilmModel_;
 }
 
 
@@ -248,7 +248,7 @@ template<class CloudType>
 inline Foam::SurfaceFilmModel<Foam::KinematicCloud<CloudType>>&
 Foam::KinematicCloud<CloudType>::surfaceFilm()
 {
-    return surfaceFilmModel_();
+    return *surfaceFilmModel_;
 }
 
 
@@ -256,7 +256,7 @@ template<class CloudType>
 inline const Foam::vectorIntegrationScheme&
 Foam::KinematicCloud<CloudType>::UIntegrator() const
 {
-    return UIntegrator_;
+    return *UIntegrator_;
 }
 
 
@@ -371,7 +371,7 @@ Foam::KinematicCloud<CloudType>::cellOccupancy()
         buildCellOccupancy();
     }
 
-    return cellOccupancyPtr_();
+    return *cellOccupancyPtr_;
 }
 
 
@@ -387,7 +387,7 @@ template<class CloudType>
 inline Foam::DimensionedField<Foam::vector, Foam::volMesh>&
 Foam::KinematicCloud<CloudType>::UTrans()
 {
-    return UTrans_();
+    return *UTrans_;
 }
 
 
@@ -395,7 +395,7 @@ template<class CloudType>
 inline const Foam::DimensionedField<Foam::vector, Foam::volMesh>&
 Foam::KinematicCloud<CloudType>::UTrans() const
 {
-    return UTrans_();
+    return *UTrans_;
 }
 
 
@@ -403,7 +403,7 @@ template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::KinematicCloud<CloudType>::UCoeff()
 {
-    return UCoeff_();
+    return *UCoeff_;
 }
 
 
@@ -411,7 +411,7 @@ template<class CloudType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::KinematicCloud<CloudType>::UCoeff() const
 {
-    return UCoeff_();
+    return *UCoeff_;
 }
 
 
@@ -447,7 +447,7 @@ Foam::KinematicCloud<CloudType>::SU(volVectorField& U) const
         }
     }
 
-    return tmp<fvVectorMatrix>(new fvVectorMatrix(U, dimForce));
+    return tmp<fvVectorMatrix>::New(U, dimForce);
 }
 
 

@@ -563,7 +563,7 @@ Foam::conformalVoronoiMesh::decomposition() const
             << exit(FatalError) << endl;
     }
 
-    return decomposition_();
+    return *decomposition_;
 }
 
 

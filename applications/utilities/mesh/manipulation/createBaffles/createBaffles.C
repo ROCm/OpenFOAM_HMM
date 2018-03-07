@@ -824,14 +824,13 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
     // Update fields
-    mesh.updateMesh(map);
-
+    mesh.updateMesh(map());
 
 
     // Correct boundary faces mapped-out-of-nothing.
     // This is just a hack to correct the value field.
     {
-        fvMeshMapper mapper(mesh, map);
+        fvMeshMapper mapper(mesh, map());
         bool hasWarned = false;
 
         forAllConstIter(wordHashSet, bafflePatches, iter)

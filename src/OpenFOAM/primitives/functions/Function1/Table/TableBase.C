@@ -49,7 +49,7 @@ Foam::Function1Types::TableBase<Type>::interpolator() const
         );
     }
 
-    return interpolatorPtr_();
+    return *interpolatorPtr_;
 }
 
 

@@ -416,20 +416,14 @@ int main(int argc, char *argv[])
     );
 
 
-    // Surface
-    autoPtr<triSurface> surf(nullptr);
-    // Search engine on surface.
-    autoPtr<triSurfaceSearch> querySurf(nullptr);
-
     if (useSurface)
     {
-        surf.reset(new triSurface(surfName));
+        triSurface surf(surfName);
 
         // Dump some stats
-        surf().writeStats(Info);
+        surf.writeStats(Info);
 
-        // Search engine on surface.
-        querySurf.reset(new triSurfaceSearch(surf));
+        triSurfaceSearch querySurf(surf);
 
         // Set cellType[celli] according to relation to surface
         cutBySurface

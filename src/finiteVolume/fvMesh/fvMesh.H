@@ -183,15 +183,19 @@ public:
         //- Construct from IOobject
         explicit fvMesh(const IOobject& io);
 
+        //- Construct from IOobject or as zero-sized mesh
+        //  Boundary is added using addPatches() member function
+        fvMesh(const IOobject& io, const zero, bool syncPar=true);
+
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
         fvMesh
         (
             const IOobject& io,
-            const Xfer<pointField>& points,
-            const Xfer<faceList>& faces,
-            const Xfer<labelList>& allOwner,
-            const Xfer<labelList>& allNeighbour,
+            pointField&& points,
+            faceList&& faces,
+            labelList&& allOwner,
+            labelList&& allNeighbour,
             const bool syncPar = true
         );
 
@@ -200,9 +204,9 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const Xfer<pointField>& points,
-            const Xfer<faceList>& faces,
-            const Xfer<cellList>& cells,
+            pointField&& points,
+            faceList&& faces,
+            cellList&& cells,
             const bool syncPar = true
         );
 
@@ -218,7 +222,7 @@ public:
             //- Add boundary patches. Constructor helper
             void addFvPatches
             (
-                const List<polyPatch*>&,
+                const List<polyPatch*>& p,
                 const bool validBoundary = true
             );
 
@@ -439,8 +443,11 @@ public:
 
     // Member Operators
 
-        bool operator!=(const fvMesh&) const;
-        bool operator==(const fvMesh&) const;
+        //- Compares addresses
+        bool operator!=(const fvMesh& rhs) const;
+
+        //- Compares addresses
+        bool operator==(const fvMesh& rhs) const;
 };
 
 

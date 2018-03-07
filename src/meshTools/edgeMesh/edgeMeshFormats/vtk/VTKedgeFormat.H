@@ -90,16 +90,12 @@ public:
         //- Read file and return surface
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>
-            (
-                new VTKedgeFormat(name)
-            );
+            return autoPtr<edgeMesh>::NewFrom<VTKedgeFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~VTKedgeFormat()
-    {}
+    virtual ~VTKedgeFormat() = default;
 
 
     // Member Functions

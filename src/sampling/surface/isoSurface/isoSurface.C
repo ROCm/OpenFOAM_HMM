@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1266,13 +1266,7 @@ Foam::triSurface Foam::isoSurface::subsetMesh
 {
     const boolList include
     (
-        createWithValues<boolList>
-        (
-            s.size(),
-            false,
-            newToOldFaces,
-            true
-        )
+        ListOps::createWithValue<bool>(s.size(), newToOldFaces, true, false)
     );
 
     newToOldPoints.setSize(s.points().size());
@@ -1695,19 +1689,21 @@ Foam::isoSurface::isoSurface
     }
 
 
-    // Transfer to mesh storage
+    // Transfer to mesh storage. Note, an iso-surface has no zones
     {
+        // Recover the pointField
+        pointField pts;
+        tmpsurf.swapPoints(pts);
+
+        // Transcribe from triFace to face
         faceList faces;
         tmpsurf.triFaceFaces(faces);
 
-        // An iso-surface has no zones
-        surfZoneList zones(0);
+        tmpsurf.clearOut();
 
-        // Reset primitive data (points, faces and zones)
-        this->MeshStorage::reset
-        (
-            tmpsurf.xferPoints(), faces.xfer(), zones.xfer()
-        );
+        MeshStorage updated(std::move(pts), std::move(faces), surfZoneList());
+
+        this->MeshStorage::transfer(updated);
     }
 }
 

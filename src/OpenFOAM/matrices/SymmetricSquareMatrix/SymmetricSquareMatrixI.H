@@ -88,10 +88,7 @@ template<class Type>
 inline Foam::autoPtr<Foam::SymmetricSquareMatrix<Type>>
 Foam::SymmetricSquareMatrix<Type>::clone() const
 {
-    return autoPtr<SymmetricSquareMatrix<Type>>
-    (
-        new SymmetricSquareMatrix<Type>(*this)
-    );
+    return autoPtr<SymmetricSquareMatrix<Type>>::New(*this);
 }
 
 

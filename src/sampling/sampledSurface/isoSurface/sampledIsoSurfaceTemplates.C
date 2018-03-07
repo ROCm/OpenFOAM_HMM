@@ -40,7 +40,7 @@ Foam::sampledIsoSurface::sampleField
     // Recreate geometry if time has changed
     updateGeometry();
 
-    return tmp<Field<Type>>(new Field<Type>(vField, surface().meshCells()));
+    return tmp<Field<Type>>::New(vField, surface().meshCells());
 }
 
 

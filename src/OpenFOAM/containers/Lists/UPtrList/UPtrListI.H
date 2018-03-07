@@ -26,9 +26,9 @@ License
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::UPtrList<T>::UPtrList(const label nElem)
+inline Foam::UPtrList<T>::UPtrList(const label len)
 :
-    ptrs_(nElem, reinterpret_cast<T*>(0))
+    ptrs_(len, reinterpret_cast<T*>(0))
 {}
 
 
@@ -44,13 +44,6 @@ inline Foam::UPtrList<T>::UPtrList(UPtrList<T>&& lst)
 :
     ptrs_(std::move(lst.ptrs_))
 {}
-
-
-template<class T>
-inline Foam::UPtrList<T>::UPtrList(const Xfer<UPtrList<T>>& lst)
-{
-    transfer(lst());
-}
 
 
 template<class T>
@@ -175,13 +168,6 @@ inline T* Foam::UPtrList<T>::set(const label i, T* ptr)
 }
 
 
-template<class T>
-inline Foam::Xfer<Foam::UPtrList<T>> Foam::UPtrList<T>::xfer()
-{
-    return xferMove(*this);
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
@@ -190,9 +176,8 @@ inline const T& Foam::UPtrList<T>::operator[](const label i) const
     if (!ptrs_[i])
     {
         FatalErrorInFunction
-            << "hanging pointer at index " << i
-            << " (size " << size()
-            << "), cannot dereference"
+            << "cannot dereference nullptr at index " << i
+            << " (size " << size() << ")"
             << abort(FatalError);
     }
 
@@ -206,9 +191,8 @@ inline T& Foam::UPtrList<T>::operator[](const label i)
     if (!ptrs_[i])
     {
         FatalErrorInFunction
-            << "hanging pointer at index " << i
-            << " (size " << size()
-            << "), cannot dereference"
+            << "cannot dereference nullptr at index " << i
+            << " (size " << size() << ")"
             << abort(FatalError);
     }
 

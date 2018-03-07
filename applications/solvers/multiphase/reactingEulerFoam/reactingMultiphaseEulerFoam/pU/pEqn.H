@@ -217,16 +217,11 @@ while (pimple.correct())
             )
         );
 
-        forAllConstIter
-        (
-            phaseSystem::KdTable,
-            fluid.Kds(),
-            KdIter
-        )
+        forAllConstIters(fluid.Kds(), KdIter)
         {
             const volScalarField& K(*KdIter());
 
-            const phasePair& pair(fluid.phasePairs()[KdIter.key()]);
+            const phasePair& pair = *(fluid.phasePairs()[KdIter.key()]);
 
             const phaseModel* phase1 = &pair.phase1();
             const phaseModel* phase2 = &pair.phase2();

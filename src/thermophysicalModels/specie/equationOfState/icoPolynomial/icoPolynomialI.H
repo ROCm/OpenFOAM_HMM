@@ -57,10 +57,7 @@ template<class Specie, int PolySize>
 inline Foam::autoPtr<Foam::icoPolynomial<Specie, PolySize>>
 Foam::icoPolynomial<Specie, PolySize>::clone() const
 {
-    return autoPtr<icoPolynomial<Specie, PolySize>>
-    (
-        new icoPolynomial<Specie, PolySize>(*this)
-    );
+    return autoPtr<icoPolynomial<Specie, PolySize>>::New(*this);
 }
 
 
@@ -68,10 +65,7 @@ template<class Specie, int PolySize>
 inline Foam::autoPtr<Foam::icoPolynomial<Specie, PolySize>>
 Foam::icoPolynomial<Specie, PolySize>::New(const dictionary& dict)
 {
-    return autoPtr<icoPolynomial<Specie, PolySize>>
-    (
-        new icoPolynomial<Specie, PolySize>(dict)
-    );
+    return autoPtr<icoPolynomial<Specie, PolySize>>::New(dict);
 }
 
 

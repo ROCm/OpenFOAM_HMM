@@ -29,9 +29,12 @@ Description
 
 #include "uLabel.H"
 #include "boolList.H"
+#include "DynamicList.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
+#include "ITstream.H"
 #include "StringStream.H"
+#include "FlatOutput.H"
 
 using namespace Foam;
 
@@ -135,8 +138,9 @@ int main(int argc, char *argv[])
 
     PackedBoolList list4
     (
-        IStringStream
+        ITstream
         (
+            "input",
             "(1 n 1 n 1 n 1 1 off 0 0 f f 0 y yes y true y false on t)"
         )()
     );
@@ -198,6 +202,18 @@ int main(int argc, char *argv[])
     list4.writeList(Info, -1) << nl; // indexed output
 
     list4.writeEntry("PackedBoolList", Info);
+
+    // Construct from labelUList, labelUIndList
+    {
+        DynamicList<label> indices({10, 50, 300});
+
+        Info<< "set: " << flatOutput(indices) << endl;
+
+        PackedBoolList bools1(indices);
+
+        Info<< "used: " << bools1.size() << " "
+            << flatOutput(bools1.used()) << endl;
+    }
 
     return 0;
 }

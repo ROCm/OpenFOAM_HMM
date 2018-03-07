@@ -293,7 +293,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::regionCoupledBase::AMI() const
         resetAMI();
     }
 
-    return AMIPtr_();
+    return *AMIPtr_;
 }
 
 

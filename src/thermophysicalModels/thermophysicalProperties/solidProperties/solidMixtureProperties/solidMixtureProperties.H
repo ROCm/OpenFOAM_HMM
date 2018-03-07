@@ -89,16 +89,12 @@ public:
         //- Construct and return a clone
         virtual autoPtr<solidMixtureProperties> clone() const
         {
-            return autoPtr<solidMixtureProperties>
-            (
-                new solidMixtureProperties(*this)
-            );
+            return autoPtr<solidMixtureProperties>::New(*this);
         }
 
 
     //- Destructor
-    virtual ~solidMixtureProperties()
-    {}
+    virtual ~solidMixtureProperties() = default;
 
 
     // Selectors

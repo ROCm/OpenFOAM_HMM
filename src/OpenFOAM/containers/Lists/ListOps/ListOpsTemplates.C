@@ -23,7 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <utility>
 #include "ListOps.H"
+#include "ListLoopM.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -559,36 +561,6 @@ Foam::labelList Foam::findIndices
 
 
 template<class ListType>
-void Foam::setValues
-(
-    ListType& input,
-    const labelUList& indices,
-    typename ListType::const_reference val
-)
-{
-    for (const label idx : indices)
-    {
-        input[idx] = val;
-    }
-}
-
-
-template<class ListType>
-ListType Foam::createWithValues
-(
-    const label len,
-    const typename ListType::const_reference initValue,
-    const labelUList& indices,
-    typename ListType::const_reference setValue
-)
-{
-    ListType list(len, initValue);
-    setValues(list, indices, setValue);
-    return list;
-}
-
-
-template<class ListType>
 Foam::label Foam::findMax(const ListType& input, const label start)
 {
     const label len = input.size();
@@ -736,51 +708,6 @@ Foam::label Foam::findLower
 }
 
 
-template<class T>
-void Foam::ListAppendEqOp<T>::operator()(List<T>& x, const List<T>& y) const
-{
-    if (y.size())
-    {
-        label len = x.size();
-        if (len)
-        {
-            x.setSize(len + y.size());
-            for (const T& val : y)
-            {
-                x[len++] = val;
-            }
-        }
-        else
-        {
-            x = y;
-        }
-    }
-}
-
-
-template<class T>
-void Foam::ListUniqueEqOp<T>::operator()(List<T>& x, const List<T>& y) const
-{
-    if (y.size())
-    {
-        if (x.size())
-        {
-            for (const T& val : y)
-            {
-                if (!x.found(val))
-                {
-                    x.append(val);
-                }
-            }
-        }
-        else
-        {
-            x = y;
-        }
-    }
-}
-
-
 template<class ListType>
 ListType Foam::reverseList(const ListType& input)
 {
@@ -856,6 +783,311 @@ void Foam::inplaceRotateList(ListType<DataType>& input, label n)
     inplaceReverseList(secondHalf);
 
     inplaceReverseList(input);
+}
+
+
+// * * * * * * * * * * * * * * * * * ListOps * * * * * * * * * * * * * * * * //
+
+template<class T>
+void Foam::ListOps::appendEqOp<T>::operator()
+(
+    List<T>& x,
+    const List<T>& y
+) const
+{
+    if (y.size())
+    {
+        label len = x.size();
+        if (len)
+        {
+            x.resize(len + y.size());
+            for (const T& val : y)
+            {
+                x[len++] = val;
+            }
+        }
+        else
+        {
+            x = y;
+        }
+    }
+}
+
+
+template<class T>
+void Foam::ListOps::uniqueEqOp<T>::operator()
+(
+    List<T>& x,
+    const List<T>& y
+) const
+{
+    if (y.size())
+    {
+        if (x.size())
+        {
+            for (const T& val : y)
+            {
+                if (!x.found(val))
+                {
+                    x.append(val);
+                }
+            }
+        }
+        else
+        {
+            x = y;
+        }
+    }
+}
+
+
+template<class T>
+void Foam::ListOps::setValue
+(
+    UList<T>& list,
+    const labelUList& locations,
+    const T& val
+)
+{
+    const label len = list.size();
+
+    for (const label index : locations)
+    {
+        // Range-checked
+        if (index >= 0 && index < len)
+        {
+            list[index] = val;
+        }
+    }
+}
+
+
+template<class T>
+void Foam::ListOps::setValue
+(
+    UList<T>& list,
+    const labelHashSet& locations,
+    const T& val
+)
+{
+    const label len = list.size();
+
+    for (const label index : locations)
+    {
+        // Range-checked
+        if (index >= 0 && index < len)
+        {
+            list[index] = val;
+        }
+    }
+}
+
+
+template<class T>
+void Foam::ListOps::setValue
+(
+    UList<T>& list,
+    const UList<bool>& locations,
+    const T& val
+)
+{
+    const label len = list.size();
+    const label count = locations.size();
+    const label end = min(count, len);
+
+    // The efficiency is modest
+    for (label index = 0; index < end; ++index)
+    {
+         if (locations[index])
+         {
+             list[index] = val;
+         }
+    }
+}
+
+
+template<class T>
+void Foam::ListOps::setValue
+(
+    UList<T>& list,
+    const PackedBoolList& locations,
+    const T& val
+)
+{
+    // Need improvements in PackedBoolList for more efficiency
+
+    const label len = list.size();
+    const label count = locations.count();
+
+    for (label index = 0, used = 0; index < len && used < count; ++index)
+    {
+        if (locations[index])
+        {
+            list[index] = val;
+            ++used;
+        }
+    }
+}
+
+
+template<class T, class T2, class UnaryOperation>
+Foam::List<T> Foam::ListOps::create
+(
+    const UList<T2>& input,
+    const UnaryOperation& op
+)
+{
+    const label len = input.size();
+
+    List<T> output(len);
+
+    if (len)
+    {
+        List_ACCESS(T, output, out);
+        List_CONST_ACCESS(T2, input, in);
+
+        for (label i = 0; i < len; ++i)
+        {
+            out[i] = op(in[i]);
+        }
+    }
+
+    return output;
+}
+
+
+template<class T, class InputIterator, class UnaryOperation>
+Foam::List<T> Foam::ListOps::create
+(
+    InputIterator first,
+    InputIterator last,
+    const UnaryOperation& op
+)
+{
+    const label len = std::distance(first, last);
+
+    List<T> output(len);
+
+    if (len)
+    {
+        List_ACCESS(T, output, out);
+
+        InputIterator in = first;
+
+        for (label i = 0; i < len; ++i)
+        {
+            out[i] = op(*in);
+            ++in;
+        }
+    }
+
+    return output;
+}
+
+
+template<class T>
+Foam::List<T> Foam::ListOps::createWithValue
+(
+    const label len,
+    const labelUList& locations,
+    const T& val,
+    const T& deflt
+)
+{
+    List<T> list(len, deflt);
+    ListOps::setValue(list, locations, val);
+
+    return list;
+}
+
+
+template<class T>
+Foam::List<T> Foam::ListOps::createWithValue
+(
+    const label len,
+    const labelHashSet& locations,
+    const T& val,
+    const T& deflt
+)
+{
+    List<T> list(len, deflt);
+    ListOps::setValue(list, locations, val);
+
+    return list;
+}
+
+
+template<class T>
+Foam::List<T> Foam::ListOps::createWithValue
+(
+    const label len,
+    const UList<bool>& locations,
+    const T& val,
+    const T& deflt
+)
+{
+    List<T> list(len, deflt);
+    ListOps::setValue(list, locations, val);
+
+    return list;
+}
+
+
+template<class T>
+Foam::List<T> Foam::ListOps::createWithValue
+(
+    const label len,
+    const PackedBoolList& locations,
+    const T& val,
+    const T& deflt
+)
+{
+    List<T> list(len, deflt);
+    ListOps::setValue(list, locations, val);
+
+    return list;
+}
+
+
+template<class T>
+Foam::List<T> Foam::ListOps::createWithValue
+(
+    const label len,
+    const label index,
+    const T& val,
+    const T& deflt
+)
+{
+    List<T> list(len, deflt);
+
+    // Range-checked
+    if (index >= 0 && index < len)
+    {
+        list[index] = val;
+    }
+
+    return list;
+}
+
+
+template<class T>
+Foam::List<T> Foam::ListOps::createWithValue
+(
+    const label len,
+    const label index,
+    T&& val,
+    const T& deflt
+)
+{
+    List<T> list(len, deflt);
+
+    // Range-checked
+    if (index >= 0 && index < len)
+    {
+        list[index] = std::move(val);
+    }
+
+    return list;
 }
 
 

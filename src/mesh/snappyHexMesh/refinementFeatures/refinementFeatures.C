@@ -423,7 +423,8 @@ Foam::refinementFeatures::regionEdgeTrees() const
             );
         }
     }
-    return regionEdgeTreesPtr_();
+
+    return *regionEdgeTreesPtr_;
 }
 
 

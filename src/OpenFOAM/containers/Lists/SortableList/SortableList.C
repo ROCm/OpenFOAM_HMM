@@ -81,15 +81,6 @@ Foam::SortableList<T>::SortableList(List<T>&& values)
 
 
 template<class T>
-Foam::SortableList<T>::SortableList(const Xfer<List<T>>& values)
-:
-    List<T>(values)
-{
-    sort();
-}
-
-
-template<class T>
 template<class InputIterator>
 inline Foam::SortableList<T>::SortableList
 (
@@ -158,13 +149,6 @@ void Foam::SortableList<T>::swap(SortableList<T>& lst)
 }
 
 
-template<class T>
-Foam::Xfer<Foam::List<T>> Foam::SortableList<T>::xfer()
-{
-    return xferMoveTo<List<T>>(*this);
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
@@ -195,7 +179,7 @@ template<class T>
 inline void Foam::SortableList<T>::operator=(List<T>&& lst)
 {
     indices_.clear();
-    List<T>::operator=(std::move(lst));
+    List<T>::transfer(lst);
 }
 
 

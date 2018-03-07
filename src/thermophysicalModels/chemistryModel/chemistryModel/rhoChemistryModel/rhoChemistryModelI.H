@@ -27,13 +27,13 @@ License
 
 inline Foam::rhoReactionThermo& Foam::rhoChemistryModel::thermo()
 {
-    return thermo_();
+    return *thermo_;
 }
 
 
 inline const Foam::rhoReactionThermo& Foam::rhoChemistryModel::thermo() const
 {
-    return thermo_();
+    return *thermo_;
 }
 
 

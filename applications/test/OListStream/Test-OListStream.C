@@ -129,7 +129,13 @@ int main(int argc, char *argv[])
 
     Info<< "transfer contents to a List or IListStream" << nl;
 
-    IListStream ibuf(obuf.xfer());
+    IListStream ibuf;
+    // Reclaim data storage from OListStream -> IListStream
+    {
+        List<char> data;
+        obuf.swap(data);
+        ibuf.swap(data);
+    }
 
     Info<<"original:";
     printInfo(obuf);
@@ -141,6 +147,7 @@ int main(int argc, char *argv[])
 
     // Create from other storage types
 
+    List<char> written;
     Info<< nl;
     {
         Info<<"create std::move(List)" << endl;
@@ -163,35 +170,9 @@ int main(int argc, char *argv[])
         toString(Info, list) << endl;
 
         printInfo(buf1);
-    }
-
-    Info<< nl;
-
-    List<char> written;
-    {
-        Info<<"create List.xfer()" << endl;
-        List<char> list(16, 'B');
-
-        Info<<"input:";
-        toString(Info, list) << endl;
-
-        OListStream buf1(list.xfer());
-        for (label i = 0; i < 26; ++i)
-        {
-            buf1 << char('A' + i);
-        }
-        for (label i = 0; i < 26; ++i)
-        {
-            buf1 << char('a' +i);
-        }
-
-        Info<<"orig:";
-        toString(Info, list) << endl;
-
-        printInfo(buf1);
 
         // Move back to written
-        written = buf1.xfer();
+        buf1.swap(written);
 
         printInfo(buf1);
     }

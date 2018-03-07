@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
                 polyMeshFilter::copySets(newMesh(), mesh);
             }
 
-            pointPriority = meshFilter.pointPriority();
+            pointPriority = *(meshFilter.pointPriority());
         }
 
         if (collapseFaceSet)
@@ -203,14 +203,14 @@ int main(int argc, char *argv[])
             // from the previous edge filtering to use as a stopping criterion.
             meshFilter.filter(indirectPatchFaces);
             {
-                polyTopoChange meshMod(newMesh);
+                polyTopoChange meshMod(newMesh());
 
                 meshMod.changeMesh(mesh, false);
 
                 polyMeshFilter::copySets(newMesh(), mesh);
             }
 
-            pointPriority = meshFilter.pointPriority();
+            pointPriority = *(meshFilter.pointPriority());
         }
 
         if (collapseFaces)
@@ -227,14 +227,14 @@ int main(int argc, char *argv[])
             // from the previous edge filtering to use as a stopping criterion.
             meshFilter.filter(nBadFaces);
             {
-                polyTopoChange meshMod(newMesh);
+                polyTopoChange meshMod(newMesh());
 
                 meshMod.changeMesh(mesh, false);
 
                 polyMeshFilter::copySets(newMesh(), mesh);
             }
 
-            pointPriority = meshFilter.pointPriority();
+            pointPriority = *(meshFilter.pointPriority());
         }
 
         // Write resulting mesh

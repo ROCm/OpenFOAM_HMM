@@ -149,7 +149,7 @@ Foam::pointPatchField<Type>::patchInternalField
             << abort(FatalError);
     }
 
-    return tmp<Field<Type1>>(new Field<Type1>(iF, meshPoints));
+    return tmp<Field<Type1>>::New(iF, meshPoints);
 }
 
 

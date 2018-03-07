@@ -78,7 +78,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, p, iF, mapper),
-    uniformValue_(ptf.uniformValue_, false)
+    uniformValue_(ptf.uniformValue_.clone())
 {
     // For safety re-evaluate
     const scalar t = this->db().time().timeOutputValue();
@@ -94,7 +94,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_, false)
+    uniformValue_(ptf.uniformValue_.clone())
 {}
 
 
@@ -107,7 +107,7 @@ uniformFixedValuePointPatchField
 )
 :
     fixedValuePointPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_, false)
+    uniformValue_(ptf.uniformValue_.clone())
 {
     // For safety re-evaluate
     const scalar t = this->db().time().timeOutputValue();

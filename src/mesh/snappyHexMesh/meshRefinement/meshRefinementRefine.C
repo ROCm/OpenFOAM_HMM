@@ -2340,15 +2340,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
     meshCutter_.setRefinement(cellsToRefine, meshMod);
 
     // Create mesh (no inflation), return map from old to new mesh.
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields
     mesh_.updateMesh(map);
 
     // Optionally inflate mesh
-    if (map().hasMotionPoints())
+    if (map.hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh_.movePoints(map.preMotionPoints());
     }
     else
     {
@@ -2362,7 +2363,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
     // Update intersection info
     updateMesh(map, getChangedFaces(map, cellsToRefine));
 
-    return map;
+    return mapPtr;
 }
 
 

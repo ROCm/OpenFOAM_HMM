@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -49,7 +49,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class cellZone;
 Ostream& operator<<(Ostream& os, const cellZone& zn);
@@ -130,15 +130,6 @@ public:
             const cellZoneMesh& zm
         );
 
-        //- Construct from components, transferring addressing
-        cellZone
-        (
-            const word& name,
-            const Xfer<labelList>& addr,
-            const label index,
-            const cellZoneMesh& zm
-        );
-
         //- Construct from dictionary
         cellZone
         (
@@ -168,24 +159,11 @@ public:
             const cellZoneMesh& zm
         );
 
-        //- Construct with a new index and zone mesh information, the name
-        //- of the original zone, (move) resetting the cell addressing.
-        cellZone
-        (
-            const cellZone& origZone,
-            const Xfer<labelList>& addr,
-            const label index,
-            const cellZoneMesh& zm
-        );
-
 
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<cellZone> clone(const cellZoneMesh& zm) const
         {
-            return autoPtr<cellZone>
-            (
-                new cellZone(*this, *this, index(), zm)
-            );
+            return autoPtr<cellZone>::New(*this, *this, index(), zm);
         }
 
         //- Construct and return a clone,
@@ -197,10 +175,7 @@ public:
             const cellZoneMesh& zm
         ) const
         {
-            return autoPtr<cellZone>
-            (
-                new cellZone(*this, addr, index, zm)
-            );
+            return autoPtr<cellZone>::New(*this, addr, index, zm);
         }
 
 
@@ -218,7 +193,7 @@ public:
 
 
     //- Destructor
-    virtual ~cellZone();
+    virtual ~cellZone() = default;
 
 
     // Member Functions
@@ -252,7 +227,7 @@ public:
         void operator=(const labelUList& addr);
 
         //- Move assign addressing, clearing demand-driven data
-        void operator=(const Xfer<labelList>& addr);
+        void operator=(labelList&& addr);
 
 
     // I-O

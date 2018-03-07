@@ -62,7 +62,7 @@ if (timeDirs.size() && !noLagrangian)
 
     if (Pstream::parRun())
     {
-        Pstream::mapCombineGather(cloudFields, HashTablePlusEqOp<word>());
+        Pstream::mapCombineGather(cloudFields, HashTableOps::plusEqOp<word>());
         Pstream::mapCombineScatter(cloudFields);
     }
 

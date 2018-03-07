@@ -216,7 +216,7 @@ template<class ParcelType>
 inline Foam::BinaryCollisionModel<Foam::DSMCCloud<ParcelType>>&
 Foam::DSMCCloud<ParcelType>::binaryCollision()
 {
-    return binaryCollisionModel_();
+    return *binaryCollisionModel_;
 }
 
 
@@ -224,7 +224,7 @@ template<class ParcelType>
 inline const Foam::WallInteractionModel<Foam::DSMCCloud<ParcelType>>&
 Foam::DSMCCloud<ParcelType>::wallInteraction() const
 {
-    return wallInteractionModel_;
+    return *wallInteractionModel_;
 }
 
 
@@ -232,7 +232,7 @@ template<class ParcelType>
 inline Foam::WallInteractionModel<Foam::DSMCCloud<ParcelType>>&
 Foam::DSMCCloud<ParcelType>::wallInteraction()
 {
-    return wallInteractionModel_();
+    return *wallInteractionModel_;
 }
 
 
@@ -240,7 +240,7 @@ template<class ParcelType>
 inline const Foam::InflowBoundaryModel<Foam::DSMCCloud<ParcelType>>&
 Foam::DSMCCloud<ParcelType>::inflowBoundary() const
 {
-    return inflowBoundaryModel_;
+    return *inflowBoundaryModel_;
 }
 
 
@@ -248,7 +248,7 @@ template<class ParcelType>
 inline Foam::InflowBoundaryModel<Foam::DSMCCloud<ParcelType>>&
 Foam::DSMCCloud<ParcelType>::inflowBoundary()
 {
-    return inflowBoundaryModel_();
+    return *inflowBoundaryModel_;
 }
 
 

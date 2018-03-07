@@ -166,15 +166,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         // Create dummy mesh. Only used on procs that don't have mesh.
         IOobject noReadIO(io);
         noReadIO.readOpt() = IOobject::NO_READ;
-        fvMesh dummyMesh
-        (
-            noReadIO,
-            xferCopy(pointField()),
-            xferCopy(faceList()),
-            xferCopy(labelList()),
-            xferCopy(labelList()),
-            false
-        );
+        fvMesh dummyMesh(noReadIO, Zero, false);
 
         // Add patches
         List<polyPatch*> patches(patchEntries.size());
@@ -261,8 +253,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     // parallel
 
     //Pout<< "Reading mesh from " << io.objectPath() << endl;
-    autoPtr<fvMesh> meshPtr(new fvMesh(io));
-    fvMesh& mesh = meshPtr();
+    auto meshPtr = autoPtr<fvMesh>::New(io);
+    fvMesh& mesh = *meshPtr;
 
 
 

@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
             if (!optNoMesh)
             {
                 autoPtr<ensightGeoFile> os = ensCase.newGeometry(meshMoving);
-                partsList.write(os.rawRef());
+                partsList.write(os.ref());
             }
         }
 

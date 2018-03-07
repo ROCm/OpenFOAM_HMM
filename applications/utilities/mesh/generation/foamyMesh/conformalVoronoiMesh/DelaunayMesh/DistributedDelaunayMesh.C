@@ -105,14 +105,11 @@ Foam::DistributedDelaunayMesh<Triangulation>::buildMap
         }
     }
 
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            constructSize,
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        constructSize,
+        std::move(sendMap),
+        std::move(constructMap)
     );
 }
 
@@ -139,13 +136,6 @@ Foam::DistributedDelaunayMesh<Triangulation>::DistributedDelaunayMesh
 :
     DelaunayMesh<Triangulation>(runTime, meshName),
     allBackgroundMeshBounds_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Triangulation>
-Foam::DistributedDelaunayMesh<Triangulation>::~DistributedDelaunayMesh()
 {}
 
 
@@ -491,7 +481,8 @@ Foam::label Foam::DistributedDelaunayMesh<Triangulation>::referVertices
 
     const label preDistributionSize = parallelVertices.size();
 
-    mapDistribute pointMap = buildMap(targetProcessor);
+    autoPtr<mapDistribute> pointMapPtr = buildMap(targetProcessor);
+    mapDistribute& pointMap = *pointMapPtr;
 
     // Make a copy of the original list.
     DynamicList<Vb> originalParallelVertices(parallelVertices);

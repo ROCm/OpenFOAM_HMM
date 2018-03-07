@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
             // Update fields
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Move mesh (since morphing does not do this)
             if (map().hasMotionPoints())
@@ -788,7 +788,7 @@ int main(int argc, char *argv[])
             (
                 layerExtrude.addedCells
                 (
-                    meshFromMesh,
+                    *meshFromMesh,
                     layerExtrude.layerFaces()
                 )
             );
@@ -937,7 +937,7 @@ int main(int argc, char *argv[])
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
             // Update fields
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Update stored data
             updateFaceLabels(map(), frontPatchFaces);
@@ -1074,7 +1074,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Update local data
         updateCellSet(map(), addedCellsSet);

@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::UList<T>::UList()
+inline constexpr Foam::UList<T>::UList() noexcept
 :
     size_(0),
     v_(nullptr)
@@ -38,7 +38,7 @@ inline Foam::UList<T>::UList()
 
 
 template<class T>
-inline Foam::UList<T>::UList(T* __restrict__ v, label size)
+inline Foam::UList<T>::UList(T* __restrict__ v, label size) noexcept
 :
     size_(size),
     v_(v)

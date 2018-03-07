@@ -177,12 +177,12 @@ Foam::twoPhaseSystem::twoPhaseSystem
             lookup("drag"),
             (
                 blendingMethods_.found("drag")
-              ? blendingMethods_["drag"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["drag"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_,
+            *pair_,
+            *pair1In2_,
+            *pair2In1_,
             false // Do not zero drag coefficent at fixed-flux BCs
         )
     );
@@ -194,12 +194,12 @@ Foam::twoPhaseSystem::twoPhaseSystem
             lookup("virtualMass"),
             (
                 blendingMethods_.found("virtualMass")
-              ? blendingMethods_["virtualMass"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["virtualMass"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
@@ -210,12 +210,12 @@ Foam::twoPhaseSystem::twoPhaseSystem
             lookup("heatTransfer"),
             (
                 blendingMethods_.found("heatTransfer")
-              ? blendingMethods_["heatTransfer"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["heatTransfer"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
@@ -226,12 +226,12 @@ Foam::twoPhaseSystem::twoPhaseSystem
             lookup("lift"),
             (
                 blendingMethods_.found("lift")
-              ? blendingMethods_["lift"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["lift"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
@@ -242,12 +242,12 @@ Foam::twoPhaseSystem::twoPhaseSystem
             lookup("wallLubrication"),
             (
                 blendingMethods_.found("wallLubrication")
-              ? blendingMethods_["wallLubrication"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["wallLubrication"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
@@ -258,12 +258,12 @@ Foam::twoPhaseSystem::twoPhaseSystem
             lookup("turbulentDispersion"),
             (
                 blendingMethods_.found("turbulentDispersion")
-              ? blendingMethods_["turbulentDispersion"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["turbulentDispersion"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 }
@@ -272,7 +272,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::twoPhaseSystem::~twoPhaseSystem()
-{}
+{} // Define here (incomplete type in header)
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

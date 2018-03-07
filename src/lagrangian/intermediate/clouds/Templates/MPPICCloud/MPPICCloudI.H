@@ -29,7 +29,7 @@ template<class CloudType>
 inline const Foam::MPPICCloud<CloudType>&
 Foam::MPPICCloud<CloudType>::cloudCopy() const
 {
-    return cloudCopyPtr_();
+    return *cloudCopyPtr_;
 }
 
 
@@ -37,7 +37,7 @@ template<class CloudType>
 inline const Foam::PackingModel<Foam::MPPICCloud<CloudType>>&
 Foam::MPPICCloud<CloudType>::packingModel() const
 {
-    return packingModel_();
+    return *packingModel_;
 }
 
 
@@ -45,7 +45,7 @@ template<class CloudType>
 inline Foam::PackingModel<Foam::MPPICCloud<CloudType>>&
 Foam::MPPICCloud<CloudType>::packingModel()
 {
-    return packingModel_();
+    return *packingModel_;
 }
 
 
@@ -53,7 +53,7 @@ template<class CloudType>
 inline const Foam::DampingModel<Foam::MPPICCloud<CloudType>>&
 Foam::MPPICCloud<CloudType>::dampingModel() const
 {
-    return dampingModel_();
+    return *dampingModel_;
 }
 
 
@@ -61,7 +61,7 @@ template<class CloudType>
 inline Foam::DampingModel<Foam::MPPICCloud<CloudType>>&
 Foam::MPPICCloud<CloudType>::dampingModel()
 {
-    return dampingModel_();
+    return *dampingModel_;
 }
 
 
@@ -69,7 +69,7 @@ template<class CloudType>
 inline const Foam::IsotropyModel<Foam::MPPICCloud<CloudType>>&
 Foam::MPPICCloud<CloudType>::isotropyModel() const
 {
-    return isotropyModel_();
+    return *isotropyModel_;
 }
 
 
@@ -77,7 +77,7 @@ template<class CloudType>
 inline Foam::IsotropyModel<Foam::MPPICCloud<CloudType>>&
 Foam::MPPICCloud<CloudType>::isotropyModel()
 {
-    return isotropyModel_();
+    return *isotropyModel_;
 }
 
 

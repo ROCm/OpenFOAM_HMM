@@ -157,13 +157,13 @@ public:
         //- Return a new cellModel on free-store created from Istream
         static autoPtr<cellModel> New(Istream& is)
         {
-            return autoPtr<cellModel>(new cellModel(is));
+            return autoPtr<cellModel>::New(is);
         }
 
         //- Return clone
         autoPtr<cellModel> clone() const
         {
-            return autoPtr<cellModel>(new cellModel(*this));
+            return autoPtr<cellModel>::New(*this);
         }
 
 

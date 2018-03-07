@@ -147,7 +147,7 @@ Note
 #include "volPointInterpolation.H"
 #include "emptyPolyPatch.H"
 #include "PstreamCombineReduceOps.H"
-#include "HashTableOps.H"
+#include "HashOps.H"
 #include "labelIOField.H"
 #include "scalarIOField.H"
 #include "sphericalTensorIOField.H"
@@ -1482,7 +1482,7 @@ int main(int argc, char *argv[])
                     Pstream::mapCombineGather
                     (
                         cloudFields,
-                        HashSetPlusEqOp<word>()
+                        HashSetOps::plusEqOp<word>()
                     );
                     Pstream::mapCombineScatter(cloudFields);
                 }

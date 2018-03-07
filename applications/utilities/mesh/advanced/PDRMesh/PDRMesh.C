@@ -1155,7 +1155,9 @@ int main(int argc, char *argv[])
     }
 
     // Change the mesh. Change points directly (no inflation).
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(subsetter.subMesh(), false);
+    autoPtr<mapPolyMesh> mapPtr =
+        meshMod.changeMesh(subsetter.subMesh(), false);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields
     subsetter.subMesh().updateMesh(map);
@@ -1231,9 +1233,9 @@ int main(int argc, char *argv[])
 
 
     // Move mesh (since morphing might not do this)
-    if (map().hasMotionPoints())
+    if (map.hasMotionPoints())
     {
-        subsetter.subMesh().movePoints(map().preMotionPoints());
+        subsetter.subMesh().movePoints(map.preMotionPoints());
     }
 
     Info<< "Writing mesh with split blockedFaces to time " << runTime.value()

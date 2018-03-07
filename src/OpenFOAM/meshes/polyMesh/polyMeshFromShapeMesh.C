@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -389,7 +389,7 @@ void Foam::polyMesh::setTopology
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
+    pointField&& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
@@ -413,7 +413,7 @@ Foam::polyMesh::polyMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        points
+        std::move(points)
     ),
     faces_
     (
@@ -671,7 +671,7 @@ Foam::polyMesh::polyMesh
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
+    pointField&& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
@@ -694,7 +694,7 @@ Foam::polyMesh::polyMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        points
+        std::move(points)
     ),
     faces_
     (

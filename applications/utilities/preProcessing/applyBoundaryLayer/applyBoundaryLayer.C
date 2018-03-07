@@ -244,7 +244,7 @@ tmp<volScalarField> calcNut
         // Correct nut
         turbulence->validate();
 
-        return tmp<volScalarField>(new volScalarField(turbulence->nut()));
+        return tmp<volScalarField>::New(turbulence->nut());
     }
     else
     {
@@ -264,7 +264,7 @@ tmp<volScalarField> calcNut
         // Correct nut
         turbulence->validate();
 
-        return tmp<volScalarField>(new volScalarField(turbulence->nut()));
+        return tmp<volScalarField>::New(turbulence->nut());
     }
 }
 

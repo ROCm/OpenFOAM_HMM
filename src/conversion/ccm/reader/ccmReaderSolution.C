@@ -377,7 +377,7 @@ Foam::ccm::reader::readField
      || !fieldTable_.found(fieldName)
     )
     {
-        return tmp<scalarField>(new Field<scalar>());
+        return tmp<scalarField>::New();
     }
 
     CCMIODataLocation requestedLocation = kCCMIOCell;
@@ -395,7 +395,7 @@ Foam::ccm::reader::readField
     // we can skip empty fields immediately
     if (!maxId)
     {
-        return tmp<scalarField>(new Field<scalar>());
+        return tmp<scalarField>::New();
     }
 
     char shortName[kCCMIOProstarShortNameLength+1];

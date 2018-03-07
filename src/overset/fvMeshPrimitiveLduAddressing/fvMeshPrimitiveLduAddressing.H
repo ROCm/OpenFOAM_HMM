@@ -92,16 +92,15 @@ public:
         fvMeshPrimitiveLduAddressing
         (
             const label nCells,
-            const Xfer<labelList>& lowerAddr,
-            const Xfer<labelList>& upperAddr,
+            labelList&& lowerAddr,
+            labelList&& upperAddr,
             const List<const labelUList*>& interfaces,
             const lduSchedule& ps
         );
 
 
     //- Destructor
-    virtual ~fvMeshPrimitiveLduAddressing()
-    {}
+    virtual ~fvMeshPrimitiveLduAddressing() = default;
 
 
     // Member Functions

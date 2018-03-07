@@ -134,7 +134,7 @@ public:
         autoPtr<block> clone() const
         {
             NotImplemented;
-            return autoPtr<block>(nullptr);
+            return autoPtr<block>();
         }
 
         //- New function which constructs and returns pointer to a block

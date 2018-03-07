@@ -230,14 +230,14 @@ inline void Foam::hashedWordList::operator=(std::initializer_list<word> lst)
 
 inline void Foam::hashedWordList::operator=(hashedWordList&& lst)
 {
-    wordList::operator=(std::move(static_cast<wordList&>(lst)));
+    wordList::transfer(static_cast<wordList&>(lst));
     lookup_ = std::move(lst.lookup_);
 }
 
 
 inline void Foam::hashedWordList::operator=(wordList&& lst)
 {
-    wordList::operator=(std::move(lst));
+    wordList::transfer(lst);
     rehash();
 }
 

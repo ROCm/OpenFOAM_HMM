@@ -553,42 +553,32 @@ void Foam::epsilonWallFunctionFvPatchScalarField::manipulateMatrix
     }
 
     DynamicList<label> constraintCells(weights.size());
-    DynamicList<scalar> constraintEpsilon(weights.size());
+    DynamicList<scalar> constraintValues(weights.size());
     const labelUList& faceCells = patch().faceCells();
 
-    const DimensionedField<scalar, volMesh>& epsilon
-        = internalField();
-
-    label nConstrainedCells = 0;
-
+    const DimensionedField<scalar, volMesh>& fld = internalField();
 
     forAll(weights, facei)
     {
         // Only set the values if the weights are > tolerance
         if (weights[facei] > tolerance_)
         {
-            nConstrainedCells++;
-
-            label celli = faceCells[facei];
+            const label celli = faceCells[facei];
 
             constraintCells.append(celli);
-            constraintEpsilon.append(epsilon[celli]);
+            constraintValues.append(fld[celli]);
         }
     }
 
     if (debug)
     {
         Pout<< "Patch: " << patch().name()
-            << ": number of constrained cells = " << nConstrainedCells
+            << ": number of constrained cells = " << constraintCells.size()
             << " out of " << patch().size()
             << endl;
     }
 
-    matrix.setValues
-    (
-        constraintCells,
-        scalarField(constraintEpsilon.xfer())
-    );
+    matrix.setValues(constraintCells, constraintValues);
 
     fvPatchField<scalar>::manipulateMatrix(matrix);
 }

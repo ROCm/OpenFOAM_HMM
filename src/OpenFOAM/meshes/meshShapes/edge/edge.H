@@ -288,7 +288,7 @@ inline bool operator==(const edge& a, const edge& b);
 inline bool operator!=(const edge& a, const edge& b);
 
 
-//- Hash specialization for hashing edges - a commutative hash value.
+//- Hash specialization for hashing edges as a commutative hash value.
 //  Hash incrementally.
 template<>
 inline unsigned Hash<edge>::operator()(const edge& e, unsigned seed) const
@@ -310,7 +310,7 @@ inline unsigned Hash<edge>::operator()(const edge& e, unsigned seed) const
 }
 
 
-//- Hash specialization for hashing edges - a commutative hash value.
+//- Hash specialization for hashing edges as a commutative hash value.
 //  Hash incrementally.
 template<>
 inline unsigned Hash<edge>::operator()(const edge& e) const

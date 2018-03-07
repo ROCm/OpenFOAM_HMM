@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -48,12 +48,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class mapPolyMesh;
 class polyMesh;
-
-
-// Forward declaration of friend functions and operators
-
 class mapDistributePolyMesh;
 
 Istream& operator>>(Istream&, mapDistributePolyMesh&);
@@ -104,8 +101,8 @@ class mapDistributePolyMesh
 
         void calcPatchSizes();
 
-        //- Disallow default bitwise copy construct
-        mapDistributePolyMesh(const mapDistributePolyMesh&);
+        //- Disallow copy construct
+        mapDistributePolyMesh(const mapDistributePolyMesh&) = delete;
 
 
 public:
@@ -114,6 +111,9 @@ public:
 
         //- Construct null
         mapDistributePolyMesh();
+
+        //- Move construct
+        mapDistributePolyMesh(mapDistributePolyMesh&& map);
 
         //- Construct from components. Note that mesh has to be changed already
         //  since uses mesh.nPoints etc as the new size.
@@ -125,47 +125,44 @@ public:
             const label nOldPoints,
             const label nOldFaces,
             const label nOldCells,
-            const Xfer<labelList>& oldPatchStarts,
-            const Xfer<labelList>& oldPatchNMeshPoints,
+            labelList&& oldPatchStarts,
+            labelList&& oldPatchNMeshPoints,
 
             // how to subset pieces of mesh to send across
-            const Xfer<labelListList>& subPointMap,
-            const Xfer<labelListList>& subFaceMap,
-            const Xfer<labelListList>& subCellMap,
-            const Xfer<labelListList>& subPatchMap,
+            labelListList&& subPointMap,
+            labelListList&& subFaceMap,
+            labelListList&& subCellMap,
+            labelListList&& subPatchMap,
 
             // how to reconstruct received mesh
-            const Xfer<labelListList>& constructPointMap,
-            const Xfer<labelListList>& constructFaceMap,
-            const Xfer<labelListList>& constructCellMap,
-            const Xfer<labelListList>& constructPatchMap,
+            labelListList&& constructPointMap,
+            labelListList&& constructFaceMap,
+            labelListList&& constructCellMap,
+            labelListList&& constructPatchMap,
 
             const bool subFaceHasFlip = false,
             const bool constructFaceHasFlip = false
         );
 
-        //- Construct from components
+        //- Move construct from components
         mapDistributePolyMesh
         (
             // mesh before changes
             const label nOldPoints,
             const label nOldFaces,
             const label nOldCells,
-            const Xfer<labelList>& oldPatchStarts,
-            const Xfer<labelList>& oldPatchNMeshPoints,
+            labelList&& oldPatchStarts,
+            labelList&& oldPatchNMeshPoints,
 
             // how to subset pieces of mesh to send across
-            const Xfer<mapDistribute>& pointMap,
-            const Xfer<mapDistribute>& faceMap,
-            const Xfer<mapDistribute>& cellMap,
-            const Xfer<mapDistribute>& patchMap
+            mapDistribute&& pointMap,
+            mapDistribute&& faceMap,
+            mapDistribute&& cellMap,
+            mapDistribute&& patchMap
         );
 
-        //- Construct by transferring parameter content
-        mapDistributePolyMesh(const Xfer<mapDistributePolyMesh>&);
-
         //- Construct from Istream
-        mapDistributePolyMesh(Istream&);
+        mapDistributePolyMesh(Istream& is);
 
 
     // Member Functions
@@ -236,10 +233,7 @@ public:
         // Other
 
             //- Transfer the contents of the argument and annul the argument.
-            void transfer(mapDistributePolyMesh&);
-
-            //- Transfer contents to the Xfer container
-            Xfer<mapDistributePolyMesh> xfer();
+            void transfer(mapDistributePolyMesh& map);
 
             //- Distribute list of point data
             template<class T>
@@ -285,9 +279,14 @@ public:
                 NotImplemented;
             }
 
-    // Member operators
 
-        void operator=(const mapDistributePolyMesh&);
+    // Member Operators
+
+        //- Copy assignment
+        void operator=(const mapDistributePolyMesh& map);
+
+        //- Move assignment
+        void operator=(mapDistributePolyMesh&& map);
 
 
     // IOstream operators
@@ -297,6 +296,7 @@ public:
 
         //- Write dictionary to Ostream
         friend Ostream& operator<<(Ostream&, const mapDistributePolyMesh&);
+
 };
 
 

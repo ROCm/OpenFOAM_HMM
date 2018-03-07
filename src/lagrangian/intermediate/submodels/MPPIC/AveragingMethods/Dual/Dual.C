@@ -29,15 +29,12 @@ License
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Type>
-Foam::autoPtr<Foam::labelList> Foam::AveragingMethods::Dual<Type>::size
-(
-    const fvMesh& mesh
-)
+Foam::labelList Foam::AveragingMethods::Dual<Type>::sizing(const fvMesh& mesh)
 {
-    autoPtr<labelList> s(new labelList(2));
-    s()[0] = mesh.nCells();
-    s()[1] = mesh.nPoints();
-    return s;
+    labelList sizes(2);
+    sizes[0] = mesh.nCells();
+    sizes[1] = mesh.nPoints();
+    return sizes;
 }
 
 
@@ -51,9 +48,9 @@ Foam::AveragingMethods::Dual<Type>::Dual
     const fvMesh& mesh
 )
 :
-    AveragingMethod<Type>(io, dict, mesh, size(mesh)),
+    AveragingMethod<Type>(io, dict, mesh, sizing(mesh)),
     volumeCell_(mesh.V()),
-    volumeDual_(mesh.nPoints(), 0.0),
+    volumeDual_(mesh.nPoints(), Zero),
     dataCell_(FieldField<Field, Type>::operator[](0)),
     dataDual_(FieldField<Field, Type>::operator[](1))
 {
@@ -95,13 +92,6 @@ Foam::AveragingMethods::Dual<Type>::Dual
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::AveragingMethods::Dual<Type>::~Dual()
-{}
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
@@ -132,7 +122,7 @@ void Foam::AveragingMethods::Dual<Type>::add
         coordinates[0]*value
       / (0.25*volumeCell_[tetIs.cell()]);
 
-    for(label i = 0; i < 3; i ++)
+    for (label i = 0; i < 3; ++i)
     {
         dataDual_[triIs[i]] +=
             coordinates[i+1]*value

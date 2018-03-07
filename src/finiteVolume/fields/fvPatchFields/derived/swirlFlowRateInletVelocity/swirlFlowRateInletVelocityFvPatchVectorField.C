@@ -99,8 +99,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    flowRate_(ptf.flowRate_, false),
-    rpm_(ptf.rpm_, false)
+    flowRate_(ptf.flowRate_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -115,8 +115,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    flowRate_(ptf.flowRate_, false),
-    rpm_(ptf.rpm_, false)
+    flowRate_(ptf.flowRate_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -132,8 +132,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    flowRate_(ptf.flowRate_, false),
-    rpm_(ptf.rpm_, false)
+    flowRate_(ptf.flowRate_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 

@@ -285,7 +285,7 @@ Foam::codedFixedValuePointPatchField<Type>::redirectPatchField() const
             ).ptr()
         );
     }
-    return redirectPatchFieldPtr_();
+    return *redirectPatchFieldPtr_;
 }
 
 

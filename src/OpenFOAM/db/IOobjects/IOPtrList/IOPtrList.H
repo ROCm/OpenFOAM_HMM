@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,6 @@ class IOPtrList
     public regIOobject,
     public PtrList<T>
 {
-
 public:
 
     //- Runtime type information
@@ -62,35 +61,42 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject using given Istream constructor class
-        template<class INew>
-        IOPtrList(const IOobject&, const INew&);
+        //- Default copy construct
+        IOPtrList(const IOPtrList&) = default;
 
         //- Construct from IOobject
-        IOPtrList(const IOobject&);
+        explicit IOPtrList(const IOobject& io);
+
+        //- Construct from IOobject using given Istream constructor class
+        template<class INew>
+        IOPtrList(const IOobject& io, const INew& inewt);
 
         //- Construct from IOobject with given size
-        IOPtrList(const IOobject&, const label);
+        IOPtrList(const IOobject& io, const label len);
 
-        //- Construct from IOobject and a PtrList
-        IOPtrList(const IOobject&, const PtrList<T>&);
+        //- Construct from IOobject and a copy of PtrList content
+        IOPtrList(const IOobject& io, const PtrList<T>& content);
 
-        //- Construct by transferring the PtrList contents
-        IOPtrList(const IOobject&, const Xfer<PtrList<T>>&);
+        //- Construct by transferring the PtrList content
+        IOPtrList(const IOobject& io, PtrList<T>&& content);
 
 
     //- Destructor
-    virtual ~IOPtrList();
+    virtual ~IOPtrList() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        bool writeData(Ostream&) const;
+        bool writeData(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const IOPtrList<T>&);
+        //- Copy assignment of entries
+        void operator=(const IOPtrList<T>& rhs);
+
+        //- Copy or move assignment of entries
+        using PtrList<T>::operator=;
 };
 
 

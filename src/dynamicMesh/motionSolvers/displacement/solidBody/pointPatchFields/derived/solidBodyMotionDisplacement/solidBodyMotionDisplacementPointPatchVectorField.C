@@ -146,7 +146,7 @@ solidBodyMotionDisplacementPointPatchVectorField::localPoints0() const
 
         localPoints0Ptr_.reset(new pointField(points0, patch().meshPoints()));
     }
-    return localPoints0Ptr_();
+    return *localPoints0Ptr_;
 }
 
 

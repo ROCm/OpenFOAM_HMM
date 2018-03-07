@@ -73,7 +73,7 @@ public:
         (
             const UList<T>& posList,
             const UList<T>& negList,
-            const Xfer<List<label>>& addr
+            List<label>&& addr
         );
 
 
@@ -99,9 +99,11 @@ public:
 
         // Edit
 
-            //- Reset addressing
+            //- Copy reset addressing
             inline void resetAddressing(const labelUList& addr);
-            inline void resetAddressing(const Xfer<List<label>>& addr);
+
+            //- Move reset addressing
+            inline void resetAddressing(List<label>&& addr);
 
 
         // Member Operators

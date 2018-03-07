@@ -53,6 +53,10 @@ class refCount
 
 public:
 
+    //- A non-counting (dummy) refCount
+    struct zero {};
+
+
     // Constructors
 
         //- Construct null initializing count to 0

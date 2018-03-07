@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -63,17 +63,17 @@ public:
     // Constructors
 
         //- Construct given an IOobject
-        IOmapDistribute(const IOobject&);
+        IOmapDistribute(const IOobject& io);
 
-        //- Construct given an IOobject and mapDistribute
-        IOmapDistribute(const IOobject&, const mapDistribute&);
+        //- Construct given an IOobject, copying mapDistribute contents
+        IOmapDistribute(const IOobject& io, const mapDistribute& map);
 
-        //- Construct by transferring the mapDistribute contents
-        IOmapDistribute(const IOobject&, const Xfer<mapDistribute>&);
+        //- Construct, moving mapDistribute contents
+        IOmapDistribute(const IOobject& io, mapDistribute&& map);
 
 
     //- Destructor
-    virtual ~IOmapDistribute();
+    virtual ~IOmapDistribute() = default;
 
 
     // Member functions

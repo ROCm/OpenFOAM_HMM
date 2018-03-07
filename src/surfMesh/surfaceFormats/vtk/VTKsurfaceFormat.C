@@ -200,6 +200,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
 
         DynamicList<Face> dynFaces(nTri);
         DynamicList<label> dynZones(nTri);
+
         forAll(faces, facei)
         {
             const face& f = faces[facei];
@@ -211,6 +212,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
                 dynZones.append(zones[facei]);
             }
         }
+        zones.clear();
 
         // Count
         labelList zoneSizes(nZones, 0);
@@ -219,7 +221,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             zoneSizes[zonei]++;
         }
 
-        this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
+        this->sortFacesAndStore(dynFaces, dynZones, sorted);
 
         // Add zones (retaining empty ones)
         this->addZones(zoneSizes, zoneNames);
@@ -227,6 +229,8 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     else
     {
         DynamicList<Face> dynFaces(faces.size());
+        DynamicList<label> dynZones(std::move(zones));
+
         for (const face& f : faces)
         {
             dynFaces.append(Face(f));
@@ -239,7 +243,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             zoneSizes[zonei]++;
         }
 
-        this->sortFacesAndStore(dynFaces.xfer(), zones.xfer(), sorted);
+        this->sortFacesAndStore(dynFaces, dynZones, sorted);
 
         // Add zones (retaining empty ones)
         this->addZones(zoneSizes, zoneNames);

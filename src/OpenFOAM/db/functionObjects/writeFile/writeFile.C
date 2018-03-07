@@ -214,7 +214,7 @@ Foam::OFstream& Foam::functionObjects::writeFile::file()
             << "File pointer not allocated";
     }
 
-    return filePtr_();
+    return *filePtr_;
 }
 
 

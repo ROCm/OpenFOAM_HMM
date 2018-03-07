@@ -77,7 +77,7 @@ inline Foam::cellShape::cellShape(Istream& is)
 
 inline Foam::autoPtr<Foam::cellShape> Foam::cellShape::clone() const
 {
-    return autoPtr<cellShape>(new cellShape(*this));
+    return autoPtr<cellShape>::New(*this);
 }
 
 

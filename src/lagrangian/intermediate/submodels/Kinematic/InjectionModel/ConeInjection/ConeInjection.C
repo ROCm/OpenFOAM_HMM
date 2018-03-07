@@ -147,7 +147,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     Umag_(im.Umag_),
     thetaInner_(im.thetaInner_),
     thetaOuter_(im.thetaOuter_),
-    sizeDistribution_(im.sizeDistribution_, false),
+    sizeDistribution_(im.sizeDistribution_.clone()),
     nInjected_(im.nInjected_),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_)

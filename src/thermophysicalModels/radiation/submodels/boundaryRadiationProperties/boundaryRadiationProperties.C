@@ -96,16 +96,14 @@ Foam::radiation::boundaryRadiationProperties::emissivity
     {
         return radBoundaryPropertiesPtrList_[patchi]->emissivity(bandi);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Patch : " << mesh().boundaryMesh()[patchi].name()
-            << " is not found in the boundaryRadiationProperties. "
-            << "Please add it"
-            << exit(FatalError);
 
-        return tmp<scalarField>(new scalarField());
-    }
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return tmp<scalarField>::New();
 }
 
 
@@ -120,16 +118,14 @@ Foam::radiation::boundaryRadiationProperties::absorptivity
     {
         return radBoundaryPropertiesPtrList_[patchi]->absorptivity(bandi);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Patch : " << mesh().boundaryMesh()[patchi].name()
-            << " is not found in the boundaryRadiationProperties. "
-            << "Please add it"
-            << exit(FatalError);
 
-        return tmp<scalarField>(new scalarField());
-    }
+     FatalErrorInFunction
+         << "Patch : " << mesh().boundaryMesh()[patchi].name()
+         << " is not found in the boundaryRadiationProperties. "
+         << "Please add it"
+         << exit(FatalError);
+
+    return tmp<scalarField>::New();
 }
 
 
@@ -144,16 +140,14 @@ Foam::radiation::boundaryRadiationProperties::transmissivity
     {
         return radBoundaryPropertiesPtrList_[patchi]->transmissivity(bandi);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Patch : " << mesh().boundaryMesh()[patchi].name()
-            << " is not found in the boundaryRadiationProperties. "
-            << "Please add it"
-            << exit(FatalError);
 
-        return tmp<scalarField>(new scalarField());
-    }
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return tmp<scalarField>::New();
 }
 
 
@@ -168,16 +162,14 @@ Foam::radiation::boundaryRadiationProperties::reflectivity
     {
         return radBoundaryPropertiesPtrList_[patchi]->reflectivity(bandi);
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Patch : " << mesh().boundaryMesh()[patchi].name()
-            << " is not found in the boundaryRadiationProperties. "
-            << "Please add it"
-            << exit(FatalError);
 
-        return tmp<scalarField>(new scalarField());
-    }
+    FatalErrorInFunction
+        << "Patch : " << mesh().boundaryMesh()[patchi].name()
+        << " is not found in the boundaryRadiationProperties. "
+        << "Please add it"
+        << exit(FatalError);
+
+    return tmp<scalarField>::New();
 }
 
 

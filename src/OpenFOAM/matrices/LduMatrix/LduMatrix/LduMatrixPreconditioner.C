@@ -89,20 +89,15 @@ Foam::LduMatrix<Type, DType, LUType>::preconditioner::New
             )
         );
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            preconditionerDict
-        )   << "cannot preconditione incomplete matrix, "
-               "no diagonal or off-diagonal coefficient"
-            << exit(FatalIOError);
 
-        return autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>
-        (
-            nullptr
-        );
-    }
+    FatalIOErrorInFunction
+    (
+        preconditionerDict
+    )   << "cannot preconditione incomplete matrix, "
+           "no diagonal or off-diagonal coefficient"
+        << exit(FatalIOError);
+
+    return autoPtr<typename LduMatrix<Type, DType, LUType>::preconditioner>();
 }
 
 

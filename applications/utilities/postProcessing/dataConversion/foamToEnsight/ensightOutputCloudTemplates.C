@@ -142,7 +142,7 @@ bool Foam::ensightCloud::writeCloudField
         IOField<Type> field(fieldObject);
         fieldObject.readOpt() = rOpt;
 
-        writeCloudField(field, output.rawRef());
+        writeCloudField(field, output.ref());
     }
 
     return true;

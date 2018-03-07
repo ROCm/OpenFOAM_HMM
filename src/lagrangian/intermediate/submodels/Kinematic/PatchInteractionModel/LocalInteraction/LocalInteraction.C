@@ -152,7 +152,7 @@ Foam::volScalarField& Foam::LocalInteraction<CloudType>::massEscape()
         );
     }
 
-    return massEscapePtr_();
+    return *massEscapePtr_;
 }
 
 
@@ -181,7 +181,7 @@ Foam::volScalarField& Foam::LocalInteraction<CloudType>::massStick()
         );
     }
 
-    return massStickPtr_();
+    return *massStickPtr_;
 }
 
 

@@ -33,7 +33,7 @@ template<>
 Foam::tmp<Foam::scalarField>
 Foam::transformFaPatchField<Foam::scalar>::gradientInternalCoeffs() const
 {
-    return tmp<scalarField>(new scalarField(size(), 0.0));
+    return tmp<scalarField>::New(size(), Zero);
 }
 
 

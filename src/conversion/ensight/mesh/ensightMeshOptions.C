@@ -136,7 +136,7 @@ const Foam::wordRes& Foam::ensightMesh::options::patchSelection() const
 {
     if (usePatchSelection())
     {
-        return patchPatterns_();
+        return *patchPatterns_;
     }
 
     return wordRes::null();
@@ -147,7 +147,7 @@ const Foam::wordRes& Foam::ensightMesh::options::faceZoneSelection() const
 {
     if (faceZonePatterns_.valid())
     {
-        return faceZonePatterns_();
+        return *faceZonePatterns_;
     }
 
     return wordRes::null();

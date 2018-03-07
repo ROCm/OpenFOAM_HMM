@@ -152,7 +152,7 @@ Foam::discreteSurface::nonCoupledboundaryTree() const
         );
     }
 
-    return boundaryTreePtr_();
+    return *boundaryTreePtr_;
 }
 
 

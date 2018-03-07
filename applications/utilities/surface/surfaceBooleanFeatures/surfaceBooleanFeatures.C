@@ -1480,33 +1480,30 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
 
     //calcFeaturePoints(inter.cutPoints(), inter.cutEdges());
 
-    return autoPtr<extendedFeatureEdgeMesh>
+    return autoPtr<extendedFeatureEdgeMesh>::New
     (
-        new extendedFeatureEdgeMesh
-        (
-            io,
-            inter.cutPoints(),
-            inter.cutEdges(),
+        io,
+        inter.cutPoints(),
+        inter.cutEdges(),
 
-            0,                  // concaveStart,
-            0,                  // mixedStart,
-            0,                  // nonFeatureStart,
+        0,                  // concaveStart,
+        0,                  // mixedStart,
+        0,                  // nonFeatureStart,
 
-            internalStart,      // internalStart,
-            nIntOrExt,           // flatStart,
-            nIntOrExt + nFlat,   // openStart,
-            nIntOrExt + nFlat + nOpen,   // multipleStart,
+        internalStart,      // internalStart,
+        nIntOrExt,          // flatStart,
+        nIntOrExt + nFlat,  // openStart,
+        nIntOrExt + nFlat + nOpen,   // multipleStart,
 
-            normalsTmp,
-            normalVolumeTypesTmp,
-            edgeDirections,
-            normalDirectionsTmp,
-            edgeNormalsTmp,
+        normalsTmp,
+        normalVolumeTypesTmp,
+        edgeDirections,
+        normalDirectionsTmp,
+        edgeNormalsTmp,
 
-            labelListList(0),   // featurePointNormals,
-            labelListList(0),   // featurePointEdges,
-            labelList(0)        // regionEdges
-        )
+        labelListList(),    // featurePointNormals,
+        labelListList(),    // featurePointEdges,
+        labelList()         // regionEdges
     );
 }
 

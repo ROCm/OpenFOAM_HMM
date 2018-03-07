@@ -106,11 +106,11 @@ void Foam::waveAlphaFvPatchScalarField::updateCoeffs()
         )
     );
 
-    waveModel& model = const_cast<waveModel&>(tmodel());
+    waveModel& model = tmodel.constCast();
 
     model.correct(db().time().value());
 
-    operator == (model.alpha());
+    operator==(model.alpha());
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
 }

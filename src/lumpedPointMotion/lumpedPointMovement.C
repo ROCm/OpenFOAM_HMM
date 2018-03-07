@@ -787,7 +787,7 @@ Foam::lumpedPointMovement::interpolator() const
         );
     }
 
-    return interpolatorPtr_();
+    return *interpolatorPtr_;
 }
 
 

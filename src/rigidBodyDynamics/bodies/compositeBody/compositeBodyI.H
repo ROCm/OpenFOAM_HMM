@@ -39,7 +39,7 @@ inline Foam::RBD::compositeBody::compositeBody
 
 inline const Foam::RBD::rigidBody& Foam::RBD::compositeBody::body() const
 {
-    return body_();
+    return *body_;
 }
 
 

@@ -213,10 +213,10 @@ public:
     // Constructors
 
         //- Null constructor
-        inline UList();
+        inline constexpr UList() noexcept;
 
         //- Construct from components
-        inline UList(T* __restrict__ v, label size);
+        inline UList(T* __restrict__ v, label size) noexcept;
 
 
     // Member Functions

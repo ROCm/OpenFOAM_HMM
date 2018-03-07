@@ -135,7 +135,7 @@ template<class T, unsigned Size>
 inline Foam::autoPtr<Foam::FixedList<T, Size>>
 Foam::FixedList<T, Size>::clone() const
 {
-    return autoPtr<FixedList<T, Size>>(new FixedList<T, Size>(*this));
+    return autoPtr<FixedList<T, Size>>::New(*this);
 }
 
 

@@ -42,7 +42,7 @@ SourceFiles
 
 #include "UList.H"
 #include "autoPtr.H"
-#include "Xfer.H"
+#include "one.H"
 #include "SLListFwd.H"
 
 #include <initializer_list>
@@ -112,49 +112,11 @@ public:
         //- Return a null List
         inline static const List<T>& null();
 
-        //- Create from a list of a dissimilar type.
-        //  Eg, convert a list of ints to floats, vectors etc.
-        //  For example,
-        //  \code
-        //  auto vectors = List<vector>::createList
-        //  (
-        //      ints,
-        //      [](const int& val){ return vector(1.5*val, 0, 0); }
-        //  );
-        //
-        //  auto neg = labelList::createList
-        //  (
-        //      ints,
-        //      std::negate<label>()
-        //  );
-        //  auto labels = labelList::createList
-        //  (
-        //      ints,
-        //      toLabel<int>()
-        //  );
-        //  \endcode
-        template<class T2, class UnaryOperation>
-        static List<T> createList
-        (
-            const UList<T2>& input,
-            const UnaryOperation& op
-        );
-
-        //- Create from an iterator range (uses std::distance for the size).
-        //  The unary operation can be used to convert to other types.
-        template<class InputIterator, class UnaryOperation>
-        static List<T> createList
-        (
-            InputIterator begIter,
-            InputIterator endIter,
-            const UnaryOperation& op
-        );
-
 
     // Constructors
 
         //- Null constructor
-        inline List();
+        inline constexpr List() noexcept;
 
         //- Construct with given size
         explicit List(const label len);
@@ -164,6 +126,15 @@ public:
 
         //- Construct with given size initializing all elements to zero
         List(const label len, const zero);
+
+        //- Construct with length=1, copying the value as the only content
+        List(const one, const T& val);
+
+        //- Construct with length=1, moving the value as the only content
+        List(const one, T&& val);
+
+        //- Construct with length=1, initializing content to zero
+        List(const one, const zero);
 
         //- Copy construct from list
         List(const List<T>& a);
@@ -200,9 +171,6 @@ public:
 
         //- Construct from an initializer list
         List(std::initializer_list<T> lst);
-
-        //- Transfer (move) construct
-        List(const Xfer<List<T>>& lst);
 
         //- Move construct from List
         List(List<T>&& lst);
@@ -278,9 +246,6 @@ public:
             //- and annul the argument list
             void transfer(SortableList<T>& lst);
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<List<T>> xfer();
-
             //- Return subscript-checked element of UList and resizing the list
             //- if required.
             inline T& newElmt(const label i);
@@ -338,6 +303,7 @@ public:
             Istream& is,
             List<T>& L
         );
+
 };
 
 

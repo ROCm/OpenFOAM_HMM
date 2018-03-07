@@ -215,7 +215,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
             compactOffsets[i] = globalToCompact.size();
         }
 
-        return autoPtr<globalIndex>(new globalIndex(std::move(compactOffsets)));
+        return autoPtr<globalIndex>::New(std::move(compactOffsets));
     }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,6 @@ class IOList
     public regIOobject,
     public List<T>
 {
-
 public:
 
     //- Runtime type information
@@ -62,33 +61,39 @@ public:
 
     // Constructors
 
+        //- Default copy construct
+        IOList(const IOList&) = default;
+
         //- Construct from IOobject
-        IOList(const IOobject&);
+        explicit IOList(const IOobject& io);
 
         //- Construct from IOobject and size of IOList
-        IOList(const IOobject&, const label);
+        IOList(const IOobject& io, const label len);
 
-        //- Construct from IOobject and a List
-        IOList(const IOobject&, const List<T>&);
+        //- Construct from IOobject and a copy of UList content
+        IOList(const IOobject& io, const UList<T>& content);
 
-        //- Construct by transferring the List contents
-        IOList(const IOobject&, const Xfer<List<T>>&);
+        //- Construct by transferring the List content
+        IOList(const IOobject& io, List<T>&& content);
 
 
     //- Destructor
-    virtual ~IOList();
+    virtual ~IOList() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        bool writeData(Ostream&) const;
+        bool writeData(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const IOList<T>&);
+        //- Copy assignment of entries
+        void operator=(const IOList<T>& rhs);
 
-        void operator=(const List<T>&);
+        //- Copy or move assignment of entries
+        using List<T>::operator=;
+
 };
 
 

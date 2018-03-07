@@ -70,7 +70,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
 :
     alphaContactAngleFvPatchScalarField(psf, p, iF, mapper),
     TName_(psf.TName_),
-    theta0_(psf.theta0_, false)
+    theta0_(psf.theta0_.clone())
 {}
 
 
@@ -82,7 +82,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
 :
     alphaContactAngleFvPatchScalarField(psf),
     TName_(psf.TName_),
-    theta0_(psf.theta0_, false)
+    theta0_(psf.theta0_.clone())
 {}
 
 
@@ -95,7 +95,7 @@ temperatureDependentAlphaContactAngleFvPatchScalarField
 :
     alphaContactAngleFvPatchScalarField(psf, iF),
     TName_(psf.TName_),
-    theta0_(psf.theta0_, false)
+    theta0_(psf.theta0_.clone())
 {}
 
 

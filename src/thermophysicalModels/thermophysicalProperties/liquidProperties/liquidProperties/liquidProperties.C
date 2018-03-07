@@ -154,22 +154,20 @@ Foam::autoPtr<Foam::liquidProperties> Foam::liquidProperties::New
             );
         }
     }
-    else
+
+    auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
+
+    if (!cstrIter.found())
     {
-        auto cstrIter = dictionaryConstructorTablePtr_->cfind(liquidType);
-
-        if (!cstrIter.found())
-        {
-            FatalErrorInFunction
-                << "Unknown liquidProperties type "
-                << liquidType << nl << nl
-                << "Valid liquidProperties types :" << nl
-                << dictionaryConstructorTablePtr_->sortedToc()
-                << exit(FatalError);
-        }
-
-        return autoPtr<liquidProperties>(cstrIter()(dict));
+        FatalErrorInFunction
+            << "Unknown liquidProperties type "
+            << liquidType << nl << nl
+            << "Valid liquidProperties types :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
     }
+
+    return autoPtr<liquidProperties>(cstrIter()(dict));
 }
 
 

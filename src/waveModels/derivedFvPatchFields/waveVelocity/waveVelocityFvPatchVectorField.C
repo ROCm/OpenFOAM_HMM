@@ -106,11 +106,11 @@ void Foam::waveVelocityFvPatchVectorField::updateCoeffs()
         )
     );
 
-    waveModel& model = const_cast<waveModel&>(tmodel());
+    waveModel& model = tmodel.constCast();
 
     model.correct(db().time().value());
 
-    operator == (model.U());
+    operator==(model.U());
 
     fixedValueFvPatchField<vector>::updateCoeffs();
 }

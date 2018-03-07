@@ -127,30 +127,30 @@ Foam::dictionary::dictionary
 Foam::dictionary::dictionary
 (
     const dictionary& parentDict,
-    const Xfer<dictionary>& dict
+    dictionary&& dict
 )
 :
     parent_(parentDict)
 {
-    transfer(dict());
+    transfer(dict);
     name() = parentDict.name() + '.' + name();
 }
 
 
 Foam::dictionary::dictionary
 (
-    const Xfer<dictionary>& dict
+    dictionary&& dict
 )
 :
     parent_(dictionary::null)
 {
-    transfer(dict());
+    transfer(dict);
 }
 
 
 Foam::autoPtr<Foam::dictionary> Foam::dictionary::clone() const
 {
-    return autoPtr<dictionary>(new dictionary(*this));
+    return autoPtr<dictionary>::New(*this);
 }
 
 
@@ -767,12 +767,6 @@ void Foam::dictionary::transfer(dictionary& dict)
     hashedEntries_.transfer(dict.hashedEntries_);
     patterns_.transfer(dict.patterns_);
     regexps_.transfer(dict.regexps_);
-}
-
-
-Foam::Xfer<Foam::dictionary> Foam::dictionary::xfer()
-{
-    return xferMove(*this);
 }
 
 

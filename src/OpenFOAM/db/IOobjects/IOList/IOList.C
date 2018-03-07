@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,7 +51,7 @@ Foam::IOList<T>::IOList(const IOobject& io)
 
 
 template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const label size)
+Foam::IOList<T>::IOList(const IOobject& io, const label len)
 :
     regIOobject(io)
 {
@@ -72,13 +72,13 @@ Foam::IOList<T>::IOList(const IOobject& io, const label size)
     }
     else
     {
-        List<T>::setSize(size);
+        List<T>::setSize(len);
     }
 }
 
 
 template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
+Foam::IOList<T>::IOList(const IOobject& io, const UList<T>& content)
 :
     regIOobject(io)
 {
@@ -99,20 +99,20 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
     }
     else
     {
-        List<T>::operator=(list);
+        List<T>::operator=(content);
     }
 }
 
 
 template<class T>
-Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T>>& list)
+Foam::IOList<T>::IOList(const IOobject& io, List<T>&& content)
 :
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOList<T>>();
 
-    List<T>::transfer(list());
+    List<T>::transfer(content);
 
     if
     (
@@ -127,13 +127,6 @@ Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T>>& list)
         close();
     }
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T>
-Foam::IOList<T>::~IOList()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -149,13 +142,6 @@ bool Foam::IOList<T>::writeData(Ostream& os) const
 
 template<class T>
 void Foam::IOList<T>::operator=(const IOList<T>& rhs)
-{
-    List<T>::operator=(rhs);
-}
-
-
-template<class T>
-void Foam::IOList<T>::operator=(const List<T>& rhs)
 {
     List<T>::operator=(rhs);
 }

@@ -66,6 +66,9 @@ case ThirdParty:
     case Gcc72:
         set gcc_version=gcc-7.2.0
         breaksw
+    case Gcc73:
+        set gcc_version=gcc-7.3.0
+        breaksw
     case Clang:
         set clang_version=llvm-3.7.1
         breaksw

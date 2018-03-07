@@ -708,25 +708,23 @@ void Foam::fvMeshSubset::setCellSubset
     }
 
 
-    // Delete any old mesh
+    // Delete any old mesh first
     fvMeshSubsetPtr_.clear();
+
     // Make a new mesh
-    fvMeshSubsetPtr_.reset
+    fvMeshSubsetPtr_ = autoPtr<fvMesh>::New
     (
-        new fvMesh
+        IOobject
         (
-            IOobject
-            (
-                baseMesh().name() + "SubSet",
-                baseMesh().time().timeName(),
-                baseMesh().time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferMove(newPoints),
-            xferMove(newFaces),
-            xferMove(newCells)
-        )
+            baseMesh().name() + "SubSet",
+            baseMesh().time().timeName(),
+            baseMesh().time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newCells)
     );
 
 
@@ -1207,23 +1205,20 @@ void Foam::fvMeshSubset::setLargeCellSubset
     // cannot find its fvSchemes (it will try to read e.g.
     // system/region0SubSet/fvSchemes)
     // Make a new mesh
-    fvMeshSubsetPtr_.reset
+    fvMeshSubsetPtr_ = autoPtr<fvMesh>::New
     (
-        new fvMesh
+        IOobject
         (
-            IOobject
-            (
-                baseMesh().name(),
-                baseMesh().time().timeName(),
-                baseMesh().time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferMove(newPoints),
-            xferMove(newFaces),
-            xferMove(newCells),
-            syncPar           // parallel synchronisation
-        )
+            baseMesh().name(),
+            baseMesh().time().timeName(),
+            baseMesh().time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newCells),
+        syncPar           // parallel synchronisation
     );
 
     // Add old patches
@@ -1488,7 +1483,7 @@ const fvMesh& Foam::fvMeshSubset::subMesh() const
 {
     checkCellSubset();
 
-    return fvMeshSubsetPtr_();
+    return *fvMeshSubsetPtr_;
 }
 
 
@@ -1496,7 +1491,7 @@ fvMesh& Foam::fvMeshSubset::subMesh()
 {
     checkCellSubset();
 
-    return fvMeshSubsetPtr_();
+    return *fvMeshSubsetPtr_;
 }
 
 
@@ -1550,7 +1545,7 @@ const labelList& Foam::fvMeshSubset::faceFlipMap() const
         }
     }
 
-    return faceFlipMapPtr_();
+    return *faceFlipMapPtr_;
 }
 
 

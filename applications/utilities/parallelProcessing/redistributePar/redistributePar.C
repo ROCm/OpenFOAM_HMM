@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -1353,10 +1353,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //}
 
 
-    return autoPtr<mapDistributePolyMesh>
-    (
-        new mapDistributePolyMesh(map.xfer())
-    );
+    return autoPtr<mapDistributePolyMesh>::New(std::move(map));
 }
 
 
@@ -1407,7 +1404,7 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
 
     autoPtr<mapDistributePolyMesh> mapPtr;
 
-    if (baseMeshPtr.valid() && baseMeshPtr().nCells())    //baseMeshPtr.valid())
+    if (baseMeshPtr.valid() && baseMeshPtr().nCells())
     {
         const fvMesh& baseMesh = baseMeshPtr();
 
@@ -1417,8 +1414,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute cellMap
         (
             baseMesh.nCells(),
-            cellSubMap.xfer(),
-            cellAddressing.xfer()
+            std::move(cellSubMap),
+            std::move(cellAddressing)
         );
 
         labelListList faceSubMap(Pstream::nProcs());
@@ -1427,8 +1424,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute faceMap
         (
             baseMesh.nFaces(),
-            faceSubMap.xfer(),
-            faceAddressing.xfer(),
+            std::move(faceSubMap),
+            std::move(faceAddressing),
             false,          //subHasFlip
             true            //constructHasFlip
         );
@@ -1439,8 +1436,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute pointMap
         (
             baseMesh.nPoints(),
-            pointSubMap.xfer(),
-            pointAddressing.xfer()
+            std::move(pointSubMap),
+            std::move(pointAddressing)
         );
 
         labelListList patchSubMap(Pstream::nProcs());
@@ -1451,8 +1448,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute patchMap
         (
             baseMesh.boundaryMesh().size(),
-            patchSubMap.xfer(),
-            boundaryAddressing.xfer()
+            std::move(patchSubMap),
+            std::move(boundaryAddressing)
         );
 
         const label nOldPoints = mesh.nPoints();
@@ -1475,12 +1472,12 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
                 nOldPoints,
                 nOldFaces,
                 nOldCells,
-                oldPatchStarts.xfer(),
-                oldPatchNMeshPoints.xfer(),
-                pointMap.xfer(),
-                faceMap.xfer(),
-                cellMap.xfer(),
-                patchMap.xfer()
+                std::move(oldPatchStarts),
+                std::move(oldPatchNMeshPoints),
+                std::move(pointMap),
+                std::move(faceMap),
+                std::move(cellMap),
+                std::move(patchMap)
             )
         );
     }
@@ -1493,8 +1490,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute cellMap
         (
             0,
-            cellSubMap.xfer(),
-            cellConstructMap.xfer()
+            std::move(cellSubMap),
+            std::move(cellConstructMap)
         );
 
         labelListList faceSubMap(Pstream::nProcs());
@@ -1504,8 +1501,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute faceMap
         (
             0,
-            faceSubMap.xfer(),
-            faceConstructMap.xfer(),
+            std::move(faceSubMap),
+            std::move(faceConstructMap),
             false,          //subHasFlip
             true            //constructHasFlip
         );
@@ -1517,8 +1514,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute pointMap
         (
             0,
-            pointSubMap.xfer(),
-            pointConstructMap.xfer()
+            std::move(pointSubMap),
+            std::move(pointConstructMap)
         );
 
         labelListList patchSubMap(Pstream::nProcs());
@@ -1530,8 +1527,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute patchMap
         (
             0,
-            patchSubMap.xfer(),
-            patchConstructMap.xfer()
+            std::move(patchSubMap),
+            std::move(patchConstructMap)
         );
 
         const label nOldPoints = mesh.nPoints();
@@ -1554,12 +1551,12 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
                 nOldPoints,
                 nOldFaces,
                 nOldCells,
-                oldPatchStarts.xfer(),
-                oldPatchNMeshPoints.xfer(),
-                pointMap.xfer(),
-                faceMap.xfer(),
-                cellMap.xfer(),
-                patchMap.xfer()
+                std::move(oldPatchStarts),
+                std::move(oldPatchNMeshPoints),
+                std::move(pointMap),
+                std::move(faceMap),
+                std::move(cellMap),
+                std::move(patchMap)
             )
         );
     }
@@ -1587,7 +1584,6 @@ void readProcAddressing
     //{
     //    Pout<< "Reading addressing from " << io.name() << " at "
     //        << mesh.facesInstance() << nl << endl;
-    //    distMap.clear();
     //    distMap.reset(new IOmapDistributePolyMesh(io));
     //}
     //else
@@ -1604,7 +1600,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
         labelIOList faceProcAddressing
         (
@@ -1616,7 +1612,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
         labelIOList pointProcAddressing
         (
@@ -1628,7 +1624,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
         labelIOList boundaryProcAddressing
         (
@@ -1640,7 +1636,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
 
 
@@ -1810,18 +1806,20 @@ void reconstructLagrangian
             );
         }
         const parLagrangianRedistributor& lagrangianReconstructor =
-            lagrangianReconstructorPtr();
+            *lagrangianReconstructorPtr;
 
         for (const word& cloudName : cloudNames)
         {
             Info<< "Reconstructing lagrangian fields for cloud "
                 << cloudName << nl << endl;
 
-            autoPtr<mapDistributeBase> lagrangianMap =
+            autoPtr<mapDistributeBase> lagrangianMapPtr =
             lagrangianReconstructor.redistributeLagrangianPositions
             (
                 cloudName
             );
+            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
+
             IOobjectList sprayObjs
             (
                 mesh,
@@ -2129,8 +2127,9 @@ void redistributeLagrangian
 
         forAll(clouds, i)
         {
-            autoPtr<mapDistributeBase> lagrangianMap =
-            distributor.redistributeLagrangianPositions(clouds[i]);
+            autoPtr<mapDistributeBase> lagrangianMapPtr =
+                distributor.redistributeLagrangianPositions(clouds[i]);
+            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
 
             distributor.redistributeStoredLagrangianFields
             <IOField<label>>
@@ -2357,7 +2356,7 @@ int main(int argc, char *argv[])
     bool nfs = true;
     {
         List<fileName> roots(1, args.rootPath());
-        combineReduce(roots, ListUniqueEqOp<fileName>());
+        combineReduce(roots, ListOps::uniqueEqOp<fileName>());
         nfs = (roots.size() == 1);
     }
 
@@ -2577,7 +2576,7 @@ int main(int argc, char *argv[])
                         runTime,
                         IOobject::READ_IF_PRESENT
                     ),
-                    labelList(0)
+                    labelList()
                 );
                 if
                 (
@@ -2694,7 +2693,7 @@ int main(int argc, char *argv[])
             (
                 baseMeshPtr(),
                 mesh,
-                distMap,
+                distMap(),
                 Pstream::master()       // do I need to write?
             )
         );
@@ -2778,7 +2777,7 @@ int main(int argc, char *argv[])
                     (
                         baseMeshPtr(),
                         mesh,
-                        distMap,
+                        distMap(),
                         Pstream::master()
                     )
                 );
@@ -2804,7 +2803,7 @@ int main(int argc, char *argv[])
                 lagrangianReconstructorPtr,
                 baseMeshPtr(),
                 mesh,
-                distMap,
+                distMap(),
                 selectedLagrangianFields
             );
 
@@ -3012,7 +3011,7 @@ int main(int argc, char *argv[])
             lagrangianReconstructorPtr,
             mesh,
             nOldCells,
-            distMap,
+            distMap(),
             clouds
         );
 

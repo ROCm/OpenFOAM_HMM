@@ -490,8 +490,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
             new mapDistribute
             (
                 compacti,
-                tgtSubMap.xfer(),
-                tgtConstructMap.xfer()
+                std::move(tgtSubMap),
+                std::move(tgtConstructMap)
             )
         );
     }
@@ -1007,7 +1007,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         }
 
         // Send data back to originating procs. Note that contributions
-        // from different processors get added (ListAppendEqOp)
+        // from different processors get added (ListOps::appendEqOp)
 
         mapDistributeBase::distribute
         (
@@ -1019,7 +1019,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             map.subMap(),
             false,                      // has flip
             tgtAddress_,
-            ListAppendEqOp<label>(),
+            ListOps::appendEqOp<label>(),
             flipOp(),                   // flip operation
             labelList()
         );
@@ -1034,7 +1034,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             map.subMap(),
             false,
             tgtWeights_,
-            ListAppendEqOp<scalar>(),
+            ListOps::appendEqOp<scalar>(),
             flipOp(),
             scalarList()
         );

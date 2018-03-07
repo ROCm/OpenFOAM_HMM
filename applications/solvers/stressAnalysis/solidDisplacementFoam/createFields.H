@@ -16,7 +16,7 @@ volVectorField D
 );
 
 
-autoPtr<volScalarField> Tptr(nullptr);
+autoPtr<volScalarField> Tptr;
 
 if (thermalStress)
 {

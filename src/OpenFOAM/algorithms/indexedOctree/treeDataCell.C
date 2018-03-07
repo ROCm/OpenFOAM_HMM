@@ -104,12 +104,12 @@ Foam::treeDataCell::treeDataCell
 (
     const bool cacheBb,
     const polyMesh& mesh,
-    const Xfer<labelList>& cellLabels,
+    labelList&& cellLabels,
     const polyMesh::cellDecomposition decompMode
 )
 :
     mesh_(mesh),
-    cellLabels_(cellLabels),
+    cellLabels_(std::move(cellLabels)),
     cacheBb_(cacheBb),
     decompMode_(decompMode)
 {

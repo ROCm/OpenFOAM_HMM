@@ -125,9 +125,6 @@ public:
         //- Move construct
         inline CompactListList(CompactListList<T, Container>&& lst);
 
-        //- Construct by transferring the parameter contents
-        explicit CompactListList(const Xfer<CompactListList<T, Container>>&);
-
         //- Construct as copy or re-use as specified.
         inline CompactListList(CompactListList<T, Container>& lst, bool reuse);
 
@@ -201,9 +198,6 @@ public:
             //- Transfer the contents of the argument CompactListList
             //  into this CompactListList and annul the argument list.
             void transfer(CompactListList<T, Container>& lst);
-
-            //- Transfer the contents to the Xfer container
-            inline Xfer<CompactListList<T, Container>> xfer();
 
 
         // Other

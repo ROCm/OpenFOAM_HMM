@@ -1413,12 +1413,12 @@ Foam::label Foam::snappyRefineDriver::shellRefine
 
     // mark list to remove any refined faces
     meshRefiner_.userFaceData()[0].first() = meshRefinement::REMOVE;
-    meshRefiner_.userFaceData()[0].second() = createWithValues<labelList>
+    meshRefiner_.userFaceData()[0].second() = ListOps::createWithValue<label>
     (
         mesh.nFaces(),
-        -1,
         meshRefiner_.intersectedFaces(),
-        0
+        0, // set value
+        -1 // default value
     );
 
     // Determine the maximum refinement level over all volume refinement

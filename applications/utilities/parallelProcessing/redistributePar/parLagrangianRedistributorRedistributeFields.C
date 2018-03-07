@@ -44,7 +44,7 @@ Foam::wordList Foam::parLagrangianRedistributor::filterObjects
 
     // Parallel synchronise
     wordList fieldNames(objects.names(fieldClassName));
-    Pstream::combineGather(fieldNames, ListUniqueEqOp<word>());
+    Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(fieldNames);
 
     if (!selectedFields.empty())
@@ -125,7 +125,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<Type>>(field)
+                    std::move(field)
                 ).write();
             }
         }
@@ -212,7 +212,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<Field<Type>>>(field)
+                    std::move(field)
                 ).write();
             }
         }
@@ -309,7 +309,7 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<typename Container::value_type>>(field)
+                    std::move(field)
                 ).write();
             }
         }

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -186,8 +186,8 @@ public:
         faceZone
         (
             const word& name,
-            const Xfer<labelList>& addr,
-            const Xfer<boolList>& fm,
+            labelList&& addr,
+            boolList&& fm,
             const label index,
             const faceZoneMesh& zm
         );
@@ -219,8 +219,8 @@ public:
         faceZone
         (
             const faceZone& origZone,
-            const Xfer<labelList>& addr,
-            const Xfer<boolList>& fm,
+            labelList&& addr,
+            boolList&& fm,
             const label index,
             const faceZoneMesh& zm
         );
@@ -228,10 +228,7 @@ public:
         //- Construct and return a clone, resetting the zone mesh
         virtual autoPtr<faceZone> clone(const faceZoneMesh& zm) const
         {
-            return autoPtr<faceZone>
-            (
-                new faceZone(*this, *this, flipMap(), index(), zm)
-            );
+            return autoPtr<faceZone>::New(*this, *this, flipMap(), index(), zm);
         }
 
         //- Construct and return a clone,
@@ -244,10 +241,7 @@ public:
             const faceZoneMesh& zm
         ) const
         {
-            return autoPtr<faceZone>
-            (
-                new faceZone(*this, addr, fm, index, zm)
-            );
+            return autoPtr<faceZone>::New(*this, addr, fm, index, zm);
         }
 
 
@@ -322,7 +316,7 @@ public:
         //  Clears demand-driven data.
         virtual void resetAddressing
         (
-            const Xfer<labelList>& addr,
+            labelList&& addr,
             const bool flipMapValue
         );
 

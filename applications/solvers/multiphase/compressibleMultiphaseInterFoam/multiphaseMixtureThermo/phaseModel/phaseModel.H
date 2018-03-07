@@ -100,7 +100,7 @@ public:
 
             autoPtr<phaseModel> operator()(Istream& is) const
             {
-                return autoPtr<phaseModel>(new phaseModel(is, p_, T_));
+                return autoPtr<phaseModel>::New(is, p_, T_);
             }
         };
 
@@ -120,13 +120,13 @@ public:
         //- Return const-access to phase rhoThermo
         const rhoThermo& thermo() const
         {
-            return thermo_();
+            return *thermo_;
         }
 
         //- Return access to phase rhoThermo
         rhoThermo& thermo()
         {
-            return thermo_();
+            return *thermo_;
         }
 
         //- Return const-access to phase divergence

@@ -64,7 +64,7 @@ Foam::fv::tabulatedNTUHeatTransfer::ntuTable()
         ntuTable_.reset(new interpolation2DTable<scalar>(coeffs_));
     }
 
-    return ntuTable_();
+    return *ntuTable_;
 }
 
 

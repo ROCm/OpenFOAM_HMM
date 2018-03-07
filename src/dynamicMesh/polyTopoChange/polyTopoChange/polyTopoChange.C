@@ -3093,10 +3093,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
         mesh.resetPrimitives
         (
-            xferMove(renumberedMeshPoints),
-            faces_.xfer(),
-            faceOwner_.xfer(),
-            faceNeighbour_.xfer(),
+            autoPtr<pointField>::New(std::move(renumberedMeshPoints)),
+            autoPtr<faceList>::New(std::move(faces_)),
+            autoPtr<labelList>::New(std::move(faceOwner_)),
+            autoPtr<labelList>::New(std::move(faceNeighbour_)),
             patchSizes,
             patchStarts,
             syncParallel
@@ -3111,10 +3111,10 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
         // Set new points.
         mesh.resetPrimitives
         (
-            xferMove(newPoints),
-            faces_.xfer(),
-            faceOwner_.xfer(),
-            faceNeighbour_.xfer(),
+            autoPtr<pointField>::New(std::move(newPoints)),
+            autoPtr<faceList>::New(std::move(faces_)),
+            autoPtr<labelList>::New(std::move(faceOwner_)),
+            autoPtr<labelList>::New(std::move(faceNeighbour_)),
             patchSizes,
             patchStarts,
             syncParallel
@@ -3204,51 +3204,48 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
 
     labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
 
-    return autoPtr<mapPolyMesh>
+    return autoPtr<mapPolyMesh>::New
     (
-        new mapPolyMesh
-        (
-            mesh,
-            nOldPoints,
-            nOldFaces,
-            nOldCells,
+        mesh,
+        nOldPoints,
+        nOldFaces,
+        nOldCells,
 
-            pointMap_,
-            pointsFromPoints,
+        pointMap_,
+        pointsFromPoints,
 
-            faceMap_,
-            facesFromPoints,
-            facesFromEdges,
-            facesFromFaces,
+        faceMap_,
+        facesFromPoints,
+        facesFromEdges,
+        facesFromFaces,
 
-            cellMap_,
-            cellsFromPoints,
-            cellsFromEdges,
-            cellsFromFaces,
-            cellsFromCells,
+        cellMap_,
+        cellsFromPoints,
+        cellsFromEdges,
+        cellsFromFaces,
+        cellsFromCells,
 
-            reversePointMap_,
-            reverseFaceMap_,
-            reverseCellMap_,
+        reversePointMap_,
+        reverseFaceMap_,
+        reverseCellMap_,
 
-            flipFaceFluxSet,
+        flipFaceFluxSet,
 
-            patchPointMap,
+        patchPointMap,
 
-            pointZoneMap,
+        pointZoneMap,
 
-            faceZonePointMap,
-            faceZoneFaceMap,
-            cellZoneMap,
+        faceZonePointMap,
+        faceZoneFaceMap,
+        cellZoneMap,
 
-            newPoints,          // if empty signals no inflation.
-            oldPatchStarts,
-            oldPatchNMeshPoints,
+        newPoints,          // if empty signals no inflation.
+        oldPatchStarts,
+        oldPatchNMeshPoints,
 
-            oldCellVolumes,
+        oldCellVolumes,
 
-            true                // steal storage.
-        )
+        true                // steal storage.
     );
 
     // At this point all member DynamicList (pointMap_, cellMap_ etc.) will
@@ -3345,13 +3342,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         new fvMesh
         (
             noReadIO,
-            xferMove(newPoints),
-            faces_.xfer(),
-            faceOwner_.xfer(),
-            faceNeighbour_.xfer()
+            std::move(newPoints),
+            std::move(faces_),
+            std::move(faceOwner_),
+            std::move(faceNeighbour_)
         )
     );
-    fvMesh& newMesh = newMeshPtr();
+    fvMesh& newMesh = *newMeshPtr;
 
     // Clear out primitives
     {
@@ -3498,49 +3495,46 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 
     labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
 
-    return autoPtr<mapPolyMesh>
+    return autoPtr<mapPolyMesh>::New
     (
-        new mapPolyMesh
-        (
-            newMesh,
-            nOldPoints,
-            nOldFaces,
-            nOldCells,
+        newMesh,
+        nOldPoints,
+        nOldFaces,
+        nOldCells,
 
-            pointMap_,
-            pointsFromPoints,
+        pointMap_,
+        pointsFromPoints,
 
-            faceMap_,
-            facesFromPoints,
-            facesFromEdges,
-            facesFromFaces,
+        faceMap_,
+        facesFromPoints,
+        facesFromEdges,
+        facesFromFaces,
 
-            cellMap_,
-            cellsFromPoints,
-            cellsFromEdges,
-            cellsFromFaces,
-            cellsFromCells,
+        cellMap_,
+        cellsFromPoints,
+        cellsFromEdges,
+        cellsFromFaces,
+        cellsFromCells,
 
-            reversePointMap_,
-            reverseFaceMap_,
-            reverseCellMap_,
+        reversePointMap_,
+        reverseFaceMap_,
+        reverseCellMap_,
 
-            flipFaceFluxSet,
+        flipFaceFluxSet,
 
-            patchPointMap,
+        patchPointMap,
 
-            pointZoneMap,
+        pointZoneMap,
 
-            faceZonePointMap,
-            faceZoneFaceMap,
-            cellZoneMap,
+        faceZonePointMap,
+        faceZoneFaceMap,
+        cellZoneMap,
 
-            newPoints,          // if empty signals no inflation.
-            oldPatchStarts,
-            oldPatchNMeshPoints,
-            oldCellVolumes,
-            true                // steal storage.
-        )
+        newPoints,          // if empty signals no inflation.
+        oldPatchStarts,
+        oldPatchNMeshPoints,
+        oldCellVolumes,
+        true                // steal storage.
     );
 
     // At this point all member DynamicList (pointMap_, cellMap_ etc.) will

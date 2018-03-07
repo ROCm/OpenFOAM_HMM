@@ -220,7 +220,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     }
     mapPointId.clear();
 
-    this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
+    this->sortFacesAndStore(dynFaces, dynZones, sorted);
 
     // Add zones (retaining empty ones)
     this->addZones(dynSizes, dynNames);

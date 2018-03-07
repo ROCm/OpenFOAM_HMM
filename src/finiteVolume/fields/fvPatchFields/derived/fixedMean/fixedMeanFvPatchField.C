@@ -65,7 +65,7 @@ Foam::fixedMeanFvPatchField<Type>::fixedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, p, iF, mapper),
-    meanValue_(ptf.meanValue_, false)
+    meanValue_(ptf.meanValue_.clone())
 {}
 
 
@@ -76,7 +76,7 @@ Foam::fixedMeanFvPatchField<Type>::fixedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    meanValue_(ptf.meanValue_, false)
+    meanValue_(ptf.meanValue_.clone())
 {}
 
 
@@ -88,7 +88,7 @@ Foam::fixedMeanFvPatchField<Type>::fixedMeanFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    meanValue_(ptf.meanValue_, false)
+    meanValue_(ptf.meanValue_.clone())
 {}
 
 

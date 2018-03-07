@@ -250,7 +250,7 @@ public:
         //- Construct and return a clone
         autoPtr<dimensionSet> clone() const
         {
-            return autoPtr<dimensionSet>(new dimensionSet(*this));
+            return autoPtr<dimensionSet>::New(*this);
         }
 
         //- Construct from Istream

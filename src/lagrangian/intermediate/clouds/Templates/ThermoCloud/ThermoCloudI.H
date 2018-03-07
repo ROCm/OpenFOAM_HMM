@@ -33,7 +33,7 @@ template<class CloudType>
 inline const Foam::ThermoCloud<CloudType>&
 Foam::ThermoCloud<CloudType>::cloudCopy() const
 {
-    return cloudCopyPtr_();
+    return *cloudCopyPtr_;
 }
 
 
@@ -78,7 +78,7 @@ template<class CloudType>
 inline const Foam::HeatTransferModel<Foam::ThermoCloud<CloudType>>&
 Foam::ThermoCloud<CloudType>::heatTransfer() const
 {
-    return heatTransferModel_;
+    return *heatTransferModel_;
 }
 
 
@@ -86,7 +86,7 @@ template<class CloudType>
 inline const Foam::scalarIntegrationScheme&
 Foam::ThermoCloud<CloudType>::TIntegrator() const
 {
-    return TIntegrator_;
+    return *TIntegrator_;
 }
 
 
@@ -108,7 +108,7 @@ Foam::ThermoCloud<CloudType>::radAreaP()
             << abort(FatalError);
     }
 
-    return radAreaP_();
+    return *radAreaP_;
 }
 
 
@@ -123,7 +123,7 @@ Foam::ThermoCloud<CloudType>::radAreaP() const
             << abort(FatalError);
     }
 
-    return radAreaP_();
+    return *radAreaP_;
 }
 
 
@@ -138,7 +138,7 @@ Foam::ThermoCloud<CloudType>::radT4()
             << abort(FatalError);
     }
 
-    return radT4_();
+    return *radT4_;
 }
 
 
@@ -153,7 +153,7 @@ Foam::ThermoCloud<CloudType>::radT4() const
             << abort(FatalError);
     }
 
-    return radT4_();
+    return *radT4_;
 }
 
 
@@ -168,7 +168,7 @@ Foam::ThermoCloud<CloudType>::radAreaPT4()
             << abort(FatalError);
     }
 
-    return radAreaPT4_();
+    return *radAreaPT4_;
 }
 
 
@@ -183,7 +183,7 @@ Foam::ThermoCloud<CloudType>::radAreaPT4() const
             << abort(FatalError);
     }
 
-    return radAreaPT4_();
+    return *radAreaPT4_;
 }
 
 
@@ -191,7 +191,7 @@ template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<CloudType>::hsTrans()
 {
-    return hsTrans_();
+    return *hsTrans_;
 }
 
 
@@ -199,7 +199,7 @@ template<class CloudType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<CloudType>::hsTrans() const
 {
-    return hsTrans_();
+    return *hsTrans_;
 }
 
 
@@ -207,7 +207,7 @@ template<class CloudType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<CloudType>::hsCoeff()
 {
-    return hsCoeff_();
+    return *hsCoeff_;
 }
 
 
@@ -215,7 +215,7 @@ template<class CloudType>
 inline const Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ThermoCloud<CloudType>::hsCoeff() const
 {
-    return hsCoeff_();
+    return *hsCoeff_;
 }
 
 
@@ -255,7 +255,7 @@ Foam::ThermoCloud<CloudType>::Sh(volScalarField& hs) const
         }
     }
 
-    return tmp<fvScalarMatrix>(new fvScalarMatrix(hs, dimEnergy/dimTime));
+    return tmp<fvScalarMatrix>::New(hs, dimEnergy/dimTime);
 }
 
 
@@ -388,10 +388,8 @@ inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmax() const
     {
         return T;
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 
@@ -414,10 +412,8 @@ inline Foam::scalar Foam::ThermoCloud<CloudType>::Tmin() const
     {
         return T;
     }
-    else
-    {
-        return 0.0;
-    }
+
+    return 0.0;
 }
 
 

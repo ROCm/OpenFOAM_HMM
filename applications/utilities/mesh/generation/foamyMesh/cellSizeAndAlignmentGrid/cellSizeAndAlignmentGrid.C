@@ -141,14 +141,11 @@ autoPtr<mapDistribute> buildMap
 
     List<Map<label>> compactMap;
 
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            globalIndexing,
-            pointPoints,
-            compactMap
-        )
+        globalIndexing,
+        pointPoints,
+        compactMap
     );
 }
 
