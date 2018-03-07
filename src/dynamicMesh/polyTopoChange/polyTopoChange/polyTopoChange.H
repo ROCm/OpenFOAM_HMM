@@ -69,7 +69,7 @@ SourceFiles
 #include "Map.H"
 #include "HashSet.H"
 #include "mapPolyMesh.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -160,13 +160,13 @@ class polyTopoChange
             Map<label> faceFromEdge_;
 
             //- In mapping whether to reverse the flux.
-            PackedBoolList flipFaceFlux_;
+            bitSet flipFaceFlux_;
 
             //- Zone of face
             Map<label> faceZone_;
 
             //- Orientation of face in zone
-            PackedBoolList faceZoneFlip_;
+            bitSet faceZoneFlip_;
 
             //- Active faces
             label nActiveFaces_;
@@ -241,7 +241,7 @@ class polyTopoChange
         );
 
         //- Get all set elements as a labelHashSet
-        static labelHashSet getSetIndices(const PackedBoolList& lst);
+        static labelHashSet getSetIndices(const bitSet& lst);
 
         //- Count number of added and removed quantities from maps.
         static void countMap

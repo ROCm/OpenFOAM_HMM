@@ -42,7 +42,7 @@ SourceFiles
 #include "primitivePatch.H"
 #include "removeFaces.H"
 #include "refinementHistory.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "uniformDimensionedFields.H"
 #include "cellShapeList.H"
 
@@ -300,7 +300,7 @@ class hexRef8
         label faceConsistentRefinement
         (
             const bool maxSet,
-            PackedBoolList& refineCell
+            bitSet& refineCell
         ) const;
 
         //- Check wanted refinement for 2:1 consistency

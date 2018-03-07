@@ -2271,7 +2271,7 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 
     ptPairs_.reIndex(oldToNewIndices);
 
-    PackedBoolList selectedElems(surfaceConformationVertices_.size(), true);
+    bitSet selectedElems(surfaceConformationVertices_.size(), true);
 
     forAll(surfaceConformationVertices_, vI)
     {
@@ -2295,7 +2295,7 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
         }
     }
 
-    inplaceSubset<PackedBoolList, List<Vb>>
+    inplaceSubset<bitSet, List<Vb>>
     (
         selectedElems,
         surfaceConformationVertices_

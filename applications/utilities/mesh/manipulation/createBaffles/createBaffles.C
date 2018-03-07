@@ -192,7 +192,7 @@ void modifyOrAddFace
     const label zoneID,
     const bool zoneFlip,
 
-    PackedBoolList& modifiedFace
+    bitSet& modifiedFace
 )
 {
     if (modifiedFace.set(facei))
@@ -247,7 +247,7 @@ void createFaces
     const labelList& newMasterPatches,
     const labelList& newSlavePatches,
     polyTopoChange& meshMod,
-    PackedBoolList& modifiedFace,
+    bitSet& modifiedFace,
     label& nModified
 )
 {
@@ -538,15 +538,13 @@ int main(int argc, char *argv[])
         if (mesh.faceZones().findZoneID(name) == -1)
         {
             mesh.faceZones().clearAddressing();
-            label sz = mesh.faceZones().size();
+            const label zoneID = mesh.faceZones().size();
 
-            labelList addr(0);
-            boolList flip(0);
-            mesh.faceZones().setSize(sz+1);
+            mesh.faceZones().setSize(zoneID+1);
             mesh.faceZones().set
             (
-                sz,
-                new faceZone(name, addr, flip, sz, mesh.faceZones())
+                zoneID,
+                new faceZone(name, labelList(), false, zoneID, mesh.faceZones())
             );
         }
     }
@@ -604,7 +602,14 @@ int main(int argc, char *argv[])
         mesh.faceZones().set
         (
             zoneID,
-            new faceZone(name, addr, flip, zoneID, mesh.faceZones())
+            new faceZone
+            (
+                name,
+                std::move(addr),
+                std::move(flip),
+                zoneID,
+                mesh.faceZones()
+            )
         );
     }
 
@@ -751,7 +756,7 @@ int main(int argc, char *argv[])
     //   side come first and faces from the other side next.
 
     // Whether first use of face (modify) or consecutive (add)
-    PackedBoolList modifiedFace(mesh.nFaces());
+    bitSet modifiedFace(mesh.nFaces());
     label nModified = 0;
 
     forAll(selectors, selectorI)

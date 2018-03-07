@@ -29,8 +29,8 @@ template <class Type>
 void Foam::fieldSmoother::minSmoothField
 (
     const label nIter,
-    const PackedBoolList& isPatchMasterPoint,
-    const PackedBoolList& isPatchMasterEdge,
+    const bitSet& isPatchMasterPoint,
+    const bitSet& isPatchMasterEdge,
     const indirectPrimitivePatch& adaptPatch,
     const scalarField& fieldMinMag,
     Field<Type>& field

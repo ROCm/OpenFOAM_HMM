@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     Info<<"Test reorder - oldToNew:" << nl
         << flatOutput(oldToNew) << nl << nl;
 
-    PackedBoolList bitset
+    bitSet bitset
     (
         ListOps::createWithValue<bool>
         (

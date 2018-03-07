@@ -36,7 +36,7 @@ License
 #include "decompositionMethod.H"
 #include "geomDecomp.H"
 #include "vectorList.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "PatchTools.H"
 #include "OBJstream.H"
 

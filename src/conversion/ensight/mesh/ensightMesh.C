@@ -222,7 +222,7 @@ void Foam::ensightMesh::correct()
     if (option().useFaceZones())
     {
         // Mark boundary faces to be excluded from export
-        PackedBoolList excludeFace(mesh_.nFaces()); // all false
+        bitSet excludeFace(mesh_.nFaces()); // all false
 
         forAll(mesh_.boundaryMesh(), patchi)
         {

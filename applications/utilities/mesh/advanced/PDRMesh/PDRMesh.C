@@ -81,7 +81,7 @@ void modifyOrAddFace
     const label zoneID,
     const bool zoneFlip,
 
-    PackedBoolList& modifiedFace
+    bitSet& modifiedFace
 )
 {
     if (modifiedFace.set(facei))
@@ -338,7 +338,7 @@ void subsetTopoSets
         Info<< "Subsetting " << set.type() << " " << set.name() << endl;
 
         // Map the data
-        PackedBoolList isSet(set.maxSize(mesh));
+        bitSet isSet(set.maxSize(mesh));
         forAllConstIter(labelHashSet, set, iter)
         {
             isSet.set(iter.key());
@@ -374,7 +374,7 @@ void createCoupledBaffles
     fvMesh& mesh,
     const labelList& coupledWantedPatch,
     polyTopoChange& meshMod,
-    PackedBoolList& modifiedFace
+    bitSet& modifiedFace
 )
 {
     const faceZoneMesh& faceZones = mesh.faceZones();
@@ -442,7 +442,7 @@ void createCyclicCoupledBaffles
     const labelList& cyclicMasterPatch,
     const labelList& cyclicSlavePatch,
     polyTopoChange& meshMod,
-    PackedBoolList& modifiedFace
+    bitSet& modifiedFace
 )
 {
     const faceZoneMesh& faceZones = mesh.faceZones();
@@ -1119,7 +1119,7 @@ int main(int argc, char *argv[])
 
 
     // Whether first use of face (modify) or consecutive (add)
-    PackedBoolList modifiedFace(mesh.nFaces());
+    bitSet modifiedFace(mesh.nFaces());
 
     // Create coupled wall-side baffles
     createCoupledBaffles

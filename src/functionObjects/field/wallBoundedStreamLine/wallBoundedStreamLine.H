@@ -139,7 +139,7 @@ protected:
         //- Find wall tet on cell
         tetIndices findNearestTet
         (
-            const PackedBoolList& isWallPatch,
+            const bitSet& isWallPatch,
             const point& seedPt,
             const label celli
         ) const;

@@ -613,7 +613,7 @@ void Foam::snappyLayerDriver::handleNonManifolds
 
     // 3. Remote check for end of layer across coupled boundaries
     {
-        PackedBoolList isCoupledEdge(mesh.nEdges());
+        bitSet isCoupledEdge(mesh.nEdges());
 
         const labelList& cpEdges = mesh.globalData().coupledPatchMeshEdges();
         isCoupledEdge.setMany(cpEdges);
@@ -1590,7 +1590,7 @@ void Foam::snappyLayerDriver::calculateLayerThickness
             << setw(0) << " -----    ------ --------- -------" << endl;
 
 
-        const PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
+        const bitSet isMasterPoint(syncTools::getMasterPoints(mesh));
 
         forAll(patchIDs, i)
         {
@@ -4317,7 +4317,7 @@ void Foam::snappyLayerDriver::addLayers
             DynamicList<label> candidates(baffles.size()*4);
 
             // Mark whether old face was on baffle
-            PackedBoolList oldBaffleFace(map.nOldFaces());
+            bitSet oldBaffleFace(map.nOldFaces());
             forAll(baffles, i)
             {
                 const labelPair& baffle = baffles[i];
@@ -4648,7 +4648,7 @@ void Foam::snappyLayerDriver::doLayers
             // requires balancing to move them off the processor boundaries.
 
             // Is face on a faceZone
-            PackedBoolList isExtrudedZoneFace(mesh.nFaces());
+            bitSet isExtrudedZoneFace(mesh.nFaces());
             {
                 // Add contributions from faceZones that get layers
                 const faceZoneMesh& fZones = mesh.faceZones();
@@ -4668,7 +4668,7 @@ void Foam::snappyLayerDriver::doLayers
                 }
             }
 
-            PackedBoolList intOrCoupled
+            bitSet intOrCoupled
             (
                 syncTools::getInternalOrCoupledFaces(mesh)
             );

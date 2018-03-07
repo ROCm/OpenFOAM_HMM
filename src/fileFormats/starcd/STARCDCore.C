@@ -26,7 +26,7 @@ License
 #include "STARCDCore.H"
 #include "ListOps.H"
 #include "clock.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "DynamicList.H"
 #include "StringStream.H"
 #include "OSspecific.H"

@@ -41,7 +41,7 @@ Usage
 #include "triSurfaceMesh.H"
 #include "indexedOctree.H"
 #include "treeBoundBox.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "unitConversion.H"
 #include "searchableSurfaces.H"
 #include "IOdictionary.H"
@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 
     List<DynamicList<labelledTri>> newFaces(surfs.size());
     List<DynamicList<point>> newPoints(surfs.size());
-    List<PackedBoolList> visitedFace(surfs.size());
+    List<bitSet> visitedFace(surfs.size());
 
     PtrList<triSurfaceMesh> newSurfaces(surfs.size());
     forAll(surfs, surfI)
@@ -370,7 +370,7 @@ int main(int argc, char *argv[])
 
             newFaces[surfI] = newSurf.localFaces();
             newPoints[surfI] = newSurf.localPoints();
-            visitedFace[surfI] = PackedBoolList(newSurf.size(), false);
+            visitedFace[surfI] = bitSet(newSurf.size(), false);
         }
 
         forAll(newSurfaces, surfI)

@@ -37,8 +37,8 @@ SourceFiles
 #ifndef PatchEdgeFaceWave_H
 #define PatchEdgeFaceWave_H
 
+#include "bitSet.H"
 #include "scalarField.H"
-#include "PackedBoolList.H"
 #include "PrimitivePatch.H"
 #include "vectorTensorTransform.H"
 
@@ -101,13 +101,13 @@ class PatchEdgeFaceWave
         TrackingData& td_;
 
         //- Has edge changed
-        PackedBoolList changedEdge_;
+        bitSet changedEdge_;
 
         //- List of changed edges
         DynamicList<label> changedEdges_;
 
         //- Has face changed
-        PackedBoolList changedFace_;
+        bitSet changedFace_;
 
         //- List of changed faces
         DynamicList<label> changedFaces_;
@@ -123,7 +123,7 @@ class PatchEdgeFaceWave
         // Addressing between edges of patch_ and globalData.coupledPatch()
         labelList patchEdges_;
         labelList coupledEdges_;
-        PackedBoolList sameEdgeOrientation_;
+        bitSet sameEdgeOrientation_;
 
 
     // Private Member Functions

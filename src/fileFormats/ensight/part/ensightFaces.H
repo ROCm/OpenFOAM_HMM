@@ -36,7 +36,7 @@ Description
 #include "labelList.H"
 #include "faceList.H"
 #include "FixedList.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -186,7 +186,7 @@ public:
             const faceList& faces,
             const labelUList& addressing,
             const boolList& flipMap = boolList(),
-            const PackedBoolList& exclude = PackedBoolList()
+            const bitSet& exclude = bitSet()
         );
 
 

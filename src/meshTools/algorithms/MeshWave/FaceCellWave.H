@@ -47,7 +47,7 @@ SourceFiles
 #ifndef FaceCellWave_H
 #define FaceCellWave_H
 
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "DynamicList.H"
 #include "primitiveFieldsFwd.H"
 #include "labelPair.H"
@@ -106,13 +106,13 @@ protected:
         TrackingData& td_;
 
         //- Has face changed
-        PackedBoolList changedFace_;
+        bitSet changedFace_;
 
         //- List of changed faces
         DynamicList<label> changedFaces_;
 
         //- Has cell changed
-        PackedBoolList changedCell_;
+        bitSet changedCell_;
 
         // Cells that have changed
         DynamicList<label> changedCells_;

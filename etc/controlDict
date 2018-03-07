@@ -390,6 +390,7 @@ DebugSwitches
     basicMixture        0;
     basicReactingCloud  0;
     basicReactingParcel 0;
+    bitSet              0;
     fluidThermo         0;
     fluidThermoCloud    0;
     fluidThermoParcel   0;

@@ -173,8 +173,8 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     // ~~~~~~~~~~~~~~~~~~~~~~~
 
     // Precalulate (mesh) master point/edge (only relevant for shared pts/edges)
-    const PackedBoolList isMeshMasterPoint(syncTools::getMasterPoints(mesh()));
-    const PackedBoolList isMeshMasterEdge(syncTools::getMasterEdges(mesh()));
+    const bitSet isMeshMasterPoint(syncTools::getMasterPoints(mesh()));
+    const bitSet isMeshMasterEdge(syncTools::getMasterEdges(mesh()));
     // Precalculate meshEdge per pp edge
     const labelList meshEdges
     (
@@ -186,7 +186,7 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
     );
 
     // Precalulate (patch) master point/edge
-    const PackedBoolList isPatchMasterPoint
+    const bitSet isPatchMasterPoint
     (
         meshRefinement::getMasterPoints
         (
@@ -194,7 +194,7 @@ void Foam::medialAxisMeshMover::update(const dictionary& coeffDict)
             meshPoints
         )
     );
-    const PackedBoolList isPatchMasterEdge
+    const bitSet isPatchMasterEdge
     (
         meshRefinement::getMasterEdges
         (
@@ -768,7 +768,7 @@ void Foam::medialAxisMeshMover::
 handleFeatureAngleLayerTerminations
 (
     const scalar minCos,
-    const PackedBoolList& isPatchMasterPoint,
+    const bitSet& isPatchMasterPoint,
     const labelList& meshEdges,
     List<snappyLayerDriver::extrudeMode>& extrudeStatus,
     pointField& patchDisp,
@@ -901,8 +901,8 @@ void Foam::medialAxisMeshMover::findIsolatedRegions
 (
     const scalar minCosLayerTermination,
     const bool detectExtrusionIsland,
-    const PackedBoolList& isPatchMasterPoint,
-    const PackedBoolList& isPatchMasterEdge,
+    const bitSet& isPatchMasterPoint,
+    const bitSet& isPatchMasterEdge,
     const labelList& meshEdges,
     const scalarField& minThickness,
     List<snappyLayerDriver::extrudeMode>& extrudeStatus,
@@ -1344,8 +1344,8 @@ void Foam::medialAxisMeshMover::calculateDisplacement
 
 
     // Precalulate master points/edge (only relevant for shared points/edges)
-    const PackedBoolList isMeshMasterPoint(syncTools::getMasterPoints(mesh()));
-    const PackedBoolList isMeshMasterEdge(syncTools::getMasterEdges(mesh()));
+    const bitSet isMeshMasterPoint(syncTools::getMasterPoints(mesh()));
+    const bitSet isMeshMasterEdge(syncTools::getMasterEdges(mesh()));
     // Precalculate meshEdge per pp edge
     const labelList meshEdges
     (
@@ -1357,7 +1357,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     );
 
     // Precalulate (patch) master point/edge
-    const PackedBoolList isPatchMasterPoint
+    const bitSet isPatchMasterPoint
     (
         meshRefinement::getMasterPoints
         (
@@ -1365,7 +1365,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
             meshPoints
         )
     );
-    const PackedBoolList isPatchMasterEdge
+    const bitSet isPatchMasterEdge
     (
         meshRefinement::getMasterEdges
         (
@@ -1614,7 +1614,7 @@ void Foam::medialAxisMeshMover::calculateDisplacement
     // Smear displacement away from fixed values (medialRatio=0 or 1)
     if (nSmoothDisplacement > 0)
     {
-        PackedBoolList isToBeSmoothed(displacement.size(), false);
+        bitSet isToBeSmoothed(displacement.size(), false);
 
         forAll(displacement, i)
         {

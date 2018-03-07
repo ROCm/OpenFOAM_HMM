@@ -125,7 +125,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
     // For reporting: number of masterFaces changed
     label nMasterChanged = 0;
-    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+    bitSet isMasterFace(syncTools::getMasterFaces(mesh));
 
     {
         // Mark any face on a cell which has been added or changed
@@ -142,10 +142,10 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         const label nInternalFaces = mesh.nInternalFaces();
 
         // Mark refined cells on old mesh
-        PackedBoolList oldRefineCell(map.nOldCells(), oldCellsToRefine);
+        bitSet oldRefineCell(map.nOldCells(), oldCellsToRefine);
 
         // Mark refined faces
-        PackedBoolList refinedInternalFace(nInternalFaces);
+        bitSet refinedInternalFace(nInternalFaces);
 
         // 1. Internal faces
 
@@ -358,7 +358,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                 label nRegions = featureMesh.regions(edgeRegion);
 
 
-                PackedBoolList regionVisited(nRegions);
+                bitSet regionVisited(nRegions);
 
 
                 // 1. Seed all 'knots' in edgeMesh
@@ -446,7 +446,7 @@ void Foam::meshRefinement::markFeatureCellLevel
     maxFeatureLevel = labelList(mesh_.nCells(), -1);
 
     // Whether edge has been visited.
-    List<PackedBoolList> featureEdgeVisited(features_.size());
+    List<bitSet> featureEdgeVisited(features_.size());
 
     forAll(features_, featI)
     {
@@ -1124,7 +1124,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     // on a different surface gets refined (if its current level etc.)
 
 
-    const PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
+    const bitSet isMasterFace(syncTools::getMasterFaces(mesh_));
 
 
     // Collect candidate faces (i.e. intersecting any surface and

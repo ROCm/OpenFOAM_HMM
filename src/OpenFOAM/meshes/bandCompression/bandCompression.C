@@ -35,7 +35,7 @@ Description
 #include "IOstreams.H"
 #include "DynamicList.H"
 #include "ListOps.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +46,7 @@ Foam::labelList Foam::bandCompression(const labelListList& cellCellAddressing)
     // the business bit of the renumbering
     SLList<label> nextCell;
 
-    PackedBoolList visited(cellCellAddressing.size());
+    bitSet visited(cellCellAddressing.size());
 
     label cellInOrder = 0;
 
@@ -171,7 +171,7 @@ Foam::labelList Foam::bandCompression
     // the business bit of the renumbering
     SLList<label> nextCell;
 
-    PackedBoolList visited(offsets.size()-1);
+    bitSet visited(offsets.size()-1);
 
     label cellInOrder = 0;
 

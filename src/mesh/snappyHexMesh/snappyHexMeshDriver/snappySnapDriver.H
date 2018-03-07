@@ -74,12 +74,12 @@ class snappySnapDriver
         // Snapping
 
             //- Calculates (geometric) shared points
-            //  Requires PackedBoolList to be sized and initialised
+            //  Requires bitSet to be sized and initialised
             static label getCollocatedPoints
             (
                 const scalar tol,
                 const pointField&,
-                PackedBoolList&
+                bitSet&
             );
 
             //- Calculate displacement (over all mesh points) to move points
@@ -196,13 +196,13 @@ class snappySnapDriver
                 (
                     const scalar featureCos,
                     const indirectPrimitivePatch& pp,
-                    const PackedBoolList& isFeatureEdge,
+                    const bitSet& isFeatureEdge,
                     const label pointi
                 ) const;
 
                 void smoothAndConstrain
                 (
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterEdge,
                     const indirectPrimitivePatch& pp,
                     const labelList& meshEdges,
                     const List<pointConstraint>& constraints,
@@ -401,7 +401,7 @@ class snappySnapDriver
                 void writeStats
                 (
                     const indirectPrimitivePatch& pp,
-                    const PackedBoolList& isMasterPoint,
+                    const bitSet& isMasterPoint,
                     const List<pointConstraint>& patchConstraints
                 ) const;
 

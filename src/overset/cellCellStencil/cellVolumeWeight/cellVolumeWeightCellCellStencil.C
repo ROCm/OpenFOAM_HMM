@@ -61,8 +61,8 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
 ) const
 {
     // Current front
-    PackedBoolList isFront(mesh_.nFaces());
-    // unused: PackedBoolList doneCell(mesh_.nCells());
+    bitSet isFront(mesh_.nFaces());
+    // unused: bitSet doneCell(mesh_.nCells());
 
     const fvBoundaryMesh& fvm = mesh_.boundary();
 
@@ -143,7 +143,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
             << " size:" << returnReduce(isFront.count(), sumOp<label>())
             << endl;
 
-        PackedBoolList newIsFront(mesh_.nFaces());
+        bitSet newIsFront(mesh_.nFaces());
         forAll(isFront, faceI)
         {
             if (isFront.test(faceI))

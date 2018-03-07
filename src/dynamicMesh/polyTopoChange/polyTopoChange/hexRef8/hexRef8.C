@@ -1564,7 +1564,7 @@ void Foam::hexRef8::walkFaceFromMid
 Foam::label Foam::hexRef8::faceConsistentRefinement
 (
     const bool maxSet,
-    PackedBoolList& refineCell
+    bitSet& refineCell
 ) const
 {
     label nChanged = 0;
@@ -1653,7 +1653,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
     const labelList& cellsToRefine
 ) const
 {
-    PackedBoolList refineCell(mesh_.nCells(), cellsToRefine);
+    bitSet refineCell(mesh_.nCells(), cellsToRefine);
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
@@ -2260,7 +2260,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
     // maxSet = false : unselect cells to refine
     // maxSet = true  : select cells to refine
 
-    PackedBoolList refineCell(mesh_.nCells(), cellsToRefine);
+    bitSet refineCell(mesh_.nCells(), cellsToRefine);
 
     while (true)
     {
@@ -2282,7 +2282,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
     }
 
     // Convert back to labelList.
-    labelList newCellsToRefine(refineCell.used());
+    labelList newCellsToRefine(refineCell.toc());
 
     if (debug)
     {
@@ -3079,7 +3079,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     // 2. Extend to 2:1. I don't understand yet why this is not done
     // 2. Extend to 2:1. For non-cube cells the scalar distance does not work
     // so make sure it at least provides 2:1.
-    PackedBoolList refineCell(mesh_.nCells());
+    bitSet refineCell(mesh_.nCells());
     forAll(allCellInfo, celli)
     {
         label wanted = allCellInfo[celli].wantedLevel(cc[celli]);
@@ -3111,7 +3111,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     }
 
     // 3. Convert back to labelList.
-    labelList newCellsToRefine(refineCell.used());
+    labelList newCellsToRefine(refineCell.toc());
 
     if (debug)
     {
@@ -3137,9 +3137,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         }
 
         // Extend to 2:1
-        PackedBoolList refineCell(mesh_.nCells(), newCellsToRefine);
+        bitSet refineCell(mesh_.nCells(), newCellsToRefine);
 
-        const PackedBoolList savedRefineCell(refineCell);
+        const bitSet savedRefineCell(refineCell);
 
         label nChanged = faceConsistentRefinement(true, refineCell);
 
@@ -3747,7 +3747,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     }
 
     // Get all affected faces.
-    PackedBoolList affectedFace(mesh_.nFaces());
+    bitSet affectedFace(mesh_.nFaces());
 
     {
         forAll(cellMidPoint, celli)
@@ -5286,14 +5286,14 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
     // maxSet = true: select points to refine
 
     // Maintain bitset for pointsToUnrefine and cellsToUnrefine
-    PackedBoolList unrefinePoint(mesh_.nPoints(), pointsToUnrefine);
+    bitSet unrefinePoint(mesh_.nPoints(), pointsToUnrefine);
 
     while (true)
     {
         // Construct cells to unrefine
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        PackedBoolList unrefineCell(mesh_.nCells());
+        bitSet unrefineCell(mesh_.nCells());
 
         forAll(unrefinePoint, pointi)
         {

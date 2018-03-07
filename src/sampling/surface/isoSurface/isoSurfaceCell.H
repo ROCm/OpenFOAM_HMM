@@ -47,7 +47,7 @@ SourceFiles
 
 #include "labelPair.H"
 #include "pointIndexHit.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "boundBox.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfacesFwd.H"
@@ -146,7 +146,7 @@ class isoSurfaceCell
         //- Determine whether cell is cut
         cellCutType calcCutType
         (
-            const PackedBoolList&,
+            const bitSet&,
             const scalarField& cellValues,
             const scalarField& pointValues,
             const label
@@ -154,7 +154,7 @@ class isoSurfaceCell
 
         void calcCutTypes
         (
-            const PackedBoolList&,
+            const bitSet&,
             const scalarField& cellValues,
             const scalarField& pointValues
         );
@@ -182,7 +182,7 @@ class isoSurfaceCell
         //  point.
         void calcSnappedCc
         (
-            const PackedBoolList& isTet,
+            const bitSet& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
             DynamicList<point>& triPoints,
@@ -214,7 +214,7 @@ class isoSurfaceCell
         //  point.
         void calcSnappedPoint
         (
-            const PackedBoolList& isTet,
+            const bitSet& isTet,
             const scalarField& cVals,
             const scalarField& pVals,
             DynamicList<point>& triPoints,

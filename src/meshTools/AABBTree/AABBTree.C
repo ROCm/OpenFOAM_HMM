@@ -25,7 +25,7 @@ License
 
 #include "AABBTree.H"
 #include "meshTools.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 //#include "OFstream.H"
 
 template<class Type>
@@ -157,7 +157,7 @@ void Foam::AABBTree<Type>::createBoxes
     {
         // Pick up points used by this set of objects
 
-        PackedBoolList isUsedPoint(points.size());
+        bitSet isUsedPoint(points.size());
         DynamicList<scalar> component(points.size());
 
         for (const label objI : objectIDs)

@@ -25,7 +25,7 @@ License
 
 #include "InjectedParticleDistributionInjection.H"
 #include "mathematicalConstants.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "injectedParticleCloud.H"
 
 using namespace Foam::constant;

@@ -90,14 +90,13 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class polyMesh;
 class mapDistribute;
 template<class T> class EdgeMap;
 class globalIndex;
 class globalIndexAndTransform;
-class PackedBoolList;
+class bitSet;
 
 /*---------------------------------------------------------------------------*\
                       Class globalMeshData Declaration
@@ -171,7 +170,7 @@ class globalMeshData
             mutable autoPtr<globalIndex> globalEdgeNumberingPtr_;
             mutable autoPtr<labelListList> globalEdgeSlavesPtr_;
             mutable autoPtr<labelListList> globalEdgeTransformedSlavesPtr_;
-            mutable autoPtr<PackedBoolList> globalEdgeOrientationPtr_;
+            mutable autoPtr<bitSet> globalEdgeOrientationPtr_;
             mutable autoPtr<mapDistribute> globalEdgeSlavesMapPtr_;
 
 
@@ -545,7 +544,7 @@ public:
                 const labelListList& globalEdgeTransformedSlaves() const;
                 const mapDistribute& globalEdgeSlavesMap() const;
                 //- Is my edge same orientation as master edge
-                const PackedBoolList& globalEdgeOrientation() const;
+                const bitSet& globalEdgeOrientation() const;
 
             // Collocated point to collocated point
 

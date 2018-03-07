@@ -483,7 +483,7 @@ int main(int argc, char *argv[])
             }
             candidates.setCapacity(sz);
 
-            PackedBoolList isCandidate(mesh.nPoints());
+            bitSet isCandidate(mesh.nPoints());
             forAll(splitPatchIDs, i)
             {
                 const labelList& mp = patches[splitPatchIDs[i]].meshPoints();

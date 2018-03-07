@@ -55,8 +55,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class polyMesh;
-class PackedBoolList;
+class bitSet;
 class boundBox;
 
 /*---------------------------------------------------------------------------*\
@@ -249,7 +250,7 @@ public:
 
         labelList& p1EdgeLabels,
         labelList& p2EdgeLabels,
-        PackedBoolList& sameOrientation
+        bitSet& sameOrientation
     );
 
 

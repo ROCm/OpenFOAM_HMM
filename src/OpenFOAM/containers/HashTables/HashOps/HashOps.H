@@ -49,7 +49,7 @@ namespace Foam
 
 // Forward declarations
 
-class PackedBoolList;
+class bitSet;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +60,7 @@ class PackedBoolList;
 namespace HashSetOps
 {
 
-//- Combine HashSet operation. Equivalent to 'a += b'
+//- Combine HashSet operation. Equivalent to 'a |= b'
 template<class Key=word, class Hash=string::hash>
 struct plusEqOp
 {
@@ -68,52 +68,56 @@ struct plusEqOp
 
     void operator()(value_type& a, const value_type& b) const
     {
-        a += b;
+        a |= b;
     }
 };
 
 
-//- Convert a packed list of bits to a labelHashSet of the indices used.
+//- Convert a bitset to a labelHashSet of the indices used.
 //
-//  \param selection the list for which a 'true' entry corresponds
-//       to an index for be added to the labelHashSet
+//  \param select the bitset for which an \a on entry corresponds
+//       to an index in the output labelHashSet
 //
 //  \return a labelHashSet of the selected indices
-labelHashSet used(const PackedBoolList& select);
+//
+//  This is equivalent of the following code, but more efficiently implemented.
+//  \code
+//      bitSet select = ...;
+//      return labelHashSet(select.toc());
+//  \endcode
+labelHashSet used(const bitSet& select);
 
 
 //- Convert a list of bools to a labelHashSet of the indices used.
 //
-//  \param selection the list for which a 'true' entry corresponds
-//       to an index for be added to the labelHashSet
+//  \param select the boolList for which a \a true entry corresponds
+//       to an index in the output labelHashSet
 //
 //  \return a labelHashSet of the selected indices
 labelHashSet used(const UList<bool>& select);
 
 
-//- Convert labels to a packed list of bits, with '1' for each
-//- non-negative value and '0' for all others.
+//- Transform the \a on locations to a bitSet.
 //
-//  \param labels the list of indices.
+//  \param locations the list of positions corresponding to an \a on bit.
 //
-//  \return a packed bit list of the selected indices
+//  \return a bitset
 //
-//  \note The operation discards any negative values since these are
-//     invalid positions in the output list.
-PackedBoolList bitset(const labelHashSet& labels);
+//  \note The operation necessarily discards any negative values since these
+//     are invalid positions in a bitset.
+bitSet bitset(const labelHashSet& locations);
 
 
-//- Convert labels to a list of bools, with 'true' for each
-//- non-negative value and 'false' for all others.
+//- Transform the \a on locations to a boolList, with \a true for each
+//- non-negative location and \a false for all others.
 //
-//  \param labels the list of indices.
+//  \param locations the list of positions corresponding to an \a on bit.
 //
-//  \return a bool List of the selected indices
+//  \return a boolList
 //
-//  \note The operation discards any negative values since these are
-//     invalid positions in the output list.
-List<bool> bools(const labelHashSet& labels);
-
+//  \note The operation necessarily discards any negative values since these
+//     are invalid positions in a boolList.
+List<bool> bools(const labelHashSet& locations);
 
 } // End namespace HashSetOps
 

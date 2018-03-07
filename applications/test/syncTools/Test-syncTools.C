@@ -406,13 +406,13 @@ void testPointSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(mesh.nPoints(), 0);
 
-        PackedBoolList isMasterPoint(syncTools::getMasterPoints(mesh));
+        bitSet isMasterPoint(syncTools::getMasterPoints(mesh));
 
         forAll(isMasterPoint, pointi)
         {
-            if (isMasterPoint[pointi])
+            if (isMasterPoint.test(pointi))
             {
-                nMasters[pointi] = 1;
+                nMasters.set(pointi);
             }
         }
 
@@ -482,13 +482,13 @@ void testEdgeSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(edges.size(), 0);
 
-        PackedBoolList isMasterEdge(syncTools::getMasterEdges(mesh));
+        bitSet isMasterEdge(syncTools::getMasterEdges(mesh));
 
         forAll(isMasterEdge, edgeI)
         {
-            if (isMasterEdge[edgeI])
+            if (isMasterEdge.test(edgeI))
             {
-                nMasters[edgeI] = 1;
+                nMasters.set(edgeI);
             }
         }
 
@@ -551,13 +551,13 @@ void testFaceSync(const polyMesh& mesh, Random& rndGen)
     {
         labelList nMasters(mesh.nFaces(), 0);
 
-        PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh));
+        Bitset isMasterFace(syncTools::getMasterFaces(mesh));
 
         forAll(isMasterFace, facei)
         {
-            if (isMasterFace[facei])
+            if (isMasterFace.test(facei))
             {
-                nMasters[facei] = 1;
+                nMasters.set(facei);
             }
         }
 

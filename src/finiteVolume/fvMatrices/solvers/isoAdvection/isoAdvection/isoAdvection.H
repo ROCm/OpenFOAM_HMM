@@ -60,6 +60,7 @@ SourceFiles
 #include "className.H"
 #include "isoCutCell.H"
 #include "isoCutFace.H"
+#include "bitSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,11 +147,11 @@ class isoAdvection
             //- Face cutting object
             isoCutFace isoCutFace_;
 
-            //- Bool list for cells that have been touched by the bounding step
-            boolList cellIsBounded_;
+            //- Cells that have been touched by the bounding step
+            bitSet cellIsBounded_;
 
             //- True for all surface cells and their neighbours
-            boolList checkBounding_;
+            bitSet checkBounding_;
 
             //- Storage for boundary faces downwind to a surface cell
             DynamicLabelList bsFaces_;

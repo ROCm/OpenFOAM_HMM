@@ -194,7 +194,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
             // This is a surface cell, increment counter, append and mark cell
             nSurfaceCells++;
             surfCells_.append(celli);
-            checkBounding_[celli] = true;
+            checkBounding_.set(celli);
 
             DebugInfo
                 << "\n------------ Cell " << celli << " with alpha1 = "
@@ -327,7 +327,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
 
                         // We want to check bounding of neighbour cells to
                         // surface cells as well:
-                        checkBounding_[otherCell] = true;
+                        checkBounding_.set(otherCell);
 
                         // Also check neighbours of neighbours.
                         // Note: consider making it a run time selectable
@@ -336,10 +336,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
                         // 1 - neighbours of neighbours
                         // 2 - ...
                         const labelList& nNeighbourCells = cellCells[otherCell];
-                        forAll(nNeighbourCells, ni)
-                        {
-                            checkBounding_[nNeighbourCells[ni]] = true;
-                        }
+                        checkBounding_.setMany(nNeighbourCells);
                     }
                     else
                     {
@@ -711,7 +708,7 @@ void Foam::isoAdvection::boundFromAbove
     // Loop through alpha cell centred field
     forAll(alpha1, celli)
     {
-        if (checkBounding_[celli])
+        if (checkBounding_.test(celli))
         {
             const scalar Vi = meshV[celli];
             scalar alpha1New = alpha1[celli] - netFlux(dVf, celli)/Vi;
@@ -734,7 +731,7 @@ void Foam::isoAdvection::boundFromAbove
                 dVfmax.clear();
                 phi.clear();
 
-                cellIsBounded_[celli] = true;
+                cellIsBounded_.set(celli);
 
                 // Find potential neighbour cells to pass surplus phase to
                 setDownwindFaces(celli, downwindFaces);
@@ -1065,12 +1062,9 @@ void Foam::isoAdvection::writeBoundedCells() const
             )
         );
 
-        forAll(cellIsBounded_, i)
+        for (const label celli : cellIsBounded_)
         {
-            if (cellIsBounded_[i])
-            {
-                cSet.insert(i);
-            }
+            cSet.insert(celli);
         }
 
         cSet.write();

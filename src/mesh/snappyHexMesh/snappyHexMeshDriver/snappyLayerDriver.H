@@ -472,7 +472,7 @@ private:
                 static void averageNeighbours
                 (
                     const polyMesh& mesh,
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterEdge,
                     const labelList& meshEdges,
                     const labelList& meshPoints,
                     const edgeList& edges,
@@ -484,7 +484,7 @@ private:
                 //- Calculate inverse sum of edge weights (currently always 1.0)
                 void sumWeights
                 (
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterEdge,
                     const labelList& meshEdges,
                     const labelList& meshPoints,
                     const edgeList& edges,
@@ -495,8 +495,8 @@ private:
                 void smoothField
                 (
                     const motionSmoother& meshMover,
-                    const PackedBoolList& isMasterPoint,
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterPoint,
+                    const bitSet& isMasterEdge,
                     const labelList& meshEdges,
                     const scalarField& fieldMin,
                     const label nSmoothDisp,
@@ -507,8 +507,8 @@ private:
                 void smoothPatchNormals
                 (
                     const motionSmoother& meshMover,
-                    const PackedBoolList& isMasterPoint,
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterPoint,
+                    const bitSet& isMasterEdge,
                     const labelList& meshEdges,
                     const label nSmoothDisp,
                     pointField& normals
@@ -518,8 +518,8 @@ private:
                 void smoothNormals
                 (
                     const label nSmoothDisp,
-                    const PackedBoolList& isMasterPoint,
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterPoint,
+                    const bitSet& isMasterEdge,
                     const labelList& fixedPoints,
                     pointVectorField& normals
                 ) const;
@@ -529,7 +529,7 @@ private:
                 void handleFeatureAngleLayerTerminations
                 (
                     const scalar minCos,
-                    const PackedBoolList& isMasterPoint,
+                    const bitSet& isMasterPoint,
                     const indirectPrimitivePatch& pp,
                     const labelList& meshEdges,
 
@@ -545,8 +545,8 @@ private:
                 void findIsolatedRegions
                 (
                     const scalar minCosLayerTermination,
-                    const PackedBoolList& isMasterPoint,
-                    const PackedBoolList& isMasterEdge,
+                    const bitSet& isMasterPoint,
+                    const bitSet& isMasterEdge,
                     const indirectPrimitivePatch& pp,
                     const labelList& meshEdges,
                     const scalarField& minThickness,

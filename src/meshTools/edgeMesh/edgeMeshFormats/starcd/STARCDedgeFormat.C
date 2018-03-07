@@ -26,7 +26,7 @@ License
 #include "STARCDedgeFormat.H"
 #include "ListOps.H"
 #include "clock.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "StringStream.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -132,7 +132,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
     pointId.clear();
 
     // note which points were really used and which can be culled
-    PackedBoolList usedPoints(points().size());
+    bitSet usedPoints(points().size());
 
     //
     // read .cel file
@@ -187,31 +187,27 @@ bool Foam::fileFormats::STARCDedgeFormat::read
 
     mapPointId.clear();
 
-    // not all the points were used, cull them accordingly
-    if (unsigned(points().size()) != usedPoints.count())
+    // Not all points were used, subset/cull them accordingly
+    if (!usedPoints.all())
     {
         label nUsed = 0;
 
         pointField& pts = storedPoints();
-        forAll(pts, pointi)
+        for (const label pointi : usedPoints)
         {
-            if (usedPoints.test(pointi))
+            if (nUsed != pointi)
             {
-                if (nUsed != pointi)
-                {
-                    pts[nUsed] = pts[pointi];
-                }
-
-                // map prev -> new id
-                mapPointId.set(pointi, nUsed);
-
-                ++nUsed;
+                pts[nUsed] = pts[pointi];
             }
+
+            // map prev -> new id
+            mapPointId.set(pointi, nUsed);
+
+            ++nUsed;
         }
+        pts.resize(nUsed);
 
-        pts.setSize(nUsed);
-
-        // renumber edge vertices
+        // Renumber edge vertices
         forAll(dynEdges, edgeI)
         {
             edge& e = dynEdges[edgeI];
@@ -220,7 +216,6 @@ bool Foam::fileFormats::STARCDedgeFormat::read
             e[1] = mapPointId[e[1]];
         }
     }
-
 
     storedEdges().transfer(dynEdges);
 

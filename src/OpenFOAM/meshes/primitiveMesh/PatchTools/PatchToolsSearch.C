@@ -27,7 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "PatchTools.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "boundBox.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -174,7 +174,7 @@ Foam::PatchTools::subsetMap
     faceMap.setSize(localFaces.size());
     pointMap.setSize(p.nPoints());
 
-    boolList pointHad(pointMap.size(), false);
+    bitSet pointHad(pointMap.size(), false);
 
     forAll(p, oldFacei)
     {
@@ -189,9 +189,8 @@ Foam::PatchTools::subsetMap
             forAll(f, fp)
             {
                 const label ptLabel = f[fp];
-                if (!pointHad[ptLabel])
+                if (pointHad.set(ptLabel))
                 {
-                    pointHad[ptLabel]  = true;
                     pointMap[pointi++] = ptLabel;
                 }
             }
@@ -222,7 +221,7 @@ void Foam::PatchTools::calcBounds
     // ourselves
     const PointField& points = p.points();
 
-    PackedBoolList pointIsUsed(points.size());
+    bitSet pointIsUsed(points.size());
 
     nPoints = 0;
     bb = boundBox::invertedBox;

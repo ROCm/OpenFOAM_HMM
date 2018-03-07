@@ -36,7 +36,7 @@ SourceFiles
 #define tetDecomposer_H
 
 #include "DynamicList.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "boolList.H"
 #include "typeInfo.H"
 #include "Enum.H"

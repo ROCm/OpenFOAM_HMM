@@ -229,7 +229,7 @@ protected:
         (
             const label cellI,
             const scalar wantedFraction,
-            PackedBoolList& isFront,
+            bitSet& isFront,
             scalarField& fraction
         ) const;
 

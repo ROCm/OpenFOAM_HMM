@@ -146,7 +146,7 @@ Foam::label Foam::meshDualiser::findDualCell
 
 void Foam::meshDualiser::generateDualBoundaryEdges
 (
-    const PackedBoolList& isBoundaryEdge,
+    const bitSet& isBoundaryEdge,
     const label pointi,
     polyTopoChange& meshMod
 )
@@ -374,7 +374,7 @@ Foam::label Foam::meshDualiser::addBoundaryFace
 void Foam::meshDualiser::createFacesAroundEdge
 (
     const bool splitFace,
-    const PackedBoolList& isBoundaryEdge,
+    const bitSet& isBoundaryEdge,
     const label edgeI,
     const label startFacei,
     polyTopoChange& meshMod,
@@ -886,7 +886,7 @@ void Foam::meshDualiser::setRefinement
     // Mark boundary edges and points.
     // (Note: in 1.4.2 we can use the built-in mesh point ordering
     //  facility instead)
-    PackedBoolList isBoundaryEdge(mesh_.nEdges());
+    bitSet isBoundaryEdge(mesh_.nEdges());
     for (label facei = mesh_.nInternalFaces(); facei < mesh_.nFaces(); facei++)
     {
         const labelList& fEdges = mesh_.faceEdges()[facei];

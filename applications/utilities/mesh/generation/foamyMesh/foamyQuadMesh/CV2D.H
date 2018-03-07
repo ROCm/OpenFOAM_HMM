@@ -122,7 +122,7 @@ SourceFiles
 #include "point2DFieldFwd.H"
 #include "dictionary.H"
 #include "Switch.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "EdgeMap.H"
 #include "cv2DControls.H"
 #include "tolerances.H"

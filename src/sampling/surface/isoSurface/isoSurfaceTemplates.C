@@ -132,7 +132,7 @@ Foam::isoSurface::adaptPatchFields
                 w*pfld.patchInternalField()
               + (1.0-w)*pfld.patchNeighbourField();
 
-            PackedBoolList isCollocated
+            bitSet isCollocated
             (
                 collocatedFaces(refCast<const processorPolyPatch>(pp))
             );
@@ -636,7 +636,7 @@ void Foam::isoSurface::generateTriPoints
             const processorPolyPatch& cpp =
                 refCast<const processorPolyPatch>(pp);
 
-            PackedBoolList isCollocated(collocatedFaces(cpp));
+            bitSet isCollocated(collocatedFaces(cpp));
 
             forAll(isCollocated, i)
             {

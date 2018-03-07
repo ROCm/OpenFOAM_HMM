@@ -35,7 +35,7 @@ License
 #include "uindirectPrimitivePatch.H"
 #include "SortableList.H"
 #include "mergePoints.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "ListOps.H"
 
 #include "ccmInternal.H" // include last to avoid any strange interactions
@@ -1099,7 +1099,7 @@ void Foam::ccm::reader::juggleSolids()
     // Identify solid cells
     // ~~~~~~~~~~~~~~~~~~~~
     label nSolids = 0;
-    boolList solidCells(cellTableId_.size(), false);
+    bitSet solidCells(cellTableId_.size(), false);
     {
         Map<word> solidMap = cellTable_.solids();
 
@@ -1107,7 +1107,7 @@ void Foam::ccm::reader::juggleSolids()
         {
             if (solidMap.found(cellTableId_[cellI]))
             {
-                solidCells[cellI] = true;
+                solidCells.set(cellI);
                 ++nSolids;
             }
         }
@@ -1130,7 +1130,7 @@ void Foam::ccm::reader::juggleSolids()
         label faceI = patchStarts[patchIndex] + i;
         label cellI = faceOwner_[faceI];
 
-        if (solidCells[cellI])
+        if (solidCells.test(cellI))
         {
             ++adjustPatch;
         }
@@ -1186,7 +1186,7 @@ void Foam::ccm::reader::juggleSolids()
         label faceI = patchStarts[patchIndex] + i;
         label cellI = faceOwner_[faceI];
 
-        if (solidCells[cellI])
+        if (solidCells.test(cellI))
         {
             oldToNew[faceI] = solidFace++;
         }
@@ -1213,7 +1213,7 @@ void Foam::ccm::reader::removeUnwanted()
     // Identify fluid/porous/solid cells for removal
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     label nRemove = 0;
-    boolList removeCells(cellTableId_.size(), false);
+    bitSet removeCells(cellTableId_.size(), false);
 
     {
         Map<word> fluidMap  = cellTable_.fluids();
@@ -1236,7 +1236,7 @@ void Foam::ccm::reader::removeUnwanted()
               : false
             )
             {
-                removeCells[cellI] = true;
+                removeCells.set(cellI);
                 ++nRemove;
                 removeMap.set(tableId, cellTable_.name(tableId));
             }
@@ -1291,7 +1291,7 @@ void Foam::ccm::reader::removeUnwanted()
     for (label faceI = 0; faceI < nFaces_; ++faceI)
     {
         label cellI = faceOwner_[faceI];
-        if (removeCells[cellI])
+        if (removeCells.test(cellI))
         {
             if (faceI < nInternalFaces_)
             {
@@ -1356,7 +1356,7 @@ void Foam::ccm::reader::removeUnwanted()
     oldToNew.setSize(nCells_, -1);
     for (label cellI = 0; cellI < nCells_; ++cellI)
     {
-        if (!removeCells[cellI])
+        if (!removeCells.test(cellI))
         {
             if (nCell != cellI)
             {
@@ -1886,7 +1886,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
     label nMergedTotal = 0;
 
     // Markup points to merge
-    PackedBoolList whichPoints(points_.size());
+    bitSet whichPoints(points_.size());
 
     Info<< "interface merge points (tol="
         << option().mergeTol() << "):" << endl;
@@ -1923,7 +1923,7 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
         }
 
         // The global addresses
-        labelList addr(whichPoints.used());
+        labelList addr(whichPoints.toc());
 
         const UIndirectList<point> pointsToMerge(points_, addr);
 

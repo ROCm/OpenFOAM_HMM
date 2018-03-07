@@ -78,7 +78,7 @@ public:
 
     public:
 
-        const PackedBoolList& isWallPatch_;
+        const bitSet& isWallPatch_;
 
         // Constructors
 
@@ -86,7 +86,7 @@ public:
             inline trackingData
             (
                 const TrackCloudType& cloud,
-                const PackedBoolList& isWallPatch
+                const bitSet& isWallPatch
             )
             :
                 particle::trackingData(cloud),

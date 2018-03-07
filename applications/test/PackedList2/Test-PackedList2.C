@@ -29,7 +29,7 @@ Description
 
 #include "argList.H"
 #include "boolList.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "HashSet.H"
 #include "cpuTime.H"
 #include <vector>
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
     unsigned long sum = 0;
 
-    PackedBoolList packed(n, 1);
+    bitSet packed(n, true);
     boolList unpacked(n, true);
 
     #ifdef TEST_STD_BOOLLIST

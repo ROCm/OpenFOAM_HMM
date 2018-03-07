@@ -1481,7 +1481,7 @@ void Foam::extendedEdgeMesh::autoMap
     // Compact region edges
     labelList subRegionEdges;
     {
-        PackedBoolList isRegionEdge(edges().size(), regionEdges());
+        bitSet isRegionEdge(edges().size(), regionEdges());
 
         DynamicList<label> newRegionEdges(regionEdges().size());
         forAll(edgeMap, subEdgeI)
@@ -1525,7 +1525,7 @@ void Foam::extendedEdgeMesh::autoMap
     DynamicList<label> normalMap(normals().size());
 
     {
-        PackedBoolList isSubNormal(normals().size());
+        bitSet isSubNormal(normals().size());
         for (label subPointI = 0; subPointI < subNonFeatStart; subPointI++)
         {
             label pointI = pointMap[subPointI];

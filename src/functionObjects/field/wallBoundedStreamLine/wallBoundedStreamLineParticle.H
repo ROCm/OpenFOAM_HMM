@@ -99,7 +99,7 @@ public:
                 const label UIndex,
                 const bool trackForward,
                 const scalar trackLength,
-                const PackedBoolList& isWallPatch,
+                const bitSet& isWallPatch,
 
                 DynamicList<List<point>>& allPositions,
                 List<DynamicList<scalarList>>& allScalars,

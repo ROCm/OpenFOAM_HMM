@@ -47,7 +47,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     pointField& cellCentres,
     labelList& cellToDelaunayVertex,
     labelListList& patchToDelaunayVertex,
-    PackedBoolList& boundaryFacesToRemove
+    bitSet& boundaryFacesToRemove
 )
 {
     timeCheck("Start calcDualMesh");
@@ -277,7 +277,7 @@ void Foam::conformalVoronoiMesh::calcTetMesh
 
     sortFaces(faces, owner, neighbour);
 
-//    PackedBoolList boundaryFacesToRemove;
+//    bitSet boundaryFacesToRemove;
 //    List<DynamicList<bool>> indirectPatchFace;
 //
 //    addPatches
@@ -703,7 +703,7 @@ Foam::conformalVoronoiMesh::createPolyMeshFromPoints
     PtrList<dictionary> patchDicts;
     pointField cellCentres;
     labelListList patchToDelaunayVertex;
-    PackedBoolList boundaryFacesToRemove;
+    bitSet boundaryFacesToRemove;
 
     timeCheck("Start of checkPolyMeshQuality");
 
@@ -1103,7 +1103,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     }
 
 
-    PackedBoolList ptToBeLimited(pts.size(), false);
+    bitSet ptToBeLimited(pts.size(), false);
 
     forAllConstIter(labelHashSet, wrongFaces, iter)
     {
@@ -1704,7 +1704,7 @@ void Foam::conformalVoronoiMesh::createFacesOwnerNeighbourAndPatches
     wordList& patchNames,
     PtrList<dictionary>& patchDicts,
     labelListList& patchPointPairSlaves,
-    PackedBoolList& boundaryFacesToRemove,
+    bitSet& boundaryFacesToRemove,
     bool includeEmptyPatches
 ) const
 {
@@ -2486,7 +2486,7 @@ void Foam::conformalVoronoiMesh::addPatches
     faceList& faces,
     labelList& owner,
     PtrList<dictionary>& patchDicts,
-    PackedBoolList& boundaryFacesToRemove,
+    bitSet& boundaryFacesToRemove,
     const List<DynamicList<face>>& patchFaces,
     const List<DynamicList<label>>& patchOwners,
     const List<DynamicList<bool>>& indirectPatchFace
@@ -2531,7 +2531,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 {
     Info<< nl << "Removing unused points" << endl;
 
-    PackedBoolList ptUsed(pts.size(), false);
+    bitSet ptUsed(pts.size(), false);
 
     // Scan all faces to find all of the points that are used
 
@@ -2585,7 +2585,7 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 {
     Info<< nl << "Removing unused cells" << endl;
 
-    PackedBoolList cellUsed(vertexCount(), false);
+    bitSet cellUsed(vertexCount(), false);
 
     // Scan all faces to find all of the cells that are used
 

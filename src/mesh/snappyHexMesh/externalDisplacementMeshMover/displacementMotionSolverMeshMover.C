@@ -226,7 +226,7 @@ bool Foam::displacementMotionSolverMeshMover::move
           : mesh().lookupObject<scalarField>(minThicknessName)
         );
 
-        const PackedBoolList isPatchMasterPoint
+        const bitSet isPatchMasterPoint
         (
             meshRefinement::getMasterPoints
             (
@@ -235,7 +235,7 @@ bool Foam::displacementMotionSolverMeshMover::move
             )
         );
 
-        const PackedBoolList isPatchMasterEdge
+        const bitSet isPatchMasterEdge
         (
             meshRefinement::getMasterEdges
             (

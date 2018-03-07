@@ -186,7 +186,7 @@ void Foam::polyTopoChange::countMap
 
 Foam::labelHashSet Foam::polyTopoChange::getSetIndices
 (
-    const PackedBoolList& lst
+    const bitSet& lst
 )
 {
     labelHashSet values(lst.count());
@@ -605,7 +605,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
     SLList<label> nextCell;
 
     // Whether cell has been done already
-    PackedBoolList visited(cellCellAddressing.size());
+    bitSet visited(cellCellAddressing.size());
 
     label cellInOrder = 0;
 
@@ -1222,8 +1222,8 @@ void Foam::polyTopoChange::compact
                         {
                             faces_[facei].flip();
                             Swap(faceOwner_[facei], faceNeighbour_[facei]);
-                            flipFaceFlux_.set(facei, !flipFaceFlux_.test(facei));
-                            faceZoneFlip_.set(facei, !faceZoneFlip_.test(facei));
+                            flipFaceFlux_.flip(facei);
+                            faceZoneFlip_.flip(facei);
                         }
                     }
                 }

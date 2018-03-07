@@ -144,7 +144,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmootherAlgo::calcEdgeWeights
 void Foam::motionSmootherAlgo::minSmooth
 (
     const scalarField& edgeWeights,
-    const PackedBoolList& isAffectedPoint,
+    const bitSet& isAffectedPoint,
     const labelList& meshPoints,
     const pointScalarField& fld,
     pointScalarField& newFld
@@ -179,7 +179,7 @@ void Foam::motionSmootherAlgo::minSmooth
 void Foam::motionSmootherAlgo::minSmooth
 (
     const scalarField& edgeWeights,
-    const PackedBoolList& isAffectedPoint,
+    const bitSet& isAffectedPoint,
     const pointScalarField& fld,
     pointScalarField& newFld
 ) const
@@ -303,7 +303,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
     const faceSet& wrongFaces,
 
     labelList& affectedFaces,
-    PackedBoolList& isAffectedPoint
+    bitSet& isAffectedPoint
 ) const
 {
     isAffectedPoint.setSize(mesh_.nPoints());
@@ -517,7 +517,7 @@ void Foam::motionSmootherAlgo::setDisplacement
     // to them since we want 'proper' values from displacement to take
     // precedence.
     {
-        PackedBoolList isPatchPoint(mesh.nPoints(), ppMeshPoints);
+        bitSet isPatchPoint(mesh.nPoints(), ppMeshPoints);
         syncTools::syncPointList
         (
             mesh,
@@ -970,7 +970,7 @@ bool Foam::motionSmootherAlgo::scaleMesh
         // Grow a few layers to determine
         // - points to be smoothed
         // - faces to be checked in next iteration
-        PackedBoolList isAffectedPoint(mesh_.nPoints());
+        bitSet isAffectedPoint(mesh_.nPoints());
         getAffectedFacesAndPoints
         (
             nSmoothScale,       // smoothing iterations

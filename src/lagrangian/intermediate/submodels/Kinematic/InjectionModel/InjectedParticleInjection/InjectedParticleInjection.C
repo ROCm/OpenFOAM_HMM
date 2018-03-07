@@ -25,7 +25,7 @@ License
 
 #include "InjectedParticleInjection.H"
 #include "mathematicalConstants.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "SortableList.H"
 #include "injectedParticleCloud.H"
 
@@ -232,7 +232,7 @@ void Foam::InjectedParticleInjection<CloudType>::updateMesh()
 {
     label nRejected = 0;
 
-    PackedBoolList keep(position_.size(), true);
+    bitSet keep(position_.size(), true);
 
     forAll(position_, particlei)
     {

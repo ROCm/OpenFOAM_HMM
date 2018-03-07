@@ -67,10 +67,10 @@ void Foam::regionSplit::calcNonCompactRegionSplit
     // Seed all faces on (real) boundaries and cell faces next to blockFace,
     // since regions can only occur because of boundaries (or blocked faces)
 
-    PackedBoolList isSeed(mesh().nFaces());
+    bitSet isSeed(mesh().nFaces());
 
     // Get internal or coupled faces
-    PackedBoolList isConnection(syncTools::getInternalOrCoupledFaces(mesh()));
+    bitSet isConnection(syncTools::getInternalOrCoupledFaces(mesh()));
 
     // 1. Seed (real) boundaries
     for
@@ -145,7 +145,7 @@ void Foam::regionSplit::calcNonCompactRegionSplit
         }
     }
 
-    List<label> seedFaces(isSeed.used());
+    List<label> seedFaces(isSeed.toc());
     List<minData> seedData(seedFaces.size());
 
     // Seed face with globally unique number

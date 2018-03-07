@@ -25,7 +25,7 @@ License
 
 #include "InflationInjection.H"
 #include "mathematicalConstants.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "cellSet.H"
 #include "ListListOps.H"
 

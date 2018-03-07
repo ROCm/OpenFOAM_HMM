@@ -144,7 +144,7 @@ class medialAxisMeshMover
             void handleFeatureAngleLayerTerminations
             (
                 const scalar minCos,
-                const PackedBoolList& isMasterPoint,
+                const bitSet& isMasterPoint,
                 const labelList& meshEdges,
                 List<snappyLayerDriver::extrudeMode>& extrudeStatus,
                 pointField& patchDisp,
@@ -158,8 +158,8 @@ class medialAxisMeshMover
             (
                 const scalar minCosLayerTermination,
                 const bool detectExtrusionIsland,
-                const PackedBoolList& isMasterPoint,
-                const PackedBoolList& isMasterEdge,
+                const bitSet& isMasterPoint,
+                const bitSet& isMasterEdge,
                 const labelList& meshEdges,
                 const scalarField& minThickness,
                 List<snappyLayerDriver::extrudeMode>& extrudeStatus,

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
     label nPatchFaces = 0;
     label nPatchEdges = 0;
 
-    forAllConstIter(labelHashSet, patchSet, iter)
+    for (const label patchi : patchSet)
     {
-        nPatchFaces += mesh.boundaryMesh()[iter.key()].size();
-        nPatchEdges += mesh.boundaryMesh()[iter.key()].nEdges();
+        nPatchFaces += mesh.boundaryMesh()[patchi].size();
+        nPatchEdges += mesh.boundaryMesh()[patchi].nEdges();
     }
 
     // Construct from estimate for the number of cells to refine
@@ -111,15 +111,13 @@ int main(int argc, char *argv[])
     DynamicList<scalar> allCutEdgeWeights(nPatchEdges);
 
     // Find cells to refine
-    forAllConstIter(labelHashSet, patchSet, iter)
+    for (const label patchi : patchSet)
     {
-        const polyPatch& pp = mesh.boundaryMesh()[iter.key()];
+        const polyPatch& pp = mesh.boundaryMesh()[patchi];
         const labelList& meshPoints = pp.meshPoints();
 
-        forAll(meshPoints, pointi)
+        for (const label meshPointi : meshPoints)
         {
-            label meshPointi = meshPoints[pointi];
-
             const labelList& pCells = mesh.pointCells()[meshPointi];
 
             cutCells.insertMany(pCells);
@@ -139,49 +137,43 @@ int main(int argc, char *argv[])
             << cells.instance()/cells.local()/cells.name()
             << nl << endl;
 
-        forAllConstIter(cellSet, cells, iter)
+        for (const label celli : cells)
         {
-            cutCells.erase(iter.key());
+            cutCells.erase(celli);
         }
         Info<< "Removed from cells to cut all the ones not in set "
             << setName << nl << endl;
     }
 
     // Mark all mesh points on patch
-    boolList vertOnPatch(mesh.nPoints(), false);
+    bitSet vertOnPatch(mesh.nPoints());
 
-    forAllConstIter(labelHashSet, patchSet, iter)
+    for (const label patchi : patchSet)
     {
-        const polyPatch& pp = mesh.boundaryMesh()[iter.key()];
+        const polyPatch& pp = mesh.boundaryMesh()[patchi];
         const labelList& meshPoints = pp.meshPoints();
 
-        forAll(meshPoints, pointi)
-        {
-            vertOnPatch[meshPoints[pointi]] = true;
-        }
+        vertOnPatch.setMany(meshPoints);
     }
 
-    forAllConstIter(labelHashSet, patchSet, iter)
+    for (const label patchi : patchSet)
     {
-        const polyPatch& pp = mesh.boundaryMesh()[iter.key()];
+        const polyPatch& pp = mesh.boundaryMesh()[patchi];
         const labelList& meshPoints = pp.meshPoints();
 
-        forAll(meshPoints, pointi)
+        for (const label meshPointi : meshPoints)
         {
-            label meshPointi = meshPoints[pointi];
-
             const labelList& pEdges = mesh.pointEdges()[meshPointi];
 
-            forAll(pEdges, pEdgeI)
+            for (const label edgei : pEdges)
             {
-                const label edgeI = pEdges[pEdgeI];
-                const edge& e = mesh.edges()[edgeI];
+                const edge& e = mesh.edges()[edgei];
 
                 label otherPointi = e.otherVertex(meshPointi);
 
-                if (!vertOnPatch[otherPointi])
+                if (!vertOnPatch.test(otherPointi))
                 {
-                    allCutEdges.append(edgeI);
+                    allCutEdges.append(edgei);
 
                     if (e.start() == meshPointi)
                     {
@@ -214,7 +206,7 @@ int main(int argc, char *argv[])
     (
         mesh,
         cutCells.toc(),     // cells candidate for cutting
-        labelList(0),       // cut vertices
+        labelList(),        // cut vertices
         allCutEdges,        // cut edges
         cutEdgeWeights      // weight on cut edges
     );

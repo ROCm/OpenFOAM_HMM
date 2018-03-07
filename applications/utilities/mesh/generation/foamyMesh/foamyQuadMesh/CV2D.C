@@ -496,7 +496,7 @@ void Foam::CV2D::newPoints()
     scalar u = 1.0;
     scalar l = 0.7;
 
-    PackedBoolList pointToBeRetained(startOfSurfacePointPairs_, true);
+    bitSet pointToBeRetained(startOfSurfacePointPairs_, true);
 
     std::list<Point> pointsToInsert;
 

@@ -147,7 +147,7 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
     {
         bool columnCells = readBool(dict_.lookup("columnCells"));
 
-        PackedBoolList nonManifoldEdge(extrudedPatch_.nEdges());
+        bitSet nonManifoldEdge(extrudedPatch_.nEdges());
         for (label edgeI = 0; edgeI < extrudedPatch_.nInternalEdges(); edgeI++)
         {
             if (columnCells)

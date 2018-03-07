@@ -48,10 +48,6 @@ Usage
 
       - \par -triSurface
         Use triSurface library for input/output
-
-      - \par -keyed
-        Use keyedSurface for input/output
-
 Note
     The filename extensions are used to determine the file format type.
 
@@ -64,7 +60,6 @@ Note
 #include "surfMesh.H"
 #include "surfFields.H"
 #include "surfPointFields.H"
-#include "PackedBoolList.H"
 
 #include "MeshedSurfaces.H"
 #include "ModifiableMeshedSurface.H"

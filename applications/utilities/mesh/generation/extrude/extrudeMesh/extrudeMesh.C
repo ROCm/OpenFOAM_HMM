@@ -890,7 +890,7 @@ int main(int argc, char *argv[])
         const edgeList& edges = mesh.edges();
         const pointField& points = mesh.points();
 
-        PackedBoolList collapseEdge(mesh.nEdges());
+        bitSet collapseEdge(mesh.nEdges());
         Map<point> collapsePointToLocation(mesh.nPoints());
 
         forAll(edges, edgeI)

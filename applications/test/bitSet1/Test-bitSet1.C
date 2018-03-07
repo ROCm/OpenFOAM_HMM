@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,50 +22,60 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 Application
+    Test-bitSet1
 
 Description
+    Test bitSet functionality
 
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "boolList.H"
+#include "bitSet.H"
+#include "HashSet.H"
 #include "cpuTime.H"
-#include "PackedBoolList.H"
+#include <vector>
+#include <unordered_set>
 
 using namespace Foam;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+inline Ostream& report
+(
+    const bitSet& bitset,
+    bool showBits = false,
+    bool debugOutput = false
+)
+{
+    Info<< "size=" << bitset.size() << "/" << bitset.capacity()
+        << " count=" << bitset.count()
+        << " all:" << bitset.all()
+        << " any:" << bitset.any()
+        << " none:" << bitset.none() << nl;
 
+    Info<< "values: " << flatOutput(bitset) << nl;
+    if (showBits)
+    {
+        bitset.printBits(Info, debugOutput) << nl;
+    }
+
+    return Info;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    const label nLoop = 5;
-    const label n = 100000000;
-    // const label nReport = 1000000;
+    bitSet set1(100);
 
-    cpuTime timer;
+    Info<<"bitSet(label): "; report(set1, true);
 
-    // test inserts
-    PackedBoolList packed;
-    for (label iloop = 0; iloop < nLoop; ++iloop)
-    {
-        for (label i = 0; i < n; ++i)
-        {
-            // if ((i % nReport) == 0 && i)
-            // {
-            //     Info<< "." << flush;
-            // }
-            packed[i] = 1;
-            // Make compiler do something else too
-            packed[i/2] = 0;
-        }
-    }
-    Info<< nl
-        << "insert test: " << nLoop << "*" << n << " elements in "
-        << timer.cpuTimeIncrement() << " s\n\n";
+    bitSet set2(100, { -1, 10, 25, 45});
+    Info<<"bitSet(label, labels): "; report(set2, true);
 
-    Info << "\nEnd\n" << endl;
+    Info<< "End\n" << endl;
 
     return 0;
 }

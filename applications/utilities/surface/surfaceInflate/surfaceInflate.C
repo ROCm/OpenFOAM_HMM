@@ -54,7 +54,7 @@ Usage
 #include "triSurfaceFields.H"
 #include "triSurfaceMesh.H"
 #include "triSurfaceGeoMesh.H"
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "OBJstream.H"
 #include "surfaceFeatures.H"
 
@@ -131,7 +131,7 @@ tmp<vectorField> calcVertexNormals(const triSurface& surf)
 tmp<vectorField> calcPointNormals
 (
     const triSurface& s,
-    const PackedBoolList& isFeaturePoint,
+    const bitSet& isFeaturePoint,
     const List<surfaceFeatures::edgeStatus>& edgeStat
 )
 {
@@ -215,7 +215,7 @@ tmp<vectorField> calcPointNormals
 void detectSelfIntersections
 (
     const triSurfaceMesh& s,
-    PackedBoolList& isEdgeIntersecting
+    bitSet& isEdgeIntersecting
 )
 {
     const edgeList& edges = s.edges();
@@ -258,9 +258,9 @@ label detectIntersectionPoints
     const vectorField& displacement,
 
     const bool checkSelfIntersect,
-    const PackedBoolList& initialIsEdgeIntersecting,
+    const bitSet& initialIsEdgeIntersecting,
 
-    PackedBoolList& isPointOnHitEdge,
+    bitSet& isPointOnHitEdge,
     scalarField& scale
 )
 {
@@ -307,7 +307,7 @@ label detectIntersectionPoints
     // 2. (new) surface self intersections
     if (checkSelfIntersect)
     {
-        PackedBoolList isEdgeIntersecting;
+        bitSet isEdgeIntersecting;
         detectSelfIntersections(s, isEdgeIntersecting);
 
         const edgeList& edges = s.edges();
@@ -400,7 +400,7 @@ tmp<scalarField> avg
 void minSmooth
 (
     const triSurface& s,
-    const PackedBoolList& isAffectedPoint,
+    const bitSet& isAffectedPoint,
     const scalarField& fld,
     scalarField& newFld
 )
@@ -442,19 +442,19 @@ void lloydsSmoothing
 (
     const label nSmooth,
     triSurface& s,
-    const PackedBoolList& isFeaturePoint,
+    const bitSet& isFeaturePoint,
     const List<surfaceFeatures::edgeStatus>& edgeStat,
-    const PackedBoolList& isAffectedPoint
+    const bitSet& isAffectedPoint
 )
 {
     const labelList& meshPoints = s.meshPoints();
     const edgeList& edges = s.edges();
 
 
-    PackedBoolList isSmoothPoint(isAffectedPoint);
+    bitSet isSmoothPoint(isAffectedPoint);
     // Extend isSmoothPoint
     {
-        PackedBoolList newIsSmoothPoint(isSmoothPoint);
+        bitSet newIsSmoothPoint(isSmoothPoint);
         forAll(edges, edgeI)
         {
             const edge& e = edges[edgeI];
@@ -539,7 +539,7 @@ void lloydsSmoothing
 
         // Extend isSmoothPoint
         {
-            PackedBoolList newIsSmoothPoint(isSmoothPoint);
+            bitSet newIsSmoothPoint(isSmoothPoint);
             forAll(edges, edgeI)
             {
                 const edge& e = edges[edgeI];
@@ -662,7 +662,7 @@ int main(int argc, char *argv[])
         << " out of " << s.nEdges() << nl
         << endl;
 
-    PackedBoolList isFeaturePoint(s.nPoints(), features.featurePoints());
+    bitSet isFeaturePoint(s.nPoints(), features.featurePoints());
 
     const List<surfaceFeatures::edgeStatus> edgeStat(features.toStatus());
 
@@ -723,11 +723,11 @@ int main(int argc, char *argv[])
 
 
     // Any point on any intersected edge in any of the iterations
-    PackedBoolList isScaledPoint(s.nPoints());
+    bitSet isScaledPoint(s.nPoints());
 
 
     // Detect any self intersections on initial mesh
-    PackedBoolList initialIsEdgeIntersecting;
+    bitSet initialIsEdgeIntersecting;
     if (checkSelfIntersect)
     {
         detectSelfIntersections(s, initialIsEdgeIntersecting);
@@ -775,7 +775,7 @@ int main(int argc, char *argv[])
 
 
         // Detect any intersections and scale back
-        PackedBoolList isAffectedPoint;
+        bitSet isAffectedPoint;
         label nIntersections = detectIntersectionPoints
         (
             1e-9,       // intersection tolerance
@@ -818,7 +818,7 @@ int main(int argc, char *argv[])
             minSmooth
             (
                 s,
-                PackedBoolList(s.nPoints(), true),
+                bitSet(s.nPoints(), true),
                 oldScale,
                 scale
             );

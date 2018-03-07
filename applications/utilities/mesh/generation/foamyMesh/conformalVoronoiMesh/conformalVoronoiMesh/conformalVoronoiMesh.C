@@ -1081,7 +1081,7 @@ void Foam::conformalVoronoiMesh::move()
         Zero
     );
 
-    PackedBoolList pointToBeRetained(number_of_vertices(), true);
+    bitSet pointToBeRetained(number_of_vertices(), true);
 
     DynamicList<Point> pointsToInsert(number_of_vertices());
 

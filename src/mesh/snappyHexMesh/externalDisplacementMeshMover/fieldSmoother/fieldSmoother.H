@@ -85,8 +85,8 @@ public:
         void smoothNormals
         (
             const label nIter,
-            const PackedBoolList& isMeshMasterPoint,
-            const PackedBoolList& isMeshMasterEdge,
+            const bitSet& isMeshMasterPoint,
+            const bitSet& isMeshMasterEdge,
             const labelList& fixedPoints,
             pointVectorField& normals
         ) const;
@@ -95,8 +95,8 @@ public:
         void smoothPatchNormals
         (
             const label nIter,
-            const PackedBoolList& isPatchMasterPoint,
-            const PackedBoolList& isPatchMasterEdge,
+            const bitSet& isPatchMasterPoint,
+            const bitSet& isPatchMasterEdge,
             const indirectPrimitivePatch& adaptPatch,
             pointField& normals
         ) const;
@@ -106,8 +106,8 @@ public:
         void minSmoothField
         (
             const label nIter,
-            const PackedBoolList& isPatchMasterPoint,
-            const PackedBoolList& isPatchMasterEdge,
+            const bitSet& isPatchMasterPoint,
+            const bitSet& isPatchMasterEdge,
             const indirectPrimitivePatch& adaptPatch,
             const scalarField& fieldMin,
             Field<Type>& field
@@ -117,9 +117,9 @@ public:
         void smoothLambdaMuDisplacement
         (
             const label nIter,
-            const PackedBoolList& isMeshMasterPoint,
-            const PackedBoolList& isMeshMasterEdge,
-            const PackedBoolList& isSmoothable,
+            const bitSet& isMeshMasterPoint,
+            const bitSet& isMeshMasterEdge,
+            const bitSet& isSmoothable,
             vectorField& displacement
         ) const;
 };

@@ -64,7 +64,7 @@ SourceFiles
 #ifndef isoSurface_H
 #define isoSurface_H
 
-#include "PackedBoolList.H"
+#include "bitSet.H"
 #include "volFields.H"
 #include "slicedVolFields.H"
 #include "MeshedSurface.H"
@@ -165,7 +165,7 @@ class isoSurface
             static bool collocatedPatch(const polyPatch&);
 
             //- Per face whether is collocated
-            PackedBoolList collocatedFaces(const coupledPolyPatch&) const;
+            bitSet collocatedFaces(const coupledPolyPatch&) const;
 
             //- Synchonise points on all non-separated coupled patches
             void syncUnseparatedPoints
@@ -231,7 +231,7 @@ class isoSurface
         //  point.
         void calcSnappedPoint
         (
-            const PackedBoolList& isBoundaryPoint,
+            const bitSet& isBoundaryPoint,
             const labelList& boundaryRegion,
             const volVectorField& meshC,
             const volScalarField& cVals,

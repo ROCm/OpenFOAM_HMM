@@ -366,7 +366,7 @@ void Foam::cellSplitter::setRefinement
 
 
     // Mark off affected face.
-    boolList faceUpToDate(mesh_.nFaces(), true);
+    bitSet faceUpToDate(mesh_.nFaces(), true);
 
     forAllConstIter(Map<point>, cellToMidPoint, iter)
     {
@@ -374,18 +374,15 @@ void Foam::cellSplitter::setRefinement
 
         const cell& cFaces = mesh_.cells()[celli];
 
-        forAll(cFaces, i)
-        {
-            label facei = cFaces[i];
-
-            faceUpToDate[facei] = false;
-        }
+        faceUpToDate.unsetMany(cFaces);
     }
 
     forAll(faceUpToDate, facei)
     {
-        if (!faceUpToDate[facei])
+        if (!faceUpToDate.test(facei))
         {
+            faceUpToDate.set(facei);
+
             const face& f = mesh_.faces()[facei];
 
             if (mesh_.isInternalFace(facei))
@@ -454,8 +451,6 @@ void Foam::cellSplitter::setRefinement
                     )
                 );
             }
-
-            faceUpToDate[facei] = true;
         }
     }
 }

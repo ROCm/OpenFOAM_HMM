@@ -660,7 +660,7 @@ Foam::label Foam::checkTopology
 
             const cellList& cells = mesh.cells();
             const faceList& faces = mesh.faces();
-            PackedBoolList isZonePoint(mesh.nPoints());
+            bitSet isZonePoint(mesh.nPoints());
 
             for (const cellZone& cZone : cellZones)
             {
