@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,11 +28,11 @@ License
 template<class T>
 inline Foam::UIndirectList<T>::UIndirectList
 (
-    const UList<T>& completeList,
+    const UList<T>& values,
     const labelUList& addr
 )
 :
-    completeList_(const_cast<UList<T>&>(completeList)),
+    values_(const_cast<UList<T>&>(values)),
     addressing_(addr)
 {}
 
@@ -56,35 +56,35 @@ inline bool Foam::UIndirectList<T>::empty() const
 template<class T>
 inline T& Foam::UIndirectList<T>::first()
 {
-    return completeList_[addressing_.first()];
+    return values_[addressing_.first()];
 }
 
 
 template<class T>
 inline const T& Foam::UIndirectList<T>::first() const
 {
-    return completeList_[addressing_.first()];
+    return values_[addressing_.first()];
 }
 
 
 template<class T>
 inline T& Foam::UIndirectList<T>::last()
 {
-    return completeList_[addressing_.last()];
+    return values_[addressing_.last()];
 }
 
 
 template<class T>
 inline const T& Foam::UIndirectList<T>::last() const
 {
-    return completeList_[addressing_.last()];
+    return values_[addressing_.last()];
 }
 
 
 template<class T>
 inline const Foam::UList<T>& Foam::UIndirectList<T>::completeList() const
 {
-    return completeList_;
+    return values_;
 }
 
 
@@ -125,61 +125,63 @@ inline Foam::List<T> Foam::UIndirectList<T>::operator()() const
 template<class T>
 inline T& Foam::UIndirectList<T>::operator[](const label i)
 {
-    return completeList_[addressing_[i]];
+    return values_[addressing_[i]];
 }
 
 
 template<class T>
 inline const T& Foam::UIndirectList<T>::operator[](const label i) const
 {
-    return completeList_[addressing_[i]];
+    return values_[addressing_[i]];
 }
 
 
 template<class T>
-inline void Foam::UIndirectList<T>::operator=(const UList<T>& ae)
+inline void Foam::UIndirectList<T>::operator=(const UList<T>& rhs)
 {
-    if (addressing_.size() != ae.size())
+    const label len = addressing_.size();
+
+    if (len != rhs.size())
     {
         FatalErrorInFunction
             << "Addressing and list of addressed elements "
-               "have different sizes: "
-            << addressing_.size() << " " << ae.size()
+               "have different sizes: " << len << " " << rhs.size()
             << abort(FatalError);
     }
 
-    forAll(addressing_, i)
+    for (label i = 0; i < len; ++i)
     {
-        completeList_[addressing_[i]] = ae[i];
+        values_[addressing_[i]] = rhs[i];
     }
 }
 
 
 template<class T>
-inline void Foam::UIndirectList<T>::operator=(const UIndirectList<T>& ae)
+inline void Foam::UIndirectList<T>::operator=(const UIndirectList<T>& rhs)
 {
-    if (addressing_.size() != ae.size())
+    const label len = addressing_.size();
+
+    if (len != rhs.size())
     {
         FatalErrorInFunction
             << "Addressing and list of addressed elements "
-               "have different sizes: "
-            << addressing_.size() << " " << ae.size()
+               "have different sizes: " << len << " " << rhs.size()
             << abort(FatalError);
     }
 
-    forAll(addressing_, i)
+    for (label i = 0; i < len; ++i)
     {
-        completeList_[addressing_[i]] = ae[i];
+        values_[addressing_[i]] = rhs[i];
     }
 }
 
 
 template<class T>
-inline void Foam::UIndirectList<T>::operator=(const T& t)
+inline void Foam::UIndirectList<T>::operator=(const T& val)
 {
-    forAll(addressing_, i)
+    for (const label idx : addressing_)
     {
-        completeList_[addressing_[i]] = t;
+        values_[idx] = val;
     }
 }
 

@@ -41,6 +41,13 @@ void printInfo(const ListType& lst)
         << "addr: " << flatOutput(lst.addressing()) << nl
         << "list: " << flatOutput(lst) << nl
         << endl;
+
+    Info<<"for-range :";
+    for (const auto& val : lst)
+    {
+        Info<< " " << val;
+    }
+    Info<< nl;
 }
 
 

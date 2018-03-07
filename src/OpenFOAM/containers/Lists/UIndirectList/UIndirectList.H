@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ Description
 
     Like IndirectList but does not store addressing.
 
-    Note the const_cast of the completeList. This is so we can use it both
+    Note the const_cast of the list values. This is so we can use it both
     on const and non-const lists. Alternative would be to have a const_
     variant etc.
 
@@ -48,7 +48,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 template<class T> class UIndirectList;
 template<class T> Ostream& operator<<(Ostream&, const UIndirectList<T>&);
 
@@ -65,25 +65,50 @@ class UIndirectList
 {
     // Private data
 
-        UList<T>& completeList_;
+        UList<T>& values_;
         const labelUList& addressing_;
-
 
 public:
 
+    // STL type definitions
+
+        //- Type of values the list contains.
+        typedef T value_type;
+
+        //- The pointer type for non-const access to value_type items
+        typedef T* pointer;
+
+        //- The pointer type for const access to value_type items
+        typedef const T* const_pointer;
+
+        //- The type used for storing into value_type objects
+        typedef T& reference;
+
+        //- The type used for reading from constant value_type objects.
+        typedef const T& const_reference;
+
+        //- The type to represent the size of a UList
+        typedef label size_type;
+
+        //- The difference between iterator objects
+        typedef label difference_type;
+
+        //- Forward iterator with non-const access
+        class iterator;
+
+        //- Forward iterator with const access
+        class const_iterator;
+
+
     // Constructors
 
-        //- Construct given the complete list and the addressing array
-        inline UIndirectList
-        (
-            const UList<T>& completeList,
-            const labelUList& addr
-        );
+        //- Copy construct from the values list and the addressing array
+        inline UIndirectList(const UList<T>& values, const labelUList& addr);
 
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- Return the number of elements in the list
         inline label size() const;
@@ -103,14 +128,14 @@ public:
         //- Return the last element of the list.
         inline const T& last() const;
 
-        //- Return the complete list
+        //- Return the complete list of values
         inline const UList<T>& completeList() const;
 
         //- Return the list addressing
         inline const List<label>& addressing() const;
 
 
-      // Search
+    // Search
 
         //- Find index of the first occurence of the value.
         //  When start is specified, any occurences before start are ignored.
@@ -139,38 +164,142 @@ public:
         //- Return const access to an element
         inline const T& operator[](const label i) const;
 
-        //- Assignment to UList of addressed elements
-        inline void operator=(const UList<T>& ae);
+        //- Copy assignment from a list of the addressed elements
+        inline void operator=(const UList<T>& rhs);
 
-        //- Assignment to UIndirectList of addressed elements
-        inline void operator=(const UIndirectList<T>& ae);
+        //- Copy assignment from a indirect list of the addressed elements
+        inline void operator=(const UIndirectList<T>& rhs);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T& t);
+        inline void operator=(const T& val);
+
+        //- An iterator for an indirect list
+        class iterator
+        {
+            typename UList<T>::pointer data_;
+            labelUList::const_iterator base_;
+
+        public:
+
+            iterator
+            (
+                UList<T>& list,
+                labelUList::const_iterator baseIter
+            )
+            :
+                data_(list.begin()),
+                base_(baseIter)
+            {}
+
+            reference operator*() const
+            {
+                return data_[*base_];
+            }
+
+            iterator& operator++()
+            {
+                ++base_;
+                return *this;
+            }
+
+            bool operator==(iterator& rhs) const
+            {
+                return base_ == rhs.base_;
+            }
+
+            bool operator!=(iterator& rhs) const
+            {
+                return (base_ != rhs.base_);
+            }
+        };
 
 
-    // STL type definitions
+        //- A const iterator for an indirect list
+        class const_iterator
+        {
+            typename UList<T>::const_pointer data_;
+            labelUList::const_iterator base_;
 
-        //- Type of values the list contains.
-        typedef T value_type;
+        public:
 
-        //- The type used for storing into UList::value_type objects.
-        typedef T& reference;
+            const_iterator
+            (
+                const UList<T>& list,
+                labelUList::const_iterator baseIter
+            )
+            :
+                data_(list.begin()),
+                base_(baseIter)
+            {}
 
-        //- The type used for reading from constant UList::value_type objects
-        typedef const T& const_reference;
+            const_reference operator*() const
+            {
+                return data_[*base_];
+            }
 
-        //- The type that can represent the difference between any two
-        //- UList iterator objects.
-        typedef label difference_type;
+            const_iterator& operator++()
+            {
+                ++base_;
+                return *this;
+            }
 
-        //- The type that can represent the size of a UList.
-        typedef label size_type;
+            bool operator==(const_iterator& rhs) const
+            {
+                return base_ == rhs.base_;
+            }
+
+            bool operator!=(const_iterator& rhs) const
+            {
+                return base_ != rhs.base_;
+            }
+        };
+
+
+    // iterator (non-const)
+
+        //- Return an iterator at begin of list
+        inline iterator begin()
+        {
+            return iterator(values_, addressing_.cbegin());
+        }
+
+        //- Return an iterator at end of list
+        inline iterator end()
+        {
+            return iterator(values_, addressing_.cend());
+        }
+
+
+    // iterator (const)
+
+        //- Return a const_iterator at begin of list
+        inline const_iterator cbegin() const
+        {
+            return const_iterator(values_, addressing_.cbegin());
+        }
+
+        //- Return a const_iterator at end of list
+        inline const_iterator cend() const
+        {
+            return const_iterator(values_, addressing_.cend());
+        }
+
+        //- Return a const_iterator at end of list
+        inline const_iterator begin() const
+        {
+            return cbegin();
+        }
+
+        //- Return a const_iterator at end of list
+        inline const_iterator end() const
+        {
+            return cend();
+        }
 
 
     // Writing
 
-        //- Write the List, with line-breaks in ASCII if the list length
+        //- Write the list, with line-breaks in ASCII if its length
         //- exceeds shortListLen.
         //  Using '0' suppresses line-breaks entirely.
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
@@ -178,11 +307,11 @@ public:
 
     // Ostream operator
 
-        //- Write List to Ostream, as per writeList() with shortListLen=10
+        //- Write list to Ostream, as per writeList() with shortListLen=10
         friend Ostream& operator<< <T>
         (
             Ostream& os,
-            const UIndirectList<T>& lst
+            const UIndirectList<T>& list
         );
 };
 

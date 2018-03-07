@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,14 +34,14 @@ inline Foam::label Foam::UIndirectList<T>::find
 {
     if (start >= 0)
     {
-        List_CONST_ACCESS(T, completeList_, lst);
+        List_CONST_ACCESS(T, values_, vals);
         List_CONST_ACCESS(label, addressing_, addr);
 
         const label len = addressing_.size();
 
         for (label i = start; i < len; ++i)
         {
-            if (lst[addr[i]] == val)
+            if (vals[addr[i]] == val)
             {
                 return i;
             }
@@ -59,7 +59,7 @@ inline Foam::label Foam::UIndirectList<T>::rfind
     const label pos
 ) const
 {
-    List_CONST_ACCESS(T, completeList_, lst);
+    List_CONST_ACCESS(T, values_, vals);
     List_CONST_ACCESS(label, addressing_, addr);
 
     for
@@ -74,7 +74,7 @@ inline Foam::label Foam::UIndirectList<T>::rfind
         --i
     )
     {
-        if (lst[addr[i]] == val)
+        if (vals[addr[i]] == val)
         {
             return i;
         }
