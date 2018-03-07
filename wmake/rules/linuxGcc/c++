@@ -4,8 +4,10 @@ c++WARN     = -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-para
               -Wno-invalid-offsetof -Wno-attributes \
               -Wno-unknown-pragmas
 
-# Suppress some warnings for flex++ and CGAL
-c++LESSWARN = -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds
+# Suppress some warnings (flex++, CGAL, etc)
+c++LESSWARN = \
+    -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds \
+    -fpermissive
 
 CC          = g++ -std=c++11 -m32
 

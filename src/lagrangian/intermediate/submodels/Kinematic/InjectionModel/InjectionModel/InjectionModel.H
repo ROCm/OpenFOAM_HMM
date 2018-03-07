@@ -81,7 +81,7 @@ public:
     // Enumerations
 
         //- Parcel basis representation options
-        //  i.e constant number of particles OR constant mass per parcel
+        //- i.e constant number of particles OR constant mass per parcel
         enum parcelBasis
         {
             pbNumber,
@@ -100,7 +100,7 @@ protected:
             scalar SOI_;
 
             //- Total volume of particles introduced by this injector [m^3]
-            //  - scaled to ensure massTotal is achieved
+            //- Note: scaled to ensure massTotal is achieved
             scalar volumeTotal_;
 
             //- Total mass to inject [kg]
@@ -128,7 +128,7 @@ protected:
             parcelBasis parcelBasis_;
 
             //- nParticle to assign to parcels when the 'fixed' basis
-            //  is selected
+            //- is selected
             scalar nParticleFixed_;
 
             //- Continuous phase time at start of injection time step [s]
@@ -137,8 +137,12 @@ protected:
             //- Time at start of injection time step [s]
             scalar timeStep0_;
 
+            //- Minimum number of particles used to represent each parcel
+            //- default = 1
+            scalar minParticlesPerParcel_;
+
             //- Volume that should have been injected, but would lead to
-            //  less than 1 particle per parcel
+            //- less than minParticlesPerParcel_ particle per parcel
             scalar delayedVolume_;
 
             //- Optional injector ID

@@ -54,6 +54,8 @@ bool Foam::faceOnlySet::trackToBoundary
     DynamicList<scalar>& samplingCurveDist
 ) const
 {
+    const vector offset = (end_ - start_);
+
     particle::trackingData td(particleCloud);
 
     point trackPt = singleParticle.position();
@@ -75,9 +77,10 @@ bool Foam::faceOnlySet::trackToBoundary
             samplingCurveDist.append(mag(trackPt - start_));
         }
 
-        if (mag(trackPt - end_) < smallDist)
+        if (-smallDist < ((trackPt - end_) & offset))
         {
-            // End reached
+            // Projected onto sampling vector
+            // - done when we are near or past the end of the sampling vector
             return false;
         }
         else if (singleParticle.onBoundaryFace())
@@ -166,7 +169,6 @@ void Foam::faceOnlySet::calcSamples
         // Set points and cell/face labels to empty lists
         //Info<< "calcSamples : Both start_ and end_ outside domain"
         //    << endl;
-        const_cast<polyMesh&>(mesh()).moving(oldMoving);
 
         const_cast<polyMesh&>(mesh()).moving(oldMoving);
         return;
