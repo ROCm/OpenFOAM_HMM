@@ -591,7 +591,7 @@ int main(int argc, char *argv[])
             {
                 addr[n] = facei;
                 flip[n] = faceToFlip[facei];
-                n++;
+                ++n;
             }
         }
 

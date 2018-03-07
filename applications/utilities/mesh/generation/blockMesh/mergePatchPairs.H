@@ -29,17 +29,10 @@
                 const polyPatch& masterPatch =
                     mesh.boundaryMesh()[masterPatchName];
 
-                labelList isf(masterPatch.size());
-
-                forAll(isf, i)
-                {
-                    isf[i] = masterPatch.start() + i;
-                }
-
                 fz[3*pairI] = new faceZone
                 (
                     mergeName + "MasterZone",
-                    isf,
+                    identity(masterPatch.size(), masterPatch.start()),
                     false, // none are flipped
                     0,
                     mesh.faceZones()
@@ -50,17 +43,10 @@
                 const polyPatch& slavePatch =
                     mesh.boundaryMesh()[slavePatchName];
 
-                labelList osf(slavePatch.size());
-
-                forAll(osf, i)
-                {
-                    osf[i] = slavePatch.start() + i;
-                }
-
                 fz[3*pairI + 1] = new faceZone
                 (
                     mergeName + "SlaveZone",
-                    osf,
+                    identity(slavePatch.size(), slavePatch.start()),
                     false, // none are flipped
                     1,
                     mesh.faceZones()

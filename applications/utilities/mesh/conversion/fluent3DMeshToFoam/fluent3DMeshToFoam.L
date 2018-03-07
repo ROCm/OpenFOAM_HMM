@@ -1168,7 +1168,7 @@ int main(int argc, char *argv[])
 
     forAll(faceZoneIDs, faceZonei)
     {
-        label zoneID = faceGroupZoneID[faceZoneIDs[faceZonei] ];
+        label zoneID = faceGroupZoneID[faceZoneIDs[faceZonei]];
         word name = groupName[zoneID];
         const word& type = groupType[zoneID];
 

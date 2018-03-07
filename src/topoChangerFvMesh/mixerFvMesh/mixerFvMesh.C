@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -79,17 +79,10 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
     const word innerSliderName(motionDict_.subDict("slider").lookup("inside"));
     const polyPatch& innerSlider = boundaryMesh()[innerSliderName];
 
-    labelList isf(innerSlider.size());
-
-    forAll(isf, i)
-    {
-        isf[i] = innerSlider.start() + i;
-    }
-
     fz[0] = new faceZone
     (
         "insideSliderZone",
-        isf,
+        identity(innerSlider.size(), innerSlider.start()),
         false, // none are flipped
         0,
         faceZones()
@@ -99,17 +92,10 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
     const word outerSliderName(motionDict_.subDict("slider").lookup("outside"));
     const polyPatch& outerSlider = boundaryMesh()[outerSliderName];
 
-    labelList osf(outerSlider.size());
-
-    forAll(osf, i)
-    {
-        osf[i] = outerSlider.start() + i;
-    }
-
     fz[1] = new faceZone
     (
         "outsideSliderZone",
-        osf,
+        identity(outerSlider.size(), outerSlider.start()),
         false, // none are flipped
         1,
         faceZones()
@@ -124,7 +110,7 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
     regionSplit rs(*this);
 
     // Get the region of the cell containing the origin.
-    label originRegion = rs[findNearestCell(cs().origin())];
+    const label originRegion = rs[findNearestCell(cs().origin())];
 
     labelList movingCells(nCells());
     label nMovingCells = 0;
@@ -134,17 +120,17 @@ void Foam::mixerFvMesh::addZonesAndModifiers()
         if (rs[celli] == originRegion)
         {
             movingCells[nMovingCells] = celli;
-            nMovingCells++;
+            ++nMovingCells;
         }
     }
 
-    movingCells.setSize(nMovingCells);
+    movingCells.resize(nMovingCells);
     Info<< "Number of cells in the moving region: " << nMovingCells << endl;
 
     cz[0] = new cellZone
     (
         "movingCells",
-        movingCells,
+        std::move(movingCells),
         0,
         cellZones()
     );
@@ -203,14 +189,14 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 
     const labelList& cellAddr = cellZones()["movingCells"];
 
-    forAll(cellAddr, celli)
+    for (const label celli : cellAddr)
     {
-        const cell& curCell = c[cellAddr[celli]];
+        const cell& curCell = c[celli];
 
-        forAll(curCell, facei)
+        for (const label facei : curCell)
         {
             // Mark all the points as moving
-            const face& curFace = f[curCell[facei]];
+            const face& curFace = f[facei];
 
             forAll(curFace, pointi)
             {
@@ -227,9 +213,9 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 
     const labelList& innerSliderAddr = faceZones()[innerSliderZoneName];
 
-    forAll(innerSliderAddr, facei)
+    for (const label facei : innerSliderAddr)
     {
-        const face& curFace = f[innerSliderAddr[facei]];
+        const face& curFace = f[facei];
 
         forAll(curFace, pointi)
         {
@@ -245,9 +231,9 @@ void Foam::mixerFvMesh::calcMovingMasks() const
 
     const labelList& outerSliderAddr = faceZones()[outerSliderZoneName];
 
-    forAll(outerSliderAddr, facei)
+    for (const label facei : outerSliderAddr)
     {
-        const face& curFace = f[outerSliderAddr[facei]];
+        const face& curFace = f[facei];
 
         forAll(curFace, pointi)
         {

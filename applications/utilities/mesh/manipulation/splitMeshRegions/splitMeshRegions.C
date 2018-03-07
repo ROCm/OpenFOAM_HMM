@@ -1925,7 +1925,7 @@ int main(int argc, char *argv[])
                         new cellZone
                         (
                             zoneName,           //name
-                            regionCells,        //addressing
+                            std::move(regionCells), //addressing
                             zoneI,              //index
                             cellZones           //cellZoneMesh
                         )

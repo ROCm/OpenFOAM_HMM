@@ -233,8 +233,8 @@ int main(int argc, char *argv[])
         new faceZone
         (
             "membraneFaces",
-            faces,
-            zoneFlip,
+            std::move(faces),
+            std::move(zoneFlip),
             0,
             mesh.faceZones()
         );
