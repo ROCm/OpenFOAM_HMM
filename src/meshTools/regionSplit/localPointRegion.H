@@ -188,7 +188,7 @@ public:
                 return meshFaceMap_;
             }
 
-            //- Per face the region of its points
+            //- Per face (in local index) the region of its points
             const faceList& faceRegions() const
             {
                 return faceRegions_;
