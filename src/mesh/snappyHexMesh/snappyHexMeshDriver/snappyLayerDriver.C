@@ -572,8 +572,26 @@ void Foam::snappyLayerDriver::handleNonManifolds
 
     pointSet nonManifoldPoints(mesh, "nonManifoldPoints", pp.nPoints());
 
-    // 1. Local check
-    checkManifold(pp, nonManifoldPoints);
+    // 1. Local check. Note that we do not check for e.g. two patch faces
+    // being connected via a point since their connection might be ok
+    // through a coupled patch. The ultimate is to do a proper point-face
+    // walk which is done when actually duplicating the points. Here we just
+    // do the obvious problems.
+    {
+        // Check for edge-faces (surface pinched at edge)
+        const labelListList& edgeFaces = pp.edgeFaces();
+
+        forAll(edgeFaces, edgei)
+        {
+            const labelList& eFaces = edgeFaces[edgei];
+            if (eFaces.size() > 2)
+            {
+                const edge& e = pp.edges()[edgei];
+                nonManifoldPoints.insert(pp.meshPoints()[e[0]]);
+                nonManifoldPoints.insert(pp.meshPoints()[e[1]]);
+            }
+        }
+    }
 
     // 2. Remote check for boundary edges on coupled boundaries
     forAll(edgeGlobalFaces, edgei)
@@ -3336,7 +3354,9 @@ void Foam::snappyLayerDriver::addLayers
 
     {
         // Check outside of baffles for non-manifoldness
-        PackedBoolList duplicatePoint(mesh.nPoints());
+
+        // Points that are candidates for duplication
+        labelList candidatePoints;
         {
             // Do full analysis to see if we need to extrude points
             // so have to duplicate them
@@ -3380,32 +3400,49 @@ void Foam::snappyLayerDriver::addLayers
                 extrudeStatus
             );
 
+
+            // Do duplication only if all patch points decide to extrude. Ignore
+            // contribution from non-patch points. Note that we need to
+            // apply this to all mesh points
+            labelList minPatchState(mesh.nPoints(), labelMax);
             forAll(extrudeStatus, patchPointi)
             {
-                if (extrudeStatus[patchPointi] != NOEXTRUDE)
+                label pointi = pp().meshPoints()[patchPointi];
+                minPatchState[pointi] = extrudeStatus[patchPointi];
+            }
+
+            syncTools::syncPointList
+            (
+                mesh,
+                minPatchState,
+                minEqOp<label>(),   // combine op
+                labelMax            // null value
+            );
+
+            // So now minPatchState:
+            // - labelMax on non-patch points
+            // - NOEXTRUDE if any patch point was not extruded
+            // - EXTRUDE or EXTRUDEREMOVE if all patch points are extruded/
+            //   extrudeRemove.
+
+            label n = 0;
+            forAll(minPatchState, pointi)
+            {
+                label state = minPatchState[pointi];
+                if (state == EXTRUDE || state == EXTRUDEREMOVE)
                 {
-                    duplicatePoint[pp().meshPoints()[patchPointi]] = 1;
+                    n++;
                 }
             }
-        }
-
-
-        // Duplicate points only if all points agree
-        syncTools::syncPointList
-        (
-            mesh,
-            duplicatePoint,
-            andEqOp<unsigned int>(),    // combine op
-            0u                          // null value
-        );
-        label n = duplicatePoint.count();
-        labelList candidatePoints(n);
-        n = 0;
-        forAll(duplicatePoint, pointi)
-        {
-            if (duplicatePoint[pointi])
+            candidatePoints.setSize(n);
+            n = 0;
+            forAll(minPatchState, pointi)
             {
-                candidatePoints[n++] = pointi;
+                label state = minPatchState[pointi];
+                if (state == EXTRUDE || state == EXTRUDEREMOVE)
+                {
+                    candidatePoints[n++] = pointi;
+                }
             }
         }
 
