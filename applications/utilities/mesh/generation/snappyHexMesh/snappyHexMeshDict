@@ -549,8 +549,8 @@ addLayersControls
     // Static analysis of starting mesh
 
         // When not to extrude surface. 0 is flat surface, 90 is when two faces
-        // are perpendicular
-        featureAngle 130;
+        // are perpendicular. Note: was not working correctly < 1806
+        featureAngle 120;
 
         // When to merge patch faces. Default is featureAngle. Useful when
         // featureAngle is large.
