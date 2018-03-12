@@ -35,6 +35,7 @@ License
 #include "pointMVCWeight.H"
 #include "dimensionedSymmTensor.H"
 #include "quaternion.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -383,6 +384,8 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
     const surfaceScalarField Df(diffusivity().operator()());
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
+    fv::options& fvOptions(fv::options::New(fvMesh_));
+
     const volTensorField gradCd(fvc::grad(cellDisp));
 
     for (int nonOrth=0; nonOrth<=nNonOrthogonalCorr_; nonOrth++)
@@ -407,7 +410,10 @@ void Foam::surfaceAlignedSBRStressFvMotionSolver::solve()
             )
           ==
             fvc::div(sigmaD_)
+          + fvOptions(cellDisp)
         );
+
+        fvOptions.constrain(DEqn);
 
         // Note: solve uncoupled
         DEqn.solveSegregatedOrCoupled(DEqn.solverDict());

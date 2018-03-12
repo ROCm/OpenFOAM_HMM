@@ -33,6 +33,7 @@ License
 #include "mapPolyMesh.H"
 #include "solidBodyMotionFunction.H"
 #include "transformField.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -344,7 +345,9 @@ void Foam::solidBodyDisplacementLaplacianFvMotionSolver::solve()
     diffusivity().correct();
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
-    Foam::solve
+    fv::options& fvOptions(fv::options::New(fvMesh_));
+
+    fvVectorMatrix TEqn
     (
         fvm::laplacian
         (
@@ -352,7 +355,13 @@ void Foam::solidBodyDisplacementLaplacianFvMotionSolver::solve()
             cellDisplacement_,
             "laplacian(diffusivity,cellDisplacement)"
         )
+     ==
+        fvOptions(cellDisplacement_)
     );
+
+    fvOptions.constrain(TEqn);
+
+    TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
 }
 
 

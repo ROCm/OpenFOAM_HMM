@@ -31,6 +31,7 @@ License
 #include "OFstream.H"
 #include "meshTools.H"
 #include "mapPolyMesh.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -333,6 +334,8 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
     diffusivity().correct();
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
+    fv::options& fvOptions(fv::options::New(fvMesh_));
+
     // We explicitly do NOT want to interpolate the motion inbetween
     // different regions so bypass all the matrix manipulation.
     fvVectorMatrix TEqn
@@ -343,7 +346,11 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
             cellDisplacement_,
             "laplacian(diffusivity,cellDisplacement)"
         )
+     ==
+        fvOptions(cellDisplacement_)
     );
+
+    fvOptions.constrain(TEqn);
 
     TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
 }

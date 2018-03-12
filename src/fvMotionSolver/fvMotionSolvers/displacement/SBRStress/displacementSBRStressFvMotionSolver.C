@@ -33,6 +33,7 @@ License
 #include "surfaceInterpolate.H"
 #include "fvcLaplacian.H"
 #include "mapPolyMesh.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -186,6 +187,8 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
 
     volTensorField gradCd("gradCd", fvc::grad(cellDisplacement_));
 
+    fv::options& fvOptions(fv::options::New(fvMesh_));
+
     fvVectorMatrix TEqn
     (
         fvm::laplacian
@@ -233,7 +236,11 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
            )
         )
         */
+     ==
+        fvOptions(cellDisplacement_)
     );
+
+    fvOptions.constrain(TEqn);
 
     TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
 }
