@@ -3,6 +3,7 @@
 #include "polyMeshTools.H"
 #include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
+#include "tetPointRef.H"
 
 using namespace Foam;
 
@@ -273,6 +274,7 @@ void Foam::writeFields
 
     // cell type
     // ~~~~~~~~~
+
     if (selectedFields.found("cellShapes"))
     {
         volScalarField shape
@@ -355,6 +357,73 @@ void Foam::writeFields
             << cellVolumeRatio.name() << endl;
         cellVolumeRatio.write();
     }
+
+    // minTetVolume
+    if (selectedFields.found("minTetVolume"))
+    {
+        volScalarField minTetVolume
+        (
+            IOobject
+            (
+                "minTetVolume",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("minTetVolume", dimless, GREAT),
+            zeroGradientFvPatchScalarField::typeName
+        );
+
+
+        const labelList& own = mesh.faceOwner();
+        const labelList& nei = mesh.faceNeighbour();
+        const pointField& p = mesh.points();
+        forAll(own, facei)
+        {
+            const face& f = mesh.faces()[facei];
+            const point& fc = mesh.faceCentres()[facei];
+
+            {
+                const point& ownCc = mesh.cellCentres()[own[facei]];
+                scalar& ownVol = minTetVolume[own[facei]];
+                forAll(f, fp)
+                {
+                    scalar tetQual = tetPointRef
+                    (
+                        p[f[fp]],
+                        p[f.nextLabel(fp)],
+                        ownCc,
+                        fc
+                    ).quality();
+                    ownVol = min(ownVol, tetQual);
+                }
+            }
+            if (mesh.isInternalFace(facei))
+            {
+                const point& neiCc = mesh.cellCentres()[nei[facei]];
+                scalar& neiVol = minTetVolume[nei[facei]];
+                forAll(f, fp)
+                {
+                    scalar tetQual = tetPointRef
+                    (
+                        p[f[fp]],
+                        p[f.nextLabel(fp)],
+                        fc,
+                        neiCc
+                    ).quality();
+                    neiVol = min(neiVol, tetQual);
+                }
+            }
+        }
+
+        minTetVolume.correctBoundaryConditions();
+        Info<< "    Writing minTetVolume to " << minTetVolume.name() << endl;
+        minTetVolume.write();
+    }
+
 
     Info<< endl;
 }

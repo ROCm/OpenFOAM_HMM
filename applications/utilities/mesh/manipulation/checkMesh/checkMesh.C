@@ -149,6 +149,7 @@ int main(int argc, char *argv[])
         selectedFields.insert("cellShapes");
         selectedFields.insert("cellVolume");
         selectedFields.insert("cellVolumeRatio");
+        selectedFields.insert("minTetVolume");
     }
 
 
