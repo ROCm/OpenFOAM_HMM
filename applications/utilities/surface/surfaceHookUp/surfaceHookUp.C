@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
                         newFacesFromSplit
                     );
 
-                    visitedFace[hitSurfI][facei] = true;
+                    visitedFace[hitSurfI].set(facei);
 
                     forAll(newFacesFromSplit, newFacei)
                     {

@@ -103,9 +103,10 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
         forAll(faceNeighbour(), facei)
         {
             label own = faceOwner()[facei];
-            bool ownProtected = unrefineableCell.get(own);
             label nei = faceNeighbour()[facei];
-            bool neiProtected = unrefineableCell.get(nei);
+
+            bool ownProtected = unrefineableCell.test(own);
+            bool neiProtected = unrefineableCell.test(nei);
 
             if (ownProtected && (cellLevel[nei] > cellLevel[own]))
             {
@@ -119,7 +120,7 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
         for (label facei = nInternalFaces(); facei < nFaces(); facei++)
         {
             label own = faceOwner()[facei];
-            bool ownProtected = unrefineableCell.get(own);
+            bool ownProtected = unrefineableCell.test(own);
             if
             (
                 ownProtected
@@ -141,16 +142,14 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
             if (seedFace[facei])
             {
                 label own = faceOwner()[facei];
-                if (unrefineableCell.get(own) == 0)
+                if (unrefineableCell.set(own))
                 {
-                    unrefineableCell.set(own, 1);
                     hasExtended = true;
                 }
 
                 label nei = faceNeighbour()[facei];
-                if (unrefineableCell.get(nei) == 0)
+                if (unrefineableCell.set(nei))
                 {
-                    unrefineableCell.set(nei, 1);
                     hasExtended = true;
                 }
             }
@@ -160,9 +159,8 @@ void Foam::dynamicRefineFvMesh::calculateProtectedCells
             if (seedFace[facei])
             {
                 label own = faceOwner()[facei];
-                if (unrefineableCell.get(own) == 0)
+                if (unrefineableCell.set(own))
                 {
-                    unrefineableCell.set(own, 1);
                     hasExtended = true;
                 }
             }
@@ -433,7 +431,7 @@ Foam::dynamicRefineFvMesh::refine
         forAll(newProtectedCell, celli)
         {
             const label oldCelli = map.cellMap()[celli];
-            newProtectedCell.set(celli, protectedCell_.get(oldCelli));
+            newProtectedCell.set(celli, protectedCell_.test(oldCelli));
         }
         protectedCell_.transfer(newProtectedCell);
     }
@@ -598,7 +596,7 @@ Foam::dynamicRefineFvMesh::unrefine
             label oldCelli = map.cellMap()[celli];
             if (oldCelli >= 0)
             {
-                newProtectedCell.set(celli, protectedCell_.get(oldCelli));
+                newProtectedCell.set(celli, protectedCell_.test(oldCelli));
             }
         }
         protectedCell_.transfer(newProtectedCell);
@@ -717,7 +715,7 @@ void Foam::dynamicRefineFvMesh::selectRefineCandidates
     {
         if (cellError[celli] > 0)
         {
-            candidateCell.set(celli, 1);
+            candidateCell.set(celli);
         }
     }
 }
@@ -754,11 +752,8 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
             if
             (
                 cellLevel[celli] < maxRefinement
-             && candidateCell.get(celli)
-             && (
-                    unrefineableCell.empty()
-                 || !unrefineableCell.get(celli)
-                )
+             && candidateCell.test(celli)
+             && !unrefineableCell.test(celli)
             )
             {
                 candidates.append(celli);
@@ -775,11 +770,8 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectRefineCells
                 if
                 (
                     cellLevel[celli] == level
-                 && candidateCell.get(celli)
-                 && (
-                        unrefineableCell.empty()
-                     || !unrefineableCell.get(celli)
-                    )
+                 && candidateCell.test(celli)
+                 && !unrefineableCell.test(celli)
                 )
                 {
                     candidates.append(celli);
@@ -840,9 +832,9 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
             {
                 label cellI = pCells[pCellI];
 
-                if (protectedCell_[cellI])
+                if (protectedCell_.test(cellI))
                 {
-                    protectedPoint[pointI] = true;
+                    protectedPoint.set(pointI);
                     break;
                 }
             }
@@ -882,7 +874,7 @@ Foam::labelList Foam::dynamicRefineFvMesh::selectUnrefinePoints
 
             forAll(pCells, pCelli)
             {
-                if (markedCell.get(pCells[pCelli]))
+                if (markedCell.test(pCells[pCelli]))
                 {
                     hasMarked = true;
                     break;
@@ -927,7 +919,7 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
 
     forAll(markedCell, celli)
     {
-        if (markedCell.get(celli))
+        if (markedCell.test(celli))
         {
             const cell& cFaces = cells()[celli];
 
@@ -945,15 +937,15 @@ void Foam::dynamicRefineFvMesh::extendMarkedCells
     {
         if (markedFace[facei])
         {
-            markedCell.set(faceOwner()[facei], 1);
-            markedCell.set(faceNeighbour()[facei], 1);
+            markedCell.set(faceOwner()[facei]);
+            markedCell.set(faceNeighbour()[facei]);
         }
     }
     for (label facei = nInternalFaces(); facei < nFaces(); facei++)
     {
         if (markedFace[facei])
         {
-            markedCell.set(faceOwner()[facei], 1);
+            markedCell.set(faceOwner()[facei]);
         }
     }
 }
@@ -983,7 +975,7 @@ void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
                 // Check if cell has already 8 anchor points -> protect cell
                 if (nAnchorPoints[celli] == 8)
                 {
-                    if (protectedCell.set(celli, true))
+                    if (protectedCell.set(celli))
                     {
                         nProtected++;
                     }
@@ -1000,9 +992,9 @@ void Foam::dynamicRefineFvMesh::checkEightAnchorPoints
 
     forAll(protectedCell, celli)
     {
-        if (!protectedCell[celli] && nAnchorPoints[celli] != 8)
+        if (!protectedCell.test(celli) && nAnchorPoints[celli] != 8)
         {
-            protectedCell.set(celli, true);
+            protectedCell.set(celli);
             nProtected++;
         }
     }
@@ -1017,7 +1009,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     meshCutter_(*this),
     dumpLevel_(false),
     nRefinementIterations_(0),
-    protectedCell_(nCells(), 0)
+    protectedCell_(nCells(), false)
 {
     // Read static part of dictionary
     readDict();
@@ -1046,7 +1038,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             label celli = pCells[i];
 
-            if (!protectedCell_.get(celli))
+            if (!protectedCell_.test(celli))
             {
                 if (pointLevel[pointi] <= cellLevel[celli])
                 {
@@ -1054,7 +1046,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 
                     if (nAnchors[celli] > 8)
                     {
-                        protectedCell_.set(celli, 1);
+                        protectedCell_.set(celli);
                         nProtected++;
                     }
                 }
@@ -1117,9 +1109,9 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             if (protectedFace[facei])
             {
-                protectedCell_.set(faceOwner()[facei], 1);
+                protectedCell_.set(faceOwner()[facei]);
                 nProtected++;
-                protectedCell_.set(faceNeighbour()[facei], 1);
+                protectedCell_.set(faceNeighbour()[facei]);
                 nProtected++;
             }
         }
@@ -1127,7 +1119,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             if (protectedFace[facei])
             {
-                protectedCell_.set(faceOwner()[facei], 1);
+                protectedCell_.set(faceOwner()[facei]);
                 nProtected++;
             }
         }
@@ -1139,7 +1131,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
 
             if (cFaces.size() < 6)
             {
-                if (protectedCell_.set(celli, 1))
+                if (protectedCell_.set(celli))
                 {
                     nProtected++;
                 }
@@ -1150,7 +1142,7 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
                 {
                     if (faces()[cFaces[cFacei]].size() < 4)
                     {
-                        if (protectedCell_.set(celli, 1))
+                        if (protectedCell_.set(celli))
                         {
                             nProtected++;
                         }
@@ -1170,7 +1162,6 @@ Foam::dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     }
     else
     {
-
         cellSet protectedCells(*this, "protectedCells", nProtected);
         forAll(protectedCell_, celli)
         {
@@ -1335,15 +1326,15 @@ bool Foam::dynamicRefineFvMesh::update()
 
                         if (oldCelli < 0)
                         {
-                            newRefineCell.set(celli, 1);
+                            newRefineCell.set(celli);
                         }
                         else if (reverseCellMap[oldCelli] != celli)
                         {
-                            newRefineCell.set(celli, 1);
+                            newRefineCell.set(celli);
                         }
                         else
                         {
-                            newRefineCell.set(celli, refineCell.get(oldCelli));
+                            newRefineCell.set(celli, refineCell.test(oldCelli));
                         }
                     }
                     refineCell.transfer(newRefineCell);

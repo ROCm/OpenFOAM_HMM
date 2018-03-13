@@ -30,7 +30,7 @@ License
 
 bool Foam::PackedBoolList::bitorPrepare
 (
-    const PackedList<1>& lst,
+    const PackedBoolList& lst,
     label& maxPackLen
 )
 {
@@ -90,71 +90,28 @@ bool Foam::PackedBoolList::bitorPrepare
 
 
 template<class LabelListType>
-Foam::label Foam::PackedBoolList::setIndices(const LabelListType& indices)
+void Foam::PackedBoolList::setIndices(const LabelListType& indices)
 {
     const label len = indices.size();
 
     // No better information, just guess something from the size
     reserve(len);
 
-    label cnt = 0;
     for (label i = 0; i < len; ++i)
     {
-        if (set(indices[i]))
-        {
-            ++cnt;
-        }
+        set(indices[i]);
     }
-
-    return cnt;
 }
 
 
 template<class LabelListType>
-Foam::label Foam::PackedBoolList::unsetIndices(const LabelListType& indices)
+void Foam::PackedBoolList::unsetIndices(const LabelListType& indices)
 {
-    label cnt = 0;
     const label len = indices.size();
     for (label i = 0; i < len; ++i)
     {
-        if (unset(indices[i]))
-        {
-            ++cnt;
-        }
+        unset(indices[i]);
     }
-
-    return cnt;
-}
-
-
-template<class LabelListType>
-Foam::label Foam::PackedBoolList::subsetIndices(const LabelListType& indices)
-{
-    const label len = indices.size();
-
-    // Handle trivial case
-    if (empty() || !len)
-    {
-        clear();
-        return 0;
-    }
-
-    PackedBoolList result;
-    result.reserve(size());
-
-    label cnt = 0;
-    for (label i = 0; i < len; ++i)
-    {
-        const label index = indices[i];
-        if (get(index))
-        {
-            result.set(index);
-            ++cnt;
-        }
-    }
-
-    transfer(result);
-    return cnt;
 }
 
 
@@ -170,7 +127,7 @@ Foam::PackedBoolList::PackedBoolList(Istream& is)
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::PackedBoolList::set(const PackedList<1>& lst)
+void Foam::PackedBoolList::set(const PackedBoolList& lst)
 {
     // extend addressable area if needed, return maximum size possible
     label len = 0;
@@ -192,19 +149,7 @@ void Foam::PackedBoolList::set(const PackedList<1>& lst)
 }
 
 
-Foam::label Foam::PackedBoolList::set(const labelUList& indices)
-{
-    return setIndices(indices);
-}
-
-
-Foam::label Foam::PackedBoolList::set(const labelUIndList& indices)
-{
-    return setIndices(indices);
-}
-
-
-void Foam::PackedBoolList::unset(const PackedList<1>& lst)
+void Foam::PackedBoolList::unset(const PackedBoolList& lst)
 {
     // operate directly with the underlying storage
     StorageList& lhs = this->storage();
@@ -220,48 +165,27 @@ void Foam::PackedBoolList::unset(const PackedList<1>& lst)
 }
 
 
-Foam::label Foam::PackedBoolList::unset(const labelUList& indices)
+void Foam::PackedBoolList::setMany(const labelUList& indices)
 {
-    return unsetIndices(indices);
+    setIndices(indices);
 }
 
 
-Foam::label Foam::PackedBoolList::unset(const labelUIndList& indices)
+void Foam::PackedBoolList::setMany(const labelUIndList& indices)
 {
-    return unsetIndices(indices);
+    setIndices(indices);
 }
 
 
-void Foam::PackedBoolList::subset(const PackedList<1>& lst)
+void Foam::PackedBoolList::unsetMany(const labelUList& indices)
 {
-    // shrink addressable area if needed
-    if (this->size() > lst.size())
-    {
-        this->resize(lst.size());
-    }
-
-    // operate directly with the underlying storage
-    StorageList& lhs = this->storage();
-    const StorageList& rhs = lst.storage();
-
-    const label len = this->packedLength();
-
-    for (label i = 0; i < len; ++i)
-    {
-        lhs[i] &= rhs[i];
-    }
+    unsetIndices(indices);
 }
 
 
-Foam::label Foam::PackedBoolList::subset(const labelUList& indices)
+void Foam::PackedBoolList::unsetMany(const labelUIndList& indices)
 {
-    return subsetIndices(indices);
-}
-
-
-Foam::label Foam::PackedBoolList::subset(const labelUIndList& indices)
-{
-    return subsetIndices(indices);
+    unsetIndices(indices);
 }
 
 
@@ -279,7 +203,7 @@ Foam::labelList Foam::PackedBoolList::used() const
 
         for (label i=0, usedi=0; (i < len && usedi < cnt); ++i)
         {
-            if (get(i))
+            if (test(i))
             {
                 lst[usedi++] = i;
             }
@@ -287,92 +211,6 @@ Foam::labelList Foam::PackedBoolList::used() const
     }
 
     return lst;
-}
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-void Foam::PackedBoolList::operator=(const UList<bool>& lst)
-{
-    const label len = lst.size();
-    this->setSize(len);
-
-    // Overwrite with new true/false values
-    for (label i = 0; i < len; ++i)
-    {
-        set(i, lst[i]);
-    }
-}
-
-
-Foam::PackedBoolList&
-Foam::PackedBoolList::operator^=(const PackedList<1>& lst)
-{
-    // Extend addressable area if needed, return maximum size possible
-    label len = 0;
-    const bool needTrim = bitorPrepare(lst, len);
-
-    // Operate directly with the underlying storage
-    StorageList& lhs = this->storage();
-    const StorageList& rhs = lst.storage();
-
-    for (label i = 0; i < len; ++i)
-    {
-        lhs[i] ^= rhs[i];
-    }
-
-    if (needTrim)
-    {
-        trim();
-    }
-
-    return *this;
-}
-
-
-// * * * * * * * * * * * * * *  Global Operators * * * * * * * * * * * * * * //
-
-Foam::PackedBoolList Foam::operator&
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-)
-{
-    PackedBoolList result(lst1);
-    result &= lst2;
-
-    // Trim to bits actually used
-    result.trim();
-
-    return result;
-}
-
-
-Foam::PackedBoolList Foam::operator^
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-)
-{
-    PackedBoolList result(lst1);
-    result ^= lst2;
-
-    // Trim to bits actually used
-    result.trim();
-
-    return result;
-}
-
-
-Foam::PackedBoolList Foam::operator|
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-)
-{
-    PackedBoolList result(lst1);
-    result |= lst2;
-    return result;
 }
 
 

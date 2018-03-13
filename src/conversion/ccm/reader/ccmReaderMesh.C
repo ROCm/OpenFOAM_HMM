@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,10 @@ License
 #include "IOdictionary.H"
 
 #include "ccmBoundaryInfo.H"
-#include "PackedList.H"
 #include "uindirectPrimitivePatch.H"
 #include "SortableList.H"
 #include "mergePoints.H"
+#include "PackedBoolList.H"
 #include "ListOps.H"
 
 #include "ccmInternal.H" // include last to avoid any strange interactions

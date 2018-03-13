@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,70 +25,43 @@ Class
     Foam::PackedList
 
 Description
-    A dynamically allocatable list of packed unsigned integers.
+    A dynamically list of packed unsigned integers, with the number of bits
+    per item specified by the \<nBits\> template parameter.
 
-    The list resizing is similar to DynamicList, thus the methods clear()
-    and setSize() behave like their DynamicList counterparts and the methods
-    reserve() and setCapacity() can be used to influence the allocation.
-
-    The number of bits per item is specified by the template parameter nBits.
+    Resizing is similar to DynamicList so that clear() and resize() affect
+    the addessed size, but not the allocated size. The reserve() and
+    setCapacity() methods can be used to influence the allocation.
 
 Note
     In a const context, the '[]' operator simply returns the stored value,
     with out-of-range elements returned as zero.
-    In a non-const context, the '[]' operator returns an iteratorBase, which
-    might not have a valid reference for out-of-range elements.
-    The iteratorBase class handles the assignment of new values.
 
-    Using the iteratorBase as a proxy allows assignment of values
-    between list elements. Thus the following bit of code works as expected:
-    \code
-        list[1] = list[5];      // value assignment, not iterator position
-        list[2] = list[5] = 4;  // propagates value
-        list[1] = list[5] = list[6];  // propagates value
-    \endcode
+    In a non-const context, the '[]' operator returns a reference to an
+    existing value. Some caution with out-of-range elements to ensure
+    that the const version of the [] operator is being called.
+    The get() method is functionally identical the the '[]' operator, but
+    is always const access.
 
-    Reading via the get() or the '[]' operator are identical.
-    Looping and reading via an iterator is approx. 15% slower,
-    but can be more flexible.
-
-    Using the set() operator (and the '[]' operator) are marginally slower
-    (approx. 5%) than using an iterator, but the set() method has the
-    advantage of also returning a bool if the value changed.  This can be
-    useful for branching on changed values.
+    The set() and unset() methods return a bool if the value changed.
+    This can be useful for branching on changed values.
 
     \code
-        list[5] = 4;
+        list.set(5, 4);
         changed = list.set(5, 8);
         if (changed) ...
     \endcode
 
-    The lazy evaluation used means that reading an out-of-range element
-    returns zero, but does not affect the list size.  Even in a non-const
-    context, only the assigment itself causes the element to be created.
+    In a const context, reading an out-of-range element returns zero without
+    affecting the list size.
     For example,
     \code
         list.resize(4);
-        Info<< list[10] << "\n";  // print zero, but doesn't adjust list
-        list[8] = 1;
+        Info<< list.get(10) << "\n";  // print zero, but doesn't adjust list
     \endcode
 
     Also note that all unused internal storage elements are guaranteed to
     always be bit-wise zero. This property must not be violated by any
     inheriting classes.
-
-    In addition to the normal output format, PackedList also supports a
-    compact ASCII format that may be convenient for user input in some
-    situations. The general format is a group of index/value pairs:
-    \verbatim
-        { (index1 value1) (index2 value2) (index3 value3) }
-    \endverbatim
-    The bool specialization just uses the indices corresponding to
-    non-zero entries instead of a index/value pair:
-    \verbatim
-        { index1 index2 index3 }
-    \endverbatim
-    In both cases, the supplied indices can be randomly ordered.
 
 See also
     Foam::DynamicList
@@ -111,12 +84,10 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
+template<unsigned nBits> class PackedList;
 class Istream;
 class Ostream;
-
-// Forward declaration of friend functions and operators
-template<unsigned nBits> class PackedList;
 
 template<unsigned nBits>
 Istream& operator>>(Istream& is, PackedList<nBits>& lst);
@@ -197,6 +168,12 @@ protected:
 
 public:
 
+    // Forward declaration of access classes
+
+        class reference;
+        typedef unsigned int const_reference;
+
+
     // Public data
 
         //- The max. number of bits that can be templated.
@@ -212,13 +189,6 @@ public:
 
         //- Masking for all bits below the offset
         inline static constexpr unsigned int maskLower(unsigned offset);
-
-
-    // Forward declaration of iterators
-
-        class iteratorBase;
-        class iterator;
-        class const_iterator;
 
 
     // Constructors
@@ -253,7 +223,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The number of elements that can be stored before reallocating
         inline label capacity() const;
@@ -312,8 +282,13 @@ public:
         //- Print information and bit patterns (with printBits)
         Ostream& printInfo(Ostream& os, const bool fullOutput=false) const;
 
+    // Check
 
-      // Edit
+        //- Check index is within valid range [0,size)
+        inline void checkIndex(const label i) const;
+
+
+    // Edit
 
         //- Trim any trailing zero elements
         bool trim();
@@ -357,7 +332,7 @@ public:
         inline void transfer(PackedList<nBits>& lst);
 
 
-      // IO
+    // IO
 
         //- Clear list and read from stream
         Istream& read(Istream& is);
@@ -365,26 +340,13 @@ public:
         //- Write the List, with line-breaks in ASCII if the list length
         //- exceeds shortListLen.
         //  Using '0' suppresses line-breaks entirely.
-        //  A special indexed output (ASCII only) is triggered by specifying
-        //  a negative value for shortListLen.
-        //
-        // The indexed output may be convenient in some situations.
-        // The general format is a group of index/value pairs:
-        //  \verbatim
-        //      { (index1 value1) (index2 value2) (index3 value3) }
-        // \endverbatim
-        // The bool specialization just uses the indices corresponding to
-        // non-zero entries instead of a index/value pair:
-        // \verbatim
-        //     { index1 index2 index3 }
-        // \endverbatim
         Ostream& writeList(Ostream& os, const label shortListLen=0) const;
 
         //- Write as a dictionary entry with keyword
         void writeEntry(const word& keyword, Ostream& os) const;
 
 
-      // Member Operators
+    // Member Operators
 
         //- Append a value at the end of the list
         inline PackedList<nBits>& append(const unsigned int val);
@@ -397,9 +359,8 @@ public:
         inline unsigned int operator[](const label i) const;
 
         //- Non-const access to value at index.
-        //  Returns iterator to perform the actual operation.
-        //  Does not auto-vivify entries, but will when assigned to.
-        inline iteratorBase operator[](const label i);
+        //  Fatal for out-of-range indices
+        inline reference operator[](const label i);
 
         //- Assignment of all entries to the given value. Takes linear time.
         inline void operator=(const unsigned int val);
@@ -419,205 +380,36 @@ public:
 
     // Iterators and helpers
 
-        //- The iterator base for PackedList
-        //  Note: data and functions are protected, to allow reuse by iterator
-        //  and prevent most external usage.
-        class iteratorBase
+        //- A reference for read/write access to an entry
+        class reference
         {
-            friend class PackedList;
+            friend class PackedList;    // Access for PackedList
+            void operator&() = delete;  // Refuse to provide its address
 
-        protected:
+            unsigned int& ref_;   //!< Reference to underlying block value
+            unsigned int shift_;  //!< The bit shift for the sub-portion
 
-            // Protected Data
+            //- Construct by taking reference of block from within the list
+            //- at the specified index.
+            inline reference(PackedList* lst, const label index);
 
-                //- Pointer to original list
-                //  This also lets us use the default bitwise copy/assignment
-                PackedList* list_;
+            //- Get value as unsigned, no range-checking
+            inline unsigned int get() const;
 
-                //- Element index
-                label index_;
-
-
-            // Constructors
-
-                //- Construct null - an end iterator
-                inline iteratorBase();
-
-                //- Construct from base list and position index
-                inline iteratorBase(const PackedList* lst, const label i);
-
-
-            // Protected Member Functions
-
-                //- Limit index to the list size - avoid going past end()
-                //  Eg, iter = iterator(list, Inf)
-                inline void bound();
-
-                //- Get value as unsigned, no range-checking
-                inline unsigned int get() const;
-
-                //- Set value, returning true if changed, no range-checking
-                inline bool set(unsigned int val);
-
-                //- Move backward through list
-                inline void prev();
-
-                //- Move forward through list
-                inline void next();
-
+            //- Set value, returning true if changed, no range-checking
+            inline bool set(unsigned int val);
 
         public:
 
-            // Member Functions
+            //- Value assignment
+            inline void operator=(const reference& other);
 
-                //- Return the element index corresponding to the iterator
-                inline label key() const;
+            //- Value assignment
+            inline void operator=(const unsigned int val);
 
-                //- Write index/value for a non-zero entry
-                //  The bool specialization writes the index only
-                inline bool writeIfSet(Ostream& os) const;
-
-            // Member Operators
-
-                //- Compare values (not positions)
-                inline bool operator==(const iteratorBase& iter) const;
-                inline bool operator!=(const iteratorBase& iter) const;
-
-                //- Assign value, not position.
-                //  This allows packed[0] = packed[3] for assigning values
-                inline void operator=(const iteratorBase& iter);
-
-                //- Assign value.
-                //  A non-existent entry will be auto-vivified.
-                inline void operator=(const unsigned int val);
-
-                //- Conversion operator
-                //  Never auto-vivify entries.
-                inline operator unsigned int () const;
-
-            //- Print information and values
-            Ostream& printInfo(Ostream& os) const;
+            //- Conversion operator
+            inline operator unsigned int () const;
         };
-
-
-        //- The iterator class used for PackedList
-        class iterator
-        :
-            public iteratorBase
-        {
-
-            //- Disallow copy constructor from const_iterator
-            //  This would violate const-ness!
-            iterator(const const_iterator& iter) = delete;
-
-            //- Disallow assignment from const_iterator
-            //  This would violate const-ness!
-            void operator=(const const_iterator& iter) = delete;
-
-
-        public:
-
-            // Constructors
-
-                //- Construct null
-                inline iterator();
-
-                //- Construct from iterator base, eg iter(packedlist[i])
-                //  but also  "iterator iter = packedlist[i];"
-                //  An out-of-range iterator is assigned end()
-                inline iterator(const iteratorBase& iter);
-
-                //- Construct from base list and position index
-                inline iterator(const PackedList* lst, const label i);
-
-
-            // Member Operators
-
-                //- Compare positions (not values)
-                inline bool operator==(const iteratorBase& iter) const;
-                inline bool operator!=(const iteratorBase& iter) const;
-
-                //- Assign from iteratorBase, eg iter = packedlist[i]
-                //  An out-of-range iterator is assigned end()
-                inline void operator=(const iteratorBase& iter);
-
-                //- Return value
-                inline unsigned int operator*() const;
-
-                //- Return iteratorBase for assigning values
-                inline iteratorBase& operator*();
-
-                inline iterator& operator++();
-                inline iterator operator++(int);
-
-                inline iterator& operator--();
-                inline iterator operator--(int);
-
-        };
-
-        //- Iterator set to the beginning of the PackedList
-        inline iterator begin();
-
-        //- Iterator set to beyond the end of the PackedList
-        inline iterator end();
-
-
-        //- The const_iterator for PackedList
-        class const_iterator
-        :
-            public iteratorBase
-        {
-        public:
-
-            // Constructors
-
-                //- Construct null
-                inline const_iterator();
-
-                //- Construct from iterator base, eg iter(packedlist[i])
-                //  but also  "const_iterator iter = packedlist[i];"
-                //  An out-of-range iterator is assigned cend()
-                inline const_iterator(const iteratorBase& iter);
-
-                //- Construct from base list and position index
-                inline const_iterator(const PackedList* lst, const label i);
-
-                //- Construct from iterator
-                inline const_iterator(const iterator& iter);
-
-
-            // Member operators
-
-                //- Compare positions (not values)
-                inline bool operator==(const iteratorBase& iter) const;
-                inline bool operator!=(const iteratorBase& iter) const;
-
-                //- Assign from iteratorBase or derived
-                //  eg, iter = packedlist[i] or even iter = list.begin()
-                inline void operator=(const iteratorBase& iter);
-
-                //- Return referenced value directly
-                inline unsigned int operator*() const;
-
-                inline const_iterator& operator++();
-                inline const_iterator operator++(int);
-
-                inline const_iterator& operator--();
-                inline const_iterator operator--(int);
-        };
-
-
-        //- const_iterator set to the beginning of the PackedList
-        inline const_iterator cbegin() const;
-
-        //- const_iterator set to beyond the end of the PackedList
-        inline const_iterator cend() const;
-
-        //- const_iterator set to the beginning of the PackedList
-        inline const_iterator begin() const;
-
-        //- const_iterator set to beyond the end of the PackedList
-        inline const_iterator end() const;
 
 
     // IOstream Operators

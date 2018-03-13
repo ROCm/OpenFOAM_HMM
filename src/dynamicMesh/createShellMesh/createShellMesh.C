@@ -143,7 +143,7 @@ void Foam::createShellMesh::syncEdges
             if (!isChangedEdge[patchEdgeI])
             {
                 changedEdges.append(patchEdgeI);
-                isChangedEdge[patchEdgeI] = true;
+                isChangedEdge.set(patchEdgeI);
             }
         }
     }
@@ -236,7 +236,7 @@ void Foam::createShellMesh::calcPointRegions
             if (!isChangedEdge[edgeI])
             {
                 changedEdges.append(edgeI);
-                isChangedEdge[edgeI] = true;
+                isChangedEdge.set(edgeI);
             }
         }
     }
@@ -289,7 +289,7 @@ void Foam::createShellMesh::calcPointRegions
                     pointGlobalRegions[facei][fp0] = edgeData[0];
                     if (!isChangedFace[facei])
                     {
-                        isChangedFace[facei] = true;
+                        isChangedFace.set(facei);
                         changedFaces.append(facei);
                     }
                 }
@@ -300,7 +300,7 @@ void Foam::createShellMesh::calcPointRegions
                     pointGlobalRegions[facei][fp1] = edgeData[1];
                     if (!isChangedFace[facei])
                     {
-                        isChangedFace[facei] = true;
+                        isChangedFace.set(facei);
                         changedFaces.append(facei);
                     }
                 }
@@ -349,7 +349,7 @@ void Foam::createShellMesh::calcPointRegions
                         if (!isChangedEdge[edgeI])
                         {
                             changedEdges.append(edgeI);
-                            isChangedEdge[edgeI] = true;
+                            isChangedEdge.set(edgeI);
                         }
                     }
                 }

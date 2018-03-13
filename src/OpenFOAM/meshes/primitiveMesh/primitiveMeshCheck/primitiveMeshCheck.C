@@ -1684,7 +1684,7 @@ bool Foam::primitiveMesh::checkFaceFaces
 
 bool Foam::primitiveMesh::checkClosedBoundary(const bool report) const
 {
-    return checkClosedBoundary(faceAreas(), report, PackedBoolList(0));
+    return checkClosedBoundary(faceAreas(), report, PackedBoolList());
 }
 
 
@@ -1693,7 +1693,7 @@ bool Foam::primitiveMesh::checkClosedCells
     const bool report,
     labelHashSet* setPtr,
     labelHashSet* aspectSetPtr,
-     const Vector<label>& solutionD
+    const Vector<label>& solutionD
 ) const
 {
     return checkClosedCells

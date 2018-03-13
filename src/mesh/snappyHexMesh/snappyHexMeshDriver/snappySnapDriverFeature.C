@@ -271,11 +271,7 @@ void Foam::snappySnapDriver::calcNearestFace
                 << exit(FatalError);
         }
         const faceZone& fZone = mesh.faceZones()[zonei];
-        PackedBoolList isZonedFace(mesh.nFaces());
-        forAll(fZone, i)
-        {
-            isZonedFace[fZone[i]] = 1;
-        }
+        PackedBoolList isZonedFace(mesh.nFaces(), fZone);
 
         DynamicList<label> ppFaces(fZone.size());
         DynamicList<label> meshFaces(fZone.size());
@@ -575,14 +571,14 @@ void Foam::snappySnapDriver::calcNearestFacePointProperties
             if (eFaces.size() == 1)
             {
                 // 'real' boundary edge
-                isBoundaryPoint[e[0]] = true;
-                isBoundaryPoint[e[1]] = true;
+                isBoundaryPoint.set(e[0]);
+                isBoundaryPoint.set(e[1]);
             }
             else if (eFaces.size() == 2 && bafflePair[eFaces[0]] == eFaces[1])
             {
                 // 'baffle' boundary edge
-                isBoundaryPoint[e[0]] = true;
-                isBoundaryPoint[e[1]] = true;
+                isBoundaryPoint.set(e[0]);
+                isBoundaryPoint.set(e[1]);
             }
         }
 
@@ -2873,7 +2869,7 @@ void Foam::snappySnapDriver::determineBaffleFeatures
 
         if (efn.size() == 2 && (efn[0]&efn[1]) < baffleFeatureCos)
         {
-            isBaffleEdge[edgei] = true;
+            isBaffleEdge.set(edgei);
             nBaffleEdges++;
             const edge& e = pp.edges()[edgei];
             pointStatus[e[0]] = 0;

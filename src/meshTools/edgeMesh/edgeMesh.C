@@ -256,11 +256,11 @@ void Foam::edgeMesh::mergeEdges()
             edges_[nUniqEdges].sort();
             ++nUniqEdges;
 
-            if (pointIsUsed.set(e[0], 1))
+            if (pointIsUsed.set(e[0]))
             {
                 ++nUniqPoints;
             }
-            if (pointIsUsed.set(e[1], 1))
+            if (pointIsUsed.set(e[1]))
             {
                 ++nUniqPoints;
             }
@@ -294,7 +294,7 @@ void Foam::edgeMesh::mergeEdges()
         label newId = 0;
         forAll(pointMap, pointi)
         {
-            if (pointIsUsed[pointi])
+            if (pointIsUsed.test(pointi))
             {
                 pointMap[pointi] = newId;
 

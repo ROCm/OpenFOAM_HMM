@@ -152,7 +152,7 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
         {
             if (columnCells)
             {
-                nonManifoldEdge[edgeI] = true;
+                nonManifoldEdge.set(edgeI);
             }
         }
 
@@ -307,7 +307,7 @@ void extrudePatchMesh::extrudeMesh(const List<polyPatch*>& regionPatches)
         {
             const labelList& eFaces = extrudedPatch_.edgeFaces()[edgeI];
 
-            if (eFaces.size() != 2 || nonManifoldEdge[edgeI])
+            if (eFaces.size() != 2 || nonManifoldEdge.test(edgeI))
             {
                 edgePatches[edgeI].setSize(eFaces.size(), sidePatchID);
             }

@@ -197,7 +197,7 @@ bool Foam::fileFormats::NASedgeFormat::read
         pointField& pts = storedPoints();
         forAll(pts, pointi)
         {
-            if (usedPoints.get(pointi))
+            if (usedPoints.test(pointi))
             {
                 if (nUsed != pointi)
                 {

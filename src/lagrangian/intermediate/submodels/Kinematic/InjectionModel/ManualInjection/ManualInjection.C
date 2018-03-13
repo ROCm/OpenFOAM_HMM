@@ -132,7 +132,7 @@ void Foam::ManualInjection<CloudType>::updateMesh()
             )
         )
         {
-            keep[pI] = false;
+            keep.unset(pI);
             nRejected++;
         }
     }

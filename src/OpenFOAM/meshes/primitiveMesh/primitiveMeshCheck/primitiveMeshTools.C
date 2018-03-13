@@ -495,7 +495,7 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::cellDeterminant
 
             forAll(curFaces, i)
             {
-                if (internalOrCoupledFace[curFaces[i]])
+                if (internalOrCoupledFace.test(curFaces[i]))
                 {
                     avgArea += mag(faceAreas[curFaces[i]]);
 
@@ -515,7 +515,7 @@ Foam::tmp<Foam::scalarField> Foam::primitiveMeshTools::cellDeterminant
 
                 forAll(curFaces, i)
                 {
-                    if (internalOrCoupledFace[curFaces[i]])
+                    if (internalOrCoupledFace.test(curFaces[i]))
                     {
                         areaTensor += sqr(faceAreas[curFaces[i]]/avgArea);
                     }

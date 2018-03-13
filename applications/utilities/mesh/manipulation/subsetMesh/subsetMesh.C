@@ -306,14 +306,14 @@ void subsetTopoSets
         PackedBoolList isSet(set.maxSize(mesh));
         forAllConstIters(set, iter)
         {
-            isSet[iter.key()] = true;
+            isSet.set(iter.key());
         }
         label nSet = 0;
         forAll(map, i)
         {
             if (isSet[map[i]])
             {
-                nSet++;
+                ++nSet;
             }
         }
 

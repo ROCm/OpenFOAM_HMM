@@ -85,9 +85,9 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
           > 0
         )
         {
-            isMasterPoint[meshPointi] = true;
+            isMasterPoint.set(meshPointi);
         }
-        donePoint[meshPointi] = true;
+        donePoint.set(meshPointi);
     }
 
 
@@ -98,7 +98,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
     {
         if (!donePoint[pointi])
         {
-            isMasterPoint[pointi] = true;
+            isMasterPoint.set(pointi);
         }
     }
 
@@ -129,9 +129,9 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
           > 0
         )
         {
-            isMasterEdge[meshEdgeI] = true;
+            isMasterEdge.set(meshEdgeI);
         }
-        doneEdge[meshEdgeI] = true;
+        doneEdge.set(meshEdgeI);
     }
 
 
@@ -142,7 +142,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
     {
         if (!doneEdge[edgeI])
         {
-            isMasterEdge[edgeI] = true;
+            isMasterEdge.set(edgeI);
         }
     }
 
@@ -152,7 +152,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
 Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 {
-    PackedBoolList isMasterFace(mesh.nFaces(), 1);
+    PackedBoolList isMasterFace(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -182,7 +182,7 @@ Foam::PackedBoolList Foam::syncTools::getInternalOrMasterFaces
     const polyMesh& mesh
 )
 {
-    PackedBoolList isMasterFace(mesh.nFaces(), 1);
+    PackedBoolList isMasterFace(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -218,7 +218,7 @@ Foam::PackedBoolList Foam::syncTools::getInternalOrCoupledFaces
     const polyMesh& mesh
 )
 {
-    PackedBoolList isMasterFace(mesh.nFaces(), 1);
+    PackedBoolList isMasterFace(mesh.nFaces(), true);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

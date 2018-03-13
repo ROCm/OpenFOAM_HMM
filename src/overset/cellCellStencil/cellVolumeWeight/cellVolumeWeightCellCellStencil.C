@@ -62,7 +62,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
 {
     // Current front
     PackedBoolList isFront(mesh_.nFaces());
-    PackedBoolList doneCell(mesh_.nCells());
+    // unused: PackedBoolList doneCell(mesh_.nCells());
 
     const fvBoundaryMesh& fvm = mesh_.boundary();
 
@@ -77,7 +77,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
 
             forAll(fvm[patchI], i)
             {
-                isFront[fvm[patchI].start()+i] = true;
+                isFront.set(fvm[patchI].start()+i);
             }
         }
     }
@@ -100,7 +100,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
             {
                 //Pout<< "Front at face:" << faceI
                 //    << " at:" << mesh_.faceCentres()[faceI] << endl;
-                isFront[faceI] = true;
+                isFront.set(faceI);
             }
         }
 
@@ -125,7 +125,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
             {
                 //Pout<< "Front at coupled face:" << faceI
                 //    << " at:" << mesh_.faceCentres()[faceI] << endl;
-                isFront[faceI] = true;
+                isFront.set(faceI);
             }
         }
     }
@@ -146,7 +146,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
         PackedBoolList newIsFront(mesh_.nFaces());
         forAll(isFront, faceI)
         {
-            if (isFront[faceI])
+            if (isFront.test(faceI))
             {
                 label own = mesh_.faceOwner()[faceI];
                 if (allCellTypes[own] != HOLE)
@@ -162,7 +162,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                                 << " to " << fraction << endl;
                         }
                         allCellTypes[own] = INTERPOLATED;
-                        newIsFront.set(mesh_.cells()[own]);
+                        newIsFront.setMany(mesh_.cells()[own]);
                     }
                 }
                 if (mesh_.isInternalFace(faceI))
@@ -182,7 +182,7 @@ void Foam::cellCellStencils::cellVolumeWeight::walkFront
                             }
 
                             allCellTypes[nei] = INTERPOLATED;
-                            newIsFront.set(mesh_.cells()[nei]);
+                            newIsFront.setMany(mesh_.cells()[nei]);
                         }
                     }
                 }

@@ -309,7 +309,7 @@ void Foam::mergeAndWrite
     PackedBoolList isInSet(mesh.nCells());
     forAllConstIter(cellSet, set, iter)
     {
-        isInSet[iter.key()] = true;
+        isInSet.set(iter.key());
     }
 
 
@@ -329,8 +329,8 @@ void Foam::mergeAndWrite
     DynamicList<label> outsideFaces(3*set.size());
     for (label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
-        bool ownVal = isInSet[mesh.faceOwner()[facei]];
-        bool neiVal = isInSet[mesh.faceNeighbour()[facei]];
+        const bool ownVal = isInSet[mesh.faceOwner()[facei]];
+        const bool neiVal = isInSet[mesh.faceNeighbour()[facei]];
 
         if (ownVal != neiVal)
         {
@@ -349,7 +349,7 @@ void Foam::mergeAndWrite
             {
                 label facei = pp.start()+i;
 
-                bool neiVal = bndInSet[facei-mesh.nInternalFaces()];
+                const bool neiVal = bndInSet[facei-mesh.nInternalFaces()];
                 if (isInSet[fc[i]] && !neiVal)
                 {
                     outsideFaces.append(facei);

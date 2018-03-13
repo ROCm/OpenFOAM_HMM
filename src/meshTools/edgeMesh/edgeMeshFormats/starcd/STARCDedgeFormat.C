@@ -195,7 +195,7 @@ bool Foam::fileFormats::STARCDedgeFormat::read
         pointField& pts = storedPoints();
         forAll(pts, pointi)
         {
-            if (usedPoints.get(pointi))
+            if (usedPoints.test(pointi))
             {
                 if (nUsed != pointi)
                 {

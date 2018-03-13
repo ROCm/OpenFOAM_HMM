@@ -69,22 +69,17 @@ class PackedBoolList
 
         //- Preparation, resizing before a bitor operation
         //  returns true if the later result needs trimming
-        bool bitorPrepare(const PackedList<1>& lst, label& maxPackLen);
+        bool bitorPrepare(const PackedBoolList& lst, label& maxPackLen);
 
         //- Set the listed indices. Return number of elements changed.
         //  Does auto-vivify for non-existent entries.
         template<class LabelListType>
-        label setIndices(const LabelListType& indices);
+        void setIndices(const LabelListType& indices);
 
         //- Unset the listed indices. Return number of elements changed.
         //  Never auto-vivify entries.
         template<class LabelListType>
-        label unsetIndices(const LabelListType& indices);
-
-        //- Subset with the listed indices. Return number of elements subsetted.
-        template<class LabelListType>
-        label subsetIndices(const LabelListType& indices);
-
+        void unsetIndices(const LabelListType& indices);
 
 public:
 
@@ -105,14 +100,8 @@ public:
         //- Copy construct
         inline PackedBoolList(const PackedBoolList& lst);
 
-        //- Copy construct
-        explicit inline PackedBoolList(const PackedList<1>& lst);
-
         //- Move construct
         inline PackedBoolList(PackedBoolList&& lst);
-
-        //- Move construct
-        inline PackedBoolList(PackedList<1>&& lst);
 
         //- Construct with given size and list of labels to set as true.
         inline PackedBoolList(const label size, const labelUList& indices);
@@ -137,43 +126,26 @@ public:
 
     // Member Functions
 
+    // Query
+
+        //- Test value at specified position.
+        //  \note Method name compatibility with std::bitset
+        inline bool test(const label pos) const;
+
+
     // Access
 
+        //- Single index/value assign
         using PackedList<1>::set;
+
+        //- Single index unassign
         using PackedList<1>::unset;
 
         //- Set specified bits.
-        void set(const PackedList<1>& lst);
-
-        //- Set the listed indices. Return number of elements changed.
-        //  Does auto-vivify for non-existent entries.
-        label set(const labelUList& indices);
-
-        //- Set the listed indices. Return number of elements changed.
-        //  Does auto-vivify for non-existent entries.
-        label set(const labelUIndList& indices);
+        void set(const PackedBoolList& lst);
 
         //- Unset specified bits.
-        void unset(const PackedList<1>& lst);
-
-        //- Unset the listed indices. Return number of elements changed.
-        //  Never auto-vivify entries.
-        label unset(const labelUList& indices);
-
-        //- Unset the listed indices. Return number of elements changed.
-        //  Never auto-vivify entries.
-        label unset(const labelUIndList& indices);
-
-        //- Subset with the specified list.
-        void subset(const PackedList<1>& lst);
-
-        //- Subset with the listed indices.
-        //  Return number of elements subsetted.
-        label subset(const labelUList& indices);
-
-        //- Subset with the listed indices.
-        //  Return number of elements subsetted.
-        label subset(const labelUIndList& indices);
+        void unset(const PackedBoolList& lst);
 
         //- Return indices of the used (true) elements as a list of labels
         labelList used() const;
@@ -185,114 +157,48 @@ public:
         //- and annul the argument list.
         inline void transfer(PackedBoolList& lst);
 
-        //- Transfer the contents of the argument list into this list
-        //- and annul the argument list.
-        inline void transfer(PackedList<1>& lst);
+
+    // Convenience Methods
+
+        //- Set the listed indices. Return number of elements changed.
+        //  Does auto-vivify for non-existent entries.
+        void setMany(const labelUList& indices);
+
+        //- Set the listed indices. Return number of elements changed.
+        //  Does auto-vivify for non-existent entries.
+        void setMany(const labelUIndList& indices);
+
+        //- Unset the listed indices. Return number of elements changed.
+        //  Never auto-vivify entries.
+        void unsetMany(const labelUList& indices);
+
+        //- Unset the listed indices. Return number of elements changed.
+        //  Never auto-vivify entries.
+        void unsetMany(const labelUIndList& indices);
 
 
     // Member Operators
 
-        //- Assignment of all entries to the given value.
+        //- Assign all entries to the given value.
         inline void operator=(const bool val);
 
         //- Copy assignment
         inline void operator=(const PackedBoolList& lst);
 
-        //- Copy assignment
-        inline void operator=(const PackedList<1>& lst);
-
         //- Move assignment
         inline void operator=(PackedBoolList&& lst);
 
-        //- Move assignment
-        inline void operator=(PackedList<1>&& lst);
 
-        //- Assignment operator.
-        void operator=(const UList<bool>& lst);
+    // Housekeeping
 
-        //- Assignment operator,
-        //- using the labels as indices to indicate which bits are set
-        inline void operator=(const labelUList& indices);
+        //- No assignment from list. Use setMany for that.
+        void operator=(const labelUList&) = delete;
 
-        //- Assignment operator,
-        //- using the labels as indices to indicate which bits are set
-        inline void operator=(const labelUIndList& indices);
-
-        //- Complement operator
-        inline PackedBoolList operator~() const;
-
-        //- And operator (lists may be dissimilar sizes)
-        inline PackedBoolList& operator&=(const PackedList<1>& lst);
-
-        //- And operator (lists may be dissimilar sizes)
-        //- using the labels as indices to indicate which bits are set
-        inline PackedBoolList& operator&=(const labelUList& indices);
-
-        //- And operator (lists may be dissimilar sizes)
-        //- using the labels as indices to indicate which bits are set
-        inline PackedBoolList& operator&=(const labelUIndList& indices);
-
-        //- Xor operator (lists may be dissimilar sizes)
-        //  Retains unique entries
-        PackedBoolList& operator^=(const PackedList<1>& lst);
-
-        //- Or operator (lists may be dissimilar sizes)
-        inline PackedBoolList& operator|=(const PackedList<1>& lst);
-
-        //- Or operator (lists may be dissimilar sizes),
-        //- using the labels as indices to indicate which bits are set
-        inline PackedBoolList& operator|=(const labelUList& indices);
-
-        //- Or operator (lists may be dissimilar sizes),
-        //- using the labels as indices to indicate which bits are set
-        inline PackedBoolList& operator|=(const labelUIndList& indices);
+        //- No assignment from list. Use setMany for that.
+        void operator=(const labelUIndList&) = delete;
 
 
-        //- Add entries to this list, synonymous with the or operator
-        inline PackedBoolList& operator+=(const PackedList<1>& lst);
-
-        //- Add entries to this list, synonymous with the or operator
-        inline PackedBoolList& operator+=(const labelUList& indices);
-
-        //- Add entries to this list, synonymous with the or operator
-        inline PackedBoolList& operator+=(const labelUIndList& indices);
-
-        //- Remove entries from this list - unset the specified bits
-        inline PackedBoolList& operator-=(const PackedList<1>& lst);
-
-        //- Remove entries from this list - unset the specified bits
-        inline PackedBoolList& operator-=(const labelUList& indices);
-
-        //- Remove entries from this list - unset the specified bits
-        inline PackedBoolList& operator-=(const labelUIndList& indices);
 };
-
-
-// Global Operators
-
-//- Intersect lists - the result is trimmed to the smallest intersecting size
-PackedBoolList operator&
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-);
-
-
-//- Combine to form a unique list (xor)
-//  The result is trimmed to the smallest intersecting size
-PackedBoolList operator^
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-);
-
-
-//- Combine lists
-PackedBoolList operator|
-(
-    const PackedBoolList& lst1,
-    const PackedBoolList& lst2
-);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

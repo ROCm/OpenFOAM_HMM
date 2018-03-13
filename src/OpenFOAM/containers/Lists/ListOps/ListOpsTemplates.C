@@ -921,7 +921,7 @@ void Foam::ListOps::setValue
 
     for (label index = 0, used = 0; index < len && used < count; ++index)
     {
-        if (locations[index])
+        if (locations.test(index))
         {
             list[index] = val;
             ++used;

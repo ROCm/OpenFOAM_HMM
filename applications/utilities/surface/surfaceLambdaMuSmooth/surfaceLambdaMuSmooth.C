@@ -66,7 +66,7 @@ tmp<pointField> avg
     {
         vector& avgPos = avg[vertI];
 
-        if (fixedPoints[vertI])
+        if (fixedPoints.test(vertI))
         {
             avgPos = s.localPoints()[vertI];
         }
@@ -121,7 +121,7 @@ void getFixedPoints
     {
         if (from0To1[fpI] != -1)
         {
-            fixedPoints[from0To1[fpI]] = true;
+            fixedPoints.set(from0To1[fpI]);
         }
     }
 }

@@ -195,7 +195,7 @@ void modifyOrAddFace
     PackedBoolList& modifiedFace
 )
 {
-    if (!modifiedFace[facei])
+    if (modifiedFace.set(facei))
     {
         // First usage of face. Modify.
         meshMod.setAction
@@ -213,7 +213,6 @@ void modifyOrAddFace
                 zoneFlip                    // face flip in zone
             )
         );
-        modifiedFace[facei] = 1;
     }
     else
     {

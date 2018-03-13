@@ -47,10 +47,7 @@ Foam::treeBoundBox Foam::treeDataFace::calcBb(const label facei) const
 
 void Foam::treeDataFace::update()
 {
-    forAll(faceLabels_, i)
-    {
-        isTreeFace_.set(faceLabels_[i], 1);
-    }
+    isTreeFace_.setMany(faceLabels_);
 
     if (cacheBb_)
     {
@@ -75,7 +72,7 @@ Foam::treeDataFace::treeDataFace
 :
     mesh_(mesh),
     faceLabels_(faceLabels),
-    isTreeFace_(mesh.nFaces(), 0),
+    isTreeFace_(mesh.nFaces(), false),
     cacheBb_(cacheBb)
 {
     update();
@@ -91,7 +88,7 @@ Foam::treeDataFace::treeDataFace
 :
     mesh_(mesh),
     faceLabels_(std::move(faceLabels)),
-    isTreeFace_(mesh.nFaces(), 0),
+    isTreeFace_(mesh.nFaces(), false),
     cacheBb_(cacheBb)
 {
     update();
@@ -106,7 +103,7 @@ Foam::treeDataFace::treeDataFace
 :
     mesh_(mesh),
     faceLabels_(identity(mesh_.nFaces())),
-    isTreeFace_(mesh.nFaces(), 0),
+    isTreeFace_(mesh.nFaces(), false),
     cacheBb_(cacheBb)
 {
     update();
@@ -124,7 +121,7 @@ Foam::treeDataFace::treeDataFace
     (
         identity(patch.size(), patch.start())
     ),
-    isTreeFace_(mesh_.nFaces(), 0),
+    isTreeFace_(mesh_.nFaces(), false),
     cacheBb_(cacheBb)
 {
     update();
@@ -255,7 +252,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
             forAll(pFaces, i)
             {
-                if (isTreeFace_.get(pFaces[i]) == 1)
+                if (isTreeFace_.test(pFaces[i]))
                 {
                     vector n = mesh_.faceAreas()[pFaces[i]];
                     n /= mag(n) + VSMALL;
@@ -324,7 +321,7 @@ Foam::volumeType Foam::treeDataFace::getVolumeType
 
             forAll(eFaces, i)
             {
-                if (isTreeFace_.get(eFaces[i]) == 1)
+                if (isTreeFace_.test(eFaces[i]))
                 {
                     vector n = mesh_.faceAreas()[eFaces[i]];
                     n /= mag(n) + VSMALL;

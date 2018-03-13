@@ -47,21 +47,7 @@ inline Foam::PackedBoolList::PackedBoolList(const PackedBoolList& lst)
 {}
 
 
-inline Foam::PackedBoolList::PackedBoolList(const PackedList<1>& lst)
-:
-    PackedList<1>(lst)
-{}
-
-
 inline Foam::PackedBoolList::PackedBoolList(PackedBoolList&& lst)
-:
-    PackedList<1>()
-{
-    transfer(lst);
-}
-
-
-inline Foam::PackedBoolList::PackedBoolList(PackedList<1>&& lst)
 :
     PackedList<1>()
 {
@@ -106,7 +92,7 @@ inline Foam::PackedBoolList::PackedBoolList
 :
     PackedList<1>(size)
 {
-    set(indices);
+    setMany(indices);
 }
 
 
@@ -118,7 +104,7 @@ inline Foam::PackedBoolList::PackedBoolList
 :
     PackedList<1>(size)
 {
-    set(indices);
+    setMany(indices);
 }
 
 
@@ -131,15 +117,15 @@ Foam::PackedBoolList::clone() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline void Foam::PackedBoolList::transfer(PackedBoolList& lst)
+inline bool Foam::PackedBoolList::test(const label pos) const
 {
-    PackedList<1>::transfer(static_cast<PackedList<1>&>(lst));
+    return get(pos);
 }
 
 
-inline void Foam::PackedBoolList::transfer(PackedList<1>& lst)
+inline void Foam::PackedBoolList::transfer(PackedBoolList& lst)
 {
-    PackedList<1>::transfer(lst);
+    PackedList<1>::transfer(static_cast<PackedList<1>&>(lst));
 }
 
 
@@ -157,138 +143,9 @@ inline void Foam::PackedBoolList::operator=(const PackedBoolList& lst)
 }
 
 
-inline void Foam::PackedBoolList::operator=(const PackedList<1>& lst)
-{
-    PackedList<1>::operator=(lst);
-}
-
-
 inline void Foam::PackedBoolList::operator=(PackedBoolList&& lst)
 {
     transfer(lst);
-}
-
-
-inline void Foam::PackedBoolList::operator=(PackedList<1>&& lst)
-{
-    transfer(lst);
-}
-
-
-inline void Foam::PackedBoolList::operator=(const labelUList& indices)
-{
-    clear();
-    set(indices);
-}
-
-
-inline void Foam::PackedBoolList::operator=(const labelUIndList& indices)
-{
-    clear();
-    set(indices);
-}
-
-
-inline Foam::PackedBoolList
-Foam::PackedBoolList::operator~() const
-{
-    PackedBoolList result(*this);
-    result.flip();
-
-    return result;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator&=(const PackedList<1>& lst)
-{
-    subset(lst);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator&=(const labelUList& indices)
-{
-    subset(indices);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator&=(const labelUIndList& indices)
-{
-    subset(indices);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator|=(const PackedList<1>& lst)
-{
-    set(lst);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator|=(const labelUList& indices)
-{
-    set(indices);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator|=(const labelUIndList& indices)
-{
-    set(indices);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator+=(const PackedList<1>& lst)
-{
-    return operator|=(lst);
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator+=(const labelUList& indices)
-{
-    return operator|=(indices);
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator+=(const labelUIndList& indices)
-{
-    return operator|=(indices);
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator-=(const PackedList<1>& lst)
-{
-    unset(lst);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator-=(const labelUList& indices)
-{
-    unset(indices);
-    return *this;
-}
-
-
-inline Foam::PackedBoolList&
-Foam::PackedBoolList::operator-=(const labelUIndList& indices)
-{
-    unset(indices);
-    return *this;
 }
 
 

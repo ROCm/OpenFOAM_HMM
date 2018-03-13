@@ -234,7 +234,7 @@ void Foam::PatchTools::calcBounds
         forAll(f, fp)
         {
             label pointi = f[fp];
-            if (pointIsUsed.set(pointi, 1u))
+            if (pointIsUsed.set(pointi))
             {
                 bb.add(points[pointi]);
                 ++nPoints;

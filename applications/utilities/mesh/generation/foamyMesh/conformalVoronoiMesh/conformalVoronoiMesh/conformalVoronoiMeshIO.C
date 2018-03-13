@@ -949,18 +949,7 @@ void Foam::conformalVoronoiMesh::writeMesh
         orEqOp<unsigned int>()
     );
 
-    labelList addr(boundaryFacesToRemove.count());
-    label count = 0;
-
-    forAll(boundaryFacesToRemove, facei)
-    {
-        if (boundaryFacesToRemove[facei])
-        {
-            addr[count++] = facei;
-        }
-    }
-
-    addr.setSize(count);
+    labelList addr(boundaryFacesToRemove.used());
 
     faceSet indirectPatchFaces
     (

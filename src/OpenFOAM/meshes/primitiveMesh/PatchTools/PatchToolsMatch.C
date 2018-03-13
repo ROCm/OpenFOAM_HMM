@@ -97,7 +97,7 @@ void Foam::PatchTools::matchEdges
     p1EdgeLabels.setSize(p1.nEdges());
     p2EdgeLabels.setSize(p1.nEdges());
     sameOrientation.setSize(p1.nEdges());
-    sameOrientation = 0;
+    sameOrientation = false;
 
     label nMatches = 0;
 
@@ -124,8 +124,8 @@ void Foam::PatchTools::matchEdges
         {
             p1EdgeLabels[nMatches] = iter();
             p2EdgeLabels[nMatches] = edgeI;
-            sameOrientation[nMatches] = (meshE[0] == iter.key()[0]);
-            nMatches++;
+            sameOrientation.set(nMatches, (meshE[0] == iter.key()[0]));
+            ++nMatches;
         }
     }
     p1EdgeLabels.setSize(nMatches);

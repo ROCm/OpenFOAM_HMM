@@ -1618,8 +1618,10 @@ void Foam::medialAxisMeshMover::calculateDisplacement
 
         forAll(displacement, i)
         {
-            isToBeSmoothed[i] =
-                medialRatio_[i] > SMALL && medialRatio_[i] < 1-SMALL;
+            if (medialRatio_[i] > SMALL && medialRatio_[i] < 1-SMALL)
+            {
+                isToBeSmoothed.set(i);
+            }
         }
 
         fieldSmoother_.smoothLambdaMuDisplacement

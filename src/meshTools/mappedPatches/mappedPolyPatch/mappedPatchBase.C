@@ -725,11 +725,7 @@ void Foam::mappedPatchBase::calcMapping() const
             {
                 label facei = map[i];
 
-                if (used[facei] == 0)
-                {
-                    used[facei] = 1;
-                }
-                else
+                if (used.test(facei))
                 {
                     FatalErrorInFunction
                         << "On patch " << patch_.name()
@@ -737,11 +733,15 @@ void Foam::mappedPatchBase::calcMapping() const
                         << " is assigned to more than once."
                         << abort(FatalError);
                 }
+                else
+                {
+                    used.set(facei);
+                }
             }
         }
         forAll(used, facei)
         {
-            if (used[facei] == 0)
+            if (!used.test(facei))
             {
                 FatalErrorInFunction
                     << "On patch " << patch_.name()

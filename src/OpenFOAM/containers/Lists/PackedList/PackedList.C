@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -155,23 +155,6 @@ Foam::labelList Foam::PackedList<nBits>::values() const
 
 
 template<unsigned nBits>
-Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::printInfo
-(
-    Ostream& os
-) const
-{
-    os  << "iterator<"  << label(nBits) << "> ["
-        << this->index_ << "]"
-        << " segment:"  << label(this->index_ / packing())
-        << " offset:"   << label(this->index_ % packing())
-        << " value:"    << this->get()
-        << nl;
-
-    return os;
-}
-
-
-template<unsigned nBits>
 Foam::Ostream& Foam::PackedList<nBits>::printBits
 (
     Ostream& os,
@@ -294,7 +277,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
                 {
                     for (label i=0; i<len; ++i)
                     {
-                        lst[i] = lst.readValue(is);
+                        lst.set(i, lst.readValue(is));
 
                         is.fatalCheck
                         (
@@ -411,7 +394,6 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
     const label shortListLen
 ) const
 {
-    const bool indexedOutput = (shortListLen < 0);
     const PackedList<nBits>& lst = *this;
     const label len = lst.size();
 
@@ -419,7 +401,7 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
     if (os.format() == IOstream::ASCII)
     {
         // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (len > 1 && !indexedOutput);
+        bool uniform = (len > 1);
         if (uniform)
         {
             forAll(lst, i)
@@ -436,26 +418,6 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
         {
             // uniform values:
             os  << len << token::BEGIN_BLOCK << lst[0] << token::END_BLOCK;
-        }
-        else if (indexedOutput)
-        {
-            // indexed output
-            os  << nl << token::BEGIN_BLOCK << nl;
-
-            for
-            (
-                typename PackedList<nBits>::const_iterator iter = lst.cbegin();
-                iter != lst.cend();
-                ++iter
-            )
-            {
-                if (iter.writeIfSet(os))
-                {
-                    os  << nl;
-                }
-            }
-
-            os  << token::END_BLOCK << nl;
         }
         else if (!shortListLen || len <= shortListLen)
         {

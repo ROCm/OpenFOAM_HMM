@@ -41,7 +41,7 @@ labelList receptorNeigCell(mesh.nInternalFaces(), -1);
             && neiType == cellCellStencil::CALCULATED
         )
         {
-            isOwnerInterpolatedFace[faceI] = true;
+            isOwnerInterpolatedFace.set(faceI);
 
             const vector& fc = mesh.faceCentres()[faceI];
 
@@ -106,7 +106,7 @@ labelList receptorNeigCell(mesh.nInternalFaces(), -1);
             && neiType == cellCellStencil::INTERPOLATED
         )
         {
-            isNeiInterpolatedFace[faceI] = true;
+            isNeiInterpolatedFace.set(faceI);
 
             const vector& fc = mesh.faceCentres()[faceI];
             for (label zoneI = 0; zoneI < nZones; zoneI++)

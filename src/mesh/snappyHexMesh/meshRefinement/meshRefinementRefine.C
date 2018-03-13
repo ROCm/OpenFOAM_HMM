@@ -142,12 +142,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         const label nInternalFaces = mesh.nInternalFaces();
 
         // Mark refined cells on old mesh
-        PackedBoolList oldRefineCell(map.nOldCells());
-
-        forAll(oldCellsToRefine, i)
-        {
-            oldRefineCell.set(oldCellsToRefine[i], 1u);
-        }
+        PackedBoolList oldRefineCell(map.nOldCells(), oldCellsToRefine);
 
         // Mark refined faces
         PackedBoolList refinedInternalFace(nInternalFaces);
@@ -161,17 +156,15 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
             if
             (
-                oldOwn >= 0
-             && oldRefineCell.get(oldOwn) == 0u
-             && oldNei >= 0
-             && oldRefineCell.get(oldNei) == 0u
+                oldOwn >= 0 && !oldRefineCell.test(oldOwn)
+             && oldNei >= 0 && !oldRefineCell.test(oldNei)
             )
             {
                 // Unaffected face since both neighbours were not refined.
             }
             else
             {
-                refinedInternalFace.set(faceI, 1u);
+                refinedInternalFace.set(faceI);
             }
         }
 
@@ -190,7 +183,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
             {
                 label oldOwn = map.cellMap()[faceOwner[faceI]];
 
-                if (oldOwn >= 0 && oldRefineCell.get(oldOwn) == 0u)
+                if (oldOwn >= 0 && !oldRefineCell.test(oldOwn))
                 {
                     // owner did exist and wasn't refined.
                 }
@@ -218,7 +211,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
 
         forAll(refinedInternalFace, faceI)
         {
-            if (refinedInternalFace.get(faceI) == 1u)
+            if (refinedInternalFace.test(faceI))
             {
                 const cell& ownFaces = cells[faceOwner[faceI]];
                 forAll(ownFaces, ownI)
@@ -405,7 +398,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                         {
                             label e0 = pointEdges[pointi][0];
                             label regioni = edgeRegion[e0];
-                            regionVisited[regioni] = 1u;
+                            regionVisited.set(regioni);
                         }
                     }
                 }
@@ -415,7 +408,7 @@ void Foam::meshRefinement::markFeatureCellLevel
                 //    only be circular regions!
                 forAll(featureMesh.edges(), edgei)
                 {
-                    if (regionVisited.set(edgeRegion[edgei], 1u))
+                    if (regionVisited.set(edgeRegion[edgei]))
                     {
                         const edge& e = featureMesh.edges()[edgei];
                         label pointi = e.start();
@@ -458,7 +451,7 @@ void Foam::meshRefinement::markFeatureCellLevel
     forAll(features_, featI)
     {
         featureEdgeVisited[featI].setSize(features_[featI].edges().size());
-        featureEdgeVisited[featI] = 0u;
+        featureEdgeVisited[featI] = false;
     }
 
     // Database to pass into trackedParticle::move
@@ -488,7 +481,7 @@ void Foam::meshRefinement::markFeatureCellLevel
     maxFeatureLevel = -1;
     forAll(features_, featI)
     {
-        featureEdgeVisited[featI] = 0u;
+        featureEdgeVisited[featI] = false;
     }
 
 
@@ -519,7 +512,7 @@ void Foam::meshRefinement::markFeatureCellLevel
         {
             label edgeI = pEdges[pEdgeI];
 
-            if (featureEdgeVisited[featI].set(edgeI, 1u))
+            if (featureEdgeVisited[featI].set(edgeI))
             {
                 // Unvisited edge. Make the particle go to the other point
                 // on the edge.
@@ -581,7 +574,7 @@ void Foam::meshRefinement::markFeatureCellLevel
             {
                 label edgeI = pEdges[i];
 
-                if (featureEdgeVisited[featI].set(edgeI, 1u))
+                if (featureEdgeVisited[featI].set(edgeI))
                 {
                     // Unvisited edge. Make the particle go to the other point
                     // on the edge.

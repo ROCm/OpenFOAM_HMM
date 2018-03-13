@@ -1081,11 +1081,7 @@ void Foam::conformalVoronoiMesh::move()
         Zero
     );
 
-    PackedBoolList pointToBeRetained
-    (
-        number_of_vertices(),
-        true
-    );
+    PackedBoolList pointToBeRetained(number_of_vertices(), true);
 
     DynamicList<Point> pointsToInsert(number_of_vertices());
 
@@ -1170,8 +1166,8 @@ void Foam::conformalVoronoiMesh::move()
 
                     if
                     (
-                        pointToBeRetained[vA->index()] == true
-                     && pointToBeRetained[vB->index()] == true
+                        pointToBeRetained.test(vA->index())
+                     && pointToBeRetained.test(vB->index())
                     )
                     {
                         const Foam::point pt(0.5*(dVA + dVB));
@@ -1185,12 +1181,12 @@ void Foam::conformalVoronoiMesh::move()
 
                 if (vA->internalPoint() && !vA->referred() && !vA->fixed())
                 {
-                    pointToBeRetained[vA->index()] = false;
+                    pointToBeRetained.unset(vA->index());
                 }
 
                 if (vB->internalPoint() && !vB->referred() && !vB->fixed())
                 {
-                    pointToBeRetained[vB->index()] = false;
+                    pointToBeRetained.unset(vB->index());
                 }
 
                 // Do not consider this Delaunay edge any further
@@ -1368,8 +1364,8 @@ void Foam::conformalVoronoiMesh::move()
                             // removed.
                             if
                             (
-                                pointToBeRetained[vA->index()] == true
-                             && pointToBeRetained[vB->index()] == true
+                                pointToBeRetained.test(vA->index())
+                             && pointToBeRetained.test(vB->index())
                             )
                             {
                                 const Foam::point pt(0.5*(dVA + dVB));
@@ -1388,7 +1384,7 @@ void Foam::conformalVoronoiMesh::move()
                          && !vA->fixed()
                         )
                         {
-                            pointToBeRetained[vA->index()] = false;
+                            pointToBeRetained.unset(vA->index());
                         }
 
                         if
@@ -1398,7 +1394,7 @@ void Foam::conformalVoronoiMesh::move()
                          && !vB->fixed()
                         )
                         {
-                            pointToBeRetained[vB->index()] = false;
+                            pointToBeRetained.unset(vB->index());
                         }
                     }
                     else
@@ -1454,7 +1450,7 @@ void Foam::conformalVoronoiMesh::move()
     {
         if (vit->internalPoint() && !vit->referred() && !vit->fixed())
         {
-            if (pointToBeRetained[vit->index()] == true)
+            if (pointToBeRetained.test(vit->index()))
             {
                 limitDisplacement
                 (
@@ -1484,7 +1480,7 @@ void Foam::conformalVoronoiMesh::move()
     {
         if (vit->internalPoint() && !vit->referred() && !vit->fixed())
         {
-            if (pointToBeRetained[vit->index()] == true)
+            if (pointToBeRetained.test(vit->index()))
             {
                 // Convert vit->point() to FOAM vector (double) to do addition,
                 // avoids memory increase because a record of the constructions
@@ -1540,7 +1536,7 @@ void Foam::conformalVoronoiMesh::move()
         {
             if (vit->internalPoint() && !vit->referred())
             {
-                if (pointToBeRetained[vit->index()] == true)
+                if (pointToBeRetained.test(vit->index()))
                 {
                     meshTools::writeOBJ(str, topoint(vit->point()));
 

@@ -152,7 +152,7 @@ tmp<vectorField> calcPointNormals
                 const edge& e = s.edges()[edgeI];
                 forAll(e, i)
                 {
-                    if (!isFeaturePoint[e[i]])
+                    if (!isFeaturePoint.test(e[i]))
                     {
                         pointNormals[e[i]] = Zero;
                     }
@@ -179,7 +179,7 @@ tmp<vectorField> calcPointNormals
                 const edge& e = s.edges()[edgeI];
                 forAll(e, i)
                 {
-                    if (!isFeaturePoint[e[i]])
+                    if (!isFeaturePoint.test(e[i]))
                     {
                         pointNormals[e[i]] += n;
                         nNormals[e[i]]++;
@@ -242,7 +242,7 @@ void detectSelfIntersections
 
         if (hitInfo.hit())
         {
-            isEdgeIntersecting[edgeI] = true;
+            isEdgeIntersecting.set(edgeI);
         }
     }
 }
@@ -297,7 +297,7 @@ label detectIntersectionPoints
             {
                 scale[pointI] = max(0.0, scale[pointI]-0.2);
 
-                isPointOnHitEdge[pointI] = true;
+                isPointOnHitEdge.set(pointI);
                 nHits++;
             }
         }
@@ -425,7 +425,7 @@ void minSmooth
 
     forAll(fld, pointI)
     {
-        if (isAffectedPoint.get(pointI) == 1)
+        if (isAffectedPoint.test(pointI))
         {
             newFld[pointI] = min
             (
@@ -458,13 +458,13 @@ void lloydsSmoothing
         forAll(edges, edgeI)
         {
             const edge& e = edges[edgeI];
-            if (isSmoothPoint[e[0]])
+            if (isSmoothPoint.test(e[0]))
             {
-                newIsSmoothPoint[e[1]] = true;
+                newIsSmoothPoint.set(e[1]);
             }
-            if (isSmoothPoint[e[1]])
+            if (isSmoothPoint.test(e[1]))
             {
-                newIsSmoothPoint[e[0]] = true;
+                newIsSmoothPoint.set(e[0]);
             }
         }
         Info<< "From points-to-smooth " << isSmoothPoint.count()
@@ -545,11 +545,11 @@ void lloydsSmoothing
                 const edge& e = edges[edgeI];
                 if (isSmoothPoint[e[0]])
                 {
-                    newIsSmoothPoint[e[1]] = true;
+                    newIsSmoothPoint.set(e[1]);
                 }
                 if (isSmoothPoint[e[1]])
                 {
-                    newIsSmoothPoint[e[0]] = true;
+                    newIsSmoothPoint.set(e[0]);
                 }
             }
             Info<< "From points-to-smooth " << isSmoothPoint.count()
@@ -662,15 +662,9 @@ int main(int argc, char *argv[])
         << " out of " << s.nEdges() << nl
         << endl;
 
-    PackedBoolList isFeaturePoint(s.nPoints());
-    forAll(features.featurePoints(), i)
-    {
-        label pointI = features.featurePoints()[i];
-        isFeaturePoint[pointI] = true;
-    }
+    PackedBoolList isFeaturePoint(s.nPoints(), features.featurePoints());
+
     const List<surfaceFeatures::edgeStatus> edgeStat(features.toStatus());
-
-
 
 
     const pointField initialPoints(s.points());
@@ -809,9 +803,9 @@ int main(int argc, char *argv[])
         // Accumulate all affected points
         forAll(isAffectedPoint, pointI)
         {
-            if (isAffectedPoint[pointI])
+            if (isAffectedPoint.test(pointI))
             {
-                isScaledPoint[pointI] = true;
+                isScaledPoint.set(pointI);
             }
         }
 

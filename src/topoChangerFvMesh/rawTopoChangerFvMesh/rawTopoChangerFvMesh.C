@@ -97,14 +97,14 @@ bool Foam::rawTopoChangerFvMesh::update()
         {
             if (faceMap[facei] >= 0)
             {
-                mappedFace[facei] = 1;
+                mappedFace.set(facei);
             }
         }
         for (label facei = nInternalFaces(); facei < nFaces(); facei++)
         {
             if (faceMap[facei] >= 0 && faceMap[facei] >= nOldInternal)
             {
-                mappedFace[facei] = 1;
+                mappedFace.set(facei);
             }
         }
 
@@ -112,21 +112,21 @@ bool Foam::rawTopoChangerFvMesh::update()
 
         forAll(fromFaces, i)
         {
-            mappedFace[fromFaces[i].index()] = 1;
+            mappedFace.set(fromFaces[i].index());
         }
 
         const List<objectMap>& fromEdges = topoChangeMap().facesFromEdgesMap();
 
         forAll(fromEdges, i)
         {
-            mappedFace[fromEdges[i].index()] = 1;
+            mappedFace.set(fromEdges[i].index());
         }
 
         const List<objectMap>& fromPts = topoChangeMap().facesFromPointsMap();
 
         forAll(fromPts, i)
         {
-            mappedFace[fromPts[i].index()] = 1;
+            mappedFace.set(fromPts[i].index());
         }
 
         // Set unmapped faces to zero

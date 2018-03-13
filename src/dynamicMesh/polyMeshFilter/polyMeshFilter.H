@@ -53,8 +53,8 @@ namespace Foam
 
 class polyMesh;
 class fvMesh;
-class PackedBoolList;
 class faceSet;
+class PackedBoolList;
 
 /*---------------------------------------------------------------------------*\
                        Class polyMeshFilter Declaration

@@ -820,7 +820,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         else if (nBoundaryAnchors == 7 && nonBoundaryAnchor != -1)
         {
             // Mark the cell. Store the (single!) non-boundary anchor point.
-            hasSevenBoundaryAnchorPoints.set(celli, 1u);
+            hasSevenBoundaryAnchorPoints.set(celli);
             nonBoundaryAnchors.insert(nonBoundaryAnchor);
         }
     }
@@ -843,7 +843,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
         forAll(pCells, i)
         {
-            if (hasSevenBoundaryAnchorPoints.get(pCells[i]) == 1u)
+            if (hasSevenBoundaryAnchorPoints.test(pCells[i]))
             {
                 n++;
             }
@@ -856,7 +856,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             {
                 label celli = pCells[i];
 
-                if (hasSevenBoundaryAnchorPoints.get(celli) == 1u)
+                if (hasSevenBoundaryAnchorPoints.test(celli))
                 {
                     if
                     (

@@ -263,9 +263,9 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
         label nMasterFaces = 0;
         forAll(isMasterFace, facei)
         {
-            if (isMasterFace.get(facei) == 1)
+            if (isMasterFace.test(facei))
             {
-                nMasterFaces++;
+                ++nMasterFaces;
             }
         }
         reduce(nMasterFaces, sumOp<label>());
@@ -273,9 +273,9 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
         label nChangedFaces = 0;
         forAll(changedFaces, i)
         {
-            if (isMasterFace.get(changedFaces[i]) == 1)
+            if (isMasterFace.test(changedFaces[i]))
             {
-                nChangedFaces++;
+                ++nChangedFaces;
             }
         }
         reduce(nChangedFaces, sumOp<label>());
@@ -1260,9 +1260,9 @@ Foam::label Foam::meshRefinement::countHits() const
 
     forAll(surfaceIndex_, facei)
     {
-        if (surfaceIndex_[facei] >= 0 && isMasterFace.get(facei) == 1)
+        if (surfaceIndex_[facei] >= 0 && isMasterFace.test(facei))
         {
-            nHits++;
+            ++nHits;
         }
     }
     return nHits;
@@ -1562,7 +1562,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
 
             forAll(f, fp)
             {
-                if (isBoundaryPoint.set(f[fp], 1u))
+                if (isBoundaryPoint.set(f[fp]))
                 {
                     nBoundaryPoints++;
                 }
@@ -1588,7 +1588,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     //
     //            forAll(f, fp)
     //            {
-    //                if (isBoundaryPoint.set(f[fp], 1u))
+    //                if (isBoundaryPoint.set(f[fp]))
     //                    nBoundaryPoints++;
     //                }
     //            }
@@ -1603,7 +1603,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints() const
     nBoundaryPoints = 0;
     forAll(isBoundaryPoint, pointi)
     {
-        if (isBoundaryPoint.get(pointi) == 1u)
+        if (isBoundaryPoint.test(pointi))
         {
             boundaryPoints[nBoundaryPoints++] = pointi;
         }
@@ -2298,7 +2298,6 @@ void Foam::meshRefinement::findRegions
 {
     PackedBoolList insideCell(mesh.nCells());
 
-
     // Mark all cells reachable from locationsInMesh
     labelList insideRegions(locationsInMesh.size());
     forAll(insideRegions, i)
@@ -2319,7 +2318,7 @@ void Foam::meshRefinement::findRegions
         {
             if (cellRegion[celli] == regioni)
             {
-                insideCell[celli] = true;
+                insideCell.set(celli);
             }
         }
     }
@@ -2736,7 +2735,7 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterPoints
     {
         if (myPoints[pointi] == globalPoints.toGlobal(pointi))
         {
-            isPatchMasterPoint[pointi] = true;
+            isPatchMasterPoint.set(pointi);
         }
     }
 
@@ -2773,7 +2772,7 @@ Foam::PackedBoolList Foam::meshRefinement::getMasterEdges
     {
         if (myEdges[edgei] == globalEdges.toGlobal(edgei))
         {
-            isMasterEdge[edgei] = true;
+            isMasterEdge.set(edgei);
         }
     }
 

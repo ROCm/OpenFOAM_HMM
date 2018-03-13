@@ -1116,10 +1116,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     {
         const face f = pMesh.faces()[iter.key()];
 
-        forAll(f, fPtI)
-        {
-            ptToBeLimited[f[fPtI]] = true;
-        }
+        ptToBeLimited.setMany(f);
     }
 
     // // Limit connected cells
@@ -1153,10 +1150,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
     //     const labelList& cP = cellPts[celli];
 
-    //     forAll(cP, cPI)
-    //     {
-    //         ptToBeLimited[cP[cPI]] = true;
-    //     }
+    //     ptToBeLimited.setMany(cP);
     // }
 
 
@@ -1176,7 +1170,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
         if (cI >= 0)
         {
-            if (ptToBeLimited[cI] == true)
+            if (ptToBeLimited.test(cI))
             {
                 cit->filterCount()++;
             }
@@ -2557,10 +2551,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
     {
         const face& f = faces[fI];
 
-        forAll(f, fPtI)
-        {
-            ptUsed[f[fPtI]] = true;
-        }
+        ptUsed.setMany(f);
     }
 
     label pointi = 0;
@@ -2572,7 +2563,7 @@ void Foam::conformalVoronoiMesh::removeUnusedPoints
 
     forAll(ptUsed, ptUI)
     {
-        if (ptUsed[ptUI] == true)
+        if (ptUsed.test(ptUI))
         {
             oldToNew[ptUI] = pointi++;
         }
@@ -2610,15 +2601,8 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 
     // Scan all faces to find all of the cells that are used
 
-    forAll(owner, oI)
-    {
-        cellUsed[owner[oI]] = true;
-    }
-
-    forAll(neighbour, nI)
-    {
-        cellUsed[neighbour[nI]] = true;
-    }
+    cellUsed.setMany(owner);
+    cellUsed.setMany(neighbour);
 
     label celli = 0;
 
@@ -2629,7 +2613,7 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 
     forAll(cellUsed, cellUI)
     {
-        if (cellUsed[cellUI] == true)
+        if (cellUsed.test(cellUI))
         {
             oldToNew[cellUI] = celli++;
         }
@@ -2645,7 +2629,7 @@ Foam::labelList Foam::conformalVoronoiMesh::removeUnusedCells
 
     forAll(cellUsed, cUI)
     {
-        if (cellUsed[cUI] == false)
+        if (!cellUsed.test(cUI))
         {
             unusedCells.append(cUI);
         }

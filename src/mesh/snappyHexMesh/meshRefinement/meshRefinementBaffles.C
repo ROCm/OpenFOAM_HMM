@@ -2917,7 +2917,7 @@ void Foam::meshRefinement::calcPatchNumMasterFaces
     {
         const label meshFaceI = patch.addressing()[faceI];
 
-        if (isMasterFace[meshFaceI])
+        if (isMasterFace.test(meshFaceI))
         {
             const labelList& fEdges = patch.faceEdges()[faceI];
             forAll(fEdges, fEdgeI)
@@ -3124,7 +3124,7 @@ void Foam::meshRefinement::consistentOrientation
             (
                 patchI != -1
              && bm[patchI].coupled()
-             && !isMasterFace[meshFaceI]
+             && !isMasterFace.test(meshFaceI)
             )
             {
                 // Slave side. Mark so doesn't get visited.
@@ -3290,7 +3290,7 @@ void Foam::meshRefinement::consistentOrientation
             (
                 patchI != -1
              && bm[patchI].coupled()
-             && !isMasterFace[meshFaceI]
+             && !isMasterFace.test(meshFaceI)
             )
             {
                 // Slave side. Take flipped from neighbour
@@ -3326,11 +3326,11 @@ void Foam::meshRefinement::consistentOrientation
 
         if (allFaceInfo[faceI] == orientedSurface::NOFLIP)
         {
-            meshFlipMap[meshFaceI] = false;
+            meshFlipMap.unset(meshFaceI);
         }
         else if (allFaceInfo[faceI] == orientedSurface::FLIP)
         {
-            meshFlipMap[meshFaceI] = true;
+            meshFlipMap.set(meshFaceI);
         }
         else
         {
@@ -3375,7 +3375,7 @@ void Foam::meshRefinement::zonify
             if (ownZone == neiZone)
             {
                 // free-standing face. Use geometrically derived orientation
-                flip = meshFlipMap[faceI];
+                flip = meshFlipMap.test(faceI);
             }
             else
             {
@@ -3428,7 +3428,7 @@ void Foam::meshRefinement::zonify
                 if (ownZone == neiZone)
                 {
                     // free-standing face. Use geometrically derived orientation
-                    flip = meshFlipMap[faceI];
+                    flip = meshFlipMap.test(faceI);
                 }
                 else
                 {
@@ -4700,13 +4700,13 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             {
                 label meshFaceI = patch.addressing()[faceI];
 
-                if (isMasterFace[meshFaceI])
+                if (isMasterFace.test(meshFaceI))
                 {
                     label n = 1;
                     if
                     (
-                        bool(posOrientation[meshFaceI])
-                     == meshFlipMap[meshFaceI]
+                        posOrientation.test(meshFaceI)
+                     == meshFlipMap.test(meshFaceI)
                     )
                     {
                         n = -1;

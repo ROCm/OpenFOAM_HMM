@@ -588,7 +588,7 @@ int main(int argc, char *argv[])
             label edgeI = iter.key();
             const edge& e = edges[edgeI];
 
-            collapseEdge[edgeI] = true;
+            collapseEdge.set(edgeI);
             collapsePointToLocation.set(e[1], points[e[0]]);
 
             newPoints[e[0]] = iter();

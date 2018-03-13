@@ -103,9 +103,9 @@ Foam::labelList Foam::bandCompression(const labelListList& cellCellAddressing)
         {
             currentCell = nextCell.removeHead();
 
-            if (!visited[currentCell])
+            if (visited.set(currentCell))
             {
-                visited[currentCell] = 1;
+                // On first visit...
 
                 // add into cellOrder
                 newOrder[cellInOrder] = currentCell;
@@ -230,7 +230,7 @@ Foam::labelList Foam::bandCompression
 
             if (!visited[currentCell])
             {
-                visited[currentCell] = 1;
+                visited.set(currentCell);
 
                 // add into cellOrder
                 newOrder[cellInOrder] = currentCell;

@@ -128,14 +128,14 @@ int main(int argc, char *argv[])
             if (protectedCell.empty())
             {
                 protectedCell.setSize(mesh.nCells());
-                protectedCell = 0;
+                protectedCell = false;
             }
 
             forAll(betav, celli)
             {
                 if (betav[celli] < 0.99)
                 {
-                    protectedCell[celli] = 1;
+                    protectedCell.set(celli);
                 }
             }
 

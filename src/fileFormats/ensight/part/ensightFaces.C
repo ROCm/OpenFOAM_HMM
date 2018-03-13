@@ -268,7 +268,7 @@ void Foam::ensightFaces::classify
     {
         const label faceId = addressing[listi];
 
-        if (!exclude[faceId])
+        if (!exclude.test(faceId))
         {
             const enum elemType what = whatType(faces[faceId]);
             sizes_[what]++;
@@ -290,7 +290,7 @@ void Foam::ensightFaces::classify
         const label faceId = addressing[listi];
         const bool  doFlip = useFlip && flipMap[listi];
 
-        if (!exclude[faceId])
+        if (!exclude.test(faceId))
         {
             add(faces[faceId], faceId, doFlip);
         }

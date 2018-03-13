@@ -97,10 +97,7 @@ Foam::label Foam::edgeCollapser::checkMeshQuality
     {
         const face& f = mesh.faces()[iter.key()];
 
-        forAll(f, pI)
-        {
-            isErrorPoint[f[pI]] = true;
-        }
+        isErrorPoint.setMany(f);
     }
 
     syncTools::syncPointList
@@ -225,10 +222,7 @@ void Foam::edgeCollapser::collapseToEdge
 
     labelList faceEdgesNeg = edgesFromPoints(facei, facePtsNeg);
 
-    forAll(faceEdgesNeg, edgeI)
-    {
-        collapseEdge[faceEdgesNeg[edgeI]] = true;
-    }
+    collapseEdge.setMany(faceEdgesNeg);
 
     forAll(facePtsNeg, pI)
     {
@@ -272,10 +266,7 @@ void Foam::edgeCollapser::collapseToEdge
 
     labelList faceEdgesPos = edgesFromPoints(facei, facePtsPos);
 
-    forAll(faceEdgesPos, edgeI)
-    {
-        collapseEdge[faceEdgesPos[edgeI]] = true;
-    }
+    collapseEdge.setMany(faceEdgesPos);
 
     forAll(facePtsPos, pI)
     {
@@ -373,11 +364,7 @@ void Foam::edgeCollapser::collapseToPoint
 
     const labelList& faceEdges = mesh_.faceEdges()[facei];
 
-    forAll(faceEdges, eI)
-    {
-        const label edgeI = faceEdges[eI];
-        collapseEdge[edgeI] = true;
-    }
+    collapseEdge.setMany(faceEdges);
 
     forAll(f, pI)
     {
@@ -866,7 +853,7 @@ Foam::label Foam::edgeCollapser::breakStringsAtEdges
 
     forAll(edges, eI)
     {
-        if (markedEdges[eI])
+        if (markedEdges.test(eI))
         {
             const edge& e = edges[eI];
 
@@ -880,7 +867,7 @@ Foam::label Foam::edgeCollapser::breakStringsAtEdges
 
                 if
                 (
-                    !collapseEdge[eI]
+                    !collapseEdge.test(eI)
                  && startCollapseIndex == endCollapseIndex
                 )
                 {
@@ -897,11 +884,11 @@ Foam::label Foam::edgeCollapser::breakStringsAtEdges
 
                         if
                         (
-                            collapseEdge[edgeI]
-                         && nbrIndex == startCollapseIndex
+                            nbrIndex == startCollapseIndex
+                         && collapseEdge.test(edgeI)
                         )
                         {
-                            collapseEdge[edgeI] = false;
+                            collapseEdge.unset(edgeI);
                             nUncollapsed++;
                         }
                     }
@@ -948,7 +935,7 @@ void Foam::edgeCollapser::determineDuplicatePointsOnFace
         label index = allPointInfo[f[fpI]].collapseIndex();
         if (duplicateCollapses.found(index))
         {
-            markedPoints[f[fpI]] = true;
+            markedPoints.set(f[fpI]);
         }
     }
 }
@@ -1385,7 +1372,7 @@ bool Foam::edgeCollapser::setRefinement
     faceList newFaces(mesh_.faces());
 
     // Current cellCollapse status
-    boolList cellRemoved(mesh_.nCells(), false);
+    PackedBoolList cellRemoved(mesh_.nCells(), false);
 
     label nUnvisited = 0;
     label nUncollapsed = 0;
@@ -1436,7 +1423,7 @@ bool Foam::edgeCollapser::setRefinement
 
         forAll(cells, celli)
         {
-            if (!cellRemoved[celli])
+            if (!cellRemoved.test(celli))
             {
                 const cell& cFaces = cells[celli];
 
@@ -1468,7 +1455,7 @@ bool Foam::edgeCollapser::setRefinement
                             }
                             Pout<< endl;
 
-                            cellRemoved[celli] = true;
+                            cellRemoved.set(celli);
 
                             // Collapse all edges of cell to nothing
 //                            collapseEdges(cellEdges[celli]);
@@ -1494,15 +1481,15 @@ bool Foam::edgeCollapser::setRefinement
 
 
     // Keep track of faces that have been done already.
-    boolList doneFace(mesh_.nFaces(), false);
+    PackedBoolList doneFace(mesh_.nFaces(), false);
 
     {
         // Mark points used.
-        boolList usedPoint(mesh_.nPoints(), false);
+        PackedBoolList usedPoint(mesh_.nPoints(), false);
 
         forAll(cellRemoved, celli)
         {
-            if (cellRemoved[celli])
+            if (cellRemoved.test(celli))
             {
                 meshMod.removeCell(celli, -1);
             }
@@ -1518,25 +1505,22 @@ bool Foam::edgeCollapser::setRefinement
                 meshMod.removeFace(facei, -1);
                 meshChanged = true;
 
-                // Mark face as been done.
-                doneFace[facei] = true;
+                // Mark face as been done - i.e. ignore it later
+                doneFace.set(facei);
             }
             else
             {
                 // Kept face. Mark vertices
-                forAll(f, fp)
-                {
-                    usedPoint[f[fp]] = true;
-                }
+                usedPoint.setMany(f);
             }
         }
 
         // Remove unused vertices that have not been marked for removal already
         forAll(usedPoint, pointi)
         {
-            if (!usedPoint[pointi])
+            if (!usedPoint.test(pointi))
             {
-                removedPoints[pointi] = true;
+                removedPoints.set(pointi);
                 meshMod.removePoint(pointi, -1);
                 meshChanged = true;
             }
@@ -1551,7 +1535,7 @@ bool Foam::edgeCollapser::setRefinement
 
         if
         (
-            removedPoints[pointi] == false
+            !removedPoints.test(pointi)
          && collapseIndex != -1
          && collapseIndex != -2
         )
@@ -1573,7 +1557,7 @@ bool Foam::edgeCollapser::setRefinement
     // Renumber faces that use points
     forAll(allPointInfo, pointi)
     {
-        if (removedPoints[pointi] == true)
+        if (removedPoints.test(pointi))
         {
             const labelList& changedFaces = pointFaces[pointi];
 
@@ -1581,9 +1565,9 @@ bool Foam::edgeCollapser::setRefinement
             {
                 label facei = changedFaces[changedFacei];
 
-                if (!doneFace[facei])
+                if (doneFace.set(facei))
                 {
-                    doneFace[facei] = true;
+                    // On first visit...
 
                     // Get current zone info
                     label zoneID = faceZones.whichZone(facei);
@@ -1689,7 +1673,7 @@ void Foam::edgeCollapser::consistentCollapse
 
             isCollapsedFace[facei] = isFaceCollapsed(f, allPointInfo);
 
-            if (isCollapsedFace[facei] < 1)
+            if (!isCollapsedFace.test(facei))
             {
                 determineDuplicatePointsOnFace
                 (
@@ -1714,7 +1698,7 @@ void Foam::edgeCollapser::consistentCollapse
         // Mark all edges attached to the point for collapse
         forAll(markedPoints, pointi)
         {
-            if (markedPoints[pointi])
+            if (markedPoints.test(pointi))
             {
                 const label index = allPointInfo[pointi].collapseIndex();
 
@@ -1727,9 +1711,9 @@ void Foam::edgeCollapser::consistentCollapse
                     const label nbrIndex
                         = allPointInfo[nbrPointi].collapseIndex();
 
-                    if (collapseEdge[edgeI] && nbrIndex == index)
+                    if (nbrIndex == index && collapseEdge.test(edgeI))
                     {
-                        collapseEdge[edgeI] = false;
+                        collapseEdge.unset(edgeI);
                         nUncollapsed++;
                     }
                 }
@@ -1751,9 +1735,9 @@ void Foam::edgeCollapser::consistentCollapse
                 {
                     label facei = cFaces[fI];
 
-                    if (isCollapsedFace[facei])
+                    if (isCollapsedFace.test(facei))
                     {
-                        nFaces--;
+                        --nFaces;
                     }
                 }
 
@@ -1770,18 +1754,17 @@ void Foam::edgeCollapser::consistentCollapse
                         {
                             label edgeI = fEdges[fEdgeI];
 
-                            if (collapseEdge[edgeI])
+                            if (collapseEdge.unset(edgeI))
                             {
-                                collapseEdge[edgeI] = false;
-                                nUncollapsed++;
+                                ++nUncollapsed;
                             }
 
-                            markedEdges[edgeI] = true;
+                            markedEdges.set(edgeI);
                         }
 
                         // Uncollapsed this face.
-                        isCollapsedFace[facei] = false;
-                        nFaces++;
+                        isCollapsedFace.unset(facei);
+                        ++nFaces;
                     }
                 }
 
@@ -1844,11 +1827,11 @@ Foam::label Foam::edgeCollapser::markSmallEdges
     {
         const edge& e = edges[edgeI];
 
-        if (!collapseEdge[edgeI])
+        if (!collapseEdge.test(edgeI))
         {
             if (e.mag(points) < minEdgeLen[edgeI])
             {
-                collapseEdge[edgeI] = true;
+                collapseEdge.set(edgeI);
 
                 label masterPointi = edgeMaster(pointPriority, e);
 
@@ -1865,7 +1848,6 @@ Foam::label Foam::edgeCollapser::markSmallEdges
 
                     collapsePointToLocation.set(masterPointi, collapsePt);
                 }
-
 
                 nCollapsed++;
             }
@@ -1929,7 +1911,7 @@ Foam::label Foam::edgeCollapser::markMergeEdges
 
                         if (e0length <= e1length)
                         {
-                            collapseEdge[e0] = true;
+                            collapseEdge.set(e0);
 
                             checkBoundaryPointMergeEdges
                             (
@@ -1941,7 +1923,7 @@ Foam::label Foam::edgeCollapser::markMergeEdges
                         }
                         else
                         {
-                            collapseEdge[e1] = true;
+                            collapseEdge.set(e1);
 
                             checkBoundaryPointMergeEdges
                             (
@@ -2159,7 +2141,7 @@ Foam::labelPair Foam::edgeCollapser::markFaceZoneEdges
 //
 //        if (!keepEdge)
 //        {
-//            collapseEdge[eI] = true;
+//            collapseEdge.set(eI);
 //
 //            const Foam::point collapsePoint =
 //                0.5*(points[e.end()] + points[e.start()]);
@@ -2178,7 +2160,7 @@ Foam::labelPair Foam::edgeCollapser::markFaceZoneEdges
 //
 //    forAll(collapseEdge, eI)
 //    {
-//        if (collapseEdge[eI])
+//        if (collapseEdge.test(eI))
 //        {
 //            const edge& e = edges[eI];
 //

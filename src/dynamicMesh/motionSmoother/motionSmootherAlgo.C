@@ -160,7 +160,7 @@ void Foam::motionSmootherAlgo::minSmooth
     forAll(meshPoints, i)
     {
         label pointi = meshPoints[i];
-        if (isAffectedPoint.get(pointi) == 1)
+        if (isAffectedPoint.test(pointi))
         {
             newFld[pointi] = min
             (
@@ -193,7 +193,7 @@ void Foam::motionSmootherAlgo::minSmooth
 
     forAll(fld, pointi)
     {
-        if (isAffectedPoint.get(pointi) == 1 && isInternalPoint(pointi))
+        if (isAffectedPoint.test(pointi) && isInternalPoint(pointi))
         {
             newFld[pointi] = min
             (
@@ -295,7 +295,7 @@ void Foam::motionSmootherAlgo::subtractField
 
 bool Foam::motionSmootherAlgo::isInternalPoint(const label pointi) const
 {
-    return isInternalPoint_.get(pointi) == 1;
+    return isInternalPoint_.test(pointi);
 }
 
 
@@ -309,7 +309,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
 ) const
 {
     isAffectedPoint.setSize(mesh_.nPoints());
-    isAffectedPoint = 0;
+    isAffectedPoint = false;
 
     faceSet nbrFaces(mesh_, "checkFaces", wrongFaces);
 
@@ -343,10 +343,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
             forAllConstIter(faceSet, nbrFaces, iter)
             {
                 const face& f = mesh_.faces()[iter.key()];
-                forAll(f, fp)
-                {
-                    isAffectedPoint.set(f[fp], 1);
-                }
+                isAffectedPoint.setMany(f);
             }
         }
     }
@@ -377,7 +374,7 @@ Foam::motionSmootherAlgo::motionSmootherAlgo
     oldPoints_(oldPoints),
     adaptPatchIDs_(adaptPatchIDs),
     paramDict_(paramDict),
-    isInternalPoint_(mesh_.nPoints(), 1)
+    isInternalPoint_(mesh_.nPoints(), true)
 {
     updateMesh();
 }
@@ -525,8 +522,7 @@ void Foam::motionSmootherAlgo::setDisplacement
     // to them since we want 'proper' values from displacement to take
     // precedence.
     {
-        PackedBoolList isPatchPoint(mesh.nPoints());
-        isPatchPoint.set(ppMeshPoints);
+        PackedBoolList isPatchPoint(mesh.nPoints(), ppMeshPoints);
         syncTools::syncPointList
         (
             mesh,

@@ -89,7 +89,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 {
     const cell& cFaces = mesh_.cells()[celli];
 
-    if (isTet.get(celli) == 1)
+    if (isTet.test(celli))
     {
         forAll(cFaces, cFacei)
         {
@@ -381,7 +381,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
 
     forAll(mesh_.cells(), celli)
     {
-        if (cellCutType_[celli] == CUT && isTet.get(celli) == 0)
+        if (cellCutType_[celli] == CUT && !isTet.test(celli))
         {
             scalar cVal = cVals[celli];
 
@@ -771,7 +771,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             label facei = pFaces[pFacei];
             label own = mesh_.faceOwner()[facei];
 
-            if (isTet.get(own) == 1)
+            if (isTet.test(own))
             {
                 // Since tets have no cell centre to include make sure
                 // we only generate a triangle once per point.
@@ -797,7 +797,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             {
                 label nei = mesh_.faceNeighbour()[facei];
 
-                if (isTet.get(nei) == 1)
+                if (isTet.test(nei))
                 {
                     if (localPointCells.insert(nei))
                     {
@@ -1327,7 +1327,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
         {
             if (tet.isA(mesh_, celli))
             {
-                isTet.set(celli, 1);
+                isTet.set(celli);
             }
         }
     }

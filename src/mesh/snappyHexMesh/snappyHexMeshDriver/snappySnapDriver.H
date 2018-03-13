@@ -74,7 +74,7 @@ class snappySnapDriver
         // Snapping
 
             //- Calculates (geometric) shared points
-            //  Requires PackedList to be sized and initalised
+            //  Requires PackedBoolList to be sized and initialised
             static label getCollocatedPoints
             (
                 const scalar tol,

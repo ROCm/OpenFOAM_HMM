@@ -1481,18 +1481,12 @@ void Foam::extendedEdgeMesh::autoMap
     // Compact region edges
     labelList subRegionEdges;
     {
-        PackedBoolList isRegionEdge(edges().size());
-        forAll(regionEdges(), i)
-        {
-            label edgeI = regionEdges()[i];
-            isRegionEdge[edgeI] = true;
-        }
+        PackedBoolList isRegionEdge(edges().size(), regionEdges());
 
         DynamicList<label> newRegionEdges(regionEdges().size());
         forAll(edgeMap, subEdgeI)
         {
-            label edgeI = edgeMap[subEdgeI];
-            if (isRegionEdge[edgeI])
+            if (isRegionEdge.test(edgeMap[subEdgeI]))
             {
                 newRegionEdges.append(subEdgeI);
             }
@@ -1537,25 +1531,19 @@ void Foam::extendedEdgeMesh::autoMap
             label pointI = pointMap[subPointI];
             const labelList& pNormals = featurePointNormals()[pointI];
 
-            forAll(pNormals, i)
-            {
-                isSubNormal[pNormals[i]] = true;
-            }
+            isSubNormal.setMany(pNormals);
         }
         forAll(edgeMap, subEdgeI)
         {
             label edgeI = edgeMap[subEdgeI];
             const labelList& eNormals = edgeNormals()[edgeI];
 
-            forAll(eNormals, i)
-            {
-                isSubNormal[eNormals[i]] = true;
-            }
+            isSubNormal.setMany(eNormals);
         }
 
         forAll(isSubNormal, normalI)
         {
-            if (isSubNormal[normalI])
+            if (isSubNormal.test(normalI))
             {
                 label subNormalI = normalMap.size();
                 reverseNormalMap[normalI] = subNormalI;

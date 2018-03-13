@@ -53,9 +53,10 @@ int main(int argc, char *argv[])
     Info<< "\nalternating bit pattern\n";
     list1.printInfo(Info, true);
 
-    PackedBoolList list2 = ~list1;
+    PackedBoolList list2(list1);
+    list2.flip();
 
-    Info<< "\ncomplementary bit pattern\n";
+    Info<< "\nflipped bit pattern\n";
     list2.printBits(Info);
 
     // set every other on
@@ -80,62 +81,6 @@ int main(int argc, char *argv[])
 
     labelList list2Labels = list2.used();
 
-    Info<< "\noperator|\n";
-
-    list1.printBits(Info);
-    list2.printBits(Info);
-    Info<< "==\n";
-    (list1 | list2).printBits(Info);
-
-    Info<< "\noperator& : does trim\n";
-    (list1 & list2).printBits(Info);
-
-    Info<< "\noperator^\n";
-    (list1 ^ list2).printBits(Info);
-
-
-    Info<< "\noperator|=\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 |= list2).printBits(Info);
-    }
-
-    Info<< "\noperator|= with labelUList\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 |= list2Labels).printBits(Info);
-    }
-
-    Info<< "\noperator&=\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 &= list2).printBits(Info);
-    }
-
-    Info<< "\noperator+=\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 += list2).printBits(Info);
-    }
-
-    Info<< "\noperator+= with labelUList\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 += list2Labels).printBits(Info);
-    }
-
-    Info<< "\noperator-=\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 -= list2).printBits(Info);
-    }
-
-    Info<< "\noperator-= with labelUList\n";
-    {
-        PackedBoolList list3 = list1;
-        (list3 -= list2Labels).printBits(Info);
-    }
-
     PackedBoolList list4
     (
         ITstream
@@ -151,7 +96,8 @@ int main(int argc, char *argv[])
     Info<< list4 << " indices: " << list4.used() << nl;
 
     Info<< "\nassign from labelList\n";
-    list4 = labelList{0, 1, 2, 3, 12, 13, 14, 19, 20, 21};
+    list4.clear();
+    list4.setMany(labelList{0, 1, 2, 3, 12, 13, 14, 19, 20, 21});
 
     list4.printInfo(Info, true);
     Info<< list4 << " indices: " << list4.used() << nl;

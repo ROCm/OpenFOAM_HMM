@@ -2190,12 +2190,12 @@ int main(int argc, char *argv[])
                 //  and generate space overlapping columns of cells.
                 if (eFaces.size() != 2)
                 {
-                    nonManifoldEdge[edgeI] = 1;
+                    nonManifoldEdge.set(edgeI);
                 }
             }
             else
             {
-                nonManifoldEdge[edgeI] = 1;
+                nonManifoldEdge.set(edgeI);
             }
         }
         else if (eFaces.size() == 2)
@@ -2222,7 +2222,7 @@ int main(int argc, char *argv[])
                     ePatches[1] = zoneZonePatch_min[index];
                 }
 
-                nonManifoldEdge[edgeI] = 1;
+                nonManifoldEdge.set(edgeI);
             }
         }
         else if (sidePatchID[edgeI] != -1)
@@ -2260,7 +2260,7 @@ int main(int argc, char *argv[])
                     ePatches[i] = zoneSidePatch[zoneID[eFaces[i]]];
                 }
             }
-            nonManifoldEdge[edgeI] = 1;
+            nonManifoldEdge.set(edgeI);
         }
     }
 

@@ -67,10 +67,10 @@ void Foam::displacementLayeredMotionMotionSolver::calcZoneMask
     if (cellZoneI == -1)
     {
         isZonePoint.setSize(mesh().nPoints());
-        isZonePoint = 1;
+        isZonePoint = true;
 
         isZoneEdge.setSize(mesh().nEdges());
-        isZoneEdge = 1;
+        isZoneEdge = true;
     }
     else
     {
@@ -82,10 +82,9 @@ void Foam::displacementLayeredMotionMotionSolver::calcZoneMask
             const labelList& cPoints = mesh().cellPoints(cz[i]);
             forAll(cPoints, cPointi)
             {
-                if (!isZonePoint[cPoints[cPointi]])
+                if (isZonePoint.set(cPoints[cPointi]))
                 {
-                    isZonePoint[cPoints[cPointi]] = 1;
-                    nPoints++;
+                    ++nPoints;
                 }
             }
         }
@@ -105,10 +104,9 @@ void Foam::displacementLayeredMotionMotionSolver::calcZoneMask
             const labelList& cEdges = mesh().cellEdges(cz[i]);
             forAll(cEdges, cEdgeI)
             {
-                if (!isZoneEdge[cEdges[cEdgeI]])
+                if (isZoneEdge.set(cEdges[cEdgeI]))
                 {
-                    isZoneEdge[cEdges[cEdgeI]] = 1;
-                    nEdges++;
+                    ++nEdges;
                 }
             }
         }

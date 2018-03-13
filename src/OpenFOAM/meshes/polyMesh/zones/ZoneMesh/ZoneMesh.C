@@ -440,15 +440,18 @@ Foam::PackedBoolList Foam::ZoneMesh<ZoneType, MeshType>::findMatching
     const keyType& key
 ) const
 {
-    PackedBoolList lst;
+    PackedBoolList bitset;
 
     const labelList indices = this->findIndices(key);
     forAll(indices, i)
     {
-        lst |= static_cast<const labelList&>(this->operator[](indices[i]));
+        bitset.setMany
+        (
+            static_cast<const labelList&>(this->operator[](indices[i]))
+        );
     }
 
-    return lst;
+    return bitset;
 }
 
 

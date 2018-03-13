@@ -148,7 +148,7 @@ Foam::label Foam::OppositeFaceCellWave<Type, TrackingData>::faceToCell()
     {
         label facei = this->changedFaces_[changedFacei];
 
-        if (!this->changedFace_[facei])
+        if (!this->changedFace_.test(facei))
         {
             FatalErrorInFunction
                 << "Face " << facei
@@ -231,7 +231,7 @@ Foam::label Foam::OppositeFaceCellWave<Type, TrackingData>::faceToCell()
         }
 
         // Reset status of face
-        this->changedFace_[facei] = false;
+        this->changedFace_.unset(facei);
     }
 
     // Handled all changed faces by now
@@ -260,7 +260,7 @@ Foam::label Foam::OppositeFaceCellWave<Type, TrackingData>::cellToFace()
         label celli = this->changedCells_[changedCelli];
         label facei = changedOppositeFaces_[changedCelli];
 
-        if (!this->changedCell_[celli])
+        if (!this->changedCell_.test(celli))
         {
             FatalErrorInFunction
                 << "Cell " << celli << " not marked as having been changed"
@@ -289,7 +289,7 @@ Foam::label Foam::OppositeFaceCellWave<Type, TrackingData>::cellToFace()
         }
 
         // Reset status of cell
-        this->changedCell_[celli] = false;
+        this->changedCell_.unset(celli);
     }
 
     // Handled all changed cells by now

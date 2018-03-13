@@ -294,9 +294,9 @@ protected:
             //- Check boundary for closedness
             bool checkClosedBoundary
             (
-                const vectorField&,
-                const bool,
-                const PackedBoolList&
+                const vectorField& areas,
+                const bool report,
+                const PackedBoolList& internalOrCoupledFaces
             ) const;
 
             //- Check cells for closedness

@@ -100,9 +100,9 @@ class meshDualiser
         //  emanating from (boundary & feature) point
         void generateDualBoundaryEdges
         (
-            const PackedBoolList&,
+            const PackedBoolList& isBoundaryEdge,
             const label pointi,
-            polyTopoChange&
+            polyTopoChange& meshMod
         );
 
         //- Check that owner and neighbour of face have same dual cell
@@ -143,10 +143,10 @@ class meshDualiser
         void createFacesAroundEdge
         (
             const bool splitFace,
-            const PackedBoolList&,
+            const PackedBoolList& isBoundaryEdge,
             const label edgeI,
             const label startFacei,
-            polyTopoChange&,
+            polyTopoChange& meshMod,
             boolList& doneEFaces
         ) const;
 

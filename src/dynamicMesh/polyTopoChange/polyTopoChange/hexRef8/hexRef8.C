@@ -1573,9 +1573,9 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
         label own = mesh_.faceOwner()[facei];
-        label ownLevel = cellLevel_[own] + refineCell.get(own);
-
         label nei = mesh_.faceNeighbour()[facei];
+
+        label ownLevel = cellLevel_[own] + refineCell.get(own);
         label neiLevel = cellLevel_[nei] + refineCell.get(nei);
 
         if (ownLevel > (neiLevel+1))
@@ -1653,18 +1653,14 @@ void Foam::hexRef8::checkWantedRefinementLevels
     const labelList& cellsToRefine
 ) const
 {
-    PackedBoolList refineCell(mesh_.nCells());
-    forAll(cellsToRefine, i)
-    {
-        refineCell.set(cellsToRefine[i]);
-    }
+    PackedBoolList refineCell(mesh_.nCells(), cellsToRefine);
 
     for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
     {
         label own = mesh_.faceOwner()[facei];
-        label ownLevel = cellLevel_[own] + refineCell.get(own);
-
         label nei = mesh_.faceNeighbour()[facei];
+
+        label ownLevel = cellLevel_[own] + refineCell.get(own);
         label neiLevel = cellLevel_[nei] + refineCell.get(nei);
 
         if (mag(ownLevel-neiLevel) > 1)
@@ -2261,12 +2257,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
     // maxSet = false : unselect cells to refine
     // maxSet = true  : select cells to refine
 
-    // Go to straight boolList.
-    PackedBoolList refineCell(mesh_.nCells());
-    forAll(cellsToRefine, i)
-    {
-        refineCell.set(cellsToRefine[i]);
-    }
+    PackedBoolList refineCell(mesh_.nCells(), cellsToRefine);
 
     while (true)
     {
@@ -2287,28 +2278,8 @@ Foam::labelList Foam::hexRef8::consistentRefinement
         }
     }
 
-
     // Convert back to labelList.
-    label nRefined = 0;
-
-    forAll(refineCell, celli)
-    {
-        if (refineCell.get(celli))
-        {
-            nRefined++;
-        }
-    }
-
-    labelList newCellsToRefine(nRefined);
-    nRefined = 0;
-
-    forAll(refineCell, celli)
-    {
-        if (refineCell.get(celli))
-        {
-            newCellsToRefine[nRefined++] = celli;
-        }
-    }
+    labelList newCellsToRefine(refineCell.used());
 
     if (debug)
     {
@@ -3137,28 +3108,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     }
 
     // 3. Convert back to labelList.
-    label nRefined = 0;
-
-    forAll(refineCell, celli)
-    {
-//        if (refineCell.get(celli))
-        if (refineCell[celli])
-        {
-            nRefined++;
-        }
-    }
-
-    labelList newCellsToRefine(nRefined);
-    nRefined = 0;
-
-    forAll(refineCell, celli)
-    {
-//        if (refineCell.get(celli))
-        if (refineCell[celli])
-        {
-            newCellsToRefine[nRefined++] = celli;
-        }
-    }
+    labelList newCellsToRefine(refineCell.used());
 
     if (debug)
     {
@@ -3184,11 +3134,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         }
 
         // Extend to 2:1
-        PackedBoolList refineCell(mesh_.nCells());
-        forAll(newCellsToRefine, i)
-        {
-            refineCell.set(newCellsToRefine[i]);
-        }
+        PackedBoolList refineCell(mesh_.nCells(), newCellsToRefine);
+
         const PackedBoolList savedRefineCell(refineCell);
 
         label nChanged = faceConsistentRefinement(true, refineCell);
@@ -3200,7 +3147,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
             );
             forAll(refineCell, celli)
             {
-                if (refineCell.get(celli))
+                if (refineCell.test(celli))
                 {
                     cellsOut2.insert(celli);
                 }
@@ -3215,7 +3162,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         {
             forAll(refineCell, celli)
             {
-                if (refineCell.get(celli) && !savedRefineCell.get(celli))
+                if (refineCell.test(celli) && !savedRefineCell.test(celli))
                 {
                     dumpCell(celli);
                     FatalErrorInFunction
@@ -3806,10 +3753,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             {
                 const cell& cFaces = mesh_.cells()[celli];
 
-                forAll(cFaces, i)
-                {
-                    affectedFace.set(cFaces[i]);
-                }
+                affectedFace.setMany(cFaces);
             }
         }
 
@@ -3827,10 +3771,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             {
                 const labelList& eFaces = mesh_.edgeFaces(edgeI);
 
-                forAll(eFaces, i)
-                {
-                    affectedFace.set(eFaces[i]);
-                }
+                affectedFace.setMany(eFaces);
             }
         }
     }
@@ -3846,7 +3787,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
     forAll(faceMidPoint, facei)
     {
-        if (faceMidPoint[facei] >= 0 && affectedFace.get(facei))
+        if (faceMidPoint[facei] >= 0 && affectedFace.test(facei))
         {
             // Face needs to be split and hasn't yet been done in some way
             // (affectedFace - is impossible since this is first change but
@@ -3997,7 +3938,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
             {
                 label facei = eFaces[i];
 
-                if (faceMidPoint[facei] < 0 && affectedFace.get(facei))
+                if (faceMidPoint[facei] < 0 && affectedFace.test(facei))
                 {
                     // Unsplit face. Add edge splits to face.
 
@@ -4097,7 +4038,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
 
     forAll(affectedFace, facei)
     {
-        if (affectedFace.get(facei))
+        if (affectedFace.test(facei))
         {
             const face& f = mesh_.faces()[facei];
 
@@ -5341,16 +5282,8 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
     // maxSet = false : unselect points to refine
     // maxSet = true: select points to refine
 
-    // Maintain boolList for pointsToUnrefine and cellsToUnrefine
-    PackedBoolList unrefinePoint(mesh_.nPoints());
-
-    forAll(pointsToUnrefine, i)
-    {
-        label pointi = pointsToUnrefine[i];
-
-        unrefinePoint.set(pointi);
-    }
-
+    // Maintain bitset for pointsToUnrefine and cellsToUnrefine
+    PackedBoolList unrefinePoint(mesh_.nPoints(), pointsToUnrefine);
 
     while (true)
     {
@@ -5361,14 +5294,11 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
         forAll(unrefinePoint, pointi)
         {
-            if (unrefinePoint.get(pointi))
+            if (unrefinePoint.test(pointi))
             {
                 const labelList& pCells = mesh_.pointCells(pointi);
 
-                forAll(pCells, j)
-                {
-                    unrefineCell.set(pCells[j]);
-                }
+                unrefineCell.setMany(pCells);
             }
         }
 
@@ -5383,9 +5313,9 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         for (label facei = 0; facei < mesh_.nInternalFaces(); facei++)
         {
             label own = mesh_.faceOwner()[facei];
-            label ownLevel = cellLevel_[own] - unrefineCell.get(own);
-
             label nei = mesh_.faceNeighbour()[facei];
+
+            label ownLevel = cellLevel_[own] - unrefineCell.get(own);
             label neiLevel = cellLevel_[nei] - unrefineCell.get(nei);
 
             if (ownLevel < (neiLevel-1))
@@ -5406,7 +5336,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
                     //         << "problem cell already unset"
                     //         << abort(FatalError);
                     // }
-                    if (unrefineCell.get(own) == 0)
+                    if (!unrefineCell.test(own))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -5424,7 +5354,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
                 }
                 else
                 {
-                    if (unrefineCell.get(nei) == 0)
+                    if (!unrefineCell.test(nei))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -5460,7 +5390,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
             {
                 if (!maxSet)
                 {
-                    if (unrefineCell.get(own) == 0)
+                    if (!unrefineCell.test(own))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -5474,7 +5404,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
             {
                 if (maxSet)
                 {
-                    if (unrefineCell.get(own) == 1)
+                    if (unrefineCell.test(own))
                     {
                         FatalErrorInFunction
                             << "problem" << abort(FatalError);
@@ -5508,13 +5438,13 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         // Knock out any point whose cell neighbour cannot be unrefined.
         forAll(unrefinePoint, pointi)
         {
-            if (unrefinePoint.get(pointi))
+            if (unrefinePoint.test(pointi))
             {
                 const labelList& pCells = mesh_.pointCells(pointi);
 
                 forAll(pCells, j)
                 {
-                    if (!unrefineCell.get(pCells[j]))
+                    if (!unrefineCell.test(pCells[j]))
                     {
                         unrefinePoint.unset(pointi);
                         break;
@@ -5530,7 +5460,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
     forAll(unrefinePoint, pointi)
     {
-        if (unrefinePoint.get(pointi))
+        if (unrefinePoint.test(pointi))
         {
             nSet++;
         }
@@ -5541,7 +5471,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
 
     forAll(unrefinePoint, pointi)
     {
-        if (unrefinePoint.get(pointi))
+        if (unrefinePoint.test(pointi))
         {
             newPointsToUnrefine[nSet++] = pointi;
         }

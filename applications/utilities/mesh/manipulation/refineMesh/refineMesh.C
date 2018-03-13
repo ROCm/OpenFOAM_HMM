@@ -85,7 +85,7 @@ void printEdgeStats(const polyMesh& mesh)
 
     forAll(edges, edgeI)
     {
-        if (isMasterEdge[edgeI])
+        if (isMasterEdge.test(edgeI))
         {
             const edge& e = edges[edgeI];
 

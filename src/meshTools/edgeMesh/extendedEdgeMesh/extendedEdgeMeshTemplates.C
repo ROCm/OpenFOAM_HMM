@@ -177,7 +177,7 @@ void Foam::extendedEdgeMesh::sortPointsAndEdges
 
         edStatus[i] = classifyEdge(norms, edgeNormals[i], fC0tofC1);
 
-        if (isRegionFeatureEdge[i])
+        if (isRegionFeatureEdge.test(i))
         {
             regionEdges.append(i);
         }

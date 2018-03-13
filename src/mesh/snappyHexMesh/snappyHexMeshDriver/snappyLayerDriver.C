@@ -616,10 +616,8 @@ void Foam::snappyLayerDriver::handleNonManifolds
         PackedBoolList isCoupledEdge(mesh.nEdges());
 
         const labelList& cpEdges = mesh.globalData().coupledPatchMeshEdges();
-        forAll(cpEdges, i)
-        {
-            isCoupledEdge[cpEdges[i]] = true;
-        }
+        isCoupledEdge.setMany(cpEdges);
+
         syncTools::syncEdgeList
         (
             mesh,
@@ -4326,8 +4324,8 @@ void Foam::snappyLayerDriver::addLayers
             forAll(baffles, i)
             {
                 const labelPair& baffle = baffles[i];
-                oldBaffleFace[baffle[0]] = true;
-                oldBaffleFace[baffle[1]] = true;
+                oldBaffleFace.set(baffle[0]);
+                oldBaffleFace.set(baffle[1]);
             }
 
             // Collect candidate if
@@ -4668,10 +4666,7 @@ void Foam::snappyLayerDriver::doLayers
 
                     if (numLayers[mpi] > 0 || numLayers[spi])
                     {
-                        forAll(fZone, i)
-                        {
-                            isExtrudedZoneFace[fZone[i]] = true;
-                        }
+                        isExtrudedZoneFace.setMany(fZone);
                     }
                 }
             }

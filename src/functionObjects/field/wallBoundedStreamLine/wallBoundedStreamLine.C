@@ -108,12 +108,7 @@ void Foam::functionObjects::wallBoundedStreamLine::track()
     // These are the faces that need to be followed
 
     autoPtr<indirectPrimitivePatch> boundaryPatch(wallPatch());
-    PackedBoolList isWallPatch(mesh_.nFaces());
-    forAll(boundaryPatch().addressing(), i)
-    {
-        isWallPatch[boundaryPatch().addressing()[i]] = 1;
-    }
-
+    PackedBoolList isWallPatch(mesh_.nFaces(), boundaryPatch().addressing());
 
 
     // Find nearest wall particle for the seedPoints

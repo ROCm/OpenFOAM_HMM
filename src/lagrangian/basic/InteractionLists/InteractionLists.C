@@ -121,7 +121,7 @@ void Foam::InteractionLists<ParticleType>::buildInteractionLists()
                 // This cell is in range of the Bb of the other
                 // processor Bb, and so needs to be referred to it
 
-                cellInRangeOfCoupledPatch[celli] = true;
+                cellInRangeOfCoupledPatch.set(celli);
 
                 cellIAndTToExchange.append
                 (

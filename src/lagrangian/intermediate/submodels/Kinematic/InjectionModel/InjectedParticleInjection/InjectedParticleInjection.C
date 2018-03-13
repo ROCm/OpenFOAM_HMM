@@ -248,7 +248,7 @@ void Foam::InjectedParticleInjection<CloudType>::updateMesh()
             )
         )
         {
-            keep[particlei] = false;
+            keep.unset(particlei);
             nRejected++;
         }
     }

@@ -75,7 +75,7 @@ T Foam::meshRefinement::gAverage
 
     forAll(values, i)
     {
-        if (isMasterElem[i])
+        if (isMasterElem.test(i))
         {
             sum += values[i];
             n++;
@@ -304,7 +304,7 @@ void Foam::meshRefinement::weightedSum
 
     forAll(edges, edgeI)
     {
-        if (isMasterEdge[edgeI])
+        if (isMasterEdge.test(edgeI))
         {
             const edge& e = edges[edgeI];
 

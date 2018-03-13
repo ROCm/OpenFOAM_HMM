@@ -261,7 +261,7 @@ void Foam::trackedParticle::correctAfterParallelTransfer
 
         // Mark edge we're currently on (was set on sending processor but not
         // receiving sender)
-        td.featureEdgeVisited_[featI].set(edgeI, 1u);
+        td.featureEdgeVisited_[featI].set(edgeI);
     }
 }
 

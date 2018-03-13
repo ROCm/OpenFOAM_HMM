@@ -1219,7 +1219,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
                     // Note that acceptors might have been marked hole if
                     // there are no donors in which case we do not want to
                     // walk this out. This is an extreme situation.
-                    isFront[fvm[patchI].start()+i] = true;
+                    isFront.set(fvm[patchI].start()+i);
                 }
             }
         }
@@ -1243,7 +1243,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
             {
                 //Pout<< "Front at face:" << faceI
                 //    << " at:" << mesh_.faceCentres()[faceI] << endl;
-                isFront[faceI] = true;
+                isFront.set(faceI);
             }
         }
 
@@ -1268,7 +1268,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
             {
                 //Pout<< "Front at coupled face:" << faceI
                 //    << " at:" << mesh_.faceCentres()[faceI] << endl;
-                isFront[faceI] = true;
+                isFront.set(faceI);
             }
         }
     }
@@ -1279,7 +1279,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
 
     forAll(isFront, faceI)
     {
-        if (isFront[faceI])
+        if (isFront.test(faceI))
         {
             fraction[faceI] = 1.0;
         }
@@ -1293,7 +1293,7 @@ void Foam::cellCellStencils::inverseDistance::walkFront
         scalarField newFraction(fraction);
         forAll(isFront, faceI)
         {
-            if (isFront[faceI])
+            if (isFront.test(faceI))
             {
                 label own = mesh_.faceOwner()[faceI];
                 if (allCellTypes[own] != HOLE)
@@ -1565,7 +1565,7 @@ void Foam::cellCellStencils::inverseDistance::createStencil
                     );
                     // Mark cell as being done so it does not get sent over
                     // again.
-                    doneAcceptor[i] = true;
+                    doneAcceptor.set(i);
                 }
             }
         }

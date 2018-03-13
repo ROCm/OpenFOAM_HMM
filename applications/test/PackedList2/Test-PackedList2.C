@@ -225,36 +225,6 @@ int main(int argc, char *argv[])
         << "  sum " << sum << nl;
 
 
-    // Read via iterator
-    sum = 0;
-    for (label iter = 0; iter < nIters; ++iter)
-    {
-        forAllIters(packed, it)
-        {
-            sum += it;
-        }
-    }
-    std::cout
-        << "Reading packed using iterator:" << timer.cpuTimeIncrement()
-        << " s" << nl
-        << "  sum " << sum << nl;
-
-
-    // Read via iterator
-    sum = 0;
-    for (label iter = 0; iter < nIters; ++iter)
-    {
-        forAllConstIters(packed, cit)
-        {
-            sum += *cit;
-        }
-    }
-    std::cout
-        << "Reading packed using const_iterator():" << timer.cpuTimeIncrement()
-        << " s" << nl
-        << "  sum " << sum << nl;
-
-
     // Read empty hash
     sum = 0;
     for (label iter = 0; iter < nIters; ++iter)
@@ -366,18 +336,6 @@ int main(int argc, char *argv[])
     }
     Info<< "Writing packed using set:" << timer.cpuTimeIncrement()
         << " s" << nl;
-
-    // Write packed
-    for (label iter = 0; iter < nIters; ++iter)
-    {
-        forAllIters(packed, it)
-        {
-            *it = 1;
-        }
-    }
-    Info<< "Writing packed using iterator:" << timer.cpuTimeIncrement()
-        << " s" << nl;
-
 
     // Write packed
     for (label iter = 0; iter < nIters; ++iter)

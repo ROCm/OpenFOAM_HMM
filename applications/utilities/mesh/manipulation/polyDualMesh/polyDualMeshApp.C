@@ -397,7 +397,7 @@ int main(int argc, char *argv[])
 
         forAll(fEdges, i)
         {
-            isBoundaryEdge.set(fEdges[i], 1);
+            isBoundaryEdge.set(fEdges[i]);
         }
     }
 

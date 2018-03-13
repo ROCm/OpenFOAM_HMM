@@ -71,7 +71,7 @@ void Foam::fieldSmoother::smoothNormals
     forAll(fixedPoints, i)
     {
         label meshPointI = fixedPoints[i];
-        isFixedPoint.set(meshPointI, 1);
+        isFixedPoint.set(meshPointI);
     }
 
     // Make sure that points that are coupled to meshPoints but not on a patch
@@ -125,7 +125,7 @@ void Foam::fieldSmoother::smoothNormals
         // Transfer to normals vector field
         forAll(average, pointI)
         {
-            if (isFixedPoint.get(pointI) == 0)
+            if (!isFixedPoint.test(pointI))
             {
                 //full smoothing neighbours + point value
                 average[pointI] = 0.5*(normals[pointI]+average[pointI]);
@@ -254,7 +254,7 @@ void Foam::fieldSmoother::smoothLambdaMuDisplacement
 
         forAll(displacement, i)
         {
-            if (isToBeSmoothed[i])
+            if (isToBeSmoothed.test(i))
             {
                 displacement[i] = (1-lambda)*displacement[i]+lambda*average[i];
             }
@@ -275,7 +275,7 @@ void Foam::fieldSmoother::smoothLambdaMuDisplacement
 
         forAll(displacement, i)
         {
-            if (isToBeSmoothed[i])
+            if (isToBeSmoothed.test(i))
             {
                 displacement[i] = (1-mu)*displacement[i]+mu*average[i];
             }

@@ -630,7 +630,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
         forAll(visited, celli)
         {
             // find the lowest connected cell that has not been visited yet
-            if (!cellRemoved(celli) && !visited[celli])
+            if (!cellRemoved(celli) && !visited.test(celli))
             {
                 if (cellCellAddressing[celli].size() < minWeight)
                 {
@@ -662,9 +662,9 @@ Foam::label Foam::polyTopoChange::getCellOrder
         {
             currentCell = nextCell.removeHead();
 
-            if (!visited[currentCell])
+            if (visited.set(currentCell))
             {
-                visited[currentCell] = 1;
+                // On first visit...
 
                 // add into cellOrder
                 newOrder[cellInOrder] = currentCell;
@@ -682,7 +682,7 @@ Foam::label Foam::polyTopoChange::getCellOrder
                 forAll(neighbours, nI)
                 {
                     label nbr = neighbours[nI];
-                    if (!cellRemoved(nbr) && !visited[nbr])
+                    if (!cellRemoved(nbr) && !visited.test(nbr))
                     {
                         // not visited, add to the list
                         nbrs.append(nbr);
@@ -1690,7 +1690,7 @@ void Foam::polyTopoChange::resetZones
             const label index = nFaces[zonei]++;
 
             addressing[zonei][index] = facei;
-            flipMode[zonei][index] = faceZoneFlip_[facei];
+            flipMode[zonei][index] = faceZoneFlip_.test(facei);
         }
 
         // Sort the addressing
@@ -2815,7 +2815,7 @@ Foam::label Foam::polyTopoChange::addFace
     {
         faceZone_.insert(facei, zoneID);
     }
-    faceZoneFlip_[facei] = (zoneFlip ? 1 : 0);
+    faceZoneFlip_.set(facei, zoneFlip);
 
     return facei;
 }
@@ -2844,8 +2844,8 @@ void Foam::polyTopoChange::modifyFace
     faceNeighbour_[facei] = nei;
     region_[facei] = patchID;
 
-    flipFaceFlux_[facei] = (flipFaceFlux ? 1 : 0);
-    faceZoneFlip_[facei] = (zoneFlip ? 1 : 0);
+    flipFaceFlux_.set(facei, flipFaceFlux);
+    faceZoneFlip_.set(facei, zoneFlip);
 
     if (zoneID >= 0)
     {
@@ -2899,8 +2899,8 @@ void Foam::polyTopoChange::removeFace
     }
     faceFromEdge_.erase(facei);
     faceFromPoint_.erase(facei);
-    flipFaceFlux_[facei] = 0;
-    faceZoneFlip_[facei] = 0;
+    flipFaceFlux_.unset(facei);
+    faceZoneFlip_.unset(facei);
     faceZone_.erase(facei);
 }
 

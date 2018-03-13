@@ -92,7 +92,7 @@ updateEdge
     {
         if (!changedEdge_[edgeI])
         {
-            changedEdge_[edgeI] = true;
+            changedEdge_.set(edgeI);
             changedEdges_.append(edgeI);
         }
     }
@@ -144,9 +144,8 @@ updateFace
 
     if (propagate)
     {
-        if (!changedFace_[facei])
+        if (changedFace_.set(facei))
         {
-            changedFace_[facei] = true;
             changedFaces_.append(facei);
         }
     }
@@ -267,8 +266,8 @@ syncEdges()
 
             if (!changedEdge_[patchEdgeI])
             {
+                changedEdge_.set(patchEdgeI);
                 changedEdges_.append(patchEdgeI);
-                changedEdge_[patchEdgeI] = true;
             }
         }
     }
@@ -473,7 +472,7 @@ setEdgeInfo
 
         if (!changedEdge_[edgeI])
         {
-            changedEdge_[edgeI] = true;
+            changedEdge_.set(edgeI);
             changedEdges_.append(edgeI);
         }
     }
@@ -497,7 +496,7 @@ faceToEdge()
     {
         label facei = changedFaces_[changedFacei];
 
-        if (!changedFace_[facei])
+        if (!changedFace_.test(facei))
         {
             FatalErrorInFunction
                 << "face " << facei

@@ -2290,7 +2290,7 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
             }
             else
             {
-                selectedElems[vI] = false;
+                selectedElems.unset(vI);
             }
         }
     }

@@ -84,7 +84,7 @@ void modifyOrAddFace
     PackedBoolList& modifiedFace
 )
 {
-    if (!modifiedFace[facei])
+    if (modifiedFace.set(facei))
     {
         // First usage of face. Modify.
         meshMod.setAction
@@ -102,7 +102,6 @@ void modifyOrAddFace
                 zoneFlip                    // face flip in zone
             )
         );
-        modifiedFace[facei] = 1;
     }
     else
     {
@@ -342,7 +341,7 @@ void subsetTopoSets
         PackedBoolList isSet(set.maxSize(mesh));
         forAllConstIter(labelHashSet, set, iter)
         {
-            isSet[iter.key()] = true;
+            isSet.set(iter.key());
         }
         label nSet = 0;
         forAll(map, i)
@@ -375,7 +374,7 @@ void createCoupledBaffles
     fvMesh& mesh,
     const labelList& coupledWantedPatch,
     polyTopoChange& meshMod,
-    PackedBoolList&  modifiedFace
+    PackedBoolList& modifiedFace
 )
 {
     const faceZoneMesh& faceZones = mesh.faceZones();
@@ -443,7 +442,7 @@ void createCyclicCoupledBaffles
     const labelList& cyclicMasterPatch,
     const labelList& cyclicSlavePatch,
     polyTopoChange& meshMod,
-    PackedBoolList&  modifiedFace
+    PackedBoolList& modifiedFace
 )
 {
     const faceZoneMesh& faceZones = mesh.faceZones();

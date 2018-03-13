@@ -341,7 +341,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
             if (!keep)
             {
-                keepVertex[vI] = false;
+                keepVertex.unset(vI);
             }
         }
 
@@ -516,7 +516,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
             if (!keep)
             {
-                keepVertex[vI] = false;
+                keepVertex.unset(vI);
             }
         }
 

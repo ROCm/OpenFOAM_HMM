@@ -94,7 +94,7 @@ Foam::PackedBoolList Foam::isoSurface::collocatedFaces
         {
             forAll(pp, i)
             {
-                collocated[i] = 1u;
+                collocated.set(i);
             }
         }
     }
@@ -104,7 +104,7 @@ Foam::PackedBoolList Foam::isoSurface::collocatedFaces
         {
             forAll(pp, i)
             {
-                collocated[i] = 1u;
+                collocated.set(i);
             }
         }
     }
@@ -691,7 +691,7 @@ void Foam::isoSurface::calcSnappedPoint
 
     forAll(mesh_.pointFaces(), pointi)
     {
-        if (isBoundaryPoint.get(pointi) == 1)
+        if (isBoundaryPoint.test(pointi))
         {
             continue;
         }
@@ -1527,10 +1527,7 @@ Foam::isoSurface::isoSurface
                     {
                         const face& f = mesh_.faces()[cpp.start()+i];
 
-                        forAll(f, fp)
-                        {
-                            isBoundaryPoint.set(f[fp], 1);
-                        }
+                        isBoundaryPoint.setMany(f);
                     }
                 }
             }
@@ -1542,10 +1539,7 @@ Foam::isoSurface::isoSurface
                 {
                     const face& f = mesh_.faces()[pp.start()+i];
 
-                    forAll(f, fp)
-                    {
-                        isBoundaryPoint.set(f[fp], 1);
-                    }
+                    isBoundaryPoint.setMany(f);
                 }
             }
         }

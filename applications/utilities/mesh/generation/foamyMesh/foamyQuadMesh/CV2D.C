@@ -639,8 +639,8 @@ void Foam::CV2D::newPoints()
                     // to be removed.
                     if
                     (
-                        pointToBeRetained[vA->index()] == true
-                     && pointToBeRetained[vB->index()] == true
+                        pointToBeRetained.test(vA->index())
+                     && pointToBeRetained.test(vB->index())
                     )
                     {
                         pointsToInsert.push_back(toPoint(0.5*(dVA + dVB)));
@@ -648,12 +648,12 @@ void Foam::CV2D::newPoints()
 
                     if (vA->internalPoint())
                     {
-                        pointToBeRetained[vA->index()] = false;
+                        pointToBeRetained.unset(vA->index());
                     }
 
                     if (vB->internalPoint())
                     {
-                        pointToBeRetained[vB->index()] = false;
+                        pointToBeRetained.unset(vB->index());
                     }
                 }
                 else
@@ -689,7 +689,7 @@ void Foam::CV2D::newPoints()
     {
         if (vit->internalPoint())
         {
-            if (pointToBeRetained[vit->index()])
+            if (pointToBeRetained.test(vit->index()))
             {
                 pointsToInsert.push_front
                 (

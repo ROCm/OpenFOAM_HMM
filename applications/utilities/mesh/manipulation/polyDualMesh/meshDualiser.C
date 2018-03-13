@@ -157,7 +157,7 @@ void Foam::meshDualiser::generateDualBoundaryEdges
     {
         label edgeI = pEdges[pEdgeI];
 
-        if (edgeToDualPoint_[edgeI] == -1 && isBoundaryEdge.get(edgeI) == 1)
+        if (edgeToDualPoint_[edgeI] == -1 && isBoundaryEdge.test(edgeI))
         {
             const edge& e = mesh_.edges()[edgeI];
 
@@ -397,7 +397,7 @@ void Foam::meshDualiser::createFacesAroundEdge
         startFacei, // face
         true,       // ownerSide
         fp,         // fp
-        isBoundaryEdge.get(edgeI) == 1  // isBoundaryEdge
+        isBoundaryEdge.test(edgeI)  // isBoundaryEdge
     );
     ie.setCanonical();
 
@@ -509,7 +509,7 @@ void Foam::meshDualiser::createFacesAroundEdge
         {
             // Back at start face (for internal edge only). See if this needs
             // adding.
-            if (isBoundaryEdge.get(edgeI) == 0)
+            if (!isBoundaryEdge.test(edgeI))
             {
                 label startDual = faceToDualPoint_[startFaceLabel];
 
@@ -891,10 +891,7 @@ void Foam::meshDualiser::setRefinement
     {
         const labelList& fEdges = mesh_.faceEdges()[facei];
 
-        forAll(fEdges, i)
-        {
-            isBoundaryEdge.set(fEdges[i], 1);
-        }
+        isBoundaryEdge.setMany(fEdges);
     }
 
 

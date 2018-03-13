@@ -103,30 +103,6 @@ int main(int argc, char *argv[])
         Info<< "[0] == [1] (unexpected)\n";
     }
 
-    Info<< "\ntest operator== with iterator\n";
-    {
-        PackedList<3>::iterator iter = list1[1];
-
-        if (iter != list1[8])
-        {
-            Info<< "iter != [8] (expected)\n";
-        }
-        else
-        {
-            Info<< "iter == [8] (unexpected)\n";
-        }
-
-        if (*iter != list1[8])
-        {
-            Info<< "*iter != [8] (unexpected)\n";
-        }
-        else
-        {
-            Info<< "*iter == [8] (expected)\n";
-        }
-    }
-
-
     {
         const PackedList<3>& constLst = list1;
         Info<< "\ntest operator[] const with out-of-range index\n";
@@ -246,55 +222,9 @@ int main(int argc, char *argv[])
     list1[32] = 2;
     list1[33] = 3;
 
-    Info<< "\ntest iterator\n";
-    PackedList<3>::iterator iter = list1.begin();
-    Info<< "begin():";
-    iter.printInfo(Info) << "\n";
-
-    Info<< "iterator:" << *iter << "\n";
-    *iter = 5;
-    iter.printInfo(Info);
-    list1.printInfo(Info, true);
-
-    iter = list1[31];
-    Info<< "iterator:" << *iter << "\n";
-    iter.printInfo(Info);
-
-
     Info<< "\ntest get() method\n";
     Info<< "get(10):" << list1.get(10) << " and list[10]:" << list1[10] << "\n";
     list1.printInfo(Info, true);
-
-    Info<< "\ntest iterator indexing\n";
-    Info<< "cend() ";
-    list1.cend().printInfo(Info) << "\n";
-
-    {
-        Info<< "\ntest assignment of iterator\n";
-        list1.printInfo(Info, true);
-        Info<< "cend()\n";
-        list1.end().printInfo(Info);
-        PackedList<3>::iterator cit = list1[100];
-        Info<< "out-of-range: ";
-        cit.printInfo(Info);
-        cit = list1[15];
-        Info<< "in-range: ";
-        cit.printInfo(Info);
-        Info<< "out-of-range: ";
-        cit = list1[1000];
-        cit.printInfo(Info);
-    }
-
-
-    for
-    (
-        PackedList<3>::iterator cit = list1[30];
-        cit != list1.end();
-        ++cit
-    )
-    {
-        cit.printInfo(Info);
-    }
 
     Info<< "\ntest operator[] auto-vivify\n";
     Info<< "size:" << list1.size() << "\n";

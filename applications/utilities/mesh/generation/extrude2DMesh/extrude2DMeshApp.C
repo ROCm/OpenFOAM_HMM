@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
                 Info<< "Merging edge " << e << " since length " << d
                     << " << " << mergeDim << nl;
 
-                collapseEdge[edgeI] = true;
+                collapseEdge.set(edgeI);
                 collapsePointToLocation.set(e[1], points[e[0]]);
             }
         }
