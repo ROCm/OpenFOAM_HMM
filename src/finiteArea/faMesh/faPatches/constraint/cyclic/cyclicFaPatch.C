@@ -281,13 +281,6 @@ Foam::tmp<Foam::vectorField> Foam::cyclicFaPatch::delta() const
 }
 
 
-Foam::label Foam::cyclicPolyPatch::neighbPatchID() const
-{
-    NotImplemented;
-    return -1;
-}
-
-
 Foam::tmp<Foam::labelField> Foam::cyclicFaPatch::interfaceInternalField
 (
     const labelUList& internalData
