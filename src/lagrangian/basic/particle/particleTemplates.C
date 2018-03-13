@@ -156,6 +156,8 @@ void Foam::particle::hitFace
     }
     else if (onBoundaryFace())
     {
+        changeToMasterPatch();
+
         if (!p.hitPatch(cloud, ttd))
         {
             const polyPatch& patch = mesh_.boundaryMesh()[p.patch()];
@@ -211,11 +213,6 @@ void Foam::particle::trackToAndHitFace
 )
 {
     trackToFace(direction, fraction);
-
-    if (onBoundaryFace())
-    {
-        changeToMasterPatch();
-    }
 
     hitFace(direction, cloud, td);
 }
