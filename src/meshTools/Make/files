@@ -76,6 +76,7 @@ meshSearch/meshSearch.C
 meshSearch/meshSearchFACE_CENTRE_TRISMeshObject.C
 meshSearch/meshSearchMeshObject.C
 
+fields/polyFields.C
 meshTools/meshTools.C
 
 algorithms = algorithms
