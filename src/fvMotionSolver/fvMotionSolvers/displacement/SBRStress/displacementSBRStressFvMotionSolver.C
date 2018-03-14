@@ -183,7 +183,11 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
     diffusivityPtr_->correct();
     pointDisplacement_.boundaryFieldRef().updateCoeffs();
 
-    surfaceScalarField Df(diffusivityPtr_->operator()());
+    const surfaceScalarField Df
+    (
+        dimensionedScalar("viscosity", dimViscosity, 1.0)
+       *diffusivityPtr_->operator()()
+    );
 
     volTensorField gradCd("gradCd", fvc::grad(cellDisplacement_));
 
@@ -241,8 +245,8 @@ void Foam::displacementSBRStressFvMotionSolver::solve()
     );
 
     fvOptions.constrain(TEqn);
-
     TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
+    fvOptions.correct(cellDisplacement_);
 }
 
 
