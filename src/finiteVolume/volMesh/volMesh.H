@@ -27,12 +27,6 @@ Class
 Description
     Mesh data needed to do the Finite Volume discretisation.
 
-Class
-    Foam::isVolMesh
-
-Description
-    Supports static assertion that a template argument is of type volMesh.
-
 \*---------------------------------------------------------------------------*/
 
 #ifndef volMesh_H
@@ -56,7 +50,6 @@ class volMesh
 :
     public GeoMesh<fvMesh>
 {
-
 public:
 
     // Constructors
@@ -71,15 +64,15 @@ public:
     // Member Functions
 
         //- Return size
-        label size() const
-        {
-            return size(mesh_);
-        }
-
-        //- Return size
         static label size(const Mesh& mesh)
         {
             return mesh.nCells();
+        }
+
+        //- Return size
+        label size() const
+        {
+            return size(mesh_);
         }
 
         //- Return cell centres
@@ -94,18 +87,10 @@ public:
                           Class isVolMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class isVolMesh
-:
-    public std::false_type
-{};
+//- Template argument for type volMesh.
+template<class> struct isVolMesh : std::false_type {};
 
-
-template<>
-class isVolMesh<volMesh>
-:
-    public std::true_type
-{};
+template<> struct isVolMesh<volMesh> : std::true_type {};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,7 @@ Namespace
     Foam::predicates
 
 Description
-    Various constant predicate types.
+    Constant predicate types.
 
 SourceFiles
     predicates.H
@@ -36,6 +36,7 @@ SourceFiles
 #define predicates_H
 
 #include <string>
+#include <type_traits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,42 +51,29 @@ namespace predicates
 \*---------------------------------------------------------------------------*/
 
 //- Unary and binary predicates that always return true, useful for templating.
-struct always
+struct always : std::true_type
 {
-    typedef always value_type;
-
-    //- Null constructible
-    inline always()
-    {}
-
-    //- Evaluated as a bool
-    //  \return true
-    inline operator bool() const
-    {
-        return true;
-    }
-
     //- Unary predicate
     //  \return true
     template<class T>
-    inline bool operator()(const T&) const
+    constexpr bool operator()(const T&) const noexcept
     {
-        return true;
+        return value;
     }
 
     //- Binary predicate
     //  \return true
     template<class T1, class T2>
-    inline bool operator()(const T1&, const T2&) const
+    constexpr bool operator()(const T1&, const T2&) const noexcept
     {
-        return true;
+        return value;
     }
 
     //- String match
     //  \return true
-    inline bool match(const std::string&, bool literal=false) const
+    constexpr bool match(const std::string&, bool literal=false) const noexcept
     {
-        return true;
+        return value;
     }
 };
 
@@ -95,42 +83,29 @@ struct always
 \*---------------------------------------------------------------------------*/
 
 //- Unary and binary predicates that never return true, useful for templating.
-struct never
+struct never : std::false_type
 {
-    typedef never value_type;
-
-    //- Null constructible
-    inline never()
-    {}
-
-    //- Evaluated as a bool
-    //  \return false
-    inline operator bool() const
-    {
-        return false;
-    }
-
     //- Unary predicate
     //  \return false
     template<class T>
-    inline bool operator()(const T&) const
+    constexpr bool operator()(const T&) const noexcept
     {
-        return false;
+        return value;
     }
 
     //- Binary predicate
     //  \return false
     template<class T1, class T2>
-    inline bool operator()(const T1&, const T2&) const
+    constexpr bool operator()(const T1&, const T2&) const noexcept
     {
-        return false;
+        return value;
     }
 
     //- String match
     //  \return false
-    inline bool match(const std::string&, bool literal=false) const
+    constexpr bool match(const std::string&, bool literal=false) const noexcept
     {
-        return false;
+        return value;
     }
 };
 
