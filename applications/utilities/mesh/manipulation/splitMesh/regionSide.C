@@ -301,10 +301,7 @@ void Foam::regionSide::walkAllPointConnectedFaces
         const label facei = iter.key();
         const labelList& fEdges = mesh.faceEdges()[facei];
 
-        forAll(fEdges, fEdgeI)
-        {
-            regionEdges.insert(fEdges[fEdgeI]);
-        }
+        regionEdges.insertMany(fEdges);
     }
 
 

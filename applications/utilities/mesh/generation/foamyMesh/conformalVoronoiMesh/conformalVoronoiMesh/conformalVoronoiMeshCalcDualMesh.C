@@ -1053,10 +1053,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
 
                 nInvalidPolyhedra++;
 
-                forAll(cells[cI], cFI)
-                {
-                    wrongFaces.insert(cells[cI][cFI]);
-                }
+                wrongFaces.insertMany(cells[cI]);
             }
         }
 
@@ -1096,11 +1093,7 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
             if (nInternalFaces[cI] <= 1)
             {
                 oneInternalFaceCells++;
-
-                forAll(cells[cI], cFI)
-                {
-                    wrongFaces.insert(cells[cI][cFI]);
-                }
+                wrongFaces.insertMany(cells[cI]);
             }
         }
 
@@ -1132,13 +1125,8 @@ Foam::labelHashSet Foam::conformalVoronoiMesh::checkPolyMeshQuality
     //     forAll(f, fPtI)
     //     {
     //         label ptI = f[fPtI];
-
     //         const labelList& pC = ptCells[ptI];
-
-    //         forAll(pC, pCI)
-    //         {
-    //             limitCells.insert(pC[pCI]);
-    //         }
+    //         limitCells.insertMany(pC);
     //     }
     // }
 

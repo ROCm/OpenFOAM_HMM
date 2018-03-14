@@ -149,7 +149,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
                 << endl;
         }
 
-        uniqIds.insert(ids);
+        uniqIds.insertMany(ids);
     }
 
     patchIDs_ = uniqIds.sortedToc();

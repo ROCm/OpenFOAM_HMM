@@ -301,11 +301,7 @@ void Foam::meshTools::writeOBJ
     forAll(cellLabels, i)
     {
         const cell& cFaces = cells[cellLabels[i]];
-
-        forAll(cFaces, j)
-        {
-            usedFaces.insert(cFaces[j]);
-        }
+        usedFaces.insertMany(cFaces);
     }
 
     writeOBJ(os, faces, points, usedFaces.toc());

@@ -343,10 +343,7 @@ void Foam::removePoints::setRefinement
             // Store faces affected
             const labelList& pFaces = mesh_.pointFaces()[pointi];
 
-            forAll(pFaces, i)
-            {
-                facesAffected.insert(pFaces[i]);
-            }
+            facesAffected.insertMany(pFaces);
         }
     }
 

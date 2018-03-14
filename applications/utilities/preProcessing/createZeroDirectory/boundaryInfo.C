@@ -123,7 +123,7 @@ Foam::boundaryInfo::boundaryInfo(const Time& runTime, const word& regionName)
         if (dict.found("inGroups"))
         {
             dict.lookup("inGroups") >> groups_[patchI];
-            allGroupNames_.insert(groups_[patchI]);
+            allGroupNames_.insertMany(groups_[patchI]);
         }
     }
 }

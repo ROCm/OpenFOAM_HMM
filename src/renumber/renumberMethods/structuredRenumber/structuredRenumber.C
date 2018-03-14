@@ -158,13 +158,9 @@ Foam::labelList Foam::structuredRenumber::renumber
 
     // Extract a submesh.
     labelHashSet patchCells(2*nFaces);
-    forAllConstIter(labelHashSet, patchIDs, iter)
+    for (const label patchId : patchIDs)
     {
-        const labelUList& fc = pbm[iter.key()].faceCells();
-        forAll(fc, i)
-        {
-            patchCells.insert(fc[i]);
-        }
+        patchCells.insertMany(pbm[patchId].faceCells());
     }
 
     label nTotalSeeds = returnReduce(patchCells.size(), sumOp<label>());

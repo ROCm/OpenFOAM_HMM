@@ -26,7 +26,6 @@ License
 #include "IOobjectList.H"
 #include "GeometricField.H"
 #include "fvMesh.H"
-#include "DynamicList.H"
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
@@ -37,14 +36,10 @@ void Foam::functionObjects::fileFieldSelection::addFromFile
     wordHashSet& set
 ) const
 {
-    DynamicList<word> names(this->size());
-
     for (const wordRe& fieldName : *this)
     {
-        names.append(allFileObjects.names(Type::typeName, fieldName));
+        set.insertMany(allFileObjects.names(Type::typeName, fieldName));
     }
-
-    set.insert(names);
 }
 
 

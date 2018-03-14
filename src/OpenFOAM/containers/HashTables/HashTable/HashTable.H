@@ -311,18 +311,6 @@ protected:
         //- An iterator with non-const access to HashTable internals.
         friend class Iterator<false>;
 
-
-    // Protected Member Functions
-
-        //- Remove using begin/end iterators of listed keys
-        template<class InputIter>
-        inline label eraseMultiple
-        (
-            const InputIter begIter,
-            const InputIter endIter
-        );
-
-
 public:
 
     // Constructors
@@ -352,7 +340,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The size of the underlying table
         inline label capacity() const;
@@ -382,7 +370,7 @@ public:
         inline const T& lookup(const Key& key, const T& deflt) const;
 
 
-      // Table of contents
+    // Table of contents
 
         //- The table of contents (the keys) in unsorted order.
         List<Key> toc() const;
@@ -465,7 +453,7 @@ public:
         ) const;
 
 
-      // Edit
+    // Edit
 
         //- Insert a new entry, not overwriting existing entries.
         //  \return True if the entry inserted, which means that it did
@@ -495,19 +483,6 @@ public:
         //  \return True if the entry existed and was removed
         bool erase(const Key& key);
 
-        //- Remove table entries given by the listed keys
-        //  \return The number of items removed
-        label erase(const UList<Key>& keys);
-
-        //- Remove table entries given by the listed keys
-        //  \return The number of items removed
-        template<unsigned Size>
-        label erase(const FixedList<Key, Size>& keys);
-
-        //- Remove table entries given by the listed keys
-        //  \return The number of items removed
-        label erase(std::initializer_list<Key> keys);
-
         //- Remove table entries given by keys of the other hash-table.
         //
         //  The other hash-table must have the same type of key, but the
@@ -516,6 +491,23 @@ public:
         //  \return The number of items removed
         template<class AnyType, class AnyHash>
         label erase(const HashTable<AnyType, Key, AnyHash>& other);
+
+        //- Remove table entries given by the listed keys
+        //  \return The number of items removed
+        inline label erase(std::initializer_list<Key> keys);
+
+        //- Remove multiple entries using an iterator range of keys
+        template<class InputIter>
+        inline label erase(InputIter first, InputIter last);
+
+        //- Remove table entries given by the listed keys
+        //  \return The number of items removed
+        template<unsigned Size>
+        inline label eraseMany(const FixedList<Key, Size>& keys);
+
+        //- Remove table entries given by the listed keys
+        //  \return The number of items removed
+        inline label eraseMany(const UList<Key>& keys);
 
         //- Retain table entries given by keys of the other hash-table.
         //

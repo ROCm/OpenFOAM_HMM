@@ -30,35 +30,6 @@ License
 #include "List.H"
 #include "FixedList.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class T, class Key, class Hash>
-template<class InputIter>
-Foam::label Foam::HashTable<T, Key, Hash>::eraseMultiple
-(
-    const InputIter begIter,
-    const InputIter endIter
-)
-{
-    const label nTotal = this->size();
-    label changed = 0;
-
-    for
-    (
-        InputIter iter = begIter;
-        changed < nTotal && iter != endIter; // terminate early
-        ++iter
-    )
-    {
-        if (this->erase(*iter))
-        {
-            ++changed;
-        }
-    }
-    return changed;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -435,30 +406,60 @@ bool Foam::HashTable<T, Key, Hash>::erase(const Key& key)
 
 
 template<class T, class Key, class Hash>
-Foam::label Foam::HashTable<T, Key, Hash>::erase(const UList<Key>& keys)
+template<class InputIter>
+inline Foam::label Foam::HashTable<T, Key, Hash>::erase
+(
+    InputIter first,
+    InputIter last
+)
 {
-    return eraseMultiple(keys.cbegin(), keys.cend());
+    label changed = 0;
+
+    for
+    (
+        const label nTotal = this->size();
+        changed < nTotal && first != last; // terminate early
+        ++first
+    )
+    {
+        if (this->erase(*first))
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
+}
+
+
+template<class T, class Key, class Hash>
+inline Foam::label Foam::HashTable<T, Key, Hash>::erase
+(
+    std::initializer_list<Key> keys
+)
+{
+    return erase(keys.begin(), keys.end());
 }
 
 
 template<class T, class Key, class Hash>
 template<unsigned Size>
-Foam::label Foam::HashTable<T, Key, Hash>::erase
+inline Foam::label Foam::HashTable<T, Key, Hash>::eraseMany
 (
     const FixedList<Key, Size>& keys
 )
 {
-    return eraseMultiple(keys.cbegin(), keys.cend());
+    return erase(keys.cbegin(), keys.cend());
 }
 
 
 template<class T, class Key, class Hash>
-Foam::label Foam::HashTable<T, Key, Hash>::erase
+inline Foam::label Foam::HashTable<T, Key, Hash>::eraseMany
 (
-    std::initializer_list<Key> keys
+    const UList<Key>& keys
 )
 {
-    return eraseMultiple(keys.begin(), keys.end());
+    return erase(keys.cbegin(), keys.cend());
 }
 
 

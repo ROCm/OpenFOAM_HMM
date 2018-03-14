@@ -300,10 +300,7 @@ void Foam::cellClassification::markCells
 
             // Mark faces of celli
             const labelList& myFaces = mesh_.cells()[celli];
-            forAll(myFaces, myFacei)
-            {
-                outsideFacesMap.insert(myFaces[myFacei]);
-            }
+            outsideFacesMap.insertMany(myFaces);
         }
     }
 

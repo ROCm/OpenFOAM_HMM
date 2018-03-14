@@ -172,11 +172,7 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
         forAll(f, fp)
         {
             const labelList& pointNbs = patch.pointFaces()[f[fp]];
-
-            forAll(pointNbs, i)
-            {
-                nbs.insert(pointNbs[i]);
-            }
+            nbs.insertMany(pointNbs);
         }
 
         // Subtract ours.

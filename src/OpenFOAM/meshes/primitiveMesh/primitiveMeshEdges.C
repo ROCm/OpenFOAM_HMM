@@ -646,7 +646,7 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
 
         for (const label facei : cFaces)
         {
-            set.insert(faceEdges(facei));
+            set.insertMany(faceEdges(facei));
         }
 
         storage.clear();

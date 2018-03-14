@@ -227,19 +227,13 @@ Foam::label Foam::meshRefinement::mergePatchFaces
 //
 //            const cell& ownFaces = cells[mesh_.faceOwner()[faceI]];
 //
-//            forAll(ownFaces, i)
-//            {
-//                retestFaces.insert(ownFaces[i]);
-//            }
+//            retestFaces.insertMany(ownFaces);
 //
 //            if (mesh_.isInternalFace(faceI))
 //            {
 //                const cell& neiFaces = cells[mesh_.faceNeighbour()[faceI]];
 //
-//                forAll(neiFaces, i)
-//                {
-//                    retestFaces.insert(neiFaces[i]);
-//                }
+//                retestFaces.insertMany(neiFaces);
 //            }
 //        }
 //        updateMesh(map, retestFaces.toc());
@@ -337,10 +331,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             faceSet allSets(mesh_, "allFaceSets", allFaceSets.size());
             forAll(allFaceSets, setI)
             {
-                forAll(allFaceSets[setI], i)
-                {
-                    allSets.insert(allFaceSets[setI][i]);
-                }
+                allSets.insertMany(allFaceSets[setI]);
             }
             Pout<< "Writing all faces to be merged to set "
                 << allSets.objectPath() << endl;

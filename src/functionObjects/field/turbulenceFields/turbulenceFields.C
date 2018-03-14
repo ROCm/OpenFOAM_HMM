@@ -146,16 +146,16 @@ bool Foam::functionObjects::turbulenceFields::read(const dictionary& dict)
     }
     else
     {
-        fieldSet_.insert(wordList(dict.lookup("fields")));
+        fieldSet_.insertMany(wordList(dict.lookup("fields")));
     }
 
     Info<< type() << " " << name() << ": ";
     if (fieldSet_.size())
     {
         Info<< "storing fields:" << nl;
-        forAllConstIter(wordHashSet, fieldSet_, iter)
+        for (const word& f : fieldSet_)
         {
-            Info<< "    " << modelName << ':' << iter.key() << nl;
+            Info<< "    " << modelName << ':' << f << nl;
         }
         Info<< endl;
     }
@@ -177,9 +177,8 @@ bool Foam::functionObjects::turbulenceFields::execute()
         const compressible::turbulenceModel& model =
             obr_.lookupObject<compressible::turbulenceModel>(modelName);
 
-        forAllConstIter(wordHashSet, fieldSet_, iter)
+        for (const word& f : fieldSet_)
         {
-            const word& f = iter.key();
             switch (compressibleFieldNames_[f])
             {
                 case cfK:
@@ -250,9 +249,8 @@ bool Foam::functionObjects::turbulenceFields::execute()
         const incompressible::turbulenceModel& model =
             obr_.lookupObject<incompressible::turbulenceModel>(modelName);
 
-        forAllConstIter(wordHashSet, fieldSet_, iter)
+        for (const word& f : fieldSet_)
         {
-            const word& f = iter.key();
             switch (incompressibleFieldNames_[f])
             {
                 case ifK:
@@ -315,9 +313,9 @@ bool Foam::functionObjects::turbulenceFields::execute()
 
 bool Foam::functionObjects::turbulenceFields::write()
 {
-    forAllConstIter(wordHashSet, fieldSet_, iter)
+    for (const word& f : fieldSet_)
     {
-        const word fieldName = modelName + ':' + iter.key();
+        const word fieldName = modelName + ':' + f;
         writeObject(fieldName);
     }
 

@@ -527,10 +527,7 @@ label findUncoveredPatchFace
 {
     // Make set of extruded faces.
     labelHashSet extrudeFaceSet(extrudeMeshFaces.size());
-    forAll(extrudeMeshFaces, i)
-    {
-        extrudeFaceSet.insert(extrudeMeshFaces[i]);
-    }
+    extrudeFaceSet.insertMany(extrudeMeshFaces);
 
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
     const labelList& eFaces = mesh.edgeFaces()[meshEdgeI];
@@ -564,10 +561,7 @@ label findUncoveredCyclicPatchFace
 {
     // Make set of extruded faces.
     labelHashSet extrudeFaceSet(extrudeMeshFaces.size());
-    forAll(extrudeMeshFaces, i)
-    {
-        extrudeFaceSet.insert(extrudeMeshFaces[i]);
-    }
+    extrudeFaceSet.insertMany(extrudeMeshFaces);
 
     const polyBoundaryMesh& pbm = mesh.boundaryMesh();
     const labelList& eFaces = mesh.edgeFaces()[meshEdgeI];

@@ -103,9 +103,9 @@ if (timeDirs.size())
             fileName::FILE
         );
 
-        forAll(contents, fileI)
+        for (const fileName& file : contents)
         {
-            missing.erase(contents[fileI].name());
+            missing.erase(file.name());
         }
 
         volumeFields.erase(missing);

@@ -5523,10 +5523,7 @@ void Foam::hexRef8::setUnrefinement
         {
             const labelList& pCells = mesh_.pointCells(splitPointLabels[i]);
 
-            forAll(pCells, j)
-            {
-                cSet.insert(pCells[j]);
-            }
+            cSet.insertMany(pCells);
         }
         cSet.write();
 
@@ -5550,10 +5547,7 @@ void Foam::hexRef8::setUnrefinement
         {
             const labelList& pFaces = mesh_.pointFaces()[splitPointLabels[i]];
 
-            forAll(pFaces, j)
-            {
-                splitFaces.insert(pFaces[j]);
-            }
+            splitFaces.insertMany(pFaces);
         }
 
         // Check with faceRemover what faces will get removed. Note that this

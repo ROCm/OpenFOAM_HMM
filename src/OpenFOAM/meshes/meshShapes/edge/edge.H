@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,25 +62,6 @@ class edge
 :
     public labelPair
 {
-    // Private Member Functions
-
-        //- Insert values, using begin/end iterators.
-        template<class InputIter>
-        inline label insertMultiple
-        (
-            const InputIter begIter,
-            const InputIter endIter
-        );
-
-        //- Remove values, using begin/end iterators.
-        template<class InputIter>
-        inline label eraseMultiple
-        (
-            const InputIter begIter,
-            const InputIter endIter
-        );
-
-
 public:
 
     // Static data members
@@ -100,13 +81,13 @@ public:
         inline edge(const labelPair& pair);
 
         //- Construct from list
-        inline edge(const FixedList<label, 2>& lst);
+        inline edge(const FixedList<label, 2>& list);
 
         //- Construct from two point labels, sorted with first less-than second
         inline edge(const label from, const label to, const bool doSort);
 
         //- Construct from list, sorted with first less-than second
-        inline edge(const FixedList<label, 2>& lst, const bool doSort);
+        inline edge(const FixedList<label, 2>& list, const bool doSort);
 
         //- Construct from Istream
         inline edge(Istream& is);
@@ -194,6 +175,7 @@ public:
         //- 'Clears' edge by setting both ends to invalid point labels.
         inline void clear();
 
+
         //- Fill any open slot with the index if it did not previously exist.
         //  Returns true on success. A negative label never inserts.
         //  Similar to a HashTable::insert().
@@ -203,20 +185,25 @@ public:
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
         //  Similar to a HashTable::insert().
-        inline label insert(const labelUList& lst);
+        inline label insert(std::initializer_list<label> list);
+
+        //- Insert values, using begin/end iterators.
+        template<class InputIter>
+        inline label insert(InputIter begIter, InputIter endIter);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
-        //  Similar to a HashTable::insert().
+        //  Similar to a HashTable::insertMany().
         template<unsigned Size>
-        inline label insert(const FixedList<label, Size>& lst);
+        inline label insertMany(const FixedList<label, Size>& list);
 
         //- Fill open slots with the indices if they did not previously exist.
         //  Returns true on success. Negative labels never insert.
         //  Return the number of slots filled.
-        //  Similar to a HashTable::insert().
-        inline label insert(std::initializer_list<label> lst);
+        //  Similar to a HashTable::insertMany().
+        inline label insertMany(const labelUList& list);
+
 
         //- Remove an existing index from the edge and set its location to '-1'.
         //  Returns the number of changes. A negative label never removes.
@@ -225,19 +212,23 @@ public:
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline label erase(const labelUList& lst);
+        inline label erase(std::initializer_list<label> list);
+
+        //- Remove values, using begin/end iterators.
+        template<class InputIter>
+        inline label erase(InputIter begIter, InputIter endIter);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
         template<unsigned Size>
-        inline label erase(const FixedList<label, Size>& lst);
+        inline label eraseMany(const FixedList<label, Size>& list);
 
         //- Remove existing indices from the edge and set locations to '-1'.
         //  Returns the number of changes.
-        inline label erase(std::initializer_list<label> lst);
+        inline label eraseMany(const labelUList& list);
 
 
-     // Geometric functions
+    // Geometric functions
 
         //- Return centre point (centroid) of the edge.
         //  No special handling of negative point labels.
@@ -260,7 +251,7 @@ public:
         inline linePointRef line(const UList<point>& pts) const;
 
 
-     // Comparison
+    // Comparison
 
         //- Compare edges
         //  \return

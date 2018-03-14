@@ -236,11 +236,11 @@ bool Foam::surfMeshSamplers::execute()
 
         // The acceptable fields
         wordHashSet acceptable(added);
-        acceptable.insert(acceptType<scalar>());
-        acceptable.insert(acceptType<vector>());
-        acceptable.insert(acceptType<sphericalTensor>());
-        acceptable.insert(acceptType<symmTensor>());
-        acceptable.insert(acceptType<tensor>());
+        acceptable.insertMany(acceptType<scalar>());
+        acceptable.insertMany(acceptType<vector>());
+        acceptable.insertMany(acceptType<sphericalTensor>());
+        acceptable.insertMany(acceptType<symmTensor>());
+        acceptable.insertMany(acceptType<tensor>());
 
         const wordList fields = acceptable.sortedToc();
         if (!fields.empty())

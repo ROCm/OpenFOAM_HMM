@@ -625,10 +625,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
             {
                 const cell& ownFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
 
-                forAll(ownFaces, i)
-                {
-                    baffledFacesSet.insert(ownFaces[i]);
-                }
+                baffledFacesSet.insertMany(ownFaces);
             }
         }
         // Pick up neighbour side of baffle (added faces)
@@ -640,10 +637,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
             {
                 const cell& ownFaces = mesh_.cells()[mesh_.faceOwner()[faceI]];
 
-                forAll(ownFaces, i)
-                {
-                    baffledFacesSet.insert(ownFaces[i]);
-                }
+                baffledFacesSet.insertMany(ownFaces);
             }
         }
         baffledFacesSet.sync(mesh_);

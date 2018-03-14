@@ -225,9 +225,9 @@ void syncEdges(const triSurface& p, labelHashSet& markedEdges)
     const edgeList& edges = p.edges();
     edgeHashSet edgeSet(2*markedEdges.size());
 
-    forAllConstIter(labelHashSet, markedEdges, iter)
+    for (const label edgei : markedEdges)
     {
-        edgeSet.insert(edges[iter.key()]);
+        edgeSet.insert(edges[edgei]);
     }
 
     forAll(edges, edgei)

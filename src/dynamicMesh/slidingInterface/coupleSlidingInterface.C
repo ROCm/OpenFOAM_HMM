@@ -186,10 +186,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             // edges
             for (const label slaveEdgei : curSlaveEdges)
             {
-                usedMasterEdges[slaveEdgei].insert
-                (
-                    curMasterEdges
-                );
+                usedMasterEdges[slaveEdgei].insertMany(curMasterEdges);
             }
         }
         else if (slavePointEdgeHits[pointi] > -1)
@@ -214,7 +211,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         {
             const labelList& curMasterEdges = masterPointEdges[masterPointi];
 
-            usedMasterEdges[masterPointEdgeHits[masterPointi]].insert
+            usedMasterEdges[masterPointEdgeHits[masterPointi]].insertMany
             (
                 curMasterEdges
             );
@@ -574,10 +571,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                 //     << masterPatch.localFaces()[facei]
                 //     << endl;
 
-                curMasterEdgesMap.insert
-                (
-                    masterFaceEdges[facei]
-                );
+                curMasterEdgesMap.insertMany(masterFaceEdges[facei]);
             }
 
             const labelList curMasterEdges(curMasterEdgesMap.toc());

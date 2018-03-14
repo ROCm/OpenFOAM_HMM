@@ -249,10 +249,7 @@ void Foam::cellToFaceStencil::unionEqOp::operator()
         else
         {
             labelHashSet set(x);
-            forAll(y, i)
-            {
-                set.insert(y[i]);
-            }
+            set.insertMany(y);
             x = set.toc();
         }
     }
@@ -391,19 +388,11 @@ void Foam::cellToFaceStencil::calcFaceStencil
 
         const labelList& ownCCells = globalCellCells[own[facei]];
         label globalOwn = ownCCells[0];
-        // Insert cellCells
-        forAll(ownCCells, i)
-        {
-            faceStencilSet.insert(ownCCells[i]);
-        }
+        faceStencilSet.insertMany(ownCCells);  // Insert cellCells
 
         const labelList& neiCCells = globalCellCells[nei[facei]];
         label globalNei = neiCCells[0];
-        // Insert cellCells
-        forAll(neiCCells, i)
-        {
-            faceStencilSet.insert(neiCCells[i]);
-        }
+        faceStencilSet.insertMany(neiCCells);  // Insert cellCells
 
         // Guarantee owner first, neighbour second.
         faceStencil[facei].setSize(faceStencilSet.size());
@@ -433,19 +422,13 @@ void Foam::cellToFaceStencil::calcFaceStencil
 
                 const labelList& ownCCells = globalCellCells[own[facei]];
                 label globalOwn = ownCCells[0];
-                forAll(ownCCells, i)
-                {
-                    faceStencilSet.insert(ownCCells[i]);
-                }
+                faceStencilSet.insertMany(ownCCells);
 
                 // And the neighbours of the coupled cell
                 const labelList& neiCCells =
                     neiGlobalCellCells[facei-mesh_.nInternalFaces()];
                 label globalNei = neiCCells[0];
-                forAll(neiCCells, i)
-                {
-                    faceStencilSet.insert(neiCCells[i]);
-                }
+                faceStencilSet.insertMany(neiCCells);
 
                 // Guarantee owner first, neighbour second.
                 faceStencil[facei].setSize(faceStencilSet.size());
@@ -475,10 +458,7 @@ void Foam::cellToFaceStencil::calcFaceStencil
 
                 const labelList& ownCCells = globalCellCells[own[facei]];
                 label globalOwn = ownCCells[0];
-                forAll(ownCCells, i)
-                {
-                    faceStencilSet.insert(ownCCells[i]);
-                }
+                faceStencilSet.insertMany(ownCCells);
 
                 // Guarantee owner first
                 faceStencil[facei].setSize(faceStencilSet.size());

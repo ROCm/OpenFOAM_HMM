@@ -227,7 +227,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
 
     for (const instant& t : dbPtr_().times())
     {
-        names.insert
+        names.insertMany
         (
             readDir
             (

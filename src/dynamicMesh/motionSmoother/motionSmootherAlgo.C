@@ -99,7 +99,7 @@ Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 
     for (const label faceId : faceLabels)
     {
-        usedPoints.insert(mesh_.faces()[faceId]);
+        usedPoints.insertMany(mesh_.faces()[faceId]);
     }
 
     return usedPoints;
@@ -115,7 +115,7 @@ Foam::labelHashSet Foam::motionSmootherAlgo::getPoints
 
     for (const label faceId : faceLabels)
     {
-        usedPoints.insert(mesh_.faces()[faceId]);
+        usedPoints.insertMany(mesh_.faces()[faceId]);
     }
 
     return usedPoints;
@@ -217,11 +217,11 @@ void Foam::motionSmootherAlgo::scaleField
     pointScalarField& fld
 ) const
 {
-    forAllConstIter(labelHashSet, pointLabels, iter)
+    for (const label pointi : pointLabels)
     {
-        if (isInternalPoint(iter.key()))
+        if (isInternalPoint(pointi))
         {
-            fld[iter.key()] *= scale;
+            fld[pointi] *= scale;
         }
     }
 
@@ -239,10 +239,8 @@ void Foam::motionSmootherAlgo::scaleField
     pointScalarField& fld
 ) const
 {
-    forAll(meshPoints, i)
+    for (const label pointi : meshPoints)
     {
-        label pointi = meshPoints[i];
-
         if (pointLabels.found(pointi))
         {
             fld[pointi] *= scale;
@@ -330,10 +328,7 @@ void Foam::motionSmootherAlgo::getAffectedFacesAndPoints
             {
                 const cell& cFaces = mesh_.cells()[pCells[pCelli]];
 
-                forAll(cFaces, cFacei)
-                {
-                    nbrFaces.insert(cFaces[cFacei]);
-                }
+                nbrFaces.insertMany(cFaces);
             }
         }
         nbrFaces.sync(mesh_);
@@ -949,20 +944,14 @@ bool Foam::motionSmootherAlgo::scaleMesh
                 label own = mesh_.faceOwner()[iter.key()];
                 const cell& ownFaces = mesh_.cells()[own];
 
-                forAll(ownFaces, cfI)
-                {
-                    newWrongFaces.insert(ownFaces[cfI]);
-                }
+                newWrongFaces.insertMany(ownFaces);
 
                 if (iter.key() < mesh_.nInternalFaces())
                 {
                     label nei = mesh_.faceNeighbour()[iter.key()];
                     const cell& neiFaces = mesh_.cells()[nei];
 
-                    forAll(neiFaces, cfI)
-                    {
-                        newWrongFaces.insert(neiFaces[cfI]);
-                    }
+                    newWrongFaces.insertMany(neiFaces);
                 }
             }
             wrongFaces.transfer(newWrongFaces);

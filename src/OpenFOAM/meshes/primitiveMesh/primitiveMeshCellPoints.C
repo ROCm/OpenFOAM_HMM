@@ -75,7 +75,7 @@ const Foam::labelList& Foam::primitiveMesh::cellPoints
 
         for (const label facei : cFaces)
         {
-            set.insert(fcs[facei]);
+            set.insertMany(fcs[facei]);
         }
 
         storage.clear();

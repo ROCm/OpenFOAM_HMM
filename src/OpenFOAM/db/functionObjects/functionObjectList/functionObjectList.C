@@ -305,7 +305,7 @@ bool Foam::functionObjectList::readFunctionObject
     else if (args.size() > 1)
     {
         funcDict.set("fields", args);
-        requiredFields.insert(args);
+        requiredFields.insertMany(args);
     }
     else if (funcDict.found("field"))
     {
@@ -313,7 +313,7 @@ bool Foam::functionObjectList::readFunctionObject
     }
     else if (funcDict.found("fields"))
     {
-        requiredFields.insert(wordReList(funcDict.lookup("fields")));
+        requiredFields.insertMany(wordReList(funcDict.lookup("fields")));
     }
 
     // Insert named arguments

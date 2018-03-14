@@ -344,10 +344,7 @@ void writePointCells
     {
         const labelList& cEdges = mesh.cellEdges()[pCells[i]];
 
-        forAll(cEdges, i)
-        {
-            allEdges.insert(cEdges[i]);
-        }
+        allEdges.insertMany(cEdges);
     }
 
 

@@ -124,9 +124,9 @@ void Foam::vtk::vtuSizing::reset
             bool first = true;
 
             const cell& cFaces = mesh.cells()[celli];
-            forAll(cFaces, cFaceI)
+            for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = mesh.faces()[facei];
 
                 // Face decomposed into triangles and quads
                 // Tri -> Tet, Quad -> Pyr
@@ -160,12 +160,12 @@ void Foam::vtk::vtuSizing::reset
             // number of faces, size of each face, vertices per face
             // [nFaces, nFace0Pts, id1, id2, ..., nFace1Pts, id1, id2, ...]
 
-            forAll(cFaces, cFaceI)
+            for (const label facei : cFaces)
             {
-                const face& f = mesh.faces()[cFaces[cFaceI]];
+                const face& f = mesh.faces()[facei];
                 nFaceLabels_ += f.size();
 
-                hashUniqId.insert(f);
+                hashUniqId.insertMany(f);
             }
 
             // Legacy format only uses the face-stream.

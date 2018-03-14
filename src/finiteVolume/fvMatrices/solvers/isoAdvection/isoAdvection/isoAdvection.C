@@ -1050,10 +1050,7 @@ void Foam::isoAdvection::writeSurfaceCells() const
             )
         );
 
-        forAll(surfCells_, i)
-        {
-            cSet.insert(surfCells_[i]);
-        }
+        cSet.insertMany(surfCells_);
 
         cSet.write();
     }

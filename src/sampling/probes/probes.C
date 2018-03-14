@@ -177,17 +177,17 @@ Foam::label Foam::probes::prepare()
     {
         wordHashSet currentFields;
 
-        currentFields.insert(scalarFields_);
-        currentFields.insert(vectorFields_);
-        currentFields.insert(sphericalTensorFields_);
-        currentFields.insert(symmTensorFields_);
-        currentFields.insert(tensorFields_);
+        currentFields.insertMany(scalarFields_);
+        currentFields.insertMany(vectorFields_);
+        currentFields.insertMany(sphericalTensorFields_);
+        currentFields.insertMany(symmTensorFields_);
+        currentFields.insertMany(tensorFields_);
 
-        currentFields.insert(surfaceScalarFields_);
-        currentFields.insert(surfaceVectorFields_);
-        currentFields.insert(surfaceSphericalTensorFields_);
-        currentFields.insert(surfaceSymmTensorFields_);
-        currentFields.insert(surfaceTensorFields_);
+        currentFields.insertMany(surfaceScalarFields_);
+        currentFields.insertMany(surfaceVectorFields_);
+        currentFields.insertMany(surfaceSphericalTensorFields_);
+        currentFields.insertMany(surfaceSymmTensorFields_);
+        currentFields.insertMany(surfaceTensorFields_);
 
         DebugInfo
             << "Probing fields: " << currentFields << nl
@@ -229,10 +229,8 @@ Foam::label Foam::probes::prepare()
         }
 
         // currentFields now just has the new fields - open streams for them
-        forAllConstIter(wordHashSet, currentFields, iter)
+        for (const word& fieldName : currentFields)
         {
-            const word& fieldName = iter.key();
-
             // Create directory if does not exist.
             mkDir(probeDir);
 

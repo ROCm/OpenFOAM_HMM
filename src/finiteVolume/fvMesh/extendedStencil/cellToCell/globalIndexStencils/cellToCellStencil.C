@@ -248,10 +248,7 @@ void Foam::cellToCellStencil::unionEqOp::operator()
         else
         {
             labelHashSet set(x);
-            forAll(y, i)
-            {
-                set.insert(y[i]);
-            }
+            set.insertMany(y);
             x = set.toc();
         }
     }

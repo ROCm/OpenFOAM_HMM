@@ -545,10 +545,7 @@ void Foam::vtk::vtuSizing::populateArrays
                 const face& f = mesh.faces()[cFaces[cFaceI]];
                 const bool isOwner = (owner[cFaces[cFaceI]] == celli);
 
-                forAll(f, fp)
-                {
-                    hashUniqId.insert(f[fp]);
-                }
+                hashUniqId.insertMany(f);
 
                 // number of labels for this face
                 faceOutput[faceIndexer++] = f.size();

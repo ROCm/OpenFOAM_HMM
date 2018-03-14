@@ -784,11 +784,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
         // Treat the given patch names as wild-cards and search the set
         // of all patch names for matches
         labelList patchIDs = findStrings(patchName, allPatchNames);
-
-        forAll(patchIDs, j)
-        {
-            ids.insert(patchIDs[j]);
-        }
+        ids.insertMany(patchIDs);
 
         if (patchIDs.empty())
         {
@@ -803,11 +799,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
                 {
                     const word& name = allGroupNames[groupIDs[i]];
                     const labelList& extraPatchIDs = groupPatchIDs()[name];
-
-                    forAll(extraPatchIDs, extraI)
-                    {
-                        ids.insert(extraPatchIDs[extraI]);
-                    }
+                    ids.insertMany(extraPatchIDs);
                 }
 
                 if (groupIDs.empty() && warnNotFound)

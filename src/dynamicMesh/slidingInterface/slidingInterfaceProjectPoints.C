@@ -880,8 +880,7 @@ bool Foam::slidingInterface::projectPoints() const
             for (const label facei : curFaceMap)
             {
                 const face& f = masterLocalFaces[facei];
-
-                curPointMap.insert(f);  // Insert all face points
+                curPointMap.insertMany(f);  // Insert all face points
             }
 
             const labelList curMasterPoints = curPointMap.toc();

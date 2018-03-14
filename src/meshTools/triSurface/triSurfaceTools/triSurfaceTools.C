@@ -384,11 +384,7 @@ Foam::labelHashSet Foam::triSurfaceTools::getCollapsedFaces
     const labelList& myFaces = surf.edgeFaces()[edgeI];
 
     labelHashSet facesToBeCollapsed(2*myFaces.size());
-
-    forAll(myFaces, myFacei)
-    {
-        facesToBeCollapsed.insert(myFaces[myFacei]);
-    }
+    facesToBeCollapsed.insertMany(myFaces);
 
     // From faces using v1 check if they share an edge with faces
     // using v2.

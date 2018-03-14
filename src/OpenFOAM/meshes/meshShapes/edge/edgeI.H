@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,66 +33,6 @@ inline int Foam::edge::compare(const edge& a, const edge& b)
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-template<class InputIter>
-inline Foam::label Foam::edge::insertMultiple
-(
-    const InputIter begIter,
-    const InputIter endIter
-)
-{
-    // Available slots.
-    // Don't use count() since it has special treatment for duplicates
-    const int maxChange = (first() < 0 ? 1 : 0) + (second() < 0 ? 1 : 0);
-
-    int changed = 0;
-    if (maxChange)
-    {
-        for (InputIter iter = begIter; iter != endIter; ++iter)
-        {
-            if (insert(*iter))
-            {
-                if (++changed >= maxChange)
-                {
-                    break;
-                }
-            }
-        }
-    }
-
-    return changed;
-}
-
-
-template<class InputIter>
-inline Foam::label Foam::edge::eraseMultiple
-(
-    const InputIter begIter,
-    const InputIter endIter
-)
-{
-    // Occupied slots.
-    // Don't use count() since it has special treatment for duplicates
-    const int maxChange = (first() >= 0 ? 1 : 0) + (second() >= 0 ? 1 : 0);
-
-    int changed = 0;
-    if (maxChange)
-    {
-        for (InputIter iter = begIter; iter != endIter; ++iter)
-        {
-            changed += erase(*iter);
-            if (changed >= maxChange)
-            {
-                break;
-            }
-        }
-    }
-
-    return changed;
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::edge::edge()
@@ -113,9 +53,9 @@ inline Foam::edge::edge(const labelPair& pair)
 {}
 
 
-inline Foam::edge::edge(const FixedList<label, 2>& lst)
+inline Foam::edge::edge(const FixedList<label, 2>& list)
 :
-    labelPair(lst.first(), lst.last())
+    labelPair(list.first(), list.last())
 {}
 
 
@@ -125,9 +65,9 @@ inline Foam::edge::edge(const label from, const label to, const bool doSort)
 {}
 
 
-inline Foam::edge::edge(const FixedList<label, 2>& lst, const bool doSort)
+inline Foam::edge::edge(const FixedList<label, 2>& list, const bool doSort)
 :
-    labelPair(lst, doSort)
+    labelPair(list, doSort)
 {}
 
 
@@ -329,22 +269,46 @@ inline bool Foam::edge::insert(const label index)
 }
 
 
-inline Foam::label Foam::edge::insert(const labelUList& lst)
+template<class InputIter>
+inline Foam::label Foam::edge::insert
+(
+    InputIter begIter,
+    InputIter endIter
+)
 {
-    return insertMultiple(lst.begin(), lst.end());
+    // Available slots.
+    // Don't use count() since it has special treatment for duplicates
+    const int maxChange = ((first() < 0 ? 1 : 0) + (second() < 0 ? 1 : 0));
+
+    int changed = 0;
+    for (; changed < maxChange && begIter != endIter; ++begIter)
+    {
+        if (insert(*begIter))
+        {
+            ++changed;
+        }
+    }
+
+    return changed;
+}
+
+
+inline Foam::label Foam::edge::insert(std::initializer_list<label> list)
+{
+    return insert(list.begin(), list.end());
 }
 
 
 template<unsigned Size>
-inline Foam::label Foam::edge::insert(const FixedList<label, Size>& lst)
+inline Foam::label Foam::edge::insertMany(const FixedList<label, Size>& list)
 {
-    return insertMultiple(lst.begin(), lst.end());
+    return insert(list.begin(), list.end());
 }
 
 
-inline Foam::label Foam::edge::insert(std::initializer_list<label> lst)
+inline Foam::label Foam::edge::insertMany(const labelUList& list)
 {
-    return insertMultiple(lst.begin(), lst.end());
+    return insert(list.begin(), list.end());
 }
 
 
@@ -374,22 +338,43 @@ inline Foam::label Foam::edge::erase(const label index)
 }
 
 
-inline Foam::label Foam::edge::erase(const labelUList& lst)
+template<class InputIter>
+inline Foam::label Foam::edge::erase
+(
+    InputIter begIter,
+    InputIter endIter
+)
 {
-    return eraseMultiple(lst.begin(), lst.end());
+    // Occupied slots.
+    // Don't use count() since it has special treatment for duplicates
+    const int maxChange = ((first() >= 0 ? 1 : 0) + (second() >= 0 ? 1 : 0));
+
+    int changed = 0;
+    for (; changed < maxChange && begIter != endIter; ++begIter)
+    {
+        changed += erase(*begIter);
+    }
+
+    return changed;
+}
+
+
+inline Foam::label Foam::edge::erase(std::initializer_list<label> list)
+{
+    return erase(list.begin(), list.end());
 }
 
 
 template<unsigned Size>
-inline Foam::label Foam::edge::erase(const FixedList<label, Size>& lst)
+inline Foam::label Foam::edge::eraseMany(const FixedList<label, Size>& list)
 {
-    return eraseMultiple(lst.begin(), lst.end());
+    return erase(list.begin(), list.end());
 }
 
 
-inline Foam::label Foam::edge::erase(std::initializer_list<label> lst)
+inline Foam::label Foam::edge::eraseMany(const labelUList& list)
 {
-    return eraseMultiple(lst.begin(), lst.end());
+    return erase(list.begin(), list.end());
 }
 
 

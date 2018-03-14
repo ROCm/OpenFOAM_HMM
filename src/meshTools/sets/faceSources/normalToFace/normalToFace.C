@@ -160,10 +160,7 @@ void Foam::normalToFace::applyToSet
             }
         }
 
-        forAll(toBeRemoved, i)
-        {
-            set.erase(toBeRemoved[i]);
-        }
+        set.eraseMany(toBeRemoved);
     }
 }
 

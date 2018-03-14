@@ -188,10 +188,10 @@ int main(int argc, char *argv[])
     Info<< "setB : " << setB << endl;
 
     labelPair pair(12, 15);
-    setB.set(pair);
+    setB.setMany(pair);
 
     Info<< "setB : " << setB << endl;
-    setB.unset(pair);
+    setB.unsetMany(pair);
 
 
     labelHashSet setC(1);
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
         someLst[elemI] = elemI*elemI;
     }
 
-    label added = setD.set(someLst);
+    label added = setD.setMany(someLst);
     Info<< "added " << added << " from " << someLst.size() << endl;
     Info<< "setD : " << flatOutput(setD) << endl;
 

@@ -34,13 +34,10 @@ void Foam::functionObjects::fieldSelection::addRegistered
     wordHashSet& set
 ) const
 {
-    DynamicList<word> names;
     for (const wordRe& name : *this)
     {
-        names.append(obr_.names<Type>(name));
+        set.insertMany(obr_.names<Type>(name));
     }
-
-    set.insert(names);
 }
 
 

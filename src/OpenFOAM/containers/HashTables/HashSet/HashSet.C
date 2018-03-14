@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -33,68 +33,36 @@ License
 
 template<class Key, class Hash>
 template<class InputIter>
-inline Foam::label Foam::HashSet<Key, Hash>::insertMultiple
+inline Foam::label Foam::HashSet<Key, Hash>::assignMany
 (
-    const InputIter begIter,
-    const InputIter endIter
-)
-{
-    label changed = 0;
-    for (InputIter iter = begIter; iter != endIter; ++iter)
-    {
-        if (insert(*iter))
-        {
-            ++changed;
-        }
-    }
-    return changed;
-}
-
-
-template<class Key, class Hash>
-template<class InputIter>
-inline Foam::label Foam::HashSet<Key, Hash>::assignMultiple
-(
-    const InputIter begIter,
-    const InputIter endIter,
-    const label sz
+    const label nItems,
+    InputIter first,
+    InputIter last
 )
 {
     if (!this->capacity())
     {
         // Could be zero-sized from a previous transfer()?
-        this->resize(sz);
+        this->resize(2*nItems);
     }
     else
     {
         this->clear();
     }
 
-    return insertMultiple(begIter, endIter);
+    return insert(first, last);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
-:
-    parent_type(2*lst.size())
-{
-    for (const auto& k : lst)
-    {
-        this->insert(k);
-    }
-}
-
-
-template<class Key, class Hash>
 template<unsigned Size>
-Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
+Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& list)
 :
-    parent_type(2*lst.size())
+    parent_type(2*list.size())
 {
-    for (const auto& k : lst)
+    for (const auto& k : list)
     {
         this->insert(k);
     }
@@ -102,11 +70,35 @@ Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> lst)
+Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& list)
 :
-    parent_type(2*lst.size())
+    parent_type(2*list.size())
 {
-    for (const auto& k : lst)
+    for (const auto& k : list)
+    {
+        this->insert(k);
+    }
+}
+
+
+template<class Key, class Hash>
+Foam::HashSet<Key, Hash>::HashSet(const UIndirectList<Key>& list)
+:
+    parent_type(2*list.size())
+{
+    for (const auto& k : list)
+    {
+        this->insert(k);
+    }
+}
+
+
+template<class Key, class Hash>
+Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> list)
+:
+    parent_type(2*list.size())
+{
+    for (const auto& k : list)
     {
         this->insert(k);
     }
@@ -132,24 +124,116 @@ Foam::HashSet<Key, Hash>::HashSet
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-Foam::label Foam::HashSet<Key, Hash>::insert(const UList<Key>& lst)
+template<class InputIter>
+inline Foam::label Foam::HashSet<Key, Hash>::insert
+(
+    InputIter first,
+    InputIter last
+)
 {
-    return insertMultiple(lst.begin(), lst.end());
+    label changed = 0;
+    for (; first != last; ++first)
+    {
+        if (insert(*first))
+        {
+            ++changed;
+        }
+    }
+    return changed;
+}
+
+
+template<class Key, class Hash>
+inline Foam::label Foam::HashSet<Key, Hash>::insert
+(
+    std::initializer_list<Key> list
+)
+{
+    return insert(list.begin(), list.end());
 }
 
 
 template<class Key, class Hash>
 template<unsigned Size>
-Foam::label Foam::HashSet<Key, Hash>::insert(const FixedList<Key, Size>& lst)
+inline Foam::label Foam::HashSet<Key, Hash>::insertMany
+(
+    const FixedList<Key, Size>& list
+)
 {
-    return insertMultiple(lst.begin(), lst.end());
+    return insert(list.begin(), list.end());
 }
 
 
 template<class Key, class Hash>
-Foam::label Foam::HashSet<Key, Hash>::insert(std::initializer_list<Key> lst)
+inline Foam::label Foam::HashSet<Key, Hash>::insertMany
+(
+    const UList<Key>& list
+)
 {
-    return insertMultiple(lst.begin(), lst.end());
+    return insert(list.begin(), list.end());
+}
+
+
+template<class Key, class Hash>
+inline  Foam::label Foam::HashSet<Key, Hash>::insertMany
+(
+    const UIndirectList<Key>& list
+)
+{
+    return insert(list.begin(), list.end());
+}
+
+
+template<class Key, class Hash>
+template<class InputIter>
+inline Foam::label Foam::HashSet<Key, Hash>::unset
+(
+    InputIter first,
+    InputIter last
+)
+{
+    return this->parent_type::erase(first, last);
+}
+
+
+template<class Key, class Hash>
+inline Foam::label Foam::HashSet<Key, Hash>::unset
+(
+    std::initializer_list<Key> list
+)
+{
+    return unset(list.begin(), list.end());
+}
+
+
+template<class Key, class Hash>
+template<unsigned Size>
+inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
+(
+    const FixedList<Key, Size>& list
+)
+{
+    return unset(list.begin(), list.end());
+}
+
+
+template<class Key, class Hash>
+inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
+(
+    const UList<Key>& list
+)
+{
+    return unset(list.begin(), list.end());
+}
+
+
+template<class Key, class Hash>
+inline Foam::label Foam::HashSet<Key, Hash>::unsetMany
+(
+    const UIndirectList<Key>& list
+)
+{
+    return unset(list.begin(), list.end());
 }
 
 
@@ -170,24 +254,24 @@ inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& rhs)
+template<unsigned Size>
+void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& rhs)
 {
-    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
+    assignMany(rhs.size(), rhs.begin(), rhs.end());
 }
 
 
 template<class Key, class Hash>
-template<unsigned Size>
-void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& rhs)
+void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& rhs)
 {
-    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
+    assignMany(rhs.size(), rhs.begin(), rhs.end());
 }
 
 
 template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> rhs)
 {
-    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
+    assignMany(rhs.size(), rhs.begin(), rhs.end());
 }
 
 

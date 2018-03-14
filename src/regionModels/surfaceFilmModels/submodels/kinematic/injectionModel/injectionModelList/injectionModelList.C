@@ -62,11 +62,7 @@ injectionModelList::injectionModelList
 {
     const wordList activeModels(dict.lookup("injectionModels"));
 
-    wordHashSet models;
-    forAll(activeModels, i)
-    {
-        models.insert(activeModels[i]);
-    }
+    wordHashSet models(activeModels);
 
     Info<< "    Selecting film injection models" << endl;
     if (models.size() > 0)
@@ -74,9 +70,8 @@ injectionModelList::injectionModelList
         this->setSize(models.size());
 
         label i = 0;
-        forAllConstIter(wordHashSet, models, iter)
+        for (const word& model : models)
         {
-            const word& model = iter.key();
             set(i, injectionModel::New(film, dict, model));
             i++;
         }
