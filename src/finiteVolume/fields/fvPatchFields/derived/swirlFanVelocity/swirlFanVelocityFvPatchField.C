@@ -156,19 +156,7 @@ Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
     useRealRadius_(dict.lookupOrDefault<Switch>("useRealRadius", false)),
     rInner_(dict.lookupOrDefault<scalar>("rInner", 0.0)),
     rOuter_(dict.lookupOrDefault<scalar>("rOuter", 0.0))
-{
-    if (dict.found("value"))
-    {
-        fvPatchVectorField::operator=
-        (
-            vectorField("value", dict, p.size())
-        );
-    }
-    else
-    {
-        this->evaluate(Pstream::commsTypes::blocking);
-    }
-}
+{}
 
 
 Foam::swirlFanVelocityFvPatchField::swirlFanVelocityFvPatchField
