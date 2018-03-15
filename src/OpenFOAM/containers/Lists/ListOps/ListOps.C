@@ -105,12 +105,69 @@ Foam::labelList Foam::identity(const label len, const label start)
 {
     labelList map(len);
 
+    // Same as std::iota(map.begin(), map.end(), start);
     for (label i = 0; i < len; ++i)
     {
         map[i] = i + start;
     }
 
     return map;
+}
+
+
+Foam::PackedBoolList Foam::reorder
+(
+    const labelUList& oldToNew,
+    const PackedBoolList& input,
+    const bool prune
+)
+{
+    const label len = input.size();
+
+    PackedBoolList output(len);
+    output.reserve(len);
+
+    for (label i=0; i < len; ++i)
+    {
+        if (input.test(i))
+        {
+            const label newIdx = oldToNew[i];
+
+            if (newIdx >= 0)
+            {
+                output.set(newIdx);
+            }
+            else if (!prune)
+            {
+                output.set(i);
+            }
+        }
+    }
+
+    if (prune)
+    {
+        output.trim();
+    }
+
+    // Verify addresses (for movable refs)
+    // Info<< "reordered in " << long(input.storage().cdata()) << nl
+    //     << "reordered out " << long(output.storage().cdata()) << nl;
+
+    return output;
+}
+
+
+void Foam::inplaceReorder
+(
+    const labelUList& oldToNew,
+    PackedBoolList& input,
+    const bool prune
+)
+{
+    input = reorder(oldToNew, input, prune);
+
+    // Verify address (for movable refs)
+    // Info<< "now have " << long(input.storage().cdata()) << nl;
 }
 
 

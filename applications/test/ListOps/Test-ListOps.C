@@ -125,7 +125,6 @@ int main(int argc, char *argv[])
            ) << nl
         << endl;
 
-
     test6.append(identity(13));
 
     // Randomize the list
@@ -134,6 +133,45 @@ int main(int argc, char *argv[])
     Info<< "Randomized: " << flatOutput(test6) << endl;
     inplaceUniqueSort(test6);
     Info<< "Unique    : " << flatOutput(test6) << endl;
+
+
+    // List reorder
+    labelList oldToNew(identity(40));
+    std::random_shuffle(oldToNew.begin(), oldToNew.end());
+
+    // Force a few -1:
+    oldToNew[4] = oldToNew[8] = -1;
+
+    Info<<"Test reorder - oldToNew:" << nl
+        << flatOutput(oldToNew) << nl << nl;
+
+    PackedBoolList bitset
+    (
+        ListOps::createWithValue<bool>
+        (
+            25,
+            labelList({8, 12, 15, 22, 4}),
+            true
+        )
+    );
+
+    Info<<"bitset input: " << flatOutput(bitset) << nl;
+    inplaceReorder(oldToNew, bitset);
+    Info<<"     reorder: " << flatOutput(bitset) << nl << nl;
+
+    PackedList<2> packed
+    (
+        ListOps::createWithValue<label>
+        (
+            25,
+            labelList({8, 12, 15, 22, 4}),
+            2
+        )
+    );
+
+    Info<<"packed input: " << flatOutput(packed) << nl;
+    inplaceReorder(oldToNew, packed);
+    Info<<"     reorder: " << flatOutput(packed) << nl << nl;
 
     Info<< "\nEnd\n" << endl;
 

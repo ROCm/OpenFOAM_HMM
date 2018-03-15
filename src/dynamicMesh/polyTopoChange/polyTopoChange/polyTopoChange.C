@@ -1222,18 +1222,8 @@ void Foam::polyTopoChange::compact
                         {
                             faces_[facei].flip();
                             Swap(faceOwner_[facei], faceNeighbour_[facei]);
-                            flipFaceFlux_[facei] =
-                            (
-                                flipFaceFlux_[facei]
-                              ? 0
-                              : 1
-                            );
-                            faceZoneFlip_[facei] =
-                            (
-                                faceZoneFlip_[facei]
-                              ? 0
-                              : 1
-                            );
+                            flipFaceFlux_.set(facei, !flipFaceFlux_.test(facei));
+                            faceZoneFlip_.set(facei, !faceZoneFlip_.test(facei));
                         }
                     }
                 }
@@ -2809,7 +2799,7 @@ Foam::label Foam::polyTopoChange::addFace
     }
     reverseFaceMap_.append(facei);
 
-    flipFaceFlux_[facei] = (flipFaceFlux ? 1 : 0);
+    flipFaceFlux_.set(facei, flipFaceFlux);
 
     if (zoneID >= 0)
     {

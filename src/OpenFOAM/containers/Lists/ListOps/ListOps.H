@@ -65,14 +65,14 @@ static const List<Type>& emptyList()
 
 
 //- Renumber the values (not the indices) of a list.
-//  Negative ListType elements are left untouched.
-template<class ListType>
-ListType renumber(const labelUList& oldToNew, const ListType& input);
+//  Negative IntListType elements are left untouched.
+template<class IntListType>
+IntListType renumber(const labelUList& oldToNew, const IntListType& input);
 
 //- Inplace renumber the values (not the indices) of a list.
-//  Negative ListType elements are left untouched.
-template<class ListType>
-void inplaceRenumber(const labelUList& oldToNew, ListType& input);
+//  Negative IntListType elements are left untouched.
+template<class IntListType>
+void inplaceRenumber(const labelUList& oldToNew, IntListType& input);
 
 
 //- Reorder the elements of a list.
@@ -98,6 +98,50 @@ void inplaceReorder
 (
     const labelUList& oldToNew,
     ListType& input,
+    const bool prune = false
+);
+
+
+//- Reorder the elements of a packed list.
+//  Similar to the general templated form, but with auto-vivify
+//  for PackedList.
+template<unsigned Width>
+PackedList<Width> reorder
+(
+    const labelUList& oldToNew,
+    const PackedList<Width>& input,
+    const bool prune = false
+);
+
+//- Inplace reorder the elements of a packed list.
+//  Similar to the general templated form, but with auto-vivify
+//  for PackedList.
+template<unsigned Width>
+void inplaceReorder
+(
+    const labelUList& oldToNew,
+    PackedList<Width>& input,
+    const bool prune = false
+);
+
+
+//- Reorder the elements of a list.
+//  Similar to the general templated form, but with auto-vivify
+//  for PackedBoolList.
+PackedBoolList reorder
+(
+    const labelUList& oldToNew,
+    const PackedBoolList& input,
+    const bool prune = false
+);
+
+//- Inplace reorder the elements of a list.
+//  Similar to the general templated form, but with auto-vivify
+//  for PackedBoolList.
+void inplaceReorder
+(
+    const labelUList& oldToNew,
+    PackedBoolList& input,
     const bool prune = false
 );
 

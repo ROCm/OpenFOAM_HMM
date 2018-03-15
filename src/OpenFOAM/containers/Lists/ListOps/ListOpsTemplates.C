@@ -29,16 +29,16 @@ License
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
-template<class ListType>
-ListType Foam::renumber
+template<class IntListType>
+IntListType Foam::renumber
 (
     const labelUList& oldToNew,
-    const ListType& input
+    const IntListType& input
 )
 {
     const label len = input.size();
 
-    ListType output(len);
+    IntListType output(len);
     output.resize(len);     // Consistent sizing (eg, DynamicList)
 
     for (label i=0; i < len; ++i)
@@ -53,11 +53,11 @@ ListType Foam::renumber
 }
 
 
-template<class ListType>
+template<class IntListType>
 void Foam::inplaceRenumber
 (
     const labelUList& oldToNew,
-    ListType& input
+    IntListType& input
 )
 {
     const label len = input.size();
@@ -120,13 +120,17 @@ template<class ListType>
 void Foam::inplaceReorder
 (
     const labelUList& oldToNew,
-    ListType& input,
+    ListType& inputOutput,
     const bool prune
 )
 {
     // NOTE: cannot use std::move() since we have no guarantee that
     // the oldToNew map is unique (ie, shuffle)
 
+    // Use const reference to ensure we obtain the proper operator[]
+    // on lazy lists (eg, List<bool>, PackedBoolList)
+
+    const ListType& input = inputOutput;
     const label len = input.size();
 
     ListType output(len);
@@ -159,7 +163,72 @@ void Foam::inplaceReorder
         output.resize(maxIdx+1);
     }
 
-    input.transfer(output);
+    inputOutput.transfer(output);
+}
+
+
+template<unsigned Width>
+Foam::PackedList<Width> Foam::reorder
+(
+    const labelUList& oldToNew,
+    const PackedList<Width>& input,
+    const bool prune
+)
+{
+    const label len = input.size();
+
+    PackedList<Width> output(len);
+
+    label maxIdx = -1;      // For pruning: newSize = maxIdx+1
+    for (label i=0; i < len; ++i)
+    {
+        const auto& val = input.get(i);
+
+        const label newIdx = oldToNew[i];
+
+        if (newIdx >= 0)
+        {
+            // Could enforce (newIdx < len)
+            // ... or just rely on FULLDEBUG from UList
+
+            output.set(newIdx, val);
+
+            if (maxIdx < newIdx)
+            {
+                maxIdx = newIdx;
+            }
+        }
+        else if (!prune)
+        {
+            output.set(i, val);
+        }
+    }
+
+    if (prune)
+    {
+        output.resize(maxIdx+1);
+    }
+
+    // Verify addresses (for movable refs)
+    // Info<< "reordered in " << long(input.storage().cdata()) << nl
+    //     << "reordered out " << long(output.storage().cdata()) << nl;
+
+    return output;
+}
+
+
+template<unsigned Width>
+void Foam::inplaceReorder
+(
+    const labelUList& oldToNew,
+    PackedList<Width>& input,
+    const bool prune
+)
+{
+    input = reorder(oldToNew, input, prune);
+
+    // Verify address (for movable refs)
+    // Info<< "now have " << long(input.storage().cdata()) << nl;
 }
 
 
