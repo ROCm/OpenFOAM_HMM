@@ -342,7 +342,8 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
     (
         fvm::laplacian
         (
-            diffusivity().operator()(),
+            dimensionedScalar("viscosity", dimViscosity, 1.0)
+           *diffusivity().operator()(),
             cellDisplacement_,
             "laplacian(diffusivity,cellDisplacement)"
         )
@@ -351,8 +352,8 @@ void Foam::displacementLaplacianFvMotionSolver::solve()
     );
 
     fvOptions.constrain(TEqn);
-
     TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
+    fvOptions.correct(cellDisplacement_);
 }
 
 

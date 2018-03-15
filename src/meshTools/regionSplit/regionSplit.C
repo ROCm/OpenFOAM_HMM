@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,36 +57,85 @@ void Foam::regionSplit::calcNonCompactRegionSplit
 
     // Take over blockedFaces by seeding a negative number
     // (so is always less than the decomposition)
-    label nUnblocked = 0;
-    forAll(faceData, facei)
+
+    forAll(blockedFace, facei)
     {
-        if (blockedFace.size() && blockedFace[facei])
+        if (blockedFace[facei])
         {
             faceData[facei] = minData(-2);
         }
-        else
-        {
-            nUnblocked++;
-        }
     }
 
-    // Seed unblocked faces
-    labelList seedFaces(nUnblocked);
-    List<minData> seedData(nUnblocked);
-    nUnblocked = 0;
+    // Seed all faces on (real) boundaries and faces on cells next to blockFace
+    // (since regions can only occur because of boundaries (or blocked faces))
+
+    PackedBoolList isSeed(mesh().nFaces());
+
+    // Get internal or coupled faces
+    PackedBoolList isConnection(syncTools::getInternalOrCoupledFaces(mesh()));
 
 
-    forAll(faceData, facei)
+    // 1. Seed (real) boundaries
+    for
+    (
+        label facei = mesh().nInternalFaces();
+        facei < mesh().nFaces();
+        facei++
+    )
     {
-        if (blockedFace.empty() || !blockedFace[facei])
+        if (!isConnection[facei])
         {
-            seedFaces[nUnblocked] = facei;
-            // Seed face with globally unique number
-            seedData[nUnblocked] = minData(globalFaces.toGlobal(facei));
-            nUnblocked++;
+            isSeed.set(facei);
         }
     }
 
+    // 2. Seed (internal) faces on cells next to blocked (internal) faces
+    //    (since we can't seed the blocked faces themselves)
+
+    if (blockedFace.size())
+    {
+        for (const cell& cFaces : mesh().cells())
+        {
+            bool blockedCell = false;
+            label connectedFacei = -1;
+
+            for (const label facei : cFaces)
+            {
+                if (blockedFace[facei])
+                {
+                    blockedCell = true;
+                }
+                else if (isConnection[facei])
+                {
+                    connectedFacei = facei;
+                }
+            }
+
+            if (blockedCell)
+            {
+                isSeed.set(connectedFacei);  // silently ignores -1
+            }
+        }
+    }
+
+    List<label> seedFaces(isSeed.used());
+    List<minData> seedData(seedFaces.size());
+
+    // Seed face with globally unique number
+    forAll(seedFaces, i)
+    {
+        const label facei = seedFaces[i];
+        seedData[i] = minData(globalFaces.toGlobal(facei));
+    }
+
+    if (debug)
+    {
+        Pout<< "Seeded " << seedFaces.size()
+            << " boundary and internal faces out of"
+            << " total:" << mesh().nInternalFaces()
+            << " boundary:" << mesh().nFaces()-mesh().nInternalFaces()
+            << endl;
+    }
 
     // Propagate information inwards
     FaceCellWave<minData> deltaCalc
@@ -112,7 +161,10 @@ void Foam::regionSplit::calcNonCompactRegionSplit
         }
         else
         {
-            // Unvisited cell -> only possible if surrounded by blocked faces.
+            // Unvisited cell -> only possible if surrounded by blocked faces
+            // since:
+            // - all walls become seed faces
+            // - all faces on cells with blocked faces become seed faces
             // If so make up region from any of the faces
             const cell& cFaces = mesh().cells()[celli];
             label facei = cFaces[0];
@@ -343,7 +395,7 @@ Foam::autoPtr<Foam::globalIndex> Foam::regionSplit::calcRegionSplit
 
 
     // Get the wanted region labels into recvNonLocal
-    labelListList recvNonLocal(Pstream::nProcs());
+    labelListList recvNonLocal;
     Pstream::exchange<labelList, label>(sendNonLocal, recvNonLocal);
 
     // Now we have the wanted compact region labels that proci wants in

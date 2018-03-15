@@ -131,7 +131,8 @@ void Foam::velocityLaplacianFvMotionSolver::solve()
     (
         fvm::laplacian
         (
-            diffusivityPtr_->operator()(),
+            dimensionedScalar("viscosity", dimViscosity, 1.0)
+           *diffusivityPtr_->operator()(),
             cellMotionU_,
             "laplacian(diffusivity,cellMotionU)"
         )
@@ -140,8 +141,8 @@ void Foam::velocityLaplacianFvMotionSolver::solve()
     );
 
     fvOptions.constrain(UEqn);
-
     UEqn.solveSegregatedOrCoupled(UEqn.solverDict());
+    fvOptions.correct(cellMotionU_);
 }
 
 
