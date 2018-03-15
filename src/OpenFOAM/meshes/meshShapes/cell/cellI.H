@@ -41,9 +41,9 @@ inline Foam::cell::cell(const labelUList& lst)
 {}
 
 
-inline Foam::cell::cell(const Xfer<labelList>& lst)
+inline Foam::cell::cell(labelList&& lst)
 :
-    labelList(lst)
+    labelList(std::move(lst))
 {}
 
 
@@ -60,6 +60,8 @@ inline Foam::label Foam::cell::nFaces() const
     return size();
 }
 
+
+// * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * * //
 
 inline bool Foam::operator!=(const cell& a, const cell& b)
 {

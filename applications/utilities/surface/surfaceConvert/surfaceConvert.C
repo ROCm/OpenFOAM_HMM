@@ -64,12 +64,12 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert between surface formats"
+        "convert between surface formats, using triSurface library components"
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("outputFile");
+    argList::addArgument("inputFile");
+    argList::addArgument("outputFile");
 
     argList::addBoolOption
     (
@@ -96,9 +96,9 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    if (args.optionFound("writePrecision"))
+    if (args.found("writePrecision"))
     {
-        label writePrecision = args.optionRead<label>("writePrecision");
+        const label writePrecision = args.opt<label>("writePrecision");
 
         IOstream::defaultPrecision(writePrecision);
         Sout.precision(writePrecision);
@@ -116,7 +116,17 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+    // Check that reading/writing is supported
+    if
+    (
+        !triSurface::canRead(importName, true)
+     || !triSurface::canWriteType(exportName.ext(), true)
+    )
+    {
+        return 1;
+    }
+
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     Info<< "Reading : " << importName << endl;
     triSurface surf(importName, scaleFactor);
@@ -125,7 +135,7 @@ int main(int argc, char *argv[])
     surf.writeStats(Info);
     Info<< endl;
 
-    if (args.optionFound("clean"))
+    if (args.found("clean"))
     {
         Info<< "Cleaning up surface" << endl;
         surf.cleanup(true);
@@ -135,7 +145,7 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    const bool sortByRegion = args.optionFound("group");
+    const bool sortByRegion = args.found("group");
     if (sortByRegion)
     {
         Info<< "Reordering faces into groups; one per region." << endl;

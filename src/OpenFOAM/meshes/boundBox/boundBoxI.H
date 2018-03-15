@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -59,11 +59,10 @@ inline Foam::boundBox::boundBox(Istream& is)
 
 inline bool Foam::boundBox::empty() const
 {
-    // Note: cannot use min_ > max_ here since that tests for -all- components
-    // of min_ being larger than max_.
+    // Check each component for max < min
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
-        if (min_[dir] > max_[dir])
+        if (max_[dir] < min_[dir])
         {
             return true;
         }
@@ -145,6 +144,27 @@ inline Foam::scalar Foam::boundBox::avgDim() const
 }
 
 
+Foam::label Foam::boundBox::nDim() const
+{
+    label ngood = 0;
+
+    for (direction dir = 0; dir < vector::nComponents; ++dir)
+    {
+        const scalar diff = (max_[dir] - min_[dir]);
+        if (diff < 0)
+        {
+            return -1;
+        }
+        else if (diff > 0)
+        {
+            ++ngood;
+        }
+    }
+
+    return ngood;
+}
+
+
 inline void Foam::boundBox::add(const boundBox& bb)
 {
     min_ = ::Foam::min(min_, bb.min_);
@@ -161,9 +181,9 @@ inline void Foam::boundBox::add(const point& pt)
 
 inline void Foam::boundBox::add(const UList<point>& points)
 {
-    forAll(points, i)
+    for (const point& p : points)
     {
-        add(points[i]);
+        add(p);
     }
 }
 
@@ -214,8 +234,8 @@ inline bool Foam::boundBox::overlaps
 
     for (direction dir = 0; dir < vector::nComponents; ++dir)
     {
-        scalar d0 = min_[dir] - centre[dir];
-        scalar d1 = max_[dir] - centre[dir];
+        const scalar d0 = min_[dir] - centre[dir];
+        const scalar d1 = max_[dir] - centre[dir];
 
         if ((d0 > 0) != (d1 > 0))
         {

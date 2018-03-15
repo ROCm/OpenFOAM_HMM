@@ -218,7 +218,7 @@ private:
                 (
                     const indirectPrimitivePatch& pp,
                     const labelList& meshEdges,
-                    const scalar minCos,
+                    const scalar minAngle,
                     pointField& patchDisp,
                     labelList& patchNLayers,
                     List<extrudeMode>& extrudeStatus

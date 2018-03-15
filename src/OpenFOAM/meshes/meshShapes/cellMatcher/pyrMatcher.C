@@ -26,15 +26,8 @@ License
 #include "pyrMatcher.H"
 #include "cellMatcher.H"
 #include "primitiveMesh.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "ListOps.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::pyrMatcher::vertPerCell = 5;
-const Foam::label Foam::pyrMatcher::facePerCell = 5;
-const Foam::label Foam::pyrMatcher::maxVertPerFace = 4;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -45,7 +38,7 @@ Foam::pyrMatcher::pyrMatcher()
         vertPerCell,
         facePerCell,
         maxVertPerFace,
-        "pyr"
+        "pyr" // same as cellModel::modelNames[cellModel::PYR]
     )
 {}
 
@@ -234,17 +227,17 @@ bool Foam::pyrMatcher::faceSizeMatch
     label nTris = 0;
     label nQuads = 0;
 
-    forAll(myFaces, myFacei)
+    for (const label facei : myFaces)
     {
-        label size = faces[myFaces[myFacei]].size();
+        const label size = faces[facei].size();
 
         if (size == 3)
         {
-            nTris++;
+            ++nTris;
         }
         else if (size == 4)
         {
-            nQuads++;
+            ++nQuads;
         }
         else
         {
@@ -252,14 +245,7 @@ bool Foam::pyrMatcher::faceSizeMatch
         }
     }
 
-    if ((nTris == 4) && (nQuads == 1))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return (nTris == 4 && nQuads == 1);
 }
 
 
@@ -313,10 +299,8 @@ bool Foam::pyrMatcher::matches
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

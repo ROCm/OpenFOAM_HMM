@@ -70,7 +70,23 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::pressure::rhoScale
 {
     if (p.dimensions() == dimPressure)
     {
-        return p;
+        return tmp<volScalarField>
+        (
+            new volScalarField
+            (
+                IOobject
+                (
+                    "rhoScale",
+                    p.mesh().time().timeName(),
+                    p.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
+                ),
+                p,
+                fvPatchField<scalar>::calculatedType()
+            )
+        );
     }
     else
     {
@@ -180,7 +196,14 @@ bool Foam::functionObjects::pressure::calc()
         (
             new volScalarField
             (
-                resultName_,
+                IOobject
+                (
+                    resultName_,
+                    p.mesh().time().timeName(),
+                    p.mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
                 coeff(pRef(pDyn(p, rhoScale(p))))
             )
         );

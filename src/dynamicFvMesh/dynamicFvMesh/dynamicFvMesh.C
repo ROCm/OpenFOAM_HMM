@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,9 +29,8 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(dynamicFvMesh, 0);
-
-defineRunTimeSelectionTable(dynamicFvMesh, IOobject);
+    defineTypeNameAndDebug(dynamicFvMesh, 0);
+    defineRunTimeSelectionTable(dynamicFvMesh, IOobject);
 }
 
 
@@ -46,20 +45,31 @@ Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io)
 Foam::dynamicFvMesh::dynamicFvMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<labelList>& allOwner,
-    const Xfer<labelList>& allNeighbour,
+    const zero,
+    const bool syncPar
+)
+:
+    fvMesh(io, Zero, syncPar)
+{}
+
+
+Foam::dynamicFvMesh::dynamicFvMesh
+(
+    const IOobject& io,
+    pointField&& points,
+    faceList&& faces,
+    labelList&& allOwner,
+    labelList&& allNeighbour,
     const bool syncPar
 )
 :
     fvMesh
     (
         io,
-        points,
-        faces,
-        allOwner,
-        allNeighbour,
+        std::move(points),
+        std::move(faces),
+        std::move(allOwner),
+        std::move(allNeighbour),
         syncPar
     )
 {}
@@ -68,26 +78,20 @@ Foam::dynamicFvMesh::dynamicFvMesh
 Foam::dynamicFvMesh::dynamicFvMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<cellList>& cells,
+    pointField&& points,
+    faceList&& faces,
+    cellList&& cells,
     const bool syncPar
 )
 :
     fvMesh
     (
         io,
-        points,
-        faces,
-        cells,
+        std::move(points),
+        std::move(faces),
+        std::move(cells),
         syncPar
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::dynamicFvMesh::~dynamicFvMesh()
 {}
 
 

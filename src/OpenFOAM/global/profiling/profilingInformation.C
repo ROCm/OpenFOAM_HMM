@@ -81,12 +81,6 @@ Foam::profilingInformation::profilingInformation
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::profilingInformation::~profilingInformation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::profilingInformation::update(const scalar elapsed)
@@ -128,18 +122,12 @@ Foam::Ostream& Foam::profilingInformation::write
     os.beginBlock(word("trigger" + Foam::name(id_)));
 
     os.writeEntry("id",             id_);
-    if (id_ != parent().id())
-    {
-        os.writeEntry("parentId",   parent().id());
-    }
+    os.writeEntryIfDifferent("parentId", id_, parent().id());
     os.writeEntry("description",    description());
     os.writeEntry("calls",          calls()     + (offset ? 1 : 0));
     os.writeEntry("totalTime",      totalTime() + elapsedTime);
     os.writeEntry("childTime",      childTime() + childTimes);
-    if (maxMem_)
-    {
-        os.writeEntry("maxMem",     maxMem_);
-    }
+    os.writeEntryIfDifferent<int>("maxMem", 0, maxMem_);
     os.writeEntry("onStack",        Switch(onStack()));
 
     os.endBlock();

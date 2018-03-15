@@ -103,7 +103,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("ODESolver");
+    argList::addArgument("ODESolver");
     argList args(argc, argv);
 
     // Create the ODE system

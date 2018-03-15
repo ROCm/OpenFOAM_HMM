@@ -23,6 +23,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "SubField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 template<class Type>
 Foam::tmp<Foam::Field<Type>> Foam::windowModel::apply
 (

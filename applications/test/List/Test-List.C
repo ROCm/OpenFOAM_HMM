@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ See also
 
 #include "OSspecific.H"
 #include "argList.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 #include "IOstreams.H"
 #include "StringStream.H"
@@ -43,12 +43,53 @@ See also
 
 #include "labelRange.H"
 #include "scalarList.H"
+#include "HashOps.H"
 #include "ListOps.H"
 #include "SubList.H"
 
 #include <list>
+#include <numeric>
+#include <functional>
+
+namespace Foam
+{
+
+// Verify inheritance
+class MyStrings
+:
+    public List<string>
+{
+public:
+
+    using List<string>::List;
+};
+
+} // end namespace Foam
+
 
 using namespace Foam;
+
+template<class T, class ListType>
+void testFind(const T& val, const ListType& lst)
+{
+    Info<< nl
+        << "Search for "<< val << " in " << flatOutput(lst) << nl
+        <<" found() = " << lst.found(val)
+        <<" find() = " << lst.find(val)
+        <<" rfind() = " << lst.rfind(val)
+        <<" find(2) = " << lst.find(val, 2)
+        <<" rfind(2) = " << lst.rfind(val, 2)
+        <<" findIndex = " << findIndex(lst, val) << nl
+        << nl;
+}
+
+
+void printMyString(const UList<string>& lst)
+{
+    MyStrings slist2(lst);
+
+    Info<<slist2 << nl;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -57,13 +98,44 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    argList::noFunctionObjects();
+
     argList::addOption("reList", "reList");
     argList::addOption("wordList", "wordList");
     argList::addOption("stringList", "stringList");
     argList::addOption("float", "xx");
+    argList::addBoolOption("create", "Test ListOps::create functionality");
+    argList::addBoolOption("ListList", "Test list of list functionality");
     argList::addBoolOption("flag");
 
     #include "setRootCase.H"
+
+    {
+        List<label> ident(15);
+        std::iota(ident.begin(), ident.end(), 0);
+
+        Info<<"Ident:";
+        forAllConstIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"reverse:";
+        forAllReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"const reverse:";
+        forAllConstReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+    }
+
 
     if (false)
     {
@@ -84,20 +156,42 @@ int main(int argc, char *argv[])
     {
         vector(0, 1, 2),
         vector(3, 4, 5),
-        vector(6, 7, 8)
+        vector(6, 7, 8),
+        vector(0, 1, 2),
+        vector(3, 4, 5),
+        vector(6, 7, 8),
     };
     Info<< "list2: " << list2 << endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllConstIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstReverseIters(list2): ";
+    forAllConstReverseIters(list2, iter) { Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllConstIters(list2): ";
+    forAllIters(list2, iter) { *iter *= 2; Info<< " " << *iter; }
+    Info<< endl;
+
+    Info<< "forAllReverseIters(list2): ";
+    forAllReverseIters(list2, iter) { *iter *= 0.5; Info<< " " << *iter; }
+    Info<< endl;
 
     list1.append(list2);
     Info<< "list1.append(list2): " << list1 << endl;
 
-    Info<< findIndex(list2, vector(3, 4, 5)) << endl;
+    for (const vector& val : { vector(3, 4, 5), vector(10,11, 12)} )
+    {
+        testFind(val, list2);
+    }
 
     list2.setSize(10, vector(1, 2, 3));
     Info<< "list2: " << list2 << endl;
 
-    List<vector> list3(list2.xfer());
-    Info<< "Transferred via the xfer() method" << endl;
+    List<vector> list3(std::move(list2));
+    Info<< "Move construct" << endl;
     Info<< "list2: " << list2 << nl
         << "list3: " << list3 << endl;
 
@@ -242,11 +336,11 @@ int main(int argc, char *argv[])
         List<scalar> sident(range.begin(), range.end());
         Info<<"range-list (scalar)=" << sident << nl;
 
-        // Sub-ranges also work
-        List<scalar> sident2(range(3), range(10));
-        Info<<"range-list (scalar)=" << sident2 << nl;
+//        // Sub-ranges also work
+//        List<scalar> sident2(range.at(3), range.at(10));
+//        Info<<"subrange-list (scalar)=" << sident2 << nl;
 
-        // VERY BAD IDEA: List<scalar> sident3(range(10), range(3));
+        // VERY BAD IDEA: List<scalar> sident3(range.at(10), range.at(3));
 
         // This doesn't work, and don't know what it should do anyhow
         // List<vector> vident(range.begin(), range.end());
@@ -267,29 +361,236 @@ int main(int argc, char *argv[])
 
     scalar xxx(-1);
 
-    if (args.optionFound("flag"))
+    if (args.found("flag"))
     {
         Info<<"-flag:" << args["flag"] << endl;
     }
 
-    if (args.optionReadIfPresent<scalar>("float", xxx))
+    if (args.found("create"))
+    {
+        Info<< nl << "Test ListOps::create functionality" << nl;
+
+        const auto labels = identity(15);
+        Info<< "labels: " << flatOutput(labels) << endl;
+
+        {
+            auto scalars = ListOps::create<scalar>
+            (
+                labels,
+                [](const label& val){ return scalar(1.5*val); }
+            );
+            Info<< "scalars: " << flatOutput(scalars) << endl;
+        }
+
+        {
+            auto vectors = ListOps::create<vector>
+            (
+                labels,
+                [](const label& val){ return vector(1.2*val, -1.2*val, 0); }
+            );
+            Info<< "vectors: " << flatOutput(vectors) << endl;
+        }
+
+        {
+            auto longs = ListOps::create<long>
+            (
+                labels,
+                [](const label& val){ return val; }
+            );
+            Info<< "longs: " << flatOutput(longs) << endl;
+        }
+        {
+            auto negs = ListOps::create<label>
+            (
+                labels,
+                std::negate<label>()
+            );
+            Info<< "negs: " << flatOutput(negs) << endl;
+        }
+
+        {
+            auto scalars = ListOps::create<scalar>
+            (
+                labelRange::null.cbegin(),
+                labelRange::identity(15).cend(),
+                [](const label& val){ return scalar(-1.125*val); }
+            );
+            Info<< "scalars: " << flatOutput(scalars) << endl;
+        }
+
+        #if WM_LABEL_SIZE == 32
+        {
+            List<int64_t> input(10);
+            std::iota(input.begin(), input.end(), 50);
+
+            auto output = ListOps::create<label>
+            (
+                input,
+                toLabel<int64_t>()
+            );
+            Info<< "label (from int64): " << flatOutput(output) << endl;
+        }
+        #elif WM_LABEL_SIZE == 64
+        {
+            List<int32_t> input(10);
+            std::iota(input.begin(), input.end(), 50);
+
+            auto output = ListOps::create<label>
+            (
+                input,
+                toLabel<int32_t>()
+            );
+            Info<< "label (from int32): " << flatOutput(output) << endl;
+        }
+        #endif
+
+
+        labelHashSet locations{ -15, 5, 10, 15, 25, 35 };
+        Info<< nl << "Test for createWithValue with locations :"
+            << flatOutput(locations.sortedToc()) << nl;
+
+        {
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                locations.toc(),  // Any order
+                100,
+                -1  // default value
+            );
+            Info<< "with labelUList: " << flatOutput(output)
+                << " selector: " << flatOutput(locations.sortedToc()) << nl;
+        }
+
+        {
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                locations,
+                100,
+                -1  // default value
+            );
+            Info<< "with labelHashSet: " << flatOutput(output)
+                << " selector: " << flatOutput(locations) << nl;
+        }
+
+        {
+            PackedBoolList select = HashSetOps::bitset(locations);
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with PackedBoolList: " << flatOutput(output)
+                << " selector: " << flatOutput(select.used()) << nl;
+        }
+
+        {
+            List<bool> select = HashSetOps::bools(locations);
+
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with boolList: " << flatOutput(output)
+                << " selector: " << flatOutput(select) << nl;
+        }
+
+        // Repeat with a shorter selector
+        locations = { -15, 5, 10 };
+
+        {
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                locations,
+                100,
+                -1  // default value
+            );
+            Info<< "with labelHashSet: " << flatOutput(output)
+                << " selector: " << flatOutput(locations) << nl;
+        }
+
+        {
+            PackedBoolList select = HashSetOps::bitset(locations);
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with PackedBoolList: " << flatOutput(output)
+                << " selector: " << flatOutput(HashSetOps::used(select))
+                << nl;
+        }
+
+        {
+            List<bool> select = HashSetOps::bools(locations);
+
+            auto output = ListOps::createWithValue<label>
+            (
+                30,
+                select,
+                100,
+                -1  // default value
+            );
+            Info<< "with boolList: " << flatOutput(output)
+                << " selector: " << flatOutput(HashSetOps::used(select))
+                << nl;
+        }
+    }
+
+    if (args.found("ListList"))
+    {
+        {
+            labelListList listlist(5, identity(5));
+            Info<<"list-list with length/val:" << listlist << nl;
+        }
+
+        {
+            labelListList listlist(one(), identity(5));
+            Info<<"list-list 1/val:" << listlist << nl;
+        }
+
+        {
+            labelList content = identity(5);
+
+            labelListList listlist(one(), content);
+            Info<<"list-list 1/copy val:" << listlist
+                <<" - from " << content << nl;
+        }
+
+        {
+            labelList content = identity(5);
+
+            labelListList listlist(one(), std::move(content));
+            Info<<"list-list 1/move val:" << listlist
+                <<" - from " << content << nl;
+        }
+
+        {
+            labelListList listlist(one(), Zero);
+            Info<<"list-list 1/move val:" << listlist
+                << nl;
+        }
+    }
+
+    if (args.readIfPresent<scalar>("float", xxx))
     {
         Info<<"read float " << xxx << endl;
     }
 
-    if (args.optionFound("reList"))
-    {
-        reLst = args.optionReadList<wordRe>("reList");
-    }
+    args.readListIfPresent<wordRe>("reList", reLst);
+    args.readListIfPresent<word>("wordList", wLst);
 
-    if (args.optionFound("wordList"))
+    if (args.readListIfPresent<string>("stringList", sLst))
     {
-        wLst = args.optionReadList<word>("wordList");
-    }
-
-    if (args.optionFound("stringList"))
-    {
-        sLst = args.optionReadList<string>("stringList");
+        printMyString(sLst);
     }
 
     Info<< nl

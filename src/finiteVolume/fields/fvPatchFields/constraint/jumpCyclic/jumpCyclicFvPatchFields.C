@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,5 +82,55 @@ void Foam::jumpCyclicFvPatchField<Foam::scalar>::updateInterfaceMatrix
     this->addToInternalField(result, !add, coeffs, pnf);
 }
 
+
+template<>
+void Foam::jumpCyclicFvPatchField<Foam::vector>::updateInterfaceMatrix
+(
+    scalarField& result,
+    const bool add,
+    const scalarField& psiInternal,
+    const scalarField& coeffs,
+    const direction cmpt,
+    const Pstream::commsTypes
+) const
+{
+    scalarField pnf(this->size());
+
+    const labelUList& nbrFaceCells =
+        this->cyclicPatch().neighbFvPatch().faceCells();
+
+    const Field<vector>& iField = this->primitiveField();
+
+    // only apply jump to original field
+    if (&psiInternal == &(iField.component(cmpt).ref()))
+    {
+        Field<vector> jf(this->jump());
+
+        if (!this->cyclicPatch().owner())
+        {
+            jf *= -1.0;
+        }
+
+        forAll(*this, facei)
+        {
+            pnf[facei] =
+                psiInternal[nbrFaceCells[facei]]
+              - jf[facei].component(cmpt);
+        }
+    }
+    else
+    {
+        forAll(*this, facei)
+        {
+            pnf[facei] = psiInternal[nbrFaceCells[facei]];
+        }
+    }
+
+    // Transform according to the transformation tensors
+    this->transformCoupleField(pnf, cmpt);
+
+    // Multiply the field by coefficients and add into the result
+    this->addToInternalField(result, !add, coeffs, pnf);
+}
 
 // ************************************************************************* //

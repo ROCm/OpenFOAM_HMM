@@ -79,7 +79,7 @@ Foam::displacementMeshMoverMotionSolver::meshMover() const
             pointDisplacement_
         );
     }
-    return meshMoverPtr_();
+    return *meshMoverPtr_;
 }
 
 
@@ -88,7 +88,7 @@ Foam::displacementMeshMoverMotionSolver::curPoints() const
 {
     // Return actual points. Cannot do a reference since complains about
     // assignment to self in polyMesh::movePoints
-    return tmp<pointField>(new pointField(mesh().points()));
+    return tmp<pointField>::New(mesh().points());
 }
 
 

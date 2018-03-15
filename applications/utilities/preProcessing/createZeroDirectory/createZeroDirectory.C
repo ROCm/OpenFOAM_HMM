@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -133,7 +133,6 @@ void createFieldFiles
     Info<< "    Generating field files" << nl << endl;
 
     // Create files
-    mkDir(runTime.path()/runTime.timeName()/regionName);
     forAll(fieldNames, i)
     {
         const_cast<word&>(IOdictionary::typeName) =
@@ -181,8 +180,8 @@ void createFieldFiles
         field2.remove("initialConditions");
         field2.remove("boundaryConditions");
 
-        // Construct and write field dictionary
-        IOdictionary fieldOut
+        // Construct and write field dictionary. Note use of localIOdictionary
+        localIOdictionary fieldOut
         (
             IOobject
             (
@@ -237,7 +236,7 @@ int main(int argc, char *argv[])
     (
         "${WM_PROJECT_DIR}/etc/caseDicts/createZeroDirectoryTemplates"
     );
-    if (args.optionFound("templateDir"))
+    if (args.found("templateDir"))
     {
         baseDir = args["templateDir"];
     }

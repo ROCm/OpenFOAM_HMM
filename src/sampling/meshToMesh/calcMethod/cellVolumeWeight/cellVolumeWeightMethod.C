@@ -56,19 +56,17 @@ bool Foam::cellVolumeWeightMethod::findInitialSeeds
     const faceList& srcFaces = src_.faces();
     const pointField& srcPts = src_.points();
 
-    for (label i = startSeedI; i < srcCellIDs.size(); i++)
+    for (label i = startSeedI; i < srcCellIDs.size(); ++i)
     {
-        label srcI = srcCellIDs[i];
+        const label srcI = srcCellIDs[i];
 
         if (mapFlag[srcI])
         {
-            const pointField
-                pts(srcCells[srcI].points(srcFaces, srcPts).xfer());
+            const pointField pts(srcCells[srcI].points(srcFaces, srcPts));
 
-            forAll(pts, ptI)
+            for (const point& pt : pts)
             {
-                const point& pt = pts[ptI];
-                label tgtI = tgt_.cellTree().findInside(pt);
+                const label tgtI = tgt_.cellTree().findInside(pt);
 
                 if (tgtI != -1 && intersect(srcI, tgtI))
                 {
@@ -377,7 +375,7 @@ void Foam::cellVolumeWeightMethod::calculate
 
     // list to keep track of whether src cell can be mapped
     boolList mapFlag(src_.nCells(), false);
-    UIndirectList<bool>(mapFlag, srcCellIDs) = true;
+    boolUIndList(mapFlag, srcCellIDs) = true;
 
     // find initial point in tgt mesh
     label srcSeedI = -1;

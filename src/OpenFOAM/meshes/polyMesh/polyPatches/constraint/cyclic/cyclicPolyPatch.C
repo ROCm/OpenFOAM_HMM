@@ -1415,7 +1415,7 @@ bool Foam::cyclicPolyPatch::order
                     << " : "
                     << "Cannot find point on face " << pp[oldFacei]
                     << " with vertices "
-                    << IndirectList<point>(pp.points(), pp[oldFacei])()
+                    << UIndirectList<point>(pp.points(), pp[oldFacei])
                     << " that matches point " << wantedAnchor
                     << " when matching the halves of processor patch " << name()
                     << "Continuing with incorrect face ordering from now on!"
@@ -1447,24 +1447,20 @@ void Foam::cyclicPolyPatch::write(Ostream& os) const
     coupledPolyPatch::write(os);
     if (!neighbPatchName_.empty())
     {
-        os.writeKeyword("neighbourPatch") << neighbPatchName_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("neighbourPatch", neighbPatchName_);
     }
     coupleGroup_.write(os);
     switch (transform())
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("rotationAxis") << rotationAxis_
-                << token::END_STATEMENT << nl;
-            os.writeKeyword("rotationCentre") << rotationCentre_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("rotationAxis", rotationAxis_);
+            os.writeEntry("rotationCentre", rotationCentre_);
             break;
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("separationVector") << separationVector_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("separationVector", separationVector_);
             break;
         }
         case NOORDERING:

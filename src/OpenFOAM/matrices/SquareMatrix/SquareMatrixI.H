@@ -148,7 +148,7 @@ template<class Type>
 inline Foam::autoPtr<Foam::SquareMatrix<Type>>
 Foam::SquareMatrix<Type>::clone() const
 {
-    return autoPtr<SquareMatrix<Type>>(new SquareMatrix<Type>(*this));
+    return autoPtr<SquareMatrix<Type>>::New(*this);
 }
 
 

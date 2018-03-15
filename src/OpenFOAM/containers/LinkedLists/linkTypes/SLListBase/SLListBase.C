@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,61 +23,57 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "SLListBase.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-Foam::SLListBase::iterator Foam::SLListBase::endIter_
-(
-    const_cast<SLListBase&>(static_cast<const SLListBase&>(SLListBase()))
-);
-
-Foam::SLListBase::const_iterator Foam::SLListBase::endConstIter_
-(
-    static_cast<const SLListBase&>(SLListBase()),
-    reinterpret_cast<const link*>(0)
-);
-
+#include "error.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::SLListBase::insert(SLListBase::link* a)
+void Foam::SLListBase::insert(SLListBase::link* item)
 {
-    nElmts_++;
+    if (!item)
+    {
+        return;
+    }
+
+    ++size_;
 
     if (last_)
     {
-        a->next_ = last_->next_;
+        item->next_ = last_->next_;
     }
     else
     {
-        last_ = a;
+        last_ = item;
     }
 
-    last_->next_ = a;
+    last_->next_ = item;
 }
 
 
-void Foam::SLListBase::append(SLListBase::link* a)
+void Foam::SLListBase::append(SLListBase::link* item)
 {
-    nElmts_++;
+    if (!item)
+    {
+        return;
+    }
+
+    ++size_;
 
     if (last_)
     {
-        a->next_ = last_->next_;
-        last_ = last_->next_ = a;
+        item->next_ = last_->next_;
+        last_ = last_->next_ = item;
     }
     else
     {
-        last_ = a->next_ = a;
+        last_ = item->next_ = item;
     }
 }
 
 
 Foam::SLListBase::link* Foam::SLListBase::removeHead()
 {
-    nElmts_--;
+    --size_;
 
     if (last_ == nullptr)
     {
@@ -86,39 +82,39 @@ Foam::SLListBase::link* Foam::SLListBase::removeHead()
             << abort(FatalError);
     }
 
-    SLListBase::link* f = last_->next_;
+    SLListBase::link *ret = last_->next_;
 
-    if (f == last_)
+    if (ret == last_)
     {
         last_ = nullptr;
     }
     else
     {
-        last_->next_ = f->next_;
+        last_->next_ = ret->next_;
     }
 
-    return f;
+    return ret;
 }
 
 
-Foam::SLListBase::link* Foam::SLListBase::remove(SLListBase::link* it)
+Foam::SLListBase::link* Foam::SLListBase::remove(SLListBase::link* item)
 {
     SLListBase::iterator iter = begin();
-    SLListBase::link *prev = &(*iter);
+    SLListBase::link *prev = iter.get_node();
 
-    if (it == prev)
+    if (item == prev)
     {
         return removeHead();
     }
 
-    nElmts_--;
-
-    for (++iter; iter != end(); ++iter)
+    for (iter.next(); iter != end(); iter.next())
     {
-        SLListBase::link *p = &(*iter);
+        SLListBase::link *p = iter.get_node();
 
-        if (p == it)
+        if (p == item)
         {
+            --size_;
+
             prev->next_ = p->next_;
 
             if (p == last_)
@@ -126,12 +122,13 @@ Foam::SLListBase::link* Foam::SLListBase::remove(SLListBase::link* it)
                 last_ = prev;
             }
 
-            return it;
+            return item;
         }
 
         prev = p;
     }
 
+    // Did not remove
     return nullptr;
 }
 

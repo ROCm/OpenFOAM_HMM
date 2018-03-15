@@ -101,8 +101,11 @@ castellatedMeshControls
 
     // The surface refinement loop might spend lots of iterations refining just
     // a few cells. This setting will cause refinement to stop if
-    // <= minimumRefine cells are selected for refinement. Note: it will
-    // at least do one iteration (unless the number of cells to refine is 0)
+    // <= minRefinementCells cells are selected for refinement. Note: it will
+    // at least do one iteration unless
+    //  a: the number of cells to refine is 0
+    //  b: minRefinementCells = -1. This is a special value indicating
+    //     no refinement.
     minRefinementCells 0;
 
     // Allow a certain level of imbalance during refining
@@ -375,6 +378,14 @@ castellatedMeshControls
     // Optional: do not refine surface cells with opposite faces of
     //           differing refinement levels
     //interfaceRefine false;
+
+    // Optional: use an erosion instead of region assignment to allocate
+    //           left-over cells to the background region (i.e. make cellZones
+    //           consistent with the intersections of the surface).
+    //           Erosion is specified as a number of erosion iterations.
+    //           Erosion has less chance of bleeding and changing the zone
+    //           for a complete region.
+    //nCellZoneErodeIter 2;
 }
 
 // Settings for the snapping.
@@ -448,7 +459,9 @@ snapControls
         //- When splitting the minimum area ratio of faces. If face split
         //  causes ratio of area less than this do not split. Default is 0.3
         //minAreaRatio 0.3;
-
+        //- Attract points only to the surface they originate from. Default
+        //  false. This can improve snapping of intersecting surfaces.
+        //  strictRegionSnap true;
 }
 
 // Settings for the layer addition.
@@ -536,8 +549,8 @@ addLayersControls
     // Static analysis of starting mesh
 
         // When not to extrude surface. 0 is flat surface, 90 is when two faces
-        // are perpendicular
-        featureAngle 130;
+        // are perpendicular. Note: was not working correctly < 1806
+        featureAngle 120;
 
         // When to merge patch faces. Default is featureAngle. Useful when
         // featureAngle is large.
@@ -602,6 +615,12 @@ addLayersControls
         //   (true)  : all surrounding points are not extruded
         // Default is false.
         //detectExtrusionIsland true;
+
+        // Optional: do not extrude around sharp edges if both faces are not
+        // fully extruded i.e. if one of the faces on either side would
+        // become a wedge.
+        // Default is 0.5*featureAngle. Set to -180 always attempt extrusion
+        //layerTerminationAngle 25;
 
         // Optional: at non-patched sides allow mesh to slip if extrusion
         // direction makes angle larger than slipFeatureAngle. Default is

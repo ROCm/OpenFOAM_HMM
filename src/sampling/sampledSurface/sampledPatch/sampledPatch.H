@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -37,6 +37,7 @@ SourceFiles
 
 #include "sampledSurface.H"
 #include "MeshedSurface.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +60,7 @@ class sampledPatch
     // Private data
 
         //- Name of patches
-        const wordReList patchNames_;
+        const wordRes patchNames_;
 
         //- Corresponding patchIDs
         mutable labelList patchIDs_;
@@ -105,7 +106,7 @@ class sampledPatch
 
 protected:
 
-        const wordReList& patchNames() const
+        const wordRes& patchNames() const
         {
             return patchNames_;
         }
@@ -136,7 +137,7 @@ public:
         (
             const word& name,
             const polyMesh& mesh,
-            const wordReList& patchNames,
+            const UList<wordRe>& patchNames,
             const bool triangulate = false
         );
 
@@ -150,7 +151,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledPatch();
+    virtual ~sampledPatch() = default;
 
 
     // Member Functions

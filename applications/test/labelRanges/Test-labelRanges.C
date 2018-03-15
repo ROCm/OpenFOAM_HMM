@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.insert("start size .. startN sizeN");
+    argList::addArgument("start size .. startN sizeN");
     argList::addOption("verbose");
     argList::addNote
     (
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv, false, true);
 
-    if (args.optionFound("verbose"))
+    if (args.found("verbose"))
     {
         labelRange::debug = 1;
     }
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
         }
 
         {
-            label start = args.argRead<label>(argI);
-            label size  = args.argRead<label>(argI+1);
+            label start = args.read<label>(argI);
+            label size  = args.read<label>(argI+1);
             ++argI;
 
             range.reset(start, size);

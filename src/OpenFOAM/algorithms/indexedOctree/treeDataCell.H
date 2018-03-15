@@ -137,21 +137,21 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and subset of cells.
+        //- Construct from mesh, copying subset of cells.
         treeDataCell
         (
             const bool cacheBb,
-            const polyMesh&,
-            const labelUList&,
+            const polyMesh& mesh,
+            const labelUList& cellLabels,
             const polyMesh::cellDecomposition decompMode
         );
 
-        //- Construct from mesh and subset of cells, transferring contents
+        //- Construct from mesh, moving subset of cells
         treeDataCell
         (
             const bool cacheBb,
-            const polyMesh&,
-            const Xfer<labelList>&,
+            const polyMesh& mesh,
+            labelList&& cellLabels,
             const polyMesh::cellDecomposition decompMode
         );
 
@@ -159,7 +159,7 @@ public:
         treeDataCell
         (
             const bool cacheBb,
-            const polyMesh&,
+            const polyMesh& mesh,
             const polyMesh::cellDecomposition decompMode
         );
 

@@ -188,7 +188,7 @@ void Foam::pressureInletOutletVelocityFvPatchVectorField::write
 const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     if (tangentialVelocity_.size())
     {
         tangentialVelocity_.writeEntry("tangentialVelocity", os);

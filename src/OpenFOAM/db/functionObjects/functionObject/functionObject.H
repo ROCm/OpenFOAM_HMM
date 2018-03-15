@@ -197,7 +197,7 @@ public:
         autoPtr<functionObject> clone() const
         {
             NotImplemented;
-            return autoPtr<functionObject>(nullptr);
+            return autoPtr<functionObject>();
         }
 
 
@@ -222,12 +222,18 @@ public:
         const word& name() const;
 
         //- Read and set the function object if its data have changed
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Called at each ++ or += of the time-loop.
         //  postProcess overrides the usual executeControl behaviour and
         //  forces execution (used in post-processing mode)
         virtual bool execute() = 0;
+
+        //- Execute using the specified subIndex.
+        //  The base implementation is a no-op.
+        //  \param subIndex an execution sub-index corresponding to a
+        //      sub-cycle or something similar.
+        virtual bool execute(const label subIndex);
 
         //- Called at each ++ or += of the time-loop.
         //  postProcess overrides the usual writeControl behaviour and
@@ -245,9 +251,11 @@ public:
         virtual bool filesModified() const;
 
         //- Update for changes of mesh
+        //  The base implementation is a no-op.
         virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Update for changes of mesh
+        //  The base implementation is a no-op.
         virtual void movePoints(const polyMesh& mesh);
 };
 

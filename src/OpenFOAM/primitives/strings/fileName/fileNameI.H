@@ -128,6 +128,12 @@ inline bool Foam::fileName::isAbsolute() const
 }
 
 
+inline bool Foam::fileName::isBackup() const
+{
+    return isBackup(*this);
+}
+
+
 inline bool Foam::fileName::hasExt() const
 {
     return string::hasExt();

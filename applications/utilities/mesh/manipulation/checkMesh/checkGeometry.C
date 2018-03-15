@@ -544,7 +544,7 @@ Foam::label Foam::checkGeometry
                 nonAlignedPoints.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, nonAlignedPoints);
+                    mergeAndWrite(setWriter(), nonAlignedPoints);
                 }
             }
         }
@@ -786,7 +786,7 @@ Foam::label Foam::checkGeometry
                 points.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, points);
+                    mergeAndWrite(setWriter(), points);
                 }
             }
         }
@@ -809,7 +809,7 @@ Foam::label Foam::checkGeometry
                 nearPoints.write();
                 if (setWriter.valid())
                 {
-                    mergeAndWrite(setWriter, nearPoints);
+                    mergeAndWrite(setWriter(), nearPoints);
                 }
             }
         }
@@ -1007,7 +1007,11 @@ Foam::label Foam::checkGeometry
                         globalFaces().gather
                         (
                             UPstream::worldComm,
-                            labelList(UPstream::procID(UPstream::worldComm)),
+                            ListOps::create<label>
+                            (
+                                UPstream::procID(UPstream::worldComm),
+                                toLabel<int>()  // int -> label
+                            ),
                             ami.srcWeightsSum(),
                             mergedWeights
                         );
@@ -1057,7 +1061,11 @@ Foam::label Foam::checkGeometry
                         globalFaces().gather
                         (
                             UPstream::worldComm,
-                            labelList(UPstream::procID(UPstream::worldComm)),
+                            ListOps::create<label>
+                            (
+                                UPstream::procID(UPstream::worldComm),
+                                toLabel<int>()  // int -> label
+                            ),
                             ami.tgtWeightsSum(),
                             mergedWeights
                         );

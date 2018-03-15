@@ -32,7 +32,6 @@ Description
 #define cellShapeRecognition_H
 
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "faceList.H"
 #include "PtrList.H"
 

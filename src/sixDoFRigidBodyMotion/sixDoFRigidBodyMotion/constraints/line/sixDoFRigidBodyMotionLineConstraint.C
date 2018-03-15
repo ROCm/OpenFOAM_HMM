@@ -130,10 +130,8 @@ void Foam::sixDoFRigidBodyMotionConstraints::line::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("centreOfRotation")
-        << centreOfRotation_ << token::END_STATEMENT << nl;
-    os.writeKeyword("direction")
-        << direction_ << token::END_STATEMENT << nl;
+    os.writeEntry("centreOfRotation", centreOfRotation_);
+    os.writeEntry("direction", direction_);
 }
 
 // ************************************************************************* //

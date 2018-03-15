@@ -74,8 +74,7 @@ Usage
             }
         }
 
-        // Number of samples in sampling window
-        // Must be a power of 2, default = 2^16 (=65536)
+        // Number of samples in sampling window, default = 2^16 (=65536)
         N               4096;
 
         // Write interval for FFT data, default = 1

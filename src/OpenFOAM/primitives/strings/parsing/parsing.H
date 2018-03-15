@@ -56,7 +56,8 @@ namespace parsing
     {
         NONE = 0,         //!< No error encountered
         GENERAL = 1,      //!< General parsing error
-        TRAILING = 2,     //!< Trailing content detected
+        RANGE = 2,        //!< Range error
+        TRAILING = 3,     //!< Trailing content detected
     };
 
 

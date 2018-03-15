@@ -49,8 +49,8 @@ int main(int argc, char *argv[])
         "Convert between edgeMesh formats"
     );
     argList::noParallel();
-    argList::validArgs.append("inputFile");
-    argList::validArgs.append("outputFile");
+    argList::addArgument("inputFile");
+    argList::addArgument("outputFile");
     argList::addOption
     (
         "scale",
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         << "\nwriting " << exportName;
 
     scalar scaleFactor = 0;
-    if (args.optionReadIfPresent("scale", scaleFactor) && scaleFactor > 0)
+    if (args.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
     {
         Info<< " with scaling " << scaleFactor << endl;
         mesh.scalePoints(scaleFactor);

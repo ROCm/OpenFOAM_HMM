@@ -141,6 +141,12 @@ bool Foam::functionObject::read(const dictionary& dict)
 }
 
 
+bool Foam::functionObject::execute(const label)
+{
+    return true;
+}
+
+
 bool Foam::functionObject::end()
 {
     return true;

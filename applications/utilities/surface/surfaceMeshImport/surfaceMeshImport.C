@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("inputFile");
+    argList::addArgument("inputFile");
 
     argList::addBoolOption
     (
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
 
 
     const fileName importName = args[1];
-    const word exportName = args.optionLookupOrDefault<word>("name", "default");
+    const word exportName = args.lookupOrDefault<word>("name", "default");
 
     // check that reading is supported
     if (!MeshedSurface<face>::canRead(importName, true))
@@ -150,15 +150,15 @@ int main(int argc, char *argv[])
     autoPtr<coordinateSystem> fromCsys;
     autoPtr<coordinateSystem> toCsys;
 
-    if (args.optionFound("from") || args.optionFound("to"))
+    if (args.found("from") || args.found("to"))
     {
         autoPtr<IOobject> ioPtr;
 
-        if (args.optionFound("dict"))
+        if (args.found("dict"))
         {
             const fileName dictPath = args["dict"];
 
-            ioPtr.set
+            ioPtr.reset
             (
                 new IOobject
                 (
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            ioPtr.set
+            ioPtr.reset
             (
                 new IOobject
                 (
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
 
         coordinateSystems csLst(ioPtr());
 
-        if (args.optionFound("from"))
+        if (args.found("from"))
         {
             const word csName = args["from"];
 
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
             fromCsys.reset(new coordinateSystem(csLst[csIndex]));
         }
 
-        if (args.optionFound("to"))
+        if (args.found("to"))
         {
             const word csName = args["to"];
 
@@ -245,14 +245,14 @@ int main(int argc, char *argv[])
 
     MeshedSurface<face> surf(importName);
 
-    if (args.optionFound("clean"))
+    if (args.found("clean"))
     {
         surf.cleanup(true);
     }
 
 
     scalar scaleIn = 0;
-    if (args.optionReadIfPresent("scaleIn", scaleIn) && scaleIn > 0)
+    if (args.readIfPresent("scaleIn", scaleIn) && scaleIn > 0)
     {
         Info<< " -scaleIn " << scaleIn << endl;
         surf.scalePoints(scaleIn);
@@ -273,7 +273,7 @@ int main(int argc, char *argv[])
     }
 
     scalar scaleOut = 0;
-    if (args.optionReadIfPresent("scaleOut", scaleOut) && scaleOut > 0)
+    if (args.readIfPresent("scaleOut", scaleOut) && scaleOut > 0)
     {
         Info<< " -scaleOut " << scaleOut << endl;
         surf.scalePoints(scaleOut);
@@ -287,7 +287,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        surf.xfer()
+        std::move(surf)
     );
 
 

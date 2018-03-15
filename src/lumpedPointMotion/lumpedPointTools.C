@@ -46,22 +46,19 @@ namespace Foam
             Info<< "Reading " << GeoFieldType::typeName
                 << ' ' << io->name() << endl;
 
-            return autoPtr<GeoFieldType>
+            return autoPtr<GeoFieldType>::New
             (
-                new GeoFieldType
+                IOobject
                 (
-                    IOobject
-                    (
-                        io->name(),
-                        io->instance(),
-                        io->local(),
-                        io->db(),
-                        IOobject::MUST_READ,
-                        IOobject::AUTO_WRITE,
-                        io->registerObject()
-                    ),
-                    mesh
-                )
+                    io->name(),
+                    io->instance(),
+                    io->local(),
+                    io->db(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE,
+                    io->registerObject()
+                ),
+                mesh
             );
         }
 

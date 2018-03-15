@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,11 +67,10 @@ public:
             DISTANCE
         };
 
+        //- String representation of coordFormat enum
+        static const Enum<coordFormat> coordFormatNames;
 
 private:
-
-        //- String representation of coordFormat enums
-        static const Enum<coordFormat> coordFormatNames_;
 
         //- Check for consistent dimensions of points and curve distance
         void checkDimensions() const;
@@ -98,13 +97,22 @@ public:
         coordSet(const word& name, const word& axis);
 
 
-        //- Construct from components
+        //- Copy construct from components
         coordSet
         (
             const word& name,
             const word& axis,
             const List<point>& points,
             const scalarList& curveDist
+        );
+
+        //- Move construct from components
+        coordSet
+        (
+            const word& name,
+            const word& axis,
+            List<point>&& points,
+            scalarList&& curveDist
         );
 
 
@@ -117,7 +125,7 @@ public:
 
         word axis() const
         {
-            return coordFormatNames_[axis_];
+            return coordFormatNames[axis_];
         }
 
         //- Cumulative distance

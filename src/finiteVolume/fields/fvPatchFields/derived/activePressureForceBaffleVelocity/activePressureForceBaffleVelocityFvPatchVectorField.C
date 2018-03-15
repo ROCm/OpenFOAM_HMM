@@ -377,21 +377,14 @@ void Foam::activePressureForceBaffleVelocityFvPatchVectorField::
 write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    writeEntryIfDifferent<word>(os, "p", "p", pName_);
-    os.writeKeyword("cyclicPatch")
-        << cyclicPatchName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("openingTime")
-        << openingTime_ << token::END_STATEMENT << nl;
-    os.writeKeyword("maxOpenFractionDelta")
-        << maxOpenFractionDelta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("openFraction")
-        << openFraction_ << token::END_STATEMENT << nl;
-    os.writeKeyword("minThresholdValue")
-        << minThresholdValue_ << token::END_STATEMENT << nl;
-    os.writeKeyword("forceBased")
-        << fBased_ << token::END_STATEMENT << nl;
-    os.writeKeyword("opening")
-        << opening_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("p", "p", pName_);
+    os.writeEntry("cyclicPatch", cyclicPatchName_);
+    os.writeEntry("openingTime", openingTime_);
+    os.writeEntry("maxOpenFractionDelta", maxOpenFractionDelta_);
+    os.writeEntry("openFraction", openFraction_);
+    os.writeEntry("minThresholdValue", minThresholdValue_);
+    os.writeEntry("forceBased", fBased_);
+    os.writeEntry("opening", opening_);
     writeEntry("value", os);
 }
 

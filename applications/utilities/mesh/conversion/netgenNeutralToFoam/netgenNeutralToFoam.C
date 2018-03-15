@@ -82,7 +82,7 @@ NOTE:
 #include "polyMesh.H"
 #include "IFstream.H"
 #include "polyPatch.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "triFace.H"
 
 using namespace Foam;
@@ -92,7 +92,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("Neutral file");
+    argList::addArgument("Neutral file");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
     Info<< "nTets:" << nTets << endl;
 
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     cellShapeList cells(nTets);
 
@@ -303,7 +303,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cells,
         patchFaces,
         patchNames,

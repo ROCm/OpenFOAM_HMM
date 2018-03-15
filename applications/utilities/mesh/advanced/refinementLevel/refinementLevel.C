@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
         << " to allow for some truncation error."
         << nl << endl;
 
-    const bool readLevel = args.optionFound("readLevel");
+    const bool readLevel = args.found("readLevel");
 
     const scalarField& vols = mesh.cellVolumes();
 
@@ -214,9 +214,9 @@ int main(int argc, char *argv[])
             runTime.timeName(),
             runTime
         ),
-        xferCopy(mesh.points()),   // could we safely re-use the data?
-        xferCopy(mesh.faces()),
-        xferCopy(mesh.cells())
+        pointField(mesh.points()),  // Could we safely re-use the data?
+        faceList(mesh.faces()),
+        cellList(mesh.cells())
     );
 
     // Add the boundary patches

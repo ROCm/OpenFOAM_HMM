@@ -33,6 +33,12 @@ Typedef
 Description
     A List of words.
 
+Typedef
+    Foam::wordSubList
+
+Description
+    A SubList of words.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef wordList_H
@@ -40,14 +46,15 @@ Description
 
 #include "word.H"
 #include "List.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef UList<word> wordUList;
-
     typedef List<word> wordList;
+    typedef SubList<word> wordSubList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

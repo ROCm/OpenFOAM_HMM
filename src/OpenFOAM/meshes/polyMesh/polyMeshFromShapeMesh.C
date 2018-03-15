@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -38,8 +38,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
     const cellShapeList& c
 ) const
 {
-    List<DynamicList<label, primitiveMesh::cellsPerPoint_>>
-        pc(points().size());
+    List<DynamicList<label>> pc(points().size());
 
     // For each cell
     forAll(c, i)
@@ -51,8 +50,7 @@ Foam::labelListList Foam::polyMesh::cellShapePointCells
         {
             // Set working point label
             label curPoint = labels[j];
-            DynamicList<label, primitiveMesh::cellsPerPoint_>& curPointCells =
-                pc[curPoint];
+            DynamicList<label>& curPointCells = pc[curPoint];
 
             // Enter the cell label in the point's cell list
             curPointCells.append(i);
@@ -391,7 +389,7 @@ void Foam::polyMesh::setTopology
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
+    pointField&& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
@@ -415,7 +413,7 @@ Foam::polyMesh::polyMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        points
+        std::move(points)
     ),
     faces_
     (
@@ -595,7 +593,7 @@ Foam::polyMesh::polyMesh
 
         // Check if there already exists a defaultFaces patch as last patch
         // and reuse it.
-        label patchi = findIndex(boundaryPatchNames, defaultBoundaryPatchName);
+        label patchi = boundaryPatchNames.find(defaultBoundaryPatchName);
 
         if (patchi != -1)
         {
@@ -673,7 +671,7 @@ Foam::polyMesh::polyMesh
 Foam::polyMesh::polyMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& points,
+    pointField&& points,
     const cellShapeList& cellsAsShapes,
     const faceListList& boundaryFaces,
     const wordList& boundaryPatchNames,
@@ -696,7 +694,7 @@ Foam::polyMesh::polyMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        points
+        std::move(points)
     ),
     faces_
     (
@@ -868,7 +866,7 @@ Foam::polyMesh::polyMesh
 
         // Check if there already exists a defaultFaces patch as last patch
         // and reuse it.
-        label patchi = findIndex(boundaryPatchNames, defaultBoundaryPatchName);
+        label patchi = boundaryPatchNames.find(defaultBoundaryPatchName);
 
         if (patchi != -1)
         {

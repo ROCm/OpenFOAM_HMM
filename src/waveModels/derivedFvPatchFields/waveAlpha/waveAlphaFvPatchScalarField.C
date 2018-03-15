@@ -106,11 +106,11 @@ void Foam::waveAlphaFvPatchScalarField::updateCoeffs()
         )
     );
 
-    waveModel& model = const_cast<waveModel&>(tmodel());
+    waveModel& model = tmodel.constCast();
 
     model.correct(db().time().value());
 
-    operator == (model.alpha());
+    operator==(model.alpha());
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
 }
@@ -120,8 +120,7 @@ void Foam::waveAlphaFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
 
-    os.writeKeyword("waveDictName") << waveDictName_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("waveDictName", waveDictName_);
 
     writeEntry("value", os);
 }

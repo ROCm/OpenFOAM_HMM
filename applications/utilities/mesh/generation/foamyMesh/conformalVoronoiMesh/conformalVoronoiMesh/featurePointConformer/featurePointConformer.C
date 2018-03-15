@@ -538,13 +538,13 @@ Foam::featurePointConformer::featurePointConformer
 
     Info<< incrIndent
         << indent << "Circulating edges is: "
-        << foamyHexMeshControls_.circulateEdges().asText() << nl
+        << foamyHexMeshControls_.circulateEdges().c_str() << nl
         << indent << "Guarding feature points is: "
-        << foamyHexMeshControls_.guardFeaturePoints().asText() << nl
+        << foamyHexMeshControls_.guardFeaturePoints().c_str() << nl
         << indent << "Snapping to feature points is: "
-        << foamyHexMeshControls_.snapFeaturePoints().asText() << nl
+        << foamyHexMeshControls_.snapFeaturePoints().c_str() << nl
         << indent << "Specialising feature points is: "
-        << foamyHexMeshControls_.specialiseFeaturePoints().asText()
+        << foamyHexMeshControls_.specialiseFeaturePoints().c_str()
         << decrIndent
         << endl;
 

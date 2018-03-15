@@ -85,7 +85,7 @@ class MRFZone
         //- Cell zone ID
         label cellZoneID_;
 
-        const wordReList excludedPatchNames_;
+        const wordRes excludedPatchNames_;
 
         labelList excludedPatchLabels_;
 
@@ -174,7 +174,7 @@ public:
         autoPtr<MRFZone> clone() const
         {
             NotImplemented;
-            return autoPtr<MRFZone>(nullptr);
+            return autoPtr<MRFZone>();
         }
 
 

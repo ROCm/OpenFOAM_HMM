@@ -63,23 +63,34 @@ public:
     // Constructors
 
         //- Construct given an IOobject
-        IOmapDistributePolyMesh(const IOobject&);
+        IOmapDistributePolyMesh(const IOobject& io);
 
         //- Construct given an IOobject and mapDistributePolyMesh
-        IOmapDistributePolyMesh(const IOobject&, const mapDistributePolyMesh&);
+        IOmapDistributePolyMesh
+        (
+            const IOobject& io,
+            const mapDistributePolyMesh& map
+        );
+
+        //- Construct given an IOobject and mapDistributePolyMesh
+        IOmapDistributePolyMesh
+        (
+            const IOobject& io,
+            mapDistributePolyMesh&& map
+        );
 
 
     //- Destructor
-    virtual ~IOmapDistributePolyMesh();
+    virtual ~IOmapDistributePolyMesh() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        //- ReadData function required for regIOobject read operation
-        virtual bool readData(Istream&);
+        //- The readData method for regIOobject read operation
+        virtual bool readData(Istream& is);
 
-        //- WriteData function required for regIOobject write operation
-        virtual bool writeData(Ostream&) const;
+        //- The writeData method for regIOobject write operation
+        virtual bool writeData(Ostream& os) const;
 
 };
 

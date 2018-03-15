@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -103,9 +103,9 @@ scalar getMergeDistance
 )
 {
     scalar mergeTol = defaultMergeTol;
-    args.optionReadIfPresent("mergeTol", mergeTol);
+    args.readIfPresent("mergeTol", mergeTol);
 
-    scalar writeTol =
+    const scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
 
     Info<< "Merge tolerance : " << mergeTol << nl
@@ -115,9 +115,9 @@ scalar getMergeDistance
     {
         FatalErrorInFunction
             << "Your current settings specify ASCII writing with "
-            << IOstream::defaultPrecision() << " digits precision." << endl
+            << IOstream::defaultPrecision() << " digits precision." << nl
             << "Your merging tolerance (" << mergeTol << ") is finer than this."
-            << endl
+            << nl
             << "Please change your writeFormat to binary"
             << " or increase the writePrecision" << endl
             << "or adjust the merge tolerance (-mergeTol)."
@@ -168,9 +168,9 @@ void printMeshData(const polyMesh& mesh)
     label totProcPatches = 0;
     label maxProcFaces = 0;
 
-    for (label procI = 0; procI < Pstream::nProcs(); procI++)
+    for (label procI = 0; procI < Pstream::nProcs(); ++procI)
     {
-        Info<< endl
+        Info<< nl
             << "Processor " << procI << nl
             << "    Number of cells = " << globalCells.localSize(procI)
             << endl;
@@ -236,7 +236,7 @@ void writeDecomposition
 (
     const word& name,
     const fvMesh& mesh,
-    const labelList& decomp
+    const labelUList& decomp
 )
 {
     // Write the decomposition as labelList for use with 'manual'
@@ -312,9 +312,9 @@ void determineDecomposition
         WarningInFunction
             << "You have selected decomposition method "
             << decomposer.typeName
-            << " which does" << endl
+            << " which does" << nl
             << "not synchronise the decomposition across"
-            << " processor patches." << endl
+            << " processor patches." << nl
             << "    You might want to select a decomposition method"
             << " which is aware of this. Continuing."
             << endl;
@@ -388,10 +388,9 @@ void determineDecomposition
 // Write addressing if decomposing (1 to many) or reconstructing (many to 1)
 void writeProcAddressing
 (
-    const bool decompose,
-    const fileName& meshSubDir,
     const fvMesh& mesh,
-    const mapDistributePolyMesh& map
+    const mapDistributePolyMesh& map,
+    const bool decompose
 )
 {
     Info<< "Writing procAddressing files to " << mesh.facesInstance()
@@ -403,7 +402,7 @@ void writeProcAddressing
         (
             "cellProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -416,7 +415,7 @@ void writeProcAddressing
         (
             "faceProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -429,7 +428,7 @@ void writeProcAddressing
         (
             "pointProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -442,7 +441,7 @@ void writeProcAddressing
         (
             "boundaryProcAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ
         ),
@@ -545,10 +544,10 @@ void writeProcAddressing
         );
     }
 
-    bool cellOk = cellMap.write();
-    bool faceOk = faceMap.write();
-    bool pointOk = pointMap.write();
-    bool patchOk = patchMap.write();
+    const bool cellOk = cellMap.write();
+    const bool faceOk = faceMap.write();
+    const bool pointOk = pointMap.write();
+    const bool patchOk = patchMap.write();
 
     if (!cellOk || !faceOk || !pointOk || !patchOk)
     {
@@ -561,6 +560,24 @@ void writeProcAddressing
     }
 }
 
+
+// Remove addressing
+void removeProcAddressing(const polyMesh& mesh)
+{
+    for (const auto prefix : {"boundary", "cell", "face", "point"})
+    {
+        IOobject io
+        (
+            prefix + word("ProcAddressing"),
+            mesh.facesInstance(),
+            polyMesh::meshSubDir,
+            mesh
+        );
+
+        const fileName procFile(io.objectPath());
+        rm(procFile);
+    }
+}
 
 
 // Generic mesh-based field reading
@@ -620,7 +637,7 @@ void readFields
     {
         FatalErrorInFunction
             << "differing fields of type " << GeoField::typeName
-            << " on processors." << endl
+            << " on processors." << nl
             << "Master has:" << masterNames << endl
             << Pstream::myProcNo() << " has:" << objectNames
             << abort(FatalError);
@@ -645,7 +662,7 @@ void readFields
                 tmp<GeoField> tsubfld = subsetterPtr().interpolate(fields[i]);
 
                 // Send to all processors that don't have a mesh
-                for (label procI = 1; procI < Pstream::nProcs(); procI++)
+                for (label procI = 1; procI < Pstream::nProcs(); ++procI)
                 {
                     if (!haveMesh[procI])
                     {
@@ -735,10 +752,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             forAll(bfld, patchi)
             {
-                typename GeoField::Patch& pfld = bfld[patchi];
+                auto& pfld = bfld[patchi];
 
-                //if (pfld.coupled())
-                //if (isA<CoupledPatchType>(pfld))
                 if (pfld.patch().coupled())
                 {
                     pfld.initEvaluate(Pstream::defaultCommsType);
@@ -755,12 +770,8 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
                 Pstream::waitRequests(nReq);
             }
 
-            forAll(bfld, patchi)
+            for (auto& pfld : bfld)
             {
-                typename GeoField::Patch& pfld = bfld[patchi];
-
-                //if (pfld.coupled())
-                //if (isA<CoupledPatchType>(pfld))
                 if (pfld.patch().coupled())
                 {
                     pfld.evaluate(Pstream::defaultCommsType);
@@ -774,11 +785,9 @@ void correctCoupledBoundaryConditions(fvMesh& mesh)
 
             forAll(patchSchedule, patchEvali)
             {
-                label patchi = patchSchedule[patchEvali].patch;
-                typename GeoField::Patch& pfld = bfld[patchi];
+                const label patchi = patchSchedule[patchEvali].patch;
+                auto& pfld = bfld[patchi];
 
-                //if (pfld.coupled())
-                //if (isA<CoupledPatchType>(pfld))
                 if (pfld.patch().coupled())
                 {
                     if (patchSchedule[patchEvali].init)
@@ -852,12 +861,12 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         // Create 0 sized mesh to do all the generation of zero sized
         // fields on processors that have zero sized meshes. Note that this is
-        // only nessecary on master but since polyMesh construction with
+        // only necessary on master but since polyMesh construction with
         // Pstream::parRun does parallel comms we have to do it on all
         // processors
         autoPtr<fvMeshSubset> subsetterPtr;
 
-        const bool allHaveMesh = (findIndex(haveMesh, false) == -1);
+        const bool allHaveMesh = !haveMesh.found(false);
         if (!allHaveMesh)
         {
             // Find last non-processor patch.
@@ -906,8 +915,8 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
         // We don't want to map the decomposition (mapping already tested when
         // mapping the cell centre field)
-        IOobjectList::iterator iter = objects.find("cellDist");
-        if (iter != objects.end())
+        auto iter = objects.find("cellDist");
+        if (iter.found())
         {
             objects.erase(iter);
         }
@@ -1162,7 +1171,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
         (
             "procAddressing",
             mesh.facesInstance(),
-            meshSubDir,
+            polyMesh::meshSubDir,
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
@@ -1181,16 +1190,16 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
             mesh.write();
             topoSet::removeFiles(mesh);
-            forAll(pointFieldNames, i)
+            for (const word& fieldName : pointFieldNames)
             {
                 IOobject io
                 (
-                    pointFieldNames[i],
+                    fieldName,
                     runTime.timeName(),
                     mesh
                 );
 
-                fileName fieldFile(io.objectPath());
+                const fileName fieldFile(io.objectPath());
                 if (topoSet::debug) DebugVar(fieldFile);
                 rm(fieldFile);
             }
@@ -1204,16 +1213,16 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     {
         mesh.write();
         topoSet::removeFiles(mesh);
-        forAll(pointFieldNames, i)
+        for (const word& fieldName : pointFieldNames)
         {
             IOobject io
             (
-                pointFieldNames[i],
+                fieldName,
                 runTime.timeName(),
                 mesh
             );
 
-            fileName fieldFile(io.objectPath());
+            const fileName fieldFile(io.objectPath());
             if (topoSet::debug) DebugVar(fieldFile);
             rm(fieldFile);
         }
@@ -1224,7 +1233,16 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
 
     if (decompose || nDestProcs == 1)
     {
-        writeProcAddressing(decompose, meshSubDir, mesh, map);
+        // Decompose (1 -> N) or reconstruct (N -> 1)
+        // so {boundary,cell,face,point}ProcAddressing have meaning
+        writeProcAddressing(mesh, map, decompose);
+    }
+    else
+    {
+        // Redistribute (N -> M)
+        // {boundary,cell,face,point}ProcAddressing would be incorrect
+        // - can either remove or redistribute previous
+        removeProcAddressing(mesh);
     }
 
 
@@ -1335,10 +1353,7 @@ autoPtr<mapDistributePolyMesh> redistributeAndWrite
     //}
 
 
-    return autoPtr<mapDistributePolyMesh>
-    (
-        new mapDistributePolyMesh(map.xfer())
-    );
+    return autoPtr<mapDistributePolyMesh>::New(std::move(map));
 }
 
 
@@ -1389,7 +1404,7 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
 
     autoPtr<mapDistributePolyMesh> mapPtr;
 
-    if (baseMeshPtr.valid() && baseMeshPtr().nCells())    //baseMeshPtr.valid())
+    if (baseMeshPtr.valid() && baseMeshPtr().nCells())
     {
         const fvMesh& baseMesh = baseMeshPtr();
 
@@ -1399,8 +1414,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute cellMap
         (
             baseMesh.nCells(),
-            cellSubMap.xfer(),
-            cellAddressing.xfer()
+            std::move(cellSubMap),
+            std::move(cellAddressing)
         );
 
         labelListList faceSubMap(Pstream::nProcs());
@@ -1409,8 +1424,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute faceMap
         (
             baseMesh.nFaces(),
-            faceSubMap.xfer(),
-            faceAddressing.xfer(),
+            std::move(faceSubMap),
+            std::move(faceAddressing),
             false,          //subHasFlip
             true            //constructHasFlip
         );
@@ -1421,8 +1436,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute pointMap
         (
             baseMesh.nPoints(),
-            pointSubMap.xfer(),
-            pointAddressing.xfer()
+            std::move(pointSubMap),
+            std::move(pointAddressing)
         );
 
         labelListList patchSubMap(Pstream::nProcs());
@@ -1433,8 +1448,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute patchMap
         (
             baseMesh.boundaryMesh().size(),
-            patchSubMap.xfer(),
-            boundaryAddressing.xfer()
+            std::move(patchSubMap),
+            std::move(boundaryAddressing)
         );
 
         const label nOldPoints = mesh.nPoints();
@@ -1457,12 +1472,12 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
                 nOldPoints,
                 nOldFaces,
                 nOldCells,
-                oldPatchStarts.xfer(),
-                oldPatchNMeshPoints.xfer(),
-                pointMap.xfer(),
-                faceMap.xfer(),
-                cellMap.xfer(),
-                patchMap.xfer()
+                std::move(oldPatchStarts),
+                std::move(oldPatchNMeshPoints),
+                std::move(pointMap),
+                std::move(faceMap),
+                std::move(cellMap),
+                std::move(patchMap)
             )
         );
     }
@@ -1475,8 +1490,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute cellMap
         (
             0,
-            cellSubMap.xfer(),
-            cellConstructMap.xfer()
+            std::move(cellSubMap),
+            std::move(cellConstructMap)
         );
 
         labelListList faceSubMap(Pstream::nProcs());
@@ -1486,8 +1501,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute faceMap
         (
             0,
-            faceSubMap.xfer(),
-            faceConstructMap.xfer(),
+            std::move(faceSubMap),
+            std::move(faceConstructMap),
             false,          //subHasFlip
             true            //constructHasFlip
         );
@@ -1499,8 +1514,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute pointMap
         (
             0,
-            pointSubMap.xfer(),
-            pointConstructMap.xfer()
+            std::move(pointSubMap),
+            std::move(pointConstructMap)
         );
 
         labelListList patchSubMap(Pstream::nProcs());
@@ -1512,8 +1527,8 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
         mapDistribute patchMap
         (
             0,
-            patchSubMap.xfer(),
-            patchConstructMap.xfer()
+            std::move(patchSubMap),
+            std::move(patchConstructMap)
         );
 
         const label nOldPoints = mesh.nPoints();
@@ -1536,12 +1551,12 @@ autoPtr<mapDistributePolyMesh> createReconstructMap
                 nOldPoints,
                 nOldFaces,
                 nOldCells,
-                oldPatchStarts.xfer(),
-                oldPatchNMeshPoints.xfer(),
-                pointMap.xfer(),
-                faceMap.xfer(),
-                cellMap.xfer(),
-                patchMap.xfer()
+                std::move(oldPatchStarts),
+                std::move(oldPatchNMeshPoints),
+                std::move(pointMap),
+                std::move(faceMap),
+                std::move(cellMap),
+                std::move(patchMap)
             )
         );
     }
@@ -1569,7 +1584,6 @@ void readProcAddressing
     //{
     //    Pout<< "Reading addressing from " << io.name() << " at "
     //        << mesh.facesInstance() << nl << endl;
-    //    distMap.clear();
     //    distMap.reset(new IOmapDistributePolyMesh(io));
     //}
     //else
@@ -1586,7 +1600,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
         labelIOList faceProcAddressing
         (
@@ -1598,7 +1612,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
         labelIOList pointProcAddressing
         (
@@ -1610,7 +1624,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
         labelIOList boundaryProcAddressing
         (
@@ -1622,7 +1636,7 @@ void readProcAddressing
                 mesh,
                 IOobject::READ_IF_PRESENT
             ),
-            labelList(0)
+            labelList()
         );
 
 
@@ -1669,7 +1683,7 @@ void reconstructMeshFields
 (
     const parFvFieldReconstructor& fvReconstructor,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     // Dimensioned fields
@@ -1766,7 +1780,7 @@ void reconstructLagrangian
     const fvMesh& baseMesh,
     const fvMesh& mesh,
     const mapDistributePolyMesh& distMap,
-    const HashSet<word>& selectedLagrangianFields
+    const wordHashSet& selectedLagrangianFields
 )
 {
     // Clouds (note: might not be present on all processors)
@@ -1792,64 +1806,66 @@ void reconstructLagrangian
             );
         }
         const parLagrangianRedistributor& lagrangianReconstructor =
-            lagrangianReconstructorPtr();
+            *lagrangianReconstructorPtr;
 
-        forAll(cloudNames, i)
+        for (const word& cloudName : cloudNames)
         {
             Info<< "Reconstructing lagrangian fields for cloud "
-                << cloudNames[i] << nl << endl;
+                << cloudName << nl << endl;
 
-            autoPtr<mapDistributeBase> lagrangianMap =
+            autoPtr<mapDistributeBase> lagrangianMapPtr =
             lagrangianReconstructor.redistributeLagrangianPositions
             (
-                cloudNames[i]
+                cloudName
             );
+            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
+
             IOobjectList sprayObjs
             (
                 mesh,
                 mesh.time().timeName(),
-                cloud::prefix/cloudNames[i]
+                cloud::prefix/cloudName
             );
 
             lagrangianReconstructor.redistributeLagrangianFields<label>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<label>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<scalar>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<scalar>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<vector>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<vector>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1857,7 +1873,7 @@ void reconstructLagrangian
             <sphericalTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1865,14 +1881,14 @@ void reconstructLagrangian
             <sphericalTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<symmTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1880,21 +1896,21 @@ void reconstructLagrangian
             <symmTensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFields<tensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
             lagrangianReconstructor.redistributeLagrangianFieldFields<tensor>
             (
                 lagrangianMap,
-                cloudNames[i],
+                cloudName,
                 sprayObjs,
                 selectedLagrangianFields
             );
@@ -1902,12 +1918,13 @@ void reconstructLagrangian
     }
 }
 
+
 // Read clouds (note: might not be present on all processors)
 void readLagrangian
 (
     const fvMesh& mesh,
     const wordList& cloudNames,
-    const HashSet<word>& selectedLagrangianFields,
+    const wordHashSet& selectedLagrangianFields,
     PtrList<unmappedPassivePositionParticleCloud>& clouds
 )
 {
@@ -2110,8 +2127,9 @@ void redistributeLagrangian
 
         forAll(clouds, i)
         {
-            autoPtr<mapDistributeBase> lagrangianMap =
-            distributor.redistributeLagrangianPositions(clouds[i]);
+            autoPtr<mapDistributeBase> lagrangianMapPtr =
+                distributor.redistributeLagrangianPositions(clouds[i]);
+            const mapDistributeBase& lagrangianMap = *lagrangianMapPtr;
 
             distributor.redistributeStoredLagrangianFields
             <IOField<label>>
@@ -2270,12 +2288,12 @@ int main(int argc, char *argv[])
     // (replacement for setRootCase that does not abort)
 
     Foam::argList args(argc, argv);
-    bool decompose = args.optionFound("decompose");
-    const bool reconstruct = args.optionFound("reconstruct");
-    bool overwrite = args.optionFound("overwrite");
-    bool writeCellDist = args.optionFound("cellDist");
-    bool newTimes = args.optionFound("newTimes");
+    const bool reconstruct = args.found("reconstruct");
+    const bool writeCellDist = args.found("cellDist");
+    const bool newTimes = args.found("newTimes");
 
+    bool decompose = args.found("decompose");
+    bool overwrite = args.found("overwrite");
 
     if (Foam::sigFpe::requested())
     {
@@ -2287,8 +2305,8 @@ int main(int argc, char *argv[])
     }
 
 
-    const HashSet<word> selectedFields(0);
-    const HashSet<word> selectedLagrangianFields(0);
+    const wordHashSet selectedFields(0);
+    const wordHashSet selectedLagrangianFields(0);
 
 
     if (decompose)
@@ -2338,7 +2356,7 @@ int main(int argc, char *argv[])
     bool nfs = true;
     {
         List<fileName> roots(1, args.rootPath());
-        combineReduce(roots, ListUniqueEqOp<fileName>());
+        combineReduce(roots, ListOps::uniqueEqOp<fileName>());
         nfs = (roots.size() == 1);
     }
 
@@ -2363,8 +2381,7 @@ int main(int argc, char *argv[])
         Info<< "No processor directories; switching on decompose mode"
             << nl << endl;
     }
-    // If master changed to decompose mode make sure all nodes know about
-    // it
+    // If master changed to decompose mode make sure all nodes know about it
     Pstream::scatter(decompose);
 
 
@@ -2382,9 +2399,9 @@ int main(int argc, char *argv[])
             timeDirs = Time::findTimes(args.path(), "constant");
         }
         Pstream::scatter(timeDirs);
-        forAll(timeDirs, i)
+        for (const instant& t : timeDirs)
         {
-            mkDir(args.path()/timeDirs[i].name());
+            mkDir(args.path()/t.name());
         }
     }
 
@@ -2418,9 +2435,9 @@ int main(int argc, char *argv[])
             timeDirs = Time::findTimes(basePath, "constant");
         }
         Pstream::scatter(timeDirs);
-        forAll(timeDirs, i)
+        for (const instant& t : timeDirs)
         {
-            mkDir(basePath/timeDirs[i].name());
+            mkDir(basePath/t.name());
         }
     }
 
@@ -2437,35 +2454,34 @@ int main(int argc, char *argv[])
     );
 
 
-    HashSet<word> masterTimeDirSet;
+    wordHashSet masterTimeDirSet;
     if (newTimes)
     {
         instantList baseTimeDirs(baseRunTime.times());
-        forAll(baseTimeDirs, i)
+        for (const instant& t : baseTimeDirs)
         {
-            masterTimeDirSet.insert(baseTimeDirs[i].name());
+            masterTimeDirSet.insert(t.name());
         }
     }
 
 
     // Determine any region
     word regionName = polyMesh::defaultRegion;
-    fileName meshSubDir;
-    if (args.optionReadIfPresent("region", regionName))
+    fileName meshSubDir = polyMesh::meshSubDir;
+    if (args.readIfPresent("region", regionName))
     {
         meshSubDir = regionName/polyMesh::meshSubDir;
-    }
-    else
-    {
-        meshSubDir = polyMesh::meshSubDir;
     }
     Info<< "Using mesh subdirectory " << meshSubDir << nl << endl;
 
 
+    // Allow override of decomposeParDict location
+    fileName decompDictFile;
+    args.readIfPresent("decomposeParDict", decompDictFile);
+
 
     // Demand driven lagrangian mapper
     autoPtr<parLagrangianRedistributor> lagrangianReconstructorPtr;
-
 
 
     if (reconstruct)
@@ -2521,7 +2537,8 @@ int main(int argc, char *argv[])
             haveMesh[Pstream::myProcNo()] = isFile(meshPath);
             Pstream::gatherList(haveMesh);
             Pstream::scatterList(haveMesh);
-            Info<< "Per processor mesh availability : " << haveMesh << endl;
+            Info<< "Per processor mesh availability:" << nl
+                << "    " << flatOutput(haveMesh) << nl << endl;
 
 
             // Addressing back to reconstructed mesh as xxxProcAddressing.
@@ -2559,7 +2576,7 @@ int main(int argc, char *argv[])
                         runTime,
                         IOobject::READ_IF_PRESENT
                     ),
-                    labelList(0)
+                    labelList()
                 );
                 if
                 (
@@ -2676,7 +2693,7 @@ int main(int argc, char *argv[])
             (
                 baseMeshPtr(),
                 mesh,
-                distMap,
+                distMap(),
                 Pstream::master()       // do I need to write?
             )
         );
@@ -2689,7 +2706,8 @@ int main(int argc, char *argv[])
         // detect points by hand
         if (mesh.pointsInstance() != mesh.facesInstance())
         {
-            Info<< "    Dected initial mesh motion; reconstructing points" << nl
+            Info<< "    Detected initial mesh motion;"
+                << " reconstructing points" << nl
                 << endl;
             fvReconstructorPtr().reconstructPoints();
         }
@@ -2759,7 +2777,7 @@ int main(int argc, char *argv[])
                     (
                         baseMeshPtr(),
                         mesh,
-                        distMap,
+                        distMap(),
                         Pstream::master()
                     )
                 );
@@ -2785,7 +2803,7 @@ int main(int argc, char *argv[])
                 lagrangianReconstructorPtr,
                 baseMeshPtr(),
                 mesh,
-                distMap,
+                distMap(),
                 selectedLagrangianFields
             );
 
@@ -2873,7 +2891,8 @@ int main(int argc, char *argv[])
         haveMesh[Pstream::myProcNo()] = isFile(meshPath);
         Pstream::gatherList(haveMesh);
         Pstream::scatterList(haveMesh);
-        Info<< "Per processor mesh availability : " << haveMesh << endl;
+        Info<< "Per processor mesh availability:" << nl
+            << "    " << flatOutput(haveMesh) << nl << endl;
 
         // Load mesh (or create dummy one)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2905,7 +2924,7 @@ int main(int argc, char *argv[])
         fvMesh& mesh = meshPtr();
 
 
-        label nOldCells = mesh.nCells();
+        const label nOldCells = mesh.nCells();
         //Pout<< "Loaded mesh : nCells:" << nOldCells
         //    << " nPatches:" << mesh.boundaryMesh().size() << endl;
 
@@ -2917,11 +2936,6 @@ int main(int argc, char *argv[])
             runTime,
             mesh.bounds()
         );
-
-        // Allow override of decomposeParDict location
-        fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
-
 
         // Determine decomposition
         // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -2997,7 +3011,7 @@ int main(int argc, char *argv[])
             lagrangianReconstructorPtr,
             mesh,
             nOldCells,
-            distMap,
+            distMap(),
             clouds
         );
 

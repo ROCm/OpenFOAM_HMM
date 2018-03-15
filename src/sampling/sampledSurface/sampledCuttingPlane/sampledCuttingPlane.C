@@ -114,7 +114,7 @@ void Foam::sampledCuttingPlane::createGeometry()
                 false
             ),
             mesh,
-            dimensionedScalar("zero", dimLength, 0)
+            dimensionedScalar(dimLength)
         )
     );
     volScalarField& cellDistance = cellDistancePtr_();
@@ -212,14 +212,13 @@ void Foam::sampledCuttingPlane::createGeometry()
                 false
             ),
             pointMesh::New(mesh),
-            dimensionedScalar("zero", dimLength, 0)
+            dimensionedScalar(dimLength)
         );
         pDist.primitiveFieldRef() = pointDistance_;
 
         Pout<< "Writing point distance:" << pDist.objectPath() << endl;
         pDist.write();
     }
-
 
     //- Direct from cell field and point field.
     isoSurfPtr_.reset
@@ -243,6 +242,43 @@ void Foam::sampledCuttingPlane::createGeometry()
         //    mergeTol_
         //)
     );
+
+    // Verify specified bounding box
+    if (!bounds_.empty())
+    {
+        // Bounding box does not overlap with (global) mesh!
+        if (!bounds_.overlaps(mesh.bounds()))
+        {
+            WarningInFunction
+                << nl
+                << name() << " : "
+                << "Bounds " << bounds_
+                << " do not overlap the mesh bounding box " << mesh.bounds()
+                << nl << endl;
+        }
+
+        // Plane does not intersect the bounding box
+        if (!bounds_.intersects(plane_))
+        {
+            WarningInFunction
+                << nl
+                << name() << " : "
+                << "Plane "<< plane_ << " does not intersect the bounds "
+                << bounds_
+                << nl << endl;
+        }
+    }
+
+    // Plane does not intersect the (global) mesh!
+    if (!mesh.bounds().intersects(plane_))
+    {
+        WarningInFunction
+            << nl
+            << name() << " : "
+            << "Plane "<< plane_ << " does not intersect the mesh bounds "
+            << mesh.bounds()
+            << nl << endl;
+    }
 
     if (debug)
     {
@@ -295,12 +331,6 @@ Foam::sampledCuttingPlane::sampledCuttingPlane
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledCuttingPlane::~sampledCuttingPlane()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

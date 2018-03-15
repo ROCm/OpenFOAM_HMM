@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,6 @@ License
 #include "ensightWrite.H"
 #include "Time.H"
 #include "polyMesh.H"
-#include "wordRes.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -109,23 +108,20 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     //
     // writer options
     //
-    writeOpts_.noPatches
-    (
-        dict.lookupOrDefault<Switch>("noPatches", false)
-    );
+    writeOpts_.noPatches(dict.lookupOrDefault("noPatches", false));
 
     if (dict.found("patches"))
     {
-        wordReList lst(dict.lookup("patches"));
-        wordRes::inplaceUniq(lst);
+        wordRes lst(dict.lookup("patches"));
+        lst.uniq();
 
         writeOpts_.patchSelection(lst);
     }
 
     if (dict.found("faceZones"))
     {
-        wordReList lst(dict.lookup("faceZones"));
-        wordRes::inplaceUniq(lst);
+        wordRes lst(dict.lookup("faceZones"));
+        lst.uniq();
 
         writeOpts_.faceZoneSelection(lst);
     }
@@ -137,21 +133,21 @@ bool Foam::functionObjects::ensightWrite::read(const dictionary& dict)
     caseOpts_.width(dict.lookupOrDefault<label>("width", 8));
 
     // remove existing output directory
-    caseOpts_.overwrite(dict.lookupOrDefault<Switch>("overwrite", false));
+    caseOpts_.overwrite(dict.lookupOrDefault("overwrite", false));
 
 
     //
     // other options
     //
     dict.readIfPresent("directory", dirName_);
-    consecutive_ = dict.lookupOrDefault<Switch>("consecutive", false);
+    consecutive_ = dict.lookupOrDefault("consecutive", false);
 
 
     //
     // output fields
     //
     dict.lookup("fields") >> selectFields_;
-    wordRes::inplaceUniq(selectFields_);
+    selectFields_.uniq();
 
     return true;
 }
@@ -228,9 +224,8 @@ bool Foam::functionObjects::ensightWrite::write()
     DynamicList<word> ignored(selectFields_.size());
 
     // check exact matches first
-    forAll(selectFields_, i)
+    for (const wordRe& select : selectFields_)
     {
-        const wordRe& select = selectFields_[i];
         if (!select.isPattern())
         {
             const word& fieldName = static_cast<const word&>(select);

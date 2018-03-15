@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -461,10 +461,10 @@ autoPtr<mapPolyMesh> reorderMesh
 
     mesh.resetPrimitives
     (
-        Xfer<pointField>::null(),
-        xferMove(newFaces),
-        xferMove(newOwner),
-        xferMove(newNeighbour),
+        autoPtr<pointField>(),  // <- null: leaves points untouched
+        autoPtr<faceList>::New(std::move(newFaces)),
+        autoPtr<labelList>::New(std::move(newOwner)),
+        autoPtr<labelList>::New(std::move(newNeighbour)),
         patchSizes,
         patchStarts,
         true
@@ -497,8 +497,8 @@ autoPtr<mapPolyMesh> reorderMesh
             sortedOrder(newAddressing, newToOld);
             fZone.resetAddressing
             (
-                UIndirectList<label>(newAddressing, newToOld)(),
-                UIndirectList<bool>(newFlipMap, newToOld)()
+                labelUIndList(newAddressing, newToOld)(),
+                boolUIndList(newFlipMap, newToOld)()
             );
         }
     }
@@ -508,7 +508,7 @@ autoPtr<mapPolyMesh> reorderMesh
         cellZones.clearAddressing();
         forAll(cellZones, zoneI)
         {
-            cellZones[zoneI] = UIndirectList<label>
+            cellZones[zoneI] = labelUIndList
             (
                 reverseCellOrder,
                 cellZones[zoneI]
@@ -518,39 +518,36 @@ autoPtr<mapPolyMesh> reorderMesh
     }
 
 
-    return autoPtr<mapPolyMesh>
+    return autoPtr<mapPolyMesh>::New
     (
-        new mapPolyMesh
-        (
-            mesh,                       // const polyMesh& mesh,
-            mesh.nPoints(),             // nOldPoints,
-            mesh.nFaces(),              // nOldFaces,
-            mesh.nCells(),              // nOldCells,
-            identity(mesh.nPoints()),   // pointMap,
-            List<objectMap>(0),         // pointsFromPoints,
-            faceOrder,                  // faceMap,
-            List<objectMap>(0),         // facesFromPoints,
-            List<objectMap>(0),         // facesFromEdges,
-            List<objectMap>(0),         // facesFromFaces,
-            cellOrder,                  // cellMap,
-            List<objectMap>(0),         // cellsFromPoints,
-            List<objectMap>(0),         // cellsFromEdges,
-            List<objectMap>(0),         // cellsFromFaces,
-            List<objectMap>(0),         // cellsFromCells,
-            identity(mesh.nPoints()),   // reversePointMap,
-            reverseFaceOrder,           // reverseFaceMap,
-            reverseCellOrder,           // reverseCellMap,
-            flipFaceFlux,               // flipFaceFlux,
-            patchPointMap,              // patchPointMap,
-            labelListList(0),           // pointZoneMap,
-            labelListList(0),           // faceZonePointMap,
-            labelListList(0),           // faceZoneFaceMap,
-            labelListList(0),           // cellZoneMap,
-            pointField(0),              // preMotionPoints,
-            patchStarts,                // oldPatchStarts,
-            oldPatchNMeshPoints,        // oldPatchNMeshPoints
-            autoPtr<scalarField>()      // oldCellVolumes
-        )
+        mesh,                       // const polyMesh& mesh,
+        mesh.nPoints(),             // nOldPoints,
+        mesh.nFaces(),              // nOldFaces,
+        mesh.nCells(),              // nOldCells,
+        identity(mesh.nPoints()),   // pointMap,
+        List<objectMap>(),          // pointsFromPoints,
+        faceOrder,                  // faceMap,
+        List<objectMap>(),          // facesFromPoints,
+        List<objectMap>(),          // facesFromEdges,
+        List<objectMap>(),          // facesFromFaces,
+        cellOrder,                  // cellMap,
+        List<objectMap>(),          // cellsFromPoints,
+        List<objectMap>(),          // cellsFromEdges,
+        List<objectMap>(),          // cellsFromFaces,
+        List<objectMap>(),          // cellsFromCells,
+        identity(mesh.nPoints()),   // reversePointMap,
+        reverseFaceOrder,           // reverseFaceMap,
+        reverseCellOrder,           // reverseCellMap,
+        flipFaceFlux,               // flipFaceFlux,
+        patchPointMap,              // patchPointMap,
+        labelListList(),            // pointZoneMap,
+        labelListList(),            // faceZonePointMap,
+        labelListList(),            // faceZoneFaceMap,
+        labelListList(),            // cellZoneMap,
+        pointField(),               // preMotionPoints,
+        patchStarts,                // oldPatchStarts,
+        oldPatchNMeshPoints,        // oldPatchNMeshPoints
+        autoPtr<scalarField>()      // oldCellVolumes
     );
 }
 
@@ -653,9 +650,9 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const bool readDict = args.optionFound("dict");
-    const bool doFrontWidth = args.optionFound("frontWidth");
-    const bool overwrite = args.optionFound("overwrite");
+    const bool readDict = args.found("dict");
+    const bool doFrontWidth = args.found("frontWidth");
+    const bool overwrite = args.found("overwrite");
 
     label band;
     scalar profile;
@@ -1074,7 +1071,7 @@ int main(int argc, char *argv[])
         );
 
         // Combine point reordering into map.
-        const_cast<labelList&>(map().pointMap()) = UIndirectList<label>
+        const_cast<labelList&>(map().pointMap()) = labelUIndList
         (
             map().pointMap(),
             pointOrderMap().pointMap()
@@ -1089,19 +1086,21 @@ int main(int argc, char *argv[])
 
 
     // Update fields
-    mesh.updateMesh(map);
+    mesh.updateMesh(map());
 
     // Update proc maps
     if (cellProcAddressing.headerOk())
     {
-        if (cellProcAddressing.size() == mesh.nCells())
+        bool localOk = (cellProcAddressing.size() == mesh.nCells());
+
+        if (returnReduce(localOk, andOp<bool>()))
         {
             Info<< "Renumbering processor cell decomposition map "
                 << cellProcAddressing.name() << endl;
 
             cellProcAddressing = labelList
             (
-                UIndirectList<label>(cellProcAddressing, map().cellMap())
+                labelUIndList(cellProcAddressing, map().cellMap())
             );
         }
         else
@@ -1118,14 +1117,16 @@ int main(int argc, char *argv[])
 
     if (faceProcAddressing.headerOk())
     {
-        if (faceProcAddressing.size() == mesh.nFaces())
+        bool localOk = (faceProcAddressing.size() == mesh.nFaces());
+
+        if (returnReduce(localOk, andOp<bool>()))
         {
             Info<< "Renumbering processor face decomposition map "
                 << faceProcAddressing.name() << endl;
 
             faceProcAddressing = labelList
             (
-                UIndirectList<label>(faceProcAddressing, map().faceMap())
+                labelUIndList(faceProcAddressing, map().faceMap())
             );
 
             // Detect any flips.
@@ -1158,14 +1159,16 @@ int main(int argc, char *argv[])
 
     if (pointProcAddressing.headerOk())
     {
-        if (pointProcAddressing.size() == mesh.nPoints())
+        bool localOk = (pointProcAddressing.size() == mesh.nPoints());
+
+        if (returnReduce(localOk, andOp<bool>()))
         {
             Info<< "Renumbering processor point decomposition map "
                 << pointProcAddressing.name() << endl;
 
             pointProcAddressing = labelList
             (
-                UIndirectList<label>(pointProcAddressing, map().pointMap())
+                labelUIndList(pointProcAddressing, map().pointMap())
             );
         }
         else
@@ -1182,7 +1185,16 @@ int main(int argc, char *argv[])
 
     if (boundaryProcAddressing.headerOk())
     {
-        if (boundaryProcAddressing.size() != mesh.boundaryMesh().size())
+        bool localOk =
+        (
+            boundaryProcAddressing.size()
+         == mesh.boundaryMesh().size()
+        );
+        if (returnReduce(localOk, andOp<bool>()))
+        {
+            // No renumbering needed
+        }
+        else
         {
             Info<< "Not writing inconsistent processor patch decomposition"
                 << " map " << boundaryProcAddressing.filePath() << endl;

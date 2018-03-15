@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -46,15 +46,26 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
 
-void Foam::functionObjects::residuals::writeFileHeader(Ostream& os) const
+void Foam::functionObjects::residuals::writeFileHeader(Ostream& os)
 {
-    writeHeader(os, "Residuals");
+    if (!fieldSet_.updateSelection())
+    {
+        return;
+    }
+
+    if (writtenHeader_)
+    {
+        writeBreak(file());
+    }
+    else
+    {
+        writeHeader(os, "Residuals");
+    }
+
     writeCommented(os, "Time");
 
-    forAll(fieldSet_, fieldi)
+    for (const word& fieldName : fieldSet_.selection())
     {
-        const word& fieldName = fieldSet_[fieldi];
-
         writeFileHeader<scalar>(os, fieldName);
         writeFileHeader<vector>(os, fieldName);
         writeFileHeader<sphericalTensor>(os, fieldName);
@@ -63,6 +74,8 @@ void Foam::functionObjects::residuals::writeFileHeader(Ostream& os) const
     }
 
     os << endl;
+
+    writtenHeader_ = true;
 }
 
 
@@ -77,10 +90,9 @@ Foam::functionObjects::residuals::residuals
 :
     fvMeshFunctionObject(name, runTime, dict),
     writeFile(obr_, name, typeName, dict),
-    fieldSet_()
+    fieldSet_(mesh_)
 {
     read(dict);
-    writeFileHeader(file());
 }
 
 
@@ -94,13 +106,13 @@ Foam::functionObjects::residuals::~residuals()
 
 bool Foam::functionObjects::residuals::read(const dictionary& dict)
 {
-    fvMeshFunctionObject::read(dict);
+    if (fvMeshFunctionObject::read(dict))
+    {
+        fieldSet_.read(dict);
+        return true;
+    }
 
-    wordList allFields(dict.lookup("fields"));
-    wordHashSet uniqueFields(allFields);
-    fieldSet_ = uniqueFields.toc();
-
-    return true;
+    return false;
 }
 
 
@@ -114,12 +126,12 @@ bool Foam::functionObjects::residuals::write()
 {
     if (Pstream::master())
     {
+        writeFileHeader(file());
+
         writeTime(file());
 
-        forAll(fieldSet_, fieldi)
+        for (const word& fieldName : fieldSet_.selection())
         {
-            const word& fieldName = fieldSet_[fieldi];
-
             writeResidual<scalar>(fieldName);
             writeResidual<vector>(fieldName);
             writeResidual<sphericalTensor>(fieldName);

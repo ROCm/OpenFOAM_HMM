@@ -58,11 +58,13 @@ void Foam::Function1Types::ramp::writeData(Ostream& os) const
 {
     Function1<scalar>::writeData(os);
     os  << token::END_STATEMENT << nl;
-    os  << indent << word(this->name() + "Coeffs") << nl;
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
-    os.writeKeyword("start") << start_ << token::END_STATEMENT << nl;
-    os.writeKeyword("duration") << duration_ << token::END_STATEMENT << nl;
-    os  << decrIndent << indent << token::END_BLOCK << endl;
+
+    os.beginBlock(word(this->name() + "Coeffs"));
+
+    os.writeEntry("start", start_);
+    os.writeEntry("duration", duration_);
+
+    os.endBlock();
 }
 
 

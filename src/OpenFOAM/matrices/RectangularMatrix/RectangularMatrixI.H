@@ -110,10 +110,7 @@ template<class Type>
 inline Foam::autoPtr<Foam::RectangularMatrix<Type>>
 Foam::RectangularMatrix<Type>::clone() const
 {
-    return autoPtr<RectangularMatrix<Type>>
-    (
-        new RectangularMatrix<Type>(*this)
-    );
+    return autoPtr<RectangularMatrix<Type>>::New(*this);
 }
 
 

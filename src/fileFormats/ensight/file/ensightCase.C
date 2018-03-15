@@ -535,7 +535,7 @@ void Foam::ensightCase::write() const
     {
         // moving
         *os_
-            << Foam::name("model: %-9d", tsGeom)        // width 16
+            << word::printf("model: %-9d", tsGeom) // width 16 (no quotes)
             << (dataMask/geometryName).c_str()
             << nl;
     }
@@ -554,7 +554,7 @@ void Foam::ensightCase::write() const
         );
 
         *os_
-            << Foam::name("measured: %-6d", tsCloud)    // width 16
+            << word::printf("measured: %-6d", tsCloud) // width 16 (no quotes)
             << (masked/"positions").c_str()
             << nl;
     }
@@ -617,7 +617,7 @@ void Foam::ensightCase::write() const
             // prefix variables with 'c' (cloud) and cloud index
             *os_
                 << ensType.c_str() << " per "
-                << Foam::name("measured node: %-5d", tsCloud) // width 20
+                << word::printf("measured node: %-5d", tsCloud) // width 20
                 << setw(15)
                 << ("c" + Foam::name(cloudNo) + varName).c_str() << ' '
                 << (masked/varName).c_str()

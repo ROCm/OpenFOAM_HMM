@@ -8,6 +8,7 @@ waveGenerationModels/derived/Boussinesq/BoussinesqWaveModel.C
 waveGenerationModels/derived/cnoidal/cnoidalWaveModel.C
 waveGenerationModels/derived/Grimshaw/GrimshawWaveModel.C
 waveGenerationModels/derived/McCowan/McCowanWaveModel.C
+waveGenerationModels/derived/streamFunction/streamFunctionWaveModel.C
 waveGenerationModels/derived/StokesII/StokesIIWaveModel.C
 waveGenerationModels/derived/StokesI/StokesIWaveModel.C
 waveGenerationModels/derived/StokesV/StokesVWaveModel.C

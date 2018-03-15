@@ -100,6 +100,15 @@ public:
     virtual ~error() throw();
 
 
+    // Static Member Functions
+
+        //- Emit warning on stderr about something being old.
+        //  \param what description for the warning
+        //  \param oldVersion is a YYMM version value for determining the
+        //      age in months.
+        static void warnAboutAge(const char* what, const int oldVersion);
+
+
     // Member functions
 
         string message() const;
@@ -194,6 +203,9 @@ public:
         //- Abort : used to stop code for fatal errors.
         //  Prints stack before exiting.
         void abort();
+
+        //- Print error message
+        void write(Ostream& os, const bool includeTitle = true) const;
 
 
     // Ostream operator

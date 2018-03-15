@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,18 +36,16 @@ SourceFiles
 #ifndef geometricSurfacePatch_H
 #define geometricSurfacePatch_H
 
-#include "word.H"
-#include "label.H"
 #include "typeInfo.H"
+#include "surfZoneIdentifier.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declarations
 class dictionary;
-
-// Forward declaration of friend functions and operators
 class geometricSurfacePatch;
 
 Istream& operator>>(Istream& is, geometricSurfacePatch& p);
@@ -59,7 +57,7 @@ Ostream& operator<<(Ostream& os, const geometricSurfacePatch& p);
 
 class geometricSurfacePatch
 {
-    // Private data
+    // Private Data
 
         //- Type name of patch
         word geometricType_;
@@ -72,10 +70,20 @@ class geometricSurfacePatch
 
 public:
 
-    // Public data
+    // Public Data
 
         //- The name for an 'empty' type
         static const word emptyType;
+
+        //- Helper to convert identifier types as an operation
+        struct fromIdentifier
+        {
+            geometricSurfacePatch operator()(const surfZoneIdentifier& ident)
+            const
+            {
+                return geometricSurfacePatch(ident);
+            }
+        };
 
 
     //- Runtime type information
@@ -105,6 +113,10 @@ public:
             const word& name,
             const label index
         );
+
+        //- Implicit conversion from surfZoneIdentifier, which has similar
+        //- information but in a different order
+        geometricSurfacePatch(const surfZoneIdentifier& ident);
 
         //- Construct from dictionary
         geometricSurfacePatch

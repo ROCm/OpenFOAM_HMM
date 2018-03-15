@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ Description
 
 #include "SLList.H"
 #include "Ostream.H"
-#include "stringListOps.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -100,30 +100,26 @@ public:
         }
 
 
-        //- Return a list of names matching whiteList and not matching blackList
+        //- Return a list of names matching white-list and not in black-list
         List<word> findNames
         (
-            const UList<wordRe>& whiteLst,
-            const UList<wordRe>& blackLst = UList<wordRe>()
+            const wordRes& white,
+            const wordRes& black = wordRes()
         ) const
         {
             List<word> matched(SLList<T>::size());
 
-            label matchI = 0;
+            label matchi = 0;
             forAllConstIters(*this, iter)
             {
                 const word& name = iter().name();
 
-                if
-                (
-                    findStrings(whiteLst, name)
-                 && !findStrings(blackLst, name)
-                )
+                if (white.match(name) && !black.match(name))
                 {
-                    matched[matchI++] = name;
+                    matched[matchi++] = name;
                 }
             }
-            matched.setSize(matchI);
+            matched.setSize(matchi);
 
             return matched;
         }

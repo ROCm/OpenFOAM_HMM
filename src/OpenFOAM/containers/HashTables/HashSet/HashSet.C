@@ -79,7 +79,7 @@ inline Foam::label Foam::HashSet<Key, Hash>::assignMultiple
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash>::HashSet(const UList<Key>& lst)
 :
-    HashTable<nil, Key, Hash>(2*lst.size())
+    parent_type(2*lst.size())
 {
     for (const auto& k : lst)
     {
@@ -92,7 +92,7 @@ template<class Key, class Hash>
 template<unsigned Size>
 Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
 :
-    HashTable<nil, Key, Hash>(2*lst.size())
+    parent_type(2*lst.size())
 {
     for (const auto& k : lst)
     {
@@ -104,7 +104,7 @@ Foam::HashSet<Key, Hash>::HashSet(const FixedList<Key, Size>& lst)
 template<class Key, class Hash>
 Foam::HashSet<Key, Hash>::HashSet(std::initializer_list<Key> lst)
 :
-    HashTable<nil, Key, Hash>(2*lst.size())
+    parent_type(2*lst.size())
 {
     for (const auto& k : lst)
     {
@@ -120,12 +120,9 @@ Foam::HashSet<Key, Hash>::HashSet
     const HashTable<AnyType, Key, AnyHash>& tbl
 )
 :
-    HashTable<nil, Key, Hash>(tbl.capacity())
+    parent_type(tbl.capacity())
 {
-    using other_iter =
-        typename HashTable<AnyType, Key, AnyHash>::const_iterator;
-
-    for (other_iter iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
+    for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
     {
         this->insert(iter.key());
     }
@@ -173,26 +170,25 @@ inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& lst)
+void Foam::HashSet<Key, Hash>::operator=(const UList<Key>& rhs)
 {
-    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
 }
 
 
 template<class Key, class Hash>
 template<unsigned Size>
-void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& lst)
+void Foam::HashSet<Key, Hash>::operator=(const FixedList<Key, Size>& rhs)
 {
-    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
 }
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> lst)
+void Foam::HashSet<Key, Hash>::operator=(std::initializer_list<Key> rhs)
 {
-    assignMultiple(lst.begin(), lst.end(), 2*lst.size());
+    assignMultiple(rhs.begin(), rhs.end(), 2*rhs.size());
 }
-
 
 
 template<class Key, class Hash>
@@ -224,25 +220,31 @@ bool Foam::HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& rhs) const
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
+Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
 {
     // Add rhs elements into lhs
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         this->insert(iter.key());
     }
+
+    return *this;
 }
 
 
 template<class Key, class Hash>
-inline void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
+inline Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
 {
     this->parent_type::retain(rhs);
+    return *this;
 }
 
 
 template<class Key, class Hash>
-void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
+Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 {
     // Add missed rhs elements, remove duplicate elements
     for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
@@ -256,13 +258,18 @@ void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
             this->insert(iter.key());
         }
     }
+
+    return *this;
 }
 
 
 template<class Key, class Hash>
-inline void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
+inline Foam::HashSet<Key, Hash>&
+Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {
     this->parent_type::erase(rhs);
+
+    return *this;
 }
 
 
@@ -275,11 +282,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashSet<Key, Hash>& tbl)
 }
 
 
-/* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
+/* * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * */
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>
-Foam::operator|
+Foam::HashSet<Key, Hash> Foam::operator|
 (
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
@@ -292,8 +298,7 @@ Foam::operator|
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>
-Foam::operator&
+Foam::HashSet<Key, Hash> Foam::operator&
 (
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
@@ -306,8 +311,7 @@ Foam::operator&
 
 
 template<class Key, class Hash>
-Foam::HashSet<Key, Hash>
-Foam::operator^
+Foam::HashSet<Key, Hash> Foam::operator^
 (
     const HashSet<Key, Hash>& hash1,
     const HashSet<Key, Hash>& hash2
@@ -336,7 +340,7 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::begin() const
 {
-    return HashTableCore::iterator_begin<const_iterator>
+    return HashTableCore::iterator_cbegin<const_iterator>
     (
         static_cast<const parent_type&>(*this)
     );
@@ -347,7 +351,7 @@ template<class Key, class Hash>
 inline typename Foam::HashSet<Key, Hash>::const_iterator
 Foam::HashSet<Key, Hash>::cbegin() const
 {
-    return HashTableCore::iterator_begin<const_iterator>
+    return HashTableCore::iterator_cbegin<const_iterator>
     (
         static_cast<const parent_type&>(*this)
     );
@@ -366,7 +370,7 @@ template<class Key, class Hash>
 inline const typename Foam::HashSet<Key, Hash>::const_iterator&
 Foam::HashSet<Key, Hash>::end() const
 {
-    return HashTableCore::iterator_end<const_iterator>();
+    return HashTableCore::iterator_cend<const_iterator>();
 }
 
 

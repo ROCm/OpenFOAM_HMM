@@ -74,7 +74,7 @@ public:
     // Constructors
 
         //- Construct null
-        inline globalIndex();
+        globalIndex() = default;
 
         //- Construct from local max size. Does communication with default
         //  communicator and message tag.
@@ -90,11 +90,11 @@ public:
             const bool parallel     // use parallel comms
         );
 
-        //- Construct from components
-        globalIndex(const labelList& offsets);
+        //- Copy construct from list of labels
+        inline globalIndex(const labelUList& offsets);
 
-        //- Construct from components
-        inline globalIndex(const Xfer<labelList>& offsets);
+        //- Move construct from list of labels
+        inline globalIndex(labelList&& offsets);
 
         //- Construct from Istream
         globalIndex(Istream& is);

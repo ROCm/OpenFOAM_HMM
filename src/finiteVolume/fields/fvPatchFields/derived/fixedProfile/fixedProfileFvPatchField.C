@@ -94,7 +94,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),  // Don't map
-    profile_(ptf.profile_, false),
+    profile_(ptf.profile_.clone()),
     dir_(ptf.dir_),
     origin_(ptf.origin_)
 {
@@ -110,7 +110,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    profile_(ptf.profile_, false),
+    profile_(ptf.profile_.clone()),
     dir_(ptf.dir_),
     origin_(ptf.origin_)
 {}
@@ -124,7 +124,7 @@ Foam::fixedProfileFvPatchField<Type>::fixedProfileFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    profile_(ptf.profile_, false),
+    profile_(ptf.profile_.clone()),
     dir_(ptf.dir_),
     origin_(ptf.origin_)
 {
@@ -158,8 +158,8 @@ void Foam::fixedProfileFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
     profile_->writeData(os);
-    os.writeKeyword("direction") << dir_ << token::END_STATEMENT << nl;
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
+    os.writeEntry("direction", dir_);
+    os.writeEntry("origin", origin_);
     this->writeEntry("value", os);
 }
 

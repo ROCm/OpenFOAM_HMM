@@ -20,7 +20,7 @@ solvers
     p
     {
         solver          GAMG;
-        tolerance       1e-06;
+        tolerance       1e-08;
         relTol          0.01;
         smoother        GaussSeidel;
     }
@@ -28,7 +28,7 @@ solvers
     pFinal
     {
         solver          GAMG;
-        tolerance       1e-06;
+        tolerance       1e-08;
         relTol          0;
         smoother        GaussSeidel;
     }
@@ -37,23 +37,24 @@ solvers
     {
         solver          smoothSolver;
         smoother        symGaussSeidel;
-        tolerance       1e-05;
-        relTol          0.1;
+        tolerance       1e-07;
+        relTol          0.05;
     }
 
     "(rho|U|k|epsilon|h)Final"
     {
         $U;
-        tolerance       1e-05;
+        tolerance       1e-07;
         relTol          0;
     }
 }
 
 PIMPLE
 {
+    momentumPredictor   no;
     transonic           no;
     nOuterCorrectors 1;
-    nCorrectors     3;
+    nCorrectors      5;
     nNonOrthogonalCorrectors 0;
 }
 

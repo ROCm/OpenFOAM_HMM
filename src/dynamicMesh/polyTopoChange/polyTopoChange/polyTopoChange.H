@@ -197,30 +197,57 @@ class polyTopoChange
 
     // Private Member Functions
 
-        //- Reorder contents of container according to map
+        //- Reorder contents of container according to oldToNew map
         template<class T>
-        static void reorder(const labelList& map, DynamicList<T>&);
-        template<class T>
-        static void reorder(const labelList& map, List<DynamicList<T>>&);
-        template<class T>
-        static void renumberKey(const labelList& map, Map<T>&);
+        static void reorder
+        (
+            const labelUList& oldToNew,
+            DynamicList<T>& lst
+        );
 
-        //- Renumber elements of container according to map
-        static void renumber(const labelList&, labelHashSet&);
+        template<class T>
+        static void reorder
+        (
+            const labelUList& oldToNew,
+            List<DynamicList<T>>& lst
+        );
+
+        template<class T>
+        static void renumberKey
+        (
+            const labelUList& oldToNew,
+            Map<T>& map
+        );
+
+        //- Renumber elements of container according to oldToNew map
+        static void renumber
+        (
+            const labelUList& oldToNew,
+            labelHashSet& labels
+        );
+
         //- Special handling of reverse maps which have <-1 in them
-        static void renumberReverseMap(const labelList&, DynamicList<label>&);
+        static void renumberReverseMap
+        (
+            const labelUList& oldToNew,
+            DynamicList<label>& elems
+        );
 
         //- Renumber & compact elements of list according to map
-        static void renumberCompact(const labelList&, labelList&);
+        static void renumberCompact
+        (
+            const labelUList& oldToNew,
+            labelList& elems
+        );
 
         //- Get all set elements as a labelHashSet
-        static labelHashSet getSetIndices(const PackedBoolList&);
+        static labelHashSet getSetIndices(const PackedBoolList& lst);
 
         //- Count number of added and removed quantities from maps.
         static void countMap
         (
-            const labelList& map,
-            const labelList& reverseMap,
+            const labelUList& map,
+            const labelUList& reverseMap,
             label& nAdd,
             label& nInflate,
             label& nMerge,
@@ -228,19 +255,19 @@ class polyTopoChange
         );
 
         //- Print some stats about mesh
-        static void writeMeshStats(const polyMesh& mesh, Ostream&);
+        static void writeMeshStats(const polyMesh& mesh, Ostream& os);
 
         //- Calculate object maps. Requires reverseMap to have destination
         //  to be marked with <-1.
         static void getMergeSets
         (
-            const labelList& reverseCellMap,
-            const labelList& cellMap,
+            const labelUList& reverseCellMap,
+            const labelUList& cellMap,
             List<objectMap>& cellsFromCells
         );
 
         //- Are all face vertices valid
-        bool hasValidPoints(const face&) const;
+        bool hasValidPoints(const face& f) const;
 
         //- Return face points
         pointField facePoints(const face& f) const;
@@ -248,7 +275,7 @@ class polyTopoChange
         //- Check inputs to modFace or addFace
         void checkFace
         (
-            const face&,
+            const face& f,
             const label facei,
             const label own,
             const label nei,
@@ -274,16 +301,16 @@ class polyTopoChange
         //- Cell ordering (bandCompression). Returns number of remaining cells.
         label getCellOrder
         (
-            const CompactListList<label, labelList>&,
-            labelList&
+            const CompactListList<label, labelList>& cellCellAddressing,
+            labelList& oldToNew
         ) const;
 
         //- Do upper-triangular ordering and patch ordering.
         void getFaceOrder
         (
             const label nActiveFaces,
-            const labelList& cellFaces,
-            const labelList& cellFaceOffsets,
+            const labelUList& cellFaces,
+            const labelUList& cellFaceOffsets,
 
             labelList& oldToNew,
             labelList& patchSizes,
@@ -294,7 +321,7 @@ class polyTopoChange
         void reorderCompactFaces
         (
             const label newSize,
-            const labelList& oldToNew
+            const labelUList& oldToNew
         );
 
         //- Remove all unused/removed points/faces/cells and update
@@ -314,50 +341,50 @@ class polyTopoChange
         //- Select either internal or external faces out of faceLabels
         static labelList selectFaces
         (
-            const primitiveMesh&,
-            const labelList& faceLabels,
+            const primitiveMesh& mesh,
+            const labelUList& faceLabels,
             const bool internalFacesOnly
         );
 
         //- Calculate mapping for patchpoints only
         void calcPatchPointMap
         (
-            const List<Map<label>>&,
-            const polyBoundaryMesh&,
-            labelListList&
+            const UList<Map<label>>& oldPatchMeshPointMaps,
+            const polyBoundaryMesh& boundary,
+            labelListList& patchPointMap
         ) const;
 
         void calcFaceInflationMaps
         (
-            const polyMesh&,
-            List<objectMap>&,
-            List<objectMap>&,
-            List<objectMap>&
+            const polyMesh& mesh,
+            List<objectMap>& facesFromPoints,
+            List<objectMap>& facesFromEdges,
+            List<objectMap>& facesFromFaces
         ) const;
 
         void calcCellInflationMaps
         (
-            const polyMesh&,
-            List<objectMap>&,
-            List<objectMap>&,
-            List<objectMap>&,
-            List<objectMap>&
+            const polyMesh& mesh,
+            List<objectMap>& cellsFromPoints,
+            List<objectMap>& cellsFromEdges,
+            List<objectMap>& cellsFromFaces,
+            List<objectMap>& cellsFromCells
         ) const;
 
         void resetZones
         (
-            const polyMesh&,        // mesh to get existing info from
-            polyMesh&,              // mesh to change zones on
-            labelListList&,
-            labelListList&,
-            labelListList&
+            const polyMesh& mesh,   // mesh to get existing info from
+            polyMesh& newMesh,      // mesh to change zones on
+            labelListList& pointZoneMap,
+            labelListList& faceZoneFaceMap,
+            labelListList& cellZoneMap
         ) const;
 
         void calcFaceZonePointMap
         (
-            const polyMesh&,
-            const List<Map<label>>&,
-            labelListList&
+            const polyMesh& mesh,
+            const UList<Map<label>>& oldFaceZoneMeshPointMaps,
+            labelListList& faceZonePointMap
         ) const;
 
 
@@ -367,15 +394,15 @@ class polyTopoChange
             void reorderCoupledFaces
             (
                 const bool syncParallel,
-                const polyBoundaryMesh&,
-                const labelList& patchStarts,
-                const labelList& patchSizes,
+                const polyBoundaryMesh& boundary,
+                const labelUList& patchStarts,
+                const labelUList& patchSizes,
                 const pointField& points
             );
 
         void compactAndReorder
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const bool syncParallel,
             const bool orderCells,
             const bool orderPoints,
@@ -445,12 +472,15 @@ public:
             }
 
             //- Is point removed?
+            //  Considered removed if point is GREAT.
             inline bool pointRemoved(const label pointi) const;
 
             //- Is face removed?
+            //  Considered removed if face is empty
             inline bool faceRemoved(const label facei) const;
 
             //- Is cell removed?
+            //  Considered removed if the cellMap is -2
             inline bool cellRemoved(const label celli) const;
 
 
@@ -463,11 +493,11 @@ public:
             //  or zone ids.
             void addMesh
             (
-                const polyMesh&,
-                const labelList& patchMap,
-                const labelList& pointZoneMap,
-                const labelList& faceZoneMap,
-                const labelList& cellZoneMap
+                const polyMesh& mesh,
+                const labelUList& patchMap,
+                const labelUList& pointZoneMap,
+                const labelUList& faceZoneMap,
+                const labelUList& cellZoneMap
             );
 
             //- Explicitly pre-size the dynamic storage for expected mesh
@@ -491,7 +521,7 @@ public:
             //  - inCell = false: add retired point (to end of point list)
             label addPoint
             (
-                const point&,
+                const point& pt,
                 const label masterPointID,
                 const label zoneID,
                 const bool inCell
@@ -499,17 +529,18 @@ public:
 
             //- Modify coordinate.
             //  Notes:
+            //  - zoneID = +ve (add to zoneID), -ve (remove from zones)
             //  - inCell = false: add retired point (to end of point list)
             void modifyPoint
             (
-                const label,
-                const point&,
-                const label newZoneID,
+                const label pointi,
+                const point& pt,
+                const label zoneID,
                 const bool inCell
             );
 
             //- Remove/merge point.
-            void removePoint(const label, const label);
+            void removePoint(const label pointi, const label mergePointi);
 
             //- Add face to cells. Return new face label.
             //  own,nei<0, zoneID>=0 : add inactive face (to end of face list)
@@ -541,7 +572,7 @@ public:
             );
 
             //- Remove/merge face.
-            void removeFace(const label, const label);
+            void removeFace(const label facei, const label mergeFacei);
 
             //- Add cell. Return new cell label.
             label addCell
@@ -554,10 +585,10 @@ public:
             );
 
             //- Modify zone of cell
-            void modifyCell(const label, const label zoneID);
+            void modifyCell(const label celli, const label zoneID);
 
             //- Remove/merge cell.
-            void removeCell(const label, const label);
+            void removeCell(const label celli, const label mergeCelli);
 
             //- Explicitly set the number of patches if construct-without-mesh
             //  used.

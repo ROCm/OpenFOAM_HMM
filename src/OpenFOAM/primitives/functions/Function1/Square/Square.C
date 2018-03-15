@@ -58,10 +58,10 @@ Foam::Function1Types::Square<Type>::Square(const Square<Type>& se)
     Function1<Type>(se),
     t0_(se.t0_),
     markSpace_(se.markSpace_),
-    amplitude_(se.amplitude_, false),
-    frequency_(se.frequency_, false),
-    scale_(se.scale_, false),
-    level_(se.level_, false)
+    amplitude_(se.amplitude_.clone()),
+    frequency_(se.frequency_.clone()),
+    scale_(se.scale_.clone()),
+    level_(se.level_.clone())
 {}
 
 

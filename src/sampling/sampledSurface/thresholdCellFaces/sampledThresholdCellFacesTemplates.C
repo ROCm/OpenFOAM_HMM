@@ -42,7 +42,7 @@ Foam::sampledThresholdCellFaces::sampleField
     // Recreate geometry if time has changed
     updateGeometry();
 
-    return tmp<Field<Type>>(new Field<Type>(vField, meshCells_));
+    return tmp<Field<Type>>::New(vField, meshCells_);
 }
 
 

@@ -1,0 +1,15 @@
+EXE_INC = \
+    -I$(KAHIP_ARCH_PATH)/include \
+    -I../decompositionMethods/lnInclude
+
+/*
+ * The $(KAHIP_ARCH_PATH)/lib$WM_COMPILER_LIB_ARCH path is provided
+ * to support central, non-thirdparty installations.
+ *
+ * KaHIP is often compiled with openmp, but may be missing the
+ * link dependency for openmp.
+ */
+LIB_LIBS = \
+    -L$(KAHIP_ARCH_PATH)/lib \
+    -L$(KAHIP_ARCH_PATH)/lib$(WM_COMPILER_LIB_ARCH) \
+    -L$(FOAM_EXT_LIBBIN) $(LINK_OPENMP) -lkahip

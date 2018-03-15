@@ -274,10 +274,10 @@ template<class Type>
 dimensioned<Type> min(const dimensioned<Type>&, const dimensioned<Type>&);
 
 template<class Type>
-bool operator>(const dimensioned<Type>&, const dimensioned<Type>&);
+bool operator<(const dimensioned<Type>&, const dimensioned<Type>&);
 
 template<class Type>
-bool operator<(const dimensioned<Type>&, const dimensioned<Type>&);
+bool operator>(const dimensioned<Type>&, const dimensioned<Type>&);
 
 template<class Type>
 dimensioned<Type> operator+(const dimensioned<Type>&, const dimensioned<Type>&);

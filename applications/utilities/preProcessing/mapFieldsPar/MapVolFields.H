@@ -121,7 +121,7 @@ template<class Type, class CombineOp>
 void MapVolFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     const meshToMesh& interp,
     const CombineOp& cop
 )

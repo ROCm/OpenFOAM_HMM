@@ -44,11 +44,11 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("scaling factor");
+    argList::addArgument("scaling factor");
 
     #include "setRootCase.H"
 
-    const scalar scaleFactor = args.argRead<scalar>(1);
+    const scalar scaleFactor = args.read<scalar>(1);
 
     #include "createTime.H"
     #include "createMesh.H"

@@ -132,13 +132,12 @@ public:
         //- Return clone
         autoPtr<coordinateRotation> clone() const
         {
-            return autoPtr<coordinateRotation>(new axesRotation(*this));
+            return autoPtr<coordinateRotation>::NewFrom<axesRotation>(*this);
         }
 
 
     //- Destructor
-    virtual ~axesRotation()
-    {}
+    virtual ~axesRotation() = default;
 
 
     // Member Functions

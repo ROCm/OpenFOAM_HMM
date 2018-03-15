@@ -39,7 +39,6 @@ SourceFiles
 #ifndef TRIsurfaceFormat_H
 #define TRIsurfaceFormat_H
 
-#include "TRIsurfaceFormatCore.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
@@ -52,7 +51,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class TRIsurfaceFormat Declaration
+                Class fileFormats::TRIsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -64,9 +63,9 @@ class TRIsurfaceFormat
 
         static inline void writeShell
         (
-            Ostream&,
-            const pointField&,
-            const Face&,
+            Ostream& os,
+            const UList<point>& pts,
+            const Face& f,
             const label zoneI
         );
 
@@ -82,50 +81,46 @@ public:
     // Constructors
 
         //- Construct from file name
-        TRIsurfaceFormat(const fileName&);
-
-
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<MeshedSurface<Face>> New(const fileName& name)
-        {
-            return autoPtr<MeshedSurface<Face>>
-            (
-                new TRIsurfaceFormat<Face>(name)
-            );
-        }
+        TRIsurfaceFormat(const fileName& filename);
 
 
     //- Destructor
-    virtual ~TRIsurfaceFormat()
-    {}
+    virtual ~TRIsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface,
         //  by default the output is not sorted by zones
         static void write
         (
-            const fileName&,
-            const UnsortedMeshedSurface<Face>&
+            const fileName& filename,
+            const UnsortedMeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& filename);
 
         //- Write object
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 };
 

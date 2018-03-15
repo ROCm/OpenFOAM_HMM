@@ -293,7 +293,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::regionCoupledBase::AMI() const
         resetAMI();
     }
 
-    return AMIPtr_();
+    return *AMIPtr_;
 }
 
 
@@ -331,21 +331,17 @@ bool Foam::regionCoupledBase::order
 
 void Foam::regionCoupledBase::write(Ostream& os) const
 {
-    os.writeKeyword("neighbourPatch") << nbrPatchName_
-    << token::END_STATEMENT << nl;
-    os.writeKeyword("neighbourRegion") << nbrRegionName_
-    << token::END_STATEMENT << nl;
+    os.writeEntry("neighbourPatch", nbrPatchName_);
+    os.writeEntry("neighbourRegion", nbrRegionName_);
 
     if (AMIReverse_)
     {
-        os.writeKeyword("flipNormals") << AMIReverse_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("flipNormals", AMIReverse_);
     }
 
     if (!surfDict_.empty())
     {
-        os.writeKeyword(surfDict_.dictName());
-        os  << surfDict_;
+        surfDict_.writeEntry(surfDict_.dictName(), os);
     }
 }
 

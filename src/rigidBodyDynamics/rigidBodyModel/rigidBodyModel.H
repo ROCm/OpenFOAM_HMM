@@ -108,7 +108,7 @@ protected:
         PtrList<subBody> mergedBodies_;
 
         //- Lookup-table of the IDs of the bodies
-        HashTable<label, word> bodyIDs_;
+        HashTable<label> bodyIDs_;
 
         //- List of indices of the parent of each body
         DynamicList<label> lambda_;

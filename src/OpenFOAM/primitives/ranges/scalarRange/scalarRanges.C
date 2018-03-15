@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,114 +24,35 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "scalarRanges.H"
-#include "DynamicList.H"
-#include "ListOps.H"
+#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::scalarRanges::scalarRanges()
+Foam::scalarRanges::scalarRanges(const std::string& str)
 :
-    List<scalarRange>(0)
-{}
-
-
-Foam::scalarRanges::scalarRanges(Istream& is)
-:
-    List<scalarRange>(0)
+    List<scalarRange>()
 {
-    DynamicList<scalarRange> lst;
+    const SubStrings<std::string> items = stringOps::splitAny(str, " ,;");
 
-    while (is.good())
+    setSize(items.size());
+
+    label nItems = 0;
+
+    for (const auto& item : items)
     {
-        scalarRange sr(is);
-        if (sr.valid())
+        const std::string s = item.str();
+
+        if (scalarRange::parse(s, operator[](nItems)))
         {
-            lst.append(sr);
+            ++nItems;
+        }
+        else
+        {
+            Info<< "Bad scalar-range while parsing: " << s << endl;
         }
     }
 
-    transfer(lst);
-}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-bool Foam::scalarRanges::selected(const scalar value) const
-{
-    forAll(*this, i)
-    {
-        if (operator[](i).selected(value))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-
-Foam::List<bool> Foam::scalarRanges::selected
-(
-    const UList<scalar>& values
-) const
-{
-    List<bool> lst(values.size(), false);
-
-    // check ranges
-    forAll(values, i)
-    {
-        if (selected(values[i]))
-        {
-            lst[i] = true;
-        }
-    }
-
-    // check specific values
-    forAll(*this, rangeI)
-    {
-        if (operator[](rangeI).isExact())
-        {
-            scalar target = operator[](rangeI).value();
-
-            int nearestIndex = -1;
-            scalar nearestDiff = Foam::GREAT;
-
-            forAll(values, timeIndex)
-            {
-                scalar diff = fabs(values[timeIndex] - target);
-                if (diff < nearestDiff)
-                {
-                    nearestDiff = diff;
-                    nearestIndex = timeIndex;
-                }
-            }
-
-            if (nearestIndex >= 0)
-            {
-                lst[nearestIndex] = true;
-            }
-        }
-    }
-
-    return lst;
-}
-
-
-Foam::List<Foam::scalar> Foam::scalarRanges::select
-(
-    const List<scalar>& values
-) const
-{
-    return subset(selected(values), values);
-}
-
-
-void Foam::scalarRanges::inplaceSelect
-(
-    List<scalar>& values
-) const
-{
-    inplaceSubset(selected(values), values);
+    setSize(nItems);
 }
 
 

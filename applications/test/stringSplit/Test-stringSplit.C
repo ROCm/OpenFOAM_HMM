@@ -71,6 +71,18 @@ int main(int argc, char *argv[])
         "string",
         "test split on substring"
     );
+    argList::addOption
+    (
+        "char",
+        "delim",
+        "test split on specified delimiter character"
+    );
+    argList::addOption
+    (
+        "fixed",
+        "int",
+        "test split on fixed width"
+    );
     argList::addBoolOption
     (
         "slash",
@@ -81,6 +93,11 @@ int main(int argc, char *argv[])
         "space",
         "test split on space"
     );
+    argList::addBoolOption
+    (
+        "empty",
+        "preserve empty strings in split"
+    );
     argList args(argc, argv, false, true);
 
     if (args.size() <= 1 && args.options().empty())
@@ -88,16 +105,12 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    int nopts = 0;
-    for (auto optName : { "any", "slash", "space", "sub" })
-    {
-        if (args.optionFound(optName))
-        {
-            ++nopts;
-        }
-    }
+    const bool keepEmpty = args.found("empty");
 
-    if (args.optionFound("any"))
+    const label nopts =
+        args.count({"any", "slash", "space", "sub", "fixed", "char"});
+
+    if (args.found("any"))
     {
         const std::string& str = args["any"];
         Info<< "split on any chars" << nl
@@ -116,7 +129,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("sub"))
+    if (args.found("sub"))
     {
         const std::string& str = args["sub"];
         Info<< "split on substring" << nl
@@ -135,7 +148,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (args.optionFound("space"))
+    if (args.found("space"))
     {
         Info<< "split on space" << nl
             << "~~~~~~~~~~~~~~" << nl;
@@ -152,15 +165,55 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Default
-    if (!nopts || args.optionFound("slash"))
+    if (args.found("char"))
     {
+        const char delim = args["char"][0];
+
+        Info<< "split on char=" << delim << nl
+            << "~~~~~~~~~~~~~~" << nl;
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const auto split = stringOps::split(args[argi], delim, keepEmpty);
+            printSubStrings(args[argi], split);
+        }
+
+        if (nopts == 1)
+        {
+            return 0;
+        }
+    }
+
+    if (args.found("fixed"))
+    {
+        const label width = args.opt<label>("fixed");
+
+        Info<< "split on fixed width = " << width << nl
+            << "~~~~~~~~~~~~~~" << nl;
+
+        for (label argi=1; argi < args.size(); ++argi)
+        {
+            const auto split = stringOps::splitFixed(args[argi], width);
+            printSubStrings(args[argi], split);
+        }
+
+        if (nopts == 1)
+        {
+            return 0;
+        }
+    }
+
+    // Default
+    if (!nopts || args.found("slash"))
+    {
+        const char delim = '/';
+
         Info<< "split on slash" << nl
             << "~~~~~~~~~~~~~~" << nl;
 
         for (label argi=1; argi < args.size(); ++argi)
         {
-            const auto split = stringOps::split(args[argi], '/');
+            const auto split = stringOps::split(args[argi], delim, keepEmpty);
             printSubStrings(args[argi], split);
         }
     }

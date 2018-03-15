@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,6 @@ License
 
 #include "ListOps.H"
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 const Foam::labelList Foam::emptyLabelList;
@@ -43,22 +42,23 @@ Foam::labelList Foam::invert
 
     forAll(map, i)
     {
-        const label newPos = map[i];
+        const label newIdx = map[i];
 
-        if (newPos >= 0)
+        if (newIdx >= 0)
         {
-            if (inverse[newPos] >= 0)
+            if (inverse[newIdx] >= 0)
             {
                 FatalErrorInFunction
                     << "Map is not one-to-one. At index " << i
-                    << " element " << newPos << " has already occurred before"
+                    << " element " << newIdx << " has already occurred before"
                     << nl << "Please use invertOneToMany instead"
                     << abort(FatalError);
             }
 
-            inverse[newPos] = i;
+            inverse[newIdx] = i;
         }
     }
+
     return inverse;
 }
 
@@ -69,31 +69,31 @@ Foam::labelListList Foam::invertOneToMany
     const labelUList& map
 )
 {
-    labelList nElems(len, 0);
+    labelList sizes(len, 0);
 
-    forAll(map, i)
+    for (const label newIdx : map)
     {
-        if (map[i] >= 0)
+        if (newIdx >= 0)
         {
-            nElems[map[i]]++;
+            sizes[newIdx]++;
         }
     }
 
     labelListList inverse(len);
 
-    forAll(nElems, i)
+    for (label i=0; i<len; ++i)
     {
-        inverse[i].setSize(nElems[i]);
-        nElems[i] = 0;
+        inverse[i].setSize(sizes[i]);
+        sizes[i] = 0; // reset size counter
     }
 
     forAll(map, i)
     {
-        const label newI = map[i];
+        const label newIdx = map[i];
 
-        if (newI >= 0)
+        if (newIdx >= 0)
         {
-            inverse[newI][nElems[newI]++] = i;
+            inverse[newIdx][sizes[newIdx]++] = i;
         }
     }
 
@@ -101,13 +101,13 @@ Foam::labelListList Foam::invertOneToMany
 }
 
 
-Foam::labelList Foam::identity(const label len)
+Foam::labelList Foam::identity(const label len, const label start)
 {
     labelList map(len);
 
     for (label i = 0; i < len; ++i)
     {
-        map[i] = i;
+        map[i] = i + start;
     }
 
     return map;

@@ -97,7 +97,7 @@ Foam::label Foam::cellSplitter::newOwner
 
         const cell& cFaces = mesh_.cells()[oldOwn];
 
-        return newCells[findIndex(cFaces, facei)];
+        return newCells[cFaces.find(facei)];
     }
 }
 
@@ -125,7 +125,7 @@ Foam::label Foam::cellSplitter::newNeighbour
 
         const cell& cFaces = mesh_.cells()[oldNbr];
 
-        return newCells[findIndex(cFaces, facei)];
+        return newCells[cFaces.find(facei)];
     }
 }
 
@@ -261,8 +261,8 @@ void Foam::cellSplitter::setRefinement
             // (since newly created cells are stored in cFaces order)
             const labelList& newCells = cellToCells[celli];
 
-            label cell0 = newCells[findIndex(cFaces, face0)];
-            label cell1 = newCells[findIndex(cFaces, face1)];
+            label cell0 = newCells[cFaces.find(face0)];
+            label cell1 = newCells[cFaces.find(face1)];
 
             if (cell0 < cell1)
             {
@@ -271,7 +271,7 @@ void Foam::cellSplitter::setRefinement
 
                 const face& f0 = mesh_.faces()[face0];
 
-                label index = findIndex(f0, e[0]);
+                label index = f0.find(e[0]);
 
                 bool edgeInFaceOrder = (f0[f0.fcIndex(index)] == e[1]);
 
@@ -317,7 +317,7 @@ void Foam::cellSplitter::setRefinement
 
                 const face& f1 = mesh_.faces()[face1];
 
-                label index = findIndex(f1, e[0]);
+                label index = f1.find(e[0]);
 
                 bool edgeInFaceOrder = (f1[f1.fcIndex(index)] == e[1]);
 

@@ -381,7 +381,7 @@ void Foam::cellCellStencils::cellVolumeWeight::findHoles
         Pstream::listCombineScatter(regionType);
 
         // Communicate region status through interpolative cells
-        labelList cellRegionType(UIndirectList<label>(regionType, cellRegion));
+        labelList cellRegionType(labelUIndList(regionType, cellRegion));
         map.distribute(cellRegionType);
 
 
@@ -643,11 +643,7 @@ void Foam::cellCellStencils::cellVolumeWeight::combineCellTypes
             {
                 allWeights[cellI] = weights[subCellI];
                 allStencil[cellI] =
-                    UIndirectList<label>
-                    (
-                        otherCells,
-                        addressing[subCellI]
-                    );
+                    labelUIndList(otherCells, addressing[subCellI]);
                 allDonorID[cellI] = donorZoneID;
             }
         }
@@ -802,7 +798,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                 (
                     mapper.tgtMap(),            // How to get remote data local
                     mapper.srcToTgtCellAddr(),
-                    labelList(UIndirectList<label>(allPatchTypes, tgtCellMap)),
+                    labelList(labelUIndList(allPatchTypes, tgtCellMap)),
                     interpolatedTgtPatchTypes
                 );
 
@@ -847,7 +843,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                 (
                     mapper.srcMap(),            // How to get remote data local
                     mapper.tgtToSrcCellAddr(),
-                    labelList(UIndirectList<label>(allPatchTypes, srcCellMap)),
+                    labelList(labelUIndList(allPatchTypes, srcCellMap)),
                     interpolatedSrcPatchTypes
                 );
 
@@ -1073,7 +1069,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
             Pout<< "cellI:" << cellI << " at:"
                 << mesh_.cellCentres()[cellI]
                 << " calculated from slots:" << slots
-                << " cc:" << UIndirectList<point>(cc, slots)()
+                << " cc:" << UIndirectList<point>(cc, slots)
                 << " weights:" << cellInterpolationWeights_[cellI]
                 << endl;
 
@@ -1101,6 +1097,41 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
 
     // Tbd: detect if anything changed. Most likely it did!
     return true;
+}
+
+
+void Foam::cellCellStencils::cellVolumeWeight::stencilWeights
+(
+    const point& sample,
+    const pointList& donorCcs,
+    scalarList& weights
+) const
+{
+    // Inverse-distance weighting
+
+    weights.setSize(donorCcs.size());
+    scalar sum = 0.0;
+    forAll(donorCcs, i)
+    {
+        scalar d = mag(sample-donorCcs[i]);
+
+        if (d > ROOTVSMALL)
+        {
+            weights[i] = 1.0/d;
+            sum += weights[i];
+        }
+        else
+        {
+            // Short circuit
+            weights = 0.0;
+            weights[i] = 1.0;
+            return;
+        }
+    }
+    forAll(weights, i)
+    {
+        weights[i] /= sum;
+    }
 }
 
 

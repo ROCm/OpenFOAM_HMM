@@ -26,8 +26,6 @@ License
 #include "staticFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -42,12 +40,6 @@ namespace Foam
 Foam::staticFvMesh::staticFvMesh(const IOobject& io)
 :
     dynamicFvMesh(io)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::staticFvMesh::~staticFvMesh()
 {}
 
 

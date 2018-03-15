@@ -553,7 +553,7 @@ void Foam::ccm::reader::readCells
             }
         }
 
-        ccmLookupOrder.resetAddressing(addr.xfer());
+        ccmLookupOrder.resetAddressing(std::move(addr));
     }
 
 
@@ -1120,7 +1120,7 @@ void Foam::ccm::reader::juggleSolids()
 
 
     // The corresponding Foam patch
-    const label patchIndex  = findIndex(origBndId_, defaultBoundaryRegion);
+    const label patchIndex  = origBndId_.find(defaultBoundaryRegion);
     const label nPatchFaces = patchSizes_[patchIndex];
 
     labelList patchStarts(patchStartList(nInternalFaces_));
@@ -1828,8 +1828,8 @@ void Foam::ccm::reader::mergeInplaceInterfaces()
 
         labelPair patchPair
         (
-            findIndex(origBndId_, ifentry.bnd0),
-            findIndex(origBndId_, ifentry.bnd1)
+            origBndId_.find(ifentry.bnd0),
+            origBndId_.find(ifentry.bnd1)
         );
 
         if
@@ -2546,7 +2546,7 @@ void Foam::ccm::reader::addFaceZones
             (
                 iter.key(),
                 iter(),
-                boolList(iter().size(), false),
+                false, // none are flipped
                 nZone,
                 mesh.faceZones()
             )
@@ -2599,36 +2599,34 @@ Foam::autoPtr<Foam::polyMesh> Foam::ccm::reader::mesh
 
     // Construct polyMesh
     // ~~~~~~~~~~~~~~~~~~
-    autoPtr<polyMesh> mesh
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                polyMesh::defaultRegion,
-                "constant",
-                registry
-            ),
-            xferMove(points_),
-            xferMove(faces_),
-            xferMove(faceOwner_),
-            xferMove(faceNeighbour_)
-        )
+            polyMesh::defaultRegion,
+            "constant",
+            registry
+        ),
+        std::move(points_),
+        std::move(faces_),
+        std::move(faceOwner_),
+        std::move(faceNeighbour_)
     );
+    polyMesh& mesh = *meshPtr;
 
-    addPatches(mesh());
+    addPatches(mesh);
 
     // Attach cellZones based on the cellTable Id
     // any other values can be extracted later from the cellTable dictionary
-    cellTable_.addCellZones(mesh(), cellTableId_);
-    warnDuplicates("cellZones", mesh().cellZones().names());
+    cellTable_.addCellZones(mesh, cellTableId_);
+    warnDuplicates("cellZones", mesh.cellZones().names());
 
-    addFaceZones(mesh());
+    addFaceZones(mesh);
 
-    warnDuplicates("boundaries", mesh().boundaryMesh().names());
+    warnDuplicates("boundaries", mesh.boundaryMesh().names());
     clearGeom();
 
-    return mesh;
+    return meshPtr;
 }
 
 

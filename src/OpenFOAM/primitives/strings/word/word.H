@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,6 +31,7 @@ Description
     semicolons or brace brackets. Words are delimited by whitespace.
 
 SourceFiles
+    wordI.H
     word.C
     wordIO.C
 
@@ -48,7 +49,6 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 class word;
-inline word operator&(const word& a, const word& b);
 Istream& operator>>(Istream& is, word& w);
 Ostream& operator<<(Ostream& os, const word& w);
 
@@ -84,7 +84,7 @@ public:
         //- Construct null
         inline word();
 
-        //- Construct as copy
+        //- Copy construct
         inline word(const word& w);
 
         //- Construct as copy of character array
@@ -98,17 +98,47 @@ public:
             const bool doStripInvalid
         );
 
-        //- Construct as copy of string
+        //- Construct as copy of Foam::string
         inline word(const string& s, const bool doStripInvalid=true);
 
         //- Construct as copy of std::string
         inline word(const std::string& s, const bool doStripInvalid=true);
 
+        //- Move construct
+        inline word(word&& w);
+
+        //- Move construct from Foam::string
+        inline word(string&& s, const bool doStripInvalid=true);
+
+        //- Move construct from std::string
+        inline word(std::string&& s, const bool doStripInvalid=true);
+
         //- Construct from Istream
         word(Istream& is);
 
 
-    // Member functions
+    // Member Functions
+
+        //- Use a printf-style formatter for a primitive.
+        //  The representation is not checked for valid characters -
+        //  it is assumed that the caller knows what they are doing
+        template<class PrimitiveType>
+        inline static word printf
+        (
+            const char* fmt,
+            const PrimitiveType& val
+        );
+
+        //- Use a printf-style formatter for a primitive.
+        //  The representation is not checked for valid characters -
+        //  it is assumed that the caller knows what they are doing
+        template<class PrimitiveType>
+        inline static word printf
+        (
+            const std::string& fmt,
+            const PrimitiveType& val
+        );
+
 
         //- Is this character valid for a word?
         inline static bool valid(char c);
@@ -119,7 +149,7 @@ public:
         static word validate(const std::string& s, const bool prefix=false);
 
 
-      // File-like functions
+    // File-like Functions
 
         //- Return word without extension (part before last .)
         word lessExt() const;
@@ -147,26 +177,28 @@ public:
 
     // Member operators
 
-      // Assignment
+    // Assignment
 
-        //- Copy, no character validation required
+        //- Copy assignment, no character validation required
         inline void operator=(const word& w);
 
-        //- Copy, stripping invalid characters
+        //- Copy assignment from Foam::string, stripping invalid characters
         inline void operator=(const string& s);
 
-        //- Copy, stripping invalid characters
+        //- Copy assignment from std::string, stripping invalid characters
         inline void operator=(const std::string& s);
 
         //- Copy, stripping invalid characters
         inline void operator=(const char* s);
 
+        //- Move assignment
+        inline void operator=(word&& w);
 
-    // Friend Operators
+        //- Move assignment from Foam::string, stripping invalid characters
+        inline void operator=(string&& s);
 
-        //- Join word a and b, capitalising the first letter of b
-        //  (so-called camelCase)
-        friend word operator&(const word& a, const word& b);
+        //- Move assignment from std::string, stripping invalid characters
+        inline void operator=(std::string&& s);
 
 
     // IOstream operators
@@ -174,6 +206,13 @@ public:
         friend Istream& operator>>(Istream& is, word& w);
         friend Ostream& operator<<(Ostream& os, const word& w);
 };
+
+
+// Global Operators
+
+//- Join words as camelCase, capitalizing the first letter of b.
+//  No effect if either argument is empty.
+word operator&(const word& a, const word& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

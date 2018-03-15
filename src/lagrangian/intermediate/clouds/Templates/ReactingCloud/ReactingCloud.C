@@ -203,13 +203,6 @@ Foam::ReactingCloud<CloudType>::ReactingCloud
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::ReactingCloud<CloudType>::~ReactingCloud()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

@@ -254,7 +254,7 @@ bool Foam::combineFaces::faceNeighboursValid
 
                 if (iter == faceRegion.end())
                 {
-                    if (findIndex(neighbourFaces, nbrI) == -1)
+                    if (!neighbourFaces.found(nbrI))
                     {
                         neighbourFaces.append(nbrI);
                     }
@@ -305,6 +305,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
     // Lists of faces that can be merged.
     DynamicList<labelList> allFaceSets(boundaryCells.size() / 10);
     // Storage for on-the-fly cell-edge addressing.
+    labelHashSet set;
     DynamicList<label> storage;
 
     // On all cells regionise the faces
@@ -314,7 +315,7 @@ Foam::labelListList Foam::combineFaces::getMergeSets
 
         const cell& cFaces = mesh_.cells()[celli];
 
-        const labelList& cEdges = mesh_.cellEdges(celli, storage);
+        const labelList& cEdges = mesh_.cellEdges(celli, set, storage);
 
         // Region per face
         Map<label> faceRegion(cFaces.size());
@@ -453,8 +454,8 @@ Foam::face Foam::combineFaces::getOutsideFace
     bool edgeLoopConsistent = false;
 
     {
-        label index0 = findIndex(outsideLoop, e[0]);
-        label index1 = findIndex(outsideLoop, e[1]);
+        label index0 = outsideLoop.find(e[0]);
+        label index1 = outsideLoop.find(e[1]);
 
         if (index0 == -1 || index1 == -1)
         {
@@ -496,7 +497,7 @@ Foam::face Foam::combineFaces::getOutsideFace
 
     {
         // Find edge in face.
-        label index = findIndex(fp.faceEdges()[eFaces[0]], bEdgeI);
+        label index = fp.faceEdges()[eFaces[0]].find(bEdgeI);
 
         if (index == -1)
         {

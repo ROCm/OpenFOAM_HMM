@@ -291,25 +291,24 @@ Foam::fileOperations::masterUncollatedFileOperation::splitProcessorPath
         local = objectPath.substr(pos+9);
     }
 
+    label proci;
+
     pos = local.find('/');
     if (pos == string::npos)
     {
         // processorXXX without local
-        label proci;
-        if (Foam::read(local.c_str(), proci))
+        if (Foam::read(local, proci))
         {
             local.clear();
             return proci;
         }
-        return -1;
     }
-    string procName(local.substr(0, pos));
-    label proci;
-    if (Foam::read(procName.c_str(), proci))
+    else if (Foam::read(local.substr(0, pos), proci))
     {
         local = local.substr(pos+1);
         return proci;
     }
+
     return -1;
 }
 
@@ -490,13 +489,6 @@ masterUncollatedFileOperation
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileOperations::masterUncollatedFileOperation::
-~masterUncollatedFileOperation()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::fileOperations::masterUncollatedFileOperation::mkDir
@@ -630,10 +622,11 @@ bool Foam::fileOperations::masterUncollatedFileOperation::rm
 
 bool Foam::fileOperations::masterUncollatedFileOperation::rmDir
 (
-    const fileName& dir
+    const fileName& dir,
+    const bool silent
 ) const
 {
-    return masterOp<bool, rmDirOp>(dir, rmDirOp());
+    return masterOp<bool, rmDirOp>(dir, rmDirOp(silent));
 }
 
 
@@ -1465,7 +1458,7 @@ Foam::instantList Foam::fileOperations::masterUncollatedFileOperation::findTimes
         }
         Pstream::scatter(times);
 
-        instantList* tPtr = new instantList(times.xfer());
+        instantList* tPtr = new instantList(std::move(times));
 
         times_.insert(directory, tPtr);
 

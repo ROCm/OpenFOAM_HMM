@@ -54,6 +54,7 @@ SourceFiles
 #include "triadFieldFwd.H"
 #include "DynamicList.H"
 #include "HashSet.H"
+#include "Map.H"
 #include "FixedList.H"
 #include "Pair.H"
 #include "vector2D.H"
@@ -159,8 +160,8 @@ class triSurfaceTools
                 const triSurface& surf,
                 const label edgeI,
                 const labelHashSet& collapsedFaces,
-                HashTable<label, label, Hash<label>>& edgeToEdge,
-                HashTable<label, label, Hash<label>>& edgeToFace
+                Map<label>& edgeToEdge,
+                Map<label>& edgeToFace
             );
 
             //- Calculates (cos of) angle across edgeI of facei,
@@ -172,8 +173,8 @@ class triSurfaceTools
                 const label v1,
                 const point& pt,
                 const labelHashSet& collapsedFaces,
-                const HashTable<label, label, Hash<label>>& edgeToEdge,
-                const HashTable<label, label, Hash<label>>& edgeToFace,
+                const Map<label>& edgeToEdge,
+                const Map<label>& edgeToFace,
                 const label facei,
                 const label edgeI
             );
@@ -188,8 +189,8 @@ class triSurfaceTools
                 const label v1,
                 const point& pt,
                 const labelHashSet& collapsedFaces,
-                const HashTable<label, label, Hash<label>>& edgeToEdge,
-                const HashTable<label, label, Hash<label>>& edgeToFace
+                const Map<label>& edgeToEdge,
+                const Map<label>& edgeToFace
             );
 
             //- Like collapseMinCosAngle but return true for value < minCos
@@ -199,8 +200,8 @@ class triSurfaceTools
                 const label v1,
                 const point& pt,
                 const labelHashSet& collapsedFaces,
-                const HashTable<label, label, Hash<label>>& edgeToEdge,
-                const HashTable<label, label, Hash<label>>& edgeToFace,
+                const Map<label>& edgeToEdge,
+                const Map<label>& edgeToFace,
                 const scalar minCos
             );
 
@@ -210,7 +211,7 @@ class triSurfaceTools
             //(
             //    const triSurface& surf,
             //    const label edgeI,
-            //    const HashTable<bool, label, Hash<label>>& collapsedFaces
+            //    const Map<bool>& collapsedFaces
             //);
 
         // Tracking

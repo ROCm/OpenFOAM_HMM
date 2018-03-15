@@ -136,15 +136,13 @@ Foam::autoPtr<Foam::lduMatrix::smoother> Foam::lduMatrix::smoother::New
             )
         );
     }
-    else
-    {
-        FatalIOErrorInFunction(solverControls)
-            << "cannot solve incomplete matrix, "
-               "no diagonal or off-diagonal coefficient"
-            << exit(FatalIOError);
 
-        return autoPtr<lduMatrix::smoother>(nullptr);
-    }
+    FatalIOErrorInFunction(solverControls)
+        << "cannot solve incomplete matrix, "
+        "no diagonal or off-diagonal coefficient"
+        << exit(FatalIOError);
+
+    return autoPtr<lduMatrix::smoother>();
 }
 
 

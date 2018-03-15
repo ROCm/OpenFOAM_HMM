@@ -53,7 +53,7 @@ rotatingTotalPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(ptf, p, iF, mapper),
-    omega_(ptf.omega_, false)
+    omega_(ptf.omega_.clone())
 {}
 
 
@@ -77,7 +77,7 @@ rotatingTotalPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(rtppsf),
-    omega_(rtppsf.omega_, false)
+    omega_(rtppsf.omega_.clone())
 {}
 
 
@@ -89,7 +89,7 @@ rotatingTotalPressureFvPatchScalarField
 )
 :
     totalPressureFvPatchScalarField(rtppsf, iF),
-    omega_(rtppsf.omega_, false)
+    omega_(rtppsf.omega_.clone())
 {}
 
 

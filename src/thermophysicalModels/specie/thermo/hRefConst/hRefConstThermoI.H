@@ -64,10 +64,7 @@ template<class EquationOfState>
 inline Foam::autoPtr<Foam::hRefConstThermo<EquationOfState>>
 Foam::hRefConstThermo<EquationOfState>::clone() const
 {
-    return autoPtr<hRefConstThermo<EquationOfState>>
-    (
-        new hRefConstThermo<EquationOfState>(*this)
-    );
+    return autoPtr<hRefConstThermo<EquationOfState>>::New(*this);
 }
 
 
@@ -75,10 +72,7 @@ template<class EquationOfState>
 inline Foam::autoPtr<Foam::hRefConstThermo<EquationOfState>>
 Foam::hRefConstThermo<EquationOfState>::New(const dictionary& dict)
 {
-    return autoPtr<hRefConstThermo<EquationOfState>>
-    (
-        new hRefConstThermo<EquationOfState>(dict)
-    );
+    return autoPtr<hRefConstThermo<EquationOfState>>::New(dict);
 }
 
 

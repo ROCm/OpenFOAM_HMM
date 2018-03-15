@@ -412,7 +412,7 @@ void Foam::tecplotWriter::writeConnectivity
             // The face that uses the vertices of e in increasing order
             // is the left face.
 
-            const label fp = findIndex(f0, e[0]);
+            const label fp = f0.find(e[0]);
             const bool f0IsLeft = (f0.nextLabel(fp) == e[1]);
 
             if (f0IsLeft)

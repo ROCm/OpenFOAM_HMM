@@ -37,7 +37,7 @@ SourceFiles
 #define cut_H
 
 #include "searchableSurfaceModifier.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "faceList.H"
 #include "pointField.H"
 
@@ -63,7 +63,7 @@ class cut
     // Private data
 
         //- Name of surfaces to cut with
-        const wordReList cutterNames_;
+        const wordRes cutterNames_;
 
 
    // Private Member Functions
@@ -100,12 +100,12 @@ public:
         autoPtr<searchableSurfaceModifier> clone() const
         {
             NotImplemented;
-            return autoPtr<searchableSurfaceModifier>(nullptr);
+            return autoPtr<searchableSurfaceModifier>();
         }
 
 
     //- Destructor
-    virtual ~cut();
+    virtual ~cut() = default;
 
 
     // Member Functions

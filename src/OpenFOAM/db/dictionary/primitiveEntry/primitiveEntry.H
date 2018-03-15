@@ -64,16 +64,23 @@ class primitiveEntry
 {
     // Private Member Functions
 
-        //- Append the given tokens starting at the current tokenIndex
-        void append(const UList<token>& varTokens);
-
-        //- Append the given token to this entry
-        void append
+        //- Test if token is acceptable after filtering for function entries
+        //- and variable expansions.
+        bool acceptToken
         (
-            const token& currToken,
+            const token& tok,
             const dictionary& dict,
             Istream& is
         );
+
+        //- Copy append the given tokens at the current tokenIndex
+        //  No filtering on the tokens.
+        void appendTokenList(const UList<token>& toks);
+
+        //- Move append the given tokens at the current tokenIndex
+        //  No filtering on the tokens.
+        void appendTokenList(List<token>&& toks);
+
 
         //- Expand the given variable.
         //  The keyword starts with '$', but has been removed by the caller
@@ -113,17 +120,17 @@ public:
         primitiveEntry(const keyType& key, const ITstream& is);
 
         //- Construct from keyword and a single token
-        primitiveEntry(const keyType& key, const token& t);
+        primitiveEntry(const keyType& key, const token& tok);
 
         //- Construct from keyword and a list of tokens
         primitiveEntry(const keyType& key, const UList<token>& tokens);
 
         //- Construct from keyword and by transferring a list of tokens
-        primitiveEntry(const keyType& key, const Xfer<List<token>>& tokens);
+        primitiveEntry(const keyType& key, List<token>&& tokens);
 
         //- Construct from keyword and a T
         template<class T>
-        primitiveEntry(const keyType& key, const T& t);
+        primitiveEntry(const keyType& key, const T& val);
 
         autoPtr<entry> clone(const dictionary&) const
         {

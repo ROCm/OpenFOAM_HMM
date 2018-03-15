@@ -27,7 +27,7 @@ License
 #include "IOstreams.H"
 #include "ISstream.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
@@ -47,7 +47,7 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::token Foam::functionEntry::readLine(const word& key, Istream& is)
 {
@@ -160,13 +160,16 @@ bool Foam::functionEntry::execute
 void Foam::functionEntry::write(Ostream& os) const
 {
     // Contents should be single string token
-    const token& t = operator[](0);
-    const string& s = t.stringToken();
+    const token& tok = operator[](0);
+    const string& s = tok.stringToken();
 
-    for (size_t i = 0; i < s.size(); i++)
+    // Write character-wise for literal output
+    for (size_t i = 0; i < s.size(); ++i)
     {
         os.write(s[i]);
     }
+
+    os << nl;
 }
 
 

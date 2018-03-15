@@ -92,16 +92,12 @@ public:
         //- Read file and return edgeMesh
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>
-            (
-                new edgeMeshFormat(name)
-            );
+            return autoPtr<edgeMesh>::NewFrom<edgeMeshFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~edgeMeshFormat()
-    {}
+    virtual ~edgeMeshFormat() = default;
 
 
     // Member Functions

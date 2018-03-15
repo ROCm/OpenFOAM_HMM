@@ -55,9 +55,9 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("output surfaceFile");
 
     argList::addOption
     (
@@ -83,10 +83,10 @@ int main(int argc, char *argv[])
     const fileName inFileName2 = args[2];
     const fileName outFileName = args[3];
 
-    const bool addPoint     = args.optionFound("points");
-    const bool mergeRegions = args.optionFound("mergeRegions");
+    const bool addPoint     = args.found("points");
+    const bool mergeRegions = args.found("mergeRegions");
 
-    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     if (addPoint)
     {
@@ -247,7 +247,7 @@ int main(int argc, char *argv[])
                 << " by this amount" << nl << endl;
 
             patch1Map = identity(surface1.patches().size());
-            patch2Map = identity(surface2.patches().size()) + patch1Map.size();
+            patch2Map = identity(surface2.patches().size(), patch1Map.size());
 
             nNewPatches = surface1.patches().size()+surface2.patches().size();
         }

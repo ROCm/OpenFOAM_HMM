@@ -37,6 +37,12 @@ Description
 
 using namespace Foam;
 
+void printCompare(const face& a, const face& b)
+{
+    Info<< "Compare " << a << " and " << b
+        << " Match = " << face::compare(a, b) << endl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -96,44 +102,35 @@ int main(int argc, char *argv[])
 
     Info<< nl << nl << "Compare two faces: " << endl;
     face a(identity(5));
-    Info<< "Compare " << a << " and " << a << " Match = " << face::compare(a, a)
-        << endl;
+    printCompare(a, a);
 
     face b(reverseList(a));
-    Info<< "Compare " << a << " and " << b << " Match = " << face::compare(a, b)
-        << endl;
+    printCompare(a, b);
 
     face c(a);
     c[4] = 3;
-    Info<< "Compare " << a << " and " << c << " Match = " << face::compare(a, c)
-        << endl;
+    printCompare(a, c);
 
     face d(rotateList(a, 2));
-    Info<< "Compare " << a << " and " << d << " Match = " << face::compare(a, d)
-        << endl;
+    printCompare(a, d);
 
     face g(labelList(5, 1));
     face h(g);
-    Info<< "Compare " << g << " and " << h << " Match = " << face::compare(g, h)
-        << endl;
+    printCompare(g, h);
 
     g[0] = 2;
     h[3] = 2;
-    Info<< "Compare " << g << " and " << h << " Match = " << face::compare(g, h)
-        << endl;
+    printCompare(g, h);
 
     g[4] = 3;
     h[4] = 3;
-    Info<< "Compare " << g << " and " << h << " Match = " << face::compare(g, h)
-        << endl;
+    printCompare(g, h);
 
     face face1(identity(1));
-    Info<< "Compare " << face1 << " and " << face1
-        << " Match = " << face::compare(face1, face1) << endl;
+    printCompare(face1, face1);
 
-    face face2(identity(1)+1);
-    Info<< "Compare " << face1 << " and " << face2
-        << " Match = " << face::compare(face1, face2) << endl;
+    face face2(identity(1, 2));
+    printCompare(face1, face2);
 
     Info<< nl << nl << "Zero face" << nl << endl;
 

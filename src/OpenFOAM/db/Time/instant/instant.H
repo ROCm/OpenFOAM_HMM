@@ -43,21 +43,11 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class instant;
 
-// Friend Operators
-
-bool operator==(const instant&, const instant&);
-bool operator!=(const instant&, const instant&);
-bool operator<(const instant&, const instant&);
-bool operator>(const instant&, const instant&);
-
-// IOstream Operators
-
-Istream& operator>>(Istream&, instant&);
-Ostream& operator<<(Ostream&, const instant&);
+Istream& operator>>(Istream& is, instant& inst);
+Ostream& operator<<(Ostream& os, const instant& inst);
 
 
 /*---------------------------------------------------------------------------*\
@@ -69,6 +59,7 @@ class instant
     // Private data
 
         scalar value_;
+
         word name_;
 
 public:
@@ -98,60 +89,58 @@ public:
         instant();
 
         //- Construct from components
-        instant(const scalar, const word&);
+        instant(const scalar val, const word& tname);
 
         //- Construct from time value
-        explicit instant(const scalar);
+        explicit instant(const scalar val);
 
-        //- Construct from word
-        explicit instant(const word&);
+        //- Construct from time name
+        explicit instant(const word& tname);
 
 
     // Member Functions
 
-        // Access
+        //- Value (const access)
+        scalar value() const
+        {
+            return value_;
+        }
 
-            //- Value (const access)
-            scalar value() const
-            {
-                return value_;
-            }
+        //- Value (non-const access)
+        scalar& value()
+        {
+            return value_;
+        }
 
-            //- Value (non-const access)
-            scalar& value()
-            {
-                return value_;
-            }
+        //- Name (const access)
+        const word& name() const
+        {
+            return name_;
+        }
 
-            //- Name (const access)
-            const word& name() const
-            {
-                return name_;
-            }
+        //- Name (non-const access)
+        word& name()
+        {
+            return name_;
+        }
 
-            //- Name (non-const access)
-            word& name()
-            {
-                return name_;
-            }
-
-            //- Comparison used for instants to be equal
-            bool equal(const scalar) const;
-
-
-    // Friend Operators
-
-        friend bool operator==(const instant&, const instant&);
-        friend bool operator!=(const instant&, const instant&);
-        friend bool operator<(const instant&, const instant&);
-        friend bool operator>(const instant&, const instant&);
+        //- Compare instant values to be equal (includes SMALL for rounding)
+        bool equal(const scalar val) const;
 
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, instant&);
-        friend Ostream& operator<<(Ostream&, const instant&);
+        friend Istream& operator>>(Istream& is, instant& inst);
+        friend Ostream& operator<<(Ostream& os, const instant& inst);
 };
+
+
+// Global Operators
+
+bool operator==(const instant& a, const instant& b);
+bool operator!=(const instant& a, const instant& b);
+bool operator<(const instant& a, const instant& b);
+bool operator>(const instant& a, const instant& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

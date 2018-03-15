@@ -141,16 +141,16 @@ void Foam::PackedList<nBits>::flip()
 
 
 template<unsigned nBits>
-Foam::Xfer<Foam::labelList> Foam::PackedList<nBits>::values() const
+Foam::labelList Foam::PackedList<nBits>::values() const
 {
     labelList elems(size_);
 
-    forAll(*this, i)
+    for (label i=0; i < size_; ++i)
     {
         elems[i] = get(i);
     }
 
-    return elems.xfer();
+    return elems;
 }
 
 
@@ -271,34 +271,34 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
     token firstTok(is);
     is.fatalCheck
     (
-        "PackedList<nBits>::read(Istream&) : "
+        "PackedList::read(Istream&) : "
         "reading first token"
     );
 
     if (firstTok.isLabel())
     {
-        const label sz = firstTok.labelToken();
+        const label len = firstTok.labelToken();
 
         // Set list length to that read
-        lst.resize(sz);
+        lst.resize(len);
 
         // Read list contents depending on data format
         if (is.format() == IOstream::ASCII)
         {
             // Read beginning of contents
-            const char delimiter = is.readBeginList("PackedList<nBits>");
+            const char delimiter = is.readBeginList("PackedList");
 
-            if (sz)
+            if (len)
             {
                 if (delimiter == token::BEGIN_LIST)
                 {
-                    for (label i=0; i<sz; ++i)
+                    for (label i=0; i<len; ++i)
                     {
                         lst[i] = lst.readValue(is);
 
                         is.fatalCheck
                         (
-                            "PackedList<nBits>::read(Istream&) : "
+                            "PackedList::read(Istream&) : "
                             "reading entry"
                         );
                     }
@@ -310,7 +310,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
 
                     is.fatalCheck
                     (
-                        "PackedList<nBits>::read(Istream&) : "
+                        "PackedList::read(Istream&) : "
                         "reading the single entry"
                     );
                 }
@@ -324,11 +324,11 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
             }
 
             // Read end of contents
-            is.readEndList("PackedList<nBits>");
+            is.readEndList("PackedList");
         }
         else
         {
-            if (sz)
+            if (len)
             {
                 is.read
                 (
@@ -338,7 +338,7 @@ Foam::Istream& Foam::PackedList<nBits>::read(Istream& is)
 
                 is.fatalCheck
                 (
-                    "PackedList<nBits>::read(Istream&) : "
+                    "PackedList::read(Istream&) : "
                     "reading the binary block"
                 );
             }
@@ -413,13 +413,13 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
 {
     const bool indexedOutput = (shortListLen < 0);
     const PackedList<nBits>& lst = *this;
-    const label sz = lst.size();
+    const label len = lst.size();
 
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII)
     {
         // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (sz > 1 && !indexedOutput);
+        bool uniform = (len > 1 && !indexedOutput);
         if (uniform)
         {
             forAll(lst, i)
@@ -435,7 +435,7 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
         if (uniform)
         {
             // uniform values:
-            os  << sz << token::BEGIN_BLOCK << lst[0] << token::END_BLOCK;
+            os  << len << token::BEGIN_BLOCK << lst[0] << token::END_BLOCK;
         }
         else if (indexedOutput)
         {
@@ -457,10 +457,10 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
 
             os  << token::END_BLOCK << nl;
         }
-        else if (!shortListLen || sz <= shortListLen)
+        else if (!shortListLen || len <= shortListLen)
         {
             // Shorter list, or line-breaks suppressed
-            os  << sz << token::BEGIN_LIST;
+            os  << len << token::BEGIN_LIST;
             forAll(lst, i)
             {
                 if (i) os << token::SPACE;
@@ -471,7 +471,7 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
         else
         {
             // Longer list
-            os << nl << sz << nl << token::BEGIN_LIST << nl;
+            os << nl << len << nl << token::BEGIN_LIST << nl;
             forAll(lst, i)
             {
                 os << lst[i] << nl;
@@ -482,9 +482,9 @@ Foam::Ostream& Foam::PackedList<nBits>::writeList
     else
     {
         // Contents are binary and contiguous
-        os  << nl << sz << nl;
+        os  << nl << len << nl;
 
-        if (sz)
+        if (len)
         {
             // write(...) includes surrounding start/end delimiters
             os.write
@@ -523,6 +523,13 @@ void Foam::PackedList<nBits>::operator=(const PackedList<nBits>& lst)
 
 
 template<unsigned nBits>
+void Foam::PackedList<nBits>::operator=(PackedList<nBits>&& lst)
+{
+    transfer(lst);
+}
+
+
+template<unsigned nBits>
 void Foam::PackedList<nBits>::operator=(const labelUList& lst)
 {
     setCapacity(lst.size());
@@ -536,7 +543,7 @@ void Foam::PackedList<nBits>::operator=(const labelUList& lst)
 
 
 template<unsigned nBits>
-void Foam::PackedList<nBits>::operator=(const UIndirectList<label>& lst)
+void Foam::PackedList<nBits>::operator=(const labelUIndList& lst)
 {
     setCapacity(lst.size());
     size_ = lst.size();

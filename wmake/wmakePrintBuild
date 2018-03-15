@@ -7,26 +7,11 @@
 #    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #-------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     wmakePrintBuild
-#
-# Usage
-#     wmakePrintBuild [OPTION]
 #
 # Description
 #     Print the version used when building the project
@@ -48,7 +33,7 @@ options:
   -pkg TAG        specify packager/release tag ('none' marks an empty packager)
   -short          report short version information (ie, without pkg tag)
   -version VER    specify an alternative version
-  -plus           report wmake value of OPENFOAM_PLUS and exit
+  -api            report wmake value of OPENFOAM/OPENFOAM_API/OPENFOAM_PLUS
   -help
 
 Print the version used when building the project, in this order of precedence:
@@ -76,12 +61,12 @@ die()
 #------------------------------------------------------------------------------
 # Parse arguments and options
 #------------------------------------------------------------------------------
-unset checkOnly update package version optPlus optShort
+unset checkOnly update package version optApi optShort
 
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     -c | -check)
@@ -108,8 +93,8 @@ do
         version="$2"
         shift
         ;;
-    -plus)
-        optPlus=true
+    -api | -plus)
+        optApi=true
         break
         ;;
     *)
@@ -156,11 +141,13 @@ printTag()
 # Get the version
 #------------------------------------------------------------------------------
 
-if [ "$optPlus" = true ]
+if [ -n "$optApi" ]
 then
-    # Retrieve OPENFOAM_PLUS=<digits> from $WM_DIR/rules/General/general
+    # Extract API version from $WM_DIR/rules/General/general
+    # Any of OPENFOAM=<digits>, OPENFOAM_API=<digits>, OPENFOAM_COM=<digits>
+    # OPENFOAM_PLUS=<digits>
     version=$(
-        sed -ne 's@^.*OPENFOAM_PLUS=\([0-9][0-9]*\).*@\1@p' \
+        sed -ne 's@^.*OPENFOAM\(_API\|_COM\|_PLUS\)*=\([0-9][0-9]*\).*@\2@p' \
         $WM_DIR/rules/General/general 2>/dev/null
     )
 
@@ -169,7 +156,7 @@ then
         echo "$version"
         exit 0
     else
-        echo "no wmake definition for OPENFOAM_PLUS" 1>&2
+        echo "no wmake definition for OPENFOAM API" 1>&2
         exit 1
     fi
 elif [ -n "$version" ]
@@ -200,7 +187,7 @@ fi
 # Retrieve old values (oldPackage oldVersion)
 getOldValues
 
-if [ "$optShort" = true ]
+if [ -n "$optShort" ]
 then
     unset package oldPackage
 fi

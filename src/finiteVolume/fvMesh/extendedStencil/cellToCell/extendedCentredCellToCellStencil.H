@@ -86,7 +86,7 @@ public:
         //- Return reference to the parallel distribution map
         const mapDistribute& map() const
         {
-            return mapPtr_();
+            return *mapPtr_;
         }
 
         //- Return reference to the stencil

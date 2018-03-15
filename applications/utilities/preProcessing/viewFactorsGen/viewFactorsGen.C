@@ -865,7 +865,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE,
             false
         ),
-        globalFaceFaces
+        std::move(globalFaceFaces)
     );
     IOglobalFaceFaces.write();
 
@@ -881,7 +881,7 @@ int main(int argc, char *argv[])
             IOobject::NO_WRITE,
             false
         ),
-        visibleFaceFaces
+        std::move(visibleFaceFaces)
     );
     IOvisibleFaceFaces.write();
 
@@ -895,7 +895,7 @@ int main(int argc, char *argv[])
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        map.xfer()
+        std::move(map)
     );
 
     IOmapDist.write();

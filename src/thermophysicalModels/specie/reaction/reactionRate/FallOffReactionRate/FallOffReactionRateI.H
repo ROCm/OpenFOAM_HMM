@@ -68,10 +68,10 @@ Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::operator()
     const scalarField& c
 ) const
 {
-    scalar k0 = k0_(p, T, c);
-    scalar kInf = kInf_(p, T, c);
+    const scalar k0 = k0_(p, T, c);
+    const scalar kInf = kInf_(p, T, c);
 
-    scalar Pr = k0*thirdBodyEfficiencies_.M(c)/kInf;
+    const scalar Pr = k0*thirdBodyEfficiencies_.M(c)/kInf;
 
     return kInf*(Pr/(1 + Pr))*F_(T, Pr);
 }
@@ -83,33 +83,21 @@ inline void Foam::FallOffReactionRate<ReactionRate, FallOffFunction>::write
     Ostream& os
 ) const
 {
-    os  << indent << "k0" << nl;
-    os  << indent << token::BEGIN_BLOCK << nl;
-    os  << incrIndent;
+    os.beginBlock("k0");
     k0_.write(os);
-    os  << decrIndent;
-    os  << indent << token::END_BLOCK << nl;
+    os.endBlock();
 
-    os  << indent << "kInf" << nl;
-    os  << indent << token::BEGIN_BLOCK << nl;
-    os  << incrIndent;
+    os.beginBlock("kInf");
     kInf_.write(os);
-    os  << decrIndent;
-    os  << indent << token::END_BLOCK << nl;
+    os.endBlock();
 
-    os  << indent << "F" << nl;
-    os  << indent << token::BEGIN_BLOCK << nl;
-    os  << incrIndent;
+    os.beginBlock("F");
     F_.write(os);
-    os  << decrIndent;
-    os  << indent << token::END_BLOCK << nl;
+    os.endBlock();
 
-    os  << indent << "thirdBodyEfficiencies" << nl;
-    os  << indent << token::BEGIN_BLOCK << nl;
-    os  << incrIndent;
+    os.beginBlock("thirdBodyEfficiencies");
     thirdBodyEfficiencies_.write(os);
-    os  << decrIndent;
-    os  << indent << token::END_BLOCK << nl;
+    os.endBlock();
 }
 
 

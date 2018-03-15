@@ -187,7 +187,7 @@ void uniformInterpolatedDisplacementPointPatchVectorField::updateCoeffs()
         );
         // Save old times so we now which ones have been loaded and need
         // 'correctBoundaryConditions'. Bit messy.
-        HashSet<word> oldTimes(fieldsCache.toc());
+        wordHashSet oldTimes(fieldsCache.toc());
 
         ReadFields<pointVectorField>
         (
@@ -260,10 +260,8 @@ void uniformInterpolatedDisplacementPointPatchVectorField::write(Ostream& os)
 const
 {
     pointPatchField<vector>::write(os);
-    os.writeKeyword("field")
-        << fieldName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("interpolationScheme")
-        << interpolationScheme_ << token::END_STATEMENT << nl;
+    os.writeEntry("field", fieldName_);
+    os.writeEntry("interpolationScheme", interpolationScheme_);
     writeEntry("value", os);
 }
 

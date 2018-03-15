@@ -59,15 +59,15 @@ Foam::fvMeshPrimitiveLduAddressing::fvMeshPrimitiveLduAddressing
 Foam::fvMeshPrimitiveLduAddressing::fvMeshPrimitiveLduAddressing
 (
     const label nCells,
-    const Xfer<labelList>& lowerAddr,
-    const Xfer<labelList>& upperAddr,
+    labelList&& lowerAddr,
+    labelList&& upperAddr,
     const List<const labelUList*>& patchAddr,
     const lduSchedule& ps
 )
 :
     lduAddressing(nCells),
-    lowerAddr_(lowerAddr),
-    upperAddr_(upperAddr),
+    lowerAddr_(std::move(lowerAddr)),
+    upperAddr_(std::move(upperAddr)),
     patchAddr_(patchAddr),
     patchSchedule_(ps)
 {}

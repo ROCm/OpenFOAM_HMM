@@ -81,7 +81,7 @@ template<class T, class Container>
 Foam::CompactListList<T, Container>::CompactListList
 (
     const labelUList& rowSizes,
-    const T& t
+    const T& val
 )
 :
     size_(rowSizes.size()),
@@ -95,31 +95,8 @@ Foam::CompactListList<T, Container>::CompactListList
         offsets_[i+1] = sumSize;
     }
 
-    m_.setSize(sumSize, t);
+    m_.setSize(sumSize, val);
 }
-
-
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList
-(
-    const Xfer<CompactListList<T, Container>>& lst
-)
-{
-    transfer(lst());
-}
-
-
-template<class T, class Container>
-Foam::CompactListList<T, Container>::CompactListList
-(
-    CompactListList<T, Container>& lst,
-    bool reuse
-)
-:
-    size_(lst.size()),
-    offsets_(lst.offsets_, reuse),
-    m_(lst.m_, reuse)
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -219,14 +196,26 @@ void Foam::CompactListList<T, Container>::clear()
 
 
 template<class T, class Container>
-void Foam::CompactListList<T, Container>::transfer
+void Foam::CompactListList<T, Container>::swap
 (
-    CompactListList<T, Container>& a
+    CompactListList<T, Container>& lst
 )
 {
-    size_ = a.size_;
-    offsets_.transfer(a.offsets_);
-    m_.transfer(a.m_);
+    Foam::Swap(size_, lst.size_);
+    offsets_.swap(lst.offsets_);
+    m_.swap(lst.m_);
+}
+
+
+template<class T, class Container>
+void Foam::CompactListList<T, Container>::transfer
+(
+    CompactListList<T, Container>& lst
+)
+{
+    size_ = lst.size_;
+    offsets_.transfer(lst.offsets_);
+    m_.transfer(lst.m_);
 }
 
 

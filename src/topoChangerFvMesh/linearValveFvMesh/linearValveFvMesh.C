@@ -67,15 +67,8 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     // Add zones
     List<pointZone*> pz(1);
 
-    // Add an empty zone for cut points
-
-    pz[0] = new pointZone
-    (
-        "cutPointZone",
-        labelList(0),
-        0,
-        pointZones()
-    );
+    // An empty zone for cut points
+    pz[0] = new pointZone("cutPointZone", 0, pointZones());
 
 
     // Do face zones for slider
@@ -97,7 +90,7 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     (
         "insideSliderZone",
         isf,
-        boolList(innerSlider.size(), false),
+        false, // none are flipped
         0,
         faceZones()
     );
@@ -117,20 +110,13 @@ void Foam::linearValveFvMesh::addZonesAndModifiers()
     (
         "outsideSliderZone",
         osf,
-        boolList(outerSlider.size(), false),
+        false, // none are flipped
         1,
         faceZones()
     );
 
-    // Add empty zone for cut faces
-    fz[2] = new faceZone
-    (
-        "cutFaceZone",
-        labelList(0),
-        boolList(0, false),
-        2,
-        faceZones()
-    );
+    // An empty zone for cut faces
+    fz[2] = new faceZone("cutFaceZone", 2, faceZones());
 
     List<cellZone*> cz(0);
 

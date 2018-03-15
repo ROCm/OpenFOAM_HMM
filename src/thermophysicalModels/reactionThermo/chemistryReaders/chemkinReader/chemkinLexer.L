@@ -34,6 +34,11 @@ License
 // For EOF only
 #include <cstdio>
 
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // flex input buffer size
 int Foam::chemkinReader::yyBufSize = YY_BUF_SIZE;
 
@@ -54,7 +59,7 @@ int yyFlexLexer::yylex()
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
 //! \cond dummy
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()

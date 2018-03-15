@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2013-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -142,6 +142,10 @@ Foam::fv::effectivenessHeatExchangerSource::effectivenessHeatExchangerSource
     secondaryInletT_(0),
     primaryInletT_(0),
     userPrimaryInletT_(false),
+    targetQdotActive_(false),
+    targetQdot_(0),
+    targetQdotCalcInterval_(5),
+    targetQdotRelax_(0.5),
     eTable_(),
     UName_("U"),
     TName_("T"),
@@ -225,47 +229,51 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     reduce(CpfMean, sumOp<scalar>());
     reduce(sumPhi, sumOp<scalar>());
     reduce(sumMagPhi, sumOp<scalar>());
-    reduce(primaryInletTfMean, sumOp<scalar>());
-
-    primaryInletTfMean /= sumMagPhi + ROOTVSMALL;
     CpfMean /= sumMagPhi + ROOTVSMALL;
 
     scalar primaryInletT = primaryInletT_;
     if (!userPrimaryInletT_)
     {
-        primaryInletT = primaryInletTfMean;
+        reduce(primaryInletTfMean, sumOp<scalar>());
+        primaryInletT = primaryInletTfMean/(sumMagPhi + ROOTVSMALL);
     }
 
-    scalar Qt =
+    const scalar alpha =
         eTable_()(mag(sumPhi), secondaryMassFlowRate_)
-       *(secondaryInletT_ - primaryInletT)
        *CpfMean*mag(sumPhi);
+
+    const scalar Qt = alpha*(secondaryInletT_ - primaryInletT);
+
+    if
+    (
+        targetQdotActive_
+     && (mesh_.time().timeIndex() % targetQdotCalcInterval_ == 0)
+    )
+    {
+        scalar dT = (targetQdot_ - Qt)/(alpha + ROOTVSMALL);
+        secondaryInletT_ += targetQdotRelax_*dT;
+    }
 
     const scalarField TCells(T, cells_);
     scalar Tref = 0;
+    scalarField deltaTCells(cells_.size(), 0);
     if (Qt > 0)
     {
-        Tref = max(TCells);
-        reduce(Tref, maxOp<scalar>());
-    }
-    else
-    {
-        Tref = min(TCells);
-        reduce(Tref, minOp<scalar>());
-    }
-
-    scalarField deltaTCells(cells_.size(), 0);
-    forAll(deltaTCells, i)
-    {
-        if (Qt > 0)
+        Tref = gMax(TCells);
+        forAll(deltaTCells, i)
         {
             deltaTCells[i] = max(Tref - TCells[i], 0.0);
         }
-        else
+    }
+    else
+    {
+        Tref = gMin(TCells);
+        forAll(deltaTCells, i)
         {
             deltaTCells[i] = max(TCells[i] - Tref, 0.0);
         }
     }
+
 
     const volVectorField& U = mesh_.lookupObject<volVectorField>(UName_);
     const scalarField& V = mesh_.V();
@@ -293,6 +301,7 @@ void Foam::fv::effectivenessHeatExchangerSource::addSup
     Info<< type() << ": " << name() << nl << incrIndent
         << indent << "Net mass flux [Kg/s]      : " << sumPhi << nl
         << indent << "Total energy exchange [W] : " << Qt << nl
+        << indent << "Secondary inlet T [K]     : " << secondaryInletT_ << nl
         << indent << "Tref [K]                  : " << Tref << nl
         << indent << "Effectiveness             : "
         << eTable_()(mag(sumPhi), secondaryMassFlowRate_) << decrIndent
@@ -314,7 +323,7 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
 
         if (coeffs_.readIfPresent("primaryInletT", primaryInletT_))
         {
-            Info<< type() << " " << this->name() << ": "
+            Info<< type() << " " << this->name() << ": " << indent << nl
                 << "employing user-specified primary flow inlet temperature: "
                 << primaryInletT_ << endl;
 
@@ -322,9 +331,31 @@ bool Foam::fv::effectivenessHeatExchangerSource::read(const dictionary& dict)
         }
         else
         {
-            Info<< type() << " " << this->name() << ": "
+            Info<< type() << " " << this->name() << ": " << indent << nl
                 << "employing flux-weighted primary flow inlet temperature"
                 << endl;
+        }
+
+        if (coeffs_.readIfPresent("targetQdot", targetQdot_))
+        {
+            targetQdotActive_ = true;
+            Info<< indent << "employing target heat rejection of "
+                << targetQdot_ << nl;
+
+            coeffs_.readIfPresent
+            (
+                "targetQdotCalcInterval",
+                targetQdotCalcInterval_
+            );
+
+            Info<< indent << "updating secondary inlet temperature every "
+                << targetQdotCalcInterval_ << " iterations" << nl;
+
+            coeffs_.readIfPresent("targetQdotRelax", targetQdotRelax_);
+
+            Info<< indent << "temperature relaxation:  "
+                << targetQdotRelax_ << endl;
+
         }
 
         return true;

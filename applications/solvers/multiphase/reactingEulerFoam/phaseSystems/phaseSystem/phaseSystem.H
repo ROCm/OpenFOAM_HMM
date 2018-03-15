@@ -134,7 +134,7 @@ protected:
             phasePairTable;
 
         typedef
-            HashTable<autoPtr<blendingMethod>, word, word::hash>
+            HashTable<autoPtr<blendingMethod>>
             blendingMethodTable;
 
         typedef

@@ -29,34 +29,74 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::tmp<Foam::complexField>
+Foam::fft::realTransform1D(const scalarField& field)
 {
+    const label n = field.size();
+    const label nBy2 = n/2;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // Copy of input field for use by fftw
+    // - require non-const access to input and output
+    // - use double to avoid additional libfftwf for single-precision
 
-void fft::transform
+    List<double> in(n);
+    List<double> out(n);
+
+    for (label i=0; i < n; ++i)
+    {
+        in[i] = field[i];
+    }
+
+    // Using real to half-complex fftw 'kind'
+    fftw_plan plan = fftw_plan_r2r_1d
+    (
+        n,
+        in.data(),
+        out.data(),
+        FFTW_R2HC,
+        FFTW_ESTIMATE
+    );
+
+    fftw_execute(plan);
+
+    // field[0] = DC component
+    tmp<complexField> tresult(new complexField(nBy2 + 1));
+    complexField& result = tresult.ref();
+
+    result[0].Re() = out[0];
+    result[nBy2].Re() = out[nBy2];
+    for (label i = 1; i < nBy2; ++i)
+    {
+        result[i].Re() = out[i];
+        result[i].Im() = out[n - i];
+    }
+
+    fftw_destroy_plan(plan);
+
+    return tresult;
+}
+
+
+Foam::tmp<Foam::complexField> Foam::fft::realTransform1D
+(
+    const tmp<scalarField>& tfield
+)
+{
+    tmp<complexField> tresult = realTransform1D(tfield());
+    tfield.clear();
+    return tresult;
+}
+
+
+void Foam::fft::transform
 (
     complexField& field,
     const UList<int>& nn,
     transformDirection dir
 )
 {
-    forAll(nn, idim)
-    {
-        // Check for power of two
-        unsigned int dimCount = nn[idim];
-        if (!dimCount || (dimCount & (dimCount - 1)))
-        {
-            FatalErrorInFunction
-                << "number of elements in direction " << idim
-                << " is not a power of 2" << endl
-                << "    Number of elements in each direction = " << nn
-                << abort(FatalError);
-        }
-    }
-
     // Copy field into fftw containers
-    label N = field.size();
+    const label N = field.size();
     fftw_complex in[N], out[N];
 
     forAll(field, i)
@@ -74,7 +114,7 @@ void fft::transform
     //    fftw_plan_dft_1d(N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
 
     // Generic 1..3-D plan
-    label rank = nn.size();
+    const label rank = nn.size();
     fftw_plan plan =
         fftw_plan_dft(rank, nn.begin(), in, out, dir, FFTW_ESTIMATE);
 
@@ -109,7 +149,7 @@ void fft::transform
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-tmp<complexField> fft::forwardTransform
+Foam::tmp<Foam::complexField> Foam::fft::forwardTransform
 (
     const tmp<complexField>& tfield,
     const UList<int>& nn
@@ -125,7 +165,7 @@ tmp<complexField> fft::forwardTransform
 }
 
 
-tmp<complexField> fft::reverseTransform
+Foam::tmp<Foam::complexField> Foam::fft::reverseTransform
 (
     const tmp<complexField>& tfield,
     const UList<int>& nn
@@ -141,7 +181,7 @@ tmp<complexField> fft::reverseTransform
 }
 
 
-tmp<complexVectorField> fft::forwardTransform
+Foam::tmp<Foam::complexVectorField> Foam::fft::forwardTransform
 (
     const tmp<complexVectorField>& tfield,
     const UList<int>& nn
@@ -170,7 +210,7 @@ tmp<complexVectorField> fft::forwardTransform
 }
 
 
-tmp<complexVectorField> fft::reverseTransform
+Foam::tmp<Foam::complexVectorField> Foam::fft::reverseTransform
 (
     const tmp<complexVectorField>& tfield,
     const UList<int>& nn
@@ -198,9 +238,5 @@ tmp<complexVectorField> fft::reverseTransform
     return tifftVectorField;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

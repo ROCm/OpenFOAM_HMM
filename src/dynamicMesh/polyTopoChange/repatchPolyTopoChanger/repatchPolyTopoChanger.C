@@ -43,7 +43,7 @@ Foam::polyTopoChange& Foam::repatchPolyTopoChanger::meshMod()
     {
         meshModPtr_.reset(new polyTopoChange(mesh_));
     }
-    return meshModPtr_();
+    return *meshModPtr_;
 }
 
 

@@ -70,7 +70,7 @@ Note
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 using namespace Foam;
 
@@ -101,7 +101,7 @@ label findFace(const primitiveMesh& mesh, const face& f)
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("file prefix");
+    argList::addArgument("file prefix");
     argList::addBoolOption
     (
         "noFaceFile",
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     const fileName prefix = args[1];
-    const bool readFaceFile = !args.optionFound("noFaceFile");
+    const bool readFaceFile = !args.found("noFaceFile");
 
     const fileName nodeFile(prefix + ".node");
     const fileName eleFile(prefix + ".ele");
@@ -276,8 +276,7 @@ int main(int argc, char *argv[])
     }
 
 
-
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList tetPoints(4);
 
@@ -319,27 +318,24 @@ int main(int argc, char *argv[])
     // Construct mesh with default boundary only
     //
 
-    autoPtr<polyMesh> meshPtr
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                polyMesh::defaultRegion,
-                runTime.constant(),
-                runTime
-            ),
-            xferCopy(points),
-            cells,
-            faceListList(0),
-            wordList(0),    // boundaryPatchNames
-            wordList(0),    // boundaryPatchTypes
-            "defaultFaces",
-            polyPatch::typeName,
-            wordList(0)
-        )
+            polyMesh::defaultRegion,
+            runTime.constant(),
+            runTime
+        ),
+        pointField(points),  // Copy of points
+        cells,
+        faceListList(),
+        wordList(),          // boundaryPatchNames
+        wordList(),          // boundaryPatchTypes
+        "defaultFaces",
+        polyPatch::typeName,
+        wordList()
     );
-    const polyMesh& mesh = meshPtr;
+    const polyMesh& mesh = *meshPtr;
 
 
     if (readFaceFile)
@@ -532,7 +528,7 @@ int main(int argc, char *argv[])
                     runTime.constant(),
                     runTime
                 ),
-                xferMove(points),
+                std::move(points),
                 cells,
                 patchFaces,
                 patchNames,

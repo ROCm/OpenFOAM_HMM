@@ -116,7 +116,7 @@ template<class SourcePatch, class TargetPatch>
 inline const Foam::mapDistribute&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::srcMap() const
 {
-    return srcMapPtr_();
+    return *srcMapPtr_;
 }
 
 
@@ -188,7 +188,7 @@ template<class SourcePatch, class TargetPatch>
 inline const Foam::mapDistribute&
 Foam::AMIInterpolation<SourcePatch, TargetPatch>::tgtMap() const
 {
-    return tgtMapPtr_();
+    return *tgtMapPtr_;
 }
 
 

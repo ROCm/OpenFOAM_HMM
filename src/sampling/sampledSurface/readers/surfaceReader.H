@@ -93,7 +93,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfaceReader();
+    virtual ~surfaceReader() = default;
 
 
     // Member Functions

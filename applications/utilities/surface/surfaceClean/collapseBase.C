@@ -99,7 +99,7 @@ static void splitTri
 {
     //label oldNTris = tris.size();
 
-    label fp = findIndex(f, e[0]);
+    label fp = f.find(e[0]);
     label fp1 = f.fcIndex(fp);
     label fp2 = f.fcIndex(fp1);
 
@@ -204,7 +204,7 @@ static bool insertSorted
     scalarField& sortedWeights
 )
 {
-    if (findIndex(sortedVerts, vertI) != -1)
+    if (sortedVerts.found(vertI))
     {
         FatalErrorInFunction
             << " which is already in list of sorted vertices "
@@ -562,7 +562,7 @@ static labelListList getOutsideVerts
             {
                 label v = e[eI];
 
-                if (findIndex(regionVerts, v) == -1)
+                if (!regionVerts.found(v))
                 {
                     label sz = regionVerts.size();
                     regionVerts.setSize(sz+1);
@@ -682,7 +682,7 @@ static void getSplitVerts
         else
         {
             // Copy upto (but not including) e[1]
-            label i1 = findIndex(orderedVerts, e[1]);
+            label i1 = orderedVerts.find(e[1]);
             splitVerts = SubList<label>(orderedVerts, i1, 0);
             splitWeights = SubList<scalar>(orderedWeights, i1, 0);
         }
@@ -703,7 +703,7 @@ static void getSplitVerts
         {
             // Copy downto (but not including) e[1]
 
-            label i1 = findIndex(orderedVerts, e[1]);
+            label i1 = orderedVerts.find(e[1]);
             splitVerts = SubList<label>(orderedVerts, sz-(i1+1), i1+1);
             reverse(splitVerts);
             splitWeights = SubList<scalar>(orderedWeights, sz-(i1+1), i1+1);
@@ -716,7 +716,7 @@ static void getSplitVerts
 
         // Copy upto (but not including) e[0]
 
-        label i0 = findIndex(orderedVerts, e[0]);
+        label i0 = orderedVerts.find(e[0]);
         splitVerts = SubList<label>(orderedVerts, i0, 0);
         reverse(splitVerts);
         splitWeights = SubList<scalar>(orderedWeights, i0, 0);
@@ -726,14 +726,14 @@ static void getSplitVerts
     {
         // Copy from (but not including) e[0] to end
 
-        label i0 = findIndex(orderedVerts, e[0]);
+        label i0 = orderedVerts.find(e[0]);
         splitVerts = SubList<label>(orderedVerts, sz-(i0+1), i0+1);
         splitWeights = SubList<scalar>(orderedWeights, sz-(i0+1), i0+1);
     }
     else
     {
-        label i0 = findIndex(orderedVerts, e[0]);
-        label i1 = findIndex(orderedVerts, e[1]);
+        label i0 = orderedVerts.find(e[0]);
+        label i1 = orderedVerts.find(e[1]);
 
         if (i0 == -1 || i1 == -1)
         {

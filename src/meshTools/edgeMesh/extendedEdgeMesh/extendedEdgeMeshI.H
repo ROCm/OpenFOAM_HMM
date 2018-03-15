@@ -234,10 +234,8 @@ Foam::extendedEdgeMesh::getPointStatus(label ptI) const
     {
         return MIXED;
     }
-    else
-    {
-        return NONFEATURE;
-    }
+
+    return NONFEATURE;
 }
 
 
@@ -260,10 +258,8 @@ Foam::extendedEdgeMesh::getEdgeStatus(label edgeI) const
     {
         return OPEN;
     }
-    else
-    {
-        return MULTIPLE;
-    }
+
+    return MULTIPLE;
 }
 
 
@@ -276,13 +272,11 @@ inline Foam::PackedList<2> Foam::extendedEdgeMesh::edgeBaffles
 
     DynamicList<label> edgeBaffles(eNormals.size());
 
-    forAll(eNormals, enI)
+    for (const label normi : eNormals)
     {
-        const label normI = eNormals[enI];
-
-        if (normalVolumeTypes_[normI])
+        if (normalVolumeTypes_[normi])
         {
-            edgeBaffles.append(normI);
+            edgeBaffles.append(normi);
         }
     }
 

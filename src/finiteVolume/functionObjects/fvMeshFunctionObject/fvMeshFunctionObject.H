@@ -110,7 +110,8 @@ public:
 
 
     //- Destructor
-    virtual ~fvMeshFunctionObject();
+    virtual ~fvMeshFunctionObject() = default;
+
 };
 
 

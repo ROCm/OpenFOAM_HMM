@@ -35,18 +35,17 @@ Foam::label Foam::fileFormats::STARCDMeshWriter::findDefaultBoundary() const
 {
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    label id = -1;
-
     // find Default_Boundary_Region if it exists
     forAll(patches, patchi)
     {
         if (defaultBoundaryName == patches[patchi].name())
         {
-            id = patchi;
+            return patchi;
             break;
         }
     }
-    return id;
+
+    return -1;
 }
 
 
@@ -165,29 +164,16 @@ void Foam::fileFormats::STARCDMeshWriter::writeCells
     OFstream os(starFileName(prefix, STARCDCore::CEL_FILE));
     writeHeader(os, STARCDCore::HEADER_CEL);
 
-    // this is what we seem to need
-    // map foam cellModeller index -> star shape
-    Map<label> shapeLookupIndex;
-    shapeLookupIndex.insert
-    (
-        hexModel->index(),
-        STARCDCore::starcdHex
-    );
-    shapeLookupIndex.insert
-    (
-        prismModel->index(),
-        STARCDCore::starcdPrism
-    );
-    shapeLookupIndex.insert
-    (
-        tetModel->index(),
-        STARCDCore::starcdTet
-    );
-    shapeLookupIndex.insert
-    (
-        pyrModel->index(),
-        STARCDCore::starcdPyr
-    );
+    //
+    // Mapping between OpenFOAM and PROSTAR primitives
+    //
+    const Map<label> shapeLookupIndex
+    {
+        { cellModel::ref(cellModel::HEX).index(), STARCDCore::starcdHex },
+        { cellModel::ref(cellModel::PRISM).index(), STARCDCore::starcdPrism },
+        { cellModel::ref(cellModel::TET).index(), STARCDCore::starcdTet },
+        { cellModel::ref(cellModel::PYR).index(), STARCDCore::starcdPyr },
+    };
 
     const cellShapeList& shapes = mesh_.cellShapes();
     const cellList& cells  = mesh_.cells();
@@ -336,12 +322,12 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
     // Mapping between OpenFOAM and PROSTAR primitives
     // - needed for face mapping
     //
-    const Map<label> prostarShapeLookup =
+    const Map<label> shapeLookupIndex =
     {
-        { hexModel->index(),   STARCDCore::starcdHex },
-        { prismModel->index(), STARCDCore::starcdPrism },
-        { tetModel->index(),   STARCDCore::starcdTet },
-        { pyrModel->index(),   STARCDCore::starcdPyr }
+        { cellModel::ref(cellModel::HEX).index(), STARCDCore::starcdHex },
+        { cellModel::ref(cellModel::PRISM).index(), STARCDCore::starcdPrism },
+        { cellModel::ref(cellModel::TET).index(), STARCDCore::starcdTet },
+        { cellModel::ref(cellModel::PYR).index(), STARCDCore::starcdPyr },
     };
 
     Info<< "Writing " << os.name() << " : "
@@ -380,7 +366,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
             label cellId = owner[facei];
             const labelList& cFaces  = cells[cellId];
             const cellShape& shape = shapes[cellId];
-            label cellFaceId = findIndex(cFaces, facei);
+            label cellFaceId = cFaces.find(facei);
 
             //      Info<< "cell " << cellId + 1 << " face " << facei
             //          << " == " << faces[facei]
@@ -396,7 +382,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
             label mapIndex = shape.model().index();
 
             // A registered primitive type
-            if (prostarShapeLookup.found(mapIndex))
+            if (shapeLookupIndex.found(mapIndex))
             {
                 const faceList sFaces = shape.faces();
                 forAll(sFaces, sFacei)
@@ -408,7 +394,7 @@ void Foam::fileFormats::STARCDMeshWriter::writeBoundary
                     }
                 }
 
-                mapIndex = prostarShapeLookup[mapIndex];
+                mapIndex = shapeLookupIndex[mapIndex];
                 cellFaceId =
                     STARCDCore::foamToStarFaceAddr[mapIndex][cellFaceId];
             }

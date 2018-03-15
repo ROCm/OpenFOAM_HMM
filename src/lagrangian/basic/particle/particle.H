@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -87,9 +87,6 @@ class particle
 {
     // Private member data
 
-        //- Write particle positions file (v1706 format and earlier)
-        static bool writeLagrangianPositions;
-
         //- Size in bytes of the position data
         static const std::size_t sizeofPosition;
 
@@ -126,6 +123,20 @@ public:
         template <class TrackCloudType>
         trackingData(const TrackCloudType& cloud)
         {}
+    };
+
+
+    //- Old particle positions content for OpenFOAM-1706 and earlier
+    struct positionsCompat1706
+    {
+        vector position;
+        label celli;
+        label facei;
+        scalar stepFraction;
+        label tetFacei;
+        label tetPti;
+        label origProc;
+        label origId;
     };
 
 
@@ -335,8 +346,8 @@ public:
         //- String representation of properties
         DefinePropertyList
         (
-            "(Px Py Pz) celli tetFacei tetPti "
-            "facei stepFraction origProc origId"
+            "(coordinatesa coordinatesb coordinatesc coordinatesd) "
+            "celli tetFacei tetPti facei stepFraction origProc origId"
         );
 
         //- String representation of property types
@@ -347,6 +358,14 @@ public:
 
         //- Cumulative particle counter - used to provide unique ID
         static label particleCount_;
+
+        //- Write particle coordinates file (v1712 and later)
+        //- Default is true
+        static bool writeLagrangianCoordinates;
+
+        //- Write particle positions file (v1706 format and earlier)
+        //- Default is false
+        static bool writeLagrangianPositions;
 
 
     // Constructors
@@ -400,7 +419,7 @@ public:
         //- Construct a clone
         virtual autoPtr<particle> clone() const
         {
-            return autoPtr<particle>(new particle(*this));
+            return autoPtr<particle>::New(*this);
         }
 
         //- Factory class to read-construct particles used for
@@ -418,14 +437,13 @@ public:
 
             autoPtr<particle> operator()(Istream& is) const
             {
-                return autoPtr<particle>(new particle(mesh_, is, true));
+                return autoPtr<particle>::New(mesh_, is, true);
             }
         };
 
 
     //- Destructor
-    virtual ~particle()
-    {}
+    virtual ~particle() = default;
 
 
     // Member Functions
@@ -685,7 +703,7 @@ public:
         void writeCoordinates(Ostream&) const;
 
         //- Write the particle position and cell
-        void writePosition(Ostream&) const;
+        virtual void writePosition(Ostream&) const;
 
 
     // Friend Operators

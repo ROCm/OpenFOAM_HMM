@@ -60,7 +60,7 @@ template<class Specie>
 inline Foam::autoPtr<Foam::linear<Specie>>
 Foam::linear<Specie>::clone() const
 {
-    return autoPtr<linear<Specie>>(new linear<Specie>(*this));
+    return autoPtr<linear<Specie>>::New(*this);
 }
 
 
@@ -71,7 +71,7 @@ Foam::linear<Specie>::New
     const dictionary& dict
 )
 {
-    return autoPtr<linear<Specie>>(new linear<Specie>(dict));
+    return autoPtr<linear<Specie>>::New(dict);
 }
 
 

@@ -146,7 +146,7 @@ bool Foam::functionObjects::particleDistribution::write()
         // Tag field present - generate distribution per tag
         const IOField<label>& tag =
             cloudObr.lookupObject<IOField<label>>(tagFieldName_);
-        const HashSet<label> tagMap(tag);
+        const labelHashSet tagMap(tag);
         const label tagMax = tagMap.size();
 
         List<DynamicList<label>> tagAddr(tagMax);

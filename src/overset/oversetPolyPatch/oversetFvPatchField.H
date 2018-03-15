@@ -28,8 +28,9 @@ Group
     grpCoupledBoundaryConditions
 
 Description
-
-SeeAlso
+    Boundary condition for use on overset patches. To be run in combination
+    with special dynamicFvMesh type that inserts local contributions into
+    the matrix. This boundary condition adds the remote contributions.
 
 SourceFiles
     oversetFvPatchField.C
@@ -39,9 +40,7 @@ SourceFiles
 #ifndef oversetFvPatchField_H
 #define oversetFvPatchField_H
 
-#include "oversetFvPatch.H"
-#include "zeroGradientFvPatchField.H"
-#include "LduInterfaceField.H"
+#include "semiImplicitOversetFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,18 +54,8 @@ namespace Foam
 template<class Type>
 class oversetFvPatchField
 :
-    public LduInterfaceField<Type>,
-    public zeroGradientFvPatchField<Type>
+    public semiImplicitOversetFvPatchField<Type>
 {
-    // Private data
-
-        //- Local reference cast into the overset patch
-        const oversetFvPatch& oversetPatch_;
-
-        //- Master patch ID
-        mutable label masterPatchID_;
-
-
 public:
 
     //- Runtime type information
@@ -133,33 +122,10 @@ public:
 
     // Member functions
 
-        // Access
-
-            //- Return local reference cast into the cyclic AMI patch
-            const oversetFvPatch& oversetPatch() const
-            {
-                return oversetPatch_;
-            }
-
-
         // Evaluation functions
 
             //- Initialise the evaluation of the patch field
             virtual void initEvaluate(const Pstream::commsTypes commsType);
-
-            //- Evaluate the patch field
-            virtual void evaluate(const Pstream::commsTypes commsType);
-
-            //- Initialise neighbour matrix update
-            virtual void initInterfaceMatrixUpdate
-            (
-                scalarField&,
-                const bool add,
-                const scalarField&,
-                const scalarField&,
-                const direction,
-                const Pstream::commsTypes commsType
-            ) const;
 
             //- Update result field based on interface functionality
             virtual void updateInterfaceMatrix
@@ -171,32 +137,6 @@ public:
                 const direction cmpt,
                 const Pstream::commsTypes commsType
             ) const;
-
-            //- Initialise neighbour matrix update
-            virtual void initInterfaceMatrixUpdate
-            (
-                Field<Type>&,
-                const bool add,
-                const Field<Type>&,
-                const scalarField&,
-                const Pstream::commsTypes commsType
-            ) const;
-
-            //- Update result field based on interface functionality
-            virtual void updateInterfaceMatrix
-            (
-                Field<Type>&,
-                const bool add,
-                const Field<Type>&,
-                const scalarField&,
-                const Pstream::commsTypes commsType
-            ) const;
-
-
-        // I-O
-
-            //- Write
-            virtual void write(Ostream& os) const;
 };
 
 

@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
     #include "addRegionOption.H"
-    argList::validArgs.append("cellSet");
+    argList::addArgument("cellSet");
     argList::addBoolOption
     (
         "minSet",
@@ -73,9 +73,9 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word cellSetName(args[1]);
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
-    const bool minSet = args.optionFound("minSet");
+    const bool minSet = args.found("minSet");
 
     Info<< "Reading cells to refine from cellSet " << cellSetName
         << nl << endl;
@@ -174,10 +174,10 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
     // Update fields
-    mesh.updateMesh(map);
+    mesh.updateMesh(map());
 
     // Update numbering of cells/vertices.
-    meshCutter.updateMesh(map);
+    meshCutter.updateMesh(map());
 
     // Optionally inflate mesh
     if (map().hasMotionPoints())

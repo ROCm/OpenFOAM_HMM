@@ -152,13 +152,13 @@ public:
         //- Return reference to the parallel distribution map
         const mapDistribute& ownMap() const
         {
-            return ownMapPtr_();
+            return *ownMapPtr_;
         }
 
         //- Return reference to the parallel distribution map
         const mapDistribute& neiMap() const
         {
-            return neiMapPtr_();
+            return *neiMapPtr_;
         }
 
         //- Return reference to the stencil

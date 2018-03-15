@@ -97,7 +97,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackingData::TInterp() const
 {
-    return TInterp_();
+    return *TInterp_;
 }
 
 
@@ -105,7 +105,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackingData::CpInterp() const
 {
-    return CpInterp_();
+    return *CpInterp_;
 }
 
 
@@ -113,7 +113,7 @@ template<class ParcelType>
 inline const Foam::interpolation<Foam::scalar>&
 Foam::ThermoParcel<ParcelType>::trackingData::kappaInterp() const
 {
-    return kappaInterp_();
+    return *kappaInterp_;
 }
 
 
@@ -128,7 +128,7 @@ Foam::ThermoParcel<ParcelType>::trackingData::GInterp() const
             << abort(FatalError);
     }
 
-    return GInterp_();
+    return *GInterp_;
 }
 
 

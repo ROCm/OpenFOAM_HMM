@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,8 @@ Class
     Foam::zero
 
 Description
-    A class representing the concept of 0 used to avoid unnecessary
-    manipulations for objects that are known to be zero at compile-time.
+    A class representing the concept of 0 (zero), which can be used to avoid
+    manipulating objects that are known to be 'zero' at compile-time.
 
 SourceFiles
     zeroI.H
@@ -43,53 +43,94 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class zero;
+class Istream;
+class Ostream;
+
 /*---------------------------------------------------------------------------*\
-                           Class zero Declaration
+                            Class zero Declaration
 \*---------------------------------------------------------------------------*/
 
 class zero
 {
 public:
-
     typedef zero value_type;
 
-    // Constructors
+    // Forward declarations
+    class null;
 
-        //- Construct null
-        zero()
-        {}
+    //- Null constructible
+    constexpr zero() noexcept {}
+
+    //- Construct from Istream consumes no content.
+    explicit constexpr zero(Istream&) noexcept {}
 
 
-    // Member operators
+    //- Return false (0) for bool
+    inline constexpr operator bool() const noexcept
+    {
+        return false;
+    }
 
-        //- Return 0 for bool
-        inline operator bool() const
-        {
-            return 0;
-        }
+    //- Return 0 for label
+    inline constexpr operator label() const noexcept
+    {
+        return 0;
+    }
 
-        //- Return 0 for label
-        inline operator label() const
-        {
-            return 0;
-        }
+    //- Return 0 for float
+    inline constexpr operator float() const noexcept
+    {
+        return 0;
+    }
 
-        //- Return 0 for float
-        inline operator float() const
-        {
-            return 0;
-        }
-
-        //- Return 0 for double
-        inline operator double() const
-        {
-            return 0;
-        }
+    //- Return 0 for double
+    inline constexpr operator double() const noexcept
+    {
+        return 0;
+    }
 };
 
 
+/*---------------------------------------------------------------------------*\
+                         Class zero::null Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A zero class with a null output adapter.
+class zero::null
+:
+    public zero
+{
+public:
+    typedef null value_type;
+
+    //- Null constructible
+    constexpr null() noexcept{}
+
+    //- Construct from Istream consumes no content.
+    explicit constexpr null(Istream&) noexcept {}
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 // Global zero
-static const zero Zero;
+static constexpr const zero Zero;
+
+// IOstream Operators
+
+//- Read from Istream consumes no content.
+inline constexpr Istream& operator>>(Istream& is, zero&) noexcept
+{
+    return is;
+}
+
+//- Write to Ostream emits no content.
+inline constexpr Ostream& operator<<(Ostream& os, const zero::null&) noexcept
+{
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

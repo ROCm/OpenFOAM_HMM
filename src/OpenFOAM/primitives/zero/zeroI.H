@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,8 +23,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "zero.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -32,59 +30,59 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-inline zero operator+(const zero&, const zero&)
+inline constexpr zero operator+(const zero&, const zero&) noexcept
 {
     return Zero;
 }
 
 template<class Type>
-inline const Type& operator+(const Type& t, const zero&)
+inline constexpr const Type& operator+(const Type& val, const zero&) noexcept
 {
-    return t;
+    return val;
 }
 
 template<class Type>
-inline const Type& operator+(const zero&, const Type& t)
+inline constexpr const Type& operator+(const zero&, const Type& val) noexcept
 {
-    return t;
+    return val;
 }
 
-inline zero operator-(const zero&, const zero&)
+inline constexpr zero operator-(const zero&, const zero&) noexcept
 {
     return Zero;
 }
 
 template<class Type>
-inline const Type& operator-(const Type& t, const zero&)
+inline constexpr const Type& operator-(const Type& val, const zero&) noexcept
 {
-    return t;
+    return val;
 }
 
 template<class Type>
-inline Type operator-(const zero&, const Type& t)
+inline constexpr Type operator-(const zero&, const Type& val)
 {
-    return -t;
+    return -val;
 }
 
-inline zero operator*(const zero&, const zero&)
+inline constexpr zero operator*(const zero&, const zero&) noexcept
 {
     return Zero;
 }
 
 template<class Type>
-inline zero operator*(const Type& t, const zero&)
+inline constexpr zero operator*(const Type& val, const zero&) noexcept
 {
     return Zero;
 }
 
 template<class Type>
-inline zero operator*(const zero&, const Type& t)
+inline constexpr zero operator*(const zero&, const Type& val) noexcept
 {
     return Zero;
 }
 
 template<class Type>
-inline zero operator/(const zero&, const Type& t)
+inline constexpr zero operator/(const zero&, const Type& val) noexcept
 {
     return Zero;
 }

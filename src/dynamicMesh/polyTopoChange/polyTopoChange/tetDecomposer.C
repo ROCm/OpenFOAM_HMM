@@ -596,7 +596,7 @@ void Foam::tetDecomposer::setRefinement
                     // we are looping in the same order the tets added for
                     // otherFacei will be before those of facei
 
-                    label otherFp = findIndex(otherF, p0);
+                    label otherFp = otherF.find(p0);
                     if (otherF.nextLabel(otherFp) == p1)
                     {
                         // ok. otherFp is first vertex of edge.

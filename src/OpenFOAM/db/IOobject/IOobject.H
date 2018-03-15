@@ -279,13 +279,13 @@ public:
         //- Clone
         autoPtr<IOobject> clone() const
         {
-            return autoPtr<IOobject>(new IOobject(*this));
+            return autoPtr<IOobject>::New(*this);
         }
 
         //- Clone resetting registry
         autoPtr<IOobject> clone(const objectRegistry& registry) const
         {
-            return autoPtr<IOobject>(new IOobject(*this, registry));
+            return autoPtr<IOobject>::New(*this, registry);
         }
 
 

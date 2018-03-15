@@ -51,7 +51,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".vtk ascii file");
+    argList::addArgument(".vtk ascii file");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -68,14 +68,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(reader.points()),
+        std::move(reader.points()),
         reader.cells(),
-        faceListList(0),
-        wordList(0),
-        wordList(0),
+        faceListList(),
+        wordList(),
+        wordList(),
         "defaultFaces",
         polyPatch::typeName,
-        wordList(0)
+        wordList()
     );
 
     // Set the precision of the points data to 10

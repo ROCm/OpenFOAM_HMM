@@ -8,8 +8,8 @@ HashTable<HashTable<word>> cloudFields;
 
 if (timeDirs.size())
 {
-    const fileName& cloudPrefix = regionPrefix/cloud::prefix;
     const word& lastTimeName = timeDirs.last().name();
+    const fileName cloudPrefix(regionPrefix/cloud::prefix);
 
     IOobjectList objs(mesh, lastTimeName);
 
@@ -28,7 +28,7 @@ if (timeDirs.size())
 
 
     //
-    // now check for lagrangian/<cloudName>
+    // Now check for lagrangian/<cloudName>
     //
     fileNameList cloudDirs;
     if (!noLagrangian)
@@ -46,48 +46,45 @@ if (timeDirs.size())
     {
         const word& cloudName = cloudDirs[cloudI];
 
-        // Create a new hash table for each cloud
-        cloudFields.insert(cloudName, HashTable<word>());
-
-        // Identify the new cloud within the hash table
-        HashTable<HashTable<word>>::iterator cloudIter =
-            cloudFields.find(cloudName);
-
-        IOobjectList objs
+        IOobjectList cloudObjs
         (
             mesh,
             lastTimeName,
             cloudPrefix/cloudName
         );
 
-        bool hasCoordinates = false;
-        forAllConstIter(IOobjectList, objs, fieldIter)
+        // Clouds require "coordinates".
+        // The "positions" are for v1706 and lower.
+        if (cloudObjs.found("coordinates") || cloudObjs.found("positions"))
         {
-            const IOobject obj = *fieldIter();
-            const word& fieldName = obj.name();
-            const word& fieldType = obj.headerClassName();
+            // Save the cloud fields on a per cloud basis
+            auto& fieldsPerCloud = cloudFields(cloudName);
 
-            if (fieldName == "positions" || fieldName == "coordinates")
+            forAllConstIters(cloudObjs, fieldIter)
             {
-                hasCoordinates = true;
-            }
-            else if (cloudFieldTypes.found(fieldType))
-            {
-                // simply ignore types that we don't handle
-                cloudIter().insert(fieldName, fieldType);
-            }
-        }
+                const IOobject* obj = fieldIter();
 
-        // drop this cloud if it has no positions or is otherwise empty
-        if (!hasCoordinates || cloudIter().empty())
-        {
-            Info<< "removing cloud " << cloudName << endl;
-            cloudFields.erase(cloudIter);
+                const word& fieldName = obj->name();
+                const word& fieldType = obj->headerClassName();
+
+                if (cloudFieldTypes.found(fieldType))
+                {
+                    // Field name/type - ignore types that we don't handle
+                    fieldsPerCloud.insert(fieldName, fieldType);
+                }
+            }
         }
     }
 
+    // Only retain a cloud that actually has fields
+    cloudFields.filterValues
+    (
+        [](const HashTable<word>& v){ return v.size(); }
+    );
+
+
     //
-    // verify that the variable is present for all times
+    // Verify that the variable is present for all times
     //
     for (label i=0; volumeFields.size() && i < timeDirs.size(); ++i)
     {
@@ -114,3 +111,6 @@ if (timeDirs.size())
         volumeFields.erase(missing);
     }
 }
+
+
+// ************************************************************************* //

@@ -108,7 +108,8 @@ public:
         (
             const word& name,
             const turbulenceModel& turbulence,
-            const dictionary& dict
+            const dictionary& dict,
+            const word& lookupName = "delta"
         );
 
         //- Return a reference to the selected LES delta
@@ -117,7 +118,8 @@ public:
             const word& name,
             const turbulenceModel& turbulence,
             const dictionary& dict,
-            const dictionaryConstructorTable&
+            const dictionaryConstructorTable& additionalConstructors,
+            const word& lookupName = "delta"
         );
 
 

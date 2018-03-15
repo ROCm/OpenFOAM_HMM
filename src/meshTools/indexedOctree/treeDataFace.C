@@ -86,11 +86,11 @@ Foam::treeDataFace::treeDataFace
 (
     const bool cacheBb,
     const primitiveMesh& mesh,
-    const Xfer<labelList>& faceLabels
+    labelList&& faceLabels
 )
 :
     mesh_(mesh),
-    faceLabels_(faceLabels),
+    faceLabels_(std::move(faceLabels)),
     isTreeFace_(mesh.nFaces(), 0),
     cacheBb_(cacheBb)
 {
@@ -122,8 +122,7 @@ Foam::treeDataFace::treeDataFace
     mesh_(patch.boundaryMesh().mesh()),
     faceLabels_
     (
-        identity(patch.size())
-      + patch.start()
+        identity(patch.size(), patch.start())
     ),
     isTreeFace_(mesh_.nFaces(), 0),
     cacheBb_(cacheBb)

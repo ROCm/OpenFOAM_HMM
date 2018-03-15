@@ -99,18 +99,13 @@ Foam::LduMatrix<Type, DType, LUType>::solver::New
             )
         );
     }
-    else
-    {
-        FatalIOErrorInFunction(solverDict)
-            << "cannot solve incomplete matrix, "
-               "no diagonal or off-diagonal coefficient"
-            << exit(FatalIOError);
 
-        return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>
-        (
-            nullptr
-        );
-    }
+    FatalIOErrorInFunction(solverDict)
+        << "cannot solve incomplete matrix, "
+           "no diagonal or off-diagonal coefficient"
+        << exit(FatalIOError);
+
+    return autoPtr<typename LduMatrix<Type, DType, LUType>::solver>();
 }
 
 

@@ -152,7 +152,8 @@ void Foam::foamPvCore::setSelectedArrayEntries
 )
 {
     const int n = select->GetNumberOfArrays();
-    // disable everything not explicitly enabled
+
+    // Disable everything not explicitly enabled
     select->DisableAllArrays();
 
     // Loop through entries, enabling as required

@@ -420,7 +420,7 @@ template<class Type>
 void Foam::parFvFieldReconstructor::reconstructFvVolumeInternalFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     const word& fieldClassName = DimensionedField<Type, volMesh>::typeName;
@@ -461,7 +461,7 @@ template<class Type>
 void Foam::parFvFieldReconstructor::reconstructFvVolumeFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     const word& fieldClassName =
@@ -504,7 +504,7 @@ template<class Type>
 void Foam::parFvFieldReconstructor::reconstructFvSurfaceFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     const word& fieldClassName =

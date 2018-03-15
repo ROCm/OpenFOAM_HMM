@@ -93,6 +93,10 @@ $(faceToCell)/MeshObjects/centredCFCFaceToCellStencilObject.C
 
 functionObjects/fvMeshFunctionObject/fvMeshFunctionObject.C
 functionObjects/volRegion/volRegion.C
+functionObjects/fieldSelection/fieldSelection.C
+functionObjects/fieldSelection/fileFieldSelection.C
+functionObjects/fieldSelection/volFieldSelection.C
+functionObjects/fieldSelection/solverFieldSelection.C
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
@@ -212,6 +216,7 @@ $(derivedFvPatchFields)/prghTotalHydrostaticPressure/prghTotalHydrostaticPressur
 $(derivedFvPatchFields)/fixedProfile/fixedProfileFvPatchFields.C
 $(derivedFvPatchFields)/plenumPressure/plenumPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/interfaceCompression/interfaceCompressionFvPatchScalarField.C
+$(derivedFvPatchFields)/swirlFanVelocity/swirlFanVelocityFvPatchField.C
 
 fvsPatchFields = fields/fvsPatchFields
 $(fvsPatchFields)/fvsPatchField/fvsPatchFields.C
@@ -306,6 +311,7 @@ $(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 $(schemes)/linearUpwind/linearUpwind.C
 $(schemes)/linearUpwind/linearUpwindV.C
 $(schemes)/LUST/LUST.C
+$(schemes)/deferredCorrection/deferredCorrection.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
@@ -421,6 +427,7 @@ $(coupling)/externalFileCoupler.C
 
 solutionControl = $(general)/solutionControl
 $(solutionControl)/solutionControl/solutionControl.C
+$(solutionControl)/loopControl/loopControl.C
 $(solutionControl)/simpleControl/simpleControl.C
 $(solutionControl)/pimpleControl/pimpleControl.C
 $(solutionControl)/pisoControl/pisoControl.C

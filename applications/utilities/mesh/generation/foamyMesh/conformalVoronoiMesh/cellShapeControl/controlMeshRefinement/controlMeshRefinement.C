@@ -267,7 +267,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
         Info<< "Inserting points from " << controlFunction.name()
             << " (" << controlFunction.type() << ")" << endl;
-        Info<< "    Force insertion is " << forceInsertion.asText() << endl;
+        Info<< "    Force insertion is " << forceInsertion.c_str() << endl;
 
         pointField pts;
         scalarField sizes;
@@ -453,7 +453,7 @@ void Foam::controlMeshRefinement::initialMeshPopulation
 
         Info<< "Inserting points from " << controlFunction.name()
             << " (" << controlFunction.type() << ")" << endl;
-        Info<< "    Force insertion is " << forceInsertion.asText() << endl;
+        Info<< "    Force insertion is " << forceInsertion.c_str() << endl;
 
         DynamicList<Foam::point> extraPts;
         DynamicList<scalar> extraSizes;

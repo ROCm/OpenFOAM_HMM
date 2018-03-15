@@ -29,24 +29,23 @@ License
 
 void Foam::fv::option::writeHeader(Ostream& os) const
 {
-    os  << indent << name_ << nl
-        << indent << token::BEGIN_BLOCK << incrIndent << nl;
+    os.beginBlock(name_);
 }
 
 
 void Foam::fv::option::writeFooter(Ostream& os) const
 {
-    os  << decrIndent << indent << token::END_BLOCK << endl;
+    os.endBlock();
 }
 
 
 void Foam::fv::option::writeData(Ostream& os) const
 {
-    os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
-    os.writeKeyword("active") << active_ << token::END_STATEMENT << nl << nl;
+    os.writeEntry("type", type());
+    os.writeEntry("active", active_);
 
-    os << indent << word(type() + "Coeffs");
-    coeffs_.write(os);
+    os << nl;
+    coeffs_.writeEntry(word(type() + "Coeffs"), os);
 }
 
 

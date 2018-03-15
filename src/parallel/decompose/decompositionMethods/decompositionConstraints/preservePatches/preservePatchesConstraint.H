@@ -37,7 +37,7 @@ SourceFiles
 #define preservePatchesConstraint_H
 
 #include "decompositionConstraint.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ class preservePatchesConstraint
     // Private data
 
         //- List of patches to keep together
-        wordReList patches_;
+        wordRes patches_;
 
 
 public:
@@ -77,13 +77,12 @@ public:
         );
 
         //- Construct from components
-        preservePatchesConstraint(const wordReList& patches);
+        preservePatchesConstraint(const UList<wordRe>& patches);
 
 
 
     //- Destructor
-    virtual ~preservePatchesConstraint()
-    {}
+    virtual ~preservePatchesConstraint() = default;
 
 
     // Member Functions

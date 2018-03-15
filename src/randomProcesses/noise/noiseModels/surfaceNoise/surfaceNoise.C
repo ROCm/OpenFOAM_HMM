@@ -58,7 +58,7 @@ void surfaceNoise::initialise(const fileName& fName)
 
         // Find the index of the pressure data
         const List<word> fieldNames(readerPtr_->fieldNames(0));
-        pIndex_ = findIndex(fieldNames, pName_);
+        pIndex_ = fieldNames.find(pName_);
         if (pIndex_ == -1)
         {
             FatalErrorInFunction
@@ -142,9 +142,9 @@ void surfaceNoise::readSurfaceData
         // Complete pressure time history data for subset of faces
         pData.setSize(nLocalFace);
         const label nTimes = times_.size();
-        forAll(pData, faceI)
+        for (scalarField& pf : pData)
         {
-            pData[faceI].setSize(nTimes);
+            pf.setSize(nTimes);
         }
 
         // Read and send data
@@ -165,7 +165,7 @@ void surfaceNoise::readSurfaceData
                 p *= rhoRef_;
 
                 // Send subset of faces to each processor
-                for (label procI = 0; procI < Pstream::nProcs(); procI++)
+                for (label procI = 0; procI < Pstream::nProcs(); ++procI)
                 {
                     label face0 = procFaceOffset[procI];
                     label nLocalFace =
@@ -194,12 +194,9 @@ void surfaceNoise::readSurfaceData
         const label nLocalFace = procFaceOffset[0];
 
         pData.setSize(nLocalFace);
-        forAll(times_, timeI)
+        for (scalarField& pf : pData)
         {
-            forAll(pData, faceI)
-            {
-                pData[faceI].setSize(times_.size());
-            }
+            pf.setSize(times_.size());
         }
 
         forAll(times_, i)
@@ -266,7 +263,7 @@ Foam::scalar surfaceNoise::writeSurfaceData
                 allData[faceI] = data[faceI];
             }
 
-            for (label procI = 1; procI < Pstream::nProcs(); procI++)
+            for (label procI = 1; procI < Pstream::nProcs(); ++procI)
             {
                 UIPstream fromProc(procI, pBufs);
                 scalarList dataSlice(fromProc);
@@ -486,7 +483,7 @@ void surfaceNoise::calculate()
             const label nFacePerProc = floor(nFace_/nProcs) + 1;
 
             procFaceOffset.setSize(nProcs + 1, 0);
-            for (label i = 1; i < procFaceOffset.size(); i++)
+            for (label i = 1; i < procFaceOffset.size(); ++i)
             {
                 procFaceOffset[i] = min(i*nFacePerProc, nFace_);
             }
@@ -539,8 +536,8 @@ void surfaceNoise::calculate()
         if (octave13BandIDs.empty())
         {
             WarningInFunction
-                << "Ocatve band calculation failed (zero sized). "
-                << "please check your input data"
+                << "Octave band calculation failed (zero sized). "
+                << "Please check your input data"
                 << endl;
         }
         else
@@ -558,33 +555,38 @@ void surfaceNoise::calculate()
 
         const windowModel& win = windowModelPtr_();
 
-        forAll(pData, faceI)
         {
-            const scalarField& p = pData[faceI];
+            noiseFFT nfft(deltaT_, win.nSamples());
 
-            noiseFFT nfft(deltaT_, p);
-            graph Prmsf(nfft.RMSmeanPf(win));
-            graph PSDf(nfft.PSDf(win));
-
-            // Store the frequency results in slot for face of surface
-            forAll(surfPrmsf, i)
+            forAll(pData, faceI)
             {
-                label freqI = i*fftWriteInterval_;
-                surfPrmsf[i][faceI] = Prmsf.y()[freqI];
-                surfPSDf[i][faceI] = PSDf.y()[freqI];
-            }
+                // Note: passes storage from pData to noiseFFT
+                nfft.setData(pData[faceI]);
 
-            // PSD [Pa^2/Hz]
-            graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
+                // Generate the FFT-based data
+                graph Prmsf(nfft.RMSmeanPf(win));
+                graph PSDf(nfft.PSDf(win));
 
-            // Integrated PSD = P(rms)^2 [Pa^2]
-            graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
+                // Store the frequency results in slot for face of surface
+                forAll(surfPrmsf, i)
+                {
+                    label freqI = i*fftWriteInterval_;
+                    surfPrmsf[i][faceI] = Prmsf.y()[freqI];
+                    surfPSDf[i][faceI] = PSDf.y()[freqI];
+                }
 
-            // Store the 1/3 octave results in slot for face of surface
-            forAll(surfPSD13f, freqI)
-            {
-                surfPSD13f[freqI][faceI] = PSD13f.y()[freqI];
-                surfPrms13f2[freqI][faceI] = Prms13f2.y()[freqI];
+                // PSD [Pa^2/Hz]
+                graph PSD13f(nfft.octaves(PSDf, octave13BandIDs, false));
+
+                // Integrated PSD = P(rms)^2 [Pa^2]
+                graph Prms13f2(nfft.octaves(PSDf, octave13BandIDs, true));
+
+                // Store the 1/3 octave results in slot for face of surface
+                forAll(surfPSD13f, freqI)
+                {
+                    surfPSD13f[freqI][faceI] = PSD13f.y()[freqI];
+                    surfPrms13f2[freqI][faceI] = Prms13f2.y()[freqI];
+                }
             }
         }
 
@@ -609,7 +611,7 @@ void surfaceNoise::calculate()
             fileName outDir(outDirBase/"fft");
 
             // Determine frequency range of interest
-            // Note: freqencies have fixed interval, and are in the range
+            // Note: frequencies have fixed interval, and are in the range
             //       0 to fftWriteInterval_*(n-1)*deltaf
             label f0 = ceil(fLower_/deltaf/scalar(fftWriteInterval_));
             label f1 = floor(fUpper_/deltaf/scalar(fftWriteInterval_));

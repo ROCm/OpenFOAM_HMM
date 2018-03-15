@@ -1,0 +1,30 @@
+| directive         | context           | content           | line oriented?
+|-------------------|-------------------|-------------------|-----------------
+  #inputMode        | dict              | word
+  #default          | dict              | entry introducer
+  #merge            | dict              | entry introducer
+  #overwrite        | dict              | entry introducer
+  #warn             | dict              | entry introducer
+  #error            | dict              | entry introducer
+                    |                   |
+  #remove           | dict              | keyType or List<keyType>
+                    |                   |
+  #include          | dict/primitive    | string
+  #includeEtc       | dict/primitive    | string
+  #includeIfPresent | dict/primitive    | string
+  #includeFunc      | dict              | word
+                    |                   |
+  #calc             | dict/primitive    | string
+  #codeStream       | dict/primitive    | dictionary
+
+
+Pending future extensions
+
+| directive         | context           | content           | line oriented?
+|-------------------|-------------------|-------------------|-----------------
+  #define           | dict              | entry introducer
+  #local            | dict              | entry introducer
+  #undef            | dict              | keyType or List<keyType>
+
+
+2017-11-26

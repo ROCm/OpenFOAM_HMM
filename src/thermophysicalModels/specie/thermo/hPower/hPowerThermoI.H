@@ -83,10 +83,7 @@ template<class EquationOfState>
 inline Foam::autoPtr<Foam::hPowerThermo<EquationOfState>>
 Foam::hPowerThermo<EquationOfState>::clone() const
 {
-    return autoPtr<hPowerThermo<EquationOfState>>
-    (
-        new hPowerThermo<EquationOfState>(*this)
-    );
+    return autoPtr<hPowerThermo<EquationOfState>>::New(*this);
 }
 
 
@@ -94,10 +91,7 @@ template<class EquationOfState>
 inline Foam::autoPtr<Foam::hPowerThermo<EquationOfState>>
 Foam::hPowerThermo<EquationOfState>::New(const dictionary& dict)
 {
-    return autoPtr<hPowerThermo<EquationOfState>>
-    (
-        new hPowerThermo<EquationOfState>(dict)
-    );
+    return autoPtr<hPowerThermo<EquationOfState>>::New(dict);
 }
 
 

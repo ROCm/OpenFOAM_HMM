@@ -90,7 +90,7 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1Types::Constant<Type>::value
     const scalarField& x
 ) const
 {
-    return tmp<Field<Type>>(new Field<Type>(x.size(), value_));
+    return tmp<Field<Type>>::New(x.size(), value_);
 }
 
 

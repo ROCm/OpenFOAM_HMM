@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-    argList::validArgs.insert("file .. fileN");
+    argList::addArgument("file .. fileN");
 
     argList::removeOption("case");
     argList::addOption("ext", "bak");
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     {
         const string& srcFile = args[argI];
 
-        if (args.optionFound("ext"))
+        if (args.found("ext"))
         {
             if (mvBak(srcFile, args["ext"]))
             {

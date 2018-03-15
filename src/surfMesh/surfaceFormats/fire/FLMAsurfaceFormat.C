@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ inline static void newline(Foam::OSstream& os)
 {
     if (os.format() == Foam::IOstream::ASCII)
     {
-        os  << Foam::endl;
+        os  << '\n';
     }
 }
 
@@ -61,9 +61,9 @@ inline void Foam::fileFormats::FLMAsurfaceFormat<Face>::writeShell
         if (f.size() == 3 || f.size() == 4)
         {
             putFireLabel(os, f.size());
-            forAll(f, fp)
+            for (const label verti : f)
             {
-                putFireLabel(os, f[fp]);
+                putFireLabel(os, verti);
             }
         }
         else
@@ -72,7 +72,7 @@ inline void Foam::fileFormats::FLMAsurfaceFormat<Face>::writeShell
             // better triangulation should have been done before
             for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
             {
-                label fp2 = f.fcIndex(fp1);
+                const label fp2 = f.fcIndex(fp1);
 
                 putFireLabel(os, 3);
                 putFireLabel(os, f[0]);
@@ -87,9 +87,9 @@ inline void Foam::fileFormats::FLMAsurfaceFormat<Face>::writeShell
         if (f.size() == 3 || f.size() == 4)
         {
             os  << ' ' << f.size();
-            forAll(f, fp)
+            for (const label verti : f)
             {
-                os  << ' ' << f[fp];
+                os  << ' ' << verti;
             }
             os  << nl;
         }
@@ -97,7 +97,7 @@ inline void Foam::fileFormats::FLMAsurfaceFormat<Face>::writeShell
         {
             for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
             {
-                label fp2 = f.fcIndex(fp1);
+                const label fp2 = f.fcIndex(fp1);
                 os  << ' ' << 3 << ' '
                     << f[0] << ' ' << f[fp1] << ' ' << f[fp2]
                     << nl;
@@ -164,9 +164,9 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
             << exit(FatalError);
     }
 
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&  faceLst = surf.surfFaces();
+    const UList<label>& faceMap = surf.faceMap();
 
     // for no zones, suppress the group name
     const List<surfZone>& zones =
@@ -222,10 +222,10 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
     putFireLabel(os, pointLst.size());
     newline(os);
 
-    forAll(pointLst, ptI)
+    for (const point& pt : pointLst)
     {
         // scaling is normally 1
-        putFirePoint(os, pointLst[ptI]);
+        putFirePoint(os, pt);
     }
     newline(os); // readability
 
@@ -236,20 +236,20 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
         newline(os);
 
         label faceIndex = 0;
-        forAll(zones, zoneI)
+        for (const surfZone& zone : zones)
         {
-            const surfZone& zone = zones[zoneI];
+            const label nLocalFaces = zone.size();
 
             if (useFaceMap)
             {
-                forAll(zone, localFaceI)
+                for (label i=0; i<nLocalFaces; ++i)
                 {
                     writeShell(os, faceLst[faceMap[faceIndex++]]);
                 }
             }
             else
             {
-                forAll(zone, localFaceI)
+                for (label i=0; i<nLocalFaces; ++i)
                 {
                     writeShell(os, faceLst[faceIndex++]);
                 }
@@ -266,20 +266,20 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
         newline(os);
 
         label faceIndex = 0;
-        forAll(zones, zoneI)
+        for (const surfZone& zone : zones)
         {
-            const surfZone& zone = zones[zoneI];
+            const label nLocalFaces = zone.size();
 
             if (useFaceMap)
             {
-                forAll(zone, localFaceI)
+                for (label i=0; i<nLocalFaces; ++i)
                 {
                     writeType(os, faceLst[faceMap[faceIndex++]]);
                 }
             }
             else
             {
-                forAll(zone, localFaceI)
+                for (label i=0; i<nLocalFaces; ++i)
                 {
                     writeType(os, faceLst[faceIndex++]);
                 }
@@ -316,9 +316,9 @@ void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 (
+    bool compress,
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf,
-    bool compress
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
     autoPtr<OFstream> osPtr
@@ -361,10 +361,11 @@ template<class Face>
 void Foam::fileFormats::FLMAsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    write(filename, surf, false);
+    write(false, filename, surf);
 }
 
 
@@ -372,10 +373,11 @@ template<class Face>
 void Foam::fileFormats::FLMAZsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    FLMAsurfaceFormat<Face>::write(filename, surf, true);
+    FLMAsurfaceFormat<Face>::write(true, filename, surf);
 }
 
 

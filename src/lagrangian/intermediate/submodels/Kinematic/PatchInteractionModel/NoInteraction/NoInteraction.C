@@ -48,13 +48,6 @@ Foam::NoInteraction<CloudType>::NoInteraction
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoInteraction<CloudType>::~NoInteraction()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

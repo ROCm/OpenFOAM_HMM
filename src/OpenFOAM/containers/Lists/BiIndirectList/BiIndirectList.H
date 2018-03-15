@@ -65,7 +65,7 @@ public:
         (
             const UList<T>& posList,
             const UList<T>& negList,
-            const labelUList&
+            const labelUList& addr
         );
 
         //- Construct given the complete list and by transferring addressing
@@ -73,7 +73,7 @@ public:
         (
             const UList<T>& posList,
             const UList<T>& negList,
-            const Xfer<List<label>>&
+            List<label>&& addr
         );
 
 
@@ -94,14 +94,16 @@ public:
             inline const List<label>& addressing() const;
 
             //- Calculate index given whether index is into posList or negList
-            inline static label posIndex(const label);
-            inline static label negIndex(const label);
+            inline static label posIndex(const label i);
+            inline static label negIndex(const label i);
 
         // Edit
 
-            //- Reset addressing
-            inline void resetAddressing(const labelUList&);
-            inline void resetAddressing(const Xfer<List<label>>&);
+            //- Copy reset addressing
+            inline void resetAddressing(const labelUList& addr);
+
+            //- Move reset addressing
+            inline void resetAddressing(List<label>&& addr);
 
 
         // Member Operators
@@ -110,16 +112,16 @@ public:
             inline List<T> operator()() const;
 
             //- Return non-const access to an element
-            inline T& operator[](const label);
+            inline T& operator[](const label i);
 
             //- Return const access to an element
-            inline const T& operator[](const label) const;
+            inline const T& operator[](const label i) const;
 
             //- Assignment to UList of addressed elements
-            inline void operator=(const UList<T>&);
+            inline void operator=(const UList<T>& ae);
 
             //- Assignment of all entries to the given value
-            inline void operator=(const T&);
+            inline void operator=(const T& val);
 };
 
 

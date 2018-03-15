@@ -3,30 +3,18 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  |
+#    \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.csh/aliases
+#     - sourced by OpenFOAM-*/etc/cshrc  (or from the user's ~/.cshrc)
 #
 # Description
 #     Aliases for working with OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/cshrc and/or ~/.cshrc
 #
 #------------------------------------------------------------------------------
 
@@ -52,12 +40,6 @@ alias wmSchedOff 'unsetenv WM_SCHEDULER'
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias foam 'cd $WM_PROJECT_DIR'
-
-if ( $?WM_PROJECT_SITE ) then
-    alias foamSite 'cd $WM_PROJECT_SITE'
-else
-    alias foamSite 'cd $WM_PROJECT_INST_DIR/site'
-endif
 
 alias src 'cd $FOAM_SRC'
 alias lib 'cd $FOAM_LIBBIN'

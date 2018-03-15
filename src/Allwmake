@@ -40,6 +40,7 @@ wmakeLnInclude -u fvOptions
 wmake $targetType finiteVolume
 wmake $targetType lagrangian/basic
 wmake $targetType lagrangian/distributionModels
+wmake $targetType finiteArea
 wmake $targetType genericPatchFields
 
 conversion/Allwmake $targetType $*
@@ -55,9 +56,7 @@ parallel/Allwmake $targetType $*
 randomProcesses/Allwmake $targetType $*
 
 wmake $targetType overset
-
 wmake $targetType ODE
-wmake $targetType fvMotionSolver
 
 transportModels/Allwmake $targetType $*
 thermophysicalModels/Allwmake $targetType $*
@@ -65,19 +64,23 @@ TurbulenceModels/Allwmake $targetType $*
 wmake $targetType combustionModels
 regionModels/Allwmake $targetType $*
 lagrangian/Allwmake $targetType $*
+
+wmake $targetType fvOptions
+wmake $targetType fvMotionSolver
+
 mesh/Allwmake $targetType $*
 renumber/Allwmake $targetType $*
 fvAgglomerationMethods/Allwmake $targetType $*
 wmake $targetType waveModels
 
 wmake $targetType engine
-wmake $targetType fvOptions
 wmake $targetType regionCoupled
 
 functionObjects/Allwmake $targetType $*
 
 wmake $targetType lumpedPointMotion
 wmake $targetType sixDoFRigidBodyMotion
+wmake $targetType sixDoFRigidBodyState
 wmake $targetType rigidBodyDynamics
 wmake $targetType rigidBodyMeshMotion
 

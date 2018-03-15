@@ -154,7 +154,7 @@ public:
         void reconstructFields
         (
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         );
 };
 

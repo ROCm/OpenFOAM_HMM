@@ -80,7 +80,7 @@ class UIPstream
 
         //- Read a T from the transfer buffer
         template<class T>
-        inline void readFromBuffer(T& t);
+        inline void readFromBuffer(T& val);
 
         //- Read count bytes of data from the transfer buffer
         //  using align byte alignment
@@ -171,8 +171,8 @@ public:
             //- Read binary block with 8-byte alignment.
             Istream& read(char* data, const std::streamsize count);
 
-            //- Rewind and return the stream so that it may be read again
-            Istream& rewind();
+            //- Rewind the stream so that it may be read again
+            void rewind();
 
 
         // Edit

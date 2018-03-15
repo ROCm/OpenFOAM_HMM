@@ -135,7 +135,7 @@ void Foam::ParticleCollector<CloudType>::initPolygons
     forAll(faces_, facei)
     {
         const Field<point>& polyPoints = polygons[facei];
-        face f(identity(polyPoints.size()) + pointOffset);
+        face f(identity(polyPoints.size(), pointOffset));
         UIndirectList<point>(points_, f) = polyPoints;
         area_[facei] = f.mag(points_);
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,33 +23,20 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "IOPosition.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class CloudType>
-const Foam::Enum<typename Foam::IOPosition<CloudType>::geometryType>
-Foam::IOPosition<CloudType>::geometryTypeNames_
-{
-    { geometryType::POSITIONS, "positions" },
-    { geometryType::COORDINATES, "coordinates" }
-};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
 Foam::IOPosition<CloudType>::IOPosition
 (
     const CloudType& c,
-    const geometryType& geomType
+    cloud::geometryType geomType
 )
 :
     regIOobject
     (
         IOobject
         (
-            geometryTypeNames_[geomType],
+            cloud::geometryTypeNames[geomType],
             c.time().timeName(),
             c,
             IOobject::MUST_READ,
@@ -77,20 +64,20 @@ bool Foam::IOPosition<CloudType>::writeData(Ostream& os) const
 
     switch (geometryType_)
     {
-        case geometryType::POSITIONS:
-        {
-            forAllConstIters(cloud_, iter)
-            {
-                iter().writePosition(os);
-                os  << nl;
-            }
-            break;
-        }
-        case geometryType::COORDINATES:
+        case cloud::geometryType::COORDINATES:
         {
             forAllConstIters(cloud_, iter)
             {
                 iter().writeCoordinates(os);
+                os  << nl;
+            }
+            break;
+        }
+        case cloud::geometryType::POSITIONS:
+        {
+            forAllConstIters(cloud_, iter)
+            {
+                iter().writePosition(os);
                 os  << nl;
             }
             break;
@@ -110,7 +97,7 @@ void Foam::IOPosition<CloudType>::readData(Istream& is, CloudType& c)
 
     token firstToken(is);
 
-    bool newFormat = geometryType_ == geometryType::COORDINATES;
+    const bool newFormat = (geometryType_ == cloud::geometryType::COORDINATES);
 
     if (firstToken.isLabel())
     {

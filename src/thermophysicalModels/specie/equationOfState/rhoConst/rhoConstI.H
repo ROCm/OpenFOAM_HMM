@@ -57,7 +57,7 @@ template<class Specie>
 inline Foam::autoPtr<Foam::rhoConst<Specie>>
 Foam::rhoConst<Specie>::clone() const
 {
-    return autoPtr<rhoConst<Specie>>(new rhoConst<Specie>(*this));
+    return autoPtr<rhoConst<Specie>>::New(*this);
 }
 
 

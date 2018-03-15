@@ -28,7 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 #include "ListOps.H"
-#include "EdgeMap.H"
+#include "edgeHashes.H"
 #include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -55,11 +55,7 @@ Foam::wordHashSet Foam::edgeMesh::writeTypes()
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-bool Foam::edgeMesh::canReadType
-(
-    const word& ext,
-    const bool verbose
-)
+bool Foam::edgeMesh::canReadType(const word& ext, bool verbose)
 {
     return checkSupport
     (
@@ -71,11 +67,7 @@ bool Foam::edgeMesh::canReadType
 }
 
 
-bool Foam::edgeMesh::canWriteType
-(
-    const word& ext,
-    const bool verbose
-)
+bool Foam::edgeMesh::canWriteType(const word& ext, bool verbose)
 {
     return checkSupport
     (
@@ -87,11 +79,7 @@ bool Foam::edgeMesh::canWriteType
 }
 
 
-bool Foam::edgeMesh::canRead
-(
-    const fileName& name,
-    const bool verbose
-)
+bool Foam::edgeMesh::canRead(const fileName& name, bool verbose)
 {
     word ext = name.ext();
     if (ext == "gz")
@@ -119,52 +107,6 @@ void Foam::edgeMesh::calcPointEdges() const
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::edgeMesh::edgeMesh()
-:
-    fileFormats::edgeMeshFormatsCore(),
-    points_(0),
-    edges_(0),
-    pointEdgesPtr_(nullptr)
-{}
-
-
-Foam::edgeMesh::edgeMesh
-(
-    const pointField& points,
-    const edgeList& edges
-)
-:
-    fileFormats::edgeMeshFormatsCore(),
-    points_(points),
-    edges_(edges),
-    pointEdgesPtr_(nullptr)
-{}
-
-
-Foam::edgeMesh::edgeMesh
-(
-    const Xfer<pointField>& pointLst,
-    const Xfer<edgeList>& edgeLst
-)
-:
-    fileFormats::edgeMeshFormatsCore(),
-    points_(0),
-    edges_(0),
-    pointEdgesPtr_(nullptr)
-{
-    points_.transfer(pointLst());
-    edges_.transfer(edgeLst());
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::edgeMesh::~edgeMesh()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::edgeMesh::clear()
@@ -175,40 +117,11 @@ void Foam::edgeMesh::clear()
 }
 
 
-void Foam::edgeMesh::reset
-(
-    const Xfer<pointField>& pointLst,
-    const Xfer<edgeList>& edgeLst
-)
-{
-    // Take over new primitive data.
-    // Optimized to avoid overwriting data at all
-    if (notNull(pointLst))
-    {
-        points_.transfer(pointLst());
-    }
-
-    if (notNull(edgeLst))
-    {
-        edges_.transfer(edgeLst());
-
-        // connectivity likely changed
-        pointEdgesPtr_.clear();
-    }
-}
-
-
 void Foam::edgeMesh::transfer(edgeMesh& mesh)
 {
     points_.transfer(mesh.points_);
     edges_.transfer(mesh.edges_);
-    pointEdgesPtr_ = mesh.pointEdgesPtr_;
-}
-
-
-Foam::Xfer<Foam::edgeMesh> Foam::edgeMesh::xfer()
-{
-    return xferMove(*this);
+    pointEdgesPtr_ = std::move(mesh.pointEdgesPtr_);
 }
 
 
@@ -323,7 +236,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
 void Foam::edgeMesh::mergeEdges()
 {
-    HashSet<edge, Hash<edge>> uniqEdges(2*edges_.size());
+    edgeHashSet uniqEdges(2*edges_.size());
     PackedBoolList pointIsUsed(points_.size());
 
     label nUniqEdges = 0;

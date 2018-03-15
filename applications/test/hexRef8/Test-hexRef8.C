@@ -58,7 +58,7 @@ bool notEqual(const scalar s1, const scalar s2, const scalar tol)
 int main(int argc, char *argv[])
 {
     #include "addTimeOptions.H"
-    argList::validArgs.append("inflate (true|false)");
+    argList::addArgument("inflate (true|false)");
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
@@ -194,9 +194,7 @@ int main(int argc, char *argv[])
         mesh.moving(false);
         mesh.topoChanging(false);
 
-
-        label action = rndGen.integer(0, 5);
-
+        label action = rndGen.position<label>(0, 5);
 
         if (action == 0)
         {
@@ -216,7 +214,10 @@ int main(int argc, char *argv[])
 
                 for (label i=0; i<nRefine; i++)
                 {
-                    refineCandidates.append(rndGen.integer(0, mesh.nCells()-1));
+                    refineCandidates.append
+                    (
+                        rndGen.position<label>(0, mesh.nCells()-1)
+                    );
                 }
 
                 labelList cellsToRefine
@@ -245,7 +246,9 @@ int main(int argc, char *argv[])
 
                 for (label i=0; i<nUnrefine; i++)
                 {
-                    label index = rndGen.integer(0, allSplitPoints.size()-1);
+                    const label index =
+                        rndGen.position<label>(0, allSplitPoints.size()-1);
+
                     candidates.insert(allSplitPoints[index]);
                 }
 
@@ -273,7 +276,7 @@ int main(int argc, char *argv[])
 
             // Update fields
             Info<< nl << "-- mapping mesh data" << endl;
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Inflate mesh
             if (map().hasMotionPoints())
@@ -284,7 +287,7 @@ int main(int argc, char *argv[])
 
             // Update numbering of cells/vertices.
             Info<< nl << "-- mapping hexRef8 data" << endl;
-            meshCutter.updateMesh(map);
+            meshCutter.updateMesh(map());
         }
 
 

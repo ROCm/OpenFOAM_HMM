@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -56,8 +56,11 @@ protected:
 
     // Member Data
 
-        //- The allocated stream pointer.
-        StreamType* allocatedPtr_;
+        //- The stream type
+        typedef StreamType stream_type;
+
+        //- The input/output stream.
+        stream_type stream_;
 
 
     // Constructors
@@ -65,56 +68,31 @@ protected:
         //- Construct null
         StringStreamAllocator()
         :
-            allocatedPtr_(new StreamType())
+            stream_()
         {}
 
-        //- Construct from pointer, taking ownership
-        StringStreamAllocator(StreamType* ptr)
-        :
-            allocatedPtr_(ptr)
-        {}
 
-        //- Construct from string
+        //- Copy construct from string
         StringStreamAllocator(const std::string& buffer)
         :
-            allocatedPtr_(new StreamType(buffer))
+            stream_(buffer)
         {}
-
-
-    //- Destructor
-    ~StringStreamAllocator()
-    {
-        deallocate();
-    }
-
-
-    // Protected Member Functions
-
-        //- Delete the stream pointer
-        void deallocate()
-        {
-            if (allocatedPtr_)
-            {
-                delete allocatedPtr_;
-                allocatedPtr_ = nullptr;
-            }
-        }
 
 
 public:
 
     // Public Member Functions
 
-        //- Get the string
+        //- Get the string - as Foam::string rather than std::string
         Foam::string str() const
         {
-            return allocatedPtr_->str();
+            return Foam::string(stream_.str());
         }
 
         //- Set the string
         void str(const std::string& s)
         {
-            allocatedPtr_->str(s);
+            stream_.str(s);
         }
 };
 
@@ -129,6 +107,8 @@ class IStringStream
     public StringStreamAllocator<std::istringstream>,
     public ISstream
 {
+    typedef StringStreamAllocator<std::istringstream> allocator_type;
+
 public:
 
     // Constructors
@@ -142,8 +122,8 @@ public:
             const Foam::string& name="input"
         )
         :
-            StringStreamAllocator<std::istringstream>(buffer),
-            ISstream(*allocatedPtr_, name, format, version)
+            allocator_type(buffer),
+            ISstream(stream_, name, format, version)
         {}
 
 
@@ -156,27 +136,36 @@ public:
             const Foam::string& name="input"
         )
         :
-            StringStreamAllocator<std::istringstream>(buffer),
-            ISstream(*allocatedPtr_, name, format, version)
+            allocator_type(buffer),
+            ISstream(stream_, name, format, version)
         {}
 
 
-    //- Destructor
-    ~IStringStream()
-    {}
+        //- Construct as copy of content
+        IStringStream(const IStringStream& str)
+        :
+            allocator_type(str.str()),
+            ISstream(stream_, str.name(), str.format(), str.version())
+        {}
 
 
     // Member Functions
 
+        //- Reset the input buffer and rewind the stream
+        virtual void reset(const std::string& s)
+        {
+            this->str(s);
+            this->rewind();
+        }
+
         //- Print description to Ostream
-        void print(Ostream& os) const;
+        virtual void print(Ostream& os) const;
 
 
     // Member operators
 
         //- Return a non-const reference to const Istream
-        //  Needed for read-constructors where the stream argument is temporary:
-        //  e.g. thing thisThing(IFstream("thingFileName")());
+        //  Needed for read-constructors where the stream argument is temporary.
         Istream& operator()() const
         {
             return const_cast<IStringStream&>(*this);
@@ -195,6 +184,8 @@ class OStringStream
     public StringStreamAllocator<std::ostringstream>,
     public OSstream
 {
+    typedef StringStreamAllocator<std::ostringstream> allocator_type;
+
 public:
 
     // Constructors
@@ -206,21 +197,17 @@ public:
             versionNumber version=currentVersion
         )
         :
-            StringStreamAllocator<std::ostringstream>(),
-            OSstream(*allocatedPtr_, "output", format, version)
+            allocator_type(),
+            OSstream(stream_, "output", format, version)
         {}
 
-        //- Construct as copy
-        OStringStream(const OStringStream& oss)
+
+        //- Construct as copy of content
+        OStringStream(const OStringStream& str)
         :
-            StringStreamAllocator<std::ostringstream>(oss.str()),
-            OSstream(*allocatedPtr_, oss.name(), oss.format(), oss.version())
+            allocator_type(str.str()),
+            OSstream(stream_, str.name(), str.format(), str.version())
         {}
-
-
-    //- Destructor
-    ~OStringStream()
-    {}
 
 
     // Member Functions
@@ -233,14 +220,14 @@ public:
         }
 
         //- Rewind the output stream
-        void rewind()
+        virtual void rewind()
         {
             // pubseekpos() instead of seekp() for symmetry with other classes
-            allocatedPtr_->rdbuf()->pubseekpos(0, std::ios_base::out);
+            stream_.rdbuf()->pubseekpos(0, std::ios_base::out);
         }
 
         //- Print description to Ostream
-        void print(Ostream& os) const;
+        virtual void print(Ostream& os) const;
 
 };
 

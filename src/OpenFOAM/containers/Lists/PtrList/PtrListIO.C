@@ -33,7 +33,7 @@ License
 
 template<class T>
 template<class INew>
-void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
+void Foam::PtrList<T>::read(Istream& is, const INew& inew)
 {
     is.fatalCheck(FUNCTION_NAME);
 
@@ -41,58 +41,66 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
 
     is.fatalCheck
     (
-        "PtrList<T>::read(Istream&, const INew&) : "
+        "PtrList::read(Istream&) : "
         "reading first token"
     );
 
+
+    // Label: could be int(..), int{...} or just a plain '0'
     if (firstToken.isLabel())
     {
         // Read size of list
-        const label s = firstToken.labelToken();
+        const label len = firstToken.labelToken();
 
         // Set list length to that read
-        setSize(s);
+        setSize(len);
 
         // Read beginning of contents
         const char delimiter = is.readBeginList("PtrList");
 
-        if (s)
+        if (len)
         {
             if (delimiter == token::BEGIN_LIST)
             {
-                forAll(*this, i)
+                for (label i=0; i<len; ++i)
                 {
-                    set(i, inewt(is));
+                    T* p = inew(is).ptr();
+                    set(i, p);
 
                     is.fatalCheck
                     (
-                        "PtrList<T>::read(Istream&, const INew&) : "
+                        "PtrList::read(Istream&) : "
                         "reading entry"
                     );
                 }
             }
             else
             {
-                T* tPtr = inewt(is).ptr();
-                set(0, tPtr);
+                T* p = inew(is).ptr();
+                set(0, p);
 
                 is.fatalCheck
                 (
-                    "PtrList<T>::read(Istream&, const INew&) : "
+                    "PtrList::read(Istream&) : "
                     "reading the single entry"
                 );
 
-                for (label i=1; i<s; ++i)
+                for (label i=1; i<len; ++i)
                 {
-                    set(i, tPtr->clone());
+                    set(i, p->clone());
                 }
             }
         }
 
         // Read end of contents
         is.readEndList("PtrList");
+
+        return;
     }
-    else if (firstToken.isPunctuation())
+
+
+    // "(...)" : read as SLList and transfer contents
+    if (firstToken.isPunctuation())
     {
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
@@ -125,32 +133,28 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
                     << exit(FatalIOError);
             }
 
-            sllPtrs.append(inewt(is).ptr());
+            sllPtrs.append(inew(is).ptr());
             is >> lastToken;
         }
 
         setSize(sllPtrs.size());
 
+        // A list of pointers - can simply copy
         label i = 0;
-        for
-        (
-            typename SLList<T*>::iterator iter = sllPtrs.begin();
-            iter != sllPtrs.end();
-            ++iter
-        )
+        for (T* ptr : sllPtrs)
         {
-            set(i++, iter());
+            set(i++, ptr);
         }
+
+        return;
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            is
-        )   << "incorrect first token, expected <int> or '(', found "
-            << firstToken.info()
-            << exit(FatalIOError);
-    }
+
+    FatalIOErrorInFunction
+    (
+        is
+    )   << "incorrect first token, expected <int> or '(', found "
+        << firstToken.info()
+        << exit(FatalIOError);
 }
 
 
@@ -158,9 +162,9 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
 
 template<class T>
 template<class INew>
-Foam::PtrList<T>::PtrList(Istream& is, const INew& inewt)
+Foam::PtrList<T>::PtrList(Istream& is, const INew& inew)
 {
-    read(is, inewt);
+    read(is, inew);
 }
 
 
@@ -174,10 +178,10 @@ Foam::PtrList<T>::PtrList(Istream& is)
 // * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
 
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, PtrList<T>& lst)
 {
-    L.clear();
-    L.read(is, INew<T>());
+    lst.clear();
+    lst.read(is, INew<T>());
 
     return is;
 }

@@ -48,19 +48,21 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+
 class Time;
 class IFstream;
 class surfZone;
-
-// Forward declaration of friend functions and operators
-
 class triSurface;
+
+template<class Face> class MeshedSurface;
+
 Istream& operator>>(Istream&, triSurface&);
 Ostream& operator<<(Ostream&, const triSurface&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class triSurface Declaration
+                         Class triSurface Declaration
 \*---------------------------------------------------------------------------*/
 
 class triSurface
@@ -83,15 +85,13 @@ class triSurface
 
     // Private data
 
-        //- The number of bytes in the STL header
-        static const int STLheaderSize = 80;
-
-        //- Patch information (face ordering nFaces/startFace only used
-        //  during reading and writing)
+        //- Patch information
+        //  (face ordering nFaces/startFace only used during reading, writing)
         geometricSurfacePatchList patches_;
 
-        static const wordHashSet readTypes_;
-        static const wordHashSet writeTypes_;
+        static wordHashSet readTypes_;
+
+        static wordHashSet writeTypes_;
 
 
     // Demand driven private data.
@@ -100,7 +100,7 @@ class triSurface
         mutable labelListList* sortedEdgeFacesPtr_;
 
         //- Label of face that 'owns' edge (i.e. e.vec() is righthanded walk
-        //  along face)
+        //- along face)
         mutable labelList* edgeOwnerPtr_;
 
 
@@ -112,8 +112,9 @@ class triSurface
         //- Calculate owner
         void calcEdgeOwner() const;
 
-        //- Sort faces according to region. Returns patch list
-        //  and sets faceMap to index of labelledTri inside *this.
+        //- Sort faces according to region.
+        //  Returns patch list and sets faceMap to index of labelledTri
+        //  inside *this.
         surfacePatchList calcPatches(labelList& faceMap) const;
 
         //- Sets default values for patches
@@ -127,57 +128,38 @@ class triSurface
             const bool verbose = false
         );
 
-        //- Read in Foam format
-        bool read(Istream&);
+        //- Read in OpenFOAM format
+        bool read(Istream& is);
+
+        //- Read in STL format
+        bool readSTL(const fileName& filename, bool forceBinary=false);
 
         //- Generic read routine. Chooses reader based on extension.
-        bool read(const fileName&, const word& ext, const bool check = true);
+        bool read
+        (
+            const fileName& filename,
+            const word& ext,
+            const bool check = true
+        );
 
-        bool readSTL(const fileName&, bool forceBinary=false);
-        bool readGTS(const fileName&);
-        bool readOBJ(const fileName&);
-        bool readOFF(const fileName&);
-        bool readTRI(const fileName&);
-        bool readAC(const fileName&);
-        bool readNAS(const fileName&);
-        bool readVTK(const fileName&);
+        //- Write STL ASCII format.
+        //  Each region becomes a 'solid' 'endsolid' block.
+        void writeSTLASCII(const fileName& filename, const bool sort) const;
+
+        //- Write STL BINARY format
+        void writeSTLBINARY(const fileName& filename) const;
+
+        //- Write GTS (Gnu Tri Surface library) format.
+        void writeGTS(const fileName& filename, const bool sort) const;
 
         //- Generic write routine. Chooses writer based on extension.
-        void write(const fileName&, const word& ext, const bool sort) const;
-
-        //- Write to Ostream in ASCII STL format.
-        //  Each region becomes 'solid' 'endsolid' block.
-        void writeSTLASCII(const bool writeSorted, Ostream&) const;
-
-        //- Write to std::ostream in BINARY STL format
-        void writeSTLBINARY(std::ostream&) const;
-
-        //- Write to Ostream in GTS (Gnu Tri Surface library)
-        //  format.
-        void writeGTS(const bool writeSorted, Ostream&) const;
-
-        //- Write to Ostream in OBJ (Lightwave) format.
-        //  writeSorted=true: sort faces acc. to region and write as single
-        //  group. =false: write in normal order.
-        void writeOBJ(const bool writeSorted, Ostream&) const;
-
-        //- Write to Ostream in OFF (Geomview) format.
-        //  writeSorted=true: sort faces acc. to region and write as single
-        //  group. =false: write in normal order.
-        void writeOFF(const bool writeSorted, Ostream&) const;
-
-        //- Write to VTK legacy format.
-        void writeVTK(const bool writeSorted, std::ostream& os) const;
-
-        //- Write to Ostream in TRI (AC3D) format
-        //  Ac3d .tri format (unmerged triangle format)
-        void writeTRI(const bool writeSorted, Ostream&) const;
-
-        //- Write to Ostream in SMESH (tetgen) format
-        void writeSMESH(const bool writeSorted, Ostream&) const;
-
-        //- Write to Ostream in AC3D format. Always sorted by patch.
-        void writeAC(Ostream&) const;
+        //  The sort option may not have an effect.
+        void write
+        (
+            const fileName& filename,
+            const word& ext,
+            const bool sort
+        ) const;
 
 
     // Static private functions
@@ -185,28 +167,25 @@ class triSurface
         //- Convert faces to labelledTri. All get same region.
         static List<labelledTri> convertToTri
         (
-            const faceList&,
+            const faceList& faces,
             const label defaultRegion = 0
         );
 
         //- Convert triFaces to labelledTri. All get same region.
         static List<labelledTri> convertToTri
         (
-            const triFaceList&,
+            const triFaceList& faces,
             const label defaultRegion = 0
         );
 
         //- Helper function to print triangle info
         static void printTriangle
         (
-            Ostream&,
-            const Foam::string& pre,
-            const labelledTri&,
-            const pointField&
+            Ostream& os,
+            const string& pre,
+            const labelledTri& f,
+            const pointField& points
         );
-
-        //- Read non-comment line
-        static string getLineNoComment(IFstream&);
 
 
 protected:
@@ -228,11 +207,10 @@ protected:
 
 public:
 
-    // Public typedefs
+    // Public Typedefs
 
         //- Placeholder only, but do not remove - it is needed for GeoMesh
         typedef bool BoundaryMesh;
-
 
         //- Runtime type information
         ClassName("triSurface");
@@ -252,7 +230,10 @@ public:
         //- Can we write this file format?
         static bool canWriteType(const word& ext, const bool verbose=false);
 
+        //- Known readable file-types
         static const wordHashSet& readTypes();
+
+        //- Known writable file-types
         static const wordHashSet& writeTypes();
 
 
@@ -261,12 +242,18 @@ public:
         //- Construct null
         triSurface();
 
+        //- Copy construct
+        triSurface(const triSurface& surf);
+
+        //- Move construct
+        triSurface(triSurface&& surf);
+
         //- Construct from triangles, patches, points.
         triSurface
         (
             const List<labelledTri>& triangles,
             const geometricSurfacePatchList& patches,
-            const pointField& points
+            const pointField& pts
         );
 
         //- Construct from triangles, patches, points. Reuse storage.
@@ -274,31 +261,24 @@ public:
         (
             List<labelledTri>& triangles,
             const geometricSurfacePatchList& patches,
-            pointField& points,
+            pointField& pts,
             const bool reuse
         );
 
-        //- Construct by transferring (triangles, points) components.
-        triSurface
-        (
-            const Xfer<List<labelledTri>>& triangles,
-            const geometricSurfacePatchList& patches,
-            const Xfer<List<point>>& points
-        );
-
-        //- Construct from triangles, points. Set patch names to default.
+        //- Construct from triangles, points.
+        //- Set patch names to default.
         triSurface
         (
             const List<labelledTri>& triangles,
-            const pointField& points
+            const pointField& pts
         );
 
-        //- Construct from triangles, points. Set region to 0 and default
-        //  patchName.
+        //- Construct from triangles, points.
+        //- Set region to 0 and default patchName.
         triSurface
         (
             const triFaceList& triangles,
-            const pointField& points
+            const pointField& pts
         );
 
         //- Construct from file name (uses extension to determine type).
@@ -311,12 +291,12 @@ public:
         //- Construct from objectRegistry
         triSurface(const Time& d);
 
-        //- Construct as copy
-        triSurface(const triSurface& ts);
-
 
     //- Destructor
     virtual ~triSurface();
+
+
+    // Member Functions
 
         void clearOut();
 
@@ -324,10 +304,10 @@ public:
 
         void clearPatchMeshAddr();
 
+        void swap(triSurface& surf);
 
-    // Member Functions
 
-      // Access
+    // Access
 
         const geometricSurfacePatchList& patches() const
         {
@@ -377,7 +357,7 @@ public:
         }
 
 
-      // Interoperability with other surface mesh classes
+    // Interoperability with other surface mesh classes
 
         //- Sort faces according to zoneIds
         //  Returns a surfZoneList and sets faceMap to index within faces()
@@ -388,10 +368,13 @@ public:
         void triFaceFaces(List<face>& plainFaceList) const;
 
 
-      // Edit
+    // Edit
 
         //- Move points
-        virtual void movePoints(const pointField& newPoints);
+        virtual void movePoints(const pointField& pts);
+
+        //- Swap points. Similar to movePoints, but returns the old points
+        virtual void swapPoints(pointField& pts);
 
         //- Scale points. A non-positive factor is ignored.
         virtual void scalePoints(const scalar scaleFactor);
@@ -425,8 +408,8 @@ public:
             labelList& faceZone
         ) const;
 
-        //- 'Create' sub mesh, including only faces for which
-        //  boolList entry is true
+        //- 'Create' sub mesh, including only faces for which boolList
+        //- entry is true
         //  Sets: pointMap: from new to old localPoints
         //        faceMap: new to old faces
         void subsetMeshMap
@@ -446,14 +429,19 @@ public:
         ) const;
 
 
-        //- Transfer stored faces to an Xfer container
-        Xfer<List<labelledTri>> xferFaces();
+        //- Swap the list of faces being addressed
+        void swapFaces(List<labelledTri>& faceLst);
 
-        //- Transfer stored points to an Xfer container
-        Xfer<List<point>> xferPoints();
+        //- Alter contents by transferring (triangles, points) components.
+        //  Patch information is small and therefore just copied.
+        void transfer(triSurface& surf);
+
+        //- Alter contents by transferring (triangles, points) components.
+        //  Patch information is small and therefore just copied.
+        void transfer(MeshedSurface<labelledTri>& surf);
 
 
-      // Write
+    // Write
 
         //- Write to Ostream in simple FOAM format
         void write(Ostream& os) const;
@@ -470,7 +458,14 @@ public:
 
     // Member operators
 
-        void operator=(const triSurface&);
+        //- Copy assignment
+        void operator=(const triSurface& surf);
+
+        //- Move assignment
+        void operator=(triSurface&& surf);
+
+        //- Move assignment
+        void operator=(MeshedSurface<labelledTri>&& surf);
 
 
     // IOstream Operators

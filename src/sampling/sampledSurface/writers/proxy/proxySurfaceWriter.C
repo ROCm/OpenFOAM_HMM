@@ -48,12 +48,6 @@ Foam::proxySurfaceWriter::proxySurfaceWriter(const word& ext)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::proxySurfaceWriter::~proxySurfaceWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::fileName Foam::proxySurfaceWriter::write

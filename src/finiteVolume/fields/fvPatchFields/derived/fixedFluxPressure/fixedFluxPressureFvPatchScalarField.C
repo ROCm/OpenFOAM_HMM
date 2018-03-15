@@ -101,12 +101,6 @@ Foam::fixedFluxPressureFvPatchScalarField::fixedFluxPressureFvPatchScalarField
                 patchInternalField()
               + gradient()*(patch().nf() & patch().delta())
             );
-    }
-    else
-    {
-        // Enforce mapping of values so we have a valid starting value. This
-        // constructor is used when reconstructing fields
-        this->map(ptf, mapper);
         }
     }
     else

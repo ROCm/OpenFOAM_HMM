@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,23 +25,27 @@ Namespace
     stdFoam
 
 Description
-    Includes some global templates and macros used by OpenFOAM.
+    Some global templates and macros used by OpenFOAM and some standard
+    C++ headers.
 
-    Some of the templates are defined here correspond to useful
+    Some of the templates defined here correspond to useful
     std templates that are part of future C++ standards, or that
     are in a state of change. Defining them here provides some additional
-    control over which definition are used within the OpenFOAM code-base.
+    control over which definitions are used within the OpenFOAM code-base.
 
 SeeAlso
-    - http://en.cppreference.com/w/cpp/iterator/end
     - http://en.cppreference.com/w/cpp/iterator/begin
+    - http://en.cppreference.com/w/cpp/iterator/end
+    - http://en.cppreference.com/w/cpp/iterator/rbegin
+    - http://en.cppreference.com/w/cpp/iterator/rend
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef StdFoam_H
-#define StdFoam_H
+#ifndef stdFoam_H
+#define stdFoam_H
 
 #include <initializer_list>
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,7 +54,9 @@ namespace stdFoam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return iterator to the beginning of the container \a c or array.
+// Forward iteration
+
+//- Return iterator to the beginning of the container \a c.
 //  Definition as per std::begin C++17
 template<class C>
 constexpr auto begin(C& c) -> decltype(c.begin())
@@ -58,7 +64,7 @@ constexpr auto begin(C& c) -> decltype(c.begin())
     return c.begin();
 }
 
-//- Return const_iterator to the beginning of the container \a c or array.
+//- Return const_iterator to the beginning of the container \a c.
 //  Definition as per std::begin C++17
 template<class C>
 constexpr auto begin(const C& c) -> decltype(c.begin())
@@ -66,7 +72,7 @@ constexpr auto begin(const C& c) -> decltype(c.begin())
     return c.begin();
 }
 
-//- Return const_iterator to the beginning of the container \a c or array.
+//- Return const_iterator to the beginning of the container \a c.
 //  Definition as per std::cbegin C++17
 template<class C>
 constexpr auto cbegin(const C& c) -> decltype(c.begin())
@@ -74,7 +80,7 @@ constexpr auto cbegin(const C& c) -> decltype(c.begin())
     return c.begin();
 }
 
-//- Return iterator to the end of the container \a c or array.
+//- Return iterator to the end of the container \a c array.
 //  Definition as per std::end C++17
 template<class C>
 constexpr auto end(C& c) -> decltype(c.end())
@@ -82,7 +88,7 @@ constexpr auto end(C& c) -> decltype(c.end())
     return c.end();
 }
 
-//- Return const_iterator to the end of the container \a c or array.
+//- Return const_iterator to the end of the container \a c array.
 //  Definition as per std::end C++17
 template<class C>
 constexpr auto end(const C& c) -> decltype(c.end())
@@ -90,7 +96,7 @@ constexpr auto end(const C& c) -> decltype(c.end())
     return c.end();
 }
 
-//- Return const_iterator to the end of the container \a c or array.
+//- Return const_iterator to the end of the container \a c.
 //  Definition as per std::cend C++17
 template<class C>
 constexpr auto cend(const C& c) -> decltype(c.end())
@@ -98,6 +104,72 @@ constexpr auto cend(const C& c) -> decltype(c.end())
     return c.end();
 }
 
+
+// Reverse iteration
+
+//- Return reverse_iterator to the reverse-begin of container \a c.
+//  Definition as per std::rbegin C++17
+template<class C>
+constexpr auto rbegin(C& c) -> decltype(c.rbegin())
+{
+    return c.rbegin();
+}
+
+//- Return const_reverse_iterator to the reverse-begin of container \a c.
+//  Definition as per std::rbegin C++17
+template<class C>
+constexpr auto rbegin(const C& c) -> decltype(c.rbegin())
+{
+    return c.rbegin();
+}
+
+//- Return const_reverse_iterator to the reverse-begin of container \a c.
+//  Definition as per std::crbegin C++17
+template<class C>
+constexpr auto crbegin(const C& c) -> decltype(c.rbegin())
+{
+    return c.rbegin();
+}
+
+//- Return reverse_iterator to reverse-end of container \a c.
+//  Definition as per std::rend C++17
+template<class C>
+constexpr auto rend(C& c) -> decltype(c.rend())
+{
+    return c.rend();
+}
+
+//- Return const_reverse_iterator to reverse-end of container \a c.
+//  Definition as per std::rend C++17
+template<class C>
+constexpr auto rend(const C& c) -> decltype(c.rend())
+{
+    return c.rend();
+}
+
+//- Return const_reverse_iterator to reverse-end of container \a c.
+//  Definition as per std::crend C++17
+template<class C>
+constexpr auto crend(const C& c) -> decltype(c.rend())
+{
+    return c.rend();
+}
+
+//- Return the lesser of the parameters.
+//  Definition as per std::min C++14
+template<class T>
+constexpr inline const T& min(const T& a, const T& b)
+{
+    return (b < a) ? b : a;
+}
+
+//- Return the greater of the parameters.
+//  Definition as per std::max C++14
+template<class T>
+constexpr inline const T& max(const T& a, const T& b)
+{
+    return (a < b) ? b : a;
+}
 
 } // End namespace stdFoam
 
@@ -114,12 +186,12 @@ constexpr auto cend(const C& c) -> decltype(c.end())
 //  }
 //  \endcode
 //  \sa forAllConstIters, forAllIter, forAllConstIters
-#define forAllIters(container,it)                                              \
+#define forAllIters(container,iter)                                            \
     for                                                                        \
     (                                                                          \
-        auto it = stdFoam::begin(container);                                   \
-        it != stdFoam::end(container);                                         \
-        ++it                                                                   \
+        auto iter = stdFoam::begin(container);                                 \
+        iter != stdFoam::end(container);                                       \
+        ++iter                                                                 \
     )
 
 
@@ -132,12 +204,49 @@ constexpr auto cend(const C& c) -> decltype(c.end())
 //  }
 //  \endcode
 //  \sa forAllIters, forAllIter, forAllConstIter
-#define forAllConstIters(container,cit)                                        \
+#define forAllConstIters(container,iter)                                       \
     for                                                                        \
     (                                                                          \
-        auto cit = stdFoam::cbegin(container);                                 \
-        cit != stdFoam::cend(container);                                       \
-        ++cit                                                                  \
+        auto iter = stdFoam::cbegin(container);                                \
+        iter != stdFoam::cend(container);                                      \
+        ++iter                                                                 \
+    )
+
+
+//- Rverse iterate across elements in the \a container object of type
+//  \a Container.
+//  \par Usage
+//  \code
+//  forAllReverseIters(container, iter)
+//  {
+//      statements;
+//  }
+//  \endcode
+//  \sa forAllConstReverseIters
+#define forAllReverseIters(container,iter)                                     \
+    for                                                                        \
+    (                                                                          \
+        auto iter = stdFoam::rbegin(container);                                \
+        iter != stdFoam::rend(container);                                      \
+        ++iter                                                                 \
+    )
+
+
+//- Reverse iterate across elements of \a container object with const access.
+//  \par Usage
+//  \code
+//  forAllReverseConstIters(container, iter)
+//  {
+//      statements;
+//  }
+//  \endcode
+//  \sa forAllReverseIters
+#define forAllConstReverseIters(container,iter)                                \
+    for                                                                        \
+    (                                                                          \
+        auto iter = stdFoam::crbegin(container);                               \
+        iter != stdFoam::crend(container);                                     \
+        ++iter                                                                 \
     )
 
 
@@ -166,6 +275,8 @@ constexpr auto cend(const C& c) -> decltype(c.end())
 #define forAllReverse(list, i) \
     for (Foam::label i=(list).size()-1; i>=0; --i)
 
+
+// Compatibility macros for pre C++11
 
 //- Iterate across all elements in the \a container object
 //  of type \a Container.

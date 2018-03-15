@@ -123,6 +123,9 @@ public:
 
     // Constructors
 
+        //- Construct null. Does not set normal and point.
+        plane();
+
         //- Construct from normal vector through the origin
         explicit plane(const vector& normalVector);
 

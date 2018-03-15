@@ -87,7 +87,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(p, iF),  // Don't map
     phiName_(ptf.phiName_),
-    uniformInletValue_(ptf.uniformInletValue_, false)
+    uniformInletValue_(ptf.uniformInletValue_.clone())
 {
     this->patchType() = ptf.patchType();
 
@@ -113,7 +113,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(ptf),
     phiName_(ptf.phiName_),
-    uniformInletValue_(ptf.uniformInletValue_, false)
+    uniformInletValue_(ptf.uniformInletValue_.clone())
 {}
 
 
@@ -126,7 +126,7 @@ Foam::uniformInletOutletFvPatchField<Type>::uniformInletOutletFvPatchField
 :
     mixedFvPatchField<Type>(ptf, iF),
     phiName_(ptf.phiName_),
-    uniformInletValue_(ptf.uniformInletValue_, false)
+    uniformInletValue_(ptf.uniformInletValue_.clone())
 {}
 
 
@@ -160,10 +160,7 @@ template<class Type>
 void Foam::uniformInletOutletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->uniformInletValue_->writeData(os);
     this->writeEntry("value", os);
 }

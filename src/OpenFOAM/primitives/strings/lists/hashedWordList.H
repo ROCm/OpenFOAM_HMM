@@ -25,7 +25,8 @@ Class
     Foam::hashedWordList
 
 Description
-    A wordList with hashed indices for additional fast lookup by name.
+    A wordList with hashed named lookup, which can be faster in some
+    situations than using the normal list find/found methods.
 
 SourceFiles
     hashedWordListI.H
@@ -44,11 +45,9 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class hashedWordList;
-
-// Forward declaration of friend functions and operators
-Istream& operator>>(Istream& is, hashedWordList& lst);
-Ostream& operator<<(Ostream& os, const hashedWordList& lst);
+inline Istream& operator>>(Istream& is, hashedWordList& lst);
 
 
 /*---------------------------------------------------------------------------*\
@@ -57,44 +56,34 @@ Ostream& operator<<(Ostream& os, const hashedWordList& lst);
 
 class hashedWordList
 :
-    public List<word>
+    public wordList
 {
-    // Private data
+    // Private Data
 
-        //- Hash of words/indices
-        mutable HashTable<label> indices_;
-
-
-    // Private Member Functions
-
-        //- Rebuild the lookup hash or make unique entries first.
-        inline void rehash(const bool unique);
+        //- Lookup HashTable of words vs list-indices
+        mutable HashTable<label> lookup_;
 
 public:
 
     // Constructors
 
-        //- Construct null
-        inline hashedWordList();
+        //- Construct an empty list
+        inline hashedWordList() = default;
 
-        //- Copy constructor.
+        //- Copy construct.
         inline hashedWordList(const hashedWordList& lst);
 
-        //- Construct from list of words,
-        //  optionally eliminating duplicates
-        inline hashedWordList
-        (
-            const UList<word>& lst,
-            const bool removeDuplicates=false
-        );
+        //- Move construct.
+        inline hashedWordList(hashedWordList&& lst);
 
-        //- Construct by transferring the parameter contents,
-        //  optionally eliminating duplicates
-        inline hashedWordList
-        (
-            const Xfer<List<word>>& lst,
-            const bool removeDuplicates=false
-        );
+        //- Copy construct from list of words
+        inline explicit hashedWordList(const wordUList& lst);
+
+        //- Copy construct from list of words, eliminating duplicates
+        inline hashedWordList(const wordUList& lst, bool unique);
+
+        //- Move construct from list of words, optionally eliminating duplicates
+        inline hashedWordList(wordList&& lst, bool unique=false);
 
         //- Construct from an initializer list
         inline hashedWordList(std::initializer_list<word> lst);
@@ -110,19 +99,14 @@ public:
 
         //- Construct from number and list of words,
         //  optionally eliminating duplicates
-        hashedWordList
-        (
-            const label count,
-            const char** lst,
-            const bool removeDuplicates=false
-        );
+        hashedWordList(const label len, const char** array, bool unique=false);
 
         //- Construct from a nullptr-terminated list of words,
         //  optionally eliminating duplicates
-        hashedWordList(const char** lst, const bool removeDuplicates=false);
+        hashedWordList(const char** array, bool unique=false);
 
         //- Construct from Istream
-        hashedWordList(Istream& is);
+        inline hashedWordList(Istream& is);
 
 
     // Member Functions
@@ -132,7 +116,7 @@ public:
 
         //- Append an element at the end of the list,
         //  optionally avoid append if it would be a duplicate entry
-        inline void append(const word& name, const bool avoidDuplicates=false);
+        inline void append(const word& name, bool unique=false);
 
         //- Does the list contain the specified name
         inline bool found(const word& name) const;
@@ -143,51 +127,64 @@ public:
         //- Return the hash of words/indices for inspection
         inline const HashTable<label>& lookup() const;
 
+        //- Swap contents
+        inline void swap(hashedWordList& lst);
+
+        //- Transfer contents of the argument into this list
+        //- and annul the argument list, optionally eliminating duplicates
+        inline void transfer(hashedWordList& lst);
+
         //- Transfer the contents of the argument List into this list
-        //  and annul the argument list,
-        //  optionally eliminating duplicates
-        void transfer(List<word>& lst, const bool removeDuplicates=false);
+        //- and annul the argument list, optionally eliminating duplicates
+        inline void transfer(wordList& lst, bool unique=false);
 
         //- Rebuild the lookup hash indices
         void rehash() const;
 
+        //- Rebuild the lookup hash indices, or make unique entries first.
+        inline void rehash(bool unique);
+
+        //- Adjust the list (if needed) to eliminate duplicate entries,
+        //- and rehash the indices
+        void uniq();
+
         //- Sort the list and rehash the indices
         inline void sort();
-
-        //- Adjust the list if necessary to eliminate duplicate entries,
-        //  and rehash the indices
-        void uniq();
 
 
     // Member Operators
 
-        //- Return name corresponding to specified index
+        //- Return name corresponding to specified index.
+        //  Fatal for out of range values.
         inline const word& operator[](const label index) const;
 
         //- Return index corresponding to specified name, or -1 on failure
         inline label operator[](const word& name) const;
 
-        //- Does the list contain the specified name - same as found.
-        //  Makes hashedWordList suitable as a unary predicate.
+        //- Check hashed values for the specified name - same as found.
+        //  Can be used as a unary predicate.
         inline bool operator()(const word& name) const;
 
 
       // Assignment
 
-        //- Assignment operator from list of words. Rehashes the indices.
-        inline void operator=(const UList<word>& lst);
-
-        //- Assignment operator from initializer list. Rehashes the indices.
-        inline void operator=(std::initializer_list<word> lst);
-
-        //- Assignment operator. Rehashes the indices.
+        //- Copy assignment. Rehashes the indices.
         inline void operator=(const hashedWordList& lst);
 
+        //- Copy assignment from list of words. Rehashes the indices.
+        inline void operator=(const wordUList& lst);
 
-    // Istream operators
+        //- Copy assignment from initializer list. Rehashes the indices.
+        inline void operator=(std::initializer_list<word> lst);
 
-        friend Istream& operator>>(Istream& is, hashedWordList& lst);
-        friend Ostream& operator<<(Ostream& os, const hashedWordList& lst);
+        //- Move assignment operator.
+        inline void operator=(hashedWordList&& lst);
+
+        //- Move assignment from list of words. Rehashes the indices.
+        inline void operator=(wordList&& lst);
+
+        //- Read from an input stream. Rehashes the indices.
+        inline friend Istream& operator>>(Istream& is, hashedWordList& lst);
 };
 
 

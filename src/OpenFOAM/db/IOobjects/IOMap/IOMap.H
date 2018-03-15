@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IOMap Declaration
+                            Class IOMap Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -54,7 +54,6 @@ class IOMap
     public regIOobject,
     public Map<T>
 {
-
 public:
 
     //- Runtime type information
@@ -63,26 +62,29 @@ public:
 
     // Constructors
 
+        //- Default copy construct
+        IOMap(const IOMap&) = default;
+
         //- Construct from IOobject
-        IOMap(const IOobject&);
+        explicit IOMap(const IOobject& io);
 
         //- Construct from IOobject and size of Map
-        IOMap(const IOobject&, const label);
+        IOMap(const IOobject& io, const label size);
 
-        //- Construct from IOobject and a Map
-        IOMap(const IOobject&, const Map<T>&);
+        //- Construct from IOobject and a copy of Map content
+        IOMap(const IOobject&, const Map<T>& content);
 
-        //- Construct by transferring the Map contents
-        IOMap(const IOobject&, const Xfer<Map<T>>&);
+        //- Construct by transferring the Map content
+        IOMap(const IOobject&, Map<T>&& content);
 
 
     //- Destructor
-    virtual ~IOMap();
+    virtual ~IOMap() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        bool writeData(Ostream&) const;
+        bool writeData(Ostream& os) const;
 
         //- Is object global
         virtual bool global() const
@@ -97,13 +99,13 @@ public:
             return globalFilePath(type());
         }
 
-    // Member operators
+    // Member Operators
 
-        //- Assignment of other IOMap's entries to this IOMap
-        void operator=(const IOMap<T>&);
+        //- Copy assignment of entries
+        void operator=(const IOMap<T>& rhs);
 
-        //- Assignment of other Map's entries to this IOMap
-        void operator=(const Map<T>&);
+        //- Copy or move assignment of entries
+        using Map<T>::operator=;
 };
 
 

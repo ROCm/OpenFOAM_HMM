@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,11 +24,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "alphatJayatillekeWallFunctionFvPatchScalarField.H"
-#include "turbulentFluidThermoModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,6 +53,37 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::checkType()
             << "Patch type for patch " << patch().name() << " must be wall\n"
             << "Current patch type is " << patch().type() << nl
             << exit(FatalError);
+    }
+}
+
+
+tmp<scalarField> alphatJayatillekeWallFunctionFvPatchScalarField::yPlus
+(
+    const compressible::turbulenceModel& turbModel
+) const
+{
+    const label patchi = patch().index();
+    const tmp<volScalarField> tnut = turbModel.nut();
+    const volScalarField& nut = tnut();
+
+    if (isA<nutWallFunctionFvPatchScalarField>(nut.boundaryField()[patchi]))
+    {
+        const nutWallFunctionFvPatchScalarField& nutPf =
+            dynamic_cast<const nutWallFunctionFvPatchScalarField&>
+            (
+                nut.boundaryField()[patchi]
+            );
+
+        return nutPf.yPlus();
+    }
+    else
+    {
+        const scalarField& y = turbModel.y()[patchi];
+        const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+
+        return
+            y*sqrt(turbModel.nuEff(patchi)*mag(Uw.snGrad()))
+           /turbModel.nu(patchi);
     }
 }
 
@@ -109,7 +140,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     Prt_(0.85),
-    Cmu_(0.09),
     kappa_(0.41),
     E_(9.8)
 {
@@ -128,7 +158,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     Prt_(ptf.Prt_),
-    Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
     E_(ptf.E_)
 {}
@@ -144,7 +173,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85)),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
@@ -160,7 +188,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(awfpsf),
     Prt_(awfpsf.Prt_),
-    Cmu_(awfpsf.Cmu_),
     kappa_(awfpsf.kappa_),
     E_(awfpsf.E_)
 {
@@ -177,7 +204,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(awfpsf, iF),
     Prt_(awfpsf.Prt_),
-    Cmu_(awfpsf.Cmu_),
     kappa_(awfpsf.kappa_),
     E_(awfpsf.E_)
 {
@@ -207,7 +233,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
             )
         );
 
-    const scalar Cmu25 = pow025(Cmu_);
+    const scalarField yPlusp(yPlus(turbModel));
 
     const scalarField& y = turbModel.y()[patchi];
 
@@ -217,11 +243,6 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const tmp<scalarField> talphaw = turbModel.alpha(patchi);
     const scalarField& alphaw = talphaw();
 
-    scalarField& alphatw = *this;
-
-    const tmp<volScalarField> tk = turbModel.k();
-    const volScalarField& k = tk();
-
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const scalarField magUp(mag(Uw.patchInternalField() - Uw));
     const scalarField magGradUw(mag(Uw.snGrad()));
@@ -229,6 +250,8 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     const scalarField& rhow = turbModel.rho().boundaryField()[patchi];
     const fvPatchScalarField& hew =
         turbModel.transport().he().boundaryField()[patchi];
+
+    scalarField& alphatw = *this;
 
     // Heat flux [W/m2] - lagging alphatw
     const scalarField qDot
@@ -239,11 +262,9 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     // Populate boundary values
     forAll(alphatw, facei)
     {
-        label celli = patch().faceCells()[facei];
+        scalar yPlus = yPlusp[facei];
 
-        scalar uTau = Cmu25*sqrt(k[celli]);
-
-        scalar yPlus = uTau*y[facei]/(muw[facei]/rhow[facei]);
+        scalar uTau = yPlus/y[facei]*(muw[facei]/rhow[facei]);
 
         // Molecular Prandtl number
         scalar Pr = muw[facei]/alphaw[facei];
@@ -300,10 +321,9 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    os.writeEntry("Prt", Prt_);
+    os.writeEntry("kappa", kappa_);
+    os.writeEntry("E", E_);
     writeEntry("value", os);
 }
 

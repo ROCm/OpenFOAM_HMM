@@ -54,6 +54,7 @@ Usage
 \*---------------------------------------------------------------------------*/
 
 #include "triangle.H"
+#include "edgeHashes.H"
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
 #include "triSurfaceTools.H"
@@ -150,7 +151,7 @@ void writeZoning
     faceList faces(surf.size());
     forAll(surf, i)
     {
-        faces[i] = surf[i].triFaceFace();
+        faces[i] = surf[i];
     }
 
     vtkSurfaceWriter().write
@@ -222,7 +223,7 @@ void syncEdges(const triSurface& p, labelHashSet& markedEdges)
     // See comment below about having duplicate edges
 
     const edgeList& edges = p.edges();
-    HashSet<edge, Hash<edge>> edgeSet(2*markedEdges.size());
+    edgeHashSet edgeSet(2*markedEdges.size());
 
     forAllConstIter(labelHashSet, markedEdges, iter)
     {
@@ -254,7 +255,7 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
         }
     }
 
-    HashSet<edge, Hash<edge>> edgeSet(2*n);
+    edgeHashSet edgeSet(2*n);
 
     forAll(isMarkedEdge, edgei)
     {
@@ -279,7 +280,7 @@ void syncEdges(const triSurface& p, boolList& isMarkedEdge)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
+    argList::addArgument("surfaceFile");
     argList::addBoolOption
     (
         "checkSelfIntersection",
@@ -312,10 +313,10 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName surfFileName = args[1];
-    const bool checkSelfIntersect = args.optionFound("checkSelfIntersection");
-    const bool splitNonManifold = args.optionFound("splitNonManifold");
+    const bool checkSelfIntersect = args.found("checkSelfIntersection");
+    const bool splitNonManifold = args.found("splitNonManifold");
     const label outputThreshold =
-        args.optionLookupOrDefault("outputThreshold", 10);
+        args.lookupOrDefault("outputThreshold", 10);
 
     Info<< "Reading surface from " << surfFileName << " ..." << nl << endl;
 
@@ -344,7 +345,7 @@ int main(int argc, char *argv[])
 
 
     // write bounding box corners
-    if (args.optionFound("blockMesh"))
+    if (args.found("blockMesh"))
     {
         pointField cornerPts(boundBox(surf.points(), false).points());
 

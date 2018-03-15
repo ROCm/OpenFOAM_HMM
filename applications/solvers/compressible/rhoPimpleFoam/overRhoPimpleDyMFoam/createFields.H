@@ -61,18 +61,6 @@ dimensionedScalar rhoMin
     )
 );
 
-Info<< "Creating turbulence model\n" << endl;
-autoPtr<compressible::turbulenceModel> turbulence
-(
-    compressible::turbulenceModel::New
-    (
-        rho,
-        U,
-        phi,
-        thermo
-    )
-);
-
 mesh.setFluxRequired(p.name());
 
 Info<< "Creating field dpdt\n" << endl;
@@ -115,3 +103,15 @@ volScalarField K("K", 0.5*magSqr(U));
 
 // Mask field for zeroing out contributions on hole cells
 #include "createCellMask.H"
+
+Info<< "Creating turbulence model\n" << endl;
+autoPtr<compressible::turbulenceModel> turbulence
+(
+    compressible::turbulenceModel::New
+    (
+        rho,
+        U,
+        phi,
+        thermo
+    )
+);

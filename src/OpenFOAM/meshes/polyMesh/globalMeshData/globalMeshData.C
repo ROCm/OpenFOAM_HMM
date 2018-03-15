@@ -508,6 +508,7 @@ void Foam::globalMeshData::calcSharedEdges() const
         }
     }
 
+
     sharedEdgeLabelsPtr_.reset(new labelList());
     labelList& sharedEdgeLabels = sharedEdgeLabelsPtr_();
     sharedEdgeLabels.transfer(dynSharedEdgeLabels);
@@ -543,14 +544,14 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
     (
         new labelListList
         (
-            globalData.pointPoints().xfer()
+            std::move(globalData.pointPoints())
         )
     );
     globalPointTransformedSlavesPtr_.reset
     (
         new labelListList
         (
-            globalData.transformedPointPoints().xfer()
+            std::move(globalData.transformedPointPoints())
         )
     );
 
@@ -558,7 +559,7 @@ void Foam::globalMeshData::calcGlobalPointSlaves() const
     (
         new mapDistribute
         (
-            globalData.map().xfer()
+            std::move(globalData.map())
         )
     );
 }
@@ -1395,10 +1396,9 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
                 // Add all slaveBFaces. Note that need to check for
                 // uniqueness only in case of cyclics.
 
-                forAll(slaveBFaces, j)
+                for (const label slave : slaveBFaces)
                 {
-                    label slave = slaveBFaces[j];
-                    if (findIndex(SubList<label>(myBFaces, sz), slave) == -1)
+                    if (!SubList<label>(myBFaces, sz).found(slave))
                     {
                         myBFaces[n++] = slave;
                     }
@@ -1434,11 +1434,10 @@ void Foam::globalMeshData::calcGlobalPointBoundaryFaces() const
                 const labelList& slaveBFaces =
                     globalPointBoundaryFaces[transformedSlaves[i]];
 
-                forAll(slaveBFaces, j)
+                for (const label slave : slaveBFaces)
                 {
-                    label slave = slaveBFaces[j];
                     // Check that same face not already present untransformed
-                    if (findIndex(untrafoFaces, slave)== -1)
+                    if (!untrafoFaces.found(slave))
                     {
                         label proci = globalIndices.whichProcID(slave);
                         label facei = globalIndices.toLocal(proci, slave);
@@ -1547,9 +1546,8 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
     }
 
 
-    boundaryCellsPtr_.reset(new labelList());
+    boundaryCellsPtr_.reset(new labelList(std::move(cellMap)));
     labelList& boundaryCells = boundaryCellsPtr_();
-    boundaryCells.transfer(cellMap.shrink());
 
 
     // Convert point-cells to global (boundary)cell numbers
@@ -1624,10 +1622,9 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
                 // Add all slaveBCells. Note that need to check for
                 // uniqueness only in case of cyclics.
 
-                forAll(slaveBCells, j)
+                for (const label slave : slaveBCells)
                 {
-                    label slave = slaveBCells[j];
-                    if (findIndex(SubList<label>(myBCells, sz), slave) == -1)
+                    if (!SubList<label>(myBCells, sz).found(slave))
                     {
                         myBCells[n++] = slave;
                     }
@@ -1663,12 +1660,10 @@ void Foam::globalMeshData::calcGlobalPointBoundaryCells() const
                 const labelList& slaveBCells =
                     globalPointBoundaryCells[transformedSlaves[i]];
 
-                forAll(slaveBCells, j)
+                for (const label slave : slaveBCells)
                 {
-                    label slave = slaveBCells[j];
-
                     // Check that same cell not already present untransformed
-                    if (findIndex(untrafoCells, slave)== -1)
+                    if (!untrafoCells.found(slave))
                     {
                         label proci = globalIndices.whichProcID(slave);
                         label celli = globalIndices.toLocal(proci, slave);
@@ -1744,14 +1739,14 @@ void Foam::globalMeshData::calcGlobalCoPointSlaves() const
     (
         new labelListList
         (
-            globalData.pointPoints().xfer()
+            std::move(globalData.pointPoints())
         )
     );
     globalCoPointSlavesMapPtr_.reset
     (
         new mapDistribute
         (
-            globalData.map().xfer()
+            std::move(globalData.map())
         )
     );
 
@@ -1894,7 +1889,8 @@ const Foam::labelList& Foam::globalMeshData::sharedPointGlobalLabels() const
             sharedPointGlobalLabels = -1;
         }
     }
-    return sharedPointGlobalLabelsPtr_();
+
+    return *sharedPointGlobalLabelsPtr_;
 }
 
 
@@ -2031,7 +2027,7 @@ const Foam::labelList& Foam::globalMeshData::sharedPointLabels() const
     {
         calcSharedPoints();
     }
-    return sharedPointLabelsPtr_();
+    return *sharedPointLabelsPtr_;
 }
 
 
@@ -2041,7 +2037,7 @@ const Foam::labelList& Foam::globalMeshData::sharedPointAddr() const
     {
         calcSharedPoints();
     }
-    return sharedPointAddrPtr_();
+    return *sharedPointAddrPtr_;
 }
 
 
@@ -2061,7 +2057,7 @@ const Foam::labelList& Foam::globalMeshData::sharedEdgeLabels() const
     {
         calcSharedEdges();
     }
-    return sharedEdgeLabelsPtr_();
+    return *sharedEdgeLabelsPtr_;
 }
 
 
@@ -2071,7 +2067,7 @@ const Foam::labelList& Foam::globalMeshData::sharedEdgeAddr() const
     {
         calcSharedEdges();
     }
-    return sharedEdgeAddrPtr_();
+    return *sharedEdgeAddrPtr_;
 }
 
 
@@ -2132,7 +2128,7 @@ const Foam::indirectPrimitivePatch& Foam::globalMeshData::coupledPatch() const
                 << endl;
         }
     }
-    return coupledPatchPtr_();
+    return *coupledPatchPtr_;
 }
 
 
@@ -2152,7 +2148,7 @@ const Foam::labelList& Foam::globalMeshData::coupledPatchMeshEdges() const
             )
         );
     }
-    return coupledPatchMeshEdgesPtr_();
+    return *coupledPatchMeshEdgesPtr_;
 }
 
 
@@ -2171,7 +2167,7 @@ const
             em.insert(me[i], i);
         }
     }
-    return coupledPatchMeshEdgeMapPtr_();
+    return *coupledPatchMeshEdgeMapPtr_;
 }
 
 
@@ -2184,7 +2180,7 @@ const Foam::globalIndex& Foam::globalMeshData::globalPointNumbering() const
             new globalIndex(coupledPatch().nPoints())
         );
     }
-    return globalPointNumberingPtr_();
+    return *globalPointNumberingPtr_;
 }
 
 
@@ -2195,7 +2191,7 @@ Foam::globalMeshData::globalTransforms() const
     {
         globalTransformsPtr_.reset(new globalIndexAndTransform(mesh_));
     }
-    return globalTransformsPtr_();
+    return *globalTransformsPtr_;
 }
 
 
@@ -2205,7 +2201,7 @@ const Foam::labelListList& Foam::globalMeshData::globalPointSlaves() const
     {
         calcGlobalPointSlaves();
     }
-    return globalPointSlavesPtr_();
+    return *globalPointSlavesPtr_;
 }
 
 
@@ -2216,7 +2212,7 @@ const
     {
         calcGlobalPointSlaves();
     }
-    return globalPointTransformedSlavesPtr_();
+    return *globalPointTransformedSlavesPtr_;
 }
 
 
@@ -2226,7 +2222,7 @@ const Foam::mapDistribute& Foam::globalMeshData::globalPointSlavesMap() const
     {
         calcGlobalPointSlaves();
     }
-    return globalPointSlavesMapPtr_();
+    return *globalPointSlavesMapPtr_;
 }
 
 
@@ -2239,7 +2235,7 @@ const Foam::globalIndex& Foam::globalMeshData::globalEdgeNumbering() const
             new globalIndex(coupledPatch().nEdges())
         );
     }
-    return globalEdgeNumberingPtr_();
+    return *globalEdgeNumberingPtr_;
 }
 
 
@@ -2249,7 +2245,7 @@ const Foam::labelListList& Foam::globalMeshData::globalEdgeSlaves() const
     {
         calcGlobalEdgeSlaves();
     }
-    return globalEdgeSlavesPtr_();
+    return *globalEdgeSlavesPtr_;
 }
 
 
@@ -2260,7 +2256,7 @@ const
     {
         calcGlobalEdgeSlaves();
     }
-    return globalEdgeTransformedSlavesPtr_();
+    return *globalEdgeTransformedSlavesPtr_;
 }
 
 
@@ -2270,7 +2266,7 @@ const Foam::PackedBoolList& Foam::globalMeshData::globalEdgeOrientation() const
     {
         calcGlobalEdgeOrientation();
     }
-    return globalEdgeOrientationPtr_();
+    return *globalEdgeOrientationPtr_;
 }
 
 
@@ -2280,7 +2276,7 @@ const Foam::mapDistribute& Foam::globalMeshData::globalEdgeSlavesMap() const
     {
         calcGlobalEdgeSlaves();
     }
-    return globalEdgeSlavesMapPtr_();
+    return *globalEdgeSlavesMapPtr_;
 }
 
 
@@ -2291,7 +2287,7 @@ const
     {
         calcGlobalPointBoundaryFaces();
     }
-    return globalBoundaryFaceNumberingPtr_();
+    return *globalBoundaryFaceNumberingPtr_;
 }
 
 
@@ -2302,7 +2298,7 @@ const
     {
         calcGlobalPointBoundaryFaces();
     }
-    return globalPointBoundaryFacesPtr_();
+    return *globalPointBoundaryFacesPtr_;
 }
 
 
@@ -2313,7 +2309,7 @@ Foam::globalMeshData::globalPointTransformedBoundaryFaces() const
     {
         calcGlobalPointBoundaryFaces();
     }
-    return globalPointTransformedBoundaryFacesPtr_();
+    return *globalPointTransformedBoundaryFacesPtr_;
 }
 
 
@@ -2324,7 +2320,7 @@ const
     {
         calcGlobalPointBoundaryFaces();
     }
-    return globalPointBoundaryFacesMapPtr_();
+    return *globalPointBoundaryFacesMapPtr_;
 }
 
 
@@ -2334,7 +2330,7 @@ const Foam::labelList& Foam::globalMeshData::boundaryCells() const
     {
         calcGlobalPointBoundaryCells();
     }
-    return boundaryCellsPtr_();
+    return *boundaryCellsPtr_;
 }
 
 
@@ -2345,7 +2341,7 @@ const
     {
         calcGlobalPointBoundaryCells();
     }
-    return globalBoundaryCellNumberingPtr_();
+    return *globalBoundaryCellNumberingPtr_;
 }
 
 
@@ -2356,7 +2352,7 @@ const
     {
         calcGlobalPointBoundaryCells();
     }
-    return globalPointBoundaryCellsPtr_();
+    return *globalPointBoundaryCellsPtr_;
 }
 
 
@@ -2367,7 +2363,7 @@ Foam::globalMeshData::globalPointTransformedBoundaryCells() const
     {
         calcGlobalPointBoundaryCells();
     }
-    return globalPointTransformedBoundaryCellsPtr_();
+    return *globalPointTransformedBoundaryCellsPtr_;
 }
 
 
@@ -2378,7 +2374,7 @@ const
     {
         calcGlobalPointBoundaryCells();
     }
-    return globalPointBoundaryCellsMapPtr_();
+    return *globalPointBoundaryCellsMapPtr_;
 }
 
 
@@ -2388,7 +2384,7 @@ const Foam::labelListList& Foam::globalMeshData::globalCoPointSlaves() const
     {
         calcGlobalCoPointSlaves();
     }
-    return globalCoPointSlavesPtr_();
+    return *globalCoPointSlavesPtr_;
 }
 
 
@@ -2398,7 +2394,7 @@ const Foam::mapDistribute& Foam::globalMeshData::globalCoPointSlavesMap() const
     {
         calcGlobalCoPointSlaves();
     }
-    return globalCoPointSlavesMapPtr_();
+    return *globalCoPointSlavesMapPtr_;
 }
 
 

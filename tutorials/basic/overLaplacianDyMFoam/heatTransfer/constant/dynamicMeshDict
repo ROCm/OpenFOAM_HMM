@@ -25,9 +25,4 @@ displacementLaplacianCoeffs
 
 dynamicFvMesh       dynamicOversetFvMesh;
 
-dynamicOversetFvMeshCoeffs
-{
-//    layerRelax 0.3;
-}
-
 // ************************************************************************* //

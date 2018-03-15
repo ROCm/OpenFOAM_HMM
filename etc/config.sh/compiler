@@ -6,33 +6,21 @@
 #    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/compiler
+#     - sourced by OpenFOAM-*/etc/config.sh/settings
 #
 # Description
-#     Setup file for custom compiler versions for OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/config.sh/settings
+#     Setup for custom compiler versions for OpenFOAM
 #
 #------------------------------------------------------------------------------
 
 case "$WM_COMPILER_TYPE" in
 ThirdParty)
-    # Default versions of GMP, MPFR and MPC, override as necessary
+    # Default versions of GMP, MPFR, MPC - override as necessary
     gmp_version=gmp-system
     mpfr_version=mpfr-system
     mpc_version=mpc-system
@@ -42,7 +30,7 @@ ThirdParty)
         gcc_version=gcc-4.8.5
         ;;
     Gcc49)
-        gcc_version=gcc-4.9.3
+        gcc_version=gcc-4.9.4
         ;;
     Gcc51)
         gcc_version=gcc-5.1.0
@@ -56,6 +44,9 @@ ThirdParty)
     Gcc54)
         gcc_version=gcc-5.4.0
         ;;
+    Gcc55)
+        gcc_version=gcc-5.5.0
+        ;;
     Gcc61)
         gcc_version=gcc-6.1.0
         ;;
@@ -65,11 +56,17 @@ ThirdParty)
     Gcc63)
         gcc_version=gcc-6.3.0
         ;;
+    Gcc64)
+        gcc_version=gcc-6.4.0
+        ;;
     Gcc71)
         gcc_version=gcc-7.1.0
         ;;
     Gcc72)
         gcc_version=gcc-7.2.0
+        ;;
+    Gcc73)
+        gcc_version=gcc-7.3.0
         ;;
     Clang)
         clang_version=llvm-3.7.1
@@ -81,7 +78,10 @@ ThirdParty)
         clang_version=llvm-3.9.1
         ;;
     Clang40)
-        clang_version=llvm-4.0.0
+        clang_version=llvm-4.0.1
+        ;;
+    Clang50)
+        clang_version=llvm-5.0.1
         ;;
     *)
         /bin/cat << UNKNOWN_COMPILER 1>&2

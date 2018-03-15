@@ -94,7 +94,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, false)
+    p0_(ptf.p0_.clone())
 {
     patchType() = ptf.patchType();
 
@@ -117,7 +117,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, false)
+    p0_(ptf.p0_.clone())
 {}
 
 
@@ -134,7 +134,7 @@ uniformTotalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
-    p0_(ptf.p0_, false)
+    p0_(ptf.p0_.clone())
 {}
 
 
@@ -227,11 +227,11 @@ void Foam::uniformTotalPressureFvPatchScalarField::updateCoeffs()
 void Foam::uniformTotalPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("U", "U", UName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntry("rho", rhoName_);
+    os.writeEntry("psi", psiName_);
+    os.writeEntry("gamma", gamma_);
     p0_->writeData(os);
     writeEntry("value", os);
 }

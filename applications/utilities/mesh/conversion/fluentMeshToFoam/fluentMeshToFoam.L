@@ -58,15 +58,14 @@ Description
 #include "cellShapeRecognition.H"
 #include "repatchPolyTopoChanger.H"
 
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma clang diagnostic ignored "-Wdeprecated-register"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace Foam;
 
 const scalar convertToMeters = 1.0;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 label dimensionOfGrid = 0;
 
@@ -103,7 +102,7 @@ wordList patchNameIDs(maxZoneID);
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -867,7 +866,7 @@ label findFace(const primitiveMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("Fluent mesh file");
+    argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",
@@ -898,10 +897,10 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
 
-    const bool writeSets  = args.optionFound("writeSets");
-    const bool writeZones = args.optionFound("writeZones");
+    const bool writeSets  = args.found("writeSets");
+    const bool writeZones = args.found("writeZones");
 
     #include "createTime.H"
 
@@ -975,7 +974,7 @@ int main(int argc, char *argv[])
 
         scalar twoDThickness = 1.0;
 
-        if (!args.optionReadIfPresent("2D", twoDThickness))
+        if (!args.readIfPresent("2D", twoDThickness))
         {
             const scalar extrusionFactor = 0.02; //0.01 in each direction
             boundBox box(points);
@@ -1077,7 +1076,6 @@ int main(int argc, char *argv[])
         // Create new faces
         forAll(faces, facei)
         {
-
             if (faces[facei].size() != 2)
             {
                 FatalErrorInFunction
@@ -1177,7 +1175,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cellShapes,
         patches,
         patchNames,
@@ -1660,7 +1658,7 @@ int main(int argc, char *argv[])
             (
                 name,
                 zoneFaces,
-                boolList(zoneFaces.size(), false),
+                false, // none are flipped
                 cnt,
                 pShapeMesh.faceZones()
             );

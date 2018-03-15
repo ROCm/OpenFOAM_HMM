@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -132,7 +132,7 @@ private:
         writeOption writeOption_;
 
         //- Names of objects to control
-        wordReList objectNames_;
+        wordRes objectNames_;
 
 
     // Private Member Functions
@@ -162,7 +162,7 @@ public:
 
 
     //- Destructor
-    virtual ~writeObjects();
+    virtual ~writeObjects() = default;
 
 
     // Member Functions

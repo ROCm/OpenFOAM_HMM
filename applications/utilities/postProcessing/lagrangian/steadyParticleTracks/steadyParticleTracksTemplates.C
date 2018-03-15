@@ -49,7 +49,7 @@ Foam::tmp<Foam::Field<Type>> Foam::readParticleField
     if (obj != nullptr)
     {
         IOField<Type> newField(*obj);
-        return tmp<Field<Type>>(new Field<Type>(newField.xfer()));
+        return tmp<Field<Type>>::New(std::move(newField));
     }
 
     FatalErrorInFunction
@@ -77,7 +77,7 @@ void Foam::readFields
         {
             Info<< "        reading field " << fieldNames[j] << endl;
             IOField<Type> newField(*obj);
-            values.set(j, new List<Type>(newField.xfer()));
+            values.set(j, new List<Type>(std::move(newField)));
         }
         else
         {

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,15 +27,35 @@ Description
 
 #include "IndirectList.H"
 #include "IOstreams.H"
+#include "Fstream.H"
+#include "ListOps.H"
+#include "labelIndList.H"
+#include "argList.H"
 
 using namespace Foam;
 
 template<class ListType>
 void printInfo(const ListType& lst)
 {
-    Info<< "addr: " << lst.addressing() << nl
-        << "list: " << lst << nl
+    Info<< "full: " << flatOutput(lst.completeList()) << nl
+        << "addr: " << flatOutput(lst.addressing()) << nl
+        << "list: " << flatOutput(lst) << nl
         << endl;
+}
+
+
+template<class T, class ListType>
+void testFind(const T& val, const ListType& lst)
+{
+    Info<< nl
+        << "Search for "<< val << " in " << flatOutput(lst) << nl
+        <<" found() = " << lst.found(val)
+        <<" find() = " << lst.find(val)
+        <<" rfind() = " << lst.rfind(val)
+        <<" find(2) = " << lst.find(val, 2)
+        <<" rfind(2) = " << lst.rfind(val, 2)
+        <<" findIndex = " << findIndex(lst, val) << nl
+        << nl;
 }
 
 
@@ -44,41 +64,45 @@ void printInfo(const ListType& lst)
 
 int main(int argc, char *argv[])
 {
-    List<double> completeList(10);
+    argList::addOption
+    (
+        "binary",
+        "file",
+        "write lists in binary to specified file"
+    );
+
+    argList args(argc, argv);
+
+    List<label> completeList(20);
 
     forAll(completeList, i)
     {
-        completeList[i] = 0.1*i;
+        completeList[i] = 10*i;
     }
 
-    Info<< "raw : " << completeList << nl << endl;
+    Info<< "raw : " << flatOutput(completeList) << nl << endl;
 
+    List<label> addresses{1, 0, 3, 7, 4, 8, 5, 1, 0, 3, 7, 4, 8, 5, };
 
-    List<label> addresses(5);
-    addresses[0] = 1;
-    addresses[1] = 0;
-    addresses[2] = 7;
-    addresses[3] = 8;
-    addresses[4] = 5;
-
-    IndirectList<double> idl1(completeList, addresses);
+    labelIndList idl1(completeList, addresses);
 
     printInfo(idl1);
 
-    addresses[4] = 1;
-    addresses[3] = 0;
-    addresses[2] = 7;
-    addresses[1] = 8;
-    addresses[0] = 5;
+    for (const label val : { 10, 30, 40, 50, 90, 80, 120 } )
+    {
+        testFind(val, idl1);
+    }
 
-    idl1.resetAddressing(addresses.xfer());
+    inplaceReverseList(addresses);
+
+    idl1.resetAddressing(std::move(addresses));
 
     printInfo(idl1);
 
-    // test copying
-    UIndirectList<double> uidl1(idl1);
-    IndirectList<double> idl2(uidl1);
-    IndirectList<double> idl3(idl2);
+    // Test copying
+    labelUIndList uidl1(idl1);
+    labelIndList idl2(uidl1);
+    labelIndList idl3(idl2);
 
     printInfo(uidl1);
 
@@ -91,6 +115,55 @@ int main(int argc, char *argv[])
     printInfo(idl1);
     printInfo(idl2);
     printInfo(idl3);
+
+    fileName binaryOutput;
+    if (args.readIfPresent("binary", binaryOutput))
+    {
+        Info<<"Writing output to " << binaryOutput << endl;
+
+        OFstream os(binaryOutput, IOstream::BINARY);
+
+        os.writeEntry("idl1", idl1);
+        os.writeEntry("idl2", idl2);
+        os.writeEntry("idl3", idl3);
+    }
+
+    if (Pstream::parRun())
+    {
+        if (Pstream::master())
+        {
+            Pout<< "full: " << flatOutput(idl3.completeList()) << nl
+                << "send: " << flatOutput(idl3) << endl;
+
+            for
+            (
+                int slave = Pstream::firstSlave();
+                slave <= Pstream::lastSlave();
+                ++slave
+            )
+            {
+                OPstream toSlave(Pstream::commsTypes::scheduled, slave);
+                toSlave << idl3;
+            }
+        }
+        else
+        {
+            // From master
+            IPstream fromMaster
+            (
+                Pstream::commsTypes::scheduled,
+                Pstream::masterNo()
+            );
+
+            List<label> recv(fromMaster);
+
+            Pout<<"recv: " << flatOutput(recv) << endl;
+        }
+
+        // MPI barrier
+        bool barrier = true;
+        Pstream::scatter(barrier);
+    }
 
     Info<< "End\n" << endl;
 

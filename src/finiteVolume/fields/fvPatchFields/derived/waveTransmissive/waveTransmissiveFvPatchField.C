@@ -139,21 +139,16 @@ void Foam::waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
 
-    this->template
-        writeEntryIfDifferent<word>(os, "phi", "phi", this->phiName_);
-    this->template
-        writeEntryIfDifferent<word>(os, "rho", "rho", this->rhoName_);
-    this->template
-        writeEntryIfDifferent<word>(os, "psi", "thermo:psi", psiName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", this->phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", this->rhoName_);
+    os.writeEntryIfDifferent<word>("psi", "thermo:psi", psiName_);
 
-    os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
+    os.writeEntry("gamma", gamma_);
 
     if (this->lInf_ > SMALL)
     {
-        os.writeKeyword("fieldInf") << this->fieldInf_
-            << token::END_STATEMENT << nl;
-        os.writeKeyword("lInf") << this->lInf_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("fieldInf", this->fieldInf_);
+        os.writeEntry("lInf", this->lInf_);
     }
 
     this->writeEntry("value", os);

@@ -25,7 +25,7 @@ License
 
 #include "Istream.H"
 #include "cell.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -37,13 +37,13 @@ inline Foam::cellShape::cellShape()
 
 inline Foam::cellShape::cellShape
 (
-    const cellModel& M,
-    const labelList& l,
+    const cellModel& model,
+    const labelUList& labels,
     const bool doCollapse
 )
 :
-    labelList(l),
-    m(&M)
+    labelList(labels),
+    m(&model)
 {
     if (doCollapse)
     {
@@ -54,13 +54,13 @@ inline Foam::cellShape::cellShape
 
 inline Foam::cellShape::cellShape
 (
-    const word& model,
-    const labelList& l,
+    const word& modelName,
+    const labelUList& labels,
     const bool doCollapse
 )
 :
-    labelList(l),
-    m(cellModeller::lookup(model))
+    labelList(labels),
+    m(cellModel::ptr(modelName))
 {
     if (doCollapse)
     {
@@ -77,7 +77,7 @@ inline Foam::cellShape::cellShape(Istream& is)
 
 inline Foam::autoPtr<Foam::cellShape> Foam::cellShape::clone() const
 {
-    return autoPtr<cellShape>(new cellShape(*this));
+    return autoPtr<cellShape>::New(*this);
 }
 
 

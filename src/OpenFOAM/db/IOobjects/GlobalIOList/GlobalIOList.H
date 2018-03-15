@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,6 @@ class GlobalIOList
     public regIOobject,
     public List<Type>
 {
-
 public:
 
     TypeName("List");
@@ -61,24 +60,27 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject
-        GlobalIOList(const IOobject&);
+        //- Default copy construct
+        GlobalIOList(const GlobalIOList&) = default;
 
         //- Construct from IOobject
-        GlobalIOList(const IOobject&, const label size);
+        explicit GlobalIOList(const IOobject& io);
+
+        //- Construct from IOobject
+        GlobalIOList(const IOobject& io, const label size);
 
         //- Construct from IOobject and a List
-        GlobalIOList(const IOobject&, const List<Type>&);
+        GlobalIOList(const IOobject& io, const UList<Type>& content);
 
-        //- Construct by transferring the List contents
-        GlobalIOList(const IOobject&, const Xfer<List<Type>>&);
+        //- Construct by transferring the List content
+        GlobalIOList(const IOobject& io, List<Type>&& content);
 
 
     //- Destructor
-    virtual ~GlobalIOList();
+    virtual ~GlobalIOList() = default;
 
 
-    // Member functions
+    // Member Functions
 
         //- Is object global
         virtual bool global() const
@@ -93,18 +95,20 @@ public:
             return globalFilePath(type());
         }
 
-        //- ReadData function required for regIOobject read operation
-        virtual bool readData(Istream&);
+        //- The readData method for regIOobject read operation
+        virtual bool readData(Istream& is);
 
-        //- WriteData function required for regIOobject write operation
-        bool writeData(Ostream&) const;
+        //- The writeData method for regIOobject write operation
+        bool writeData(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const GlobalIOList<Type>&);
+        //- Copy assignment of entries
+        void operator=(const GlobalIOList<Type>& rhs);
 
-        void operator=(const List<Type>&);
+        //- Copy or move assignment of entries
+        using List<Type>::operator=;
 };
 
 

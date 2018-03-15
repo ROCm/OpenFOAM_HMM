@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,7 +36,7 @@ namespace Foam
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::polyTopoChanger::readModifiers()
 {
@@ -73,13 +73,14 @@ void Foam::polyTopoChanger::readModifiers()
             );
         }
 
-        // Check state of IOstream
         is.check(FUNCTION_NAME);
 
         close();
     }
 }
 
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::polyTopoChanger::polyTopoChanger
 (
@@ -95,10 +96,14 @@ Foam::polyTopoChanger::polyTopoChanger
 }
 
 
-Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
+Foam::polyTopoChanger::polyTopoChanger
+(
+    polyMesh& mesh,
+    const IOobject::readOption rOpt
+
+)
 :
-    PtrList<polyMeshModifier>(),
-    regIOobject
+    polyTopoChanger
     (
         IOobject
         (
@@ -107,32 +112,36 @@ Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
             (
                 mesh.meshDir(),
                 "meshModifiers",
-                IOobject::READ_IF_PRESENT
+                rOpt
             ),
             mesh.meshSubDir,
             mesh,
-            IOobject::READ_IF_PRESENT,
+            rOpt,
             IOobject::NO_WRITE
-        )
-    ),
-    mesh_(mesh)
-{
-    readModifiers();
-}
+        ),
+        mesh
+    )
+{}
+
+
+Foam::polyTopoChanger::polyTopoChanger(polyMesh& mesh)
+:
+    polyTopoChanger(mesh, IOobject::readOption::READ_IF_PRESENT)
+{}
 
 
 Foam::wordList Foam::polyTopoChanger::types() const
 {
     const PtrList<polyMeshModifier>& modifiers = *this;
 
-    wordList t(modifiers.size());
+    wordList lst(modifiers.size());
 
-    forAll(modifiers, modifierI)
+    forAll(modifiers, i)
     {
-        t[modifierI] = modifiers[modifierI].type();
+        lst[i] = modifiers[i].type();
     }
 
-    return t;
+    return lst;
 }
 
 
@@ -140,14 +149,14 @@ Foam::wordList Foam::polyTopoChanger::names() const
 {
     const PtrList<polyMeshModifier>& modifiers = *this;
 
-    wordList t(modifiers.size());
+    wordList lst(modifiers.size());
 
-    forAll(modifiers, modifierI)
+    forAll(modifiers, i)
     {
-        t[modifierI] = modifiers[modifierI].name();
+        lst[i] = modifiers[i].name();
     }
 
-    return t;
+    return lst;
 }
 
 
@@ -277,7 +286,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChanger::changeMesh
     else
     {
         mesh_.topoChanging(false);
-        return autoPtr<mapPolyMesh>(nullptr);
+        return autoPtr<mapPolyMesh>();
     }
 }
 

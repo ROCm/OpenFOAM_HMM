@@ -165,7 +165,7 @@ IOdictionary PDRProperties
 autoPtr<PDRDragModel> drag = PDRDragModel::New
 (
     PDRProperties,
-    turbulence,
+    *turbulence,
     rho,
     U,
     phi
@@ -176,7 +176,7 @@ autoPtr<XiModel> flameWrinkling = XiModel::New
 (
     PDRProperties,
     thermo,
-    turbulence,
+    *turbulence,
     Su,
     rho,
     b,

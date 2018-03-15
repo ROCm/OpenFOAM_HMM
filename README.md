@@ -1,7 +1,8 @@
 # About OpenFOAM
 OpenFOAM is a free, open source CFD software [released and developed primarily by OpenCFD Ltd](http://www.openfoam.com) since 2004. It has a large user base across most areas of engineering and science, from both commercial and academic organisations. OpenFOAM has an extensive range of features to solve anything from complex fluid flows involving chemical reactions, turbulence and heat transfer, to acoustics, solid mechanics and electromagnetics.  [More...](http://www.openfoam.com/documentation)
 
-OpenFOAM+ is professionally released every six months to include customer sponsored developments and contributions from the community, including the OpenFOAM Foundation. Releases designated OpenFOAM+ contain several man years of client-sponsored developments of which much has been transferred to, but not released in the OpenFOAM Foundation branch.
+
+OpenFOAM is professionally released every six months to include customer sponsored developments and contributions from the community - individual and group contributors, fork re-integrations including from FOAM-extend and OpenFOAM Foundation Ltd - in this Official Release sanctioned by the OpenFOAM Worldwide Trademark Owner aiming towards one OpenFOAM.
 
 
 # Copyright
@@ -9,7 +10,7 @@ OpenFOAM is free software: you can redistribute it and/or modify it under the te
 
 
 # OpenFOAM Trademark
-OpenCFD Ltd grants use of the OpenFOAM trademark by Third Parties on a licence basis. ESI Group and the OpenFOAM Foundation Ltd are currently permitted to use the Name and agreed Domain Name. For information on trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
+OpenCFD Ltd grants use of its OpenFOAM trademark by Third Parties on a licence basis. ESI Group and OpenFOAM Foundation Ltd are currently permitted to use the Name and agreed Domain Name. For information on trademark use, please refer to the [trademark policy guidelines](http://www.openfoam.com/legal/trademark-policy.php).
 
 Please [contact OpenCFD](http://www.openfoam.com/contact) if you have any questions on the use of the OpenFOAM trademark.
 

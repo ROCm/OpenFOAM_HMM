@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -72,6 +72,8 @@ Note
 #include "IOobjectList.H"
 #include "IOmanip.H"
 #include "OFstream.H"
+#include "PstreamCombineReduceOps.H"
+#include "HashOps.H"
 
 #include "fvc.H"
 #include "volFields.H"
@@ -96,25 +98,6 @@ Note
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// file-scope helper
-static bool inFileNameList
-(
-    const fileNameList& nameList,
-    const word& name
-)
-{
-    forAll(nameList, i)
-    {
-        if (nameList[i] == name)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -144,20 +127,20 @@ int main(int argc, char *argv[])
     argList::addOption
     (
         "patches",
-        "wordReList",
+        "wordRes",
         "specify particular patches to write - eg '(outlet \"inlet.*\")'. "
         "An empty list suppresses writing the internalMesh."
     );
     argList::addOption
     (
         "faceZones",
-        "wordReList",
+        "wordRes",
         "specify faceZones to write - eg '( slice \"mfp-.*\" )'."
     );
     argList::addOption
     (
         "fields",
-        "wordReList",
+        "wordRes",
         "specify fields to export (all by default) - eg '( \"U.*\" )'."
     );
     argList::addOption
@@ -200,12 +183,12 @@ int main(int argc, char *argv[])
     // Default to binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
 
-    const bool nodeValues = args.optionFound("nodeValues");
+    const bool nodeValues = args.found("nodeValues");
 
     cpuTime timer;
     memInfo mem;
@@ -228,8 +211,8 @@ int main(int argc, char *argv[])
     //
     ensightCase::options caseOpts(format);
 
-    caseOpts.nodeValues(args.optionFound("nodeValues"));
-    caseOpts.width(args.optionLookupOrDefault<label>("width", 8));
+    caseOpts.nodeValues(args.found("nodeValues"));
+    caseOpts.width(args.lookupOrDefault<label>("width", 8));
     caseOpts.overwrite(true); // remove existing output directory
 
     // Can also have separate directory for lagrangian
@@ -239,7 +222,7 @@ int main(int argc, char *argv[])
     // Define sub-directory name to use for EnSight data.
     // The path to the ensight directory is at case level only
     // - For parallel cases, data only written from master
-    fileName ensightDir = args.optionLookupOrDefault<word>("name", "EnSight");
+    fileName ensightDir = args.lookupOrDefault<word>("name", "EnSight");
     if (!ensightDir.isAbsolute())
     {
         ensightDir = args.rootPath()/args.globalCaseName()/ensightDir;
@@ -250,30 +233,27 @@ int main(int argc, char *argv[])
     // Output configuration (geometry related)
     //
     ensightMesh::options writeOpts(format);
-    writeOpts.noPatches(args.optionFound("noPatches"));
+    writeOpts.noPatches(args.found("noPatches"));
 
-    if (args.optionFound("patches"))
+    if (args.found("patches"))
     {
-        writeOpts.patchSelection(args.optionReadList<wordRe>("patches"));
+        writeOpts.patchSelection(args.readList<wordRe>("patches"));
     }
-    if (args.optionFound("faceZones"))
+    if (args.found("faceZones"))
     {
-        writeOpts.faceZoneSelection(args.optionReadList<wordRe>("faceZones"));
+        writeOpts.faceZoneSelection(args.readList<wordRe>("faceZones"));
     }
 
     //
     // output configuration (field related)
     //
-    const bool noLagrangian = args.optionFound("noLagrangian");
+    const bool noLagrangian = args.found("noLagrangian");
 
-    wordReList fieldPatterns;
-    if (args.optionFound("fields"))
-    {
-        fieldPatterns = args.optionReadList<wordRe>("fields");
-    }
+    wordRes fieldPatterns;
+    args.readListIfPresent<wordRe>("fields", fieldPatterns);
 
     word cellZoneName;
-    if (args.optionReadIfPresent("cellZone", cellZoneName))
+    if (args.readIfPresent("cellZone", cellZoneName))
     {
         Info<< "Converting cellZone " << cellZoneName
             << " only (puts outside faces into patch "
@@ -641,8 +621,13 @@ int main(int argc, char *argv[])
 
             Info<< "Write " << cloudName << " (";
 
-            bool cloudExists = inFileNameList(currentCloudDirs, cloudName);
-            reduce(cloudExists, orOp<bool>());
+            const bool cloudExists =
+                returnReduce
+                (
+                    currentCloudDirs.found(cloudName),
+                    orOp<bool>()
+                );
+
 
             {
                 autoPtr<ensightFile> os = ensCase.newCloud(cloudName);
@@ -662,10 +647,10 @@ int main(int argc, char *argv[])
                 }
             }
 
-            forAllConstIter(HashTable<word>, theseCloudFields, fieldIter)
+            forAllConstIters(theseCloudFields, fieldIter)
             {
                 const word& fieldName = fieldIter.key();
-                const word& fieldType = fieldIter();
+                const word& fieldType = fieldIter.object();
 
                 IOobject fieldObject
                 (
@@ -676,10 +661,13 @@ int main(int argc, char *argv[])
                     IOobject::MUST_READ
                 );
 
-                // cannot have field without cloud positions
-                bool fieldExists = cloudExists;
+                bool fieldExists = cloudExists; // No field without positions
                 if (cloudExists)
                 {
+                    // Want MUST_READ (globally) and valid=false (locally),
+                    // but that combination does not work.
+                    // So check the header and sync globally
+
                     fieldExists =
                         fieldObject.typeHeaderOk<IOField<scalar>>(false);
 

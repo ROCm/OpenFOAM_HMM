@@ -69,7 +69,7 @@ Foam::cellDistFuncs::cellDistFuncs(const polyMesh& mesh)
 
 Foam::labelHashSet Foam::cellDistFuncs::getPatchIDs
 (
-    const wordReList& patchNames
+    const UList<wordRe>& patchNames
 ) const
 {
     return mesh().boundaryMesh().patchSet(patchNames, false);

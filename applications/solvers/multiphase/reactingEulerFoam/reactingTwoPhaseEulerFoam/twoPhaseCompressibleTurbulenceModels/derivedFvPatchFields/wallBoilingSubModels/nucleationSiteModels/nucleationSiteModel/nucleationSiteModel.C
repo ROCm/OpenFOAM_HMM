@@ -53,7 +53,7 @@ Foam::wallBoilingModels::nucleationSiteModel::~nucleationSiteModel()
 
 void Foam::wallBoilingModels::nucleationSiteModel::write(Ostream& os) const
 {
-    os.writeKeyword("type") << this->type() << token::END_STATEMENT << nl;
+    os.writeEntry("type", this->type());
 }
 
 

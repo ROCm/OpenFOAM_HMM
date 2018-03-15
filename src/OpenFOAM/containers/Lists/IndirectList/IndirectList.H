@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -62,10 +62,10 @@ class IndirectListAddressing
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        IndirectListAddressing(const IndirectListAddressing&);
+        IndirectListAddressing(const IndirectListAddressing&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const IndirectListAddressing&);
+        void operator=(const IndirectListAddressing&) = delete;
 
 
 protected:
@@ -76,21 +76,19 @@ protected:
         explicit inline IndirectListAddressing(const labelUList& addr);
 
         //- Construct by transferring addressing array
-        explicit inline IndirectListAddressing(const Xfer<List<label>>& addr);
+        explicit inline IndirectListAddressing(List<label>&& addr);
 
 
     // Member Functions
 
-        // Access
+        //- Return the list addressing
+        inline const List<label>& addressing() const;
 
-            //- Return the list addressing
-            inline const List<label>& addressing() const;
+        //- Copy reset addressing
+        inline void resetAddressing(const labelUList& addr);
 
-        // Edit
-
-            //- Reset addressing
-            inline void resetAddressing(const labelUList&);
-            inline void resetAddressing(const Xfer<List<label>>&);
+        //- Move reset addressing
+        inline void resetAddressing(List<label>&& addr);
 
 };
 
@@ -108,10 +106,10 @@ class IndirectList
     // Private Member Functions
 
         //- Disallow default assignment operator
-        void operator=(const IndirectList<T>&);
+        void operator=(const IndirectList<T>&) = delete;
 
         //- Disallow assignment from UIndirectList
-        void operator=(const UIndirectList<T>&);
+        void operator=(const UIndirectList<T>&) = delete;
 
 
 public:
@@ -119,37 +117,40 @@ public:
     // Constructors
 
         //- Construct given the complete list and the addressing array
-        inline IndirectList(const UList<T>&, const labelUList&);
+        inline IndirectList
+        (
+            const UList<T>& completeList,
+            const labelUList& addr
+        );
 
         //- Construct given the complete list and by transferring addressing
-        inline IndirectList(const UList<T>&, const Xfer<List<label>>&);
+        inline IndirectList
+        (
+            const UList<T>& completeList,
+            List<label>&& addr
+        );
 
         //- Copy constructor
-        inline IndirectList(const IndirectList<T>&);
+        inline IndirectList(const IndirectList<T>& lst);
 
         //- Construct from UIndirectList
-        explicit inline IndirectList(const UIndirectList<T>&);
+        explicit inline IndirectList(const UIndirectList<T>& lst);
 
 
     // Member Functions
 
+        //- Return the list addressing
+        using UIndirectList<T>::addressing;
 
-        // Access
-
-            //- Return the list addressing
-            using UIndirectList<T>::addressing;
-
-
-        // Edit
-
-            //- Reset addressing
-            using IndirectListAddressing::resetAddressing;
+        //- Reset addressing
+        using IndirectListAddressing::resetAddressing;
 
 
-        // Member Operators
+    // Member Operators
 
-            //- Assignment operator
-            using UIndirectList<T>::operator=;
+        //- Assignment operator
+        using UIndirectList<T>::operator=;
+
 };
 
 

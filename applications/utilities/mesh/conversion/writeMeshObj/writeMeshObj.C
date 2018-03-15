@@ -429,13 +429,13 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const bool patchFaces = args.optionFound("patchFaces");
-    const bool patchEdges = args.optionFound("patchEdges");
-    const bool doCell     = args.optionFound("cell");
-    const bool doPoint    = args.optionFound("point");
-    const bool doFace     = args.optionFound("face");
-    const bool doCellSet  = args.optionFound("cellSet");
-    const bool doFaceSet  = args.optionFound("faceSet");
+    const bool patchFaces = args.found("patchFaces");
+    const bool patchEdges = args.found("patchEdges");
+    const bool doCell     = args.found("cell");
+    const bool doPoint    = args.found("point");
+    const bool doFace     = args.found("face");
+    const bool doCellSet  = args.found("cellSet");
+    const bool doFaceSet  = args.found("faceSet");
 
 
     Info<< "Writing mesh objects as .obj files such that the object"
@@ -467,19 +467,19 @@ int main(int argc, char *argv[])
             }
             if (doCell)
             {
-                label celli = args.optionRead<label>("cell");
+                const label celli = args.opt<label>("cell");
 
                 writePoints(mesh, celli, runTime.timeName());
             }
             if (doPoint)
             {
-                label pointi = args.optionRead<label>("point");
+                const label pointi = args.opt<label>("point");
 
                 writePointCells(mesh, pointi, runTime.timeName());
             }
             if (doFace)
             {
-                label facei = args.optionRead<label>("face");
+                const label facei = args.opt<label>("face");
 
                 fileName fName
                 (

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,19 +65,18 @@ void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
     }
     else
     {
-        label nTri = 0;
-        label nQuad = 0;
-        forAll(*this, i)
+        label nTri = 0, nQuad = 0;
+        for (const Face& f : *this)
         {
-            const label n = this->operator[](i).size();
+            const label n = f.size();
 
             if (n == 3)
             {
-                nTri++;
+                ++nTri;
             }
             else if (n == 4)
             {
-                nQuad++;
+                ++nQuad;
             }
         }
 
@@ -93,22 +92,14 @@ void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class Face>
-Foam::Istream& Foam::operator>>
-(
-    Foam::Istream& is,
-    Foam::MeshedSurface<Face>& surf
-)
+Foam::Istream& Foam::operator>>(Istream& is, MeshedSurface<Face>& surf)
 {
     return surf.read(is);
 }
 
 
 template<class Face>
-Foam::Ostream& Foam::operator<<
-(
-    Foam::Ostream& os,
-    const Foam::MeshedSurface<Face>& surf
-)
+Foam::Ostream& Foam::operator<<(Ostream& os, const MeshedSurface<Face>& surf)
 {
     return surf.write(os);
 }

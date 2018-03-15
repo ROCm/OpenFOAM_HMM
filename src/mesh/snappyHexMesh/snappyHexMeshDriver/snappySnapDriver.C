@@ -2897,8 +2897,8 @@ void Foam::snappySnapDriver::doSnap
                 labelList duplicateFace(getInternalOrBaffleDuplicateFace());
 
                 {
-                    labelList oldSplitFaces(splitFaces.xfer());
-                    List<labelPair> oldSplits(splits.xfer());
+                    labelList oldSplitFaces(std::move(splitFaces));
+                    List<labelPair> oldSplits(std::move(splits));
                     forAll(oldSplitFaces, i)
                     {
                         if (duplicateFace[oldSplitFaces[i]] == -1)

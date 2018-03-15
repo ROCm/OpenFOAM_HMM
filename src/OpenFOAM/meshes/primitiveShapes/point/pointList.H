@@ -25,13 +25,25 @@ Typedef
     Foam::pointList
 
 Description
-    A List of points
+    A List of points.
+
+Typedef
+    Foam::pointUList
+
+Description
+    A UList of points.
+
+Typedef
+    Foam::pointSubList
+
+Description
+    A SubList of points.
 
 Typedef
     Foam::pointListList
 
 Description
-    A List of labelList
+    A List of pointList.
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,14 +52,15 @@ Description
 
 #include "point.H"
 #include "List.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    // Note: frequently used UList version is located in container itself
-
+    typedef UList<point> pointUList;
     typedef List<point> pointList;
+    typedef SubList<point> pointSubList;
     typedef List<pointList> pointListList;
 }
 

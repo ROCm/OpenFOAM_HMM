@@ -133,7 +133,7 @@ public:
 
 
     //- Destructor
-    virtual ~sampledCuttingPlane();
+    virtual ~sampledCuttingPlane() = default;
 
 
     // Member Functions
@@ -141,7 +141,7 @@ public:
         //const isoSurfaceCell& surface() const
         const isoSurface& surface() const
         {
-            return isoSurfPtr_();
+            return *isoSurfPtr_;
         }
 
         //- Does the surface need an update?

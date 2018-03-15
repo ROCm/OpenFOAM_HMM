@@ -82,7 +82,7 @@ Foam::label Foam::coupleGroupIdentifier::findOtherPatchID
             return -1;
         }
 
-        label index = findIndex(patchIDs, thisPatch.index());
+        label index = patchIDs.find(thisPatch.index());
 
         if (index == -1)
         {

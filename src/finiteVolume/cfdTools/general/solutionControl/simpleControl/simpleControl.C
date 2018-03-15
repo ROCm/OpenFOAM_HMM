@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,26 +53,29 @@ bool Foam::simpleControl::criteriaSatisfied()
     bool checked = false;    // safety that some checks were indeed performed
 
     const dictionary& solverDict = mesh_.solverPerformanceDict();
-    forAllConstIter(dictionary, solverDict, iter)
+    forAllConstIters(solverDict, iter)
     {
-        const word& variableName = iter().keyword();
-        const label fieldi = applyToField(variableName);
+        const entry& solverPerfDictEntry = *iter;
+
+        const word& fieldName = solverPerfDictEntry.keyword();
+        const label fieldi = applyToField(fieldName);
+
         if (fieldi != -1)
         {
-            scalar lastResidual = 0;
-            const scalar residual =
-                maxResidual(variableName, iter().stream(), lastResidual);
-
+            Pair<scalar> residuals = maxResidual(solverPerfDictEntry);
             checked = true;
 
-            bool absCheck = residual < residualControl_[fieldi].absTol;
+            const bool absCheck =
+                (residuals.first() < residualControl_[fieldi].absTol);
+
             achieved = achieved && absCheck;
 
             if (debug)
             {
                 Info<< algorithmName_ << " solution statistics:" << endl;
 
-                Info<< "    " << variableName << ": tolerance = " << residual
+                Info<< "    " << fieldName << ": tolerance = "
+                    << residuals.first()
                     << " (" << residualControl_[fieldi].absTol << ")"
                     << endl;
             }
@@ -85,40 +88,34 @@ bool Foam::simpleControl::criteriaSatisfied()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::simpleControl::simpleControl(fvMesh& mesh)
+Foam::simpleControl::simpleControl(fvMesh& mesh, const word& dictName)
 :
-    solutionControl(mesh, "SIMPLE"),
+    solutionControl(mesh, dictName),
     initialised_(false)
 {
     read();
 
-    Info<< nl;
+    Info<< nl
+        << algorithmName_;
 
     if (residualControl_.empty())
     {
-        Info<< algorithmName_ << ": no convergence criteria found. "
-            << "Calculations will run for "
+        Info<< ": no convergence criteria found. Calculations will run for "
             << mesh_.time().endTime().value() - mesh_.time().startTime().value()
-            << " steps." << nl << endl;
+            << " steps." << nl;
     }
     else
     {
-        Info<< algorithmName_ << ": convergence criteria" << nl;
-        forAll(residualControl_, i)
+        Info<< ": convergence criteria" << nl;
+        for (const fieldData& ctrl : residualControl_)
         {
-            Info<< "    field " << residualControl_[i].name << token::TAB
-                << " tolerance " << residualControl_[i].absTol
+            Info<< "    field " << ctrl.name << token::TAB
+                << " tolerance " << ctrl.absTol
                 << nl;
         }
-        Info<< endl;
     }
+    Info<< endl;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::simpleControl::~simpleControl()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -127,22 +124,17 @@ bool Foam::simpleControl::loop()
 {
     read();
 
-    Time& time = const_cast<Time&>(mesh_.time());
+    Time& runTime = const_cast<Time&>(mesh_.time());
 
-    if (initialised_)
+    if (initialised_ && criteriaSatisfied())
     {
-        if (criteriaSatisfied())
-        {
-            Info<< nl << algorithmName_ << " solution converged in "
-                << time.timeName() << " iterations" << nl << endl;
+        Info<< nl
+            << algorithmName_
+            << " solution converged in "
+            << runTime.timeName() << " iterations" << nl << endl;
 
-            // Set to finalise calculation
-            time.writeAndEnd();
-        }
-        else
-        {
-            storePrevIterFields();
-        }
+        // Set to finalise calculation
+        runTime.writeAndEnd();
     }
     else
     {
@@ -150,8 +142,7 @@ bool Foam::simpleControl::loop()
         storePrevIterFields();
     }
 
-
-    return time.loop();
+    return runTime.loop();
 }
 
 

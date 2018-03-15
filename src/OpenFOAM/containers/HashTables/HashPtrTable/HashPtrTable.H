@@ -70,11 +70,11 @@ class HashPtrTable
 
         //- Read from Istream using given Istream constructor class
         template<class INew>
-        void read(Istream& is, const INew& inewt);
+        void read(Istream& is, const INew& inew);
 
         //- Read from dictionary using given dictionary constructor class
         template<class INew>
-        void read(const dictionary& dict, const INew& inewt);
+        void read(const dictionary& dict, const INew& inew);
 
 
 public:
@@ -91,18 +91,21 @@ public:
 
     // Constructors
 
-        //- Construct given initial table size
-        HashPtrTable(const label size = 128);
+        //- Construct null with default table capacity
+        HashPtrTable();
+
+        //- Construct given initial table capacity
+        explicit HashPtrTable(const label size);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
-        HashPtrTable(Istream& is, const INew& inewt);
+        HashPtrTable(Istream& is, const INew& inew);
 
         //- Construct from Istream using default Istream constructor class
         HashPtrTable(Istream& is);
 
         //- Construct from dictionary with default dictionary constructor class
-        HashPtrTable(const dictionary& dict);
+        explicit HashPtrTable(const dictionary& dict);
 
         //- Construct as copy
         HashPtrTable(const this_type& ht);
@@ -120,14 +123,14 @@ public:
         //  Includes a safeguard against the end-iterator.
         T* remove(iterator& iter);
 
-        //- Erase an entry specified by given iterator
+        //- Erase an entry specified by given iterator.
         //  Includes a safeguard against the end-iterator.
         bool erase(iterator& iter);
 
         //- Erase an entry specified by the given key
         bool erase(const Key& key);
 
-        //- Clear all entries from table
+        //- Clear all entries from table and deleting any allocated pointers
         void clear();
 
         //- Write

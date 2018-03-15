@@ -718,10 +718,11 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     // On-the-fly addressing storage.
     DynamicList<label> dynFEdges;
     DynamicList<label> dynCPoints;
+    labelHashSet pSet;
 
     forAll(cellLevel, celli)
     {
-        const labelList& cPoints = mesh_.cellPoints(celli, dynCPoints);
+        const labelList& cPoints = mesh_.cellPoints(celli, pSet, dynCPoints);
 
         // Get number of anchor points (pointLevel <= cellLevel)
 
@@ -729,10 +730,8 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         label nNonAnchorBoundary = 0;
         label nonBoundaryAnchor = -1;
 
-        forAll(cPoints, i)
+        for (const label pointi : cPoints)
         {
-            label pointi = cPoints[i];
-
             if (pointLevel[pointi] <= cellLevel[celli])
             {
                 // Anchor point
@@ -818,7 +817,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
                 }
             }
         }
-        else if (nBoundaryAnchors == 7)
+        else if (nBoundaryAnchors == 7 && nonBoundaryAnchor != -1)
         {
             // Mark the cell. Store the (single!) non-boundary anchor point.
             hasSevenBoundaryAnchorPoints.set(celli, 1u);

@@ -54,7 +54,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
-    argList::validArgs.append("faceSet");
+    argList::addArgument("faceSet");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     const word setName = args[1];
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     // Read faces
     faceSet candidateSet(mesh, setName);
@@ -155,18 +155,18 @@ int main(int argc, char *argv[])
         meshMod
     );
 
-    autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, false);
+    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
-    mesh.updateMesh(morphMap);
+    mesh.updateMesh(map());
 
     // Move mesh (since morphing does not do this)
-    if (morphMap().hasMotionPoints())
+    if (map().hasMotionPoints())
     {
-        mesh.movePoints(morphMap().preMotionPoints());
+        mesh.movePoints(map().preMotionPoints());
     }
 
     // Update numbering of cells/vertices.
-    faceRemover.updateMesh(morphMap);
+    faceRemover.updateMesh(map());
 
     if (!overwrite)
     {

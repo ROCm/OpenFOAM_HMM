@@ -33,6 +33,7 @@ Description
 #include "IFstream.H"
 #include "StringStream.H"
 #include "cpuTime.H"
+#include "DynamicList.H"
 
 using namespace Foam;
 
@@ -43,16 +44,16 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-    argList::validArgs.insert("string .. stringN");
+    argList::addArgument("string .. stringN");
     argList::addOption("file", "name");
     argList::addOption("repeat", "count");
     argList::addBoolOption("verbose", "report for each repeat");
 
     argList args(argc, argv, false, true);
 
-    const label repeat = args.optionLookupOrDefault<label>("repeat", 1);
+    const label repeat = args.lookupOrDefault<label>("repeat", 1);
 
-    const bool optVerbose = args.optionFound("verbose");
+    const bool optVerbose = args.found("verbose");
 
     cpuTime timer;
     for (label count = 0; count < repeat; ++count)
@@ -69,6 +70,8 @@ int main(int argc, char *argv[])
 
             IStringStream is(rawArg);
 
+            DynamicList<token> tokens;
+
             while (is.good())
             {
                 token tok(is);
@@ -83,12 +86,23 @@ int main(int argc, char *argv[])
                         << "  lookahead: '" << char(lookahead) << "'"
                         << endl;
                 }
+
+                if (tok.good())
+                {
+                    tokens.append(std::move(tok));
+                    if (verbose)
+                    {
+                        Info<< "after append: " << tok.info() << endl;
+                    }
+                }
             }
 
             if (verbose)
             {
                 Info<< nl;
                 IOobject::writeDivider(Info);
+
+                Info<< "tokenList:" << tokens << endl;
             }
         }
     }
@@ -97,7 +111,7 @@ int main(int argc, char *argv[])
         << timer.cpuTimeIncrement() << " s\n\n";
 
     fileName inputFile;
-    if (args.optionReadIfPresent("file", inputFile))
+    if (args.readIfPresent("file", inputFile))
     {
         IFstream is(inputFile);
 

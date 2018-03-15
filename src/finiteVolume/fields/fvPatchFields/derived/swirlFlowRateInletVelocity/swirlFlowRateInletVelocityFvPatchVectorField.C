@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,7 +65,7 @@ swirlFlowRateInletVelocityFvPatchVectorField
         dict.lookupOrDefault
         (
             "origin",
-            patch().size()
+            returnReduce(patch().size(), maxOp<label>())
           ? gSum(patch().Cf()*patch().magSf())/gSum(patch().magSf())
           : Zero
         )
@@ -99,8 +99,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    flowRate_(ptf.flowRate_, false),
-    rpm_(ptf.rpm_, false)
+    flowRate_(ptf.flowRate_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -115,8 +115,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    flowRate_(ptf.flowRate_, false),
-    rpm_(ptf.rpm_, false)
+    flowRate_(ptf.flowRate_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -132,8 +132,8 @@ swirlFlowRateInletVelocityFvPatchVectorField
     rhoName_(ptf.rhoName_),
     origin_(ptf.origin_),
     axis_(ptf.axis_),
-    flowRate_(ptf.flowRate_, false),
-    rpm_(ptf.rpm_, false)
+    flowRate_(ptf.flowRate_.clone()),
+    rpm_(ptf.rpm_.clone())
 {}
 
 
@@ -199,10 +199,10 @@ void Foam::swirlFlowRateInletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchField<vector>::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
-    os.writeKeyword("axis") << axis_ << token::END_STATEMENT << nl;
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
+    os.writeEntry("origin", origin_);
+    os.writeEntry("axis", axis_);
     flowRate_->writeData(os);
     rpm_->writeData(os);
     writeEntry("value", os);

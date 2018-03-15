@@ -1525,7 +1525,7 @@ void Foam::surfaceIntersection::mergePoints(const scalar mergeDist)
 
 void Foam::surfaceIntersection::mergeEdges()
 {
-    HashSet<edge, Hash<edge>> uniqEdges(2*cutEdges_.size());
+    edgeHashSet uniqEdges(2*cutEdges_.size());
 
     label nUniqEdges = 0;
     labelList edgeNumbering(cutEdges_.size(), -1);

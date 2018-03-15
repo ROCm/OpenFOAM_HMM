@@ -110,7 +110,7 @@ static const Enum<ExtrudeMode> ExtrudeModeNames
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("surfaceFormat");
+    argList::addArgument("surfaceFormat");
 
     #include "addOverwriteOption.H"
 
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     runTimeExtruded.functionObjects().off();
 
     const ExtrudeMode surfaceFormat = ExtrudeModeNames[args[1]];
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     Info<< "Extruding from " << ExtrudeModeNames[surfaceFormat]
         << " at time " << runTimeExtruded.timeName() << endl;
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 
     if (surfaceFormat == MESHEDSURFACE)
     {
-        fMesh.set(new MeshedSurface<face>("MeshedSurface.obj"));
+        fMesh.reset(new MeshedSurface<face>("MeshedSurface.obj"));
 
         EdgeMap<label> edgeRegionMap;
         wordList patchNames(1, "default");
@@ -184,24 +184,21 @@ int main(int argc, char *argv[])
 
         poly2DMesh.createMesh();
 
-        mesh.set
+        mesh = autoPtr<polyMesh>::New
         (
-            new polyMesh
+            IOobject
             (
-                IOobject
-                (
-                    polyMesh::defaultRegion,
-                    runTimeExtruded.constant(),
-                    runTimeExtruded,
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
-                xferMove(poly2DMesh.points()),
-                xferMove(poly2DMesh.faces()),
-                xferMove(poly2DMesh.owner()),
-                xferMove(poly2DMesh.neighbour())
-            )
+                polyMesh::defaultRegion,
+                runTimeExtruded.constant(),
+                runTimeExtruded,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            std::move(poly2DMesh.points()),
+            std::move(poly2DMesh.faces()),
+            std::move(poly2DMesh.owner()),
+            std::move(poly2DMesh.neighbour())
         );
 
         Info<< "Constructing patches." << endl;
@@ -224,17 +221,14 @@ int main(int argc, char *argv[])
     }
     else if (surfaceFormat == POLYMESH2D)
     {
-        mesh.set
+        mesh = autoPtr<polyMesh>::New
         (
-            new polyMesh
+            Foam::IOobject
             (
-                Foam::IOobject
-                (
-                    Foam::polyMesh::defaultRegion,
-                    runTimeExtruded.timeName(),
-                    runTimeExtruded,
-                    Foam::IOobject::MUST_READ
-                )
+                Foam::polyMesh::defaultRegion,
+                runTimeExtruded.timeName(),
+                runTimeExtruded,
+                Foam::IOobject::MUST_READ
             )
         );
     }
@@ -244,14 +238,14 @@ int main(int argc, char *argv[])
 
     extruder.addFrontBackPatches();
 
-    meshMod.set(new polyTopoChange(mesh().boundaryMesh().size()));
+    meshMod.reset(new polyTopoChange(mesh().boundaryMesh().size()));
 
     extruder.setRefinement(meshMod());
 
     // Create a mesh from topo changes.
     autoPtr<mapPolyMesh> morphMap = meshMod().changeMesh(mesh(), false);
 
-    mesh().updateMesh(morphMap);
+    mesh().updateMesh(morphMap());
 
     {
         edgeCollapser collapser(mesh());
@@ -302,7 +296,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> morphMap
             = meshModCollapse.changeMesh(mesh(), false);
 
-        mesh().updateMesh(morphMap);
+        mesh().updateMesh(morphMap());
     }
 
     if (!overwrite)

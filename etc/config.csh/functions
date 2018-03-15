@@ -1,0 +1,62 @@
+#----------------------------------*-sh-*--------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
+#
+# File
+#     etc/config.csh/functions
+#     - sourced by OpenFOAM-*/etc/cshrc
+#
+# Description
+#     C-shell aliases and variables used when sourcing the OpenFOAM environment
+#
+#     Some functionality implemented via bin/tools/lib-dir
+#
+#------------------------------------------------------------------------------
+
+# Cleaning environment variables
+alias _foamClean 'eval `$WM_PROJECT_DIR/bin/foamCleanPath -csh-env=\!*`'
+
+# Prepend PATH, MANPATH, LD_LIBRARY_PATH
+alias _foamAddPath 'setenv PATH \!*\:${PATH}'
+alias _foamAddMan  'setenv MANPATH \!*\:${MANPATH}'
+alias _foamAddLib  'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
+
+# Prefix to LD_LIBRARY_PATH with additional checking
+# $1 = base directory for 'lib' or 'lib64'
+# $2 = fallback libname ('lib' or 'lib64')
+alias _foamAddLibAuto 'eval `$WM_PROJECT_DIR/bin/tools/lib-dir -csh \!*`'
+
+# Source an etc file, possibly with some verbosity
+if ($?FOAM_VERBOSE && $?prompt) then
+    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh-verbose \!*`'
+else
+    alias _foamEtc 'eval `$WM_PROJECT_DIR/bin/foamEtcFile -csh \!*`'
+endif
+
+
+#------------------------------------------------------------------------------
+# Avoid any ThirdParty settings that may have 'leaked' into the environment
+
+unsetenv MPI_ARCH_PATH
+unsetenv ADIOS_ARCH_PATH
+unsetenv ADIOS1_ARCH_PATH
+unsetenv ADIOS2_ARCH_PATH
+unsetenv BOOST_ARCH_PATH
+unsetenv CCMIO_ARCH_PATH
+unsetenv CGAL_ARCH_PATH
+unsetenv FFTW_ARCH_PATH
+unsetenv GPERFTOOLS_ARCH_PATH
+unsetenv GMP_ARCH_PATH
+unsetenv MPFR_ARCH_PATH
+unsetenv MESA_ARCH_PATH
+unsetenv METIS_ARCH_PATH
+unsetenv SCOTCH_ARCH_PATH
+
+#------------------------------------------------------------------------------

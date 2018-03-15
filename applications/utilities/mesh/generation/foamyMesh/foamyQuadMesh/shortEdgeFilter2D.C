@@ -43,7 +43,7 @@ void Foam::shortEdgeFilter2D::addRegion
     {
         bPointRegions.append(regionI);
     }
-    else if (findIndex(bPointRegions, regionI) == -1)
+    else if (!bPointRegions.found(regionI))
     {
         bPointRegions.append(regionI);
     }
@@ -204,7 +204,7 @@ Foam::shortEdgeFilter2D::shortEdgeFilter2D
 
     points2D.clear();
 
-    ms_ = MeshedSurface<face>(xferMove(points), xferMove(faces));
+    ms_ = MeshedSurface<face>(std::move(points), std::move(faces));
 
     Info<< "Meshed surface stats before edge filtering :" << endl;
     ms_.writeStats(Info);
@@ -533,12 +533,7 @@ Foam::shortEdgeFilter2D::filter()
 
     newFaces.setSize(newFacei);
 
-    MeshedSurface<face> fMesh
-    (
-        xferMove(newPoints),
-        xferMove(newFaces),
-        xferCopy(List<surfZone>())
-    );
+    MeshedSurface<face> fMesh(std::move(newPoints), std::move(newFaces));
 
     updateEdgeRegionMap
     (

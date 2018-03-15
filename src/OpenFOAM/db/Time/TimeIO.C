@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Time.H"
+#include "argList.H"
 #include "Pstream.H"
 #include "simpleObjectRegistry.H"
 #include "dimensionedConstants.H"
@@ -42,192 +43,285 @@ void Foam::Time::readDict()
         setEnv("FOAM_APPLICATION", application, false);
     }
 
-
     // Check for local switches and settings
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // - echo values, unless the application was invoked with noBanner
+    const bool echo = argList::bannerEnabled();
 
-    // Debug switches
-    if (controlDict_.found("DebugSwitches"))
+    const dictionary* localDict = nullptr;
+
+    // DebugSwitches
+    if
+    (
+        (localDict = controlDict_.subDictPtr("DebugSwitches")) != nullptr
+     && localDict->size()
+    )
     {
-        Info<< "Overriding DebugSwitches according to " << controlDict_.name()
-            << endl;
+        if (echo)
+        {
+            Info<< "Overriding DebugSwitches according to "
+                << controlDict_.name() << nl;
+        }
 
-        simpleObjectRegistry& objects = debug::debugObjects();
-        const dictionary& localSettings = controlDict_.subDict("DebugSwitches");
-        forAllConstIter(dictionary, localSettings, iter)
+        simpleObjectRegistry& objs = debug::debugObjects();
+
+        forAllConstIters(*localDict, iter)
         {
             const word& name = iter().keyword();
 
-            simpleObjectRegistryEntry* objPtr = objects.lookupPtr(name);
+            simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
             if (objPtr)
             {
-                Info<< "    " << iter() << endl;
-
                 const List<simpleRegIOobject*>& objects = *objPtr;
+
+                if (echo)
+                {
+                    Info<< "    " << iter() << nl;
+                }
 
                 if (iter().isDict())
                 {
-                    forAll(objects, i)
+                    for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
                         os  << iter().dict();
                         IStringStream is(os.str());
-                        objects[i]->readData(is);
+                        obj->readData(is);
                     }
                 }
                 else
                 {
-                    forAll(objects, i)
+                    for (simpleRegIOobject* obj : objects)
                     {
-                        objects[i]->readData(iter().stream());
+                        obj->readData(iter().stream());
                     }
                 }
             }
         }
     }
 
-    // Optimisation Switches
-    if (controlDict_.found("OptimisationSwitches"))
-    {
-        Info<< "Overriding OptimisationSwitches according to "
-            << controlDict_.name() << endl;
 
-        simpleObjectRegistry& objects = debug::optimisationObjects();
-        const dictionary& localSettings = controlDict_.subDict
-        (
-            "OptimisationSwitches"
-        );
-        forAllConstIter(dictionary, localSettings, iter)
+    // InfoSwitches
+    if
+    (
+        (localDict = controlDict_.subDictPtr("InfoSwitches")) != nullptr
+     && localDict->size()
+    )
+    {
+        if (echo)
+        {
+            Info<< "Overriding InfoSwitches according to "
+                << controlDict_.name() << nl;
+        }
+
+        simpleObjectRegistry& objs = debug::infoObjects();
+
+        forAllConstIters(*localDict, iter)
         {
             const word& name = iter().keyword();
 
-            simpleObjectRegistryEntry* objPtr = objects.lookupPtr(name);
+            simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
 
             if (objPtr)
             {
-                Info<< "    " << iter() << endl;
+                const List<simpleRegIOobject*>& objects = *objPtr;
+
+                if (echo)
+                {
+                    Info<< "    " << iter() << nl;
+                }
+
+                if (iter().isDict())
+                {
+                    for (simpleRegIOobject* obj : objects)
+                    {
+                        OStringStream os(IOstream::ASCII);
+                        os  << iter().dict();
+                        IStringStream is(os.str());
+                        obj->readData(is);
+                    }
+                }
+                else
+                {
+                    for (simpleRegIOobject* obj : objects)
+                    {
+                        obj->readData(iter().stream());
+                    }
+                }
+            }
+        }
+    }
+
+    // OptimisationSwitches
+    if
+    (
+        (localDict = controlDict_.subDictPtr("OptimisationSwitches")) != nullptr
+     && localDict->size()
+    )
+    {
+        if (echo)
+        {
+            Info<< "Overriding OptimisationSwitches according to "
+                << controlDict_.name() << nl;
+        }
+
+        simpleObjectRegistry& objs = debug::optimisationObjects();
+
+        forAllConstIters(*localDict, iter)
+        {
+            const word& name = iter().keyword();
+
+            simpleObjectRegistryEntry* objPtr = objs.lookupPtr(name);
+
+            if (objPtr)
+            {
+                if (echo)
+                {
+                    Info<< "    " << iter() << nl;
+                }
 
                 const List<simpleRegIOobject*>& objects = *objPtr;
 
                 if (iter().isDict())
                 {
-                    forAll(objects, i)
+                    for (simpleRegIOobject* obj : objects)
                     {
                         OStringStream os(IOstream::ASCII);
                         os  << iter().dict();
                         IStringStream is(os.str());
-                        objects[i]->readData(is);
+                        obj->readData(is);
                     }
                 }
                 else
                 {
-                    forAll(objects, i)
+                    for (simpleRegIOobject* obj : objects)
                     {
-                        objects[i]->readData(iter().stream());
+                        obj->readData(iter().stream());
                     }
                 }
             }
         }
+    }
 
 
-        // Handle fileHandler override explicitly since interacts with
-        // local dictionary monitoring.
-        word fileHandlerName;
-        if
-        (
-            localSettings.readIfPresent("fileHandler", fileHandlerName)
-         && fileHandler().type() != fileHandlerName
-        )
+    // Handle fileHandler explicitly since it affects local dictionary
+    // monitoring.
+    word fileHandlerName;
+    if
+    (
+        localDict
+     && localDict->readIfPresent("fileHandler", fileHandlerName)
+     && fileHandler().type() != fileHandlerName
+    )
+    {
+        if (echo)
         {
-            // Remove the old watches since destroying the file
-            fileNameList oldWatchedFiles(controlDict_.watchIndices());
-            forAllReverse(controlDict_.watchIndices(), i)
-            {
-                label watchi = controlDict_.watchIndices()[i];
-                oldWatchedFiles[i] = fileHandler().getFile(watchi);
-                fileHandler().removeWatch(watchi);
-            }
-            controlDict_.watchIndices().clear();
+            Info<< "Overriding fileHandler to " << fileHandlerName << nl;
+        }
 
-            // Installing the new handler
-            Info<< "Overriding fileHandler to " << fileHandlerName << endl;
+        // Remove old watches since destroying the file
+        fileNameList oldWatched(controlDict_.watchIndices().size());
+        forAllReverse(controlDict_.watchIndices(), i)
+        {
+            const label watchi = controlDict_.watchIndices()[i];
+            oldWatched[i] = fileHandler().getFile(watchi);
+            fileHandler().removeWatch(watchi);
+        }
+        controlDict_.watchIndices().clear();
 
-            autoPtr<fileOperation> handler
+        // Installing the new handler
+        autoPtr<fileOperation> handler
+        (
+            fileOperation::New
             (
-                fileOperation::New
-                (
-                    fileHandlerName,
-                    true
-                )
-            );
-            Foam::fileHandler(handler);
+                fileHandlerName,
+                true
+            )
+        );
+        Foam::fileHandler(handler);
 
-            // Reinstall old watches
-            fileHandler().addWatches(controlDict_, oldWatchedFiles);
-        }
+        // Reinstall old watches
+        fileHandler().addWatches(controlDict_, oldWatched);
     }
 
 
-    // DimensionedConstants. Handled as a special case since both e.g.
-    // the 'unitSet' might be changed and the individual values
-    if (controlDict_.found("DimensionedConstants"))
+    // DimensionedConstants.
+    // - special case since it may change both the 'unitSet' and the
+    //   individual values
+    if
+    (
+
+        (localDict = controlDict_.subDictPtr("DimensionedConstants")) != nullptr
+     && localDict->size()
+    )
     {
-        Info<< "Overriding DimensionedConstants according to "
-            << controlDict_.name() << endl;
+        if (echo)
+        {
+            Info<< "Overriding DimensionedConstants according to "
+                << controlDict_.name() << nl;
+        }
+
+        simpleObjectRegistry& objs = debug::dimensionedConstantObjects();
 
         // Change in-memory
-        dimensionedConstants().merge
-        (
-            controlDict_.subDict("DimensionedConstants")
-        );
-
-
-        simpleObjectRegistry& objects = debug::dimensionedConstantObjects();
+        dimensionedConstants().merge(*localDict);
 
         IStringStream dummyIs("");
 
-        forAllConstIter(simpleObjectRegistry, objects, iter)
+        forAllConstIter(simpleObjectRegistry, objs, iter)
         {
             const List<simpleRegIOobject*>& objects = *iter;
 
-            forAll(objects, i)
+            for (simpleRegIOobject* obj : objects)
             {
-                objects[i]->readData(dummyIs);
+                obj->readData(dummyIs);
 
-                Info<< "    ";
-                objects[i]->writeData(Info);
-                Info<< endl;
+                if (echo)
+                {
+                    Info<< "    ";
+                    obj->writeData(Info);
+                    Info<< nl;
+                }
             }
         }
     }
 
 
-    // Dimension sets
-    if (controlDict_.found("DimensionSets"))
+    // DimensionSets
+    if
+    (
+        (localDict = controlDict_.subDictPtr("DimensionSets")) != nullptr
+        && localDict->size()
+    )
     {
-        Info<< "Overriding DimensionSets according to "
-            << controlDict_.name() << endl;
+        if (echo)
+        {
+            Info<< "Overriding DimensionSets according to "
+                << controlDict_.name() << nl;
+        }
+
+        simpleObjectRegistry& objs = debug::dimensionSetObjects();
 
         dictionary dict(Foam::dimensionSystems());
-        dict.merge(controlDict_.subDict("DimensionSets"));
+        dict.merge(*localDict);
 
-        simpleObjectRegistry& objects = debug::dimensionSetObjects();
-
-        simpleObjectRegistryEntry* objPtr = objects.lookupPtr("DimensionSets");
+        simpleObjectRegistryEntry* objPtr = objs.lookupPtr("DimensionSets");
 
         if (objPtr)
         {
-            Info<< controlDict_.subDict("DimensionSets") << endl;
+            if (echo)
+            {
+                Info<< *localDict << nl;
+            }
 
             const List<simpleRegIOobject*>& objects = *objPtr;
 
-            forAll(objects, i)
+            for (simpleRegIOobject* obj : objects)
             {
                 OStringStream os(IOstream::ASCII);
                 os  << dict;
                 IStringStream is(os.str());
-                objects[i]->readData(is);
+                obj->readData(is);
             }
         }
     }
@@ -240,7 +334,7 @@ void Foam::Time::readDict()
 
     if (controlDict_.found("writeControl"))
     {
-        writeControl_ = writeControlNames_.lookup
+        writeControl_ = writeControlNames.lookup
         (
             "writeControl",
             controlDict_
@@ -328,7 +422,7 @@ void Foam::Time::readDict()
     // if nothing is specified, the endTime is zero
     if (controlDict_.found("stopAt"))
     {
-        stopAt_ = stopAtControlNames_.lookup("stopAt", controlDict_);
+        stopAt_ = stopAtControlNames.lookup("stopAt", controlDict_);
 
         if (stopAt_ == saEndTime)
         {
@@ -439,10 +533,8 @@ bool Foam::Time::read()
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -567,10 +659,8 @@ bool Foam::Time::writeObject
 
         return writeOK;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 

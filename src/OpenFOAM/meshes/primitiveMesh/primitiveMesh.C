@@ -279,27 +279,6 @@ void Foam::primitiveMesh::reset
 }
 
 
-void Foam::primitiveMesh::reset
-(
-    const label nPoints,
-    const label nInternalFaces,
-    const label nFaces,
-    const label nCells,
-    const Xfer<cellList>& clst
-)
-{
-    reset
-    (
-        nPoints,
-        nInternalFaces,
-        nFaces,
-        nCells
-    );
-
-    cfPtr_ = new cellList(clst);
-}
-
-
 Foam::tmp<Foam::scalarField> Foam::primitiveMesh::movePoints
 (
     const pointField& newPoints,

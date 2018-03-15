@@ -40,12 +40,6 @@ Foam::fileFormats::FIRECore::file3dExtensions
 };
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::FIRECore::FIRECore()
-{}
-
-
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 Foam::label Foam::fileFormats::FIRECore::readPoints

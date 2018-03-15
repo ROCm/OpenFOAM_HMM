@@ -39,7 +39,6 @@ Description
 #include "cellShapeControl.H"
 #include "backgroundMeshDecomposition.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "DynamicField.H"
 #include "isoSurfaceCell.H"
 #include "vtkSurfaceWriter.H"
@@ -63,7 +62,7 @@ scalar getMergeDistance
 )
 {
     scalar mergeTol = defaultMergeTol;
-    args.optionReadIfPresent("mergeTol", mergeTol);
+    args.readIfPresent("mergeTol", mergeTol);
 
     scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
@@ -252,7 +251,7 @@ autoPtr<polyMesh> generateHexMesh
     }
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
     cellShapeList cellShapes(nCells[0]*nCells[1]*nCells[2]);
 
     labelList hexPoints(8);
@@ -283,20 +282,17 @@ autoPtr<polyMesh> generateHexMesh
     word defaultFacesType = polyPatch::typeName;
     wordList patchPhysicalTypes(0);
 
-    return autoPtr<polyMesh>
+    return autoPtr<polyMesh>::New
     (
-        new polyMesh
-        (
-            io,
-            xferMoveTo<pointField>(points),
-            cellShapes,
-            boundary,
-            patchNames,
-            patchTypes,
-            defaultFacesName,
-            defaultFacesType,
-            patchPhysicalTypes
-        )
+        io,
+        std::move(points),
+        cellShapes,
+        boundary,
+        patchNames,
+        patchTypes,
+        defaultFacesName,
+        defaultFacesType,
+        patchPhysicalTypes
     );
 }
 
@@ -405,7 +401,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const bool writeMesh = args.optionFound("writeMesh");
+    const bool writeMesh = args.found("writeMesh");
 
     if (writeMesh)
     {
@@ -524,7 +520,7 @@ int main(int argc, char *argv[])
 
         // Allow override of decomposeParDict location
         fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        args.readIfPresent("decomposeParDict", decompDictFile);
 
         labelList decomp = decompositionModel::New
         (
@@ -721,7 +717,7 @@ int main(int argc, char *argv[])
         isoFaces.setSize(iso.size());
         forAll(isoFaces, i)
         {
-            isoFaces[i] = iso[i].triFaceFace();
+            isoFaces[i] = iso[i];
         }
         isoPoints = iso.points();
     }

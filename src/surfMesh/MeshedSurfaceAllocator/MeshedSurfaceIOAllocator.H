@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -64,10 +64,10 @@ class MeshedSurfaceIOAllocator
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
+        //- Disallow copy construct
         MeshedSurfaceIOAllocator(const MeshedSurfaceIOAllocator&) = delete;
 
-        //- Disallow default bitwise assignment
+        //- Disallow copy assignment
         void operator=(const MeshedSurfaceIOAllocator&) = delete;
 
 
@@ -86,23 +86,17 @@ public:
         //- Construct from IOobjects, copying components
         MeshedSurfaceIOAllocator
         (
-            const IOobject& ioPoints,
-            const pointField& points,
-            const IOobject& ioFaces,
-            const faceList& faces,
-            const IOobject& ioZones,
-            const surfZoneList& zones
+            const IOobject& ioPoints, const pointField& points,
+            const IOobject& ioFaces,  const faceList& faces,
+            const IOobject& ioZones,  const surfZoneList& zones
         );
 
-        //- Construct from IOobjects, possibly transferring components
+        //- Construct from IOobjects, moving components
         MeshedSurfaceIOAllocator
         (
-            const IOobject& ioPoints,
-            const Xfer<pointField>& points,
-            const IOobject& ioFaces,
-            const Xfer<faceList>& faces,
-            const IOobject& ioZones,
-            const Xfer<surfZoneList>& zones
+            const IOobject& ioPoints, pointField&& points,
+            const IOobject& ioFaces,  faceList&& faces,
+            const IOobject& ioZones,  surfZoneList&& zones
         );
 
 
@@ -112,96 +106,70 @@ public:
 
     // Member Functions
 
-        // Database
+    // Database
 
-            //- Set the instance for mesh files
-            void setInstance(const fileName&);
+        //- Set the instance for mesh files
+        void setInstance(const fileName& inst);
 
-            //- Adjust the write option for all components
-            void setWriteOption(IOobject::writeOption);
-
-
-        // Access
-
-            //- Non-const access to the points
-            pointIOField& storedIOPoints()
-            {
-                return points_;
-            }
-
-            //- Non-const access to the faces
-            faceCompactIOList& storedIOFaces()
-            {
-                return faces_;
-            }
-
-            //- Non-const access to the zones
-            surfZoneIOList& storedIOZones()
-            {
-                return zones_;
-            }
-
-            //- Const access to the points
-            const pointIOField& storedIOPoints() const
-            {
-                return points_;
-            }
-
-            //- Const access to the faces
-            const faceCompactIOList& storedIOFaces() const
-            {
-                return faces_;
-            }
-
-            //- Const access to the zones
-            const surfZoneIOList& storedIOZones() const
-            {
-                return zones_;
-            }
+        //- Adjust the write option for all components
+        void setWriteOption(IOobject::writeOption wOpt);
 
 
-        //  Storage management
+   // Access
 
-            //- Clear primitive data (points, faces and zones)
-            void clear();
+       //- Non-const access to the points
+       pointIOField& storedIOPoints()
+       {
+           return points_;
+       }
 
-            //- Reset primitive data (faces and zones)
-            //  Note, optimized to avoid overwriting data (with Xfer::null)
-            void resetFaces
-            (
-                const Xfer<faceList>& faces,
-                const Xfer<surfZoneList>& zones
-            );
+       //- Non-const access to the faces
+       faceCompactIOList& storedIOFaces()
+       {
+           return faces_;
+       }
 
-            //- Reset primitive data (points, faces and zones)
-            //  Note, optimized to avoid overwriting data (with Xfer::null)
-            void reset
-            (
-                const Xfer<pointField>& points,
-                const Xfer<faceList>& faces,
-                const Xfer<surfZoneList>& zones
-            );
+       //- Non-const access to the zones
+       surfZoneIOList& storedIOZones()
+       {
+           return zones_;
+       }
 
-            //- Reset primitive data (points, faces and zones)
-            //  Note, optimized to avoid overwriting data (with Xfer::null)
-            void reset
-            (
-                const Xfer<List<point>>& points,
-                const Xfer<faceList>& faces,
-                const Xfer<surfZoneList>& zones
-            );
+       //- Const access to the points
+       const pointIOField& storedIOPoints() const
+       {
+           return points_;
+       }
+
+       //- Const access to the faces
+       const faceCompactIOList& storedIOFaces() const
+       {
+           return faces_;
+       }
+
+       //- Const access to the zones
+       const surfZoneIOList& storedIOZones() const
+       {
+           return zones_;
+       }
 
 
-        // Writing
+   //  Storage Management
 
-            //- Write using given format, version and compression
-            virtual bool writeObject
-            (
-                IOstream::streamFormat,
-                IOstream::versionNumber,
-                IOstream::compressionType,
-                const bool valid
-            ) const;
+       //- Clear primitive data (points, faces and zones)
+       void clear();
+
+
+   // Writing
+
+       //- Write using given format, version and compression
+       virtual bool writeObject
+       (
+           IOstream::streamFormat fmt,
+           IOstream::versionNumber ver,
+           IOstream::compressionType cmp,
+           const bool valid
+       ) const;
 
 };
 

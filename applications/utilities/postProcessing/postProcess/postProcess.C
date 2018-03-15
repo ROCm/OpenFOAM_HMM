@@ -39,6 +39,7 @@ Description
 #include "surfaceFields.H"
 #include "pointFields.H"
 #include "uniformDimensionedFields.H"
+#include "fileFieldSelection.H"
 
 using namespace Foam;
 
@@ -59,7 +60,7 @@ void executeFunctionObjects
     const argList& args,
     const Time& runTime,
     fvMesh& mesh,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     functionObjectList& functions,
     bool lastTime
 )
@@ -142,7 +143,7 @@ int main(int argc, char *argv[])
 
     #include "setRootCase.H"
 
-    if (args.optionFound("list"))
+    if (args.found("list"))
     {
         functionObjectList::list();
         return 0;
@@ -153,14 +154,14 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
 
     // Initialize the set of selected fields from the command-line options
-    HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
+    functionObjects::fileFieldSelection fields(mesh);
+    if (args.found("fields"))
     {
-        args.optionLookup("fields")() >> selectedFields;
+        args.lookup("fields")() >> fields;
     }
-    if (args.optionFound("field"))
+    if (args.found("field"))
     {
-        selectedFields.insert(args.optionLookup("field")());
+        fields.insert(args.lookup("field")());
     }
 
     // Externally stored dictionary for functionObjectList
@@ -170,7 +171,13 @@ int main(int argc, char *argv[])
     // Construct functionObjectList
     autoPtr<functionObjectList> functionsPtr
     (
-        functionObjectList::New(args, runTime, functionsDict, selectedFields)
+        functionObjectList::New
+        (
+            args,
+            runTime,
+            functionsDict,
+            fields
+        )
     );
 
     forAll(timeDirs, timei)
@@ -178,6 +185,8 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[timei], timei);
 
         Info<< "Time = " << runTime.timeName() << endl;
+
+        fields.updateSelection();
 
         if (mesh.readUpdate() != polyMesh::UNCHANGED)
         {
@@ -187,7 +196,7 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 functionsDict,
-                selectedFields
+                fields
             );
         }
 
@@ -200,7 +209,7 @@ int main(int argc, char *argv[])
                 args,
                 runTime,
                 mesh,
-                selectedFields,
+                fields.selection(),
                 functionsPtr(),
                 timei == timeDirs.size()-1
             );

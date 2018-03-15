@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,11 +39,54 @@ inline Foam::edgeList& Foam::edgeMesh::storedEdges()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+inline Foam::edgeMesh::edgeMesh()
+:
+    fileFormats::edgeMeshFormatsCore(),
+    points_(),
+    edges_(),
+    pointEdgesPtr_(nullptr)
+{}
+
+
 inline Foam::edgeMesh::edgeMesh(const edgeMesh& em)
 :
     fileFormats::edgeMeshFormatsCore(),
     points_(em.points_),
     edges_(em.edges_),
+    pointEdgesPtr_(nullptr)
+{}
+
+
+inline Foam::edgeMesh::edgeMesh(edgeMesh&& em)
+:
+    edgeMesh()
+{
+    transfer(em);
+}
+
+
+inline Foam::edgeMesh::edgeMesh
+(
+    const pointField& points,
+    const edgeList& edges
+)
+:
+    fileFormats::edgeMeshFormatsCore(),
+    points_(points),
+    edges_(edges),
+    pointEdgesPtr_(nullptr)
+{}
+
+
+inline Foam::edgeMesh::edgeMesh
+(
+    pointField&& points,
+    edgeList&& edges
+)
+:
+    fileFormats::edgeMeshFormatsCore(),
+    points_(std::move(points)),
+    edges_(std::move(edges)),
     pointEdgesPtr_(nullptr)
 {}
 
@@ -68,17 +111,23 @@ inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
     {
         calcPointEdges();
     }
-    return pointEdgesPtr_();
+    return *pointEdgesPtr_;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::edgeMesh::operator=(const edgeMesh& rhs)
+inline void Foam::edgeMesh::operator=(const edgeMesh& rhs)
 {
     points_ = rhs.points_;
     edges_ = rhs.edges_;
     pointEdgesPtr_.clear();
+}
+
+
+inline void Foam::edgeMesh::operator=(edgeMesh&& rhs)
+{
+    transfer(rhs);
 }
 
 

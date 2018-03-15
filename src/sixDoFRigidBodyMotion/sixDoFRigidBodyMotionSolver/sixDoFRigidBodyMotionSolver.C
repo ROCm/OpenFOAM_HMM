@@ -81,11 +81,11 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
         )
       : coeffDict()
     ),
-    patches_(wordReList(coeffDict().lookup("patches"))),
+    patches_(wordRes(coeffDict().lookup("patches"))),
     patchSet_(mesh.boundaryMesh().patchSet(patches_)),
     di_(readScalar(coeffDict().lookup("innerDistance"))),
     do_(readScalar(coeffDict().lookup("outerDistance"))),
-    test_(coeffDict().lookupOrDefault<Switch>("test", false)),
+    test_(coeffDict().lookupOrDefault("test", false)),
     rhoInf_(1.0),
     rhoName_(coeffDict().lookupOrDefault<word>("rho", "rho")),
     scale_
@@ -149,13 +149,6 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
     }
 }
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sixDoFRigidBodyMotionSolver::~sixDoFRigidBodyMotionSolver()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::sixDoFRigidBodyMotion&
@@ -185,7 +178,7 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
             << " points." << exit(FatalError);
     }
 
-    // Store the motion state at the beginning of the time-stepbool
+    // Store the motion state at the beginning of the time-step
     bool firstIter = false;
     if (curTimeIndex_ != this->db().time().timeIndex())
     {
@@ -205,8 +198,8 @@ void Foam::sixDoFRigidBodyMotionSolver::solve()
         coeffDict().lookup("g") >> g;
     }
 
-    // scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
-    scalar ramp = 1.0;
+    // const scalar ramp = min(max((this->db().time().value() - 5)/10, 0), 1);
+    const scalar ramp = 1.0;
 
     if (test_)
     {

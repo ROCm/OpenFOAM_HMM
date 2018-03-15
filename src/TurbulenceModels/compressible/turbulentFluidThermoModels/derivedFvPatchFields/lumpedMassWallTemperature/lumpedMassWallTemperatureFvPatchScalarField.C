@@ -190,9 +190,8 @@ void Foam::lumpedMassWallTemperatureFvPatchScalarField::write
     mixedFvPatchScalarField::write(os);
     temperatureCoupledBase::write(os);
 
-    os.writeKeyword("Cp")<< Cp_ << token::END_STATEMENT << nl;
-    os.writeKeyword("mass")<< mass_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("Cp", Cp_);
+    os.writeEntry("mass", mass_);
 }
 
 

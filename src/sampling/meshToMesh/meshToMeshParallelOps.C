@@ -70,7 +70,7 @@ Foam::label Foam::meshToMesh::calcDistribution
         }
         else if (nHaveCells == 1)
         {
-            proci = findIndex(cellsPresentOnProc, 1);
+            proci = cellsPresentOnProc.find(1);
             if (debug)
             {
                 InfoInFunction
@@ -246,17 +246,12 @@ Foam::autoPtr<Foam::mapDistribute> Foam::meshToMesh::calcProcMap
         }
     }
 
-    autoPtr<mapDistribute> mapPtr
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmentI,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmentI,       // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
-
-    return mapPtr;
 }
 
 

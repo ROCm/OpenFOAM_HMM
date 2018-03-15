@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,6 +34,24 @@ Description
     The jump is specified as a \c Function1 type, to enable the use of, e.g.
     contant, polynomial, table values.
 
+    The switch nonDimensional can be used for a non-dimensional table. It needs
+    inputs rpm and dm of the fan. It should be used with uniformJump true.
+
+    The nonDimensional U for the table is calculate as :
+
+        phi = 120*Un/(PI^3*dm*rpm)
+        where:
+            dm is the mean diameter.
+            rpm is the RPM of the fan.
+
+    The nonDimensinal pressure :
+
+        Psi = 2 deltaP/(rho*(sqr(PI*omega*dm)))
+        where:
+            deltaP is the pressure drop
+
+    The non-dimensional table should be given as Psi = F(phi).
+
 Usage
     \table
         Property     | Description             | Required    | Default value
@@ -43,6 +61,9 @@ Usage
         rho          | density field name      | no          | none
         uniformJump  | applies a uniform pressure based on the averaged
                        velocity | no | false
+        nonDimensional | uses non-dimensional table | no | false
+        rpm          | fan rpm for non-dimensional table | no | 0.0
+        dm           | mean diameter for non-dimensional table | no | 0.0
     \endtable
 
     Example of the boundary condition specification:
@@ -113,6 +134,17 @@ class fanFvPatchField
 
         //- Uniform pressure drop
         bool uniformJump_;
+
+        //- Swtich for using non-dimensional curve
+        Switch nonDimensional_;
+
+        // Parameters for non-dimensional table
+
+            //- Fan rpm
+            scalar rpm_;
+
+            //- Fan mean diameter
+            scalar dm_;
 
 
     // Private Member Functions

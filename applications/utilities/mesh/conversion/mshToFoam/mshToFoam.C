@@ -48,7 +48,7 @@ Description
 #include "IFstream.H"
 #include "polyPatch.H"
 #include "ListOps.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 #include <fstream>
 
@@ -60,7 +60,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".msh file");
+    argList::addArgument(".msh file");
     argList::addBoolOption
     (
         "hex",
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const bool readHex = args.optionFound("hex");
+    const bool readHex = args.found("hex");
     IFstream mshStream(args[1]);
 
     label nCells;
@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
 
     cellShapeList cells(nCells);
 
-    const cellModel& tet = *(cellModeller::lookup("tet"));
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& tet = cellModel::ref(cellModel::TET);
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     labelList tetPoints(4);
     labelList hexPoints(8);
@@ -144,14 +144,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cells,
-        faceListList(0),
-        wordList(0),
-        wordList(0),
+        faceListList(),
+        wordList(),
+        wordList(),
         "defaultFaces",
         polyPatch::typeName,
-        wordList(0)
+        wordList()
     );
 
     // Set the precision of the points data to 10

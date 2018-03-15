@@ -141,16 +141,7 @@ public:
             const IOobject& io,
             const Mesh& mesh,
             const dimensionSet& dims,
-            const Xfer<Field<Type>>& field
-        );
-
-        //- Construct from components, transferring the initial field content
-        DimensionedField
-        (
-            const IOobject& io,
-            const Mesh& mesh,
-            const dimensionSet& dims,
-            const Xfer<List<Type>>& field
+            List<Type>&& field
         );
 
         //- Construct from components
@@ -203,9 +194,9 @@ public:
         );
 
         //- Construct by transferring the DimensionedField
-        DimensionedField
+        explicit DimensionedField
         (
-            const Xfer<DimensionedField<Type, GeoMesh>>& df
+            DimensionedField<Type, GeoMesh>&& df
         );
 
         //- Construct as copy of tmp<DimensionedField> deleting argument
@@ -250,7 +241,7 @@ public:
         DimensionedField
         (
             const word& newName,
-            const Xfer<DimensionedField<Type, GeoMesh>>& df
+            DimensionedField<Type, GeoMesh>&& df
         );
 
         //- Construct as copy resetting name

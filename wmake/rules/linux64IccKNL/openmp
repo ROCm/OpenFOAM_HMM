@@ -1,0 +1,5 @@
+# Flags for compiling/linking openmp
+# The USE_OMP is for OpenFOAM-specific use (general use is _OPENMP)
+
+COMP_OPENMP = -DUSE_OMP -qopenmp
+LINK_OPENMP = -liomp5

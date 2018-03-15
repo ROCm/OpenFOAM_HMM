@@ -54,17 +54,19 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::ptscotchDecomp::graphPath(const polyMesh& unused)
+{}
+
+
 void Foam::ptscotchDecomp::check(const int retVal, const char* str)
 {}
 
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const fileName& meshPath,
-    const List<label>& initxadj,
-    const List<label>& initadjncy,
-    const scalarField& initcWeights,
-
+    const labelUList& initxadj,
+    const labelUList& initadjncy,
+    const UList<scalar>& initcWeights,
     List<label>& finalDecomp
 ) const
 {
@@ -77,12 +79,11 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 Foam::label Foam::ptscotchDecomp::decompose
 (
-    const fileName& meshPath,
     const label adjncySize,
     const label adjncy[],
     const label xadjSize,
     const label xadj[],
-    const scalarField& cWeights,
+    const UList<scalar>& cWeights,
     List<label>& finalDecomp
 ) const
 {
@@ -97,10 +98,22 @@ Foam::label Foam::ptscotchDecomp::decompose
 
 Foam::ptscotchDecomp::ptscotchDecomp
 (
-    const dictionary& decompositionDict
+    const dictionary& decompDict
 )
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict),
+    coeffsDict_(dictionary::null)
+{}
+
+
+Foam::ptscotchDecomp::ptscotchDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName),
+    coeffsDict_(dictionary::null)
 {}
 
 

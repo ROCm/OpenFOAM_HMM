@@ -40,7 +40,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 class phasePairKey;
 
@@ -59,41 +59,24 @@ class phasePairKey
 :
     public Pair<word>
 {
-public:
-
-        class hash
-        :
-            public Hash<phasePairKey>
-        {
-        public:
-
-            // Constructors
-
-                // Construct null
-                hash();
-
-
-            // Member operators
-
-                // Generate a hash from a phase pair key
-                label operator()(const phasePairKey& key) const;
-        };
-
-
-private:
-
     // Private data
 
         //- Flag to indicate whether ordering is important
         bool ordered_;
 
-
 public:
+
+        struct hash
+        {
+            // Generate a hash from a phase pair key
+            label operator()(const phasePairKey& key) const;
+        };
+
 
     // Constructors
 
         //- Construct null
-        phasePairKey();
+        phasePairKey() {} // = default
 
         //- Construct from names and the ordering flag
         phasePairKey
@@ -105,7 +88,7 @@ public:
 
 
     // Destructor
-    virtual ~phasePairKey();
+    virtual ~phasePairKey() = default;
 
 
     // Access

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class FLMAsurfaceFormat Declaration
+               Class fileFormats::FLMAsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -58,8 +58,8 @@ class FLMAsurfaceFormat
 {
     // Private Member Functions
 
-        static inline void writeShell(OSstream&, const Face&);
-        static inline void writeType(OSstream&, const Face&);
+        static inline void writeShell(OSstream& os, const Face& f);
+        static inline void writeType(OSstream& os, const Face& f);
 
         //- Disallow default bitwise copy construct
         FLMAsurfaceFormat(const FLMAsurfaceFormat<Face>&) = delete;
@@ -75,17 +75,17 @@ protected:
         //- Write surface mesh components by proxy
         static void write
         (
-            OSstream&,
-            const MeshedSurfaceProxy<Face>&
+            OSstream& os,
+            const MeshedSurfaceProxy<Face>& surf
         );
 
 
         //- Write surface mesh components by proxy with/without compression
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&,
-            bool compress
+            bool compress,
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf
         );
 
 
@@ -94,28 +94,34 @@ public:
     // Constructors
 
         //- Construct null
-        FLMAsurfaceFormat()
-        {}
+        FLMAsurfaceFormat() = default;
 
 
     //- Destructor
-    virtual ~FLMAsurfaceFormat()
-    {}
+    virtual ~FLMAsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Write flma file
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 
 };
@@ -144,28 +150,34 @@ public:
     // Constructors
 
         //- Construct null
-        FLMAZsurfaceFormat()
-        {}
+        FLMAZsurfaceFormat() = default;
 
 
     //- Destructor
-    virtual ~FLMAZsurfaceFormat()
-    {}
+    virtual ~FLMAZsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write surface mesh components by proxy
         static void write
         (
-            const fileName&,
-            const MeshedSurfaceProxy<Face>&
+            const fileName& filename,
+            const MeshedSurfaceProxy<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Write flmaz file
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, MeshedSurfaceProxy<Face>(*this));
+            write(name, MeshedSurfaceProxy<Face>(*this), options);
         }
 
 };

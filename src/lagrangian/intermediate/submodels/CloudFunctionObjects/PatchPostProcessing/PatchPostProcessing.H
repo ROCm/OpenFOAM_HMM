@@ -115,7 +115,7 @@ public:
 
 
     //- Destructor
-    virtual ~PatchPostProcessing();
+    virtual ~PatchPostProcessing() = default;
 
 
     // Member Functions

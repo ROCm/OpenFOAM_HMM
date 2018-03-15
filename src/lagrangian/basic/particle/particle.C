@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,21 +27,32 @@ License
 #include "transform.H"
 #include "treeDataCell.H"
 #include "cubicEqn.H"
+#include "registerSwitch.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(particle, 0);
+}
 
 const Foam::scalar Foam::particle::negativeSpaceDisplacementFactor = 1.01;
 
 Foam::label Foam::particle::particleCount_ = 0;
 
-namespace Foam
-{
-    defineTypeNameAndDebug(particle, 0);
-    bool particle::writeLagrangianPositions
-    (
-        debug::infoSwitch("writeLagrangianPositions", 0)
-    );
-}
+bool Foam::particle::writeLagrangianCoordinates = true;
+
+bool Foam::particle::writeLagrangianPositions
+(
+    Foam::debug::infoSwitch("writeLagrangianPositions", 0)
+);
+
+registerInfoSwitch
+(
+    "writeLagrangianPositions",
+    bool,
+    Foam::particle::writeLagrangianPositions
+);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -388,7 +399,7 @@ void Foam::particle::changeFace(const label tetTriI)
         tetFacei_ = newFaceI;
         tetPti_ = edgeI;
 
-        // Exit the loop now that the the tet point has been found
+        // Exit the loop now that the tet point has been found
         break;
     }
 
@@ -890,11 +901,11 @@ Foam::scalar Foam::particle::trackToMovingTri
     // Calculate the hit fraction
     label iH = -1;
     scalar muH = std::isnormal(detA[0]) && detA[0] <= 0 ? VGREAT : 1/detA[0];
-    for (label i = 0; i < 4; ++ i)
+    for (label i = 0; i < 4; ++i)
     {
         const Roots<3> mu = hitEqn[i].roots();
 
-        for (label j = 0; j < 3; ++ j)
+        for (label j = 0; j < 3; ++j)
         {
             if (mu.type(j) == roots::real && hitEqn[i].derivative(mu[j]) < 0)
             {

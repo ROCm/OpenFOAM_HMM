@@ -143,7 +143,7 @@ public:
         const bool nodeValues = false
     )
     {
-        return writeField(vf, ensMesh, output.rawRef(), nodeValues);
+        return writeField(vf, ensMesh, output.ref(), nodeValues);
     }
 
 };

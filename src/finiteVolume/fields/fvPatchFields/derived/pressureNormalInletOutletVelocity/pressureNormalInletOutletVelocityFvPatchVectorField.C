@@ -160,8 +160,8 @@ void Foam::pressureNormalInletOutletVelocityFvPatchVectorField::write
 ) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+    os.writeEntry("phi", phiName_);
+    os.writeEntry("rho", rhoName_);
     writeEntry("value", os);
 }
 

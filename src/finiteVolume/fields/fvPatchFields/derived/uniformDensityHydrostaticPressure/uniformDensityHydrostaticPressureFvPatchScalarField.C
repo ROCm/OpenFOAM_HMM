@@ -144,9 +144,9 @@ void Foam::uniformDensityHydrostaticPressureFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("rho") << rho_ << token::END_STATEMENT << nl;
-    os.writeKeyword("pRefValue") << pRefValue_ << token::END_STATEMENT << nl;
-    os.writeKeyword("pRefPoint") << pRefPoint_ << token::END_STATEMENT << nl;
+    os.writeEntry("rho", rho_);
+    os.writeEntry("pRefValue", pRefValue_);
+    os.writeEntry("pRefPoint", pRefPoint_);
     writeEntry("value", os);
 }
 

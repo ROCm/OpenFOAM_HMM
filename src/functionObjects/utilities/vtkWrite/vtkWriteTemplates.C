@@ -58,4 +58,29 @@ Foam::functionObjects::vtkWrite::writeFields
 }
 
 
+template<class GeoField>
+Foam::label
+Foam::functionObjects::vtkWrite::writeFields
+(
+    vtk::surfaceMeshWriter& writer,
+    bool verbose
+) const
+{
+    const wordList names = obr_.sortedNames<GeoField>(selectFields_);
+
+    if (verbose && names.size())
+    {
+        Info<< "    " << GeoField::typeName
+            << " " << flatOutput(names) << endl;
+    }
+
+    for (const word& fieldName : names)
+    {
+        writer.write(obr_.lookupObject<GeoField>(fieldName));
+    }
+
+    return names.size();
+}
+
+
 // ************************************************************************* //

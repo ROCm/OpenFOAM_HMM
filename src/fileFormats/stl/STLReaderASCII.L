@@ -26,6 +26,7 @@ License
 %option prefix="yySTL"
 %option yyclass="yySTLFlexLexer"
 
+
 %{
 
  /* ------------------------------------------------------------------------ *\
@@ -34,6 +35,9 @@ License
 
 #include "STLReader.H"
 #include "OSspecific.H"
+
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma clang diagnostic ignored "-Wdeprecated-register"
 
 using namespace Foam;
 // Dummy yyFlexLexer::yylex() to keep the linker happy. It is not called
@@ -411,7 +415,7 @@ bool Foam::fileFormats::STLReader::readASCII
     const fileName& filename
 )
 {
-    format_ = UNKNOWN;
+    format_ = STLFormat::UNKNOWN;
 
     IFstream is(filename);
     if (!is)
@@ -434,7 +438,7 @@ bool Foam::fileFormats::STLReader::readASCII
     names_.transfer(lexer.names());
     sizes_.transfer(lexer.sizes());
 
-    format_ = ASCII;
+    format_ = STLFormat::ASCII;
     return true;
 }
 

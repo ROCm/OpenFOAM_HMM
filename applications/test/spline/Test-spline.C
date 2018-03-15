@@ -46,7 +46,7 @@ inline Ostream& printPoint(Ostream& os, const point& p)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("file .. fileN");
+    argList::addArgument("file .. fileN");
     argList::addBoolOption("B", "B-Spline implementation");
     argList::addBoolOption("CMR", "catmull-rom spline (default)");
     argList::addOption
@@ -63,9 +63,9 @@ int main(int argc, char *argv[])
         args.printUsage();
     }
 
-    bool useBSpline = args.optionFound("B");
-    bool useCatmullRom = args.optionFound("CMR");
-    label nSeg = args.optionLookupOrDefault<label>("n", 20);
+    bool useBSpline = args.found("B");
+    bool useCatmullRom = args.found("CMR");
+    label nSeg = args.lookupOrDefault<label>("n", 20);
 
     if (!useCatmullRom && !useBSpline)
     {

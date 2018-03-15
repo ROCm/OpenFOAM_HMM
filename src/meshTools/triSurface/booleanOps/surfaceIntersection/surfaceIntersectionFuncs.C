@@ -26,6 +26,7 @@ License
 #include "surfaceIntersection.H"
 #include "triSurface.H"
 #include "triSurfaceSearch.H"
+#include "edgeHashes.H"
 #include "labelPairHashes.H"
 #include "OFstream.H"
 
@@ -161,7 +162,7 @@ Foam::edgeList Foam::surfaceIntersection::filterEdges
     labelList& map
 )
 {
-    HashSet<edge, Hash<edge>> uniqueEdges(10*edges.size());
+    edgeHashSet uniqueEdges(10*edges.size());
 
     edgeList newEdges(edges.size());
 

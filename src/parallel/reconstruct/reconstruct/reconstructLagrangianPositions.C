@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -60,7 +60,7 @@ void Foam::reconstructLagrangianPositions
 
             // Inverting sign if necessary and subtracting 1 from
             // faceProcAddressing
-            label mappedTetFace = mag(faceMap[ppi.tetFace()]) - 1;
+            const label mappedTetFace = mag(faceMap[ppi.tetFace()]) - 1;
 
             lagrangianPositions.append
             (
@@ -77,6 +77,16 @@ void Foam::reconstructLagrangianPositions
     }
 
     IOPosition<Cloud<passiveParticle>>(lagrangianPositions).write();
+
+    // Force writing of "positions" too, if specified via the InfoSwitch
+    if (particle::writeLagrangianPositions)
+    {
+        IOPosition<Cloud<passiveParticle>>
+        (
+            lagrangianPositions,
+            cloud::geometryType::POSITIONS
+        ).write();
+    }
 }
 
 

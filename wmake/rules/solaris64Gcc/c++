@@ -1,9 +1,10 @@
 SUFFIXES += .C .cc .cpp .cxx
 
 c++WARN     = -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter \
-              -Wno-invalid-offsetof -Wno-attributes
+              -Wno-invalid-offsetof -Wno-attributes \
+              -Wno-unknown-pragmas
 
-# Suppress some warnings for flex++ and CGAL
+# Suppress some warnings (flex++, CGAL, etc)
 c++LESSWARN =
 
 CC          = g++ -std=c++11 -m64

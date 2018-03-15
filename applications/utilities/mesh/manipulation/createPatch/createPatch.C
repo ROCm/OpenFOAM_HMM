@@ -102,7 +102,7 @@ void changePatchID
 
 
 // Filter out the empty patches.
-void filterPatches(polyMesh& mesh, const HashSet<word>& addedPatchNames)
+void filterPatches(polyMesh& mesh, const wordHashSet& addedPatchNames)
 {
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -523,13 +523,13 @@ int main(int argc, char *argv[])
     runTime.functionObjects().off();
 
     Foam::word meshRegionName = polyMesh::defaultRegion;
-    args.optionReadIfPresent("region", meshRegionName);
+    args.readIfPresent("region", meshRegionName);
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     #include "createNamedPolyMesh.H"
 
-    const bool writeObj = args.optionFound("writeObj");
+    const bool writeObj = args.found("writeObj");
 
     const word oldInstance = mesh.pointsInstance();
 
@@ -557,7 +557,7 @@ int main(int argc, char *argv[])
     // Read patch construct info from dictionary
     PtrList<dictionary> patchSources(dict.lookup("patches"));
 
-    HashSet<word> addedPatchNames;
+    wordHashSet addedPatchNames;
     forAll(patchSources, addedI)
     {
         const dictionary& dict = patchSources[addedI];

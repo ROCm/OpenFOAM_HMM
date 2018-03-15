@@ -54,9 +54,9 @@ namespace Foam
             false
         )
     );
-
-    word fileOperation::processorsDir = "processors";
 }
+
+Foam::word Foam::fileOperation::processorsDir = "processors";
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -74,7 +74,7 @@ Foam::fileMonitor& Foam::fileOperation::monitor() const
             )
         );
     }
-    return monitorPtr_();
+    return *monitorPtr_;
 }
 
 
@@ -105,12 +105,8 @@ Foam::instantList Foam::fileOperation::sortTimes
     // Read and parse all the entries in the directory
     forAll(dirEntries, i)
     {
-        //IStringStream timeStream(dirEntries[i]);
-        //token timeToken(timeStream);
-
-        //if (timeToken.isNumber() && timeStream.eof())
         scalar timeValue;
-        if (readScalar(dirEntries[i].c_str(), timeValue))
+        if (readScalar(dirEntries[i], timeValue))
         {
             Times[nTimes].value() = timeValue;
             Times[nTimes].name() = dirEntries[i];
@@ -147,42 +143,31 @@ bool Foam::fileOperation::isFileOrDir(const bool isFile, const fileName& f)
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::fileOperation::fileOperation()
-{}
-
-
 Foam::autoPtr<Foam::fileOperation> Foam::fileOperation::New
 (
-    const word& type,
+    const word& handlerType,
     const bool verbose
 )
 {
     if (debug)
     {
-        InfoInFunction << "Constructing fileOperation" << endl;
+        InfoInFunction << "Constructing fileHandler" << endl;
     }
 
-    wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_->find(type);
+    auto cstrIter = wordConstructorTablePtr_->cfind(handlerType);
 
-    if (cstrIter == wordConstructorTablePtr_->end())
+    if (!cstrIter.found())
     {
         FatalErrorInFunction
-            << "Unknown fileOperation type "
-            << type << nl << nl
-            << "Valid fileOperation types are" << endl
+            << "Unknown fileHandler type "
+            << handlerType << nl << nl
+            << "Valid fileHandler types :" << endl
             << wordConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
 
     return autoPtr<fileOperation>(cstrIter()(verbose));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fileOperation::~fileOperation()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -282,10 +267,8 @@ Foam::fileName Foam::fileOperation::filePath(const fileName& fName) const
     {
         return fName;
     }
-    else
-    {
-        return fileName::null;
-    }
+
+    return fileName::null;
 }
 
 
@@ -614,7 +597,8 @@ const Foam::fileOperation& Foam::fileHandler()
 
         fileOperation::fileHandlerPtr_ = fileOperation::New(handler, true);
     }
-    return fileOperation::fileHandlerPtr_();
+
+    return *fileOperation::fileHandlerPtr_;
 }
 
 
@@ -635,7 +619,7 @@ void Foam::fileHandler(autoPtr<fileOperation>& newHandlerPtr)
 
     if (newHandlerPtr.valid())
     {
-        fileOperation::fileHandlerPtr_ = newHandlerPtr;
+        fileOperation::fileHandlerPtr_ = std::move(newHandlerPtr);
     }
 }
 

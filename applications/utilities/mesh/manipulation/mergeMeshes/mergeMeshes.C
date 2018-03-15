@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 
     #include "addOverwriteOption.H"
 
-    argList::validArgs.append("masterCase");
+    argList::addArgument("masterCase");
     argList::addOption
     (
         "masterRegion",
@@ -77,12 +77,18 @@ int main(int argc, char *argv[])
         "specify alternative mesh region for the master mesh"
     );
 
-    argList::validArgs.append("addCase");
+    argList::addArgument("addCase");
     argList::addOption
     (
         "addRegion",
         "name",
         "specify alternative mesh region for the additional mesh"
+    );
+    argList::addOption
+    (
+        "resultTime",
+        "time",
+        "specify a time for the resulting mesh"
     );
 
     argList args(argc, argv);
@@ -91,23 +97,32 @@ int main(int argc, char *argv[])
          FatalError.exit();
     }
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     fileName masterCase = args[1];
-    word masterRegion = polyMesh::defaultRegion;
-    args.optionReadIfPresent("masterRegion", masterRegion);
-
     fileName addCase = args[2];
-    word addRegion = polyMesh::defaultRegion;
-    args.optionReadIfPresent("addRegion", addRegion);
+
+    const word masterRegion =
+        args.lookupOrDefault<word>
+        (
+            "masterRegion",
+            polyMesh::defaultRegion
+        );
+
+    const word addRegion =
+        args.lookupOrDefault<word>
+        (
+            "masterRegion",
+            polyMesh::defaultRegion
+        );
 
     // Since we don't use argList processor directory detection, add it to
     // the casename ourselves so it triggers the logic inside TimePath.
     const fileName& cName = args.caseName();
-    std::string::size_type pos = cName.find("processor");
+    const auto pos = cName.find("processor");
     if (pos != string::npos && pos != 0)
     {
-        fileName processorName = cName.substr(pos, cName.size()-pos);
+        fileName processorName = cName.substr(pos);
         masterCase += '/' + processorName;
         addCase += '/' + processorName;
     }
@@ -133,11 +148,8 @@ int main(int argc, char *argv[])
             runTimeMaster
         )
     );
-    const word oldInstance = masterMesh.pointsInstance();
-
 
     Info<< "Reading mesh to add for time = " << runTimeToAdd.timeName() << nl;
-
     Info<< "Create mesh\n" << endl;
     polyMesh meshToAdd
     (
@@ -149,7 +161,19 @@ int main(int argc, char *argv[])
         )
     );
 
-    if (!overwrite)
+    word meshInstance = masterMesh.pointsInstance();
+
+    const bool specifiedInstance =
+    (
+        !overwrite
+     && args.readIfPresent("resultTime", meshInstance)
+    );
+
+    if (specifiedInstance)
+    {
+        runTimeMaster.setTime(instant(meshInstance), 0);
+    }
+    else if (!overwrite)
     {
         runTimeMaster++;
     }
@@ -159,9 +183,9 @@ int main(int argc, char *argv[])
     masterMesh.addMesh(meshToAdd);
     masterMesh.merge();
 
-    if (overwrite)
+    if (overwrite || specifiedInstance)
     {
-        masterMesh.setInstance(oldInstance);
+        masterMesh.setInstance(meshInstance);
     }
 
     masterMesh.write();

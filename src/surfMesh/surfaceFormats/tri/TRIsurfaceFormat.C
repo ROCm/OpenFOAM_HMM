@@ -24,7 +24,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIsurfaceFormat.H"
+#include "TRIReader.H"
 #include "OFstream.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -32,20 +34,20 @@ template<class Face>
 inline void Foam::fileFormats::TRIsurfaceFormat<Face>::writeShell
 (
     Ostream& os,
-    const pointField& pointLst,
+    const UList<point>& pts,
     const Face& f,
     const label zoneI
 )
 {
     // simple triangulation about f[0].
     // better triangulation should have been done before
-    const point& p0 = pointLst[f[0]];
+    const point& p0 = pts[f[0]];
     for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
     {
-        label fp2 = f.fcIndex(fp1);
+        const label fp2 = f.fcIndex(fp1);
 
-        const point& p1 = pointLst[f[fp1]];
-        const point& p2 = pointLst[f[fp2]];
+        const point& p1 = pts[f[fp1]];
+        const point& p2 = pts[f[fp2]];
 
         os  << p0.x() << ' ' << p0.y() << ' ' << p0.z() << ' '
             << p1.x() << ' ' << p1.y() << ' ' << p1.z() << ' '
@@ -79,7 +81,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     this->clear();
 
     // Read in the values
-    TRIsurfaceFormatCore reader(filename);
+    TRIReader reader(filename);
 
     // Get the map for stitched surface points
     labelList pointMap;
@@ -96,10 +98,10 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     }
 
     // Retrieve the original zone information
-    List<label> sizes(reader.sizes().xfer());
-    List<label> zoneIds(reader.zoneIds().xfer());
+    List<label> sizes(std::move(reader.sizes()));
+    List<label> zoneIds(std::move(reader.zoneIds()));
 
-    // generate the (sorted) faces
+    // Generate the (sorted) faces
     List<Face> faceLst(zoneIds.size());
 
     if (reader.sorted())
@@ -118,12 +120,12 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     }
     else
     {
-        // Unsorted - determine the sorted order:
-        // avoid SortableList since we discard the main list anyhow
-        List<label> faceMap;
+        // Determine the sorted order:
+        // use sortedOrder directly (the intermediate list is discared anyhow)
+        labelList faceMap;
         sortedOrder(zoneIds, faceMap);
 
-        // generate sorted faces
+        // Generate sorted faces
         forAll(faceMap, facei)
         {
             const label startPt = 3*faceMap[facei];
@@ -137,7 +139,7 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
     }
     zoneIds.clear();
 
-    // transfer:
+    // Transfer:
     this->storedFaces().transfer(faceLst);
 
     this->addZones(sizes);
@@ -151,14 +153,15 @@ template<class Face>
 void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary& options
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&   faceLst = surf.surfFaces();
+    const UList<label>&  faceMap = surf.faceMap();
 
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst)
@@ -176,26 +179,29 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
     }
 
     label faceIndex = 0;
-    forAll(zones, zoneI)
+    label zoneIndex = 0;
+    for (const surfZone& zone : zones)
     {
-        const surfZone& zone = zones[zoneI];
+        const label nLocalFaces = zone.size();
 
         if (useFaceMap)
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, pointLst, f, zoneI);
+                writeShell(os, pointLst, f, zoneIndex);
             }
         }
         else
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
-                writeShell(os, pointLst, f, zoneI);
+                writeShell(os, pointLst, f, zoneIndex);
             }
         }
+
+        ++zoneIndex;
     }
 }
 
@@ -204,11 +210,12 @@ template<class Face>
 void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
+    const UnsortedMeshedSurface<Face>& surf,
+    const dictionary& options
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.surfFaces();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&   faceLst = surf.surfFaces();
 
     OFstream os(filename);
     if (!os.good())
@@ -218,11 +225,10 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
             << exit(FatalError);
     }
 
-
-    // a single zone needs no sorting
+    // A single zone needs no sorting
     if (surf.zoneToc().size() == 1)
     {
-        const List<label>& zoneIds  = surf.zoneIds();
+        const UList<label>& zoneIds = surf.zoneIds();
 
         forAll(faceLst, facei)
         {
@@ -235,13 +241,18 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
         List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
         label faceIndex = 0;
-        forAll(zoneLst, zoneI)
+        label zoneIndex = 0;
+        for (const surfZone& zone : zoneLst)
         {
-            forAll(zoneLst[zoneI], localFacei)
+            const label nLocalFaces = zone.size();
+
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, pointLst, f, zoneI);
+                writeShell(os, pointLst, f, zoneIndex);
             }
+
+            ++zoneIndex;
         }
     }
 }

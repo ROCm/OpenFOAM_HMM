@@ -33,17 +33,17 @@ template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 :
     HashTableCore(),
-    nElmts_(0),
-    tableSize_(HashTableCore::canonicalSize(size)),
+    size_(0),
+    capacity_(HashTableCore::canonicalSize(size)),
     table_(nullptr)
 {
-    if (tableSize_)
+    if (capacity_)
     {
-        table_ = new hashedEntry*[tableSize_];
+        table_ = new node_type*[capacity_];
 
-        for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
+        for (label i=0; i < capacity_; ++i)
         {
-            table_[hashIdx] = nullptr;
+            table_[i] = nullptr;
         }
     }
 
@@ -60,10 +60,10 @@ Foam::Ostream& Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
     label maxChain = 0;
     unsigned avgChain = 0;
 
-    for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
+    for (label i=0; i < capacity_; ++i)
     {
         label count = 0;
-        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
+        for (node_type* ep = table_[i]; ep; ep = ep->next_)
         {
             ++count;
         }
@@ -81,7 +81,7 @@ Foam::Ostream& Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
     }
 
     os  << "HashTable<T,Key,Hash>"
-        << " elements:" << size() << " slots:" << used << "/" << tableSize_
+        << " elements:" << size() << " slots:" << used << "/" << capacity_
         << " chaining(avg/max):" << (used ? (float(avgChain)/used) : 0)
         << "/" << maxChain << endl;
 
@@ -145,7 +145,7 @@ Foam::Istream& Foam::operator>>
 {
     is.fatalCheck(FUNCTION_NAME);
 
-    // Anull list
+    // Anull existing table
     L.clear();
 
     is.fatalCheck(FUNCTION_NAME);
@@ -154,27 +154,27 @@ Foam::Istream& Foam::operator>>
 
     is.fatalCheck
     (
-        "operator>>(Istream&, HashTable<T, Key, Hash>&) : "
+        "operator>>(Istream&, HashTable&) : "
         "reading first token"
     );
 
     if (firstToken.isLabel())
     {
-        const label s = firstToken.labelToken();
+        const label len = firstToken.labelToken();
 
         // Read beginning of contents
-        const char delimiter = is.readBeginList("HashTable<T, Key, Hash>");
+        const char delimiter = is.readBeginList("HashTable");
 
-        if (s)
+        if (len)
         {
-            if (2*s > L.tableSize_)
+            if (2*len > L.capacity_)
             {
-                L.resize(2*s);
+                L.resize(2*len);
             }
 
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; ++i)
+                for (label i=0; i<len; ++i)
                 {
                     Key key;
                     is >> key;
@@ -182,7 +182,7 @@ Foam::Istream& Foam::operator>>
 
                     is.fatalCheck
                     (
-                        "operator>>(Istream&, HashTable<T, Key, Hash>&) : "
+                        "operator>>(Istream&, HashTable&) : "
                         "reading entry"
                     );
                 }
@@ -224,15 +224,11 @@ Foam::Istream& Foam::operator>>
 
             Key key;
             is >> key;
-
-            T element;
-            is >> element;
-
-            L.insert(key, element);
+            L.insert(key, pTraits<T>(is));
 
             is.fatalCheck
             (
-                "operator>>(Istream&, HashTable<T, Key, Hash>&) : "
+                "operator>>(Istream&, HashTable&) : "
                 "reading entry"
             );
 
@@ -262,19 +258,26 @@ Foam::Ostream& Foam::operator<<
     const HashTable<T, Key, Hash>& tbl
 )
 {
-    using const_iterator = typename HashTable<T, Key, Hash>::const_iterator;
+    const label len = tbl.size();
 
-    // Write size and start delimiter
-    os << nl << tbl.size() << nl << token::BEGIN_LIST << nl;
-
-    // Write contents
-    for (const_iterator iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
+    if (len)
     {
-        os << iter.key() << token::SPACE << iter.object() << nl;
-    }
+        // Size and start list delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
 
-    // Write end delimiter
-    os << token::END_LIST;
+        // Contents
+        for (auto iter = tbl.cbegin(); iter != tbl.cend(); ++iter)
+        {
+            os << iter.key() << token::SPACE << iter.object() << nl;
+        }
+
+        os << token::END_LIST;    // End list delimiter
+    }
+    else
+    {
+        // Empty hash table
+        os << len << token::BEGIN_LIST << token::END_LIST;
+    }
 
     os.check(FUNCTION_NAME);
     return os;

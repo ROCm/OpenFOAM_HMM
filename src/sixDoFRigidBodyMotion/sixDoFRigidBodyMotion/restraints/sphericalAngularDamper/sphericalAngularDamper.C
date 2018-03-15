@@ -107,7 +107,7 @@ void Foam::sixDoFRigidBodyMotionRestraints::sphericalAngularDamper::write
     Ostream& os
 ) const
 {
-    os.writeKeyword("coeff") << coeff_ << token::END_STATEMENT << nl;
+    os.writeEntry("coeff", coeff_);
 }
 
 

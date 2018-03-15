@@ -48,8 +48,9 @@ Note
         list[1] = list[5] = list[6];  // propagates value
     \endcode
 
-    Using get() or the '[]' operator are similarly fast. Looping and reading
-    via an iterator is approx. 15% slower, but can be more flexible.
+    Reading via the get() or the '[]' operator are identical.
+    Looping and reading via an iterator is approx. 15% slower,
+    but can be more flexible.
 
     Using the set() operator (and the '[]' operator) are marginally slower
     (approx. 5%) than using an iterator, but the set() method has the
@@ -157,7 +158,7 @@ protected:
     // Protected Member Functions
 
         //- Calculate the list length when packed
-        inline static label packedLength(const label);
+        inline static constexpr label packedLength(const label nElem);
 
         //- Read a list entry (allows for specialization)
         inline static unsigned int readValue(Istream& is);
@@ -200,17 +201,17 @@ public:
 
         //- The max. number of bits that can be templated.
         //  Might someday be useful for a template assert.
-        inline static unsigned int max_bits();
+        inline static constexpr unsigned int max_bits();
 
         //- The max. value for an entry, which simultaneously the bit-mask
         //  eg, ((1 << 2) - 1) yields 0b0011
-        inline static unsigned int max_value();
+        inline static constexpr unsigned int max_value();
 
         //- The number of entries per packed storage element
-        inline static unsigned int packing();
+        inline static constexpr unsigned int packing();
 
         //- Masking for all bits below the offset
-        inline static unsigned int maskLower(unsigned offset);
+        inline static constexpr unsigned int maskLower(unsigned offset);
 
 
     // Forward declaration of iterators
@@ -234,17 +235,17 @@ public:
         //- Construct from Istream
         inline PackedList(Istream& is);
 
-        //- Copy constructor
+        //- Copy construct
         inline PackedList(const PackedList<nBits>& lst);
 
-        //- Construct by transferring the parameter contents
-        inline PackedList(const Xfer<PackedList<nBits>>& lst);
+        //- Move construct
+        inline PackedList(PackedList<nBits>&& lst);
 
         //- Construct from a list of labels
         explicit inline PackedList(const labelUList& lst);
 
         //- Construct from an indirect list of labels
-        explicit inline PackedList(const UIndirectList<label>& lst);
+        explicit inline PackedList(const labelUIndList& lst);
 
         //- Clone
         inline autoPtr<PackedList<nBits>> clone() const;
@@ -267,13 +268,14 @@ public:
         //  Never auto-vivify entries.
         inline unsigned int get(const label i) const;
 
-        //- Set value at index I. Return true if value changed.
+        //- Set value at index I, default value set is the max_value.
         //  Does auto-vivify for non-existent, non-zero entries.
-        //  Default value set is the max_value.
+        //  \return true if value changed.
         inline bool set(const label i, const unsigned int val = ~0u);
 
-        //- Unset the entry at index I. Return true if value changed.
+        //- Unset the entry at index I.
         //  Never auto-vivify entries.
+        //  \return true if value changed.
         inline bool unset(const label i);
 
         //- Return the underlying packed storage
@@ -286,8 +288,7 @@ public:
         //- The list length when packed
         inline label packedLength() const;
 
-        //- Return the binary size in number of characters
-        //  used in the underlying storage
+        //- The number of bytes used in the underlying storage
         inline std::streamsize byteSize() const;
 
         //- Count number of bits set, O(log(n))
@@ -296,7 +297,7 @@ public:
         unsigned int count() const;
 
         //- Return the values as a list of labels
-        Xfer<labelList> values() const;
+        labelList values() const;
 
         //- Print bit patterns, optionally output unused elements
         //
@@ -355,9 +356,6 @@ public:
         //  and annul the argument list.
         inline void transfer(PackedList<nBits>& lst);
 
-        //- Transfer contents to the Xfer container
-        inline Xfer<PackedList<nBits>> xfer();
-
 
       // IO
 
@@ -365,7 +363,8 @@ public:
         Istream& read(Istream& is);
 
         //- Write the List, with line-breaks in ASCII if the list length
-        //  exceeds shortListLen. Using '0' suppresses line-breaks entirely.
+        //- exceeds shortListLen.
+        //  Using '0' suppresses line-breaks entirely.
         //  A special indexed output (ASCII only) is triggered by specifying
         //  a negative value for shortListLen.
         //
@@ -385,7 +384,7 @@ public:
         void writeEntry(const word& keyword, Ostream& os) const;
 
 
-      // Member operators
+      // Member Operators
 
         //- Append a value at the end of the list
         inline PackedList<nBits>& append(const unsigned int val);
@@ -393,11 +392,11 @@ public:
         //- Remove and return the last element
         inline unsigned int remove();
 
-        //- Get value at index I
+        //- Identical to get() - get value at index.
         //  Never auto-vivify entries.
         inline unsigned int operator[](const label i) const;
 
-        //- Set value at index I.
+        //- Non-const access to value at index.
         //  Returns iterator to perform the actual operation.
         //  Does not auto-vivify entries, but will when assigned to.
         inline iteratorBase operator[](const label i);
@@ -405,14 +404,17 @@ public:
         //- Assignment of all entries to the given value. Takes linear time.
         inline void operator=(const unsigned int val);
 
-        //- Assignment operator.
+        //- Copy assignment.
         void operator=(const PackedList<nBits>& lst);
+
+        //- Move assignment.
+        void operator=(PackedList<nBits>&& lst);
 
         //- Assignment operator.
         void operator=(const labelUList& lst);
 
         //- Assignment operator.
-        void operator=(const UIndirectList<label>& lst);
+        void operator=(const labelUIndList& lst);
 
 
     // Iterators and helpers
@@ -436,7 +438,20 @@ public:
                 label index_;
 
 
+            // Constructors
+
+                //- Construct null - an end iterator
+                inline iteratorBase();
+
+                //- Construct from base list and position index
+                inline iteratorBase(const PackedList* lst, const label i);
+
+
             // Protected Member Functions
+
+                //- Limit index to the list size - avoid going past end()
+                //  Eg, iter = iterator(list, Inf)
+                inline void bound();
 
                 //- Get value as unsigned, no range-checking
                 inline unsigned int get() const;
@@ -444,14 +459,11 @@ public:
                 //- Set value, returning true if changed, no range-checking
                 inline bool set(unsigned int val);
 
+                //- Move backward through list
+                inline void prev();
 
-            // Constructors
-
-                //- Construct null
-                inline iteratorBase();
-
-                //- Construct from base list and position index
-                inline iteratorBase(const PackedList* lst, const label i);
+                //- Move forward through list
+                inline void next();
 
 
         public:
@@ -496,11 +508,11 @@ public:
 
             //- Disallow copy constructor from const_iterator
             //  This would violate const-ness!
-            iterator(const const_iterator& iter);
+            iterator(const const_iterator& iter) = delete;
 
             //- Disallow assignment from const_iterator
             //  This would violate const-ness!
-            void operator=(const const_iterator& iter);
+            void operator=(const const_iterator& iter) = delete;
 
 
         public:
@@ -532,14 +544,8 @@ public:
                 //- Return value
                 inline unsigned int operator*() const;
 
-                //- Return value
-                inline unsigned int operator()() const;
-
                 //- Return iteratorBase for assigning values
                 inline iteratorBase& operator*();
-
-                //- Return iteratorBase for assigning values
-                inline iteratorBase& operator()();
 
                 inline iterator& operator++();
                 inline iterator operator++(int);
@@ -592,9 +598,6 @@ public:
 
                 //- Return referenced value directly
                 inline unsigned int operator*() const;
-
-                //- Return referenced value directly
-                inline unsigned int operator()() const;
 
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);

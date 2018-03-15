@@ -57,7 +57,7 @@ bool notEqual(const scalar s1, const scalar s2, const scalar tol)
 int main(int argc, char *argv[])
 {
     #include "addTimeOptions.H"
-    argList::validArgs.append("inflate (true|false)");
+    argList::addArgument("inflate (true|false)");
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
@@ -163,7 +163,9 @@ int main(int argc, char *argv[])
         }
 
         // Remove face
-        label candidateFacei = rndGen.integer(0, mesh.nInternalFaces()-1);
+        label candidateFacei =
+            rndGen.position<label>(0, mesh.nInternalFaces()-1);
+
         Info<< "Wanting to delete face " << mesh.faceCentres()[candidateFacei]
             << nl << endl;
 
@@ -200,7 +202,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> morphMap = meshMod.changeMesh(mesh, inflate);
 
         Info<< "Mapping fields" << nl << endl;
-        mesh.updateMesh(morphMap);
+        mesh.updateMesh(morphMap());
 
         // Move mesh (since morphing does not do this)
         if (morphMap().hasMotionPoints())
@@ -210,7 +212,7 @@ int main(int argc, char *argv[])
         }
 
         // Update numbering of cells/vertices.
-        faceRemover.updateMesh(morphMap);
+        faceRemover.updateMesh(morphMap());
 
 
         Info<< "Writing fields" << nl << endl;

@@ -201,7 +201,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addTimeOptions.H"
-    argList::validArgs.append("patch");
+    argList::addArgument("patch");
     #include "setRootCase.H"
     #include "createTime.H"
 
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 //            (
 //                mesh,
 //                pp,
-//                identity(pp.size())+pp.start()
+//                identity(pp.size(), pp.start())
 //            )
 //        );
 //        forAll(pn, pointi)
@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
 //            (
 //                mesh,
 //                pp,
-//                identity(pp.size())+pp.start()
+//                identity(pp.size(), pp.start())
 //            )
 //        );
 //        forAll(pn, pointi)

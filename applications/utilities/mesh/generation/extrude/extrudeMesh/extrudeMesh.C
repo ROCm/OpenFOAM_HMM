@@ -268,7 +268,7 @@ int main(int argc, char *argv[])
     // Get optional regionName
     word regionName;
     word regionDir;
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         regionDir = regionName;
         Info<< "Create mesh " << regionName << " for time = "
@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
             // Update fields
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Move mesh (since morphing does not do this)
             if (map().hasMotionPoints())
@@ -441,7 +441,6 @@ int main(int argc, char *argv[])
                 mesh.movePoints(map().preMotionPoints());
             }
         }
-
 
 
         indirectPrimitivePatch extrudePatch
@@ -789,7 +788,7 @@ int main(int argc, char *argv[])
             (
                 layerExtrude.addedCells
                 (
-                    meshFromMesh,
+                    *meshFromMesh,
                     layerExtrude.layerFaces()
                 )
             );
@@ -938,7 +937,7 @@ int main(int argc, char *argv[])
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
             // Update fields
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Update stored data
             updateFaceLabels(map(), frontPatchFaces);
@@ -1026,7 +1025,7 @@ int main(int argc, char *argv[])
             (
                 cutZoneName,
                 frontPatchFaces,
-                boolList(frontPatchFaces.size(), false),
+                false, // none are flipped
                 0,
                 mesh.faceZones()
             )
@@ -1075,7 +1074,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Update local data
         updateCellSet(map(), addedCellsSet);

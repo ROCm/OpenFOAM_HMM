@@ -62,8 +62,8 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
-    argList::validArgs.append("patches");
-    argList::validArgs.append("edgeFraction");
+    argList::addArgument("patches");
+    argList::addArgument("edgeFraction");
 
     argList::addOption
     (
@@ -81,12 +81,11 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     // Find set of patches from the list of regular expressions provided
-    const wordReList patches((IStringStream(args[1])()));
+    const wordRes patches(args.readList<wordRe>(1));
+    const scalar weight  = args.read<scalar>(2);
+    const bool overwrite = args.found("overwrite");
+
     const labelHashSet patchSet(mesh.boundaryMesh().patchSet(patches));
-
-    const scalar weight  = args.argRead<scalar>(2);
-    const bool overwrite = args.optionFound("overwrite");
-
     if (!patchSet.size())
     {
         FatalErrorInFunction
@@ -132,7 +131,7 @@ int main(int argc, char *argv[])
 
     // Edit list of cells to refine according to specified set
     word setName;
-    if (args.optionReadIfPresent("useSet", setName))
+    if (args.readIfPresent("useSet", setName))
     {
         Info<< "Subsetting cells to cut based on cellSet"
             << setName << nl << endl;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -34,7 +34,7 @@ Foam::sampledPlane::sampleField
     const GeometricField<Type, fvPatchField, volMesh>& vField
 ) const
 {
-    return tmp<Field<Type>>(new Field<Type>(vField, meshCells()));
+    return tmp<Field<Type>>::New(vField, meshCells());
 }
 
 
@@ -45,8 +45,10 @@ Foam::sampledPlane::interpolateField
     const interpolation<Type>& interpolator
 ) const
 {
-    // One value per point
-    tmp<Field<Type>> tvalues(new Field<Type>(points().size()));
+    // One value per point.
+    // Initialize with Zero to handle missed/degenerate faces
+
+    tmp<Field<Type>> tvalues(new Field<Type>(points().size(), Zero));
     Field<Type>& values = tvalues.ref();
 
     boolList pointDone(points().size(), false);
@@ -54,19 +56,18 @@ Foam::sampledPlane::interpolateField
     forAll(faces(), cutFacei)
     {
         const face& f = faces()[cutFacei];
+        const label celli = meshCells()[cutFacei];
 
-        forAll(f, faceVertI)
+        for (const label pointi : f)
         {
-            label pointi = f[faceVertI];
-
             if (!pointDone[pointi])
             {
+                pointDone[pointi] = true;
                 values[pointi] = interpolator.interpolate
                 (
                     points()[pointi],
-                    meshCells()[cutFacei]
+                    celli
                 );
-                pointDone[pointi] = true;
             }
         }
     }

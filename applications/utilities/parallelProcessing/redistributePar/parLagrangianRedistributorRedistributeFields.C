@@ -37,14 +37,14 @@ template<class Container>
 Foam::wordList Foam::parLagrangianRedistributor::filterObjects
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const word fieldClassName(Container::typeName);
 
     // Parallel synchronise
     wordList fieldNames(objects.names(fieldClassName));
-    Pstream::combineGather(fieldNames, ListUniqueEqOp<word>());
+    Pstream::combineGather(fieldNames, ListOps::uniqueEqOp<word>());
     Pstream::combineScatter(fieldNames);
 
     if (!selectedFields.empty())
@@ -69,7 +69,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
     const mapDistributeBase& map,
     const word& cloudName,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     const wordList objectNames
@@ -105,7 +105,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                0
+                label(0)
             );
 
             map.distribute(field);
@@ -125,7 +125,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<Type>>(field)
+                    std::move(field)
                 ).write();
             }
         }
@@ -141,7 +141,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
     const mapDistributeBase& map,
     const word& cloudName,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 ) const
 {
     wordList objectNames
@@ -179,7 +179,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
             Info<< "        " <<  objectNames[i] << endl;
 
             // Read if present
-            CompactIOField<Field<Type>, Type > field
+            CompactIOField<Field<Type>, Type> field
             (
                 IOobject
                 (
@@ -191,7 +191,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                     IOobject::NO_WRITE,
                     false
                 ),
-                0
+                label(0)
             );
 
             // Distribute
@@ -212,7 +212,7 @@ void Foam::parLagrangianRedistributor::redistributeLagrangianFieldFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<Field<Type>>>(field)
+                    std::move(field)
                 ).write();
             }
         }
@@ -225,7 +225,7 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
 (
     const passivePositionParticleCloud& cloud,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const wordList objectNames
@@ -259,7 +259,7 @@ void Foam::parLagrangianRedistributor::readLagrangianFields
                     IOobject::READ_IF_PRESENT,
                     IOobject::NO_WRITE
                 ),
-                0
+                label(0)
             );
 
             fieldPtr->store();
@@ -277,7 +277,7 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
 {
     HashTable<Container*> fields
     (
-        cloud.lookupClass<Container >()
+        cloud.lookupClass<Container>()
     );
 
     if (fields.size())
@@ -309,7 +309,7 @@ void Foam::parLagrangianRedistributor::redistributeStoredLagrangianFields
                         IOobject::NO_WRITE,
                         false
                     ),
-                    xferMove<Field<typename Container::value_type>>(field)
+                    std::move(field)
                 ).write();
             }
         }

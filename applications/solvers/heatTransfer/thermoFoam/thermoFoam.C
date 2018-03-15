@@ -54,8 +54,6 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createFvOptions.H"
 
-    const volScalarField& alphaEff = talphaEff();
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nEvolving thermodynamics\n" << endl;

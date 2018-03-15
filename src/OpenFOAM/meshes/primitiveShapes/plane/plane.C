@@ -109,6 +109,10 @@ void Foam::plane::calcPntAndVec
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::plane::plane()
+{}
+
+
 Foam::plane::plane(const vector& normalVector)
 :
     normal_(normalVector),

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -122,17 +122,7 @@ public:
         {
             // Copy data into old format structure. Exact opposite of
             // particleIO.C reading old format.
-            struct oldParticle
-            {
-                vector position;
-                label celli;
-                label facei;
-                scalar stepFraction;
-                label tetFacei;
-                label tetPti;
-                label origProc;
-                label origId;
-            } p;
+            particle::positionsCompat1706 p;
 
             p.position = ppi.position_;
             p.celli = ppi.cell();
@@ -158,7 +148,8 @@ public:
             {
                 const std::size_t sizeofFields
                 (
-                    sizeof(oldParticle) - offsetof(oldParticle, position)
+                    sizeof(particle::positionsCompat1706)
+                  - offsetof(particle::positionsCompat1706, position)
                 );
 
                 os.write

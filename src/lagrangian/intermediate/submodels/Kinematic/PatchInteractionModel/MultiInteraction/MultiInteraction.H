@@ -130,7 +130,7 @@ public:
 
 
     //- Destructor
-    virtual ~MultiInteraction();
+    virtual ~MultiInteraction() = default;
 
 
     // Member Functions

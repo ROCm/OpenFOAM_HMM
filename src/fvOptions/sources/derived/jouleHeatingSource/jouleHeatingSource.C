@@ -63,7 +63,7 @@ const Foam::coordinateSystem& Foam::fv::jouleHeatingSource::coordSys() const
             << abort(FatalError);
     }
 
-    return coordSysPtr_();
+    return *coordSysPtr_;
 }
 
 

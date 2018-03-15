@@ -113,7 +113,7 @@ label addPatch
 
 
 // Filter out the empty patches.
-void filterPatches(fvMesh& mesh, const HashSet<word>& addedPatchNames)
+void filterPatches(fvMesh& mesh, const wordHashSet& addedPatchNames)
 {
     // Remove any zero-sized ones. Assumes
     // - processor patches are already only there if needed
@@ -438,7 +438,7 @@ int main(int argc, char *argv[])
     #include "createNamedMesh.H"
 
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
     const word oldInstance = mesh.pointsInstance();
 
@@ -613,7 +613,7 @@ int main(int argc, char *argv[])
 
     // Count patches to add
     // ~~~~~~~~~~~~~~~~~~~~
-    HashSet<word> bafflePatches;
+    wordHashSet bafflePatches;
     {
         forAll(selectors, selectorI)
         {
@@ -655,7 +655,7 @@ int main(int argc, char *argv[])
     // Pass 1: add patches
     // ~~~~~~~~~~~~~~~~~~~
 
-    //HashSet<word> addedPatches;
+    // wordHashSet addedPatches;
     {
         const polyBoundaryMesh& pbm = mesh.boundaryMesh();
         forAll(selectors, selectorI)
@@ -824,17 +824,16 @@ int main(int argc, char *argv[])
     autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
     // Update fields
-    mesh.updateMesh(map);
-
+    mesh.updateMesh(map());
 
 
     // Correct boundary faces mapped-out-of-nothing.
     // This is just a hack to correct the value field.
     {
-        fvMeshMapper mapper(mesh, map);
+        fvMeshMapper mapper(mesh, map());
         bool hasWarned = false;
 
-        forAllConstIter(HashSet<word>, bafflePatches, iter)
+        forAllConstIter(wordHashSet, bafflePatches, iter)
         {
             label patchi = mesh.boundaryMesh().findPatchID(iter.key());
 

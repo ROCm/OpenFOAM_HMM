@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,6 @@ License
 #include "profiling.H"
 #include "argList.H"
 #include "timeControlFunctionObject.H"
-//#include "IFstream.H"
 #include "dictionaryEntry.H"
 #include "stringOps.H"
 #include "Tuple2.H"
@@ -84,7 +83,7 @@ Foam::functionObject* Foam::functionObjectList::remove
         oldIndex = fnd();
 
         // Retrieve the pointer and remove it from the old list
-        ptr = this->set(oldIndex, 0).ptr();
+        ptr = this->set(oldIndex, nullptr).ptr();
         indices_.erase(fnd);
     }
     else
@@ -99,17 +98,17 @@ Foam::functionObject* Foam::functionObjectList::remove
 void Foam::functionObjectList::listDir
 (
     const fileName& dir,
-    HashSet<word>& foMap
+    wordHashSet& foMap
 )
 {
     // Search specified directory for functionObject configuration files
     {
         fileNameList foFiles(fileHandler().readDir(dir));
-        forAll(foFiles, f)
+        for (const fileName& f : foFiles)
         {
-            if (foFiles[f].ext().empty())
+            if (f.ext().empty())
             {
-                foMap.insert(foFiles[f]);
+                foMap.insert(f);
             }
         }
     }
@@ -117,9 +116,9 @@ void Foam::functionObjectList::listDir
     // Recurse into sub-directories
     {
         fileNameList foDirs(fileHandler().readDir(dir, fileName::DIRECTORY));
-        forAll(foDirs, fd)
+        for (const fileName& d : foDirs)
         {
-            listDir(dir/foDirs[fd], foMap);
+            listDir(dir/d, foMap);
         }
     }
 }
@@ -127,13 +126,13 @@ void Foam::functionObjectList::listDir
 
 void Foam::functionObjectList::list()
 {
-    HashSet<word> foMap;
+    wordHashSet foMap;
 
     fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
 
-    forAll(etcDirs, ed)
+    for (const fileName& d : etcDirs)
     {
-        listDir(etcDirs[ed], foMap);
+        listDir(d, foMap);
     }
 
     Info<< nl
@@ -153,17 +152,15 @@ Foam::fileName Foam::functionObjectList::findDict(const word& funcName)
     {
         return dictFile;
     }
-    else
-    {
-        fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
 
-        forAll(etcDirs, i)
+    fileNameList etcDirs(findEtcDirs(functionObjectDictPath));
+
+    for (const fileName& d : etcDirs)
+    {
+        dictFile = search(funcName, d);
+        if (!dictFile.empty())
         {
-            dictFile = search(funcName, etcDirs[i]);
-            if (!dictFile.empty())
-            {
-                return dictFile;
-            }
+            return dictFile;
         }
     }
 
@@ -175,7 +172,7 @@ bool Foam::functionObjectList::readFunctionObject
 (
     const string& funcNameArgs,
     dictionary& functionsDict,
-    HashSet<word>& requiredFields,
+    HashSet<wordRe>& requiredFields,
     const word& region
 )
 {
@@ -189,7 +186,7 @@ bool Foam::functionObjectList::readFunctionObject
     word funcName(funcNameArgs);
 
     int argLevel = 0;
-    wordList args;
+    wordReList args;
 
     List<Tuple2<word, string>> namedArgs;
     bool namedArg = false;
@@ -236,9 +233,12 @@ bool Foam::functionObjectList::readFunctionObject
                 {
                     args.append
                     (
-                        word::validate
+                        wordRe
                         (
-                            funcNameArgs.substr(start, i - start)
+                            word::validate
+                            (
+                                funcNameArgs.substr(start, i - start)
+                            )
                         )
                     );
                 }
@@ -309,11 +309,11 @@ bool Foam::functionObjectList::readFunctionObject
     }
     else if (funcDict.found("field"))
     {
-        requiredFields.insert(word(funcDict.lookup("field")));
+        requiredFields.insert(wordRe(funcDict.lookup("field")));
     }
     else if (funcDict.found("fields"))
     {
-        requiredFields.insert(wordList(funcDict.lookup("fields")));
+        requiredFields.insert(wordReList(funcDict.lookup("fields")));
     }
 
     // Insert named arguments
@@ -383,11 +383,9 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
     const argList& args,
     const Time& runTime,
     dictionary& controlDict,
-    HashSet<word>& requiredFields
+    HashSet<wordRe>& requiredFields
 )
 {
-    autoPtr<functionObjectList> functionsPtr;
-
     controlDict.add
     (
         dictionaryEntry("functions", controlDict, dictionary::null)
@@ -395,64 +393,66 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
     dictionary& functionsDict = controlDict.subDict("functions");
 
-    word region = word::null;
+    word region;
+    args.readIfPresent("region", region);
 
-    // Set the region name if specified
-    if (args.optionFound("region"))
+    bool modifiedControlDict = false;
+
+    if (args.found("dict"))
     {
-        region = args["region"];
+        modifiedControlDict = true;
+
+        controlDict.merge
+        (
+            IOdictionary
+            (
+                IOobject
+                (
+                    args["dict"],
+                    runTime,
+                    IOobject::MUST_READ_IF_MODIFIED
+                )
+            )
+        );
     }
 
-    if
-    (
-        args.optionFound("dict")
-     || args.optionFound("func")
-     || args.optionFound("funcs")
-    )
+    if (args.found("func"))
     {
-        if (args.optionFound("dict"))
-        {
-            controlDict.merge
-            (
-                IOdictionary
-                (
-                    IOobject
-                    (
-                        args["dict"],
-                        runTime,
-                        IOobject::MUST_READ_IF_MODIFIED
-                    )
-                )
-            );
-        }
+        modifiedControlDict = true;
 
-        if (args.optionFound("func"))
+        readFunctionObject
+        (
+            args["func"],
+            functionsDict,
+            requiredFields,
+            region
+        );
+    }
+
+    if (args.found("funcs"))
+    {
+        modifiedControlDict = true;
+
+        ITstream is("funcs", args["funcs"]);
+        wordList funcNames(is);
+
+        for (const word& funcName : funcNames)
         {
             readFunctionObject
             (
-                args["func"],
+                funcName,
                 functionsDict,
                 requiredFields,
                 region
             );
         }
+    }
 
-        if (args.optionFound("funcs"))
-        {
-            wordList funcs(args.optionLookup("funcs")());
 
-            forAll(funcs, i)
-            {
-                readFunctionObject
-                (
-                    funcs[i],
-                    functionsDict,
-                    requiredFields,
-                    region
-                );
-            }
-        }
+    autoPtr<functionObjectList> functionsPtr;
 
+    if (modifiedControlDict)
+    {
         functionsPtr.reset(new functionObjectList(runTime, controlDict));
     }
     else
@@ -464,12 +464,6 @@ Foam::autoPtr<Foam::functionObjectList> Foam::functionObjectList::New
 
     return functionsPtr;
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjectList::~functionObjectList()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -489,7 +483,7 @@ Foam::IOdictionary& Foam::functionObjectList::stateDict()
         createStateDict();
     }
 
-    return stateDictPtr_();
+    return *stateDictPtr_;
 }
 
 
@@ -500,7 +494,7 @@ const Foam::IOdictionary& Foam::functionObjectList::stateDict() const
         createStateDict();
     }
 
-    return stateDictPtr_();
+    return *stateDictPtr_;
 }
 
 
@@ -581,7 +575,7 @@ bool Foam::functionObjectList::execute()
     }
 
     // Force writing of state dictionary after function object execution
-    if (time_.outputTime())
+    if (time_.writeTime())
     {
         label oldPrecision = IOstream::precision_;
         IOstream::precision_ = 16;
@@ -595,6 +589,49 @@ bool Foam::functionObjectList::execute()
         );
 
         IOstream::precision_ = oldPrecision;
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute(const label subIndex)
+{
+    bool ok = execution_;
+
+    if (ok)
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            ok = funcObj.execute(subIndex) && ok;
+        }
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::execute
+(
+    const UList<wordRe>& functionNames,
+    const label subIndex
+)
+{
+    bool ok = execution_;
+
+    if (ok && functionNames.size())
+    {
+        forAll(*this, obji)
+        {
+            functionObject& funcObj = operator[](obji);
+
+            if (stringOps::match(functionNames, funcObj.name()))
+            {
+                ok = funcObj.execute(subIndex) && ok;
+            }
+        }
     }
 
     return ok;
@@ -771,7 +808,7 @@ bool Foam::functionObjectList::read()
                     );
                     if (functionObjects::timeControl::entriesPresent(dict))
                     {
-                        foPtr.set
+                        foPtr.reset
                         (
                             new functionObjects::timeControl(key, time_, dict)
                         );
@@ -788,8 +825,9 @@ bool Foam::functionObjectList::read()
                 }
                 catch (Foam::error& err)
                 {
-                    WarningInFunction
-                        << "Caught FatalError " << err << nl << endl;
+                    // Bit of trickery to get the original message
+                    err.write(Warning, false);
+                    InfoInFunction << nl << endl;
                 }
 
                 // Restore previous exception throwing state

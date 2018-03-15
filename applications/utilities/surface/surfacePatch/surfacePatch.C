@@ -52,7 +52,6 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.clear();
     argList::noParallel();
     #include "addDictOption.H"
 
@@ -138,6 +137,7 @@ int main(int argc, char *argv[])
 
                     labelList regionIDs =
                         findStrings(regionName, surf.regions());
+
                     if (modifier().modify(regionIDs, surf))
                     {
                         changed = true;

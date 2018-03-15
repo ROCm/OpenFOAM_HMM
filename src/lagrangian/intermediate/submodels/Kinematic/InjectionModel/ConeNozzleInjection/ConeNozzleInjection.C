@@ -223,7 +223,7 @@ Foam::ConeNozzleInjection<CloudType>::ConeNozzleInjection
     flowRateProfile_(im.flowRateProfile_),
     thetaInner_(im.thetaInner_),
     thetaOuter_(im.thetaOuter_),
-    sizeDistribution_(im.sizeDistribution_, false),
+    sizeDistribution_(im.sizeDistribution_.clone()),
     tanVec1_(im.tanVec1_),
     tanVec2_(im.tanVec2_),
     normal_(im.normal_),

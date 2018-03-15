@@ -37,7 +37,7 @@ SourceFiles
 #define preserveFaceZonesConstraint_H
 
 #include "decompositionConstraint.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ class preserveFaceZonesConstraint
     // Private data
 
         //- List of zones to keep together
-        wordReList zones_;
+        wordRes zones_;
 
 
 public:
@@ -77,12 +77,11 @@ public:
         );
 
         //- Construct from components
-        preserveFaceZonesConstraint(const wordReList& zones);
+        preserveFaceZonesConstraint(const UList<wordRe>& zones);
 
 
     //- Destructor
-    virtual ~preserveFaceZonesConstraint()
-    {}
+    virtual ~preserveFaceZonesConstraint() = default;
 
 
     // Member Functions

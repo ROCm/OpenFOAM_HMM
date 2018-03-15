@@ -331,7 +331,7 @@ Foam::conformationSurfaces::conformationSurfaces
     List<sideVolumeType> globalVolumeTypes(surfI);
     List<Map<sideVolumeType>> regionVolumeTypes(surfI);
 
-    HashSet<word> unmatchedKeys(surfacesDict.toc());
+    wordHashSet unmatchedKeys(surfacesDict.toc());
 
     surfI = 0;
     forAll(allGeometry_.names(), geomI)

@@ -50,15 +50,15 @@ bool Foam::TrajectoryCollision<CloudType>::collideParcels
 {
     bool coalescence = false;
 
-    const vector& pos1 = p1.position();
-    const vector& pos2 = p2.position();
+    const vector pos1(p1.position());
+    const vector pos2(p2.position());
 
     const vector& U1 = p1.U();
     const vector& U2 = p2.U();
 
-    vector URel = U1 - U2;
+    vector URel(U1 - U2);
 
-    vector d = pos2 - pos1;
+    vector d(pos2 - pos1);
     scalar magd = mag(d);
 
     scalar vAlign = URel & (d/(magd + ROOTVSMALL));

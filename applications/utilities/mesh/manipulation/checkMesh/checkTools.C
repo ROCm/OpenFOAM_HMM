@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2015-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -104,7 +104,7 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
         << "    internal faces:   " << nIntFaces << nl
         << "    cells:            " << nCells << nl
         << "    faces per cell:   "
-        << scalar(nFaces + nIntFaces)/max(1, nCells) << nl
+        << (scalar(nFaces) + scalar(nIntFaces))/max(1, nCells) << nl
         << "    boundary patches: " << mesh.boundaryMesh().size() << nl
         << "    point zones:      " << mesh.pointZones().size() << nl
         << "    face zones:       " << mesh.faceZones().size() << nl

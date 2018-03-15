@@ -126,7 +126,7 @@ bool Foam::functionObjects::writeDictionary::read(const dictionary& dict)
     regionFunctionObject::read(dict);
 
     wordList dictNames(dict.lookup("dictNames"));
-    HashSet<word> uniqueNames(dictNames);
+    wordHashSet uniqueNames(dictNames);
     dictNames_ = uniqueNames.toc();
 
     digests_.setSize(dictNames_.size(), SHA1Digest());

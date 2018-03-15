@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,7 @@ License
 #include "clock.H"
 #include "regExp.H"
 #include "IFstream.H"
+#include "SubStrings.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -35,10 +36,7 @@ License
 // don't bother with the older comma-delimited format
 
 Foam::Map<Foam::word>
-Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
-(
-    IFstream& is
-)
+Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable(ISstream& is)
 {
     Map<word> lookup;
 
@@ -47,7 +45,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
         return lookup;
     }
 
-    const regExp ctnameRE
+    const regExp ctname
     (
         " *CTNA[^ ]*"        // keyword - min 4 chars
         "[[:space:]]+"       // space delimited
@@ -58,13 +56,14 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
     );
 
     string line;
-    List<std::string> groups;
+    regExp::results_type groups;
+
     while (is.good() && is.getLine(line).good())
     {
-        if (ctnameRE.match(line, groups))
+        if (ctname.match(line, groups))
         {
-            const label tableId = atoi(groups[0].c_str());
-            const word tableName = word::validate(groups[1], true);
+            const label tableId = readLabel(groups.str(1));
+            const word tableName = word::validate(groups.str(2), true);
 
             if (!tableName.empty())
             {
@@ -80,7 +79,7 @@ Foam::fileFormats::STARCDsurfaceFormatCore::readInpCellTable
 void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
 (
     Ostream& os,
-    const pointField& pointLst,
+    const UList<point>& pts,
     const label nFaces,
     const UList<surfZone>& zoneLst
 )
@@ -88,7 +87,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     const word caseName = os.name().nameLessExt();
 
     os  << "! STAR-CD file written " << clock::dateTime().c_str() << nl
-        << "! " << pointLst.size() << " points, " << nFaces << " faces" << nl
+        << "! " << pts.size() << " points, " << nFaces << " faces" << nl
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;
 

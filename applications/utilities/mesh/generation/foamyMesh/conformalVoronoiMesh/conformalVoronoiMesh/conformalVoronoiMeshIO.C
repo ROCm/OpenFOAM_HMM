@@ -299,14 +299,14 @@ void Foam::conformalVoronoiMesh::writeMesh(const fileName& instance)
 //                IOobject::AUTO_WRITE,
 //                false
 //            ),
-//            UIndirectList<label>
+//            labelUIndList
 //            (
 //                vertexToDualAddressing,
 //                pointToDelaunayVertex
 //            )()
 //        );
 //
-//        label pointi = findIndex(pointDualAddressing, -1);
+//        label pointi = pointDualAddressing.find(-1);
 //        if (pointi != -1)
 //        {
 //            WarningInFunction
@@ -404,16 +404,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::conformalVoronoiMesh::createDummyMesh
     const PtrList<dictionary>& patchDicts
 ) const
 {
-    autoPtr<fvMesh> meshPtr
-    (
-        new fvMesh
-        (
-            io,
-            xferCopy(pointField()),
-            xferCopy(faceList()),
-            xferCopy(cellList())
-        )
-    );
+    auto meshPtr = autoPtr<fvMesh>::New(io, Zero);
     fvMesh& mesh = meshPtr();
 
     List<polyPatch*> patches(patchDicts.size());
@@ -827,10 +818,10 @@ void Foam::conformalVoronoiMesh::writeMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        xferMove(points),
-        xferMove(faces),
-        xferMove(owner),
-        xferMove(neighbour)
+        std::move(points),
+        std::move(faces),
+        std::move(owner),
+        std::move(neighbour)
     );
 
     Info<< indent << "Adding patches to mesh" << endl;

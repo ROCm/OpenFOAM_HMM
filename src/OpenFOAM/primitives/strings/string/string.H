@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,6 +39,7 @@ See also
 SourceFiles
     string.C
     stringIO.C
+    stringTemplates.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -84,7 +85,29 @@ protected:
 
         //- Find position of a file extension dot, return npos on failure.
         //  A wrapped version of find_last_of("./") with additional logic.
-        inline size_type find_ext() const;
+        inline static std::string::size_type find_ext(const std::string& str);
+
+        //- Find position of a file extension dot, return npos on failure.
+        //  A wrapped version of find_last_of("./") with additional logic.
+        inline std::string::size_type find_ext() const;
+
+        //- A printf-style formatter for a primitive.
+        template<class PrimitiveType>
+        static std::string::size_type string_printf
+        (
+            std::string& output,
+            const char* fmt,
+            const PrimitiveType& val
+        );
+
+        //- A printf-style formatter for a primitive.
+        template<class PrimitiveType>
+        static std::string::size_type string_printf
+        (
+            std::string& output,
+            const std::string& fmt,
+            const PrimitiveType& val
+        );
 
         //- Return file name extension (part after last .)
         word ext() const;
@@ -120,16 +143,14 @@ public:
         static const string null;
 
 
-    //- Hashing function class, shared by all the derived classes
-    class hash
+    //- Hashing function for string and derived string classes
+    struct hash
     {
-    public:
-        hash()
-        {}
-
-        //- Hash for string.
-        //  Uses Foam::string instead of std::string for automatic conversions.
-        inline unsigned operator()(const string& str, unsigned seed = 0) const;
+        inline unsigned operator()
+        (
+            const std::string& str,
+            unsigned seed = 0
+        ) const;
     };
 
 
@@ -148,10 +169,13 @@ public:
         inline string(const char* str, const size_type len);
 
         //- Construct from a single character
-        inline string(const char c);
+        inline explicit string(const char c);
 
-        //- Construct from copies of a single character
+        //- Construct fill copies of a single character
         inline string(const size_type len, const char c);
+
+        //- Move construct from std::string
+        inline string(std::string&& str);
 
         //- Construct from Istream
         string(Istream& is);
@@ -159,7 +183,9 @@ public:
 
     // Member Functions
 
-        //- Count and return the number of a given character in the string
+        //- Count the number of occurences of the specified character
+        //- in the string
+        //  Partially deprecated (NOV-2017) in favour of stringOps::count
         size_type count(const char c) const;
 
         //- Does the string contain valid characters only?
@@ -187,14 +213,15 @@ public:
             const char quote = '\\'
         );
 
-        //- True when strings match literally
+        //- Test for equality.
+        //  \return True when strings match literally.
         inline bool match(const std::string& text) const;
 
         //- Avoid masking the normal std::string replace
         using std::string::replace;
 
         //- Replace first occurence of sub-string oldStr with newStr,
-        //  beginning at start
+        //- beginning at start
         string& replace
         (
             const string& oldStr,
@@ -203,7 +230,7 @@ public:
         );
 
         //- Replace all occurences of sub-string oldStr with newStr,
-        //  beginning at start. This is a no-op if oldStr is empty.
+        //- beginning at start. This is a no-op if oldStr is empty.
         string& replaceAll
         (
             const string& oldStr,
@@ -263,7 +290,7 @@ public:
 
     // Member Operators
 
-        //- Match text
+        //- Test for equality. Allows use as a predicate.
         //  \return True when strings match literally.
         inline bool operator()(const std::string& text) const;
 
@@ -282,6 +309,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "stringI.H"
+
+#ifdef NoRepository
+    #include "stringTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

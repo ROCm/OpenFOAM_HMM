@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,59 +31,49 @@ License
 
 template<class LListBase, class T>
 template<class INew>
-void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
+void Foam::ILList<LListBase, T>::read(Istream& is, const INew& inew)
 {
     is.fatalCheck(FUNCTION_NAME);
 
     token firstToken(is);
 
-    is.fatalCheck
-    (
-        "operator>>(Istream&, ILList<LListBase, T>&) : reading first token"
-    );
+    is.fatalCheck("ILList::readList : reading first token");
 
     if (firstToken.isLabel())
     {
-        const label s = firstToken.labelToken();
+        const label len = firstToken.labelToken();
 
         // Read beginning of contents
-        const char delimiter = is.readBeginList("ILList<LListBase, T>");
+        const char delimiter = is.readBeginList("ILList");
 
-        if (s)
+        if (len)
         {
             if (delimiter == token::BEGIN_LIST)
             {
-                for (label i=0; i<s; ++i)
+                for (label i=0; i<len; ++i)
                 {
-                    this->append(iNew(is).ptr());
+                    T* p = inew(is).ptr();
+                    this->append(p);
 
-                    is.fatalCheck
-                    (
-                        "operator>>(Istream&, ILList<LListBase, T>&) : "
-                        "reading entry"
-                    );
+                    is.fatalCheck("ILList::readList : reading entry");
                 }
             }
             else
             {
-                T* tPtr = iNew(is).ptr();
-                this->append(tPtr);
+                T* p = inew(is).ptr();
+                this->append(p);
 
-                is.fatalCheck
-                (
-                    "operator>>(Istream&, ILList<LListBase, T>&) : "
-                    "reading entry"
-                );
+                is.fatalCheck("ILList::readList : reading entry");
 
-                for (label i=1; i<s; ++i)
+                for (label i=1; i<len; ++i)
                 {
-                    this->append(new T(*tPtr));
+                    this->append(new T(*p));  // Copy construct
                 }
             }
         }
 
         // Read end of contents
-        is.readEndList("ILList<LListBase, T>");
+        is.readEndList("ILList");
     }
     else if (firstToken.isPunctuation())
     {
@@ -108,7 +98,9 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
         )
         {
             is.putBack(lastToken);
-            this->append(iNew(is).ptr());
+
+            T* p = inew(is).ptr();
+            this->append(p);
 
             is >> lastToken;
             is.fatalCheck(FUNCTION_NAME);
@@ -128,9 +120,9 @@ void Foam::ILList<LListBase, T>::read(Istream& is, const INew& iNew)
 
 template<class LListBase, class T>
 template<class INew>
-Foam::ILList<LListBase, T>::ILList(Istream& is, const INew& iNew)
+Foam::ILList<LListBase, T>::ILList(Istream& is, const INew& inew)
 {
-    this->read(is, iNew);
+    this->read(is, inew);
 }
 
 
@@ -144,10 +136,10 @@ Foam::ILList<LListBase, T>::ILList(Istream& is)
 // * * * * * * * * * * * * * * * Istream Operator  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Foam::Istream& Foam::operator>>(Istream& is, ILList<LListBase, T>& L)
+Foam::Istream& Foam::operator>>(Istream& is, ILList<LListBase, T>& lst)
 {
-    L.clear();
-    L.read(is, INew<T>());
+    lst.clear();
+    lst.read(is, INew<T>());
 
     return is;
 }

@@ -47,6 +47,38 @@ namespace functionObjects
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+const Foam::word&
+Foam::functionObjects::streamLineBase::sampledSetAxis() const
+{
+    if (sampledSetPtr_.empty())
+    {
+        sampledSetPoints();
+    }
+
+    return sampledSetAxis_;
+}
+
+
+const Foam::sampledSet&
+Foam::functionObjects::streamLineBase::sampledSetPoints() const
+{
+    if (sampledSetPtr_.empty())
+    {
+        sampledSetPtr_ = sampledSet::New
+        (
+            "seedSampleSet",
+            mesh_,
+            meshSearchMeshObject::New(mesh_),
+            dict_.subDict("seedSampleSet")
+        );
+
+        sampledSetAxis_ = sampledSetPtr_->axis();
+    }
+
+    return *sampledSetPtr_;
+}
+
+
 Foam::autoPtr<Foam::indirectPrimitivePatch>
 Foam::functionObjects::streamLineBase::wallPatch() const
 {
@@ -54,12 +86,12 @@ Foam::functionObjects::streamLineBase::wallPatch() const
 
     label nFaces = 0;
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        //if (!polyPatch::constraintType(patches[patchi].type()))
-        if (isA<wallPolyPatch>(patches[patchi]))
+        //if (!polyPatch::constraintType(pp.type()))
+        if (isA<wallPolyPatch>(pp))
         {
-            nFaces += patches[patchi].size();
+            nFaces += pp.size();
         }
     }
 
@@ -67,13 +99,11 @@ Foam::functionObjects::streamLineBase::wallPatch() const
 
     nFaces = 0;
 
-    forAll(patches, patchi)
+    for (const polyPatch& pp : patches)
     {
-        //if (!polyPatch::constraintType(patches[patchi].type()))
-        if (isA<wallPolyPatch>(patches[patchi]))
+        //if (!polyPatch::constraintType(pp.type()))
+        if (isA<wallPolyPatch>(pp))
         {
-            const polyPatch& pp = patches[patchi];
-
             forAll(pp, i)
             {
                 addressing[nFaces++] = pp.start()+i;
@@ -81,17 +111,14 @@ Foam::functionObjects::streamLineBase::wallPatch() const
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>
+    return autoPtr<indirectPrimitivePatch>::New
     (
-        new indirectPrimitivePatch
+        IndirectList<face>
         (
-            IndirectList<face>
-            (
-                mesh_.faces(),
-                addressing
-            ),
-            mesh_.points()
-        )
+            mesh_.faces(),
+            addressing
+        ),
+        mesh_.points()
     );
 }
 
@@ -110,24 +137,24 @@ void Foam::functionObjects::streamLineBase::initInterpolations
     label nScalar = 0;
     label nVector = 0;
 
-    forAll(fields_, i)
+    for (const word& fieldName : fields_)
     {
-        if (foundObject<volScalarField>(fields_[i]))
+        if (foundObject<volScalarField>(fieldName))
         {
             nScalar++;
         }
-        else if (foundObject<volVectorField>(fields_[i]))
+        else if (foundObject<volVectorField>(fieldName))
         {
             nVector++;
         }
         else
         {
             FatalErrorInFunction
-                << "Cannot find field " << fields_[i] << nl
+                << "Cannot find field " << fieldName << nl
                 << "Valid scalar fields are:"
-                << mesh_.names(volScalarField::typeName) << nl
+                << flatOutput(mesh_.names(volScalarField::typeName)) << nl
                 << "Valid vector fields are:"
-                << mesh_.names(volVectorField::typeName)
+                << flatOutput(mesh_.names(volVectorField::typeName))
                 << exit(FatalError);
         }
     }
@@ -136,12 +163,11 @@ void Foam::functionObjects::streamLineBase::initInterpolations
     vvInterp.setSize(nVector);
     nVector = 0;
 
-    forAll(fields_, i)
+    for (const word& fieldName : fields_)
     {
-        if (foundObject<volScalarField>(fields_[i]))
+        if (foundObject<volScalarField>(fieldName))
         {
-            const volScalarField& f =
-                lookupObject<volScalarField>(fields_[i]);
+            const volScalarField& f = lookupObject<volScalarField>(fieldName);
             vsInterp.set
             (
                 nScalar++,
@@ -152,10 +178,9 @@ void Foam::functionObjects::streamLineBase::initInterpolations
                 )
             );
         }
-        else if (foundObject<volVectorField>(fields_[i]))
+        else if (foundObject<volVectorField>(fieldName))
         {
-            const volVectorField& f =
-                lookupObject<volVectorField>(fields_[i]);
+            const volVectorField& f = lookupObject<volVectorField>(fieldName);
 
             if (f.name() == UName_)
             {
@@ -231,7 +256,7 @@ void Foam::functionObjects::streamLineBase::storePoint
     DynamicList<vectorList>& newVectors
 ) const
 {
-    label sz = newTrack.size();
+    const label sz = newTrack.size();
 
     const List<point>& track = allTracks_[tracki];
 
@@ -274,6 +299,7 @@ void Foam::functionObjects::streamLineBase::trimToBox
 ) const
 {
     const List<point>& track = allTracks_[tracki];
+
     if (track.size())
     {
         for
@@ -287,7 +313,7 @@ void Foam::functionObjects::streamLineBase::trimToBox
             const point& endPt = track[segmenti];
 
             const vector d(endPt-startPt);
-            scalar magD = mag(d);
+            const scalar magD = mag(d);
             if (magD > ROOTVSMALL)
             {
                 if (bb.contains(startPt))
@@ -507,6 +533,12 @@ Foam::functionObjects::streamLineBase::~streamLineBase()
 
 bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 {
+    if (&dict_ != &dict)
+    {
+        // Update local copy of dictionary:
+        dict_ = dict;
+    }
+
     fvMeshFunctionObject::read(dict);
 
     Info<< type() << " " << name() << ":" << nl;
@@ -516,7 +548,7 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     Info<< "    Employing velocity field " << UName_ << endl;
 
-    if (findIndex(fields_, UName_) == -1)
+    if (!fields_.found(UName_))
     {
         FatalIOErrorInFunction(dict)
             << "Velocity field for tracking " << UName_
@@ -536,10 +568,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
 
     trackLength_ = VGREAT;
-    if (dict.found("trackLength"))
+    if (dict.readIfPresent("trackLength", trackLength_))
     {
-        dict.lookup("trackLength") >> trackLength_;
-
         Info<< type() << " : fixed track length specified : "
             << trackLength_ << nl << endl;
     }
@@ -562,14 +592,8 @@ bool Foam::functionObjects::streamLineBase::read(const dictionary& dict)
 
     cloudName_ = dict.lookupOrDefault<word>("cloud", type());
 
-    sampledSetPtr_ = sampledSet::New
-    (
-        "seedSampleSet",
-        mesh_,
-        meshSearchMeshObject::New(mesh_),
-        dict.subDict("seedSampleSet")
-    );
-    sampledSetAxis_ = sampledSetPtr_->axis();
+    sampledSetPtr_.clear();
+    sampledSetAxis_.clear();
 
     scalarFormatterPtr_ = writer<scalar>::New(dict.lookup("setFormat"));
     vectorFormatterPtr_ = writer<vector>::New(dict.lookup("setFormat"));
@@ -631,8 +655,8 @@ bool Foam::functionObjects::streamLineBase::write()
         const mapDistribute distMap
         (
             globalTrackIDs.size(),
-            sendMap.xfer(),
-            recvMap.xfer()
+            std::move(sendMap),
+            std::move(recvMap)
         );
 
 
@@ -756,7 +780,7 @@ bool Foam::functionObjects::streamLineBase::write()
                     new coordSet
                     (
                         "track" + Foam::name(nTracks),
-                        sampledSetAxis_                 //"xyz"
+                        sampledSetAxis()  // "xyz"
                     )
                 );
                 oldToNewTrack[tracki] = nTracks;
@@ -767,7 +791,7 @@ bool Foam::functionObjects::streamLineBase::write()
 
         // Convert scalar values
 
-        if (allScalars_.size() > 0 && tracks.size() > 0)
+        if (!allScalars_.empty() && !tracks.empty())
         {
             List<List<scalarField>> scalarValues(allScalars_.size());
 
@@ -781,7 +805,7 @@ bool Foam::functionObjects::streamLineBase::write()
                     scalarList& vals = allTrackVals[tracki];
                     if (vals.size())
                     {
-                        label newTracki = oldToNewTrack[tracki];
+                        const label newTracki = oldToNewTrack[tracki];
                         scalarValues[scalari][newTracki].transfer(vals);
                     }
                 }
@@ -811,7 +835,7 @@ bool Foam::functionObjects::streamLineBase::write()
 
         // Convert vector values
 
-        if (allVectors_.size() > 0 && tracks.size() > 0)
+        if (!allVectors_.empty() && !tracks.empty())
         {
             List<List<vectorField>> vectorValues(allVectors_.size());
 
@@ -825,7 +849,7 @@ bool Foam::functionObjects::streamLineBase::write()
                     vectorList& vals = allTrackVals[tracki];
                     if (vals.size())
                     {
-                        label newTracki = oldToNewTrack[tracki];
+                        const label newTracki = oldToNewTrack[tracki];
                         vectorValues[vectori][newTracki].transfer(vals);
                     }
                 }
@@ -854,20 +878,18 @@ bool Foam::functionObjects::streamLineBase::write()
     // File names are generated on the master but setProperty needs to
     // be across all procs
     Pstream::scatter(scalarVtkFile);
-    forAll(scalarNames_, namei)
+    for (const word& fieldName : scalarNames_)
     {
         dictionary propsDict;
         propsDict.add("file", scalarVtkFile);
-        const word& fieldName = scalarNames_[namei];
         setProperty(fieldName, propsDict);
     }
 
     Pstream::scatter(vectorVtkFile);
-    forAll(vectorNames_, namei)
+    for (const word& fieldName : vectorNames_)
     {
         dictionary propsDict;
         propsDict.add("file", vectorVtkFile);
-        const word& fieldName = vectorNames_[namei];
         setProperty(fieldName, propsDict);
     }
 

@@ -227,14 +227,14 @@ Foam::tmp<Foam::volScalarField> Foam::phaseModel::d() const
 Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
 Foam::phaseModel::turbulence()
 {
-    return turbulence_();
+    return *turbulence_;
 }
 
 
 const Foam::PhaseCompressibleTurbulenceModel<Foam::phaseModel>&
 Foam::phaseModel::turbulence() const
 {
-    return turbulence_();
+    return *turbulence_;
 }
 
 

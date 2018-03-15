@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -82,6 +82,15 @@ void Foam::zone::calcLookupMap() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::zone::zone(const word& name, const label index)
+:
+    labelList(),
+    name_(name),
+    index_(index),
+    lookupMapPtr_(nullptr)
+{}
+
+
 Foam::zone::zone
 (
     const word& name,
@@ -99,11 +108,11 @@ Foam::zone::zone
 Foam::zone::zone
 (
     const word& name,
-    const Xfer<labelList>& addr,
+    labelList&& addr,
     const label index
 )
 :
-    labelList(addr),
+    labelList(std::move(addr)),
     name_(name),
     index_(index),
     lookupMapPtr_(nullptr)
@@ -127,13 +136,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const zone& z,
+    const zone& origZone,
     const labelUList& addr,
     const label index
 )
 :
     labelList(addr),
-    name_(z.name()),
+    name_(origZone.name()),
     index_(index),
     lookupMapPtr_(nullptr)
 {}
@@ -141,13 +150,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const zone& z,
-    const Xfer<labelList>& addr,
+    const zone& origZone,
+    labelList&& addr,
     const label index
 )
 :
-    labelList(addr),
-    name_(z.name()),
+    labelList(std::move(addr)),
+    name_(origZone.name()),
     index_(index),
     lookupMapPtr_(nullptr)
 {}
@@ -165,18 +174,7 @@ Foam::zone::~zone()
 
 Foam::label Foam::zone::localID(const label globalCellID) const
 {
-    const Map<label>& lm = lookupMap();
-
-    Map<label>::const_iterator lmIter = lm.find(globalCellID);
-
-    if (lmIter == lm.end())
-    {
-        return -1;
-    }
-    else
-    {
-        return lmIter();
-    }
+    return lookupMap().lookup(globalCellID, -1);
 }
 
 
@@ -195,9 +193,9 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
     // To check for duplicate entries
     labelHashSet elems(size());
 
-    forAll(addr, i)
+    for (const label idx : addr)
     {
-        if (addr[i] < 0 || addr[i] >= maxSize)
+        if (idx < 0 || idx >= maxSize)
         {
             hasError = true;
 
@@ -205,7 +203,7 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
             {
                 SeriousErrorInFunction
                     << "Zone " << name_
-                    << " contains invalid index label " << addr[i] << nl
+                    << " contains invalid index label " << idx << nl
                     << "Valid index labels are 0.."
                     << maxSize-1 << endl;
             }
@@ -215,13 +213,13 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
                 break;
             }
         }
-        else if (!elems.insert(addr[i]))
+        else if (!elems.insert(idx))
         {
             if (report)
             {
                 WarningInFunction
                     << "Zone " << name_
-                    << " contains duplicate index label " << addr[i] << endl;
+                    << " contains duplicate index label " << idx << endl;
             }
         }
     }
@@ -239,9 +237,9 @@ void Foam::zone::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const zone& z)
+Foam::Ostream& Foam::operator<<(Ostream& os, const zone& zn)
 {
-    z.write(os);
+    zn.write(os);
     os.check(FUNCTION_NAME);
     return os;
 }

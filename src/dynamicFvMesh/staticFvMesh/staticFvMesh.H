@@ -72,7 +72,7 @@ public:
 
 
     //- Destructor
-    ~staticFvMesh();
+    ~staticFvMesh() = default;
 
 
     // Member Functions

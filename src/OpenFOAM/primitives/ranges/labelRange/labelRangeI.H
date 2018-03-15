@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -23,10 +23,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::labelRange::labelRange()
+inline constexpr Foam::labelRange::labelRange() noexcept
 :
     start_(0),
     size_(0)
@@ -36,22 +35,35 @@ inline Foam::labelRange::labelRange()
 inline Foam::labelRange::labelRange
 (
     const label start,
+    const label size
+) noexcept
+:
+    start_(start),
+    size_(size)
+{
+    if (size_ < 0)
+    {
+        size_ = 0;  // No negative sizes
+    }
+}
+
+inline Foam::labelRange::labelRange
+(
+    const label start,
     const label size,
     const bool adjustStart
-)
+) noexcept
 :
     start_(start),
     size_(size)
 {
     if (adjustStart)
     {
-        // Disallow invalid indices and sizes
-        adjust();
+        adjust(); // Eliminate negative start, adjust size accordingly
     }
     else if (size_ < 0)
     {
-        // Disallow invalid sizes
-        size_ = 0;
+        size_ = 0;  // No negative sizes
     }
 }
 
@@ -89,7 +101,7 @@ Foam::labelRange::const_iterator::operator++()
 inline Foam::labelRange::const_iterator
 Foam::labelRange::const_iterator::operator++(int)
 {
-    const_iterator old = *this;
+    const_iterator old(*this);
     ++value_;
     return old;
 }
@@ -125,6 +137,14 @@ inline Foam::labelRange::const_iterator Foam::labelRange::cbegin() const
 }
 
 
+inline Foam::labelRange::const_iterator
+Foam::labelRange::at(const label localIndex) const
+{
+    // The constructor handles out-of-range properly
+    return const_iterator(this, localIndex);
+}
+
+
 inline const Foam::labelRange::const_iterator Foam::labelRange::end() const
 {
     return const_iterator(this, -1);
@@ -139,93 +159,94 @@ inline const Foam::labelRange::const_iterator Foam::labelRange::cend() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline Foam::labelRange Foam::labelRange::identity(const label len)
+inline Foam::labelRange Foam::labelRange::identity(const label len) noexcept
 {
     return labelRange(0, len);
 }
 
 
-inline void Foam::labelRange::setStart(const label i)
+inline void Foam::labelRange::setStart(const label i) noexcept
 {
     start_ = i;
 }
 
 
-inline void Foam::labelRange::setSize(const label n)
+inline void Foam::labelRange::resize(const label n) noexcept
 {
     size_ = n;
-    if (size_ < 0) size_ = 0;
+    if (size_ < 0) size_ = 0;  // No negative sizes
 }
 
 
-inline void Foam::labelRange::resize(const label n)
+inline void Foam::labelRange::setSize(const label n) noexcept
 {
-    setSize(n);
+    size_ = n;
+    if (size_ < 0) size_ = 0;  // No negative sizes
 }
 
 
-inline void Foam::labelRange::decrement()
+inline void Foam::labelRange::decrement() noexcept
 {
     --size_;
-    if (size_ < 0) size_ = 0;
+    if (size_ < 0) size_ = 0;  // No negative sizes
 }
 
 
-inline void Foam::labelRange::increment()
+inline void Foam::labelRange::increment() noexcept
 {
     ++size_;
 }
 
 
-inline void Foam::labelRange::clear()
+inline void Foam::labelRange::clear() noexcept
 {
     start_ = size_ = 0;
 }
 
 
-inline bool Foam::labelRange::empty() const
+inline bool Foam::labelRange::empty() const noexcept
 {
     return !size_;
 }
 
 
-inline bool Foam::labelRange::valid() const
+inline bool Foam::labelRange::valid() const noexcept
 {
     return size_;
 }
 
 
-inline Foam::label Foam::labelRange::size() const
+inline Foam::label Foam::labelRange::size() const noexcept
 {
     return size_;
 }
 
 
-inline Foam::label Foam::labelRange::start() const
+inline Foam::label Foam::labelRange::start() const noexcept
 {
     return start_;
 }
 
 
-inline Foam::label Foam::labelRange::first() const
+inline Foam::label Foam::labelRange::first() const noexcept
 {
     return start_;
 }
 
 
-inline Foam::label Foam::labelRange::last() const
+inline Foam::label Foam::labelRange::last() const noexcept
 {
     return start_ + size_ - 1;
 }
 
 
-inline Foam::label Foam::labelRange::before() const
+inline Foam::label Foam::labelRange::before() const noexcept
 {
     return start_ - 1;
 }
 
 
-inline Foam::label Foam::labelRange::after() const
+inline Foam::label Foam::labelRange::after() const noexcept
 {
     return start_ + size_;
 }
@@ -234,29 +255,45 @@ inline Foam::label Foam::labelRange::after() const
 inline bool Foam::labelRange::reset
 (
     const label start,
-    const label size,
-    const bool adjustStart
-)
+    const label size
+) noexcept
 {
     start_ = start;
     size_  = size;
 
-    if (adjustStart)
+    if (size_ < 0)
     {
-        // Disallow invalid indices and sizes
-        adjust();
-    }
-    else if (size_ < 0)
-    {
-        // Disallow invalid sizes
-        size_ = 0;
+        size_ = 0;  // No negative sizes
     }
 
     return size_;
 }
 
 
-inline bool Foam::labelRange::found(const label value) const
+inline bool Foam::labelRange::reset
+(
+    const label start,
+    const label size,
+    const bool adjustStart
+) noexcept
+{
+    start_ = start;
+    size_  = size;
+
+    if (adjustStart)
+    {
+        adjust(); // Eliminate negative start, adjust size accordingly
+    }
+    else if (size_ < 0)
+    {
+        size_ = 0;  // No negative sizes
+    }
+
+    return size_;
+}
+
+
+inline bool Foam::labelRange::found(const label value) const noexcept
 {
     return (value >= this->first() && value <= this->last());
 }
@@ -264,41 +301,43 @@ inline bool Foam::labelRange::found(const label value) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline Foam::label Foam::labelRange::operator[](const label localIndex) const
+inline Foam::label Foam::labelRange::operator[]
+(
+    const label localIndex
+) const noexcept
 {
     return start_ + localIndex;
 }
 
 
-inline Foam::labelRange::const_iterator
-Foam::labelRange::operator()(const label localIndex) const
+inline bool Foam::labelRange::operator()(const label value) const noexcept
 {
-    return const_iterator(this, localIndex);
+    return found(value);
 }
 
 
-inline Foam::label Foam::labelRange::operator++()
+inline Foam::label Foam::labelRange::operator++() noexcept
 {
     return ++size_;
 }
 
 
-inline Foam::label Foam::labelRange::operator++(int)
+inline Foam::label Foam::labelRange::operator++(int) noexcept
 {
     return size_++;
 }
 
 
-inline Foam::label Foam::labelRange::operator--()
+inline Foam::label Foam::labelRange::operator--() noexcept
 {
     decrement();
     return size_;
 }
 
 
-inline Foam::label Foam::labelRange::operator--(int)
+inline Foam::label Foam::labelRange::operator--(int) noexcept
 {
-    const label old = size_;
+    const label old(size_);
     decrement();
     return old;
 }

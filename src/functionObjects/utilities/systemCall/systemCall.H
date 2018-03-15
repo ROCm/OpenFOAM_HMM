@@ -28,7 +28,7 @@ Group
     grpUtilitiesFunctionObjects
 
 Description
-    Executes system calls, entered in the form of a string lists.
+    Executes system calls, entered in the form of string lists.
 
     Calls can be made at the following points in the calculation:
     - every time step
@@ -36,7 +36,7 @@ Description
     - end of the calculation
 
 Usage
-    Example of function object specification:
+    Example of the function object specification:
     \verbatim
     systemCall1
     {
@@ -49,11 +49,11 @@ Usage
         );
         writeCalls
         (
-            "echo \*\*\* writing data \*\*\*"
+            "echo === writing data ==="
         );
         endCalls
         (
-            "echo \*\*\* writing .bashrc \*\*\*"
+            "echo === echoing .bashrc ==="
             "cat ~/.bashrc"
             "echo \*\*\* done \*\*\*"
         );
@@ -67,6 +67,7 @@ Usage
         executeCalls | list of calls on execute | yes         |
         writeCalls   | list of calls on write   | yes         |
         endCalls     | list of calls on end     | yes         |
+        master       | execute on master only   | no          | false
     \endtable
 
 Note
@@ -74,6 +75,9 @@ Note
     security risk.  In order to use the \c systemCall function object, the
     \c allowSystemOperations must be set to '1'; otherwise, system calls will
     not be allowed.
+
+    Additionally, since the system commands are normally sent via the shell,
+    special shell character may require backslash escaping.
 
 See also
     Foam::functionObject
@@ -118,16 +122,20 @@ protected:
         //- List of calls to execute - write steps
         stringList writeCalls_;
 
+        //- Perform system calls on the master only
+        bool masterOnly_;
 
-private:
 
-    // Private member functions
+    // Protected Member Functions
+
+        //- Dispatch specified calls
+        label dispatch(const stringList& calls);
 
         //- Disallow default bitwise copy construct
-        systemCall(const systemCall&);
+        systemCall(const systemCall&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const systemCall&);
+        void operator=(const systemCall&) = delete;
 
 
 public:
@@ -148,22 +156,22 @@ public:
 
 
     //- Destructor
-    virtual ~systemCall();
+    virtual ~systemCall() = default;
 
 
     // Member Functions
 
         //- Read the system calls
-        virtual bool read(const dictionary&);
+        virtual bool read(const dictionary& dict);
 
         //- Execute the "executeCalls" at each time-step
         virtual bool execute();
 
-        //- Execute the "endCalls" at the final time-loop
-        virtual bool end();
-
         //- Write, execute the "writeCalls"
         virtual bool write();
+
+        //- Execute the "endCalls" at the final time-loop
+        virtual bool end();
 };
 
 

@@ -136,7 +136,7 @@ public:
 
 
     //- Destructor
-    virtual ~PatchInteractionModel();
+    virtual ~PatchInteractionModel() = default;
 
 
     //- Selector
@@ -174,10 +174,8 @@ public:
         void addToEscapedParcels(const scalar mass);
 
 
-        // I-O
-
-            //- Write patch interaction info to stream
-            virtual void info(Ostream& os);
+        //- Write patch interaction info to stream
+        virtual void info(Ostream& os);
 };
 
 

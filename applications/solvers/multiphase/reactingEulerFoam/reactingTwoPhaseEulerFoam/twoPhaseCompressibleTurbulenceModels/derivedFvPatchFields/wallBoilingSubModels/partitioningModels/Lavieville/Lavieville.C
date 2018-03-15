@@ -88,7 +88,7 @@ void Foam::wallBoilingModels::partitioningModels::
 Lavieville::write(Ostream& os) const
 {
     partitioningModel::write(os);
-    os.writeKeyword("alphaCrit") << alphaCrit_ << token::END_STATEMENT << nl;
+    os.writeEntry("alphaCrit", alphaCrit_);
 }
 
 

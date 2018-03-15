@@ -25,7 +25,7 @@ Class
     Foam::displacementSBRStressFvMotionSolver
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Mesh motion solver for an fvMesh.  Based on solving the cell-centre
@@ -130,7 +130,7 @@ public:
         //- Return diffusivity
         motionDiffusivity& diffusivity()
         {
-            return diffusivityPtr_();
+            return *diffusivityPtr_;
         }
 
         //- Return point location obtained from the current motion field

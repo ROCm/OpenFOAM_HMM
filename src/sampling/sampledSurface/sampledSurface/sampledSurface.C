@@ -137,7 +137,7 @@ Foam::tmp<Foam::scalarField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<scalarField>(nullptr);
+    return tmp<scalarField>();
 }
 
 
@@ -147,7 +147,7 @@ Foam::tmp<Foam::vectorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<vectorField>(nullptr);
+    return tmp<vectorField>();
 }
 
 
@@ -157,7 +157,7 @@ Foam::tmp<Foam::sphericalTensorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<sphericalTensorField>(nullptr);
+    return tmp<sphericalTensorField>();
 }
 
 
@@ -167,7 +167,7 @@ Foam::tmp<Foam::symmTensorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<symmTensorField>(nullptr);
+    return tmp<symmTensorField>();
 }
 
 
@@ -177,7 +177,7 @@ Foam::tmp<Foam::tensorField> Foam::sampledSurface::sample
 ) const
 {
     NotImplemented;
-    return tmp<tensorField>(nullptr);
+    return tmp<tensorField>();
 }
 
 

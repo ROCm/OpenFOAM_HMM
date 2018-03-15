@@ -152,7 +152,7 @@ public:
         void reconstructFvVolumeInternalFields
         (
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         ) const;
 
         //- Read, reconstruct and write all/selected volume fields
@@ -160,7 +160,7 @@ public:
         void reconstructFvVolumeFields
         (
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         ) const;
 
         //- Read, reconstruct and write all/selected surface fields
@@ -168,7 +168,7 @@ public:
         void reconstructFvSurfaceFields
         (
             const IOobjectList& objects,
-            const HashSet<word>& selectedFields
+            const wordHashSet& selectedFields
         ) const;
 
         //- Helper: reconstruct and write mesh points

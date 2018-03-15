@@ -62,16 +62,6 @@ inline word name(const uint32_t val)
 }
 
 
-//- Return a word representation of a uint32, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const char* fmt, const uint32_t);
-
-
-//- Return a word representation of a uint32, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const std::string& fmt, const uint32_t);
-
-
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 //- Read uint32_t from stream

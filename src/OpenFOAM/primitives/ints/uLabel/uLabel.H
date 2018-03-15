@@ -58,7 +58,7 @@ namespace Foam
 
 typedef UINT_SIZE(uint, _t) uLabel;
 
-static const uLabel uLabelMax = UINT_SIZE(UINT, _MAX);
+constexpr uLabel uLabelMax = UINT_SIZE(UINT, _MAX);
 
 //- Read uLabel from stream.
 //  Uses readUint32 or readUint64 according to WM_LABEL_SIZE

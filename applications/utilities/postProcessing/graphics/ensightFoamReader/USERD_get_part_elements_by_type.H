@@ -57,7 +57,7 @@ int USERD_get_part_elements_by_type
         //================================
         if (element_type == Z_HEX08)
         {
-            const cellModel& hex = *(cellModeller::lookup("hex"));
+            const cellModel& hex = cellModel::ref(cellModel::HEX);
 
             label nHex08 = 0;
             forAll(cellShapes, celli)
@@ -80,7 +80,7 @@ int USERD_get_part_elements_by_type
         //================================
         else if (element_type == Z_PEN06)
         {
-            const cellModel& prism = *(cellModeller::lookup("prism"));
+            const cellModel& prism = cellModel::ref(cellModel::PRISM);
 
             label nPen06 = 0;
             forAll(cellShapes, celli)
@@ -103,7 +103,7 @@ int USERD_get_part_elements_by_type
         //================================
         else if (element_type == Z_PYR05)
         {
-            const cellModel& pyr = *(cellModeller::lookup("pyr"));
+            const cellModel& pyr = cellModel::ref(cellModel::PYR);
 
             label nPyr05 = 0;
             forAll(cellShapes, celli)
@@ -126,7 +126,7 @@ int USERD_get_part_elements_by_type
         //================================
         else if (element_type == Z_TET04)
         {
-            const cellModel& tet = *(cellModeller::lookup("tet"));
+            const cellModel& tet = cellModel::ref(cellModel::TET);
 
             label nTet04 = 0;
             forAll(cellShapes, celli)

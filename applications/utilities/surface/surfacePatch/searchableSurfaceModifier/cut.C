@@ -80,7 +80,7 @@ void Foam::searchableSurfaceModifiers::cut::triangulate
             patchI
         );
     }
-    cutSurf = triSurface(tris.xfer(), patches, pts.xfer());
+    cutSurf = triSurface(tris, patches, pts, true);
 }
 
 
@@ -277,12 +277,6 @@ Foam::searchableSurfaceModifiers::cut::cut
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::searchableSurfaceModifiers::cut::~cut()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::searchableSurfaceModifiers::cut::modify
@@ -296,14 +290,12 @@ bool Foam::searchableSurfaceModifiers::cut::modify
     bool changed = false;
 
     // Find the surfaces to cut with
-    forAll(cutterNames_, cutNameI)
+    for (const wordRe& cutterName : cutterNames_)
     {
-        labelList geomIDs =
-            findStrings(cutterNames_[cutNameI], geometry_.names());
+        labelList geomIDs = findStrings(cutterName, geometry_.names());
 
-        forAll(geomIDs, j)
+        for (const label geomI : geomIDs)
         {
-            label geomI = geomIDs[j];
             const searchableSurface& cutter = geometry_[geomI];
 
             // Triangulate
@@ -339,12 +331,12 @@ bool Foam::searchableSurfaceModifiers::cut::modify
             {
                 if (volTypes[i] == volumeType::INSIDE)
                 {
-                    nInside++;
+                    ++nInside;
                 }
             }
 
             // Add a patch for inside the box
-            if (nInside > 0 && surf3.patches().size() > 0)
+            if (nInside && surf3.patches().size() > 0)
             {
                 geometricSurfacePatchList newPatches(surf3.patches());
                 label sz = newPatches.size();
@@ -370,7 +362,7 @@ bool Foam::searchableSurfaceModifiers::cut::modify
                     }
                 }
                 pointField newPoints(surf3.points());
-                surf = triSurface(newTris.xfer(), newPatches, newPoints.xfer());
+                surf = triSurface(newTris, newPatches, newPoints, true);
 
                 changed = true;
             }

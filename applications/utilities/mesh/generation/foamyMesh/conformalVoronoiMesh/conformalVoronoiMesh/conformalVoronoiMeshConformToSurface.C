@@ -420,7 +420,7 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation()
             }
         }
 
-        receivedVertices.set
+        receivedVertices.reset
         (
             new labelPairHashSet(number_of_vertices()/Pstream::nProcs())
         );

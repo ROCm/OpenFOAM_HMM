@@ -103,7 +103,7 @@ Foam::constantAlphaContactAngleFvPatchScalarField::theta
     const fvsPatchVectorField&
 ) const
 {
-    return tmp<scalarField>(new scalarField(size(), theta0_));
+    return tmp<scalarField>::New(size(), theta0_);
 }
 
 
@@ -113,7 +113,7 @@ void Foam::constantAlphaContactAngleFvPatchScalarField::write
 ) const
 {
     alphaContactAngleFvPatchScalarField::write(os);
-    os.writeKeyword("theta0") << theta0_ << token::END_STATEMENT << nl;
+    os.writeEntry("theta0", theta0_);
     writeEntry("value", os);
 }
 

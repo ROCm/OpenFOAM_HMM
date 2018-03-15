@@ -57,7 +57,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("outputFile.ext");
+    argList::addArgument("outputFile.ext");
     timeSelector::addOptions();
 
     argList::addOption
@@ -77,8 +77,8 @@ int main(int argc, char *argv[])
     fileName exportName = args[1];
 
     scalar scaleFactor = 0;
-    args.optionReadIfPresent<scalar>("scale", scaleFactor);
-    const bool doTriangulate = args.optionFound("tri");
+    args.readIfPresent<scalar>("scale", scaleFactor);
+    const bool doTriangulate = args.found("tri");
 
     fileName exportBase = exportName.lessExt();
     word exportExt = exportName.ext();

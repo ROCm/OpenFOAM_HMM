@@ -57,7 +57,7 @@ Foam::regionModels::regionModel1D::nMagSf() const
          << "Face normal areas not available" << abort(FatalError);
     }
 
-    return nMagSfPtr_();
+    return *nMagSfPtr_;
 }
 
 

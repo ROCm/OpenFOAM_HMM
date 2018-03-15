@@ -138,10 +138,7 @@ template<class Type>
 void Foam::inletOutletFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
     this->refValue().writeEntry("inletValue", os);
     this->writeEntry("value", os);
 }

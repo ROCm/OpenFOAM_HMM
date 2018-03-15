@@ -40,66 +40,18 @@ namespace Foam
     defineSurfaceWriterWriteFields(nastranSurfaceWriter);
 }
 
-
 const Foam::Enum
 <
-    Foam::nastranSurfaceWriter::writeFormat
+    Foam::nastranSurfaceWriter::loadFormat
 >
-Foam::nastranSurfaceWriter::writeFormatNames_
+Foam::nastranSurfaceWriter::loadFormatNames_
 {
-    { writeFormat::wfShort, "short" },
-    { writeFormat::wfLong, "long" },
-    { writeFormat::wfFree, "free" },
-};
-
-
-const Foam::Enum
-<
-    Foam::nastranSurfaceWriter::dataFormat
->
-Foam::nastranSurfaceWriter::dataFormatNames_
-{
-    { dataFormat::dfPLOAD2, "PLOAD2" },
-    { dataFormat::dfPLOAD4, "PLOAD4" },
+    { loadFormat::PLOAD2, "PLOAD2" },
+    { loadFormat::PLOAD4, "PLOAD4" },
 };
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::nastranSurfaceWriter::formatOS(Ostream& os) const
-{
-    os.setf(ios_base::scientific);
-
-    // Capitalise the E marker
-    os.setf(ios_base::uppercase);
-
-    label prec = 0;
-    label offset = 7;
-    switch (writeFormat_)
-    {
-        case wfShort:
-        {
-            prec = 8 - offset;
-            break;
-        }
-
-        case wfFree:
-        case wfLong:
-        {
-            prec = 16 - offset;
-            break;
-        }
-
-        default:
-        {
-            FatalErrorInFunction
-                << "Unknown writeFormat enumeration" << abort(FatalError);
-        }
-    }
-
-    os.precision(prec);
-}
-
 
 Foam::Ostream& Foam::nastranSurfaceWriter::writeKeyword
 (
@@ -107,97 +59,65 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeKeyword
     const word& keyword
 ) const
 {
-    os.setf(ios_base::left);
-
-    switch (writeFormat_)
-    {
-        case wfShort:
-        {
-            os  << setw(8) << keyword;
-            break;
-        }
-
-        case wfLong:
-        {
-            os  << setw(8) << word(keyword + '*');
-            break;
-        }
-
-        case wfFree:
-        {
-            os  << keyword;
-            break;
-        }
-    }
-
-    os.unsetf(ios_base::left);
-
-    return os;
+    return fileFormats::NASCore::writeKeyword(os, keyword, writeFormat_);
 }
 
 
 void Foam::nastranSurfaceWriter::writeCoord
 (
     Ostream& os,
-    const point& p,
+    const point& pt,
     const label pointI
 ) const
 {
     // Fixed short/long formats:
     // 1 GRID
     // 2 ID   : point ID - requires starting index of 1
-    // 3 CP   : co-ordinate system ID                (blank)
-    // 4 X1   : point x cp-ordinate
-    // 5 X2   : point x cp-ordinate
-    // 6 X3   : point x cp-ordinate
-    // 7 CD   : co-ordinate system for displacements (blank)
-    // 8 PS   : single point constraints             (blank)
+    // 3 CP   : coordinate system ID                (blank)
+    // 4 X1   : point x coordinate
+    // 5 X2   : point x coordinate
+    // 6 X3   : point x coordinate
+    // 7 CD   : coordinate system for displacements (blank)
+    // 8 PS   : single point constraints            (blank)
     // 9 SEID : super-element ID
 
     writeKeyword(os, "GRID")    << separator_;
 
-    os.setf(ios_base::right);
+    os.setf(std::ios_base::right);
 
     writeValue(os, pointI+1)    << separator_;
     writeValue(os, "")          << separator_;
-    writeValue(os, p.x())       << separator_;
-    writeValue(os, p.y())       << separator_;
+    writeValue(os, pt.x())      << separator_;
+    writeValue(os, pt.y())      << separator_;
 
     switch (writeFormat_)
     {
-        case wfShort:
+        case fieldFormat::SHORT :
         {
-            os  << setw(8) << p.z()
-                << nl;
-            os.unsetf(ios_base::right);
+            os  << setw(8) << pt.z() << nl;
+            os.unsetf(std::ios_base::right);
             break;
         }
 
-        case wfLong:
+        case fieldFormat::LONG :
         {
             os  << nl;
-            os.unsetf(ios_base::right);
+            os.unsetf(std::ios_base::right);
             writeKeyword(os, "");
-            os.setf(ios_base::right);
+            os.setf(std::ios_base::right);
 
-            writeValue(os, p.z())  << nl;
+            writeValue(os, pt.z())  << nl;
             break;
         }
 
-        case wfFree:
+        case fieldFormat::FREE :
         {
-            writeValue(os, p.z())  << nl;
+            writeValue(os, pt.z())  << nl;
             break;
-        }
-
-        default:
-        {
-            FatalErrorInFunction
-                << "Unknown writeFormat enumeration" << abort(FatalError);
         }
     }
 
-    os.unsetf(ios_base::right);
+    os.unsetf(std::ios_base::right);
 }
 
 
@@ -226,23 +146,24 @@ void Foam::nastranSurfaceWriter::writeFace
 
     writeKeyword(os, faceType)   << separator_;
 
-    os.setf(ios_base::right);
+    os.setf(std::ios_base::right);
 
     writeValue(os, nFace)        << separator_;
     writeValue(os, PID);
 
     switch (writeFormat_)
     {
-        case wfShort:
+        case fieldFormat::SHORT :
         {
-            forAll(facePts, i)
+            for (const label pointi : facePts)
             {
-                writeValue(os, facePts[i] + 1);
+                writeValue(os, pointi + 1);
             }
 
             break;
         }
-        case wfLong:
+
+        case fieldFormat::LONG :
         {
             forAll(facePts, i)
             {
@@ -250,33 +171,29 @@ void Foam::nastranSurfaceWriter::writeFace
                 if (i == 1)
                 {
                     os  << nl;
-                    os.unsetf(ios_base::right);
+                    os.unsetf(std::ios_base::right);
                     writeKeyword(os, "");
-                    os.setf(ios_base::right);
+                    os.setf(std::ios_base::right);
                 }
             }
 
             break;
         }
-        case wfFree:
+
+        case fieldFormat::FREE :
         {
-            forAll(facePts, i)
+            for (const label pointi : facePts)
             {
                 os  << separator_;
-                writeValue(os, facePts[i] + 1);
+                writeValue(os, pointi + 1);
             }
 
             break;
         }
-        default:
-        {
-            FatalErrorInFunction
-                << "Unknown writeFormat enumeration" << abort(FatalError);
-        }
     }
 
     os  << nl;
-    os.unsetf(ios_base::right);
+    os.unsetf(std::ios_base::right);
 }
 
 
@@ -375,7 +292,7 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFooter
 
     // use single material ID
 
-    label MID = 1;
+    const label MID = 1;
 
     writeKeyword(os, "MAT1")    << separator_;
     writeValue(os, MID);
@@ -397,47 +314,46 @@ Foam::Ostream& Foam::nastranSurfaceWriter::writeFooter
 Foam::nastranSurfaceWriter::nastranSurfaceWriter()
 :
     surfaceWriter(),
-    writeFormat_(wfShort),
+    writeFormat_(fieldFormat::SHORT),
     fieldMap_(),
-    scale_(1.0)
+    scale_(1.0),
+    separator_()
 {}
 
 
 Foam::nastranSurfaceWriter::nastranSurfaceWriter(const dictionary& options)
 :
     surfaceWriter(),
-    writeFormat_(writeFormat::wfLong),
-    fieldMap_(),
-    scale_(options.lookupOrDefault("scale", 1.0)),
-    separator_("")
-{
-    writeFormat_ = writeFormatNames_.lookupOrDefault
+    writeFormat_
     (
-        "format",
-        options,
-        writeFormat::wfLong
-    );
-
-    if (writeFormat_ == wfFree)
+        fileFormats::NASCore::fieldFormatNames.lookupOrDefault
+        (
+            "format",
+            options,
+            fieldFormat::LONG
+        )
+    ),
+    fieldMap_(),
+    scale_(options.lookupOrDefault<scalar>("scale", 1.0)),
+    separator_()
+{
+    if (writeFormat_ == fieldFormat::FREE)
     {
         separator_ = ",";
     }
 
-    List<Pair<word>> fieldSet(options.lookup("fields"));
+    List<Pair<word>> fieldPairs(options.lookup("fields"));
 
-    forAll(fieldSet, i)
+    for (const Pair<word>& item : fieldPairs)
     {
-        dataFormat format = dataFormatNames_[fieldSet[i].second()];
-
-        fieldMap_.insert(fieldSet[i].first(), format);
+        // (field name => load format)
+        fieldMap_.insert
+        (
+            item.first(),
+            loadFormatNames_[item.second()]
+        );
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::nastranSurfaceWriter::~nastranSurfaceWriter()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -456,7 +372,7 @@ Foam::fileName Foam::nastranSurfaceWriter::write
     }
 
     OFstream os(outputDir/surfaceName + ".nas");
-    formatOS(os);
+    fileFormats::NASCore::setPrecision(os, writeFormat_);
 
     if (verbose)
     {
@@ -472,7 +388,7 @@ Foam::fileName Foam::nastranSurfaceWriter::write
     writeGeometry(os, surf, decomposedFaces);
 
     writeFooter(os, surf)
-        << "ENDDATA" << endl;
+        << "ENDDATA" << nl;
 
     return os.name();
 }

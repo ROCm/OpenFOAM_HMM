@@ -47,7 +47,7 @@ void mapConsistentMesh
     const word& mapMethod,
     const word& AMIMapMethod,
     const bool subtract,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     const bool noLagrangian
 )
 {
@@ -86,7 +86,7 @@ void mapSubMesh
     const word& mapMethod,
     const word& AMIMapMethod,
     const bool subtract,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     const bool noLagrangian
 )
 {
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
         "map volume fields from one mesh to another"
     );
 
-    argList::validArgs.append("sourceCase");
+    argList::addArgument("sourceCase");
 
     argList::addOption
     (
@@ -200,21 +200,19 @@ int main(int argc, char *argv[])
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
     word sourceRegion = fvMesh::defaultRegion;
-    if (args.optionFound("sourceRegion"))
+    if (args.readIfPresent("sourceRegion", sourceRegion))
     {
-        sourceRegion = args["sourceRegion"];
         Info<< "Source region: " << sourceRegion << endl;
     }
 
     Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
     word targetRegion = fvMesh::defaultRegion;
-    if (args.optionFound("targetRegion"))
+    if (args.readIfPresent("targetRegion", targetRegion))
     {
-        targetRegion = args["targetRegion"];
         Info<< "Target region: " << targetRegion << endl;
     }
 
-    const bool consistent = args.optionFound("consistent");
+    const bool consistent = args.found("consistent");
 
 
     word mapMethod = meshToMesh::interpolationMethodNames_
@@ -222,14 +220,14 @@ int main(int argc, char *argv[])
         meshToMesh::imCellVolumeWeight
     ];
 
-    if  (args.optionReadIfPresent("mapMethod", mapMethod))
+    if  (args.readIfPresent("mapMethod", mapMethod))
     {
         Info<< "Mapping method: " << mapMethod << endl;
     }
 
 
     word patchMapMethod;
-    if (meshToMesh::interpolationMethodNames_.hasEnum(mapMethod))
+    if (meshToMesh::interpolationMethodNames_.found(mapMethod))
     {
         // Lookup corresponding AMI method
         meshToMesh::interpolationMethod method =
@@ -242,10 +240,8 @@ int main(int argc, char *argv[])
     }
 
     // Optionally override
-    if (args.optionFound("patchMapMethod"))
+    if (args.readIfPresent("patchMapMethod", patchMapMethod))
     {
-        patchMapMethod = args["patchMapMethod"];
-
         Info<< "Patch mapping method: " << patchMapMethod << endl;
     }
 
@@ -258,19 +254,16 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const bool subtract = args.optionFound("subtract");
+    const bool subtract = args.found("subtract");
     if (subtract)
     {
         Info<< "Subtracting mapped source field from target" << endl;
     }
 
-    HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
-    {
-        args.optionLookup("fields")() >> selectedFields;
-    }
+    wordHashSet selectedFields;
+    args.readIfPresent("fields", selectedFields);
 
-    const bool noLagrangian = args.optionFound("noLagrangian");
+    const bool noLagrangian = args.found("noLagrangian");
 
     #include "createTimes.H"
 

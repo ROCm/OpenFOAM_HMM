@@ -7,26 +7,14 @@
 #    \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     Allrun
 #
 # Description
-#     Runs tutorial cases and summarizes the outcome as 'testLoopReport'
+#     Run tutorial cases and summarize the outcome as 'testLoopReport'
 #
 #------------------------------------------------------------------------------
 cd ${0%/*} || exit 1    # Run from this directory
@@ -43,25 +31,27 @@ options:
   -collect          Collect logs only. Can be useful for aborted runs.
   -help             print the usage
 
-* Runs tutorial cases and summarizes the outcome as 'testLoopReport'
+Run tutorial cases and summarize the outcome as 'testLoopReport'
 
 USAGE
     exit 1
 }
 
 #------------------------------------------------------------------------------
+unset optCollect
 
-unset optCollectOnly
-
-# parse options
+# Parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
-    -h | -help)
+    -h | -help*)
         usage
         ;;
     -collect)
-        optCollectOnly=true
+        optCollect=true
+        ;;
+    -test)   # Known options to pass through
+        break
         ;;
     -*)
         usage "unknown option: $1"
@@ -74,87 +64,13 @@ do
 done
 
 #------------------------------------------------------------------------------
+. $WM_PROJECT_DIR/bin/tools/LogFunctions    # Tutorial log-file functions
 
-# logReport <logfile>
-# Extracts useful info from log file.
-logReport()
-{
-    local logfile=$1
-
-    # logfile is path/to/case/log.application
-    caseName=$(dirname $logfile | sed -e 's/\(.*\)\.\///g')
-    app=$(echo $logfile | sed -e 's/\(.*\)log\.//g')
-    appAndCase="Application $app - case $caseName"
-
-    if grep -q "FOAM FATAL" $logfile
-    then
-        echo "$appAndCase: ** FOAM FATAL ERROR **"
-        return 1
-    fi
-
-    # Check for solution singularity on U equation
-    for eqn in Ux Uy Uz
-    do
-        if grep -q -E "${eqn}[:| ]*solution singularity" $logfile
-        then
-            if [ "$eqn" = Uz ]
-            then
-                # Can only get here if Ux,Uy,Uz all failed
-                echo "$appAndCase: ** Solution singularity **"
-                return 1
-            fi
-        else
-            break
-        fi
-    done
-
-    if grep -q -E "^[\t ]*[Ee]nd" $logfile
-    then
-        # Extract time from this type of content
-        ## ExecutionTime = 60.2 s  ClockTime = 63 s --> "60.2 s"
-        completionTime=$(tail -10 $logfile | \
-            sed -n -e '/Execution/{s/^[^=]*=[ \t]*//; s/\( s\) .*$/\1/; p}')
-
-        echo "$appAndCase: completed${completionTime:+ in }$completionTime"
-    else
-        echo "$appAndCase: unconfirmed completion"
-    fi
-}
-
-if [ -z "$optCollectOnly" ]
+if [ -z "$optCollect" ]
 then
-    # Recursively run all tutorials
-    foamRunTutorials -skipFirst $*
+    foamRunTutorials -skipFirst $*          # Run tutorials recursively
 fi
 
-
-# Analyse all log files
-echo "Collecting log files..." 1>&2
-rm -f logs testLoopReport > /dev/null 2>&1
-touch logs testLoopReport
-
-for appDir in *
-do
-    [ -d $appDir ] || continue
-    echo -n "    $appDir..." 1>&2
-
-    logs=$(find -L $appDir -name 'log.*' -type f)
-    if [ -n "$logs" ]
-    then
-        echo 1>&2
-    else
-        echo " (no logs)" 1>&2
-        continue
-    fi
-
-    # Sort logs by time-stamp
-    for log in $(echo $logs | xargs ls -rt)
-    do
-        # Concatenate and summarize logs
-        cat "$log" >> logs 2>/dev/null
-        logReport $log
-    done
-    echo
-done > testLoopReport
+collectLogs
 
 #------------------------------------------------------------------------------

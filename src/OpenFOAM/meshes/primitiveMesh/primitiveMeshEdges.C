@@ -404,7 +404,7 @@ void Foam::primitiveMesh::calcEdges(const bool doFaceEdges) const
 
         if (debug)
         {
-            label edgeI = findIndex(oldToNew, -1);
+            label edgeI = oldToNew.find(-1);
 
             if (edgeI != -1)
             {
@@ -630,6 +630,7 @@ const Foam::labelList& Foam::primitiveMesh::faceEdges(const label facei) const
 const Foam::labelList& Foam::primitiveMesh::cellEdges
 (
     const label celli,
+    labelHashSet& set,
     DynamicList<label>& storage
 ) const
 {
@@ -641,28 +642,22 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
     {
         const labelList& cFaces = cells()[celli];
 
-        labelSet_.clear();
+        set.clear();
 
-        forAll(cFaces, i)
+        for (const label facei : cFaces)
         {
-            const labelList& fe = faceEdges(cFaces[i]);
-
-            forAll(fe, feI)
-            {
-                labelSet_.insert(fe[feI]);
-            }
+            set.insert(faceEdges(facei));
         }
 
         storage.clear();
-
-        if (labelSet_.size() > storage.capacity())
+        if (set.size() > storage.capacity())
         {
-            storage.setCapacity(labelSet_.size());
+            storage.setCapacity(set.size());
         }
 
-        forAllConstIter(labelHashSet, labelSet_, iter)
+        for (const label edgei : set)
         {
-            storage.append(iter.key());
+            storage.append(edgei);
         }
 
         return storage;
@@ -672,7 +667,7 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
 
 const Foam::labelList& Foam::primitiveMesh::cellEdges(const label celli) const
 {
-    return cellEdges(celli, labels_);
+    return cellEdges(celli, labelSet_, labels_);
 }
 
 

@@ -113,10 +113,8 @@ void Foam::cpuInfo::parse()
     std::string line, key, val;
 
     std::ifstream is("/proc/cpuinfo");
-    while (is.good())
+    while (is.good() && std::getline(is, line))
     {
-        std::getline(is, line);
-
         if (!split(line, key, val))
         {
             continue;
@@ -156,12 +154,6 @@ Foam::cpuInfo::cpuInfo()
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cpuInfo::~cpuInfo()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::cpuInfo::write(Ostream& os) const
@@ -174,26 +166,12 @@ void Foam::cpuInfo::write(Ostream& os) const
     {
         os.writeEntry("model_name", model_name);
     }
-    if (cpu_family != -1)
-    {
-        os.writeEntry("cpu_family", cpu_family);
-    }
-    if (model != -1)
-    {
-        os.writeEntry("model", model);
-    }
-    if (cpu_MHz > 0)
-    {
-        os.writeEntry("cpu_MHz", cpu_MHz);
-    }
-    if (cpu_cores > 0)
-    {
-        os.writeEntry("cpu_cores", cpu_cores);
-    }
-    if (siblings > 0)
-    {
-        os.writeEntry("siblings", siblings);
-    }
+
+    os.writeEntryIfDifferent<int>("cpu_family", -1, cpu_family);
+    os.writeEntryIfDifferent<int>("model", -1, model);
+    os.writeEntryIfDifferent<float>("cpu_MHz", 0, cpu_MHz);
+    os.writeEntryIfDifferent<int>("cpu_cores", 0, cpu_cores);
+    os.writeEntryIfDifferent<int>("siblings", 0, siblings);
 }
 
 

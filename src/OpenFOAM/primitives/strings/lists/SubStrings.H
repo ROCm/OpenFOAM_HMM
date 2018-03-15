@@ -66,8 +66,7 @@ public:
     // Constructors
 
         //- Construct null
-        SubStrings()
-        {}
+        SubStrings() = default;
 
 
     // Member Functions
@@ -112,6 +111,13 @@ public:
         auto last() const -> decltype(this->back())
         {
             return this->back();
+        }
+
+
+        //- Get element pos, converted to a string type.
+        String str(size_t pos) const
+        {
+            return (*this)[pos].str();
         }
 
 };

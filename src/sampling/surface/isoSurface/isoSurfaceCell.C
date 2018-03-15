@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -226,12 +226,12 @@ Foam::labelPair Foam::isoSurfaceCell::findCommonPoints
     labelPair common(-1, -1);
 
     label fp0 = 0;
-    label fp1 = findIndex(tri1, tri0[fp0]);
+    label fp1 = tri1.find(tri0[fp0]);
 
     if (fp1 == -1)
     {
         fp0 = 1;
-        fp1 = findIndex(tri1, tri0[fp0]);
+        fp1 = tri1.find(tri0[fp0]);
     }
 
     if (fp1 != -1)
@@ -553,7 +553,7 @@ void Foam::isoSurfaceCell::genPointTris
         label nextFp = f.fcIndex(fp);
         triFace tri(f[fp0], f[fp], f[nextFp]);
 
-        label index = findIndex(tri, pointi);
+        label index = tri.find(pointi);
 
         if (index == -1)
         {
@@ -616,8 +616,6 @@ void Foam::isoSurfaceCell::genPointTris
     const pointField& pts = mesh_.points();
     const cell& cFaces = mesh_.cells()[celli];
 
-    FixedList<label, 4> tet;
-
     // Make tet from this face to the 4th point (same as cellcentre in
     // non-tet cells)
     const face& f = mesh_.faces()[facei];
@@ -631,7 +629,7 @@ void Foam::isoSurfaceCell::genPointTris
         {
             label p1 = f1[fp];
 
-            if (findIndex(f, p1) == -1)
+            if (!f.found(p1))
             {
                 ccPointi = p1;
                 break;
@@ -645,7 +643,7 @@ void Foam::isoSurfaceCell::genPointTris
 
 
     // Tet between index..index-1, index..index+1, index..cc
-    label index = findIndex(f, pointi);
+    label index = f.find(pointi);
     label b = f[f.fcIndex(index)];
     label c = f[f.rcIndex(index)];
 
@@ -1236,13 +1234,7 @@ Foam::triSurface Foam::isoSurfaceCell::subsetMesh
 {
     const boolList include
     (
-        createWithValues<boolList>
-        (
-            s.size(),
-            false,
-            newToOldFaces,
-            true
-        )
+        ListOps::createWithValue<bool>(s.size(), newToOldFaces, true, false)
     );
 
     newToOldPoints.setSize(s.points().size());
@@ -1569,19 +1561,21 @@ Foam::isoSurfaceCell::isoSurfaceCell
     }
 
 
-    // Transfer to mesh storage
+    // Transfer to mesh storage. Note, an iso-surface has no zones
     {
+        // Recover the pointField
+        pointField pts;
+        tmpsurf.swapPoints(pts);
+
+        // Transcribe from triFace to face
         faceList faces;
         tmpsurf.triFaceFaces(faces);
 
-        // An iso-surface has no zones
-        surfZoneList zones(0);
+        tmpsurf.clearOut();
 
-        // Reset primitive data (points, faces and zones)
-        this->MeshStorage::reset
-        (
-            tmpsurf.xferPoints(), faces.xfer(), zones.xfer()
-        );
+        MeshStorage updated(std::move(pts), std::move(faces), surfZoneList());
+
+        this->MeshStorage::transfer(updated);
     }
 }
 

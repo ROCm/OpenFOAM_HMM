@@ -18,17 +18,15 @@ FoamFile
 
 Documentation
 {
-    docBrowser      "firefox %f";
+    docBrowser          "firefox -new-tab %f";
+    doxySourceFileExt   "_8C.html";
+
+    // Places to search for documentation, http is last in the list
     doxyDocDirs
     (
         "$WM_PROJECT_USER_DIR/html"
-        "~OpenFOAM/html"
         "$WM_PROJECT_DIR/doc/Doxygen/html"
-    );
-    doxySourceFileExts
-    (
-        "App_8C.html"
-        "_8C.html"
+        "https://www.openfoam.com/documentation/cpp-guide/html"
     );
 }
 
@@ -82,14 +80,14 @@ OptimisationSwitches
     fileHandler uncollated;
 
     //- collated: thread buffer size for queued file writes.
-    //  If set to 0 or not sufficient for the file size threading is not used.
-    //  Default: 2e9
-    maxThreadFileBufferSize 2e9;
+    //  If set to 0 or not sufficient for the file size, threading is not used.
+    //  Default: 1e9
+    maxThreadFileBufferSize 0;
 
     //- masterUncollated: non-blocking buffer size.
     //  If the file exceeds this buffer size scheduled transfer is used.
-    //  Default: 2e9
-    maxMasterFileBufferSize 2e9;
+    //  Default: 1e9
+    maxMasterFileBufferSize 1e9;
 
     commsType       nonBlocking; //scheduled; //blocking;
     floatTransfer   0;
@@ -110,11 +108,11 @@ OptimisationSwitches
     maxCommsSize    0;
 
     // Trap floating point exception.
-    // Can override with FOAM_SIGFPE (true|false)
+    // Can override with FOAM_SIGFPE env variable (true|false)
     trapFpe         1;
 
     // Initialization malloced memory to NaN.
-    // Can override with FOAM_SETNAN (true|false)
+    // Can override with FOAM_SETNAN env variable (true|false)
     setNaN          0;
 
     // Force dumping (at next timestep) upon signal (-1 to disable)
@@ -337,7 +335,6 @@ DebugSwitches
     SpalartAllmarasIDDES    0;
     SphereDrag          0;
     StandardWallInteraction 0;
-    StaticHashTable     0;
     StochasticDispersionRAS 0;
     SuperBee            0;
     SuperBeeV           0;
@@ -816,7 +813,6 @@ DebugSwitches
     saturateEvaporationModel 0;
     scalarAverageField  0;
     scalarField         0;
-    scalarRange         0;
     scaleSimilarity     0;
     scatterModel        0;
     searchableBox       0;
@@ -966,66 +962,66 @@ DebugSwitches
 
 DimensionedConstants
 {
-    unitSet             SI; // USCS
+    unitSet SI; // USCS
 
     SICoeffs
     {
         universal
         {
-            c               c [0 1 -1 0 0 0 0] 2.99792e+08;
-            G               G [-1 3 -2 0 0 0 0] 6.67429e-11;
-            h               h [1 2 -1 0 0 0 0] 6.62607e-34;
+            c  c [0 1 -1 0 0 0 0] 2.99792e+08;
+            G  G [-1 3 -2 0 0 0 0] 6.67429e-11;
+            h  h [1 2 -1 0 0 0 0] 6.62607e-34;
         }
         electromagnetic
         {
-            e               e [0 0 1 0 0 1 0] 1.60218e-19;
+            e  e [0 0 1 0 0 1 0] 1.60218e-19;
         }
         atomic
         {
-            me              me [1 0 0 0 0 0 0] 9.10938e-31;
-            mp              mp [1 0 0 0 0 0 0] 1.67262e-27;
+            me me [1 0 0 0 0 0 0] 9.10938e-31;
+            mp mp [1 0 0 0 0 0 0] 1.67262e-27;
         }
         physicoChemical
         {
-            mu              mu [1 0 0 0 0 0 0] 1.66054e-27;
-            k               k [1 2 -2 -1 0 0 0] 1.38065e-23;
+            mu mu [1 0 0 0 0 0 0] 1.66054e-27;
+            k  k  [1 2 -2 -1 0 0 0] 1.38065e-23;
         }
         standard
         {
             //- Standard pressure [Pa]
-            Pstd            Pstd [1 -1 -2 0 0 0 0] 1e5;
+            Pstd Pstd [1 -1 -2 0 0 0 0] 1e5;
             //- Standard temperature [degK]
-            Tstd            Tstd [0 0 0 1 0 0 0] 298.15;
+            Tstd Tstd [0 0 0 1 0 0 0] 298.15;
         }
     }
     USCSCoeffs
     {
         universal
         {
-            c               c [0 1 -1 0 0 0 0] 9.83558e+08;
-            G               G [-1 3 -2 0 0 0 0] 1.06909e-09;
-            h               h [1 2 -1 0 0 0 0] 1.57234e-32;
+            c  c [0 1 -1 0 0 0 0] 9.83558e+08;
+            G  G [-1 3 -2 0 0 0 0] 1.06909e-09;
+            h  h [1 2 -1 0 0 0 0] 1.57234e-32;
         }
         electromagnetic
         {
-            e               e [0 0 1 0 0 1 0] 1.60218e-19;
+            e  e [0 0 1 0 0 1 0] 1.60218e-19;
         }
         atomic
         {
-            me              me [1 0 0 0 0 0 0] 2.00825e-30;
-            mp              mp [1 0 0 0 0 0 0] 3.68746e-27;
+            me  me [1 0 0 0 0 0 0] 2.00825e-30;
+            mp  mp [1 0 0 0 0 0 0] 3.68746e-27;
         }
         physicoChemical
         {
-            mu              mu [1 0 0 0 0 0 0] 3.66083e-27;
-            k               k [1 2 -2 -1 0 0 0] 1.82012e-22;
+            mu mu [1 0 0 0 0 0 0] 3.66083e-27;
+            k  k  [1 2 -2 -1 0 0 0] 1.82012e-22;
         }
         standard
         {
             //- Standard pressure [lbm/ft^2]
-            Pstd            Pstd [1 -1 -2 0 0 0 0] 2088.6;
+            Pstd  Pstd [1 -1 -2 0 0 0 0] 2088.6;
             //- Standard temperature [degR]
-            Tstd            Tstd [0 0 0 1 0 0 0] 536.67;
+            Tstd  Tstd [0 0 0 1 0 0 0] 536.67;
         }
     }
 }
@@ -1033,7 +1029,7 @@ DimensionedConstants
 
 DimensionSets
 {
-    unitSet             SI; // USCS
+    unitSet SI; // USCS
 
     SICoeffs
     {

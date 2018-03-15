@@ -72,8 +72,7 @@ surfaceNoiseCoeffs
     // Reference density (to convert from kinematic to static pressure)
     rhoRef          1.205;
 
-    // Number of samples in sampling window
-    // Must be a power of 2, default = 2^16 (=65536)
+    // Number of samples in sampling window, default = 2^16 (=65536)
     N               4096; // 8192; // 4096;
 
     // Lower frequency limit, default = 25Hz
@@ -123,8 +122,7 @@ pointNoiseCoeffs
     // Reference density (to convert from kinematic to static pressure)
     rhoRef          1.2;
 
-    // Number of samples in sampling window
-    // Must be a power of 2, default = 2^16 (=65536)
+    // Number of samples in sampling window, default = 2^16 (=65536)
     N               4096;
 
     // Lower frequency limit, default = 25Hz

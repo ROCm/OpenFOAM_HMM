@@ -16,6 +16,9 @@
 
     fvOptions.constrain(UEqn);
 
-    solve(UEqn == -cellMask*fvc::grad(p));
+    if (simple.momentumPredictor())
+    {
+        solve(UEqn == -cellMask*fvc::grad(p));
+    }
 
     fvOptions.correct(U);

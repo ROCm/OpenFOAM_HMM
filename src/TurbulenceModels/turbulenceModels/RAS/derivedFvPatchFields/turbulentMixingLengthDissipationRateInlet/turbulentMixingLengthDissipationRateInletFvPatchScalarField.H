@@ -74,8 +74,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef turbulentMixingLengthDissipationRateInlet_H
-#define turbulentMixingLengthDissipationRateInlet_H
+#ifndef turbulentMixingLengthDissipationRateInletFvPatchScalarField_H
+#define turbulentMixingLengthDissipationRateInletFvPatchScalarField_H
 
 #include "inletOutletFvPatchFields.H"
 

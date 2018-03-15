@@ -53,12 +53,12 @@ int readNumProcs
 {
     const word dictName = "decomposeParDict";
     fileName dictFile;
-    if (args.optionReadIfPresent(optionName, dictFile) && isDir(dictFile))
+    if (args.readIfPresent(optionName, dictFile) && isDir(dictFile))
     {
         dictFile = dictFile / dictName;
     }
 
-    return readInt
+    return decompositionMethod::nDomains
     (
         IOdictionary
         (
@@ -75,7 +75,7 @@ int readNumProcs
                 ),
                 dictFile
             )
-        ).lookup("numberOfSubdomains")
+        )
     );
 }
 
@@ -220,7 +220,7 @@ int main(int argc, char *argv[])
         "map volume fields from one mesh to another"
     );
     argList::noParallel();
-    argList::validArgs.append("sourceCase");
+    argList::addArgument("sourceCase");
 
     argList::addOption
     (
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
 
     Info<< "Source: " << rootDirSource << " " << caseDirSource << endl;
     word sourceRegion = fvMesh::defaultRegion;
-    if (args.optionFound("sourceRegion"))
+    if (args.found("sourceRegion"))
     {
         sourceRegion = args["sourceRegion"];
         Info<< "Source region: " << sourceRegion << endl;
@@ -304,18 +304,18 @@ int main(int argc, char *argv[])
 
     Info<< "Target: " << rootDirTarget << " " << caseDirTarget << endl;
     word targetRegion = fvMesh::defaultRegion;
-    if (args.optionFound("targetRegion"))
+    if (args.found("targetRegion"))
     {
         targetRegion = args["targetRegion"];
         Info<< "Target region: " << targetRegion << endl;
     }
 
-    const bool parallelSource = args.optionFound("parallelSource");
-    const bool parallelTarget = args.optionFound("parallelTarget");
-    const bool consistent = args.optionFound("consistent");
+    const bool parallelSource = args.found("parallelSource");
+    const bool parallelTarget = args.found("parallelTarget");
+    const bool consistent = args.found("consistent");
 
     meshToMesh0::order mapOrder = meshToMesh0::INTERPOLATE;
-    if (args.optionFound("mapMethod"))
+    if (args.found("mapMethod"))
     {
         const word mapMethod(args["mapMethod"]);
         if (mapMethod == "mapNearest")
@@ -341,7 +341,7 @@ int main(int argc, char *argv[])
         Info<< "Mapping method: " << mapMethod << endl;
     }
 
-    const bool subtract = args.optionFound("subtract");
+    const bool subtract = args.found("subtract");
     if (subtract)
     {
         Info<< "Subtracting mapped source field from target" << endl;

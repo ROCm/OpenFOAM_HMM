@@ -33,7 +33,7 @@ License
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "polyTopoChange.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -174,7 +174,7 @@ void Foam::multiDirRefinement::addCells
             added[0] = masterI;
             added[1] = newCelli;
         }
-        else if (findIndex(added, newCelli) == -1)
+        else if (!added.found(newCelli))
         {
             label sz = added.size();
             added.setSize(sz + 1);
@@ -186,7 +186,7 @@ void Foam::multiDirRefinement::addCells
 
 Foam::labelList Foam::multiDirRefinement::splitOffHex(const primitiveMesh& mesh)
 {
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     const cellShapeList& cellShapes = mesh.cellShapes();
 
@@ -452,7 +452,7 @@ void Foam::multiDirRefinement::refineFromDict
     // How to walk cell circumference.
     Switch pureGeomCut(dict.lookup("geometricCut"));
 
-    autoPtr<cellLooper> cellWalker(nullptr);
+    autoPtr<cellLooper> cellWalker;
     if (pureGeomCut)
     {
         cellWalker.reset(new geomCellLooper(mesh));

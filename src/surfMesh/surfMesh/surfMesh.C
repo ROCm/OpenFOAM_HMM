@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,9 +35,8 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(surfMesh, 0);
+  defineTypeNameAndDebug(surfMesh, 0);
 }
-
 
 Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
 
@@ -70,6 +69,12 @@ Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::surfMesh::surfMesh(const IOobject& io)
+:
+    surfMesh(io, io.name())
+{}
+
 
 Foam::surfMesh::surfMesh(const IOobject& io, const word& surfName)
 :
@@ -111,8 +116,7 @@ Foam::surfMesh::surfMesh(const IOobject& io, const word& surfName)
 Foam::surfMesh::surfMesh
 (
     const IOobject& io,
-    const Xfer<pointField>& pointLst,
-    const Xfer<faceList>& faceLst,
+    const MeshedSurface<face>& surf,
     const word& surfName
 )
 :
@@ -128,7 +132,6 @@ Foam::surfMesh::surfMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        pointLst,
         IOobject
         (
             "faces",
@@ -138,7 +141,6 @@ Foam::surfMesh::surfMesh
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        faceLst,
         IOobject
         (
             "surfZones",
@@ -147,53 +149,7 @@ Foam::surfMesh::surfMesh
             *this,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
-        ),
-        Xfer<surfZoneList>()
-    ),
-    MeshReference(this->storedIOFaces(), this->storedIOPoints())
-{}
-
-
-Foam::surfMesh::surfMesh
-(
-    const IOobject& io,
-    const Xfer<MeshedSurface<face>>& surf,
-    const word& surfName
-)
-:
-    surfaceRegistry(io.db(), (surfName.size() ? surfName : io.name())),
-    Allocator
-    (
-        IOobject
-        (
-            "points",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pointField(),
-        IOobject
-        (
-            "faces",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        faceList(),
-        IOobject
-        (
-            "surfZones",
-            instance(),
-            meshSubDir,
-            *this,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        surfZoneList()
+        )
     ),
     MeshReference(this->storedIOFaces(), this->storedIOPoints())
 {
@@ -208,11 +164,62 @@ Foam::surfMesh::surfMesh
         Info<<"timeName: " << instance() << endl;
     }
 
-    // We can also send Xfer<..>::null just to initialize without allocating
-    if (notNull(surf))
+    copyContents(surf);
+}
+
+
+Foam::surfMesh::surfMesh
+(
+    const IOobject& io,
+    MeshedSurface<face>&& surf,
+    const word& surfName
+)
+:
+    surfaceRegistry(io.db(), (surfName.size() ? surfName : io.name())),
+    Allocator
+    (
+        IOobject
+        (
+            "points",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        IOobject
+        (
+            "faces",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        IOobject
+        (
+            "surfZones",
+            instance(),
+            meshSubDir,
+            *this,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        )
+    ),
+    MeshReference(this->storedIOFaces(), this->storedIOPoints())
+{
+    if (debug)
     {
-        transfer(surf());
+        Info<<"IOobject: " << io.path() << nl
+            <<" name: " << io.name()
+            <<" instance: " << io.instance()
+            <<" local: " << io.local()
+            <<" dbDir: " << io.db().dbDir() << endl;
+        Info<<"creating surfMesh at instance " << instance() << endl;
+        Info<<"timeName: " << instance() << endl;
     }
+
+    transfer(surf);
 }
 
 
@@ -258,39 +265,18 @@ void Foam::surfMesh::updateRefs()
 }
 
 
-void Foam::surfMesh::resetPrimitives
+void Foam::surfMesh::copyContents
 (
-    const Xfer<pointField>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<surfZoneList>& zones,
-    const bool validate
+    const MeshedSurface<face>& surf,
+    bool validate
 )
 {
-    // Clear addressing.
-    clearOut();
+    clearOut(); // Clear addressing
 
-    Allocator::reset(points, faces, zones);
-    this->updateRefs();
+    this->storedIOPoints() = surf.points();
+    this->storedIOFaces() = surf.surfFaces();
+    this->storedIOZones() = surf.surfZones();
 
-    if (validate)
-    {
-        checkZones();
-    }
-}
-
-
-void Foam::surfMesh::resetPrimitives
-(
-    const Xfer<List<point>>& points,
-    const Xfer<faceList>& faces,
-    const Xfer<surfZoneList>& zones,
-    const bool validate
-)
-{
-    // Clear addressing.
-    clearOut();
-
-    Allocator::reset(points, faces, zones);
     this->updateRefs();
 
     if (validate)
@@ -302,36 +288,40 @@ void Foam::surfMesh::resetPrimitives
 
 void Foam::surfMesh::transfer
 (
-    MeshedSurface<face>& surf
+    MeshedSurface<face>& surf,
+    bool validate
 )
 {
-    // Clear addressing.
-    clearOut();
+    clearOut(); // Clear addressing
 
     this->storedIOPoints().transfer(surf.storedPoints());
     this->storedIOFaces().transfer(surf.storedFaces());
     this->storedIOZones().transfer(surf.storedZones());
 
     this->updateRefs();
+
+    if (validate)
+    {
+        checkZones();
+    }
 }
 
 
-Foam::Xfer<Foam::MeshedSurface<Foam::face>>
-Foam::surfMesh::xfer()
+Foam::autoPtr<Foam::MeshedSurface<Foam::face>>
+Foam::surfMesh::releaseGeom()
 {
-    Xfer<MeshedSurface<face>> xf;
+    // Start with an empty geometry
+    auto aptr = autoPtr<MeshedSurface<face>>::New();
 
-    xf().storedPoints().transfer(this->storedPoints());
-    xf().storedFaces().transfer(this->storedFaces());
-    xf().storedZones().transfer(this->storedZones());
+    // Transfer in content
+    aptr->storedPoints().transfer(this->storedPoints());
+    aptr->storedFaces().transfer(this->storedFaces());
+    aptr->storedZones().transfer(this->storedZones());
 
-    // is this needed?
-    this->updateRefs();
+    this->updateRefs(); // This may not be needed...
+    clearOut(); // Clear addressing.
 
-    // Clear addressing.
-    clearOut();
-
-    return xf;
+    return aptr;
 }
 
 
@@ -386,31 +376,30 @@ void Foam::surfMesh::checkZones()
     if (zones.size() <= 1)
     {
         removeZones();
+        return;
     }
-    else
+
+    label count = 0;
+    for (surfZone& zn : zones)
     {
-        label count = 0;
-        forAll(zones, zoneI)
-        {
-            zones[zoneI].start() = count;
-            count += zones[zoneI].size();
-        }
+        zn.start() = count;
+        count += zn.size();
+    }
 
-        if (count < nFaces())
-        {
-            WarningInFunction
-                << "more faces " << nFaces() << " than zones " << count
-                << " ... extending final zone"
-                << endl;
+    if (count < nFaces())
+    {
+        WarningInFunction
+            << "More faces " << nFaces() << " than zones " << count
+            << " ... extending final zone"
+            << endl;
 
-            zones.last().size() += count - nFaces();
-        }
-        else if (count > size())
-        {
-            FatalErrorInFunction
-                << "more zones " << count << " than faces " << nFaces()
-                << exit(FatalError);
-        }
+        zones.last().size() += count - nFaces();
+    }
+    else if (size() < count)
+    {
+        FatalErrorInFunction
+            << "More zones " << count << " than faces " << nFaces()
+            << exit(FatalError);
     }
 }
 
@@ -424,9 +413,9 @@ void Foam::surfMesh::addZones
 {
     surfZoneList& zones = Allocator::storedIOZones();
 
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        zones[zoneI] = surfZone(srfZones[zoneI], zoneI);
+        zones[zonei] = surfZone(srfZones[zonei], zonei);
     }
 
     if (validate)
@@ -452,20 +441,29 @@ void Foam::surfMesh::removeFiles() const
 }
 
 
-void Foam::surfMesh::write(const fileName& name, const surfMesh& surf)
+void Foam::surfMesh::write
+(
+    const fileName& name,
+    const dictionary& options
+) const
 {
-    MeshedSurfaceProxy<face>
-    (
-        surf.points(),
-        surf.faces(),
-        surf.surfZones()
-    ).write(name);
+    write(name, name.ext(), options);
 }
 
 
-void Foam::surfMesh::write(const fileName& name)
+void Foam::surfMesh::write
+(
+    const fileName& name,
+    const word& ext,
+    const dictionary& options
+) const
 {
-    write(name, *this);
+    MeshedSurfaceProxy<face>
+    (
+        this->points(),
+        this->faces(),
+        this->surfZones()
+    ).write(name, ext, options);
 }
 
 

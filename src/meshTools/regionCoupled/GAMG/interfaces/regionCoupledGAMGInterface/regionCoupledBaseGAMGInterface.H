@@ -130,7 +130,7 @@ public:
 
             //virtual const AMIPatchToPatchInterpolation& AMI() const
             //{
-            //    return amiPtr_();
+            //    return *amiPtr_;
             //}
 
             virtual const polyMesh& nbrMesh() const

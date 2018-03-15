@@ -36,9 +36,7 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(backgroundMeshDecomposition, 0);
-
+    defineTypeNameAndDebug(backgroundMeshDecomposition, 0);
 }
 
 
@@ -114,14 +112,11 @@ Foam::autoPtr<Foam::mapDistribute> Foam::backgroundMeshDecomposition::buildMap
         }
     }
 
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            constructSize,
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        constructSize,
+        std::move(sendMap),
+        std::move(constructMap)
     );
 }
 
@@ -248,10 +243,10 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 );
 
                 // Update fields
-                mesh_.updateMesh(map);
+                mesh_.updateMesh(map());
 
                 // Update numbering of cells/vertices.
-                meshCutter_.updateMesh(map);
+                meshCutter_.updateMesh(map());
 
                 {
                     // Map volumeStatus
@@ -357,11 +352,11 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 );
 
                 // Update fields
-                mesh_.updateMesh(map);
+                mesh_.updateMesh(map());
 
                 // Update numbering of cells/vertices.
-                meshCutter_.updateMesh(map);
-                cellRemover.updateMesh(map);
+                meshCutter_.updateMesh(map());
+                cellRemover.updateMesh(map());
 
                 {
                     // Map volumeStatus
@@ -416,7 +411,7 @@ void Foam::backgroundMeshDecomposition::initialRefinement()
                 newDecomp
             );
 
-            meshCutter_.distribute(mapDist);
+            meshCutter_.distribute(mapDist());
 
             mapDist().distributeCellData(volumeStatus);
 
@@ -840,12 +835,6 @@ Foam::backgroundMeshDecomposition::backgroundMeshDecomposition
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::backgroundMeshDecomposition::~backgroundMeshDecomposition()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::mapDistributePolyMesh>
@@ -954,10 +943,10 @@ Foam::backgroundMeshDecomposition::distribute
         );
 
         // Update fields
-        mesh_.updateMesh(map);
+        mesh_.updateMesh(map());
 
         // Update numbering of cells/vertices.
-        meshCutter_.updateMesh(map);
+        meshCutter_.updateMesh(map());
 
         Info<< "    Background mesh refined from "
             << returnReduce(map().nOldCells(), sumOp<label>())
@@ -1000,7 +989,7 @@ Foam::backgroundMeshDecomposition::distribute
 
     autoPtr<mapDistributePolyMesh> mapDist = distributor.distribute(newDecomp);
 
-    meshCutter_.distribute(mapDist);
+    meshCutter_.distribute(mapDist());
 
     if (debug)
     {

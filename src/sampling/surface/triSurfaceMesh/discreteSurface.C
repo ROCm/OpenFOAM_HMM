@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -152,7 +152,7 @@ Foam::discreteSurface::nonCoupledboundaryTree() const
         );
     }
 
-    return boundaryTreePtr_();
+    return *boundaryTreePtr_;
 }
 
 
@@ -306,7 +306,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
                 patchi,
                 (
                     patches[patchi].name().empty()
-                  ? Foam::name("patch%d", patchi)
+                  ? word::printf("patch%d", patchi)
                   : patches[patchi].name()
                 )
             );
@@ -339,7 +339,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
                     zoneNames.set
                     (
                         regionid,
-                        Foam::name("patch%d", regionid)
+                        word::printf("patch%d", regionid)
                     );
                 }
 
@@ -387,7 +387,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
         }
         if (name.empty())
         {
-            name = ::Foam::name("patch%d", regionid);
+            name = word::printf("patch%d", regionid);
         }
 
         zoneLst[zoneI] = surfZone
@@ -431,7 +431,7 @@ bool Foam::discreteSurface::update(const meshSearch& meshSearcher)
     }
 
     // Subset cellOrFaceLabels (for compact faces)
-    cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
+    cellOrFaceLabels = labelUIndList(cellOrFaceLabels, faceMap)();
 
     // Store any face per point (without using pointFaces())
     labelList pointToFace(pointMap.size());
@@ -642,7 +642,7 @@ Foam::discreteSurface::discreteSurface
             surfaceName,
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                   // registry
+            mesh.time(),            // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
@@ -680,7 +680,7 @@ Foam::discreteSurface::discreteSurface
             dict.lookup("surface"),
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                   // registry
+            mesh.time(),            // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
@@ -716,7 +716,7 @@ Foam::discreteSurface::discreteSurface
             name,
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                   // registry
+            mesh.time(),            // registry
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false

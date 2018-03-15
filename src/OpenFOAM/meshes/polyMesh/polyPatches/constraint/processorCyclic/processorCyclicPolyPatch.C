@@ -337,13 +337,8 @@ bool Foam::processorCyclicPolyPatch::order
 void Foam::processorCyclicPolyPatch::write(Ostream& os) const
 {
     processorPolyPatch::write(os);
-    os.writeKeyword("referPatch") << referPatchName_
-        << token::END_STATEMENT << nl;
-    if (tag_ != -1)
-    {
-        os.writeKeyword("tag") << tag_
-            << token::END_STATEMENT << nl;
-    }
+    os.writeEntry("referPatch", referPatchName_);
+    os.writeEntryIfDifferent<label>("tag", -1, tag_);
 }
 
 

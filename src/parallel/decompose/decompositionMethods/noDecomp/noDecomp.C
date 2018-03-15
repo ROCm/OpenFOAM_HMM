@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -39,14 +39,32 @@ namespace Foam
         dictionary,
         none
     );
+
+    addNamedToRunTimeSelectionTable
+    (
+        decompositionMethod,
+        noDecomp,
+        dictionaryRegion,
+        none
+    );
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::noDecomp::noDecomp(const dictionary& decompositionDict)
+Foam::noDecomp::noDecomp(const dictionary& decompDict)
 :
-    decompositionMethod(decompositionDict)
+    decompositionMethod(decompDict)
+{}
+
+
+Foam::noDecomp::noDecomp
+(
+    const dictionary& decompDict,
+    const word& regionName
+)
+:
+    decompositionMethod(decompDict, regionName)
 {}
 
 

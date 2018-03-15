@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
     argList::noBanner();
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
+    argList::addArgument("surfaceFile");
 
     argList::addOption
     (
@@ -112,14 +112,14 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    const bool writeXML = args.optionFound("xml");
-    const bool writeAreas = args.optionFound("areas");
+    const bool writeXML = args.found("xml");
+    const bool writeAreas = args.found("areas");
 
 
     // use UnsortedMeshedSurface, not MeshedSurface to maintain ordering
     UnsortedMeshedSurface<face> surf(importName);
 
-    const scalar scaling = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaling = args.lookupOrDefault<scalar>("scale", -1);
     if (scaling > 0)
     {
         Info<< " -scale " << scaling << nl;

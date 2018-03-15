@@ -37,7 +37,7 @@ translatingWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(p, iF),
-    U_(0)
+    U_(nullptr)
 {}
 
 
@@ -67,7 +67,7 @@ translatingWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    U_(ptf.U_, false)
+    U_(ptf.U_.clone())
 {}
 
 
@@ -78,7 +78,7 @@ translatingWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(twvpvf),
-    U_(twvpvf.U_, false)
+    U_(twvpvf.U_.clone())
 {}
 
 
@@ -90,7 +90,7 @@ translatingWallVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(twvpvf, iF),
-    U_(twvpvf.U_, false)
+    U_(twvpvf.U_.clone())
 {}
 
 

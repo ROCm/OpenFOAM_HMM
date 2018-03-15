@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -98,7 +98,7 @@ class mapFields
         autoPtr<meshToMesh> interpPtr_;
 
         //- List of field names to interpolate
-        wordReList fieldNames_;
+        wordRes fieldNames_;
 
 
     // Private Member Functions
@@ -142,7 +142,7 @@ public:
 
 
     //- Destructor
-    virtual ~mapFields();
+    virtual ~mapFields() = default;
 
 
     // Member Functions

@@ -148,6 +148,13 @@ inline Foam::wordRe::wordRe(const word& str, const compOption opt)
 }
 
 
+inline Foam::wordRe::wordRe(wordRe&& str)
+:
+    word(std::move(static_cast<word&>(str))),
+    re_(std::move(str.re_))
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline bool Foam::wordRe::isPattern() const
@@ -222,10 +229,8 @@ inline bool Foam::wordRe::match(const std::string& text, bool literal) const
     {
         return !compare(text);  // Compare as literal string
     }
-    else
-    {
-        return re_.match(text); // Match as regex
-    }
+
+    return re_.match(text);     // Match as regex
 }
 
 
@@ -246,6 +251,13 @@ inline void Foam::wordRe::set(const char* str, const compOption opt)
 {
     string::operator=(str);
     compile(opt);
+}
+
+
+inline void Foam::wordRe::swap(wordRe& str)
+{
+    word::swap(static_cast<word&>(str));
+    re_.swap(str.re_);
 }
 
 
@@ -310,6 +322,13 @@ inline void Foam::wordRe::operator=(const char* str)
 {
     string::operator=(str);
     compile(wordRe::DETECT);  // Auto-detect regex
+}
+
+
+inline void Foam::wordRe::operator=(wordRe&& str)
+{
+    clear();
+    swap(str);
 }
 
 

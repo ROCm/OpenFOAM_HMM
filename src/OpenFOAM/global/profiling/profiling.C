@@ -40,6 +40,7 @@ int Foam::profiling::allowed
 
 Foam::profiling* Foam::profiling::pool_(nullptr);
 
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 Foam::profilingInformation* Foam::profiling::find
@@ -48,8 +49,7 @@ Foam::profilingInformation* Foam::profiling::find
     const label parentId
 )
 {
-    StorageContainer::iterator iter = hash_.find(Key(descr, parentId));
-    return (iter.found() ? iter() : 0);
+    return hash_.lookup(Key(descr, parentId), nullptr);
 }
 
 
@@ -99,10 +99,8 @@ bool Foam::profiling::print(Ostream& os)
     {
         return pool_->writeData(os);
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -110,12 +108,10 @@ bool Foam::profiling::writeNow()
 {
     if (active())
     {
-        return pool_->write();
+        return pool_->regIOobject::write();
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -190,7 +186,7 @@ Foam::profilingInformation* Foam::profiling::New
     clockTime& timer
 )
 {
-    profilingInformation *info = 0;
+    profilingInformation *info = nullptr;
 
     if (active())
     {
@@ -247,7 +243,7 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    regIOobject(io),
+    IOdictionary(io),
     owner_(owner),
     clockTime_(),
     hash_(),
@@ -266,7 +262,7 @@ Foam::profiling::profiling
     const Time& owner
 )
 :
-    regIOobject(io),
+    IOdictionary(io),
     owner_(owner),
     clockTime_(),
     hash_(),
@@ -312,6 +308,7 @@ const Foam::Time& Foam::profiling::owner() const
 {
     return owner_;
 }
+
 
 Foam::label Foam::profiling::size() const
 {

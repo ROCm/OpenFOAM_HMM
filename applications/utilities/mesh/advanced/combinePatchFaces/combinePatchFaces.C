@@ -113,7 +113,7 @@ label mergePatchFaces
             map = meshMod.changeMesh(mesh, false, true);
 
             // Update fields
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Move mesh (since morphing does not do this)
             if (map().hasMotionPoints())
@@ -269,7 +269,7 @@ label mergePatchFaces
             map = meshMod.changeMesh(mesh, false, true);
 
             // Update fields
-            mesh.updateMesh(map);
+            mesh.updateMesh(map());
 
             // Move mesh (since morphing does not do this)
             if (map().hasMotionPoints())
@@ -322,7 +322,7 @@ label mergeEdges(const scalar minCos, polyMesh& mesh)
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false, true);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())
@@ -349,7 +349,7 @@ int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
 
-    argList::validArgs.append("featureAngle [0..180]");
+    argList::addArgument("featureAngle [0..180]");
     argList::addOption
     (
         "concaveAngle",
@@ -368,16 +368,16 @@ int main(int argc, char *argv[])
     #include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar featureAngle = args.read<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
     // Sin of angle between two consecutive edges on a face.
     // If sin(angle) larger than this the face will be considered concave.
-    scalar concaveAngle = args.optionLookupOrDefault("concaveAngle", 30.0);
+    scalar concaveAngle = args.lookupOrDefault("concaveAngle", 30.0);
     scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
-    const bool overwrite = args.optionFound("overwrite");
-    const bool meshQuality = args.optionFound("meshQuality");
+    const bool overwrite = args.found("overwrite");
+    const bool meshQuality = args.found("meshQuality");
 
     Info<< "Merging all faces of a cell" << nl
         << "    - which are on the same patch" << nl

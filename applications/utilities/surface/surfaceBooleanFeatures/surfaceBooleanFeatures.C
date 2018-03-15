@@ -416,7 +416,7 @@ void visitPointRegion
 
 
 
-        label index = findIndex(s.pointFaces()[pointI], nextFaceI);
+        label index = s.pointFaces()[pointI].find(nextFaceI);
 
         if (pFacesZone[index] == -1)
         {
@@ -588,7 +588,7 @@ label dupNonManifoldPoints(triSurface& s, labelList& pointMap)
 
         //s.transfer(dupSurf);
         s = dupSurf;
-        pointMap = UIndirectList<label>(pointMap, dupPointMap)();
+        pointMap = labelUIndList(pointMap, dupPointMap)();
     }
 
     return nNonManifold;
@@ -1480,42 +1480,39 @@ autoPtr<extendedFeatureEdgeMesh> createEdgeMesh
 
     //calcFeaturePoints(inter.cutPoints(), inter.cutEdges());
 
-    return autoPtr<extendedFeatureEdgeMesh>
+    return autoPtr<extendedFeatureEdgeMesh>::New
     (
-        new extendedFeatureEdgeMesh
-        (
-            io,
-            inter.cutPoints(),
-            inter.cutEdges(),
+        io,
+        inter.cutPoints(),
+        inter.cutEdges(),
 
-            0,                  // concaveStart,
-            0,                  // mixedStart,
-            0,                  // nonFeatureStart,
+        0,                  // concaveStart,
+        0,                  // mixedStart,
+        0,                  // nonFeatureStart,
 
-            internalStart,      // internalStart,
-            nIntOrExt,           // flatStart,
-            nIntOrExt + nFlat,   // openStart,
-            nIntOrExt + nFlat + nOpen,   // multipleStart,
+        internalStart,      // internalStart,
+        nIntOrExt,          // flatStart,
+        nIntOrExt + nFlat,  // openStart,
+        nIntOrExt + nFlat + nOpen,   // multipleStart,
 
-            normalsTmp,
-            normalVolumeTypesTmp,
-            edgeDirections,
-            normalDirectionsTmp,
-            edgeNormalsTmp,
+        normalsTmp,
+        normalVolumeTypesTmp,
+        edgeDirections,
+        normalDirectionsTmp,
+        edgeNormalsTmp,
 
-            labelListList(0),   // featurePointNormals,
-            labelListList(0),   // featurePointEdges,
-            labelList(0)        // regionEdges
-        )
+        labelListList(),    // featurePointNormals,
+        labelListList(),    // featurePointEdges,
+        labelList()         // regionEdges
     );
 }
 
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("action");
-    argList::validArgs.append("surfaceFile1");
-    argList::validArgs.append("surfaceFile2");
+    argList::addArgument("action");
+    argList::addArgument("surfaceFile1");
+    argList::addArgument("surfaceFile2");
 
     argList::addOption
     (
@@ -1577,7 +1574,7 @@ int main(int argc, char *argv[])
         { booleanSurface::DIFFERENCE, "difference" }
     };
 
-    if (!validActions.hasEnum(action))
+    if (!validActions.found(action))
     {
         FatalErrorInFunction
             << "Unsupported action " << action << endl
@@ -1587,7 +1584,7 @@ int main(int argc, char *argv[])
 
 
     List<Pair<word>> surfaceAndSide;
-    if (args.optionReadIfPresent("trim", surfaceAndSide))
+    if (args.readIfPresent("trim", surfaceAndSide))
     {
         Info<< "Trimming edges with " << surfaceAndSide << endl;
     }
@@ -1595,7 +1592,7 @@ int main(int argc, char *argv[])
 
     // Scale factor for both surfaces:
     const scalar scaleFactor
-        = args.optionLookupOrDefault<scalar>("scale", -1);
+        = args.lookupOrDefault<scalar>("scale", -1);
 
     const word surf1Name(args[2]);
     Info<< "Reading surface " << surf1Name << endl;
@@ -1641,13 +1638,13 @@ int main(int argc, char *argv[])
     surf2.writeStats(Info);
     Info<< endl;
 
-    const bool surf1Baffle = args.optionFound("surf1Baffle");
-    const bool surf2Baffle = args.optionFound("surf2Baffle");
+    const bool surf1Baffle = args.found("surf1Baffle");
+    const bool surf2Baffle = args.found("surf2Baffle");
 
     edgeIntersections edgeCuts1;
     edgeIntersections edgeCuts2;
 
-    const bool invertedSpace = args.optionFound("invertedSpace");
+    const bool invertedSpace = args.found("invertedSpace");
 
     if (invertedSpace && validActions[action] == booleanSurface::DIFFERENCE)
     {
@@ -1663,7 +1660,7 @@ int main(int argc, char *argv[])
     (
         surf1,
         surf2,
-        args.optionFound("perturb"),
+        args.found("perturb"),
         edgeCuts1,
         edgeCuts2
     );
@@ -1673,7 +1670,7 @@ int main(int argc, char *argv[])
     (
         surf1,
         surf2,
-        args.optionFound("perturb"),
+        args.found("perturb"),
         edgeCuts1,
         edgeCuts2
     );

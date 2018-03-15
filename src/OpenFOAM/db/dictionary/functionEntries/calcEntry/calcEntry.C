@@ -66,7 +66,7 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    Info<< "Using #calcEntry at line " << is.lineNumber()
+    Info<< "Using #calc at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << endl;
 
     dynamicCode::checkSecurity
@@ -110,7 +110,7 @@ bool Foam::functionEntries::calcEntry::execute
     Istream& is
 )
 {
-    Info<< "Using #calcEntry at line " << is.lineNumber()
+    Info<< "Using #calc at line " << is.lineNumber()
         << " in file " <<  parentDict.name() << endl;
 
     dynamicCode::checkSecurity

@@ -25,7 +25,7 @@ Class
     Foam::rigidBodyMeshMotion
 
 Group
-    grpMeshMotionSolvers 
+    grpMeshMotionSolvers
 
 Description
     Rigid-body mesh motion solver for fvMesh.
@@ -68,7 +68,7 @@ class rigidBodyMeshMotion
         const label bodyID_;
 
         //- List of mesh patches associated with this body
-        const wordReList patches_;
+        const wordRes patches_;
 
         //- Patches to integrate forces
         const labelHashSet patchSet_;
@@ -107,9 +107,8 @@ class rigidBodyMeshMotion
         //  weighting for each body
         PtrList<bodyMesh> bodyMeshes_;
 
-        //- Switch for test-mode in which only the
-        //  gravitational body-force is applied
-        Switch test_;
+        //- Test-mode in which only the gravitational body-force is applied
+        bool test_;
 
         //- Reference density required by the forces object for
         //  incompressible calculations, required if rho == rhoInf
@@ -130,13 +129,10 @@ class rigidBodyMeshMotion
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        rigidBodyMeshMotion
-        (
-            const rigidBodyMeshMotion&
-        );
+        rigidBodyMeshMotion(const rigidBodyMeshMotion&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const rigidBodyMeshMotion&);
+        void operator=(const rigidBodyMeshMotion&) = delete;
 
 
 public:
@@ -156,7 +152,7 @@ public:
 
 
     //- Destructor
-    ~rigidBodyMeshMotion();
+    ~rigidBodyMeshMotion() = default;
 
 
     // Member Functions

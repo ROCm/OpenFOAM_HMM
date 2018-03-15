@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -74,10 +74,10 @@ private:
     // Private member functions
 
         //- Disallow default bitwise copy construct
-        simpleControl(const simpleControl&);
+        simpleControl(const simpleControl&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const simpleControl&);
+        void operator=(const simpleControl&) = delete;
 
 
 public:
@@ -90,19 +90,19 @@ public:
 
     // Constructors
 
-        //- Construct from mesh
-        simpleControl(fvMesh& mesh);
+        //- Construct from mesh and the name of control sub-dictionary
+        simpleControl(fvMesh& mesh, const word& dictName="SIMPLE");
 
 
     //- Destructor
-    virtual ~simpleControl();
+    virtual ~simpleControl() = default;
 
 
     // Member Functions
 
         // Solution control
 
-            //- Loop loop
+            //- SIMPLE loop
             virtual bool loop();
 };
 

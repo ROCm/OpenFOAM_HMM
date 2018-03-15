@@ -53,7 +53,7 @@ class fieldInterpolator
     Time& runTime_;
     const fvMesh& mesh_;
     const IOobjectList& objects_;
-    const HashSet<word>& selectedFields_;
+    const wordHashSet& selectedFields_;
     instant ti_;
     instant ti1_;
     const interpolationWeights& interpolator_;
@@ -67,7 +67,7 @@ public:
         Time& runTime,
         const fvMesh& mesh,
         const IOobjectList& objects,
-        const HashSet<word>& selectedFields,
+        const wordHashSet& selectedFields,
         const instant& ti,
         const instant& ti1,
         const interpolationWeights& interpolator,
@@ -216,11 +216,9 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    HashSet<word> selectedFields;
-    if (args.optionFound("fields"))
-    {
-        args.optionLookup("fields")() >> selectedFields;
-    }
+    wordHashSet selectedFields;
+    args.readIfPresent("fields", selectedFields);
+
     if (selectedFields.size())
     {
         Info<< "Interpolating fields " << selectedFields << nl << endl;
@@ -232,14 +230,14 @@ int main(int argc, char *argv[])
 
 
     int divisions = 1;
-    if (args.optionFound("divisions"))
+    if (args.found("divisions"))
     {
-        args.optionLookup("divisions")() >> divisions;
+        args.lookup("divisions")() >> divisions;
     }
     Info<< "Using " << divisions << " per time interval" << nl << endl;
 
 
-    const word interpolationType = args.optionLookupOrDefault<word>
+    const word interpolationType = args.lookupOrDefault<word>
     (
         "interpolationType",
         "linear"

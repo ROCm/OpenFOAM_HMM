@@ -47,7 +47,7 @@ Foam::sampledPatch::sampledPatch
 (
     const word& name,
     const polyMesh& mesh,
-    const wordReList& patchNames,
+    const UList<wordRe>& patchNames,
     const bool triangulate
 )
 :
@@ -69,12 +69,6 @@ Foam::sampledPatch::sampledPatch
     patchNames_(dict.lookup("patches")),
     triangulate_(dict.lookupOrDefault("triangulate", false)),
     needsUpdate_(true)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::sampledPatch::~sampledPatch()
 {}
 
 
@@ -126,7 +120,8 @@ bool Foam::sampledPatch::update()
     label sz = 0;
     forAll(patchIDs(), i)
     {
-        label patchi = patchIDs()[i];
+        const label patchi = patchIDs()[i];
+
         const polyPatch& pp = mesh().boundaryMesh()[patchi];
 
         if (isA<emptyPolyPatch>(pp))
@@ -150,7 +145,7 @@ bool Foam::sampledPatch::update()
 
     forAll(patchIDs(), i)
     {
-        label patchi = patchIDs()[i];
+        const label patchi = patchIDs()[i];
 
         patchStart_[i] = sz;
 
@@ -204,11 +199,11 @@ void Foam::sampledPatch::remapFaces(const labelUList& faceMap)
         MeshStorage::remapFaces(faceMap);
         patchFaceLabels_ = labelList
         (
-            UIndirectList<label>(patchFaceLabels_, faceMap)
+            labelUIndList(patchFaceLabels_, faceMap)
         );
         patchIndex_ = labelList
         (
-            UIndirectList<label>(patchIndex_, faceMap)
+            labelUIndList(patchIndex_, faceMap)
         );
 
         // Redo patchStart.

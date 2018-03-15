@@ -78,7 +78,7 @@ if (argList::postProcess(argc, argv))
 
     #include "setRootCase.H"
 
-    if (args.optionFound("list"))
+    if (args.found("list"))
     {
         functionObjectList::list();
         return 0;
@@ -96,7 +96,7 @@ if (argList::postProcess(argc, argv))
     // if not constructed from runTime
     dictionary functionsDict;
 
-    HashSet<word> selectedFields;
+    HashSet<wordRe> selectedFields;
 
     // Construct functionObjectList
     autoPtr<functionObjectList> functionsPtr

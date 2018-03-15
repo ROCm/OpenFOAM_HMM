@@ -24,6 +24,15 @@ License
 Class
     Foam::fileOperation
 
+Description
+    An encapsulation of filesystem-related operations.
+
+Namespace
+    Foam::fileOperations
+
+Description
+    Namespace for implementations of a fileOperation
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef fileOperation_H
@@ -75,7 +84,7 @@ public:
 
     // Static data
 
-        //- Return the processors directory name (usually "processors")
+        //- The processors directory name (usually "processors")
         static word processorsDir;
 
         //- Default fileHandler
@@ -108,7 +117,7 @@ public:
     // Constructors
 
         //- Construct null
-        fileOperation();
+        fileOperation() = default;
 
 
     // Declare run-time constructor selection table
@@ -127,12 +136,16 @@ public:
 
     // Selectors
 
-        //- Select type
-        static autoPtr<fileOperation> New(const word& type, const bool verbose);
+        //- Select fileHandler-type
+        static autoPtr<fileOperation> New
+        (
+            const word& handlerType,
+            const bool verbose
+        );
 
 
     //- Destructor
-    virtual ~fileOperation();
+    virtual ~fileOperation() = default;
 
 
     // Member Functions
@@ -247,7 +260,12 @@ public:
             virtual bool rm(const fileName&) const = 0;
 
             //- Remove a dirctory and its contents
-            virtual bool rmDir(const fileName&) const = 0;
+            //  \param silent do not report missing directory
+            virtual bool rmDir
+            (
+                const fileName& dir,
+                const bool silent = false
+            ) const = 0;
 
 //            //- Open a shared library. Return handle to library. Print error
 //            //  message if library cannot be loaded (check = true)

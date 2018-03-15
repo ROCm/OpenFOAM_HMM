@@ -170,7 +170,7 @@ public:
                 const tmp<scalarField>&
             ) const
             {
-                return tmp<Field<Type>>(new Field<Type>(0));
+                return tmp<Field<Type>>::New();
             }
 
             //- Return the matrix source coefficients corresponding to the
@@ -180,21 +180,21 @@ public:
                 const tmp<scalarField>&
             ) const
             {
-                return tmp<Field<Type>>(new Field<Type>(0));
+                return tmp<Field<Type>>::New();
             }
 
             //- Return the matrix diagonal coefficients corresponding to the
             //  evaluation of the gradient of this patchField
             tmp<Field<Type>> gradientInternalCoeffs() const
             {
-                return tmp<Field<Type>>(new Field<Type>(0));
+                return tmp<Field<Type>>::New();
             }
 
             //- Return the matrix source coefficients corresponding to the
             //  evaluation of the gradient of this patchField
             tmp<Field<Type>> gradientBoundaryCoeffs() const
             {
-                return tmp<Field<Type>>(new Field<Type>(0));
+                return tmp<Field<Type>>::New();
             }
 };
 

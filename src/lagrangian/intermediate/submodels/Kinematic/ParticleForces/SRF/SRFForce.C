@@ -93,7 +93,7 @@ Foam::forceSuSp Foam::SRFForce<CloudType>::calcNonCoupled
 
     const vector& omega = srf.omega().value();
 
-    const vector& r = p.position();
+    const vector r(p.position());
 
     // Coriolis and centrifugal acceleration terms
     value.Su() =

@@ -244,7 +244,7 @@ tmp<volScalarField> calcNut
         // Correct nut
         turbulence->validate();
 
-        return tmp<volScalarField>(new volScalarField(turbulence->nut()));
+        return tmp<volScalarField>::New(turbulence->nut());
     }
     else
     {
@@ -261,15 +261,10 @@ tmp<volScalarField> calcNut
             incompressible::turbulenceModel::New(U, phi, laminarTransport)
         );
 
-        // Hack to correct nut
-        // Note: in previous versions of the code, nut was initialised on
-        //       construction of the turbulence model.  This is no longer the
-        //       case for the Templated Turbulence models.  The call to correct
-        //       below will evolve the turbulence model equations and update
-        //       nut, whereas only nut update is required.  Need to revisit.
-        turbulence->correct();
+        // Correct nut
+        turbulence->validate();
 
-        return tmp<volScalarField>(new volScalarField(turbulence->nut()));
+        return tmp<volScalarField>::New(turbulence->nut());
     }
 }
 
@@ -296,10 +291,15 @@ int main(int argc, char *argv[])
         "scalar",
         "boundary-layer thickness as Cbl * mean distance to wall"
     );
+    argList::addBoolOption
+    (
+        "write-nut",
+        "Write the turbulence viscosity field"
+    );
 
     #include "setRootCase.H"
 
-    if (!args.optionFound("ybl") && !args.optionFound("Cbl"))
+    if (!args.found("ybl") && !args.found("Cbl"))
     {
         FatalErrorInFunction
             << "Neither option 'ybl' or 'Cbl' have been provided to calculate "
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
             << "Please choose either 'ybl' OR 'Cbl'."
             << exit(FatalError);
     }
-    else if (args.optionFound("ybl") && args.optionFound("Cbl"))
+    else if (args.found("ybl") && args.found("Cbl"))
     {
         FatalErrorInFunction
             << "Both 'ybl' and 'Cbl' have been provided to calculate "
@@ -315,6 +315,8 @@ int main(int argc, char *argv[])
             << "Please choose either 'ybl' OR 'Cbl'."
             << exit(FatalError);
     }
+
+    const bool writeNut = args.found("write-nut");
 
     #include "createTime.H"
     #include "createNamedMesh.H"
@@ -348,7 +350,11 @@ int main(int argc, char *argv[])
     // Do not correct BC - wall functions will 'undo' manipulation above
     // by using nut from turbulence model
     correctProcessorPatches<scalar>(nut);
-    nut.write();
+    if (writeNut)
+    {
+        Info<< "Writing nut\n" << endl;
+        nut.write();
+    }
 
     // Boundary layer turbulence kinetic energy
     scalar ck0 = pow025(Cmu)*kappa;
@@ -362,7 +368,7 @@ int main(int argc, char *argv[])
     blendField("k", mesh, mask, kBL);
     blendField("epsilon", mesh, mask, epsilonBL);
     calcOmegaField(mesh, mask, kBL, epsilonBL);
-    setField(mesh, "nuTilda", nut);
+    if (writeNut) setField(mesh, "nuTilda", nut);
 
     // Write the updated U field
     Info<< "Writing U\n" << endl;

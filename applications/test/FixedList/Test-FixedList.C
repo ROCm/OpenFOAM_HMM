@@ -25,7 +25,7 @@ Application
     Test-FixedList
 
 Description
-    Simple tests and examples of use of FixedList
+    Simple tests and examples for FixedList
 
 See also
     Foam::FixedList
@@ -35,69 +35,217 @@ See also
 #include "argList.H"
 #include "FixedList.H"
 #include "Fstream.H"
+#include "List.H"
 #include "IPstream.H"
 #include "OPstream.H"
+#include <numeric>
 
 using namespace Foam;
+
+template<class T, unsigned Size>
+Ostream& printInfo(const FixedList<List<T>, Size>& list)
+{
+    Info<< list << " addresses:";
+    for (unsigned i = 0; i < Size; ++i)
+    {
+        Info<< " " << long(list[i].cdata());
+    }
+    Info<< nl;
+    return Info;
+}
+
+
+template<class T, unsigned Size>
+Ostream& printInfo
+(
+    const FixedList<List<T>, Size>& list1,
+    const FixedList<List<T>, Size>& list2
+)
+{
+    Info<< "llist1:"; printInfo(list1);
+    Info<< "llist2:"; printInfo(list2);
+    return Info;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
-    argList args(argc, argv);
+    argList::addBoolOption("assign");
+    argList::addBoolOption("iter");
+    argList::addBoolOption("swap");
+    argList::addBoolOption("default", "reinstate default tests");
+    argList::addNote("runs default tests or specified ones only");
 
-    FixedList<label, 4> list;
-    list[0] = 1;
-    list[1] = 2;
-    list[2] = 3;
-    list[3] = 4;
+    #include "setRootCase.H"
 
-    Info<< "list:" << list
-        << " hash:" << FixedList<label, 4>::Hash<>()(list) << endl;
+    // Run default tests, unless only specific tests are requested
+    const bool defaultTests =
+        args.found("default") || args.options().empty();
 
-    label a[4] = {0, 1, 2, 3};
-    FixedList<label, 4> list2(a);
 
-    Info<< "list2:" << list2
-        << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
-
-    // Using FixedList for content too
+    if (defaultTests || args.found("iter"))
     {
-        List<FixedList<label, 4>> twolists{list, list2};
-        Info<<"List of FixedList: " << flatOutput(twolists) << endl;
-        sort(twolists);
-        // outer-sort only
-        Info<<"sorted FixedList : " << flatOutput(twolists) << endl;
+        Info<< nl
+            << "Test iterators" << nl;
+
+        FixedList<label, 15> ident;
+        std::iota(ident.begin(), ident.end(), 0);
+
+        // auto iter = ident.begin();
+        //
+        // iter += 5;
+        // Info << *iter << "< " << nl;
+        // iter -= 2;
+        // Info << *iter << "< " << nl;
+
+        // Don't yet bother with making reverse iterators random access
+        // auto riter = ident.crbegin();
+
+        // riter += 5;
+        // Info << *riter << "< " << nl;
+        // riter += 2;
+        // Info << *riter << "< " << nl;
+
+        Info<<"Ident:";
+        forAllConstIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"reverse:";
+        forAllReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
+
+        Info<<"const reverse:";
+        forAllConstReverseIters(ident, iter)
+        {
+            Info<<" " << *iter;
+        }
+        Info<< nl;
     }
 
-    Info<< "list: " << list << nl
-        << "list2: " << list2 << endl;
-    list.swap(list2);
-    Info<< "Swapped via the swap() method" << endl;
-    Info<< "list: " << list << nl
-        << "list2: " << list2 << endl;
+    if (defaultTests || args.found("swap"))
+    {
+        Info<< nl
+            << "Test swap" << nl;
+
+        FixedList<label, 4> list1{2, 3, 4, 5};
+
+        Info<< "list1:" << list1
+            << " hash:" << FixedList<label, 4>::Hash<>()(list1) << nl;
+
+        label a[4] = {0, 1, 2, 3};
+        FixedList<label, 4> list2(a);
+
+        Info<< "list2:" << list2
+            << " hash:" << FixedList<label, 4>::Hash<>()(list2) << nl;
+
+        // Using FixedList for content too
+        {
+            List<FixedList<label, 4>> twolists{list1, list2};
+            Info<<"List of FixedList: " << flatOutput(twolists) << nl;
+            sort(twolists);
+            // outer-sort only
+            Info<<"sorted FixedList : " << flatOutput(twolists) << nl;
+        }
+
+        Info<< "====" << nl
+            << "Test swap" << nl;
+
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << nl;
+
+        // Addresses don't change with swap
+        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+
+        list1.swap(list2);
+        Info<< "The swap() method" << nl;
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << nl;
+
+        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+
+        Swap(list1, list2);
+        Info<< "The Swap() function" << nl;
+        Info<< "list1: " << list1 << nl
+            << "list2: " << list2 << nl;
+
+        Info<< "mem: " << long(list1.data()) << " " << long(list2.data()) << nl;
+
+        Info<< "====" << nl;
+
+
+        Info<< nl
+            << "Test of swap with other container content" << nl;
+
+        FixedList<labelList, 4> llist1;
+        FixedList<labelList, 4> llist2;
+
+        {
+            label i = 1;
+            for (auto& item : llist1)
+            {
+                item = identity(1 + 1.5*i);
+                ++i;
+            }
+        }
+
+        Info<< nl
+            << "initial lists" << nl;
+        printInfo(llist1, llist2);
+
+        llist2.transfer(llist1);
+        Info<< nl
+            << "After transfer" << nl;
+        printInfo(llist1, llist2);
+
+        llist2.swap(llist1);
+        Info<< nl
+            << "After swap" << nl;
+        printInfo(llist1, llist2);
+
+        llist2 = llist1;
+        Info<< nl
+            << "After copy assignment" << nl;
+        printInfo(llist1, llist2);
+
+        llist2 = std::move(llist1);
+        Info<< nl
+            << "After move assignment" << nl;
+        printInfo(llist1, llist2);
+    }
+
+    Info<< nl
+        << "Test construct and assignment" << nl;
+
 
     List<label> list3{0, 1, 2, 3};
     FixedList<label, 4> list4(list3.begin(), list3.end());
     Info<< "list3: " << list3 << nl
-        << "list4: " << list4 << endl;
+        << "list4: " << list4 << nl;
 
     list4 = {1, 2, 3, 5};
     Info<< "list4: " << list4 << nl;
 
     FixedList<label, 5> list5{0, 1, 2, 3, 4};
-    Info<< "list5: " << list5 << endl;
+    Info<< "list5: " << list5 << nl;
 
     List<FixedList<label, 2>> list6{{0, 1}, {2, 3}};
-    Info<< "list6: " << list6 << endl;
+    Info<< "list6: " << list6 << nl;
 
     if (Pstream::parRun())
     {
         if (Pstream::myProcNo() != Pstream::masterNo())
         {
             Serr<< "slave sending to master "
-                << Pstream::masterNo() << endl;
+                << Pstream::masterNo() << nl;
 
             OPstream toMaster
             (

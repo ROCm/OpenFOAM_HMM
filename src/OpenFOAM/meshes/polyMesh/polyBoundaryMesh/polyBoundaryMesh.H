@@ -82,10 +82,10 @@ class polyBoundaryMesh
         void calcGeometry();
 
         //- Disallow construct as copy
-        polyBoundaryMesh(const polyBoundaryMesh&);
+        polyBoundaryMesh(const polyBoundaryMesh&) = delete;
 
         //- Disallow assignment
-        void operator=(const polyBoundaryMesh&);
+        void operator=(const polyBoundaryMesh&) = delete;
 
 
 public:
@@ -126,7 +126,7 @@ public:
 
 
     //- Destructor
-    ~polyBoundaryMesh();
+    ~polyBoundaryMesh() = default;
 
         //- Clear geometry at this level and at patches
         void clearGeom();
@@ -151,6 +151,9 @@ public:
         //  Only valid for singly connected polyBoundaryMesh and not parallel
         const List<labelPairList>& neighbourEdges() const;
 
+        //- Return the number of non-processor patches
+        label nNonProcessor() const;
+
         //- Return a list of patch names
         wordList names() const;
 
@@ -163,12 +166,12 @@ public:
         //- Return patch indices for all matches. Optionally matches patchGroups
         labelList findIndices
         (
-            const keyType&,
+            const keyType& key,
             const bool usePatchGroups = true
         ) const;
 
         //- Return patch index for the first match, return -1 if not found
-        label findIndex(const keyType&) const;
+        label findIndex(const keyType& key) const;
 
         //- Find patch index given a name
         label findPatchID
@@ -233,10 +236,10 @@ public:
         void reorder(const labelUList&, const bool validBoundary);
 
         //- writeData member function required by regIOobject
-        bool writeData(Ostream&) const;
+        virtual bool writeData(Ostream&) const;
 
         //- Write using given format, version and form uncompression
-        bool writeObject
+        virtual bool writeObject
         (
             IOstream::streamFormat fmt,
             IOstream::versionNumber ver,

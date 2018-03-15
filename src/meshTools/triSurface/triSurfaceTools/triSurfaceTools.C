@@ -101,7 +101,7 @@ void Foam::triSurfaceTools::greenRefine
 
     // Find index of edge in face.
 
-    label fp0 = findIndex(f, e[0]);
+    label fp0 = f.find(e[0]);
     label fp1 = f.fcIndex(fp0);
     label fp2 = f.fcIndex(fp1);
 
@@ -451,8 +451,8 @@ void Foam::triSurfaceTools::getMergedEdges
     const triSurface& surf,
     const label edgeI,
     const labelHashSet& collapsedFaces,
-    HashTable<label, label, Hash<label>>& edgeToEdge,
-    HashTable<label, label, Hash<label>>& edgeToFace
+    Map<label>& edgeToEdge,
+    Map<label>& edgeToFace
 )
 {
     const edge& e = surf.edges()[edgeI];
@@ -534,8 +534,8 @@ Foam::scalar Foam::triSurfaceTools::edgeCosAngle
     const label v1,
     const point& pt,
     const labelHashSet& collapsedFaces,
-    const HashTable<label, label, Hash<label>>& edgeToEdge,
-    const HashTable<label, label, Hash<label>>& edgeToFace,
+    const Map<label>& edgeToEdge,
+    const Map<label>& edgeToFace,
     const label facei,
     const label edgeI
 )
@@ -630,8 +630,8 @@ Foam::scalar Foam::triSurfaceTools::collapseMinCosAngle
     const label v1,
     const point& pt,
     const labelHashSet& collapsedFaces,
-    const HashTable<label, label, Hash<label>>& edgeToEdge,
-    const HashTable<label, label, Hash<label>>& edgeToFace
+    const Map<label>& edgeToEdge,
+    const Map<label>& edgeToFace
 )
 {
     const labelList& v1Faces = surf.pointFaces()[v1];
@@ -684,8 +684,8 @@ bool Foam::triSurfaceTools::collapseCreatesFold
     const label v1,
     const point& pt,
     const labelHashSet& collapsedFaces,
-    const HashTable<label, label, Hash<label>>& edgeToEdge,
-    const HashTable<label, label, Hash<label>>& edgeToFace,
+    const Map<label>& edgeToEdge,
+    const Map<label>& edgeToFace,
     const scalar minCos
 )
 {
@@ -749,7 +749,7 @@ bool Foam::triSurfaceTools::collapseCreatesFold
 //    // neighbours actually contains the
 //    // edge with which triangle connects to collapsedFaces.
 //
-//    HashTable<label, label, Hash<label>> neighbours;
+//    Map<label> neighbours;
 //
 //    labelList collapsed = collapsedFaces.toc();
 //
@@ -881,7 +881,7 @@ Foam::surfaceLocation Foam::triSurfaceTools::cutEdge
     {
         // Excluded point. Test only opposite edge.
 
-        label fp0 = findIndex(s.localFaces()[triI], excludePointi);
+        label fp0 = s.localFaces()[triI].find(excludePointi);
 
         if (fp0 == -1)
         {
@@ -1062,7 +1062,7 @@ void Foam::triSurfaceTools::snapToEnd
             // endpoint on edge; current on triangle
             const labelList& fEdges = s.faceEdges()[current.index()];
 
-            if (findIndex(fEdges, end.index()) != -1)
+            if (fEdges.found(end.index()))
             {
                 //if (debug)
                 //{
@@ -1111,7 +1111,7 @@ void Foam::triSurfaceTools::snapToEnd
             // endpoint on point; current on triangle
             const triSurface::FaceType& f = s.localFaces()[current.index()];
 
-            if (findIndex(f, end.index()) != -1)
+            if (f.found(end.index()))
             {
                 //if (debug)
                 //{
@@ -1415,7 +1415,7 @@ void Foam::triSurfaceTools::otherEdges
 {
     const labelList& eFaces = surf.faceEdges()[facei];
 
-    label i0 = findIndex(eFaces, edgeI);
+    label i0 = eFaces.find(edgeI);
 
     if (i0 == -1)
     {

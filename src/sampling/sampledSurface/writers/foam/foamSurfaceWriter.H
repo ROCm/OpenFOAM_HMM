@@ -75,11 +75,11 @@ public:
     // Constructors
 
         //- Construct null
-        foamSurfaceWriter();
+        foamSurfaceWriter() = default;
 
 
     //- Destructor
-    virtual ~foamSurfaceWriter();
+    virtual ~foamSurfaceWriter() = default;
 
 
     // Member Functions

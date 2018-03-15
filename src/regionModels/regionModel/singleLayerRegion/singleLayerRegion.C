@@ -213,7 +213,7 @@ const Foam::volVectorField& Foam::regionModels::singleLayerRegion::nHat() const
             << abort(FatalError);
     }
 
-    return nHatPtr_();
+    return *nHatPtr_;
 }
 
 
@@ -226,7 +226,7 @@ const Foam::volScalarField& Foam::regionModels::singleLayerRegion::magSf() const
             << abort(FatalError);
     }
 
-    return magSfPtr_();
+    return *magSfPtr_;
 }
 
 

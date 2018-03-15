@@ -91,10 +91,7 @@ template<class Thermo>
 inline Foam::autoPtr<Foam::sutherlandTransport<Thermo>>
 Foam::sutherlandTransport<Thermo>::clone() const
 {
-    return autoPtr<sutherlandTransport<Thermo>>
-    (
-        new sutherlandTransport<Thermo>(*this)
-    );
+    return autoPtr<sutherlandTransport<Thermo>>::New(*this);
 }
 
 
@@ -105,10 +102,7 @@ Foam::sutherlandTransport<Thermo>::New
     const dictionary& dict
 )
 {
-    return autoPtr<sutherlandTransport<Thermo>>
-    (
-        new sutherlandTransport<Thermo>(dict)
-    );
+    return autoPtr<sutherlandTransport<Thermo>>::New(dict);
 }
 
 

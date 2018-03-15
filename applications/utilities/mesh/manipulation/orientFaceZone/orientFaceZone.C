@@ -50,15 +50,15 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
-    argList::validArgs.append("faceZone");
-    argList::validArgs.append("outsidePoint");
+    argList::addArgument("faceZone");
+    argList::addArgument("outsidePoint");
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedPolyMesh.H"
 
     const word zoneName  = args[1];
-    const point outsidePoint = args.argRead<point>(2);
+    const point outsidePoint = args.read<point>(2);
 
     Info<< "Orienting faceZone " << zoneName
         << " such that " << outsidePoint << " is outside"

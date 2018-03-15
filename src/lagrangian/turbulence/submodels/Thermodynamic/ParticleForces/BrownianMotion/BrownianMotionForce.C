@@ -70,15 +70,13 @@ Foam::BrownianMotionForce<CloudType>::kModel() const
             obr.lookupObject<turbulenceModel>(turbName);
         return model.k();
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Turbulence model not found in mesh database" << nl
-            << "Database objects include: " << obr.sortedToc()
-            << abort(FatalError);
 
-        return tmp<volScalarField>(nullptr);
-    }
+    FatalErrorInFunction
+        << "Turbulence model not found in mesh database" << nl
+        << "Database objects include: " << obr.sortedToc()
+        << abort(FatalError);
+
+    return tmp<volScalarField>();
 }
 
 

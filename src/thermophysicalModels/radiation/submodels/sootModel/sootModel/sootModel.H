@@ -29,8 +29,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationsootModel_H
-#define radiationsootModel_H
+#ifndef radiation_sootModel_H
+#define radiation_sootModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"

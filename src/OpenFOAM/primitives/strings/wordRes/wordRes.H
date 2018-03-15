@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,11 +25,7 @@ Class
     Foam::wordRes
 
 Description
-    A wrapper for matching a std::string against a wordRe list.
-
-Note
-    The constructor should remain non-explicit. This allows automatic
-    conversion from UList\<wordRe\> to wordRes in search functions.
+    A List of wordRe with additional matching capabilities.
 
 SourceFiles
     wordResI.H
@@ -52,71 +48,80 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class wordRes
+:
+    public List<wordRe>
 {
-    // Private data
+    // Private Methods
 
-        //- Reference to underlying list
-        const UList<wordRe>& list_;
+        //- Check for any match of text in list of matchers
+        inline static bool found_match
+        (
+            const UList<wordRe>& patterns,
+            const std::string& text,
+            bool literal=false
+        );
+
 
 public:
 
-    // STL type definitions
+    // Public Classes
 
-        //- Type of values the list contains
-        typedef wordRe value_type;
+        //- Functor wrapper for matching against a List of wordRe
+        struct matcher
+        {
+            const UList<wordRe>& values;
+
+            matcher(const UList<wordRe>& list)
+            :
+                values(list)
+            {}
+
+            //- Return true if string matches ANY of the regular expressions
+            //  Allows use as a predicate.
+            bool operator()(const std::string& text) const
+            {
+                return found_match(values, text);
+            }
+        };
+
+
+    // Factory Methods
+
+        //- Return a null wordRes - a reference to the NullObject
+        inline static const wordRes& null();
+
+        //- Return a wordRes with duplicate words filtered out.
+        //  No filtering attempted on regular expressions.
+        static wordRes uniq(const UList<wordRe>& input);
 
 
     // Constructors
 
-        //- Construct from a list of wordRe
-        inline wordRes(const UList<wordRe>& list);
+        //- Inherit constructors from List of wordRe
+        using List<wordRe>::List;
 
 
-    // Static Constructors, Helpers
-
-        //- Return a wordReList with duplicate words filtered out.
-        //  No filtering is done on regular expressions.
-        static wordReList uniq(const UList<wordRe>& input);
-
-        //- Inplace subset of wordReList with duplicate words filtered out.
-        //  No filtering is done on regular expressions.
-        static void inplaceUniq(wordReList& input);
+    //- Destructor
+    ~wordRes() = default;
 
 
     // Member Functions
 
-      // Access
+        //- Filter out duplicate words (inplace).
+        //  No filtering attempted on regular expressions.
+        void uniq();
 
-        //- The number of elements in the list
-        inline label size() const;
-
-        //- True if the list is empty
-        inline bool empty() const;
-
-
-      // Searching
-
-        //- Return true if string matches any of the regular expressions
+        //- Return true if string matches ANY of the regular expressions
         //  Smart match as regular expression or as a string.
-        //  Optionally specify a literal match only.
-        inline bool match
-        (
-            const std::string& text,
-            const bool literal = false
-        ) const;
+        //  Optionally force a literal match only
+        inline bool match(const std::string& text, bool literal=false) const;
 
 
     // Member operators
 
-        //- Return underlying list of wordRe
-        inline const UList<wordRe>& operator()() const;
-
         //- Perform smart match on text, as per match()
+        //  Allows use as a predicate.
         inline bool operator()(const std::string& text) const;
-
-        //- Return element of constant list
-        inline const wordRe& operator[](const label i) const;
-
 };
 
 

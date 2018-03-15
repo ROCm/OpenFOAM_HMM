@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     );
     timeSelector::addOptions();
 
-    argList::validArgs.append("output file");
+    argList::addArgument("output file");
     #include "addRegionOption.H"
     argList::addBoolOption
     (
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 
     const bool includeProcPatches =
        !(
-            args.optionFound("excludeProcPatches")
+            args.found("excludeProcPatches")
          || Pstream::parRun()
         );
 
@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
 
         labelHashSet includePatches(bMesh.size());
 
-        if (args.optionFound("patches"))
+        if (args.found("patches"))
         {
             includePatches = bMesh.patchSet
             (
-                wordReList(args.optionLookup("patches")())
+                args.readList<wordRe>("patches")
             );
         }
         else
@@ -195,14 +195,12 @@ int main(int argc, char *argv[])
         const faceZoneMesh& fzm = mesh.faceZones();
         labelHashSet includeFaceZones(fzm.size());
 
-        if (args.optionFound("faceZones"))
+        if (args.found("faceZones"))
         {
-            wordReList zoneNames(args.optionLookup("faceZones")());
+            wordReList zoneNames(args.readList<wordRe>("faceZones"));
             const wordList allZoneNames(fzm.names());
-            forAll(zoneNames, i)
+            for (const wordRe& zoneName : zoneNames)
             {
-                const wordRe& zoneName = zoneNames[i];
-
                 labelList zoneIDs = findStrings(zoneName, allZoneNames);
 
                 forAll(zoneIDs, j)
@@ -219,11 +217,11 @@ int main(int argc, char *argv[])
 
             }
             Info<< "Additionally triangulating faceZones "
-                << UIndirectList<word>
-                  (
-                      allZoneNames,
-                      includeFaceZones.sortedToc()
-                  )
+                <<  UIndirectList<word>
+                    (
+                        allZoneNames,
+                        includeFaceZones.sortedToc()
+                    )
                 << endl;
         }
 
@@ -366,7 +364,7 @@ int main(int argc, char *argv[])
 
         // Gather all ZoneIDs
         List<labelList> gatheredZones(Pstream::nProcs());
-        gatheredZones[Pstream::myProcNo()] = compactZones.xfer();
+        gatheredZones[Pstream::myProcNo()].transfer(compactZones);
         Pstream::gatherList(gatheredZones);
 
         // On master combine all points, faces, zones
@@ -406,10 +404,10 @@ int main(int argc, char *argv[])
 
             UnsortedMeshedSurface<face> unsortedFace
             (
-                xferMove(allPoints),
-                xferMove(allFaces),
-                xferMove(allZones),
-                xferMove(surfZones)
+                std::move(allPoints),
+                std::move(allFaces),
+                std::move(allZones),
+                surfZones
             );
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -149,6 +149,18 @@ public:
 //- Update result field based on interface functionality
 template<>
 void jumpCyclicFvPatchField<scalar>::updateInterfaceMatrix
+(
+    scalarField& result,
+    const bool add,
+    const scalarField& psiInternal,
+    const scalarField& coeffs,
+    const direction cmpt,
+    const Pstream::commsTypes commsType
+) const;
+
+
+template<>
+void jumpCyclicFvPatchField<vector>::updateInterfaceMatrix
 (
     scalarField& result,
     const bool add,

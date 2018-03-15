@@ -75,14 +75,14 @@ public:
 
     // Selectors
 
-        //- Read (optionallly from absolute path) & register on mesh
+        //- Read (optionally from absolute path) & register on mesh
         static const decompositionModel& New
         (
             const polyMesh& mesh,
             const fileName& decompDictFile = ""
         );
 
-        //- Read (optionallly from supplied dictionary) & register on mesh
+        //- Read (optionally from supplied dictionary) & register on mesh
         static const decompositionModel& New
         (
             const polyMesh& mesh,
@@ -94,42 +94,51 @@ public:
     // Constructors
 
         //- Construct from typeName or optional path to controlDictionary
-        decompositionModel(const polyMesh&, const fileName& = "");
+        decompositionModel
+        (
+            const polyMesh& mesh,
+            const fileName& decompDictFile = ""
+        );
 
 
         //- Construct from typeName or optional path to controlDictionary
         decompositionModel
         (
-            const polyMesh&,
+            const polyMesh& mesh,
             const dictionary& dict,
-            const fileName& = ""
+            const fileName& decompDictFile = ""
         );
 
 
-    // Member functions
+    // Member Functions
 
         decompositionMethod& decomposer() const
         {
             if (!decomposerPtr_.valid())
             {
-                decomposerPtr_ = decompositionMethod::New(*this);
+                decomposerPtr_ =
+                    decompositionMethod::New
+                    (
+                        *this,
+                        this->mesh().name()  // Name of mesh region
+                    );
             }
-            return decomposerPtr_();
+            return *decomposerPtr_;
         }
 
         //- Helper: return IOobject with optionally absolute path provided
-        static IOobject selectIO(const IOobject&, const fileName&);
+        static IOobject selectIO(const IOobject& io, const fileName& f);
 
 
-        // UpdateableMeshObject
+      // UpdateableMeshObject
 
-            virtual bool movePoints()
-            {
-                return false;
-            }
+        virtual bool movePoints()
+        {
+            return false;
+        }
 
-            virtual void updateMesh(const mapPolyMesh&)
-            {}
+        virtual void updateMesh(const mapPolyMesh&)
+        {}
 
 };
 

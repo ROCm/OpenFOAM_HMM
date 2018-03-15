@@ -204,7 +204,7 @@ public:
 
 
     //- Destructor
-    ~backgroundMeshDecomposition();
+    ~backgroundMeshDecomposition() = default;
 
 
     // Member Functions

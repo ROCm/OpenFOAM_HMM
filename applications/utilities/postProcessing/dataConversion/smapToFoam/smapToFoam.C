@@ -40,7 +40,7 @@ Description
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("SMAP fileName");
+    argList::addArgument("SMAP fileName");
 
     argList args(argc, argv);
 

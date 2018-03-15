@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -57,11 +57,11 @@ class dynamicFvMesh
 {
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        dynamicFvMesh(const dynamicFvMesh&);
+        //- Disallow copy construct
+        dynamicFvMesh(const dynamicFvMesh&) = delete;
 
-        //- Disallow default bitwise assignment
-        void operator=(const dynamicFvMesh&);
+        //- Disallow copy assignment
+        void operator=(const dynamicFvMesh&) = delete;
 
 
 public:
@@ -89,13 +89,17 @@ public:
 
         //- Construct from components without boundary.
         //  Boundary is added using addFvPatches() member function
+        dynamicFvMesh(const IOobject& io, const zero, const bool syncPar=true);
+
+        //- Construct from components without boundary.
+        //  Boundary is added using addFvPatches() member function
         dynamicFvMesh
         (
             const IOobject& io,
-            const Xfer<pointField>& points,
-            const Xfer<faceList>& faces,
-            const Xfer<labelList>& allOwner,
-            const Xfer<labelList>& allNeighbour,
+            pointField&& points,
+            faceList&& faces,
+            labelList&& allOwner,
+            labelList&& allNeighbour,
             const bool syncPar = true
         );
 
@@ -104,9 +108,9 @@ public:
         dynamicFvMesh
         (
             const IOobject& io,
-            const Xfer<pointField>& points,
-            const Xfer<faceList>& faces,
-            const Xfer<cellList>& cells,
+            pointField&& points,
+            faceList&& faces,
+            cellList&& cells,
             const bool syncPar = true
         );
 
@@ -118,7 +122,7 @@ public:
 
 
     //- Destructor
-    virtual ~dynamicFvMesh();
+    virtual ~dynamicFvMesh() = default;
 
 
     // Member Functions

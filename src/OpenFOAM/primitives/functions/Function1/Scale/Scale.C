@@ -52,8 +52,8 @@ template<class Type>
 Foam::Function1Types::Scale<Type>::Scale(const Scale<Type>& se)
 :
     Function1<Type>(se),
-    scale_(se.scale_, false),
-    value_(se.value_, false)
+    scale_(se.scale_.clone()),
+    value_(se.value_.clone())
 {}
 
 
@@ -71,11 +71,13 @@ void Foam::Function1Types::Scale<Type>::writeData(Ostream& os) const
 {
     Function1<Type>::writeData(os);
     os  << token::END_STATEMENT << nl;
-    os  << indent << word(this->name() + "Coeffs") << nl;
-    os  << indent << token::BEGIN_BLOCK << incrIndent << nl;
+
+    os.beginBlock(word(this->name() + "Coeffs"));
+
     scale_->writeData(os);
     value_->writeData(os);
-    os  << decrIndent << indent << token::END_BLOCK << endl;
+
+    os.endBlock();
 }
 
 

@@ -29,7 +29,7 @@ Description
 #ifndef foamPvFields_H
 #define foamPvFields_H
 
-#include "volFields.H"
+#include "symmTensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,27 +40,17 @@ namespace Foam
                         Class foamPvFields Declaration
 \*---------------------------------------------------------------------------*/
 
-class foamPvFields
+struct foamPvFields
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        foamPvFields(const foamPvFields&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const foamPvFields&) = delete;
-
-public:
-
     //- Remapping for some data types
     template<class Type>
     inline static void remapTuple(float vec[])
     {}
 
+};
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-}; // End class foamPvFields
-
 
 // Template specialization for symmTensor
 template<>

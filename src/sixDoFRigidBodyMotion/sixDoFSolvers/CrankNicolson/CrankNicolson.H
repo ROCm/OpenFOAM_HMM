@@ -101,10 +101,7 @@ public:
         //- Construct and return a clone
         virtual autoPtr<sixDoFSolver> clone() const
         {
-            return autoPtr<sixDoFSolver>
-            (
-                new CrankNicolson(dict_, body_)
-            );
+            return autoPtr<sixDoFSolver>::NewFrom<CrankNicolson>(dict_, body_);
         }
 
 

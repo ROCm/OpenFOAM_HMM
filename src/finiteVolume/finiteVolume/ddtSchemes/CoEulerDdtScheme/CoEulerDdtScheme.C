@@ -135,14 +135,12 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::CofrDeltaT() const
 
         return max(Co/maxCo_, scalar(1))/deltaT;
     }
-    else
-    {
-        FatalErrorInFunction
-            << "Incorrect dimensions of phi: " << phi.dimensions()
-            << abort(FatalError);
 
-        return tmp<surfaceScalarField>(nullptr);
-    }
+    FatalErrorInFunction
+        << "Incorrect dimensions of phi: " << phi.dimensions()
+        << abort(FatalError);
+
+    return tmp<surfaceScalarField>();
 }
 
 

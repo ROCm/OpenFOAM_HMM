@@ -138,20 +138,18 @@ void Foam::globalPoints::addToSend
     // information is the patch faces using the point and the relative position
     // of the point in the face)
 
-    label meshPointi = pp.meshPoints()[patchPointi];
+    const label meshPointi = pp.meshPoints()[patchPointi];
 
     // Add all faces using the point so we are sure we find it on the
     // other side.
     const labelList& pFaces = pp.pointFaces()[patchPointi];
 
-    forAll(pFaces, i)
+    for (const label patchFacei : pFaces)
     {
-        label patchFacei = pFaces[i];
-
         const face& f = pp[patchFacei];
 
         patchFaces.append(patchFacei);
-        indexInFace.append(findIndex(f, meshPointi));
+        indexInFace.append(f.find(meshPointi));
 
         // Add patch transformation
         allInfo.append(addSendTransform(pp.index(), knownInfo));
@@ -732,16 +730,16 @@ void Foam::globalPoints::remove
     // those points where the equivalence list is only me and my (face)neighbour
 
     // Save old ones.
-    Map<label> oldMeshToProcPoint(meshToProcPoint_.xfer());
+    Map<label> oldMeshToProcPoint(std::move(meshToProcPoint_));
     meshToProcPoint_.resize(oldMeshToProcPoint.size());
-    DynamicList<labelPairList> oldProcPoints(procPoints_.xfer());
+    DynamicList<labelPairList> oldProcPoints(std::move(procPoints_));
     procPoints_.setCapacity(oldProcPoints.size());
 
     // Go through all equivalences
-    forAllConstIter(Map<label>, oldMeshToProcPoint, iter)
+    forAllConstIters(oldMeshToProcPoint, iter)
     {
-        label localPointi = iter.key();
-        const labelPairList& pointInfo = oldProcPoints[iter()];
+        const label localPointi = iter.key();
+        const labelPairList& pointInfo = oldProcPoints[iter.object()];
 
         if (pointInfo.size() == 2)
         {

@@ -108,13 +108,6 @@ Foam::MultiInteraction<CloudType>::MultiInteraction
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::MultiInteraction<CloudType>::~MultiInteraction()
-{}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 template<class CloudType>

@@ -278,7 +278,7 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
         // to choose our type
         dict.set("type", name_);
 
-        redirectPatchFieldPtr_.set
+        redirectPatchFieldPtr_.reset
         (
             dynamic_cast<mixedFvPatchField<Type>*>
             (
@@ -291,7 +291,7 @@ Foam::codedMixedFvPatchField<Type>::redirectPatchField() const
             )
         );
     }
-    return redirectPatchFieldPtr_();
+    return *redirectPatchFieldPtr_;
 }
 
 
@@ -343,8 +343,7 @@ template<class Type>
 void Foam::codedMixedFvPatchField<Type>::write(Ostream& os) const
 {
     mixedFvPatchField<Type>::write(os);
-    os.writeKeyword("name") << name_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("name", name_);
 
     codedBase::writeCodeDict(os, dict_);
 }

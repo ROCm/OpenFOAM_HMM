@@ -106,11 +106,11 @@ void Foam::waveVelocityFvPatchVectorField::updateCoeffs()
         )
     );
 
-    waveModel& model = const_cast<waveModel&>(tmodel());
+    waveModel& model = tmodel.constCast();
 
     model.correct(db().time().value());
 
-    operator == (model.U());
+    operator==(model.U());
 
     fixedValueFvPatchField<vector>::updateCoeffs();
 }
@@ -120,8 +120,7 @@ void Foam::waveVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
 
-    os.writeKeyword("waveDictName") << waveDictName_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("waveDictName", waveDictName_);
 
     writeEntry("value", os);
 }

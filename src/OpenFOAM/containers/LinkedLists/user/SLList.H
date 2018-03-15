@@ -32,18 +32,10 @@ Description
 #ifndef SLList_H
 #define SLList_H
 
-#include "LList.H"
 #include "SLListBase.H"
+#include "LList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    template<class T>
-    using SLList = LList<SLListBase, T>;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "SLListFwd.H"
 
 #endif
 

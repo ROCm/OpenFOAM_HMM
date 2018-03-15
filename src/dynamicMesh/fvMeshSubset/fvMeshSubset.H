@@ -180,7 +180,7 @@ public:
             //- setLargeCellSubset but only marking certain cells
             void setLargeCellSubset
             (
-                const UList<label>& globalCellMap,
+                const labelUList& globalCellMap,
                 const label patchID = -1,
                 const bool syncPar = true
             );

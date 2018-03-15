@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -41,32 +41,31 @@ tmp<DimensionedField<TypeR, GeoMesh>> New
     const dimensionSet& dimensions
 )
 {
-    DimensionedField<TypeR, GeoMesh>& df1 =
-        const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
-
     if (tdf1.isTmp())
     {
+        auto& df1 = tdf1.constCast();
+
         df1.rename(name);
         df1.dimensions().reset(dimensions);
         return tdf1;
     }
-    else
-    {
-        return tmp<DimensionedField<TypeR, GeoMesh>>
+
+    const auto& df1 = tdf1();
+
+    return tmp<DimensionedField<TypeR, GeoMesh>>
+    (
+        new DimensionedField<TypeR, GeoMesh>
         (
-            new DimensionedField<TypeR, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    df1.instance(),
-                    df1.db()
-                ),
-                df1.mesh(),
-                dimensions
-            )
-        );
-    }
+                name,
+                df1.instance(),
+                df1.db()
+            ),
+            df1.mesh(),
+            dimensions
+        )
+    );
 }
 
 
@@ -82,7 +81,7 @@ public:
         const dimensionSet& dimensions
     )
     {
-        const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
+        const auto& df1 = tdf1();
 
         return tmp<DimensionedField<TypeR, GeoMesh>>
         (
@@ -114,32 +113,31 @@ public:
         const dimensionSet& dimensions
     )
     {
-        DimensionedField<TypeR, GeoMesh>& df1 =
-            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
-
         if (tdf1.isTmp())
         {
+            auto& df1 = tdf1.constCast();
+
             df1.rename(name);
             df1.dimensions().reset(dimensions);
             return tdf1;
         }
-        else
-        {
-            return tmp<DimensionedField<TypeR, GeoMesh>>
+
+        const auto& df1 = tdf1();
+
+        return tmp<DimensionedField<TypeR, GeoMesh>>
+        (
+            new DimensionedField<TypeR, GeoMesh>
             (
-                new DimensionedField<TypeR, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        df1.instance(),
-                        df1.db()
-                    ),
-                    df1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    df1.instance(),
+                    df1.db()
+                ),
+                df1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -157,7 +155,7 @@ public:
         const dimensionSet& dimensions
     )
     {
-        const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
+        const auto& df1 = tdf1();
 
         return tmp<DimensionedField<TypeR, GeoMesh>>
         (
@@ -190,33 +188,31 @@ public:
         const dimensionSet& dimensions
     )
     {
-        const DimensionedField<Type1, GeoMesh>& df1 = tdf1();
-        DimensionedField<TypeR, GeoMesh>& df2 =
-            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf2());
-
         if (tdf2.isTmp())
         {
+            auto& df2 = tdf2.constCast();
+
             df2.rename(name);
             df2.dimensions().reset(dimensions);
             return tdf2;
         }
-        else
-        {
-            return tmp<DimensionedField<TypeR, GeoMesh>>
+
+        const auto& df1 = tdf1();
+
+        return tmp<DimensionedField<TypeR, GeoMesh>>
+        (
+            new DimensionedField<TypeR, GeoMesh>
             (
-                new DimensionedField<TypeR, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        df1.instance(),
-                        df1.db()
-                    ),
-                    df1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    df1.instance(),
+                    df1.db()
+                ),
+                df1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -234,32 +230,31 @@ public:
         const dimensionSet& dimensions
     )
     {
-        DimensionedField<TypeR, GeoMesh>& df1 =
-            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
-
         if (tdf1.isTmp())
         {
+            auto& df1 = tdf1.constCast();
+
             df1.rename(name);
             df1.dimensions().reset(dimensions);
             return tdf1;
         }
-        else
-        {
-            return tmp<DimensionedField<TypeR, GeoMesh>>
+
+        const auto& df1 = tdf1();
+
+        return tmp<DimensionedField<TypeR, GeoMesh>>
+        (
+            new DimensionedField<TypeR, GeoMesh>
             (
-                new DimensionedField<TypeR, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        df1.instance(),
-                        df1.db()
-                    ),
-                    df1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    df1.instance(),
+                    df1.db()
+                ),
+                df1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -277,40 +272,39 @@ public:
         const dimensionSet& dimensions
     )
     {
-        DimensionedField<TypeR, GeoMesh>& df1 =
-            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf1());
-        DimensionedField<TypeR, GeoMesh>& df2 =
-            const_cast<DimensionedField<TypeR, GeoMesh>&>(tdf2());
-
         if (tdf1.isTmp())
         {
+            auto& df1 = tdf1.constCast();
+
             df1.rename(name);
             df1.dimensions().reset(dimensions);
             return tdf1;
         }
         else if (tdf2.isTmp())
         {
+            auto& df2 = tdf2.constCast();
+
             df2.rename(name);
             df2.dimensions().reset(dimensions);
             return tdf2;
         }
-        else
-        {
-            return tmp<DimensionedField<TypeR, GeoMesh>>
+
+        const auto& df1 = tdf1();
+
+        return tmp<DimensionedField<TypeR, GeoMesh>>
+        (
+            new DimensionedField<TypeR, GeoMesh>
             (
-                new DimensionedField<TypeR, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        df1.instance(),
-                        df1.db()
-                    ),
-                    df1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    df1.instance(),
+                    df1.db()
+                ),
+                df1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 

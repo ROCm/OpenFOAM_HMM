@@ -172,7 +172,7 @@ void Foam::SprayParcel<ParcelType>::calcAtomization
 
     scalar soi = cloud.injectors().timeStart();
     scalar currentTime = cloud.db().time().value();
-    const vector& pos = this->position();
+    const vector pos(this->position());
     const vector& injectionPos = this->position0();
 
     // Disregard the continous phase when calculating the relative velocity

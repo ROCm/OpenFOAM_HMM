@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "boundBox.H"
 #include "PstreamReduceOps.H"
 #include "tmp.H"
+#include "plane.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -106,7 +107,7 @@ Foam::boundBox::boundBox
 
 Foam::tmp<Foam::pointField> Foam::boundBox::points() const
 {
-    tmp<pointField> tpoints = tmp<pointField>(new pointField(8));
+    tmp<pointField> tpoints(new pointField(8));
     pointField& pt = tpoints.ref();
 
     pt[0] = min_;                                   // min-x, min-y, min-z
@@ -147,6 +148,36 @@ bool Foam::boundBox::intersect(const boundBox& bb)
 }
 
 
+bool Foam::boundBox::intersects(const plane& pln) const
+{
+    // Require a full 3D box
+    if (nDim() != 3)
+    {
+        return false;
+    }
+
+    bool above = false;
+    bool below = false;
+
+    tmp<pointField> tpts(points());
+    const pointField& pts = tpts();
+
+    for (const point& p : pts)
+    {
+        if (pln.sideOfPlane(p) == plane::NORMAL)
+        {
+            above = true;
+        }
+        else
+        {
+            below = true;
+        }
+    }
+
+    return (above && below);
+}
+
+
 bool Foam::boundBox::contains(const UList<point>& points) const
 {
     if (points.empty())
@@ -154,9 +185,9 @@ bool Foam::boundBox::contains(const UList<point>& points) const
         return true;
     }
 
-    forAll(points, i)
+    for (const point& p : points)
     {
-        if (!contains(points[i]))
+        if (!contains(p))
         {
             return false;
         }
@@ -196,9 +227,9 @@ bool Foam::boundBox::containsAny(const UList<point>& points) const
         return true;
     }
 
-    forAll(points, i)
+    for (const point& p : points)
     {
-        if (contains(points[i]))
+        if (contains(p))
         {
             return true;
         }

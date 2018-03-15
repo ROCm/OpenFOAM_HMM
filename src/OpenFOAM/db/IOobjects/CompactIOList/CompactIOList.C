@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -61,7 +61,7 @@ bool Foam::CompactIOList<T, BaseType>::overflows() const
     label size = 0;
     forAll(*this, i)
     {
-        label oldSize = size;
+        const label oldSize = size;
         size += this->operator[](i).size();
         if (size < oldSize)
         {
@@ -94,7 +94,7 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
-    const label size
+    const label len
 )
 :
     regIOobject(io)
@@ -109,7 +109,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
     }
     else
     {
-        List<T>::setSize(size);
+        List<T>::setSize(len);
     }
 }
 
@@ -118,7 +118,7 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
-    const List<T>& list
+    const UList<T>& content
 )
 :
     regIOobject(io)
@@ -133,7 +133,7 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
     }
     else
     {
-        List<T>::operator=(list);
+        List<T>::operator=(content);
     }
 }
 
@@ -142,12 +142,12 @@ template<class T, class BaseType>
 Foam::CompactIOList<T, BaseType>::CompactIOList
 (
     const IOobject& io,
-    const Xfer<List<T>>& list
+    List<T>&& content
 )
 :
     regIOobject(io)
 {
-    List<T>::transfer(list());
+    List<T>::transfer(content);
 
     if
     (
@@ -158,14 +158,6 @@ Foam::CompactIOList<T, BaseType>::CompactIOList
         readFromStream();
     }
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-template<class T, class BaseType>
-Foam::CompactIOList<T, BaseType>::~CompactIOList()
-{}
-
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -179,29 +171,26 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
     const bool valid
 ) const
 {
+    bool nonCompact = false;
+
     if (fmt == IOstream::ASCII)
     {
-        // Change type to be non-compact format type
-        const word oldTypeName = typeName;
-
-        const_cast<word&>(typeName) = IOList<T>::typeName;
-
-        bool good = regIOobject::writeObject(fmt, ver, cmp, valid);
-
-        // Change type back
-        const_cast<word&>(typeName) = oldTypeName;
-
-        return good;
+        nonCompact = true;
     }
     else if (overflows())
     {
+        nonCompact = true;
+
         WarningInFunction
             << "Overall number of elements of CompactIOList of size "
             << this->size() << " overflows the representation of a label"
-            << endl << "    Switching to ascii writing" << endl;
+            << nl << "    Switching to ascii writing" << endl;
+    }
 
-        // Change type to be non-compact format type
-        const word oldTypeName = typeName;
+    if (nonCompact)
+    {
+        // Change to non-compact type
+        const word oldTypeName(typeName);
 
         const_cast<word&>(typeName) = IOList<T>::typeName;
 
@@ -212,29 +201,8 @@ bool Foam::CompactIOList<T, BaseType>::writeObject
 
         return good;
     }
-    else if (overflows())
-    {
-        WarningInFunction
-            << "Overall number of elements of CompactIOList of size "
-            << this->size() << " overflows the representation of a label"
-            << endl << "    Switching to ascii writing" << endl;
 
-        // Change type to be non-compact format type
-        const word oldTypeName = typeName;
-
-        const_cast<word&>(typeName) = IOList<T>::typeName;
-
-        bool good = regIOobject::writeObject(IOstream::ASCII, ver, cmp, valid);
-
-        // Change type back
-        const_cast<word&>(typeName) = oldTypeName;
-
-        return good;
-    }
-    else
-    {
-        return regIOobject::writeObject(fmt, ver, cmp, valid);
-    }
+    return regIOobject::writeObject(fmt, ver, cmp, valid);
 }
 
 
@@ -252,13 +220,6 @@ void Foam::CompactIOList<T, BaseType>::operator=
 (
     const CompactIOList<T, BaseType>& rhs
 )
-{
-    List<T>::operator=(rhs);
-}
-
-
-template<class T, class BaseType>
-void Foam::CompactIOList<T, BaseType>::operator=(const List<T>& rhs)
 {
     List<T>::operator=(rhs);
 }
@@ -317,7 +278,7 @@ Foam::Ostream& Foam::operator<<
         start[0] = 0;
         for (label i = 1; i < start.size(); i++)
         {
-            label prev = start[i-1];
+            const label prev = start[i-1];
             start[i] = prev+L[i-1].size();
 
             if (start[i] < prev)

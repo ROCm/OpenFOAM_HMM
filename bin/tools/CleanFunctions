@@ -3,23 +3,11 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     CleanFunctions
@@ -31,7 +19,7 @@
 
 cleanTimeDirectories()
 {
-    echo "Cleaning $PWD case"
+    echo "Cleaning case $PWD"
     zeros=""
     while [ ${#zeros} -lt 8 ]
     do
@@ -41,7 +29,8 @@ cleanTimeDirectories()
     done
     rm -rf \
         ./[1-9]* ./-[1-9]* ./log ./log.* ./log-* ./logSummary.* \
-        ./.fxLock ./*.xml ./ParaView* ./paraFoam* ./*.OpenFOAM ./*.blockMesh \
+        ./.fxLock ./*.xml ./ParaView* ./paraFoam* \
+        ./*.blockMesh ./*.foam ./*.OpenFOAM \
         ./.setSet > /dev/null 2>&1
 }
 
@@ -105,15 +94,13 @@ cleanCase()
     cleanSnappyFiles
     rm -f 0/cellDist > /dev/null 2>&1
 
-    if [ -d constant ]
-    then
-        (cd constant && \
-            rm -rf \
-            cellDecomposition cellToRegion cellLevel* pointLevel* \
-            polyMesh tetDualMesh \
-            > /dev/null 2>&1 \
-        )
-    fi
+    (
+        cd constant 2>/dev/null && \
+        rm -rf \
+          cellDecomposition cellToRegion cellLevel* pointLevel* \
+          polyMesh tetDualMesh \
+          > /dev/null 2>&1 \
+    )
 
     if [ -e system/blockMeshDict.m4 ]
     then
@@ -122,9 +109,17 @@ cleanCase()
 }
 
 
+# Frequently used - cleanCase and rm -rf 0/
+cleanCase0()
+{
+    cleanCase
+    rm -rf 0
+}
+
+
 removeCase()
 {
-    echo "Removing ${1:-unknown} case"
+    echo "Removing case ${1:-unknown}"
     [ "$#" -ge 1 ] && rm -rf "$1"
 }
 
@@ -141,9 +136,20 @@ cleanUcomponents()
 }
 
 
+cleanFaMesh ()
+{
+    (
+        cd constant/faMesh 2>/dev/null && \
+        rm -rf \
+          faceLabels* faBoundary* \
+          > /dev/null 2>&1 \
+    )
+}
+
+
 cleanApplication()
 {
-    echo "Cleaning $PWD application"
+    echo "Cleaning application $PWD"
     wclean
 }
 

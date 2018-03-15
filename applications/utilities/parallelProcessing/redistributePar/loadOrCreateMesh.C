@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2012-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,6 +29,10 @@ License
 #include "Time.H"
 //#include "IOPtrList.H"
 #include "polyBoundaryMeshEntries.H"
+#include "IOobjectList.H"
+#include "pointSet.H"
+#include "faceSet.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
@@ -162,15 +166,7 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
         // Create dummy mesh. Only used on procs that don't have mesh.
         IOobject noReadIO(io);
         noReadIO.readOpt() = IOobject::NO_READ;
-        fvMesh dummyMesh
-        (
-            noReadIO,
-            xferCopy(pointField()),
-            xferCopy(faceList()),
-            xferCopy(labelList()),
-            xferCopy(labelList()),
-            false
-        );
+        fvMesh dummyMesh(noReadIO, Zero, false);
 
         // Add patches
         List<polyPatch*> patches(patchEntries.size());
@@ -214,7 +210,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new pointZone
             (
                 "dummyPointZone",
-                labelList(0),
                 0,
                 dummyMesh.pointZones()
             )
@@ -225,8 +220,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new faceZone
             (
                 "dummyFaceZone",
-                labelList(0),
-                boolList(0),
                 0,
                 dummyMesh.faceZones()
             )
@@ -237,7 +230,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             new cellZone
             (
                 "dummyCellZone",
-                labelList(0),
                 0,
                 dummyMesh.cellZones()
             )
@@ -261,8 +253,8 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
     // parallel
 
     //Pout<< "Reading mesh from " << io.objectPath() << endl;
-    autoPtr<fvMesh> meshPtr(new fvMesh(io));
-    fvMesh& mesh = meshPtr();
+    auto meshPtr = autoPtr<fvMesh>::New(io);
+    fvMesh& mesh = *meshPtr;
 
 
 
@@ -343,7 +335,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             pz[i] = new pointZone
             (
                 pointZoneNames[i],
-                labelList(0),
                 i,
                 mesh.pointZones()
             );
@@ -354,8 +345,6 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             fz[i] = new faceZone
             (
                 faceZoneNames[i],
-                labelList(0),
-                boolList(0),
                 i,
                 mesh.faceZones()
             );
@@ -366,12 +355,46 @@ Foam::autoPtr<Foam::fvMesh> Foam::loadOrCreateMesh
             cz[i] = new cellZone
             (
                 cellZoneNames[i],
-                labelList(0),
                 i,
                 mesh.cellZones()
             );
         }
         mesh.addZones(pz, fz, cz);
+    }
+
+
+    // Determine sets
+    // ~~~~~~~~~~~~~~
+
+    wordList pointSetNames;
+    wordList faceSetNames;
+    wordList cellSetNames;
+    if (Pstream::master())
+    {
+        // Read sets
+        IOobjectList objects(mesh, mesh.facesInstance(), "polyMesh/sets");
+        pointSetNames = objects.sortedNames(pointSet::typeName);
+        faceSetNames = objects.sortedNames(faceSet::typeName);
+        cellSetNames = objects.sortedNames(cellSet::typeName);
+    }
+    Pstream::scatter(pointSetNames);
+    Pstream::scatter(faceSetNames);
+    Pstream::scatter(cellSetNames);
+
+    if (!haveMesh)
+    {
+        forAll(pointSetNames, i)
+        {
+            pointSet(mesh, pointSetNames[i], 0).write();
+        }
+        forAll(faceSetNames, i)
+        {
+            faceSet(mesh, faceSetNames[i], 0).write();
+        }
+        forAll(cellSetNames, i)
+        {
+            cellSet(mesh, cellSetNames[i], 0).write();
+        }
     }
 
 

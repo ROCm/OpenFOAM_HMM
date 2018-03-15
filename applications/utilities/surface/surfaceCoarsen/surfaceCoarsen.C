@@ -72,9 +72,9 @@ int mapVertex(::List<int>& collapse_map, int a, int mx)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("surfaceFile");
-    argList::validArgs.append("reductionFactor");
-    argList::validArgs.append("output surfaceFile");
+    argList::addArgument("surfaceFile");
+    argList::addArgument("reductionFactor");
+    argList::addArgument("output surfaceFile");
     argList::addOption
     (
         "scale",
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
 
     const fileName inFileName = args[1];
-    const scalar reduction = args.argRead<scalar>(2);
+    const scalar reduction = args.read<scalar>(2);
     const fileName outFileName = args[3];
 
     if (reduction <= 0 || reduction > 1)
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     Info<< "Input surface   :" << inFileName << nl
         << "Scaling factor  :" << scaleFactor << nl

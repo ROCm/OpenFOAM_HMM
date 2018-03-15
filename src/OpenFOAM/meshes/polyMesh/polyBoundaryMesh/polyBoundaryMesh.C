@@ -167,10 +167,6 @@ Foam::polyBoundaryMesh::polyBoundaryMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::polyBoundaryMesh::~polyBoundaryMesh()
-{}
-
-
 void Foam::polyBoundaryMesh::clearGeom()
 {
     forAll(*this, patchi)
@@ -369,7 +365,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
         }
     }
 
-    return neighbourEdgesPtr_();
+    return *neighbourEdgesPtr_;
 }
 
 
@@ -398,7 +394,8 @@ const Foam::labelList& Foam::polyBoundaryMesh::patchID() const
             }
         }
     }
-    return patchIDPtr_();
+
+    return *patchIDPtr_;
 }
 
 
@@ -450,7 +447,7 @@ Foam::polyBoundaryMesh::groupPatchIDs() const
         }
     }
 
-    return groupPatchIDsPtr_();
+    return *groupPatchIDsPtr_;
 }
 
 
@@ -502,6 +499,28 @@ void Foam::polyBoundaryMesh::setGroup
             }
         }
     }
+}
+
+
+Foam::label Foam::polyBoundaryMesh::nNonProcessor() const
+{
+    const polyPatchList& patches = *this;
+
+    label nonProc = 0;
+
+    for (const polyPatch& p : patches)
+    {
+        if (isA<processorPolyPatch>(p))
+        {
+            break;
+        }
+        else
+        {
+            ++nonProc;
+        }
+    }
+
+    return nonProc;
 }
 
 
@@ -558,63 +577,65 @@ Foam::labelList Foam::polyBoundaryMesh::findIndices
 {
     DynamicList<label> indices;
 
-    if (!key.empty())
+    if (key.empty())
     {
-        if (key.isPattern())
+        // no-op
+    }
+    else if (key.isPattern())
+    {
+        const regExp keyRe(key);
+
+        indices = findStrings(keyRe, this->names());
+
+        if (usePatchGroups && groupPatchIDs().size())
         {
-            indices = findStrings(key, this->names());
+            labelHashSet indexSet(indices);
 
-            if (usePatchGroups && groupPatchIDs().size())
+            const wordList allGroupNames = groupPatchIDs().toc();
+            labelList groupIDs = findStrings(keyRe, allGroupNames);
+            forAll(groupIDs, i)
             {
-                labelHashSet indexSet(indices);
-
-                const wordList allGroupNames = groupPatchIDs().toc();
-                labelList groupIDs = findStrings(key, allGroupNames);
-                forAll(groupIDs, i)
+                const word& grpName = allGroupNames[groupIDs[i]];
+                const labelList& patchIDs = groupPatchIDs()[grpName];
+                forAll(patchIDs, j)
                 {
-                    const word& grpName = allGroupNames[groupIDs[i]];
-                    const labelList& patchIDs = groupPatchIDs()[grpName];
-                    forAll(patchIDs, j)
+                    if (indexSet.insert(patchIDs[j]))
                     {
-                        if (indexSet.insert(patchIDs[j]))
-                        {
-                            indices.append(patchIDs[j]);
-                        }
+                        indices.append(patchIDs[j]);
                     }
                 }
             }
         }
-        else
+    }
+    else
+    {
+        // Literal string. Special version of above to avoid
+        // unnecessary memory allocations
+
+        indices.setCapacity(1);
+        forAll(*this, i)
         {
-            // Literal string. Special version of above to avoid
-            // unnecessary memory allocations
-
-            indices.setCapacity(1);
-            forAll(*this, i)
+            if (key == operator[](i).name())
             {
-                if (key == operator[](i).name())
-                {
-                    indices.append(i);
-                    break;
-                }
+                indices.append(i);
+                break;
             }
+        }
 
-            if (usePatchGroups && groupPatchIDs().size())
+        if (usePatchGroups && groupPatchIDs().size())
+        {
+            const auto iter = groupPatchIDs().cfind(key);
+
+            if (iter.found())
             {
-                const HashTable<labelList>::const_iterator iter =
-                    groupPatchIDs().find(key);
+                labelHashSet indexSet(indices);
 
-                if (iter.found())
+                const labelList& patchIDs = iter();
+                forAll(patchIDs, j)
                 {
-                    labelHashSet indexSet(indices);
-
-                    const labelList& patchIDs = iter();
-                    forAll(patchIDs, j)
+                    if (indexSet.insert(patchIDs[j]))
                     {
-                        if (indexSet.insert(patchIDs[j]))
-                        {
-                            indices.append(patchIDs[j]);
-                        }
+                        indices.append(patchIDs[j]);
                     }
                 }
             }
@@ -627,26 +648,27 @@ Foam::labelList Foam::polyBoundaryMesh::findIndices
 
 Foam::label Foam::polyBoundaryMesh::findIndex(const keyType& key) const
 {
-    if (!key.empty())
+    if (key.empty())
     {
-        if (key.isPattern())
-        {
-            labelList indices = this->findIndices(key);
+        // no-op
+    }
+    else if (key.isPattern())
+    {
+        labelList indices = this->findIndices(key);
 
-            // return first element
-            if (!indices.empty())
-            {
-                return indices[0];
-            }
-        }
-        else
+        // return first element
+        if (!indices.empty())
         {
-            forAll(*this, i)
+            return indices[0];
+        }
+    }
+    else
+    {
+        forAll(*this, i)
+        {
+            if (key == operator[](i).name())
             {
-                if (key == operator[](i).name())
-                {
-                    return i;
-                }
+                return i;
             }
         }
     }
@@ -856,7 +878,6 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         return false;
     }
 
-
     const polyBoundaryMesh& bm = *this;
 
     bool hasError = false;
@@ -943,7 +964,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     bool hasError = false;
 
-    HashSet<word> patchNames(2*size());
+    wordHashSet patchNames(2*size());
 
     forAll(bm, patchi)
     {

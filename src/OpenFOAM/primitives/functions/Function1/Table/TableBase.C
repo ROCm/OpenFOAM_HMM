@@ -49,7 +49,7 @@ Foam::Function1Types::TableBase<Type>::interpolator() const
         );
     }
 
-    return interpolatorPtr_();
+    return *interpolatorPtr_;
 }
 
 
@@ -345,18 +345,19 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1Types::TableBase<Type>::y() const
 template<class Type>
 void Foam::Function1Types::TableBase<Type>::writeEntries(Ostream& os) const
 {
-    if (bounding_ != bounds::repeatableBounding::CLAMP)
-    {
-        os.writeEntry
-        (
-            "outOfBounds",
-            bounds::repeatableBoundingNames[bounding_]
-        );
-    }
-    if (interpolationScheme_ != "linear")
-    {
-        os.writeEntry("interpolationScheme", interpolationScheme_);
-    }
+    os.writeEntryIfDifferent<word>
+    (
+        "outOfBounds",
+        bounds::repeatableBoundingNames[bounds::repeatableBounding::CLAMP],
+        bounds::repeatableBoundingNames[bounding_]
+    );
+
+    os.writeEntryIfDifferent<word>
+    (
+        "interpolationScheme",
+        "linear",
+        interpolationScheme_
+    );
 }
 
 

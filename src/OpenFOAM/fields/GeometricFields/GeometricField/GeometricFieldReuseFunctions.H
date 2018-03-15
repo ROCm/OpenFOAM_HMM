@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -45,9 +45,8 @@ bool reusable(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
     {
         if (GeometricField<Type, PatchField, GeoMesh>::debug)
         {
-            const GeometricField<Type, PatchField, GeoMesh>& gf = tgf();
-            const typename GeometricField<Type, PatchField, GeoMesh>::
-                Boundary& gbf = gf.boundaryField();
+            const auto& gf = tgf();
+            const auto& gbf = gf.boundaryField();
 
             forAll(gbf, patchi)
             {
@@ -68,10 +67,8 @@ bool reusable(const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf)
 
         return true;
     }
-    else
-    {
-        return false;
-    }
+
+    return false;
 }
 
 
@@ -84,39 +81,38 @@ tmp<GeometricField<TypeR, PatchField, GeoMesh>> New
     const bool initRet = false
 )
 {
-    GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-        const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
-
     if (reusable(tgf1))
     {
+        auto& gf1 = tgf1.constCast();
+
         gf1.rename(name);
         gf1.dimensions().reset(dimensions);
         return tgf1;
     }
-    else
-    {
-        tmp<GeometricField<TypeR, PatchField, GeoMesh>> rtgf
+
+    const auto& gf1 = tgf1();
+
+    tmp<GeometricField<TypeR, PatchField, GeoMesh>> rtgf
+    (
+        new GeometricField<TypeR, PatchField, GeoMesh>
         (
-            new GeometricField<TypeR, PatchField, GeoMesh>
+            IOobject
             (
-                IOobject
-                (
-                    name,
-                    gf1.instance(),
-                    gf1.db()
-                ),
-                gf1.mesh(),
-                dimensions
-            )
-        );
+                name,
+                gf1.instance(),
+                gf1.db()
+            ),
+            gf1.mesh(),
+            dimensions
+        )
+    );
 
-        if (initRet)
-        {
-            rtgf.ref() == tgf1();
-        }
-
-        return rtgf;
+    if (initRet)
+    {
+        rtgf.ref() == gf1;
     }
+
+    return rtgf;
 }
 
 
@@ -138,7 +134,7 @@ public:
         const dimensionSet& dimensions
     )
     {
-        const GeometricField<Type1, PatchField, GeoMesh>& gf1 = tgf1();
+        const auto& gf1 = tgf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
         (
@@ -170,32 +166,31 @@ public:
         const dimensionSet& dimensions
     )
     {
-        GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
-
         if (reusable(tgf1))
         {
+            auto& gf1 = tgf1.constCast();
+
             gf1.rename(name);
             gf1.dimensions().reset(dimensions);
             return tgf1;
         }
-        else
-        {
-            return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+
+        const auto& gf1 = tgf1();
+
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        (
+            new GeometricField<TypeR, PatchField, GeoMesh>
             (
-                new GeometricField<TypeR, PatchField, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        gf1.instance(),
-                        gf1.db()
-                    ),
-                    gf1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    gf1.instance(),
+                    gf1.db()
+                ),
+                gf1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -221,7 +216,7 @@ public:
         const dimensionSet& dimensions
     )
     {
-        const GeometricField<Type1, PatchField, GeoMesh>& gf1 = tgf1();
+        const auto& gf1 = tgf1();
 
         return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
         (
@@ -262,33 +257,31 @@ public:
         const dimensionSet& dimensions
     )
     {
-        const GeometricField<Type1, PatchField, GeoMesh>& gf1 = tgf1();
-        GeometricField<TypeR, PatchField, GeoMesh>& gf2 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf2());
-
         if (reusable(tgf2))
         {
+            auto& gf2 = tgf2.constCast();
+
             gf2.rename(name);
             gf2.dimensions().reset(dimensions);
             return tgf2;
         }
-        else
-        {
-            return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+
+        const auto& gf1 = tgf1();
+
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        (
+            new GeometricField<TypeR, PatchField, GeoMesh>
             (
-                new GeometricField<TypeR, PatchField, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        gf1.instance(),
-                        gf1.db()
-                    ),
-                    gf1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    gf1.instance(),
+                    gf1.db()
+                ),
+                gf1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -312,32 +305,31 @@ public:
         const dimensionSet& dimensions
     )
     {
-        GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
-
         if (reusable(tgf1))
         {
+            auto& gf1 = tgf1.constCast();
+
             gf1.rename(name);
             gf1.dimensions().reset(dimensions);
             return tgf1;
         }
-        else
-        {
-            return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+
+        const auto& gf1 = tgf1();
+
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        (
+            new GeometricField<TypeR, PatchField, GeoMesh>
             (
-                new GeometricField<TypeR, PatchField, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        gf1.instance(),
-                        gf1.db()
-                    ),
-                    gf1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    gf1.instance(),
+                    gf1.db()
+                ),
+                gf1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 
@@ -355,40 +347,39 @@ public:
         const dimensionSet& dimensions
     )
     {
-        GeometricField<TypeR, PatchField, GeoMesh>& gf1 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf1());
-        GeometricField<TypeR, PatchField, GeoMesh>& gf2 =
-            const_cast<GeometricField<TypeR, PatchField, GeoMesh>&>(tgf2());
-
         if (reusable(tgf1))
         {
+            auto& gf1 = tgf1.constCast();
+
             gf1.rename(name);
             gf1.dimensions().reset(dimensions);
             return tgf1;
         }
         else if (reusable(tgf2))
         {
+            auto& gf2 = tgf2.constCast();
+
             gf2.rename(name);
             gf2.dimensions().reset(dimensions);
             return tgf2;
         }
-        else
-        {
-            return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+
+        const auto& gf1 = tgf1();
+
+        return tmp<GeometricField<TypeR, PatchField, GeoMesh>>
+        (
+            new GeometricField<TypeR, PatchField, GeoMesh>
             (
-                new GeometricField<TypeR, PatchField, GeoMesh>
+                IOobject
                 (
-                    IOobject
-                    (
-                        name,
-                        gf1.instance(),
-                        gf1.db()
-                    ),
-                    gf1.mesh(),
-                    dimensions
-                )
-            );
-        }
+                    name,
+                    gf1.instance(),
+                    gf1.db()
+                ),
+                gf1.mesh(),
+                dimensions
+            )
+        );
     }
 };
 

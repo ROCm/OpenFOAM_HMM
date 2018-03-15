@@ -289,10 +289,8 @@ void Foam::JohnsonJacksonParticleThetaFvPatchScalarField::write
 ) const
 {
     fvPatchScalarField::write(os);
-    os.writeKeyword("restitutionCoefficient")
-        << restitutionCoefficient_ << token::END_STATEMENT << nl;
-    os.writeKeyword("specularityCoefficient")
-        << specularityCoefficient_ << token::END_STATEMENT << nl;
+    os.writeEntry("restitutionCoefficient", restitutionCoefficient_);
+    os.writeEntry("specularityCoefficient", specularityCoefficient_);
     writeEntry("value", os);
 }
 

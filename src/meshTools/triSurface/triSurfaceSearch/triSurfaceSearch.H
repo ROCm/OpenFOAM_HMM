@@ -80,7 +80,7 @@ class triSurfaceSearch
         bool checkUniqueHit
         (
             const pointIndexHit& currHit,
-            const DynamicList<pointIndexHit, 1, 1>& hits,
+            const UList<pointIndexHit>& hits,
             const vector& lineVec
         ) const;
 

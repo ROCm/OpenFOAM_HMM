@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -30,30 +30,61 @@ License
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 template<class LListBase, class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const UILList<LListBase, T>& lst)
+Foam::Ostream& Foam::UILList<LListBase, T>::writeList
+(
+    Ostream& os,
+    const label shortListLen
+) const
 {
-    // Write size
-    os << nl << lst.size();
+    const label len = this->size();
 
-    // Write beginning of contents
-    os << nl << token::BEGIN_LIST << nl;
-
-    // Write contents
-    for
+    if
     (
-        typename UILList<LListBase, T>::const_iterator iter = lst.begin();
-        iter != lst.end();
-        ++iter
+        len <= 1 || !shortListLen
+     || (len <= shortListLen)
     )
     {
-        os << iter() << nl;
-    }
+        // Size and start delimiter
+        os << len << token::BEGIN_LIST;
 
-    // Write end of contents
-    os << token::END_LIST;
+        // Contents
+        bool space = false;
+        for (const T& val : *this)
+        {
+            if (space) os << token::SPACE;
+            space = true;
+            os << val;
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
+    else
+    {
+        // Size and start delimiter
+        os << nl << len << nl << token::BEGIN_LIST << nl;
+
+        // Contents
+        for (const T& val : *this)
+        {
+            os << val << nl;
+        }
+
+        // End delimiter
+        os << token::END_LIST;
+    }
 
     os.check(FUNCTION_NAME);
     return os;
+
 }
+
+
+template<class LListBase, class T>
+Foam::Ostream& Foam::operator<<(Ostream& os, const UILList<LListBase, T>& lst)
+{
+    return lst.writeList(os, -1);
+}
+
 
 // ************************************************************************* //

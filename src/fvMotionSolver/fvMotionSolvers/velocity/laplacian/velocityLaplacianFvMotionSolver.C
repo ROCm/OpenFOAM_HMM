@@ -28,6 +28,7 @@ License
 #include "motionDiffusivity.H"
 #include "fvmLaplacian.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -124,17 +125,24 @@ void Foam::velocityLaplacianFvMotionSolver::solve()
     diffusivityPtr_->correct();
     pointMotionU_.boundaryFieldRef().updateCoeffs();
 
+    fv::options& fvOptions(fv::options::New(fvMesh_));
+
     fvVectorMatrix UEqn
     (
         fvm::laplacian
         (
-            diffusivityPtr_->operator()(),
+            dimensionedScalar("viscosity", dimViscosity, 1.0)
+           *diffusivityPtr_->operator()(),
             cellMotionU_,
             "laplacian(diffusivity,cellMotionU)"
         )
+     ==
+        fvOptions(cellMotionU_)
     );
 
+    fvOptions.constrain(UEqn);
     UEqn.solveSegregatedOrCoupled(UEqn.solverDict());
+    fvOptions.correct(cellMotionU_);
 }
 
 

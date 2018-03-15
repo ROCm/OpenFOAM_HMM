@@ -92,24 +92,24 @@ void Foam::helpTypes::helpBoundary::execute
     word condition(word::null);
     word fieldName(word::null);
 
-    if (args.optionReadIfPresent("browse", condition))
+    if (args.readIfPresent("browse", condition))
     {
         // TODO: strip scoping info if present?
         // e.g. conditions with leading "compressible::" will not be found
         // ".*[fF]vPatchField.*" + className + ".*"
         displayDoc(condition, ".*[fF]vPatchField.*", false, "H");
     }
-    else if (args.optionFound("constraint"))
+    else if (args.found("constraint"))
     {
-        HashSet<word> constraintTypes(fvPatch::constraintTypes());
+        wordHashSet constraintTypes(fvPatch::constraintTypes());
         Info<< "Constraint types:" << nl;
-        forAllConstIter(HashSet<word>, constraintTypes, iter)
+        for (const word& cType : constraintTypes)
         {
-            Info<< "    " << iter.key() << nl;
+            Info<< "    " << cType << nl;
         }
         Info<< endl;
     }
-    else if (args.optionReadIfPresent("field", fieldName))
+    else if (args.readIfPresent("field", fieldName))
     {
         IOobject fieldHeader
         (
@@ -122,7 +122,7 @@ void Foam::helpTypes::helpBoundary::execute
         // Check for any type of volField
         if (fieldHeader.typeHeaderOk<volScalarField>(false))
         {
-            if (args.optionFound("fixedValue"))
+            if (args.found("fixedValue"))
             {
                 fixedValueFieldConditions<scalar>(fieldHeader);
                 fixedValueFieldConditions<vector>(fieldHeader);
@@ -145,7 +145,7 @@ void Foam::helpTypes::helpBoundary::execute
                 << "Unable to read field " << fieldName << exit(FatalError);
         }
     }
-    else if (args.optionReadIfPresent("fixedValue", fieldName))
+    else if (args.readIfPresent("fixedValue", fieldName))
     {
         FatalErrorInFunction
             << "-field option must be specified when using the -fixedValue "

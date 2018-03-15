@@ -82,10 +82,11 @@ public:
 
 
     //- Destructor
-    virtual ~Rebound();
+    virtual ~Rebound() = default;
 
 
     // Member Functions
+
         //- Apply velocity correction
         //  Returns true if particle remains in same cell
         virtual bool correct

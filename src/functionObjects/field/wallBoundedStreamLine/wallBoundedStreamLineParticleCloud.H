@@ -32,8 +32,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef streamLineCloud_H
-#define streamLineCloud_H
+#ifndef wallBoundedStreamLineParticleCloud_H
+#define wallBoundedStreamLineParticleCloud_H
 
 #include "Cloud.H"
 #include "wallBoundedStreamLineParticle.H"

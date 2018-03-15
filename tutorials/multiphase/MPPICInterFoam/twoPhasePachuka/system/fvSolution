@@ -24,7 +24,7 @@ solvers
         cAlpha          1;
 
         MULESCorr       yes;
-        nLimiterIter    2;
+        nLimiterIter    10;
 
         solver          smoothSolver;
         smoother        symGaussSeidel;
@@ -45,7 +45,7 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-07;
+        tolerance       1e-08;
         relTol          0.05;
     }
 

@@ -7,6 +7,7 @@ viscosityModels/BirdCarreau/BirdCarreau.C
 viscosityModels/HerschelBulkley/HerschelBulkley.C
 viscosityModels/Casson/Casson.C
 viscosityModels/strainRateFunction/strainRateFunction.C
+viscosityModels/Arrhenius/Arrheniuss.C
 
 transportModel/transportModel.C
 singlePhaseTransportModel/singlePhaseTransportModel.C

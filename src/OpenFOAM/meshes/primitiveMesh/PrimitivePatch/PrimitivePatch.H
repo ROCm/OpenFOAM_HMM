@@ -252,11 +252,11 @@ public:
             const Field<PointType>& points
         );
 
-        //- Construct from components
+        //- Construct from components, transferring faces
         PrimitivePatch
         (
-            const Xfer<FaceList<Face>>& faces,
-            const Xfer<List<PointType>>& points
+            FaceList<Face>&& faces,
+            const Field<PointType>& points
         );
 
         //- Construct from components, reuse storage
@@ -287,6 +287,10 @@ public:
 
 
     // Member Functions
+
+        //- Suppress direct swapping, since storage containers may be const
+        void swap(PrimitivePatch&) = delete;
+
 
     // Access
 
@@ -320,9 +324,9 @@ public:
             label nInternalEdges() const;
 
             //- Is internal edge?
-            bool isInternalEdge(const label edgeI) const
+            bool isInternalEdge(const label edgei) const
             {
-                return edgeI < nInternalEdges();
+                return edgei < nInternalEdges();
             }
 
             //- Return list of boundary points,

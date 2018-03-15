@@ -25,9 +25,9 @@ Class
     vtkPVFoamReader
 
 Description
-    reads a dataset in OpenFOAM format
+    Reads a dataset in OpenFOAM format
 
-    vtkPVblockMeshReader creates an multiblock dataset.
+    vtkPVFoamReader creates an multiblock dataset.
     It uses the OpenFOAM infrastructure (fvMesh, etc) to handle mesh and
     field data.
 

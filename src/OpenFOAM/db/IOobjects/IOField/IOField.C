@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -115,7 +115,7 @@ Foam::IOField<Type>::IOField(const IOobject& io, const label size)
 
 
 template<class Type>
-Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
+Foam::IOField<Type>::IOField(const IOobject& io, const UList<Type>& content)
 :
     regIOobject(io)
 {
@@ -136,20 +136,20 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Field<Type>& f)
     }
     else
     {
-        Field<Type>::operator=(f);
+        Field<Type>::operator=(content);
     }
 }
 
 
 template<class Type>
-Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type>>& f)
+Foam::IOField<Type>::IOField(const IOobject& io, Field<Type>&& content)
 :
     regIOobject(io)
 {
     // Check for MUST_READ_IF_MODIFIED
     warnNoRereading<IOField<Type>>();
 
-    Field<Type>::transfer(f());
+    Field<Type>::transfer(content);
 
     if
     (
@@ -166,11 +166,38 @@ Foam::IOField<Type>::IOField(const IOobject& io, const Xfer<Field<Type>>& f)
 }
 
 
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
 template<class Type>
-Foam::IOField<Type>::~IOField()
-{}
+Foam::IOField<Type>::IOField(const IOobject& io, const tmp<Field<Type>>& tfld)
+:
+    regIOobject(io)
+{
+    const bool reuse = tfld.movable();
+
+    if (reuse)
+    {
+        Field<Type>::transfer(tfld.ref());
+    }
+
+    if
+    (
+        (
+            io.readOpt() == IOobject::MUST_READ
+         || io.readOpt() == IOobject::MUST_READ_IF_MODIFIED
+        )
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
+    else if (!reuse)
+    {
+        Field<Type>::operator=(tfld());
+    }
+
+    tfld.clear();
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -185,13 +212,6 @@ bool Foam::IOField<Type>::writeData(Ostream& os) const
 
 template<class Type>
 void Foam::IOField<Type>::operator=(const IOField<Type>& rhs)
-{
-    Field<Type>::operator=(rhs);
-}
-
-
-template<class Type>
-void Foam::IOField<Type>::operator=(const Field<Type>& rhs)
 {
     Field<Type>::operator=(rhs);
 }

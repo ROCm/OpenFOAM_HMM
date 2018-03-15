@@ -50,26 +50,16 @@ class profilingSysInfo;
 
 class profilingSysInfo
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        profilingSysInfo(const profilingSysInfo&) = delete;
-
-        //- Disallow default bitwise assignment
-        void operator=(const profilingSysInfo&) = delete;
-
-
 public:
-
 
     // Constructors
 
-        //- Construct from components
-        profilingSysInfo();
+        //- Construct null
+        profilingSysInfo() = default;
 
 
     //- Destructor
-    ~profilingSysInfo();
+    ~profilingSysInfo() = default;
 
 
     // Member Functions

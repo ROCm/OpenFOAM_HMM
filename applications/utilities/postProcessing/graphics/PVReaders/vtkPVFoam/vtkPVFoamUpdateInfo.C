@@ -34,10 +34,16 @@ License
 #include "polyBoundaryMeshEntries.H"
 #include "entry.H"
 #include "Cloud.H"
-#include "vtkPVFoamReader.h"
+#include "areaFaMesh.H"
 
 // VTK includes
 #include "vtkDataArraySelection.h"
+
+// OpenFOAM/VTK interface
+#include "vtkPVFoamReader.h"
+
+// Templates (only needed here)
+#include "vtkPVFoamUpdateTemplates.C"
 
 // * * * * * * * * * * * * * * * Private Classes * * * * * * * * * * * * * * //
 
@@ -142,17 +148,57 @@ void Foam::vtkPVFoam::updateInfoInternalMesh
 {
     if (debug)
     {
-        Info<< "<beg> updateInfoInternalMesh" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
     }
 
     // Determine mesh parts (internalMesh, patches...)
-    //- Add internal mesh as first entry
+    // Add internal mesh as first entry
     rangeVolume_.reset(select->GetNumberOfArrays(), 1);
     select->AddArray("internalMesh");
 
     if (debug)
     {
-        Info<< "<end> updateInfoInternalMesh" << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
+    }
+}
+
+
+void Foam::vtkPVFoam::updateInfoAreaMesh
+(
+    vtkDataArraySelection* select
+)
+{
+    if (debug)
+    {
+        Info<< "<beg> " << FUNCTION_NAME << nl;
+    }
+
+    rangeArea_.reset(select->GetNumberOfArrays(), 0);
+
+    // Use the db directly since this might be called without a mesh,
+    // but the region must get added back in
+    fileName faMeshPrefix(faMesh::meshSubDir);
+    if (meshRegion_ != polyMesh::defaultRegion)
+    {
+        faMeshPrefix = meshRegion_/faMeshPrefix;
+    }
+
+    // Check for finiteArea mesh
+    if
+    (
+        isFile
+        (
+            dbPtr_->constantPath()/faMeshPrefix/"faceLabels"
+        )
+    )
+    {
+        rangeArea_ += 1;
+        select->AddArray("areaMesh");
+    }
+
+    if (debug)
+    {
+        Info<< "<end> " << FUNCTION_NAME << nl;
     }
 }
 
@@ -165,7 +211,7 @@ void Foam::vtkPVFoam::updateInfoLagrangian
     if (debug)
     {
         Info<< "<beg> " << FUNCTION_NAME << nl
-            << "    " << dbPtr_->timePath()/cloud::prefix << endl;
+            << "    " << dbPtr_->timePath()/cloud::prefix << nl;
     }
 
     // Use the db directly since this might be called without a mesh,
@@ -191,12 +237,12 @@ void Foam::vtkPVFoam::updateInfoLagrangian
         );
     }
 
-    rangeLagrangian_.reset(select->GetNumberOfArrays());
-    rangeLagrangian_ += addToArray(select, "lagrangian/", names.sortedToc());
+    rangeClouds_.reset(select->GetNumberOfArrays());
+    rangeClouds_ += addToArray(select, "lagrangian/", names.sortedToc());
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
     }
 }
 
@@ -210,14 +256,14 @@ void Foam::vtkPVFoam::updateInfoPatches
     if (debug)
     {
         Info<< "<beg> " << FUNCTION_NAME
-            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
+            << " [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]" << nl;
     }
 
     rangePatches_.reset(select->GetNumberOfArrays());
 
-    if (meshPtr_)
+    if (volMeshPtr_)
     {
-        const polyBoundaryMesh& patches = meshPtr_->boundaryMesh();
+        const polyBoundaryMesh& patches = volMeshPtr_->boundaryMesh();
         const HashTable<labelList>& groups = patches.groupPatchIDs();
         DynamicList<string> displayNames(groups.size());
 
@@ -387,7 +433,7 @@ void Foam::vtkPVFoam::updateInfoPatches
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
     }
 }
 
@@ -404,17 +450,16 @@ void Foam::vtkPVFoam::updateInfoZones
 
     if (debug)
     {
-        Info<< "<beg> updateInfoZones"
-            << " [meshPtr=" << (meshPtr_ ? "set" : "null") << "]" << endl;
+        Info<< "<beg> " << FUNCTION_NAME
+            << " [volMeshPtr=" << (volMeshPtr_ ? "set" : "null") << "]" << nl;
     }
-
 
     // cellZones
     {
         const wordList names =
         (
-            meshPtr_
-          ? getZoneNames(meshPtr_->cellZones())
+            volMeshPtr_
+          ? getZoneNames(volMeshPtr_->cellZones())
           : getZoneNames("cellZones")
         );
 
@@ -426,8 +471,8 @@ void Foam::vtkPVFoam::updateInfoZones
     {
         const wordList names =
         (
-            meshPtr_
-          ? getZoneNames(meshPtr_->faceZones())
+            volMeshPtr_
+          ? getZoneNames(volMeshPtr_->faceZones())
           : getZoneNames("faceZones")
         );
 
@@ -439,8 +484,8 @@ void Foam::vtkPVFoam::updateInfoZones
     {
         const wordList names =
         (
-            meshPtr_
-          ? getZoneNames(meshPtr_->pointZones())
+            volMeshPtr_
+          ? getZoneNames(volMeshPtr_->pointZones())
           : getZoneNames("pointZones")
         );
 
@@ -450,7 +495,7 @@ void Foam::vtkPVFoam::updateInfoZones
 
     if (debug)
     {
-        Info<< "<end> updateInfoZones" << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
     }
 }
 
@@ -467,7 +512,7 @@ void Foam::vtkPVFoam::updateInfoSets
 
     if (debug)
     {
-        Info<< "<beg> updateInfoSets" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
     }
 
     // Add names of sets. Search for last time directory with a sets
@@ -493,7 +538,7 @@ void Foam::vtkPVFoam::updateInfoSets
     if (debug)
     {
         Info<< "     updateInfoSets read "
-            << objects.names() << " from " << setsInstance << endl;
+            << objects.names() << " from " << setsInstance << nl;
     }
 
 
@@ -523,7 +568,91 @@ void Foam::vtkPVFoam::updateInfoSets
 
     if (debug)
     {
-        Info<< "<end> updateInfoSets" << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
+    }
+}
+
+
+void Foam::vtkPVFoam::updateInfoContinuumFields
+(
+    vtkDataArraySelection* select
+)
+{
+    if (debug)
+    {
+        Info<< "<beg> " << FUNCTION_NAME << nl;
+    }
+
+    // Preserve the enabled selections
+    HashSet<string> enabled;
+    if (!select->GetNumberOfArrays() && !volMeshPtr_)
+    {
+        // First call: automatically enable 'p' and 'U'
+        enabled = { "p", "U" };
+    }
+    else
+    {
+        enabled = getSelectedArraySet(select);
+    }
+
+    select->RemoveAllArrays();   // Clear existing list
+
+    // Use the db directly since this might be called without a mesh,
+    // but the region name is still required
+    word regionPrefix;
+    if (meshRegion_ != polyMesh::defaultRegion)
+    {
+        regionPrefix = meshRegion_;
+    }
+
+    // Objects for this time and mesh region
+    IOobjectList objects(dbPtr_(), dbPtr_().timeName(), regionPrefix);
+
+    updateInfoFields<fvPatchField, volMesh>(select, objects);
+    updateInfoFields<faPatchField, areaMesh>(select, objects);
+
+    setSelectedArrayEntries(select, enabled);  // Adjust/restore selected
+
+    if (debug)
+    {
+        Info<< "<end> " << FUNCTION_NAME << nl;
+    }
+}
+
+
+void Foam::vtkPVFoam::updateInfoPointFields
+(
+    vtkDataArraySelection* select
+)
+{
+    if (debug)
+    {
+        Info<< "<beg> " << FUNCTION_NAME << nl;
+    }
+
+    // Preserve the enabled selections
+    HashSet<string> enabled = getSelectedArraySet(select);
+
+    select->RemoveAllArrays();   // Clear existing list
+
+    // Use the db directly since this might be called without a mesh,
+    // but the region name is still required
+    word regionPrefix;
+    if (meshRegion_ != polyMesh::defaultRegion)
+    {
+        regionPrefix = meshRegion_;
+    }
+
+    // Objects for this time and mesh region
+    IOobjectList objects(dbPtr_(), dbPtr_().timeName(), regionPrefix);
+
+    updateInfoFields<pointPatchField, pointMesh>(select, objects);
+
+    setSelectedArrayEntries(select, enabled);  // Adjust/restore selected
+
+    if (debug)
+    {
+        Info<< "<end> " << FUNCTION_NAME << nl;
     }
 }
 
@@ -535,14 +664,14 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
 {
     if (debug)
     {
-        Info<< "<beg> updateInfoLagrangianFields" << endl;
+        Info<< "<beg> " << FUNCTION_NAME << nl;
     }
 
     // Preserve the enabled selections
     HashSet<string> enabled = getSelectedArraySet(select);
     select->RemoveAllArrays();
 
-    const arrayRange& range = rangeLagrangian_;
+    const arrayRange& range = rangeClouds_;
     if (range.empty())
     {
         return;
@@ -600,7 +729,7 @@ void Foam::vtkPVFoam::updateInfoLagrangianFields
 
     if (debug)
     {
-        Info<< "<end> " << FUNCTION_NAME << endl;
+        Info<< "<end> " << FUNCTION_NAME << nl;
     }
 }
 

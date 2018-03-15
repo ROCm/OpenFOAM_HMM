@@ -71,14 +71,14 @@ public:
         //- Add labels to a list of values
         inline static List<Keyed<T>> createList
         (
-            const List<T>&,
+            const UList<T>& lst,
             const label key=0
         );
 
         //- Add labels to a list of values
         inline static List<Keyed<T>> createList
         (
-            const List<T>&,
+            const UList<T>& lst,
             const labelUList& keys
         );
 
@@ -88,14 +88,14 @@ public:
         //- Construct null
         inline Keyed();
 
-        //- Construct as a copy of item, with a key
+        //- Copy construct item, with a key
         inline Keyed(const T& item, const label key=0);
 
-        //- Construct by transferring the item, with a key
-        inline Keyed(const Xfer<T>& item, const label key=0);
+        //- Move construct item, with a key
+        inline Keyed(T&& item, const label key=0);
 
         //- Construct from Istream
-        inline Keyed(Istream&);
+        inline Keyed(Istream& is);
 
 
     // Member Functions

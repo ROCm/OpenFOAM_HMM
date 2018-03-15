@@ -67,7 +67,7 @@ Foam::functionObjects::fieldValues::volFieldValue::getFieldValues
             << abort(FatalError);
     }
 
-    return tmp<Field<Type>>(new Field<Type>(0.0));
+    return tmp<Field<Type>>::New(Zero);
 }
 
 
@@ -266,7 +266,7 @@ Foam::functionObjects::fieldValues::volFieldValue::filterField
     }
     else
     {
-        return tmp<Field<Type>>(new Field<Type>(field, cellIDs()));
+        return tmp<Field<Type>>::New(field, cellIDs());
     }
 }
 

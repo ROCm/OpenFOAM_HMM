@@ -51,13 +51,13 @@ typedef double doubleScalar;
 // Largest and smallest scalar values allowed in certain parts of the code.
 // (15 is the number of significant figures in an
 //  IEEE double precision number.  See limits.h or float.h)
-static const doubleScalar doubleScalarGREAT = 1.0e+15;
-static const doubleScalar doubleScalarVGREAT = 1.0e+300;
-static const doubleScalar doubleScalarROOTVGREAT = 1.0e+150;
-static const doubleScalar doubleScalarSMALL = 1.0e-15;
-static const doubleScalar doubleScalarROOTSMALL = 3.0e-8;
-static const doubleScalar doubleScalarVSMALL = 1.0e-300;
-static const doubleScalar doubleScalarROOTVSMALL = 1.0e-150;
+constexpr doubleScalar doubleScalarGREAT = 1.0e+15;
+constexpr doubleScalar doubleScalarVGREAT = 1.0e+300;
+constexpr doubleScalar doubleScalarROOTVGREAT = 1.0e+150;
+constexpr doubleScalar doubleScalarSMALL = 1.0e-15;
+constexpr doubleScalar doubleScalarROOTSMALL = 3.0e-8;
+constexpr doubleScalar doubleScalarVSMALL = 1.0e-300;
+constexpr doubleScalar doubleScalarROOTVSMALL = 1.0e-150;
 
 
 #define Scalar doubleScalar

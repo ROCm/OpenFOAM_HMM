@@ -40,7 +40,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::addOption("re", "wordReList");
+    argList::addOption("re", "wordRes");
 
     // timeSelector::addOptions();
     timeSelector::addOptions(true, true);
@@ -48,12 +48,10 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
 
-    wordReList matcher;
-    if (args.optionFound("re"))
+    wordRes matcher;
+    if (args.readListIfPresent<wordRe>("re", matcher))
     {
-        matcher = args.optionReadList<wordRe>("re");
         Info<<"limit names: " << matcher << nl;
-
     }
 
     const hashedWordList subsetTypes

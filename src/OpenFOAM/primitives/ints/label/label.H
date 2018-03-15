@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -58,8 +58,8 @@ namespace Foam
 
 typedef INT_SIZE(int, _t) label;
 
-static const label labelMin = INT_SIZE(INT, _MIN);
-static const label labelMax = INT_SIZE(INT, _MAX);
+constexpr label labelMin = INT_SIZE(INT, _MIN);
+constexpr label labelMax = INT_SIZE(INT, _MAX);
 
 //- Read label from stream.
 //  Uses readInt32 or readInt64 according to WM_LABEL_SIZE
@@ -119,6 +119,40 @@ inline label component(const label l, const direction)
 {
     return l;
 }
+
+
+/*---------------------------------------------------------------------------*\
+                          Struct toLabel Declaration
+\*---------------------------------------------------------------------------*/
+
+//- Conversion to label structure
+template<class Type> struct toLabel {};
+
+//- Convert (likely promote) from int32_t to label
+template<>
+struct toLabel<int32_t>
+{
+    constexpr label operator()(const int32_t& val) const noexcept
+    {
+        return val;
+    }
+};
+
+
+//- Convert (possibly truncate) from int64_t to label
+template<>
+struct toLabel<int64_t>
+{
+    constexpr label operator()(const int64_t& val) const noexcept
+    {
+        #if WM_LABEL_SIZE == 32
+        return label(val);
+        #elif WM_LABEL_SIZE == 64
+        return val;
+        #endif
+    }
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

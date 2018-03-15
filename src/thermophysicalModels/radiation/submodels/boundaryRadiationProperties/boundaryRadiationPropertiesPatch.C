@@ -131,14 +131,14 @@ Foam::radiation::boundaryRadiationPropertiesPatch::
 const Foam::radiation::absorptionEmissionModel&
 Foam::radiation::boundaryRadiationPropertiesPatch::absorptionEmission() const
 {
-    return absorptionEmission_();
+    return *absorptionEmission_;
 }
 
 
 const Foam::radiation::transmissivityModel&
 Foam::radiation::boundaryRadiationPropertiesPatch::transmissiveModel() const
 {
-    return transmissivity_();
+    return *transmissivity_;
 }
 
 

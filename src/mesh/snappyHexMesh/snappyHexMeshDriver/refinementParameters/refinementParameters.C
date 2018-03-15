@@ -68,7 +68,8 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     interfaceRefine_
     (
         dict.lookupOrDefault<Switch>("interfaceRefine", true)
-    )
+    ),
+    nErodeCellZone_(dict.lookupOrDefault<label>("nCellZoneErodeIter", 0))
 {
     point locationInMesh;
     if (dict.readIfPresent("locationInMesh", locationInMesh))

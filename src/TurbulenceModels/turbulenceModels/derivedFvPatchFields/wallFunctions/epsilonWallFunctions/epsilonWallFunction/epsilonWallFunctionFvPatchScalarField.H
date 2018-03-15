@@ -42,15 +42,19 @@ Description
         G       | turblence generation field
     \endvartable
 
-    The model switches between laminar and turbulent functions based on the
-    laminar-to-turbulent y+ value derived from kappa and E.
+    The low-Re correction is activated by setting the entry
+    \c lowReCorrection to 'on'; in this mode the model switches between
+    laminar and turbulent functions based on the laminar-to-turbulent y+ value
+    derived from kappa and E.  When the \c lowReCorrection is inactive, the
+    wall function operates in high-Re mode.
 
 Usage
     \table
-        Property     | Description             | Required    | Default value
-        Cmu          | model coefficient       | no          | 0.09
-        kappa        | Von Karman constant     | no          | 0.41
-        E            | model coefficient       | no          | 9.8
+        Property        | Description              | Required  | Default value
+        Cmu             | model coefficient        | no        | 0.09
+        kappa           | Von Karman constant      | no        | 0.41
+        E               | model coefficient        | no        | 9.8
+        lowReCorrection | Low-Re correction active | no        | off
     \endtable
 
     Example of the boundary condition specification:
@@ -114,6 +118,9 @@ protected:
 
         //- Local copy of turbulence epsilon field
         scalarField epsilon_;
+
+        //- Apply low-Re correction term; default = no
+        bool lowReCorrection_;
 
         //- Initialised flag
         bool initialised_;

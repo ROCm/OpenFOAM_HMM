@@ -1,8 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 setDecompressionTankFine()
 {
@@ -28,18 +26,21 @@ setDecompressionTankFine()
 # Do decompressionTank
 ( cd decompressionTank && foamRunTutorials )
 
-# Clone case
-cloneCase decompressionTank decompressionTankFine
+if notTest $@
+then
+    # Clone case
+    cloneCase decompressionTank decompressionTankFine
 
-(
-    cd decompressionTankFine || exit
+    (
+        cd decompressionTankFine || exit
 
-    # Modify case
-    setDecompressionTankFine
+        # Modify case
+        setDecompressionTankFine
 
-    # And execute
-    runApplication blockMesh
-    runApplication $(getApplication)
-)
+        # And execute
+        runApplication blockMesh
+        runApplication $(getApplication)
+    )
+fi
 
 #------------------------------------------------------------------------------

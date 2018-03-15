@@ -59,12 +59,6 @@ Foam::inversePointDistanceDiffusivity::inversePointDistanceDiffusivity
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::inversePointDistanceDiffusivity::~inversePointDistanceDiffusivity()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::inversePointDistanceDiffusivity::correct()

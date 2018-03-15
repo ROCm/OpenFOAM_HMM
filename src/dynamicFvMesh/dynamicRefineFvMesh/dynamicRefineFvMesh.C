@@ -223,11 +223,11 @@ Foam::dynamicRefineFvMesh::refine
     meshCutter_.setRefinement(cellsToRefine, meshMod);
 
     // Create mesh (with inflation), return map from old to new mesh.
-    //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(*this, false);
+    mapPolyMesh& map = *mapPtr;
 
     Info<< "Refined from "
-        << returnReduce(map().nOldCells(), sumOp<label>())
+        << returnReduce(map.nOldCells(), sumOp<label>())
         << " to " << globalData().nTotalCells() << " cells." << endl;
 
     if (debug)
@@ -235,7 +235,7 @@ Foam::dynamicRefineFvMesh::refine
         // Check map.
         for (label facei = 0; facei < nInternalFaces(); facei++)
         {
-            label oldFacei = map().faceMap()[facei];
+            label oldFacei = map.faceMap()[facei];
 
             if (oldFacei >= nInternalFaces())
             {
@@ -256,26 +256,11 @@ Foam::dynamicRefineFvMesh::refine
     // Update fields
     updateMesh(map);
 
-
-    // Move mesh
-    /*
-    pointField newPoints;
-    if (map().hasMotionPoints())
-    {
-        newPoints = map().preMotionPoints();
-    }
-    else
-    {
-        newPoints = points();
-    }
-    movePoints(newPoints);
-    */
-
     // Correct the flux for modified/added faces. All the faces which only
     // have been renumbered will already have been handled by the mapping.
     {
-        const labelList& faceMap = map().faceMap();
-        const labelList& reverseFaceMap = map().reverseFaceMap();
+        const labelList& faceMap = map.faceMap();
+        const labelList& reverseFaceMap = map.reverseFaceMap();
 
         // Storage for any master faces. These will be the original faces
         // on the coarse cell that get split into four (or rather the
@@ -437,7 +422,6 @@ Foam::dynamicRefineFvMesh::refine
     }
 
 
-
     // Update numbering of cells/vertices.
     meshCutter_.updateMesh(map);
 
@@ -448,7 +432,7 @@ Foam::dynamicRefineFvMesh::refine
 
         forAll(newProtectedCell, celli)
         {
-            label oldCelli = map().cellMap()[celli];
+            const label oldCelli = map.cellMap()[celli];
             newProtectedCell.set(celli, protectedCell_.get(oldCelli));
         }
         protectedCell_.transfer(newProtectedCell);
@@ -457,7 +441,7 @@ Foam::dynamicRefineFvMesh::refine
     // Debug: Check refinement levels (across faces only)
     meshCutter_.checkRefinementLevels(-1, labelList(0));
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -504,36 +488,21 @@ Foam::dynamicRefineFvMesh::unrefine
 
 
     // Change mesh and generate map.
-    //autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, true);
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(*this, false);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(*this, false);
+    mapPolyMesh& map = *mapPtr;
 
     Info<< "Unrefined from "
-        << returnReduce(map().nOldCells(), sumOp<label>())
+        << returnReduce(map.nOldCells(), sumOp<label>())
         << " to " << globalData().nTotalCells() << " cells."
         << endl;
 
     // Update fields
     updateMesh(map);
 
-
-    // Move mesh
-    /*
-    pointField newPoints;
-    if (map().hasMotionPoints())
-    {
-        newPoints = map().preMotionPoints();
-    }
-    else
-    {
-        newPoints = points();
-    }
-    movePoints(newPoints);
-    */
-
     // Correct the flux for modified faces.
     {
-        const labelList& reversePointMap = map().reversePointMap();
-        const labelList& reverseFaceMap = map().reverseFaceMap();
+        const labelList& reversePointMap = map.reversePointMap();
+        const labelList& reverseFaceMap = map.reverseFaceMap();
 
         HashTable<surfaceScalarField*> fluxes
         (
@@ -626,7 +595,7 @@ Foam::dynamicRefineFvMesh::unrefine
 
         forAll(newProtectedCell, celli)
         {
-            label oldCelli = map().cellMap()[celli];
+            label oldCelli = map.cellMap()[celli];
             if (oldCelli >= 0)
             {
                 newProtectedCell.set(celli, protectedCell_.get(oldCelli));
@@ -638,7 +607,7 @@ Foam::dynamicRefineFvMesh::unrefine
     // Debug: Check refinement levels (across faces only)
     meshCutter_.checkRefinementLevels(-1, labelList(0));
 
-    return map;
+    return mapPtr;
 }
 
 

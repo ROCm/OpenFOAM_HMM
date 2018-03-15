@@ -122,13 +122,13 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.append("surface file");
-    argList::validArgs.append("surface file");
+    argList::addArgument("surface file");
+    argList::addArgument("surface file");
 
     #include "setRootCase.H"
     #include "createTime.H"
 
-    const scalar scaleFactor = args.optionLookupOrDefault<scalar>("scale", -1);
+    const scalar scaleFactor = args.lookupOrDefault<scalar>("scale", -1);
 
     const word outputFile(args.executable() + ".obj");
 
@@ -145,18 +145,18 @@ int main(int argc, char *argv[])
     Info<< endl;
 
 
-    if (args.optionFound("debug2"))
+    if (args.found("debug2"))
     {
         surfaceIntersection::debug |= 2;
     }
-    if (args.optionFound("debug4"))
+    if (args.found("debug4"))
     {
         surfaceIntersection::debug |= 4;
     }
-    const bool optPrint = args.optionFound("print");
+    const bool optPrint = args.found("print");
 
     dictionary intersectOptions;
-    if (args.optionFound("dict"))
+    if (args.found("dict"))
     {
         intersectOptions = IOdictionary
         (
@@ -190,12 +190,12 @@ int main(int argc, char *argv[])
     }
 
     word mergeOp;
-    if (args.optionFound("mergePoints"))
+    if (args.found("mergePoints"))
     {
-        cuts.mergePoints(args.optionRead<scalar>("mergePoints"));
+        cuts.mergePoints(args.opt<scalar>("mergePoints"));
         mergeOp = "mergePoints";
     }
-    else if (args.optionFound("mergeEdges"))
+    else if (args.found("mergeEdges"))
     {
         cuts.mergeEdges();
         mergeOp = "mergeEdges";

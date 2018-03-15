@@ -274,7 +274,7 @@ const Foam::wordList& Foam::searchablePlate::regions() const
 
 Foam::tmp<Foam::pointField> Foam::searchablePlate::coordinates() const
 {
-    return tmp<pointField>(new pointField(1, origin_ + 0.5*span_));
+    return tmp<pointField>::New(1, origin_ + 0.5*span_);
 }
 
 

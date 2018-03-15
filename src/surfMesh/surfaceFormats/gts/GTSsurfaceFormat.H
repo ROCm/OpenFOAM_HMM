@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,8 @@ Class
     Foam::fileFormats::GTSsurfaceFormat
 
 Description
-    Provide a means of reading/writing GTS format.
+    Read/write GTS format.
+
     The output is never sorted by zone and is only written if it consists
     entirely of triangles.
 
@@ -49,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class GTSsurfaceFormat Declaration
+                Class fileFormats::GTSsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -58,6 +59,10 @@ class GTSsurfaceFormat
     public UnsortedMeshedSurface<Face>
 {
     // Private Member Functions
+
+        //- Check and raise FatalError if output is not triangulated
+        //  Triangulatinng on-the-fly is otherwise too annoying
+        static bool checkIfTriangulated(const UList<Face>& faceLst);
 
         //- Disallow default bitwise copy construct
         GTSsurfaceFormat(const GTSsurfaceFormat<Face>&) = delete;
@@ -71,49 +76,45 @@ public:
     // Constructors
 
         //- Construct from file name
-        GTSsurfaceFormat(const fileName&);
-
-
-    // Selectors
-
-        //- Read file and return surface
-        static autoPtr<UnsortedMeshedSurface<Face>> New(const fileName& name)
-        {
-            return autoPtr<UnsortedMeshedSurface<Face>>
-            (
-                new GTSsurfaceFormat<Face>(name)
-            );
-        }
+        GTSsurfaceFormat(const fileName& filename);
 
 
     //- Destructor
-    virtual ~GTSsurfaceFormat()
-    {}
+    virtual ~GTSsurfaceFormat() = default;
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Write MeshedSurface
         static void write
         (
-            const fileName&,
-            const MeshedSurface<Face>&
+            const fileName& filename,
+            const MeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
         //- Write UnsortedMeshedSurface, the output remains unsorted
         static void write
         (
-            const fileName&,
-            const UnsortedMeshedSurface<Face>&
+            const fileName& filename,
+            const UnsortedMeshedSurface<Face>& surf,
+            const dictionary& options = dictionary::null
         );
 
+
+    // Member Functions
+
         //- Read from file
-        virtual bool read(const fileName&);
+        virtual bool read(const fileName& filename);
 
         //- Write object
-        virtual void write(const fileName& name) const
+        virtual void write
+        (
+            const fileName& name,
+            const dictionary& options = dictionary::null
+        ) const
         {
-            write(name, *this);
+            write(name, *this, options);
         }
 };
 

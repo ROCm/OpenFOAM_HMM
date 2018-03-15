@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,59 +26,26 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ListLoop_H
-#define ListLoop_H
+#ifndef ListLoopM_H
+#define ListLoopM_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Element access looping
 
-#ifdef vectorMachine
+// Initial non-const access to list
+#define List_ACCESS(type, f, fp)                \
+    type* const __restrict__ fp = (f).begin()
 
-// Element access looping using [] for vector machines
+// Initial const access to list
+#define List_CONST_ACCESS(type, f, fp)          \
+    const type* const __restrict__ fp = (f).begin()
 
 #define List_FOR_ALL(f, i)                      \
         const label _n##i = (f).size();         \
-        for (label i=0; i<_n##i; ++i)           \
-        {
+        for (label i=0; i<_n##i; ++i)
 
-#define List_END_FOR_ALL  }
-
-// Provide current element
-#define List_CELEM(f, fp, i)  (fp[i])
-
-// Provide current element
-#define List_ELEM(f, fp, i)  (fp[i])
-
-#define List_ACCESS(type, f, fp) \
-    type* const __restrict__ fp = (f).begin()
-
-#define List_CONST_ACCESS(type, f, fp) \
-    const type* const __restrict__ fp = (f).begin()
-
-#else
-
-// Pointer looping for scalar machines
-
-#define List_FOR_ALL(f, i)                      \
-        label i = (f).size();                   \
-        while (i--)                             \
-        {                                       \
-
-#define List_END_FOR_ALL  }
-
-// Provide current element without incrementing pointer
-#define List_CELEM(f, fp, i)  (*fp)
-
-// Provide current element and increment pointer
-#define List_ELEM(f, fp, i)  (*fp++)
-
-#define List_ACCESS(type, f, fp) \
-    type* __restrict__ fp = (f).begin()
-
-#define List_CONST_ACCESS(type, f, fp) \
-    const type* __restrict__ fp = (f).begin()
-
-#endif
-
+// Current element (non-const access)
+#define List_ELEM(fp, i)  (fp[i])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

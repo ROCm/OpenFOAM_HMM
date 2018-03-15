@@ -52,21 +52,20 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
+template<class T, int SizeMin> class DynamicList;
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-class DynamicList;
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+template<class T, int SizeMin>
 Ostream& operator<<
 (
     Ostream& os,
-    const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+    const DynamicList<T, SizeMin>& lst
 );
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+
+template<class T, int SizeMin>
 Istream& operator>>
 (
     Istream& is,
-    DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+    DynamicList<T, SizeMin>& lst
 );
 
 
@@ -74,22 +73,36 @@ Istream& operator>>
                            Class DynamicList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, unsigned SizeInc=0, unsigned SizeMult=2, unsigned SizeDiv=1>
+template<class T, int SizeMin = 16>
 class DynamicList
 :
     public List<T>
 {
-    static_assert
-    (
-        (SizeInc || SizeMult) && SizeDiv,
-        "Invalid sizing parameters"
-    );
+    static_assert(SizeMin > 0, "Invalid min size parameter");
 
     // Private data
 
         //- The capacity (allocated size) of the underlying list.
         label capacity_;
 
+private:
+
+    // Private Member Functions
+
+        //- Remove elements in range
+        label removeElements(const labelRange& slice);
+
+        //- Subset elements in range
+        label subsetElements(const labelRange& slice);
+
+
+protected:
+
+    // Protected Member Functions
+
+        //- Copy assignment from another list
+        template<class ListType>
+        inline void assignDynList(const ListType& lst);
 
 public:
 
@@ -104,21 +117,29 @@ public:
         //- Construct null
         inline DynamicList();
 
-        //- Construct given size.
+        //- Construct an empty list with given reserve size.
         explicit inline DynamicList(const label nElem);
 
         //- Construct with given size and value for all elements.
-        inline DynamicList(const label nElem, const T& a);
+        inline DynamicList(const label nElem, const T& val);
 
-        //- Construct copy.
-        inline DynamicList
-        (
-            const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
-        );
+        //- Construct with given size initializing all elements to zero
+        inline DynamicList(const label nElem, const zero);
+
+        //- Copy construct.
+        inline DynamicList(const DynamicList<T, SizeMin>& lst);
+
+        //- Copy construct from DynamicList with different sizing parameters
+        template<int AnySizeMin>
+        inline DynamicList(const DynamicList<T, AnySizeMin>& lst);
 
         //- Construct from UList. Size set to UList size.
         //  Also constructs from DynamicList with different sizing parameters.
         explicit inline DynamicList(const UList<T>& lst);
+
+        //- Construct from a FixedList
+        template<unsigned FixedSize>
+        inline DynamicList(const FixedList<T, FixedSize>& lst);
 
         //- Construct given begin/end iterators.
         //  Uses std::distance to determine the size.
@@ -131,8 +152,18 @@ public:
         //- Construct from UIndirectList. Size set to UIndirectList size.
         explicit inline DynamicList(const UIndirectList<T>& lst);
 
-        //- Construct by transferring the parameter contents
-        explicit inline DynamicList(const Xfer<List<T>>& lst);
+        //- Move construct.
+        inline DynamicList(DynamicList<T, SizeMin>&& lst);
+
+        //- Move construct with different sizing parameters
+        template<int AnySizeMin>
+        inline DynamicList(DynamicList<T, AnySizeMin>&& lst);
+
+        //- Move construct from List
+        inline DynamicList(List<T>&& lst);
+
+        //- Move construct from SortableList
+        DynamicList(SortableList<T>&& lst);
 
         //- Construct from Istream. Size set to size of list read.
         explicit DynamicList(Istream& is);
@@ -140,10 +171,14 @@ public:
 
     // Member Functions
 
-        // Access
+      // Access
 
-            //- Size of the underlying storage.
-            inline label capacity() const;
+        //- Normal lower capacity limit - the SizeMin template parameter
+        inline label min_size() const;
+
+        //- Size of the underlying storage.
+        inline label capacity() const;
+
 
         // Edit
 
@@ -153,25 +188,23 @@ public:
             //  Use this or reserve() in combination with append().
             inline void setCapacity(const label nElem);
 
-            //- Alter the addressed list size.
+            //- Alter addressable list size.
             //  New space will be allocated if required.
             //  Use this to resize the list prior to using the operator[] for
             //  setting values (as per List usage).
             inline void setSize(const label nElem);
 
-            //- Alter the addressed list size and fill new space with a
-            //  constant.
-            inline void setSize(const label nElem, const T& t);
+            //- Alter addressable list size and fill new space with constant.
+            inline void setSize(const label nElem, const T& val);
 
-            //- Alter the addressed list size.
+            //- Alter addressable list size.
             //  New space will be allocated if required.
             //  Use this to resize the list prior to using the operator[] for
             //  setting values (as per List usage).
             inline void resize(const label nElem);
 
-            //- Alter the addressed list size and fill new space with a
-            //  constant.
-            inline void resize(const label nElem, const T& t);
+            //- Alter addressable list size and fill new space with constant.
+            inline void resize(const label nElem, const T& val);
 
             //- Reserve allocation space for at least this size.
             //  Never shrinks the allocated size, use setCapacity() for that.
@@ -184,67 +217,121 @@ public:
             //- Clear the list and delete storage.
             inline void clearStorage();
 
+            //- Expand the addressable size to fit the allocated capacity.
+            //  Returns the previous addressable size.
+            inline label expandStorage();
+
             //- Shrink the allocated space to the number of elements used.
             //  Returns a reference to the DynamicList.
-            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& shrink();
+            inline DynamicList<T, SizeMin>& shrink();
+
+            //- Swap content with any sized DynamicList
+            template<int AnySizeMin>
+            inline void swap(DynamicList<T, AnySizeMin>& lst);
 
             //- Transfer contents of the argument List into this.
             inline void transfer(List<T>& lst);
 
-            //- Transfer contents of the argument DynamicList into this.
-            inline void transfer
-            (
-                DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
-            );
+            //- Transfer contents of any sized DynamicList into this.
+            template<int AnySizeMin>
+            inline void transfer(DynamicList<T, AnySizeMin>& lst);
 
-            //- Transfer contents to the Xfer container as a plain List
-            inline Xfer<List<T>> xfer();
+            //- Transfer contents  of the argument SortableList into this.
+            inline void transfer(SortableList<T>& lst);
+
+            //- Append an element to the end of this list.
+            inline DynamicList<T, SizeMin>& append(const T& val);
+
+            //- Move append an element
+            inline DynamicList<T, SizeMin>& append(T&& val);
+
+            //- Append another list to the end of this list.
+            inline DynamicList<T, SizeMin>& append(const UList<T>& lst);
+
+            //- Append a FixedList to the end of this list.
+            template<unsigned FixedSize>
+            inline DynamicList<T, SizeMin>&
+            append(const FixedList<T, FixedSize>& lst);
+
+            //- Append an initializer list at the end of this list.
+            inline DynamicList<T, SizeMin>&
+            append(std::initializer_list<T> lst);
+
+            //- Append a UIndirectList at the end of this list
+            inline DynamicList<T, SizeMin>&
+            append(const UIndirectList<T>& lst);
+
+            //- Move append list
+            inline DynamicList<T, SizeMin>& append(List<T>&& lst);
+
+            //- Move append list
+            inline DynamicList<T, SizeMin>&
+            append(DynamicList<T, SizeMin>&& lst);
+
+            //- Move append list
+            template<int AnySizeMin>
+            inline DynamicList<T, SizeMin>&
+            append(DynamicList<T, AnySizeMin>&& lst);
+
+            //- Move append list
+            inline DynamicList<T, SizeMin>&
+            append(SortableList<T>&& lst);
+
+            //- Remove and return the last element. Fatal on an empty list.
+            inline T remove();
+
+            //- Remove and return the specified element. Fatal on an empty list.
+            //  With fast=true (operates in constant time), the place of the
+            //  removed element is swapped with the last one in the list, which
+            //  changes the ordering.
+            //  With fast=false (operates in linear time), the elements
+            //  are swapped down in the list to preserve ordering.
+            inline T remove(const label idx, const bool fast=false);
+
+            //- Remove a (start,size) subset from the list.
+            //  The range is subsetted with the list size itself to ensure
+            //  result always addresses a valid section of the list.
+            //  Remaining elements are moved down.
+            inline label remove(const labelRange& range);
+
+            //- Remove a (start,size) subset from the list.
+            inline label remove(std::initializer_list<label> start_size);
+
+            //- Retain a (start,size) subset from the list.
+            //  The range is subsetted with the list size itself to ensure
+            //  result always addresses a valid section of the list.
+            //  Remaining elements are moved down.
+            inline label subset(const labelRange& range);
+
+            //- Retain a (start,size) subset from List.
+            inline label subset(std::initializer_list<label> start_size);
 
 
         // Member Operators
 
-            //- Append an element at the end of the list
-            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
-            (
-                const T& t
-            );
-
-            //- Append a List at the end of this list
-            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
-            (
-                const UList<T>& lst
-            );
-
-            //- Append an initializer list at the end of this list.
-            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
-            (
-                std::initializer_list<T> lst
-            );
-
-            //- Append a UIndirectList at the end of this list
-            inline DynamicList<T, SizeInc, SizeMult, SizeDiv>& append
-            (
-                const UIndirectList<T>& lst
-            );
-
-            //- Remove and return the top element
-            inline T remove();
-
             //- Return non-const access to an element, resizing list if
             //  necessary
-            inline T& operator()(const label elemI);
+            inline T& operator()(const label i);
 
             //- Assignment of all addressed entries to the given value
-            inline void operator=(const T& t);
+            inline void operator=(const T& val);
 
-            //- Assignment to DynamicList
-            inline void operator=
-            (
-                const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
-            );
+            //- Assignment of all entries to zero
+            inline void operator=(const zero);
 
             //- Assignment to UList
             inline void operator=(const UList<T>& lst);
+
+            //- Assignment to FixedList
+            template<unsigned FixedSize>
+            inline void operator=(const FixedList<T, FixedSize>& lst);
+
+            //- Assignment to DynamicList
+            inline void operator=(const DynamicList<T, SizeMin>& lst);
+
+            //- Assignment from DynamicList with different sizing parameters
+            template<int AnySizeMin>
+            inline void operator=(const DynamicList<T, AnySizeMin>& lst);
 
             //- Assignment from initializer list
             inline void operator=(std::initializer_list<T> lst);
@@ -252,33 +339,44 @@ public:
             //- Assignment to UIndirectList
             inline void operator=(const UIndirectList<T>& lst);
 
+            //- Move assignment
+            inline void operator=(List<T>&& lst);
 
-        // STL member functions
+            //- Move assignment
+            inline void operator=(DynamicList<T, SizeMin>&& lst);
 
-            //- Erase an element, move the remaining elements to fill the gap
-            //  and resize the List
-            typename UList<T>::iterator erase
-            (
-                typename UList<T>::iterator curIter
-            );
+            //- Move assignment
+            template<int AnySizeMin>
+            inline void operator=(DynamicList<T, AnySizeMin>&& lst);
+
+            //- Move assignment
+            inline void operator=(SortableList<T>&& lst);
 
 
         // IOstream operators
 
             // Write DynamicList to Ostream.
-            friend Ostream& operator<< <T, SizeInc, SizeMult, SizeDiv>
+            friend Ostream& operator<< <T, SizeMin>
             (
                 Ostream& os,
-                const DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+                const DynamicList<T, SizeMin>& lst
             );
 
             //- Read from Istream, discarding contents of existing DynamicList.
-            friend Istream& operator>> <T, SizeInc, SizeMult, SizeDiv>
+            friend Istream& operator>> <T, SizeMin>
             (
                 Istream& is,
-                DynamicList<T, SizeInc, SizeMult, SizeDiv>& lst
+                DynamicList<T, SizeMin>& lst
             );
+
 };
+
+
+// Global Functions
+
+// Exchange contents of lists - see DynamicList::swap().
+template<class T, int SizeMin1, int SizeMin2>
+inline void Swap(DynamicList<T, SizeMin1>& a, DynamicList<T, SizeMin2>& b);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

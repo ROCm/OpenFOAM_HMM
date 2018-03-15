@@ -3,29 +3,18 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # Script
 #     RunFunctions
 #
 # Description
 #     Miscellaneous functions for running tutorial cases
+#
 #------------------------------------------------------------------------------
 
 # The normal locations
@@ -35,7 +24,7 @@
 #------------------------------------------------------------------------------
 
 #
-# Look for '-parallel' in the argument list.
+# Check presence of '-parallel' in the argument list.
 #
 isParallel()
 {
@@ -43,14 +32,25 @@ isParallel()
     return 1
 }
 
+
 #
-# Look for '-test' in the argument list.
+# Check presence of '-test' in the argument list.
 #
 isTest()
 {
     for i; do [ "$i" = "-test" ] && return 0; done
     return 1
 }
+
+#
+# Check absence of '-test' in the argument list.
+#
+notTest()
+{
+    for i; do [ "$i" = "-test" ] && return 1; done
+    return 0
+}
+
 
 #
 # Extract 'numberOfSubdomains' from system/decomposeParDict
@@ -100,119 +100,138 @@ getApplication()
     fi
 }
 
+
+#
+# Run given application in serial with logfile output.
+# The preexistence of the log file prevents rerunning.
+#
 runApplication()
 {
-    APP_RUN=
-    LOG_IGNORE=false
-    LOG_APPEND=false
-    LOG_SUFFIX=
+    local appRun logFile logMode
 
-    # Parse options and executable
-    while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
-        key="$1"
-        case "$key" in
-            -append|-a)
-                LOG_IGNORE=true
-                LOG_APPEND=true
+    # Any additional parsed arguments (eg, decomposeParDict)
+    local appArgs
+
+    # Parse options until executable is encountered
+    while [ $# -gt 0 -a -z "$appRun" ]
+    do
+        case "$1" in
+            -a | -append)
+                logMode=append
                 ;;
-            -overwrite|-o)
-                LOG_IGNORE=true
+            -o | -overwrite)
+                logMode=overwrite
                 ;;
-            -suffix|-s)
-                LOG_SUFFIX=".$2"
+            -s | -suffix)
+                logFile=".$2"
                 shift
                 ;;
+            -decomposeParDict)
+                appArgs="$appArgs $1 $2"
+                shift
+                ;;
+            '')
+                ;;
             *)
-                APP_RUN="$key"
-                APP_NAME="${key##*/}"
-                LOG_SUFFIX="${APP_NAME}${LOG_SUFFIX}"
+                appRun="$1"
                 ;;
         esac
         shift
     done
 
-    if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
+    local appName="${appRun##*/}"
+    logFile="log.$appName$logFile"
+
+    if [ -f "$logFile" -a -z "$logMode" ]
     then
-        echo "$APP_NAME already run on $PWD:" \
-             "remove log file 'log.$LOG_SUFFIX' to re-run"
+        echo "$appName already run on $PWD:" \
+             "remove log file '$logFile' to re-run"
     else
-        echo "Running $APP_RUN on $PWD"
-        if [ "$LOG_APPEND" = "true" ]; then
-            $APP_RUN "$@" >> log.$LOG_SUFFIX 2>&1
+        echo "Running $appRun on $PWD"
+        if [ "$logMode" = append ]
+        then
+            $appRun $appArgs "$@" >> $logFile 2>&1
         else
-            $APP_RUN "$@" > log.$LOG_SUFFIX 2>&1
+            $appRun $appArgs "$@" > $logFile 2>&1
         fi
     fi
 }
 
+
+#
+# Run given application in parallel with logfile output.
+# The preexistence of the log file prevents rerunning.
+#
 runParallel()
 {
-    APP_RUN=
-    LOG_IGNORE=false
-    LOG_APPEND=false
-    LOG_SUFFIX=
+    local appRun logFile logMode nProcs
 
-    # Store any parsed additional arguments e.g. decomposeParDict
-    APP_PARARGS=
+    # Any additional parsed arguments (eg, decomposeParDict)
+    local appArgs="-parallel"
 
-    # Initialise number of procs to unset value
-    nProcs=-1
-
-    # Parse options and executable
-    while [ $# -gt 0 ] && [ -z "$APP_RUN" ]; do
-        key="$1"
-        case "$key" in
-            -append|-a)
-                LOG_IGNORE=true
-                LOG_APPEND=true
+    # Parse options until executable is encountered
+    while [ $# -gt 0 -a -z "$appRun" ]
+    do
+        case "$1" in
+            -a | -append)
+                logMode=append
                 ;;
-            -overwrite|-o)
-                LOG_IGNORE=true
+            -o | -overwrite)
+                logMode=overwrite
                 ;;
-            -suffix|-s)
-                LOG_SUFFIX=".$2"
+            -s | -suffix)
+                logFile=".$2"
                 shift
                 ;;
-            -np|-n)
+            -n | -np)
                 nProcs="$2"
                 shift
                 ;;
             -decomposeParDict)
+                appArgs="$appArgs $1 $2"
                 nProcs=$(getNumberOfProcessors "$2")
-                APP_PARARGS="$APP_PARARGS -decomposeParDict $2"
                 shift
                 ;;
+            '')
+                ;;
             *)
-                APP_RUN="$key"
-                APP_NAME="${key##*/}"
-                LOG_SUFFIX="${APP_NAME}${LOG_SUFFIX}"
+                appRun="$1"
                 ;;
         esac
-
         shift
     done
 
-    [ "$nProcs" -eq -1 ] && nProcs=$(getNumberOfProcessors system/decomposeParDict)
+    [ -n "$nProcs" ] || nProcs=$(getNumberOfProcessors system/decomposeParDict)
 
-    if [ -f log.$LOG_SUFFIX ] && [ "$LOG_IGNORE" = "false" ]
+    local appName="${appRun##*/}"
+    logFile="log.$appName$logFile"
+
+    if [ -f "$logFile" -a -z "$logMode" ]
     then
-        echo "$APP_NAME already run on $PWD:" \
-             "remove log file 'log.$LOG_SUFFIX' to re-run"
+        echo "$appName already run on $PWD:" \
+             "remove log file '$logFile' to re-run"
     else
-        echo "Running $APP_RUN in parallel on $PWD using $nProcs processes"
-        if [ "$LOG_APPEND" = "true" ]; then
-            ( mpirun -np $nProcs $APP_RUN $APP_PARARGS -parallel "$@" < /dev/null >> log.$LOG_SUFFIX 2>&1 )
+        echo "Running $appRun ($nProcs processes) on $PWD "
+        if [ "$logMode" = append ]
+        then
+        (
+            mpirun -np $nProcs $appRun $appArgs "$@" </dev/null >> $logFile 2>&1
+        )
         else
-            ( mpirun -np $nProcs $APP_RUN $APP_PARARGS -parallel "$@" < /dev/null > log.$LOG_SUFFIX 2>&1 )
+        (
+            mpirun -np $nProcs $appRun $appArgs "$@" </dev/null > $logFile 2>&1
+        )
         fi
     fi
 }
+
 
 compileApplication()
 {
     echo "Compiling $1 application"
     wmake $1
 }
+
 
 #
 # cloneCase srcDir dstDir
@@ -248,6 +267,7 @@ cloneCase()
     done
     return 0
 }
+
 
 #
 # cloneParallelCase srcDir dstDir [...times]
@@ -312,13 +332,14 @@ cloneParallelCase()
     return 0
 }
 
+
 # Overwrite 0/ with the contents of 0.orig/ if it exists.
 # The -processor option to do the processor directories instead
 #
 restore0Dir()
 {
-    if [ "$1" = "-processor" ]
-    then
+    case "$1" in
+    -processor | -processors)
         echo "Restore 0/ from 0.orig/ for processor directories"
         [ -d 0.orig ] || echo "    Warning: no 0.orig/ found"
 
@@ -326,7 +347,24 @@ restore0Dir()
         \ls -d processor* | xargs -I {} \rm -rf ./{}/0
         \ls -d processor* | xargs -I {} \cp -r 0.orig ./{}/0 > /dev/null 2>&1
 
-    else
+        # Remove '#include' directives from field dictionaries
+        # for collated format
+        if [ "$1" = "-processors" ]
+        then
+        (
+            echo "Filter #include directives in processors/0:"
+            cd processors/0 2>/dev/null || exit 0
+            for file in $(grep -l "#include" * 2> /dev/null)
+            do
+                foamDictionary "$file" > "$file.$$." && mv "$file.$$." "$file"
+                echo "    $file"
+            done | tr -d '\n'
+            echo
+        )
+        fi
+        ;;
+
+    *)
         echo "Restore 0/ from 0.orig/"
         if [ -d 0.orig ]
         then
@@ -335,7 +373,9 @@ restore0Dir()
         else
             echo "    Warning: no 0.orig/ found"
         fi
-    fi
+        ;;
+    esac
 }
+
 
 #------------------------------------------------------------------------------

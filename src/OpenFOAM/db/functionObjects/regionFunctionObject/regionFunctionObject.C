@@ -148,12 +148,6 @@ Foam::functionObjects::regionFunctionObject::regionFunctionObject
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::regionFunctionObject::~regionFunctionObject()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::functionObjects::regionFunctionObject::read(const dictionary& dict)

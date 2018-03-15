@@ -47,16 +47,16 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     // primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
     label count = 0;
-    forAll(f, fp)
+    for (const label verti : f)
     {
         if ((count % 8) == 0)
         {
             os  << nl << "  " << cellId;
         }
-        os  << ' ' << f[fp] + 1;
-        count++;
+        os  << ' ' << verti + 1;
+        ++count;
     }
-    os  << endl;
+    os  << nl;
 }
 
 
@@ -84,7 +84,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     fileName baseName = filename.lessExt();
 
-    // read cellTable names (if possible)
+    // Read cellTable names (if possible)
     Map<word> cellTableLookup = readInpCellTable
     (
         IFstream(starFileName(baseName, STARCDCore::INP_FILE))()
@@ -111,7 +111,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     pointId.clear();
 
 
-    // read .cel file
+    // Read .cel file
     // ~~~~~~~~~~~~~~
     IFstream is(starFileName(baseName, STARCDCore::CEL_FILE));
     if (!is.good())
@@ -131,7 +131,7 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
     // assume the cellTableIds are not intermixed
     bool sorted = true;
-    label zoneI = 0;
+    label zoneId = 0;
 
     label lineLabel, shapeId, nLabels, cellTableId, typeId;
     DynamicList<label> vertexLabels(64);
@@ -159,35 +159,34 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
         if (typeId == starcdShellType)
         {
-            // Convert groupID into zoneID
-            Map<label>::const_iterator fnd = lookup.find(cellTableId);
-            if (fnd != lookup.end())
+            // Convert cellTableId to zoneId
+            const auto iterGroup = lookup.cfind(cellTableId);
+            if (iterGroup.found())
             {
-                if (zoneI != fnd())
+                if (zoneId != *iterGroup)
                 {
                     // cellTableIds are intermixed
                     sorted = false;
                 }
-                zoneI = fnd();
+                zoneId = *iterGroup;
             }
             else
             {
-                zoneI = dynSizes.size();
-                lookup.insert(cellTableId, zoneI);
+                zoneId = dynSizes.size();
+                lookup.insert(cellTableId, zoneId);
 
-                Map<word>::const_iterator tableNameIter =
-                    cellTableLookup.find(cellTableId);
+                const auto iterTableName = cellTableLookup.cfind(cellTableId);
 
-                if (tableNameIter == cellTableLookup.end())
+                if (iterTableName.found())
+                {
+                    dynNames.append(*iterTableName);
+                }
+                else
                 {
                     dynNames.append
                     (
                         word("cellTable_") + ::Foam::name(cellTableId)
                     );
-                }
-                else
-                {
-                    dynNames.append(tableNameIter());
                 }
 
                 dynSizes.append(0);
@@ -203,27 +202,28 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                 label nTri = 0;
                 f.triangles(this->points(), nTri, trias);
 
-                forAll(trias, facei)
+                for (const face& tri : trias)
                 {
                     // a triangular 'face', convert to 'triFace' etc
-                    dynFaces.append(Face(trias[facei]));
-                    dynZones.append(zoneI);
-                    dynSizes[zoneI]++;
+                    dynFaces.append(Face(tri));
+                    dynZones.append(zoneId);
+                    dynSizes[zoneId]++;
                 }
             }
-            else
+            else if (nLabels >= 3)
             {
                 dynFaces.append(Face(vertices));
-                dynZones.append(zoneI);
-                dynSizes[zoneI]++;
+                dynZones.append(zoneId);
+                dynSizes[zoneId]++;
             }
         }
     }
     mapPointId.clear();
 
-    this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
+    this->sortFacesAndStore(dynFaces, dynZones, sorted);
 
-    this->addZones(dynSizes, dynNames, true); // add zones, cull empty ones
+    // Add zones (retaining empty ones)
+    this->addZones(dynSizes, dynNames);
     this->addZonesToFaces(); // for labelledTri
 
     return true;
@@ -234,14 +234,15 @@ template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary&
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&  faceLst  = surf.surfFaces();
+    const UList<label>& faceMap  = surf.faceMap();
 
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst)
@@ -249,7 +250,6 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     );
 
     const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
-
 
     fileName baseName = filename.lessExt();
 
@@ -262,29 +262,30 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeHeader(os, STARCDCore::HEADER_CEL);
 
     label faceIndex = 0;
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        const surfZone& zone = zones[zoneI];
+        const surfZone& zone = zones[zonei];
+        const label nLocalFaces = zone.size();
 
         if (useFaceMap)
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
-                writeShell(os, f, faceIndex, zoneI + 1);
+                writeShell(os, f, faceIndex, zonei + 1);
             }
         }
         else
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
-                writeShell(os, f, faceIndex, zoneI + 1);
+                writeShell(os, f, faceIndex, zonei + 1);
             }
         }
     }
 
-    // write simple .inp file
+    // Write simple .inp file
     writeCase
     (
         OFstream(starFileName(baseName, STARCDCore::INP_FILE))(),

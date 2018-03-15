@@ -41,7 +41,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("file");
+    argList::addArgument("file");
     #include "setRootCase.H"
 
     if (!Pstream::parRun())

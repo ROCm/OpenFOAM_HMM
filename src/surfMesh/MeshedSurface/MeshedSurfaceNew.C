@@ -48,8 +48,8 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
         if (delegate.found(ext))
         {
             // Create indirectly
-            autoPtr<MeshedSurface<Face>> surf(new MeshedSurface<Face>);
-            surf().transfer(FriendType::New(name, ext)());
+            auto surf = autoPtr<MeshedSurface<Face>>::New();
+            surf().transfer(*(FriendType::New(name, ext)));
 
             return surf;
         }

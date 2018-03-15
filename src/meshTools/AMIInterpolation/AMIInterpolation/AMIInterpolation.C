@@ -372,8 +372,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
 
         // Local constructMap is just identity
         {
-            tgtConstructMap[Pstream::myProcNo()] =
-                identity(targetCoarseSize);
+            tgtConstructMap[Pstream::myProcNo()] = identity(targetCoarseSize);
         }
 
         labelList tgtCompactMap(map.constructSize());
@@ -473,7 +472,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 label elemi = elems[i];
                 label coarseElemi = tgtCompactMap[elemi];
 
-                label index = findIndex(newElems, coarseElemi);
+                label index = newElems.find(coarseElemi);
                 if (index == -1)
                 {
                     newElems.append(coarseElemi);
@@ -491,8 +490,8 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
             new mapDistribute
             (
                 compacti,
-                tgtSubMap.xfer(),
-                tgtConstructMap.xfer()
+                std::move(tgtSubMap),
+                std::move(tgtConstructMap)
             )
         );
     }
@@ -519,7 +518,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::agglomerate
                 label elemi = elems[i];
                 label coarseElemi = targetRestrictAddressing[elemi];
 
-                label index = findIndex(newElems, coarseElemi);
+                label index = newElems.find(coarseElemi);
                 if (index == -1)
                 {
                     newElems.append(coarseElemi);
@@ -1008,7 +1007,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
         }
 
         // Send data back to originating procs. Note that contributions
-        // from different processors get added (ListAppendEqOp)
+        // from different processors get added (ListOps::appendEqOp)
 
         mapDistributeBase::distribute
         (
@@ -1020,7 +1019,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             map.subMap(),
             false,                      // has flip
             tgtAddress_,
-            ListAppendEqOp<label>(),
+            ListOps::appendEqOp<label>(),
             flipOp(),                   // flip operation
             labelList()
         );
@@ -1035,7 +1034,7 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::update
             map.subMap(),
             false,
             tgtWeights_,
-            ListAppendEqOp<scalar>(),
+            ListOps::appendEqOp<scalar>(),
             flipOp(),
             scalarList()
         );
@@ -1134,13 +1133,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
             {
                 mapMap.append
                 (
-                    identity(srcConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        srcConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
                 newMapMap.append
                 (
-                    identity(newSrcConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        newSrcConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
             }
 
@@ -1188,13 +1193,19 @@ void Foam::AMIInterpolation<SourcePatch, TargetPatch>::append
             {
                 mapMap.append
                 (
-                    identity(tgtConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        tgtConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
                 newMapMap.append
                 (
-                    identity(newTgtConstructMap[proci].size())
-                  + mapMap.size() + newMapMap.size()
+                    identity
+                    (
+                        newTgtConstructMap[proci].size(),
+                        (mapMap.size() + newMapMap.size())
+                    )
                 );
             }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,27 +25,55 @@ InNamespace
     Foam
 
 Description
-    Swap its arguments
+    Swap arguments as per std::swap, but in Foam namespace.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef Swap_H
 #define Swap_H
 
+#include <type_traits>
+#include <utility>
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+//- Swap non-array types as per std::swap example, but in Foam namespace.
+//  \sa http://www.cplusplus.com/reference/utility/swap/
 template<class T>
-inline void Swap(T& a, T& b)
+void Swap(T& a, T& b)
 {
-    T tmp = a;
-    a = b;
-    b = tmp;
+    // compile-time resolution with std::enable_if not yet working
+    if (std::is_fundamental<T>::value || std::is_pointer<T>::value)
+    {
+        // Use copy/assign for simple types
+        const T tmp = a;
+        a = b;
+        b = tmp;
+    }
+    else
+    {
+        // Use move/assignment
+        T tmp(std::move(a));
+        a = std::move(b);
+        b = std::move(tmp);
+    }
 }
+
+
+//- Swap array types as per std::swap example, but in Foam namespace.
+//  \sa http://www.cplusplus.com/reference/utility/swap/
+template<class T, size_t N>
+void Swap(T (&a)[N], T (&b)[N])
+{
+    for (size_t i = 0; i < N; ++i)
+    {
+        Foam::Swap(a[i], b[i]);
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

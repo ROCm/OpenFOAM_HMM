@@ -31,6 +31,48 @@ License
 #include "Pstream.H"
 #include "OSspecific.H"
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+void Foam::error::warnAboutAge
+(
+    const char* what,
+    const int oldVersion
+)
+{
+    if (oldVersion <= 0)
+    {
+        // No warning for 0 (unversioned) or -ve values (silent versioning)
+    }
+    else if (oldVersion < 1000)
+    {
+        // Emit warning
+        std::cerr
+            << "    This " << what << " is considered to be VERY old!\n"
+            << std::endl;
+    }
+    else if (OPENFOAM_PLUS > oldVersion)
+    {
+        const int months =
+        (
+            // YYMM -> months
+            (12 * (OPENFOAM_PLUS/100) + (OPENFOAM_PLUS % 100))
+          - (12 * (oldVersion/100) + (oldVersion % 100))
+        );
+
+        std::cerr
+            << "    This " << what << " is deemed to be " << months
+            << " months old.\n"
+            << std::endl;
+    }
+///// Uncertain if this is desirable
+///    else if (OPENFOAM_PLUS < oldVersion)
+///    {
+///        std::cerr
+///            << "    This " << what << " appears to be a future option\n"
+///            << std::endl;
+///    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -149,7 +191,7 @@ Foam::error::operator Foam::dictionary() const
     dictionary errDict;
 
     string oneLineMessage(message());
-    oneLineMessage.replaceAll('\n', ' ');
+    oneLineMessage.replaceAll("\n", " ");
 
     errDict.add("type", word("Foam::error"));
     errDict.add("message", oneLineMessage);
@@ -250,21 +292,30 @@ void Foam::error::abort()
 }
 
 
+void Foam::error::write(Ostream& os, const bool includeTitle) const
+{
+    os  << nl;
+    if (includeTitle)
+    {
+        os  << title().c_str() << endl;
+    }
+    os  << message().c_str();
+
+    if (error::level >= 2 && sourceFileLineNumber())
+    {
+        os  << nl << nl
+            << "    From function " << functionName().c_str() << endl
+            << "    in file " << sourceFileName().c_str()
+            << " at line " << sourceFileLineNumber() << '.';
+    }
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 Foam::Ostream& Foam::operator<<(Ostream& os, const error& err)
 {
-    os  << nl
-        << err.title().c_str() << endl
-        << err.message().c_str();
-
-    if (error::level >= 2 && err.sourceFileLineNumber())
-    {
-        os  << nl << nl
-            << "    From function " << err.functionName().c_str() << endl
-            << "    in file " << err.sourceFileName().c_str()
-            << " at line " << err.sourceFileLineNumber() << '.';
-    }
+    err.write(os);
 
     return os;
 }

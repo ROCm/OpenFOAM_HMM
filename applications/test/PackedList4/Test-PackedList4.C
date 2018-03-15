@@ -28,9 +28,13 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "uLabel.H"
+#include "boolList.H"
+#include "DynamicList.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
+#include "ITstream.H"
 #include "StringStream.H"
+#include "FlatOutput.H"
 
 using namespace Foam;
 
@@ -134,8 +138,9 @@ int main(int argc, char *argv[])
 
     PackedBoolList list4
     (
-        IStringStream
+        ITstream
         (
+            "input",
             "(1 n 1 n 1 n 1 1 off 0 0 f f 0 y yes y true y false on t)"
         )()
     );
@@ -143,19 +148,18 @@ int main(int argc, char *argv[])
     Info<< "\ntest Istream constructor\n";
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() << nl;
+    Info<< list4 << " indices: " << list4.used() << nl;
 
     Info<< "\nassign from labelList\n";
-    list4 = labelList
-    (
-        IStringStream
-        (
-            "(0 1 2 3 12 13 14 19 20 21)"
-        )()
-    );
+    list4 = labelList{0, 1, 2, 3, 12, 13, 14, 19, 20, 21};
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() << nl;
+    Info<< list4 << " indices: " << list4.used() << nl;
+
+    // Not yet:
+    // PackedBoolList list5{0, 1, 2, 3, 12, 13, 14, 19, 20, 21};
+    // list5.printInfo(Info, true);
+    // Info<< list5 << " indices: " << list5.used() << nl;
 
     Info<< "\nassign from indices\n";
     list4.read
@@ -168,15 +172,15 @@ int main(int argc, char *argv[])
 
 
     list4.printInfo(Info, true);
-    Info<< list4 << " indices: " << list4.used()() << nl;
+    Info<< list4 << " indices: " << list4.used() << nl;
 
-    List<bool> boolLst(list4.size());
+    boolList bools(list4.size());
     forAll(list4, i)
     {
-        boolLst[i] = list4[i];
+        bools[i] = list4[i];
     }
 
-    Info<< "List<bool>: " << boolLst << nl;
+    Info<< "boolList: " << bools << nl;
 
     // check roundabout assignments
     PackedList<2> pl2
@@ -198,6 +202,18 @@ int main(int argc, char *argv[])
     list4.writeList(Info, -1) << nl; // indexed output
 
     list4.writeEntry("PackedBoolList", Info);
+
+    // Construct from labelUList, labelUIndList
+    {
+        DynamicList<label> indices({10, 50, 300});
+
+        Info<< "set: " << flatOutput(indices) << endl;
+
+        PackedBoolList bools1(indices);
+
+        Info<< "used: " << bools1.size() << " "
+            << flatOutput(bools1.used()) << endl;
+    }
 
     return 0;
 }

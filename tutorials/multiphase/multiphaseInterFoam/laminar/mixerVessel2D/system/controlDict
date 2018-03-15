@@ -52,5 +52,62 @@ maxAlphaCo      0.5;
 
 maxDeltaT       1;
 
+functions
+{
+    sTransport
+    {
+        type            energyTransport;
+        libs            ("libsolverFunctionObjects.so");
 
+        enabled         true;
+        writeControl    outputTime;
+        writeInterval   1;
+
+        field           T;
+
+        rho             rho;
+        phi             rhoPhi;
+
+        write           true;
+
+        phaseThermos
+        {
+            alpha.air
+            {
+                Cp          1e3;
+                kappa       0.0243;
+            }
+            alpha.mercury
+            {
+                Cp          140;
+                kappa       8.2;
+            }
+            alpha.oil
+            {
+                Cp          2e3;
+                kappa       0.2;
+            }
+            alpha.water
+            {
+                Cp          4e3;
+                kappa       0.6;
+            }
+        }
+
+        fvOptions
+        {
+            viscousDissipation
+            {
+                type            viscousDissipation;
+                enabled         true;
+
+                viscousDissipationCoeffs
+                {
+                    fields          (T);
+                    rho             rho; //rho Field
+                }
+            }
+        }
+    }
+}
 // ************************************************************************* //

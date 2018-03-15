@@ -89,12 +89,6 @@ Foam::fv::variableHeatTransfer::variableHeatTransfer
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::fv::variableHeatTransfer::~variableHeatTransfer()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::fv::variableHeatTransfer::calculateHtc()
@@ -122,7 +116,7 @@ void Foam::fv::variableHeatTransfer::calculateHtc()
 
     const scalarField htcNbrMapped(interpolate(htcNbr));
 
-    htc_.primitiveFieldRef() = htcNbrMapped*AoV_;
+    htc_.primitiveFieldRef() = htcNbrMapped * AoV_();
 }
 
 

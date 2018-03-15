@@ -50,6 +50,7 @@ SourceFiles
 #include "faceListFwd.H"
 #include "intersection.H"
 #include "pointHit.H"
+#include "FixedList.H"
 #include "ListListOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -62,8 +63,7 @@ namespace Foam
 class face;
 class triFace;
 
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-class DynamicList;
+template<class T, int SizeMin> class DynamicList;
 
 inline Istream& operator>>(Istream& is, face& f);
 
@@ -107,15 +107,15 @@ class face
         //- Enumeration listing the modes for split()
         enum splitMode
         {
-            COUNTTRIANGLE,  // count if split into triangles
-            COUNTQUAD,      // count if split into triangles&quads
-            SPLITTRIANGLE,  // split into triangles
-            SPLITQUAD       // split into triangles&quads
+            COUNTTRIANGLE,  //!< count if split into triangles
+            COUNTQUAD,      //!< count if split into triangles and quads
+            SPLITTRIANGLE,  //!< split into triangles
+            SPLITQUAD       //!< split into  triangles and quads
         };
 
-        //- Split face into triangles or triangles&quads.
+        //- Split face into triangles or triangles and quads.
         //  Stores results quadFaces[quadI], triFaces[triI]
-        //  Returns number of new faces created
+        //  \return number of new faces created
         label split
         (
             const splitMode mode,
@@ -150,14 +150,18 @@ public:
         //- Construct given size, with invalid point labels (-1)
         explicit inline face(const label sz);
 
-        //- Construct from list of labels
+        //- Copy construct from list of labels
         explicit inline face(const labelUList& lst);
 
-        //- Construct from an initializer list of labels
+        //- Copy construct from list of labels
+        template<unsigned Size>
+        explicit inline face(const FixedList<label, Size>& lst);
+
+        //- Copy construct from an initializer list of labels
         explicit inline face(std::initializer_list<label> lst);
 
-        //- Construct by transferring the parameter contents
-        explicit inline face(const Xfer<labelList>& lst);
+        //- Move construct from list of labels
+        explicit inline face(labelList&& lst);
 
         //- Copy construct from triFace
         face(const triFace& f);
@@ -312,8 +316,8 @@ public:
         //- Return n-th face edge
         inline edge faceEdge(const label n) const;
 
-        //- Return the edge direction on the face
-        //  Returns:
+        //- The edge direction on the face
+        //  \return
         //  -  0: edge not found on the face
         //  - +1: forward (counter-clockwise) on the face
         //  - -1: reverse (clockwise) on the face
@@ -344,11 +348,11 @@ public:
             //- Split into triangles using existing points.
             //  Append to DynamicList.
             //  Returns number of faces created.
-            template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+            template<int SizeMin>
             label triangles
             (
                 const UList<point>& points,
-                DynamicList<face, SizeInc, SizeMult, SizeDiv>& triFaces
+                DynamicList<face, SizeMin>& triFaces
             ) const;
 
             //- Number of triangles and quads after splitting
@@ -374,9 +378,10 @@ public:
             ) const;
 
         //- Compare faces
-        //   0: different
-        //  +1: identical
-        //  -1: same face, but different orientation
+        //  \return
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same face, but different orientation
         static int compare(const face& a, const face& b);
 
         //- Return true if the faces have the same vertices
@@ -389,13 +394,10 @@ public:
 };
 
 
-//- Hash specialization to offset faces in ListListOps::combineOffset
+//- Specialization to offset faces, used in ListListOps::combineOffset
 template<>
-class offsetOp<face>
+struct offsetOp<face>
 {
-
-public:
-
     inline face operator()
     (
         const face& x,

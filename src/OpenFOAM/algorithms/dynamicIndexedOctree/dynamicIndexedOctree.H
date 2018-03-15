@@ -50,7 +50,7 @@ SourceFiles
 namespace Foam
 {
 
-typedef DynamicList<autoPtr<DynamicList<label >>> contentListList;
+typedef DynamicList<autoPtr<DynamicList<label>>> contentListList;
 
 // Forward declaration of classes
 template<class Type> class dynamicIndexedOctree;
@@ -418,10 +418,7 @@ public:
         //- Clone
         autoPtr<dynamicIndexedOctree<Type>> clone() const
         {
-            return autoPtr<dynamicIndexedOctree<Type>>
-            (
-                new dynamicIndexedOctree<Type>(*this)
-            );
+            return autoPtr<dynamicIndexedOctree<Type>>::New(*this);
         }
 
 

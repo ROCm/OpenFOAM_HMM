@@ -117,7 +117,7 @@ void readFields
 (
     const typename GeoFieldType::Mesh& mesh,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     LIFOStack<regIOobject*>& storedObjects
 );
 
@@ -129,7 +129,7 @@ template<class GeoFieldType>
 void readUniformFields
 (
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields,
+    const wordHashSet& selectedFields,
     LIFOStack<regIOobject*>& storedObjects,
     const bool syncPar = true
 );

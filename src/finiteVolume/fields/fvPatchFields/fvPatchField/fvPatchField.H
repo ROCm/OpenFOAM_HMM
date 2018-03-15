@@ -219,7 +219,7 @@ public:
         //- Construct and return a clone
         virtual tmp<fvPatchField<Type>> clone() const
         {
-            return tmp<fvPatchField<Type>>(new fvPatchField<Type>(*this));
+            return tmp<fvPatchField<Type>>::New(*this);
         }
 
         //- Construct as copy setting internal field reference
@@ -235,7 +235,7 @@ public:
             const DimensionedField<Type, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type>>(new fvPatchField<Type>(*this, iF));
+            return tmp<fvPatchField<Type>>::New(*this, iF);
         }
 
 
@@ -529,17 +529,6 @@ public:
 
             //- Write
             virtual void write(Ostream&) const;
-
-            //- Helper function to write the keyword and entry only if the
-            //  values are not equal. The value is then output as value2
-            template<class EntryType>
-            void writeEntryIfDifferent
-            (
-                Ostream& os,
-                const word& entryName,
-                const EntryType& value1,
-                const EntryType& value2
-            ) const;
 
 
         // Check

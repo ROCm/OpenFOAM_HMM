@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,20 @@ namespace Foam
 
 const char* const Foam::pointZone::labelsName = "pointLabels";
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::pointZone::pointZone
+(
+    const word& name,
+    const label index,
+    const pointZoneMesh& zm
+)
+:
+    zone(name, index),
+    zoneMesh_(zm)
+{}
+
 
 Foam::pointZone::pointZone
 (
@@ -60,12 +73,12 @@ Foam::pointZone::pointZone
 Foam::pointZone::pointZone
 (
     const word& name,
-    const Xfer<labelList>& addr,
+    labelList&& addr,
     const label index,
     const pointZoneMesh& zm
 )
 :
-    zone(name, addr, index),
+    zone(name, std::move(addr), index),
     zoneMesh_(zm)
 {}
 
@@ -85,33 +98,27 @@ Foam::pointZone::pointZone
 
 Foam::pointZone::pointZone
 (
-    const pointZone& pz,
+    const pointZone& origZone,
     const labelUList& addr,
     const label index,
     const pointZoneMesh& zm
 )
 :
-    zone(pz, addr, index),
+    zone(origZone, addr, index),
     zoneMesh_(zm)
 {}
 
 
 Foam::pointZone::pointZone
 (
-    const pointZone& pz,
-    const Xfer<labelList>& addr,
+    const pointZone& origZone,
+    labelList&& addr,
     const label index,
     const pointZoneMesh& zm
 )
 :
-    zone(pz, addr, index),
+    zone(origZone, std::move(addr), index),
     zoneMesh_(zm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::pointZone::~pointZone()
 {}
 
 
@@ -141,9 +148,11 @@ bool Foam::pointZone::checkParallelSync(const bool report) const
 
     labelList maxZone(mesh.nPoints(), -1);
     labelList minZone(mesh.nPoints(), labelMax);
-    forAll(*this, i)
+
+    const labelList& addr = *this;
+
+    for (const label pointi : addr)
     {
-        label pointi = operator[](i);
         maxZone[pointi] = index();
         minZone[pointi] = index();
     }
@@ -213,10 +222,10 @@ void Foam::pointZone::operator=(const labelUList& addr)
 }
 
 
-void Foam::pointZone::operator=(const Xfer<labelList>& addr)
+void Foam::pointZone::operator=(labelList&& addr)
 {
     clearAddressing();
-    labelList::operator=(addr);
+    labelList::transfer(addr);
 }
 
 

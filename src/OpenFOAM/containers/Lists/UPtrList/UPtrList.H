@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +25,15 @@ Class
     Foam::UPtrList
 
 Description
-    A templated 1D list of pointers to objects of type \<T\>, where the
-    size of the array is known and used for subscript bounds checking, etc.
+    A list of pointers to objects of type \<T\>, without allocation/deallocation
+    management of the pointers - this is to be done elsewhere.
+    The operator[] returns a reference to the object, not the pointer.
 
-    The element operator [] returns a reference to the object rather than a
-    pointer.  Storage is not allocated during construction or use but is
-    supplied to the constructor as an argument.
+See Also
+    Foam::PtrList
 
 SourceFiles
+    UPtrListI.H
     UPtrList.C
     UPtrListIO.C
 
@@ -43,333 +44,264 @@ SourceFiles
 
 #include "List.H"
 #include "PtrList.H"
+#include <iterator>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend classes
-template<class T> class PtrList;
+// Forward declarations
 
-// Forward declaration of friend functions and operators
+template<class T> class PtrList;
 template<class T> class UPtrList;
 
-template<class T>
-inline typename UPtrList<T>::iterator operator+
-(
-    const typename UPtrList<T>::iterator&,
-    label
-);
-
-template<class T>
-inline typename UPtrList<T>::iterator operator+
-(
-    label,
-    const typename UPtrList<T>::iterator&
-);
-
-template<class T>
-inline typename UPtrList<T>::iterator operator-
-(
-    const typename UPtrList<T>::iterator&,
-    label
-);
-
-template<class T>
-inline label operator-
-(
-    const typename UPtrList<T>::iterator&,
-    const typename UPtrList<T>::iterator&
-);
-
-template<class T>
-inline typename UPtrList<T>::const_iterator operator+
-(
-    const typename UPtrList<T>::const_iterator&,
-    label
-);
-
-template<class T>
-inline typename UPtrList<T>::const_iterator operator+
-(
-    label,
-    const typename UPtrList<T>::const_iterator&
-);
-
-template<class T>
-inline typename UPtrList<T>::const_iterator operator-
-(
-    const typename UPtrList<T>::const_iterator&,
-    label
-);
-
-template<class T>
-inline label operator-
-(
-    const typename UPtrList<T>::const_iterator&,
-    const typename UPtrList<T>::const_iterator&
-);
-
-template<class T>
-Istream& operator>>(Istream&, UPtrList<T>&);
-
-template<class T>
-Ostream& operator<<(Ostream&, const UPtrList<T>&);
+template<class T> Ostream& operator<<(Ostream& os, const UPtrList<T>& lst);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class UPtrList Declaration
+                          Class UPtrList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
 class UPtrList
 {
-    // Private data
+protected:
+
+    // Protected data
 
         List<T*> ptrs_;
 
 
 public:
 
-    // Related types
+    // STL type definitions
 
-        //- Declare friendship with the UPtrList class
-        friend class PtrList<T>;
+        //- Type of values the list contains
+        typedef T value_type;
+
+        //- A non-const reference to the value_type
+        typedef T& reference;
+
+        //- A const reference to the value_type
+        typedef const T& const_reference;
+
+        //- Random-access iterator with non-const access
+        class iterator;
+
+        //- Random-access iterator with const access
+        class const_iterator;
 
 
     // Constructors
 
-        //- Null Constructor
-        UPtrList();
+        //- Construct null
+        UPtrList() = default;
 
-        //- Construct with size specified
-        explicit UPtrList(const label);
+        //- Construct with specified size, each element initialized to nullptr
+        explicit inline UPtrList(const label len);
 
-        //- Construct from UList
-        explicit UPtrList(UList<T>&);
+        //- Construct from PtrList, copying addresses of each list element.
+        //  The argument is non-const access since this UPtrList can be used
+        //  to change its values.
+        explicit inline UPtrList(PtrList<T>& lst);
 
-        //- Construct from PtrList
-        explicit UPtrList(PtrList<T>&);
-
-        //- Construct by transferring the parameter contents
-        UPtrList(const Xfer<UPtrList<T>>&);
+        //- Construct from UList, taking addresses of each list element
+        explicit UPtrList(UList<T>& lst);
 
         //- Construct as copy or re-use as specified
-        UPtrList(UPtrList<T>&, bool reuse);
+        inline UPtrList(UPtrList<T>& lst, bool reuse);
+
+        //- Copy construct
+        inline UPtrList(const UPtrList<T>& lst) = default;
+
+        //- Move construct
+        inline UPtrList(UPtrList<T>&& lst);
 
 
     // Member functions
 
-        // Access
+    // Access
 
-            //- Return the number of elements in the UPtrList
-            inline label size() const;
+        //- Return the number of elements in the UPtrList
+        inline label size() const;
 
-            //- Return true if the UPtrList is empty (ie, size() is zero)
-            inline bool empty() const;
+        //- Return true if the UPtrList is empty (ie, size() is zero)
+        inline bool empty() const;
 
-            //- Return reference to the first element of the list
-            inline T& first();
+        //- Return reference to the first element of the list
+        inline T& first();
 
-            //- Return reference to first element of the list
-            inline const T& first() const;
+        //- Return reference to first element of the list
+        inline const T& first() const;
 
-            //- Return reference to the last element of the list
-            inline T& last();
+        //- Return reference to the last element of the list
+        inline T& last();
 
-            //- Return reference to the last element of the list
-            inline const T& last() const;
+        //- Return reference to the last element of the list
+        inline const T& last() const;
 
 
-        // Edit
+    // Edit
 
-            //- Reset size of UPtrList.  This can only be used to set the size
-            //  of an empty UPtrList, extend a UPtrList, remove entries from
-            //  the end of a UPtrList
-            void setSize(const label);
+        //- Set list size to zero.
+        inline void clear();
 
-            //- Reset size of UPtrList.  This can only be used to set the size
-            //  of an empty UPtrList, extend a UPtrList, remove entries from
-            //  the end of a UPtrList
-            inline void resize(const label);
+        //- Reset size of UPtrList.
+        //  New entries are initialized to nullptr.
+        inline void setSize(const label newLen);
 
-            //- Clear the UPtrList, i.e. set size to zero
-            void clear();
+        //- Reset size of UPtrList.
+        //  New entries are initialized to nullptr.
+        inline void resize(const label newLen);
 
-            //- Transfer the contents of the argument UPtrList into this
-            //  UPtrList and annul the argument list
-            void transfer(UPtrList<T>&);
+        //- Append an element to the end of the list
+        inline void append(T* ptr);
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<UPtrList<T>> xfer();
+        //- Swap content
+        inline void swap(UPtrList<T>& lst);
 
-            //- Is element set
-            inline bool set(const label) const;
+        //- Transfer contents into this list and annul the argument
+        inline void transfer(UPtrList<T>& lst);
 
-            //- Set element. Return old element (can be nullptr).
-            //  No checks on new element
-            inline T* set(const label, T*);
+        //- Return true if element is set (ie, not a nullptr)
+        inline bool set(const label i) const;
 
-            //- Reorders elements. Ordering does not have to be done in
-            //  ascending or descending order. Reordering has to be unique.
-            //  (is shuffle)
-            void reorder(const labelUList&);
+        //- Set element to given pointer and return old element (can be null).
+        //  No checks on new element
+        inline T* set(const label i, T* ptr);
+
+        //- Reorder elements. Reordering must be unique (ie, shuffle).
+        void reorder(const labelUList& oldToNew);
 
 
     // Member operators
 
         //- Return element const reference
-        inline const T& operator[](const label) const;
+        inline const T& operator[](const label i) const;
 
         //- Return element reference
-        inline T& operator[](const label);
+        inline T& operator[](const label i);
 
         //- Return element const pointer
-        inline const T* operator()(const label) const;
+        inline const T* operator()(const label i) const;
+
+        //- Copy assignment
+        UPtrList<T>& operator=(const UPtrList<T>& lst) = default;
+
+        //- Move assignment
+        inline void operator=(UPtrList<T>&& lst);
 
 
-    // STL type definitions
+    // Iterators
 
-        //- Type of values the UPtrList contains
-        typedef T value_type;
-
-        //- Type that can be used for storing into UPtrList::value_type objects
-        typedef T& reference;
-
-        //- Type that can be used for storing into constant UPtrList::value_type
-        //  objects
-        typedef const T& const_reference;
-
-
-    // STL iterator
-    // Random access iterator for traversing UPtrList
-
-        class iterator;
-        friend class iterator;
-
-        //- An STL iterator
+        //- Random-access iterator with non-const access
         class iterator
         {
             T** ptr_;
 
         public:
 
-            //- Construct for a given UPtrList entry
-            inline iterator(T**);
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type = T;
+            using difference_type = label;
+            using pointer = T*;
+            using reference = T&;
+            friend class const_iterator;
+
+            //- Construct for a given entry
+            inline iterator(T** ptr);
 
             // Member operators
 
-                inline bool operator==(const iterator&) const;
-                inline bool operator!=(const iterator&) const;
+            inline bool operator==(const iterator& iter) const;
+            inline bool operator!=(const iterator& iter) const;
 
-                inline T& operator*();
-                inline T& operator()();
+            inline reference operator*() const;
+            inline reference operator()() const;
 
-                inline iterator operator++();
-                inline iterator operator++(int);
+            // Forward iteration
+            inline iterator& operator++();
+            inline iterator operator++(int);
 
-                inline iterator operator--();
-                inline iterator operator--(int);
+            inline iterator& operator--();
+            inline iterator operator--(int);
 
-                inline iterator operator+=(label);
+            // Random-access
+            inline iterator& operator+=(difference_type n);
+            inline iterator& operator-=(difference_type n);
+            inline iterator operator+(difference_type n) const;
+            inline iterator operator-(difference_type n) const;
 
-                friend iterator operator+ <T>(const iterator&, label);
-                friend iterator operator+ <T>(label, const iterator&);
+            inline difference_type operator-(const iterator& iter) const;
 
-                inline iterator operator-=(label);
+            inline reference operator[](difference_type n) const;
 
-                friend iterator operator- <T>(const iterator&, label);
+            inline bool operator<(const iterator& iter) const;
+            inline bool operator>(const iterator& iter) const;
 
-                friend label operator- <T>
-                (
-                    const iterator&,
-                    const iterator&
-                );
-
-                inline T& operator[](label);
-
-                inline bool operator<(const iterator&) const;
-                inline bool operator>(const iterator&) const;
-
-                inline bool operator<=(const iterator&) const;
-                inline bool operator>=(const iterator&) const;
+            inline bool operator<=(const iterator& iter) const;
+            inline bool operator>=(const iterator& iter) const;
         };
 
-        //- Return an iterator to begin traversing the UPtrList
-        inline iterator begin();
 
-        //- Return an iterator to end traversing the UPtrList
-        inline iterator end();
-
-
-    // STL const_iterator
-    // Random access iterator for traversing UPtrList
-
-        //- An STL-conforming const_iterator
+        //- Random-access iterator with const access
         class const_iterator
         {
             const T* const* ptr_;
 
         public:
 
-            //- Construct for a given UPtrList entry
-            inline const_iterator(const T* const*);
+            using iterator_category = std::random_access_iterator_tag;
+            using value_type = const T;
+            using difference_type = label;
+            using pointer = const T*;
+            using reference = const T&;
 
-            //- Construct from an iterator
-            inline const_iterator(const iterator&);
+            //- Construct for a given entry
+            inline const_iterator(const T* const* ptr);
 
+            //- Copy construct from non-const iterator
+            inline const_iterator(const iterator& iter);
 
             // Member operators
 
-                inline bool operator==(const const_iterator&) const;
-                inline bool operator!=(const const_iterator&) const;
+            inline bool operator==(const const_iterator& iter) const;
+            inline bool operator!=(const const_iterator& iter) const;
 
-                typedef const T& Tref;
-                inline Tref operator*();
-                inline Tref operator()();
+            inline reference operator*() const;
+            inline reference operator()() const;
 
-                inline const_iterator operator++();
-                inline const_iterator operator++(int);
+            // Forward iteration
+            inline const_iterator& operator++();
+            inline const_iterator operator++(int);
 
-                inline const_iterator operator--();
-                inline const_iterator operator--(int);
+            inline const_iterator& operator--();
+            inline const_iterator operator--(int);
 
-                inline const_iterator operator+=(label);
+            // Random-access
+            inline const_iterator& operator+=(difference_type n);
+            inline const_iterator& operator-=(difference_type n);
+            inline const_iterator operator+(difference_type n) const;
+            inline const_iterator operator-(difference_type n) const;
 
-                friend const_iterator operator+ <T>
-                (
-                    const const_iterator&,
-                    label
-                );
-                friend const_iterator operator+ <T>
-                (
-                    label,
-                    const const_iterator&
-                );
+            inline difference_type operator-(const const_iterator& iter) const;
 
-                inline const_iterator operator-=(label);
+            inline reference operator[](difference_type n) const;
 
-                friend const_iterator operator- <T>
-                (
-                    const const_iterator&,
-                    label
-                );
+            inline bool operator<(const const_iterator& iter) const;
+            inline bool operator>(const const_iterator& iter) const;
 
-                friend label operator- <T>
-                (
-                    const const_iterator&,
-                    const const_iterator&
-                );
-
-                inline const T& operator[](label);
-
-                inline bool operator<(const const_iterator&) const;
-                inline bool operator>(const const_iterator&) const;
-
-                inline bool operator<=(const const_iterator&) const;
-                inline bool operator>=(const const_iterator&) const;
+            inline bool operator<=(const const_iterator& iter) const;
+            inline bool operator>=(const const_iterator& iter) const;
         };
+
+
+        //- Return an iterator to begin traversing the UPtrList
+        inline iterator begin();
+
+        //- Return an iterator to end traversing the UPtrList
+        inline iterator end();
 
         //- Return an const_iterator to begin traversing the UPtrList
         inline const_iterator cbegin() const;
@@ -387,7 +319,8 @@ public:
     // IOstream operator
 
         //- Write UPtrList to Ostream
-        friend Ostream& operator<< <T>(Ostream&, const UPtrList<T>&);
+        friend Ostream& operator<< <T>(Ostream& os, const UPtrList<T>& lst);
+
 };
 
 
@@ -403,6 +336,7 @@ public:
 
 #ifdef NoRepository
     #include "UPtrList.C"
+    #include "UPtrListIO.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

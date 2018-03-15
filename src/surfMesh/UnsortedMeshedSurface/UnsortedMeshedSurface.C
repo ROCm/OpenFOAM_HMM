@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,7 +52,7 @@ template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canReadType
 (
     const word& ext,
-    const bool verbose
+    bool verbose
 )
 {
    return fileFormats::surfaceFormatsCore::checkSupport
@@ -69,7 +69,7 @@ template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canWriteType
 (
     const word& ext,
-    const bool verbose
+    bool verbose
 )
 {
     return fileFormats::surfaceFormatsCore::checkSupport
@@ -86,7 +86,7 @@ template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::canRead
 (
     const fileName& name,
-    const bool verbose
+    bool verbose
 )
 {
     word ext = name.ext();
@@ -102,15 +102,27 @@ template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::write
 (
     const fileName& name,
-    const UnsortedMeshedSurface<Face>& surf
+    const UnsortedMeshedSurface<Face>& surf,
+    const dictionary& options
+)
+{
+    write(name, name.ext(), surf, options);
+}
+
+
+template<class Face>
+void Foam::UnsortedMeshedSurface<Face>::write
+(
+    const fileName& name,
+    const word& ext,
+    const UnsortedMeshedSurface<Face>& surf,
+    const dictionary& options
 )
 {
     if (debug)
     {
         InfoInFunction << "Writing to " << name << endl;
     }
-
-    const word ext = name.ext();
 
     auto mfIter = writefileExtensionMemberFunctionTablePtr_->cfind(ext);
 
@@ -121,7 +133,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
         if (delegate.found(ext))
         {
-            MeshedSurfaceProxy<Face>(surf).write(name, ext);
+            MeshedSurfaceProxy<Face>(surf).write(name, ext, options);
         }
         else
         {
@@ -134,7 +146,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
     }
     else
     {
-        mfIter()(name, surf);
+        mfIter()(name, surf, options);
     }
 }
 
@@ -151,58 +163,10 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface()
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const Xfer<List<label>>& zoneIds,
-    const Xfer<surfZoneIdentifierList>& zoneTofc
-)
-:
-    ParentType(pointLst, faceLst),
-    zoneIds_(zoneIds),
-    zoneToc_(zoneTofc)
-{}
-
-
-template<class Face>
-Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
-(
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const labelUList& zoneSizes,
-    const UList<word>& zoneNames
-)
-:
-    ParentType(pointLst, faceLst)
-{
-    if (zoneSizes.size())
-    {
-        if (zoneNames.size())
-        {
-            setZones(zoneSizes, zoneNames);
-        }
-        else
-        {
-            setZones(zoneSizes);
-        }
-    }
-    else
-    {
-        setOneZone();
-    }
-}
-
-
-template<class Face>
-Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
-(
     const UnsortedMeshedSurface<Face>& surf
 )
 :
-    ParentType
-    (
-        xferCopy(surf.points()),
-        xferCopy(surf.surfFaces())
-    ),
+    ParentType(surf.points(), surf.surfFaces()), // Copy construct (no zones)
     zoneIds_(surf.zoneIds()),
     zoneToc_(surf.zoneToc())
 {}
@@ -214,11 +178,9 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const MeshedSurface<Face>& surf
 )
 :
-    ParentType
-    (
-        xferCopy(surf.points()),
-        xferCopy(surf.surfFaces())
-    )
+    ParentType(surf.points(), surf.surfFaces()), // Copy construct (no zones)
+    zoneIds_(),
+    zoneToc_()
 {
     setZones(surf.surfZones());
 }
@@ -227,25 +189,40 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const Xfer<UnsortedMeshedSurface<Face>>& surf
+    UnsortedMeshedSurface<Face>&& surf
 )
 :
-    ParentType()
+    UnsortedMeshedSurface<Face>()
 {
-    transfer(surf());
+    transfer(surf);
 }
 
 
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const Xfer<MeshedSurface<Face>>& surf
+    MeshedSurface<Face>&& surf
 )
 :
-    ParentType()
+    UnsortedMeshedSurface<Face>()
 {
-    transfer(surf());
+    transfer(surf);
 }
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
+(
+    pointField&& pointLst,
+    List<Face>&& faceLst,
+    List<label>&& zoneIds,
+    UList<surfZoneIdentifier>& tocInfo
+)
+:
+    ParentType(std::move(pointLst), std::move(faceLst)),
+    zoneIds_(std::move(zoneIds)),
+    zoneToc_(tocInfo)
+{}
 
 
 template<class Face>
@@ -255,7 +232,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const word& ext
 )
 :
-    ParentType()
+    UnsortedMeshedSurface<Face>()
 {
     read(name, ext);
 }
@@ -267,7 +244,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const fileName& name
 )
 :
-    ParentType()
+    UnsortedMeshedSurface<Face>()
 {
     read(name);
 }
@@ -279,9 +256,7 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     Istream& is
 )
 :
-    ParentType(),
-    zoneIds_(),
-    zoneToc_()
+    UnsortedMeshedSurface<Face>()
 {
     read(is);
 }
@@ -294,18 +269,11 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
     const word& surfName
 )
 :
-    ParentType()
+    UnsortedMeshedSurface<Face>()
 {
     MeshedSurface<Face> surf(t, surfName);
     transfer(surf);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Face>
-Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
-{}
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -313,7 +281,9 @@ Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setOneZone()
 {
-    zoneIds_.setSize(size());
+    this->removeZones(); // Parent information is unreliable
+
+    zoneIds_.resize(size());
     zoneIds_ = 0;
 
     word zoneName;
@@ -326,8 +296,9 @@ void Foam::UnsortedMeshedSurface<Face>::setOneZone()
         zoneName = "zone0";
     }
 
-    // Set single default zone
-    zoneToc_ = { surfZoneIdentifier(zoneName, 0) };
+    // Assign single default zone
+    zoneToc_.resize(1);
+    zoneToc_[0] = surfZoneIdentifier(zoneName, 0);
 }
 
 
@@ -337,17 +308,18 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
     const surfZoneList& zoneLst
 )
 {
-    zoneIds_.setSize(size());
-    zoneToc_.setSize(zoneLst.size());
+    this->removeZones(); // Parent information is unreliable
 
-    forAll(zoneToc_, zoneI)
+    zoneIds_.resize(size());
+    zoneToc_.resize(zoneLst.size());
+
+    forAll(zoneToc_, zonei)
     {
-        const surfZone& zone = zoneLst[zoneI];
-        zoneToc_[zoneI] = zone;
+        const surfZone& zone = zoneLst[zonei];
+        zoneToc_[zonei] = zone;
 
-        // assign sub-zone Ids
-        SubList<label> subZone(zoneIds_, zone.size(), zone.start());
-        subZone = zoneI;
+        // Assign sub-zone Ids
+        SubList<label>(zoneIds_, zone.size(), zone.start()) = zonei;
     }
 }
 
@@ -359,19 +331,20 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
     const UList<word>& names
 )
 {
-    zoneIds_.setSize(size());
-    zoneToc_.setSize(sizes.size());
+    this->removeZones(); // Parent information is unreliable
+
+    zoneIds_.resize(size());
+    zoneToc_.resize(sizes.size());
 
     label start = 0;
-    forAll(zoneToc_, zoneI)
+    forAll(zoneToc_, zonei)
     {
-        zoneToc_[zoneI] = surfZoneIdentifier(names[zoneI], zoneI);
+        zoneToc_[zonei] = surfZoneIdentifier(names[zonei], zonei);
 
-        // assign sub-zone Ids
-        SubList<label> subZone(zoneIds_, sizes[zoneI], start);
-        subZone = zoneI;
+        // Assign sub-zone Ids
+        SubList<label>(zoneIds_, sizes[zonei], start) = zonei;
 
-        start += sizes[zoneI];
+        start += sizes[zonei];
     }
 }
 
@@ -382,23 +355,24 @@ void Foam::UnsortedMeshedSurface<Face>::setZones
     const labelUList& sizes
 )
 {
-    zoneIds_.setSize(size());
-    zoneToc_.setSize(sizes.size());
+    this->removeZones(); // Parent information is unreliable
+
+    zoneIds_.resize(size());
+    zoneToc_.resize(sizes.size());
 
     label start = 0;
-    forAll(zoneToc_, zoneI)
+    forAll(zoneToc_, zonei)
     {
-        zoneToc_[zoneI] = surfZoneIdentifier
+        zoneToc_[zonei] = surfZoneIdentifier
         (
-            word("zone") + ::Foam::name(zoneI),
-            zoneI
+            word("zone") + ::Foam::name(zonei),
+            zonei
         );
 
-        // assign sub-zone Ids
-        SubList<label> subZone(zoneIds_, sizes[zoneI], start);
-        subZone = zoneI;
+        // Assign sub-zone Ids
+        SubList<label>(zoneIds_, sizes[zonei], start) = zonei;
 
-        start += sizes[zoneI];
+        start += sizes[zonei];
     }
 }
 
@@ -409,28 +383,29 @@ void Foam::UnsortedMeshedSurface<Face>::remapFaces
     const labelUList& faceMap
 )
 {
-    // re-assign the zone Ids
-    if (notNull(faceMap) && faceMap.size())
+    // Re-assign the zone Ids
+    if (isNull(faceMap) || faceMap.empty())
     {
-        if (zoneToc_.empty())
-        {
-            setOneZone();
-        }
-        else if (zoneToc_.size() == 1)
-        {
-            // optimized for single-zone case
-            zoneIds_ = 0;
-        }
-        else
-        {
-            List<label> newZones(faceMap.size());
+        return;
+    }
 
-            forAll(faceMap, facei)
-            {
-                newZones[facei] = zoneIds_[faceMap[facei]];
-            }
-            zoneIds_.transfer(newZones);
+    if (zoneToc_.empty())
+    {
+        setOneZone();
+    }
+    else if (zoneToc_.size() == 1)
+    {
+        zoneIds_ = 0;  // Optimized for single-zone case
+    }
+    else
+    {
+        List<label> newZones(faceMap.size());
+
+        forAll(faceMap, facei)
+        {
+            newZones[facei] = zoneIds_[faceMap[facei]];
         }
+        zoneIds_.transfer(newZones);
     }
 }
 
@@ -464,9 +439,9 @@ Foam::Ostream& Foam::UnsortedMeshedSurface<Face>::write(Ostream& os) const
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::setSize(const label s)
 {
-    this->storedFaces().setSize(s);
+    this->storedFaces().resize(s);
     // if zones extend: set with last zoneId
-    zoneIds_.setSize(s, zoneToc_.size() - 1);
+    zoneIds_.resize(s, zoneToc_.size() - 1);
 }
 
 
@@ -487,9 +462,9 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
 {
     // supply some zone names
     Map<word> zoneNames;
-    forAll(zoneToc_, zoneI)
+    forAll(zoneToc_, zonei)
     {
-        zoneNames.insert(zoneI, zoneToc_[zoneI].name());
+        zoneNames.insert(zonei, zoneToc_[zonei].name());
     }
 
     // std::sort() really seems to mix up the order.
@@ -498,7 +473,7 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
     // Assuming that we have relatively fewer zones compared to the
     // number of items, just do it ourselves
 
-    // step 1: get zone sizes and store (origId => zoneI)
+    // Step 1: get zone sizes and store (origId => zoneI)
     Map<label> lookup;
     forAll(zoneIds_, facei)
     {
@@ -515,7 +490,7 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
         }
     }
 
-    // step 2: assign start/size (and name) to the newZones
+    // Step 2: assign start/size (and name) to the newZones
     // re-use the lookup to map (zoneId => zoneI)
     surfZoneList zoneLst(lookup.size());
     label start = 0;
@@ -550,16 +525,16 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
     }
 
 
-    // step 3: build the re-ordering
-    faceMap.setSize(zoneIds_.size());
+    // Step 3: build the re-ordering
+    faceMap.resize(zoneIds_.size());
 
     forAll(zoneIds_, facei)
     {
-        label zoneI = lookup[zoneIds_[facei]];
-        faceMap[facei] = zoneLst[zoneI].start() + zoneLst[zoneI].size()++;
+        label zonei = lookup[zoneIds_[facei]];
+        faceMap[facei] = zoneLst[zonei].start() + zoneLst[zonei].size()++;
     }
 
-    // with reordered faces registered in faceMap
+    // With reordered faces registered in faceMap
     return zoneLst;
 }
 
@@ -608,13 +583,16 @@ Foam::UnsortedMeshedSurface<Face>::subsetMesh
     }
     oldToNew.clear();
 
-    // construct a sub-surface
-    return UnsortedMeshedSurface
+    // Retain the same zone toc information
+    List<surfZoneIdentifier> subToc(zoneToc_);
+
+    // Return sub-surface
+    return UnsortedMeshedSurface<Face>
     (
-        xferMove(newPoints),
-        xferMove(newFaces),
-        xferMove(newZones),
-        xferCopy(zoneToc_)
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newZones),
+        std::move(subToc)
     );
 }
 
@@ -631,46 +609,21 @@ Foam::UnsortedMeshedSurface<Face> Foam::UnsortedMeshedSurface<Face>::subsetMesh
 
 
 template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::reset
+void Foam::UnsortedMeshedSurface<Face>::swap
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const Xfer<List<label>>& zoneIds
+    UnsortedMeshedSurface<Face>& surf
 )
 {
-    ParentType::reset
-    (
-        pointLst,
-        faceLst,
-        Xfer<surfZoneList>()
-    );
+    this->clearOut();  // Topology changes
+    surf.clearOut();   // Topology changes
 
-    if (notNull(zoneIds))
-    {
-        zoneIds_.transfer(zoneIds());
-    }
-}
+    this->storedPoints().swap(surf.storedPoints());
+    this->storedFaces().swap(surf.storedFaces());
+    zoneIds_.swap(surf.zoneIds_);
+    zoneToc_.swap(surf.zoneToc_);
 
-
-template<class Face>
-void Foam::UnsortedMeshedSurface<Face>::reset
-(
-    const Xfer<List<point>>& pointLst,
-    const Xfer<List<Face>>& faceLst,
-    const Xfer<List<label>>& zoneIds
-)
-{
-    ParentType::reset
-    (
-        pointLst,
-        faceLst,
-        Xfer<surfZoneList>()
-    );
-
-    if (notNull(zoneIds))
-    {
-        zoneIds_.transfer(zoneIds());
-    }
+    this->storedZones().clear(); // Should not be there anyhow
+    surf.storedZones().clear();
 }
 
 
@@ -680,13 +633,10 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
     UnsortedMeshedSurface<Face>& surf
 )
 {
-    ParentType::reset
-    (
-        xferMove(surf.storedPoints()),
-        xferMove(surf.storedFaces()),
-        Xfer<surfZoneList>()
-    );
+    this->clear();
 
+    this->storedPoints().transfer(surf.storedPoints());
+    this->storedFaces().transfer(surf.storedFaces());
     zoneIds_.transfer(surf.zoneIds_);
     zoneToc_.transfer(surf.zoneToc_);
 
@@ -700,31 +650,18 @@ void Foam::UnsortedMeshedSurface<Face>::transfer
     MeshedSurface<Face>& surf
 )
 {
-    ParentType::reset
-    (
-        xferMove(surf.storedPoints()),
-        xferMove(surf.storedFaces()),
-        Xfer<surfZoneList>()
-    );
+    surfZoneList zoneInfo(surf.surfZones());
+    ParentType::transfer(surf);
 
-    setZones(surf.surfZones());
-    surf.clear();
+    setZones(zoneInfo);
 }
 
 
 template<class Face>
-Foam::Xfer<Foam::UnsortedMeshedSurface<Face>>
-Foam::UnsortedMeshedSurface<Face>::xfer()
+Foam::autoPtr<Foam::labelList>
+Foam::UnsortedMeshedSurface<Face>::releaseZoneIds()
 {
-    return xferMove(*this);
-}
-
-
-template<class Face>
-Foam::Xfer<Foam::labelList>
-Foam::UnsortedMeshedSurface<Face>::xferZoneIds()
-{
-    return this->storedZoneIds().xfer();
+    return autoPtr<labelList>::New(this->storedZoneIds());
 }
 
 
@@ -732,16 +669,14 @@ Foam::UnsortedMeshedSurface<Face>::xferZoneIds()
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)
 {
-    word ext = name.ext();
+    const word ext(name.ext());
     if (ext == "gz")
     {
         fileName unzipName = name.lessExt();
         return read(unzipName, unzipName.ext());
     }
-    else
-    {
-        return read(name, ext);
-    }
+
+    return read(name, ext);
 }
 
 
@@ -790,6 +725,16 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
 
 
 template<class Face>
+void Foam::UnsortedMeshedSurface<Face>::operator=
+(
+    UnsortedMeshedSurface<Face>&& surf
+)
+{
+    transfer();
+}
+
+
+template<class Face>
 Foam::UnsortedMeshedSurface<Face>::operator
 Foam::MeshedSurfaceProxy<Face>() const
 {
@@ -811,8 +756,8 @@ Foam::MeshedSurfaceProxy<Face>() const
 template<class Face>
 Foam::Istream& Foam::operator>>
 (
-    Foam::Istream& is,
-    Foam::UnsortedMeshedSurface<Face>& surf
+    Istream& is,
+    UnsortedMeshedSurface<Face>& surf
 )
 {
     return surf.read(is);
@@ -822,8 +767,8 @@ Foam::Istream& Foam::operator>>
 template<class Face>
 Foam::Ostream& Foam::operator<<
 (
-    Foam::Ostream& os,
-    const Foam::UnsortedMeshedSurface<Face>& surf
+    Ostream& os,
+    const UnsortedMeshedSurface<Face>& surf
 )
 {
     return surf.write(os);

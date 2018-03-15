@@ -36,6 +36,8 @@ Foam::pyrMatcher Foam::degenerateMatcher::pyr;
 Foam::tetMatcher Foam::degenerateMatcher::tet;
 
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
 Foam::cellShape Foam::degenerateMatcher::match
 (
     const faceList& faces,
@@ -50,30 +52,28 @@ Foam::cellShape Foam::degenerateMatcher::match
     {
         return cellShape(hex.model(), hex.vertLabels());
     }
-    else if (tet.matchShape(false, faces, owner, celli, cellFaces))
+    if (tet.matchShape(false, faces, owner, celli, cellFaces))
     {
         return cellShape(tet.model(), tet.vertLabels());
     }
-    else if (prism.matchShape(false, faces, owner, celli, cellFaces))
+    if (prism.matchShape(false, faces, owner, celli, cellFaces))
     {
         return cellShape(prism.model(), prism.vertLabels());
     }
-    else if (pyr.matchShape(false, faces, owner, celli, cellFaces))
+    if (pyr.matchShape(false, faces, owner, celli, cellFaces))
     {
         return cellShape(pyr.model(), pyr.vertLabels());
     }
-    else if (wedge.matchShape(false, faces, owner, celli, cellFaces))
+    if (wedge.matchShape(false, faces, owner, celli, cellFaces))
     {
         return cellShape(wedge.model(), wedge.vertLabels());
     }
-    else if (tetWedge.matchShape(false, faces, owner, celli, cellFaces))
+    if (tetWedge.matchShape(false, faces, owner, celli, cellFaces))
     {
         return cellShape(tetWedge.model(), tetWedge.vertLabels());
     }
-    else
-    {
-        return cellShape(*(cellModeller::lookup(0)), labelList(0));
-    }
+
+    return cellShape(cellModel::ref(cellModel::UNKNOWN), labelList());
 }
 
 

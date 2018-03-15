@@ -3,30 +3,18 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/aliases
+#     - sourced by OpenFOAM-*/etc/bashrc (or from the user's ~/.bashrc)
 #
 # Description
-#     Aliases for working with OpenFOAM
-#     Sourced from OpenFOAM-<VERSION>/etc/bashrc and/or ~/.bashrc
+#     Aliases for working with OpenFOAM.
 #
 #------------------------------------------------------------------------------
 
@@ -51,13 +39,6 @@ alias wmSchedOff='unset WM_SCHEDULER'
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 alias foam='cd $WM_PROJECT_DIR'
 
-if [ -n "$WM_PROJECT_SITE" ]
-then
-    alias foamSite='cd $WM_PROJECT_SITE'
-else
-    alias foamSite='cd $WM_PROJECT_INST_DIR/site'
-fi
-
 alias src='cd $FOAM_SRC'
 alias lib='cd $FOAM_LIBBIN'
 alias app='cd $FOAM_APP'
@@ -72,10 +53,10 @@ alias run='cd $FOAM_RUN'
 unset -f wmRefresh 2>/dev/null
 wmRefresh()
 {
-    wmProjectDir=$WM_PROJECT_DIR
-    foamSettings=$FOAM_SETTINGS
+    local projectDir=$WM_PROJECT_DIR
+    local foamSettings=$FOAM_SETTINGS
     wmUnset
-    . $wmProjectDir/etc/bashrc $foamSettings
+    . $projectDir/etc/bashrc $foamSettings
 }
 
 
@@ -84,12 +65,25 @@ wmRefresh()
 unset -f foamVersion 2>/dev/null
 foamVersion()
 {
-    if [ "$1" ]; then
+    if [ "$#" -gt 0 ]
+    then
+        local ver=$1
+        shift
+        # The variable foamInstDir had meaning for older OpenFOAM versions
         foamInstDir=$FOAM_INST_DIR
-        wmUnset
-        . $foamInstDir/OpenFOAM-$1/etc/bashrc
-        foam
-        echo "Changed to OpenFOAM-$1" 1>&2
+        if [ -f "$foamInstDir/OpenFOAM-$ver/etc/bashrc" ]
+        then
+            wmUnset
+            . $foamInstDir/OpenFOAM-$ver/etc/bashrc
+            unset foamInstDir
+            foam
+            echo "Changed to OpenFOAM-$WM_PROJECT_VERSION" 1>&2
+        else
+            unset foamInstDir
+            echo "No OpenFOAM-$ver available" 1>&2
+            echo "Using OpenFOAM-$WM_PROJECT_VERSION" 1>&2
+            return 1
+        fi
     else
         echo "OpenFOAM-$WM_PROJECT_VERSION" 1>&2
     fi
@@ -98,10 +92,15 @@ foamVersion()
 
 # Change ParaView version
 # ~~~~~~~~~~~~~~~~~~~~~~~
+# pass in first value directly (eg, 5.4.1) and transform to
+# ParaView_VERSION=...
+# Any additional arguments must be fully specified and start with "ParaView".
+# Eg,
+# ParaView_QT=...
 unset -f foamPV 2>/dev/null
 foamPV()
 {
-    . $WM_PROJECT_DIR/etc/config.sh/paraview "${@+ParaView_VERSION=$1}"
+    . $WM_PROJECT_DIR/etc/config.sh/paraview "${@+ParaView_VERSION=$@}"
     local pvdir="${ParaView_DIR##*/}"
     echo "${pvdir:-ParaView_DIR not set}" 1>&2
 }

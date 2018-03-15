@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,10 +28,6 @@ License
 #include "demandDrivenData.H"
 #include "DynamicList.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const Foam::label Foam::enrichedPatch::nFaceHits_ = 4;
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::enrichedPatch::calcMasterPointFaces() const
@@ -51,7 +47,7 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     // Master face points lists the points of the enriched master face plus
     // points projected into the master face
 
-    Map<DynamicList<label>> mpf(meshPoints().size());
+    Map<DynamicList<label>> mpf(2*meshPoints().size());
 
     const faceList& ef = enrichedFaces();
 
@@ -59,28 +55,11 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     forAll(masterPatch_, facei)
     {
         const face& curFace = ef[facei + slavePatch_.size()];
-//         Pout<< "Cur face in pfAddr: " << curFace << endl;
-        forAll(curFace, pointi)
+
+        for (const label pointi : curFace)
         {
-            Map<DynamicList<label>>::iterator mpfIter =
-                mpf.find(curFace[pointi]);
-
-            if (mpfIter == mpf.end())
-            {
-                // Not found, add new dynamic list
-                mpf.insert
-                (
-                    curFace[pointi],
-                    DynamicList<label>(primitiveMesh::facesPerPoint_)
-                );
-
-                // Iterator is invalidated - have to find again
-                mpf.find(curFace[pointi])().append(facei);
-            }
-            else
-            {
-                mpfIter().append(facei);
-            }
+            // Existing or auto-vivify DynamicList
+            mpf(pointi).append(facei);
         }
     }
 
@@ -96,50 +75,24 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
          && slavePointFaceHits_[pointi].hit()
         )
         {
-            // Get the index of projected point corresponding to this slave
-            // point
-            const label mergedSmp =
-                pointMergeMap().find(slaveMeshPoints[pointi])();
+            // Index of projected point corresponding to this slave point
+            const label mergedPointi = pointMergeMap()[slaveMeshPoints[pointi]];
 
-            Map<DynamicList<label>>::iterator mpfIter =
-                mpf.find(mergedSmp);
-
-            if (mpfIter == mpf.end())
-            {
-                // Not found, add new dynamic list
-                mpf.insert
-                (
-                    mergedSmp,
-                    DynamicList<label>(primitiveMesh::facesPerPoint_)
-                );
-
-                // Iterator is invalidated - have to find again
-                mpf.find(mergedSmp)().append
-                (
-                    slavePointFaceHits_[pointi].hitObject()
-                );
-            }
-            else
-            {
-                mpfIter().append(slavePointFaceHits_[pointi].hitObject());
-            }
+            // Existing or auto-vivify DynamicList
+            mpf(mergedPointi).append(slavePointFaceHits_[pointi].hitObject());
         }
     }
 
     // Re-pack dynamic lists into normal lists
-    const labelList mpfToc = mpf.toc();
 
-    masterPointFacesPtr_ = new Map<labelList>(2*mpfToc.size());
-    Map<labelList>& masterPointFaceAddr = *masterPointFacesPtr_;
+    masterPointFacesPtr_ = new Map<labelList>(2*mpf.size());
+    Map<labelList>& masterPointFaceMap = *masterPointFacesPtr_;
 
-    forAll(mpfToc, mpfTocI)
+    forAllIters(mpf, mpfIter)
     {
-        labelList l;
-        l.transfer(mpf.find(mpfToc[mpfTocI])());
-
-        masterPointFaceAddr.insert(mpfToc[mpfTocI], l);
+        masterPointFaceMap(mpfIter.key()).transfer(mpfIter.object());
     }
-    // Pout<< "masterPointFaceAddr: " << masterPointFaceAddr << endl;
+    // Pout<< "masterPointFaceMap: " << masterPointFaceMap << endl;
 }
 
 

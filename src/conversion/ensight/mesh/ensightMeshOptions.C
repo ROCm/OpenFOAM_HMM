@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -107,7 +107,7 @@ void Foam::ensightMesh::options::noPatches(const bool b)
 
 void Foam::ensightMesh::options::patchSelection
 (
-    const wordReList& patterns
+    const UList<wordRe>& patterns
 )
 {
     if (noPatches_)
@@ -118,43 +118,39 @@ void Foam::ensightMesh::options::patchSelection
     }
     else
     {
-        patchPatterns_.reset(new wordReList(patterns));
+        patchPatterns_.reset(new wordRes(patterns));
     }
 }
 
 
 void Foam::ensightMesh::options::faceZoneSelection
 (
-    const wordReList& patterns
+    const UList<wordRe>& patterns
 )
 {
-    faceZonePatterns_.reset(new wordReList(patterns));
+    faceZonePatterns_.reset(new wordRes(patterns));
 }
 
 
-const Foam::wordReList& Foam::ensightMesh::options::patchSelection() const
+const Foam::wordRes& Foam::ensightMesh::options::patchSelection() const
 {
     if (usePatchSelection())
     {
-        return patchPatterns_();
+        return *patchPatterns_;
     }
-    else
-    {
-        return wordReList::null();
-    }
+
+    return wordRes::null();
 }
 
 
-const Foam::wordReList& Foam::ensightMesh::options::faceZoneSelection() const
+const Foam::wordRes& Foam::ensightMesh::options::faceZoneSelection() const
 {
     if (faceZonePatterns_.valid())
     {
-        return faceZonePatterns_();
+        return *faceZonePatterns_;
     }
-    else
-    {
-        return wordReList::null();
-    }
+
+    return wordRes::null();
 }
 
 

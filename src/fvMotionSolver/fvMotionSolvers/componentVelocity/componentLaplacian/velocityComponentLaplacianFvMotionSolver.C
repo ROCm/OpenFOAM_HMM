@@ -28,6 +28,7 @@ License
 #include "motionDiffusivity.H"
 #include "fvmLaplacian.H"
 #include "addToRunTimeSelectionTable.H"
+#include "fvOptions.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -129,19 +130,26 @@ void Foam::velocityComponentLaplacianFvMotionSolver::solve()
     diffusivityPtr_->correct();
     pointMotionU_.boundaryFieldRef().updateCoeffs();
 
+    fv::options& fvOptions(fv::options::New(fvMesh_));
+
     // We explicitly do NOT want to interpolate the motion inbetween
     // different regions so bypass all the matrix manipulation.
     fvScalarMatrix TEqn
     (
         fvm::laplacian
         (
-            diffusivityPtr_->operator()(),
+            dimensionedScalar("viscosity", dimViscosity, 1.0)
+           *diffusivityPtr_->operator()(),
             cellMotionU_,
             "laplacian(diffusivity,cellMotionU)"
         )
+     ==
+        fvOptions(cellMotionU_)
     );
 
+    fvOptions.constrain(TEqn);
     TEqn.solveSegregatedOrCoupled(TEqn.solverDict());
+    fvOptions.correct(cellMotionU_);
 }
 
 

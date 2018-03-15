@@ -220,11 +220,11 @@ void Foam::CLASS::write
 ) const
 {
     FVPATCHF::write(os);
-    os.writeKeyword("scalarData") << scalarData_ << token::END_STATEMENT << nl;
-    os.writeKeyword("data") << data_ << token::END_STATEMENT << nl;
+    os.writeEntry("scalarData", scalarData_);
+    os.writeEntry("data", data_);
     fieldData_.writeEntry("fieldData", os);
     timeVsData_->writeData(os);
-    os.writeKeyword("wordData") << wordData_ << token::END_STATEMENT << nl;
+    os.writeEntry("wordData", wordData_);
     this->writeEntry("value", os);
 }
 

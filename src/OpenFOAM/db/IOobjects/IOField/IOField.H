@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -53,7 +53,6 @@ class IOField
     public regIOobject,
     public Field<Type>
 {
-
 public:
 
     TypeName("Field");
@@ -61,36 +60,44 @@ public:
 
     // Constructors
 
+        //- Default copy construct
+        IOField(const IOField&) = default;
+
         //- Construct from IOobject
-        IOField(const IOobject&);
+        explicit IOField(const IOobject& io);
 
         //- Construct from IOobject; does local processor require reading?
-        IOField(const IOobject&, const bool valid);
+        IOField(const IOobject& io, const bool valid);
 
         //- Construct from IOobject and size (does not set values)
-        IOField(const IOobject&, const label size);
+        IOField(const IOobject& io, const label size);
 
-        //- Construct from components
-        IOField(const IOobject&, const Field<Type>&);
+        //- Construct from IOobject and a List/Field content
+        IOField(const IOobject& io, const UList<Type>& content);
 
-        //- Construct by transferring the Field contents
-        IOField(const IOobject&, const Xfer<Field<Type>>&);
+        //- Construct by transferring the Field content
+        IOField(const IOobject& io, Field<Type>&& content);
+
+        //- Construct by copying/moving tmp content
+        IOField(const IOobject& io, const tmp<Field<Type>>& tfld);
 
 
     //- Destructor
-    virtual ~IOField();
+    virtual ~IOField() = default;
 
 
-    // Member functions
+    // Member Functions
 
-        bool writeData(Ostream&) const;
+        bool writeData(Ostream& os) const;
 
 
-    // Member operators
+    // Member Operators
 
-        void operator=(const IOField<Type>&);
+        //- Copy assignment of entries
+        void operator=(const IOField<Type>& rhs);
 
-        void operator=(const Field<Type>&);
+        //- Copy or move assignment of entries
+        using Field<Type>::operator=;
 };
 
 

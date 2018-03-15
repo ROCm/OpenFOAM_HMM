@@ -41,7 +41,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("(patches)");
+    argList::addArgument("(patches)");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     labelList patchIDs
     (
-        pbm.patchSet(wordReList(IStringStream(args[1])())).sortedToc()
+        pbm.patchSet(args.readList<wordRe>(1)).sortedToc()
     );
 
     Info<< "Starting walk from patches "

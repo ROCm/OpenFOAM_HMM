@@ -169,8 +169,7 @@ template<class Type>
 void Foam::fixedJumpAMIFvPatchField<Type>::write(Ostream& os) const
 {
     fvPatchField<Type>::write(os);
-    os.writeKeyword("patchType") << this->interfaceFieldType()
-        << token::END_STATEMENT << nl;
+    os.writeEntry("patchType", this->interfaceFieldType());
 
     if (this->cyclicAMIPatch().owner())
     {

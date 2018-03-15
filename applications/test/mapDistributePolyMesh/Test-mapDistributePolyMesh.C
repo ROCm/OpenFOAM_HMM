@@ -51,18 +51,19 @@ int main(int argc, char *argv[])
     const scalar instanceValue(0.005);
 
 
-    IOobject io
+    IOmapDistributePolyMesh map
     (
-        "procAddressing",
-        instance,
-        fvMesh::meshSubDir,
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
+        IOobject
+        (
+            "procAddressing",
+            instance,
+            fvMesh::meshSubDir,
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        )
     );
-
-    IOmapDistributePolyMesh map(io);
 
     {
         // Load the instance mesh
@@ -111,7 +112,6 @@ int main(int argc, char *argv[])
                     << endl;
             }
         }
-
 
         {
             const mapDistribute& cellMap = map.cellMap();

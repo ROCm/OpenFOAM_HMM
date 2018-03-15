@@ -38,7 +38,7 @@ SourceFiles
 
 #include "HashSet.H"
 #include "Map.H"
-#include "wordReList.H"
+#include "wordRe.H"
 #include "scalarField.H"
 #include "point.H"
 #include "primitivePatch.H"
@@ -98,7 +98,7 @@ public:
         }
 
         //- Return the set of patch IDs corresponding to the given names
-        labelHashSet getPatchIDs(const wordReList& patchNames) const;
+        labelHashSet getPatchIDs(const UList<wordRe>& patchNames) const;
 
         //- Get patchIDs of/derived off certain type (e.g. 'processorPolyPatch')
         //  Uses isA, not isType

@@ -50,14 +50,14 @@ Foam::combustionModels::psiThermoCombustion::~psiThermoCombustion()
 Foam::psiReactionThermo&
 Foam::combustionModels::psiThermoCombustion::thermo()
 {
-    return thermoPtr_();
+    return *thermoPtr_;
 }
 
 
 const Foam::psiReactionThermo&
 Foam::combustionModels::psiThermoCombustion::thermo() const
 {
-    return thermoPtr_();
+    return *thermoPtr_;
 }
 
 

@@ -102,10 +102,10 @@ int main(int argc, char *argv[])
 
     IOdictionary collapseDict(dictIO);
 
-    const bool overwrite = args.optionFound("overwrite");
+    const bool overwrite = args.found("overwrite");
 
-    const bool collapseFaces = args.optionFound("collapseFaces");
-    const bool collapseFaceSet = args.optionFound("collapseFaceSet");
+    const bool collapseFaces = args.found("collapseFaces");
+    const bool collapseFaceSet = args.found("collapseFaceSet");
 
     if (collapseFaces && collapseFaceSet)
     {
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
     word faceSetName("indirectPatchFaces");
     IOobject::readOption readFlag = IOobject::READ_IF_PRESENT;
 
-    if (args.optionReadIfPresent("collapseFaceSet", faceSetName))
+    if (args.readIfPresent("collapseFaceSet", faceSetName))
     {
         readFlag = IOobject::MUST_READ;
     }
@@ -166,7 +166,7 @@ int main(int argc, char *argv[])
 
 
         {
-            meshFilterPtr.set
+            meshFilterPtr.reset
             (
                 new polyMeshFilter(mesh, pointPriority, collapseDict)
             );
@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
                 polyMeshFilter::copySets(newMesh(), mesh);
             }
 
-            pointPriority = meshFilter.pointPriority();
+            pointPriority = *(meshFilter.pointPriority());
         }
 
         if (collapseFaceSet)
@@ -203,14 +203,14 @@ int main(int argc, char *argv[])
             // from the previous edge filtering to use as a stopping criterion.
             meshFilter.filter(indirectPatchFaces);
             {
-                polyTopoChange meshMod(newMesh);
+                polyTopoChange meshMod(newMesh());
 
                 meshMod.changeMesh(mesh, false);
 
                 polyMeshFilter::copySets(newMesh(), mesh);
             }
 
-            pointPriority = meshFilter.pointPriority();
+            pointPriority = *(meshFilter.pointPriority());
         }
 
         if (collapseFaces)
@@ -227,14 +227,14 @@ int main(int argc, char *argv[])
             // from the previous edge filtering to use as a stopping criterion.
             meshFilter.filter(nBadFaces);
             {
-                polyTopoChange meshMod(newMesh);
+                polyTopoChange meshMod(newMesh());
 
                 meshMod.changeMesh(mesh, false);
 
                 polyMeshFilter::copySets(newMesh(), mesh);
             }
 
-            pointPriority = meshFilter.pointPriority();
+            pointPriority = *(meshFilter.pointPriority());
         }
 
         // Write resulting mesh

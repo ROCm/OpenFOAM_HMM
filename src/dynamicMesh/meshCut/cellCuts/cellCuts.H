@@ -112,6 +112,10 @@ class cellCuts
 {
     // Private data
 
+        //- Warn for illegal cuts
+        const bool verbose_;
+
+
         // Per point/edge status
 
             //- Is mesh point cut
@@ -472,7 +476,8 @@ public:
             const labelList& cutCells,
             const labelList& meshVerts,
             const labelList& meshEdges,
-            const scalarField& meshEdgeWeights
+            const scalarField& meshEdgeWeights,
+            const bool verbose = true
         );
 
         //- Construct from pattern of cuts. Detect cells to cut.
@@ -481,7 +486,8 @@ public:
             const polyMesh& mesh,
             const labelList& meshVerts,
             const labelList& meshEdges,
-            const scalarField& meshEdgeWeights
+            const scalarField& meshEdgeWeights,
+            const bool verbose = true
         );
 
         //- Construct from complete cellLoops through specified cells.
@@ -492,7 +498,8 @@ public:
             const polyMesh& mesh,
             const labelList& cellLabels,
             const labelListList& cellLoops,
-            const List<scalarField>& cellEdgeWeights
+            const List<scalarField>& cellEdgeWeights,
+            const bool verbose = true
         );
 
         //- Construct from list of cells to cut and direction to cut in
@@ -501,7 +508,8 @@ public:
         (
             const polyMesh& mesh,
             const cellLooper& cellCutter,
-            const List<refineCell>& refCells
+            const List<refineCell>& refCells,
+            const bool verbose = true
         );
 
         //- Construct from list of cells to cut and plane to cut with and
@@ -511,7 +519,8 @@ public:
             const polyMesh& mesh,
             const cellLooper& cellCutter,
             const labelList& cellLabels,
-            const List<plane>& cutPlanes
+            const List<plane>& cutPlanes,
+            const bool verbose = true
         );
 
         //- Construct from components
@@ -524,7 +533,8 @@ public:
             const Map<edge>& faceSplitCut,
             const labelListList& cellLoops,
             const label nLoops,
-            const labelListList& cellAnchorPoints
+            const labelListList& cellAnchorPoints,
+            const bool verbose = true
         );
 
 
@@ -565,7 +575,7 @@ public:
                 {
                     calcFaceCuts();
                 }
-                return faceCutsPtr_();
+                return *faceCutsPtr_;
             }
 
             //- Gives for split face the two cuts that split the face into two.
@@ -630,7 +640,6 @@ public:
 
             //- debugging:Write edges of cell and loop
             void writeCellOBJ(const fileName& dir, const label celli) const;
-
 };
 
 

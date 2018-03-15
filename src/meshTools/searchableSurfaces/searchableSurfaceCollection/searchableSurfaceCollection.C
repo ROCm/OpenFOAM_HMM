@@ -285,7 +285,7 @@ Foam::searchableSurfaceCollection::~searchableSurfaceCollection()
 
 const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regionOffset_.setSize(subGeom_.size());
 
@@ -309,7 +309,7 @@ const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
                 }
             }
         }
-        regions_.transfer(allRegions.shrink());
+        regions_.transfer(allRegions);
     }
     return regions_;
 }
@@ -324,7 +324,7 @@ Foam::label Foam::searchableSurfaceCollection::size() const
 Foam::tmp<Foam::pointField>
 Foam::searchableSurfaceCollection::coordinates() const
 {
-    tmp<pointField> tCtrs = tmp<pointField>(new pointField(size()));
+    tmp<pointField> tCtrs(new pointField(size()));
     pointField& ctrs = tCtrs.ref();
 
     // Append individual coordinates

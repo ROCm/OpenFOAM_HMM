@@ -55,7 +55,7 @@ Foam::dictionary::dictionary(Istream& is)
 }
 
 
-Foam::dictionary::dictionary(Istream& is, const bool keepHeader)
+Foam::dictionary::dictionary(Istream& is, bool keepHeader)
 :
     dictionaryName(is.name()),
     parent_(dictionary::null)
@@ -71,14 +71,20 @@ Foam::dictionary::dictionary(Istream& is, const bool keepHeader)
 
 Foam::autoPtr<Foam::dictionary> Foam::dictionary::New(Istream& is)
 {
-    return autoPtr<dictionary>(new dictionary(is));
+    return autoPtr<dictionary>::New(is);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-bool Foam::dictionary::read(Istream& is, const bool keepHeader)
+bool Foam::dictionary::read(Istream& is, bool keepHeader)
 {
+    // Normally remove FoamFile header when read, but avoid this if it already
+    // existed prior to the current read.
+    // We would otherwise lose it with every top-level '#include ...'
+
+    keepHeader = keepHeader || hashedEntries_.found("FoamFile");
+
     // Check for empty dictionary
     if (is.eof())
     {
@@ -103,7 +109,6 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
     while (!is.eof() && entry::New(*this, is))
     {}
 
-    // Normally remove the FoamFile header entry if it exists
     if (!keepHeader)
     {
         remove("FoamFile");
@@ -125,30 +130,6 @@ bool Foam::dictionary::read(Istream& is, const bool keepHeader)
 bool Foam::dictionary::read(Istream& is)
 {
     return this->read(is, false);
-}
-
-
-bool Foam::dictionary::substituteKeyword(const word& keyword, bool mergeEntry)
-{
-    const word varName = keyword.substr(1);
-
-    // Lookup the variable name in the given dictionary
-    const entry* ePtr = lookupEntryPtr(varName, true, true);
-
-    // If defined insert its entries into this dictionary
-    if (ePtr != nullptr)
-    {
-        const dictionary& addDict = ePtr->dict();
-
-        forAllConstIter(parent_type, addDict, iter)
-        {
-            add(iter(), mergeEntry);
-        }
-
-        return true;
-    }
-
-    return false;
 }
 
 

@@ -84,7 +84,7 @@ bool Foam::functionObjects::readFields::loadField(const word& fieldName)
             mesh_.objectRegistry::store(sfPtr);
             return true;
         }
-        else if (fieldHeader.typeHeaderOk<SurfFieldType>(true))
+        else if (fieldHeader.typeHeaderOk<SurfFieldType>(true, true, false))
         {
             if (isA<surfMesh>(obr()))
             {

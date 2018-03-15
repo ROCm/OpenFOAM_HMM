@@ -235,7 +235,7 @@ void Foam::patchSeedSet::calcSamples
         subset.setSize(myMaxPoints);
 
         // Subset patchFaces
-        patchFaces = UIndirectList<label>(patchFaces, subset)();
+        patchFaces = labelUIndList(patchFaces, subset)();
 
         if (debug)
         {
@@ -362,12 +362,6 @@ Foam::patchSeedSet::patchSeedSet
         write(Info);
     }
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::patchSeedSet::~patchSeedSet()
-{}
 
 
 // ************************************************************************* //

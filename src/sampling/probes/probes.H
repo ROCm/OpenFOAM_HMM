@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -85,7 +85,7 @@ SourceFiles
 #include "volFieldsFwd.H"
 #include "surfaceFieldsFwd.H"
 #include "surfaceMesh.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 using namespace Foam::functionObjects;
 
@@ -141,7 +141,7 @@ protected:
       // Read from dictonary
 
         //- Names of fields to probe
-        wordReList fieldSelection_;
+        wordRes fieldSelection_;
 
         //- Fixed locations, default = yes
         //  Note: set to false for moving mesh calculations where locations
@@ -254,13 +254,13 @@ public:
 
 
     //- Destructor
-    virtual ~probes();
+    virtual ~probes() = default;
 
 
     // Member Functions
 
         //- Return names of fields to probe
-        virtual const wordReList& fieldNames() const
+        virtual const wordRes& fieldNames() const
         {
             return fieldSelection_;
         }

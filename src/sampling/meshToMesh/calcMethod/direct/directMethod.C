@@ -266,7 +266,7 @@ void Foam::directMethod::calculate
 
     // list to keep track of whether src cell can be mapped
     boolList mapFlag(src_.nCells(), false);
-    UIndirectList<bool>(mapFlag, srcCellIDs) = true;
+    boolUIndList(mapFlag, srcCellIDs) = true;
 
     // find initial point in tgt mesh
     label srcSeedI = -1;

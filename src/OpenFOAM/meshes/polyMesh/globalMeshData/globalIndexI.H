@@ -27,13 +27,15 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::globalIndex::globalIndex()
+inline Foam::globalIndex::globalIndex(const labelUList& offsets)
+:
+    offsets_(offsets)
 {}
 
 
-Foam::globalIndex::globalIndex(const Xfer<labelList>& offsets)
+inline Foam::globalIndex::globalIndex(labelList&& offsets)
 :
-    offsets_(offsets)
+    offsets_(std::move(offsets))
 {}
 
 

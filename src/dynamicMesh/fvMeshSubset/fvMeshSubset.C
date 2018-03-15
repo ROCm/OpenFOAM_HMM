@@ -56,10 +56,8 @@ bool Foam::fvMeshSubset::checkCellSubset() const
 
         return false;
     }
-    else
-    {
-        return true;
-    }
+
+    return true;
 }
 
 
@@ -69,10 +67,10 @@ void Foam::fvMeshSubset::markPoints
     Map<label>& pointMap
 )
 {
-    forAll(curPoints, pointi)
+    for (const label pointi : curPoints)
     {
         // Note: insert will only insert if not yet there.
-        pointMap.insert(curPoints[pointi], 0);
+        pointMap.insert(pointi, 0);
     }
 }
 
@@ -83,9 +81,9 @@ void Foam::fvMeshSubset::markPoints
     labelList& pointMap
 )
 {
-    forAll(curPoints, pointi)
+    for (const label pointi : curPoints)
     {
-        pointMap[curPoints[pointi]] = 0;
+        pointMap[pointi] = 0;
     }
 }
 
@@ -710,25 +708,23 @@ void Foam::fvMeshSubset::setCellSubset
     }
 
 
-    // Delete any old mesh
+    // Delete any old mesh first
     fvMeshSubsetPtr_.clear();
+
     // Make a new mesh
-    fvMeshSubsetPtr_.reset
+    fvMeshSubsetPtr_ = autoPtr<fvMesh>::New
     (
-        new fvMesh
+        IOobject
         (
-            IOobject
-            (
-                baseMesh().name() + "SubSet",
-                baseMesh().time().timeName(),
-                baseMesh().time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferMove(newPoints),
-            xferMove(newFaces),
-            xferMove(newCells)
-        )
+            baseMesh().name() + "SubSet",
+            baseMesh().time().timeName(),
+            baseMesh().time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newCells)
     );
 
 
@@ -1209,23 +1205,20 @@ void Foam::fvMeshSubset::setLargeCellSubset
     // cannot find its fvSchemes (it will try to read e.g.
     // system/region0SubSet/fvSchemes)
     // Make a new mesh
-    fvMeshSubsetPtr_.reset
+    fvMeshSubsetPtr_ = autoPtr<fvMesh>::New
     (
-        new fvMesh
+        IOobject
         (
-            IOobject
-            (
-                baseMesh().name(),
-                baseMesh().time().timeName(),
-                baseMesh().time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            xferMove(newPoints),
-            xferMove(newFaces),
-            xferMove(newCells),
-            syncPar           // parallel synchronisation
-        )
+            baseMesh().name(),
+            baseMesh().time().timeName(),
+            baseMesh().time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        std::move(newPoints),
+        std::move(newFaces),
+        std::move(newCells),
+        syncPar           // parallel synchronisation
     );
 
     // Add old patches
@@ -1386,14 +1379,14 @@ void Foam::fvMeshSubset::setLargeCellSubset
 
 void Foam::fvMeshSubset::setLargeCellSubset
 (
-    const UList<label>& globalCellMap,
+    const labelUList& globalCellMap,
     const label patchID,
     const bool syncPar
 )
 {
     labelList region(baseMesh().nCells(), 0);
 
-    for (auto cellId : globalCellMap)
+    for (const label cellId : globalCellMap)
     {
         region[cellId] = 1;
     }
@@ -1410,9 +1403,9 @@ void Foam::fvMeshSubset::setLargeCellSubset
 {
     labelList region(baseMesh().nCells(), 0);
 
-    forAllConstIter(labelHashSet, globalCellMap, iter)
+    for (const label cellId : globalCellMap)
     {
-        region[iter.key()] = 1;
+        region[cellId] = 1;
     }
     setLargeCellSubset(region, 1, patchID, syncPar);
 }
@@ -1490,7 +1483,7 @@ const fvMesh& Foam::fvMeshSubset::subMesh() const
 {
     checkCellSubset();
 
-    return fvMeshSubsetPtr_();
+    return *fvMeshSubsetPtr_;
 }
 
 
@@ -1498,7 +1491,7 @@ fvMesh& Foam::fvMeshSubset::subMesh()
 {
     checkCellSubset();
 
-    return fvMeshSubsetPtr_();
+    return *fvMeshSubsetPtr_;
 }
 
 
@@ -1552,7 +1545,7 @@ const labelList& Foam::fvMeshSubset::faceFlipMap() const
         }
     }
 
-    return faceFlipMapPtr_();
+    return *faceFlipMapPtr_;
 }
 
 

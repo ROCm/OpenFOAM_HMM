@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -151,11 +151,17 @@ public:
         //- Construct null. This is equivalent to an identity coordinateSystem
         coordinateSystem();
 
-        //- Construct copy with a different name
+        //- Copy construct
+        coordinateSystem(const coordinateSystem& cs);
+
+        //- Move construct
+        coordinateSystem(coordinateSystem&& cs);
+
+        //- Copy construct with a different name
         coordinateSystem
         (
             const word& name,
-            const coordinateSystem&
+            const coordinateSystem& cs
         );
 
         //- Construct from origin and rotation
@@ -193,7 +199,7 @@ public:
     //- Return clone
     autoPtr<coordinateSystem> clone() const
     {
-        return autoPtr<coordinateSystem>(new coordinateSystem(*this));
+        return autoPtr<coordinateSystem>::New(*this);
     }
 
 
@@ -231,7 +237,7 @@ public:
 
 
     //- Destructor
-    virtual ~coordinateSystem();
+    virtual ~coordinateSystem() = default;
 
 
     // Member Functions
@@ -265,13 +271,13 @@ public:
             //- Return const reference to co-ordinate rotation
             const coordinateRotation& R() const
             {
-                return R_();
+                return *R_;
             }
 
             //- Return non const reference to co-ordinate rotation
             coordinateRotation& R()
             {
-                return R_();
+                return *R_;
             }
 
             //- Update and return the co-ordinate rotation for a list of cells
@@ -282,7 +288,7 @@ public:
             )
             {
                 R_->updateCells(mesh, cells);
-                return R_();
+                return *R_;
             }
 
             //- Return as dictionary of entries
@@ -308,6 +314,9 @@ public:
             //- Reset origin and rotation to an identity coordinateSystem
             //  Also resets the note
             virtual void clear();
+
+            //- Transfer contents from parameter
+            void transfer(coordinateSystem& cs);
 
 
         // Write
@@ -380,12 +389,19 @@ public:
 
     // Member Operators
 
+        //- Copy assignment
+        void operator=(const coordinateSystem& cs);
+
+        //- Move assignment
+        void operator=(coordinateSystem&& cs);
+
+
         // friend Operators
 
             friend bool operator!=
             (
-                const coordinateSystem&,
-                const coordinateSystem&
+                const coordinateSystem& a,
+                const coordinateSystem& b
             );
 
 

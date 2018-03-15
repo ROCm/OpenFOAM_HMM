@@ -28,14 +28,14 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::foamVtkMeshMaps::renumberCells(const UList<label>& mapping)
+void Foam::foamVtkMeshMaps::renumberCells(const labelUList& mapping)
 {
     inplaceRenumber(mapping, cellMap_);
     inplaceRenumber(mapping, additionalIds_);
 }
 
 
-void Foam::foamVtkMeshMaps::renumberPoints(const UList<label>& mapping)
+void Foam::foamVtkMeshMaps::renumberPoints(const labelUList& mapping)
 {
     inplaceRenumber(mapping, pointMap_);
 }

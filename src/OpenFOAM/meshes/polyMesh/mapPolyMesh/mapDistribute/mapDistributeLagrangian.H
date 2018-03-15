@@ -25,10 +25,7 @@ Class
     Foam::mapDistributeLagrangian
 
 Description
-    Class containing mesh-to-mesh mapping information for particles
-
-SourceFiles
-    mapDistributeLagrangian.C
+    Mesh-to-mesh mapping information for particles
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,12 +42,12 @@ namespace Foam
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class mapDistributeLagrangian Declaration
+                   Class mapDistributeLagrangian Declaration
 \*---------------------------------------------------------------------------*/
 
 class mapDistributeLagrangian
 {
-    // Private data
+    // Private Data
 
         //- Map to distribute particles
         const mapDistribute particleMap_;
@@ -63,17 +60,22 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Move construct from components
         mapDistributeLagrangian
         (
             const label nNewParticles,
-            const Xfer<labelListList>& subParticleMap,
-            const Xfer<labelListList>& constructParticleMap,
-            const Xfer<labelListList>& constructCellLabels
+            labelListList&& subParticleMap,
+            labelListList&& constructParticleMap,
+            labelListList&& constructCellLabels
         )
         :
-            particleMap_(nNewParticles, subParticleMap, constructParticleMap),
-            constructCellLabels_(constructCellLabels)
+            particleMap_
+            (
+                nNewParticles,
+                std::move(subParticleMap),
+                std::move(constructParticleMap)
+            ),
+            constructCellLabels_(std::move(constructCellLabels))
         {}
 
 

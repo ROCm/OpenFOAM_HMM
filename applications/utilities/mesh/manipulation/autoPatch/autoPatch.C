@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 {
     #include "addOverwriteOption.H"
     argList::noParallel();
-    argList::validArgs.append("feature angle[0-180]");
+    argList::addArgument("feature angle[0-180]");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
         << " s\n" << endl << endl;
 
 
-    const scalar featureAngle = args.argRead<scalar>(1);
-    const bool overwrite      = args.optionFound("overwrite");
+    const scalar featureAngle = args.read<scalar>(1);
+    const bool overwrite      = args.found("overwrite");
 
     const scalar minCos = Foam::cos(degToRad(featureAngle));
 
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
     while (true)
     {
         // Find first unset face.
-        label unsetFacei = findIndex(patchIDs, -1);
+        label unsetFacei = patchIDs.find(-1);
 
         if (unsetFacei == -1)
         {

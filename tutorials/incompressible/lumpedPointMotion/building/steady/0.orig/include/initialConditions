@@ -12,6 +12,4 @@ turbulentKE          37;
 turbulentOmega       32;
 turbulentEpsilon     30;
 
-#inputMode           merge
-
 // ************************************************************************* //

@@ -1,3 +1,5 @@
+processorFaMeshes.C
+faFieldReconstructor.C
 reconstructPar.C
 
 EXE = $(FOAM_APPBIN)/reconstructPar

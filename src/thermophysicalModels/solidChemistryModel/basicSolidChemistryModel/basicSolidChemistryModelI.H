@@ -27,14 +27,14 @@ License
 
 inline Foam::solidReactionThermo& Foam::basicSolidChemistryModel::solidThermo()
 {
-    return solidThermo_();
+    return *solidThermo_;
 }
 
 
 inline const Foam::solidReactionThermo&
 Foam::basicSolidChemistryModel::solidThermo() const
 {
-    return solidThermo_();
+    return *solidThermo_;
 }
 
 

@@ -140,7 +140,7 @@ Foam::InflationInjection<CloudType>::InflationInjection
     fraction_(im.fraction_),
     selfSeed_(im.selfSeed_),
     dSeed_(im.dSeed_),
-    sizeDistribution_(im.sizeDistribution_, false)
+    sizeDistribution_(im.sizeDistribution_.clone())
 {}
 
 
@@ -292,7 +292,7 @@ Foam::label Foam::InflationInjection<CloudType>::parcelsToInject
                     continue;
                 }
 
-                const point& pP = pPtr->position();
+                const point pP(pPtr->position());
                 const vector& pU = pPtr->U();
 
                 // Generate a tetrahedron of new positions with the

@@ -1,30 +1,28 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-
-# Source tutorial run functions
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 runApplication blockMesh
 runApplication topoSet
 runApplication splitMeshRegions -cellZones -overwrite
 
 # Remove unwanted region
-rm -r 0/domain3
-rm -r constant/domain3
-rm -r system/domain3
+rm -rf 0/domain3 constant/domain3 system/domain3
 
-# remove fluid fields from solid regions (important for post-processing)
-for i in solid floor
+# Remove fluid fields from solid regions (important for post-processing)
+for region in $(foamListRegions solid)
 do
-   rm -f 0*/$i/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
+    rm -f 0/$region/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
+    rm -f processor*/0/$region/{rho,mut,alphat,epsilon,k,U,p_rgh,qr,G,IDefault}
 done
 
-# set the initial fields
+# Set the initial fields
 restore0Dir
 
-for i in air solid floor
+for region in $(foamListRegions)
 do
-    runApplication -s $i changeDictionary -region $i -subDict dictionaryReplacement
+    runApplication -s $region changeDictionary \
+        -region $region -subDict dictionaryReplacement
 done
 
-# -----------------------------------------------------------------------------
+#------------------------------------------------------------------------------

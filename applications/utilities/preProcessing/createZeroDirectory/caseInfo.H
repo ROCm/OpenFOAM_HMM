@@ -36,7 +36,7 @@ Description
 #include "labelList.H"
 #include "wordList.H"
 #include "HashSet.H"
-#include "wordReList.H"
+#include "wordRes.H"
 #include "IOdictionary.H"
 #include "boundaryInfo.H"
 
@@ -72,7 +72,7 @@ class caseInfo
         // Per-condition information
 
             //- List of patch names
-            List<wordReList> patchNames_;
+            List<wordRes> patchNames_;
 
             //- Patch category
             wordList patchCategories_;
@@ -103,7 +103,7 @@ public:
         ) const;
 
         //- Return the list of patch names
-        const List<wordReList>& patchNames() const;
+        const List<wordRes>& patchNames() const;
 
         //- Return the condition name for patch with index patchI
         const word& conditionName(const label patchI) const;

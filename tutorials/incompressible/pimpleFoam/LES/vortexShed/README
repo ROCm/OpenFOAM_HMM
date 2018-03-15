@@ -1,0 +1,3 @@
+- Acoustic pressure is calculated based on Curle's analogy.
+- Such field is sampled for point (probe) and surface (cutting plane)
+- noise utility is operated onto these samples to obtain frequency information

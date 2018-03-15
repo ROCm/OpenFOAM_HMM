@@ -28,12 +28,73 @@ License
 #include "OSspecific.H"
 #include "etcFiles.H"
 #include "StringStream.H"
+#include <cctype>
 
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+namespace Foam
+{
+// Standard handling of "~/", "./" etc.
+static void standardExpansions(std::string& s)
+{
+    if (s.empty())
+    {
+        return;
+    }
+
+    if (s[0] == '.')
+    {
+        // Expand a lone '.' and an initial './' into cwd
+        if (s.size() == 1)
+        {
+            s = cwd();
+        }
+        else if (s[1] == '/')
+        {
+            s.std::string::replace(0, 1, cwd());
+        }
+    }
+    else if (s[0] == '~')
+    {
+        // Expand initial ~
+        //   ~/        => home directory
+        //   ~OpenFOAM => site/user OpenFOAM configuration directory
+        //   ~user     => home directory for specified user
+
+        string user;
+        fileName file;
+
+        const auto slash = s.find('/');
+        if (slash == std::string::npos)
+        {
+            user = s.substr(1);
+        }
+        else
+        {
+            user = s.substr(1, slash - 1);
+            file = s.substr(slash + 1);
+        }
+
+        // NB: be a bit lazy and expand ~unknownUser as an
+        // empty string rather than leaving it untouched.
+        // otherwise add extra test
+
+        if (user == "OpenFOAM")
+        {
+            s = findEtcFile(file);
+        }
+        else
+        {
+            s = home(user)/file;
+        }
+    }
+}
+}
+
 
 //! \cond fileScope
 //  Find the type/position of the ":-" or ":+" alternative values
+//  Returns 0, '-', '+' corresponding to not-found or ':-' or ':+'
 static inline int findParameterAlternative
 (
     const std::string& s,
@@ -70,6 +131,49 @@ static inline int findParameterAlternative
 //! \endcond
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+std::string::size_type Foam::stringOps::count
+(
+    const std::string& str,
+    const char c
+)
+{
+    std::string::size_type n = 0;
+
+    for (auto iter = str.cbegin(); iter != str.cend(); ++iter)
+    {
+        if (*iter == c)
+        {
+            ++n;
+        }
+    }
+
+    return n;
+}
+
+
+std::string::size_type Foam::stringOps::count(const char* str, const char c)
+{
+    if (!str)
+    {
+        return 0;
+    }
+
+    std::string::size_type n = 0;
+
+    for (const char *iter = str; *iter; ++iter)
+    {
+        if (*iter == c)
+        {
+            ++n;
+        }
+    }
+
+    return n;
+}
+
+
 Foam::string Foam::stringOps::expand
 (
     const string& original,
@@ -78,52 +182,53 @@ Foam::string Foam::stringOps::expand
 )
 {
     string s(original);
-    return inplaceExpand(s, mapping);
+    inplaceExpand(s, mapping);
+    return s;
 }
 
 
-Foam::string& Foam::stringOps::inplaceExpand
+void Foam::stringOps::inplaceExpand
 (
-    string& s,
+    std::string& s,
     const HashTable<string, word, string::hash>& mapping,
     const char sigil
 )
 {
-    string::size_type begVar = 0;
+    std::string::size_type varBeg = 0;
 
     // Expand $VAR or ${VAR}
     // Repeat until nothing more is found
     while
     (
-        (begVar = s.find(sigil, begVar)) != string::npos
-     && begVar < s.size()-1
+        (varBeg = s.find(sigil, varBeg)) != std::string::npos
+     && varBeg < s.size()-1
     )
     {
-        if (begVar == 0 || s[begVar-1] != '\\')
+        if (varBeg == 0 || s[varBeg-1] != '\\')
         {
             // Find end of first occurrence
-            string::size_type endVar = begVar;
-            string::size_type delim = 0;
+            std::string::size_type varEnd = varBeg;
+            std::string::size_type delim = 0;
 
             // The type/position of the ":-" or ":+" alternative values
             int altType = 0;
-            string::size_type altPos = string::npos;
+            auto altPos = std::string::npos;
 
-            if (s[begVar+1] == '{')
+            if (s[varBeg+1] == '{')
             {
-                endVar = s.find('}', begVar);
+                varEnd = s.find('}', varBeg);
                 delim = 1;
 
                 // check for ${parameter:-word} or ${parameter:+word}
-                if (endVar != string::npos)
+                if (varEnd != std::string::npos)
                 {
-                    altPos = begVar;
-                    altType = findParameterAlternative(s, altPos, endVar);
+                    altPos = varBeg;
+                    altType = findParameterAlternative(s, altPos, varEnd);
                 }
             }
             else
             {
-                string::const_iterator iter = s.cbegin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + varBeg + 1;
 
                 // more generous in accepting keywords than for env variables
                 while
@@ -139,19 +244,19 @@ Foam::string& Foam::stringOps::inplaceExpand
                 )
                 {
                     ++iter;
-                    ++endVar;
+                    ++varEnd;
                 }
             }
 
-            if (endVar == string::npos)
+            if (varEnd == std::string::npos)
             {
                 // likely parsed '${...' without closing '}' - abort
                 break;
             }
-            else if (endVar == begVar)
+            else if (varEnd == varBeg)
             {
                 // parsed '${}' or $badChar  - skip over
-                begVar = endVar + 1;
+                varBeg = varEnd + 1;
             }
             else
             {
@@ -159,23 +264,23 @@ Foam::string& Foam::stringOps::inplaceExpand
                 (
                     s.substr
                     (
-                        begVar + 1 + delim,
+                        varBeg + 1 + delim,
                         (
-                            (altPos == string::npos ? endVar : altPos)
-                          - begVar - 2*delim
+                            (altPos == std::string::npos ? varEnd : altPos)
+                          - varBeg - 2*delim
                         )
                     ),
                     false
                 );
 
                 std::string altValue;
-                if (altPos != string::npos)
+                if (altPos != std::string::npos)
                 {
                     // had ":-" or ":+" alternative value
                     altValue = s.substr
                     (
                         altPos + 2,
-                        endVar - altPos - 2*delim
+                        varEnd - altPos - 2*delim
                     );
                 }
 
@@ -184,54 +289,52 @@ Foam::string& Foam::stringOps::inplaceExpand
 
                 if (fnd.found())
                 {
-                    if (altPos != string::npos && altType == '+')
+                    if (altPos != std::string::npos && altType == '+')
                     {
                         // was found, use ":+" alternative
                         s.std::string::replace
                         (
-                            begVar,
-                            endVar - begVar + 1,
+                            varBeg,
+                            varEnd - varBeg + 1,
                             altValue
                         );
-                        begVar += altValue.size();
+                        varBeg += altValue.size();
                     }
                     else
                     {
                         // was found, use value
                         s.std::string::replace
                         (
-                            begVar,
-                            endVar - begVar + 1,
+                            varBeg,
+                            varEnd - varBeg + 1,
                             *fnd
                         );
-                        begVar += (*fnd).size();
+                        varBeg += (*fnd).size();
                     }
                 }
-                else if (altPos != string::npos && altType == '-')
+                else if (altPos != std::string::npos && altType == '-')
                 {
                     // was not found, use ":-" alternative
                     s.std::string::replace
                     (
-                        begVar,
-                        endVar - begVar + 1,
+                        varBeg,
+                        varEnd - varBeg + 1,
                         altValue
                     );
-                    begVar += altValue.size();
+                    varBeg += altValue.size();
                 }
                 else
                 {
                     // substitute with nothing, also for ":+" alternative
-                    s.std::string::erase(begVar, endVar - begVar + 1);
+                    s.std::string::erase(varBeg, varEnd - varBeg + 1);
                 }
             }
         }
         else
         {
-            ++begVar;
+            ++varBeg;
         }
     }
-
-    return s;
 }
 
 
@@ -243,7 +346,8 @@ Foam::string Foam::stringOps::expand
 )
 {
     string s(original);
-    return inplaceExpand(s, dict, sigil);
+    inplaceExpand(s, dict, sigil);
+    return s;
 }
 
 
@@ -257,13 +361,9 @@ Foam::string Foam::stringOps::getVariable
 {
     string value;
 
-    const entry* ePtr = dict.lookupScopedEntryPtr
-    (
-        name,
-        true,
-        false
-    );
-    if (ePtr)
+    const entry* eptr = dict.lookupScopedEntryPtr(name, true, false);
+
+    if (eptr)
     {
         OStringStream buf;
         // Force floating point numbers to be printed with at least
@@ -271,11 +371,8 @@ Foam::string Foam::stringOps::getVariable
         buf << fixed;
         buf.precision(IOstream::defaultPrecision());
 
-        // fail for non-primitiveEntry
-        dynamicCast<const primitiveEntry>
-        (
-            *ePtr
-        ).write(buf, true);
+        // Fails for non-primitiveEntry
+        dynamicCast<const primitiveEntry>(*eptr).write(buf, true);
 
         value = buf.str();
     }
@@ -286,7 +383,7 @@ Foam::string Foam::stringOps::getVariable
         if (value.empty() && !name.empty())
         {
             // The type/position of the ":-" or ":+" alternative values
-            string::size_type altPos = 0;
+            std::string::size_type altPos = 0;
 
             // check for parameter:-word or parameter:+word
             const int altType =
@@ -308,8 +405,11 @@ Foam::string Foam::stringOps::getVariable
                 }
             }
         }
+    }
 
-        if (!allowEmpty && value.empty())
+    if (!allowEmpty && value.empty())
+    {
+        if (allowEnvVars)
         {
             FatalIOErrorInFunction
             (
@@ -317,15 +417,14 @@ Foam::string Foam::stringOps::getVariable
             )   << "Cannot find dictionary or environment variable "
                 << name << exit(FatalIOError);
         }
-    }
-
-    if (!allowEmpty && value.empty())
-    {
-        FatalIOErrorInFunction
-        (
-            dict
-        )   << "Cannot find dictionary variable "
-            << name << exit(FatalIOError);
+        else
+        {
+            FatalIOErrorInFunction
+            (
+                dict
+            )   << "Cannot find dictionary variable "
+                << name << exit(FatalIOError);
+        }
     }
 
     return value;
@@ -335,13 +434,13 @@ Foam::string Foam::stringOps::getVariable
 Foam::string Foam::stringOps::expand
 (
     const string& s,
-    string::size_type& index,
+    std::string::size_type& index,
     const dictionary& dict,
     const bool allowEnvVars,
     const bool allowEmpty
 )
 {
-    string newString;
+    string out;
 
     while (index < s.size())
     {
@@ -350,54 +449,55 @@ Foam::string Foam::stringOps::expand
             // Recurse to parse variable name
             index += 2;
             string val = expand(s, index, dict, allowEnvVars, allowEmpty);
-            newString.append(val);
+            out.append(val);
         }
         else if (s[index] == '}')
         {
-            return getVariable(newString, dict, allowEnvVars, allowEmpty);
+            return getVariable(out, dict, allowEnvVars, allowEmpty);
         }
         else
         {
-            newString.append(string(s[index]));
+            out.append(1, s[index]);  // append char
         }
-        index++;
+        ++index;
     }
-    return newString;
+
+    return out;
 }
 
 
-Foam::string& Foam::stringOps::inplaceExpand
+void Foam::stringOps::inplaceExpand
 (
-    string& s,
+    std::string& s,
     const dictionary& dict,
     const bool allowEnvVars,
     const bool allowEmpty,
     const char sigil
 )
 {
-    string::size_type begVar = 0;
+    std::string::size_type varBeg = 0;
 
     // Expand $VAR or ${VAR}
     // Repeat until nothing more is found
     while
     (
-        (begVar = s.find(sigil, begVar)) != string::npos
-     && begVar < s.size()-1
+        (varBeg = s.find(sigil, varBeg)) != std::string::npos
+     && varBeg < s.size()-1
     )
     {
-        if (begVar == 0 || s[begVar-1] != '\\')
+        if (varBeg == 0 || s[varBeg-1] != '\\')
         {
-            if (s[begVar+1] == '{')
+            if (s[varBeg+1] == '{')
             {
                 // Recursive variable expansion mode
-                label stringStart = begVar;
-                begVar += 2;
+                auto stringStart = varBeg;
+                varBeg += 2;
                 string varValue
                 (
                     expand
                     (
                         s,
-                        begVar,
+                        varBeg,
                         dict,
                         allowEnvVars,
                         allowEmpty
@@ -407,16 +507,16 @@ Foam::string& Foam::stringOps::inplaceExpand
                 s.std::string::replace
                 (
                     stringStart,
-                    begVar - stringStart + 1,
+                    varBeg - stringStart + 1,
                     varValue
                 );
 
-                begVar = stringStart+varValue.size();
+                varBeg = stringStart+varValue.size();
             }
             else
             {
-                string::const_iterator iter = s.cbegin() + begVar + 1;
-                string::size_type endVar = begVar;
+                std::string::const_iterator iter = s.cbegin() + varBeg + 1;
+                std::string::size_type varEnd = varBeg;
 
                 // more generous in accepting keywords than for env variables
                 while
@@ -432,15 +532,15 @@ Foam::string& Foam::stringOps::inplaceExpand
                 )
                 {
                     ++iter;
-                    ++endVar;
+                    ++varEnd;
                 }
 
                 const word varName
                 (
                     s.substr
                     (
-                        begVar + 1,
-                        endVar - begVar
+                        varBeg + 1,
+                        varEnd - varBeg
                     ),
                     false
                 );
@@ -458,102 +558,55 @@ Foam::string& Foam::stringOps::inplaceExpand
 
                 s.std::string::replace
                 (
-                    begVar,
+                    varBeg,
                     varName.size()+1,
                     varValue
                 );
-                begVar += varValue.size();
+                varBeg += varValue.size();
             }
         }
         else
         {
-            ++begVar;
+            ++varBeg;
         }
     }
 
-    if (!s.empty())
-    {
-        if (s[0] == '~')
-        {
-            // Expand initial ~
-            //   ~/        => home directory
-            //   ~OpenFOAM => site/user OpenFOAM configuration directory
-            //   ~user     => home directory for specified user
-
-            string user;
-            fileName file;
-
-            if ((begVar = s.find('/')) != string::npos)
-            {
-                user = s.substr(1, begVar - 1);
-                file = s.substr(begVar + 1);
-            }
-            else
-            {
-                user = s.substr(1);
-            }
-
-            // NB: be a bit lazy and expand ~unknownUser as an
-            // empty string rather than leaving it untouched.
-            // otherwise add extra test
-            if (user == "OpenFOAM")
-            {
-                s = findEtcFile(file);
-            }
-            else
-            {
-                s = home(user)/file;
-            }
-        }
-        else if (s[0] == '.')
-        {
-            // Expand a lone '.' and an initial './' into cwd
-            if (s.size() == 1)
-            {
-                s = cwd();
-            }
-            else if (s[1] == '/')
-            {
-                s.std::string::replace(0, 1, cwd());
-            }
-        }
-    }
-
-    return s;
+    // Standard handling of "~/", "./" etc.
+    standardExpansions(s);
 }
 
 
-Foam::string& Foam::stringOps::inplaceExpand
+void Foam::stringOps::inplaceExpand
 (
-    string& s,
+    std::string& s,
     const dictionary& dict,
     const char sigil
 )
 {
-    string::size_type begVar = 0;
+    std::string::size_type varBeg = 0;
 
     // Expand $VAR or ${VAR}
     // Repeat until nothing more is found
     while
     (
-        (begVar = s.find(sigil, begVar)) != string::npos
-     && begVar < s.size()-1
+        (varBeg = s.find(sigil, varBeg)) != std::string::npos
+     && varBeg < s.size()-1
     )
     {
-        if (begVar == 0 || s[begVar-1] != '\\')
+        if (varBeg == 0 || s[varBeg-1] != '\\')
         {
             // Find end of first occurrence
-            string::size_type endVar = begVar;
-            string::size_type delim = 0;
+            std::string::size_type varEnd = varBeg;
+            std::string::size_type delim = 0;
 
-            if (s[begVar+1] == '{')
+            if (s[varBeg+1] == '{')
             {
-                endVar = s.find('}', begVar);
+                varEnd = s.find('}', varBeg);
                 delim = 1;
             }
             else
             {
-                string::const_iterator iter = s.cbegin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + varBeg + 1;
 
                 // more generous in accepting keywords than for env variables
                 while
@@ -569,19 +622,19 @@ Foam::string& Foam::stringOps::inplaceExpand
                 )
                 {
                     ++iter;
-                    ++endVar;
+                    ++varEnd;
                 }
             }
 
-            if (endVar == string::npos)
+            if (varEnd == std::string::npos)
             {
                 // likely parsed '${...' without closing '}' - abort
                 break;
             }
-            else if (endVar == begVar)
+            else if (varEnd == varBeg)
             {
                 // parsed '${}' or $badChar  - skip over
-                begVar = endVar + 1;
+                varBeg = varEnd + 1;
             }
             else
             {
@@ -589,64 +642,63 @@ Foam::string& Foam::stringOps::inplaceExpand
                 (
                     s.substr
                     (
-                        begVar + 1 + delim,
-                        endVar - begVar - 2*delim
+                        varBeg + 1 + delim,
+                        varEnd - varBeg - 2*delim
                     ),
                     false
                 );
 
 
-                // lookup in the dictionary
-                const entry* ePtr = dict.lookupScopedEntryPtr
+                // Lookup in the dictionary without wildcards.
+                // See note in primitiveEntry
+                const entry* eptr = dict.lookupScopedEntryPtr
                 (
                     varName,
                     true,
-                    false   // wildcards disabled. See primitiveEntry
+                    false
                 );
 
                 // if defined - copy its entries
-                if (ePtr)
+                if (eptr)
                 {
                     OStringStream buf;
                     // Force floating point numbers to be printed with at least
                     // some decimal digits.
                     buf << fixed;
                     buf.precision(IOstream::defaultPrecision());
-                    if (ePtr->isDict())
+                    if (eptr->isDict())
                     {
-                        ePtr->dict().write(buf, false);
+                        eptr->dict().write(buf, false);
                     }
                     else
                     {
-                        // fail for other types
+                        // Fail for non-primitiveEntry
                         dynamicCast<const primitiveEntry>
                         (
-                            *ePtr
+                            *eptr
                         ).write(buf, true);
                     }
 
                     s.std::string::replace
                     (
-                        begVar,
-                        endVar - begVar + 1,
+                        varBeg,
+                        varEnd - varBeg + 1,
                         buf.str()
                     );
-                    begVar += buf.str().size();
+                    varBeg += buf.str().size();
                 }
                 else
                 {
                     // not defined - leave original string untouched
-                    begVar = endVar + 1;
+                    varBeg = varEnd + 1;
                 }
             }
         }
         else
         {
-            ++begVar;
+            ++varBeg;
         }
     }
-
-    return s;
 }
 
 
@@ -657,51 +709,52 @@ Foam::string Foam::stringOps::expand
 )
 {
     string s(original);
-    return inplaceExpand(s, allowEmpty);
+    inplaceExpand(s, allowEmpty);
+    return s;
 }
 
 
-Foam::string& Foam::stringOps::inplaceExpand
+void Foam::stringOps::inplaceExpand
 (
-    string& s,
+    std::string& s,
     const bool allowEmpty
 )
 {
-    string::size_type begVar = 0;
+    std::string::size_type varBeg = 0;
 
     // Expand $VARS
     // Repeat until nothing more is found
     while
     (
-        (begVar = s.find('$', begVar)) != string::npos
-     && begVar < s.size()-1
+        (varBeg = s.find('$', varBeg)) != std::string::npos
+     && varBeg < s.size()-1
     )
     {
-        if (begVar == 0 || s[begVar-1] != '\\')
+        if (varBeg == 0 || s[varBeg-1] != '\\')
         {
             // Find end of first occurrence
-            string::size_type endVar = begVar;
-            string::size_type delim = 0;
+            std::string::size_type varEnd = varBeg;
+            std::string::size_type delim = 0;
 
             // The type/position of the ":-" or ":+" alternative values
             int altType = 0;
-            string::size_type altPos = string::npos;
+            std::string::size_type altPos = std::string::npos;
 
-            if (s[begVar+1] == '{')
+            if (s[varBeg+1] == '{')
             {
-                endVar = s.find('}', begVar);
+                varEnd = s.find('}', varBeg);
                 delim = 1;
 
                 // check for ${parameter:-word} or ${parameter:+word}
-                if (endVar != string::npos)
+                if (varEnd != std::string::npos)
                 {
-                    altPos = begVar;
-                    altType = findParameterAlternative(s, altPos, endVar);
+                    altPos = varBeg;
+                    altType = findParameterAlternative(s, altPos, varEnd);
                 }
             }
             else
             {
-                string::const_iterator iter = s.cbegin() + begVar + 1;
+                string::const_iterator iter = s.cbegin() + varBeg + 1;
 
                 while
                 (
@@ -710,20 +763,20 @@ Foam::string& Foam::stringOps::inplaceExpand
                 )
                 {
                     ++iter;
-                    ++endVar;
+                    ++varEnd;
                 }
             }
 
 
-            if (endVar == string::npos)
+            if (varEnd == std::string::npos)
             {
                 // likely parsed '${...' without closing '}' - abort
                 break;
             }
-            else if (endVar == begVar)
+            else if (varEnd == varBeg)
             {
                 // parsed '${}' or $badChar  - skip over
-                begVar = endVar + 1;
+                varBeg = varEnd + 1;
             }
             else
             {
@@ -731,53 +784,53 @@ Foam::string& Foam::stringOps::inplaceExpand
                 (
                     s.substr
                     (
-                        begVar + 1 + delim,
+                        varBeg + 1 + delim,
                         (
-                            (altPos == string::npos ? endVar : altPos)
-                          - begVar - 2*delim
+                            (altPos == std::string::npos ? varEnd : altPos)
+                          - varBeg - 2*delim
                         )
                     ),
                     false
                 );
 
                 std::string altValue;
-                if (altPos != string::npos)
+                if (altPos != std::string::npos)
                 {
                     // had ":-" or ":+" alternative value
                     altValue = s.substr
                     (
                         altPos + 2,
-                        endVar - altPos - 2*delim
+                        varEnd - altPos - 2*delim
                     );
                 }
 
                 const string varValue = getEnv(varName);
                 if (varValue.size())
                 {
-                    if (altPos != string::npos && altType == '+')
+                    if (altPos != std::string::npos && altType == '+')
                     {
                         // was found, use ":+" alternative
                         s.std::string::replace
                         (
-                            begVar,
-                            endVar - begVar + 1,
+                            varBeg,
+                            varEnd - varBeg + 1,
                             altValue
                         );
-                        begVar += altValue.size();
+                        varBeg += altValue.size();
                     }
                     else
                     {
                         // was found, use value
                         s.std::string::replace
                         (
-                            begVar,
-                            endVar - begVar + 1,
+                            varBeg,
+                            varEnd - varBeg + 1,
                             varValue
                         );
-                        begVar += varValue.size();
+                        varBeg += varValue.size();
                     }
                 }
-                else if (altPos != string::npos)
+                else if (altPos != std::string::npos)
                 {
                     // use ":-" or ":+" alternative values
                     if (altType == '-')
@@ -785,22 +838,22 @@ Foam::string& Foam::stringOps::inplaceExpand
                         // was not found, use ":-" alternative
                         s.std::string::replace
                         (
-                            begVar,
-                            endVar - begVar + 1,
+                            varBeg,
+                            varEnd - varBeg + 1,
                             altValue
                         );
-                        begVar += altValue.size();
+                        varBeg += altValue.size();
                     }
                     else
                     {
                         // was not found, ":+" alternative implies
                         // substitute with nothing
-                        s.std::string::erase(begVar, endVar - begVar + 1);
+                        s.std::string::erase(varBeg, varEnd - varBeg + 1);
                     }
                 }
                 else if (allowEmpty)
                 {
-                    s.std::string::erase(begVar, endVar - begVar + 1);
+                    s.std::string::erase(varBeg, varEnd - varBeg + 1);
                 }
                 else
                 {
@@ -812,63 +865,16 @@ Foam::string& Foam::stringOps::inplaceExpand
         }
         else
         {
-            ++begVar;
+            ++varBeg;
         }
     }
 
-    if (!s.empty())
-    {
-        if (s[0] == '~')
-        {
-            // Expand initial ~
-            //   ~/        => home directory
-            //   ~OpenFOAM => site/user OpenFOAM configuration directory
-            //   ~user     => home directory for specified user
-
-            string user;
-            fileName file;
-
-            if ((begVar = s.find('/')) != string::npos)
-            {
-                user = s.substr(1, begVar - 1);
-                file = s.substr(begVar + 1);
-            }
-            else
-            {
-                user = s.substr(1);
-            }
-
-            // NB: be a bit lazy and expand ~unknownUser as an
-            // empty string rather than leaving it untouched.
-            // otherwise add extra test
-            if (user == "OpenFOAM")
-            {
-                s = findEtcFile(file);
-            }
-            else
-            {
-                s = home(user)/file;
-            }
-        }
-        else if (s[0] == '.')
-        {
-            // Expand a lone '.' and an initial './' into cwd
-            if (s.size() == 1)
-            {
-                s = cwd();
-            }
-            else if (s[1] == '/')
-            {
-                s.std::string::replace(0, 1, cwd());
-            }
-        }
-    }
-
-    return s;
+    // Standard handling of "~/", "./" etc.
+    standardExpansions(s);
 }
 
 
-bool Foam::stringOps::inplaceReplaceVar(string& s, const word& varName)
+bool Foam::stringOps::inplaceReplaceVar(std::string& s, const word& varName)
 {
     if (s.empty() || varName.empty())
     {
@@ -886,11 +892,9 @@ bool Foam::stringOps::inplaceReplaceVar(string& s, const word& varName)
     {
         return false;
     }
-    else
-    {
-        s.replace(i, content.size(), string("${" + varName + "}"));
-        return true;
-    }
+
+    s.replace(i, content.size(), string("${" + varName + "}"));
+    return true;
 }
 
 
@@ -898,7 +902,7 @@ Foam::string Foam::stringOps::trimLeft(const string& s)
 {
     if (!s.empty())
     {
-        string::size_type beg = 0;
+        std::string::size_type beg = 0;
         while (beg < s.size() && std::isspace(s[beg]))
         {
             ++beg;
@@ -914,11 +918,11 @@ Foam::string Foam::stringOps::trimLeft(const string& s)
 }
 
 
-Foam::string& Foam::stringOps::inplaceTrimLeft(string& s)
+void Foam::stringOps::inplaceTrimLeft(std::string& s)
 {
     if (!s.empty())
     {
-        string::size_type beg = 0;
+        std::string::size_type beg = 0;
         while (beg < s.size() && std::isspace(s[beg]))
         {
             ++beg;
@@ -929,8 +933,6 @@ Foam::string& Foam::stringOps::inplaceTrimLeft(string& s)
             s.erase(0, beg);
         }
     }
-
-    return s;
 }
 
 
@@ -938,15 +940,15 @@ Foam::string Foam::stringOps::trimRight(const string& s)
 {
     if (!s.empty())
     {
-        string::size_type sz = s.size();
-        while (sz && std::isspace(s[sz-1]))
+        auto n = s.size();
+        while (n && std::isspace(s[n-1]))
         {
-            --sz;
+            --n;
         }
 
-        if (sz < s.size())
+        if (n < s.size())
         {
-            return s.substr(0, sz);
+            return s.substr(0, n);
         }
     }
 
@@ -954,20 +956,18 @@ Foam::string Foam::stringOps::trimRight(const string& s)
 }
 
 
-Foam::string& Foam::stringOps::inplaceTrimRight(string& s)
+void Foam::stringOps::inplaceTrimRight(std::string& s)
 {
     if (!s.empty())
     {
-        string::size_type sz = s.size();
-        while (sz && std::isspace(s[sz-1]))
+        auto n = s.size();
+        while (n && std::isspace(s[n-1]))
         {
-            --sz;
+            --n;
         }
 
-        s.resize(sz);
+        s.resize(n);
     }
-
-    return s;
 }
 
 
@@ -977,12 +977,50 @@ Foam::string Foam::stringOps::trim(const string& original)
 }
 
 
-Foam::string& Foam::stringOps::inplaceTrim(string& s)
+void Foam::stringOps::inplaceTrim(std::string& s)
 {
     inplaceTrimRight(s);
     inplaceTrimLeft(s);
+}
 
+
+Foam::string Foam::stringOps::lower(const string& original)
+{
+    string s(original);
+    inplaceLower(s);
     return s;
+}
+
+
+void Foam::stringOps::inplaceLower(std::string& s)
+{
+    for (auto iter = s.begin(); iter != s.end(); ++iter)
+    {
+        *iter = static_cast<std::string::value_type>
+        (
+            std::tolower(static_cast<unsigned char>(*iter))
+        );
+    }
+}
+
+
+Foam::string Foam::stringOps::upper(const string& original)
+{
+    string s(original);
+    inplaceUpper(s);
+    return s;
+}
+
+
+void Foam::stringOps::inplaceUpper(std::string& s)
+{
+    for (auto iter = s.begin(); iter != s.end(); ++iter)
+    {
+        *iter = static_cast<std::string::value_type>
+        (
+            std::toupper(static_cast<unsigned char>(*iter))
+        );
+    }
 }
 
 

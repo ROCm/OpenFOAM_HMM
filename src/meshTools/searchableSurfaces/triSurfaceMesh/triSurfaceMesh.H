@@ -131,7 +131,7 @@ class triSurfaceMesh
             const point& start,
             const point& end,
             const vector& smallVec,
-            DynamicList<pointIndexHit, 1, 1>& hits
+            DynamicList<pointIndexHit>& hits
         );
 
         //- Disallow default bitwise copy construct

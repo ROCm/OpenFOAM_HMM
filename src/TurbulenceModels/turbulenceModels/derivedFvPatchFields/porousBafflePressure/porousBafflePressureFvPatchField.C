@@ -59,7 +59,7 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     D_(Function1<scalar>::New("D", dict)),
     I_(Function1<scalar>::New("I", dict)),
     length_(readScalar(dict.lookup("length"))),
-    uniformJump_(dict.lookupOrDefault<bool>("uniformJump", false))
+    uniformJump_(dict.lookupOrDefault("uniformJump", false))
 {
     fvPatchField<scalar>::operator=
     (
@@ -79,8 +79,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf, p, iF, mapper),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_, false),
-    I_(ptf.I_, false),
+    D_(ptf.D_.clone()),
+    I_(ptf.I_.clone()),
     length_(ptf.length_),
     uniformJump_(ptf.uniformJump_)
 {}
@@ -95,8 +95,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_, false),
-    I_(ptf.I_, false),
+    D_(ptf.D_.clone()),
+    I_(ptf.I_.clone()),
     length_(ptf.length_),
     uniformJump_(ptf.uniformJump_)
 {}
@@ -111,8 +111,8 @@ Foam::porousBafflePressureFvPatchField::porousBafflePressureFvPatchField
     fixedJumpFvPatchField<scalar>(ptf, iF),
     phiName_(ptf.phiName_),
     rhoName_(ptf.rhoName_),
-    D_(ptf.D_, false),
-    I_(ptf.I_, false),
+    D_(ptf.D_.clone()),
+    I_(ptf.I_.clone()),
     length_(ptf.length_),
     uniformJump_(ptf.uniformJump_)
 {}
@@ -190,13 +190,12 @@ void Foam::porousBafflePressureFvPatchField::updateCoeffs()
 void Foam::porousBafflePressureFvPatchField::write(Ostream& os) const
 {
     fixedJumpFvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    os.writeEntryIfDifferent<word>("phi", "phi", phiName_);
+    os.writeEntryIfDifferent<word>("rho", "rho", rhoName_);
     D_->writeData(os);
     I_->writeData(os);
-    os.writeKeyword("length") << length_ << token::END_STATEMENT << nl;
-    os.writeKeyword("uniformJump") << uniformJump_
-        << token::END_STATEMENT << nl;
+    os.writeEntry("length", length_);
+    os.writeEntry("uniformJump", uniformJump_);
 }
 
 

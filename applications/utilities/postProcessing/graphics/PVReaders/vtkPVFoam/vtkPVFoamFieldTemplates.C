@@ -38,6 +38,8 @@ InClass
 #include "zeroGradientFvPatchField.H"
 #include "interpolatePointToCell.H"
 #include "foamPvFields.H"
+#include "areaFaMesh.H"
+#include "areaFields.H"
 
 // vtk includes
 #include "vtkFloatArray.h"
@@ -69,7 +71,7 @@ void Foam::vtkPVFoam::convertVolField
     {
         if (debug)
         {
-            Info<< "convertVolField interpolating:" << fld.name() << endl;
+            Info<< "convertVolField interpolating:" << fld.name() << nl;
         }
 
         ptfPtr.reset
@@ -83,12 +85,12 @@ void Foam::vtkPVFoam::convertVolField
     convertVolFieldBlock(fld, ptfPtr, rangeCellSets_);  // cellSets
 
     // Patches - currently skip field conversion for groups
-    for (auto partId : rangePatches_)
+    for
+    (
+        const auto partId
+      : rangePatches_.intersection(selectedPartIds_)
+    )
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
         const auto& longName = selectedPartIds_[partId];
 
         auto iter = cachedVtp_.find(longName);
@@ -97,10 +99,12 @@ void Foam::vtkPVFoam::convertVolField
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
+
         foamVtpData& vtpData = iter.object();
         auto dataset = vtpData.dataset;
 
         const labelList& patchIds = vtpData.additionalIds();
+
         if (patchIds.empty())
         {
             continue;
@@ -184,12 +188,12 @@ void Foam::vtkPVFoam::convertVolField
 
 
     // Face Zones
-    for (auto partId : rangeFaceZones_)
+    for
+    (
+        const auto partId
+      : rangeFaceZones_.intersection(selectedPartIds_)
+    )
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
         const auto& longName = selectedPartIds_[partId];
         const word zoneName = getFoamName(longName);
 
@@ -199,6 +203,7 @@ void Foam::vtkPVFoam::convertVolField
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
+
         foamVtpData& vtpData = iter.object();
         auto dataset = vtpData.dataset;
 
@@ -224,12 +229,12 @@ void Foam::vtkPVFoam::convertVolField
 
 
     // Face Sets
-    for (auto partId : rangeFaceSets_)
+    for
+    (
+        const auto partId
+      : rangeFaceSets_.intersection(selectedPartIds_)
+    )
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
         const auto& longName = selectedPartIds_[partId];
         const word selectName = getFoamName(longName);
 
@@ -349,12 +354,12 @@ void Foam::vtkPVFoam::convertVolFieldBlock
     const arrayRange& range
 )
 {
-    for (auto partId : range)
+    for
+    (
+        const auto partId
+      : range.intersection(selectedPartIds_)
+    )
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
         const auto& longName = selectedPartIds_[partId];
 
         auto iter = cachedVtu_.find(longName);
@@ -363,6 +368,7 @@ void Foam::vtkPVFoam::convertVolFieldBlock
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
+
         foamVtuData& vtuData = iter.object();
         auto dataset = vtuData.dataset;
 
@@ -382,6 +388,65 @@ void Foam::vtkPVFoam::convertVolFieldBlock
                 vtuData
             );
             dataset->GetPointData()->AddArray(pdata);
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+//
+// area-fields
+//
+
+template<class Type>
+void Foam::vtkPVFoam::convertAreaFields
+(
+    const faMesh& mesh,
+    const IOobjectList& objects
+)
+{
+    typedef GeometricField<Type, faPatchField, areaMesh> FieldType;
+
+    const List<label> partIds =
+        rangeArea_.intersection(selectedPartIds_);
+
+    if (partIds.empty())
+    {
+        return;
+    }
+
+    forAllConstIters(objects, iter)
+    {
+        // Restrict to GeometricField<Type, ...>
+        const auto& ioobj = *(iter.object());
+
+        if (ioobj.headerClassName() == FieldType::typeName)
+        {
+            // Load field
+            FieldType fld(ioobj, mesh);
+
+            // Convert
+            for (const auto partId : partIds)
+            {
+                const auto& longName = selectedPartIds_[partId];
+
+                auto iter = cachedVtp_.find(longName);
+                if (!iter.found() || !iter.object().dataset)
+                {
+                    // Should not happen, but for safety require a vtk geometry
+                    continue;
+                }
+
+                foamVtpData& vtpData = iter.object();
+                auto dataset = vtpData.dataset;
+
+                vtkSmartPointer<vtkFloatArray> cdata = convertFieldToVTK
+                (
+                    fld.name(),
+                    fld
+                );
+                dataset->GetCellData()->AddArray(cdata);
+            }
         }
     }
 }
@@ -416,7 +481,7 @@ void Foam::vtkPVFoam::convertPointFields
 
         if (debug)
         {
-            Info<< "convertPointFields : " << fieldName << endl;
+            Info<< "convertPointFields : " << fieldName << nl;
         }
 
         FieldType pfld(ioobj, pMesh);
@@ -426,12 +491,12 @@ void Foam::vtkPVFoam::convertPointFields
         convertPointFieldBlock(pfld, rangeCellSets_);   // cellSets
 
         // Patches - currently skip field conversion for groups
-        for (auto partId : rangePatches_)
+        for
+        (
+            const auto partId
+          : rangePatches_.intersection(selectedPartIds_)
+        )
         {
-            if (!selectedPartIds_.found(partId))
-            {
-                continue;
-            }
             const auto& longName = selectedPartIds_[partId];
 
             auto iter = cachedVtp_.find(longName);
@@ -440,6 +505,7 @@ void Foam::vtkPVFoam::convertPointFields
                 // Should not happen, but for safety require a vtk geometry
                 continue;
             }
+
             foamVtpData& vtpData = iter.object();
             auto dataset = vtpData.dataset;
 
@@ -461,12 +527,12 @@ void Foam::vtkPVFoam::convertPointFields
         }
 
         // Face Zones
-        for (auto partId : rangeFaceZones_)
+        for
+        (
+            const auto partId
+          : rangeFaceZones_.intersection(selectedPartIds_)
+        )
         {
-            if (!selectedPartIds_.found(partId))
-            {
-                continue;
-            }
             const auto& longName = selectedPartIds_[partId];
             const word zoneName = getFoamName(longName);
 
@@ -476,6 +542,7 @@ void Foam::vtkPVFoam::convertPointFields
                 // Should not happen, but for safety require a vtk geometry
                 continue;
             }
+
             foamVtpData& vtpData = iter.object();
             auto dataset = vtpData.dataset;
 
@@ -513,12 +580,12 @@ void Foam::vtkPVFoam::convertPointFieldBlock
     const arrayRange& range
 )
 {
-    for (auto partId : range)
+    for
+    (
+        const auto partId
+      : range.intersection(selectedPartIds_)
+    )
     {
-        if (!selectedPartIds_.found(partId))
-        {
-            continue;
-        }
         const auto& longName = selectedPartIds_[partId];
 
         auto iter = cachedVtu_.find(longName);
@@ -527,6 +594,7 @@ void Foam::vtkPVFoam::convertPointFieldBlock
             // Should not happen, but for safety require a vtk geometry
             continue;
         }
+
         foamVtuData& vtuData = iter.object();
         auto dataset = vtuData.dataset;
 
@@ -579,7 +647,7 @@ vtkSmartPointer<vtkFloatArray> Foam::vtkPVFoam::convertPointField
             << pfld.name()
             << " size="  << (nPoints + addPointCellLabels.size())
             << " (" << nPoints << " + " << addPointCellLabels.size()
-            << ") nComp=" << nComp << endl;
+            << ") nComp=" << nComp << nl;
     }
 
     float vec[nComp];
@@ -728,7 +796,7 @@ Foam::label Foam::vtkPVFoam::transcribeFloatData
             << pTraits<Type>::typeName
             << "' : target array has " << array->GetNumberOfComponents()
             << " components instead of " << nComp
-            << endl;
+            << nl;
     }
 
     const vtkIdType maxSize = array->GetNumberOfTuples();
@@ -740,7 +808,7 @@ Foam::label Foam::vtkPVFoam::transcribeFloatData
             << "vtk array '" << array->GetName()
             << "' copy with out-of-range (0-" << long(maxSize-1) << ")"
             << " starting location"
-            << endl;
+            << nl;
 
         return 0;
     }
@@ -751,7 +819,7 @@ Foam::label Foam::vtkPVFoam::transcribeFloatData
             << "' copy ends out-of-range (" << long(maxSize) << ")"
             << " using sizing (start,size) = ("
             << start << "," << input.size() << ")"
-            << endl;
+            << nl;
 
         return 0;
     }
@@ -788,7 +856,7 @@ Foam::vtkPVFoam::convertFieldToVTK
         Info<< "convert UList<" << pTraits<Type>::typeName << "> "
             << name
             << " size="  << fld.size()
-            << " nComp=" << nComp << endl;
+            << " nComp=" << nComp << nl;
     }
 
     auto data = vtkSmartPointer<vtkFloatArray>::New();
@@ -816,7 +884,7 @@ Foam::vtkPVFoam::convertFaceFieldToVTK
         Info<< "convert face field: "
             << fld.name()
             << " size="  << faceLabels.size()
-            << " nComp=" << int(pTraits<Type>::nComponents) << endl;
+            << " nComp=" << int(pTraits<Type>::nComponents) << nl;
     }
 
     const fvMesh& mesh = fld.mesh();
@@ -887,7 +955,7 @@ Foam::vtkPVFoam::convertVolFieldToVTK
             << " size=" << cellMap.size()
             << " (" << fld.size() << " + "
             << (cellMap.size() - fld.size())
-            << ") nComp=" << nComp << endl;
+            << ") nComp=" << nComp << nl;
     }
 
     float scratch[nComp];
@@ -905,6 +973,7 @@ Foam::vtkPVFoam::convertVolFieldToVTK
 
     return data;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -40,7 +40,7 @@ License
 template<class TrackCloudType>
 void Foam::particle::readFields(TrackCloudType& c)
 {
-    bool valid = c.size();
+    const bool valid = c.size();
 
     IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
 
@@ -70,8 +70,9 @@ void Foam::particle::readFields(TrackCloudType& c)
 template<class TrackCloudType>
 void Foam::particle::writeFields(const TrackCloudType& c)
 {
-    label np = c.size();
+    const label np = c.size();
 
+    if (writeLagrangianCoordinates)
     {
         IOPosition<TrackCloudType> ioP(c);
         ioP.write(np > 0);
@@ -83,7 +84,7 @@ void Foam::particle::writeFields(const TrackCloudType& c)
         IOPosition<TrackCloudType> ioP
         (
             c,
-            IOPosition<TrackCloudType>::geometryType::POSITIONS
+            cloud::geometryType::POSITIONS
         );
         ioP.write(np > 0);
     }
@@ -115,7 +116,7 @@ void Foam::particle::writeFields(const TrackCloudType& c)
 template<class CloudType>
 void Foam::particle::writeObjects(const CloudType& c, objectRegistry& obr)
 {
-    label np = c.size();
+    const label np = c.size();
 
     IOField<label>& origProc(cloud::createIOField<label>("origProc", np, obr));
     IOField<label>& origId(cloud::createIOField<label>("origId", np, obr));

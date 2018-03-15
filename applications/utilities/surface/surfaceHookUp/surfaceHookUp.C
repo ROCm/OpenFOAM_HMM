@@ -63,7 +63,7 @@ void greenRefine
 
     // Find index of edge in face.
 
-    label fp0 = findIndex(f, e[0]);
+    label fp0 = f.find(e[0]);
     label fp1 = f.fcIndex(fp0);
     label fp2 = f.fcIndex(fp1);
 
@@ -165,10 +165,10 @@ void createBoundaryEdgeTrees
 
         // Boundary edges
         treeBoundaryEdges[surfI] =
-            labelList
+            identity
             (
-                identity(surf.nEdges() - surf.nInternalEdges())
-              + surf.nInternalEdges()
+                surf.nEdges() - surf.nInternalEdges(),
+                surf.nInternalEdges()
             );
 
         Random rndGen(17301893);
@@ -235,16 +235,11 @@ public:
     {
         const treeDataEdge& shape = tree_.shapes();
 
-        forAll(indices, i)
+        for (const label index : indices)
         {
-            const label index = indices[i];
             const label edgeIndex = shape.edgeLabels()[index];
 
-            if
-            (
-                !shapeMask_.empty()
-             && findIndex(shapeMask_, edgeIndex) != -1
-            )
+            if (shapeMask_.found(edgeIndex))
             {
                 continue;
             }
@@ -256,7 +251,7 @@ public:
             // Only register hit if closest point is not an edge point
             if (nearHit.hit())
             {
-                scalar distSqr = sqr(nearHit.distance());
+                const scalar distSqr = sqr(nearHit.distance());
 
                 if (distSqr < nearestDistSqr)
                 {
@@ -280,7 +275,7 @@ int main(int argc, char *argv[])
         "boundary edges to match other surface boundary edges"
     );
     argList::noParallel();
-    argList::validArgs.append("hookTolerance");
+    argList::addArgument("hookTolerance");
 
     #include "addDictOption.H"
 
@@ -294,7 +289,7 @@ int main(int argc, char *argv[])
 
     const IOdictionary dict(dictIO);
 
-    const scalar dist(args.argRead<scalar>(1));
+    const scalar dist(args.read<scalar>(1));
     const scalar matchTolerance(max(1e-6*dist, SMALL));
     const label maxIters = 100;
 

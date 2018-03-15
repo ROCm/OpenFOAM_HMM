@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -27,6 +27,12 @@ InNamspace
 Description
     Various functions to operate on Lists.
 
+Namespace
+    Foam::ListOps
+
+Description
+    Various utility functions to work on Lists.
+
 SourceFiles
     ListOps.C
     ListOpsTemplates.C
@@ -38,6 +44,8 @@ SourceFiles
 
 #include "FlatOutput.H"
 #include "labelList.H"
+#include "HashSet.H"
+#include "PackedBoolList.H"
 #include "ops.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -59,12 +67,12 @@ static const List<Type>& emptyList()
 //- Renumber the values (not the indices) of a list.
 //  Negative ListType elements are left untouched.
 template<class ListType>
-ListType renumber(const labelUList& oldToNew, const ListType& lst);
+ListType renumber(const labelUList& oldToNew, const ListType& input);
 
 //- Inplace renumber the values (not the indices) of a list.
 //  Negative ListType elements are left untouched.
 template<class ListType>
-void inplaceRenumber(const labelUList& oldToNew, ListType& lst);
+void inplaceRenumber(const labelUList& oldToNew, ListType& input);
 
 
 //- Reorder the elements of a list.
@@ -76,7 +84,7 @@ template<class ListType>
 ListType reorder
 (
     const labelUList& oldToNew,
-    const ListType& lst,
+    const ListType& input,
     const bool prune = false
 );
 
@@ -89,7 +97,7 @@ template<class ListType>
 void inplaceReorder
 (
     const labelUList& oldToNew,
-    ListType& lst,
+    ListType& input,
     const bool prune = false
 );
 
@@ -99,74 +107,87 @@ void inplaceReorder
 
 //- Map values. Do not map negative values.
 template<class Container>
-void inplaceMapValue(const labelUList& oldToNew, Container& lst);
+void inplaceMapValue(const labelUList& oldToNew, Container& input);
 
 //- Recreate with mapped keys. Do not map elements with negative key.
 template<class Container>
-void inplaceMapKey(const labelUList& oldToNew, Container& lst);
+void inplaceMapKey(const labelUList& oldToNew, Container& input);
 
 
 //- Generate the (stable) sort order for the list
 template<class T>
-void sortedOrder(const UList<T>& lst, labelList& order);
+void sortedOrder(const UList<T>& input, labelList& order);
 
-template<class T, class Cmp>
-void sortedOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+//- Sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void sortedOrder
+(
+    const UList<T>& input,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 //- Generate (sorted) indices corresponding to duplicate list values
 template<class T>
-void duplicateOrder(const UList<T>& lst, labelList& order);
+void duplicateOrder(const UList<T>& input, labelList& order);
 
-template<class T, class Cmp>
-void duplicateOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+//- Generate (sorted) indices corresponding to duplicate list values
+//  sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void duplicateOrder
+(
+    const UList<T>& input,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 //- Generate (sorted) indices corresponding to unique list values
 template<class T>
-void uniqueOrder(const UList<T>& lst, labelList& order);
+void uniqueOrder(const UList<T>& input, labelList& order);
 
-template<class T, class Cmp>
-void uniqueOrder(const UList<T>& lst, labelList& order, const Cmp& cmp);
+//- Generate (sorted) indices corresponding to unique list values
+//  sort using specified list compare predicate
+template<class T, class ListComparePredicate>
+void uniqueOrder
+(
+    const UList<T>& input,
+    labelList& order,
+    const ListComparePredicate& comp
+);
 
 
 //- Inplace sorting and removal of duplicates.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class ListType>
-void inplaceUniqueSort(ListType& lst);
+void inplaceUniqueSort(ListType& input);
 
 //- Inplace sorting and removal of duplicates.
 //  Do not use FixedList for the input list, since it doesn't resize.
-template<class ListType, class Cmp>
-void inplaceUniqueSort(ListType& lst, const Cmp& cmp);
-
-
-//- Extract elements of List when select is a certain value.
-//  \deprecated use subsetList instead (deprecated Mar 2017)
-template<class T, class ListType>
-ListType subset(const UList<T>& select, const T& value, const ListType&);
-
-//- Inplace extract elements of List when select is a certain value.
-//  \deprecated use inplaceSubsetList instead (deprecated Mar 2017)
-template<class T, class ListType>
-void inplaceSubset(const UList<T>& select, const T& value, ListType&);
+template<class ListType, class ListComparePredicate>
+void inplaceUniqueSort
+(
+    ListType& input,
+    const ListComparePredicate& comp
+);
 
 
 //- Extract elements of List when select is true
 //  eg, to extract all selected elements:
-//    subset<boolList, labelList>(selectedElems, lst);
+//    subset<boolList, labelList>(selectedElems, list);
 //  Note a labelHashSet can also be used as the bool-list.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class BoolListType, class ListType>
-ListType subset(const BoolListType& select, const ListType& lst);
+ListType subset(const BoolListType& select, const ListType& input);
 
 //- Inplace extract elements of List when select is true
 //  eg, to extract all selected elements:
-//    inplaceSubset<boolList, labelList>(selectedElems, lst);
+//    inplaceSubset<boolList, labelList>(selectedElems, list);
 //  Note a labelHashSet can also be used as the bool-list.
 //  Do not use FixedList for the input list, since it doesn't resize.
 template<class BoolListType, class ListType>
-void inplaceSubset(const BoolListType& select, ListType& lst);
+void inplaceSubset(const BoolListType& select, ListType& input);
 
 
 //- Copy a subset of the input list when predicate is true.
@@ -175,7 +196,8 @@ template<class ListType, class UnaryPredicate>
 ListType subsetList
 (
     const ListType& input,
-    const UnaryPredicate& pred
+    const UnaryPredicate& pred,
+    const bool invert=false
 );
 
 //- Inplace subset of the list when predicate is true.
@@ -184,7 +206,8 @@ template<class ListType, class UnaryPredicate>
 void inplaceSubsetList
 (
     ListType& input,
-    const UnaryPredicate& pred
+    const UnaryPredicate& pred,
+    const bool invert=false
 );
 
 
@@ -218,56 +241,43 @@ List<OutputIntListType> invertManyToMany
 }
 
 //- Create identity map of the given length with (map[i] == i)
-labelList identity(const label len);
+//  Optionally with an alternative start index, so that (map[i] == i+start)
+labelList identity(const label len, const label start=0);
 
 //- Find first occurence of given element and return index,
 //  return -1 if not found. Linear search.
+//  \deprecated prefer UList find/found methods (deprecated Oct 2017)
 template<class ListType>
 label findIndex
 (
-    const ListType&,
-    typename ListType::const_reference,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
-);
+)
+{
+    return input.find(val, start);
+}
+
 
 //- Find all occurences of given element. Linear search.
 template<class ListType>
 labelList findIndices
 (
-    const ListType& l,
-    typename ListType::const_reference t,
-    const label start=0
-);
-
-//- Opposite of findIndices: set values at indices to given value
-template<class ListType>
-void setValues
-(
-    ListType& l,
-    const labelUList& indices,
-    typename ListType::const_reference t
-);
-
-//- Opposite of findIndices: set values at indices to given value
-template<class ListType>
-ListType createWithValues
-(
-    const label sz,
-    typename ListType::const_reference initValue,
-    const labelUList& indices,
-    typename ListType::const_reference setValue
+    const ListType& input,
+    typename ListType::const_reference val,
+    label start=0
 );
 
 //- Find index of max element (and larger than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
-label findMax(const ListType& l, const label start=0);
+label findMax(const ListType& input, const label start=0);
 
 
 //- Find index of min element (and less than given element).
 //  return -1 if not found. Linear search.
 template<class ListType>
-label findMin(const ListType& l, const label start=0);
+label findMin(const ListType& input, const label start=0);
 
 
 //- Find first occurrence of given element in sorted list and return index,
@@ -275,21 +285,21 @@ label findMin(const ListType& l, const label start=0);
 template<class ListType>
 label findSortedIndex
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
 );
 
 
 //- Find last element < given value in sorted list and return index,
 //  return -1 if not found. Binary search.
-template<class ListType, class BinaryOp>
+template<class ListType, class BinaryPredicate>
 label findLower
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start,
-    const BinaryOp& bop
+    const BinaryPredicate& pred
 );
 
 
@@ -298,54 +308,20 @@ label findLower
 template<class ListType>
 label findLower
 (
-    const ListType& l,
-    typename ListType::const_reference t,
+    const ListType& input,
+    typename ListType::const_reference val,
     const label start=0
 );
-
-
-//- To construct a List from a C array. Has extra Container type
-//  to initialise e.g. wordList from arrays of char*.
-//
-//  \deprecated can often use initializer_list instead (deprecated Mar 2017)
-template<class Container, class T, int mRows>
-List<Container> initList(const T[mRows]);
-
-
-//- To construct a (square) ListList from a C array. Has extra Container type
-//  to initialise e.g. faceList from arrays of labels.
-//
-//  \deprecated can often use initializer_list instead (deprecated Mar 2017)
-template<class Container, class T, int mRows, int nColumns>
-List<Container> initListList(const T[mRows][nColumns]);
-
-
-//- Helper class for list to append y onto the end of x
-template<class T>
-class ListAppendEqOp
-{
-public:
-    void operator()(List<T>& x, const List<T>& y) const;
-};
-
-
-//- Helper class for list to append unique elements of y onto the end of x
-template<class T>
-class ListUniqueEqOp
-{
-public:
-    void operator()(List<T>& x, const List<T>& y) const;
-};
 
 
 //- Reverse a list. First element becomes last element etc.
 template<class ListType>
-ListType reverseList(const ListType& list);
+ListType reverseList(const ListType& input);
 
 
 //- Inplace reversal of a list using Swap.
 template<class ListType>
-void inplaceReverseList(ListType& list);
+void inplaceReverseList(ListType& input);
 
 
 //- Rotate a list by n places. If n is positive rotate clockwise/right/down.
@@ -358,6 +334,271 @@ ListType rotateList(const ListType& list, const label n);
 template<template<typename> class ListType, class DataType>
 void inplaceRotateList(ListType<DataType>& list, label n);
 
+
+/*---------------------------------------------------------------------------*\
+                         Namespace ListOps Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace ListOps
+{
+
+//- List helper to append y elements onto the end of x
+template<class T>
+struct appendEqOp
+{
+    void operator()(List<T>& x, const List<T>& y) const;
+};
+
+//- List helper to append y unique elements onto the end of x
+template<class T>
+struct uniqueEqOp
+{
+    void operator()(List<T>& x, const List<T>& y) const;
+};
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const labelUList& locations,
+    const T& val
+);
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const labelHashSet& locations,
+    const T& val
+);
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const UList<bool>& locations,
+    const T& val
+);
+
+
+//- Set various locations of the list with a specified value.
+//
+//  \param list the list to modify
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+template<class T>
+void setValue
+(
+    UList<T>& list,
+    const PackedBoolList& locations,
+    const T& val
+);
+
+
+//- Create a List from a List of a dissimilar type, using the entire list.
+//  For example, convert a list of ints to floats, vectors etc.
+//
+//  \param input the list input values.
+//  \param op the unary conversion operator, which can be used to convert
+//      to other types.
+//
+//  \code
+//  auto neg = ListOps::create<label>
+//  (
+//      ints,
+//      std::negate<label>()
+//  );
+//
+//  auto labels = ListOps::create<label>
+//  (
+//      ints,
+//      toLabel<int>()
+//  );
+//
+//  auto vectors = ListOps::create<vector>
+//  (
+//      ints,
+//      [](const int& val){ return vector(1.5*val, 0, 0); }
+//  );
+//
+//  \endcode
+template<class T, class T2, class UnaryOperation>
+List<T> create
+(
+    const UList<T2>& input,
+    const UnaryOperation& op
+);
+
+
+//- Create a List from an iterator range [first,last) of a dissimilar type.
+//  Uses std::distance for the size.
+//
+//  \param first the begin of the iterator range
+//  \param last the end of the iterator range
+//  \param op the unary conversion operator, which can be used to convert
+//      to other types.
+template<class T, class InputIterator, class UnaryOperation>
+List<T> create
+(
+    InputIterator first,
+    InputIterator last,
+    const UnaryOperation& op
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const labelUList& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const labelHashSet& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const UList<bool>& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and various locations with
+//- another specified value.
+//
+//  \param len the length of the list
+//  \param locations where to apply the specified value
+//       An out-of-range index is silently ignored.
+//  \param val the value to set at the specified locations
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const PackedBoolList& locations,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and one specified value,
+//- which is copy assigned at the specified index
+//
+//  \param len the length of the list
+//  \param index where to apply the specified value.
+//       An out-of-range index is silently ignored.
+//  \param val the value to copy assign at the specified index
+//  \param deflt the initialization default value
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const label index,
+    const T& val,
+    const T& deflt = T()
+);
+
+
+//- Create a List filled with default values and one specified value,
+//- which is move assigned at the specified index
+//
+//  \param len the length of the list
+//  \param index where to apply the specified value.
+//       An out-of-range index is silently ignored.
+//  \param val the value to move assign at the specified index
+//  \param deflt the initialization default value
+//
+//  For example,
+//  \code
+//  // Gather all unique points on master
+//
+//  List<pointField> gatheredPoints(Pstream::nProcs());
+//  gatheredPoints[Pstream::myProcNo()] = pointField
+//  (
+//      mesh.points(),
+//      uniqueMeshPoints
+//  );
+//  ...
+//
+//  // Or else
+//  auto gatheredPoints = ListOps::createWithValue<pointField>
+//  (
+//      Pstream::nProcs(),
+//      Pstream::myProcNo(),
+//      pointField(mesh.points(), uniqueMeshPoints)
+//  );
+//  ...
+//
+//  \endcode
+template<class T>
+List<T> createWithValue
+(
+    const label len,
+    const label index,
+    T&& val,
+    const T& deflt = T()
+);
+
+} // End namespace ListOps
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

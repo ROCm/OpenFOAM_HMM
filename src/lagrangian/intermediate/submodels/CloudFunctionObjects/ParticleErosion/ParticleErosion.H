@@ -120,7 +120,7 @@ public:
 
 
     //- Destructor
-    virtual ~ParticleErosion();
+    virtual ~ParticleErosion() = default;
 
 
     // Member Functions

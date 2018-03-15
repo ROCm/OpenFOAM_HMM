@@ -249,10 +249,19 @@ protected:
 
         class rmDirOp
         {
+            bool silent_;
         public:
+            rmDirOp()
+            :
+                silent_(false)
+            {}
+            rmDirOp(const bool silent)
+            :
+                silent_(silent)
+            {}
             bool operator()(const fileName& fName) const
             {
-                return Foam::rmDir(fName);
+                return Foam::rmDir(fName, silent_);
             }
         };
 
@@ -418,7 +427,7 @@ public:
 
 
     //- Destructor
-    virtual ~masterUncollatedFileOperation();
+    virtual ~masterUncollatedFileOperation() = default;
 
 
     // Member Functions
@@ -533,7 +542,12 @@ public:
             virtual bool rm(const fileName&) const;
 
             //- Remove a dirctory and its contents
-            virtual bool rmDir(const fileName&) const;
+            //  \param silent do not report missing directory
+            virtual bool rmDir
+            (
+                const fileName& dir,
+                const bool silent = false
+            ) const;
 
 //            //- Open a shared library. Return handle to library. Print error
 //            //  message if library cannot be loaded (check = true)

@@ -28,7 +28,10 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::surfMesh::setInstance(const fileName& inst, IOobject::writeOption w)
+void Foam::surfMesh::setInstance
+(
+    const fileName& inst,
+    IOobject::writeOption wOpt)
 {
     if (debug)
     {
@@ -38,14 +41,14 @@ void Foam::surfMesh::setInstance(const fileName& inst, IOobject::writeOption w)
     instance() = inst;
     Allocator::setInstance(inst);
 
-    setWriteOption(w);
+    setWriteOption(wOpt);
 }
 
 
-void Foam::surfMesh::setWriteOption(IOobject::writeOption w)
+void Foam::surfMesh::setWriteOption(IOobject::writeOption wOpt)
 {
-    writeOpt() = w;
-    Allocator::setWriteOption(w);
+    writeOpt() = wOpt;
+    Allocator::setWriteOption(wOpt);
 }
 
 

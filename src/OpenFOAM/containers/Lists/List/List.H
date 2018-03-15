@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,9 @@ SourceFiles
 
 #include "UList.H"
 #include "autoPtr.H"
-#include "Xfer.H"
+#include "one.H"
+#include "SLListFwd.H"
+
 #include <initializer_list>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,31 +52,26 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of classes
+// Forward declarations
 
 class Istream;
 class Ostream;
 
-// Forward declaration of friend functions and operators
 template<class T> class List;
-
-template<class T> Istream& operator>>(Istream& is, List<T>& L);
-
 template<class T, unsigned Size> class FixedList;
+template<class T, int SizeMin> class DynamicList;
+
 template<class T> class PtrList;
-
-class SLListBase;
-template<class LListBase, class T> class LList;
-template<class T>
-using SLList = LList<SLListBase, T>;
-
-template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-class DynamicList;
-
 template<class T> class SortableList;
 template<class T> class IndirectList;
 template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
+
+template<class T> Istream& operator>>(Istream& is, List<T>& L);
+
+// Commonly required list types
+typedef List<char> charList;
+
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -91,15 +88,11 @@ class List
         inline void alloc();
 
         //- Reallocate list storage to the given size
-        inline void reAlloc(const label s);
+        inline void reAlloc(const label len);
 
-        //- Copy list of given type
+        //- Copy list of given type.
         template<class List2>
         inline void copyList(const List2& lst);
-
-        //- Allocate storage and copy list of given type
-        template<class List2>
-        inline void allocCopyList(const List2& lst);
 
         //- Construct given begin/end iterators and number of elements
         //  Since the size is provided, the end iterator is actually ignored.
@@ -108,15 +101,8 @@ class List
         (
             InputIterator begIter,
             InputIterator endIter,
-            const label s
+            const label len
         );
-
-
-protected:
-
-    //- Override size to be inconsistent with allocated storage.
-    //  Use with care
-    inline void size(const label n);
 
 
 public:
@@ -130,35 +116,40 @@ public:
     // Constructors
 
         //- Null constructor
-        inline List();
+        inline constexpr List() noexcept;
 
         //- Construct with given size
-        explicit List(const label s);
+        explicit List(const label len);
 
         //- Construct with given size and value for all elements
-        List(const label s, const T& a);
+        List(const label len, const T& val);
 
         //- Construct with given size initializing all elements to zero
-        List(const label s, const zero);
+        List(const label len, const zero);
 
-        //- Copy constructor
+        //- Construct with length=1, copying the value as the only content
+        List(const one, const T& val);
+
+        //- Construct with length=1, moving the value as the only content
+        List(const one, T&& val);
+
+        //- Construct with length=1, initializing content to zero
+        List(const one, const zero);
+
+        //- Copy construct from list
         List(const List<T>& a);
 
-        //- Copy constructor from list containing another type
-        template<class T2>
-        explicit List(const List<T2>& a);
-
-        //- Construct by transferring the parameter contents
-        List(const Xfer<List<T>>& lst);
+        //- Copy construct contents from list
+        explicit List(const UList<T>& a);
 
         //- Construct as copy or re-use as specified
         List(List<T>& a, bool reuse);
 
         //- Construct as subset
-        List(const UList<T>& a, const labelUList& mapAddressing);
+        List(const UList<T>& lst, const labelUList& mapAddressing);
 
         //- Construct given begin/end iterators.
-        //  Uses std::distance to determine the size.
+        //  Uses std::distance for the size.
         template<class InputIterator>
         List(InputIterator begIter, InputIterator endIter);
 
@@ -181,6 +172,19 @@ public:
         //- Construct from an initializer list
         List(std::initializer_list<T> lst);
 
+        //- Move construct from List
+        List(List<T>&& lst);
+
+        //- Move construct from DynamicList
+        template<int SizeMin>
+        List(DynamicList<T, SizeMin>&& lst);
+
+        //- Move construct from SortableList
+        List(SortableList<T>&& lst);
+
+        //- Move construct from SLList
+        List(SLList<T>&& lst);
+
         //- Construct from Istream
         List(Istream& is);
 
@@ -200,54 +204,50 @@ public:
 
     // Member Functions
 
-        //- Return the number of elements in the UList
-        inline label size() const;
-
-
         // Edit
 
             //- Alias for setSize(const label)
             inline void resize(const label newSize);
 
             //- Alias for setSize(const label, const T&)
-            inline void resize(const label newSize, const T& a);
+            inline void resize(const label newSize, const T& val);
 
             //- Reset size of List
             void setSize(const label newSize);
 
             //- Reset size of List and value for new elements
-            void setSize(const label newSize, const T& a);
+            void setSize(const label newSize, const T& val);
 
             //- Clear the list, i.e. set size to zero
             inline void clear();
 
             //- Append an element at the end of the list
-            inline void append(const T& t);
+            inline void append(const T& val);
 
-            //- Append a List at the end of this list
+            //- Move append an element at the end of the list
+            inline void append(T&& val);
+
+            //- Append a List to the end of this list
             inline void append(const UList<T>& lst);
 
             //- Append a UIndirectList at the end of this list
             inline void append(const UIndirectList<T>& lst);
 
             //- Transfer the contents of the argument List into this list
-            //  and annul the argument list
-            void transfer(List<T>& a);
+            //- and annul the argument list
+            void transfer(List<T>& lst);
 
             //- Transfer the contents of the argument List into this list
-            //  and annul the argument list
-            template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-            void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>& a);
+            //- and annul the argument list
+            template<int SizeMin>
+            void transfer(DynamicList<T, SizeMin>& lst);
 
             //- Transfer the contents of the argument List into this list
-            //  and annul the argument list
-            void transfer(SortableList<T>& a);
+            //- and annul the argument list
+            void transfer(SortableList<T>& lst);
 
-            //- Transfer contents to the Xfer container
-            inline Xfer<List<T>> xfer();
-
-            //- Return subscript-checked element of UList.
-            //  Resize list if required.
+            //- Return subscript-checked element of UList and resizing the list
+            //- if required.
             inline T& newElmt(const label i);
 
 
@@ -261,7 +261,7 @@ public:
         void operator=(const UList<T>& a);
 
         //- Assignment operator. Takes linear time
-        void operator=(const List<T>& a);
+        void operator=(const List<T>& lst);
 
         //- Assignment to SLList operator. Takes linear time
         void operator=(const SLList<T>& lst);
@@ -276,29 +276,35 @@ public:
         void operator=(std::initializer_list<T> lst);
 
         //- Assignment of all entries to the given value
-        inline void operator=(const T& t);
+        inline void operator=(const T& val);
 
         //- Assignment of all entries to zero
         inline void operator=(const zero);
+
+        //- Move assignment. Takes constant time
+        void operator=(List<T>&& lst);
+
+        //- Move assignment. Takes constant time.
+        template<int SizeMin>
+        void operator=(DynamicList<T, SizeMin>&& lst);
+
+        //- Move assignment. Takes constant time.
+        void operator=(SortableList<T>&& lst);
+
+        //- Move assignment. Takes constant time
+        void operator=(SLList<T>&& lst);
 
 
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List
         friend Istream& operator>> <T>
-        (Istream& is, List<T>& L);
+        (
+            Istream& is,
+            List<T>& L
+        );
+
 };
-
-
-//- Read a bracket-delimited list, or handle a single value as list of size 1
-//  For example,
-//  \code
-//      wList = readList<word>(IStringStream("(patch1 patch2 patch3)")());
-//      wList = readList<word>(IStringStream("patch0")());
-//  \endcode
-//  Mostly useful for handling command-line arguments
-template<class T>
-List<T> readList(Istream& is);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

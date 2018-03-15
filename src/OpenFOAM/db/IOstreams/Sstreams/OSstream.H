@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,7 +69,7 @@ public:
 
     // Constructors
 
-        //- Construct and set stream status
+        //- Construct as wrapper around std::ostream and set stream status
         OSstream
         (
             std::ostream& os,
@@ -104,8 +104,9 @@ public:
 
         // Write functions
 
-            //- Write next token to stream
-            virtual Ostream& write(const token& t);
+            //- Write token to stream or otherwise handle it.
+            //  \return false if the token type was not handled by this method
+            virtual bool write(const token& tok);
 
             //- Write character
             virtual Ostream& write(const char c);
@@ -116,7 +117,7 @@ public:
             //- Write word
             virtual Ostream& write(const word& str);
 
-            //- Write string
+            //- Write string (quoted)
             //  In the rare case that the string contains a final trailing
             //  backslash, it will be dropped to the appearance of an escaped
             //  double-quote.
@@ -143,7 +144,26 @@ public:
             virtual Ostream& write(const doubleScalar val);
 
             //- Write binary block
-            virtual Ostream& write(const char* buf, std::streamsize count);
+            virtual Ostream& write
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- Begin marker for low-level raw binary output.
+            //  The count should indicate the number of bytes for subsequent
+            //  writeRaw calls.
+            virtual Ostream& beginRaw(const std::streamsize count);
+
+            //- Low-level raw binary output.
+            virtual Ostream& writeRaw
+            (
+                const char* data,
+                const std::streamsize count
+            );
+
+            //- End marker for low-level raw binary output.
+            virtual Ostream& endRaw();
 
             //- Add indentation characters
             virtual void indent();

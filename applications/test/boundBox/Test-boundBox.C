@@ -31,7 +31,7 @@ Description
 #include "polyMesh.H"
 #include "boundBox.H"
 #include "treeBoundBox.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 
 using namespace Foam;
 
@@ -52,15 +52,11 @@ boundBox cube(scalar start, scalar width)
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
-    // #include "createTime.H"
-    // #include "createMesh.H"
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-
-    Info<<"boundBox faces: " << boundBox::faces << endl;
-    Info<<"hex faces: " << hex.modelFaces() << endl;
-    Info<<"tree-bb faces: " << treeBoundBox::faces << endl;
-    Info<<"tree-bb edges: " << treeBoundBox::edges << endl;
+    Info<<"boundBox faces: " << boundBox::faces << nl
+        <<"hex faces: " << cellModel::ref(cellModel::HEX).modelFaces() << nl
+        <<"tree-bb faces: " << treeBoundBox::faces << nl
+        <<"tree-bb edges: " << treeBoundBox::edges << endl;
 
     boundBox bb = boundBox::greatBox;
     Info<<"great box: " << bb << endl;

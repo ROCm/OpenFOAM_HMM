@@ -3,23 +3,11 @@
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-#    \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+#    \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.csh/unset
@@ -121,15 +109,16 @@ unsetenv OPAL_PREFIX
 unsetenv ENSIGHT9_READER
 unsetenv ParaView_DIR
 unsetenv ParaView_INCLUDE_DIR
-unsetenv ParaView_MAJOR
 unsetenv ParaView_VERSION
 unsetenv PV_PLUGIN_PATH
 unsetenv VTK_DIR
 
 #------------------------------------------------------------------------------
-# unset other ThirdParty environment variables
+# Unset other ThirdParty environment variables
 
 unsetenv ADIOS_ARCH_PATH
+unsetenv ADIOS1_ARCH_PATH
+unsetenv ADIOS2_ARCH_PATH
 unsetenv BOOST_ARCH_PATH
 unsetenv CCMIO_ARCH_PATH
 unsetenv CGAL_ARCH_PATH
@@ -147,20 +136,15 @@ unsetenv SCOTCH_ARCH_PATH
 
 if ( $?foamClean ) then
 
-    set cleaned=`$foamClean "$PATH" "$foamOldDirs"`
-    if ( $status == 0 ) setenv PATH $cleaned
+    eval `$foamClean -csh-env=PATH "$foamOldDirs"`
 
     if ($?LD_LIBRARY_PATH) then
-        set cleaned=`$foamClean "$LD_LIBRARY_PATH" "$foamOldDirs"`
-        if ( $status == 0 ) setenv LD_LIBRARY_PATH $cleaned
-
+        eval `$foamClean -csh-env=LD_LIBRARY_PATH "$foamOldDirs"`
         if ( ${%LD_LIBRARY_PATH} == 0 ) unsetenv LD_LIBRARY_PATH
     endif
 
     if ($?MANPATH) then
-        set cleaned=`$foamClean "$MANPATH" "$foamOldDirs"`
-        if ( $status == 0 ) setenv MANPATH $cleaned
-
+        eval `$foamClean -csh-env=MANPATH "$foamOldDirs"`
         if ( ${%MANPATH} == 0 ) unsetenv MANPATH
     endif
 
@@ -182,7 +166,6 @@ unalias wmSchedOn
 unalias wmSchedOff
 
 unalias foam
-unalias foamSite
 
 unalias src
 unalias lib

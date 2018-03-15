@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,12 +26,50 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "hashedWordList.H"
+#include "nil.H"
+#include "HashOps.H"
 #include "HashSet.H"
 #include "Map.H"
 #include "labelPairHashes.H"
 #include "FlatOutput.H"
 
+#include <algorithm>
+
 using namespace Foam;
+
+template<class Iter>
+void printIf(const Iter& iter)
+{
+    if (iter.found())
+    {
+        Info<< *iter;
+    }
+    else
+    {
+        Info<<"(null)";
+    }
+}
+
+
+template<class Key, class Hash>
+void printMinMax(const HashSet<Key, Hash>& set)
+{
+    const auto first = set.cbegin();
+    const auto last  = set.cend();
+
+    const auto min = std::min_element(first, last);
+    const auto max = std::max_element(first, last);
+
+    Info<< "set: " << flatOutput(set) << nl;
+    Info<< "    min=";
+    printIf(min);
+    Info<< nl;
+
+    Info<< "    max=";
+    printIf(max);
+    Info<< nl;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
@@ -55,7 +93,7 @@ int main(int argc, char *argv[])
 
     setA = { "kjhk", "kjhk2", "abced" };
 
-    HashTable<label, word> tableA
+    HashTable<label> tableA
     {
         { "value1", 1 },
         { "value2", 2 },
@@ -68,6 +106,8 @@ int main(int argc, char *argv[])
     tableB.insert("value6", nil());
 
     Info<< "tableA keys: "; tableA.writeKeys(Info) << endl;
+
+    Info<< "tableB content: " << tableB << endl;
 
     auto keyIterPair = tableA.keys();
     for (const auto& i : keyIterPair)
@@ -128,9 +168,14 @@ int main(int argc, char *argv[])
     Info<< "create from Map<label>: ";
     Info<< labelHashSet(mapA) << endl;
 
-    Info<<"combined toc: "
-        << (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB))
-        << nl;
+    {
+        auto allToc =
+            (wordHashSet(setA) | wordHashSet(tableA) | wordHashSet(tableB));
+
+        Info<<"combined toc: " << flatOutput(allToc) << nl;
+
+        printMinMax(allToc);
+    }
 
     labelHashSet setB
     {
@@ -222,6 +267,37 @@ int main(int argc, char *argv[])
     {
         Info << i << endl;
     }
+
+    printMinMax(setD);
+    Info<< nl;
+
+    printMinMax(labelHashSet());
+    Info<< nl;
+
+    Info<< nl << "Test swapping, moving etc." << nl;
+    setA.insert({ "some", "more", "entries" });
+
+    Info<< "input" << nl;
+    Info<< "setA: " << setA << nl;
+
+    wordHashSet setA1(std::move(setA));
+
+    Info<< "move construct" << nl;
+    Info<< "setA: " << setA << nl
+        << "setA1: " << setA1 << nl;
+
+
+    wordHashSet setB1;
+    Info<< "move assign" << nl;
+    setB1 = std::move(setA1);
+
+    Info<< "setA1: " << setA1 << nl
+        << "setB1: " << setB1 << nl;
+
+    setB1.swap(setA1);
+
+    Info<< "setA1: " << setA1 << nl
+        << "setB1: " << setB1 << nl;
 
     return 0;
 }

@@ -90,10 +90,7 @@ Foam::liquidMixtureProperties::New
     const dictionary& thermophysicalProperties
 )
 {
-    return autoPtr<liquidMixtureProperties>
-    (
-        new liquidMixtureProperties(thermophysicalProperties)
-    );
+    return autoPtr<liquidMixtureProperties>::New(thermophysicalProperties);
 }
 
 

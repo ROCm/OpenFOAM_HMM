@@ -103,13 +103,13 @@ public:
         //- Return const-access to phase1 viscosityModel
         const viscosityModel& nuModel1() const
         {
-            return nuModel1_();
+            return *nuModel1_;
         }
 
         //- Return const-access to phase2 viscosityModel
         const viscosityModel& nuModel2() const
         {
-            return nuModel2_();
+            return *nuModel2_;
         }
 
         //- Return const-access to phase1 density

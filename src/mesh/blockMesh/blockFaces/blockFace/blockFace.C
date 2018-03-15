@@ -65,7 +65,7 @@ Foam::blockFace::blockFace
 Foam::autoPtr<Foam::blockFace> Foam::blockFace::clone() const
 {
     NotImplemented;
-    return autoPtr<blockFace>(nullptr);
+    return autoPtr<blockFace>();
 }
 
 

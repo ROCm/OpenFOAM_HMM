@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,7 +25,7 @@ Class
     Foam::multiLevelDecomp
 
 Description
-    Decomposition given using consecutive application of decomposers.
+    Decompose given using consecutive application of decomposers.
 
 SourceFiles
     multiLevelDecomp.C
@@ -50,12 +50,23 @@ class multiLevelDecomp
 {
     // Private data
 
+        //- Original coefficients for this method
+        const dictionary& coeffsDict_;
+
+        //- Rewritten dictionary of individual methods
         dictionary methodsDict_;
 
         PtrList<decompositionMethod> methods_;
 
 
     // Private Member Functions
+
+        //- Fill the methodsDict_
+        void createMethodsDict();
+
+        //- Set methods based on the contents of the methodsDict_
+        void setMethods();
+
 
         //- Given connectivity across processors work out connectivity
         //  for a (consistent) subset
@@ -71,21 +82,22 @@ class multiLevelDecomp
             labelList& cutConnections
         ) const;
 
-        //- Decompose level methodI without addressing
+        //- Decompose at 'currLevel' without addressing
         void decompose
         (
             const labelListList& pointPoints,
             const pointField& points,
             const scalarField& pointWeights,
-            const labelList& pointMap,  // map back to original points
-            const label levelI,
+            const labelUList& pointMap,  // map back to original points
+            const label currLevel,
+            const label leafOffset,
 
-            labelField& finalDecomp
+            labelList& finalDecomp
         );
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const multiLevelDecomp&);
-        multiLevelDecomp(const multiLevelDecomp&);
+        void operator=(const multiLevelDecomp&) = delete;
+        multiLevelDecomp(const multiLevelDecomp&) = delete;
 
 
 public:
@@ -97,7 +109,14 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        multiLevelDecomp(const dictionary& decompositionDict);
+        multiLevelDecomp(const dictionary& decompDict);
+
+        //- Construct given decomposition dictionary and region name
+        multiLevelDecomp
+        (
+            const dictionary& decompDict,
+            const word& regionName
+        );
 
 
     //- Destructor

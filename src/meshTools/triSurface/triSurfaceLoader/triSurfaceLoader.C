@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,12 +65,6 @@ Foam::triSurfaceLoader::triSurfaceLoader(const Time& runTime)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::triSurfaceLoader::~triSurfaceLoader()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::triSurfaceLoader::readDir()
@@ -85,9 +79,8 @@ Foam::label Foam::triSurfaceLoader::readDir()
     // (eg, files with/without .gz)
     wordHashSet names(2*files.size());
 
-    forAll(files, filei)
+    for (const fileName& f : files)
     {
-        const fileName& f = files[filei];
         if (triSurface::canRead(f))
         {
             names.insert(f.name());
@@ -127,12 +120,12 @@ Foam::label Foam::triSurfaceLoader::select(const wordRe& mat)
 
     if (mat.isPattern())
     {
-        foundIds = findMatchingStrings(mat, available_);
+        foundIds = findStrings(mat, available_);
         sort(foundIds);
     }
     else
     {
-        const word& plain = static_cast<const word&>(mat);
+        const word& plain = mat;
         if (available_.found(plain))
         {
             foundIds.append(available_[plain]);
@@ -151,7 +144,7 @@ Foam::label Foam::triSurfaceLoader::select(const wordRe& mat)
 }
 
 
-Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
+Foam::label Foam::triSurfaceLoader::select(const UList<wordRe>& matcher)
 {
     // Need to be more careful when select.
     // - preserve same order as the input matcher itself
@@ -167,18 +160,15 @@ Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
     wordHashSet hashedMissing(2*matcher.size());
 
     // Exact matches must exist
-    forAll(matcher, i)
+    for (const wordRe& mat : matcher)
     {
-        const wordRe& mat = matcher[i];
-
         if (mat.isPattern())
         {
-            labelList indices = findMatchingStrings(mat, available_);
+            labelList indices = findStrings(mat, available_);
             sort(indices);
 
-            forAll(indices, j)
+            for (const label idx : indices)
             {
-                const label idx = indices[j];
                 if (hashedFound.insert(idx))
                 {
                     foundIds.append(idx);
@@ -187,7 +177,7 @@ Foam::label Foam::triSurfaceLoader::select(const wordReList& matcher)
         }
         else
         {
-            const word& plain = static_cast<const word&>(mat);
+            const word& plain = mat;
             if (available_.found(plain))
             {
                 const label idx = available_[plain];
@@ -231,7 +221,7 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
     else if (selected_.size() == 1)
     {
         // Use scaling (if any)
-        output.set(new triSurface(directory_/selected_[0], scaleFactor));
+        output.reset(new triSurface(directory_/selected_[0], scaleFactor));
 
         triSurface& surf = output();
 
@@ -272,10 +262,13 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
 
     forAll(selected_, surfi)
     {
+        List<labelledTri> addfaces;
+        pointField addpoints;
+
         triSurface addsurf(directory_/selected_[surfi]);
 
-        List<labelledTri> addfaces(addsurf.xferFaces());
-        List<point> addpoints(addsurf.xferPoints());
+        addsurf.swapFaces(addfaces);
+        addsurf.swapPoints(addpoints);
 
         // Offset the points for all additional surfaces
         if (surfi)
@@ -400,7 +393,7 @@ Foam::autoPtr<Foam::triSurface> Foam::triSurfaceLoader::load
         points *= scaleFactor;
     }
 
-    output.set(new triSurface(faces, patches, points, true));
+    output.reset(new triSurface(faces, patches, points, true));
 
     return output;
 }

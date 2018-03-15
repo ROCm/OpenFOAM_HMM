@@ -49,19 +49,34 @@ namespace Foam
 {
     typedef floatScalar scalar;
 
-    static const scalar GREAT = floatScalarGREAT;
-    static const scalar VGREAT = floatScalarVGREAT;
-    static const scalar ROOTVGREAT = floatScalarROOTVGREAT;
-    static const scalar SMALL = floatScalarSMALL;
-    static const scalar ROOTSMALL = floatScalarROOTSMALL;
-    static const scalar VSMALL = floatScalarVSMALL;
-    static const scalar ROOTVSMALL = floatScalarROOTVSMALL;
+    constexpr scalar GREAT = floatScalarGREAT;
+    constexpr scalar VGREAT = floatScalarVGREAT;
+    constexpr scalar ROOTVGREAT = floatScalarROOTVGREAT;
+    constexpr scalar SMALL = floatScalarSMALL;
+    constexpr scalar ROOTSMALL = floatScalarROOTSMALL;
+    constexpr scalar VSMALL = floatScalarVSMALL;
+    constexpr scalar ROOTVSMALL = floatScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
+
+    inline scalar readScalar(const char* buf)
+    {
+        return readFloat(buf);
+    }
+
+    inline bool readScalar(const char* buf, scalar& val)
+    {
+        return readFloat(buf, val);
+    }
 
     inline scalar readScalar(const std::string& str)
     {
         return readFloat(str);
+    }
+
+    inline bool readScalar(const std::string& str, scalar& val)
+    {
+        return readFloat(str, val);
     }
 }
 
@@ -73,19 +88,34 @@ namespace Foam
 {
     typedef doubleScalar scalar;
 
-    static const scalar GREAT = doubleScalarGREAT;
-    static const scalar VGREAT = doubleScalarVGREAT;
-    static const scalar ROOTVGREAT = doubleScalarROOTVGREAT;
-    static const scalar SMALL = doubleScalarSMALL;
-    static const scalar ROOTSMALL = doubleScalarROOTSMALL;
-    static const scalar VSMALL = doubleScalarVSMALL;
-    static const scalar ROOTVSMALL = doubleScalarROOTVSMALL;
+    constexpr scalar GREAT = doubleScalarGREAT;
+    constexpr scalar VGREAT = doubleScalarVGREAT;
+    constexpr scalar ROOTVGREAT = doubleScalarROOTVGREAT;
+    constexpr scalar SMALL = doubleScalarSMALL;
+    constexpr scalar ROOTSMALL = doubleScalarROOTSMALL;
+    constexpr scalar VSMALL = doubleScalarVSMALL;
+    constexpr scalar ROOTVSMALL = doubleScalarROOTVSMALL;
 
     scalar readScalar(Istream& is);
+
+    inline scalar readScalar(const char* buf)
+    {
+        return readDouble(buf);
+    }
+
+    inline bool readScalar(const char* buf, scalar& val)
+    {
+        return readDouble(buf, val);
+    }
 
     inline scalar readScalar(const std::string& str)
     {
         return readDouble(str);
+    }
+
+    inline bool readScalar(const std::string& str, scalar& val)
+    {
+        return readDouble(str, val);
     }
 }
 

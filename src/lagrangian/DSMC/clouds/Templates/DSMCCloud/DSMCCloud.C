@@ -54,8 +54,7 @@ void Foam::DSMCCloud<ParcelType>::buildConstProps()
 
         const dictionary& molDict(moleculeProperties.subDict(id));
 
-        constProps_[i] =
-        typename ParcelType::constantProperties::constantProperties(molDict);
+        constProps_[i] = typename ParcelType::constantProperties(molDict);
     }
 }
 
@@ -127,7 +126,7 @@ void Foam::DSMCCloud<ParcelType>::initialise
             {
                 const word& moleculeName(molecules[i]);
 
-                label typeId(findIndex(typeIdList_, moleculeName));
+                label typeId = typeIdList_.find(moleculeName);
 
                 if (typeId == -1)
                 {
@@ -137,7 +136,7 @@ void Foam::DSMCCloud<ParcelType>::initialise
                 }
 
                 const typename ParcelType::constantProperties& cP =
-                constProps(typeId);
+                    constProps(typeId);
 
                 scalar numberDensity = numberDensities[i];
 

@@ -41,7 +41,6 @@ SeeAlso
 #include "fvMesh.H"
 #include "Time.H"
 #include "volFields.H"
-#include "CompactListList.H"
 #include "unitConversion.H"
 #include "pairPatchAgglomeration.H"
 #include "labelListIOList.H"

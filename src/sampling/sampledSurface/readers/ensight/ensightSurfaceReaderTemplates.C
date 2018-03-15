@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2015-2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2015-2017 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,7 +75,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
 
     std::ostringstream oss;
     label nMask = 0;
-    for (size_t chari = 0; chari < fieldFileName.size(); chari++)
+    for (size_t chari = 0; chari < fieldFileName.size(); ++chari)
     {
         if (fieldFileName[chari] == '*')
         {
@@ -130,7 +130,7 @@ Foam::tmp<Foam::Field<Type>> Foam::ensightSurfaceReader::readField
     label n = surfPtr_->size();
     forAll(values, cmptI)
     {
-        values.setSize(n);
+        values[cmptI].setCapacity(n);
     }
 
     // Read data file using schema generated while reading the surface

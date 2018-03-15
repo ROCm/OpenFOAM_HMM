@@ -37,7 +37,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("point (x y z)");
+    argList::addArgument("point (x y z)");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
     label nReps = 10000;
 
-    const point sample = args.argRead<point>(1);
+    const point sample = args.read<point>(1);
 
     const polyMesh::cellDecomposition decompMode = polyMesh::CELL_TETS;
 

@@ -25,7 +25,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 inline Foam::IndirectListAddressing::IndirectListAddressing
 (
     const labelUList& addr
@@ -37,10 +36,10 @@ inline Foam::IndirectListAddressing::IndirectListAddressing
 
 inline Foam::IndirectListAddressing::IndirectListAddressing
 (
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 :
-    addressing_(addr)
+    addressing_(std::move(addr))
 {}
 
 
@@ -64,10 +63,10 @@ template<class T>
 inline Foam::IndirectList<T>::IndirectList
 (
     const UList<T>& completeList,
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 :
-    IndirectListAddressing(addr),
+    IndirectListAddressing(std::move(addr)),
     UIndirectList<T>
     (
         completeList,
@@ -126,10 +125,10 @@ inline void Foam::IndirectListAddressing::resetAddressing
 
 inline void Foam::IndirectListAddressing::resetAddressing
 (
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 {
-    addressing_.transfer(addr());
+    addressing_.transfer(addr);
 }
 
 

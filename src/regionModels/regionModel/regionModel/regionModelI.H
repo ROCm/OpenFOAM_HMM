@@ -70,7 +70,7 @@ inline const Foam::fvMesh& Foam::regionModels::regionModel::regionMesh() const
          << "Region mesh not available" << abort(FatalError);
     }
 
-    return regionMeshPtr_();
+    return *regionMeshPtr_;
 }
 
 
@@ -89,7 +89,7 @@ inline Foam::fvMesh& Foam::regionModels::regionModel::regionMesh()
          << "Region mesh not available" << abort(FatalError);
     }
 
-    return regionMeshPtr_();
+    return *regionMeshPtr_;
 }
 
 
@@ -116,7 +116,7 @@ Foam::regionModels::regionModel::outputProperties() const
             << abort(FatalError);
     }
 
-    return outputPropertiesPtr_();
+    return *outputPropertiesPtr_;
 }
 
 
@@ -130,7 +130,7 @@ Foam::regionModels::regionModel::outputProperties()
             << abort(FatalError);
     }
 
-    return outputPropertiesPtr_();
+    return *outputPropertiesPtr_;
 }
 
 

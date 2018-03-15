@@ -84,7 +84,11 @@ void writeWeights
     globalFaces().gather
     (
         UPstream::worldComm,
-        labelList(UPstream::procID(UPstream::worldComm)),
+        ListOps::create<label>
+        (
+            UPstream::procID(UPstream::worldComm),
+            toLabel<int>()  // int -> label
+        ),
         wghtSum,
         mergedWeights
     );
@@ -168,7 +172,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createNamedDynamicFvMesh.H"
 
-    const bool checkAMI  = args.optionFound("checkAMI");
+    const bool checkAMI  = args.found("checkAMI");
 
     if (checkAMI)
     {

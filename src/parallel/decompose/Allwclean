@@ -17,8 +17,9 @@ wcleanMpiLib()
 }
 
 
-wclean scotchDecomp
 wclean metisDecomp
+wclean kahipDecomp
+wclean scotchDecomp
 wclean decompositionMethods
 wclean decompose
 wcleanMpiLib ptscotchDecomp

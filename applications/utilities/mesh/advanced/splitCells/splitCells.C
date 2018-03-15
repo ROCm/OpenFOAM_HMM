@@ -52,7 +52,7 @@ Description
 #include "polyMesh.H"
 #include "cellCuts.H"
 #include "cellSet.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "meshCutter.H"
 #include "unitConversion.H"
 #include "geomCellLooper.H"
@@ -225,8 +225,8 @@ bool splitHex
 
         const face& f = faces[facei];
 
-        label fp0 = findIndex(f, e[0]);
-        label fp1 = findIndex(f, e[1]);
+        label fp0 = f.find(e[0]);
+        label fp1 = f.find(e[1]);
 
         if (fp0 == -1)
         {
@@ -387,7 +387,7 @@ void collectCuts
     const vectorField& faceAreas = mesh.faceAreas();
 
     // Hex shape
-    const cellModel& hex = *(cellModeller::lookup("hex"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
 
     // cut handling functions
     edgeVertex ev(mesh);
@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
     );
     #include "addOverwriteOption.H"
     argList::noParallel();
-    argList::validArgs.append("edgeAngle [0..360]");
+    argList::addArgument("edgeAngle [0..360]");
 
     argList::addOption
     (
@@ -553,15 +553,15 @@ int main(int argc, char *argv[])
     #include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
-    const scalar featureAngle = args.argRead<scalar>(1);
+    const scalar featureAngle = args.read<scalar>(1);
     const scalar minCos = Foam::cos(degToRad(featureAngle));
     const scalar minSin = Foam::sin(degToRad(featureAngle));
 
-    const bool readSet   = args.optionFound("set");
-    const bool geometry  = args.optionFound("geometry");
-    const bool overwrite = args.optionFound("overwrite");
+    const bool readSet   = args.found("set");
+    const bool geometry  = args.found("geometry");
+    const bool overwrite = args.found("overwrite");
 
-    const scalar edgeTol = args.optionLookupOrDefault("tol", 0.2);
+    const scalar edgeTol = args.lookupOrDefault("tol", 0.2);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl

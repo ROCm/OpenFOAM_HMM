@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,8 +26,7 @@ License
 #include "OBJsurfaceFormat.H"
 #include "clock.H"
 #include "Fstream.H"
-#include "StringStream.H"
-#include "ListOps.H"
+#include "stringOps.H"
 #include "faceTraits.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -60,115 +59,123 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
             << exit(FatalError);
     }
 
-    // assume that the groups are not intermixed
+    // Assume that the groups are not intermixed
+    // Place faces without a group in zone0.
+    // zoneId = -1 to signal uninitialized
+    label zoneId = -1;
     bool sorted = true;
 
     DynamicList<point> dynPoints;
+    DynamicList<label> dynVerts;
     DynamicList<Face>  dynFaces;
-    DynamicList<label> dynZones;
-    DynamicList<word>  dynNames;
-    DynamicList<label> dynSizes;
-    HashTable<label>   lookup;
 
-    // place faces without a group in zone0
-    label zoneI = 0;
-    lookup.insert("zone0", zoneI);
-    dynNames.append("zone0");
-    dynSizes.append(0);
+    DynamicList<word>  dynNames;
+    DynamicList<label> dynZones;
+    DynamicList<label> dynSizes;
+
+    HashTable<label>   groupLookup;
 
     while (is.good())
     {
         string line = this->getLineNoComment(is);
 
-        // Handle continuations
-        if (line.removeEnd("\\"))
+        // Line continuations
+        while (line.removeEnd("\\"))
         {
             line += this->getLineNoComment(is);
         }
 
-        // Read first word
-        IStringStream lineStream(line);
-        word cmd;
-        lineStream >> cmd;
+        const SubStrings<string> tokens = stringOps::splitSpace(line);
+
+        // Require command and some arguments
+        if (tokens.size() < 2)
+        {
+            continue;
+        }
+
+        const word cmd = word::validate(tokens[0]);
 
         if (cmd == "v")
         {
-            scalar x, y, z;
-            lineStream >> x >> y >> z;
-            dynPoints.append(point(x, y, z));
+            // Vertex
+            // v x y z
+
+            dynPoints.append
+            (
+                point
+                (
+                    readScalar(tokens[1]),
+                    readScalar(tokens[2]),
+                    readScalar(tokens[3])
+                )
+            );
         }
         else if (cmd == "g")
         {
-            word name;
-            lineStream >> name;
+            // Grouping
+            // g name
 
-            HashTable<label>::const_iterator fnd = lookup.find(name);
-            if (fnd != lookup.end())
+            const word groupName = word::validate(tokens[1]);
+            const auto iterGroup = groupLookup.cfind(groupName);
+
+            if (iterGroup.found())
             {
-                if (zoneI != fnd())
+                if (zoneId != *iterGroup)
                 {
-                    // group appeared out of order
-                    sorted = false;
+                    sorted = false; // group appeared out of order
                 }
-                zoneI = fnd();
+                zoneId = *iterGroup;
             }
             else
             {
-                zoneI = dynSizes.size();
-                lookup.insert(name, zoneI);
-                dynNames.append(name);
+                zoneId = dynSizes.size();
+                groupLookup.insert(groupName, zoneId);
+                dynNames.append(groupName);
                 dynSizes.append(0);
             }
         }
         else if (cmd == "f")
         {
-            DynamicList<label> dynVertices;
+            // Face
+            // f v1 v2 v3 ...
+            // OR
+            // f v1/vt1 v2/vt2 v3/vt3 ...
 
-            // Assume 'f' is followed by space.
-            string::size_type endNum = 1;
-
-            while (true)
+            // Ensure it has as valid grouping
+            if (zoneId < 0)
             {
-                string::size_type startNum =
-                    line.find_first_not_of(' ', endNum);
-
-                if (startNum == string::npos)
-                {
-                    break;
-                }
-
-                endNum = line.find(' ', startNum);
-
-                string vertexSpec;
-                if (endNum != string::npos)
-                {
-                    vertexSpec = line.substr(startNum, endNum-startNum);
-                }
-                else
-                {
-                    vertexSpec = line.substr(startNum, line.size() - startNum);
-                }
-
-                string::size_type slashPos = vertexSpec.find('/');
-
-                label vertI = 0;
-                if (slashPos != string::npos)
-                {
-                    IStringStream intStream(vertexSpec.substr(0, slashPos));
-
-                    intStream >> vertI;
-                }
-                else
-                {
-                    IStringStream intStream(vertexSpec);
-
-                    intStream >> vertI;
-                }
-                dynVertices.append(vertI - 1);
+                zoneId = 0;
+                groupLookup.insert("zone0", 0);
+                dynNames.append("zone0");
+                dynSizes.append(0);
             }
-            dynVertices.shrink();
 
-            labelUList& f = static_cast<labelUList&>(dynVertices);
+            dynVerts.clear();
+
+            bool first = true;
+            for (const auto& tok : tokens)
+            {
+                if (first)
+                {
+                    // skip initial "f" or "l"
+                    first = false;
+                    continue;
+                }
+
+                const string vrtSpec(tok);
+                const auto slash = vrtSpec.find('/');
+
+                const label vertId =
+                (
+                    slash != string::npos
+                  ? readLabel(vrtSpec.substr(0, slash))
+                  : readLabel(vrtSpec)
+                );
+
+                dynVerts.append(vertId - 1);
+            }
+
+            const labelUList& f = dynVerts;
 
             if (faceTraits<Face>::isTri() && f.size() > 3)
             {
@@ -176,28 +183,30 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                 // points may be incomplete
                 for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {
-                    label fp2 = f.fcIndex(fp1);
+                    const label fp2 = f.fcIndex(fp1);
 
                     dynFaces.append(Face{f[0], f[fp1], f[fp2]});
-                    dynZones.append(zoneI);
-                    dynSizes[zoneI]++;
+                    dynZones.append(zoneId);
+                    dynSizes[zoneId]++;
                 }
             }
-            else
+            else if (f.size() >= 3)
             {
                 dynFaces.append(Face(f));
-                dynZones.append(zoneI);
-                dynSizes[zoneI]++;
+                dynZones.append(zoneId);
+                dynSizes[zoneId]++;
             }
         }
     }
 
 
-    // transfer to normal lists
+    // Transfer to normal lists
     this->storedPoints().transfer(dynPoints);
 
-    this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
-    this->addZones(dynSizes, dynNames, true); // add zones, cull empty ones
+    this->sortFacesAndStore(dynFaces, dynZones, sorted);
+
+    // Add zones (retaining empty ones)
+    this->addZones(dynSizes, dynNames);
     this->addZonesToFaces(); // for labelledTri
 
     return true;
@@ -208,15 +217,16 @@ template<class Face>
 void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary& options
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&  faceLst  = surf.surfFaces();
+    const UList<label>& faceMap  = surf.faceMap();
 
     // for no zones, suppress the group name
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst, "")
@@ -242,68 +252,66 @@ void Foam::fileFormats::OBJsurfaceFormat<Face>::write
         << "# zones  : " << zones.size() << nl;
 
     // Print zone names as comment
-    forAll(zones, zoneI)
+    forAll(zones, zonei)
     {
-        os  << "#   " << zoneI << "  " << zones[zoneI].name()
-            << "  (nFaces: " << zones[zoneI].size() << ")" << nl;
+        os  << "#   " << zonei << "  " << zones[zonei].name()
+            << "  (nFaces: " << zones[zonei].size() << ")" << nl;
     }
 
     os  << nl
         << "# <points count=\"" << pointLst.size() << "\">" << nl;
 
     // Write vertex coords
-    forAll(pointLst, ptI)
+    for (const point& pt : pointLst)
     {
-        const point& pt = pointLst[ptI];
-
         os  << "v " << pt.x() << ' '  << pt.y() << ' '  << pt.z() << nl;
     }
 
     os  << "# </points>" << nl
         << nl
-        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+        << "# <faces count=\"" << faceLst.size() << "\">" << nl;
 
 
     label faceIndex = 0;
-    forAll(zones, zoneI)
+    for (const surfZone& zone : zones)
     {
-        const surfZone& zone = zones[zoneI];
-
         if (zone.name().size())
         {
-            os << "g " << zone.name() << endl;
+            os << "g " << zone.name() << nl;
         }
+
+        const label nLocalFaces = zone.size();
 
         if (useFaceMap)
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceMap[faceIndex++]];
 
                 os << 'f';
-                forAll(f, fp)
+                for (const label verti : f)
                 {
-                    os << ' ' << f[fp] + 1;
+                    os << ' ' << verti + 1;
                 }
-                os << endl;
+                os << nl;
             }
         }
         else
         {
-            forAll(zone, localFacei)
+            for (label i=0; i<nLocalFaces; ++i)
             {
                 const Face& f = faceLst[faceIndex++];
 
                 os << 'f';
-                forAll(f, fp)
+                for (const label verti : f)
                 {
-                    os << ' ' << f[fp] + 1;
+                    os << ' ' << verti + 1;
                 }
-                os << endl;
+                os << nl;
             }
         }
     }
-    os << "# </faces>" << endl;
+    os << "# </faces>" << nl;
 }
 
 

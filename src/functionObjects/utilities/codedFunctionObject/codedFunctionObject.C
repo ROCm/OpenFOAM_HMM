@@ -162,7 +162,7 @@ Foam::functionObjects::codedFunctionObject::redirectFunctionObject() const
             constructDict
         );
     }
-    return redirectFunctionObjectPtr_();
+    return *redirectFunctionObjectPtr_;
 }
 
 

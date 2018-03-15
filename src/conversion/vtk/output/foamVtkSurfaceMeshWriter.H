@@ -40,6 +40,7 @@ SourceFiles
 #include "OFstream.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "areaFields.H"
 #include "indirectPrimitivePatch.H"
 #include "foamVtkOutputOptions.H"
 
@@ -121,7 +122,7 @@ public:
 
         inline vtk::formatter& format()
         {
-            return format_();
+            return *format_;
         }
 
         //- Open write for CellData of count fields.
@@ -152,6 +153,13 @@ public:
             const GeometricField<Type, fvsPatchField, surfaceMesh>& field
         );
 
+        //- Write surface field
+        template<class Type>
+        void write
+        (
+            const GeometricField<Type, faPatchField, areaMesh>& field
+        );
+
 
       // Write fields (collectively)
 
@@ -162,6 +170,16 @@ public:
             const UPtrList
             <
                 const GeometricField<Type, fvsPatchField, surfaceMesh>
+            >& sflds
+        );
+
+        //- Write surface fields
+        template<class Type>
+        void write
+        (
+            const UPtrList
+            <
+                const GeometricField<Type, faPatchField, areaMesh>
             >& sflds
         );
 };

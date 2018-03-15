@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -19,17 +18,12 @@ numberOfSubdomains 4;
 
 method          metis;
 
-simpleCoeffs
+coeffs
 {
-    n               (2 2 1);
-    delta           0.001;
-}
-
-hierarchicalCoeffs
-{
-    n               (1 1 1);
-    delta           0.001;
-    order           xyz;
+    n           (2 2 1);
+    //delta       0.001; // default=0.001
+    //order       xyz;   // default=xzy
+    dataFile    "";
 }
 
 metisCoeffs
@@ -37,14 +31,9 @@ metisCoeffs
     processorWeights ( 1 1 1 1 );
 }
 
-manualCoeffs
-{
-    dataFile        "";
-}
 
 distributed     no;
 
 roots           ( );
-
 
 // ************************************************************************* //

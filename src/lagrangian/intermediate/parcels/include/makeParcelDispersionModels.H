@@ -23,8 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelDispersionModels_h
-#define makeParcelDispersionModels_h
+#ifndef makeParcelDispersionModels_H
+#define makeParcelDispersionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

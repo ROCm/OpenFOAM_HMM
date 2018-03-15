@@ -243,12 +243,16 @@ void Foam::surfaceFeatures::calcFeatPoints
 
                 if (edgeStat[edgeI] != NONE)
                 {
-                    edgeVecs.append(edges[edgeI].vec(localPoints));
-                    edgeVecs.last() /= mag(edgeVecs.last());
+                    vector vec = edges[edgeI].vec(localPoints);
+                    scalar magVec = mag(vec);
+                    if (magVec > SMALL)
+                    {
+                        edgeVecs.append(vec/magVec);
+                    }
                 }
             }
 
-            if (mag(edgeVecs[0] & edgeVecs[1]) < minCos)
+            if (edgeVecs.size() == 2 && mag(edgeVecs[0] & edgeVecs[1]) < minCos)
             {
                 featurePoints.append(pointi);
             }
@@ -388,7 +392,7 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
 
     label nVisited = 0;
 
-    if (findIndex(featurePoints_, startPointi) >= 0)
+    if (featurePoints_.found(startPointi))
     {
         // Do not walk across feature points
 
@@ -619,7 +623,7 @@ Foam::surfaceFeatures::surfaceFeatures::checkFlatRegionEdge
 
             regionAndNormal1[i] = myRegionAndNormal;
 
-            label index = findIndex(regionAndNormal, -myRegionAndNormal);
+            label index = regionAndNormal.find(-myRegionAndNormal);
             if (index == -1)
             {
                 // Not found.

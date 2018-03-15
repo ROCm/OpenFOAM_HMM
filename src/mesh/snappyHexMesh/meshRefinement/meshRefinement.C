@@ -619,8 +619,11 @@ void Foam::meshRefinement::checkData()
         localPointRegion::findDuplicateFaces
         (
             mesh_,
-            identity(mesh_.nFaces()-mesh_.nInternalFaces())
-          + mesh_.nInternalFaces()
+            identity
+            (
+                mesh_.nFaces() - mesh_.nInternalFaces(),
+                mesh_.nInternalFaces()
+            )
         )
     );
 
@@ -669,15 +672,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
     );
 
     // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields
     mesh_.updateMesh(map);
 
     // Move mesh (since morphing might not do this)
-    if (map().hasMotionPoints())
+    if (map.hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh_.movePoints(map.preMotionPoints());
     }
     else
     {
@@ -695,7 +699,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
     // Update intersections. Recalculate intersections for exposed faces.
     labelList newExposedFaces = renumber
     (
-        map().reverseFaceMap(),
+        map.reverseFaceMap(),
         exposedFaces
     );
 
@@ -704,7 +708,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
 
     updateMesh(map, newExposedFaces);
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -860,15 +864,16 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         doSplitFaces(splitFaces, splits, meshMod);
 
         // Change the mesh (no inflation)
-        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+        autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh (since morphing might not do this)
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
 
         // Reset the instance for if in overwrite mode
@@ -881,7 +886,7 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
         forAll(originalFaces, i)
         {
-            inplaceRenumber(map().reversePointMap(), originalFaces[i]);
+            inplaceRenumber(map.reversePointMap(), originalFaces[i]);
         }
 
         {
@@ -891,9 +896,9 @@ Foam::label Foam::meshRefinement::splitFacesUndo
                 splitFaceToIndex.insert(splitFaces[i], i);
             }
 
-            forAll(map().faceMap(), facei)
+            forAll(map.faceMap(), facei)
             {
-                label oldFacei = map().faceMap()[facei];
+                label oldFacei = map.faceMap()[facei];
                 Map<label>::iterator oldFaceFnd = splitFaceToIndex.find
                 (
                     oldFacei
@@ -927,13 +932,13 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         {
             meshRefinement::updateList
             (
-                map().faceMap(),
+                map.faceMap(),
                 label(-1),
                 duplicateFace
             );
         }
 
-        const labelList& oldToNewFaces = map().reverseFaceMap();
+        const labelList& oldToNewFaces = map.reverseFaceMap();
         forAll(baffles, i)
         {
             labelPair& baffle = baffles[i];
@@ -1087,15 +1092,16 @@ Foam::label Foam::meshRefinement::splitFacesUndo
 
 
         // Change the mesh (no inflation)
-        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+        autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh (since morphing might not do this)
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
 
         // Reset the instance for if in overwrite mode
@@ -1107,8 +1113,8 @@ Foam::label Foam::meshRefinement::splitFacesUndo
         // ~~~~~~~~~~~~~~~~~~~~~~
 
         {
-            const labelList& oldToNewFaces = map().reverseFaceMap();
-            const labelList& oldToNewPoints = map().reversePointMap();
+            const labelList& oldToNewFaces = map.reverseFaceMap();
+            const labelList& oldToNewPoints = map.reversePointMap();
 
             // Compact out merged faces
             DynamicList<label> changedFaces(mergedIndices.size());
@@ -1168,13 +1174,13 @@ Foam::label Foam::meshRefinement::splitFacesUndo
             {
                 meshRefinement::updateList
                 (
-                    map().faceMap(),
+                    map.faceMap(),
                     label(-1),
                     duplicateFace
                 );
             }
 
-            const labelList& reverseFaceMap = map().reverseFaceMap();
+            const labelList& reverseFaceMap = map.reverseFaceMap();
             forAll(baffles, i)
             {
                 labelPair& baffle = baffles[i];
@@ -1475,12 +1481,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
         map = distributor.distribute(distribution);
 
         // Update numbering of meshRefiner
-        distribute(map);
+        distribute(map());
 
         // Set correct instance (for if overwrite)
         mesh_.setInstance(timeName());
         setInstance(mesh_.facesInstance());
-
 
 
         if (debug && keepZoneFaces)
@@ -1643,13 +1648,10 @@ Foam::autoPtr<Foam::indirectPrimitivePatch> Foam::meshRefinement::makePatch
         }
     }
 
-    return autoPtr<indirectPrimitivePatch>
+    return autoPtr<indirectPrimitivePatch>::New
     (
-        new indirectPrimitivePatch
-        (
-            IndirectList<face>(mesh.faces(), addressing),
-            mesh.points()
-        )
+        IndirectList<face>(mesh.faces(), addressing),
+        mesh.points()
     );
 }
 
@@ -2037,7 +2039,7 @@ Foam::label Foam::meshRefinement::addMeshedPatch
     const dictionary& patchInfo
 )
 {
-    label meshedi = findIndex(meshedPatches_, name);
+    label meshedi = meshedPatches_.find(name);
 
     if (meshedi != -1)
     {
@@ -2341,7 +2343,7 @@ void Foam::meshRefinement::findRegions
         {
             // Do a quick check for locationsOutsideMesh overlapping with
             // inside ones.
-            label index = findIndex(insideRegions, regioni);
+            label index = insideRegions.find(regioni);
             if (index != -1)
             {
                 FatalErrorInFunction

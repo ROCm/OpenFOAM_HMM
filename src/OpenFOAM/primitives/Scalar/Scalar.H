@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -105,20 +105,17 @@ public:
 
 // * * * * * * * * * * * * * * * IO/Conversion * * * * * * * * * * * * * * * //
 
-//- Return a string representation of a Scalar
+//- Return a word representation of a Scalar.
+//  Uses stringstream instead of std::to_string for more consistent formatting.
 word name(const Scalar val);
-
-//- Return a word representation of a Scalar, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const char* fmt, const Scalar val);
-
-//- Return a word representation of a Scalar, using printf-style formatter.
-//  The representation is not checked for valid word characters.
-word name(const std::string& fmt, const Scalar val);
 
 //- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
 //  \return Parsed value or FatalIOError on any problem
 Scalar ScalarRead(const char* buf);
+
+//- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
+//  \return True if successful.
+bool ScalarRead(const char* buf, Scalar& val);
 
 //- Parse entire string as a float/double, skipping leading/trailing whitespace.
 //  \return Parsed value or FatalIOError on any problem
@@ -127,16 +124,13 @@ inline Scalar ScalarRead(const std::string& str)
     return ScalarRead(str.c_str());
 }
 
-//- Parse entire buffer as a float/double, skipping leading/trailing whitespace.
-//  \return True if successful.
-bool readScalar(const char* buf, Scalar& val);
-
 //- Parse entire string as a float/double, skipping leading/trailing whitespace.
 //  \return True if successful.
-inline bool readScalar(const std::string& str, Scalar& val)
+inline bool ScalarRead(const std::string& str, Scalar& val)
 {
-    return readScalar(str.c_str(), val);
+    return ScalarRead(str.c_str(), val);
 }
+
 
 Scalar ScalarRead(Istream& is);
 Istream& operator>>(Istream& is, Scalar& val);

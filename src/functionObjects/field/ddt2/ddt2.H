@@ -79,10 +79,9 @@ SourceFiles
 #include "fvMeshFunctionObject.H"
 #include "volFieldsFwd.H"
 #include "OFstream.H"
-#include "wordReList.H"
 #include "regExp.H"
 #include "HashSet.H"
-#include "Switch.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -102,7 +101,7 @@ class ddt2
     // Private data
 
         //- Name of fields to process
-        wordReList selectFields_;
+        wordRes selectFields_;
 
         //- Formatting for the result fields.
         word resultName_;
@@ -116,13 +115,13 @@ class ddt2
         //- Use 'mag' instead of 'magSqr'.
         //  Cannot be adjusted during the simulation since it alters the
         //  dimensions of the output field.
-        const Switch mag_;
+        const bool mag_;
 
 
     // Private Member Functions
 
         //- Check that the word contains the appropriate substitution token(s).
-        static bool checkFormatName(const word&);
+        static bool checkFormatName(const word& str);
 
 
         //- Accept unless field name appears to have already been processed
@@ -161,7 +160,7 @@ public:
 
 
     //- Destructor
-    virtual ~ddt2();
+    virtual ~ddt2() = default;
 
 
     // Member Functions

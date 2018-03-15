@@ -54,7 +54,7 @@ Foam::functionObjects::timeControl::writeControl() const
 inline const Foam::functionObject&
 Foam::functionObjects::timeControl::filter() const
 {
-    return foPtr_();
+    return *foPtr_;
 }
 
 

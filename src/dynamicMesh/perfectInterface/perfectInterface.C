@@ -79,7 +79,6 @@ Foam::pointField Foam::perfectInterface::calcFaceCentres
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::perfectInterface::perfectInterface
 (
     const word& name,
@@ -97,7 +96,6 @@ Foam::perfectInterface::perfectInterface
 {}
 
 
-// Construct from dictionary
 Foam::perfectInterface::perfectInterface
 (
     const word& name,
@@ -457,14 +455,14 @@ void Foam::perfectInterface::setRefinement(polyTopoChange& ref) const
         const polyPatch& patch1 = patches[slavePatchID_.index()];
 
 
-        labelList pp0Labels(identity(patch0.size())+patch0.start());
+        labelList pp0Labels(identity(patch0.size(), patch0.start()));
         indirectPrimitivePatch pp0
         (
             IndirectList<face>(mesh.faces(), pp0Labels),
             mesh.points()
         );
 
-        labelList pp1Labels(identity(patch1.size())+patch1.start());
+        labelList pp1Labels(identity(patch1.size(), patch1.start()));
         indirectPrimitivePatch pp1
         (
             IndirectList<face>(mesh.faces(), pp1Labels),
@@ -506,34 +504,16 @@ void Foam::perfectInterface::write(Ostream& os) const
 
 void Foam::perfectInterface::writeDict(Ostream& os) const
 {
-    os  << nl << name() << nl << token::BEGIN_BLOCK << nl
+    os  << nl;
 
-        << "    type " << type()
-        << token::END_STATEMENT << nl
-
-        << "    active " << active()
-        << token::END_STATEMENT << nl
-
-        << "    faceZoneName " << faceZoneID_.name()
-        << token::END_STATEMENT << nl
-
-        << "    masterPatchName " << masterPatchID_.name()
-        << token::END_STATEMENT << nl
-
-        << "    slavePatchName " << slavePatchID_.name()
-        << token::END_STATEMENT << nl
-
-        << token::END_BLOCK << endl;
+    os.beginBlock(name());
+    os.writeEntry("type", type());
+    os.writeEntry("active", active());
+    os.writeEntry("faceZoneName", faceZoneID_.name());
+    os.writeEntry("masterPatchName", masterPatchID_.name());
+    os.writeEntry("slavePatchName", slavePatchID_.name());
+    os.endBlock();
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

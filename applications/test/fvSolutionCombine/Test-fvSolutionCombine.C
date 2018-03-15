@@ -106,8 +106,8 @@ int main(int argc, char *argv[])
 
     const word dictName("fvSolution");
 
-    bool optRewrite = args.optionFound("rewrite");
-    bool optShow = args.optionFound("show");
+    bool optRewrite = args.found("rewrite");
+    bool optShow = args.found("show");
 
     IOdictionary solutionDict
     (

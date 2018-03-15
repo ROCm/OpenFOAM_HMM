@@ -304,10 +304,10 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-    const bool readDict   = args.optionFound("dict");
-    const bool split      = args.optionFound("split");
-    const bool overwrite  = args.optionFound("overwrite");
-    const bool detectOnly = args.optionFound("detectOnly");
+    const bool readDict   = args.found("dict");
+    const bool split      = args.found("split");
+    const bool overwrite  = args.found("overwrite");
+    const bool detectOnly = args.found("detectOnly");
 
     if (readDict && (split || detectOnly))
     {
@@ -450,7 +450,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())
@@ -520,7 +520,7 @@ int main(int argc, char *argv[])
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(map);
+        mesh.updateMesh(map());
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())

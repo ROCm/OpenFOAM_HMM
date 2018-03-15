@@ -45,7 +45,7 @@ namespace mathematical
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    static const char* const group = "mathematical";
+    constexpr const char* const group = "mathematical";
 
     constexpr scalar e(M_E);
     constexpr scalar pi(M_PI);

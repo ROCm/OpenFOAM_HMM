@@ -60,7 +60,7 @@ template<class CloudType>
 inline const Foam::Cloud<typename CloudType::parcelType>&
 Foam::ParticleTracks<CloudType>::cloud() const
 {
-    return cloudPtr_();
+    return *cloudPtr_;
 }
 
 

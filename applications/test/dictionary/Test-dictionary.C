@@ -43,7 +43,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.insert("dict .. dictN");
+    argList::addArgument("dict .. dictN");
     argList args(argc, argv, false, true);
 
     {
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
                 << "keys: " << dict1.keys() << nl
                 << "patterns: " << dict1.keys(true) << endl;
 
-            dictionary dict2(dict1.xfer());
+            dictionary dict2(std::move(dict1));
 
             Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
                 << "dict2.toc(): " << dict2.name() << " " << dict2.toc()

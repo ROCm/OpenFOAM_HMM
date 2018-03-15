@@ -36,7 +36,7 @@ Foam::PressureGradientForce<CloudType>::DUcDtInterp() const
             << abort(FatalError);
     }
 
-    return DUcDtInterpPtr_();
+    return *DUcDtInterpPtr_;
 }
 
 

@@ -25,10 +25,10 @@ Class
     Foam::pyrMatcher
 
 Description
-    A cellMatcher for pyr cells
+    A cellMatcher for pyr cells (cellModel::PYR)
 
 See also
-    cellMatcher
+    cellMatcher, cellModel
 
 SourceFiles
     pyrMatcher.C
@@ -46,28 +46,28 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pyrMatcher Declaration
+                         Class pyrMatcher Declaration
 \*---------------------------------------------------------------------------*/
 
 class pyrMatcher
 :
     public cellMatcher
 {
-    // Static data members
+    // Static Data Members
 
-        //- Constants for this shape
-        static const label vertPerCell;
-        static const label facePerCell;
-        static const label maxVertPerFace;
+        // Constants for this shape
+        static constexpr label vertPerCell = 5;
+        static constexpr label facePerCell = 5;
+        static constexpr label maxVertPerFace = 4;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        pyrMatcher(const pyrMatcher&);
+        pyrMatcher(const pyrMatcher&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const pyrMatcher&);
+        pyrMatcher& operator=(const pyrMatcher&) = delete;
 
 
 public:

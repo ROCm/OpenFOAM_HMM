@@ -194,7 +194,7 @@ Foam::regionModels::regionModel::interRegionAMI
     const bool flip
 ) const
 {
-    label nbrRegionID = findIndex(interRegionAMINames_, nbrRegion.name());
+    label nbrRegionID = interRegionAMINames_.find(nbrRegion.name());
 
     const fvMesh& nbrRegionMesh = nbrRegion.regionMesh();
 

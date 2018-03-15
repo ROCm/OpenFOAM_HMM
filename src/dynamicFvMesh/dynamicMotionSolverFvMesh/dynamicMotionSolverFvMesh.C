@@ -61,7 +61,7 @@ Foam::dynamicMotionSolverFvMesh::~dynamicMotionSolverFvMesh()
 
 const Foam::motionSolver& Foam::dynamicMotionSolverFvMesh::motion() const
 {
-    return motionPtr_();
+    return *motionPtr_;
 }
 
 

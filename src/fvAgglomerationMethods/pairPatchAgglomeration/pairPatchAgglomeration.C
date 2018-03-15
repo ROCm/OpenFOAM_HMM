@@ -25,6 +25,7 @@ License
 
 #include "pairPatchAgglomeration.H"
 #include "meshTools.H"
+#include "edgeHashes.H"
 #include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -123,7 +124,7 @@ void Foam::pairPatchAgglomeration::setEdgeWeights
     const label nCoarseI =  max(fineToCoarse) + 1;
     labelListList coarseToFine(invertOneToMany(nCoarseI, fineToCoarse));
 
-    HashSet<edge, Hash<edge>> fineFeaturedFaces(coarsePatch.nEdges()/10);
+    edgeHashSet fineFeaturedFaces(coarsePatch.nEdges()/10);
 
     // Map fine faces with featured edge into coarse faces
     forAllConstIter(EdgeMap<scalar>, facePairWeight_, iter)

@@ -59,21 +59,20 @@ static bool startsWithSolid(const char header[STLHeaderSize])
 //! \endcond
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::fileFormats::STLCore::STLCore()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 bool Foam::fileFormats::STLCore::isBinaryName
 (
     const fileName& filename,
-    const STLFormat& format
+    const STLFormat format
 )
 {
-    return (format == UNKNOWN ? (filename.ext() == "stlb") : format == BINARY);
+    return
+    (
+        format == STLFormat::UNKNOWN
+      ? (filename.ext() == "stlb")
+      : format == STLFormat::BINARY
+    );
 }
 
 
@@ -81,7 +80,7 @@ bool Foam::fileFormats::STLCore::isBinaryName
 // this seems to work better than the old token-based method
 // - using wordToken can cause an abort if non-word (binary) content
 //   is detected ... this is not exactly what we want.
-// - some programs (eg, pro-STAR) have 'solid' as the first word in
+// - some programs (eg, PROSTAR) have 'solid' as the first word in
 //   the binary header. This is just wrong and not our fault.
 int Foam::fileFormats::STLCore::detectBinaryHeader
 (

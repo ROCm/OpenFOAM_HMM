@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -42,7 +42,20 @@ namespace Foam
 
 const char * const Foam::cellZone::labelsName = "cellLabels";
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::cellZone::cellZone
+(
+    const word& name,
+    const label index,
+    const cellZoneMesh& zm
+)
+:
+    zone(name, index),
+    zoneMesh_(zm)
+{}
+
 
 Foam::cellZone::cellZone
 (
@@ -60,12 +73,12 @@ Foam::cellZone::cellZone
 Foam::cellZone::cellZone
 (
     const word& name,
-    const Xfer<labelList>& addr,
+    labelList&& addr,
     const label index,
     const cellZoneMesh& zm
 )
 :
-    zone(name, addr, index),
+    zone(name, std::move(addr), index),
     zoneMesh_(zm)
 {}
 
@@ -85,32 +98,27 @@ Foam::cellZone::cellZone
 
 Foam::cellZone::cellZone
 (
-    const cellZone& cz,
+    const cellZone& origZone,
     const labelUList& addr,
     const label index,
     const cellZoneMesh& zm
 )
 :
-    zone(cz, addr, index),
+    zone(origZone, addr, index),
     zoneMesh_(zm)
 {}
 
+
 Foam::cellZone::cellZone
 (
-    const cellZone& cz,
-    const Xfer<labelList>& addr,
+    const cellZone& origZone,
+    labelList&& addr,
     const label index,
     const cellZoneMesh& zm
 )
 :
-    zone(cz, addr, index),
+    zone(origZone, std::move(addr), index),
     zoneMesh_(zm)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cellZone::~cellZone()
 {}
 
 
@@ -161,10 +169,10 @@ void Foam::cellZone::operator=(const labelUList& addr)
 }
 
 
-void Foam::cellZone::operator=(const Xfer<labelList>& addr)
+void Foam::cellZone::operator=(labelList&& addr)
 {
     clearAddressing();
-    labelList::operator=(addr);
+    labelList::transfer(addr);
 }
 
 

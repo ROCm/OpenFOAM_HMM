@@ -30,7 +30,7 @@ inline const ThermophysicalProperties&
 Foam::thermophysicalPropertiesSelector<ThermophysicalProperties>
 ::properties() const
 {
-    return propertiesPtr_();
+    return *propertiesPtr_;
 }
 
 

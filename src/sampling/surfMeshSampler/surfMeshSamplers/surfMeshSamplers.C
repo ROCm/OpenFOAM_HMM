@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016-2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,6 @@ License
 #include "volPointInterpolation.H"
 #include "PatchTools.H"
 #include "mapPolyMesh.H"
-#include "wordRes.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -130,12 +129,6 @@ Foam::surfMeshSamplers::surfMeshSamplers
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfMeshSamplers::~surfMeshSamplers()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -279,10 +272,10 @@ bool Foam::surfMeshSamplers::write()
     // or elsewhere
 
     // This could be more efficient
-    wordReList select(fieldSelection_.size() + derivedNames_.size());
+    wordRes select(fieldSelection_.size() + derivedNames_.size());
 
     label nElem = 0;
-    for (const auto& item : fieldSelection_)
+    for (const wordRe& item : fieldSelection_)
     {
         select[nElem++] = item;
     }
@@ -291,8 +284,8 @@ bool Foam::surfMeshSamplers::write()
         select[nElem++] = derivedName;
     }
 
-    // avoid duplicate entries
-    select = wordRes::uniq(select);
+    // Avoid duplicate entries
+    select.uniq();
 
     for (const surfMeshSampler& s : surfaces())
     {
@@ -308,15 +301,13 @@ bool Foam::surfMeshSamplers::read(const dictionary& dict)
     fieldSelection_.clear();
     derivedNames_.clear();
 
-    const bool createOnRead =
-        dict.lookupOrDefault<Switch>("createOnRead", false);
+    const bool createOnRead = dict.lookupOrDefault("createOnRead", false);
 
     if (dict.found("surfaces"))
     {
-        fieldSelection_ = wordRes::uniq
-        (
-            wordReList(dict.lookup("fields"))
-        );
+        dict.lookup("fields") >> fieldSelection_;
+        fieldSelection_.uniq();
+
         Info<< type() << " fields: " << fieldSelection_ << nl;
 
         if (dict.readIfPresent("derived", derivedNames_))

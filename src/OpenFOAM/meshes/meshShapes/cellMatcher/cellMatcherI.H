@@ -24,7 +24,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "primitiveMesh.H"
-#include "cellModeller.H"
 #include "cellModel.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -87,11 +86,10 @@ inline const Foam::cellModel& Foam::cellMatcher::model() const
 {
     if (cellModelPtr_ == nullptr)
     {
-        cellModelPtr_ = cellModeller::lookup(cellModelName_);
+        cellModelPtr_ = cellModel::ptr(cellModelName_);
     }
     return *cellModelPtr_;
 }
-
 
 
 // Key into edgeFaces_. key and key+1 are the entries for edge going from

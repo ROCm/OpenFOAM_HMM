@@ -42,7 +42,7 @@ Description
 #include "polyMesh.H"
 #include "Time.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "cellSet.H"
 #include "faceSet.H"
 #include "DynamicList.H"
@@ -68,9 +68,11 @@ namespace Foam
         return Hash<face>::operator()(t, 0);
     }
 }
+
 const string SEPARATOR("    -1");
 
-bool isSeparator(const string& line)
+
+bool isSeparator(const std::string& line)
 {
     return line.substr(0, 6) == SEPARATOR;
 }
@@ -100,7 +102,7 @@ label readTag(IFstream& is)
 
     } while (tag == SEPARATOR);
 
-    return readLabel(IStringStream(tag)());
+    return readLabel(tag);
 }
 
 
@@ -144,14 +146,14 @@ void skipSection(IFstream& is)
 }
 
 
-scalar readUnvScalar(const string& unvString)
+scalar readUnvScalar(const std::string& unvString)
 {
     string s(unvString);
 
     s.replaceAll("d", "E");
     s.replaceAll("D", "E");
 
-    return readScalar(IStringStream(s)());
+    return readScalar(s);
 }
 
 
@@ -170,13 +172,13 @@ void readUnits
     string line;
     is.getLine(line);
 
-    label l = readLabel(IStringStream(line.substr(0, 10))());
+    label l = readLabel(line.substr(0, 10));
     Info<< "l:" << l << endl;
 
     string units(line.substr(10, 20));
     Info<< "units:" << units << endl;
 
-    label unitType = readLabel(IStringStream(line.substr(30, 10))());
+    label unitType = readLabel(line.substr(30, 10));
     Info<< "unitType:" << unitType << endl;
 
     // Read lengthscales
@@ -215,7 +217,7 @@ void readPoints
         string line;
         is.getLine(line);
 
-        label pointi = readLabel(IStringStream(line.substr(0, 10))());
+        label pointi = readLabel(line.substr(0, 10));
 
         if (pointi == -1)
         {
@@ -289,9 +291,9 @@ void readCells
     labelList unvToFoam(invert(maxUnvPoint+1, unvPointID));
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelHashSet skippedElements;
 
@@ -589,7 +591,8 @@ void readDOFS
     is.getLine(line);
     {
         IStringStream lineStr(line);
-        patchNames.append(lineStr);
+        word pName(lineStr);
+        patchNames.append(pName);
     }
 
     Info<< "For DOF set " << group
@@ -659,7 +662,7 @@ label findPatch(const List<labelHashSet>& dofGroups, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".unv file");
+    argList::addArgument(".unv file");
     argList::addBoolOption
     (
         "dump",
@@ -805,7 +808,7 @@ int main(int argc, char *argv[])
             )
         );
 
-        if (findIndex(foamVerts, -1) != -1)
+        if (foamVerts.found(-1))
         {
             FatalErrorInFunction
                 << "Cell " << celli
@@ -824,7 +827,7 @@ int main(int argc, char *argv[])
     {
         labelList foamVerts(renumber(unvToFoam, boundaryFaces[bFacei]));
 
-        if (findIndex(foamVerts, -1) != -1)
+        if (foamVerts.found(-1))
         {
             FatalErrorInFunction
                 << "Boundary face " << bFacei
@@ -850,7 +853,7 @@ int main(int argc, char *argv[])
 
     labelList own(boundaryFaces.size(), -1);
     labelList nei(boundaryFaces.size(), -1);
-    HashTable<label, label> faceToCell[2];
+    Map<label> faceToCell[2];
 
     {
         HashTable<label, face, Hash<face>> faceToFaceID(boundaryFaces.size());
@@ -1119,23 +1122,19 @@ int main(int argc, char *argv[])
 
 
     // For debugging: dump boundary faces as OBJ surface mesh
-    if (args.optionFound("dump"))
+    if (args.found("dump"))
     {
         Info<< "Writing boundary faces to OBJ file boundaryFaces.obj"
             << nl << endl;
 
         // Create globally numbered surface
-        meshedSurface rawSurface
-        (
-            xferCopy(polyPoints),
-            xferCopyTo<faceList>(boundaryFaces)
-        );
+        meshedSurface rawSurface(polyPoints, boundaryFaces);
 
         // Write locally numbered surface
         meshedSurface
         (
-            xferCopy(rawSurface.localPoints()),
-            xferCopy(rawSurface.localFaces())
+            rawSurface.localPoints(),
+            rawSurface.localFaces()
         ).write(runTime.path()/"boundaryFaces.obj");
     }
 
@@ -1168,14 +1167,14 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(polyPoints),
+        std::move(polyPoints),
         cellVerts,
-        usedPatchFaceVerts,             // boundaryFaces,
-        usedPatchNames,                 // boundaryPatchNames,
+        usedPatchFaceVerts,     // boundaryFaces,
+        usedPatchNames,         // boundaryPatchNames,
         wordList(patchNames.size(), polyPatch::typeName), // boundaryPatchTypes,
-        "defaultFaces",             // defaultFacesName
-        polyPatch::typeName,        // defaultFacesType,
-        wordList(0)                 // boundaryPatchPhysicalTypes
+        "defaultFaces",         // defaultFacesName
+        polyPatch::typeName,    // defaultFacesType,
+        wordList()              // boundaryPatchPhysicalTypes
     );
 
     // Remove files now, to ensure all mesh files written are consistent.
@@ -1279,7 +1278,7 @@ int main(int argc, char *argv[])
                 (
                     faceZones.toc()[cnt],
                     indizes,
-                    boolList(indizes.size(),false),
+                    false, // none are flipped
                     cnt,
                     mesh.faceZones()
                 );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2016-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -111,7 +111,7 @@ protected:
 
         //- Write the given fields
         template<class Type>
-        label writeFields(const wordReList& select) const;
+        label writeFields(const wordRes& select) const;
 
 public:
 
@@ -181,7 +181,7 @@ public:
         autoPtr<surfMeshSampler> clone() const
         {
             NotImplemented;
-            return autoPtr<surfMeshSampler>(nullptr);
+            return autoPtr<surfMeshSampler>();
         }
 
 
@@ -198,7 +198,7 @@ public:
 
 
     //- Destructor
-    virtual ~surfMeshSampler();
+    virtual ~surfMeshSampler() = default;
 
 
     // Member Functions
@@ -253,16 +253,16 @@ public:
         virtual bool sample(const word& fieldName) const = 0;
 
         //- Sample from volume fields to specified surface fields.
-        virtual label sample(const UList<word>& fields) const;
+        virtual label sample(const UList<word>& fieldNames) const;
 
 
       // Write
 
         //- Write specified fields
-        virtual label write(const wordReList& fieldSelection) const;
+        virtual label write(const wordRes& fieldSelection) const;
 
         //- Write
-        virtual void print(Ostream&) const;
+        virtual void print(Ostream& os) const;
 
 };
 

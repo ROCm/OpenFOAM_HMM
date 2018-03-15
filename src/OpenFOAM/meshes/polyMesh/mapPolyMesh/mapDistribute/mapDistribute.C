@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,7 +31,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(mapDistribute, 0);
+    defineTypeNameAndDebug(mapDistribute, 0);
 }
 
 
@@ -43,29 +43,28 @@ void Foam::mapDistribute::transform::operator()
     const vectorTensorTransform&,
     const bool,
     List<label>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     UList<label>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     Map<label>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     EdgeMap<label>&
-) const
-{}
+) const {}
 
 
 template<>
@@ -74,29 +73,28 @@ void Foam::mapDistribute::transform::operator()
     const vectorTensorTransform&,
     const bool,
     List<scalar>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     UList<scalar>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     Map<scalar>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     EdgeMap<scalar>&
-) const
-{}
+) const {}
 
 
 template<>
@@ -105,29 +103,28 @@ void Foam::mapDistribute::transform::operator()
     const vectorTensorTransform&,
     const bool,
     List<bool>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     UList<bool>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     Map<bool>&
-) const
-{}
+) const {}
+
 template<>
 void Foam::mapDistribute::transform::operator()
 (
     const coupledPolyPatch&,
     EdgeMap<bool>&
-) const
-{}
+) const {}
 
 
 void Foam::mapDistribute::printLayout(Ostream& os) const
@@ -154,11 +151,27 @@ Foam::mapDistribute::mapDistribute()
 {}
 
 
+Foam::mapDistribute::mapDistribute(const mapDistribute& map)
+:
+    mapDistributeBase(map),
+    transformElements_(map.transformElements_),
+    transformStart_(map.transformStart_)
+{}
+
+
+Foam::mapDistribute::mapDistribute(mapDistribute&& map)
+:
+    mapDistribute()
+{
+    transfer(map);
+}
+
+
 Foam::mapDistribute::mapDistribute
 (
     const label constructSize,
-    const Xfer<labelListList>& subMap,
-    const Xfer<labelListList>& constructMap,
+    labelListList&& subMap,
+    labelListList&& constructMap,
     const bool subHasFlip,
     const bool constructHasFlip
 )
@@ -166,8 +179,8 @@ Foam::mapDistribute::mapDistribute
     mapDistributeBase
     (
         constructSize,
-        subMap,
-        constructMap,
+        std::move(subMap),
+        std::move(constructMap),
         subHasFlip,
         constructHasFlip
     )
@@ -177,10 +190,10 @@ Foam::mapDistribute::mapDistribute
 Foam::mapDistribute::mapDistribute
 (
     const label constructSize,
-    const Xfer<labelListList>& subMap,
-    const Xfer<labelListList>& constructMap,
-    const Xfer<labelListList>& transformElements,
-    const Xfer<labelList>& transformStart,
+    labelListList&& subMap,
+    labelListList&& constructMap,
+    labelListList&& transformElements,
+    labelList&& transformStart,
     const bool subHasFlip,
     const bool constructHasFlip
 )
@@ -188,20 +201,20 @@ Foam::mapDistribute::mapDistribute
     mapDistributeBase
     (
         constructSize,
-        subMap,
-        constructMap,
+        std::move(subMap),
+        std::move(constructMap),
         subHasFlip,
         constructHasFlip
     ),
-    transformElements_(transformElements),
-    transformStart_(transformStart)
+    transformElements_(std::move(transformElements)),
+    transformStart_(std::move(transformStart))
 {}
 
 
 Foam::mapDistribute::mapDistribute
 (
-    const labelList& sendProcs,
-    const labelList& recvProcs
+    const labelUList& sendProcs,
+    const labelUList& recvProcs
 )
 :
     mapDistributeBase(sendProcs, recvProcs)
@@ -467,29 +480,6 @@ Foam::mapDistribute::mapDistribute
 }
 
 
-Foam::mapDistribute::mapDistribute(const mapDistribute& map)
-:
-    mapDistributeBase(map),
-    transformElements_(map.transformElements_),
-    transformStart_(map.transformStart_)
-{}
-
-
-Foam::mapDistribute::mapDistribute(const Xfer<mapDistribute>& map)
-:
-    mapDistributeBase
-    (
-        map().constructSize_,
-        map().subMap_.xfer(),
-        map().constructMap_.xfer(),
-        map().subHasFlip(),
-        map().constructHasFlip()
-    ),
-    transformElements_(map().transformElements_.xfer()),
-    transformStart_(map().transformStart_.xfer())
-{}
-
-
 Foam::mapDistribute::mapDistribute(Istream& is)
 {
     is  >> *this;
@@ -498,7 +488,7 @@ Foam::mapDistribute::mapDistribute(Istream& is)
 
 Foam::autoPtr<Foam::mapDistribute> Foam::mapDistribute::clone() const
 {
-    return autoPtr<mapDistribute>(new mapDistribute(*this));
+    return autoPtr<mapDistribute>::New(*this);
 }
 
 
@@ -518,19 +508,13 @@ void Foam::mapDistribute::transfer(mapDistribute& rhs)
 }
 
 
-Foam::Xfer<Foam::mapDistribute> Foam::mapDistribute::xfer()
-{
-    return xferMove(*this);
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 void Foam::mapDistribute::operator=(const mapDistribute& rhs)
 {
-    // Check for assignment to self
     if (this == &rhs)
     {
+        // Avoid self-assignment
         FatalErrorInFunction
             << "Attempted assignment to self"
             << abort(FatalError);
@@ -538,6 +522,16 @@ void Foam::mapDistribute::operator=(const mapDistribute& rhs)
     mapDistributeBase::operator=(rhs);
     transformElements_ = rhs.transformElements_;
     transformStart_ = rhs.transformStart_;
+}
+
+
+void Foam::mapDistribute::operator=(mapDistribute&& rhs)
+{
+    if (this != &rhs)
+    {
+        // Avoid self-assignment
+        transfer(rhs);
+    }
 }
 
 

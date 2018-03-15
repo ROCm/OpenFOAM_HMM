@@ -68,7 +68,7 @@ public:
         //- Construct and return clone
         virtual autoPtr<solidProperties> clone() const
         {
-            return autoPtr<solidProperties>(new C(*this));
+            return autoPtr<solidProperties>::NewFrom<C>(*this);
         }
 
 

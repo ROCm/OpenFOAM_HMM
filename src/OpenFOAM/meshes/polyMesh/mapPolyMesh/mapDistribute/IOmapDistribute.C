@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2014-2015 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -90,7 +90,7 @@ Foam::IOmapDistribute::IOmapDistribute
 Foam::IOmapDistribute::IOmapDistribute
 (
     const IOobject& io,
-    const Xfer<mapDistribute>& map
+    mapDistribute&& map
 )
 :
     regIOobject(io)
@@ -98,7 +98,7 @@ Foam::IOmapDistribute::IOmapDistribute
     // Warn for MUST_READ_IF_MODIFIED
     warnNoRereading<IOmapDistribute>();
 
-    mapDistribute::transfer(map());
+    mapDistribute::transfer(map);
 
     if
     (
@@ -113,12 +113,6 @@ Foam::IOmapDistribute::IOmapDistribute
         close();
     }
 }
-
-
-// * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * * //
-
-Foam::IOmapDistribute::~IOmapDistribute()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

@@ -62,12 +62,83 @@ int main(int argc, char *argv[])
     dict.add("FOAM_RUN", subDict);
 
 
+    // Test Foam::name with formatting string
+    {
+        word formatted = word::printf("formatted=<%X>", 0xdeadbeef);
+        Info<<"formatted: " << formatted << nl;
+    }
+
+    Info<<"formatted: "
+        << word::printf("formatted not checked for validity=<%X>", 0xdeadbeef)
+        << nl
+        << endl;
+
+
     Info<< "string:" << test << nl << "hash:"
         << unsigned(string::hash()(test)) << endl;
 
     Info<<"trimLeft: " << stringOps::trimLeft(test) << endl;
     Info<<"trimRight: " << stringOps::trimRight(test) << endl;
     Info<<"trim: " << stringOps::trim(test) << endl;
+
+    if (false)
+    {
+        Info<<"test move construct - string size:" << test.size() << nl;
+        string test2(std::move(test));
+
+        Info<<"input size:" << test.size() << nl;
+        Info<<"moved size:" << test2.size() << nl;
+
+        Info<<"test move assign - string sizes:"
+            << test.size() << "/" << test2.size() << nl;
+
+        test = std::move(test2);
+
+        Info<<"input size:" << test.size() << nl;
+        Info<<"moved size:" << test2.size() << nl;
+    }
+
+    if (false)
+    {
+        std::string str("some text");
+
+        Info<<"test move construct to string:" << str.size() << nl;
+
+        Foam::string test2(std::move(str));
+
+        Info<<"input/moved sizes:" << str.size() << "/" << test2.size() << nl;
+
+        str = std::move(test2);
+
+        Info<<"test move assign - sizes:"
+            << str.size() << "/" << test2.size() << nl;
+    }
+
+    if (false)
+    {
+        Foam::string str("thisIsAWord");
+
+        Info<<"test move construct to word:" << str.size() << nl;
+
+        word test2(std::move(str));
+
+        Info<<"input/moved sizes:" << str.size() << "/" << test2.size() << nl;
+
+        str = std::move(test2);
+
+        Info<<"test move assign - sizes:"
+            << str.size() << "/" << test2.size() << nl;
+
+        // move back
+        test2.swap(str);
+
+        Info<<"test move assign - sizes:"
+            << str.size() << "/" << test2.size() << nl;
+
+        string str2(std::move(test2));
+        Info<<"input/moved sizes:" << test2.size() << "/" << str2.size() << nl;
+
+    }
 
     {
         fileName test1("libFooBar.so");
@@ -156,7 +227,7 @@ int main(int argc, char *argv[])
 
     cout<< "\ntest Foam::name()\n";
 
-    Info<< "hash: = " << Foam::name("0x%012X", string::hash()(s2)) << endl;
+    Info<< "hash: = " << word::printf("0x%012X", string::hash()(s2)) << endl;
 
     // test formatting on int
     {
@@ -165,7 +236,7 @@ int main(int argc, char *argv[])
 
         Info<< "int " << val << " as word >"
             << Foam::name(val) << "< or "
-            << Foam::name("formatted >%08d<", val) << "\n";
+            << word::printf("formatted >%08d<", val) << "\n";
     }
 
     // test formatting on scalar
@@ -173,7 +244,7 @@ int main(int argc, char *argv[])
         scalar val = 3.1415926535897931;
         Info<< "scalar " << val << " as word >"
             << Foam::name(val) << "< or "
-            << Foam::name("formatted >%.9f<", val) << "\n";
+            << word::printf("formatted >%.9f<", val) << "\n";
     }
 
     // test formatting on uint
@@ -183,7 +254,7 @@ int main(int argc, char *argv[])
 
         Info<< "uint64 " << val << " as word >"
             << Foam::name(val) << "< or "
-            << Foam::name("formatted >%08d<", val) << "\n";
+            << word::printf("formatted >%08d<", val) << "\n";
     }
 
     // test startsWith, endsWith methods

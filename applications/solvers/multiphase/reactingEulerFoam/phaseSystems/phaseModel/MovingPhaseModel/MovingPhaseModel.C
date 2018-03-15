@@ -401,7 +401,7 @@ template<class BasePhaseModel>
 const Foam::phaseCompressibleTurbulenceModel&
 Foam::MovingPhaseModel<BasePhaseModel>::turbulence() const
 {
-    return turbulence_;
+    return *turbulence_;
 }
 
 

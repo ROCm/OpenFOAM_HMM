@@ -59,14 +59,9 @@ HeatAndMassTransferPhaseSystem
         massTransferModels_
     );
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -197,14 +192,9 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::dmdt
         )
     );
 
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -239,14 +229,9 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::momentumTransfer() const
     phaseSystem::momentumTransferTable& eqns = eqnsPtr();
 
     // Source term due to mass trasfer
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {
@@ -291,17 +276,10 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
     }
 
     // Heat transfer with the interface
-    forAllConstIter
-    (
-        heatTransferModelTable,
-        heatTransferModels_,
-        heatTransferModelIter
-    )
+    forAllConstIters(heatTransferModels_, heatTransferModelIter)
     {
-        const phasePair& pair
-        (
-            this->phasePairs_[heatTransferModelIter.key()]
-        );
+        const phasePair& pair =
+            *(this->phasePairs_[heatTransferModelIter.key()]);
 
         const phaseModel* phase = &pair.phase1();
         const phaseModel* otherPhase = &pair.phase2();
@@ -344,14 +322,9 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::heatTransfer() const
     }
 
     // Source term due to mass transfer
-    forAllConstIter
-    (
-        phaseSystem::phasePairTable,
-        this->phasePairs_,
-        phasePairIter
-    )
+    forAllConstIters(this->phasePairs_, phasePairIter)
     {
-        const phasePair& pair(phasePairIter());
+        const phasePair& pair = *(phasePairIter.object());
 
         if (pair.ordered())
         {

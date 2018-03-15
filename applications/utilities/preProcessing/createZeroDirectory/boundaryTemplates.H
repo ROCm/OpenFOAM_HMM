@@ -27,9 +27,9 @@ Class
 Description
     Class to store boundary template specifications
 
-    Templates are typically stored centrally, and constructed in a hierarchical
-    manner.  The main use is to convert the (user) specified conditions into
-    a form which can be inserted into each field file as dictionary entries.
+    Templates are typically stored centrally, and constructed hierarchically.
+    The main use is to convert the (user) specified conditions into
+    a form that can be inserted into each field file as dictionary entries.
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,8 +37,6 @@ Description
 #define boundaryTemplates_H
 
 #include "dictionary.H"
-#include "wordList.H"
-#include "wordReList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

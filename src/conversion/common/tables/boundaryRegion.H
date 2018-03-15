@@ -57,7 +57,7 @@ SourceFiles
 #include "dictionary.H"
 #include "labelList.H"
 #include "wordList.H"
-#include "wordReList.H"
+#include "wordRes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,7 +75,7 @@ class boundaryRegion
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        boundaryRegion(const boundaryRegion&);
+        boundaryRegion(const boundaryRegion&) = delete;
 
 
 public:
@@ -95,7 +95,7 @@ public:
 
 
     //- Destructor
-    ~boundaryRegion();
+    ~boundaryRegion() = default;
 
 
     // Member Functions
@@ -111,7 +111,7 @@ public:
         Map<word> names() const;
 
         //- Return a Map of (id => names) selected by patterns
-        Map<word> names(const UList<wordRe>& patterns) const;
+        Map<word> names(const wordRes& patterns) const;
 
         //- Return a Map of (id => type)
         Map<word> boundaryTypes() const;

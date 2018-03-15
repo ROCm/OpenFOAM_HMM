@@ -37,6 +37,10 @@ U
             type            fixedValue;
             value           uniform (0 0 0);
         }
+        "procBoundary.*"
+        {
+            type            processor;
+        }
     }
 }
 
@@ -49,6 +53,11 @@ T
         ".*"
         {
             type            zeroGradient;
+        }
+
+        "procBoundary.*"
+        {
+            type            processor;
         }
 
         "bottomAir_to_.*"
@@ -74,6 +83,10 @@ epsilon
             type            epsilonWallFunction;
             value           uniform 0.01;
         }
+        "procBoundary.*"
+        {
+            type            processor;
+        }
     }
 }
 
@@ -87,6 +100,10 @@ k
         {
             type            kqRWallFunction;
             value           uniform 0.1;
+        }
+        "procBoundary.*"
+        {
+            type            processor;
         }
     }
 }
@@ -102,6 +119,10 @@ p_rgh
             type            fixedFluxPressure;
             value           uniform 1e5;
         }
+        "procBoundary.*"
+        {
+            type            processor;
+        }
     }
 }
 
@@ -115,6 +136,10 @@ p
         {
             type            calculated;
             value           uniform 1e5;
+        }
+        "procBoundary.*"
+        {
+            type            processor;
         }
     }
 }

@@ -69,7 +69,7 @@ preserveFaceZonesConstraint
 Foam::decompositionConstraints::preserveFaceZonesConstraint::
 preserveFaceZonesConstraint
 (
-    const wordReList& zones
+    const UList<wordRe>& zones
 )
 :
     decompositionConstraint(dictionary(), typeName),

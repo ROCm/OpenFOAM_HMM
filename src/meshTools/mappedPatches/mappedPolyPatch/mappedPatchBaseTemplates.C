@@ -30,7 +30,7 @@ void Foam::mappedPatchBase::distribute(List<Type>& lst) const
     {
         case NEARESTPATCHFACEAMI:
         {
-            lst = AMI().interpolateToSource(Field<Type>(lst.xfer()));
+            lst = AMI().interpolateToSource(Field<Type>(std::move(lst)));
             break;
         }
         default:
@@ -52,11 +52,7 @@ void Foam::mappedPatchBase::distribute
     {
         case NEARESTPATCHFACEAMI:
         {
-            lst = AMI().interpolateToSource
-                (
-                    Field<Type>(lst.xfer()),
-                    cop
-                );
+            lst = AMI().interpolateToSource(Field<Type>(std::move(lst)), cop);
             break;
         }
         default:
@@ -87,7 +83,7 @@ void Foam::mappedPatchBase::reverseDistribute(List<Type>& lst) const
     {
         case NEARESTPATCHFACEAMI:
         {
-            lst = AMI().interpolateToTarget(Field<Type>(lst.xfer()));
+            lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)));
             break;
         }
         default:
@@ -110,11 +106,7 @@ void Foam::mappedPatchBase::reverseDistribute
     {
         case NEARESTPATCHFACEAMI:
         {
-            lst = AMI().interpolateToTarget
-                (
-                    Field<Type>(lst.xfer()),
-                    cop
-                );
+            lst = AMI().interpolateToTarget(Field<Type>(std::move(lst)), cop);
             break;
         }
         default:

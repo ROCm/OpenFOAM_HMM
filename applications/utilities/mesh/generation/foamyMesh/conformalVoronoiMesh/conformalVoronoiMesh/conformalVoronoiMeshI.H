@@ -465,12 +465,12 @@ inline Foam::List<Foam::label> Foam::conformalVoronoiMesh::processorsAttached
 
     forAll(c1Procs, aPI)
     {
-        if (findIndex(procsAttached, c1Procs[aPI] == -1))
+        if (!procsAttached.found(c1Procs[aPI]))
         {
             procsAttached.append(c1Procs[aPI]);
         }
 
-        if (findIndex(procsAttached, c2Procs[aPI] == -1))
+        if (!procsAttached.found(c2Procs[aPI]))
         {
             procsAttached.append(c2Procs[aPI]);
         }
@@ -563,7 +563,7 @@ Foam::conformalVoronoiMesh::decomposition() const
             << exit(FatalError) << endl;
     }
 
-    return decomposition_();
+    return *decomposition_;
 }
 
 

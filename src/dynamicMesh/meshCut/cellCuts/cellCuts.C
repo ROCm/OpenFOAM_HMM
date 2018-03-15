@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -189,12 +189,12 @@ void Foam::cellCuts::syncProc()
                             if (isEdge(cuts[i]))
                             {
                                 label edgei = getEdge(cuts[i]);
-                                label index = findIndex(fEdges, edgei);
+                                label index = fEdges.find(edgei);
                                 relCuts[bFacei][i] = -index-1;
                             }
                             else
                             {
-                                label index = findIndex(f, getVertex(cuts[i]));
+                                label index = f.find(getVertex(cuts[i]));
                                 relCuts[bFacei][i] = index+1;
                             }
                         }
@@ -242,7 +242,12 @@ void Foam::cellCuts::syncProc()
                             else
                             {
                                 label oppFp = relCut[i]-1;
-                                label fp = f.size()-1-oppFp;
+                                label fp =
+                                (
+                                    oppFp == 0
+                                  ? 0
+                                  : f.size()-oppFp
+                                );
                                 absoluteCut[i] = vertToEVert(f[fp]);
                             }
                         }
@@ -390,13 +395,9 @@ Foam::label Foam::cellCuts::edgeEdgeToFace
 
         const labelList& fEdges = mesh().faceEdges()[facei];
 
-        if
-        (
-            findIndex(fEdges, edgeA) != -1
-         && findIndex(fEdges, edgeB) != -1
-        )
+        if (fEdges.found(edgeA) && fEdges.found(edgeB))
         {
-           return facei;
+            return facei;
         }
     }
 
@@ -432,13 +433,9 @@ Foam::label Foam::cellCuts::edgeVertexToFace
 
         const labelList& fEdges = mesh().faceEdges()[facei];
 
-        if
-        (
-            findIndex(fEdges, edgeI) != -1
-         && findIndex(f, vertI) != -1
-        )
+        if (fEdges.found(edgeI) && f.found(vertI))
         {
-           return facei;
+            return facei;
         }
     }
 
@@ -469,13 +466,9 @@ Foam::label Foam::cellCuts::vertexVertexToFace
 
         const face& f = mesh().faces()[facei];
 
-        if
-        (
-            findIndex(f, vertA) != -1
-         && findIndex(f, vertB) != -1
-        )
+        if (f.found(vertA) && f.found(vertB))
         {
-           return facei;
+            return facei;
         }
     }
 
@@ -608,9 +601,12 @@ void Foam::cellCuts::calcFaceCuts() const
 
         if (allVerticesCut)
         {
-            WarningInFunction
-                << "Face " << facei << " vertices " << f
-                << " has all its vertices cut. Not cutting face." << endl;
+            if (verbose_ || debug)
+            {
+                WarningInFunction
+                    << "Face " << facei << " vertices " << f
+                    << " has all its vertices cut. Not cutting face." << endl;
+            }
 
             cutI = 0;
         }
@@ -677,7 +673,7 @@ Foam::label Foam::cellCuts::loopFace
 
             if (isEdge(cut))
             {
-                if (findIndex(fEdges, getEdge(cut)) == -1)
+                if (!fEdges.found(getEdge(cut)))
                 {
                     // Edge not on face. Skip face.
                     allOnFace = false;
@@ -686,7 +682,7 @@ Foam::label Foam::cellCuts::loopFace
             }
             else
             {
-                if (findIndex(f, getVertex(cut)) == -1)
+                if (!f.found(getVertex(cut)))
                 {
                     // Vertex not on face. Skip face.
                     allOnFace = false;
@@ -820,13 +816,17 @@ bool Foam::cellCuts::addCut
         labelList truncVisited(visited);
         truncVisited.setSize(nVisited);
 
-        Pout<< "For cell " << celli << " : trying to add duplicate cut " << cut;
-        labelList cuts(1, cut);
-        writeCuts(Pout, cuts, loopWeights(cuts));
+        if (verbose_ || debug)
+        {
+            Pout<< "For cell " << celli << " : trying to add duplicate cut "
+                << cut;
+            labelList cuts(1, cut);
+            writeCuts(Pout, cuts, loopWeights(cuts));
 
-        Pout<< " to path:";
-        writeCuts(Pout, truncVisited, loopWeights(truncVisited));
-        Pout<< endl;
+            Pout<< " to path:";
+            writeCuts(Pout, truncVisited, loopWeights(truncVisited));
+            Pout<< endl;
+        }
 
         return false;
     }
@@ -917,9 +917,12 @@ bool Foam::cellCuts::walkFace
     }
     else
     {
-        WarningInFunction
-            << "In middle of cut. cell:" << celli << " face:" << facei
-            << " cuts:" << fCuts << " current cut:" << cut << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "In middle of cut. cell:" << celli << " face:" << facei
+                << " cuts:" << fCuts << " current cut:" << cut << endl;
+        }
 
         return false;
     }
@@ -1175,7 +1178,7 @@ void Foam::cellCuts::calcCellLoops(const labelList& cutCells)
         bool validLoop = false;
 
         // Quick rejection: has enough faces that are cut?
-        if (nCutFaces[celli] >= 3)
+        if (nCutFaces[celli] >= 1)
         {
             const labelList& cFaces = mesh().cells()[celli];
 
@@ -1261,11 +1264,14 @@ void Foam::cellCuts::calcCellLoops(const labelList& cutCells)
             {
                 // Invalid loop. Leave cellLoops_[celli] zero size which
                 // flags this.
-                Pout<< "calcCellLoops(const labelList&) : did not find valid"
-                    << " loop for cell " << celli << endl;
-                // Dump cell and cuts on cell.
-                writeUncutOBJ(".", celli);
-
+                if (verbose_ || debug)
+                {
+                    Pout<< "calcCellLoops(const labelList&) :"
+                        << " did not find valid"
+                        << " loop for cell " << celli << endl;
+                    // Dump cell and cuts on cell.
+                    writeUncutOBJ(".", celli);
+                }
                 cellLoops_[celli].setSize(0);
             }
         }
@@ -1333,8 +1339,8 @@ Foam::labelList Foam::cellCuts::nonAnchorPoints
 
         if
         (
-            findIndex(anchorPoints, pointi) == -1
-         && findIndex(loop, vertToEVert(pointi)) == -1
+            !anchorPoints.found(pointi)
+         && !loop.found(vertToEVert(pointi))
         )
         {
             newElems[newElemI++] = pointi;
@@ -1439,12 +1445,15 @@ bool Foam::cellCuts::calcAnchors
 
     if (uncutIndex == -1)
     {
-        WarningInFunction
-            << "Invalid loop " << loop << " for cell " << celli << endl
-            << "Can not find point on cell which is not cut by loop."
-            << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "Invalid loop " << loop << " for cell " << celli << endl
+                << "Can not find point on cell which is not cut by loop."
+                << endl;
 
-        writeOBJ(".", celli, loopPts, labelList(0));
+            writeOBJ(".", celli, loopPts, labelList(0));
+        }
 
         return false;
     }
@@ -1459,12 +1468,15 @@ bool Foam::cellCuts::calcAnchors
     {
         // All vertices either in loop or in anchor. So split is along single
         // face.
-        WarningInFunction
-            << "Invalid loop " << loop << " for cell " << celli << endl
-            << "All vertices of cell are either in loop or in anchor set"
-            << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "Invalid loop " << loop << " for cell " << celli << endl
+                << "All vertices of cell are either in loop or in anchor set"
+                << endl;
 
-        writeOBJ(".", celli, loopPts, labelList(0));
+            writeOBJ(".", celli, loopPts, labelList(0));
+        }
 
         return false;
     }
@@ -1496,11 +1508,14 @@ bool Foam::cellCuts::calcAnchors
 
     if (uncutIndex != -1)
     {
-        WarningInFunction
-            << "Invalid loop " << loop << " for cell " << celli
-            << " since it splits the cell into more than two cells" << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "Invalid loop " << loop << " for cell " << celli
+                << " since it splits the cell into more than two cells" << endl;
 
-        writeOBJ(".", celli, loopPts, connectedPoints);
+            writeOBJ(".", celli, loopPts, connectedPoints);
+        }
 
         return false;
     }
@@ -1540,24 +1555,30 @@ bool Foam::cellCuts::calcAnchors
 
     if (connectedFaces.size() < 3)
     {
-        WarningInFunction
-            << "Invalid loop " << loop << " for cell " << celli
-            << " since would have too few faces on one side." << nl
-            << "All faces:" << cFaces << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "Invalid loop " << loop << " for cell " << celli
+                << " since would have too few faces on one side." << nl
+                << "All faces:" << cFaces << endl;
 
-        writeOBJ(".", celli, loopPts, connectedPoints);
+            writeOBJ(".", celli, loopPts, connectedPoints);
+        }
 
         return false;
     }
 
     if (otherFaces.size() < 3)
     {
-        WarningInFunction
-            << "Invalid loop " << loop << " for cell " << celli
-            << " since would have too few faces on one side." << nl
-            << "All faces:" << cFaces << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "Invalid loop " << loop << " for cell " << celli
+                << " since would have too few faces on one side." << nl
+                << "All faces:" << cFaces << endl;
 
-        writeOBJ(".", celli, loopPts, otherPoints);
+            writeOBJ(".", celli, loopPts, otherPoints);
+        }
 
         return false;
     }
@@ -1596,13 +1617,16 @@ bool Foam::cellCuts::calcAnchors
                     if (hasSet1)
                     {
                         // Second occurence of set1.
-                        WarningInFunction
-                            << "Invalid loop " << loop << " for cell " << celli
-                            << " since face " << f << " would be split into"
-                            << " more than two faces" << endl;
+                        if (verbose_ || debug)
+                        {
+                            WarningInFunction
+                                << "Invalid loop " << loop << " for cell "
+                                << celli
+                                << " since face " << f << " would be split into"
+                                << " more than two faces" << endl;
 
-                        writeOBJ(".", celli, loopPts, otherPoints);
-
+                            writeOBJ(".", celli, loopPts, otherPoints);
+                        }
                         return false;
                     }
 
@@ -1613,13 +1637,16 @@ bool Foam::cellCuts::calcAnchors
                     if (hasSet2)
                     {
                         // Second occurence of set1.
-                        WarningInFunction
-                            << "Invalid loop " << loop << " for cell " << celli
-                            << " since face " << f << " would be split into"
-                            << " more than two faces" << endl;
+                        if (verbose_ || debug)
+                        {
+                            WarningInFunction
+                                << "Invalid loop " << loop << " for cell "
+                                << celli
+                                << " since face " << f << " would be split into"
+                                << " more than two faces" << endl;
 
-                        writeOBJ(".", celli, loopPts, otherPoints);
-
+                            writeOBJ(".", celli, loopPts, otherPoints);
+                        }
                         return false;
                     }
 
@@ -1651,12 +1678,16 @@ bool Foam::cellCuts::calcAnchors
                     if (hasSet1)
                     {
                         // Second occurence of set1.
-                        WarningInFunction
-                            << "Invalid loop " << loop << " for cell " << celli
-                            << " since face " << f << " would be split into"
-                            << " more than two faces" << endl;
+                        if (verbose_ || debug)
+                        {
+                            WarningInFunction
+                                << "Invalid loop " << loop << " for cell "
+                                << celli
+                                << " since face " << f << " would be split into"
+                                << " more than two faces" << endl;
 
-                        writeOBJ(".", celli, loopPts, otherPoints);
+                            writeOBJ(".", celli, loopPts, otherPoints);
+                        }
 
                         return false;
                     }
@@ -1668,13 +1699,16 @@ bool Foam::cellCuts::calcAnchors
                     if (hasSet2)
                     {
                         // Second occurence of set1.
-                        WarningInFunction
-                            << "Invalid loop " << loop << " for cell " << celli
-                            << " since face " << f << " would be split into"
-                            << " more than two faces" << endl;
+                        if (verbose_ || debug)
+                        {
+                            WarningInFunction
+                                << "Invalid loop " << loop << " for cell "
+                                << celli
+                                << " since face " << f << " would be split into"
+                                << " more than two faces" << endl;
 
-                        writeOBJ(".", celli, loopPts, otherPoints);
-
+                            writeOBJ(".", celli, loopPts, otherPoints);
+                        }
                         return false;
                     }
 
@@ -1826,7 +1860,7 @@ Foam::label Foam::cellCuts::countFaceCuts
         if
         (
             pointIsCut_[vertI]
-         || (findIndex(loop, vertToEVert(vertI)) != -1)
+         || loop.found(vertToEVert(vertI))
         )
         {
             nCuts++;
@@ -1844,7 +1878,7 @@ Foam::label Foam::cellCuts::countFaceCuts
         if
         (
             edgeIsCut_[edgeI]
-         || (findIndex(loop, edgeToEVert(edgeI)) != -1)
+         || loop.found(edgeToEVert(edgeI))
         )
         {
             nCuts++;
@@ -2095,9 +2129,12 @@ bool Foam::cellCuts::validLoop
 
     if (faceContainingLoop != -1)
     {
-        WarningInFunction
-            << "Found loop on cell " << celli << " with all points"
-            << " on face " << faceContainingLoop << endl;
+        if (verbose_ || debug)
+        {
+            WarningInFunction
+                << "Found loop on cell " << celli << " with all points"
+                << " on face " << faceContainingLoop << endl;
+        }
 
         //writeOBJ(".", celli, loopPoints(loop, loopWeights), labelList(0));
 
@@ -2149,12 +2186,14 @@ void Foam::cellCuts::setFromCellLoops()
             )
             {
                 //writeOBJ(".", celli, loopPoints(celli), anchorPoints);
-
-                WarningInFunction
-                    << "Illegal loop " << loop
-                    << " when recreating cut-addressing"
-                    << " from existing cellLoops for cell " << celli
-                    << endl;
+                if (verbose_ || debug)
+                {
+                    WarningInFunction
+                        << "Illegal loop " << loop
+                        << " when recreating cut-addressing"
+                        << " from existing cellLoops for cell " << celli
+                        << endl;
+                }
 
                 cellLoops_[celli].setSize(0);
                 cellAnchorPoints_[celli].setSize(0);
@@ -2764,7 +2803,7 @@ void Foam::cellCuts::check() const
             if
             (
                 !isEdge(cut)
-             && findIndex(anchors, getVertex(cut)) != -1
+             && anchors.found(getVertex(cut))
             )
             {
                 FatalErrorInFunction
@@ -2834,10 +2873,12 @@ Foam::cellCuts::cellCuts
     const labelList& cutCells,
     const labelList& meshVerts,
     const labelList& meshEdges,
-    const scalarField& meshEdgeWeights
+    const scalarField& meshEdgeWeights,
+    const bool verbose
 )
 :
     edgeVertex(mesh),
+    verbose_(verbose),
     pointIsCut_(expand(mesh.nPoints(), meshVerts)),
     edgeIsCut_(expand(mesh.nEdges(), meshEdges)),
     edgeWeight_(expand(mesh.nEdges(), meshEdges, meshEdgeWeights)),
@@ -2876,10 +2917,12 @@ Foam::cellCuts::cellCuts
     const polyMesh& mesh,
     const labelList& meshVerts,
     const labelList& meshEdges,
-    const scalarField& meshEdgeWeights
+    const scalarField& meshEdgeWeights,
+    const bool verbose
 )
 :
     edgeVertex(mesh),
+    verbose_(verbose),
     pointIsCut_(expand(mesh.nPoints(), meshVerts)),
     edgeIsCut_(expand(mesh.nEdges(), meshEdges)),
     edgeWeight_(expand(mesh.nEdges(), meshEdges, meshEdgeWeights)),
@@ -2923,10 +2966,12 @@ Foam::cellCuts::cellCuts
     const polyMesh& mesh,
     const labelList& cellLabels,
     const labelListList& cellLoops,
-    const List<scalarField>& cellEdgeWeights
+    const List<scalarField>& cellEdgeWeights,
+    const bool verbose
 )
 :
     edgeVertex(mesh),
+    verbose_(verbose),
     pointIsCut_(mesh.nPoints(), false),
     edgeIsCut_(mesh.nEdges(), false),
     edgeWeight_(mesh.nEdges(), -GREAT),
@@ -2968,10 +3013,12 @@ Foam::cellCuts::cellCuts
 (
     const polyMesh& mesh,
     const cellLooper& cellCutter,
-    const List<refineCell>& refCells
+    const List<refineCell>& refCells,
+    const bool verbose
 )
 :
     edgeVertex(mesh),
+    verbose_(verbose),
     pointIsCut_(mesh.nPoints(), false),
     edgeIsCut_(mesh.nEdges(), false),
     edgeWeight_(mesh.nEdges(), -GREAT),
@@ -3014,10 +3061,12 @@ Foam::cellCuts::cellCuts
     const polyMesh& mesh,
     const cellLooper& cellCutter,
     const labelList& cellLabels,
-    const List<plane>& cutPlanes
+    const List<plane>& cutPlanes,
+    const bool verbose
 )
 :
     edgeVertex(mesh),
+    verbose_(verbose),
     pointIsCut_(mesh.nPoints(), false),
     edgeIsCut_(mesh.nEdges(), false),
     edgeWeight_(mesh.nEdges(), -GREAT),
@@ -3066,10 +3115,12 @@ Foam::cellCuts::cellCuts
     const Map<edge>& faceSplitCut,
     const labelListList& cellLoops,
     const label nLoops,
-    const labelListList& cellAnchorPoints
+    const labelListList& cellAnchorPoints,
+    const bool verbose
 )
 :
     edgeVertex(mesh),
+    verbose_(verbose),
     pointIsCut_(pointIsCut),
     edgeIsCut_(edgeIsCut),
     edgeWeight_(edgeWeight),
@@ -3185,7 +3236,10 @@ void Foam::cellCuts::writeOBJ(Ostream& os) const
 
     forAll(cellLoops_, celli)
     {
-        writeOBJ(os, loopPoints(celli), vertI);
+        if (cellLoops_[celli].size())
+        {
+            writeOBJ(os, loopPoints(celli), vertI);
+        }
     }
 }
 

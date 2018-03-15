@@ -1,4 +1,4 @@
-argList::validArgs.append("tool");
+argList::addArgument("tool");
 const wordList opts(helpType::dictionaryConstructorTablePtr_->sortedToc());
 
 string note = "Valid <tool> options include:";

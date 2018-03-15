@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,8 +25,15 @@ Class
     Foam::autoPtr
 
 Description
-    An auto-pointer similar to the STL auto_ptr but with automatic casting
-    to a reference to the type and with pointer allocation checking on access.
+    Pointer management similar to std::unique_ptr, with some additional
+    methods and type checking.
+
+Note
+    Parts of the interface now mirror std::unique_ptr, but since it pre-dates
+    both C++11 and std::unique_ptr, it has some additional idiosyncrasies.
+    The const-reference constructors and assignment operators
+    actually use move semantics to allow their participation in
+    default constructible, default assignable classes.
 
 SourceFiles
     autoPtrI.H
@@ -36,7 +43,12 @@ SourceFiles
 #ifndef autoPtr_H
 #define autoPtr_H
 
-#include <cstddef>
+// Transitional features/misfeatures:
+#define Foam_autoPtr_copyConstruct
+#define Foam_autoPtr_copyAssign
+#define Foam_autoPtr_castOperator
+
+#include <utility>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,104 +62,215 @@ namespace Foam
 template<class T>
 class autoPtr
 {
-    // Public data
-
-        //- Pointer to object
-        mutable T* ptr_;
+    //- Pointer to managed object
+    T* ptr_;
 
 
 public:
 
-    typedef T Type;
+    // STL type definitions
+
+        //- Type of object being managed
+        typedef T element_type;
+
+        //- Pointer to type of object being managed
+        typedef T* pointer;
+
+
+    // Factory Methods
+
+        //- Construct autoPtr of T with forwarding arguments
+        //  \param args list of arguments with which an instance of T
+        //      will be constructed.
+        //
+        //  \note Similar to std::make_unique, but the overload for
+        //      array types is not disabled.
+        template<class... Args>
+        inline static autoPtr<T> New(Args&&... args);
+
+        //- Construct autoPtr from derived type with forwarding arguments
+        //  \param args list of arguments with which an instance of U
+        //      will be constructed.
+        //
+        //  \note Similar to New but for derived types.
+        //  In the future check for is_convertible on the pointer types
+        template<class U, class... Args>
+        inline static autoPtr<T> NewFrom(Args&&... args);
 
 
     // Constructors
 
-        //- Store object pointer
-        inline explicit autoPtr(T* p = nullptr);
+        //- Construct with no managed object.
+        inline constexpr autoPtr() noexcept;
 
-        //- Construct as copy by transferring pointer to this autoPtr and
-        //  setting the arguments pointer to nullptr
-        inline autoPtr(const autoPtr<T>& ap);
+        //- Construct with no managed object (literal nullptr).
+        inline constexpr autoPtr(std::nullptr_t) noexcept;
 
-        //- Construct either by transferring pointer or cloning.
-        //  Should only be called with type that supports cloning
-        inline autoPtr(const autoPtr<T>& ap, const bool reuse);
+        //- Construct, taking ownership of the pointer.
+        inline explicit autoPtr(T* p) noexcept;
+
+        //- Move construct, transferring ownership.
+        inline autoPtr(autoPtr<T>&& ap) noexcept;
+
+        //- Move construct, transferring ownership from derived type.
+        //  U must be derivable from T
+        //  \note In the future check for is_convertible on the pointer types
+        template<class U>
+        inline explicit autoPtr(autoPtr<U>&& ap);
+
+        //- A move construct disguised as a copy construct (transfers ownership)
+        //  \remark This is a non-standard definition, and should ideally be
+        //      marked as deleted - pending cleanup of code currently relying
+        //      on this behaviour.
+        #ifdef Foam_autoPtr_copyConstruct
+        inline autoPtr(const autoPtr<T>& ap) noexcept;
+        #else
+        autoPtr(const autoPtr<T>& ap) = delete;
+        #endif
 
 
-    //- Destructor, delete object if pointer is not nullptr
-    inline ~autoPtr();
+    //- Destructs the managed object if such is present
+    inline ~autoPtr() noexcept;
 
 
     // Member Functions
 
-        // Check
+    // Check
 
-            //- Return true if the autoPtr is empty (ie, no pointer set)
-            inline bool empty() const;
+        //- True if the managed pointer is null
+        inline bool empty() const noexcept;
 
-            //- Return true if the autoPtr valid (ie, the pointer is set)
-            inline bool valid() const;
-
-
-        // Edit
-
-            //- Return object pointer for reuse
-            inline T* ptr();
-
-            //- Set pointer to that given.
-            //  If object pointer already set issue a FatalError
-            inline void set(T* p);
-
-            //- If object pointer already set, delete object and set to given
-            //  pointer
-            inline void reset(T* p = nullptr);
-
-            //- Delete object (if the pointer is valid) and set pointer to
-            //  nullptr
-            inline void clear();
+        //- True if the managed pointer is non-null
+        inline bool valid() const noexcept;
 
 
-        // Access
+    // Access
 
-            //- Return the pointer, without nullptr checking.
-            //  Pointer remains under autoPtr management.
-            inline T* rawPtr();
+        //- Return pointer to managed object without nullptr checking.
+        //  Pointer remains under autoPtr management.
+        inline T* get() noexcept;
 
-            //- Const access to the pointer, without nullptr checking.
-            //  Pointer remains under autoPtr management.
-            inline const T* rawPtr() const;
+        //- Return const pointer to managed object without nullptr checking.
+        //  Pointer remains under autoPtr management.
+        inline const T* get() const noexcept;
 
-            //- Return the reference, without nullptr checking.
-            inline T& rawRef();
+        //- Return reference to the managed object without nullptr checking.
+        //  When get() == nullptr, additional guards may be required to avoid
+        //  inadvertent access to a nullptr.
+        inline T& ref();
 
-            //- Return the const reference, without nullptr checking.
-            inline const T& rawRef() const;
+
+    // Edit
+
+        //- Return pointer to the managed object and release ownership.
+        inline T* release() noexcept;
+
+        //- Return pointer to the managed object and release ownership.
+        //- Identical behaviour to release().
+        //  \note Provided for method naming consistent with Foam::tmp
+        inline T* ptr() noexcept;
+
+        //- Delete managed object and set pointer to nullptr
+        inline void clear() noexcept;
+
+        //- Delete managed object and set to new given pointer
+        inline void reset(T* p = nullptr) noexcept;
+
+        //- Delete managed object and set to new given pointer
+        //  \remark This is a non-standard definition, but may provide better
+        //      code documentation than a simple move assign would.
+        inline void reset(autoPtr<T>&& other) noexcept;
+
+        //- Delete managed object and set to new given pointer
+        //- Identical behaviour to reset().
+        //  \note Provided for backward compatibility - the older version
+        //      enforced a run-time check (Fatal if pointer was already set)
+        //      but this was rarely used.
+        inline void set(T* p) noexcept;
+
+        //- Swaps the managed object with other autoPtr.
+        inline void swap(autoPtr<T>& other) noexcept;
 
 
-        // Member operators
+    // Other
 
-            //- Return reference to the object data
-            inline T& operator()();
+        //- Construct copy by invoking clone on underlying managed object
+        //  \param args list of arguments for clone
+        template<class... Args>
+        inline autoPtr<T> clone(Args&&... args) const;
 
-            //- Return const reference to the object data
-            inline const T& operator()() const;
 
-            //- Const cast to the underlying type reference
-            inline operator const T&() const;
+    // Member Operators
 
-            //- Return object pointer
-            inline T* operator->();
+        //- Return reference to the managed object.
+        //  Fatal error if no pointer is managed
+        inline T& operator*();
 
-            //- Return const object pointer
-            inline const T* operator->() const;
+        //- Return const reference to the object.
+        //  Fatal error if no pointer is managed
+        inline const T& operator*() const;
 
-            //- Take over the object pointer from parameter
-            inline void operator=(T* p);
+        //- Dereferences (non-const) pointer to the managed object
+        //  Fatal error if no pointer is managed
+        inline T* operator->();
 
-            //- Take over the object pointer from parameter
-            inline void operator=(const autoPtr<T>& ap);
+        //- Dereferences (const) pointer to the managed object
+        //  Fatal error if no pointer is managed
+        inline const T* operator->() const;
+
+        //- Return reference to the object data.
+        //  Fatal error if no pointer is managed
+        inline T& operator()();
+
+        //- Return const reference to the object data
+        //  Fatal error if no pointer is managed
+        inline const T& operator()() const;
+
+        //- Automatic cast conversion to the underlying type reference
+        //  Fatal error if no pointer is managed
+        #ifdef Foam_autoPtr_castOperator
+        inline operator const T&() const { return operator*(); }
+        #else
+        operator const T&() const = delete;
+        #endif
+
+
+        //- Transfer object ownership from parameter
+        inline void operator=(autoPtr<T>&& ap) noexcept;
+
+        //- Transfer object ownership from parameter
+        template<class U>
+        inline void operator=(autoPtr<U>&& ap) noexcept;
+
+        #ifdef Foam_autoPtr_copyAssign
+        //- A move assignment disguised as a copy assignment
+        //  \remark Non-standard definition - should just be movable
+        inline void operator=(const autoPtr<T>& ap) noexcept;
+        #else
+        void operator=(const autoPtr<T>& ap) = delete;
+        #endif
+
+        //- Allow reset via assignment from literal nullptr
+        inline void operator=(std::nullptr_t) noexcept;
+
+
+    // Housekeeping
+
+        //- Disallow assignment from plain pointer
+        //  \deprecated Convenient, but uncontrolled access (FEB-2018)
+        void operator=(T* p) = delete;
 };
+
+
+// Global Functions
+
+//- Specializes the Swap algorithm for autoPtr.
+//  Swaps the pointers of lhs and rhs. Calls \c lhs.swap(rhs)
+template<class T>
+void Swap(autoPtr<T>& lhs, autoPtr<T>& rhs)
+{
+    lhs.swap(rhs);
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

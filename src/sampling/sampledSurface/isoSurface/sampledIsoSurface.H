@@ -157,7 +157,7 @@ public:
 
         const isoSurface& surface() const
         {
-            return surfPtr_();
+            return *surfPtr_;
         }
 
         //- Does the surface need an update?

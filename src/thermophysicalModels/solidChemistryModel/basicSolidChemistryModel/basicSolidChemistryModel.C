@@ -69,7 +69,7 @@ Foam::basicSolidChemistryModel::RR(const label i)
 
     return dynamic_cast<volScalarField::Internal&>
     (
-        const_cast<volScalarField::Internal& >
+        const_cast<volScalarField::Internal&>
         (
             volScalarField::Internal::null()
         )
@@ -88,7 +88,7 @@ Foam::basicSolidChemistryModel::calculateRR
 
     return dynamic_cast<tmp<volScalarField::Internal>&>
     (
-        const_cast<volScalarField::Internal& >
+        const_cast<volScalarField::Internal&>
         (
             volScalarField::Internal::null()
         )

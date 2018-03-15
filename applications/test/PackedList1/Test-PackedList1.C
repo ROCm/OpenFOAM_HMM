@@ -251,13 +251,13 @@ int main(int argc, char *argv[])
     Info<< "begin():";
     iter.printInfo(Info) << "\n";
 
-    Info<< "iterator:" << iter() << "\n";
-    iter() = 5;
+    Info<< "iterator:" << *iter << "\n";
+    *iter = 5;
     iter.printInfo(Info);
     list1.printInfo(Info, true);
 
     iter = list1[31];
-    Info<< "iterator:" << iter() << "\n";
+    Info<< "iterator:" << *iter << "\n";
     iter.printInfo(Info);
 
 

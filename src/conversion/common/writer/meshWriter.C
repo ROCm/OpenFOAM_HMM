@@ -24,46 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "meshWriter.H"
-#include "cellModeller.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 Foam::string Foam::meshWriter::defaultMeshName = "meshExport";
-
-
-const Foam::cellModel* Foam::meshWriter::unknownModel = Foam::cellModeller::
-lookup
-(
-    "unknown"
-);
-
-
-const Foam::cellModel* Foam::meshWriter::tetModel = Foam::cellModeller::
-lookup
-(
-    "tet"
-);
-
-
-const Foam::cellModel* Foam::meshWriter::pyrModel = Foam::cellModeller::
-lookup
-(
-    "pyr"
-);
-
-
-const Foam::cellModel* Foam::meshWriter::prismModel = Foam::cellModeller::
-lookup
-(
-    "prism"
-);
-
-
-const Foam::cellModel* Foam::meshWriter::hexModel = Foam::cellModeller::
-lookup
-(
-    "hex"
-);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

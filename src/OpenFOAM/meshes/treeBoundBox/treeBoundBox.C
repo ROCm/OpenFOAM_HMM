@@ -104,7 +104,7 @@ Foam::treeBoundBox::treeBoundBox
 
 Foam::tmp<Foam::pointField> Foam::treeBoundBox::points() const
 {
-    tmp<pointField> tpoints = tmp<pointField>(new pointField(8));
+    tmp<pointField> tpoints(new pointField(8));
     pointField& pts = tpoints.ref();
 
     forAll(pts, octant)

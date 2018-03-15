@@ -23,6 +23,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+template<class T>
+inline Foam::label Foam::BiIndirectList<T>::posIndex(const label i)
+{
+    return i;
+}
+
+
+template<class T>
+inline Foam::label Foam::BiIndirectList<T>::negIndex(const label i)
+{
+    return -i-1;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -44,12 +60,12 @@ inline Foam::BiIndirectList<T>::BiIndirectList
 (
     const UList<T>& posList,
     const UList<T>& negList,
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 :
     posList_(const_cast<UList<T>&>(posList)),
     negList_(const_cast<UList<T>&>(negList)),
-    addressing_(addr)
+    addressing_(std::move(addr))
 {}
 
 
@@ -104,24 +120,10 @@ inline void Foam::BiIndirectList<T>::resetAddressing
 template<class T>
 inline void Foam::BiIndirectList<T>::resetAddressing
 (
-    const Xfer<List<label>>& addr
+    List<label>&& addr
 )
 {
-    addressing_.transfer(addr());
-}
-
-
-template<class T>
-inline Foam::label Foam::BiIndirectList<T>::posIndex(const label i)
-{
-    return i;
-}
-
-
-template<class T>
-inline Foam::label Foam::BiIndirectList<T>::negIndex(const label i)
-{
-    return -i-1;
+    addressing_.transfer(addr);
 }
 
 
@@ -144,7 +146,7 @@ inline Foam::List<T> Foam::BiIndirectList<T>::operator()() const
 template<class T>
 inline T& Foam::BiIndirectList<T>::operator[](const label i)
 {
-    label index = addressing_[i];
+    const label index = addressing_[i];
 
     if (index >= 0)
     {
@@ -160,7 +162,7 @@ inline T& Foam::BiIndirectList<T>::operator[](const label i)
 template<class T>
 inline const T& Foam::BiIndirectList<T>::operator[](const label i) const
 {
-    label index = addressing_[i];
+    const label index = addressing_[i];
 
     if (index >= 0)
     {
@@ -193,11 +195,11 @@ inline void Foam::BiIndirectList<T>::operator=(const UList<T>& ae)
 
 
 template<class T>
-inline void Foam::BiIndirectList<T>::operator=(const T& t)
+inline void Foam::BiIndirectList<T>::operator=(const T& val)
 {
     forAll(addressing_, i)
     {
-        operator[](i) = t;
+        operator[](i) = val;
     }
 }
 

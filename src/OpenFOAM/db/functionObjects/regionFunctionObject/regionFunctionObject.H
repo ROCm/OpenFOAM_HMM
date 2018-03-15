@@ -170,7 +170,7 @@ public:
 
 
     //- Destructor
-    virtual ~regionFunctionObject();
+    virtual ~regionFunctionObject() = default;
 
 
     // Member Functions

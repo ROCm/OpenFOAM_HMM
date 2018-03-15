@@ -30,17 +30,24 @@ Description
 #include "HashTable.H"
 #include "HashPtrTable.H"
 #include "Map.H"
-#include "StaticHashTable.H"
 #include "cpuTime.H"
 
 using namespace Foam;
+
+template<class T>
+Ostream& printInfo(Ostream& os, const HashTable<T, T, Hash<T>>& ht)
+{
+    os << " (size " << ht.size() << " capacity " << ht.capacity() << ") ";
+    return os;
+}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    const label nLoops = 30;
+    const label nLoops = 300;
     const label nBase  = 100000;
     const label nSize  = nLoops * nBase;
 
@@ -49,20 +56,20 @@ int main(int argc, char *argv[])
     // ie, a
     // Map<label> map(2 * nSize);
     // HashTable<label, label, Hash<label>> map(2 * nSize);
-    // StaticHashTable<label, label, Hash<label>> map(2 * nSize);
     HashTable<label, label, Hash<label>> map(2 * nSize);
 
-    Info<< "Constructed map of size: " << nSize
-        << " (size " << map.size() << " capacity " << map.capacity() << ") "
-        << "  " << timer.cpuTimeIncrement() << " s\n\n";
+    Info<< "Constructed map of size: " << nSize;
+    printInfo(Info, map);
+    Info<< timer.cpuTimeIncrement() << " s\n\n";
 
     for (label i = 0; i < nSize; i++)
     {
         map.insert(i, i);
     }
-    Info<< "Inserted " << nSize << " elements"
-        << " (size " << map.size() << " capacity " << map.capacity() << ") "
-        << timer.cpuTimeIncrement() << " s\n";
+
+    Info<< "Inserted " << nSize << " elements";
+    printInfo(Info, map);
+    Info<< timer.cpuTimeIncrement() << " s\n\n";
 
     label elemI = 0;
     for (label iLoop = 0; iLoop < nLoops; iLoop++)
@@ -72,11 +79,13 @@ int main(int argc, char *argv[])
             map.erase(elemI++);
         }
 
-        map.shrink();
-        Info<< "loop " << iLoop << " - Erased " << nBase << " elements"
-            << " (size " << map.size() << " capacity " << map.capacity() << ") "
-            << timer.cpuTimeIncrement() << " s\n";
+        // map.shrink();
+        Info<< "loop " << iLoop << " - Erased " << nBase << " elements";
+        printInfo(Info, map);
+        Info << nl;
     }
+
+    Info<< timer.cpuTimeIncrement() << " s\n";
 
     return 0;
 }

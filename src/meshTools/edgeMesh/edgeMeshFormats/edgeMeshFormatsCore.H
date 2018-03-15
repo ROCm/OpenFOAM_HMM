@@ -46,7 +46,7 @@ namespace Foam
 
 // Forward declaration of classes
 
-class IFstream;
+class ISstream;
 class Time;
 
 namespace fileFormats
@@ -63,7 +63,7 @@ protected:
     // Protected Member Functions
 
         //- Read non-comment line
-        static string getLineNoComment(IFstream&);
+        static string getLineNoComment(ISstream& is, const char comment='#');
 
 public:
 
@@ -103,11 +103,11 @@ public:
     // Constructors
 
         //- Construct null
-        edgeMeshFormatsCore();
+        edgeMeshFormatsCore() = default;
 
 
     //- Destructor
-    virtual ~edgeMeshFormatsCore();
+    virtual ~edgeMeshFormatsCore() = default;
 
 };
 

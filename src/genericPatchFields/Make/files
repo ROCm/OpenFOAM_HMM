@@ -1,3 +1,4 @@
+genericFaPatchField/genericFaPatchFields.C
 genericFvPatchField/genericFvPatchFields.C
 genericPointPatchField/genericPointPatchFields.C
 

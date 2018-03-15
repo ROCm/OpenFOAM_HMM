@@ -53,7 +53,6 @@ Description
 #include "faceSet.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
-#include "cellModeller.H"
 #include "uindirectPrimitivePatch.H"
 #include "surfZoneIdentifierList.H"
 #include "UnsortedMeshedSurface.H"
@@ -119,7 +118,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
     List<Map<scalar>> regionAngle(surfi);
     List<Map<autoPtr<dictionary>>> regionPatchInfo(surfi);
 
-    HashSet<word> unmatchedKeys(surfacesDict.toc());
+    wordHashSet unmatchedKeys(surfacesDict.toc());
 
     surfi = 0;
     forAll(allGeometry.names(), geomi)
@@ -315,7 +314,7 @@ autoPtr<refinementSurfaces> createRefinementSurfaces
         }
     }
 
-    surfacePtr.set
+    surfacePtr.reset
     (
         new refinementSurfaces
         (
@@ -477,7 +476,7 @@ void extractSurface
 
     // Gather all ZoneIDs
     List<labelList> gatheredZones(Pstream::nProcs());
-    gatheredZones[Pstream::myProcNo()] = compactZones.xfer();
+    gatheredZones[Pstream::myProcNo()].transfer(compactZones);
     Pstream::gatherList(gatheredZones);
 
     // On master combine all points, faces, zones
@@ -516,10 +515,10 @@ void extractSurface
 
         UnsortedMeshedSurface<face> unsortedFace
         (
-            xferMove(allPoints),
-            xferMove(allFaces),
-            xferMove(allZones),
-            xferMove(surfZones)
+            std::move(allPoints),
+            std::move(allFaces),
+            std::move(allZones),
+            surfZones
         );
 
 
@@ -712,27 +711,26 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     runTime.functionObjects().off();
 
-    const bool overwrite = args.optionFound("overwrite");
-    const bool checkGeometry = args.optionFound("checkGeometry");
-    const bool surfaceSimplify = args.optionFound("surfaceSimplify");
+    const bool overwrite = args.found("overwrite");
+    const bool checkGeometry = args.found("checkGeometry");
+    const bool surfaceSimplify = args.found("surfaceSimplify");
 
     autoPtr<fvMesh> meshPtr;
 
     {
-        word regionName;
-        if (args.optionReadIfPresent("region", regionName))
+        word regionName = fvMesh::defaultRegion;
+        if (args.readIfPresent("region", regionName))
         {
             Info<< "Create mesh " << regionName << " for time = "
                 << runTime.timeName() << nl << endl;
         }
         else
         {
-            regionName = fvMesh::defaultRegion;
             Info<< "Create mesh for time = "
                 << runTime.timeName() << nl << endl;
         }
 
-        meshPtr.set
+        meshPtr.reset
         (
             new fvMesh
             (
@@ -793,7 +791,7 @@ int main(int argc, char *argv[])
     if (Pstream::parRun())
     {
         fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        args.readIfPresent("decomposeParDict", decompDictFile);
 
         // A demand-driven decompositionMethod can have issues finding
         // an alternative decomposeParDict location.
@@ -983,7 +981,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        surfacesPtr.set
+        surfacesPtr.reset
         (
             new refinementSurfaces
             (
@@ -1664,11 +1662,11 @@ int main(int argc, char *argv[])
 
         labelHashSet includePatches(bMesh.size());
 
-        if (args.optionFound("patches"))
+        if (args.found("patches"))
         {
             includePatches = bMesh.patchSet
             (
-                wordReList(args.optionLookup("patches")())
+                args.readList<wordRe>("patches")
             );
         }
         else
@@ -1686,7 +1684,7 @@ int main(int argc, char *argv[])
 
         fileName outFileName
         (
-            args.optionLookupOrDefault<fileName>
+            args.lookupOrDefault<fileName>
             (
                 "outFile",
                 "constant/triSurface/simplifiedSurface.stl"

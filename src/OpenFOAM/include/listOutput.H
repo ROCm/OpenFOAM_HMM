@@ -2,24 +2,24 @@ bool listOptions = false ;
 
 if
 (
-    args.optionFound("listSwitches")
+    args.found("listSwitches")
 )
 {
-    debug::listSwitches(args.optionFound("includeUnsetSwitches"));
+    debug::listSwitches(args.found("includeUnsetSwitches"));
     listOptions = true;
 }
 
 if
 (
-    args.optionFound("listRegisteredSwitches")
+    args.found("listRegisteredSwitches")
 )
 {
-    debug::listRegisteredSwitches(args.optionFound("includeUnsetSwitches"));
+    debug::listRegisteredSwitches(args.found("includeUnsetSwitches"));
     listOptions = true;
 }
 
 #ifdef fvPatchField_H
-if (args.optionFound("listScalarBCs"))
+if (args.found("listScalarBCs"))
 {
     Info<< "scalarBCs"
         << fvPatchField<scalar>::dictionaryConstructorTablePtr_->sortedToc()
@@ -27,7 +27,7 @@ if (args.optionFound("listScalarBCs"))
     listOptions = true;
 }
 
-if (args.optionFound("listVectorBCs"))
+if (args.found("listVectorBCs"))
 {
     Info<< "vectorBCs"
         << fvPatchField<vector>::dictionaryConstructorTablePtr_->sortedToc()
@@ -37,7 +37,7 @@ if (args.optionFound("listVectorBCs"))
 #endif
 
 #ifdef functionObject_H
-if (args.optionFound("listFunctionObjects"))
+if (args.found("listFunctionObjects"))
 {
     Info<< "functionObjects"
         << functionObject::dictionaryConstructorTablePtr_->sortedToc()
@@ -47,7 +47,7 @@ if (args.optionFound("listFunctionObjects"))
 #endif
 
 #ifdef fvOption_H
-if (args.optionFound("listFvOptions"))
+if (args.found("listFvOptions"))
 {
     Info<< "fvOptions"
         << fv::option::dictionaryConstructorTablePtr_->sortedToc()
@@ -57,7 +57,7 @@ if (args.optionFound("listFvOptions"))
 #endif
 
 #ifdef turbulentTransportModel_H
-if (args.optionFound("listTurbulenceModels"))
+if (args.found("listTurbulenceModels"))
 {
     Info<< "Turbulence models"
         << incompressible::turbulenceModel::
@@ -76,7 +76,7 @@ if (args.optionFound("listTurbulenceModels"))
     listOptions = true;
 }
 #elif defined(turbulentFluidThermoModel_H)
-if (args.optionFound("listTurbulenceModels"))
+if (args.found("listTurbulenceModels"))
 {
     Info<< "Turbulence models"
         << compressible::turbulenceModel::

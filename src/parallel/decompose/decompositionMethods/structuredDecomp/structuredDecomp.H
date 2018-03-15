@@ -25,7 +25,7 @@ Class
     Foam::structuredDecomp
 
 Description
-    Decomposition by walking out decomposition of patch cells mesh.
+    Walk out decomposition of patch cells mesh - selectable as \c structured.
 
 SourceFiles
     structuredDecomp.C
@@ -36,12 +36,13 @@ SourceFiles
 #define structuredDecomp_H
 
 #include "decompositionMethod.H"
+#include "wordRes.H"
 
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class structuredDecomp Declaration
+                      Class structuredDecomp Declaration
 \*---------------------------------------------------------------------------*/
 
 class structuredDecomp
@@ -52,7 +53,7 @@ class structuredDecomp
 
         dictionary methodDict_;
 
-        wordReList patches_;
+        wordRes patches_;
 
         autoPtr<decompositionMethod> method_;
 
@@ -60,8 +61,8 @@ class structuredDecomp
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const structuredDecomp&);
-        structuredDecomp(const structuredDecomp&);
+        void operator=(const structuredDecomp&) = delete;
+        structuredDecomp(const structuredDecomp&) = delete;
 
 
 public:
@@ -73,12 +74,11 @@ public:
     // Constructors
 
         //- Construct given the decomposition dictionary
-        structuredDecomp(const dictionary& decompositionDict);
+        structuredDecomp(const dictionary& decompDict);
 
 
     //- Destructor
-    virtual ~structuredDecomp()
-    {}
+    virtual ~structuredDecomp() = default;
 
 
     // Member Functions

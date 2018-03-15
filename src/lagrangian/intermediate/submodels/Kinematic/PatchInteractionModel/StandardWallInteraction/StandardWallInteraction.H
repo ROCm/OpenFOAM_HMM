@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -69,6 +69,9 @@ protected:
 
     // Protected data
 
+        // Reference to mesh
+        const fvMesh& mesh_;
+
         //- Interaction type
         typename PatchInteractionModel<CloudType>::interactionType
             interactionType_;
@@ -79,20 +82,26 @@ protected:
         //- Restitution coefficient
         scalar mu_;
 
+    // Bookkeeping for particle fates
 
-        // Counters for particle fates
+        //- Number of parcels escaped
+        List<List<label>> nEscape_;
 
-            //- Number of parcels escaped
-            label nEscape_;
+        //- Mass of parcels escaped
+        List<List<scalar>> massEscape_;
 
-            //- Mass of parcels escaped
-            scalar massEscape_;
+        //- Number of parcels stuck to patches
+        List<List<label>> nStick_;
 
-            //- Number of parcels stuck to patches
-            label nStick_;
+        //- Mass of parcels stuck to patches
+        List<List<scalar>> massStick_;
 
-            //- Mass of parcels stuck to patches
-            scalar massStick_;
+        //- Flag to output escaped/mass particles sorted by injectorID
+        bool outputByInjectorId_;
+
+        //- InjectorId to index map, when outputting escaped/stick/...
+        //  particles sorted by injectorID
+        Map<label> injIdToIndex_;
 
 
 public:
@@ -120,7 +129,7 @@ public:
 
 
     //- Destructor
-    virtual ~StandardWallInteraction();
+    virtual ~StandardWallInteraction() = default;
 
 
     // Member Functions
@@ -135,10 +144,8 @@ public:
         );
 
 
-        // I-O
-
-            //- Write patch interaction info to stream
-            virtual void info(Ostream& os);
+        //- Write patch interaction info to stream
+        virtual void info(Ostream& os);
 };
 
 

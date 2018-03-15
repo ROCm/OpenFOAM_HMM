@@ -195,7 +195,7 @@ public:
 
 
     //- Destructor
-    virtual ~ReactingCloud();
+    virtual ~ReactingCloud() = default;
 
 
     // Member Functions

@@ -178,8 +178,8 @@ bool Foam::dynamicOversetFvMesh::updateAddressing() const
         new fvMeshPrimitiveLduAddressing
         (
             nCells(),
-            lowerAddr.xfer(),
-            upperAddr.xfer(),
+            std::move(lowerAddr),
+            std::move(upperAddr),
             patchAddr,
             ps
         )
@@ -228,7 +228,10 @@ Foam::dynamicOversetFvMesh::dynamicOversetFvMesh(const IOobject& io)
 :
     dynamicMotionSolverFvMesh(io),
     active_(false)
-{}
+{
+    // Force loading zoneID field before time gets incremented
+    (void)cellCellStencil::zoneID(*this);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -250,7 +253,7 @@ const Foam::lduAddressing& Foam::dynamicOversetFvMesh::lduAddr() const
         // Build extended addressing
         updateAddressing();
     }
-    return lduPtr_();
+    return *lduPtr_;
 }
 
 
@@ -263,7 +266,7 @@ Foam::dynamicOversetFvMesh::primitiveLduAddr() const
             << "Extended addressing not allocated" << abort(FatalError);
     }
 
-    return lduPtr_();
+    return *lduPtr_;
 }
 
 

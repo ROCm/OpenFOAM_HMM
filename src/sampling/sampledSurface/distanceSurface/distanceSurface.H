@@ -209,12 +209,10 @@ public:
         {
             if (cell_)
             {
-                return isoSurfCellPtr_();
+                return *isoSurfCellPtr_;
             }
-            else
-            {
-                return isoSurfPtr_();
-            }
+
+            return *isoSurfPtr_;
         }
 
 

@@ -101,7 +101,7 @@ public:
 
 
     //- Destructor
-    ~PrintTable();
+    ~PrintTable() = default;
 
 
     // Member Functions

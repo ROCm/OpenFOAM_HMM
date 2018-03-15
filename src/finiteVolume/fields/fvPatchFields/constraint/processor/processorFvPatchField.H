@@ -164,7 +164,7 @@ public:
 
 
     //- Destructor
-    ~processorFvPatchField();
+    ~processorFvPatchField() = default;
 
 
     // Member functions

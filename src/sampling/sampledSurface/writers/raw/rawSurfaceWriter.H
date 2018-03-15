@@ -110,7 +110,7 @@ public:
 
 
     //- Destructor
-    virtual ~rawSurfaceWriter();
+    virtual ~rawSurfaceWriter() = default;
 
 
     // Member Functions

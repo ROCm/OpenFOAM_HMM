@@ -48,17 +48,19 @@ Description
 #include "scalar.H"
 #include "StringStream.H"
 
-using namespace Foam;
-
 #include "argList.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "emptyPolyPatch.H"
 #include "preservePatchTypes.H"
 #include "cellShape.H"
-#include "cellModeller.H"
 #include "SLList.H"
 #include "SLPtrList.H"
+
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+
+using namespace Foam;
 
 SLList<point> slPoints;
 SLList<label> slPointMap;
@@ -76,11 +78,10 @@ PtrList<SLList<label>> slPatchCellFaces;
 Map<word> cellTypes;
 label currentTypei = -1;
 
-
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -298,7 +299,7 @@ label findFace(const polyMesh& mesh, const face& f)
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("ANSYS input file");
+    argList::addArgument("ANSYS input file");
     argList::addOption
     (
         "scale",
@@ -313,7 +314,7 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    const scalar scaleFactor = args.optionLookupOrDefault("scale", 1.0);
+    const scalar scaleFactor = args.lookupOrDefault("scale", 1.0);
 
     #include "createTime.H"
 
@@ -363,10 +364,10 @@ int main(int argc, char *argv[])
     }
 
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     labelList labelsHex(8);
     labelList labelsPrism(6);
@@ -445,27 +446,23 @@ int main(int argc, char *argv[])
     const word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
 
-    // Create dummy mesh just to find out what are internal/external
-    // faces
-    autoPtr<polyMesh> dummyMesh
+    // Create dummy mesh just to find out what are internal/external faces
+    auto dummyMesh = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                "dummyMesh",
-                runTime.constant(),
-                runTime
-            ),
-            xferCopy(points),
-            cellShapes,
-            faceListList(0),
-            wordList(0),
-            wordList(0),
-            defaultFacesName,
-            defaultFacesType,
-            wordList(0)
-        )
+            "dummyMesh",
+            runTime.constant(),
+            runTime
+        ),
+        pointField(points),  // copy
+        cellShapes,
+        faceListList(),
+        wordList(),
+        wordList(),
+        defaultFacesName,
+        defaultFacesType,
+        wordList()
     );
 
 
@@ -604,7 +601,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cellShapes,
         patchFaces,
         patchNames,
@@ -614,7 +611,7 @@ int main(int argc, char *argv[])
     );
 
 
-    if (cellTypes.size() > 0 || patchNames.size() > 0)
+    if (cellTypes.size() || patchNames.size())
     {
         DynamicList<pointZone*> pz;
         DynamicList<faceZone*> fz;
@@ -643,7 +640,7 @@ int main(int argc, char *argv[])
                     (
                         patchNames[patchi],
                         bFaceLabels,
-                        boolList(bFaceLabels.size(), false),
+                        false, // none are flipped
                         fz.size(),
                         pShapeMesh.faceZones()
                     )

@@ -51,18 +51,22 @@ template<class TYPE>
 unsigned testParsing
 (
     TYPE (*function)(const std::string&),
-    const List<Tuple2<std::string, bool>>& tests
+    std::initializer_list
+    <
+        Tuple2<bool, std::string>
+    > tests
 )
 {
     unsigned nFail = 0;
+    string errMsg;
 
     // Expect some failures
     const bool prev = FatalIOError.throwExceptions();
 
-    for (const Tuple2<std::string, bool>& test : tests)
+    for (const Tuple2<bool, std::string>& test : tests)
     {
-        const std::string& str = test.first();
-        const bool expected = test.second();
+        const bool expected = test.first();
+        const std::string& str = test.second();
 
         bool parsed = true;
 
@@ -74,6 +78,7 @@ unsigned testParsing
         catch (Foam::error& err)
         {
             parsed = false;
+            errMsg = err.message();
         }
 
         if (parsed)
@@ -93,12 +98,15 @@ unsigned testParsing
             if (expected)
             {
                 ++nFail;
-                Info<< "(fail) unexpected failure " << str << nl;
+                Info<< "(fail) unexpected";
             }
             else
             {
-                Info<< "(pass) expected failure " << str << nl;
+                Info<< "(pass) expected";
             }
+
+            Info<< " failure " << str
+                << "  >> " << errMsg.c_str() << nl;
         }
     }
 
@@ -113,32 +121,44 @@ int main(int argc, char *argv[])
     unsigned nFail = 0;
 
     {
-        Info<< nl << "Test readDouble:" << nl;
+        Info<< nl << "Test readDouble: (small=" << doubleScalarVSMALL
+            << " great=" << doubleScalarVSMALL << "):" << nl;
         nFail += testParsing
         (
             &readDouble,
             {
-                { "", false },
-                { "  ", false },
-                { " xxx ", false },
-                { " 1234E-", false },
-                { " 1234E junk", false },
-                { " 3.14159 ", true },
-                { " 31.4159E-1 " , true },
+                { false, "" },
+                { false, "  " },
+                { false, " xxx " },
+                { false, " 1234E-" },
+                { false, " 1234E junk" },
+                { true,  " 3.14159 " },
+                { true,  " 31.4159E-1 "  },
+                { false, " 100E1000 "  },
+                { true,  " 1E-40 "  },
+                { true,  " 1E-305 "  },
+                { true,  " 1E-37 "  },
+                { true,  " 1E-300 "  },
             }
         );
     }
 
     {
-        Info<< nl << "Test readFloat:" << nl;
+        Info<< nl << "Test readFloat: (small=" << floatScalarVSMALL
+            << " great=" << floatScalarVGREAT << "):" << nl;
+
         nFail += testParsing
         (
             &readFloat,
             {
-                { " 3.14159 ", true },
-                { " 31.4159E-1 " , true },
-                { " 31.4159E200 " , false },
-                { " 31.4159E20 " , true },
+                { true,  " 3.14159 " },
+                { true,  " 31.4159E-1 "  },
+                { false, " 31.4159E200 "  },
+                { true,  " 31.4159E20 "  },
+                { true,  " 1E-40 "  },
+                { true,  " 1E-305 "  },
+                { true,  " 1E-37 "  },
+                { true,  " 1E-300 "  },
             }
         );
     }
@@ -149,38 +169,46 @@ int main(int argc, char *argv[])
         (
             &readNasScalar,
             {
-                { " 3.14159 ", true },
-                { " 31.4159E-1 " , true },
-                { " 314.159-2 " , true },
-                { " 31.4159E200 " , true },
-                { " 31.4159E20 " , true },
+                { true,  " 3.14159 " },
+                { true,  " 31.4159E-1 "  },
+                { true,  " 314.159-2 "  },
+                { true,  " 31.4159E200 "  },
+                { true,  " 31.4159E20 "  },
+                { true,  " 1E-40 "  },
+                { true,  " 1E-305 "  },
+                { true,  " 1E-37 "  },
+                { true,  " 1E-300 "  },
             }
         );
     }
 
     {
-        Info<< nl << "Test readInt32 (max= " << INT32_MAX << "):" << nl;
+        Info<< nl << "Test readInt32 (max=" << INT32_MAX << "):" << nl;
         nFail += testParsing
         (
             &readInt32,
             {
-                { " 3.14159 ", false },
-                { " 31.4159E-1 " , false },
-                { "100" , true },
-                { "	2147483644" , true },
-                { "   2147483700  " , false },
+                { false, " 3.14159 " },
+                { false, " 31E1 " },
+                { false, " 31.4159E-1 "  },
+                { true,  "100"  },
+                { true,  "	2147483644"  },
+                { false, "   2147483700  "  },
             }
         );
     }
 
     {
-        Info<< nl << "Test readUint32 (max= " << INT32_MAX << "):" << nl;
+        Info<< nl << "Test readUint32 (max="
+            << unsigned(UINT32_MAX) << "):" << nl;
         nFail += testParsing
         (
             &readUint32,
             {
-                { "	2147483644" , true },
-                { "   2147483700  " , true },
+                { true,  "\t2147483644"  },
+                { true,  " 2147483700  "  },
+                { true,  " 4294967295  "  },
+                { false, " 4294968000  "  },
             }
         );
     }

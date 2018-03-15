@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,10 +24,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "alphatJayatillekeWallFunctionFvPatchScalarField.H"
-#include "turbulenceModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "wallFvPatch.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,6 +54,37 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::checkType()
             << " must be wall" << nl
             << "    Current patch type is " << patch().type() << nl << endl
             << abort(FatalError);
+    }
+}
+
+
+tmp<scalarField> alphatJayatillekeWallFunctionFvPatchScalarField::yPlus
+(
+    const turbulenceModel& turbModel
+) const
+{
+    const label patchi = patch().index();
+    const tmp<volScalarField> tnut = turbModel.nut();
+    const volScalarField& nut = tnut();
+
+    if (isA<nutWallFunctionFvPatchScalarField>(nut.boundaryField()[patchi]))
+    {
+        const nutWallFunctionFvPatchScalarField& nutPf =
+            dynamic_cast<const nutWallFunctionFvPatchScalarField&>
+            (
+                nut.boundaryField()[patchi]
+            );
+
+        return nutPf.yPlus();
+    }
+    else
+    {
+        const scalarField& y = turbModel.y()[patchi];
+        const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
+
+        return
+            y*sqrt(turbModel.nuEff(patchi)*mag(Uw.snGrad()))
+           /turbModel.nu(patchi);
     }
 }
 
@@ -110,7 +141,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     Prt_(0.85),
-    Cmu_(0.09),
     kappa_(0.41),
     E_(9.8)
 {
@@ -129,7 +159,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     Prt_(ptf.Prt_),
-    Cmu_(ptf.Cmu_),
     kappa_(ptf.kappa_),
     E_(ptf.E_)
 {
@@ -147,7 +176,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     Prt_(readScalar(dict.lookup("Prt"))), // force read to avoid ambiguity
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
@@ -163,7 +191,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wfpsf),
     Prt_(wfpsf.Prt_),
-    Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_)
 {
@@ -180,7 +207,6 @@ alphatJayatillekeWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(wfpsf, iF),
     Prt_(wfpsf.Prt_),
-    Cmu_(wfpsf.Cmu_),
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_)
 {
@@ -210,13 +236,11 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
         )
     );
 
-    const scalar Cmu25 = pow(Cmu_, 0.25);
-    const scalarField& y = turbModel.y()[patchi];
+    const scalarField yPlusp(yPlus(turbModel));
+
     const tmp<volScalarField> tnu = turbModel.nu();
     const volScalarField& nu = tnu();
     const scalarField& nuw = nu.boundaryField()[patchi];
-    const tmp<volScalarField> tk = turbModel.k();
-    const volScalarField& k = tk();
 
     const IOdictionary& transportProperties =
         db().lookupObject<IOdictionary>("transportProperties");
@@ -236,10 +260,7 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
     scalarField& alphatw = *this;
     forAll(alphatw, facei)
     {
-        label celli = patch().faceCells()[facei];
-
-        // y+
-        scalar yPlus = Cmu25*sqrt(k[celli])*y[facei]/nuw[facei];
+        scalar yPlus = yPlusp[facei];
 
         // Molecular-to-turbulent Prandtl number ratio
         scalar Prat = Pr/Prt_;
@@ -268,10 +289,9 @@ void alphatJayatillekeWallFunctionFvPatchScalarField::updateCoeffs()
 void alphatJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    os.writeEntry("Prt", Prt_);
+    os.writeEntry("kappa", kappa_);
+    os.writeEntry("E", E_);
     writeEntry("value", os);
 }
 

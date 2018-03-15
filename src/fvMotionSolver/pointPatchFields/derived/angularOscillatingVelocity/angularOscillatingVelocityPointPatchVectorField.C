@@ -184,16 +184,11 @@ void angularOscillatingVelocityPointPatchVectorField::write
 ) const
 {
     pointPatchField<vector>::write(os);
-    os.writeKeyword("axis")
-        << axis_ << token::END_STATEMENT << nl;
-    os.writeKeyword("origin")
-        << origin_ << token::END_STATEMENT << nl;
-    os.writeKeyword("angle0")
-        << angle0_ << token::END_STATEMENT << nl;
-    os.writeKeyword("amplitude")
-        << amplitude_ << token::END_STATEMENT << nl;
-    os.writeKeyword("omega")
-        << omega_ << token::END_STATEMENT << nl;
+    os.writeEntry("axis", axis_);
+    os.writeEntry("origin", origin_);
+    os.writeEntry("angle0", angle0_);
+    os.writeEntry("amplitude", amplitude_);
+    os.writeEntry("omega", omega_);
     p0_.writeEntry("p0", os);
     writeEntry("value", os);
 }

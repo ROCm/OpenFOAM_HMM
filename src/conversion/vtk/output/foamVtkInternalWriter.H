@@ -127,7 +127,7 @@ public:
 
         inline vtk::formatter& format()
         {
-            return format_();
+            return *format_;
         }
 
 

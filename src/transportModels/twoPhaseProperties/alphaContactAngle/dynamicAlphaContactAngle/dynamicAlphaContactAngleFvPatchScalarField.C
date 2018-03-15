@@ -120,7 +120,7 @@ Foam::dynamicAlphaContactAngleFvPatchScalarField::theta
 {
     if (uTheta_ < SMALL)
     {
-        return tmp<scalarField>(new scalarField(size(), theta0_));
+        return tmp<scalarField>::New(size(), theta0_);
     }
 
     const vectorField nf(patch().nf());
@@ -146,10 +146,10 @@ Foam::dynamicAlphaContactAngleFvPatchScalarField::theta
 void Foam::dynamicAlphaContactAngleFvPatchScalarField::write(Ostream& os) const
 {
     alphaContactAngleFvPatchScalarField::write(os);
-    os.writeKeyword("theta0") << theta0_ << token::END_STATEMENT << nl;
-    os.writeKeyword("uTheta") << uTheta_ << token::END_STATEMENT << nl;
-    os.writeKeyword("thetaA") << thetaA_ << token::END_STATEMENT << nl;
-    os.writeKeyword("thetaR") << thetaR_ << token::END_STATEMENT << nl;
+    os.writeEntry("theta0", theta0_);
+    os.writeEntry("uTheta", uTheta_);
+    os.writeEntry("thetaA", thetaA_);
+    os.writeEntry("thetaR", thetaR_);
     writeEntry("value", os);
 }
 

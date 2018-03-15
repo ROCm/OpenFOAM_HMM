@@ -77,7 +77,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(p, iF),   // Don't map
-    uniformValue_(ptf.uniformValue_, false)
+    uniformValue_(ptf.uniformValue_.clone())
 {
     // Evaluate since value not mapped
     this->evaluate();
@@ -91,7 +91,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf),
-    uniformValue_(ptf.uniformValue_, false)
+    uniformValue_(ptf.uniformValue_.clone())
 {}
 
 
@@ -103,7 +103,7 @@ Foam::uniformFixedValueFvPatchField<Type>::uniformFixedValueFvPatchField
 )
 :
     fixedValueFvPatchField<Type>(ptf, iF),
-    uniformValue_(ptf.uniformValue_, false)
+    uniformValue_(ptf.uniformValue_.clone())
 {
     // Evaluate the profile if defined
     if (ptf.uniformValue_.valid())

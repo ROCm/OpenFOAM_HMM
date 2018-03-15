@@ -163,7 +163,7 @@ void Foam::reconstructLagrangianFields
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     const word fieldClassName(IOField<Type>::typeName);
@@ -206,7 +206,7 @@ void Foam::reconstructLagrangianFieldFields
     const polyMesh& mesh,
     const PtrList<fvMesh>& meshes,
     const IOobjectList& objects,
-    const HashSet<word>& selectedFields
+    const wordHashSet& selectedFields
 )
 {
     {

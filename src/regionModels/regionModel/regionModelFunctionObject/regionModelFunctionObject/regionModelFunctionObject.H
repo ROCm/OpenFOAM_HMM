@@ -108,10 +108,7 @@ public:
         //- Construct and return a clone
         virtual autoPtr<regionModelFunctionObject> clone() const
         {
-            return autoPtr<regionModelFunctionObject>
-            (
-                new regionModelFunctionObject(*this)
-            );
+            return autoPtr<regionModelFunctionObject>::New(*this);
         }
 
 

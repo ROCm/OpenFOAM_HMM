@@ -66,7 +66,7 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, p, iF, mapper),
-    flowRate_(ptf.flowRate_, false),
+    flowRate_(ptf.flowRate_.clone()),
     alphaName_(ptf.alphaName_)
 {}
 
@@ -78,7 +78,7 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf),
-    flowRate_(ptf.flowRate_, false),
+    flowRate_(ptf.flowRate_.clone()),
     alphaName_(ptf.alphaName_)
 {}
 
@@ -91,7 +91,7 @@ Foam::variableHeightFlowRateInletVelocityFvPatchVectorField
 )
 :
     fixedValueFvPatchField<vector>(ptf, iF),
-    flowRate_(ptf.flowRate_, false),
+    flowRate_(ptf.flowRate_.clone()),
     alphaName_(ptf.alphaName_)
 {}
 
@@ -133,7 +133,7 @@ void Foam::variableHeightFlowRateInletVelocityFvPatchVectorField::write
 {
     fvPatchField<vector>::write(os);
     flowRate_->writeData(os);
-    os.writeKeyword("alpha") << alphaName_ << token::END_STATEMENT << nl;
+    os.writeEntry("alpha", alphaName_);
     writeEntry("value", os);
 }
 

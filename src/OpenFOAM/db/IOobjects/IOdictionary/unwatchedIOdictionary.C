@@ -93,7 +93,7 @@ Foam::label Foam::unwatchedIOdictionary::addWatch(const fileName& f)
 
     if (readOpt() == MUST_READ_IF_MODIFIED)
     {
-        index = findIndex(files_, f);
+        index = files_.find(f);
 
         if (index == -1)
         {
@@ -117,7 +117,7 @@ void Foam::unwatchedIOdictionary::addWatch()
             f = objectPath();
         }
 
-        if (findIndex(files_, f) != -1)
+        if (files_.found(f))
         {
             FatalErrorInFunction
                 << "Object " << objectPath() << " of type " << type()

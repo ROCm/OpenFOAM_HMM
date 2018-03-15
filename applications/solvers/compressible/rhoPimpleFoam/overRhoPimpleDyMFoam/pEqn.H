@@ -7,8 +7,8 @@ surfaceScalarField faceMask(localMin<scalar>(mesh).interpolate(cellMask));
 
 volScalarField rAU(1.0/UEqn.A());
 surfaceScalarField rhorAUf("rhorAUf", faceMask*fvc::interpolate(rho*rAU));
-volVectorField HbyA("HbyA", constrainHbyA(rAU*UEqn.H(), U, p));
-//mesh.interpolate(HbyA);
+volVectorField HbyA("HbyA", U);
+HbyA = constrainHbyA(cellMask*rAU*UEqn.H(), U, p);
 
 if (pimple.nCorrPISO() <= 1)
 {

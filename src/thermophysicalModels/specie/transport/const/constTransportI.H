@@ -56,10 +56,7 @@ template<class Thermo>
 inline Foam::autoPtr<Foam::constTransport<Thermo>>
 Foam::constTransport<Thermo>::clone() const
 {
-    return autoPtr<constTransport<Thermo>>
-    (
-        new constTransport<Thermo>(*this)
-    );
+    return autoPtr<constTransport<Thermo>>::New(*this);
 }
 
 
@@ -70,10 +67,7 @@ Foam::constTransport<Thermo>::New
     const dictionary& dict
 )
 {
-    return autoPtr<constTransport<Thermo>>
-    (
-        new constTransport<Thermo>(dict)
-    );
+    return autoPtr<constTransport<Thermo>>::New(dict);
 }
 
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,8 +22,6 @@ License
     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
 
 \*---------------------------------------------------------------------------*/
-
-#include "stringOps.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,26 +62,19 @@ word name(const Scalar val)
 }
 
 
-word name(const char* fmt, const Scalar val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
-word name(const std::string& fmt, const Scalar val)
-{
-    return stringOps::name(fmt, val);
-}
-
-
 Scalar ScalarRead(const char* buf)
 {
     char* endptr = nullptr;
     errno = 0;
+    const auto parsed = ScalarConvert(buf, &endptr);
 
-    const Scalar val = ScalarConvert(buf, &endptr);
+    const parsing::errorType err =
+    (
+        (parsed < -ScalarVGREAT || parsed > ScalarVGREAT)
+      ? parsing::errorType::RANGE
+      : parsing::checkConversion(buf, endptr)
+    );
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
     if (err != parsing::errorType::NONE)
     {
         FatalIOErrorInFunction("unknown")
@@ -91,29 +82,36 @@ Scalar ScalarRead(const char* buf)
             << exit(FatalIOError);
     }
 
-    return val;
+    // Round underflow to zero
+    return
+    (
+        (parsed > -ScalarVSMALL && parsed < ScalarVSMALL)
+      ? 0
+      : Scalar(parsed)
+    );
 }
 
 
-bool readScalar(const char* buf, Scalar& val)
+bool ScalarRead(const char* buf, Scalar& val)
 {
     char* endptr = nullptr;
     errno = 0;
+    const auto parsed = ScalarConvert(buf, &endptr);
 
-    val = ScalarConvert(buf, &endptr);
+    // Round underflow to zero
+    val =
+    (
+        (parsed >= -ScalarVSMALL && parsed <= ScalarVSMALL)
+      ? 0
+      : Scalar(parsed)
+    );
 
-    const parsing::errorType err = parsing::checkConversion(buf, endptr);
-    if (err != parsing::errorType::NONE)
-    {
-        #ifdef FULLDEBUG
-        IOWarningInFunction("unknown")
-            << parsing::errorNames[err] << " '" << buf << "'"
-            << endl;
-        #endif
-        return false;
-    }
-
-    return true;
+    return
+    (
+        (parsed < -ScalarVGREAT || parsed > ScalarVGREAT)
+      ? false
+      : (parsing::checkConversion(buf, endptr) == parsing::errorType::NONE)
+    );
 }
 
 
@@ -141,6 +139,7 @@ Istream& operator>>(Istream& is, Scalar& val)
     if (t.isNumber())
     {
         val = t.number();
+        is.check(FUNCTION_NAME);
     }
     else
     {
@@ -148,11 +147,8 @@ Istream& operator>>(Istream& is, Scalar& val)
         FatalIOErrorInFunction(is)
             << "wrong token type - expected Scalar, found " << t.info()
             << exit(FatalIOError);
-
-        return is;
     }
 
-    is.check(FUNCTION_NAME);
     return is;
 }
 

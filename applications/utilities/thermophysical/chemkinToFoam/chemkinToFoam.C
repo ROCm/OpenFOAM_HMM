@@ -54,11 +54,11 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.append("CHEMKINFile");
-    argList::validArgs.append("CHEMKINThermodynamicsFile");
-    argList::validArgs.append("CHEMKINTransport");
-    argList::validArgs.append("FOAMChemistryFile");
-    argList::validArgs.append("FOAMThermodynamicsFile");
+    argList::addArgument("CHEMKINFile");
+    argList::addArgument("CHEMKINThermodynamicsFile");
+    argList::addArgument("CHEMKINTransport");
+    argList::addArgument("FOAMChemistryFile");
+    argList::addArgument("FOAMThermodynamicsFile");
 
     argList::addBoolOption
     (
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
 
-    const bool newFormat = args.optionFound("newFormat");
+    const bool newFormat = args.found("newFormat");
 
     speciesTable species;
 

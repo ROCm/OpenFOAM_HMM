@@ -23,21 +23,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-inline std::string::size_type Foam::string::find_ext() const
+inline std::string::size_type Foam::string::find_ext(const std::string& str)
 {
-    const size_type i = find_last_of("./");
+    const auto i = str.find_last_of("./");
 
-    if (i == npos || i == 0 || operator[](i) == '/')
+    if (i == npos || i == 0 || str[i] == '/')
     {
         return npos;
     }
-    else
-    {
-        return i;
-    }
+
+    return i;
+}
+
+
+inline std::string::size_type Foam::string::find_ext() const
+{
+    return find_ext(*this);
 }
 
 
@@ -49,23 +52,23 @@ inline bool Foam::string::hasExt() const
 
 inline bool Foam::string::removeExt()
 {
-    const size_type i = find_ext();
+    const auto i = find_ext();
 
     if (i == npos)
     {
         return false;
     }
-    else
-    {
-        this->resize(i);
-        return true;
-    }
+
+    this->resize(i);
+    return true;
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::string::string()
+:
+    std::string()
 {}
 
 
@@ -96,6 +99,12 @@ inline Foam::string::string(const char c)
 inline Foam::string::string(const size_type len, const char c)
 :
     std::string(len, c)
+{}
+
+
+inline Foam::string::string(std::string&& str)
+:
+    std::string(std::move(str))
 {}
 
 
@@ -245,7 +254,7 @@ inline bool Foam::string::operator()(const std::string& text) const
 
 inline unsigned Foam::string::hash::operator()
 (
-    const string& str,
+    const std::string& str,
     unsigned seed
 ) const
 {

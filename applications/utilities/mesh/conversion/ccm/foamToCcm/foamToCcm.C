@@ -123,12 +123,12 @@ int main(int argc, char *argv[])
     // get times list
     instantList timeDirs = Foam::timeSelector::select0(runTime, args);
 
-    const bool optMesh      = args.optionFound("mesh");
-    const bool optResults   = args.optionFound("results");
-    const bool optOverwrite = args.optionFound("overwrite");
+    const bool optMesh      = args.found("mesh");
+    const bool optResults   = args.found("results");
+    const bool optOverwrite = args.found("overwrite");
 
     fileName exportName = ccm::writer::defaultMeshName;
-    if (args.optionReadIfPresent("name", exportName))
+    if (args.readIfPresent("name", exportName))
     {
         const word ext = exportName.ext();
         // strip erroneous extension (.ccm, .ccmg, .ccmp)
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
             exportName = exportName.lessExt();
         }
     }
-    else if (args.optionFound("case"))
+    else if (args.found("case"))
     {
         exportName += '-' + args.globalCaseName();
     }
@@ -154,9 +154,9 @@ int main(int argc, char *argv[])
 //     // skip over time=0, unless some other time option has been specified
 //     if
 //     (
-//         !args.optionFound("zeroTime")
-//      && !args.optionFound("time")
-//      && !args.optionFound("latestTime")
+//         !args.found("zeroTime")
+//      && !args.found("time")
+//      && !args.found("latestTime")
 //      && Times.size() > 2
 //     )
 //     {
@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
             );
             // writer.setTopologyFile(exportName + ".ccmg");
             Info<< "writing solution:";
-            if (args.optionFound("remap"))
+            if (args.found("remap"))
             {
                 writer.writeSolution(objects, args["remap"]);
             }

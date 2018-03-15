@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -35,17 +35,22 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 )
 :
     PatchInteractionModel<CloudType>(dict, cloud, typeName),
+    mesh_(cloud.mesh()),
     interactionType_
     (
         this->wordToInteractionType(this->coeffDict().lookup("type"))
     ),
     e_(0.0),
     mu_(0.0),
-    nEscape_(0),
-    massEscape_(0.0),
-    nStick_(0),
-    massStick_(0.0)
+    nEscape_(mesh_.boundaryMesh().nNonProcessor()),
+    massEscape_(nEscape_.size()),
+    nStick_(nEscape_.size()),
+    massStick_(nEscape_.size()),
+    injIdToIndex_()
 {
+    const bool outputByInjectorId
+        = this->coeffDict().lookupOrDefault("outputByInjectorId", false);
+
     switch (interactionType_)
     {
         case PatchInteractionModel<CloudType>::itOther:
@@ -69,6 +74,30 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
         default:
         {}
     }
+
+    // Determine the number of injectors and the injector mapping
+    label nInjectors = 0;
+    if (outputByInjectorId)
+    {
+        for (const auto& inj : cloud.injectors())
+        {
+            injIdToIndex_.insert(inj.injectorID(), nInjectors++);
+        }
+    }
+
+    // The normal case, and safety if injector mapping was somehow null.
+    if (injIdToIndex_.empty())
+    {
+        nInjectors = 1;
+    }
+
+    forAll(nEscape_, patchi)
+    {
+        nEscape_[patchi].setSize(nInjectors, Zero);
+        massEscape_[patchi].setSize(nInjectors, Zero);
+        nStick_[patchi].setSize(nInjectors, Zero);
+        massStick_[patchi].setSize(nInjectors, Zero);
+    }
 }
 
 
@@ -79,20 +108,15 @@ Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
 )
 :
     PatchInteractionModel<CloudType>(pim),
+    mesh_(pim.mesh_),
     interactionType_(pim.interactionType_),
     e_(pim.e_),
     mu_(pim.mu_),
     nEscape_(pim.nEscape_),
     massEscape_(pim.massEscape_),
     nStick_(pim.nStick_),
-    massStick_(pim.massStick_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
+    massStick_(pim.massStick_),
+    injIdToIndex_(pim.injIdToIndex_)
 {}
 
 
@@ -110,6 +134,14 @@ bool Foam::StandardWallInteraction<CloudType>::correct
 
     if (isA<wallPolyPatch>(pp))
     {
+        // Location for storing the stats.
+        const label idx =
+        (
+            injIdToIndex_.size()
+          ? injIdToIndex_.lookup(p.typeId(), 0)
+          : 0
+        );
+
         switch (interactionType_)
         {
             case PatchInteractionModel<CloudType>::itNone:
@@ -121,8 +153,11 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 keepParticle = false;
                 p.active(false);
                 U = Zero;
-                nEscape_++;
-                massEscape_ += p.nParticle()*p.mass();
+
+                const scalar dm = p.nParticle()*p.mass();
+
+                nEscape_[pp.index()][idx]++;
+                massEscape_[pp.index()][idx] += dm;
                 break;
             }
             case PatchInteractionModel<CloudType>::itStick:
@@ -130,8 +165,11 @@ bool Foam::StandardWallInteraction<CloudType>::correct
                 keepParticle = true;
                 p.active(false);
                 U = Zero;
-                nStick_++;
-                massStick_ += p.nParticle()*p.mass();
+
+                const scalar dm = p.nParticle()*p.mass();
+
+                nStick_[pp.index()][idx]++;
+                massStick_[pp.index()][idx] += dm;
                 break;
             }
             case PatchInteractionModel<CloudType>::itRebound:
@@ -184,21 +222,86 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
 {
     PatchInteractionModel<CloudType>::info(os);
 
-    label npe0 = this->template getModelProperty<scalar>("nEscape");
-    label npe = npe0 + returnReduce(nEscape_, sumOp<label>());
+    labelListList npe0(nEscape_);
+    this->getModelProperty("nEscape", npe0);
 
-    scalar mpe0 = this->template getModelProperty<scalar>("massEscape");
-    scalar mpe = mpe0 + returnReduce(massEscape_, sumOp<scalar>());
+    scalarListList mpe0(massEscape_);
+    this->getModelProperty("massEscape", mpe0);
 
-    label nps0 = this->template getModelProperty<scalar>("nStick");
-    label nps = nps0 + returnReduce(nStick_, sumOp<label>());
+    labelListList nps0(nStick_);
+    this->getModelProperty("nStick", nps0);
 
-    scalar mps0 = this->template getModelProperty<scalar>("massStick");
-    scalar mps = mps0 + returnReduce(massStick_, sumOp<scalar>());
+    scalarListList mps0(massStick_);
+    this->getModelProperty("massStick", mps0);
 
-    os  << "    Parcel fate: walls (number, mass)" << nl
-        << "      - escape                      = " << npe << ", " << mpe << nl
-        << "      - stick                       = " << nps << ", " << mps << nl;
+    // Accumulate current data
+    labelListList npe(nEscape_);
+
+    forAll(npe, i)
+    {
+        Pstream::listCombineGather(npe[i], plusEqOp<label>());
+        npe[i] = npe[i] + npe0[i];
+    }
+
+    scalarListList mpe(massEscape_);
+    forAll(mpe, i)
+    {
+        Pstream::listCombineGather(mpe[i], plusEqOp<scalar>());
+        mpe[i] = mpe[i] + mpe0[i];
+    }
+
+    labelListList nps(nStick_);
+    forAll(nps, i)
+    {
+        Pstream::listCombineGather(nps[i], plusEqOp<label>());
+        nps[i] = nps[i] + nps0[i];
+    }
+
+    scalarListList mps(massStick_);
+    forAll(nps, i)
+    {
+        Pstream::listCombineGather(mps[i], plusEqOp<scalar>());
+        mps[i] = mps[i] + mps0[i];
+    }
+
+    if (injIdToIndex_.size())
+    {
+        // Since injIdToIndex_ is a one-to-one mapping (starting as zero),
+        // can simply invert it.
+        labelList indexToInjector(injIdToIndex_.size());
+        forAllConstIters(injIdToIndex_, iter)
+        {
+            indexToInjector[iter.object()] = iter.key();
+        }
+
+        forAll(npe, i)
+        {
+            forAll(mpe[i], idx)
+            {
+                os  << "    Parcel fate: patch " <<  mesh_.boundary()[i].name()
+                    << " (number, mass)" << nl
+                    << "      - escape  (injector " << indexToInjector[idx]
+                    << ")  = " << npe[i][idx]
+                    << ", " << mpe[i][idx] << nl
+                    << "      - stick   (injector " << indexToInjector[idx]
+                    << ")  = " << nps[i][idx]
+                    << ", " << mps[i][idx] << nl;
+            }
+        }
+    }
+    else
+    {
+        forAll(npe, i)
+        {
+            os  << "    Parcel fate: patch (number, mass) "
+                << mesh_.boundary()[i].name() << nl
+                << "      - escape                      = "
+                << npe[i][0] << ", " << mpe[i][0] << nl
+                << "      - stick                       = "
+                << nps[i][0] << ", " << mps[i][0] << nl;
+
+        }
+    }
 
     if (this->writeTime())
     {
@@ -206,6 +309,11 @@ void Foam::StandardWallInteraction<CloudType>::info(Ostream& os)
         this->setModelProperty("massEscape", mpe);
         this->setModelProperty("nStick", nps);
         this->setModelProperty("massStick", mps);
+
+        nEscape_ = Zero;
+        massEscape_ = Zero;
+        nStick_ = Zero;
+        massStick_ = Zero;
     }
 }
 

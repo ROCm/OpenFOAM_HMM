@@ -40,7 +40,7 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     const int n = 10000000;
-    const char* const memTags = "peak/size/rss mem: ";
+    const char* const memTags = "peak/size/rss/free mem: ";
 
     memInfo mem;
 

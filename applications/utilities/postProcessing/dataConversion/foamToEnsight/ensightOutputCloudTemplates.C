@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,8 +36,8 @@ License
 template<class Type>
 bool Foam::ensightCloud::writeCloudField
 (
-    const Foam::IOField<Type>& field,
-    Foam::ensightFile& os
+    const IOField<Type>& field,
+    ensightFile& os
 )
 {
     const bool exists = (returnReduce(field.size(), sumOp<label>()) > 0);
@@ -125,15 +125,24 @@ bool Foam::ensightCloud::writeCloudField
 template<class Type>
 bool Foam::ensightCloud::writeCloudField
 (
-    const Foam::IOobject& fieldObject,
+    IOobject& fieldObject,
     const bool exists,
-    Foam::autoPtr<Foam::ensightFile>& output
+    autoPtr<ensightFile>& output
 )
 {
     if (exists)
     {
+        // when exists == true, it exists globally,
+        // but can still be missing on the local processor.
+        // Handle this by READ_IF_PRESENT instead.
+
+        const IOobject::readOption rOpt = fieldObject.readOpt();
+        fieldObject.readOpt() = IOobject::READ_IF_PRESENT;
+
         IOField<Type> field(fieldObject);
-        writeCloudField(field, output.rawRef());
+        fieldObject.readOpt() = rOpt;
+
+        writeCloudField(field, output.ref());
     }
 
     return true;

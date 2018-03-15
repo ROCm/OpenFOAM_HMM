@@ -77,10 +77,10 @@ class mergePolyMesh
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        mergePolyMesh(const mergePolyMesh&);
+        mergePolyMesh(const mergePolyMesh&) = delete;
 
         //- Disallow default bitwise assignment
-        void operator=(const mergePolyMesh&);
+        void operator=(const mergePolyMesh&) = delete;
 
 
         //- Return patch index given a name and type

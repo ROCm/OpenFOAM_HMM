@@ -23,6 +23,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include <algorithm>
+
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
@@ -78,6 +80,14 @@ inline Foam::regExp::regExp(const std::string& pattern, bool ignoreCase)
 }
 
 
+inline Foam::regExp::regExp(regExp&& rgx)
+:
+    preg_(rgx.preg_)
+{
+    rgx.preg_ = nullptr;
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 inline Foam::regExp::~regExp()
@@ -112,11 +122,24 @@ inline bool Foam::regExp::search(const std::string& text) const
 }
 
 
+inline void Foam::regExp::swap(regExp& rgx)
+{
+    std::swap(preg_, rgx.preg_);
+}
+
+
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 inline bool Foam::regExp::operator()(const std::string& text) const
 {
     return match(text);
+}
+
+
+inline void Foam::regExp::operator=(regExp&& rgx)
+{
+    clear();
+    swap(rgx);
 }
 
 

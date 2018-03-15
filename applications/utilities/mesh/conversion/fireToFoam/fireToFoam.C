@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     );
 
     argList::noParallel();
-    argList::validArgs.append("firePolyMesh");
+    argList::addArgument("firePolyMesh");
     argList::addBoolOption
     (
         "ascii",
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     // Binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     (
         args[1],
         // Default no scaling
-        args.optionLookupOrDefault("scale", 1.0)
+        args.lookupOrDefault("scale", 1.0)
     );
 
 
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
     reader.writeMesh(mesh(), format);
 
 
-    if (args.optionFound("check"))
+    if (args.found("check"))
     {
         checkFireEdges(mesh());
     }

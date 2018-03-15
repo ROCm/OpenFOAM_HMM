@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,9 +36,9 @@ template<class Patch>
 void Foam::extendedEdgeMesh::sortPointsAndEdges
 (
     const Patch& surf,
-    const labelList& featureEdges,
-    const labelList& regionFeatureEdges,// subset of featureEdges: inter-region
-    const labelList& featurePoints
+    const labelUList& featureEdges,
+    const labelUList& regionFeatureEdges,// subset of featureEdges: inter-region
+    const labelUList& featurePoints
 )
 {
     const pointField& sFeatLocalPts(surf.localPoints());
@@ -361,7 +361,10 @@ void Foam::extendedEdgeMesh::sortPointsAndEdges
 
     // Reinitialise the edgeMesh with sorted feature points and
     // renumbered edges
-    reset(xferMove(pts), xferMove(eds));
+    {
+        edgeMesh newmesh(std::move(pts), std::move(eds));
+        edgeMesh::transfer(newmesh);
+    }
 
     // Generate the featurePointNormals
 
@@ -379,7 +382,7 @@ void Foam::extendedEdgeMesh::sortPointsAndEdges
 
             forAll(ptEdNorms, k)
             {
-                if (findIndex(tmpFtPtNorms, ptEdNorms[k]) == -1)
+                if (!tmpFtPtNorms.found(ptEdNorms[k]))
                 {
                     bool addNormal = true;
 

@@ -6,34 +6,22 @@
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
-#     This file is part of OpenFOAM.
-#
-#     OpenFOAM is free software: you can redistribute it and/or modify it
-#     under the terms of the GNU General Public License as published by
-#     the Free Software Foundation, either version 3 of the License, or
-#     (at your option) any later version.
-#
-#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
-#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-#     for more details.
-#
-#     You should have received a copy of the GNU General Public License
-#     along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+#     This file is part of OpenFOAM, licensed under GNU General Public License
+#     <http://www.gnu.org/licenses/>.
 #
 # File
 #     etc/config.sh/ccmio
+#     - sourced during wmake process only.
 #
 # Description
-#     Setup file for libccmio include/libraries.
-#     Sourced during wmake process only.
+#     Setup for LIBCCMIO include/libraries.
 #
 #     Static libraries (recommended) are found under CCMIO_ARCH_PATH/lib.
 #     Dynamic libraries are found under FOAM_EXT_LIBBIN path.
 #
 # Note
-#     A csh version is not needed, since the values here are only sourced
-#     during the wmake process
+#     No csh version. This file is only used by wmake.
+#
 #------------------------------------------------------------------------------
 # USER EDITABLE PART: Changes made here may be lost with the next upgrade
 

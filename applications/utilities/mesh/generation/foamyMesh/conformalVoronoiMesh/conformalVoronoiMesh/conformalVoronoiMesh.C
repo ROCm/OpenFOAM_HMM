@@ -509,7 +509,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         if (!distributeBackground(cellSizeMesh))
         {
             // Synchronise the cell size mesh if it has not been distributed
-            cellSizeMesh.distribute(decomposition_);
+            cellSizeMesh.distribute(decomposition_());
         }
     }
 
@@ -531,7 +531,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
 
         if (Pstream::parRun())
         {
-            cellSizeMesh.distribute(decomposition_);
+            cellSizeMesh.distribute(decomposition_());
         }
 
         Info<< "    Iteration " << i
@@ -549,7 +549,7 @@ void Foam::conformalVoronoiMesh::buildCellSizeAndAlignmentMesh()
         // Need to distribute the cell size mesh to cover the background mesh
         if (!distributeBackground(cellSizeMesh))
         {
-            cellSizeMesh.distribute(decomposition_);
+            cellSizeMesh.distribute(decomposition_());
         }
     }
 
@@ -660,7 +660,7 @@ Foam::face Foam::conformalVoronoiMesh::buildDualFace
 
             if (cc1I != cc2I)
             {
-                if (findIndex(verticesOnFace, cc1I) == -1)
+                if (!verticesOnFace.found(cc1I))
                 {
                     nUniqueVertices++;
                 }

@@ -61,12 +61,6 @@ Foam::ensightSurfaceWriter::ensightSurfaceWriter(const dictionary& options)
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::ensightSurfaceWriter::~ensightSurfaceWriter()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Note that ensight does supports geometry in a separate file,

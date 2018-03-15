@@ -146,7 +146,7 @@ solidBodyMotionDisplacementPointPatchVectorField::localPoints0() const
 
         localPoints0Ptr_.reset(new pointField(points0, patch().meshPoints()));
     }
-    return localPoints0Ptr_();
+    return *localPoints0Ptr_;
 }
 
 
@@ -174,8 +174,8 @@ write(Ostream& os) const
     // Note: write value
     fixedValuePointPatchVectorField::write(os);
 
-    os.writeKeyword(solidBodyMotionFunction::typeName) << SBMFPtr_->type()
-        << token::END_STATEMENT << nl;
+    os.writeEntry(solidBodyMotionFunction::typeName, SBMFPtr_->type());
+
     os  << indent << word(SBMFPtr_->type() + "Coeffs");
     SBMFPtr_->writeData(os);
 }

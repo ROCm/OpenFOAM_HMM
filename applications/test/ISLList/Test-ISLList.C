@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -28,9 +28,12 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
-
 #include "IOstreams.H"
 #include "ISLList.H"
+#include "List.H"
+#include "FlatOutput.H"
+#include "ListOps.H"
+#include "OSspecific.H"
 
 using namespace Foam;
 
@@ -66,7 +69,7 @@ public:
 
 int main(int argc, char *argv[])
 {
-    ISLList<Scalar> myList;
+    ISLList<Scalar> myList(new Scalar(0));
 
     for (int i = 0; i<10; i++)
     {
@@ -76,31 +79,74 @@ int main(int argc, char *argv[])
     myList.append(new Scalar(100.3));
     myList.append(new Scalar(500.3));
 
-    Info<< nl << "And again using STL iterator: " << nl << endl;
+    Info<< "ISLList<scalar>" << myList << nl;
+    Info<< nl << "flat-output: " << flatOutput(myList) << nl;
 
-    forAllIters(myList, iter)
+    Info<< nl << "range-for:" << nl;
+    for (const auto& val : myList)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "  " << val << nl;
+        // Info<<" is " << typeid(val).name() << endl;
     }
 
-    Info<< nl << "And again using STL const_iterator: " << nl << endl;
+    Info<< nl << "const_iterator:" << nl;
 
     const ISLList<Scalar>& const_myList = myList;
 
     forAllConstIters(const_myList, iter)
     {
-        Info<< "element:" << *iter << endl;
+        Info<< "  " << *iter << endl;
+    }
+
+    {
+        Info<< nl << "Remove element:" << nl;
+
+        Scalar *iter = myList.removeHead();
+
+        Info<< "  remove " << *iter;
+        Info<< " => " << flatOutput(myList) << nl;
+
+        delete iter;
     }
 
 
-    Info<< nl << "Testing transfer: " << nl << endl;
-    Info<< "original: " << myList << endl;
+    Info<< nl << "Transfer: " << nl;
+    Info<< "original: " << flatOutput(myList) << endl;
 
     ISLList<Scalar> newList;
     newList.transfer(myList);
 
-    Info<< nl << "source: " << myList << nl
-        << nl << "target: " << newList << endl;
+    Info<< nl
+        << "source: " << flatOutput(myList) << nl
+        << "target: " << flatOutput(newList) << endl;
+
+    myList.swap(newList);
+
+    Info<< nl << "swap: " << nl;
+    Info<< nl
+        << "source: " << flatOutput(myList) << nl
+        << "target: " << flatOutput(newList) << endl;
+
+    myList.swap(newList);
+
+    Info<< nl << "Move Construct: " << nl;
+
+    ISLList<Scalar> list2(std::move(newList));
+
+    Info<< nl
+        << "in : " << flatOutput(newList) << nl
+        << "out: " << flatOutput(list2) << nl;
+
+    // Move back
+    Info<< nl << "Move Assignment: " << nl;
+
+    newList = std::move(list2);
+
+    Info<< nl << "move assign: " << nl;
+    Info<< nl
+        << "source: " << flatOutput(list2) << nl
+        << "target: " << flatOutput(newList) << endl;
+
 
     Info<< nl << "Bye." << endl;
     return 0;

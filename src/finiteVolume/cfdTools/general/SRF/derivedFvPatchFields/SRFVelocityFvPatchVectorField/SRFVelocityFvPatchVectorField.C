@@ -153,7 +153,7 @@ void Foam::SRFVelocityFvPatchVectorField::updateCoeffs()
 void Foam::SRFVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchVectorField::write(os);
-    os.writeKeyword("relative") << relative_ << token::END_STATEMENT << nl;
+    os.writeEntry("relative", relative_);
     inletValue_.writeEntry("inletValue", os);
     writeEntry("value", os);
 }

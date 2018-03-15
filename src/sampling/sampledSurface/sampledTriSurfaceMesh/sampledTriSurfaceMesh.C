@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -158,7 +158,7 @@ Foam::sampledTriSurfaceMesh::nonCoupledboundaryTree() const
         );
     }
 
-    return boundaryTreePtr_();
+    return *boundaryTreePtr_;
 }
 
 
@@ -312,7 +312,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                 patchi,
                 (
                     patches[patchi].name().empty()
-                  ? Foam::name("patch%d", patchi)
+                  ? word::printf("patch%d", patchi)
                   : patches[patchi].name()
                 )
             );
@@ -345,7 +345,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
                     zoneNames.set
                     (
                         regionid,
-                        Foam::name("patch%d", regionid)
+                        word::printf("patch%d", regionid)
                     );
                 }
 
@@ -393,7 +393,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
         }
         if (name.empty())
         {
-            name = ::Foam::name("patch%d", regionid);
+            name = word::printf("patch%d", regionid);
         }
 
         zoneLst[zoneI] = surfZone
@@ -437,7 +437,7 @@ bool Foam::sampledTriSurfaceMesh::update(const meshSearch& meshSearcher)
     }
 
     // Subset cellOrFaceLabels (for compact faces)
-    cellOrFaceLabels = UIndirectList<label>(cellOrFaceLabels, faceMap)();
+    cellOrFaceLabels = labelUIndList(cellOrFaceLabels, faceMap)();
 
     // Store any face per point (without using pointFaces())
     labelList pointToFace(pointMap.size());
@@ -647,7 +647,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             surfaceName,
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                   // registry
+            mesh.time(),            // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
@@ -679,7 +679,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             dict.lookup("surface"),
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                   // registry
+            mesh.time(),            // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
@@ -713,7 +713,7 @@ Foam::sampledTriSurfaceMesh::sampledTriSurfaceMesh
             name,
             mesh.time().constant(), // instance
             "triSurface",           // local
-            mesh,                   // registry
+            mesh.time(),            // registry
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
@@ -787,6 +787,12 @@ bool Foam::sampledTriSurfaceMesh::update()
     {
         // Surface and mesh do not overlap at all. Guarantee a valid
         // bounding box so we don't get any 'invalid bounding box' errors.
+
+        WarningInFunction
+            << "Surface " << surface_.searchableSurface::name()
+            << " does not overlap bounding box of mesh " << mesh().bounds()
+            << endl;
+
         bb = treeBoundBox(mesh().bounds());
         const vector span(bb.span());
 

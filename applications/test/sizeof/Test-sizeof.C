@@ -62,6 +62,10 @@ int main(int argc, char *argv[])
         cout<<"nil:" << sizeof(x) << nl;
     }
     {
+        zero x;
+        cout<<"zero:" << sizeof(x) << nl;
+    }
+    {
         bool x(0);
         cout<<"bool:" << sizeof(x) << nl;
     }
@@ -91,6 +95,10 @@ int main(int argc, char *argv[])
         cout<<"long:" << sizeof(long) << nl;
         cout<<"float:" << sizeof(float) << nl;
         cout<<"double:" << sizeof(double) << nl;
+    }
+
+    {
+        cout<<"string:" << sizeof(Foam::string) << nl;
     }
 
 

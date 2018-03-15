@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -29,7 +29,7 @@ License
 
 namespace Foam
 {
-defineTypeNameAndDebug(surfZoneIOList, 0);
+    defineTypeNameAndDebug(surfZoneIOList, 0);
 }
 
 
@@ -40,14 +40,9 @@ Foam::surfZoneIOList::surfZoneIOList
     const IOobject& io
 )
 :
-    surfZoneList(),
-    regIOobject(io)
+    regIOobject(io),
+    surfZoneList()
 {
-    Foam::string functionName =
-        "surfZoneIOList::surfZoneIOList"
-        "(const IOobject& io)";
-
-
     if
     (
         readOpt() == IOobject::MUST_READ
@@ -95,9 +90,7 @@ Foam::surfZoneIOList::surfZoneIOList
             facei += zoneSize;
         }
 
-        // Check state of IOstream
-        is.check(functionName.c_str());
-
+        is.check(FUNCTION_NAME);
         close();
     }
 }
@@ -106,51 +99,50 @@ Foam::surfZoneIOList::surfZoneIOList
 Foam::surfZoneIOList::surfZoneIOList
 (
     const IOobject& io,
-    const surfZoneList& zones
+    const UList<surfZone>& content
 )
 :
-    surfZoneList(zones),
-    regIOobject(io)
+    regIOobject(io),
+    surfZoneList(content)
 {}
 
 
 Foam::surfZoneIOList::surfZoneIOList
 (
     const IOobject& io,
-    const Xfer<surfZoneList>& zones
+    surfZoneList&& content
 )
 :
-    surfZoneList(zones),
-    regIOobject(io)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::surfZoneIOList::~surfZoneIOList()
+    regIOobject(io),
+    surfZoneList(std::move(content))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-// writeData member function required by regIOobject
 bool Foam::surfZoneIOList::writeData(Ostream& os) const
 {
-    os  << *this;
-    return os.good();
+    return (os << *this).good();
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::surfZoneIOList::operator=(const surfZoneIOList& rhs)
+{
+    surfZoneList::operator=(rhs);
 }
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIOList& L)
+Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIOList& list)
 {
-    os  << L.size() << nl << token::BEGIN_LIST << incrIndent << nl;
+    os  << list.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
-    forAll(L, i)
+    for (const surfZone& item : list)
     {
-        L[i].writeDict(os);
+        item.writeDict(os);
     }
 
     os  << decrIndent << token::END_LIST;

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2016-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -31,10 +31,18 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(cloud, 0);
-
-    const word cloud::prefix("lagrangian");
-    word cloud::defaultName("defaultCloud");
 }
+
+const Foam::word Foam::cloud::prefix("lagrangian");
+Foam::word Foam::cloud::defaultName("defaultCloud");
+
+const Foam::Enum<Foam::cloud::geometryType>
+Foam::cloud::geometryTypeNames
+{
+    { geometryType::COORDINATES, "coordinates" },
+    { geometryType::POSITIONS, "positions" }
+};
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -52,12 +60,6 @@ Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
             IOobject::AUTO_WRITE
         )
     )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::cloud::~cloud()
 {}
 
 

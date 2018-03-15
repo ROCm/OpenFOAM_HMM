@@ -1487,23 +1487,23 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
-    if (args.optionReadIfPresent("blockedFaces", blockedFacesName))
+    if (args.readIfPresent("blockedFaces", blockedFacesName))
     {
         Info<< "Reading blocked internal faces from faceSet "
             << blockedFacesName << nl << endl;
     }
 
-    const bool makeCellZones    = args.optionFound("makeCellZones");
-    const bool largestOnly      = args.optionFound("largestOnly");
-    const bool insidePoint      = args.optionFound("insidePoint");
-    const bool useCellZones     = args.optionFound("cellZones");
-    const bool useCellZonesOnly = args.optionFound("cellZonesOnly");
-    const bool useCellZonesFile = args.optionFound("cellZonesFileOnly");
-    const bool overwrite        = args.optionFound("overwrite");
-    const bool detectOnly       = args.optionFound("detectOnly");
-    const bool sloppyCellZones  = args.optionFound("sloppyCellZones");
-    const bool useFaceZones     = args.optionFound("useFaceZones");
-    const bool prefixRegion     = args.optionFound("prefixRegion");
+    const bool makeCellZones    = args.found("makeCellZones");
+    const bool largestOnly      = args.found("largestOnly");
+    const bool insidePoint      = args.found("insidePoint");
+    const bool useCellZones     = args.found("cellZones");
+    const bool useCellZonesOnly = args.found("cellZonesOnly");
+    const bool useCellZonesFile = args.found("cellZonesFileOnly");
+    const bool overwrite        = args.found("overwrite");
+    const bool detectOnly       = args.found("detectOnly");
+    const bool sloppyCellZones  = args.found("sloppyCellZones");
+    const bool useFaceZones     = args.found("useFaceZones");
+    const bool prefixRegion     = args.found("prefixRegion");
 
 
     if
@@ -1574,7 +1574,7 @@ int main(int argc, char *argv[])
             << " This requires all"
             << " cells to be in one and only one cellZone." << nl << endl;
 
-        label unzonedCelli = findIndex(zoneID, -1);
+        label unzonedCelli = zoneID.find(-1);
         if (unzonedCelli != -1)
         {
             FatalErrorInFunction
@@ -1599,7 +1599,7 @@ int main(int argc, char *argv[])
     }
     else if (useCellZonesFile)
     {
-        const word zoneFile = args.option("cellZonesFileOnly");
+        const word zoneFile(args["cellZonesFileOnly"]);
         Info<< "Reading split from cellZones file " << zoneFile << endl
             << "This requires all"
             << " cells to be in one and only one cellZone." << nl << endl;
@@ -1623,7 +1623,7 @@ int main(int argc, char *argv[])
         labelList newNeiZoneID(mesh.nFaces()-mesh.nInternalFaces());
         getZoneID(mesh, newCellZones, newZoneID, newNeiZoneID);
 
-        label unzonedCelli = findIndex(newZoneID, -1);
+        label unzonedCelli = newZoneID.find(-1);
         if (unzonedCelli != -1)
         {
             FatalErrorInFunction
@@ -2001,7 +2001,7 @@ int main(int argc, char *argv[])
 
         if (insidePoint)
         {
-            const point insidePoint = args.optionRead<point>("insidePoint");
+            const point insidePoint = args.opt<point>("insidePoint");
 
             label regionI = -1;
 

@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,9 +25,8 @@ Class
     Foam::one
 
 Description
-    A class representing the concept of 1 (scalar(1.0)) used to avoid
-    unnecessary manipulations for objects which are known to be one at
-    compile-time.
+    A class representing the concept of 1 (one), which can be used to avoid
+    manipulating objects that are known to be 'one' at compile-time.
 
 SourceFiles
     oneI.H
@@ -44,43 +43,131 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
+class one;
+class Istream;
+class Ostream;
+
 /*---------------------------------------------------------------------------*\
-                           Class one Declaration
+                             Class one Declaration
 \*---------------------------------------------------------------------------*/
 
 class one
 {
 public:
-
     typedef one value_type;
 
-    // Constructors
+    // Forward declarations
+    class minus;
+    class null;
 
-        //- Construct null
-        one()
-        {}
+    //- Null constructible
+    constexpr one() noexcept {}
+
+    //- Construct from Istream consumes no content.
+    explicit constexpr one(Istream&) noexcept {}
 
 
-    // Member operators
+    //- Return 1 for label
+    inline constexpr operator label() const noexcept
+    {
+        return 1;
+    }
 
-        //- Return 1 for label
-        inline operator label() const
-        {
-            return 1;
-        }
+    //- Return 1 for float
+    inline constexpr operator float() const noexcept
+    {
+        return 1;
+    }
 
-        //- Return 1 for float
-        inline operator float() const
-        {
-            return 1;
-        }
-
-        //- Return 1 for double
-        inline operator double() const
-        {
-            return 1;
-        }
+    //- Return 1 for double
+    inline constexpr operator double() const noexcept
+    {
+        return 1;
+    }
 };
+
+
+/*---------------------------------------------------------------------------*\
+                         Class one::minus Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A class representing the concept of -1.
+//  Note that this class must never be derived from 'one', since this could
+//  potentially mask its behaviour.
+class one::minus
+{
+public:
+    typedef minus value_type;
+
+    //- Null constructible
+    constexpr minus() noexcept {}
+
+    //- Construct from Istream consumes no content.
+    explicit constexpr minus(Istream&) noexcept {}
+
+
+    //- Return -1 for label
+    inline constexpr operator label() const noexcept
+    {
+        return -1;
+    }
+
+    //- Return -1 for float
+    inline constexpr operator float() const noexcept
+    {
+        return -1;
+    }
+
+    //- Return -1 for double
+    inline constexpr operator double() const noexcept
+    {
+        return -1;
+    }
+};
+
+
+/*---------------------------------------------------------------------------*\
+                          Class one::null Declaration
+\*---------------------------------------------------------------------------*/
+
+//- A one class with a null output adapter.
+class one::null
+:
+    public one
+{
+public:
+    typedef null value_type;
+
+    //- Null constructible
+    constexpr null() noexcept {}
+
+    //- Construct from Istream consumes no content.
+    explicit constexpr null(Istream&) noexcept {}
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// IOstream Operators
+
+//- Read from Istream consumes no content.
+inline constexpr Istream& operator>>(Istream& is, one&) noexcept
+{
+    return is;
+}
+
+//- Read from Istream consumes no content.
+inline constexpr Istream& operator>>(Istream& is, one::minus&) noexcept
+{
+    return is;
+}
+
+//- Write to Ostream emits no content.
+inline constexpr Ostream& operator<<(Ostream& os, const one::null&) noexcept
+{
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

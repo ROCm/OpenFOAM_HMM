@@ -229,35 +229,23 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     if (curPointZoneNames.size())
     {
         pointZoneNames_.setCapacity(2*curPointZoneNames.size());
-    }
-
-    forAll(curPointZoneNames, zoneI)
-    {
-        pointZoneNames_.append(curPointZoneNames[zoneI]);
+        pointZoneNames_.append(curPointZoneNames);
     }
 
     // Face zones
     wordList curFaceZoneNames = faceZones().names();
-
     if (curFaceZoneNames.size())
     {
         faceZoneNames_.setCapacity(2*curFaceZoneNames.size());
-    }
-    forAll(curFaceZoneNames, zoneI)
-    {
-        faceZoneNames_.append(curFaceZoneNames[zoneI]);
+        faceZoneNames_.append(curFaceZoneNames);
     }
 
     // Cell zones
     wordList curCellZoneNames = cellZones().names();
-
     if (curCellZoneNames.size())
     {
         cellZoneNames_.setCapacity(2*curCellZoneNames.size());
-    }
-    forAll(curCellZoneNames, zoneI)
-    {
-        cellZoneNames_.append(curCellZoneNames[zoneI]);
+        cellZoneNames_.append(curCellZoneNames);
     }
 }
 
@@ -514,70 +502,58 @@ void Foam::mergePolyMesh::merge()
     // Add the zones if necessary
     if (pointZoneNames_.size() > pointZones().size())
     {
-        Info<< "Adding new pointZones. " << endl;
-        label nZones = pointZones().size();
+        Info<< "Adding new pointZones." << endl;
 
-        pointZones().setSize(pointZoneNames_.size());
+        label zonei = pointZones().size(); // continue from here
 
-        for (label zoneI = nZones; zoneI < pointZoneNames_.size(); zoneI++)
+        const label nZones = pointZoneNames_.size();
+
+        pointZones().setSize(nZones);
+
+        for (/*nil*/; zonei < nZones; ++zonei)
         {
             pointZones().set
             (
-                zoneI,
-                new pointZone
-                (
-                    pointZoneNames_[zoneI],
-                    labelList(),
-                    zoneI,
-                    pointZones()
-                )
+                zonei,
+                new pointZone(pointZoneNames_[zonei], zonei, pointZones())
             );
         }
     }
     if (cellZoneNames_.size() > cellZones().size())
     {
-        Info<< "Adding new cellZones. " << endl;
+        Info<< "Adding new cellZones." << endl;
 
-        label nZones = cellZones().size();
+        label zonei = cellZones().size(); // continue from here
+
+        const label nZones = cellZoneNames_.size();
 
         cellZones().setSize(cellZoneNames_.size());
 
-        for (label zoneI = nZones; zoneI < cellZoneNames_.size(); zoneI++)
+        for (/*nil*/; zonei < nZones; ++zonei)
         {
             cellZones().set
             (
-                zoneI,
-                new cellZone
-                (
-                    cellZoneNames_[zoneI],
-                    labelList(),
-                    zoneI,
-                    cellZones()
-                )
+                zonei,
+                new cellZone(cellZoneNames_[zonei], zonei, cellZones())
             );
         }
     }
     if (faceZoneNames_.size() > faceZones().size())
     {
-        Info<< "Adding new faceZones. " << endl;
+        Info<< "Adding new faceZones." << endl;
 
-        label nZones = faceZones().size();
+        label zonei = faceZones().size(); // continue from here
 
-        faceZones().setSize(faceZoneNames_.size());
+        const label nZones = faceZoneNames_.size();
 
-        for (label zoneI = nZones; zoneI < faceZoneNames_.size(); zoneI++)
+        faceZones().setSize(nZones);
+
+        for (/*nil*/; zonei < nZones; ++zonei)
         {
             faceZones().set
             (
-                zoneI,
-                new faceZone
-                (
-                    faceZoneNames_[zoneI],
-                    labelList(),
-                    boolList(),
-                    zoneI,
-                    faceZones()
-                )
+                zonei,
+                new faceZone(faceZoneNames_[zonei], zonei, faceZones())
             );
         }
     }

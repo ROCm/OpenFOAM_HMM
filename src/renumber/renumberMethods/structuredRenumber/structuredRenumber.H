@@ -89,22 +89,22 @@ public:
 
         const dictionary methodDict_;
 
-        const wordReList patches_;
+        const wordRes patches_;
 
         const label nLayers_;
 
         const Switch depthFirst_;
 
-        const autoPtr<renumberMethod> method_;
-
         const Switch reverse_;
+
+        const autoPtr<renumberMethod> method_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct and assignment
-        void operator=(const structuredRenumber&);
-        structuredRenumber(const structuredRenumber&);
+        void operator=(const structuredRenumber&) = delete;
+        structuredRenumber(const structuredRenumber&) = delete;
 
 
 public:
@@ -120,8 +120,7 @@ public:
 
 
     //- Destructor
-    virtual ~structuredRenumber()
-    {}
+    virtual ~structuredRenumber() = default;
 
 
     // Member Functions

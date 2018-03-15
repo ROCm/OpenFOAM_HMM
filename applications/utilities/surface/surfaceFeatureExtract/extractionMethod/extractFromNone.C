@@ -73,7 +73,7 @@ Foam::surfaceFeaturesExtraction::extractFromNone::features
     const triSurface& surf
 ) const
 {
-    return autoPtr<surfaceFeatures>(new surfaceFeatures(surf));
+    return autoPtr<surfaceFeatures>::New(surf);
 }
 
 

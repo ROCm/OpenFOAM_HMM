@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noChemistySolver_H
-#define noChemistySolver_H
+#ifndef noChemistrySolver_H
+#define noChemistrySolver_H
 
 #include "chemistrySolver.H"
 

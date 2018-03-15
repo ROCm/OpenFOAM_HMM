@@ -53,7 +53,7 @@ Foam::functionObjects::fieldValues::surfaceFieldValue::faceFlip() const
 inline bool
 Foam::functionObjects::fieldValues::surfaceFieldValue::usesMag() const
 {
-    // Operation specifically tagged to use mag 
+    // Operation specifically tagged to use mag
     return (operation_ & typeAbsolute);
 }
 

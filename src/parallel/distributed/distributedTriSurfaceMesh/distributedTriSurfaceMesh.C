@@ -298,8 +298,8 @@ Foam::distributedTriSurfaceMesh::distributeSegments
             sendMap[proci].transfer(dynSendMap[proci]);
         }
 
-        allSegments.transfer(dynAllSegments.shrink());
-        allSegmentMap.transfer(dynAllSegmentMap.shrink());
+        allSegments.transfer(dynAllSegments);
+        allSegmentMap.transfer(dynAllSegmentMap);
     }
 
 
@@ -339,14 +339,11 @@ Foam::distributedTriSurfaceMesh::distributeSegments
         }
     }
 
-    return autoPtr<mapDistribute>
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmenti,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmenti, // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
 }
 
@@ -636,9 +633,9 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
     (
         new mapDistribute
         (
-            segmenti,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
+            segmenti, // size after construction
+            std::move(sendMap),
+            std::move(constructMap)
         )
     );
     const mapDistribute& map = mapPtr();
@@ -648,7 +645,6 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
     // ~~~~~~~~~~~~~~~~~
 
     map.distribute(triangleIndex);
-
 
     return mapPtr;
 }
@@ -743,9 +739,9 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
             sendMap[proci].transfer(dynSendMap[proci]);
         }
 
-        allCentres.transfer(dynAllCentres.shrink());
-        allRadiusSqr.transfer(dynAllRadiusSqr.shrink());
-        allSegmentMap.transfer(dynAllSegmentMap.shrink());
+        allCentres.transfer(dynAllCentres);
+        allRadiusSqr.transfer(dynAllRadiusSqr);
+        allSegmentMap.transfer(dynAllSegmentMap);
     }
 
 
@@ -785,16 +781,12 @@ Foam::distributedTriSurfaceMesh::calcLocalQueries
         }
     }
 
-    autoPtr<mapDistribute> mapPtr
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmenti,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmenti, // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
-    return mapPtr;
 }
 
 
@@ -1084,13 +1076,7 @@ Foam::triSurface Foam::distributedTriSurfaceMesh::subsetMesh
 {
     const boolList include
     (
-        createWithValues<boolList>
-        (
-            s.size(),
-            false,
-            newToOldFaces,
-            true
-        )
+        ListOps::createWithValue<bool>(s.size(), newToOldFaces, true, false)
     );
 
     newToOldPoints.setSize(s.points().size());
@@ -1147,7 +1133,7 @@ Foam::label Foam::distributedTriSurfaceMesh::findTriangle
         if (f.region() == otherF.region())
         {
             // Find index of otherF[0]
-            label fp0 = findIndex(f, otherF[0]);
+            label fp0 = f.find(otherF[0]);
             // Check rest of triangle in same order
             label fp1 = f.fcIndex(fp0);
             label fp2 = f.fcIndex(fp1);
@@ -1479,7 +1465,7 @@ const Foam::globalIndex& Foam::distributedTriSurfaceMesh::globalTris() const
     {
         globalTris_.reset(new globalIndex(triSurface::size()));
     }
-    return globalTris_;
+    return *globalTris_;
 }
 
 
@@ -2307,8 +2293,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         new mapDistribute
         (
             allTris.size(),
-            faceSendMap.xfer(),
-            faceConstructMap.xfer()
+            std::move(faceSendMap),
+            std::move(faceConstructMap)
         )
     );
     pointMap.reset
@@ -2316,8 +2302,8 @@ void Foam::distributedTriSurfaceMesh::distribute
         new mapDistribute
         (
             allPoints.size(),
-            pointSendMap.xfer(),
-            pointConstructMap.xfer()
+            std::move(pointSendMap),
+            std::move(pointConstructMap)
         )
     );
 

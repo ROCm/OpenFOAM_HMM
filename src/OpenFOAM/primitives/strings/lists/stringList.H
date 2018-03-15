@@ -33,6 +33,12 @@ Typedef
 Description
     A List of strings.
 
+Typedef
+    Foam::stringSubList
+
+Description
+    A SubList of strings.
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef stringList_H
@@ -40,14 +46,15 @@ Description
 
 #include "string.H"
 #include "List.H"
+#include "SubList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     typedef UList<string> stringUList;
-
     typedef List<string> stringList;
+    typedef SubList<string> stringSubList;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

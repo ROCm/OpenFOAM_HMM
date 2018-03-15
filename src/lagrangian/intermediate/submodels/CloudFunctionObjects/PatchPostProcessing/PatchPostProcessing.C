@@ -134,33 +134,32 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     times_(),
     patchData_()
 {
-    const wordList allPatchNames = owner.mesh().boundaryMesh().names();
-    wordList patchName(this->coeffDict().lookup("patches"));
+    const wordList allPatchNames(owner.mesh().boundaryMesh().names());
+    const wordReList patchNames(this->coeffDict().lookup("patches"));
 
-    labelHashSet uniquePatchIDs;
-    forAllReverse(patchName, i)
+    labelHashSet uniqIds;
+    for (const wordRe& re : patchNames)
     {
-        labelList patchIDs = findStrings(patchName[i], allPatchNames);
+        labelList ids = findStrings(re, allPatchNames);
 
-        if (patchIDs.empty())
+        if (ids.empty())
         {
             WarningInFunction
-                << "Cannot find any patch names matching " << patchName[i]
+                << "Cannot find any patch names matching " << re
                 << endl;
         }
 
-        uniquePatchIDs.insert(patchIDs);
+        uniqIds.insert(ids);
     }
 
-    patchIDs_ = uniquePatchIDs.toc();
+    patchIDs_ = uniqIds.sortedToc();
 
     if (debug)
     {
-        forAll(patchIDs_, i)
+        for (const label patchi : patchIDs_)
         {
-            const label patchi = patchIDs_[i];
-            const word& patchName = owner.mesh().boundaryMesh()[patchi].name();
-            Info<< "Post-process patch " << patchName << endl;
+            Info<< "Post-process patch "
+                << owner.mesh().boundaryMesh()[patchi].name() << endl;
         }
     }
 
@@ -180,13 +179,6 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     patchIDs_(ppm.patchIDs_),
     times_(ppm.times_),
     patchData_(ppm.patchData_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PatchPostProcessing<CloudType>::~PatchPostProcessing()
 {}
 
 

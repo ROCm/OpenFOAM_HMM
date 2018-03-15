@@ -126,8 +126,7 @@ bool Foam::CloudSubModelBase<CloudType>::writeTime() const
 template<class CloudType>
 void Foam::CloudSubModelBase<CloudType>::write(Ostream& os) const
 {
-    os.writeKeyword("owner") << owner_.name() << token::END_STATEMENT
-        << nl;
+    os.writeEntry("owner", owner_.name());
 
     subModelBase::write(os);
 }

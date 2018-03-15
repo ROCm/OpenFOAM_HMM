@@ -34,7 +34,7 @@ const Foam::fvMesh& Foam::backgroundMeshDecomposition::mesh() const
 const Foam::indexedOctree<Foam::treeDataBPatch>&
 Foam::backgroundMeshDecomposition::tree() const
 {
-    return bFTreePtr_();
+    return *bFTreePtr_;
 }
 
 

@@ -29,8 +29,8 @@ solvers
 
     "alpha.water.*"
     {
-        nAlphaCorr      2;
-        nAlphaSubCycles 1;
+        nAlphaCorr      3;
+        nAlphaSubCycles 2;
         cAlpha          1;
         icAlpha         0;
 
@@ -82,8 +82,12 @@ PIMPLE
     nCorrectors         2;
     nNonOrthogonalCorrectors 0;
 
-    ddtCorr         yes;
-    correctPhi      no;
+    ddtCorr                     yes;
+    correctPhi                 no;
+    massFluxInterpolation      no;
+
+    moveMeshOuterCorrectors no;
+    turbOnFinalIterOnly no;
 
     oversetAdjustPhi    no;
 

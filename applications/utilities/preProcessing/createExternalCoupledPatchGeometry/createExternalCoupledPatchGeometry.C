@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 {
     #include "addRegionOption.H"
     #include "addRegionsOption.H"
-    argList::validArgs.append("patchGroup");
+    argList::addArgument("patchGroup");
     argList::addOption
     (
         "commsDir",
@@ -81,15 +81,15 @@ int main(int argc, char *argv[])
     #include "createTime.H"
 
     wordList regionNames(1, fvMesh::defaultRegion);
-    if (!args.optionReadIfPresent("region", regionNames[0]))
+    if (!args.readIfPresent("region", regionNames[0]))
     {
-        args.optionReadIfPresent("regions", regionNames);
+        args.readIfPresent("regions", regionNames);
     }
 
-    const wordRe patchGroup(args.argRead<wordRe>(1));
+    const wordRe patchGroup(args.read<wordRe>(1));
 
     fileName commsDir(runTime.path()/"comms");
-    args.optionReadIfPresent("commsDir", commsDir);
+    args.readIfPresent("commsDir", commsDir);
 
 
     // Make sure region names are in canonical order

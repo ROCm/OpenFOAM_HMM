@@ -130,17 +130,15 @@ Foam::lduMatrix::preconditioner::New
             )
         );
     }
-    else
-    {
-        FatalIOErrorInFunction
-        (
-            controls
-        )   << "cannot solve incomplete matrix, "
-               "no diagonal or off-diagonal coefficient"
-            << exit(FatalIOError);
 
-        return autoPtr<lduMatrix::preconditioner>(nullptr);
-    }
+    FatalIOErrorInFunction
+    (
+        controls
+    )   << "cannot solve incomplete matrix, "
+           "no diagonal or off-diagonal coefficient"
+        << exit(FatalIOError);
+
+    return autoPtr<lduMatrix::preconditioner>();
 }
 
 

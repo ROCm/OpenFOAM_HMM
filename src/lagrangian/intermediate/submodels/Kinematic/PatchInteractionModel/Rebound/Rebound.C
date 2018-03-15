@@ -47,13 +47,6 @@ Foam::Rebound<CloudType>::Rebound(const Rebound<CloudType>& pim)
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::Rebound<CloudType>::~Rebound()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>

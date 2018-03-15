@@ -28,6 +28,13 @@ Description
     A NamedEnum is a wrapper around a list of names that represent
     particular enumeration values.
 
+    \deprecated This class is retained for compatibility only and should
+    not normally be used for any new code.
+    The Foam::Enum class is robuster, more flexible, easier to use.
+
+See Also
+    Foam::Enum
+
 SourceFiles
     NamedEnum.C
 
@@ -97,7 +104,7 @@ public:
 
     // Member Functions
 
-      // Access
+    // Access
 
         //- The number of lookup names for the enumeration
         inline label size() const;
@@ -115,7 +122,7 @@ public:
         List<int> values() const;
 
 
-      // Query
+    // Query
 
         //- Test if there is an enumeration corresponding to the given name.
         inline bool found(const word& enumName) const;
@@ -127,7 +134,7 @@ public:
         bool hasName(const EnumType e) const;
 
 
-      // Lookup
+    // Lookup
 
         //- Lookup the key in the dictionary and return the corresponding
         // enumeration element based on its name.
@@ -150,7 +157,7 @@ public:
         ) const;
 
 
-      // IO
+    // IO
 
         //- Read a word from Istream and return the corresponding enumeration
         EnumType read(Istream& is) const;

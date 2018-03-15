@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -24,60 +24,34 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "regExp.H"
-#include "List.H"
+#include "SubStrings.H"
+#include "error.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Local Functions * * * * * * * * * * * * * * //
 
-bool Foam::regExp::matchGrouping
-(
-    const std::string& text,
-    List<std::string>& groups
-) const
+// Verify that the entire len was matched
+static inline bool fullMatch(const regmatch_t& m, const regoff_t len)
 {
-    if (preg_ && !text.empty())
-    {
-        size_t nmatch = ngroups() + 1;
-        regmatch_t pmatch[nmatch];
-
-        // Also verify that the entire string was matched.
-        // pmatch[0] is the entire match
-        // pmatch[1..] are the (...) sub-groups
-        if
-        (
-            regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0
-         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == label(text.size()))
-        )
-        {
-            groups.setSize(ngroups());
-            label groupI = 0;
-
-            for (size_t matchI = 1; matchI < nmatch; matchI++)
-            {
-                if (pmatch[matchI].rm_so != -1 && pmatch[matchI].rm_eo != -1)
-                {
-                    groups[groupI] = text.substr
-                    (
-                        pmatch[matchI].rm_so,
-                        pmatch[matchI].rm_eo - pmatch[matchI].rm_so
-                    );
-                }
-                else
-                {
-                    groups[groupI].clear();
-                }
-                groupI++;
-            }
-
-            return true;
-        }
-    }
-
-    groups.clear();
-    return false;
+    return (m.rm_so == 0 && m.rm_eo == len);
 }
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+bool Foam::regExp::clear()
+{
+    if (preg_)
+    {
+        regfree(preg_);
+        delete preg_;
+        preg_ = nullptr;
+
+        return true;
+    }
+
+    return false;
+}
+
 
 bool Foam::regExp::set(const char* pattern, bool ignoreCase)
 {
@@ -136,26 +110,11 @@ bool Foam::regExp::set(const std::string& pattern, bool ignoreCase)
 }
 
 
-bool Foam::regExp::clear()
-{
-    if (preg_)
-    {
-        regfree(preg_);
-        delete preg_;
-        preg_ = nullptr;
-
-        return true;
-    }
-
-    return false;
-}
-
-
 std::string::size_type Foam::regExp::find(const std::string& text) const
 {
     if (preg_ && !text.empty())
     {
-        size_t nmatch = 1;
+        const size_t nmatch = 1;
         regmatch_t pmatch[1];
 
         if (regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0)
@@ -170,21 +129,20 @@ std::string::size_type Foam::regExp::find(const std::string& text) const
 
 bool Foam::regExp::match(const std::string& text) const
 {
-    if (preg_ && !text.empty())
+    const auto len = text.size();
+
+    if (preg_ && len)
     {
-        size_t nmatch = 1;
+        const size_t nmatch = 1;
         regmatch_t pmatch[1];
 
-        // Also verify that the entire string was matched
-        // pmatch[0] is the entire match
-        if
+        // Verify that the entire string was matched
+        // - [0] is the entire match result
+        return
         (
             regexec(preg_, text.c_str(), nmatch, pmatch, 0) == 0
-         && (pmatch[0].rm_so == 0 && pmatch[0].rm_eo == regoff_t(text.size()))
-        )
-        {
-            return true;
-        }
+         && fullMatch(pmatch[0], len)
+        );
     }
 
     return false;
@@ -194,10 +152,54 @@ bool Foam::regExp::match(const std::string& text) const
 bool Foam::regExp::match
 (
     const std::string& text,
-    List<std::string>& groups
+    SubStrings<std::string>& matches
 ) const
 {
-    return matchGrouping(text, groups);
+    matches.clear();
+
+    const auto len = text.size();
+    if (preg_ && len)
+    {
+        const size_t nmatch = ngroups() + 1;
+        regmatch_t pmatch[nmatch];
+
+        // Verify that the entire string was matched
+        // - [0] is the entire match result
+        // - [1..] are the match groups (1..)
+        if
+        (
+            regexec(preg_, text.c_str(), nmatch, pmatch, 0) != 0
+         || !fullMatch(pmatch[0], len)
+        )
+        {
+            return false;
+        }
+
+        matches.reserve(nmatch);
+
+        for (size_t matchi = 0; matchi < nmatch; ++matchi)
+        {
+            const auto& mat = pmatch[matchi];
+
+            if (mat.rm_so != -1 && mat.rm_eo != -1)
+            {
+                matches.append
+                (
+                    text.cbegin() + mat.rm_so,
+                    text.cbegin() + mat.rm_eo
+                );
+            }
+            else
+            {
+                // This may be misleading...
+                matches.append(text.cbegin(), text.cbegin());
+            }
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 

@@ -79,8 +79,7 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::value
 ) const
 {
     NotImplemented;
-
-    return tmp<Foam::Field<Type>>(nullptr);
+    return tmp<Field<Type>>();
 }
 
 
@@ -101,8 +100,7 @@ Foam::tmp<Foam::Field<Type>> Foam::Function1<Type>::integrate
 ) const
 {
     NotImplemented;
-
-    return tmp<Foam::Field<Type>>(nullptr);
+    return tmp<Field<Type>>();
 }
 
 

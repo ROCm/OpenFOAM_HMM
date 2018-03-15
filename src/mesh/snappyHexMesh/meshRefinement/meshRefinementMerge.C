@@ -106,15 +106,16 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         faceCombiner.setRefinement(mergeSets, meshMod);
 
         // Change the mesh (no inflation)
-        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+        autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+        mapPolyMesh& map = *mapPtr;
 
         // Update fields
         mesh_.updateMesh(map);
 
         // Move mesh (since morphing does not do this)
-        if (map().hasMotionPoints())
+        if (map.hasMotionPoints())
         {
-            mesh_.movePoints(map().preMotionPoints());
+            mesh_.movePoints(map.preMotionPoints());
         }
         else
         {
@@ -135,7 +136,7 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         forAll(mergeSets, setI)
         {
             label oldMasterI = mergeSets[setI][0];
-            retestFaces.insert(map().reverseFaceMap()[oldMasterI]);
+            retestFaces.insert(map.reverseFaceMap()[oldMasterI]);
         }
         updateMesh(map, growFaceCellFace(retestFaces));
     }
@@ -143,8 +144,7 @@ Foam::label Foam::meshRefinement::mergePatchFaces
     return nFaceSets;
 }
 
-//
-//
+
 //// Remove points not used by any face or points used by only two faces where
 //// the edges are in line
 //Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeEdges
@@ -369,7 +369,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
         autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
 
         // Update fields
-        mesh_.updateMesh(map);
+        mesh_.updateMesh(map());
 
         // Move mesh (since morphing does not do this)
         if (map().hasMotionPoints())
@@ -385,7 +385,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
         // Reset the instance for if in overwrite mode
         mesh_.setInstance(timeName());
 
-        faceCombiner.updateMesh(map);
+        faceCombiner.updateMesh(map());
 
         // Get the kept faces that need to be recalculated.
         // Merging two boundary faces might shift the cell centre
@@ -397,7 +397,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             label oldMasterI = allFaceSets[setI][0];
             retestFaces.insert(map().reverseFaceMap()[oldMasterI]);
         }
-        updateMesh(map, growFaceCellFace(retestFaces));
+        updateMesh(map(), growFaceCellFace(retestFaces));
 
         if (debug&meshRefinement::MESH)
         {
@@ -558,7 +558,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
 
             // Update fields
-            mesh_.updateMesh(map);
+            mesh_.updateMesh(map());
 
             // Move mesh (since morphing does not do this)
             if (map().hasMotionPoints())
@@ -575,7 +575,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             // Reset the instance for if in overwrite mode
             mesh_.setInstance(timeName());
 
-            faceCombiner.updateMesh(map);
+            faceCombiner.updateMesh(map());
 
             // Renumber restore maps
             inplaceMapKey(map().reversePointMap(), restoredPoints);
@@ -596,7 +596,7 @@ Foam::label Foam::meshRefinement::mergePatchFacesUndo
             // Experimental:restore all points/face/cells in maps
             updateMesh
             (
-                map,
+                map(),
                 growFaceCellFace(retestFaces),
                 restoredPoints,
                 restoredFaces,
@@ -640,15 +640,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemovePoints
     pointRemover.setRefinement(pointCanBeDeleted, meshMod);
 
     // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields
     mesh_.updateMesh(map);
 
     // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
+    if (map.hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh_.movePoints(map.preMotionPoints());
     }
     else
     {
@@ -681,7 +682,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemovePoints
         checkData();
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -713,15 +714,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRestorePoints
     );
 
     // Change the mesh (no inflation)
-    autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh_, false, true);
+    autoPtr<mapPolyMesh> mapPtr = meshMod.changeMesh(mesh_, false, true);
+    mapPolyMesh& map = *mapPtr;
 
     // Update fields
     mesh_.updateMesh(map);
 
     // Move mesh (since morphing does not do this)
-    if (map().hasMotionPoints())
+    if (map.hasMotionPoints())
     {
-        mesh_.movePoints(map().preMotionPoints());
+        mesh_.movePoints(map.preMotionPoints());
     }
     else
     {
@@ -737,7 +739,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRestorePoints
     labelHashSet retestFaces(2*facesToRestore.size());
     forAll(facesToRestore, i)
     {
-        label faceI = map().reverseFaceMap()[facesToRestore[i]];
+        label faceI = map.reverseFaceMap()[facesToRestore[i]];
         if (faceI >= 0)
         {
             retestFaces.insert(faceI);
@@ -753,7 +755,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRestorePoints
         checkData();
     }
 
-    return map;
+    return mapPtr;
 }
 
 
@@ -826,7 +828,7 @@ namespace Foam
 // Pick up faces of cells of faces in set.
 Foam::labelList Foam::meshRefinement::growFaceCellFace
 (
-    const UList<label>& set
+    const labelUList& set
 ) const
 {
     boolList selected(mesh_.nFaces(), false);

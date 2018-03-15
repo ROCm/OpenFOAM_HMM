@@ -28,8 +28,6 @@ License
 #include "IFstream.H"
 #include "StringStream.H"
 
-using namespace Foam;
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::boundaryTemplates::boundaryTemplates

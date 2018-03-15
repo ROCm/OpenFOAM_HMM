@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ Description
     Convenience class for loading single or multiple surface files
     from the constant/triSurface (or other) directory.
 
-    Surfaces selection based on word, wordRe, wordReList.
+    Surfaces selection based on word, wordRe, list of wordRe.
     If multiple surfaces are selected, they are concatenated into a
     single surface with offset faces,points,regions.
 
@@ -109,7 +109,7 @@ public:
 
 
     //- Destructor
-    ~triSurfaceLoader();
+    ~triSurfaceLoader() = default;
 
 
     // Member Functions
@@ -151,7 +151,7 @@ public:
         label select(const wordRe& mat);
 
         //- Populates 'selected' with a subset of the available files.
-        label select(const wordReList& matcher);
+        label select(const UList<wordRe>& matcher);
 
         //- Load a single file, or load and combine multiple selected files
         //  Optionally scale the surface(s) on input, with a zero or negative

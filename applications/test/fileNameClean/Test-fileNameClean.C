@@ -46,6 +46,9 @@ void printCleaning(fileName& pathName)
         << "  name() = " << pathName.name() << nl
         << "  joined = " << pathName.path()/pathName.name() << nl << nl;
 
+    Info<< "components  = " << flatOutput(pathName.components()) << nl;
+    Info<< "component 2 = " << pathName.component(2) << nl;
+
     pathName.clean();
 
     Info<< "cleaned  = " << pathName << nl
@@ -64,7 +67,7 @@ int main(int argc, char *argv[])
 {
     argList::noBanner();
     argList::noParallel();
-    argList::validArgs.insert("fileName .. fileNameN");
+    argList::addArgument("fileName .. fileNameN");
     argList::addOption("istream", "file", "test Istream values");
 
     argList args(argc, argv, false, true);
@@ -75,7 +78,7 @@ int main(int argc, char *argv[])
     }
 
     fileName pathName;
-    if (args.optionReadIfPresent("case", pathName))
+    if (args.readIfPresent("case", pathName))
     {
         Info<< nl
             << "-case" << nl
@@ -95,10 +98,8 @@ int main(int argc, char *argv[])
         printCleaning(pathName);
     }
 
-    if (args.optionFound("istream"))
+    if (args.readIfPresent("istream", pathName))
     {
-        args.optionLookup("istream")() >> pathName;
-
         Info<< nl
             << "-case" << nl
             << "path = " << args.path() << nl

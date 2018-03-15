@@ -810,7 +810,7 @@ const Foam::AMIPatchToPatchInterpolation& Foam::cyclicAMIPolyPatch::AMI() const
         resetAMI(AMIMethod_);
     }
 
-    return AMIPtr_();
+    return *AMIPtr_;
 }
 
 
@@ -1058,8 +1058,7 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     coupledPolyPatch::write(os);
     if (!nbrPatchName_.empty())
     {
-        os.writeKeyword("neighbourPatch") << nbrPatchName_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("neighbourPatch", nbrPatchName_);
     }
     coupleGroup_.write(os);
 
@@ -1067,23 +1066,19 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
     {
         case ROTATIONAL:
         {
-            os.writeKeyword("rotationAxis") << rotationAxis_
-                << token::END_STATEMENT << nl;
-            os.writeKeyword("rotationCentre") << rotationCentre_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("rotationAxis", rotationAxis_);
+            os.writeEntry("rotationCentre", rotationCentre_);
 
             if (rotationAngleDefined_)
             {
-                os.writeKeyword("rotationAngle") << radToDeg(rotationAngle_)
-                    << token::END_STATEMENT << nl;
+                os.writeEntry("rotationAngle", radToDeg(rotationAngle_));
             }
 
             break;
         }
         case TRANSLATIONAL:
         {
-            os.writeKeyword("separationVector") << separationVector_
-                << token::END_STATEMENT << nl;
+            os.writeEntry("separationVector", separationVector_);
             break;
         }
         case NOORDERING:
@@ -1098,30 +1093,29 @@ void Foam::cyclicAMIPolyPatch::write(Ostream& os) const
 
     if (AMIMethod_ != AMIPatchToPatchInterpolation::imFaceAreaWeight)
     {
-        os.writeKeyword("method")
-            <<  AMIPatchToPatchInterpolation::interpolationMethodToWord
-                (
-                    AMIMethod_
-                )
-            << token::END_STATEMENT << nl;
+        os.writeEntry
+        (
+            "method",
+            AMIPatchToPatchInterpolation::interpolationMethodToWord
+            (
+                AMIMethod_
+            )
+        );
     }
 
     if (AMIReverse_)
     {
-        os.writeKeyword("flipNormals") << AMIReverse_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("flipNormals", AMIReverse_);
     }
 
     if (AMILowWeightCorrection_ > 0)
     {
-        os.writeKeyword("lowWeightCorrection") << AMILowWeightCorrection_
-            << token::END_STATEMENT << nl;
+        os.writeEntry("lowWeightCorrection", AMILowWeightCorrection_);
     }
 
     if (!surfDict_.empty())
     {
-        os.writeKeyword(surfDict_.dictName());
-        os  << surfDict_;
+        surfDict_.writeEntry(surfDict_.dictName(), os);
     }
 }
 

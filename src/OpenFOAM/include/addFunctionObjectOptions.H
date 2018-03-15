@@ -9,8 +9,7 @@ Foam::argList::addOption
 (
     "fields",
     "list",
-    "Specify a list of fields to be processed, e.g. '(U T p)' - "
-    "regular expressions not currently supported"
+    "Specify a list of fields to be processed, e.g. '(U T p)'"
 );
 Foam::argList::addOption
 (

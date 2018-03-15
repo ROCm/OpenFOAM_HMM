@@ -45,7 +45,7 @@ Foam::blockVertex::blockVertex()
 Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::clone() const
 {
     NotImplemented;
-    return autoPtr<blockVertex>(nullptr);
+    return autoPtr<blockVertex>();
 }
 
 
@@ -92,15 +92,13 @@ Foam::autoPtr<Foam::blockVertex> Foam::blockVertex::New
 
         return autoPtr<blockVertex>(cstrIter()(dict, index, geometry, is));
     }
-    else
-    {
-        FatalIOErrorInFunction(is)
-            << "incorrect first token, expected <word> or '(', found "
-            << firstToken.info()
-            << exit(FatalIOError);
 
-        return autoPtr<blockVertex>(nullptr);
-    }
+    FatalIOErrorInFunction(is)
+        << "incorrect first token, expected <word> or '(', found "
+        << firstToken.info()
+        << exit(FatalIOError);
+
+    return autoPtr<blockVertex>();
 }
 
 

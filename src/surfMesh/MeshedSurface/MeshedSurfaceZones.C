@@ -24,6 +24,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MeshedSurface.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -64,37 +65,36 @@ void Foam::MeshedSurface<Face>::checkZones()
 template<class Face>
 void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
-    const Xfer<List<Face>>& unsortedFaces,
-    const Xfer<List<label>>& zoneIds,
+    DynamicList<Face>& unsortedFaces,
+    DynamicList<label>& zoneIds,
     const bool sorted
 )
 {
-    List<Face>  oldFaces(unsortedFaces);
-    List<label> zones(zoneIds);
+    List<Face>  oldFaces(std::move(unsortedFaces));
+    List<label> zones(std::move(zoneIds));
 
     if (sorted)
     {
-        // already sorted - simply transfer faces
+        // Already sorted - simply transfer faces
         this->storedFaces().transfer(oldFaces);
-    }
-    else
-    {
-        // unsorted - determine the sorted order:
-        // avoid SortableList since we discard the main list anyhow
-        List<label> faceMap;
-        sortedOrder(zones, faceMap);
         zones.clear();
-
-        // sorted faces
-        List<Face> newFaces(faceMap.size());
-        forAll(faceMap, facei)
-        {
-            // use transfer to recover memory where possible
-            newFaces[facei].transfer(oldFaces[faceMap[facei]]);
-        }
-        this->storedFaces().transfer(newFaces);
+        return;
     }
+
+    // Determine the sorted order:
+    // use sortedOrder directly since we discard the intermediate list anyhow
+    List<label> faceMap;
+    sortedOrder(zones, faceMap);
     zones.clear();
+
+    // Sorted faces
+    List<Face> newFaces(faceMap.size());
+    forAll(faceMap, facei)
+    {
+        // use transfer to recover memory where possible
+        newFaces[facei].transfer(oldFaces[faceMap[facei]]);
+    }
+    this->storedFaces().transfer(newFaces);
 }
 
 
@@ -116,7 +116,7 @@ void Foam::MeshedSurface<Face>::addZones
         if (srfZones[zoneI].size() || !cullEmpty)
         {
             zones[nZone] = surfZone(srfZones[zoneI], nZone);
-            nZone++;
+            ++nZone;
         }
     }
     zones.setSize(nZone);
@@ -148,7 +148,7 @@ void Foam::MeshedSurface<Face>::addZones
                 nZone
             );
             start += sizes[zoneI];
-            nZone++;
+            ++nZone;
         }
     }
     zones.setSize(nZone);
@@ -179,7 +179,7 @@ void Foam::MeshedSurface<Face>::addZones
                 nZone
             );
             start += sizes[zoneI];
-            nZone++;
+            ++nZone;
         }
     }
     zones.setSize(nZone);

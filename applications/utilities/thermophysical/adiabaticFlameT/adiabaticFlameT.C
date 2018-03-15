@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     );
     argList::noParallel();
     argList::noFunctionObjects();
-    argList::validArgs.append("controlFile");
+    argList::addArgument("controlFile");
 
     argList args(argc, argv);
 

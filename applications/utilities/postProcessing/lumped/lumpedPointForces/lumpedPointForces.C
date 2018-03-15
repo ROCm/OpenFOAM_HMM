@@ -55,22 +55,19 @@ autoPtr<GeoFieldType> loadField
         Info<< "Reading " << GeoFieldType::typeName
             << ' ' << io->name() << endl;
 
-        return autoPtr<GeoFieldType>
+        return autoPtr<GeoFieldType>::New
         (
-            new GeoFieldType
+            IOobject
             (
-                IOobject
-                (
-                    io->name(),
-                    io->instance(),
-                    io->local(),
-                    io->db(),
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE,
-                    io->registerObject()
-                ),
-                mesh
-            )
+                io->name(),
+                io->instance(),
+                io->local(),
+                io->db(),
+                IOobject::MUST_READ,
+                IOobject::AUTO_WRITE,
+                io->registerObject()
+            ),
+            mesh
         );
     }
 
@@ -100,7 +97,7 @@ int main(int argc, char *argv[])
     #include "addRegionOption.H"
     #include "setRootCase.H"
 
-    const bool withVTK = args.optionFound("vtk");
+    const bool withVTK = args.found("vtk");
 
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
@@ -155,7 +152,7 @@ int main(int argc, char *argv[])
             if (withVTK && Pstream::master())
             {
                 const word outputName =
-                    Foam::name("forces_%06d.vtp", runTime.timeIndex());
+                    word::printf("forces_%06d.vtp", runTime.timeIndex());
 
                 Info<<"    " << outputName << endl;
 

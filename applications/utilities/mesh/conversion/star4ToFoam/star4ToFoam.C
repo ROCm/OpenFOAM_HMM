@@ -28,7 +28,7 @@ Group
     grpMeshConversionUtilities
 
 Description
-    Converts a Star-CD (v4) pro-STAR mesh into OpenFOAM format.
+    Converts a STARCD/PROSTAR (v4) mesh into OpenFOAM format.
 
 Usage
     \b star4ToFoam [OPTION] prostarMesh
@@ -66,11 +66,11 @@ int main(int argc, char *argv[])
 {
     argList::addNote
     (
-        "convert pro-STAR (v4) mesh to OpenFOAM"
+        "convert STARCD/PROSTAR (v4) mesh to OpenFOAM"
     );
 
     argList::noParallel();
-    argList::validArgs.append("pro-STAR prefix");
+    argList::addArgument("PROSTAR prefix");
     argList::addBoolOption
     (
         "ascii",
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     // Binary output, unless otherwise specified
     const IOstream::streamFormat format =
     (
-        args.optionFound("ascii")
+        args.found("ascii")
       ? IOstream::ASCII
       : IOstream::BINARY
     );
@@ -113,13 +113,13 @@ int main(int argc, char *argv[])
         prefix,
         runTime,
         // Default rescale from [mm] to [m]
-        args.optionLookupOrDefault("scale", 0.001),
-        args.optionFound("solids")
+        args.lookupOrDefault("scale", 0.001),
+        args.found("solids")
     );
 
 
     autoPtr<polyMesh> mesh = reader.mesh(runTime);
-    reader.writeMesh(mesh, format);
+    reader.writeMesh(mesh(), format);
 
 
     Info<< "\nEnd\n" << endl;

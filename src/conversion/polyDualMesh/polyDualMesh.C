@@ -165,7 +165,7 @@ void Foam::polyDualMesh::getPointEdges
         if (e[0] == pointi)
         {
             // One of the edges using pointi. Check which one.
-            label index = findIndex(f, pointi);
+            label index = f.find(pointi);
 
             if (f.nextLabel(index) == e[1])
             {
@@ -184,7 +184,7 @@ void Foam::polyDualMesh::getPointEdges
         else if (e[1] == pointi)
         {
             // One of the edges using pointi. Check which one.
-            label index = findIndex(f, pointi);
+            label index = f.find(pointi);
 
             if (f.nextLabel(index) == e[0])
             {
@@ -545,8 +545,6 @@ void Foam::polyDualMesh::splitFace
                 if (subFace.size() > 2)
                 {
                     // Enough vertices to create a face from.
-                    subFace.shrink();
-
                     dualFaces.append(face(subFace));
                     dualOwner.append(meshPointi);
                     dualNeighbour.append(-1);
@@ -559,8 +557,6 @@ void Foam::polyDualMesh::splitFace
             if (subFace.size() > 2)
             {
                 // Enough vertices to create a face from.
-                subFace.shrink();
-
                 dualFaces.append(face(subFace));
                 dualOwner.append(meshPointi);
                 dualNeighbour.append(-1);
@@ -929,7 +925,7 @@ void Foam::polyDualMesh::calcDual
         label startFacei = -1;
         label endFacei = -1;
 
-        label index = findIndex(f0, neighbour);
+        label index = f0.find(neighbour);
 
         if (f0.nextLabel(index) == owner)
         {
@@ -1062,7 +1058,7 @@ void Foam::polyDualMesh::calcDual
             // the face uses the owner, neighbour
             const face& f0 = mesh.faces()[face0];
 
-            label index = findIndex(f0, neighbour);
+            label index = f0.find(neighbour);
 
             bool f0OrderOk = (f0.nextLabel(index) == owner);
 
@@ -1194,18 +1190,10 @@ void Foam::polyDualMesh::calcDual
 
     // Transfer face info to straight lists
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    faceList dualFaces(dynDualFaces.shrink(), true);
-    dynDualFaces.clear();
-
-    labelList dualOwner(dynDualOwner.shrink(), true);
-    dynDualOwner.clear();
-
-    labelList dualNeighbour(dynDualNeighbour.shrink(), true);
-    dynDualNeighbour.clear();
-
-    labelList dualRegion(dynDualRegion.shrink(), true);
-    dynDualRegion.clear();
-
+    faceList dualFaces(std::move(dynDualFaces));
+    labelList dualOwner(std::move(dynDualOwner));
+    labelList dualNeighbour(std::move(dynDualNeighbour));
+    labelList dualRegion(std::move(dynDualRegion));
 
 
     // Dump faces.
@@ -1340,10 +1328,10 @@ void Foam::polyDualMesh::calcDual
     // Assign to mesh.
     resetPrimitives
     (
-        xferMove(dualPoints),
-        xferMove(dualFaces),
-        xferMove(dualOwner),
-        xferMove(dualNeighbour),
+        autoPtr<pointField>::New(std::move(dualPoints)),
+        autoPtr<faceList>::New(std::move(dualFaces)),
+        autoPtr<labelList>::New(std::move(dualOwner)),
+        autoPtr<labelList>::New(std::move(dualNeighbour)),
         patchSizes,
         patchStarts
     );
@@ -1391,13 +1379,7 @@ Foam::polyDualMesh::polyDualMesh
     const labelList& featurePoints
 )
 :
-    polyMesh
-    (
-        mesh,
-        xferCopy(pointField()),// to prevent any warnings "points not allocated"
-        xferCopy(faceList()),  // to prevent any warnings "faces  not allocated"
-        xferCopy(cellList())
-    ),
+    polyMesh(mesh, Zero),
     cellPoint_
     (
         IOobject
@@ -1436,13 +1418,7 @@ Foam::polyDualMesh::polyDualMesh
     const scalar featureCos
 )
 :
-    polyMesh
-    (
-        mesh,
-        xferCopy(pointField()),// to prevent any warnings "points not allocated"
-        xferCopy(faceList()),  // to prevent any warnings "faces  not allocated"
-        xferCopy(cellList())
-    ),
+    polyMesh(mesh, Zero),
     cellPoint_
     (
         IOobject

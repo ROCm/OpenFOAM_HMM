@@ -53,7 +53,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::writePolys
 {
     // connectivity count without additional storage (done internally)
     label nConnectivity = 0;
-    for (const auto& f : faces)
+    for (const Face& f : faces)
     {
         nConnectivity += f.size();
     }
@@ -109,7 +109,7 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
             << exit(FatalError);
     }
 
-    // assume that the groups are not intermixed
+    // Assume groups are not intermixed
     bool sorted = true;
 
 
@@ -187,9 +187,9 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
     label nTri = 0;
     if (faceTraits<Face>::isTri())
     {
-        forAll(faces, facei)
+        for (const face& f : faces)
         {
-            nTri += faces[facei].nTriangles();
+            nTri += f.nTriangles();
         }
     }
 
@@ -200,50 +200,53 @@ bool Foam::fileFormats::VTKsurfaceFormat<Face>::read
 
         DynamicList<Face> dynFaces(nTri);
         DynamicList<label> dynZones(nTri);
+
         forAll(faces, facei)
         {
             const face& f = faces[facei];
             for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
             {
-                label fp2 = f.fcIndex(fp1);
+                const label fp2 = f.fcIndex(fp1);
 
                 dynFaces.append(Face{f[0], f[fp1], f[fp2]});
                 dynZones.append(zones[facei]);
             }
         }
+        zones.clear();
 
         // Count
         labelList zoneSizes(nZones, 0);
-        forAll(dynZones, triI)
+        for (const label zonei : dynZones)
         {
-            zoneSizes[dynZones[triI]]++;
+            zoneSizes[zonei]++;
         }
 
-        this->sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
+        this->sortFacesAndStore(dynFaces, dynZones, sorted);
 
-        // add zones, culling empty ones
-        this->addZones(zoneSizes, zoneNames, true);
+        // Add zones (retaining empty ones)
+        this->addZones(zoneSizes, zoneNames);
     }
     else
     {
         DynamicList<Face> dynFaces(faces.size());
-        forAll(faces, facei)
+        DynamicList<label> dynZones(std::move(zones));
+
+        for (const face& f : faces)
         {
-            const face& f = faces[facei];
             dynFaces.append(Face(f));
         }
 
         // Count
         labelList zoneSizes(nZones, 0);
-        forAll(zones, facei)
+        for (const label zonei : zones)
         {
-            zoneSizes[zones[facei]]++;
+            zoneSizes[zonei]++;
         }
 
-        this->sortFacesAndStore(dynFaces.xfer(), zones.xfer(), sorted);
+        this->sortFacesAndStore(dynFaces, dynZones, sorted);
 
-        // add zones, culling empty ones
-        this->addZones(zoneSizes, zoneNames, true);
+        // Add zones (retaining empty ones)
+        this->addZones(zoneSizes, zoneNames);
     }
     this->addZonesToFaces(); // for labelledTri
 
@@ -258,14 +261,15 @@ template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurfaceProxy<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf,
+    const dictionary& options
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>&  faceLst = surf.surfFaces();
-    const List<label>& faceMap = surf.faceMap();
+    const UList<point>& pointLst = surf.points();
+    const UList<Face>&   faceLst = surf.surfFaces();
+    const UList<label>&  faceMap = surf.faceMap();
 
-    const List<surfZone>& zones =
+    const UList<surfZone>& zones =
     (
         surf.surfZones().empty()
       ? surfaceFormatsCore::oneZone(faceLst)
@@ -285,7 +289,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
     {
         // connectivity count without additional storage (done internally)
         label nConnectivity = 0;
-        for (const auto& f : faceLst)
+        for (const Face& f : faceLst)
         {
             nConnectivity += f.size();
         }
@@ -329,7 +333,8 @@ template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
+    const UnsortedMeshedSurface<Face>& surf,
+    const dictionary& options
 )
 {
     std::ofstream os(filename);

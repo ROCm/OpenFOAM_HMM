@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
         "directory"
     );
 
-    argList::validArgs.append("triSurfaceMesh");
-    argList::validArgs.append("distributionType");
+    argList::addArgument("triSurfaceMesh");
+    argList::addArgument("distributionType");
     argList::addBoolOption
     (
         "keepNonMapped",
@@ -130,7 +130,7 @@ int main(int argc, char *argv[])
         << "Using distribution method "
         << distTypeName << nl << endl;
 
-    const bool keepNonMapped = args.optionFound("keepNonMapped");
+    const bool keepNonMapped = args.found("keepNonMapped");
 
     if (keepNonMapped)
     {
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
     if (distType == distributedTriSurfaceMesh::INDEPENDENT)
     {
         fileName decompDictFile;
-        args.optionReadIfPresent("decomposeParDict", decompDictFile);
+        args.readIfPresent("decomposeParDict", decompDictFile);
 
         // A demand-driven decompositionMethod can have issues finding
         // an alternative decomposeParDict location.
@@ -240,7 +240,10 @@ int main(int argc, char *argv[])
         if (Pstream::master())
         {
             // Actually load the surface
+            const bool oldParRun = Pstream::parRun();
+            Pstream::parRun() = false;
             triSurfaceMesh surf(io);
+            Pstream::parRun() = oldParRun;
             s = surf;
             bbs = List<treeBoundBox>(1, treeBoundBox(boundBox::greatBox));
         }

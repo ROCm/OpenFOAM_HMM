@@ -247,16 +247,15 @@ tmp<scalarField> nutkFilmWallFunctionFvPatchScalarField::yPlus() const
 void nutkFilmWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "filmRegion",
         "surfaceFilmProperties",
         filmRegionName_
     );
     writeLocalEntries(os);
-    os.writeKeyword("B") << B_ << token::END_STATEMENT << nl;
-    os.writeKeyword("yPlusCrit") << yPlusCrit_ << token::END_STATEMENT << nl;
+    os.writeEntry("B", B_);
+    os.writeEntry("yPlusCrit", yPlusCrit_);
     writeEntry("value", os);
 }
 

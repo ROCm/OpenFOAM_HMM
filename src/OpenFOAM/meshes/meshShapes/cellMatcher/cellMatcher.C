@@ -31,7 +31,6 @@ License
 #include "labelList.H"
 #include "ListOps.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::cellMatcher::cellMatcher
@@ -61,9 +60,9 @@ Foam::cellMatcher::cellMatcher
         f.setSize(maxVertPerFace);
     }
 
-    forAll(pointFaceIndex_, vertI)
+    forAll(pointFaceIndex_, verti)
     {
-        pointFaceIndex_[vertI].setSize(facePerCell);
+        pointFaceIndex_[verti].setSize(facePerCell);
     }
 }
 
@@ -83,7 +82,7 @@ Foam::label Foam::cellMatcher::calcLocalFaces
     label newVertI = 0;
     forAll(myFaces, myFacei)
     {
-        label facei = myFaces[myFacei];
+        const label facei = myFaces[myFacei];
 
         const face& f = faces[facei];
         face& localFace = localFaces_[myFacei];
@@ -202,10 +201,10 @@ void Foam::cellMatcher::calcPointFaceIndex()
         (
             label fp = 0;
             fp < faceSize_[localFacei];
-            fp++
+            ++fp
         )
         {
-            label vert = f[fp];
+            const label vert = f[fp];
             pointFaceIndex_[vert][localFacei] = fp;
         }
     }
@@ -220,7 +219,7 @@ Foam::label Foam::cellMatcher::otherFace
     const label localFacei
 ) const
 {
-    label key = edgeKey(numVert, v0, v1);
+    const label key = edgeKey(numVert, v0, v1);
 
     if (edgeFaces_[key] == localFacei)
     {
@@ -230,17 +229,15 @@ Foam::label Foam::cellMatcher::otherFace
     {
         return edgeFaces_[key];
     }
-    else
-    {
-        FatalErrorInFunction
-            << "edgeFaces_ does not contain:" << localFacei
-            << " for edge " << v0 << " " << v1 << " at key " << key
-            << " edgeFaces_[key, key+1]:" <<  edgeFaces_[key]
-            << " , " << edgeFaces_[key+1]
-            << abort(FatalError);
 
-        return -1;
-    }
+    FatalErrorInFunction
+        << "edgeFaces_ does not contain:" << localFacei
+        << " for edge " << v0 << " " << v1 << " at key " << key
+        << " edgeFaces_[key, key+1]:" <<  edgeFaces_[key]
+        << " , " << edgeFaces_[key+1]
+        << abort(FatalError);
+
+    return -1;
 }
 
 
@@ -256,10 +253,10 @@ void Foam::cellMatcher::write(Foam::Ostream& os) const
         {
             os  << ' ' << localFaces_[facei][fp];
         }
-        os  << endl;
+        os  << nl;
     }
 
-    os  <<  "Face map  : " << faceMap_ << endl;
+    os  <<  "Face map  : " << faceMap_ << nl;
     os  <<  "Point map : " << pointMap_ << endl;
 }
 

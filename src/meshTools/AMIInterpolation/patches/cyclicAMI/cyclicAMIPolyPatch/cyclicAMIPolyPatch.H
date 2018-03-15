@@ -220,7 +220,7 @@ public:
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
-            return autoPtr<polyPatch>(new cyclicAMIPolyPatch(*this, bm));
+            return autoPtr<polyPatch>::NewFrom<cyclicAMIPolyPatch>(*this, bm);
         }
 
         //- Construct and return a clone, resetting the face list

@@ -25,7 +25,7 @@ Class
     Foam::fileFormats::STARCDedgeFormat
 
 Description
-    Read/write the lines from pro-STAR vrt/cel files.
+    Read/write the lines from PROSTAR vrt/cel files.
 
 Note
     Uses the extension \a .inp (input) to denote the format.
@@ -100,16 +100,12 @@ public:
         //- Read file and return edgeMesh
         static autoPtr<edgeMesh> New(const fileName& name)
         {
-            return autoPtr<edgeMesh>
-            (
-                new STARCDedgeFormat(name)
-            );
+            return autoPtr<edgeMesh>::NewFrom<STARCDedgeFormat>(name);
         }
 
 
     //- Destructor
-    virtual ~STARCDedgeFormat()
-    {}
+    virtual ~STARCDedgeFormat() = default;
 
 
     // Member Functions

@@ -90,7 +90,7 @@ Foam::dlLibraryTable& Foam::fv::CodedSource<Type>::libs() const
 template<class Type>
 Foam::string Foam::fv::CodedSource<Type>::description() const
 {
-    return "fvOption:: " + name_;
+    return "fvOption::" + name_;
 }
 
 
@@ -143,7 +143,7 @@ Foam::fv::option& Foam::fv::CodedSource<Type>::redirectFvOption() const
             mesh_
         );
     }
-    return redirectFvOptionPtr_();
+    return *redirectFvOptionPtr_;
 }
 
 

@@ -98,11 +98,11 @@ public:
     // Constructors
 
         //- Construct null
-        starcdSurfaceWriter();
+        starcdSurfaceWriter() = default;
 
 
     //- Destructor
-    virtual ~starcdSurfaceWriter();
+    virtual ~starcdSurfaceWriter() = default;
 
 
     // Member Functions

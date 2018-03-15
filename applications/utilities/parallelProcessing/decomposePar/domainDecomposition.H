@@ -160,7 +160,7 @@ public:
     // Constructors
 
         //- Construct from IOobjects (for mesh and optional non-standard
-        //  decomposeParDict location)
+        //- decomposeParDict location)
         domainDecomposition
         (
             const IOobject& io,
@@ -169,7 +169,7 @@ public:
 
 
     //- Destructor
-    ~domainDecomposition();
+    ~domainDecomposition() = default;
 
 
     // Member Functions
@@ -203,7 +203,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

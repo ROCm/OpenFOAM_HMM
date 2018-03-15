@@ -31,4 +31,5 @@ EXE_LIBS = \
     -lsampling \
     -ldynamicMesh \
     -ldecompositionMethods \
-    -L$(FOAM_LIBBIN)/dummy -lscotchDecomp -lptscotchDecomp
+    -L$(FOAM_LIBBIN)/dummy \
+    -lkahipDecomp -lmetisDecomp -lptscotchDecomp -lscotchDecomp

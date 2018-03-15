@@ -1,6 +1,6 @@
 #!/bin/sh
-cd ${0%/*} || exit 1    # Run from this directory
-. $WM_PROJECT_DIR/bin/tools/RunFunctions
+cd ${0%/*} || exit 1                        # Run from this directory
+. $WM_PROJECT_DIR/bin/tools/RunFunctions    # Tutorial run functions
 
 # 1) Run meshing
 # 2) Reconstruct
@@ -51,7 +51,7 @@ linkParallelCase()
 # Do steady-state case
 (cd steady && ./Allrun.pre)
 
-if ! isTest $@
+if notTest $@
 then
     # Copy/link the steady-state case to movement
     linkParallelCase steady movement

@@ -141,7 +141,7 @@ public:
 
 
     //- Destructor
-    ~DistributedDelaunayMesh();
+    ~DistributedDelaunayMesh() = default;
 
 
     // Queries

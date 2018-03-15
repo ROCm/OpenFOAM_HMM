@@ -52,7 +52,7 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "IFstream.H"
-#include "cellModeller.H"
+#include "cellModel.H"
 #include "repatchPolyTopoChanger.H"
 #include "cellSet.H"
 #include "faceSet.H"
@@ -136,7 +136,7 @@ label findFace(const primitivePatch& pp, const labelList& meshF)
 
         forAll(f, fp)
         {
-            if (findIndex(meshF, f[fp]) != -1)
+            if (meshF.found(f[fp]))
             {
                 nMatched++;
             }
@@ -168,7 +168,7 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
 
         forAll(f, fp)
         {
-            if (findIndex(meshF, f[fp]) != -1)
+            if (meshF.found(f[fp]))
             {
                 nMatched++;
             }
@@ -435,10 +435,10 @@ void readCells
 
     Info<< "Starting to read cells at line " << inFile.lineNumber() << endl;
 
-    const cellModel& hex = *(cellModeller::lookup("hex"));
-    const cellModel& prism = *(cellModeller::lookup("prism"));
-    const cellModel& pyr = *(cellModeller::lookup("pyr"));
-    const cellModel& tet = *(cellModeller::lookup("tet"));
+    const cellModel& hex = cellModel::ref(cellModel::HEX);
+    const cellModel& prism = cellModel::ref(cellModel::PRISM);
+    const cellModel& pyr = cellModel::ref(cellModel::PYR);
+    const cellModel& tet = cellModel::ref(cellModel::TET);
 
     face triPoints(3);
     face quadPoints(4);
@@ -769,7 +769,7 @@ void readCells
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append(".msh file");
+    argList::addArgument(".msh file");
     argList::addBoolOption
     (
         "keepOrientation",
@@ -783,7 +783,7 @@ int main(int argc, char *argv[])
 
     Foam::word regionName;
 
-    if (args.optionReadIfPresent("region", regionName))
+    if (args.readIfPresent("region", regionName))
     {
         Foam::Info
             << "Creating polyMesh for region " << regionName << endl;
@@ -793,7 +793,7 @@ int main(int argc, char *argv[])
         regionName = Foam::polyMesh::defaultRegion;
     }
 
-    const bool keepOrientation = args.optionFound("keepOrientation");
+    const bool keepOrientation = args.found("keepOrientation");
     IFstream inFile(args[1]);
 
     // Storage for points
@@ -931,7 +931,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferMove(points),
+        std::move(points),
         cells,
         boundaryFaces,
         boundaryPatchNames,
@@ -1102,7 +1102,7 @@ int main(int argc, char *argv[])
                 (
                     zoneName,
                     zoneFaces[zoneI],
-                    boolList(zoneFaces[zoneI].size(), true),
+                    true, // all are flipped
                     nValidFaceZones,
                     mesh.faceZones()
                 );

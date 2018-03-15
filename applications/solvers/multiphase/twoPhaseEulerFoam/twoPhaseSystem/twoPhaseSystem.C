@@ -132,7 +132,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
     phasePair::scalarTable sigmaTable(lookup("sigma"));
     phasePair::dictTable aspectRatioTable(lookup("aspectRatio"));
 
-    pair_.set
+    pair_.reset
     (
         new phasePair
         (
@@ -143,7 +143,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    pair1In2_.set
+    pair1In2_.reset
     (
         new orderedPhasePair
         (
@@ -155,7 +155,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
         )
     );
 
-    pair2In1_.set
+    pair2In1_.reset
     (
         new orderedPhasePair
         (
@@ -170,100 +170,100 @@ Foam::twoPhaseSystem::twoPhaseSystem
 
     // Models
 
-    drag_.set
+    drag_.reset
     (
         new BlendedInterfacialModel<dragModel>
         (
             lookup("drag"),
             (
                 blendingMethods_.found("drag")
-              ? blendingMethods_["drag"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["drag"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_,
+            *pair_,
+            *pair1In2_,
+            *pair2In1_,
             false // Do not zero drag coefficent at fixed-flux BCs
         )
     );
 
-    virtualMass_.set
+    virtualMass_.reset
     (
         new BlendedInterfacialModel<virtualMassModel>
         (
             lookup("virtualMass"),
             (
                 blendingMethods_.found("virtualMass")
-              ? blendingMethods_["virtualMass"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["virtualMass"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
-    heatTransfer_.set
+    heatTransfer_.reset
     (
         new BlendedInterfacialModel<heatTransferModel>
         (
             lookup("heatTransfer"),
             (
                 blendingMethods_.found("heatTransfer")
-              ? blendingMethods_["heatTransfer"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["heatTransfer"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
-    lift_.set
+    lift_.reset
     (
         new BlendedInterfacialModel<liftModel>
         (
             lookup("lift"),
             (
                 blendingMethods_.found("lift")
-              ? blendingMethods_["lift"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["lift"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
-    wallLubrication_.set
+    wallLubrication_.reset
     (
         new BlendedInterfacialModel<wallLubricationModel>
         (
             lookup("wallLubrication"),
             (
                 blendingMethods_.found("wallLubrication")
-              ? blendingMethods_["wallLubrication"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["wallLubrication"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 
-    turbulentDispersion_.set
+    turbulentDispersion_.reset
     (
         new BlendedInterfacialModel<turbulentDispersionModel>
         (
             lookup("turbulentDispersion"),
             (
                 blendingMethods_.found("turbulentDispersion")
-              ? blendingMethods_["turbulentDispersion"]
-              : blendingMethods_["default"]
+              ? *(blendingMethods_["turbulentDispersion"])
+              : *(blendingMethods_["default"])
             ),
-            pair_,
-            pair1In2_,
-            pair2In1_
+            *pair_,
+            *pair1In2_,
+            *pair2In1_
         )
     );
 }
@@ -272,7 +272,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::twoPhaseSystem::~twoPhaseSystem()
-{}
+{} // Define here (incomplete type in header)
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

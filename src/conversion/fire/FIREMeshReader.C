@@ -377,7 +377,7 @@ bool Foam::fileFormats::FIREMeshReader::readGeometry(const scalar scaleFactor)
     IOstream::streamFormat fmt = IOstream::ASCII;
 
     const word ext = geometryFile_.ext();
-    bool supported = FIRECore::file3dExtensions.hasEnum(ext);
+    bool supported = FIRECore::file3dExtensions.found(ext);
     if (supported)
     {
         FIRECore::fileExt3d fireFileType = FIRECore::file3dExtensions[ext];
@@ -425,31 +425,29 @@ Foam::autoPtr<Foam::polyMesh> Foam::fileFormats::FIREMeshReader::mesh
 
     Info<< "Creating a polyMesh" << endl;
 
-    autoPtr<polyMesh> mesh
+    auto meshPtr = autoPtr<polyMesh>::New
     (
-        new polyMesh
+        IOobject
         (
-            IOobject
-            (
-                polyMesh::defaultRegion,
-                "constant",
-                registry
-            ),
-            xferMove(points_),
-            xferMove(meshFaces_),
-            xferMove(owner_),
-            xferMove(neigh_)
-        )
+            polyMesh::defaultRegion,
+            "constant",
+            registry
+        ),
+        std::move(points_),
+        std::move(meshFaces_),
+        std::move(owner_),
+        std::move(neigh_)
     );
+    polyMesh& mesh = *meshPtr;
 
     // adding patches also checks the mesh
-    addPatches(mesh());
+    addPatches(mesh);
 
-    cellTable_.addCellZones(mesh(), cellTableId_);
+    cellTable_.addCellZones(mesh, cellTableId_);
 
-    // addFaceZones(mesh());
+    // addFaceZones(mesh);
 
-    return mesh;
+    return meshPtr;
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

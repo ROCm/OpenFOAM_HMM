@@ -80,7 +80,7 @@ Foam::isoAdvection::isoAdvection
 
     // Tolerances and solution controls
     nAlphaBounds_(dict_.lookupOrDefault<label>("nAlphaBounds", 3)),
-    vof2IsoTol_(dict_.lookupOrDefault<scalar>("vof2IsoTol", 1e-8)),
+    isoFaceTol_(dict_.lookupOrDefault<scalar>("isoFaceTol", 1e-8)),
     surfCellTol_(dict_.lookupOrDefault<scalar>("surfCellTol", 1e-8)),
     gradAlphaBasedNormal_
     (
@@ -249,7 +249,7 @@ void Foam::isoAdvection::timeIntegratedFlux()
             (
                 celli,
                 alpha1In_[celli],
-                vof2IsoTol_,
+                isoFaceTol_,
                 maxIter
             );
 
@@ -1100,9 +1100,9 @@ void Foam::isoAdvection::writeIsoFaces
             mesh_.time().path()/".."/"isoFaces"
           : mesh_.time().path()/"isoFaces"
     );
-    const string fName
+    const word fName
     (
-        "isoFaces_" + Foam::name("%012d", mesh_.time().timeIndex())
+        word::printf("isoFaces_%012d", mesh_.time().timeIndex())
     );
 
     if (Pstream::parRun())

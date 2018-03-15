@@ -464,7 +464,7 @@ public:
         {
             forAll(y, yi)
             {
-                if (findIndex(x, y[yi]) == -1)
+                if (!x.found(y[yi]))
                 {
                     label sz = x.size();
                     x.setSize(sz+1);
@@ -521,8 +521,8 @@ labelListList globalEdgeFaces
 label findUncoveredPatchFace
 (
     const fvMesh& mesh,
-    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
-    const label meshEdgeI                       // mesh edge
+    const labelUIndList& extrudeMeshFaces,  // mesh faces that are extruded
+    const label meshEdgeI                   // mesh edge
 )
 {
     // Make set of extruded faces.
@@ -549,6 +549,7 @@ label findUncoveredPatchFace
             return facei;
         }
     }
+
     return -1;
 }
 
@@ -557,8 +558,8 @@ label findUncoveredPatchFace
 label findUncoveredCyclicPatchFace
 (
     const fvMesh& mesh,
-    const UIndirectList<label>& extrudeMeshFaces,// mesh faces that are extruded
-    const label meshEdgeI                       // mesh edge
+    const labelUIndList& extrudeMeshFaces,  // mesh faces that are extruded
+    const label meshEdgeI                   // mesh edge
 )
 {
     // Make set of extruded faces.
@@ -585,6 +586,7 @@ label findUncoveredCyclicPatchFace
             return facei;
         }
     }
+
     return -1;
 }
 
@@ -712,7 +714,7 @@ void countExtrudePatches
             label facei = findUncoveredPatchFace
             (
                 mesh,
-                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                labelUIndList(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
@@ -934,7 +936,7 @@ void addCoupledPatches
                 label facei = findUncoveredCyclicPatchFace
                 (
                     mesh,
-                    UIndirectList<label>(extrudeMeshFaces, eFaces),
+                    labelUIndList(extrudeMeshFaces, eFaces),
                     extrudeMeshEdges[edgeI]
                 );
 
@@ -1471,8 +1473,6 @@ void extrudeGeometricProperties
 }
 
 
-
-
 int main(int argc, char *argv[])
 {
     argList::addNote("Create region mesh by extruding a faceZone or faceSet");
@@ -1499,8 +1499,7 @@ int main(int argc, char *argv[])
 
 
     const word oldInstance = mesh.pointsInstance();
-    bool overwrite = args.optionFound("overwrite");
-
+    const bool overwrite = args.found("overwrite");
 
     const word dictName("extrudeToRegionMeshDict");
 
@@ -1508,10 +1507,8 @@ int main(int argc, char *argv[])
 
     IOdictionary dict(dictIO);
 
-
     // Point generator
     autoPtr<extrudeModel> model(extrudeModel::New(dict));
-
 
     // Region
     const word shellRegionName(dict.lookup("region"));
@@ -1520,7 +1517,7 @@ int main(int argc, char *argv[])
     wordList zoneNames;
     wordList zoneShadowNames;
 
-    bool hasZones = dict.found("faceZones");
+    const bool hasZones = dict.found("faceZones");
     if (hasZones)
     {
         dict.lookup("faceZones") >> zoneNames;
@@ -1883,7 +1880,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    const primitiveFacePatch extrudePatch(zoneFaces.xfer(), mesh.points());
+    const primitiveFacePatch extrudePatch(std::move(zoneFaces), mesh.points());
 
 
     Pstream::listCombineGather(isInternal, orEqOp<bool>());
@@ -2242,7 +2239,7 @@ int main(int argc, char *argv[])
             label facei = findUncoveredPatchFace
             (
                 mesh,
-                UIndirectList<label>(extrudeMeshFaces, eFaces),
+                labelUIndList(extrudeMeshFaces, eFaces),
                 extrudeMeshEdges[edgeI]
             );
 
@@ -2408,10 +2405,7 @@ int main(int argc, char *argv[])
             IOobject::AUTO_WRITE,
             false
         ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(labelList()),
-        xferCopy(labelList()),
+        Zero,
         false
     );
 
@@ -2473,7 +2467,7 @@ int main(int argc, char *argv[])
 
 
     // Update numbering on extruder.
-    extruder.updateMesh(shellMap);
+    extruder.updateMesh(shellMap());
 
 
     // Calculate offsets from shell mesh back to original mesh
@@ -2488,14 +2482,14 @@ int main(int argc, char *argv[])
 
         if (isA<mappedWallPolyPatch>(pp))
         {
-            if (findIndex(interRegionTopPatch, patchi) != -1)
+            if (interRegionTopPatch.found(patchi))
             {
-                label zoneI = findIndex(interRegionTopPatch, patchi);
+                label zoneI = interRegionTopPatch.find(patchi);
                 topOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
             }
-            else if (findIndex(interRegionBottomPatch, patchi) != -1)
+            else if (interRegionBottomPatch.found(patchi))
             {
-                label zoneI = findIndex(interRegionBottomPatch, patchi);
+                label zoneI = interRegionBottomPatch.find(patchi);
                 bottomOffsets[zoneI] = calcOffset(extrudePatch, extruder, pp);
             }
         }
@@ -2821,7 +2815,7 @@ int main(int argc, char *argv[])
         addBafflesMap = meshMod.changeMesh(mesh, false);
 
         // Update fields
-        mesh.updateMesh(addBafflesMap);
+        mesh.updateMesh(addBafflesMap());
 
 
 //XXXXXX

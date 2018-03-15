@@ -45,8 +45,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationModelviewFactor_H
-#define radiationModelviewFactor_H
+#ifndef radiation_viewFactor_H
+#define radiation_viewFactor_H
 
 #include "radiationModel.H"
 #include "singleCellFvMesh.H"

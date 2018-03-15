@@ -52,6 +52,9 @@ Description
 #include "IFstream.H"
 #include "readHexLabel.H"
 
+// Flex may use register, which is deprecated and incompatible with C++17
+#pragma clang diagnostic ignored "-Wdeprecated-register"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 using namespace Foam;
@@ -100,7 +103,7 @@ DynamicList<label> cellGroupType;
 bool cubitFile = false;
 
 
-void uniquify(word& name, HashSet<word>& patchNames)
+void uniquify(word& name, wordHashSet& patchNames)
 {
     if (!patchNames.found(name))
     {
@@ -126,7 +129,7 @@ void uniquify(word& name, HashSet<word>& patchNames)
 // Dummy yywrap to keep yylex happy at compile time.
 // It is called by yylex but is not used as the mechanism to change file.
 // See <<EOF>>
-#if YY_FLEX_MINOR_VERSION < 6 && YY_FLEX_SUBMINOR_VERSION < 34
+#if YY_FLEX_MAJOR_VERSION <= 2 && YY_FLEX_MINOR_VERSION <= 5 && YY_FLEX_SUBMINOR_VERSION < 34
 extern "C" int yywrap()
 #else
 int yyFlexLexer::yywrap()
@@ -771,7 +774,7 @@ endOfSection               {space}")"{space}
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-    argList::validArgs.append("Fluent mesh file");
+    argList::addArgument("Fluent mesh file");
     argList::addOption
     (
         "scale",
@@ -804,15 +807,15 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    args.optionReadIfPresent("scale", scaleFactor);
+    args.readIfPresent("scale", scaleFactor);
 
     wordHashSet ignoreCellGroups;
     wordHashSet ignoreFaceGroups;
 
-    args.optionReadIfPresent("ignoreCellGroups", ignoreCellGroups);
-    args.optionReadIfPresent("ignoreFaceGroups", ignoreFaceGroups);
+    args.readIfPresent("ignoreCellGroups", ignoreCellGroups);
+    args.readIfPresent("ignoreFaceGroups", ignoreFaceGroups);
 
-    cubitFile = args.optionFound("cubit");
+    cubitFile = args.found("cubit");
 
     if (cubitFile)
     {
@@ -926,7 +929,7 @@ int main(int argc, char *argv[])
     // Foam patch type for Fluent zone type
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    HashSet<word> fluentGroupToFoamPatch;
+    wordHashSet fluentGroupToFoamPatch;
     fluentGroupToFoamPatch.insert("wall");
     fluentGroupToFoamPatch.insert("fan");
 
@@ -942,10 +945,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        xferCopy(pointField()),
-        xferCopy(faceList()),
-        xferCopy(labelList()),
-        xferCopy(labelList())
+        Zero
     );
 
 
@@ -1037,7 +1037,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~~~~
 
     List<polyPatch*> newPatches(patchIDs.size());
-    HashSet<word> patchNames;
+    wordHashSet patchNames;
 
     forAll(patchIDs, patchi)
     {
@@ -1135,7 +1135,7 @@ int main(int argc, char *argv[])
 
     // Cell zones
     mesh.cellZones().setSize(cellZoneIDs.size());
-    HashSet<word> cellZoneNames;
+    wordHashSet cellZoneNames;
 
     forAll(cellZoneIDs, cellZonei)
     {
@@ -1156,7 +1156,6 @@ int main(int argc, char *argv[])
             new cellZone
             (
                 name,
-                labelList(0),
                 cellZonei,
                 mesh.cellZones()
             )
@@ -1165,7 +1164,7 @@ int main(int argc, char *argv[])
 
     // Face zones
     mesh.faceZones().setSize(faceZoneIDs.size());
-    HashSet<word> faceZoneNames;
+    wordHashSet faceZoneNames;
 
     forAll(faceZoneIDs, faceZonei)
     {
@@ -1186,8 +1185,6 @@ int main(int argc, char *argv[])
             new faceZone
             (
                 name,
-                labelList(0),
-                boolList(0),
                 faceZonei,
                 mesh.faceZones()
             )

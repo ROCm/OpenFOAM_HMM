@@ -86,20 +86,20 @@ int main(int argc, char *argv[])
         "slave",
         "invoke as a slave responder for testing"
     );
-    argList::validArgs.insert("responseFile");
+    argList::addArgument("responseFile");
 
     #include "setRootCase.H"
 
     const label maxOut =
-        Foam::max(0, args.optionLookupOrDefault<label>("max", 0));
+        Foam::max(0, args.lookupOrDefault<label>("max", 0));
 
     const label span =
-        Foam::max(1, args.optionLookupOrDefault<label>("span", 1));
+        Foam::max(1, args.lookupOrDefault<label>("span", 1));
 
-    const scalar relax = args.optionLookupOrDefault<scalar>("scale", 1);
+    const scalar relax = args.lookupOrDefault<scalar>("scale", 1);
 
-    const bool slave = args.optionFound("slave");
-    const bool removeLock = args.optionFound("removeLock");
+    const bool slave = args.found("slave");
+    const bool removeLock = args.found("removeLock");
 
     #include "createTime.H"
 
@@ -226,14 +226,16 @@ int main(int argc, char *argv[])
 
             // State/response = what comes back from FEM
             {
-                const word outputName = Foam::name("state_%06d.vtp", index);
+                const word outputName = word::printf("state_%06d.vtp", index);
+
                 Info<<"    " << outputName << endl;
 
                 state.writeVTP(outputName, movement().axis());
             }
 
             {
-                const word outputName = Foam::name("geom_%06d.vtp", index);
+                const word outputName = word::printf("geom_%06d.vtp", index);
+
                 Info<<"    " << outputName << endl;
 
                 movement().writeVTP(outputName, state, mesh, patchLst, points0);

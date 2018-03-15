@@ -594,7 +594,7 @@ Foam::shellSurfaces::shellSurfaces
     nullGapLevel[2] = 0;
 
 
-    HashSet<word> unmatchedKeys(shellsDict.toc());
+    wordHashSet unmatchedKeys(shellsDict.toc());
     shellI = 0;
 
     forAll(allGeometry_.names(), geomI)

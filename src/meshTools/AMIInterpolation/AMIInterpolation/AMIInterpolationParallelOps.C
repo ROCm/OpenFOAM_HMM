@@ -67,7 +67,7 @@ Foam::label Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcDistribution
         }
         else if (nHaveFaces == 1)
         {
-            proci = findIndex(facesPresentOnProc, 1);
+            proci = facesPresentOnProc.find(1);
             if (debug)
             {
                 InfoInFunction
@@ -454,17 +454,12 @@ Foam::AMIInterpolation<SourcePatch, TargetPatch>::calcProcMap
         }
     }
 
-    autoPtr<mapDistribute> mapPtr
+    return autoPtr<mapDistribute>::New
     (
-        new mapDistribute
-        (
-            segmentI,       // size after construction
-            sendMap.xfer(),
-            constructMap.xfer()
-        )
+        segmentI, // size after construction
+        std::move(sendMap),
+        std::move(constructMap)
     );
-
-    return mapPtr;
 }
 
 

@@ -48,13 +48,13 @@ Foam::wordList Foam::fieldNames
         const wordList localNames(masterNames);
         Pstream::scatter(masterNames);
 
-        HashSet<word> localNamesSet(localNames);
+        wordHashSet localNamesSet(localNames);
 
         forAll(masterNames, i)
         {
             const word& masterFld = masterNames[i];
 
-            HashSet<word>::iterator iter = localNamesSet.find(masterFld);
+            wordHashSet::iterator iter = localNamesSet.find(masterFld);
 
             if (iter == localNamesSet.end())
             {
@@ -70,7 +70,7 @@ Foam::wordList Foam::fieldNames
             }
         }
 
-        forAllConstIter(HashSet<word>, localNamesSet, iter)
+        forAllConstIter(wordHashSet, localNamesSet, iter)
         {
             FatalErrorInFunction
                 << "Fields not synchronised across processors." << endl

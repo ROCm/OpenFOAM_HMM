@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2017-2018 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -26,6 +26,7 @@ License
 #include "vtkWrite.H"
 #include "dictionary.H"
 #include "Time.H"
+#include "areaFields.H"
 #include "foamVtkInternalWriter.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -57,12 +58,6 @@ Foam::functionObjects::vtkWrite::vtkWrite
 {
     read(dict);
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::functionObjects::vtkWrite::~vtkWrite()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -111,7 +106,7 @@ bool Foam::functionObjects::vtkWrite::read(const dictionary& dict)
     // output fields
     //
     dict.lookup("fields") >> selectFields_;
-    wordRes::inplaceUniq(selectFields_);
+    selectFields_.uniq();
 
     return true;
 }
@@ -125,21 +120,6 @@ bool Foam::functionObjects::vtkWrite::execute()
 
 bool Foam::functionObjects::vtkWrite::write()
 {
-    // Count number of fields to be written: only needed for legacy vtk format
-    label nFields = 0;
-    if (writeOpts_.legacy())
-    {
-        nFields =
-        (
-            (writeIds_ ? 1 : 0)
-          + countFields<volScalarField>()
-          + countFields<volVectorField>()
-          + countFields<volSphericalTensorField>()
-          + countFields<volSymmTensorField>()
-          + countFields<volTensorField>()
-        );
-    }
-
     // const word timeDesc =
     //     useTimeName ? time_.timeName() : Foam::name(time_.timeIndex());
 
@@ -157,7 +137,7 @@ bool Foam::functionObjects::vtkWrite::write()
     if (Pstream::parRun())
     {
         // Strip off leading casename, leaving just processor_DDD ending.
-        string::size_type i = vtkName.rfind("processor");
+        const auto i = vtkName.rfind("processor");
 
         if (i != string::npos)
         {
@@ -165,54 +145,71 @@ bool Foam::functionObjects::vtkWrite::write()
         }
     }
 
-    // Create file and write header
-    const fileName outputName
-    (
-        vtkDir/vtkName
-      + "_"
-      + timeDesc
-    );
-
-    Info<< name() << " output Time: " << time_.timeName() << nl
-        << "    Internal  : " << outputName << endl;
-
-    vtk::vtuCells vtuMeshCells
-    (
-        mesh_,
-        writeOpts_,
-        true  // decompose
-    );
-
-    // Write mesh
-    vtk::internalWriter writer
-    (
-        mesh_,
-        vtuMeshCells,
-        outputName,
-        writeOpts_
-    );
-
-    // CellData
+    // internal mesh
     {
-        writer.beginCellData(nFields);
+        const fileName outputName
+        (
+            vtkDir/vtkName
+          + "_"
+          + timeDesc
+        );
 
-        // Write cellID field
-        if (writeIds_)
+        Info<< name() << " output Time: " << time_.timeName() << nl
+            << "    Internal  : " << outputName << endl;
+
+        // Number of fields to be written: only needed for legacy vtk format
+        label nVolFields = 0;
+        if (writeOpts_.legacy())
         {
-            writer.writeCellIDs();
+            nVolFields =
+            (
+                (writeIds_ ? 1 : 0)
+              + countFields<volScalarField>()
+              + countFields<volVectorField>()
+              + countFields<volSphericalTensorField>()
+              + countFields<volSymmTensorField>()
+              + countFields<volTensorField>()
+            );
         }
 
-        // Write volFields
-        writeFields<volScalarField>(writer);
-        writeFields<volVectorField>(writer);
-        writeFields<volSphericalTensorField>(writer);
-        writeFields<volSymmTensorField>(writer);
-        writeFields<volTensorField>(writer);
+        vtk::vtuCells vtuMeshCells
+        (
+            mesh_,
+            writeOpts_,
+            true  // decompose
+        );
 
-        writer.endCellData();
+        // Write mesh
+        vtk::internalWriter writer
+        (
+            mesh_,
+            vtuMeshCells,
+            outputName,
+            writeOpts_
+        );
+
+        // CellData
+        {
+            writer.beginCellData(nVolFields);
+
+            // Write cellID field
+            if (writeIds_)
+            {
+                writer.writeCellIDs();
+            }
+
+            // Write volFields
+            writeFields<volScalarField>(writer);
+            writeFields<volVectorField>(writer);
+            writeFields<volSphericalTensorField>(writer);
+            writeFields<volSymmTensorField>(writer);
+            writeFields<volTensorField>(writer);
+
+            writer.endCellData();
+        }
+
+        writer.writeFooter();
     }
-
-    writer.writeFooter();
 
     return true;
 }

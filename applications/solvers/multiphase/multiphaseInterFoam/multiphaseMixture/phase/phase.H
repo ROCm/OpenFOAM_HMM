@@ -120,7 +120,7 @@ public:
         //- Return const-access to phase1 viscosityModel
         const viscosityModel& nuModel() const
         {
-            return nuModel_();
+            return *nuModel_;
         }
 
         //- Return the kinematic laminar viscosity

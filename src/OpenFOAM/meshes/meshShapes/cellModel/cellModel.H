@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -25,14 +25,21 @@ Class
     Foam::cellModel
 
 Description
-    Maps a geometry to a set of cell primitives, which enables
-    geometric cell data to be calculated without access to the primitive
-    geometric level.  This means mapping a 3D geometry to a set of
-    pyramids which are each described by a cell face and the cell centre
-    point.
+    Maps a geometry to a set of cell primitives.
+
+    This enables geometric cell data to be calculated without access
+    to the primitive geometric level. This means mapping a 3D
+    geometry to a set of pyramids which are each described by a cell
+    face and the cell centre point.
+
+    Also includes a static collection of cell models (normally loaded from
+    etc/cellModels), and a means of looking them up.
 
 SourceFiles
     cellModelI.H
+    cellModel.C
+    cellModels.C
+    cellModelIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -44,19 +51,17 @@ SourceFiles
 #include "faceList.H"
 #include "InfoProxy.H"
 #include "autoPtr.H"
+#include "PtrList.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
-
+// Forward declarations
 class cellModel;
-inline bool operator==(const cellModel& m1, const cellModel& m2);
-inline bool operator!=(const cellModel& m1, const cellModel& m2);
-Ostream& operator<<(Ostream& os, const cellModel& c);
-
+Ostream& operator<<(Ostream& os, const cellModel& cm);
 
 /*---------------------------------------------------------------------------*\
                           Class cellModel Declaration
@@ -64,12 +69,66 @@ Ostream& operator<<(Ostream& os, const cellModel& c);
 
 class cellModel
 {
-    // Private data
+public:
 
-        //- Name
+        //- Enumeration of commonly used cellModel types.
+        //  The indices must match those in "etc/cellModels"
+        enum modelType
+        {
+            UNKNOWN = 0,     //!< unknown
+            HEX = 3,         //!< hex
+            WEDGE = 4,       //!< wedge
+            PRISM = 5,       //!< prism
+            PYR = 6,         //!< pyr
+            TET = 7,         //!< tet
+            SPLITHEX = 8,    //!< splitHex
+            TETWEDGE = 9,    //!< tetWedge
+        };
+
+        //- Names of commonly used cellModels corresponding to modelType.
+        //  The names must match those in "etc/cellModels"
+        static const Enum<modelType> modelNames;
+
+
+    // Lookup Static Models
+
+        //- Look up pointer to cellModel by enumeration, or nullptr on failure.
+        static const cellModel* ptr(const modelType model);
+
+        //- Look up pointer to cellModel by name, or nullptr on failure.
+        static const cellModel* ptr(const word& modelName);
+
+        //- Look up pointer to cellModel by index, or nullptr on failure
+        static const cellModel* ptr(const label modelIndex);
+
+
+        //- Look up reference to cellModel by enumeration. Fatal on failure
+        static const cellModel& ref(const modelType model);
+
+        //- Look up reference to cellModel by name. Fatal on failure
+        static const cellModel& ref(const word& modelName);
+
+        //- Look up reference to cellModel by index. Fatal on failure
+        static const cellModel& ref(const label modelIndex);
+
+
+private:
+
+    // Private Static Data
+
+        //- PtrList of predefined models
+        static PtrList<cellModel> models_;
+
+        //- Lookup of model pointers (in models_) by index
+        static List<const cellModel*> modelPtrs_;
+
+
+    // Private Data
+
+        //- (Unique) model name
         word name_;
 
-        //- Label in the model list
+        //- Index in the model list
         label index_;
 
         //- Number of points in the model which determines the geometry
@@ -82,6 +141,12 @@ class cellModel
         edgeList edges_;
 
 
+    // Private Member Functions
+
+        //- Construct from central "etc/cellModels" file.
+        static void constructModels();
+
+
 public:
 
     // Constructors
@@ -92,43 +157,44 @@ public:
         //- Return a new cellModel on free-store created from Istream
         static autoPtr<cellModel> New(Istream& is)
         {
-            return autoPtr<cellModel>(new cellModel(is));
+            return autoPtr<cellModel>::New(is);
         }
 
         //- Return clone
         autoPtr<cellModel> clone() const
         {
-            return autoPtr<cellModel>(new cellModel(*this));
+            return autoPtr<cellModel>::New(*this);
         }
 
 
     // Member functions
 
-        // Access
+        //- Return model name
+        inline const word& name() const;
 
-            //- Return model name
-            inline const word& name() const;
+        //- Return index of model in the model list
+        inline label index() const;
 
-            //- Return index of model in the model list
-            inline label index() const;
+        //- Return number of points
+        inline label nPoints() const;
 
-            //- Return number of points
-            inline label nPoints() const;
+        //- Return number of edges
+        inline label nEdges() const;
 
-            //- Return number of edges
-            inline label nEdges() const;
+        //- Return number of faces
+        inline label nFaces() const;
 
-            //- Return number of faces
-            inline label nFaces() const;
+        //- Return a raw list of model edges
+        inline const edgeList& modelEdges() const;
 
-            //- Return list of edges
-            inline edgeList edges(const UList<label>& pointLabels) const;
+        //- Return a raw list of model faces
+        inline const faceList& modelFaces() const;
 
-            //- Return a raw list of model faces
-            inline const faceList& modelFaces() const;
+        //- Return list of edges
+        inline edgeList edges(const labelUList& pointLabels) const;
 
-            //- Return list of faces
-            inline faceList faces(const UList<label>& pointLabels) const;
+        //- Return list of faces
+        inline faceList faces(const labelUList& pointLabels) const;
 
 
         //- Vector centroid
@@ -146,7 +212,7 @@ public:
         ) const;
 
         //- Return info proxy.
-        //  Used to print token information to a stream
+        //  Used to print information to a stream
         InfoProxy<cellModel> info() const
         {
             return *this;
@@ -160,23 +226,26 @@ public:
         }
 
 
-    // Friend operators
-
-        //- Equality operator: true => ptr to models are equal !
-        friend bool operator==(const cellModel& m1, const cellModel& m2);
-
-        //- Inequality operator: true => ptr to models are not equal !
-        friend bool operator!=(const cellModel& m1, const cellModel& m2);
-
-
     // Ostream operator
 
-        friend Ostream& operator<<(Ostream& os, const cellModel& c);
+       friend Ostream& operator<<(Ostream& os, const cellModel& cm);
+
 };
 
 
+// Ostream operators
+
 template<>
 Ostream& operator<<(Ostream& os, const InfoProxy<cellModel>& ip);
+
+
+// Global operators
+
+//- Equality: true when model pointers are identical
+inline bool operator==(const cellModel& lhs, const cellModel& rhs);
+
+//- Inequality: true when model pointers are not identical
+inline bool operator!=(const cellModel& lhs, const cellModel& rhs);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

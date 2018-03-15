@@ -162,14 +162,14 @@ public:
         //- Return the thermophysical model
         const rhoThermo& thermo() const
         {
-            return thermo_();
+            return *thermo_;
         }
 
         //- Return non-const access to the thermophysical model
         //  for correction
         rhoThermo& thermo()
         {
-            return thermo_();
+            return *thermo_;
         }
 
         //- Return the laminar viscosity
@@ -286,13 +286,13 @@ public:
         //- Return the volumetric flux
         const surfaceScalarField& phi() const
         {
-            return phiPtr_();
+            return *phiPtr_;
         }
 
         //- Return non-const access to the volumetric flux
         surfaceScalarField& phi()
         {
-            return phiPtr_();
+            return *phiPtr_;
         }
 
         //- Return the volumetric flux of the phase

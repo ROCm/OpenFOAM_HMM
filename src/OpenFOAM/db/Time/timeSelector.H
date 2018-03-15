@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2015 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -89,35 +89,38 @@ class Time;
 
 class timeSelector
 :
-    public scalarRanges
+    private scalarRanges
 {
 public:
 
     // Constructors
 
-        //- Construct Null
+        //- Construct null
         timeSelector();
 
-        //- Construct from Istream
-        timeSelector(Istream&);
+        //- Construct by parsing string for time ranges
+        timeSelector(const std::string& str);
 
 
     // Member Functions
 
         //- Return true if the given instant is within the ranges
-        bool selected(const instant&) const;
+        bool selected(const instant& value) const;
 
         //- Return the set of selected instants in the given list that are
-        //  within the ranges
-        List<bool> selected(const instantList&) const;
+        //- within the ranges
+        List<bool> selected(const instantList& times) const;
 
         //- Select a list of Time values that are within the ranges
-        instantList select(const instantList&) const;
+        instantList select(const instantList& times) const;
 
         //- Select a list of Time values that are within the ranges
-        void inplaceSelect(instantList&) const;
+        void inplaceSelect(instantList& times) const;
 
-        //- Add the options handled by timeSelector to argList::validOptions
+
+    // Static Member Functions
+
+        //- Add timeSelector options to argList::validOptions
         //
         // \param constant
         //   Add the \b -constant option to include the \c constant/ directory
@@ -137,7 +140,7 @@ public:
         //- Return the set of times selected based on the argList options
         static instantList select
         (
-            const instantList&,
+            const instantList& times,
             const argList& args,
             const word& constantName = "constant"
         );

@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
         "skip",
         "skip some parts"
     );
-    argList::validArgs.append("recursive (true|false)");
+    argList::addArgument("recursive (true|false)");
 
     #include "setRootCase.H"
     #include "createTime.H"
@@ -166,8 +166,8 @@ int main(int argc, char *argv[])
 
     recursive = Switch(args[1]);
 
-    const bool optMesh   = args.optionFound("mesh");
-    const bool optSkip   = args.optionFound("skip");
+    const bool optMesh   = args.found("mesh");
+    const bool optSkip   = args.found("skip");
     const objectRegistry& db = (optMesh ? mesh.thisDb() : runTime);
 
     Info<<"## start ##" << nl;

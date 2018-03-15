@@ -1,6 +1,6 @@
 SUFFIXES += .c
 
-cWARN        =
+cWARN       =
 
 cc          = icc -gcc-version=400
 

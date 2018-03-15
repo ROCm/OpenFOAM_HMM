@@ -141,7 +141,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(-1),
     endSampledValues_(0),
     endAverage_(Zero),
-    offset_(ptf.offset_, false)
+    offset_(ptf.offset_.clone())
 {}
 
 
@@ -165,7 +165,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
     endAverage_(ptf.endAverage_),
-    offset_(ptf.offset_, false)
+    offset_(ptf.offset_.clone())
 {}
 
 
@@ -190,7 +190,7 @@ timeVaryingMappedFixedValueFvPatchField
     endSampleTime_(ptf.endSampleTime_),
     endSampledValues_(ptf.endSampledValues_),
     endAverage_(ptf.endAverage_),
-    offset_(ptf.offset_, false)
+    offset_(ptf.offset_.clone())
 {}
 
 
@@ -568,23 +568,20 @@ void Foam::timeVaryingMappedFixedValueFvPatchField<Type>::write
 {
     fvPatchField<Type>::write(os);
 
-    this->writeEntryIfDifferent(os, "setAverage", Switch(false), setAverage_);
+    os.writeEntryIfDifferent("setAverage", Switch(false), setAverage_);
+    os.writeEntryIfDifferent<scalar>("perturb", 1e-5, perturb_);
 
-    this->writeEntryIfDifferent(os, "perturb", scalar(1e-5), perturb_);
-
-    this->writeEntryIfDifferent
+    os.writeEntryIfDifferent
     (
-        os,
         "fieldTable",
         this->internalField().name(),
         fieldTableName_
     );
 
-    this->writeEntryIfDifferent
+    os.writeEntryIfDifferent<word>
     (
-        os,
         "mapMethod",
-        word("planarInterpolation"),
+        "planarInterpolation",
         mapMethod_
     );
 
