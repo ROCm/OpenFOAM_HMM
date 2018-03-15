@@ -2,8 +2,8 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  |
+    \\  /    A nd           | Copyright (C) 2011-2014 OpenFOAM Foundation
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -52,26 +52,33 @@ namespace Foam
 
 class cpuTime
 {
-    // Private data
+    //- Time structure used, with additional methods
+    struct value_type : tms
+    {
+        //- Construct with the current clock time
+        value_type();
 
-        //- Time structure used
-        typedef struct tms timeType;
+        //- Update with the current clock time
+        void update();
+    };
+
+
+    // Private Data
+
+        //- Start time, at the time of construction
+        value_type start_;
+
+        //- Last time when elapsedTime or timeIncrement was called
+        mutable value_type last_;
 
         //- Clock-ticks per second
-        static const long Hz_;
+        static const long clockTicks_;
 
-        //- The start time
-        timeType startTime_;
-        mutable timeType lastTime_;
-        mutable timeType newTime_;
 
     // Private Member Functions
 
-        //- Retrieve the current time values from the system
-        static void getTime(timeType&);
-
-        //- Difference between two times
-        static double timeDifference(const timeType& beg, const timeType& end);
+        //- Difference between two times  (a - b)
+        static double diff(const value_type& a, const value_type& b);
 
 
 public:
@@ -83,6 +90,9 @@ public:
 
 
     // Member Functions
+
+        //- Reset to use the current time for the start time
+        void resetCpuTime();
 
         //- Return CPU time (in seconds) from the start
         double elapsedCpuTime() const;

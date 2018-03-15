@@ -26,6 +26,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
+#include "clock.H"
+#include "clockTime.H"
+#include "cpuTime.H"
 
 using namespace Foam;
 
@@ -34,7 +37,64 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    Info<<"rmDir" << nl;
     rmDir("hmm");
+
+    {
+        Foam::clock sysClock();
+
+        Info<< "clock: date "  << clock::date() << nl
+            << "clock: time "  << clock::clockTime() << nl
+            << "clock: iso  "  << clock::dateTime() << nl;
+    }
+
+
+    {
+        clockValue a;
+
+        Info<< "clockValue() " << a << nl;
+        a.update();
+        Info<< "updated " << a << nl;
+
+        Info<< "sleep 4..." << endl;
+        sleep(4);
+
+        a.update();
+        Info<< " = " << a.seconds() << nl;
+
+        Info<< "sleep 2..." << endl;
+        sleep(2);
+
+        Info<< "elapsed = " << a.elapsed() << nl;
+        Info<< "elapsed = " << a.elapsed().seconds() << nl;
+
+        clockValue b = clockValue::now();
+
+        Info<< "(" << b << " - " << a << ") = " << (b - a) << nl;
+        Info<< "(" << b << " + " << a << ") = " << (b + a) << nl;
+    }
+
+    {
+        clockTime clk;
+
+        Info<< "starting clockTime" << nl;
+
+        Info<< "sleep 4..." << endl;
+        sleep(4);
+
+        Info<< "increment = " << clk.timeIncrement() << nl;
+        Info<< "elapsed   = " << clk.elapsedTime() << nl;
+
+        Info<< "sleep 4..." << endl;
+        sleep(4);
+        Info<< "increment = " << clk.timeIncrement() << nl;
+        Info<< "elapsed   = " << clk.elapsedTime() << nl;
+
+        Info<< "sleep 2..." << endl;
+        sleep(2);
+        Info<< "elapsed   = " << clk.elapsedTime() << nl;
+        Info<< "increment = " << clk.timeIncrement() << nl;
+    }
 
     Info<< "End\n" << endl;
 

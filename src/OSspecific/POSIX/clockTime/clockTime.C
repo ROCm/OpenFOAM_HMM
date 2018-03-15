@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2011-2012 OpenFOAM Foundation
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,46 +24,44 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "clockTime.H"
-#include <sys/time.h>
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::clockTime::getTime(timeType& t)
-{
-    gettimeofday(&t, 0);
-}
-
-
-double Foam::clockTime::timeDifference(const timeType& beg, const timeType& end)
-{
-    return end.tv_sec - beg.tv_sec + 1e-6*(end.tv_usec - beg.tv_usec);
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::clockTime::clockTime()
-{
-    getTime(startTime_);
-    lastTime_ = startTime_;
-    newTime_ = startTime_;
-}
+:
+    start_(true),
+    last_(start_)
+{}
+
+
+Foam::clockTime::clockTime(const clockValue& clockval)
+:
+    start_(clockval),
+    last_(start_)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::clockTime::resetTime()
+{
+    last_.update();
+    start_ = last_;
+}
+
+
 double Foam::clockTime::elapsedTime() const
 {
-    getTime(newTime_);
-    return timeDifference(startTime_, newTime_);
+    last_.update();
+    return (last_ - start_);
 }
 
 
 double Foam::clockTime::timeIncrement() const
 {
-    lastTime_ = newTime_;
-    getTime(newTime_);
-    return timeDifference(lastTime_, newTime_);
+    const value_type prev(last_);
+    last_.update();
+    return (last_ - prev);
 }
 
 

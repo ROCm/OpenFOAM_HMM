@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -36,6 +36,7 @@ SourceFiles
 #define clock_H
 
 #include <ctime>
+#include <string>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,28 +53,24 @@ class clock
 {
     // Private data
 
-        //- Start time in seconds
-        time_t startTime_;
+        //- Time structure used
+        typedef time_t value_type;
 
-        //- Time when clockTimeIncrement() was last called
-        mutable time_t lastTime_;
+        //- Start time in seconds, at the time of construction
+        value_type start_;
 
-        //- Latest time from either elapsedClockTime() or clockTimeIncrement()
-        mutable time_t newTime_;
-
-        //- Names of the months
-        static const char *monthNames[];
-
+        //- Last time when elapsedClockTime or clockTimeIncrement was called
+        mutable value_type last_;
 
 public:
 
     // Constructors
 
-        //- Null constructor which stores the start time
+        //- Construct null, storing the start time
         clock();
 
 
-    // Member Functions
+    // Static Member Functions
 
         //- Get the current clock time in seconds
         static time_t getTime();
@@ -83,13 +80,16 @@ public:
 
         //- Return the current wall-clock date/time as a string
         //  format according to ISO-8601 (yyyy-mm-ddThh:mm:ss)
-        static string dateTime();
+        static std::string dateTime();
 
         //- Return the current wall-clock date as a string
-        static string date();
+        static std::string date();
 
         //- Return the current wall-clock time as a string
-        static string clockTime();
+        static std::string clockTime();
+
+
+    // Member Functions
 
         //- Returns wall-clock time from clock instantiation
         time_t elapsedClockTime() const;
