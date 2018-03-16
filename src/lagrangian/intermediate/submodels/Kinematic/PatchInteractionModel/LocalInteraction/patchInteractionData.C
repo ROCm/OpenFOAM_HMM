@@ -46,7 +46,7 @@ const Foam::word& Foam::patchInteractionData::interactionTypeName() const
 }
 
 
-const Foam::word& Foam::patchInteractionData::patchName() const
+const Foam::keyType& Foam::patchInteractionData::patchName() const
 {
     return patchName_;
 }

@@ -61,7 +61,7 @@ class patchInteractionData
         word interactionTypeName_;
 
         //- Patch name
-        word patchName_;
+        keyType patchName_;
 
         //- Elasticity coefficient
         scalar e_;
@@ -86,7 +86,7 @@ public:
             const word& interactionTypeName() const;
 
             //- Return const access to the patch name
-            const word& patchName() const;
+            const keyType& patchName() const;
 
             //- Return const access to the elasticity coefficient
             scalar e() const;
