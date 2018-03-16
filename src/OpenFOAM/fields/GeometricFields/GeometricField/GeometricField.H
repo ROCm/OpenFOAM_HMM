@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2016 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -51,9 +51,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declarations
 class dictionary;
-
-// Forward declaration of friend functions and operators
 
 template<class Type, template<class> class PatchField, class GeoMesh>
 class GeometricField;
@@ -291,44 +290,48 @@ public:
 
     // Constructors
 
-        //- Constructor given IOobject, mesh, dimensions and patch type.
-        //  This allocates storage for the field but not values.
+        //- Construct given IOobject, mesh, dimensions and patch type.
+        //  This allocates storage for the field but does not set values.
         //  Used only within this class to create TEMPORARY variables
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
-            const dimensionSet&,
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
             const word& patchFieldType=PatchField<Type>::calculatedType()
         );
 
-        //- Constructor given IOobject, mesh, dimensions and patch types.
-        //  This allocates storage for the field but not values.
+        //- Construct given IOobject, mesh, dimensions and patch types.
+        //  This allocates storage for the field but does not set values.
         //  Used only within this class to create TEMPORARY variables
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
-            const dimensionSet&,
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
             const wordList& wantedPatchTypes,
             const wordList& actualPatchTypes = wordList()
         );
 
-        //- Constructor given IOobject, mesh, dimensioned<Type> and patch type.
+        //- Construct given IOobject, mesh, dimensioned<Type> and patch type.
+        //  This assigns both dimensions and values.
+        //  The internal name for the dimensioned\<Type\> has no influence.
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
-            const dimensioned<Type>&,
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensioned<Type>& dt,
             const word& patchFieldType=PatchField<Type>::calculatedType()
         );
 
-        //- Constructor given IOobject, mesh, dimensioned<Type> and patch types.
+        //- Construct given IOobject, mesh, dimensioned<Type> and patch types.
+        //  This assigns both dimensions and values.
+        //  The internal name for the dimensioned\<Type\> has no influence.
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
-            const dimensioned<Type>&,
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensioned<Type>& dt,
             const wordList& wantedPatchTypes,
             const wordList& actualPatchTypes = wordList()
         );
@@ -336,64 +339,64 @@ public:
         //- Constructor from components
         GeometricField
         (
-            const IOobject&,
-            const Internal&,
-            const PtrList<PatchField<Type>>&
+            const IOobject& io,
+            const Internal& diField,
+            const PtrList<PatchField<Type>>& ptfl
         );
 
         //- Constructor from components
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
-            const dimensionSet&,
-            const Field<Type>&,
-            const PtrList<PatchField<Type>>&
+            const IOobject& io,
+            const Mesh& mesh,
+            const dimensionSet& ds,
+            const Field<Type>& iField,
+            const PtrList<PatchField<Type>>& ptfl
         );
 
         //- Construct and read given IOobject
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
+            const IOobject& io,
+            const Mesh& mesh,
             const bool readOldTime = true
         );
 
         //- Construct from dictionary
         GeometricField
         (
-            const IOobject&,
-            const Mesh&,
-            const dictionary&
+            const IOobject& io,
+            const Mesh& mesh,
+            const dictionary& dict
         );
 
-        //- Construct as copy
+        //- Copy construct
         GeometricField
         (
-            const GeometricField<Type, PatchField, GeoMesh>&
+            const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
         //- Construct as copy of tmp<GeometricField> deleting argument
         #ifndef NoConstructFromTmp
         GeometricField
         (
-            const tmp<GeometricField<Type, PatchField, GeoMesh>>&
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
         #endif
 
         //- Construct as copy resetting IO parameters
         GeometricField
         (
-            const IOobject&,
-            const GeometricField<Type, PatchField, GeoMesh>&
+            const IOobject& io,
+            const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
         //- Construct as copy of tmp<GeometricField> resetting IO parameters
         #ifndef NoConstructFromTmp
         GeometricField
         (
-            const IOobject&,
-            const tmp<GeometricField<Type, PatchField, GeoMesh>>&
+            const IOobject& io,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
         #endif
 
@@ -401,7 +404,7 @@ public:
         GeometricField
         (
             const word& newName,
-            const GeometricField<Type, PatchField, GeoMesh>&
+            const GeometricField<Type, PatchField, GeoMesh>& gf
         );
 
         //- Construct as copy resetting name
@@ -409,23 +412,23 @@ public:
         GeometricField
         (
             const word& newName,
-            const tmp<GeometricField<Type, PatchField, GeoMesh>>&
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf
         );
         #endif
 
         //- Construct as copy resetting IO parameters and patch type
         GeometricField
         (
-            const IOobject&,
-            const GeometricField<Type, PatchField, GeoMesh>&,
+            const IOobject& io,
+            const GeometricField<Type, PatchField, GeoMesh>& gf,
             const word& patchFieldType
         );
 
         //- Construct as copy resetting IO parameters and boundary types
         GeometricField
         (
-            const IOobject&,
-            const GeometricField<Type, PatchField, GeoMesh>&,
+            const IOobject& io,
+            const GeometricField<Type, PatchField, GeoMesh>& gf,
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
         );
@@ -434,8 +437,8 @@ public:
         #ifndef NoConstructFromTmp
         GeometricField
         (
-            const IOobject&,
-            const tmp<GeometricField<Type, PatchField, GeoMesh>>&,
+            const IOobject& io,
+            const tmp<GeometricField<Type, PatchField, GeoMesh>>& tgf,
             const wordList& patchFieldTypes,
             const wordList& actualPatchTypes = wordList()
         );

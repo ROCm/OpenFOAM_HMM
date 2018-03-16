@@ -77,7 +77,7 @@ void Foam::AveragingMethods::Basic<Type>::updateGrad()
             false
         ),
         this->mesh_,
-        dimensioned<Type>("zero", dimless, Zero),
+        dimensioned<Type>(dimless, Zero),
         zeroGradientFvPatchField<Type>::typeName
     );
     tempData.primitiveFieldRef() = data_;

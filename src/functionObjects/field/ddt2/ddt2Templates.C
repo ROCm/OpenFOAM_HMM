@@ -49,6 +49,13 @@ int Foam::functionObjects::ddt2::apply(const word& inputName, int& state)
 
     if (!foundObject<volScalarField>(outputName))
     {
+        const dimensionSet dims =
+        (
+            mag_
+          ? mag(input.dimensions()/dimTime)
+          : magSqr(input.dimensions()/dimTime)
+        );
+
         tmp<volScalarField> tddt2
         (
             new volScalarField
@@ -62,16 +69,7 @@ int Foam::functionObjects::ddt2::apply(const word& inputName, int& state)
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar
-                (
-                    "0",
-                    (
-                        mag_
-                      ? mag(input.dimensions()/dimTime)
-                      : magSqr(input.dimensions()/dimTime)
-                    ),
-                    Zero
-                )
+                dimensionedScalar(dims, Zero)
             )
         );
 

@@ -63,7 +63,7 @@ Foam::combustionModels::EDC<Type>::EDC
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("kappa", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     )
 {}
 
@@ -198,7 +198,7 @@ Foam::combustionModels::EDC<Type>::Qdot() const
                 false
             ),
             this->mesh(),
-            dimensionedScalar("Qdot", dimEnergy/dimVolume/dimTime, 0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         )
     );
 

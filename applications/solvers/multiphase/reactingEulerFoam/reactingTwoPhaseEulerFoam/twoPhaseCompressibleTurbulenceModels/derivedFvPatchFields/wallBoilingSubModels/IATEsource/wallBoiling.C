@@ -74,7 +74,7 @@ Foam::diameterModels::IATEsources::wallBoiling::R
             phase().mesh()
         ),
         phase().mesh(),
-        dimensionedScalar("R", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     );
 
     volScalarField::Internal Rdk
@@ -86,7 +86,7 @@ Foam::diameterModels::IATEsources::wallBoiling::R
             phase().mesh()
         ),
         phase().mesh(),
-        dimensionedScalar("Rdk", kappai.dimensions()/dimTime, 0)
+        dimensionedScalar(kappai.dimensions()/dimTime, Zero)
     );
 
     const phaseCompressibleTurbulenceModel& turbulence =

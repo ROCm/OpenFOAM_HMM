@@ -46,7 +46,7 @@ Foam::AnisothermalPhaseModel<BasePhaseModel>::AnisothermalPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("K", sqr(dimVelocity), scalar(0))
+        dimensionedScalar(sqr(dimVelocity), Zero)
     )
 {}
 

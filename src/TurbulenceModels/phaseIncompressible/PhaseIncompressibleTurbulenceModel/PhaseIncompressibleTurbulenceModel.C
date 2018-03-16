@@ -103,21 +103,18 @@ template<class TransportModel>
 Foam::tmp<Foam::volScalarField>
 Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::pPrime() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("pPrime", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            IOobject::groupName("pPrime", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedScalar("pPrimef", dimPressure, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        this->mesh_,
+        dimensionedScalar(dimPressure, Zero)
     );
 }
 
@@ -126,21 +123,18 @@ template<class TransportModel>
 Foam::tmp<Foam::surfaceScalarField>
 Foam::PhaseIncompressibleTurbulenceModel<TransportModel>::pPrimef() const
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("pPrimef", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            IOobject::groupName("pPrimef", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedScalar("pPrimef", dimPressure, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        this->mesh_,
+        dimensionedScalar(dimPressure, Zero)
     );
 }
 

@@ -52,7 +52,7 @@ Foam::phaseChangeTwoPhaseMixtures::Kunz::Kunz
     Cc_("Cc", dimless, phaseChangeTwoPhaseMixtureCoeffs_),
     Cv_("Cv", dimless, phaseChangeTwoPhaseMixtureCoeffs_),
 
-    p0_("0", pSat().dimensions(), 0.0),
+    p0_(pSat().dimensions(), Zero),
 
     mcCoeff_(Cc_*rho2()/tInf_),
     mvCoeff_(Cv_*rho2()/(0.5*rho1()*sqr(UInf_)*tInf_))

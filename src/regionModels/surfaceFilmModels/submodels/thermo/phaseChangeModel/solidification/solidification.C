@@ -82,7 +82,7 @@ solidification::solidification
             IOobject::AUTO_WRITE
         ),
         film.regionMesh(),
-        dimensionedScalar("zero", dimMass, 0.0),
+        dimensionedScalar(dimMass, Zero),
         zeroGradientFvPatchScalarField::typeName
     ),
     thickness_
@@ -96,7 +96,7 @@ solidification::solidification
             IOobject::AUTO_WRITE
         ),
         film.regionMesh(),
-        dimensionedScalar("zero", dimLength, 0.0),
+        dimensionedScalar(dimLength, Zero),
         zeroGradientFvPatchScalarField::typeName
     )
 {}

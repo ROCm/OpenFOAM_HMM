@@ -263,7 +263,7 @@ void Foam::twoPhaseSystem::solve()
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("Sp", dimless/dimTime, 0.0)
+            dimensionedScalar(dimless/dimTime, Zero)
         );
 
         volScalarField::Internal Su

@@ -55,7 +55,7 @@ Foam::interfaceCompositionModels::Raoult<Thermo, OtherThermo>::Raoult
             pair.phase1().mesh()
         ),
         pair.phase1().mesh(),
-        dimensionedScalar("zero", dimless/dimTemperature, 0)
+        dimensionedScalar(dimless/dimTemperature, Zero)
     )
 {
     forAllConstIter(hashedWordList, this->speciesNames_, iter)

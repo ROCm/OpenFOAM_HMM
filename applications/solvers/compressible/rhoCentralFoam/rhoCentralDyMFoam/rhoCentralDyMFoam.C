@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
     #include "readFluxScheme.H"
 
-    dimensionedScalar v_zero("v_zero", dimVolume/dimTime, 0.0);
+    const dimensionedScalar v_zero(dimVolume/dimTime, Zero);
 
     // Courant numbers used to adjust the time-step
     scalar CoNum = 0.0;

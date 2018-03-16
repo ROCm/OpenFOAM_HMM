@@ -67,20 +67,12 @@ localEulerDdtScheme<Type>::fvcDdt
         mesh()
     );
 
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
-        (
-            ddtIOobject,
-            mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                dt.dimensions()/dimTime,
-                Zero
-            ),
-            calculatedFvPatchField<Type>::typeName
-        )
+        ddtIOobject,
+        mesh(),
+        dimensioned<Type>(dt.dimensions()/dimTime, Zero),
+        calculatedFvPatchField<Type>::typeName
     );
 }
 
@@ -539,22 +531,19 @@ tmp<surfaceScalarField> localEulerDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                "meshPhi",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "meshPhi",
+            mesh().time().timeName(),
             mesh(),
-            dimensionedScalar("0", dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh(),
+        dimensionedScalar(dimVolume/dimTime, Zero)
     );
 }
 

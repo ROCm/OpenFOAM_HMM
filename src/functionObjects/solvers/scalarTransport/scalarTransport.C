@@ -101,34 +101,26 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
 
     if (constantD_)
     {
-        tmp<volScalarField> tD
+        return tmp<volScalarField>::New
         (
-            new volScalarField
+            IOobject
             (
-                IOobject
-                (
-                    Dname,
-                    mesh_.time().timeName(),
-                    mesh_.time(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_,
-                dimensionedScalar(Dname, phi.dimensions()/dimLength, D_)
-            )
+                Dname,
+                mesh_.time().timeName(),
+                mesh_.time(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar(Dname, phi.dimensions()/dimLength, D_)
         );
-
-        return tD;
     }
     else if (nutName_ != "none")
     {
         const volScalarField& nutMean =
             mesh_.lookupObject<volScalarField>(nutName_);
 
-        return tmp<volScalarField>
-        (
-            new volScalarField(Dname, nutMean)
-        );
+        return tmp<volScalarField>::New(Dname, nutMean);
     }
     else if (foundObject<icoModel>(turbulenceModel::propertiesName))
     {
@@ -137,13 +129,10 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
             turbulenceModel::propertiesName
         );
 
-        return tmp<volScalarField>
+        return tmp<volScalarField>::New
         (
-             new volScalarField
-             (
-                 Dname,
-                 alphaD_*model.nu() + alphaDt_*model.nut()
-             )
+            Dname,
+            alphaD_*model.nu() + alphaDt_*model.nut()
         );
     }
     else if (foundObject<cmpModel>(turbulenceModel::propertiesName))
@@ -153,34 +142,27 @@ Foam::tmp<Foam::volScalarField> Foam::functionObjects::scalarTransport::D
             turbulenceModel::propertiesName
         );
 
-        return tmp<volScalarField>
+        return tmp<volScalarField>::New
         (
-             new volScalarField
-             (
-                 Dname,
-                 alphaD_*model.mu() + alphaDt_*model.mut()
-             )
+            Dname,
+            alphaD_*model.mu() + alphaDt_*model.mut()
         );
     }
-    else
-    {
-        return tmp<volScalarField>
+
+
+    return tmp<volScalarField>::New
+    (
+        IOobject
         (
-            new volScalarField
-            (
-                IOobject
-                (
-                    Dname,
-                    mesh_.time().timeName(),
-                    mesh_.time(),
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_,
-                dimensionedScalar(Dname, phi.dimensions()/dimLength, 0.0)
-            )
-        );
-    }
+            Dname,
+            mesh_.time().timeName(),
+            mesh_.time(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar(phi.dimensions()/dimLength, Zero)
+    );
 }
 
 
@@ -219,7 +201,7 @@ Foam::functionObjects::scalarTransport::scalarTransport
 
     if (resetOnStartUp_)
     {
-        s == dimensionedScalar("zero", dimless, 0.0);
+        s == dimensionedScalar(dimless, Zero);
     }
 }
 

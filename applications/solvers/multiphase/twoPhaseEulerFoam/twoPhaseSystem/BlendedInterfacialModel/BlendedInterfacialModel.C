@@ -151,7 +151,7 @@ Foam::BlendedInterfacialModel<modelType>::K() const
                 false
             ),
             pair_.phase1().mesh(),
-            dimensionedScalar("zero", modelType::dimK, 0)
+            dimensionedScalar(modelType::dimK, Zero)
         )
     );
 
@@ -219,7 +219,7 @@ Foam::BlendedInterfacialModel<modelType>::Kf() const
                 false
             ),
             pair_.phase1().mesh(),
-            dimensionedScalar("zero", modelType::dimK, 0)
+            dimensionedScalar(modelType::dimK, Zero)
         )
     );
 
@@ -282,7 +282,7 @@ Foam::BlendedInterfacialModel<modelType>::F() const
                 false
             ),
             pair_.phase1().mesh(),
-            dimensioned<Type>("zero", modelType::dimF, Zero)
+            dimensioned<Type>(modelType::dimF, Zero)
         )
     );
 
@@ -350,7 +350,7 @@ Foam::BlendedInterfacialModel<modelType>::Ff() const
                 false
             ),
             pair_.phase1().mesh(),
-            dimensionedScalar("zero", modelType::dimF*dimArea, 0)
+            dimensionedScalar(modelType::dimF*dimArea, Zero)
         )
     );
 
@@ -412,7 +412,7 @@ Foam::BlendedInterfacialModel<modelType>::D() const
                 false
             ),
             pair_.phase1().mesh(),
-            dimensionedScalar("zero", modelType::dimD, 0)
+            dimensionedScalar(modelType::dimD, Zero)
         )
     );
 

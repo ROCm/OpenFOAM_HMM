@@ -82,7 +82,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noTransmissivity::tauEff
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 }

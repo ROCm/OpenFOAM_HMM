@@ -106,7 +106,7 @@ Foam::twoPhaseSystem::twoPhaseSystem
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("dgdt", dimless/dimTime, 0)
+        dimensionedScalar(dimless/dimTime, Zero)
     )
 {
     phase2_.volScalarField::operator=(scalar(1) - phase1_);
@@ -399,7 +399,7 @@ void Foam::twoPhaseSystem::solve()
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("Sp", dgdt_.dimensions(), 0.0)
+            dimensionedScalar(dgdt_.dimensions(), Zero)
         );
 
         volScalarField::Internal Su

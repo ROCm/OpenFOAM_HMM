@@ -103,10 +103,10 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
             mesh()
         ),
         data.mesh(),
-        dimensionedScalar("zero", dimless, 0),
+        dimensionedScalar(dimless, Zero),
         zeroGradientPointPatchField<scalar>::typeName
     );
-    data = dimensioned<Type>("zero", data.dimensions(), Type(Zero));
+    data = dimensioned<Type>(data.dimensions(), Zero);
 
     forAll(patchGroups_, patchGroupI)
     {
@@ -120,7 +120,7 @@ void Foam::patchCorrectedInterpolation::interpolateDataFromPatchGroups
                 mesh()
             ),
             data.mesh(),
-            dimensionedScalar("zero", data.dimensions(), 0),
+            dimensionedScalar(data.dimensions(), Zero),
             zeroGradientPointPatchField<scalar>::typeName
         );
         GeometricField<Type, pointPatchField, pointMesh> patchData(data);

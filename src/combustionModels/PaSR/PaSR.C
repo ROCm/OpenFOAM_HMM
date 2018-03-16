@@ -49,7 +49,7 @@ Foam::combustionModels::PaSR<Type>::PaSR
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("kappa", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     )
 {}
 

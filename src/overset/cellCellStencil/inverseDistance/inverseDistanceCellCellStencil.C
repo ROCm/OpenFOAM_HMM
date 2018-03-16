@@ -1607,7 +1607,7 @@ Foam::cellCellStencils::inverseDistance::inverseDistance
             false
         ),
         mesh_,
-        dimensionedScalar("zero", dimless, 0.0),
+        dimensionedScalar(dimless, Zero),
         zeroGradientFvPatchScalarField::typeName
     )
 {
@@ -1998,7 +1998,7 @@ bool Foam::cellCellStencils::inverseDistance::update()
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 

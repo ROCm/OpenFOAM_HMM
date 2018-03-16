@@ -66,12 +66,7 @@ Foam::tmp
                 mesh
             ),
             mesh,
-            dimensioned<WeightedType>
-            (
-                fld.name(),
-                fld.dimensions(),
-                Zero
-            )
+            dimensioned<WeightedType>(fld.dimensions(), Zero)
         )
     );
     WeightedFieldType& wf = twf();

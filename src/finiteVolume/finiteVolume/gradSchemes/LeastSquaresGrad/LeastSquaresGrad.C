@@ -71,12 +71,7 @@ Foam::fv::LeastSquaresGrad<Type, Stencil>::calcGrad
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<GradType>
-            (
-                "zero",
-                vtf.dimensions()/dimLength,
-                Zero
-            ),
+            dimensioned<GradType>(vtf.dimensions()/dimLength, Zero),
             extrapolatedCalculatedFvPatchField<GradType>::typeName
         )
     );

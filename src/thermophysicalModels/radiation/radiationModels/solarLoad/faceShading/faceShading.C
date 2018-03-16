@@ -377,7 +377,7 @@ void Foam::faceShading::calculate()
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar("zero", dimless, 0)
+                dimensionedScalar(dimless, Zero)
             )
         );
 

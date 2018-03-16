@@ -64,8 +64,7 @@ infinitelyFastChemistry<CombThermoType, ThermoType>::~infinitelyFastChemistry()
 template<class CombThermoType, class ThermoType>
 void infinitelyFastChemistry<CombThermoType, ThermoType>::correct()
 {
-    this->wFuel_ ==
-        dimensionedScalar("zero", dimMass/pow3(dimLength)/dimTime, 0.0);
+    this->wFuel_ == dimensionedScalar(dimMass/dimVolume/dimTime, Zero);
 
     if (this->active())
     {

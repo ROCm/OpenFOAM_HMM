@@ -85,12 +85,7 @@ void ReadAndMapFields
                     readField.registerObject()
                 ),
                 pointMesh::New(tetDualMesh),
-                dimensioned<Type>
-                (
-                    "zero",
-                    readField.dimensions(),
-                    Zero
-                )
+                dimensioned<Type>(readField.dimensions(), Zero)
             )
         );
 

@@ -207,7 +207,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
                 IOobject::NO_WRITE
             ),
             mesh(),
-            dimensionedScalar("a", dimless/dimLength, 0.0),
+            dimensionedScalar(dimless/dimLength, Zero),
             extrapolatedCalculatedFvPatchVectorField::typeName
         )
     );
@@ -288,7 +288,7 @@ Foam::radiation::greyMeanAbsorptionEmission::ECont(const label bandI) const
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+            dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
         )
     );
 

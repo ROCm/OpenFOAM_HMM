@@ -86,22 +86,19 @@ template<class BasicTurbulenceModel>
 tmp<volScalarField>
 Stokes<BasicTurbulenceModel>::nut() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("nut", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            IOobject::groupName("nut", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedScalar("nut", dimViscosity, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(dimViscosity, Zero)
     );
 }
 
@@ -149,22 +146,19 @@ template<class BasicTurbulenceModel>
 tmp<volScalarField>
 Stokes<BasicTurbulenceModel>::k() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("k", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            IOobject::groupName("k", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedScalar("k", sqr(this->U_.dimensions()), 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(sqr(this->U_.dimensions()), Zero)
     );
 }
 
@@ -173,25 +167,19 @@ template<class BasicTurbulenceModel>
 tmp<volScalarField>
 Stokes<BasicTurbulenceModel>::epsilon() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("epsilon", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            IOobject::groupName("epsilon", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedScalar
-            (
-                "epsilon", sqr(this->U_.dimensions())/dimTime, 0.0
-            )
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedScalar(sqr(this->U_.dimensions())/dimTime, Zero)
     );
 }
 
@@ -200,25 +188,19 @@ template<class BasicTurbulenceModel>
 tmp<volSymmTensorField>
 Stokes<BasicTurbulenceModel>::R() const
 {
-    return tmp<volSymmTensorField>
+    return tmp<volSymmTensorField>::New
     (
-        new volSymmTensorField
+        IOobject
         (
-            IOobject
-            (
-                IOobject::groupName("R", this->U_.group()),
-                this->runTime_.timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            IOobject::groupName("R", this->U_.group()),
+            this->runTime_.timeName(),
             this->mesh_,
-            dimensionedSymmTensor
-            (
-                "R", sqr(this->U_.dimensions()), Zero
-            )
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh_,
+        dimensionedSymmTensor(sqr(this->U_.dimensions()), Zero)
     );
 }
 

@@ -118,7 +118,7 @@ Foam::functionObjects::wallHeatFlux::wallHeatFlux
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedScalar("0", dimMass/pow3(dimTime), 0)
+            dimensionedScalar(dimMass/pow3(dimTime), Zero)
         )
     );
 

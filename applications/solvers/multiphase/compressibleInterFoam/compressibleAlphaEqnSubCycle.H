@@ -13,7 +13,7 @@ if (nAlphaSubCycles > 1)
             mesh
         ),
         mesh,
-        dimensionedScalar("0", alphaPhi10.dimensions(), 0)
+        dimensionedScalar(alphaPhi10.dimensions(), Zero)
     );
 
     surfaceScalarField rhoPhiSum
@@ -25,7 +25,7 @@ if (nAlphaSubCycles > 1)
             mesh
         ),
         mesh,
-        dimensionedScalar("0", rhoPhi.dimensions(), 0)
+        dimensionedScalar(rhoPhi.dimensions(), Zero)
     );
 
     tmp<volScalarField> trSubDeltaT;

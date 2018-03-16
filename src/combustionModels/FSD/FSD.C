@@ -72,7 +72,7 @@ FSD<CombThermoType, ThermoType>::FSD
             IOobject::AUTO_WRITE
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimless, 0.0)
+        dimensionedScalar(dimless, Zero)
     ),
     YFuelFuelStream_(dimensionedScalar("YFuelStream", dimless, 1.0)),
     YO2OxiStream_(dimensionedScalar("YOxiStream", dimless, 0.23)),
@@ -159,7 +159,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
                 IOobject::NO_WRITE
             ),
             U.mesh(),
-            dimensionedScalar("Pc", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 
@@ -178,12 +178,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
                 IOobject::NO_WRITE
             ),
             U.mesh(),
-            dimensionedScalar
-            (
-                "omegaFuelBar",
-                omegaFuel.dimensions(),
-                0
-            )
+            dimensionedScalar(omegaFuel.dimensions(), Zero)
         )
     );
 
@@ -309,7 +304,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
                 IOobject::NO_WRITE
             ),
             U.mesh(),
-            dimensionedScalar("products", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 
@@ -338,8 +333,7 @@ void FSD<CombThermoType, ThermoType>::calculateSourceNorm()
 template<class CombThermoType, class ThermoType>
 void FSD<CombThermoType, ThermoType>::correct()
 {
-    this->wFuel_ ==
-        dimensionedScalar("zero", dimMass/pow3(dimLength)/dimTime, 0.0);
+    this->wFuel_ == dimensionedScalar(dimMass/dimTime/dimVolume, Zero);
 
     if (this->active())
     {

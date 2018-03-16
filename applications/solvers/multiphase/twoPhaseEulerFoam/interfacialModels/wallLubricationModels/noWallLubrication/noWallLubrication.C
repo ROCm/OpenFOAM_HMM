@@ -69,22 +69,19 @@ Foam::wallLubricationModels::noWallLubrication::Fi() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
-    return tmp<volVectorField>
+    return tmp<volVectorField>::New
     (
-        new volVectorField
+        IOobject
         (
-            IOobject
-            (
-                "noWallLubrication:Fi",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "noWallLubrication:Fi",
+            mesh.time().timeName(),
             mesh,
-            dimensionedVector("zero", dimF, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        dimensionedVector(dimF, Zero)
     );
 }
 
@@ -94,22 +91,19 @@ Foam::wallLubricationModels::noWallLubrication::F() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
-    return tmp<volVectorField>
+    return tmp<volVectorField>::New
     (
-        new volVectorField
+        IOobject
         (
-            IOobject
-            (
-                "noWallLubrication:F",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "noWallLubrication:F",
+            mesh.time().timeName(),
             mesh,
-            dimensionedVector("zero", dimF, Zero)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        dimensionedVector(dimF, Zero)
     );
 }
 

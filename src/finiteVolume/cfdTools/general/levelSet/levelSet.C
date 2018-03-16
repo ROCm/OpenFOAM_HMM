@@ -50,7 +50,7 @@ Foam::levelSetFraction
                 mesh
             ),
             mesh,
-            dimensionedScalar("0", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         )
     );
     DimensionedField<scalar, volMesh>& result = tResult.ref();

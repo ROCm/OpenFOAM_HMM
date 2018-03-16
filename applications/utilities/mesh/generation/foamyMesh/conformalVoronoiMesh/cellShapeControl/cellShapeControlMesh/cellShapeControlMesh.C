@@ -658,7 +658,7 @@ void Foam::cellShapeControlMesh::write() const
             IOobject::AUTO_WRITE
         ),
         pointMesh::New(mesh),
-        dimensionedScalar("zero", dimLength, scalar(0))
+        dimensionedScalar(dimLength, Zero)
     );
 
     triadIOField alignments

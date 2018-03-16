@@ -47,7 +47,7 @@ if (mesh.changing())
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("pcorr", p.dimensions(), 0.0),
+        dimensionedScalar(p.dimensions(), Zero),
         pcorrTypes
     );
 

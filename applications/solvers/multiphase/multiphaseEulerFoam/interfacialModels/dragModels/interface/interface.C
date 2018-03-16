@@ -70,22 +70,19 @@ Foam::tmp<Foam::volScalarField> Foam::dragModels::interface::K
     const volScalarField& Ur
 ) const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "K",
-                Ur.mesh().time().timeName(),
-                Ur.mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "K",
+            Ur.mesh().time().timeName(),
             Ur.mesh(),
-            dimensionedScalar("K", dimDensity/dimTime, 0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        Ur.mesh(),
+        dimensionedScalar(dimDensity/dimTime, Zero)
     );
 }
 

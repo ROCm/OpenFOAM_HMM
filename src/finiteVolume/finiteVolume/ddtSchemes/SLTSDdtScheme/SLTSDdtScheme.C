@@ -106,7 +106,7 @@ tmp<volScalarField> SLTSDdtScheme<Type>::SLrDeltaT() const
                 mesh()
             ),
             mesh(),
-            dimensionedScalar("rDeltaT", dimless/dimTime, 0.0),
+            dimensionedScalar(dimless/dimTime, Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
@@ -174,12 +174,7 @@ SLTSDdtScheme<Type>::fvcDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    Zero
-                )
+                dimensioned<Type>(dt.dimensions()/dimTime, Zero)
             )
         );
 
@@ -196,12 +191,7 @@ SLTSDdtScheme<Type>::fvcDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    Zero
-                ),
+                dimensioned<Type>(dt.dimensions()/dimTime, Zero),
                 calculatedFvPatchField<Type>::typeName
             )
         );
@@ -782,22 +772,19 @@ tmp<surfaceScalarField> SLTSDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                "meshPhi",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "meshPhi",
+            mesh().time().timeName(),
             mesh(),
-            dimensionedScalar("0", dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh(),
+        dimensionedScalar(dimVolume/dimTime, Zero)
     );
 }
 

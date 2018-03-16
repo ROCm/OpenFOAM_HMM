@@ -63,12 +63,7 @@ Foam::tmp<Foam::volScalarField> Foam::kineticTheoryModels::noneViscosity::nu
     const dimensionedScalar& e
 ) const
 {
-    return dimensionedScalar
-    (
-        "0",
-        dimensionSet(0, 2, -1, 0, 0, 0, 0),
-        0.0
-    )*alpha1;
+    return dimensionedScalar(dimViscosity, Zero)*alpha1;
 }
 
 

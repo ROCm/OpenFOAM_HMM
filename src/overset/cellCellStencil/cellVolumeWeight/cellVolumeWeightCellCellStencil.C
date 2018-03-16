@@ -680,7 +680,7 @@ Foam::cellCellStencils::cellVolumeWeight::cellVolumeWeight
             false
         ),
         mesh_,
-        dimensionedScalar("zero", dimless, 0.0),
+        dimensionedScalar(dimless, Zero),
         zeroGradientFvPatchScalarField::typeName
     )
 {
@@ -987,7 +987,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 
@@ -1012,7 +1012,7 @@ bool Foam::cellCellStencils::cellVolumeWeight::update()
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 

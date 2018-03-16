@@ -111,7 +111,7 @@ Foam::incompressibleTwoPhaseMixture::incompressibleTwoPhaseMixture
             U_.db()
         ),
         U_.mesh(),
-        dimensionedScalar("nu", dimViscosity, 0),
+        dimensionedScalar(dimViscosity, Zero),
         calculatedFvPatchScalarField::typeName
     )
 {

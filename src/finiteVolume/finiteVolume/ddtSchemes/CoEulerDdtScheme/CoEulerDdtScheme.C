@@ -56,7 +56,7 @@ tmp<volScalarField> CoEulerDdtScheme<Type>::CorDeltaT() const
                 mesh()
             ),
             mesh(),
-            dimensionedScalar("CorDeltaT", cofrDeltaT.dimensions(), 0.0),
+            dimensionedScalar(cofrDeltaT.dimensions(), Zero),
             extrapolatedCalculatedFvPatchScalarField::typeName
         )
     );
@@ -168,12 +168,7 @@ CoEulerDdtScheme<Type>::fvcDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    Zero
-                )
+                dimensioned<Type>(dt.dimensions()/dimTime, Zero)
             )
         );
 
@@ -191,12 +186,7 @@ CoEulerDdtScheme<Type>::fvcDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    Zero
-                ),
+                dimensioned<Type>(dt.dimensions()/dimTime, Zero),
                 calculatedFvPatchField<Type>::typeName
             )
         );
@@ -777,21 +767,18 @@ tmp<surfaceScalarField> CoEulerDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>&
 )
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                "meshPhi",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
+            "meshPhi",
+            mesh().time().timeName(),
             mesh(),
-            dimensionedScalar("0", dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh(),
+        dimensionedScalar(dimVolume/dimTime, Zero)
     );
 }
 

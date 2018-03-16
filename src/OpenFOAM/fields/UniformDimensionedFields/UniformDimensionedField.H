@@ -67,13 +67,19 @@ public:
     // Constructors
 
         //- Construct from components. Either reads or uses supplied value.
-        UniformDimensionedField(const IOobject&, const dimensioned<Type>&);
+        //  The name of the dimensioned\<Type\> defines the name of the
+        //  field.
+        UniformDimensionedField
+        (
+            const IOobject& io,
+            const dimensioned<Type>& dt
+        );
 
         //- Construct as copy
-        UniformDimensionedField(const UniformDimensionedField<Type>&);
+        UniformDimensionedField(const UniformDimensionedField<Type>& rdt);
 
         //- Construct from Istream
-        UniformDimensionedField(const IOobject&);
+        UniformDimensionedField(const IOobject& io);
 
 
     //- Destructor
@@ -111,8 +117,11 @@ public:
 
     // Member Operators
 
-        void operator=(const UniformDimensionedField<Type>&);
-        void operator=(const dimensioned<Type>&);
+        //- Assign name, dimensions and value.
+        void operator=(const UniformDimensionedField<Type>& rhs);
+
+        //- Assign name, dimensions and value.
+        void operator=(const dimensioned<Type>& rhs);
 
         Type operator[](const label) const
         {

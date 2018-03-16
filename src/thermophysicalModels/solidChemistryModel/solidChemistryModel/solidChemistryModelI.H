@@ -80,7 +80,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRs() const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
         )
     );
 
@@ -113,7 +113,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::RRsHs() const
                 IOobject::NO_WRITE
             ),
             this->mesh(),
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         )
     );
 

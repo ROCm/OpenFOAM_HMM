@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2015-2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2015-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -144,7 +144,8 @@ public:
             List<Type>&& field
         );
 
-        //- Construct from components
+        //- Construct from components, setting the initial size and assigning
+        //- the dimensions, but not initialising any field values.
         //  Used for temporary fields which are initialised after construction
         DimensionedField
         (
@@ -154,7 +155,9 @@ public:
             const bool checkIOFlags = true
         );
 
-        //- Construct from components
+        //- Construct from components, setting the initial size and assigning
+        //- both dimensions and values.
+        //  The internal name for the dimensioned\<Type\> has no influence.
         DimensionedField
         (
             const IOobject& io,
@@ -163,7 +166,7 @@ public:
             const bool checkIOFlags = true
         );
 
-        //- Construct from Istream
+        //- Construct from Istream.
         DimensionedField
         (
             const IOobject& io,
@@ -180,20 +183,20 @@ public:
             const word& fieldDictEntry = "value"
         );
 
-        //- Construct as copy
+        //- Copy construct
         DimensionedField
         (
             const DimensionedField<Type, GeoMesh>& df
         );
 
-        //- Construct as copy or re-use as specified.
+        //- Copy construct or reuse (move) as specified.
         DimensionedField
         (
             DimensionedField<Type, GeoMesh>& df,
             bool reuse
         );
 
-        //- Construct by transferring the DimensionedField
+        //- Move construct
         explicit DimensionedField
         (
             DimensionedField<Type, GeoMesh>&& df
@@ -207,14 +210,14 @@ public:
         );
         #endif
 
-        //- Construct as copy resetting IO parameters
+        //- Copy construct, resetting IO parameters
         DimensionedField
         (
             const IOobject& io,
             const DimensionedField<Type, GeoMesh>& df
         );
 
-        //- Construct as copy resetting IO parameters and re-use as specified.
+        //- Copy or move construct, resetting IO parameters.
         DimensionedField
         (
             const IOobject& io,
@@ -222,14 +225,14 @@ public:
             bool reuse
         );
 
-        //- Construct as copy resetting name
+        //- Copy construct, resetting name
         DimensionedField
         (
             const word& newName,
             const DimensionedField<Type, GeoMesh>& df
         );
 
-        //- Construct as copy resetting name and re-use as specified.
+        //- Copy or move construct, resetting name.
         DimensionedField
         (
             const word& newName,
@@ -237,7 +240,7 @@ public:
             bool reuse
         );
 
-        //- Construct by transferring the DimensionedField with a new name
+        //- Move construct with a new name
         DimensionedField
         (
             const word& newName,
@@ -343,6 +346,8 @@ public:
 
         void operator=(const DimensionedField<Type, GeoMesh>& df);
         void operator=(const tmp<DimensionedField<Type, GeoMesh>>& tdf);
+
+        //- Assign dimensions and value.
         void operator=(const dimensioned<Type>& dt);
 
         void operator+=(const DimensionedField<Type, GeoMesh>& df);

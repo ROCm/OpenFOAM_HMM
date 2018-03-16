@@ -73,7 +73,7 @@ Foam::radiation::P1::P1(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qr", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     a_
     (
@@ -86,7 +86,7 @@ Foam::radiation::P1::P1(const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     e_
     (
@@ -99,7 +99,7 @@ Foam::radiation::P1::P1(const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     E_
     (
@@ -112,7 +112,7 @@ Foam::radiation::P1::P1(const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     )
 {}
 
@@ -143,7 +143,7 @@ Foam::radiation::P1::P1(const dictionary& dict, const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qr", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     a_
     (
@@ -156,7 +156,7 @@ Foam::radiation::P1::P1(const dictionary& dict, const volScalarField& T)
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     e_
     (
@@ -169,7 +169,7 @@ Foam::radiation::P1::P1(const dictionary& dict, const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("a", dimless/dimLength, 0.0)
+        dimensionedScalar(dimless/dimLength, Zero)
     ),
     E_
     (
@@ -182,7 +182,7 @@ Foam::radiation::P1::P1(const dictionary& dict, const volScalarField& T)
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("E", dimMass/dimLength/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     )
 {}
 
@@ -217,7 +217,7 @@ void Foam::radiation::P1::calculate()
     E_ = absorptionEmission_->E();
     const volScalarField sigmaEff(scatter_->sigmaEff());
 
-    const dimensionedScalar a0 ("a0", a_.dimensions(), ROOTVSMALL);
+    const dimensionedScalar a0("a0", a_.dimensions(), ROOTVSMALL);
 
     // Construct diffusion
     const volScalarField gamma

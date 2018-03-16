@@ -72,9 +72,9 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotAlphal() const
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
 
-    const  dimensionedScalar& TSat = thermo.TSat();
+    const dimensionedScalar& TSat = thermo.TSat();
 
-    dimensionedScalar T0("0", dimTemperature, 0.0);
+    const dimensionedScalar T0(dimTemperature, Zero);
 
     return Pair<tmp<volScalarField>>
     (
@@ -106,9 +106,9 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDot() const
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
 
-    const  dimensionedScalar& TSat = thermo.TSat();
+    const dimensionedScalar& TSat = thermo.TSat();
 
-    dimensionedScalar T0("0", dimTemperature, 0.0);
+    const dimensionedScalar T0(dimTemperature, Zero);
 
     return Pair<tmp<volScalarField>>
     (
@@ -139,8 +139,7 @@ Foam::temperaturePhaseChangeTwoPhaseMixtures::constant::mDotDeltaT() const
             mesh_.lookupObject<basicThermo>(basicThermo::dictName)
         );
 
-    const  dimensionedScalar& TSat = thermo.TSat();
-
+    const dimensionedScalar& TSat = thermo.TSat();
 
     return Pair<tmp<volScalarField>>
     (

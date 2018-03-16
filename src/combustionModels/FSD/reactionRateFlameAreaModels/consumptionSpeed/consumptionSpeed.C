@@ -93,12 +93,7 @@ Foam::tmp<Foam::volScalarField> Foam::consumptionSpeed::omega0Sigma
                 IOobject::NO_WRITE
             ),
             sigma.mesh(),
-            dimensionedScalar
-            (
-                "omega0",
-                dimensionSet(1, -2, -1, 0, 0, 0, 0),
-                0
-            )
+            dimensionedScalar(dimensionSet(1, -2, -1, 0, 0, 0, 0), Zero)
         )
     );
 

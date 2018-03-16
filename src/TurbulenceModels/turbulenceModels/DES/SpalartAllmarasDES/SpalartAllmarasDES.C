@@ -473,7 +473,7 @@ tmp<volScalarField> SpalartAllmarasDES<BasicTurbulenceModel>::k() const
                 IOobject::NO_WRITE
             ),
             this->mesh_,
-            dimensionedScalar("0", dimLength, 0.0),
+            dimensionedScalar(dimLength, Zero),
             zeroGradientFvPatchField<vector>::typeName
         )
     );
@@ -558,7 +558,7 @@ void SpalartAllmarasDES<BasicTurbulenceModel>::correct()
     fvOptions.constrain(nuTildaEqn.ref());
     solve(nuTildaEqn);
     fvOptions.correct(nuTilda_);
-    bound(nuTilda_, dimensionedScalar("0", nuTilda_.dimensions(), 0.0));
+    bound(nuTilda_, dimensionedScalar(nuTilda_.dimensions(), Zero));
     nuTilda_.correctBoundaryConditions();
 
     correctNut();

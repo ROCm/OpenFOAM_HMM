@@ -151,12 +151,7 @@ public:
                         mesh
                     ),
                     mesh,
-                    dimensioned<Type>
-                    (
-                        vf.name(),
-                        vf.dimensions(),
-                        Zero
-                    )
+                    dimensioned<Type>(vf.dimensions(), Zero)
                 )
             );
 

@@ -66,12 +66,7 @@ Foam::velocityLaplacianFvMotionSolver::velocityLaplacianFvMotionSolver
             IOobject::AUTO_WRITE
         ),
         fvMesh_,
-        dimensionedVector
-        (
-            "cellMotionU",
-            pointMotionU_.dimensions(),
-            Zero
-        ),
+        dimensionedVector(pointMotionU_.dimensions(), Zero),
         cellMotionBoundaryTypes<vector>(pointMotionU_.boundaryField())
     ),
     interpolationPtr_

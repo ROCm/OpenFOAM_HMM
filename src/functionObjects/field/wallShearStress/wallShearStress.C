@@ -109,12 +109,7 @@ Foam::functionObjects::wallShearStress::wallShearStress
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedVector
-            (
-                "0",
-                sqr(dimLength)/sqr(dimTime),
-                Zero
-            )
+            dimensionedVector(sqr(dimLength)/sqr(dimTime), Zero)
         )
     );
 

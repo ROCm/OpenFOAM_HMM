@@ -46,24 +46,16 @@ steadyStateDdtScheme<Type>::fvcDdt
     const dimensioned<Type>& dt
 )
 {
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "ddt("+dt.name()+')',
-                mesh().time().timeName(),
-                mesh()
-            ),
-            mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                dt.dimensions()/dimTime,
-                Zero
-            )
-        )
+            "ddt("+dt.name()+')',
+            mesh().time().timeName(),
+            mesh()
+        ),
+        mesh(),
+        dimensioned<Type>(dt.dimensions()/dimTime, Zero)
     );
 }
 
@@ -75,24 +67,16 @@ steadyStateDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "ddt("+vf.name()+')',
-                mesh().time().timeName(),
-                mesh()
-            ),
-            mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                vf.dimensions()/dimTime,
-                Zero
-            )
-        )
+            "ddt("+vf.name()+')',
+            mesh().time().timeName(),
+            mesh()
+        ),
+        mesh(),
+        dimensioned<Type>(vf.dimensions()/dimTime, Zero)
     );
 }
 
@@ -105,24 +89,16 @@ steadyStateDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "ddt("+rho.name()+','+vf.name()+')',
-                mesh().time().timeName(),
-                mesh()
-            ),
-            mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                rho.dimensions()*vf.dimensions()/dimTime,
-                Zero
-            )
-        )
+            "ddt("+rho.name()+','+vf.name()+')',
+            mesh().time().timeName(),
+            mesh()
+        ),
+        mesh(),
+        dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
     );
 }
 
@@ -135,24 +111,16 @@ steadyStateDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "ddt("+rho.name()+','+vf.name()+')',
-                mesh().time().timeName(),
-                mesh()
-            ),
-            mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                rho.dimensions()*vf.dimensions()/dimTime,
-                Zero
-            )
-        )
+            "ddt("+rho.name()+','+vf.name()+')',
+            mesh().time().timeName(),
+            mesh()
+        ),
+        mesh(),
+        dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
     );
 }
 
@@ -166,24 +134,16 @@ steadyStateDdtScheme<Type>::fvcDdt
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<GeometricField<Type, fvPatchField, volMesh>>
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
     (
-        new GeometricField<Type, fvPatchField, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
-                mesh().time().timeName(),
-                mesh()
-            ),
-            mesh(),
-            dimensioned<Type>
-            (
-                "0",
-                rho.dimensions()*vf.dimensions()/dimTime,
-                Zero
-            )
-        )
+            "ddt("+alpha.name()+','+rho.name()+','+vf.name()+')',
+            mesh().time().timeName(),
+            mesh()
+        ),
+        mesh(),
+        dimensioned<Type>(rho.dimensions()*vf.dimensions()/dimTime, Zero)
     );
 }
 
@@ -293,9 +253,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
             mesh(),
             dimensioned<typename flux<Type>::type>
             (
-                "0",
-                Uf.dimensions()*dimArea/dimTime,
-                Zero
+                Uf.dimensions()*dimArea/dimTime, Zero
             )
         )
     );
@@ -327,9 +285,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             mesh(),
             dimensioned<typename flux<Type>::type>
             (
-                "0",
-                phi.dimensions()/dimTime,
-                Zero
+                phi.dimensions()/dimTime, Zero
             )
         )
     );
@@ -364,9 +320,7 @@ steadyStateDdtScheme<Type>::fvcDdtUfCorr
             mesh(),
             dimensioned<typename flux<Type>::type>
             (
-                "0",
-                Uf.dimensions()*dimArea/dimTime,
-                Zero
+                Uf.dimensions()*dimArea/dimTime, Zero
             )
         )
     );
@@ -401,9 +355,7 @@ steadyStateDdtScheme<Type>::fvcDdtPhiCorr
             mesh(),
             dimensioned<typename flux<Type>::type>
             (
-                "0",
-                phi.dimensions()/dimTime,
-                Zero
+                phi.dimensions()/dimTime, Zero
             )
         )
     );
@@ -420,22 +372,19 @@ tmp<surfaceScalarField> steadyStateDdtScheme<Type>::meshPhi
     const GeometricField<Type, fvPatchField, volMesh>& vf
 )
 {
-    return tmp<surfaceScalarField>
+    return tmp<surfaceScalarField>::New
     (
-        new surfaceScalarField
+        IOobject
         (
-            IOobject
-            (
-                "meshPhi",
-                mesh().time().timeName(),
-                mesh(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "meshPhi",
+            mesh().time().timeName(),
             mesh(),
-            dimensionedScalar("0", dimVolume/dimTime, 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh(),
+        dimensionedScalar(dimVolume/dimTime, Zero)
     );
 }
 

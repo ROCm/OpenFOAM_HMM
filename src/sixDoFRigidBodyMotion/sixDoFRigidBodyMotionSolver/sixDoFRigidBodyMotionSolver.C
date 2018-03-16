@@ -100,7 +100,7 @@ Foam::sixDoFRigidBodyMotionSolver::sixDoFRigidBodyMotionSolver
             false
         ),
         pointMesh::New(mesh),
-        dimensionedScalar("zero", dimless, 0.0)
+        dimensionedScalar(dimless, Zero)
     ),
     curTimeIndex_(-1)
 {

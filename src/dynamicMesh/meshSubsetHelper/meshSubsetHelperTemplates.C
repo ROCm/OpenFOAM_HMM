@@ -55,7 +55,7 @@ Foam::meshSubsetHelper::zeroGradientField
         (
             io,
             df.mesh(),
-            dimensioned<Type>("0", df.dimensions(), Zero),
+            dimensioned<Type>(df.dimensions(), Zero),
             zeroGradientFvPatchField<Type>::typeName
         )
     );

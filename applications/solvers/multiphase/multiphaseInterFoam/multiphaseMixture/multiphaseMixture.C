@@ -87,7 +87,7 @@ Foam::multiphaseMixture::multiphaseMixture
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("rhoPhi", dimMass/dimTime, 0.0)
+        dimensionedScalar(dimMass/dimTime, Zero)
     ),
 
     alphas_
@@ -101,7 +101,7 @@ Foam::multiphaseMixture::multiphaseMixture
             IOobject::AUTO_WRITE
         ),
         mesh_,
-        dimensionedScalar("alphas", dimless, 0.0)
+        dimensionedScalar(dimless, Zero)
     ),
 
     nu_
@@ -260,12 +260,7 @@ Foam::multiphaseMixture::surfaceTensionForce() const
                 mesh_
             ),
             mesh_,
-            dimensionedScalar
-            (
-                "surfaceTensionForce",
-                dimensionSet(1, -2, -2, 0, 0),
-                0.0
-            )
+            dimensionedScalar(dimensionSet(1, -2, -2, 0, 0), Zero)
         )
     );
 
@@ -330,7 +325,7 @@ void Foam::multiphaseMixture::solve()
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("0", rhoPhi_.dimensions(), 0)
+            dimensionedScalar(rhoPhi_.dimensions(), Zero)
         );
 
         dimensionedScalar totalDeltaT = runTime.deltaT();
@@ -542,7 +537,7 @@ Foam::multiphaseMixture::nearInterface() const
                 mesh_
             ),
             mesh_,
-            dimensionedScalar("nearInterface", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
 
@@ -629,7 +624,7 @@ void Foam::multiphaseMixture::solveAlphas
 
     MULES::limitSum(alphaPhiCorrs);
 
-    rhoPhi_ = dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0);
+    rhoPhi_ = dimensionedScalar(dimensionSet(1, 0, -1, 0, 0), Zero);
 
     volScalarField sumAlpha
     (
@@ -640,7 +635,7 @@ void Foam::multiphaseMixture::solveAlphas
             mesh_
         ),
         mesh_,
-        dimensionedScalar("sumAlpha", dimless, 0)
+        dimensionedScalar(dimless, Zero)
     );
 
     phasei = 0;

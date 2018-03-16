@@ -1693,24 +1693,20 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
 
     // Note: time().timeName() instead of meshRefinement::timeName() since
     // postprocessable field.
-    tmp<pointVectorField> tfld
+    return tmp<pointVectorField>::New
     (
-        new pointVectorField
+        IOobject
         (
-            IOobject
-            (
-                "pointDisplacement",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            pMesh,
-            dimensionedVector("displacement", dimLength, Zero),
-            patchFieldTypes
-        )
+            "pointDisplacement",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        pMesh,
+        dimensionedVector(dimLength, Zero),
+        patchFieldTypes
     );
-    return tfld;
 }
 
 
@@ -2878,7 +2874,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0),
+            dimensionedScalar(dimless, Zero),
             zeroGradientFvPatchScalarField::typeName
         );
 
@@ -2908,7 +2904,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
                 false
             ),
             pMesh,
-            dimensionedScalar("zero", dimless, 0)
+            dimensionedScalar(dimless, Zero)
         );
 
         const labelList& pointLevel = meshCutter_.pointLevel();

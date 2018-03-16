@@ -65,7 +65,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("I", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     qr_
     (
@@ -78,7 +78,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qr", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     qin_
     (
@@ -91,7 +91,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qin", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     qem_
     (
@@ -104,7 +104,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
             IOobject::NO_WRITE
         ),
         mesh_,
-        dimensionedScalar("qem", dimMass/pow3(dimTime), 0.0)
+        dimensionedScalar(dimMass/pow3(dimTime), Zero)
     ),
     d_(Zero),
     dAve_(Zero),
@@ -295,7 +295,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 
 void Foam::radiation::radiativeIntensityRay::addIntensity()
 {
-    I_ = dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
+    I_ = dimensionedScalar(dimMass/pow3(dimTime), Zero);
 
     forAll(ILambda_, lambdaI)
     {

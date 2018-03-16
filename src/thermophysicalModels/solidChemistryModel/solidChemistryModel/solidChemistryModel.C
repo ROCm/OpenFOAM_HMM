@@ -75,7 +75,7 @@ solidChemistryModel
                     IOobject::NO_WRITE
                 ),
                 mesh,
-                dimensionedScalar("zero", dimMass/dimVolume/dimTime, 0.0)
+                dimensionedScalar(dimMass/dimVolume/dimTime, Zero)
             )
         );
    }
@@ -130,7 +130,7 @@ Foam::solidChemistryModel<CompType, SolidThermo>::Qdot() const
                 false
             ),
             this->mesh_,
-            dimensionedScalar("zero", dimEnergy/dimVolume/dimTime, 0.0)
+            dimensionedScalar(dimEnergy/dimVolume/dimTime, Zero)
         )
     );
 

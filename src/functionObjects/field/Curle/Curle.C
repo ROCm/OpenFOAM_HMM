@@ -61,12 +61,7 @@ bool Foam::functionObjects::Curle::calc()
         const volScalarField::Boundary& dpdtBf = dpdt.boundaryField();
         const surfaceVectorField::Boundary& SfBf = mesh_.Sf().boundaryField();
 
-        dimensionedVector dfdt
-        (
-            "0",
-            p.dimensions()*dimArea/dimTime,
-            vector::zero
-        );
+        dimensionedVector dfdt("dfdt", p.dimensions()*dimArea/dimTime, Zero);
 
         for (auto patchi : patchSet_)
         {
@@ -93,7 +88,7 @@ bool Foam::functionObjects::Curle::calc()
                     IOobject::NO_WRITE
                 ),
                 mesh_,
-                dimensionedScalar("0", p.dimensions(), 0)
+                dimensionedScalar(p.dimensions(), Zero)
             )
         );
 
@@ -120,8 +115,8 @@ Foam::functionObjects::Curle::Curle
 :
     fieldExpression(name, runTime, dict, "p"),
     patchSet_(),
-    x0_("x0", dimLength, vector::zero),
-    c0_("c0", dimVelocity, 0)
+    x0_("x0", dimLength,  Zero),
+    c0_("c0", dimVelocity, Zero)
 {
     read(dict);
 

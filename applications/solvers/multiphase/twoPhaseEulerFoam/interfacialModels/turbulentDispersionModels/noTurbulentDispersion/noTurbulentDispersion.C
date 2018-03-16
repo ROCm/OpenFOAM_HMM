@@ -70,22 +70,19 @@ Foam::turbulentDispersionModels::noTurbulentDispersion::D() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "zero",
-                mesh.time().timeName(),
-                mesh,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "zero",
+            mesh.time().timeName(),
             mesh,
-            dimensionedScalar("zero", dimD, 0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh,
+        dimensionedScalar(dimD, Zero)
     );
 }
 
@@ -95,21 +92,17 @@ Foam::turbulentDispersionModels::noTurbulentDispersion::F() const
 {
     const fvMesh& mesh(this->pair_.phase1().mesh());
 
-    return
-        tmp<volVectorField>
+    return tmp<volVectorField>::New
+    (
+        IOobject
         (
-            new volVectorField
-            (
-                IOobject
-                (
-                    "zero",
-                    mesh.time().timeName(),
-                    mesh
-                ),
-                mesh,
-                dimensionedVector("zero", dimF, Zero)
-            )
-        );
+            "zero",
+            mesh.time().timeName(),
+            mesh
+        ),
+        mesh,
+        dimensionedVector(dimF, Zero)
+    );
 }
 
 

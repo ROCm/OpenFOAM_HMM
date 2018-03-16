@@ -151,7 +151,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(0, 3, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(0, 3, -1, 0, 0), Zero)
     ),
     alphaRhoPhi_
     (
@@ -162,7 +162,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimensionSet(1, 0, -1, 0, 0), 0)
+        dimensionedScalar(dimensionSet(1, 0, -1, 0, 0), Zero)
     ),
     DUDt_
     (
@@ -173,7 +173,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedVector("0", dimAcceleration, Zero)
+        dimensionedVector(dimAcceleration, Zero)
     ),
     divU_(nullptr),
     turbulence_
@@ -197,7 +197,7 @@ Foam::MovingPhaseModel<BasePhaseModel>::MovingPhaseModel
             fluid.mesh()
         ),
         fluid.mesh(),
-        dimensionedScalar("0", dimDensity/dimTime, 0)
+        dimensionedScalar(dimDensity/dimTime, Zero)
     )
 {
     alphaPhi_.setOriented();

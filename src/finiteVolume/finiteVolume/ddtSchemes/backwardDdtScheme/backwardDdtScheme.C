@@ -102,12 +102,7 @@ backwardDdtScheme<Type>::fvcDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    Zero
-                )
+                dimensioned<Type>(dt.dimensions()/dimTime, Zero)
             )
         );
 
@@ -118,24 +113,14 @@ backwardDdtScheme<Type>::fvcDdt
 
         return tdtdt;
     }
-    else
-    {
-        return tmp<GeometricField<Type, fvPatchField, volMesh>>
-        (
-            new GeometricField<Type, fvPatchField, volMesh>
-            (
-                ddtIOobject,
-                mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    Zero
-                ),
-                calculatedFvPatchField<Type>::typeName
-            )
-        );
-    }
+
+    return tmp<GeometricField<Type, fvPatchField, volMesh>>::New
+    (
+        ddtIOobject,
+        mesh(),
+        dimensioned<Type>(dt.dimensions()/dimTime, Zero),
+        calculatedFvPatchField<Type>::typeName
+    );
 }
 
 

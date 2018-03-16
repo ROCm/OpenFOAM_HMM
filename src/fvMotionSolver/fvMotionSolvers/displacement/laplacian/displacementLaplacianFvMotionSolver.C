@@ -76,12 +76,7 @@ Foam::displacementLaplacianFvMotionSolver::displacementLaplacianFvMotionSolver
             IOobject::AUTO_WRITE
         ),
         fvMesh_,
-        dimensionedVector
-        (
-            "cellDisplacement",
-            pointDisplacement_.dimensions(),
-            Zero
-        ),
+        dimensionedVector(pointDisplacement_.dimensions(), Zero),
         cellMotionBoundaryTypes<vector>(pointDisplacement_.boundaryField())
     ),
     pointLocation_(nullptr),
@@ -166,12 +161,7 @@ displacementLaplacianFvMotionSolver
             IOobject::AUTO_WRITE
         ),
         fvMesh_,
-        dimensionedVector
-        (
-            "cellDisplacement",
-            pointDisplacement_.dimensions(),
-            Zero
-        ),
+        dimensionedVector(pointDisplacement_.dimensions(), Zero),
         cellMotionBoundaryTypes<vector>(pointDisplacement_.boundaryField())
     ),
     pointLocation_(nullptr),

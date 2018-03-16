@@ -155,7 +155,7 @@ Foam::motionSmootherAlgo::avg
                 false
             ),
             fld.mesh(),
-            dimensioned<Type>("zero", fld.dimensions(), Zero)
+            dimensioned<Type>(fld.dimensions(), Zero)
         )
     );
     GeometricField<Type, pointPatchField, pointMesh>& res = tres.ref();

@@ -76,12 +76,7 @@ leastSquaresFaGrad<Type>::grad
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<GradType>
-            (
-                "zero",
-                vsf.dimensions()/dimLength,
-                pTraits<GradType>::zero
-            ),
+            dimensioned<GradType>(vsf.dimensions()/dimLength, Zero),
             zeroGradientFaPatchField<GradType>::typeName
         )
     );

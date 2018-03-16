@@ -43,7 +43,7 @@ areaVectorField Us
         IOobject::NO_WRITE
     ),
     aMesh,
-    dimensioned<vector>("Us", dimVelocity, vector::zero)
+    dimensionedVector(dimVelocity, Zero)
 );
 
 dimensioned<scalar> Uinf("Uinf", dimVelocity, 1.0);

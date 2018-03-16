@@ -9,7 +9,7 @@ volVectorField U
         IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedVector("0", dimVelocity, vector::zero)
+    dimensionedVector(dimVelocity, Zero)
 );
 
 
@@ -24,7 +24,7 @@ volScalarField H
         IOobject::AUTO_WRITE
     ),
     mesh,
-    dimensionedScalar("0", dimLength, 0)
+    dimensionedScalar(dimLength, Zero)
 );
 
 // Create volume-to surface mapping object

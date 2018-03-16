@@ -34,6 +34,6 @@
 
 if (!thermo.dpdt())
 {
-    dpdt == dimensionedScalar("0", dpdt.dimensions(), 0);
+    dpdt == dimensionedScalar(dpdt.dimensions(), Zero);
     dpdt.writeOpt() = IOobject::NO_WRITE;
 }

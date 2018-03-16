@@ -404,7 +404,7 @@ Foam::tmp<Foam::surfaceScalarField> Foam::fvMeshDistribute::generateTestField
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensionedScalar("zero", dimless, 0.0)
+            dimensionedScalar(dimless, Zero)
         )
     );
     surfaceScalarField& fld = tfld.ref();

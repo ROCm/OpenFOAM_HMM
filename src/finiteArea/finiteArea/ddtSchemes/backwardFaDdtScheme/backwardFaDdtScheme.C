@@ -105,12 +105,7 @@ backwardFaDdtScheme<Type>::facDdt
             (
                 ddtIOobject,
                 mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    pTraits<Type>::zero
-                )
+                dimensioned<Type>(dt.dimensions()/dimTime, Zero)
             )
         );
 
@@ -121,24 +116,14 @@ backwardFaDdtScheme<Type>::facDdt
 
         return tdtdt;
     }
-    else
-    {
-        return tmp<GeometricField<Type, faPatchField, areaMesh>>
-        (
-            new GeometricField<Type, faPatchField, areaMesh>
-            (
-                ddtIOobject,
-                mesh(),
-                dimensioned<Type>
-                (
-                    "0",
-                    dt.dimensions()/dimTime,
-                    pTraits<Type>::zero
-                ),
-                calculatedFaPatchField<Type>::typeName
-            )
-        );
-    }
+
+    return tmp<GeometricField<Type, faPatchField, areaMesh>>::New
+    (
+        ddtIOobject,
+        mesh(),
+        dimensioned<Type>(dt.dimensions()/dimTime, Zero),
+        calculatedFaPatchField<Type>::typeName
+    );
 }
 
 

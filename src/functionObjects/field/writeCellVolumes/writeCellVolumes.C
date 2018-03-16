@@ -88,7 +88,7 @@ bool Foam::functionObjects::writeCellVolumes::write()
             false
         ),
         mesh_,
-        dimensionedScalar(mesh_.V().name(), mesh_.V().dimensions(), 0),
+        dimensionedScalar(mesh_.V().dimensions(), Zero),
         calculatedFvPatchField<scalar>::typeName
     );
 

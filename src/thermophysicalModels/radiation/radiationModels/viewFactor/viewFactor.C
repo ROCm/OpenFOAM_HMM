@@ -675,26 +675,21 @@ void Foam::radiation::viewFactor::calculate()
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::viewFactor::Rp() const
 {
-    return tmp<volScalarField>
+    return tmp<volScalarField>::New
     (
-        new volScalarField
+        IOobject
         (
-            IOobject
-            (
-                "Rp",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "Rp",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar
-            (
-                "zero",
-                dimMass/pow3(dimTime)/dimLength/pow4(dimTemperature),
-                0.0
-            )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar
+        (
+            dimMass/dimLength/pow3(dimTime)/pow4(dimTemperature), Zero
         )
     );
 }
@@ -703,22 +698,19 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::viewFactor::Rp() const
 Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh>>
 Foam::radiation::viewFactor::Ru() const
 {
-    return tmp<DimensionedField<scalar, volMesh>>
+    return tmp<DimensionedField<scalar, volMesh>>::New
     (
-        new DimensionedField<scalar, volMesh>
+        IOobject
         (
-            IOobject
-            (
-                "Ru",
-                mesh_.time().timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
+            "Ru",
+            mesh_.time().timeName(),
             mesh_,
-            dimensionedScalar("zero", dimMass/dimLength/pow3(dimTime), 0.0)
-        )
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimensionedScalar(dimMass/dimLength/pow3(dimTime), Zero)
     );
 }
 

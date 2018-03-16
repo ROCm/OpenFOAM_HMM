@@ -98,12 +98,7 @@ surfaceIntegrate
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<Type>
-            (
-                "0",
-                ssf.dimensions()/dimVol,
-                Zero
-            ),
+            dimensioned<Type>(ssf.dimensions()/dimVol, Zero),
             extrapolatedCalculatedFvPatchField<Type>::typeName
         )
     );
@@ -154,7 +149,7 @@ surfaceSum
                 IOobject::NO_WRITE
             ),
             mesh,
-            dimensioned<Type>("0", ssf.dimensions(), Zero),
+            dimensioned<Type>(ssf.dimensions(), Zero),
             extrapolatedCalculatedFvPatchField<Type>::typeName
         )
     );

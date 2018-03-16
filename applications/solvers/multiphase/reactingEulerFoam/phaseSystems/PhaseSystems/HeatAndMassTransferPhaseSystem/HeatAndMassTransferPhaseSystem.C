@@ -84,7 +84,7 @@ HeatAndMassTransferPhaseSystem
                     IOobject::AUTO_WRITE
                 ),
                 this->mesh(),
-                dimensionedScalar("zero", dimDensity/dimTime, 0)
+                dimensionedScalar(dimDensity/dimTime, Zero)
             )
         );
 
@@ -100,7 +100,7 @@ HeatAndMassTransferPhaseSystem
                     this->mesh()
                 ),
                 this->mesh(),
-                dimensionedScalar("zero", dimDensity/dimTime, 0)
+                dimensionedScalar(dimDensity/dimTime, Zero)
             )
         );
 
@@ -188,7 +188,7 @@ Foam::HeatAndMassTransferPhaseSystem<BasePhaseSystem>::dmdt
                 this->mesh_
             ),
             this->mesh_,
-            dimensionedScalar("zero", dimDensity/dimTime, 0)
+            dimensionedScalar(dimDensity/dimTime, Zero)
         )
     );
 

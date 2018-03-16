@@ -149,7 +149,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::D
                 p.mesh()
             ),
             p.mesh(),
-            dimensionedScalar("zero", dimArea/dimTime, 0)
+            dimensionedScalar(dimArea/dimTime, Zero)
         )
     );
 
@@ -203,7 +203,7 @@ Foam::InterfaceCompositionModel<Thermo, OtherThermo>::L
                 p.mesh()
             ),
             p.mesh(),
-            dimensionedScalar("zero", dimEnergy/dimMass, 0)
+            dimensionedScalar(dimEnergy/dimMass, Zero)
         )
     );
 

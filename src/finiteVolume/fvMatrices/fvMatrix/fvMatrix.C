@@ -865,7 +865,7 @@ Foam::fvMatrix<Type>::H() const
             Hphi.replace
             (
                 cmpt,
-                dimensionedScalar("0", Hphi.dimensions(), 0.0)
+                dimensionedScalar(Hphi.dimensions(), Zero)
             );
         }
     }

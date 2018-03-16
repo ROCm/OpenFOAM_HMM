@@ -87,7 +87,7 @@ Foam::fv::jouleHeatingSource::transformSigma
                 false
             ),
             mesh_,
-            dimensionedSymmTensor("0", sigmaLocal.dimensions(), Zero),
+            dimensionedSymmTensor(sigmaLocal.dimensions(), Zero),
             zeroGradientFvPatchField<symmTensor>::typeName
         )
     );
