@@ -69,7 +69,7 @@ timeVaryingMappedFixedValueFvPatchField
     fieldTableName_(iF.name()),
     setAverage_(dict.lookupOrDefault("setAverage", false)),
     perturb_(dict.lookupOrDefault("perturb", 1e-5)),
-    pointsName_(dict.lookupOrDefault("points", "points")),
+    pointsName_(dict.lookupOrDefault<word>("points", "points")),
     mapMethod_
     (
         dict.lookupOrDefault<word>
