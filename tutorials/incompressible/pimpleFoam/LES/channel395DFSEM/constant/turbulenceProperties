@@ -25,7 +25,7 @@ LES
     kEqnCoeffs
     {
         Ce              1.048;
-        Ck              0.07; // 0.094;
+        Ck              0.02654; // set to approximate a Cs of 0.065
     }
 
     printCoeffs     on;

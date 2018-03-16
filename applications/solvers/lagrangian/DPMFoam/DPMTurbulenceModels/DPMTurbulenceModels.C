@@ -70,6 +70,12 @@ makeLaminarModel(Stokes);
 #include "kEpsilon.H"
 makeRASModel(kEpsilon);
 
+#include "realizableKE.H"
+makeRASModel(realizableKE);
+
+#include "kOmegaSST.H"
+makeRASModel(kOmegaSST);
+
 #include "Smagorinsky.H"
 makeLESModel(Smagorinsky);
 
