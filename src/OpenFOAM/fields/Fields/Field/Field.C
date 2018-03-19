@@ -38,83 +38,6 @@ const char* const Foam::Field<Type>::typeName("Field");
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Field<Type>::Field()
-:
-    List<Type>()
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const label len)
-:
-    List<Type>(len)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const label len, const Type& val)
-:
-    List<Type>(len, val)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const label len, const zero)
-:
-    List<Type>(len, Zero)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const Field<Type>& fld)
-:
-    List<Type>(fld)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const UList<Type>& list)
-:
-    List<Type>(list)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(const UIndirectList<Type>& list)
-:
-    List<Type>(list)
-{}
-
-
-template<class Type>
-Foam::Field<Type>::Field(Field<Type>&& fld)
-:
-    List<Type>()
-{
-    List<Type>::transfer(fld);
-}
-
-
-template<class Type>
-Foam::Field<Type>::Field(List<Type>&& list)
-:
-    List<Type>()
-{
-    List<Type>::transfer(list);
-}
-
-
-template<class Type>
-template<int SizeMin>
-Foam::Field<Type>::Field(DynamicList<Type, SizeMin>&& list)
-:
-    List<Type>()
-{
-    List<Type>::transfer(list);
-}
-
-
-template<class Type>
 Foam::Field<Type>::Field
 (
     const UList<Type>& mapF,
@@ -257,31 +180,6 @@ Foam::Field<Type>::Field
 
 
 template<class Type>
-Foam::Field<Type>::Field(Field<Type>& fld, bool reuse)
-:
-    List<Type>(fld, reuse)
-{}
-
-
-#ifndef NoConstructFromTmp
-template<class Type>
-Foam::Field<Type>::Field(const tmp<Field<Type>>& tfld)
-:
-    List<Type>(tfld.constCast(), tfld.movable())
-{
-    tfld.clear();
-}
-#endif
-
-
-template<class Type>
-Foam::Field<Type>::Field(Istream& is)
-:
-    List<Type>(is)
-{}
-
-
-template<class Type>
 Foam::Field<Type>::Field
 (
     const word& keyword,
@@ -353,13 +251,6 @@ Foam::Field<Type>::Field
             }
         }
     }
-}
-
-
-template<class Type>
-Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::clone() const
-{
-    return tmp<Field<Type>>::New(*this);
 }
 
 
@@ -739,13 +630,17 @@ void Foam::Field<Type>::writeEntry(const word& keyword, Ostream& os) const
 {
     os.writeKeyword(keyword);
 
+    const label len = this->size();
+
     // Can the contents be considered 'uniform' (ie, identical)?
-    bool uniform = (this->size() && contiguous<Type>());
+    bool uniform = (contiguous<Type>() && len);
     if (uniform)
     {
-        forAll(*this, i)
+        const Type& val = this->operator[](0);
+
+        for (label i=1; i<len; ++i)
         {
-            if (this->operator[](i) != this->operator[](0))
+            if (val != this->operator[](i))
             {
                 uniform = false;
                 break;
@@ -784,20 +679,6 @@ void Foam::Field<Type>::operator=(const Field<Type>& rhs)
 
 
 template<class Type>
-void Foam::Field<Type>::operator=(const UList<Type>& rhs)
-{
-    List<Type>::operator=(rhs);
-}
-
-
-template<class Type>
-void Foam::Field<Type>::operator=(const SubField<Type>& rhs)
-{
-    List<Type>::operator=(rhs);
-}
-
-
-template<class Type>
 void Foam::Field<Type>::operator=(const tmp<Field>& rhs)
 {
     if (this == &(rhs()))
@@ -808,42 +689,6 @@ void Foam::Field<Type>::operator=(const tmp<Field>& rhs)
     }
 
     List<Type>::operator=(rhs());
-}
-
-
-template<class Type>
-void Foam::Field<Type>::operator=(Field<Type>&& rhs)
-{
-    List<Type>::transfer(rhs);
-}
-
-
-template<class Type>
-void Foam::Field<Type>::operator=(List<Type>&& rhs)
-{
-    List<Type>::transfer(rhs);
-}
-
-
-template<class Type>
-template<int SizeMin>
-void Foam::Field<Type>::operator=(DynamicList<Type, SizeMin>&& rhs)
-{
-    List<Type>::transfer(rhs);
-}
-
-
-template<class Type>
-void Foam::Field<Type>::operator=(const Type& val)
-{
-    List<Type>::operator=(val);
-}
-
-
-template<class Type>
-void Foam::Field<Type>::operator=(const zero)
-{
-    List<Type>::operator=(Zero);
 }
 
 

@@ -115,7 +115,7 @@ public:
     // Constructors
 
         //- Construct null
-        inline DynamicList();
+        inline constexpr DynamicList() noexcept;
 
         //- Construct an empty list with given reserve size.
         explicit inline DynamicList(const label nElem);

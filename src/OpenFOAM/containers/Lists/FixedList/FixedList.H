@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -40,14 +40,16 @@ SourceFiles
 #include "bool.H"
 #include "label.H"
 #include "uLabel.H"
+#include "zero.H"
 #include "Hash.H"
 #include "autoPtr.H"
 #include "Swap.H"
 #include "SLListFwd.H"
 
-#include <type_traits>
 #include <initializer_list>
 #include <iterator>
+#include <type_traits>
+#include <limits>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -76,7 +78,7 @@ class FixedList
 {
     static_assert
     (
-        Size && Size <= INT_MAX,
+        Size && Size <= std::numeric_limits<int>::max(),
         "Size must be positive (non-zero) and also fit as a signed value"
     );
 
@@ -90,9 +92,12 @@ protected:
 
     // Protected Member Functions
 
+        //- True if there are two or more entries and all entries have
+        //  identical values.
+        inline bool uniform() const;
+
         //- Write the FixedList with its compound type
         void writeEntry(Ostream& os) const;
-
 
 public:
 
@@ -139,7 +144,7 @@ public:
     {
         inline unsigned operator()
         (
-            const FixedList<T, Size>& lst,
+            const FixedList<T, Size>& list,
             unsigned seed = 0
         ) const;
     };
@@ -156,18 +161,21 @@ public:
         //- Null constructor
         inline FixedList() = default;
 
-        //- Construct from value
+        //- Construct and initialize all entries to given value
         explicit inline FixedList(const T& val);
 
+        //- Construct and initialize all entries to zero
+        explicit inline FixedList(const zero);
+
         //- Copy construct from C-array
-        explicit inline FixedList(const T lst[Size]);
+        explicit inline FixedList(const T list[Size]);
 
         //- Copy constructor
-        inline FixedList(const FixedList<T, Size>& lst);
+        inline FixedList(const FixedList<T, Size>& list);
 
         //- Move construct by using move assignment for the individual
         //- list elements
-        inline FixedList(FixedList<T, Size>&& lst);
+        inline FixedList(FixedList<T, Size>&& list);
 
         //- Construct given begin/end iterators
         //  Uses std::distance when verifying the size.
@@ -175,13 +183,13 @@ public:
         inline FixedList(InputIterator begIter, InputIterator endIter);
 
         //- Construct from an initializer list
-        inline FixedList(std::initializer_list<T> lst);
+        inline FixedList(std::initializer_list<T> list);
 
         //- Construct from UList
-        explicit inline FixedList(const UList<T>& lst);
+        explicit inline FixedList(const UList<T>& list);
 
         //- Construct from SLList
-        explicit inline FixedList(const SLList<T>& lst);
+        explicit inline FixedList(const SLList<T>& list);
 
         //- Construct from Istream
         FixedList(Istream& is);
@@ -250,7 +258,7 @@ public:
             inline void checkIndex(const label i) const;
 
 
-      // Search
+    // Search
 
         //- Find index of the first occurence of the value.
         //  Linear search.
@@ -261,7 +269,7 @@ public:
         inline bool found(const T& val, const label start=0) const;
 
 
-        // Edit
+    // Edit
 
         //- Dummy resize function
         //  needed to make FixedList consistent with List
@@ -285,7 +293,7 @@ public:
 
         //- Transfer by swapping using a move assignment for the content
         //- of the individual list elements
-        inline void transfer(FixedList<T, Size>& lst);
+        inline void transfer(FixedList<T, Size>& list);
 
 
     // Member operators
@@ -297,25 +305,25 @@ public:
         inline const T& operator[](const label i) const;
 
         //- Assignment to array operator. Takes linear time
-        inline void operator=(const T lst[Size]);
+        inline void operator=(const T list[Size]);
 
         //- Assignment to UList operator. Takes linear time
-        inline void operator=(const UList<T>& lst);
+        inline void operator=(const UList<T>& list);
 
         //- Assignment to SLList operator. Takes linear time
-        inline void operator=(const SLList<T>& lst);
+        inline void operator=(const SLList<T>& list);
 
         //- Assignment to an initializer list. Takes linear time
-        inline void operator=(std::initializer_list<T> lst);
+        inline void operator=(std::initializer_list<T> list);
 
         //- Assignment of all entries to the given value
         inline void operator=(const T& val);
 
         //- Copy assignment
-        inline void operator=(const FixedList<T, Size>& lst);
+        inline void operator=(const FixedList<T, Size>& list);
 
         //- Move assignment
-        inline void operator=(FixedList<T, Size>&& lst);
+        inline void operator=(FixedList<T, Size>&& list);
 
 
     // Random access iterator (non-const)
@@ -378,7 +386,7 @@ public:
         inline bool empty() const;
 
         //- Swap lists by swapping the content of the individual list elements
-        inline void swap(FixedList<T, Size>& lst);
+        inline void swap(FixedList<T, Size>& list);
 
 
     // STL member operators
@@ -421,14 +429,14 @@ public:
         friend Istream& operator>> <T, Size>
         (
             Istream& is,
-            FixedList<T, Size>& lst
+            FixedList<T, Size>& list
         );
 
         //- Write to Ostream, as per writeList() with shortListLen=10
         friend Ostream& operator<< <T, Size>
         (
             Ostream& os,
-            const FixedList<T, Size>& lst
+            const FixedList<T, Size>& list
         );
 };
 

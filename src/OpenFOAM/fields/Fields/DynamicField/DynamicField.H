@@ -100,7 +100,7 @@ public:
     // Constructors
 
         //- Construct null
-        inline DynamicField();
+        inline constexpr DynamicField() noexcept;
 
         //- Construct with given capacity.
         explicit inline DynamicField(const label len);

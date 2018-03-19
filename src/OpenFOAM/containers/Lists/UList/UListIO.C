@@ -74,37 +74,17 @@ Foam::Ostream& Foam::UList<T>::writeList
     const label shortListLen
 ) const
 {
-    const UList<T>& L = *this;
+    const UList<T>& list = *this;
 
-    const label len = L.size();
+    const label len = list.size();
 
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (len > 1 && contiguous<T>());
-        if (uniform)
+        if (contiguous<T>() && list.uniform())
         {
-            for (label i=1; i < len; ++i)
-            {
-                if (L[i] != L[0])
-                {
-                    uniform = false;
-                    break;
-                }
-            }
-        }
-
-        if (uniform)
-        {
-            // Size and start delimiter
-            os << len << token::BEGIN_BLOCK;
-
-            // Contents
-            os << L[0];
-
-            // End delimiter
-            os << token::END_BLOCK;
+            // Two or more entries, and all entries have identical values.
+            os  << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
         else if
         (
@@ -119,7 +99,7 @@ Foam::Ostream& Foam::UList<T>::writeList
             for (label i=0; i < len; ++i)
             {
                 if (i) os << token::SPACE;
-                os << L[i];
+                os << list[i];
             }
 
             // End delimiter
@@ -133,7 +113,7 @@ Foam::Ostream& Foam::UList<T>::writeList
             // Contents
             for (label i=0; i < len; ++i)
             {
-                os << L[i] << nl;
+                os << list[i] << nl;
             }
 
             // End delimiter
@@ -150,8 +130,8 @@ Foam::Ostream& Foam::UList<T>::writeList
             // write(...) includes surrounding start/end delimiters
             os.write
             (
-                reinterpret_cast<const char*>(L.cdata()),
-                L.byteSize()
+                reinterpret_cast<const char*>(list.cdata()),
+                list.byteSize()
             );
         }
     }
@@ -164,17 +144,17 @@ Foam::Ostream& Foam::UList<T>::writeList
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
 template<class T>
-Foam::Ostream& Foam::operator<<(Ostream& os, const UList<T>& lst)
+Foam::Ostream& Foam::operator<<(Ostream& os, const UList<T>& list)
 {
-    return lst.writeList(os, 10);
+    return list.writeList(os, 10);
 }
 
 
 template<class T>
-Foam::Istream& Foam::operator>>(Istream& is, UList<T>& lst)
+Foam::Istream& Foam::operator>>(Istream& is, UList<T>& list)
 {
     // The target list length - must match with sizes read
-    const label len = lst.size();
+    const label len = list.size();
 
     is.fatalCheck(FUNCTION_NAME);
 
@@ -207,7 +187,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& lst)
 
         for (label i = 0; i < len; ++i)
         {
-            lst[i] = std::move(elems[i]);
+            list[i] = std::move(elems[i]);
         }
 
         return is;
@@ -241,7 +221,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& lst)
                 {
                     for (label i=0; i<len; ++i)
                     {
-                        is >> lst[i];
+                        is >> list[i];
 
                         is.fatalCheck
                         (
@@ -264,7 +244,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& lst)
 
                     for (label i=0; i<len; ++i)
                     {
-                        lst[i] = element;  // Copy the value
+                        list[i] = element;  // Copy the value
                     }
                 }
             }
@@ -276,7 +256,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& lst)
         {
             // Non-empty, binary, contiguous
 
-            is.read(reinterpret_cast<char*>(lst.data()), len*sizeof(T));
+            is.read(reinterpret_cast<char*>(list.data()), len*sizeof(T));
 
             is.fatalCheck
             (
@@ -315,7 +295,7 @@ Foam::Istream& Foam::operator>>(Istream& is, UList<T>& lst)
         // Move assign each list element
         for (label i = 0; i < len; ++i)
         {
-            lst[i] = std::move(sll.removeHead());
+            list[i] = std::move(sll.removeHead());
         }
 
         return is;

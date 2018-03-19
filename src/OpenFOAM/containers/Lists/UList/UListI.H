@@ -27,6 +27,33 @@ License
 #include "pTraits.H"
 #include "Swap.H"
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T>
+inline bool Foam::UList<T>::uniform() const
+{
+    const label len = size();
+
+    if (len > 1)
+    {
+        const T& val = first();
+
+        for (label i=1; i<len; ++i)
+        {
+            if (val != (*this)[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -358,29 +385,29 @@ inline bool Foam::UList<T>::empty() const
 
 
 template<class T>
-inline void Foam::UList<T>::swap(UList<T>& lst)
+inline void Foam::UList<T>::swap(UList<T>& list)
 {
-    Foam::Swap(size_, lst.size_);
-    Foam::Swap(v_, lst.v_);
+    Foam::Swap(size_, list.size_);
+    Foam::Swap(v_, list.v_);
 }
 
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::reverse(UList<T>& lst, const label n)
+inline void Foam::reverse(UList<T>& list, const label n)
 {
     for (label i=0; i<n/2; ++i)
     {
-        Foam::Swap(lst[i], lst[n-1-i]);
+        Foam::Swap(list[i], list[n-1-i]);
     }
 }
 
 
 template<class T>
-inline void Foam::reverse(UList<T>& lst)
+inline void Foam::reverse(UList<T>& list)
 {
-    reverse(lst, lst.size());
+    reverse(list, list.size());
 }
 
 

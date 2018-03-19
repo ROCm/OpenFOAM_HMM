@@ -108,6 +108,10 @@ protected:
         //  Use with care
         inline void size(const label n);
 
+        //- True if there are two or more entries and all entries have
+        //  identical values.
+        inline bool uniform() const;
+
         //- Write the UList with its compound type
         void writeEntry(Ostream& os) const;
 
@@ -433,7 +437,7 @@ public:
         inline bool empty() const;
 
         //- Swap content with another UList of the same type in constant time
-        inline void swap(UList<T>& lst);
+        inline void swap(UList<T>& list);
 
 
     // STL member operators
@@ -476,7 +480,7 @@ public:
         friend Ostream& operator<< <T>
         (
             Ostream& os,
-            const UList<T>& lst
+            const UList<T>& list
         );
 
         //- Read List contents from Istream.
@@ -508,11 +512,11 @@ void shuffle(UList<T>& a);
 
 // Reverse the first n elements of the list
 template<class T>
-inline void reverse(UList<T>& lst, const label n);
+inline void reverse(UList<T>& list, const label n);
 
 // Reverse all the elements of the list
 template<class T>
-inline void reverse(UList<T>& lst);
+inline void reverse(UList<T>& list);
 
 // Exchange contents of lists - see UList::swap().
 template<class T>

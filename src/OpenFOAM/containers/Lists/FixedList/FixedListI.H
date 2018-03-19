@@ -30,6 +30,30 @@ License
 #include <type_traits>
 #include <utility>
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class T, unsigned Size>
+inline bool Foam::FixedList<T, Size>::uniform() const
+{
+    if (Size > 1)
+    {
+        const T& val = first();
+
+        for (unsigned i=1; i<Size; ++i)
+        {
+            if (val != (*this)[i])
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, unsigned Size>
@@ -43,31 +67,41 @@ inline Foam::FixedList<T, Size>::FixedList(const T& val)
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const T lst[Size])
+inline Foam::FixedList<T, Size>::FixedList(const zero)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst[i];
+        v_[i] = Zero;
     }
 }
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
+inline Foam::FixedList<T, Size>::FixedList(const T list[Size])
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst.v_[i];
+        v_[i] = list[i];
     }
 }
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(FixedList<T, Size>&& lst)
+inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& list)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = std::move(lst.v_[i]);
+        v_[i] = list.v_[i];
+    }
+}
+
+
+template<class T, unsigned Size>
+inline Foam::FixedList<T, Size>::FixedList(FixedList<T, Size>&& list)
+{
+    for (unsigned i=0; i<Size; ++i)
+    {
+        v_[i] = std::move(list.v_[i]);
     }
 }
 
@@ -92,11 +126,11 @@ inline Foam::FixedList<T, Size>::FixedList
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(std::initializer_list<T> lst)
+inline Foam::FixedList<T, Size>::FixedList(std::initializer_list<T> list)
 {
-    checkSize(lst.size());
+    checkSize(list.size());
 
-    auto iter = lst.begin();
+    auto iter = list.begin();
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = *iter;
@@ -106,23 +140,23 @@ inline Foam::FixedList<T, Size>::FixedList(std::initializer_list<T> lst)
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const UList<T>& lst)
+inline Foam::FixedList<T, Size>::FixedList(const UList<T>& list)
 {
-    checkSize(lst.size());
+    checkSize(list.size());
 
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst[i];
+        v_[i] = list[i];
     }
 }
 
 
 template<class T, unsigned Size>
-inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
+inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& list)
 {
-    checkSize(lst.size());
+    checkSize(list.size());
 
-    auto iter = lst.begin();
+    auto iter = list.begin();
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = *iter;
@@ -256,21 +290,21 @@ inline void Foam::FixedList<T, Size>::setSize(const label n)
 
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& lst)
+inline void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& list)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        Foam::Swap(v_[i], lst.v_[i]);
+        Foam::Swap(v_[i], list.v_[i]);
     }
 }
 
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::transfer(FixedList<T, Size>& lst)
+inline void Foam::FixedList<T, Size>::transfer(FixedList<T, Size>& list)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = std::move(lst[i]);
+        v_[i] = std::move(list[i]);
     }
 }
 
@@ -342,31 +376,31 @@ inline const T& Foam::FixedList<T, Size>::operator[](const label i) const
 
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(const T lst[Size])
+inline void Foam::FixedList<T, Size>::operator=(const T list[Size])
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst[i];
+        v_[i] = list[i];
     }
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(const UList<T>& lst)
+inline void Foam::FixedList<T, Size>::operator=(const UList<T>& list)
 {
-    checkSize(lst.size());
+    checkSize(list.size());
 
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst[i];
+        v_[i] = list[i];
     }
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& lst)
+inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& list)
 {
-    checkSize(lst.size());
+    checkSize(list.size());
 
-    typename SLList<T>::const_iterator iter = lst.begin();
+    auto iter = list.begin();
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = *iter;
@@ -375,11 +409,11 @@ inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& lst)
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(std::initializer_list<T> lst)
+inline void Foam::FixedList<T, Size>::operator=(std::initializer_list<T> list)
 {
-    checkSize(lst.size());
+    checkSize(list.size());
 
-    auto iter = lst.begin();
+    auto iter = list.begin();
     for (unsigned i=0; i<Size; ++i)
     {
         v_[i] = *iter;
@@ -397,22 +431,22 @@ inline void Foam::FixedList<T, Size>::operator=(const T& val)
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(const FixedList<T, Size>& lst)
+inline void Foam::FixedList<T, Size>::operator=(const FixedList<T, Size>& list)
 {
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = lst.v_[i];
+        v_[i] = list.v_[i];
     }
 }
 
 template<class T, unsigned Size>
-inline void Foam::FixedList<T, Size>::operator=(FixedList<T, Size>&& lst)
+inline void Foam::FixedList<T, Size>::operator=(FixedList<T, Size>&& list)
 {
     // No significant speedup observed for copy assignment on simple types,
     // use move assignment for generality with more complex types
     for (unsigned i=0; i<Size; ++i)
     {
-        v_[i] = std::move(lst.v_[i]);
+        v_[i] = std::move(list.v_[i]);
     }
 }
 
@@ -540,14 +574,14 @@ template<class T, unsigned Size>
 template<class HashT>
 inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
-    const FixedList<T, Size>& lst,
+    const FixedList<T, Size>& list,
     unsigned seed
 ) const
 {
     if (contiguous<T>())
     {
         // Hash directly
-        return Hasher(lst.v_, sizeof(lst.v_), seed);
+        return Hasher(list.v_, sizeof(list.v_), seed);
     }
 
     // Hash incrementally
@@ -555,7 +589,7 @@ inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
 
     for (unsigned i=0; i<Size; ++i)
     {
-        val = HashT()(lst[i], val);
+        val = HashT()(list[i], val);
     }
 
     return val;

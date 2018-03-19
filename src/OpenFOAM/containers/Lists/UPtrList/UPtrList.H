@@ -56,7 +56,7 @@ namespace Foam
 template<class T> class PtrList;
 template<class T> class UPtrList;
 
-template<class T> Ostream& operator<<(Ostream& os, const UPtrList<T>& lst);
+template<class T> Ostream& operator<<(Ostream& os, const UPtrList<T>& list);
 
 
 /*---------------------------------------------------------------------------*\
@@ -96,7 +96,7 @@ public:
     // Constructors
 
         //- Construct null
-        UPtrList() = default;
+        inline constexpr UPtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
         explicit inline UPtrList(const label len);
@@ -104,19 +104,19 @@ public:
         //- Construct from PtrList, copying addresses of each list element.
         //  The argument is non-const access since this UPtrList can be used
         //  to change its values.
-        explicit inline UPtrList(PtrList<T>& lst);
+        explicit inline UPtrList(PtrList<T>& list);
 
         //- Construct from UList, taking addresses of each list element
-        explicit UPtrList(UList<T>& lst);
+        explicit UPtrList(UList<T>& list);
 
         //- Construct as copy or re-use as specified
-        inline UPtrList(UPtrList<T>& lst, bool reuse);
+        inline UPtrList(UPtrList<T>& list, bool reuse);
 
         //- Copy construct
-        inline UPtrList(const UPtrList<T>& lst) = default;
+        inline UPtrList(const UPtrList<T>& list) = default;
 
         //- Move construct
-        inline UPtrList(UPtrList<T>&& lst);
+        inline UPtrList(UPtrList<T>&& list);
 
 
     // Member functions
@@ -149,20 +149,20 @@ public:
 
         //- Reset size of UPtrList.
         //  New entries are initialized to nullptr.
-        inline void setSize(const label newLen);
+        inline void resize(const label newLen);
 
         //- Reset size of UPtrList.
         //  New entries are initialized to nullptr.
-        inline void resize(const label newLen);
+        inline void setSize(const label newLen);
 
         //- Append an element to the end of the list
         inline void append(T* ptr);
 
         //- Swap content
-        inline void swap(UPtrList<T>& lst);
+        inline void swap(UPtrList<T>& list);
 
         //- Transfer contents into this list and annul the argument
-        inline void transfer(UPtrList<T>& lst);
+        inline void transfer(UPtrList<T>& list);
 
         //- Return true if element is set (ie, not a nullptr)
         inline bool set(const label i) const;
@@ -187,10 +187,10 @@ public:
         inline const T* operator()(const label i) const;
 
         //- Copy assignment
-        UPtrList<T>& operator=(const UPtrList<T>& lst) = default;
+        UPtrList<T>& operator=(const UPtrList<T>& list) = default;
 
         //- Move assignment
-        inline void operator=(UPtrList<T>&& lst);
+        inline void operator=(UPtrList<T>&& list);
 
 
     // Iterators
@@ -319,7 +319,7 @@ public:
     // IOstream operator
 
         //- Write UPtrList to Ostream
-        friend Ostream& operator<< <T>(Ostream& os, const UPtrList<T>& lst);
+        friend Ostream& operator<< <T>(Ostream& os, const UPtrList<T>& list);
 
 };
 

@@ -29,6 +29,13 @@ License
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
+inline constexpr Foam::PtrList<T>::PtrList() noexcept
+:
+    UPtrList<T>()
+{}
+
+
+template<class T>
 inline Foam::PtrList<T>::PtrList(const label nElem)
 :
     UPtrList<T>(nElem)
@@ -36,18 +43,18 @@ inline Foam::PtrList<T>::PtrList(const label nElem)
 
 
 template<class T>
-inline Foam::PtrList<T>::PtrList(PtrList<T>&& lst)
+inline Foam::PtrList<T>::PtrList(PtrList<T>&& list)
 :
-    UPtrList<T>(std::move(lst))
+    UPtrList<T>(std::move(list))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::PtrList<T>::resize(const label newLen)
+inline void Foam::PtrList<T>::setSize(const label newLen)
 {
-    this->setSize(newLen);
+    this->resize(newLen);
 }
 
 
@@ -68,16 +75,14 @@ inline void Foam::PtrList<T>::append(const tmp<T>& tptr)
 template<class T>
 inline bool Foam::PtrList<T>::set(const label i) const
 {
-    return this->ptrs_[i] != nullptr;
+    return UPtrList<T>::set(i);
 }
 
 
 template<class T>
 inline Foam::autoPtr<T> Foam::PtrList<T>::set(const label i, T* ptr)
 {
-    autoPtr<T> old(this->ptrs_[i]);
-    this->ptrs_[i] = ptr;
-    return old;
+    return autoPtr<T>(UPtrList<T>::set(i, ptr));
 }
 
 
@@ -104,20 +109,19 @@ inline Foam::autoPtr<T> Foam::PtrList<T>::set
 
 
 template<class T>
-inline void Foam::PtrList<T>::transfer(PtrList<T>& lst)
+inline void Foam::PtrList<T>::transfer(PtrList<T>& list)
 {
     this->clear();
-    UPtrList<T>::swap(lst);
+    UPtrList<T>::transfer(list);
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::PtrList<T>::operator=(PtrList<T>&& lst)
+inline void Foam::PtrList<T>::operator=(PtrList<T>&& list)
 {
-    this->clear();
-    this->swap(lst);
+    this->transfer(list);
 }
 
 

@@ -28,7 +28,10 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-inline Foam::SortableList<T>::SortableList()
+inline constexpr Foam::SortableList<T>::SortableList() noexcept
+:
+    List<T>(),
+    indices_()
 {}
 
 

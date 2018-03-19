@@ -26,6 +26,13 @@ License
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
+inline constexpr Foam::UPtrList<T>::UPtrList() noexcept
+:
+    ptrs_()
+{}
+
+
+template<class T>
 inline Foam::UPtrList<T>::UPtrList(const label len)
 :
     ptrs_(len, reinterpret_cast<T*>(0))
@@ -33,23 +40,23 @@ inline Foam::UPtrList<T>::UPtrList(const label len)
 
 
 template<class T>
-inline Foam::UPtrList<T>::UPtrList(PtrList<T>& lst)
+inline Foam::UPtrList<T>::UPtrList(PtrList<T>& list)
 :
-    ptrs_(lst.ptrs_)
+    ptrs_(list.ptrs_)
 {}
 
 
 template<class T>
-inline Foam::UPtrList<T>::UPtrList(UPtrList<T>&& lst)
+inline Foam::UPtrList<T>::UPtrList(UPtrList<T>&& list)
 :
-    ptrs_(std::move(lst.ptrs_))
+    ptrs_(std::move(list.ptrs_))
 {}
 
 
 template<class T>
-inline Foam::UPtrList<T>::UPtrList(UPtrList<T>& lst, bool reuse)
+inline Foam::UPtrList<T>::UPtrList(UPtrList<T>& list, bool reuse)
 :
-    ptrs_(lst.ptrs_, reuse)
+    ptrs_(list.ptrs_, reuse)
 {}
 
 
@@ -77,16 +84,16 @@ inline void Foam::UPtrList<T>::clear()
 
 
 template<class T>
-inline void Foam::UPtrList<T>::swap(UPtrList<T>& lst)
+inline void Foam::UPtrList<T>::swap(UPtrList<T>& list)
 {
-    ptrs_.swap(lst.ptrs_);
+    ptrs_.swap(list.ptrs_);
 }
 
 
 template<class T>
-inline void Foam::UPtrList<T>::transfer(UPtrList<T>& lst)
+inline void Foam::UPtrList<T>::transfer(UPtrList<T>& list)
 {
-    ptrs_.transfer(lst.ptrs_);
+    ptrs_.transfer(list.ptrs_);
 }
 
 
@@ -119,7 +126,7 @@ inline const T& Foam::UPtrList<T>::last() const
 
 
 template<class T>
-inline void Foam::UPtrList<T>::setSize(const label newLen)
+inline void Foam::UPtrList<T>::resize(const label newLen)
 {
     if (newLen <= 0)
     {
@@ -131,15 +138,15 @@ inline void Foam::UPtrList<T>::setSize(const label newLen)
     if (newLen != oldLen)
     {
         // Truncate or extend. Any new elements are initialized to nullptr.
-        ptrs_.setSize(newLen, reinterpret_cast<T*>(0));
+        ptrs_.resize(newLen, reinterpret_cast<T*>(0));
     }
 }
 
 
 template<class T>
-inline void Foam::UPtrList<T>::resize(const label nElem)
+inline void Foam::UPtrList<T>::setSize(const label newLen)
 {
-    this->setSize(nElem);
+    this->resize(newLen);
 }
 
 
@@ -147,7 +154,7 @@ template<class T>
 inline void Foam::UPtrList<T>::append(T* ptr)
 {
     const label idx = this->size();
-    ptrs_.setSize(idx + 1);
+    ptrs_.resize(idx + 1);
     ptrs_[idx] = ptr;
 }
 
@@ -590,10 +597,9 @@ Foam::UPtrList<T>::end() const
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-inline void Foam::UPtrList<T>::operator=(UPtrList<T>&& lst)
+inline void Foam::UPtrList<T>::operator=(UPtrList<T>&& list)
 {
-    this->clear();
-    this->swap(lst);
+    this->transfer(list);
 }
 
 

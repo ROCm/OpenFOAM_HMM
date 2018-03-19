@@ -54,10 +54,10 @@ inline void Foam::DynamicField<T, SizeMin>::assignDynField
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::DynamicField<T, SizeMin>::DynamicField()
+inline constexpr Foam::DynamicField<T, SizeMin>::DynamicField() noexcept
 :
     Field<T>(),
-    capacity_(Field<T>::size())
+    capacity_(0)
 {}
 
 

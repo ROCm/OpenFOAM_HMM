@@ -60,7 +60,7 @@ public:
     // Constructors
 
         //- Construct null initializing count to 0
-        refCount()
+        constexpr refCount() noexcept
         :
             count_(0)
         {}
@@ -69,13 +69,13 @@ public:
     // Member Functions
 
         //- Return the current reference count
-        int count() const
+        int count() const noexcept
         {
             return count_;
         }
 
         //- Return true if the reference count is zero
-        bool unique() const
+        bool unique() const noexcept
         {
             return !count_;
         }

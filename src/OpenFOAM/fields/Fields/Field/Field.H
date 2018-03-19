@@ -31,6 +31,7 @@ SourceFiles
     FieldFunctions.H
     FieldFunctionsM.H
     FieldMapper.H
+    FieldI.H
     FieldM.H
     Field.C
     FieldFunctions.C
@@ -103,36 +104,36 @@ public:
 
         //- Construct null
         //  For temporary fields that are initialised after construction
-        Field();
+        inline constexpr Field() noexcept;
 
         //- Construct given size
         //  For temporary fields that are initialised after construction
-        explicit Field(const label len);
+        inline explicit Field(const label len);
 
         //- Construct given size and initial value
-        Field(const label len, const Type& val);
+        inline Field(const label len, const Type& val);
 
         //- Construct given size and initial values of zero
-        Field(const label len, const zero);
+        inline Field(const label len, const zero);
 
         //- Copy construct
-        Field(const Field<Type>& fld);
+        inline Field(const Field<Type>& fld);
 
         //- Copy construct from UList\<Type\>
-        explicit Field(const UList<Type>& list);
+        inline explicit Field(const UList<Type>& list);
 
         //- Copy construct from UIndirectList\<Type\>
-        explicit Field(const UIndirectList<Type>& list);
+        inline explicit Field(const UIndirectList<Type>& list);
 
         //- Move construct from Field
-        Field(Field<Type>&& fld);
+        inline Field(Field<Type>&& fld);
 
         //- Move construct from List
-        Field(List<Type>&& list);
+        inline Field(List<Type>&& list);
 
         //- Move construct from DynamicList
         template<int SizeMin>
-        Field(DynamicList<Type, SizeMin>&& list);
+        inline Field(DynamicList<Type, SizeMin>&& list);
 
         //- Construct by 1 to 1 mapping from the given field
         Field
@@ -219,21 +220,21 @@ public:
         );
 
         //- Copy construct or re-use as specified.
-        Field(Field<Type>& fld, bool reuse);
+        inline Field(Field<Type>& fld, bool reuse);
 
         //- Copy or move construct from tmp
         #ifndef NoConstructFromTmp
-        Field(const tmp<Field<Type>>& tfld);
+        inline Field(const tmp<Field<Type>>& tfld);
         #endif
 
         //- Construct from Istream
-        Field(Istream& is);
+        inline Field(Istream& is);
 
         //- Construct from a dictionary entry
         Field(const word& keyword, const dictionary& dict, const label len);
 
         //- Clone
-        tmp<Field<Type>> clone() const;
+        inline tmp<Field<Type>> clone() const;
 
         //- Return a pointer to a new calculatedFvPatchFieldField created on
         //  freestore without setting patchField values
@@ -358,21 +359,21 @@ public:
 
         //- Copy assignment
         void operator=(const Field<Type>&);
-        void operator=(const UList<Type>&);
-        void operator=(const SubField<Type>&);
         void operator=(const tmp<Field<Type>>&);
+        inline void operator=(const UList<Type>&);
+        inline void operator=(const SubField<Type>&);
 
         //- Move assignment
-        void operator=(Field<Type>&& rhs);
-        void operator=(List<Type>&& rhs);
+        inline void operator=(Field<Type>&& rhs);
+        inline void operator=(List<Type>&& rhs);
 
         template<int SizeMin>
-        void operator=(DynamicList<Type, SizeMin>&& rhs);
+        inline void operator=(DynamicList<Type, SizeMin>&& rhs);
 
 
         //- Value assignment
-        void operator=(const Type&);
-        void operator=(const zero);
+        inline void operator=(const Type& val);
+        inline void operator=(const zero);
 
         template<class Form, class Cmpt, direction nCmpt>
         void operator=(const VectorSpace<Form,Cmpt,nCmpt>&);
@@ -412,6 +413,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "FieldI.H"
 #include "FieldFunctions.H"
 
 #ifdef NoRepository

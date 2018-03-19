@@ -56,7 +56,7 @@ inline void Foam::DynamicList<T, SizeMin>::assignDynList
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, int SizeMin>
-inline Foam::DynamicList<T, SizeMin>::DynamicList()
+inline constexpr Foam::DynamicList<T, SizeMin>::DynamicList() noexcept
 :
     capacity_(0)
 {}

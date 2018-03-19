@@ -1,0 +1,190 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2018 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM.  If not, see <http://www.gnu.org/licenses/>.
+
+\*---------------------------------------------------------------------------*/
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+inline constexpr Foam::Field<Type>::Field() noexcept
+:
+    List<Type>()
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const label len)
+:
+    List<Type>(len)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const label len, const Type& val)
+:
+    List<Type>(len, val)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const label len, const zero)
+:
+    List<Type>(len, Zero)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const Field<Type>& fld)
+:
+    List<Type>(fld)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const UList<Type>& list)
+:
+    List<Type>(list)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(const UIndirectList<Type>& list)
+:
+    List<Type>(list)
+{}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(Field<Type>&& fld)
+:
+    List<Type>()
+{
+    List<Type>::transfer(fld);
+}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(List<Type>&& list)
+:
+    List<Type>()
+{
+    List<Type>::transfer(list);
+}
+
+
+template<class Type>
+template<int SizeMin>
+inline Foam::Field<Type>::Field(DynamicList<Type, SizeMin>&& list)
+:
+    List<Type>()
+{
+    List<Type>::transfer(list);
+}
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(Field<Type>& fld, bool reuse)
+:
+    List<Type>(fld, reuse)
+{}
+
+
+#ifndef NoConstructFromTmp
+template<class Type>
+inline Foam::Field<Type>::Field(const tmp<Field<Type>>& tfld)
+:
+    List<Type>(tfld.constCast(), tfld.movable())
+{
+    tfld.clear();
+}
+#endif
+
+
+template<class Type>
+inline Foam::Field<Type>::Field(Istream& is)
+:
+    List<Type>(is)
+{}
+
+
+template<class Type>
+inline Foam::tmp<Foam::Field<Type>> Foam::Field<Type>::clone() const
+{
+    return tmp<Field<Type>>::New(*this);
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+template<class Type>
+inline void Foam::Field<Type>::operator=(const UList<Type>& rhs)
+{
+    List<Type>::operator=(rhs);
+}
+
+
+template<class Type>
+inline void Foam::Field<Type>::operator=(const SubField<Type>& rhs)
+{
+    List<Type>::operator=(rhs);
+}
+
+
+template<class Type>
+inline void Foam::Field<Type>::operator=(Field<Type>&& rhs)
+{
+    List<Type>::transfer(rhs);
+}
+
+
+template<class Type>
+inline void Foam::Field<Type>::operator=(List<Type>&& rhs)
+{
+    List<Type>::transfer(rhs);
+}
+
+
+template<class Type>
+template<int SizeMin>
+inline void Foam::Field<Type>::operator=(DynamicList<Type, SizeMin>&& rhs)
+{
+    List<Type>::transfer(rhs);
+}
+
+
+template<class Type>
+inline void Foam::Field<Type>::operator=(const Type& val)
+{
+    List<Type>::operator=(val);
+}
+
+
+template<class Type>
+inline void Foam::Field<Type>::operator=(const zero)
+{
+    List<Type>::operator=(Zero);
+}
+
+
+
+// ************************************************************************* //

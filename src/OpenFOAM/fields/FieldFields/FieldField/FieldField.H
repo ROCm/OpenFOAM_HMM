@@ -46,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-// Forward declaration of friend functions and operators
+// Forward declarations
 
 template<template<class> class Field, class Type>
 class FieldField;
@@ -87,7 +87,7 @@ public:
 
         //- Construct null
         //  Used for temporary fields which are initialised after construction
-        FieldField();
+        constexpr FieldField() noexcept;
 
         //- Construct given size
         //  Used for temporary fields which are initialised after construction

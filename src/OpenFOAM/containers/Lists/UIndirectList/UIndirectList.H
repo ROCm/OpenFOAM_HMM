@@ -68,6 +68,15 @@ class UIndirectList
         UList<T>& values_;
         const labelUList& addressing_;
 
+protected:
+
+    // Protected Member Functions
+
+        //- True if there are two or more entries and all entries have
+        //  identical values.
+        inline bool uniform() const;
+
+
 public:
 
     // STL type definitions

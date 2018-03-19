@@ -105,7 +105,7 @@ void checkFields
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<template<class> class Field, class Type>
-FieldField<Field, Type>::FieldField()
+constexpr FieldField<Field, Type>::FieldField() noexcept
 :
     PtrList<Field<Type>>()
 {}

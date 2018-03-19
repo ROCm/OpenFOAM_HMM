@@ -65,7 +65,7 @@ public:
     // Constructors
 
         //- Null constructor, sort later (eg, after assignment or transfer)
-        inline SortableList();
+        inline constexpr SortableList() noexcept;
 
         //- Construct given size, sort later.
         //  The indices remain empty until the list is sorted

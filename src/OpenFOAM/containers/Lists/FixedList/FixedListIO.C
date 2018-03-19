@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2016 OpenFOAM Foundation
-     \\/     M anipulation  | Copyright (C) 2017 OpenCFD Ltd.
+     \\/     M anipulation  | Copyright (C) 2017-2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -67,35 +67,16 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
     const label shortListLen
 ) const
 {
-    const FixedList<T, Size>& lst = *this;
+    const FixedList<T, Size>& list = *this;
 
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (Size > 1 && contiguous<T>());
-        if (uniform)
+        if (contiguous<T>() && list.uniform())
         {
-            for (unsigned i=0; i<Size; ++i)
-            {
-                if (lst[i] != lst[0])
-                {
-                    uniform = false;
-                    break;
-                }
-            }
-        }
+            // Two or more entries, and all entries have identical values.
 
-        if (uniform)
-        {
-            // Write size (so it is valid dictionary entry) and start delimiter
-            os << Size << token::BEGIN_BLOCK;
-
-            // Contents
-            os << lst[0];
-
-            // End delimiter
-            os << token::END_BLOCK;
+            os << Size << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
         else if
         (
@@ -110,7 +91,7 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
             for (unsigned i=0; i<Size; ++i)
             {
                 if (i) os << token::SPACE;
-                os << lst[i];
+                os << list[i];
             }
 
             // End delimiter
@@ -124,7 +105,7 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
             // Contents
             for (unsigned i=0; i<Size; ++i)
             {
-                os << lst[i] << nl;
+                os << list[i] << nl;
             }
 
             // End delimiter
@@ -136,7 +117,7 @@ Foam::Ostream& Foam::FixedList<T, Size>::writeList
         // Binary, contiguous
 
         // write(...) includes surrounding start/end delimiters
-        os.write(reinterpret_cast<const char*>(lst.cdata()), Size*sizeof(T));
+        os.write(reinterpret_cast<const char*>(list.cdata()), Size*sizeof(T));
     }
 
     os.check(FUNCTION_NAME);
@@ -154,7 +135,7 @@ Foam::FixedList<T, Size>::FixedList(Istream& is)
 
 
 template<class T, unsigned Size>
-Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
+Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& list)
 {
     is.fatalCheck(FUNCTION_NAME);
 
@@ -169,7 +150,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
 
         if (firstToken.isCompound())
         {
-            lst = dynamicCast<token::Compound<List<T>>>
+            list = dynamicCast<token::Compound<List<T>>>
             (
                 firstToken.transferCompoundToken(is)
             );
@@ -179,7 +160,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
             const label len = firstToken.labelToken();
 
             // List lengths must match
-            lst.checkSize(len);
+            list.checkSize(len);
         }
         else if (!firstToken.isPunctuation())
         {
@@ -202,7 +183,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
         {
             for (unsigned i=0; i<Size; ++i)
             {
-                is >> lst[i];
+                is >> list[i];
 
                 is.fatalCheck
                 (
@@ -224,7 +205,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
 
             for (unsigned i=0; i<Size; ++i)
             {
-                lst[i] = element;  // Copy the value
+                list[i] = element;  // Copy the value
             }
         }
 
@@ -235,7 +216,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
     {
         // Binary and contiguous
 
-        is.read(reinterpret_cast<char*>(lst.data()), Size*sizeof(T));
+        is.read(reinterpret_cast<char*>(list.data()), Size*sizeof(T));
 
         is.fatalCheck
         (
@@ -249,9 +230,9 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& lst)
 
 
 template<class T, unsigned Size>
-Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& lst)
+Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& list)
 {
-    return lst.writeList(os, 10);
+    return list.writeList(os, 10);
 }
 
 

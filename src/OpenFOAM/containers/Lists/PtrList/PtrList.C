@@ -29,38 +29,38 @@ License
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
 template<class T>
-Foam::PtrList<T>::PtrList(const PtrList<T>& lst)
+Foam::PtrList<T>::PtrList(const PtrList<T>& list)
 :
-    UPtrList<T>(lst.size())
+    UPtrList<T>(list.size())
 {
     const label len = this->size();
 
     for (label i=0; i<len; ++i)
     {
-        this->ptrs_[i] = (lst[i]).clone().ptr();
+        this->ptrs_[i] = (list[i]).clone().ptr();
     }
 }
 
 
 template<class T>
 template<class CloneArg>
-Foam::PtrList<T>::PtrList(const PtrList<T>& lst, const CloneArg& cloneArg)
+Foam::PtrList<T>::PtrList(const PtrList<T>& list, const CloneArg& cloneArg)
 :
-    UPtrList<T>(lst.size())
+    UPtrList<T>(list.size())
 {
     const label len = this->size();
 
     for (label i=0; i<len; ++i)
     {
-        this->ptrs_[i] = (lst[i]).clone(cloneArg).ptr();
+        this->ptrs_[i] = (list[i]).clone(cloneArg).ptr();
     }
 }
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(PtrList<T>& lst, bool reuse)
+Foam::PtrList<T>::PtrList(PtrList<T>& list, bool reuse)
 :
-    UPtrList<T>(lst, reuse)
+    UPtrList<T>(list, reuse)
 {
     if (!reuse)
     {
@@ -68,21 +68,21 @@ Foam::PtrList<T>::PtrList(PtrList<T>& lst, bool reuse)
 
         for (label i=0; i<len; ++i)
         {
-            this->ptrs_[i] = (lst[i]).clone().ptr();
+            this->ptrs_[i] = (list[i]).clone().ptr();
         }
     }
 }
 
 
 template<class T>
-Foam::PtrList<T>::PtrList(const SLPtrList<T>& lst)
+Foam::PtrList<T>::PtrList(const SLPtrList<T>& list)
 :
-    UPtrList<T>(lst.size())
+    UPtrList<T>(list.size())
 {
-    if (lst.size())
+    if (list.size())
     {
         label i = 0;
-        for (auto iter = lst.cbegin(); iter != lst.cend(); ++iter)
+        for (auto iter = list.cbegin(); iter != list.cend(); ++iter)
         {
             this->ptrs_[i++] = (*iter).clone().ptr();
         }
@@ -128,7 +128,7 @@ void Foam::PtrList<T>::clear()
 
 
 template<class T>
-void Foam::PtrList<T>::setSize(const label newLen)
+void Foam::PtrList<T>::resize(const label newLen)
 {
     if (newLen <= 0)
     {
@@ -150,7 +150,7 @@ void Foam::PtrList<T>::setSize(const label newLen)
         }
 
         // Any new elements are initialized to nullptr.
-        this->ptrs_.setSize(newLen, reinterpret_cast<T*>(0));
+        this->ptrs_.resize(newLen, reinterpret_cast<T*>(0));
     }
 }
 
@@ -158,9 +158,9 @@ void Foam::PtrList<T>::setSize(const label newLen)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class T>
-void Foam::PtrList<T>::operator=(const PtrList<T>& lst)
+void Foam::PtrList<T>::operator=(const PtrList<T>& list)
 {
-    if (this == &lst)
+    if (this == &list)
     {
         FatalErrorInFunction
             << "attempted assignment to self for type " << typeid(T).name()
@@ -168,17 +168,17 @@ void Foam::PtrList<T>::operator=(const PtrList<T>& lst)
     }
 
     const label oldLen = this->size();
-    const label newLen = lst.size();
+    const label newLen = list.size();
 
     // Truncate (frees old pointers) or extend the length
-    setSize(newLen);
+    resize(newLen);
 
     if (newLen < oldLen)
     {
         // Copy values for existing entries
         for (label i=0; i<newLen; ++i)
         {
-            (*this)[i] = lst[i];
+            (*this)[i] = list[i];
         }
     }
     else
@@ -186,13 +186,13 @@ void Foam::PtrList<T>::operator=(const PtrList<T>& lst)
         // Copy values for existing entries
         for (label i=0; i<oldLen; ++i)
         {
-            (*this)[i] = lst[i];
+            (*this)[i] = list[i];
         }
 
         // Clone pointers for new entries
         for (label i=oldLen; i<newLen; ++i)
         {
-            this->ptrs_[i] = (lst[i]).clone().ptr();
+            this->ptrs_[i] = (list[i]).clone().ptr();
         }
     }
 }

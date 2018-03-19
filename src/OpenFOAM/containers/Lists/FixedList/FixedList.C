@@ -37,11 +37,11 @@ Foam::label Foam::FixedList<T, Size>::find
 {
     if (start >= 0)
     {
-        List_CONST_ACCESS(T, *this, lst);
+        List_CONST_ACCESS(T, *this, list);
 
         for (label i = start; i < label(Size); ++i)
         {
-            if (lst[i] == val)
+            if (list[i] == val)
             {
                 return i;
             }

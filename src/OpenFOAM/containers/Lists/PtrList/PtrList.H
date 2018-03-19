@@ -83,26 +83,26 @@ public:
     // Constructors
 
         //- Construct null
-        PtrList() = default;
+        inline constexpr PtrList() noexcept;
 
         //- Construct with specified size, each element initialized to nullptr
         explicit inline PtrList(const label nElem);
 
         //- Copy construct using 'clone()' method on each element
-        PtrList(const PtrList<T>& lst);
+        PtrList(const PtrList<T>& list);
 
         //- Move construct
-        inline PtrList(PtrList<T>&& lst);
+        inline PtrList(PtrList<T>&& list);
 
         //- Copy construct with additional argument for 'clone()'
         template<class CloneArg>
-        PtrList(const PtrList<T>& lst, const CloneArg& cloneArg);
+        PtrList(const PtrList<T>& list, const CloneArg& cloneArg);
 
         //- Construct as copy or re-use as specified
-        PtrList(PtrList<T>& lst, bool reuse);
+        PtrList(PtrList<T>& list, bool reuse);
 
         //- Construct as copy of SLPtrList<T>
-        explicit PtrList(const SLPtrList<T>& lst);
+        explicit PtrList(const SLPtrList<T>& list);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
@@ -123,11 +123,11 @@ public:
 
         //- Reset size of PtrList.
         //  New entries are initialized to nullptr, removed entries are deleted
-        void setSize(const label newLen);
+        void resize(const label newLen);
 
         //- Reset size of PtrList.
         //  New entries are initialized to nullptr, removed entries are deleted
-        inline void resize(const label newLen);
+        inline void setSize(const label newLen);
 
         //- Append an element at the end of the list
         using UPtrList<T>::append;
@@ -139,7 +139,7 @@ public:
         inline void append(const tmp<T>& tptr);
 
         //- Transfer into this list and annul the argument list
-        inline void transfer(PtrList<T>& lst);
+        inline void transfer(PtrList<T>& list);
 
         //- Return true if element is set (ie, not a nullptr)
         inline bool set(const label i) const;
@@ -159,16 +159,16 @@ public:
         //- Copy assignment.
         //  For existing list entries, values are copied from the list.
         //  For new list entries, pointers are cloned from the list.
-        void operator=(const PtrList<T>& lst);
+        void operator=(const PtrList<T>& list);
 
         //- Move assignment
-        inline void operator=(PtrList<T>&& lst);
+        inline void operator=(PtrList<T>&& list);
 
 
     // IOstream operator
 
         //- Read PtrList from Istream, discarding contents of existing PtrList
-        friend Istream& operator>> <T>(Istream& is, PtrList<T>& lst);
+        friend Istream& operator>> <T>(Istream& is, PtrList<T>& list);
 
 };
 

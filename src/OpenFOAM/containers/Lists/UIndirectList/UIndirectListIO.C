@@ -37,37 +37,17 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
     const label shortListLen
 ) const
 {
-    const UIndirectList<T>& L = *this;
+    const UIndirectList<T>& list = *this;
 
-    const label len = L.size();
+    const label len = list.size();
 
     // Write list contents depending on data format
     if (os.format() == IOstream::ASCII || !contiguous<T>())
     {
-        // Can the contents be considered 'uniform' (ie, identical)?
-        bool uniform = (len > 1 && contiguous<T>());
-        if (uniform)
+        if (contiguous<T>() && list.uniform())
         {
-            for (label i=1; i < len; ++i)
-            {
-                if (L[i] != L[0])
-                {
-                    uniform = false;
-                    break;
-                }
-            }
-        }
-
-        if (uniform)
-        {
-            // Size and start delimiter
-            os << len << token::BEGIN_BLOCK;
-
-            // Contents
-            os << L[0];
-
-            // End delimiter
-            os << token::END_BLOCK;
+            // Two or more entries, and all entries have identical values.
+            os << len << token::BEGIN_BLOCK << list[0] << token::END_BLOCK;
         }
         else if
         (
@@ -82,7 +62,7 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
             for (label i=0; i < len; ++i)
             {
                 if (i) os << token::SPACE;
-                os << L[i];
+                os << list[i];
             }
 
             // End delimiter
@@ -96,7 +76,7 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
             // Contents
             for (label i=0; i < len; ++i)
             {
-                os << L[i] << nl;
+                os << list[i] << nl;
             }
 
             // End delimiter
@@ -119,7 +99,7 @@ Foam::Ostream& Foam::UIndirectList<T>::writeList
             {
                 os.writeRaw
                 (
-                    reinterpret_cast<const char*>(&(L[i])),
+                    reinterpret_cast<const char*>(&(list[i])),
                     sizeof(T)
                 );
             }
