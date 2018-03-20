@@ -47,15 +47,18 @@ const char* Foam::distributionModels::binned::header =
 void Foam::distributionModels::binned::initialise()
 {
     const label nSample(xy_.size());
-    forAll(xy_, bini)
-    {
-        xy_[bini][1] /= scalar(nSample);
-    }
 
     // Convert values to integral values
     for (label bini = 1; bini < nSample; ++bini)
     {
         xy_[bini][1] += xy_[bini - 1][1];
+    }
+
+    // Normalise
+    scalar sumProb = xy_.last()[1];
+    forAll(xy_, bini)
+    {
+        xy_[bini][1] /= sumProb;
     }
 
     // Calculate the mean value
@@ -188,16 +191,7 @@ Foam::scalar Foam::distributionModels::binned::sample() const
     {
         if (xy_[i][1] > y)
         {
-            scalar d1 = y - xy_[i][1];
-            scalar d2 = xy_[i+1][1] - y;
-            if (d1 < d2)
-            {
-                return xy_[i][0];
-            }
-            else
-            {
-                return xy_[i+1][0];
-            }
+            return xy_[i][0];
         }
     }
 
