@@ -4,6 +4,7 @@
 #include "zeroGradientFvPatchFields.H"
 #include "syncTools.H"
 #include "tetPointRef.H"
+#include "regionSplit.H"
 
 using namespace Foam;
 
@@ -424,6 +425,32 @@ void Foam::writeFields
         minTetVolume.write();
     }
 
+    if (selectedFields.found("cellRegion"))
+    {
+        volScalarField cellRegion
+        (
+            IOobject
+            (
+                "cellRegion",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("cellRegion", dimless, 0),
+            calculatedFvPatchScalarField::typeName
+        );
+
+        regionSplit rs(mesh);
+        forAll(rs, celli)
+        {
+            cellRegion[celli] = rs[celli];
+        }
+        cellRegion.correctBoundaryConditions();
+        Info<< "    Writing cell region to " << cellRegion.name() << endl;
+        cellRegion.write();
+    }
 
     Info<< endl;
 }
