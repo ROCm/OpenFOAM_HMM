@@ -39,10 +39,7 @@ template<class T, int SizeMin>
 Foam::tmp<Foam::DynamicField<T, SizeMin>>
 Foam::DynamicField<T, SizeMin>::clone() const
 {
-    return tmp<DynamicField<T, SizeMin>>
-    (
-        new DynamicField<T, SizeMin>(*this)
-    );
+    return tmp<DynamicField<T, SizeMin>>::New(*this);
 }
 
 
