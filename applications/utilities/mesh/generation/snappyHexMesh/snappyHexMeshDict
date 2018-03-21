@@ -586,6 +586,10 @@ addLayersControls
         //        maxY
         //    );
         //}
+        // Note that e.g. displacementLaplacian needs entries in
+        // fvSchemes, fvSolution. Also specify a minIter > 1 when solving
+        // cellDisplacement since otherwise solution might not be sufficiently
+        // accurate on points.
 
 
     // Medial axis analysis (for use with default displacementMedialAxis)
