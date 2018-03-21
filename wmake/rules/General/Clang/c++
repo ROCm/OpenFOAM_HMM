@@ -1,0 +1,19 @@
+SUFFIXES += .C .cc .cpp .cxx
+
+CC          = clang++ -std=c++11
+
+ptFLAGS     = -DNoRepository -ftemplate-depth-100
+
+# - Standard warnings
+# - Less restrictive warnings (may be needed for flex++, CGAL, etc.)
+
+c++WARN     = \
+    -Wall -Wextra -Wold-style-cast \
+    -Wnon-virtual-dtor -Wno-unused-parameter -Wno-invalid-offsetof \
+    -Wno-undefined-var-template \
+    -Wno-unknown-warning-option
+
+c++LESSWARN = \
+    -Wno-old-style-cast -Wno-unused-local-typedefs \
+    -Wno-tautological-undefined-compare -Wno-shift-negative-value \
+    -Wno-null-pointer-arithmetic

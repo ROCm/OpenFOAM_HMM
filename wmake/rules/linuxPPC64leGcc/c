@@ -1,8 +1,8 @@
 SUFFIXES += .c
 
-cWARN       = -Wall
-
 cc          = gcc -m64 -mcpu=power8
+
+cWARN       = -Wall
 
 include $(DEFAULT_RULES)/c$(WM_COMPILE_OPTION)
 

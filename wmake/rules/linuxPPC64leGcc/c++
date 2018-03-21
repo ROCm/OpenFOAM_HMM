@@ -1,19 +1,8 @@
-SUFFIXES += .C .cc .cpp .cxx
-
-c++WARN     = -Wall -Wextra -Wold-style-cast -Wnon-virtual-dtor -Wno-unused-parameter \
-              -Wno-invalid-offsetof -Wno-attributes \
-              -Wno-unknown-pragmas
-
-# Suppress some warnings (flex++, CGAL, etc)
-c++LESSWARN = \
-    -Wno-old-style-cast -Wno-unused-local-typedefs -Wno-array-bounds \
-    -fpermissive
+include $(GENERAL_RULES)/Gcc/c++
 
 CC          = g++ -std=c++11 -m64 -mcpu=power8
 
 include $(DEFAULT_RULES)/c++$(WM_COMPILE_OPTION)
-
-ptFLAGS     = -DNoRepository -ftemplate-depth-100
 
 c++FLAGS    = $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS) -fPIC
 
