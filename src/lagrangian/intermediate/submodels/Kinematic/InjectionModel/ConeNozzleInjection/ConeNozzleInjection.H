@@ -3,7 +3,7 @@
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
     \\  /    A nd           | Copyright (C) 2011-2017 OpenFOAM Foundation
-     \\/     M anipulation  |
+     \\/     M anipulation  | Copyright (C) 2018 OpenCFD Ltd.
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -65,6 +65,7 @@ SourceFiles
 #define ConeNozzleInjection_H
 
 #include "InjectionModel.H"
+#include "Enum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -90,19 +91,24 @@ class ConeNozzleInjection
 public:
 
     //- Injection method enumeration
-    enum injectionMethod
+    enum class injectionMethod
     {
         imPoint,
-        imDisc
+        imDisc,
+        imMovingPoint
     };
 
+    static const Enum<injectionMethod> injectionMethodNames;
+
     //- Flow type enumeration
-    enum flowType
+    enum class flowType
     {
         ftConstantVelocity,
         ftPressureDrivenVelocity,
         ftFlowRateAndDischarge
     };
+
+    static const Enum<flowType> flowTypeNames;
 
 
 private:
@@ -123,6 +129,9 @@ private:
 
         //- Injection duration [s]
         scalar duration_;
+
+        //- Position relative to SOI []
+        TimeFunction1<vector> positionVsTime_;
 
         //- Injector position [m]
         vector position_;
